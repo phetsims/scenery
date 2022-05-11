@@ -12,6 +12,9 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowConstraint, LayoutProxy, Node, scenery } from '../imports.js';
 import LayoutCell from './LayoutCell.js';
 
+// Position changes smaller than this will be ignored
+const CHANGE_POSITION_THRESHOLD = 1e-9;
+
 export default class FlowCell extends FlowConfigurable( LayoutCell ) {
 
   _pendingSize: number; // scenery-internal
@@ -51,10 +54,19 @@ export default class FlowCell extends FlowConfigurable( LayoutCell ) {
     return this._bottomMargin !== null ? this._bottomMargin : this._flowConstraint._bottomMargin!;
   }
 
+  getEffectiveMinMargin( orientation: Orientation ): number {
+    return orientation === Orientation.HORIZONTAL ? this.effectiveLeftMargin : this.effectiveTopMargin;
+  }
+
+  getEffectiveMaxMargin( orientation: Orientation ): number {
+    return orientation === Orientation.HORIZONTAL ? this.effectiveRightMargin : this.effectiveBottomMargin;
+  }
+
   get effectiveGrow(): number {
     return this._grow !== null ? this._grow : this._flowConstraint._grow!;
   }
 
+  // TODO: factor all of this out
   get effectiveMinContentWidth(): number | null {
     return this._minContentWidth !== null ? this._minContentWidth : this._flowConstraint._minContentWidth;
   }
@@ -71,6 +83,14 @@ export default class FlowCell extends FlowConfigurable( LayoutCell ) {
     return this._maxContentHeight !== null ? this._maxContentHeight : this._flowConstraint._maxContentHeight;
   }
 
+  getEffectiveMinContent( orientation: Orientation ): number | null {
+    return orientation === Orientation.HORIZONTAL ? this.effectiveMinContentWidth : this.effectiveMinContentHeight;
+  }
+
+  getEffectiveMaxContent( orientation: Orientation ): number | null {
+    return orientation === Orientation.HORIZONTAL ? this.effectiveMaxContentWidth : this.effectiveMaxContentHeight;
+  }
+
   protected override onLayoutOptionsChange(): void {
     if ( this.node.layoutOptions ) {
       this.setOptions( this.node.layoutOptions as FlowConfigurableOptions );
@@ -85,18 +105,12 @@ export default class FlowCell extends FlowConfigurable( LayoutCell ) {
   }
 
   getMinimumSize( orientation: Orientation ): number {
-    if ( orientation === Orientation.HORIZONTAL ) {
-      return this.effectiveLeftMargin +
-             Math.max( this.proxy.minimumWidth, this.effectiveMinContentWidth || 0 ) +
-             this.effectiveRightMargin;
-    }
-    else {
-      return this.effectiveTopMargin +
-             Math.max( this.proxy.minimumHeight, this.effectiveMinContentHeight || 0 ) +
-             this.effectiveBottomMargin;
-    }
+    return this.getEffectiveMinMargin( orientation ) +
+           Math.max( this.proxy.getMinimum( orientation ), this.getEffectiveMinContent( orientation ) || 0 ) +
+           this.getEffectiveMaxMargin( orientation );
   }
 
+  // TODO: complete this cleanup of orientation, and combine with the Grid portion
   getMaximumSize( orientation: Orientation ): number {
     const isSizable = orientation === Orientation.HORIZONTAL ? this.proxy.widthSizable : this.proxy.heightSizable;
 
@@ -133,32 +147,16 @@ export default class FlowCell extends FlowConfigurable( LayoutCell ) {
   }
 
   positionStart( orientation: Orientation, value: number ): void {
-    if ( orientation === Orientation.HORIZONTAL ) {
-      const left = this.effectiveLeftMargin + value;
+    const start = this.getEffectiveMinMargin( orientation ) + value;
 
-      if ( Math.abs( this.proxy.left - left ) > 1e-9 ) {
-        this.proxy.left = left;
-      }
-    }
-    else {
-      const top = this.effectiveTopMargin + value;
-
-      if ( Math.abs( this.proxy.top - top ) > 1e-9 ) {
-        this.proxy.top = top;
-      }
+    if ( Math.abs( this.proxy[ orientation.minSide ] - start ) > CHANGE_POSITION_THRESHOLD ) {
+      this.proxy[ orientation.minSide ] = start;
     }
   }
 
   positionOrigin( orientation: Orientation, value: number ): void {
-    if ( orientation === Orientation.HORIZONTAL ) {
-      if ( Math.abs( this.proxy.x - value ) > 1e-9 ) {
-        this.proxy.x = value;
-      }
-    }
-    else {
-      if ( Math.abs( this.proxy.y - value ) > 1e-9 ) {
-        this.proxy.y = value;
-      }
+    if ( Math.abs( this.proxy[ orientation.coordinate ] - value ) > CHANGE_POSITION_THRESHOLD ) {
+      this.proxy[ orientation.coordinate ] = value;
     }
   }
 

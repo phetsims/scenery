@@ -128,8 +128,8 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
       const minField = orientation === Orientation.HORIZONTAL ? 'minX' as const : 'minY' as const;
       const maxField = orientation === Orientation.HORIZONTAL ? 'maxX' as const : 'maxY' as const;
 
-      // {Map.<index:number,GridLine>
-      const lineMap = this.displayedLines.get( orientation );
+      // // index => GridLine
+      const lineMap: Map<number, GridLine> = this.displayedLines.get( orientation );
 
       // Clear out the lineMap
       lineMap.forEach( line => line.freeToPool() );
@@ -145,6 +145,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
 
         return line;
       } );
+
       const lineSpacings = typeof orientedSpacing === 'number' ?
                            _.range( 0, lines.length - 1 ).map( () => orientedSpacing ) :
                            orientedSpacing.slice( 0, lines.length - 1 );
@@ -156,12 +157,21 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
           const line = lineMap.get( cell.position.get( orientation ) )!;
           line.min = Math.max( line.min, cell.getMinimumSize( orientation ) );
           line.max = Math.min( line.max, cell.getMaximumSize( orientation ) );
+
+          // For origin-specified cells, we will record their maximum reach from the origin, so these can be "summed"
+          // (since the origin line may end up taking more space).
+          if ( cell.getEffectiveAlign( orientation ) === GridConfigurableAlign.ORIGIN ) {
+            const originBounds = cell.getOriginBounds();
+            line.minOrigin = Math.min( originBounds[ minField ], line.minOrigin );
+            line.maxOrigin = Math.max( originBounds[ maxField ], line.maxOrigin );
+          }
         }
       } );
 
       // Then increase for spanning cells as necessary
       cells.forEach( cell => {
         if ( cell.size.get( orientation ) > 1 ) {
+          assert && assert( cell.getEffectiveAlign( orientation ) !== GridConfigurableAlign.ORIGIN, 'origin alignment cannot be specified for cells that span >1 width or height' );
           // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise)
           // TODO: also handle maxes
           const lines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
@@ -178,9 +188,16 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
 
       // Adjust line sizes to the min
       lines.forEach( line => {
-        line.size = line.min;
+        // If we have origin-specified content, we'll need to include the maximum origin span (which may be larger)
+        if ( isFinite( line.minOrigin ) && isFinite( line.maxOrigin ) ) {
+          line.size = Math.max( line.min, line.maxOrigin - line.minOrigin );
+        }
+        else {
+          line.size = line.min;
+        }
       } );
-      const minSizeAndSpacing = _.sum( lines.map( line => line.min ) ) + _.sum( lineSpacings );
+
+      const minSizeAndSpacing = _.sum( lines.map( line => line.size ) ) + _.sum( lineSpacings );
       minimumSizes.set( orientation, minSizeAndSpacing );
       const size = Math.max( minSizeAndSpacing, preferredSizes.get( orientation ) || 0 );
       let sizeRemaining = size - minSizeAndSpacing;
@@ -203,30 +220,34 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
       }
 
       // Layout
-      layoutBounds[ minField ] = 0;
-      layoutBounds[ maxField ] = size;
+      const startPosition = isFinite( lines[ 0 ].minOrigin ) ? lines[ 0 ].minOrigin : 0;
+      layoutBounds[ minField ] = startPosition;
+      layoutBounds[ maxField ] = startPosition + size;
       lines.forEach( ( line, arrayIndex ) => {
-        line.position = _.sum( lines.slice( 0, arrayIndex ).map( line => line.size ) ) + _.sum( lineSpacings.slice( 0, line.index ) );
+        line.position = startPosition + _.sum( lines.slice( 0, arrayIndex ).map( line => line.size ) ) + _.sum( lineSpacings.slice( 0, line.index ) );
       } );
       cells.forEach( cell => {
         const cellIndexPosition = cell.position.get( orientation );
         const cellSize = cell.size.get( orientation );
         const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
-        const firstColumn = lineMap.get( cellIndexPosition )!;
+        const firstLine = lineMap.get( cellIndexPosition )!;
         const cellSpacings = lineSpacings.slice( cellIndexPosition, cellIndexPosition + cellSize - 1 );
         const cellAvailableSize = _.sum( cellLines.map( line => line.size ) ) + _.sum( cellSpacings );
         const cellMinimumSize = cell.getMinimumSize( orientation );
-        const cellPosition = firstColumn.position;
+        const cellPosition = firstLine.position;
+        const originOffset = -firstLine.minOrigin;
 
         const align = cell.getEffectiveAlign( orientation );
+        const preferredSize = align === GridConfigurableAlign.STRETCH ? cellAvailableSize : cellMinimumSize;
 
-        if ( align === GridConfigurableAlign.STRETCH ) {
-          cell.attemptPreferredSize( orientation, cellAvailableSize );
+        cell.attemptPreferredSize( orientation, preferredSize );
+
+        if ( align === GridConfigurableAlign.ORIGIN ) {
+          cell.positionOrigin( orientation, cellPosition + originOffset );
         }
         else {
-          cell.attemptPreferredSize( orientation, cellMinimumSize );
+          cell.positionStart( orientation, cellPosition + ( cellAvailableSize - cell.proxy[ orientation.size ] ) * align.padRatio );
         }
-        cell.attemptPosition( orientation, align, cellPosition, cellAvailableSize );
 
         const cellBounds = cell.getCellBounds();
         assert && assert( cellBounds.isFinite() );

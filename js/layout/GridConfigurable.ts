@@ -64,6 +64,7 @@ export class GridConfigurableAlign extends EnumerationValue {
 }
 
 export type GridConfigurableOptions = {
+  // NOTE: 'origin' aligns will only apply to cells that are 1 grid line in that orientation (width/height)
   xAlign?: GridHorizontalAlign | null;
   yAlign?: GridVerticalAlign | null;
   grow?: number | null;

@@ -9,6 +9,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import Orientation from '../../../phet-core/js/Orientation.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import { HeightSizableNode, isHeightSizable, isWidthSizable, Node, scenery, Trail, WidthSizableNode } from '../imports.js';
 
@@ -449,6 +450,10 @@ export default class LayoutProxy {
     const minimumHeight = isHeightSizable( this.node ) ? this.node.minimumHeight || 0 : this.node.height;
 
     return Math.abs( this.trail!.getParentTransform().transformDeltaY( minimumHeight ) );
+  }
+
+  getMinimum( orientation: Orientation ): number {
+    return orientation === Orientation.HORIZONTAL ? this.minimumWidth : this.minimumHeight;
   }
 
   /**

@@ -16,6 +16,8 @@ export default class GridLine {
   grow!: number;
   min!: number;
   max!: number;
+  minOrigin!: number;
+  maxOrigin!: number;
   size!: number;
   position!: number;
 
@@ -31,6 +33,8 @@ export default class GridLine {
     this.grow = grow;
     this.min = 0;
     this.max = Number.POSITIVE_INFINITY;
+    this.minOrigin = Number.POSITIVE_INFINITY;
+    this.maxOrigin = Number.NEGATIVE_INFINITY;
     this.size = 0;
     this.position = 0;
   }

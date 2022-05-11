@@ -19,7 +19,7 @@ const sizableFlagPair = new OrientationPair( 'widthSizable' as const, 'heightSiz
 const minimumSizePair = new OrientationPair( 'minimumWidth' as const, 'minimumHeight' as const );
 const preferredSizePair = new OrientationPair( 'preferredWidth' as const, 'preferredHeight' as const );
 
-// {number} - Position changes smaller than this will be ignored
+// Position changes smaller than this will be ignored
 const CHANGE_POSITION_THRESHOLD = 1e-9;
 
 type SelfOptions = {
@@ -132,7 +132,6 @@ export default class GridCell extends GridConfigurable( LayoutCell ) {
     return orientation === Orientation.HORIZONTAL ? this.effectiveMinContentWidth : this.effectiveMinContentHeight;
   }
 
-
   get effectiveMaxContentWidth(): number | null {
     return this._maxContentWidth !== null ? this._maxContentWidth : this._gridConstraint._maxContentWidth;
   }
@@ -187,25 +186,27 @@ export default class GridCell extends GridConfigurable( LayoutCell ) {
     }
   }
 
-  attemptPosition( orientation: Orientation, align: GridConfigurableAlign, value: number, availableSize: number ): void {
-    if ( align === GridConfigurableAlign.ORIGIN ) {
-      // TODO: handle layout bounds
-      // TODO: OMG this is horribly broken right? We would need to align stuff first
-      // TODO: Do a pass to handle origin cells first (and in FLOW too)
-      if ( Math.abs( this.proxy[ orientation.coordinate ] - value ) > CHANGE_POSITION_THRESHOLD ) {
-        this.proxy[ orientation.coordinate ] = value;
-      }
-    }
-    else {
-      const minMargin = this.getEffectiveMinMargin( orientation );
-      const maxMargin = this.getEffectiveMaxMargin( orientation );
-      const extraSpace = availableSize - this.proxy[ orientation.size ] - minMargin - maxMargin;
-      value += minMargin + extraSpace * align.padRatio;
+  // TODO: Create a Cell type that has margins built in, so we can handle these? Combine Flow and Grid code
+  positionStart( orientation: Orientation, value: number ): void {
+    const start = this.getEffectiveMinMargin( orientation ) + value;
 
-      if ( Math.abs( this.proxy[ orientation.minSide ] - value ) > CHANGE_POSITION_THRESHOLD ) {
-        this.proxy[ orientation.minSide ] = value;
-      }
+    if ( Math.abs( this.proxy[ orientation.minSide ] - start ) > CHANGE_POSITION_THRESHOLD ) {
+      this.proxy[ orientation.minSide ] = start;
     }
+  }
+
+  positionOrigin( orientation: Orientation, value: number ): void {
+    if ( Math.abs( this.proxy[ orientation.coordinate ] - value ) > CHANGE_POSITION_THRESHOLD ) {
+      this.proxy[ orientation.coordinate ] = value;
+    }
+  }
+
+  /**
+   * Returns the bounding box of the cell if it was repositioned to have its origin shifted to the origin of the
+   * ancestor node's local coordinate frame.
+   */
+  getOriginBounds(): Bounds2 {
+    return this.getCellBounds().shiftedXY( -this.proxy.x, -this.proxy.y );
   }
 
   getCellBounds(): Bounds2 {
