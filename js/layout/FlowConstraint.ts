@@ -423,7 +423,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
           cell.positionOrigin( oppositeOrientation, lineStartPosition + originOffset );
         }
         else {
-          cell.positionStart( oppositeOrientation, lineStartPosition + ( lineSize - cell.proxy[ oppositeOrientation.size ] ) * align.padRatio );
+          cell.positionStart( oppositeOrientation, lineStartPosition + ( lineSize - cell.getCellBounds()[ oppositeOrientation.size ] ) * align.padRatio );
         }
 
         const cellBounds = cell.getCellBounds();

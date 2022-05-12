@@ -246,7 +246,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
           cell.positionOrigin( orientation, cellPosition + originOffset );
         }
         else {
-          cell.positionStart( orientation, cellPosition + ( cellAvailableSize - cell.proxy[ orientation.size ] ) * align.padRatio );
+          cell.positionStart( orientation, cellPosition + ( cellAvailableSize - cell.getCellBounds()[ orientation.size ] ) * align.padRatio );
         }
 
         const cellBounds = cell.getCellBounds();
