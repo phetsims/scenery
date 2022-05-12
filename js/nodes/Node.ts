@@ -172,7 +172,7 @@ import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
@@ -4651,13 +4651,13 @@ class Node extends ParallelDOM {
     return this.getLayoutOptions();
   }
 
+  mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {
+    this.layoutOptions = optionize3<ILayoutOptions, {}, ILayoutOptions>()( {}, this.layoutOptions || {}, layoutOptions );
+  }
+
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable
   get widthSizable(): boolean { return false; }
   get heightSizable(): boolean { return false; }
-
-  mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {
-    this.layoutOptions = merge( {}, this.layoutOptions, layoutOptions );
-  }
 
   /**
    * Sets the preventFit performance flag.

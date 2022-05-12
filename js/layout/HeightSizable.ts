@@ -24,6 +24,7 @@ export type HeightSizableSelfOptions = {
   // Sets the preferred height of the Node in the parent coordinate frame. Nodes that implement this will attempt to keep
   // their `node.height` at this value. If null, the node will likely set its configuration to the minimum height.
   // NOTE: changing this or localPreferredHeight will adjust the other.
+  // NOTE: preferredHeight is not guaranteed currently. The component may end up having a smaller or larger size
   preferredHeight?: number | null;
 
   // Sets the minimum height of the Node in the parent coordinate frame. Usually not directly set by a client.

@@ -24,6 +24,7 @@ export type WidthSizableSelfOptions = {
   // Sets the preferred width of the Node in the parent coordinate frame. Nodes that implement this will attempt to keep
   // their `node.width` at this value. If null, the node will likely set its configuration to the minimum width.
   // NOTE: changing this or localPreferredWidth will adjust the other.
+  // NOTE: preferredHeight is not guaranteed currently. The component may end up having a smaller or larger size
   preferredWidth?: number | null;
 
   // Sets the minimum width of the Node in the parent coordinate frame. Usually not directly set by a client.
