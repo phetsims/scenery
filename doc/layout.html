@@ -471,7 +471,6 @@
           'top',
           'bottom',
           'center',
-          'stretch',
           'origin'
         ].map( align => {
           const expandingRect = new ExampleExpandingRectangle( 0, 0, 50, 10, { fill: 'gray' } );
@@ -635,7 +634,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Stretch alignment will have a resizable element take up the entire row/column size:</p>
+    <p>Stretch will have a resizable element take up the entire row/column size:</p>
 
     <div id="stretch-example"></div>
     <script type="text/javascript">
@@ -844,7 +843,7 @@
             } ),
             new ExampleExpandingRectangle( {
               fill: 'gray',
-              layoutOptions: { grow: 1, xAlign: 'stretch', yAlign: 'stretch' }
+              layoutOptions: { grow: 1, stretch: true }
             } ),
             new scenery.Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ]

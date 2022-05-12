@@ -1,6 +1,6 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
-import { FlowHorizontalAlign, FlowOrientation, FlowVerticalAlign, GridHorizontalAlign, GridVerticalAlign } from '../imports.js';
+import { HorizontalLayoutAlign, LayoutOrientation, VerticalLayoutAlign } from '../imports.js';
 
 /**
  * The main type interface for layout options
@@ -9,11 +9,13 @@ import { FlowHorizontalAlign, FlowOrientation, FlowVerticalAlign, GridHorizontal
  */
 
 export default interface ILayoutOptions {
-  orientation?: FlowOrientation;
-  align?: FlowHorizontalAlign | FlowVerticalAlign;
+  orientation?: LayoutOrientation;
+  align?: HorizontalLayoutAlign | VerticalLayoutAlign;
   stretch?: boolean;
-  xAlign?: GridHorizontalAlign;
-  yAlign?: GridVerticalAlign;
+  xStretch?: boolean;
+  yStretch?: boolean;
+  xAlign?: HorizontalLayoutAlign;
+  yAlign?: VerticalLayoutAlign;
   grow?: number;
   xGrow?: number;
   yGrow?: number;

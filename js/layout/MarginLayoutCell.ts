@@ -10,8 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import { LayoutConstraint, LayoutProxy, Node, scenery } from '../imports.js';
-import LayoutCell from './LayoutCell.js';
+import { LayoutCell, LayoutConstraint, LayoutProxy, Node, scenery } from '../imports.js';
 
 const sizableFlagPair = new OrientationPair( 'widthSizable' as const, 'heightSizable' as const );
 const preferredSizePair = new OrientationPair( 'preferredWidth' as const, 'preferredHeight' as const );

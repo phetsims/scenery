@@ -13,9 +13,8 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridConfigurableOptions, GridLine, LayoutConstraint, Node, scenery } from '../imports.js';
+import { GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridConfigurableOptions, GridLine, LayoutAlign, LayoutConstraint, Node, scenery } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
-import { GridConfigurableAlign } from './GridConfigurable.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
@@ -160,7 +159,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
 
           // For origin-specified cells, we will record their maximum reach from the origin, so these can be "summed"
           // (since the origin line may end up taking more space).
-          if ( cell.getEffectiveAlign( orientation ) === GridConfigurableAlign.ORIGIN ) {
+          if ( cell.getEffectiveAlign( orientation ) === LayoutAlign.ORIGIN ) {
             const originBounds = cell.getOriginBounds();
             line.minOrigin = Math.min( originBounds[ minField ], line.minOrigin );
             line.maxOrigin = Math.max( originBounds[ maxField ], line.maxOrigin );
@@ -171,7 +170,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
       // Then increase for spanning cells as necessary
       cells.forEach( cell => {
         if ( cell.size.get( orientation ) > 1 ) {
-          assert && assert( cell.getEffectiveAlign( orientation ) !== GridConfigurableAlign.ORIGIN, 'origin alignment cannot be specified for cells that span >1 width or height' );
+          assert && assert( cell.getEffectiveAlign( orientation ) !== LayoutAlign.ORIGIN, 'origin alignment cannot be specified for cells that span >1 width or height' );
           // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise)
           // TODO: also handle maxes
           const lines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
@@ -243,7 +242,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
 
         cell.attemptPreferredSize( orientation, preferredSize );
 
-        if ( align === GridConfigurableAlign.ORIGIN ) {
+        if ( align === LayoutAlign.ORIGIN ) {
           cell.positionOrigin( orientation, cellPosition + originOffset );
         }
         else {

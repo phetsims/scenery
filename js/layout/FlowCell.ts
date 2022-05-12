@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowConstraint, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
+import { FlowConfigurable, FlowConfigurableOptions, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
 
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
@@ -24,7 +24,7 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
     this.onLayoutOptionsChange();
   }
 
-  get effectiveAlign(): FlowConfigurableAlign {
+  get effectiveAlign(): LayoutAlign {
     return this._align !== null ? this._align : this.flowConstraint._align!;
   }
 

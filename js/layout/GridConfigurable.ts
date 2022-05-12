@@ -8,11 +8,9 @@
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
-import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { scenery } from '../imports.js';
+import { HorizontalLayoutAlign, HorizontalLayoutAlignValues, LayoutAlign, scenery, VerticalLayoutAlign, VerticalLayoutAlignValues } from '../imports.js';
 
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',
@@ -36,39 +34,10 @@ const GRID_CONFIGURABLE_OPTION_KEYS = [
   'maxContentHeight'
 ];
 
-const gridHorizontalAligns = [ 'left', 'right', 'center', 'origin' ] as const;
-const gridVerticalAligns = [ 'top', 'bottom', 'center', 'origin' ] as const;
-
-export type GridHorizontalAlign = typeof gridHorizontalAligns[number];
-export type GridVerticalAlign = typeof gridVerticalAligns[number];
-
-export class GridConfigurableAlign extends EnumerationValue {
-  static readonly START = new GridConfigurableAlign( 'left', 'top', 0 );
-  static readonly END = new GridConfigurableAlign( 'right', 'bottom', 1 );
-  static readonly CENTER = new GridConfigurableAlign( 'center', 'center', 0.5 );
-  static readonly ORIGIN = new GridConfigurableAlign( 'origin', 'origin' );
-
-  readonly horizontal: GridHorizontalAlign;
-  readonly vertical: GridVerticalAlign;
-  readonly padRatio: number;
-
-  constructor( horizontal: GridHorizontalAlign, vertical: GridVerticalAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
-    super();
-
-    this.horizontal = horizontal;
-    this.vertical = vertical;
-    this.padRatio = padRatio;
-  }
-
-  static readonly enumeration = new Enumeration( GridConfigurableAlign, {
-    phetioDocumentation: 'Align for GridConfigurable'
-  } );
-}
-
 export type GridConfigurableOptions = {
   // NOTE: 'origin' aligns will only apply to cells that are 1 grid line in that orientation (width/height)
-  xAlign?: GridHorizontalAlign | null;
-  yAlign?: GridVerticalAlign | null;
+  xAlign?: HorizontalLayoutAlign | null;
+  yAlign?: VerticalLayoutAlign | null;
   stretch?: number | null;
   xStretch?: number | null;
   yStretch?: number | null;
@@ -88,42 +57,11 @@ export type GridConfigurableOptions = {
   maxContentHeight?: number | null;
 };
 
-const horizontalAlignMap = {
-  left: GridConfigurableAlign.START,
-  right: GridConfigurableAlign.END,
-  center: GridConfigurableAlign.CENTER,
-  origin: GridConfigurableAlign.ORIGIN
-};
-const verticalAlignMap = {
-  top: GridConfigurableAlign.START,
-  bottom: GridConfigurableAlign.END,
-  center: GridConfigurableAlign.CENTER,
-  origin: GridConfigurableAlign.ORIGIN
-};
-const horizontalAlignToInternal = ( key: GridHorizontalAlign | null ): GridConfigurableAlign | null => {
-  if ( key === null ) {
-    return null;
-  }
-
-  assert && assert( horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ] );
-
-  return horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ];
-};
-const verticalAlignToInternal = ( key: GridVerticalAlign | null ): GridConfigurableAlign | null => {
-  if ( key === null ) {
-    return null;
-  }
-
-  assert && assert( verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ] );
-
-  return verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ];
-};
-
 const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
-    _xAlign: GridConfigurableAlign | null;
-    _yAlign: GridConfigurableAlign | null;
+    _xAlign: LayoutAlign | null;
+    _yAlign: LayoutAlign | null;
     _xStretch: boolean | null;
     _yStretch: boolean | null;
     _leftMargin: number | null;
@@ -165,8 +103,8 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     }
 
     setConfigToBaseDefault(): void {
-      this._xAlign = GridConfigurableAlign.CENTER;
-      this._yAlign = GridConfigurableAlign.CENTER;
+      this._xAlign = LayoutAlign.CENTER;
+      this._yAlign = LayoutAlign.CENTER;
       this._xStretch = false;
       this._yStretch = false;
       this._leftMargin = 0;
@@ -205,7 +143,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this.changedEmitter.emit();
     }
 
-    get xAlign(): GridHorizontalAlign | null {
+    get xAlign(): HorizontalLayoutAlign | null {
       const result = this._xAlign === null ? null : this._xAlign.horizontal;
 
       assert && assert( result === null || typeof result === 'string' );
@@ -213,14 +151,14 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       return result;
     }
 
-    set xAlign( value: GridHorizontalAlign | null ) {
-      assert && assert( value === null || gridHorizontalAligns.includes( value ),
-        `align ${value} not supported, the valid values are ${gridHorizontalAligns} or null` );
+    set xAlign( value: HorizontalLayoutAlign | null ) {
+      assert && assert( value === null || HorizontalLayoutAlignValues.includes( value ),
+        `align ${value} not supported, the valid values are ${HorizontalLayoutAlignValues} or null` );
 
       // remapping align values to an independent set, so they aren't orientation-dependent
-      const mappedValue = horizontalAlignToInternal( value );
+      const mappedValue = LayoutAlign.horizontalAlignToInternal( value );
 
-      assert && assert( mappedValue === null || mappedValue instanceof GridConfigurableAlign );
+      assert && assert( mappedValue === null || mappedValue instanceof LayoutAlign );
 
       if ( this._xAlign !== mappedValue ) {
         this._xAlign = mappedValue;
@@ -229,7 +167,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get yAlign(): GridVerticalAlign | null {
+    get yAlign(): VerticalLayoutAlign | null {
       const result = this._yAlign === null ? null : this._yAlign.vertical;
 
       assert && assert( result === null || typeof result === 'string' );
@@ -237,14 +175,14 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       return result;
     }
 
-    set yAlign( value: GridVerticalAlign | null ) {
-      assert && assert( value === null || gridVerticalAligns.includes( value ),
-        `align ${value} not supported, the valid values are ${gridVerticalAligns} or null` );
+    set yAlign( value: VerticalLayoutAlign | null ) {
+      assert && assert( value === null || VerticalLayoutAlignValues.includes( value ),
+        `align ${value} not supported, the valid values are ${VerticalLayoutAlignValues} or null` );
 
       // remapping align values to an independent set, so they aren't orientation-dependent
-      const mappedValue = verticalAlignToInternal( value );
+      const mappedValue = LayoutAlign.verticalAlignToInternal( value );
 
-      assert && assert( mappedValue === null || mappedValue instanceof GridConfigurableAlign );
+      assert && assert( mappedValue === null || mappedValue instanceof LayoutAlign );
 
       if ( this._yAlign !== mappedValue ) {
         this._yAlign = mappedValue;

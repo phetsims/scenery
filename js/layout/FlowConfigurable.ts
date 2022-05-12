@@ -13,10 +13,8 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { scenery } from '../imports.js';
+import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, scenery, VerticalLayoutAlign } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
-import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
@@ -36,24 +34,16 @@ const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'maxContentHeight'
 ];
 
-const flowHorizontalAligns = [ 'top', 'bottom', 'center', 'origin' ] as const;
-const flowVerticalAligns = [ 'left', 'right', 'center', 'origin' ] as const;
-const flowOrientations = [ 'horizontal', 'vertical' ] as const;
-
-export type FlowHorizontalAlign = typeof flowHorizontalAligns[number];
-export type FlowVerticalAlign = typeof flowVerticalAligns[number];
-export type FlowOrientation = typeof flowOrientations[number];
-
 export type FlowConfigurableOptions = {
   // The main orientation of the layout that takes place. Items will be spaced out in this orientation (e.g. if it's
   // 'vertical', the y-values of the components will be adjusted to space them out); this is known as the "primary"
   // dimension. Items will be aligned/stretched in the opposite orientation (e.g. if it's 'vertical', the x-values of
   // the components will be adjusted by align and stretch); this is known as the "secondary" or "opposite" dimension.
-  orientation?: FlowOrientation | null;
+  orientation?: LayoutOrientation | null;
 
   // Adjusts the position of elements in the "opposite" dimension, either to a specific side, the center, or so that all
   // the origins of items are aligned (similar to x=0 for a 'vertical' orientation).
-  align?: FlowHorizontalAlign | FlowVerticalAlign | null;
+  align?: HorizontalLayoutAlign | VerticalLayoutAlign | null;
 
   // Controls whether elements will attempt to expand in the "opposite" dimension to take up the full size of the
   // largest layout element.
@@ -81,78 +71,12 @@ export type FlowConfigurableOptions = {
   maxContentHeight?: number | null;
 };
 
-const getAllowedAligns = ( orientation: Orientation ): readonly ( string | null )[] => {
-  return [ ...( orientation === Orientation.HORIZONTAL ? flowHorizontalAligns : flowVerticalAligns ), null ];
-};
-
-export class FlowConfigurableAlign extends EnumerationValue {
-  static readonly START = new FlowConfigurableAlign( 'top', 'left', 0 );
-  static readonly END = new FlowConfigurableAlign( 'bottom', 'right', 1 );
-  static readonly CENTER = new FlowConfigurableAlign( 'center', 'center', 0.5 );
-  static readonly ORIGIN = new FlowConfigurableAlign( 'origin', 'origin' );
-
-  readonly horizontal: FlowHorizontalAlign;
-  readonly vertical: FlowVerticalAlign;
-  readonly padRatio: number;
-
-  constructor( horizontal: FlowHorizontalAlign, vertical: FlowVerticalAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
-    super();
-
-    this.horizontal = horizontal;
-    this.vertical = vertical;
-    this.padRatio = padRatio;
-  }
-
-  static readonly enumeration = new Enumeration( FlowConfigurableAlign, {
-    phetioDocumentation: 'Align for FlowConfigurable'
-  } );
-}
-
-const horizontalAlignMap = {
-  top: FlowConfigurableAlign.START,
-  bottom: FlowConfigurableAlign.END,
-  center: FlowConfigurableAlign.CENTER,
-  origin: FlowConfigurableAlign.ORIGIN
-};
-const verticalAlignMap = {
-  left: FlowConfigurableAlign.START,
-  right: FlowConfigurableAlign.END,
-  center: FlowConfigurableAlign.CENTER,
-  origin: FlowConfigurableAlign.ORIGIN
-};
-const alignToInternal = ( orientation: Orientation, key: FlowHorizontalAlign | FlowVerticalAlign | null ): FlowConfigurableAlign | null => {
-  if ( key === null ) {
-    return null;
-  }
-  else if ( orientation === Orientation.HORIZONTAL ) {
-    assert && assert( horizontalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ] );
-
-    return horizontalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ];
-  }
-  else {
-    assert && assert( verticalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ] );
-
-    return verticalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ];
-  }
-};
-const internalToAlign = ( orientation: Orientation, align: FlowConfigurableAlign | null ): FlowHorizontalAlign | FlowVerticalAlign | null => {
-  if ( align === null ) {
-    return null;
-  }
-  else if ( orientation === Orientation.HORIZONTAL ) {
-    return align.horizontal;
-  }
-  else {
-    return align.vertical;
-  }
-};
-
 const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
     _orientation: Orientation;
 
-    _align: FlowConfigurableAlign | null;
+    _align: LayoutAlign | null;
     _stretch: boolean | null;
     _leftMargin: number | null;
     _rightMargin: number | null;
@@ -193,7 +117,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     }
 
     setConfigToBaseDefault(): void {
-      this._align = FlowConfigurableAlign.CENTER;
+      this._align = LayoutAlign.CENTER;
       this._stretch = false;
       this._leftMargin = 0;
       this._rightMargin = 0;
@@ -227,11 +151,11 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this.changedEmitter.emit();
     }
 
-    get orientation(): FlowOrientation {
+    get orientation(): LayoutOrientation {
       return this._orientation === Orientation.HORIZONTAL ? 'horizontal' : 'vertical';
     }
 
-    set orientation( value: FlowOrientation ) {
+    set orientation( value: LayoutOrientation ) {
       assert && assert( value === 'horizontal' || value === 'vertical' );
 
       const enumOrientation = value === 'horizontal' ? Orientation.HORIZONTAL : Orientation.VERTICAL;
@@ -244,22 +168,22 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get align(): FlowHorizontalAlign | FlowVerticalAlign | null {
-      const result = internalToAlign( this._orientation, this._align );
+    get align(): HorizontalLayoutAlign | VerticalLayoutAlign | null {
+      const result = LayoutAlign.internalToAlign( this._orientation, this._align );
 
       assert && assert( result === null || typeof result === 'string' );
 
       return result;
     }
 
-    set align( value: FlowHorizontalAlign | FlowVerticalAlign | null ) {
-      assert && assert( getAllowedAligns( this._orientation ).includes( value ),
-        `align ${value} not supported, with the orientation ${this._orientation}, the valid values are ${getAllowedAligns( this._orientation )}` );
+    set align( value: HorizontalLayoutAlign | VerticalLayoutAlign | null ) {
+      assert && assert( LayoutAlign.getAllowedAligns( this._orientation.opposite ).includes( value ),
+        `align ${value} not supported, with the orientation ${this._orientation}, the valid values are ${LayoutAlign.getAllowedAligns( this._orientation.opposite )}` );
 
       // remapping align values to an independent set, so they aren't orientation-dependent
-      const mappedValue = alignToInternal( this._orientation, value );
+      const mappedValue = LayoutAlign.alignToInternal( this._orientation.opposite, value );
 
-      assert && assert( mappedValue === null || mappedValue instanceof FlowConfigurableAlign );
+      assert && assert( mappedValue === null || mappedValue instanceof LayoutAlign );
 
       if ( this._align !== mappedValue ) {
         this._align = mappedValue;

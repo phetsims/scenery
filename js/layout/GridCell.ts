@@ -9,8 +9,7 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
-import { GridConfigurableAlign } from './GridConfigurable.js';
+import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
@@ -63,15 +62,15 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     this.onLayoutOptionsChange();
   }
 
-  get effectiveXAlign(): GridConfigurableAlign {
+  get effectiveXAlign(): LayoutAlign {
     return this._xAlign !== null ? this._xAlign : this.gridConstraint._xAlign!;
   }
 
-  get effectiveYAlign(): GridConfigurableAlign {
+  get effectiveYAlign(): LayoutAlign {
     return this._yAlign !== null ? this._yAlign : this.gridConstraint._yAlign!;
   }
 
-  getEffectiveAlign( orientation: Orientation ): GridConfigurableAlign {
+  getEffectiveAlign( orientation: Orientation ): LayoutAlign {
     return orientation === Orientation.HORIZONTAL ? this.effectiveXAlign : this.effectiveYAlign;
   }
 

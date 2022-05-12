@@ -8,7 +8,7 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustification, FlowOrientation, FlowVerticalAlign, FlowVerticalJustification, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, SceneryConstants } from '../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalJustification, LayoutOrientation, FlowVerticalJustification, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, SceneryConstants, HorizontalLayoutAlign, VerticalLayoutAlign } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -177,11 +177,11 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     this._constraint.enabled = value;
   }
 
-  get orientation(): FlowOrientation {
+  get orientation(): LayoutOrientation {
     return this._constraint.orientation;
   }
 
-  set orientation( value: FlowOrientation ) {
+  set orientation( value: LayoutOrientation ) {
     this._constraint.orientation = value;
   }
 
@@ -217,13 +217,13 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     this._constraint.wrap = value;
   }
 
-  get align(): FlowHorizontalAlign | FlowVerticalAlign {
+  get align(): HorizontalLayoutAlign | VerticalLayoutAlign {
     assert && assert( typeof this._constraint.align === 'string' );
 
     return this._constraint.align!;
   }
 
-  set align( value: FlowHorizontalAlign | FlowVerticalAlign ) {
+  set align( value: HorizontalLayoutAlign | VerticalLayoutAlign ) {
     assert && assert( typeof value === 'string', 'FlowBox align should be a string' );
 
     this._constraint.align = value;

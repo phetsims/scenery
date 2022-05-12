@@ -7,7 +7,7 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, GridHorizontalAlign, GridVerticalAlign, HeightSizable, HeightSizableSelfOptions, ILayoutOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS } from '../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HeightSizable, HeightSizableSelfOptions, ILayoutOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, VerticalLayoutAlign } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -167,19 +167,19 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
     this._constraint.ySpacing = value;
   }
 
-  get xAlign(): GridHorizontalAlign {
+  get xAlign(): HorizontalLayoutAlign {
     return this._constraint.xAlign!;
   }
 
-  set xAlign( value: GridHorizontalAlign ) {
+  set xAlign( value: HorizontalLayoutAlign ) {
     this._constraint.xAlign = value;
   }
 
-  get yAlign(): GridVerticalAlign {
+  get yAlign(): VerticalLayoutAlign {
     return this._constraint.yAlign!;
   }
 
-  set yAlign( value: GridVerticalAlign ) {
+  set yAlign( value: VerticalLayoutAlign ) {
     this._constraint.yAlign = value;
   }
 

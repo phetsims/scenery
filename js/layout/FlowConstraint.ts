@@ -14,7 +14,7 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { scenery, Node, Divider, FlowCell, FlowConfigurable, LayoutConstraint, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurableOptions, FlowConfigurableAlign } from '../imports.js';
+import { scenery, Node, Divider, FlowCell, FlowConfigurable, LayoutConstraint, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurableOptions, LayoutAlign } from '../imports.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import IProperty from '../../../axon/js/IProperty.js';
@@ -389,7 +389,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
 
       // Find the union of all origin-based cells (will be Bounds2.NOTHING if there are none)
       const maximumOriginBounds = line.reduce( ( bounds: Bounds2, cell: FlowCell ) => {
-        return cell.effectiveAlign === FlowConfigurableAlign.ORIGIN ? bounds.union( cell.getOriginBounds() ) : bounds;
+        return cell.effectiveAlign === LayoutAlign.ORIGIN ? bounds.union( cell.getOriginBounds() ) : bounds;
       }, Bounds2.NOTHING );
 
       // When we lay out everything with align:origin, what is the dimension of all of that content?
@@ -419,7 +419,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
 
         cell.attemptPreferredSize( oppositeOrientation, preferredSize );
 
-        if ( align === FlowConfigurableAlign.ORIGIN ) {
+        if ( align === LayoutAlign.ORIGIN ) {
           cell.positionOrigin( oppositeOrientation, lineStartPosition + originOffset );
         }
         else {
