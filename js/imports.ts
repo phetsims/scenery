@@ -235,6 +235,8 @@ export { default as LayoutProxyProperty } from './layout/LayoutProxyProperty.js'
 export { default as TrackingLayoutProxyProperty } from './layout/TrackingLayoutProxyProperty.js';
 export { default as LayoutConstraint } from './layout/LayoutConstraint.js';
 export { default as LayoutCell } from './layout/LayoutCell.js';
+export { default as MarginLayoutCell } from './layout/MarginLayoutCell.js';
+export type { MarginLayout } from './layout/MarginLayoutCell.js';
 export { default as FlowConfigurable, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurableAlign } from './layout/FlowConfigurable.js';
 export type { FlowHorizontalAlign, FlowVerticalAlign, FlowOrientation, FlowConfigurableOptions } from './layout/FlowConfigurable.js';
 export { default as FlowCell } from './layout/FlowCell.js';
