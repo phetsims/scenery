@@ -87,6 +87,18 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     return orientation === Orientation.HORIZONTAL ? this.effectiveXGrow : this.effectiveYGrow;
   }
 
+  get effectiveXStretch(): boolean {
+    return this._xStretch !== null ? this._xStretch : this.gridConstraint._xStretch!;
+  }
+
+  get effectiveYStretch(): boolean {
+    return this._yStretch !== null ? this._yStretch : this.gridConstraint._yStretch!;
+  }
+
+  getEffectiveStretch( orientation: Orientation ): boolean {
+    return orientation === Orientation.HORIZONTAL ? this.effectiveXStretch : this.effectiveYStretch;
+  }
+
   protected override onLayoutOptionsChange(): void {
     this.setOptions( this.node.layoutOptions as GridConfigurableOptions );
 

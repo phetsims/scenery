@@ -17,6 +17,9 @@ import { scenery } from '../imports.js';
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',
   'yAlign',
+  'stretch',
+  'xStretch',
+  'yStretch',
   'grow',
   'xGrow',
   'yGrow',
@@ -33,8 +36,8 @@ const GRID_CONFIGURABLE_OPTION_KEYS = [
   'maxContentHeight'
 ];
 
-const gridHorizontalAligns = [ 'left', 'right', 'center', 'origin', 'stretch' ] as const;
-const gridVerticalAligns = [ 'top', 'bottom', 'center', 'origin', 'stretch' ] as const;
+const gridHorizontalAligns = [ 'left', 'right', 'center', 'origin' ] as const;
+const gridVerticalAligns = [ 'top', 'bottom', 'center', 'origin' ] as const;
 
 export type GridHorizontalAlign = typeof gridHorizontalAligns[number];
 export type GridVerticalAlign = typeof gridVerticalAligns[number];
@@ -44,7 +47,6 @@ export class GridConfigurableAlign extends EnumerationValue {
   static readonly END = new GridConfigurableAlign( 'right', 'bottom', 1 );
   static readonly CENTER = new GridConfigurableAlign( 'center', 'center', 0.5 );
   static readonly ORIGIN = new GridConfigurableAlign( 'origin', 'origin' );
-  static readonly STRETCH = new GridConfigurableAlign( 'stretch', 'stretch', 0 );
 
   readonly horizontal: GridHorizontalAlign;
   readonly vertical: GridVerticalAlign;
@@ -67,6 +69,9 @@ export type GridConfigurableOptions = {
   // NOTE: 'origin' aligns will only apply to cells that are 1 grid line in that orientation (width/height)
   xAlign?: GridHorizontalAlign | null;
   yAlign?: GridVerticalAlign | null;
+  stretch?: number | null;
+  xStretch?: number | null;
+  yStretch?: number | null;
   grow?: number | null;
   xGrow?: number | null;
   yGrow?: number | null;
@@ -87,33 +92,31 @@ const horizontalAlignMap = {
   left: GridConfigurableAlign.START,
   right: GridConfigurableAlign.END,
   center: GridConfigurableAlign.CENTER,
-  origin: GridConfigurableAlign.ORIGIN,
-  stretch: GridConfigurableAlign.STRETCH
+  origin: GridConfigurableAlign.ORIGIN
 };
 const verticalAlignMap = {
   top: GridConfigurableAlign.START,
   bottom: GridConfigurableAlign.END,
   center: GridConfigurableAlign.CENTER,
-  origin: GridConfigurableAlign.ORIGIN,
-  stretch: GridConfigurableAlign.STRETCH
+  origin: GridConfigurableAlign.ORIGIN
 };
 const horizontalAlignToInternal = ( key: GridHorizontalAlign | null ): GridConfigurableAlign | null => {
   if ( key === null ) {
     return null;
   }
 
-  assert && assert( horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' | 'stretch' ] );
+  assert && assert( horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ] );
 
-  return horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' | 'stretch' ];
+  return horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ];
 };
 const verticalAlignToInternal = ( key: GridVerticalAlign | null ): GridConfigurableAlign | null => {
   if ( key === null ) {
     return null;
   }
 
-  assert && assert( verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' | 'stretch' ] );
+  assert && assert( verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ] );
 
-  return verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' | 'stretch' ];
+  return verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ];
 };
 
 const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
@@ -121,6 +124,8 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
     _xAlign: GridConfigurableAlign | null;
     _yAlign: GridConfigurableAlign | null;
+    _xStretch: boolean | null;
+    _yStretch: boolean | null;
     _leftMargin: number | null;
     _rightMargin: number | null;
     _topMargin: number | null;
@@ -139,6 +144,8 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
       this._xAlign = null;
       this._yAlign = null;
+      this._xStretch = null;
+      this._yStretch = null;
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;
@@ -160,6 +167,8 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     setConfigToBaseDefault(): void {
       this._xAlign = GridConfigurableAlign.CENTER;
       this._yAlign = GridConfigurableAlign.CENTER;
+      this._xStretch = false;
+      this._yStretch = false;
       this._leftMargin = 0;
       this._rightMargin = 0;
       this._topMargin = 0;
@@ -180,6 +189,8 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     setConfigToInherit(): void {
       this._xAlign = null;
       this._yAlign = null;
+      this._xStretch = null;
+      this._yStretch = null;
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;
@@ -338,6 +349,51 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
       if ( this._yGrow !== value ) {
         this._yGrow = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    get stretch(): boolean | null {
+      assert && assert( this._xStretch === this._yStretch );
+
+      return this._xStretch;
+    }
+
+    set stretch( value: boolean | null ) {
+      assert && assert( value === null || typeof value === 'boolean' );
+
+      if ( this._xStretch !== value || this._yStretch !== value ) {
+        this._xStretch = value;
+        this._yStretch = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    get xStretch(): boolean | null {
+      return this._xStretch;
+    }
+
+    set xStretch( value: boolean | null ) {
+      assert && assert( value === null || typeof value === 'boolean' );
+
+      if ( this._xStretch !== value ) {
+        this._xStretch = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    get yStretch(): boolean | null {
+      return this._yStretch;
+    }
+
+    set yStretch( value: boolean | null ) {
+      assert && assert( value === null || typeof value === 'boolean' );
+
+      if ( this._yStretch !== value ) {
+        this._yStretch = value;
 
         this.changedEmitter.emit();
       }

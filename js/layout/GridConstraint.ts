@@ -238,7 +238,8 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
         const originOffset = -firstLine.minOrigin;
 
         const align = cell.getEffectiveAlign( orientation );
-        const preferredSize = align === GridConfigurableAlign.STRETCH ? cellAvailableSize : cellMinimumSize;
+        const stretch = cell.getEffectiveStretch( orientation );
+        const preferredSize = ( stretch && cell.isSizable( orientation ) ) ? cellAvailableSize : cellMinimumSize;
 
         cell.attemptPreferredSize( orientation, preferredSize );
 
