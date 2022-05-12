@@ -296,7 +296,7 @@ export default class AlignGroup {
    * Lets the group know that the alignBox has had its content resized. Called by the AlignBox (scenery-internal)
    */
   onAlignBoxResized( alignBox: AlignBox ): void {
-    // TODO: in the future, we could only update this specific alignBox if the others don't need updating.
+    // NOTE: in the future, we could only update this specific alignBox if the others don't need updating.
     this.updateLayout();
   }
 

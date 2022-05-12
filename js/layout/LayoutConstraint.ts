@@ -54,7 +54,7 @@ export default class LayoutConstraint {
     if ( addLock ) {
       node._activeParentLayoutConstraint = this;
     }
-    // TODO: listen to things in-between!!
+
     node.boundsProperty.lazyLink( this._updateLayoutListener );
     node.visibleProperty.lazyLink( this._updateLayoutListener );
     if ( isWidthSizable( node ) ) {
@@ -147,7 +147,6 @@ export default class LayoutConstraint {
   createLayoutProxy( node: Node ): LayoutProxy | null {
     assert && assert( node instanceof Node );
 
-    // TODO: performance, don't create these closures
     const trails = node.getTrails( n => n === this.ancestorNode );
 
     if ( trails.length === 1 ) {

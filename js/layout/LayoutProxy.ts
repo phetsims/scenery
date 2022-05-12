@@ -47,7 +47,6 @@ export default class LayoutProxy {
   get bounds(): Bounds2 {
     assert && this.checkPreconditions();
 
-    // TODO: optimizations if we're the only node in the Trail!!
     return this.trail!.parentToGlobalBounds( this.node.bounds );
   }
 

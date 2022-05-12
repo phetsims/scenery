@@ -175,7 +175,6 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
   };
 
   // If we're extending into a Node type, include option keys
-  // TODO: This is ugly, we'll need to mutate after construction, no?
   if ( type.prototype._mutatorKeys ) {
     clazz.prototype._mutatorKeys = type.prototype._mutatorKeys.concat( WIDTH_SIZABLE_OPTION_KEYS );
   }

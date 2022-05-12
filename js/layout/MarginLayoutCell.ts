@@ -110,8 +110,6 @@ export default class MarginLayoutCell extends LayoutCell {
 
   getMaximumSize( orientation: Orientation ): number {
     return this.getEffectiveMinMargin( orientation ) +
-           // TODO: flow had Math.min( isSizable ? Number.POSITIVE_INFINITY : this.proxy.width, this.effectiveMaxContentWidth || Number.POSITIVE_INFINITY ) +
-           // TODO: ensure ignoring this is correct
            ( this.getEffectiveMaxContent( orientation ) || Number.POSITIVE_INFINITY ) +
            this.getEffectiveMaxMargin( orientation );
   }
@@ -128,8 +126,6 @@ export default class MarginLayoutCell extends LayoutCell {
 
       this.proxy[ preferredSizePair.get( orientation ) ] = value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation );
     }
-
-    // TODO: warning if preferred sizes weren't reached?
   }
 
   positionStart( orientation: Orientation, value: number ): void {

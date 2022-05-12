@@ -268,7 +268,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
     const maxMinimumCellSize: number = Math.max( ...cells.map( cell => cell.getMinimumSize( orientation ) || 0 ) );
 
-    // TODO: how to handle disobeying preferred size?
     if ( maxMinimumCellSize > ( preferredSize || Number.POSITIVE_INFINITY ) ) {
       preferredSize = maxMinimumCellSize;
     }
@@ -341,25 +340,25 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
       } );
 
       // Grow potential sizes if possible
-      // TODO: This looks unfun to read... check this with a fresh mind
       let growableCells;
       while ( spaceRemaining > 1e-7 && ( growableCells = line.filter( cell => {
-        const grow = cell.effectiveGrow;
-        if ( grow === 0 ) {
-          return false;
-        }
-        return cell._pendingSize < cell.getMaximumSize( orientation ) - 1e-7;
+        // Can the cell grow more?
+        return cell.effectiveGrow !== 0 && cell._pendingSize < cell.getMaximumSize( orientation ) - 1e-7;
       } ) ).length ) {
-        const totalGrow = _.sum( growableCells.map( cell => cell.grow ) );
+        // Total sum of "grow" values in cells that could potentially grow
+        const totalGrow = _.sum( growableCells.map( cell => cell.effectiveGrow ) );
         const amountToGrow = Math.min(
-          Math.min( ...growableCells.map( cell => ( cell.getMaximumSize( orientation ) - cell._pendingSize ) / ( cell.grow || 0 ) ) ),
+          // Smallest amount that any of the cells couldn't grow past (note: proportional to effectiveGrow)
+          Math.min( ...growableCells.map( cell => ( cell.getMaximumSize( orientation ) - cell._pendingSize ) / cell.effectiveGrow ) ),
+
+          // Amount each cell grows if all of our extra space fits in ALL the cells
           spaceRemaining / totalGrow
         );
 
         assert && assert( amountToGrow > 1e-11 );
 
         growableCells.forEach( cell => {
-          cell._pendingSize += amountToGrow * cell.grow!;
+          cell._pendingSize += amountToGrow * cell.effectiveGrow!;
         } );
         spaceRemaining -= amountToGrow * totalGrow;
       }

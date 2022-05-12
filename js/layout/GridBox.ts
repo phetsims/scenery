@@ -15,7 +15,7 @@ const GRIDBOX_OPTION_KEYS = [
 ].concat( GRID_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
 
 const DEFAULT_OPTIONS = {
-  resize: true // TODO: how is resize working
+  resize: true
 } as const;
 
 type SelfOptions = {
