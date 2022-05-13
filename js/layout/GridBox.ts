@@ -92,7 +92,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
       }, layoutOptions || undefined );
     }
 
-    if ( layoutOptions!.wrap ) {
+    if ( layoutOptions.wrap ) {
       // TODO: how to handle wrapping with larger spans?
       this._nextX = 0;
       this._nextY++;

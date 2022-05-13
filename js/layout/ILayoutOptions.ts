@@ -1,6 +1,6 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
-import { HorizontalLayoutAlign, LayoutOrientation, VerticalLayoutAlign } from '../imports.js';
+import { FlowCellOptions, GridCellOptions } from '../imports.js';
 
 /**
  * The main type interface for layout options
@@ -8,31 +8,5 @@ import { HorizontalLayoutAlign, LayoutOrientation, VerticalLayoutAlign } from '.
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default interface ILayoutOptions {
-  orientation?: LayoutOrientation;
-  align?: HorizontalLayoutAlign | VerticalLayoutAlign;
-  stretch?: boolean;
-  xStretch?: boolean;
-  yStretch?: boolean;
-  xAlign?: HorizontalLayoutAlign;
-  yAlign?: VerticalLayoutAlign;
-  grow?: number;
-  xGrow?: number;
-  yGrow?: number;
-  margin?: number;
-  xMargin?: number;
-  yMargin?: number;
-  leftMargin?: number;
-  rightMargin?: number;
-  topMargin?: number;
-  bottomMargin?: number;
-  minContentWidth?: number;
-  minContentHeight?: number;
-  maxContentWidth?: number;
-  maxContentHeight?: number;
-  wrap?: boolean;
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-} // eslint-disable-line
+export type ILayoutOptions = GridCellOptions & FlowCellOptions;
+export default ILayoutOptions;

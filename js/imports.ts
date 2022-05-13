@@ -246,6 +246,7 @@ export type { MarginLayout } from './layout/MarginLayoutCell.js';
 export { default as FlowConfigurable, FLOW_CONFIGURABLE_OPTION_KEYS } from './layout/FlowConfigurable.js';
 export type { FlowConfigurableOptions } from './layout/FlowConfigurable.js';
 export { default as FlowCell } from './layout/FlowCell.js';
+export type { FlowCellOptions } from './layout/FlowCell.js';
 export { default as FlowLine } from './layout/FlowLine.js';
 export { default as FlowConstraint, FLOW_CONSTRAINT_OPTION_KEYS } from './layout/FlowConstraint.js';
 export type { FlowConstraintOptions } from './layout/FlowConstraint.js';

@@ -38,7 +38,7 @@ export type GridConfigurableOptions = {
   // NOTE: 'origin' aligns will only apply to cells that are 1 grid line in that orientation (width/height)
   xAlign?: HorizontalLayoutAlign | null;
   yAlign?: VerticalLayoutAlign | null;
-  stretch?: number | null;
+  stretch?: boolean;
   xStretch?: number | null;
   yStretch?: number | null;
   grow?: number | null;

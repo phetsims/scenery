@@ -13,10 +13,20 @@ import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutAlign,
 import optionize from '../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
+  // Defines the column (or if width>1, the left-most column) index of the cell. x:0 is the left-most column.
   x?: number;
+
+  // Defines the row (or if height>1, the top-most row) index of the cell. y:0 is the top-most row
   y?: number;
+
+  // How many columns this one cell spans.
   width?: number;
+
+  // How many rows this one cell spans
   height?: number;
+
+  // Whether
+  wrap?: boolean;
 };
 
 export type GridCellOptions = SelfOptions & GridConfigurableOptions;
@@ -28,10 +38,10 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
   size: OrientationPair<number>;
 
   // Set to be the bounds available for the cell
-  lastAvailableBounds: Bounds2;
+  lastAvailableBounds: Bounds2 = Bounds2.NOTHING.copy();
 
   // Set to be the bounds used by the cell
-  lastUsedBounds: Bounds2;
+  lastUsedBounds: Bounds2 = Bounds2.NOTHING.copy();
 
   gridConstraint: GridConstraint;
 
@@ -41,7 +51,8 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
       x: 0,
       y: 0,
       width: 1,
-      height: 1
+      height: 1,
+      wrap: false
     }, node.layoutOptions as GridConfigurableOptions );
 
     assert && assert( typeof options.x === 'number' && Number.isInteger( options.x ) && isFinite( options.x ) && options.x >= 0 );
@@ -55,8 +66,6 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
     this.position = new OrientationPair( options.x, options.y );
     this.size = new OrientationPair( options.width, options.height );
-    this.lastAvailableBounds = Bounds2.NOTHING.copy();
-    this.lastUsedBounds = Bounds2.NOTHING.copy();
 
     this.setOptions( options );
     this.onLayoutOptionsChange();

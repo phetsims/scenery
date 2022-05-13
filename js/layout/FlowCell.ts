@@ -8,6 +8,8 @@
 
 import { FlowConfigurable, FlowConfigurableOptions, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
 
+export type FlowCellOptions = Omit<FlowConfigurableOptions, 'orientation'>;
+
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
   _pendingSize: number; // scenery-internal
