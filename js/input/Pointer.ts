@@ -27,6 +27,9 @@ import IProperty from '../../../axon/js/IProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
+import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
 import { IInputListener, scenery, SceneryEvent, Trail } from '../imports.js';
 import IAttachableInputListener from './IAttachableInputListener.js';
 
@@ -99,6 +102,7 @@ export default abstract class Pointer {
   // so they can be removed on disposal
   private _listenerForDragReserve: IInputListener | null;
   private _listenerForKeyboardDragReserve: IInputListener | null;
+  static PointerIO: IOType<Pointer>;
 
   /**
    * @param initialPoint
@@ -440,5 +444,25 @@ export default abstract class Pointer {
     assert && assert( this._listeners.length === 0, 'Should not have listeners when a pointer is disposed' );
   }
 }
+
+// Pointer is not a PhetioObject and not instrumented, but this type is used for
+// toStateObject in Input
+Pointer.PointerIO = new IOType<Pointer>( 'PointerIO', {
+
+  // Cannot use valueType since Pointer is abstract
+  isValidValue: p => p instanceof Pointer,
+  toStateObject: ( pointer: Pointer ) => {
+    return {
+      point: pointer.point.toStateObject(),
+      isDown: pointer.isDownProperty.value,
+      type: pointer.type
+    };
+  },
+  stateSchema: {
+    point: Vector2.Vector2IO,
+    isDown: BooleanIO,
+    type: StringIO
+  }
+} );
 
 scenery.register( 'Pointer', Pointer );

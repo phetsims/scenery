@@ -169,6 +169,10 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Features, IInputListener, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, Touch, Trail, WindowTouch } from '../imports.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
+import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 
 // This is the list of keys that get serialized AND deserialized. NOTE: Do not add or change this without
 // consulting the PhET-iO IOType schema for this in EventIO
@@ -249,13 +253,13 @@ type TargetSubstitudeAugmentedEvent = Event & {
 // sending a mouseup event and a click event.
 const PDOM_CLICK_DELAY = 80;
 
-export type InputOptions = {
-  tandem?: Tandem;
-};
+type SelfOptions = {};
+
+export type InputOptions = SelfOptions & PickOptional<PhetioObjectOptions, 'tandem'>
 
 type EventListenerOptions = { capture?: boolean; passive?: boolean; once?: boolean } | boolean;
 
-export default class Input {
+export default class Input extends PhetioObject {
 
   display: Display;
   rootNode: Node;
@@ -326,7 +330,7 @@ export default class Input {
   // Event listeners are not added until initializeEvents, and are stored in this Map so they can be removed
   // again in detachEvents.
   private pdomEventListenerMap?: Map<string, ( event: Event ) => void>;
-
+  static InputIO: IOType<Input>;
 
   /**
    * @param display
@@ -345,9 +349,12 @@ export default class Input {
     assert && assert( typeof batchDOMEvents === 'boolean' );
     assert && assert( typeof assumeFullWindow === 'boolean' );
 
-    const options = optionize<InputOptions, InputOptions>()( {
+    const options = optionize<InputOptions, SelfOptions, PhetioObjectOptions>()( {
+      phetioType: Input.InputIO,
       tandem: Tandem.OPTIONAL
     }, providedOptions );
+
+    super( options );
 
     this.display = display;
     this.rootNode = display.rootNode;
@@ -1997,5 +2004,20 @@ export default class Input {
     }
   }
 }
+
+const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
+
+Input.InputIO = new IOType<Input>( 'InputIO', {
+  valueType: Input,
+  applyState: () => {},
+  toStateObject: ( input: Input ) => {
+    return {
+      pointers: ArrayIOPointerIO.toStateObject( input.pointers )
+    };
+  },
+  stateSchema: {
+    pointers: ArrayIOPointerIO
+  }
+} );
 
 scenery.register( 'Input', Input );
