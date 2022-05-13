@@ -225,25 +225,18 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
         const firstLine = lineMap.get( cellIndexPosition )!;
         const cellSpacings = lineSpacings.slice( cellIndexPosition, cellIndexPosition + cellSize - 1 );
         const cellAvailableSize = _.sum( cellLines.map( line => line.size ) ) + _.sum( cellSpacings );
-        const cellMinimumSize = cell.getMinimumSize( orientation );
         const cellPosition = firstLine.position;
-        const originOffset = -firstLine.minOrigin;
 
-        const align = cell.getEffectiveAlign( orientation );
-        const stretch = cell.getEffectiveStretch( orientation );
-        const preferredSize = ( stretch && cell.isSizable( orientation ) ) ? cellAvailableSize : cellMinimumSize;
-
-        cell.attemptPreferredSize( orientation, preferredSize );
-
-        if ( align === LayoutAlign.ORIGIN ) {
-          cell.positionOrigin( orientation, cellPosition + originOffset );
-        }
-        else {
-          cell.positionStart( orientation, cellPosition + ( cellAvailableSize - cell.getCellBounds()[ orientation.size ] ) * align.padRatio );
-        }
+        cell.reposition(
+          orientation,
+          cellAvailableSize,
+          cellPosition,
+          cell.getEffectiveStretch( orientation ),
+          -firstLine.minOrigin,
+          cell.getEffectiveAlign( orientation )
+        );
 
         const cellBounds = cell.getCellBounds();
-        assert && assert( cellBounds.isFinite() );
 
         cell.lastAvailableBounds[ orientation.minCoordinate ] = cellPosition;
         cell.lastAvailableBounds[ orientation.maxCoordinate ] = cellPosition + cellAvailableSize;

@@ -280,12 +280,12 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
       // Update preferred dimension based on the pending size
       line.cells.forEach( cell => cell.attemptPreferredSize( orientation, cell._pendingSize ) );
 
-      const spacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.cells.length );
+      const primarySpacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.cells.length );
 
       let position = 0;
 
       line.cells.forEach( ( cell, index ) => {
-        position += spacingFunction( index );
+        position += primarySpacingFunction( index );
         if ( index > 0 ) {
           position += this.spacing;
         }
@@ -314,7 +314,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     }
     else {
       // If we're justifying lines, we won't add any additional space into things
-
       const spacingFunction = this._justifyLines.spacingFunctionFactory( oppositeSpaceRemaining, lines.length );
 
       lines.forEach( ( line, index ) => {
@@ -323,33 +322,9 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
         oppositePosition += line.size + this.lineSpacing;
       } );
     }
-    lines.forEach( line => {
-      // Mimicking https://www.w3.org/TR/css-flexbox-1/#align-items-property for baseline (for our origin)
-      // Origin will sync all origin-based items (so their origin matches), and then position ALL of that as if it was
-      // align left or top (depending on the orientation).
-
-      // The distance from the "start" (top/left) to the origin, for origin-aligned items
-      const originOffset = line.hasOrigin() ? -line.minOrigin : 0;
-
-      line.cells.forEach( cell => {
-        const align = cell.effectiveAlign;
-
-        // If stretching, we'll expand to the lineSize (otherwise will use the minimum size available)
-        const preferredSize = ( cell.effectiveStretch && cell.isSizable( oppositeOrientation ) ) ? line.size : cell.getMinimumSize( oppositeOrientation );
-
-        cell.attemptPreferredSize( oppositeOrientation, preferredSize );
-
-        if ( align === LayoutAlign.ORIGIN ) {
-          cell.positionOrigin( oppositeOrientation, line.position + originOffset );
-        }
-        else {
-          cell.positionStart( oppositeOrientation, line.position + ( line.size - cell.getCellBounds()[ oppositeOrientation.size ] ) * align.padRatio );
-        }
-
-        const cellBounds = cell.getCellBounds();
-        assert && assert( cellBounds.isFinite() );
-      } );
-    } );
+    lines.forEach( line => line.cells.forEach( cell => {
+      cell.reposition( oppositeOrientation, line.size, line.position, cell.effectiveStretch, -line.minOrigin, cell.effectiveAlign );
+    } ) );
 
     const minCoordinate = 0;
     const maxCoordinate = size;
@@ -374,6 +349,8 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumCurrentOppositeSize : minimumAllowableSize;
 
     this.finishedLayoutEmitter.emit();
+
+    lines.forEach( line => line.freeToPool() );
   }
 
   get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
