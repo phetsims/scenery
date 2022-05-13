@@ -188,7 +188,7 @@ const INPUT_ENABLED_PROPERTY_TANDEM_NAME = 'inputEnabledProperty';
 
 const PHET_IO_STATE_DEFAULT = false;
 
-const REQUIRES_BOUNDS_OPTION_KEYS = [
+export const REQUIRES_BOUNDS_OPTION_KEYS = [
   'leftTop', // {Vector2} - The upper-left corner of this Node's bounds, see setLeftTop() for more documentation
   'centerTop', // {Vector2} - The top-center of this Node's bounds, see setCenterTop() for more documentation
   'rightTop', // {Vector2} - The upper-right corner of this Node's bounds, see setRightTop() for more documentation

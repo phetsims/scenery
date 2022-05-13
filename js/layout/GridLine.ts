@@ -39,6 +39,10 @@ export default class GridLine {
     this.position = 0;
   }
 
+  hasOrigin(): boolean {
+    return isFinite( this.minOrigin ) && isFinite( this.maxOrigin );
+  }
+
   freeToPool(): void {
     GridLine.pool.freeToPool( this );
   }

@@ -8,7 +8,7 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalJustification, LayoutOrientation, FlowVerticalJustification, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, SceneryConstants, HorizontalLayoutAlign, VerticalLayoutAlign } from '../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, LayoutOrientation, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, SceneryConstants, HorizontalLayoutAlign, VerticalLayoutAlign, HorizontalLayoutJustification, VerticalLayoutJustification } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -201,12 +201,20 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     this._constraint.lineSpacing = value;
   }
 
-  get justify(): FlowHorizontalJustification | FlowVerticalJustification {
+  get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
     return this._constraint.justify;
   }
 
-  set justify( value: FlowHorizontalJustification | FlowVerticalJustification ) {
+  set justify( value: HorizontalLayoutJustification | VerticalLayoutJustification ) {
     this._constraint.justify = value;
+  }
+
+  get justifyLines(): HorizontalLayoutJustification | VerticalLayoutJustification | null {
+    return this._constraint.justifyLines;
+  }
+
+  set justifyLines( value: HorizontalLayoutJustification | VerticalLayoutJustification | null ) {
+    this._constraint.justifyLines = value;
   }
 
   get wrap(): boolean {

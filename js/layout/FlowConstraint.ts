@@ -14,115 +14,18 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { scenery, Node, Divider, FlowCell, FlowConfigurable, LayoutConstraint, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurableOptions, LayoutAlign } from '../imports.js';
-import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
+import { Divider, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowConfigurableOptions, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutConstraint, LayoutJustification, Node, scenery, VerticalLayoutJustification } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
+  ...FLOW_CONFIGURABLE_OPTION_KEYS,
   'spacing',
   'lineSpacing',
   'justify',
+  'justifyLines',
   'wrap',
   'excludeInvisible'
-].concat( FLOW_CONFIGURABLE_OPTION_KEYS );
-
-const flowHorizontalJustificationValues = [ 'left', 'right', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
-const flowVerticalJustificationValues = [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
-
-export type FlowHorizontalJustification = typeof flowHorizontalJustificationValues[number];
-export type FlowVerticalJustification = typeof flowVerticalJustificationValues[number];
-
-const getAllowedJustificationValues = ( orientation: Orientation ): readonly string[] => {
-  return orientation === Orientation.HORIZONTAL ? flowHorizontalJustificationValues : flowVerticalJustificationValues;
-};
-
-type SpaceRemainingFunctionFactory = ( spaceRemaining: number, lineLength: number ) => ( ( index: number ) => number );
-
-class FlowConstraintJustify extends EnumerationValue {
-  static readonly START = new FlowConstraintJustify(
-    () => () => 0,
-    'left', 'top'
-  );
-
-  static readonly END = new FlowConstraintJustify(
-    spaceRemaining => index => index === 0 ? spaceRemaining : 0,
-    'right', 'bottom'
-  );
-
-  static readonly CENTER = new FlowConstraintJustify(
-    spaceRemaining => index => index === 0 ? spaceRemaining / 2 : 0,
-    'center', 'center'
-  );
-
-  static readonly SPACE_BETWEEN = new FlowConstraintJustify(
-    ( spaceRemaining, lineLength ) => index => index !== 0 ? ( spaceRemaining / ( lineLength - 1 ) ) : 0,
-    'spaceBetween', 'spaceBetween'
-  );
-
-  static readonly SPACE_AROUND = new FlowConstraintJustify(
-    ( spaceRemaining, lineLength ) => index => ( index !== 0 ? 2 : 1 ) * spaceRemaining / ( 2 * lineLength ),
-    'spaceAround', 'spaceAround'
-  );
-
-  static readonly SPACE_EVENLY = new FlowConstraintJustify(
-    ( spaceRemaining, lineLength ) => index => spaceRemaining / ( lineLength + 1 ),
-    'spaceEvenly', 'spaceEvenly'
-  );
-
-  readonly horizontal: FlowHorizontalJustification;
-  readonly vertical: FlowVerticalJustification;
-  readonly spacingFunctionFactory: SpaceRemainingFunctionFactory;
-
-  constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: FlowHorizontalJustification, vertical: FlowVerticalJustification ) {
-    super();
-
-    this.spacingFunctionFactory = spacingFunctionFactory;
-    this.horizontal = horizontal;
-    this.vertical = vertical;
-  }
-
-  static readonly enumeration = new Enumeration( FlowConstraintJustify, {
-    phetioDocumentation: 'Justify for FlowConstraint'
-  } );
-}
-
-const horizontalJustifyMap = {
-  left: FlowConstraintJustify.START,
-  right: FlowConstraintJustify.END,
-  center: FlowConstraintJustify.CENTER,
-  spaceBetween: FlowConstraintJustify.SPACE_BETWEEN,
-  spaceAround: FlowConstraintJustify.SPACE_AROUND,
-  spaceEvenly: FlowConstraintJustify.SPACE_EVENLY
-};
-const verticalJustifyMap = {
-  top: FlowConstraintJustify.START,
-  bottom: FlowConstraintJustify.END,
-  center: FlowConstraintJustify.CENTER,
-  spaceBetween: FlowConstraintJustify.SPACE_BETWEEN,
-  spaceAround: FlowConstraintJustify.SPACE_AROUND,
-  spaceEvenly: FlowConstraintJustify.SPACE_EVENLY
-};
-const justifyToInternal = ( orientation: Orientation, key: FlowHorizontalJustification | FlowVerticalJustification ): FlowConstraintJustify => {
-  if ( orientation === Orientation.HORIZONTAL ) {
-    assert && assert( horizontalJustifyMap[ key as 'left' | 'right' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ] );
-
-    return horizontalJustifyMap[ key as 'left' | 'right' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ];
-  }
-  else {
-    assert && assert( verticalJustifyMap[ key as 'top' | 'bottom' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ] );
-
-    return verticalJustifyMap[ key as 'top' | 'bottom' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ];
-  }
-};
-const internalToJustify = ( orientation: Orientation, justify: FlowConstraintJustify ): FlowHorizontalJustification | FlowVerticalJustification => {
-  if ( orientation === Orientation.HORIZONTAL ) {
-    return justify.horizontal;
-  }
-  else {
-    return justify.vertical;
-  }
-};
+];
 
 type SelfOptions = {
   // The default spacing in-between elements in the primary direction. If additional (or less) spacing is desired for
@@ -133,7 +36,10 @@ type SelfOptions = {
   lineSpacing?: number;
 
   // How extra space in the primary direction is allocated. The default is spaceBetween.
-  justify?: FlowHorizontalJustification | FlowVerticalJustification;
+  justify?: HorizontalLayoutJustification | VerticalLayoutJustification;
+
+  // How extra space in the secondary direction is allocated. The default is null (which will expand content to fit)
+  justifyLines?: HorizontalLayoutJustification | VerticalLayoutJustification | null;
 
   // Whether line-wrapping is enabled. If so, the primary preferred dimension will determine where things are wrapped.
   wrap?: boolean;
@@ -154,12 +60,13 @@ export type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions;
 
 export default class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
-  private readonly cells: FlowCell[];
-  private _justify: FlowConstraintJustify;
-  private _wrap: boolean;
-  private _spacing: number;
-  private _lineSpacing: number;
-  private _excludeInvisible: boolean;
+  private readonly cells: FlowCell[] = [];
+  private _justify: LayoutJustification = LayoutJustification.SPACE_BETWEEN;
+  private _justifyLines: LayoutJustification | null = null;
+  private _wrap = false;
+  private _spacing = 0;
+  private _lineSpacing = 0;
+  private _excludeInvisible = true;
 
   readonly preferredWidthProperty: IProperty<number | null>;
   readonly preferredHeightProperty: IProperty<number | null>;
@@ -182,13 +89,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     }, providedOptions );
 
     super( ancestorNode );
-
-    this.cells = [];
-    this._justify = FlowConstraintJustify.SPACE_BETWEEN;
-    this._wrap = false;
-    this._spacing = 0;
-    this._lineSpacing = 0;
-    this._excludeInvisible = true;
 
     this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
       useDeepEquality: true
@@ -272,48 +172,66 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
       preferredSize = maxMinimumCellSize;
     }
 
-    // Wrapping all of the cells into lines
-    const lines = [];
+    // Wrapping all the cells into lines
+    const lines: FlowLine[] = [];
     if ( this.wrap ) {
-      let currentLine: FlowCell[] = [];
+      let currentLineCells: FlowCell[] = [];
       let availableSpace = preferredSize || Number.POSITIVE_INFINITY;
 
       while ( cells.length ) {
         const cell = cells.shift()!;
         const cellSpace = cell.getMinimumSize( orientation );
 
-        if ( currentLine.length === 0 ) {
-          currentLine.push( cell );
+        if ( currentLineCells.length === 0 ) {
+          currentLineCells.push( cell );
           availableSpace -= cellSpace;
         }
         else if ( this.spacing + cellSpace <= availableSpace + 1e-7 ) {
-          currentLine.push( cell );
+          currentLineCells.push( cell );
           availableSpace -= this.spacing + cellSpace;
         }
         else {
-          lines.push( currentLine );
+          lines.push( FlowLine.pool.create( orientation, currentLineCells ) );
           availableSpace = preferredSize || Number.POSITIVE_INFINITY;
 
-          currentLine = [ cell ];
+          currentLineCells = [ cell ];
           availableSpace -= cellSpace;
         }
       }
 
-      if ( currentLine.length ) {
-        lines.push( currentLine );
+      if ( currentLineCells.length ) {
+        lines.push( FlowLine.pool.create( orientation, currentLineCells ) );
       }
     }
     else {
-      lines.push( cells );
+      lines.push( FlowLine.pool.create( orientation, cells ) );
     }
 
+    lines.forEach( line => {
+      line.cells.forEach( cell => {
+        line.min = Math.max( line.min, cell.getMinimumSize( oppositeOrientation ) );
+        line.max = Math.min( line.max, cell.getMaximumSize( oppositeOrientation ) );
+
+        // For origin-specified cells, we will record their maximum reach from the origin, so these can be "summed"
+        // (since the origin line may end up taking more space).
+        if ( cell.effectiveAlign === LayoutAlign.ORIGIN ) {
+          const originBounds = cell.getOriginBounds();
+          line.minOrigin = Math.min( originBounds[ oppositeOrientation.minCoordinate ], line.minOrigin );
+          line.maxOrigin = Math.max( originBounds[ oppositeOrientation.maxCoordinate ], line.maxOrigin );
+        }
+      } );
+
+      if ( isFinite( line.minOrigin ) && isFinite( line.maxOrigin ) ) {
+        line.size = Math.max( line.min, line.maxOrigin - line.minOrigin );
+      }
+      else {
+        line.size = line.min;
+      }
+    } );
+
     // Given our wrapped lines, what is our minimum size we could take up?
-    const minimumCurrentSize: number = Math.max( ...lines.map( line => {
-      return ( line.length - 1 ) * this.spacing + _.sum( line.map( cell => cell.getMinimumSize( orientation ) ) );
-    } ) );
-    const minimumCurrentOppositeSize = _.sum( lines.map( line => {
-      return _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation ) ) );
-    } ) ) + ( lines.length - 1 ) * this.lineSpacing;
+    const minimumCurrentSize: number = Math.max( ...lines.map( line => line.getMinimumSize( this.spacing ) ) );
+    const minimumCurrentOppositeSize = _.sum( lines.map( line => line.size ) ) + ( lines.length - 1 ) * this.lineSpacing;
 
     // Used for determining our "minimum" size for preferred sizes... if wrapping is enabled, we can be smaller than
     // current minimums
@@ -321,27 +239,23 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
 
     // Increase things if our preferred size is larger than our minimums (we'll figure out how to compensate
     // for the extra space below).
-    const size: number = Math.max( minimumCurrentSize, preferredSize || 0 );
-
-    const minCoordinate = 0;
-    const maxCoordinate = size;
-    let minOppositeCoordinate = Number.POSITIVE_INFINITY;
-    let maxOppositeCoordinate = Number.NEGATIVE_INFINITY;
+    const size = Math.max( minimumCurrentSize, preferredSize || 0 );
+    const oppositeSize = Math.max( minimumCurrentOppositeSize, preferredOppositeSize || 0 );
 
     // Primary-direction layout
     lines.forEach( line => {
-      const minimumContent = _.sum( line.map( cell => cell.getMinimumSize( orientation ) ) );
-      const spacingAmount = this.spacing * ( line.length - 1 );
+      const minimumContent = _.sum( line.cells.map( cell => cell.getMinimumSize( orientation ) ) );
+      const spacingAmount = this.spacing * ( line.cells.length - 1 );
       let spaceRemaining = size - minimumContent - spacingAmount;
 
       // Initial pending sizes
-      line.forEach( cell => {
+      line.cells.forEach( cell => {
         cell._pendingSize = cell.getMinimumSize( orientation );
       } );
 
       // Grow potential sizes if possible
       let growableCells;
-      while ( spaceRemaining > 1e-7 && ( growableCells = line.filter( cell => {
+      while ( spaceRemaining > 1e-7 && ( growableCells = line.cells.filter( cell => {
         // Can the cell grow more?
         return cell.effectiveGrow !== 0 && cell._pendingSize < cell.getMaximumSize( orientation ) - 1e-7;
       } ) ).length ) {
@@ -364,14 +278,14 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
       }
 
       // Update preferred dimension based on the pending size
-      line.forEach( cell => cell.attemptPreferredSize( orientation, cell._pendingSize ) );
+      line.cells.forEach( cell => cell.attemptPreferredSize( orientation, cell._pendingSize ) );
 
-      const spacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.length );
+      const primarySpacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.cells.length );
 
       let position = 0;
 
-      line.forEach( ( cell, index ) => {
-        position += spacingFunction( index );
+      line.cells.forEach( ( cell, index ) => {
+        position += primarySpacingFunction( index );
         if ( index > 0 ) {
           position += this.spacing;
         }
@@ -381,74 +295,41 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     } );
 
     // Secondary-direction layout
-    let secondaryPosition = 0;
-    lines.forEach( ( line, index ) => {
-      // Mimicking https://www.w3.org/TR/css-flexbox-1/#align-items-property for baseline (for our origin)
-      // Origin will sync all origin-based items (so their origin matches), and then position ALL of that as if it was
-      // align left or top (depending on the orientation).
+    const oppositeSpaceRemaining = oppositeSize - minimumCurrentOppositeSize;
+    const initialOppositePosition = lines[ 0 ].hasOrigin() ? lines[ 0 ].minOrigin : 0;
+    let oppositePosition = initialOppositePosition;
+    if ( this._justifyLines === null ) {
+      // null justifyLines will result in expanding all of our lines into the remaining space.
 
-      // Find the union of all origin-based cells (will be Bounds2.NOTHING if there are none)
-      const maximumOriginBounds = line.reduce( ( bounds: Bounds2, cell: FlowCell ) => {
-        return cell.effectiveAlign === LayoutAlign.ORIGIN ? bounds.union( cell.getOriginBounds() ) : bounds;
-      }, Bounds2.NOTHING );
-
-      // When we lay out everything with align:origin, what is the dimension of all of that content?
-      const maximumOriginSize = maximumOriginBounds.isFinite() ? maximumOriginBounds[ oppositeOrientation.size ] : 0;
-
-      // TODO: using preferredOppositeSize doesn't seem to mesh well with wrapping, no? Perhaps align-content equivalent would fix this?
-      const lineSize = Math.max( preferredOppositeSize || 0, maximumOriginSize, ...line.map( cell => cell.getMinimumSize( oppositeOrientation ) || 0 ) );
-
-      // The distance from the "start" (top/left) to the origin, for origin-aligned items
-      const originOffset = maximumOriginBounds.isValid() ? -maximumOriginBounds.top : 0;
-
-      // The position of the "start" (top/left) for the entire line
-      const lineStartPosition = index === 0 ? -originOffset : secondaryPosition;
-
-      if ( index === 0 ) {
-        minOppositeCoordinate = lineStartPosition;
-      }
-      if ( index === lines.length - 1 ) {
-        maxOppositeCoordinate = lineStartPosition + lineSize;
-      }
-
-      line.forEach( cell => {
-        const align = cell.effectiveAlign;
-
-        // If stretching, we'll expand to the lineSize (otherwise will use the minimum size available)
-        const preferredSize = ( cell.effectiveStretch && cell.isSizable( oppositeOrientation ) ) ? lineSize : cell.getMinimumSize( oppositeOrientation );
-
-        cell.attemptPreferredSize( oppositeOrientation, preferredSize );
-
-        if ( align === LayoutAlign.ORIGIN ) {
-          cell.positionOrigin( oppositeOrientation, lineStartPosition + originOffset );
-        }
-        else {
-          cell.positionStart( oppositeOrientation, lineStartPosition + ( lineSize - cell.getCellBounds()[ oppositeOrientation.size ] ) * align.padRatio );
-        }
-
-        const cellBounds = cell.getCellBounds();
-        assert && assert( cellBounds.isFinite() );
+      // Add space remaining evenly (for now) since we don't have any grow values
+      lines.forEach( line => {
+        line.size += oppositeSpaceRemaining / lines.length;
       } );
 
-      const incrementAmount = lineSize + this.lineSpacing;
-
-      if ( index === 0 ) {
-        // If we're the first line, we need to include the lineStartPosition (if we had something origin-positioned,
-        // we want to have the first line's position origin be exactly 0). We'll start from there, and then each line
-        // in the future will be simpler with an increment (originOffset will handle things nicely)
-        secondaryPosition = lineStartPosition + incrementAmount;
-      }
-      else {
-        // Otherwise we can just increment by the line size (and add in spacing)
-        secondaryPosition += incrementAmount;
-      }
-    } );
-
-    // TODO: align-content flexbox equivalent (this is possibly not needed, since we are typically not wrapping?
-    // For now, we'll just pad ourself out
-    if ( preferredOppositeSize && ( maxOppositeCoordinate - minOppositeCoordinate ) < preferredOppositeSize ) {
-      maxOppositeCoordinate = minOppositeCoordinate + preferredOppositeSize;
+      // Position the lines
+      lines.forEach( line => {
+        line.position = oppositePosition;
+        oppositePosition += line.size + this.lineSpacing;
+      } );
     }
+    else {
+      // If we're justifying lines, we won't add any additional space into things
+      const spacingFunction = this._justifyLines.spacingFunctionFactory( oppositeSpaceRemaining, lines.length );
+
+      lines.forEach( ( line, index ) => {
+        oppositePosition += spacingFunction( index );
+        line.position = oppositePosition;
+        oppositePosition += line.size + this.lineSpacing;
+      } );
+    }
+    lines.forEach( line => line.cells.forEach( cell => {
+      cell.reposition( oppositeOrientation, line.size, line.position, cell.effectiveStretch, -line.minOrigin, cell.effectiveAlign );
+    } ) );
+
+    const minCoordinate = 0;
+    const maxCoordinate = size;
+    const minOppositeCoordinate = initialOppositePosition;
+    const maxOppositeCoordinate = initialOppositePosition + oppositeSize;
 
     // We're taking up these layout bounds (nodes could use them for localBounds)
     this.layoutBoundsProperty.value = orientation === Orientation.HORIZONTAL ? new Bounds2(
@@ -468,27 +349,58 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumCurrentOppositeSize : minimumAllowableSize;
 
     this.finishedLayoutEmitter.emit();
+
+    lines.forEach( line => line.freeToPool() );
   }
 
-  get justify(): FlowHorizontalJustification | FlowVerticalJustification {
-    const result = internalToJustify( this._orientation, this._justify );
+  get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
+    const result = LayoutJustification.internalToJustify( this._orientation, this._justify );
 
-    assert && assert( getAllowedJustificationValues( this._orientation ).includes( result ) );
+    assert && assert( LayoutJustification.getAllowedJustificationValues( this._orientation ).includes( result ) );
 
     return result;
   }
 
-  set justify( value: FlowHorizontalJustification | FlowVerticalJustification ) {
-    assert && assert( getAllowedJustificationValues( this._orientation ).includes( value ),
-      `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${getAllowedJustificationValues( this._orientation )}` );
+  set justify( value: HorizontalLayoutJustification | VerticalLayoutJustification ) {
+    assert && assert( LayoutJustification.getAllowedJustificationValues( this._orientation ).includes( value ),
+      `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${LayoutJustification.getAllowedJustificationValues( this._orientation )}` );
 
     // remapping align values to an independent set, so they aren't orientation-dependent
-    const mappedValue = justifyToInternal( this._orientation, value );
+    const mappedValue = LayoutJustification.justifyToInternal( this._orientation, value );
 
-    assert && assert( mappedValue instanceof FlowConstraintJustify );
+    assert && assert( mappedValue instanceof LayoutJustification );
 
     if ( this._justify !== mappedValue ) {
       this._justify = mappedValue;
+
+      this.updateLayoutAutomatically();
+    }
+  }
+
+  get justifyLines(): HorizontalLayoutJustification | VerticalLayoutJustification | null {
+    if ( this._justifyLines === null ) {
+      return null;
+    }
+    else {
+      const result = LayoutJustification.internalToJustify( this._orientation, this._justifyLines );
+
+      assert && assert( LayoutJustification.getAllowedJustificationValues( this._orientation ).includes( result ) );
+
+      return result;
+    }
+  }
+
+  set justifyLines( value: HorizontalLayoutJustification | VerticalLayoutJustification | null ) {
+    assert && assert( value === null || LayoutJustification.getAllowedJustificationValues( this._orientation.opposite ).includes( value ),
+      `justify ${value} not supported, with the orientation ${this._orientation.opposite}, the valid values are ${LayoutJustification.getAllowedJustificationValues( this._orientation.opposite )} or null` );
+
+    // remapping align values to an independent set, so they aren't orientation-dependent
+    const mappedValue = value === null ? null : LayoutJustification.justifyToInternal( this._orientation.opposite, value );
+
+    assert && assert( mappedValue === null || mappedValue instanceof LayoutJustification );
+
+    if ( this._justifyLines !== mappedValue ) {
+      this._justifyLines = mappedValue;
 
       this.updateLayoutAutomatically();
     }

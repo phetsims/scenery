@@ -10,7 +10,7 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { scenery, Node } from '../imports.js';
+import { scenery, Node, REQUIRES_BOUNDS_OPTION_KEYS } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 
 export const WIDTH_SIZABLE_OPTION_KEYS = [
@@ -177,7 +177,14 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
   // If we're extending into a Node type, include option keys
   if ( type.prototype._mutatorKeys ) {
-    clazz.prototype._mutatorKeys = type.prototype._mutatorKeys.concat( WIDTH_SIZABLE_OPTION_KEYS );
+    const existingKeys = type.prototype._mutatorKeys;
+    const newKeys = WIDTH_SIZABLE_OPTION_KEYS;
+    const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
+    clazz.prototype._mutatorKeys = [
+      ...existingKeys.slice( 0, indexOfBoundsBasedOptions ),
+      ...newKeys,
+      ...existingKeys.slice( indexOfBoundsBasedOptions )
+    ];
   }
 
   return clazz;
