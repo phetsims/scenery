@@ -272,7 +272,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
       preferredSize = maxMinimumCellSize;
     }
 
-    // Wrapping all of the cells into lines
+    // Wrapping all the cells into lines
     const lines = [];
     if ( this.wrap ) {
       let currentLine: FlowCell[] = [];
