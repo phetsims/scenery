@@ -18,11 +18,12 @@ import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
+  ...GRID_CONFIGURABLE_OPTION_KEYS,
   'excludeInvisible',
   'spacing',
   'xSpacing',
   'ySpacing'
-].concat( GRID_CONFIGURABLE_OPTION_KEYS );
+];
 
 type SelfOptions = {
   excludeInvisible?: boolean;
@@ -40,16 +41,16 @@ export type GridConstraintOptions = SelfOptions & GridConfigurableOptions;
 
 export default class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
-  private readonly cells: Set<GridCell>;
+  private readonly cells: Set<GridCell> = new Set();
 
   // scenery-internal
-  displayedCells: GridCell[];
+  displayedCells: GridCell[] = [];
 
   // Looked up by index
-  private displayedLines: OrientationPair<Map<number, GridLine>>;
+  private displayedLines: OrientationPair<Map<number, GridLine>> = new OrientationPair( new Map(), new Map() );
 
-  private _excludeInvisible: boolean;
-  private _spacing: OrientationPair<number | number[]>;
+  private _excludeInvisible = true;
+  private _spacing: OrientationPair<number | number[]> = new OrientationPair<number | number[]>( 0, 0 );
 
   // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
   readonly layoutBoundsProperty: IProperty<Bounds2>;
@@ -72,12 +73,6 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
     }, providedOptions );
 
     super( ancestorNode );
-
-    this.cells = new Set();
-    this.displayedCells = [];
-    this.displayedLines = new OrientationPair( new Map(), new Map() );
-    this._excludeInvisible = true;
-    this._spacing = new OrientationPair<number | number[]>( 0, 0 );
 
     this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
       useDeepEquality: true
@@ -124,8 +119,6 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
     // Handle horizontal first, so if we re-wrap we can handle vertical later.
     [ Orientation.HORIZONTAL, Orientation.VERTICAL ].forEach( orientation => {
       const orientedSpacing = this._spacing.get( orientation );
-      const minField = orientation === Orientation.HORIZONTAL ? 'minX' as const : 'minY' as const;
-      const maxField = orientation === Orientation.HORIZONTAL ? 'maxX' as const : 'maxY' as const;
 
       // // index => GridLine
       const lineMap: Map<number, GridLine> = this.displayedLines.get( orientation );
@@ -161,8 +154,8 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
           // (since the origin line may end up taking more space).
           if ( cell.getEffectiveAlign( orientation ) === LayoutAlign.ORIGIN ) {
             const originBounds = cell.getOriginBounds();
-            line.minOrigin = Math.min( originBounds[ minField ], line.minOrigin );
-            line.maxOrigin = Math.max( originBounds[ maxField ], line.maxOrigin );
+            line.minOrigin = Math.min( originBounds[ orientation.minCoordinate ], line.minOrigin );
+            line.maxOrigin = Math.max( originBounds[ orientation.maxCoordinate ], line.maxOrigin );
           }
         }
       } );
@@ -188,7 +181,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
       // Adjust line sizes to the min
       lines.forEach( line => {
         // If we have origin-specified content, we'll need to include the maximum origin span (which may be larger)
-        if ( isFinite( line.minOrigin ) && isFinite( line.maxOrigin ) ) {
+        if ( line.hasOrigin() ) {
           line.size = Math.max( line.min, line.maxOrigin - line.minOrigin );
         }
         else {
@@ -219,9 +212,9 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
       }
 
       // Layout
-      const startPosition = isFinite( lines[ 0 ].minOrigin ) ? lines[ 0 ].minOrigin : 0;
-      layoutBounds[ minField ] = startPosition;
-      layoutBounds[ maxField ] = startPosition + size;
+      const startPosition = lines[ 0 ].hasOrigin() ? lines[ 0 ].minOrigin : 0;
+      layoutBounds[ orientation.minCoordinate ] = startPosition;
+      layoutBounds[ orientation.maxCoordinate ] = startPosition + size;
       lines.forEach( ( line, arrayIndex ) => {
         line.position = startPosition + _.sum( lines.slice( 0, arrayIndex ).map( line => line.size ) ) + _.sum( lineSpacings.slice( 0, line.index ) );
       } );
@@ -256,8 +249,8 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
         cell.lastAvailableBounds[ orientation.maxCoordinate ] = cellPosition + cellAvailableSize;
         cell.lastUsedBounds.set( cellBounds );
 
-        layoutBounds[ minField ] = Math.min( layoutBounds[ minField ], cellBounds[ minField ] );
-        layoutBounds[ maxField ] = Math.max( layoutBounds[ maxField ], cellBounds[ maxField ] );
+        layoutBounds[ orientation.minCoordinate ] = Math.min( layoutBounds[ orientation.minCoordinate ], cellBounds[ orientation.minCoordinate ] );
+        layoutBounds[ orientation.maxCoordinate ] = Math.max( layoutBounds[ orientation.maxCoordinate ], cellBounds[ orientation.maxCoordinate ] );
       } );
     } );
 

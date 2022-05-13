@@ -97,6 +97,7 @@ import './layout/FlowBox.js';
 import './layout/FlowCell.js';
 import './layout/FlowConfigurable.js';
 import './layout/FlowConstraint.js';
+import './layout/FlowLine.js';
 import './layout/GridBackgroundNode.js';
 import './layout/GridBox.js';
 import './layout/GridCell.js';
