@@ -632,6 +632,31 @@ class Node extends ParallelDOM {
   // (and avoid the infinite loops that can happen if that is triggered).
   _activeParentLayoutConstraint: LayoutConstraint | null = null;
 
+  // This is an array of property (setter) names for Node.mutate(), which are also used when creating
+  // Nodes with parameter objects.
+  //
+  // E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
+  // (node.x = 5; node.rotation = 20)
+  //
+  // Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
+  // node.scale( 2 ).
+  //
+  // The order below is important! Don't change this without knowing the implications.
+  //
+  // NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
+  //       occurring "after" the rotation / scaling
+  // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
+  //       changes of bounds that may happen beforehand
+  _mutatorKeys!: string[];
+
+  // List of all dirty flags that should be available on drawables created from this Node (or
+  // subtype). Given a flag (e.g. radius), it indicates the existence of a function
+  // drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
+  // (scenery-internal)
+  //
+  // Should be overridden by subtypes.
+  drawableMarkFlags!: string[];
+
   /**
    * Creates a Node with options.
    *
@@ -6202,35 +6227,6 @@ class Node extends ParallelDOM {
   }
 
   static NodeIO: IOType;
-}
-
-// Interface extension to support things on the prototype
-interface Node { // eslint-disable-line
-
-  // This is an array of property (setter) names for Node.mutate(), which are also used when creating
-  // Nodes with parameter objects.
-  //
-  // E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
-  // (node.x = 5; node.rotation = 20)
-  //
-  // Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
-  // node.scale( 2 ).
-  //
-  // The order below is important! Don't change this without knowing the implications.
-  //
-  // NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
-  //       occurring "after" the rotation / scaling
-  // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
-  //       changes of bounds that may happen beforehand
-  _mutatorKeys: string[];
-
-  // List of all dirty flags that should be available on drawables created from this Node (or
-  // subtype). Given a flag (e.g. radius), it indicates the existence of a function
-  // drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
-  // (scenery-internal)
-  //
-  // Should be overridden by subtypes.
-  drawableMarkFlags: string[];
 }
 
 Node.prototype._mutatorKeys = ACCESSIBILITY_OPTION_KEYS.concat( NODE_OPTION_KEYS );
