@@ -7,16 +7,13 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HeightSizable, HeightSizableSelfOptions, ILayoutOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, VerticalLayoutAlign } from '../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, ILayoutOptions, LayoutNode, LayoutNodeOptions, Node, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS, LAYOUT_NODE_OPTION_KEYS } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
-  'resize' // {boolean} - Whether we should update the layout when children change, see setResize for documentation
-].concat( GRID_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
-
-const DEFAULT_OPTIONS = {
-  resize: true
-} as const;
+  ...LAYOUT_NODE_OPTION_KEYS,
+  ...GRID_CONSTRAINT_OPTION_KEYS.filter( key => key !== 'excludeInvisible' )
+];
 
 type SelfOptions = {
   // Controls whether the GridBox will retrigger layout automatically after the "first" layout during construction.
@@ -25,21 +22,18 @@ type SelfOptions = {
   resize?: boolean;
 } & Omit<GridConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
 
-type SuperType = NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+export type GridBoxOptions = SelfOptions & LayoutNodeOptions;
 
-export type GridBoxOptions = SelfOptions & SuperType;
-
-export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
+export default class GridBox extends LayoutNode<GridConstraint> {
 
   private readonly _cellMap: Map<Node, GridCell>;
-  private readonly _constraint: GridConstraint;
 
   // For handling the shortcut-style API
   private _nextX: number;
   private _nextY: number;
 
   constructor( providedOptions?: GridBoxOptions ) {
-    const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions>, SuperType>()( {
+    const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
 
@@ -67,16 +61,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
     this.mutate( options );
     this._constraint.updateLayout();
 
-    // Adjust the localBounds to be the laid-out area
-    this._constraint.layoutBoundsProperty.link( layoutBounds => {
-      this.localBounds = layoutBounds;
-    } );
-  }
-
-  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
-    super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
-
-    this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;
+    this.linkLayoutBounds();
   }
 
   /**
@@ -114,13 +99,6 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
   }
 
   /**
-   * Manually run the layout (for instance, if resize:false is currently set, or if there is other hackery going on).
-   */
-  updateLayout(): void {
-    this._constraint.updateLayout();
-  }
-
-  /**
    * Called when a child is removed.
    */
   private onGridBoxChildRemoved( node: Node ): void {
@@ -133,14 +111,6 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
     this._constraint.removeCell( cell );
 
     cell.dispose();
-  }
-
-  get resize(): boolean {
-    return this._constraint.enabled;
-  }
-
-  set resize( value: boolean ) {
-    this._constraint.enabled = value;
   }
 
   get spacing(): number | number[] {
@@ -294,13 +264,6 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
   set maxContentHeight( value: number | null ) {
     this._constraint.maxContentHeight = value;
   }
-
-  /**
-   * Manual access to the constraint
-   */
-  get constraint(): GridConstraint {
-    return this._constraint;
-  }
 }
 
 /**
@@ -311,8 +274,5 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
  *       cases that may apply.
  */
 GridBox.prototype._mutatorKeys = [ ...WIDTH_SIZABLE_OPTION_KEYS, ...HEIGHT_SIZABLE_OPTION_KEYS, ...GRIDBOX_OPTION_KEYS, ...Node.prototype._mutatorKeys ];
-
-// {Object}
-GridBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'GridBox', GridBox );

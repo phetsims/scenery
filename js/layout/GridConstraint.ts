@@ -7,15 +7,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridConfigurableOptions, GridLine, LayoutAlign, LayoutConstraint, Node, scenery } from '../imports.js';
+import { GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridConfigurableOptions, GridLine, LayoutAlign, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
-import optionize from '../../../phet-core/js/optionize.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   ...GRID_CONFIGURABLE_OPTION_KEYS,
@@ -26,7 +23,6 @@ const GRID_CONSTRAINT_OPTION_KEYS = [
 ];
 
 type SelfOptions = {
-  excludeInvisible?: boolean;
   spacing?: number;
   xSpacing?: number;
   ySpacing?: number;
@@ -37,9 +33,9 @@ type SelfOptions = {
   minimumHeightProperty?: IProperty<number | null>;
 };
 
-export type GridConstraintOptions = SelfOptions & GridConfigurableOptions;
+export type GridConstraintOptions = SelfOptions & GridConfigurableOptions & NodeLayoutAvailableConstraintOptions;
 
-export default class GridConstraint extends GridConfigurable( LayoutConstraint ) {
+export default class GridConstraint extends GridConfigurable( NodeLayoutConstraint ) {
 
   private readonly cells: Set<GridCell> = new Set();
 
@@ -49,49 +45,19 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
   // Looked up by index
   private displayedLines: OrientationPair<Map<number, GridLine>> = new OrientationPair( new Map(), new Map() );
 
-  private _excludeInvisible = true;
   private _spacing: OrientationPair<number | number[]> = new OrientationPair<number | number[]>( 0, 0 );
-
-  // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
-  readonly layoutBoundsProperty: IProperty<Bounds2>;
-
-  readonly preferredWidthProperty: IProperty<number | null>;
-  readonly preferredHeightProperty: IProperty<number | null>;
-  readonly minimumWidthProperty: IProperty<number | null>;
-  readonly minimumHeightProperty: IProperty<number | null>;
 
   constructor( ancestorNode: Node, providedOptions?: GridConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
-    // The omitted options are set to proper defaults below
-    const options = optionize<GridConstraintOptions, Omit<SelfOptions, 'excludeInvisible' | 'spacing' | 'xSpacing' | 'ySpacing'>, GridConfigurableOptions>()( {
-      // As options, so we could hook into a Node's preferred/minimum sizes if desired
-      preferredWidthProperty: new TinyProperty<number | null>( null ),
-      preferredHeightProperty: new TinyProperty<number | null>( null ),
-      minimumWidthProperty: new TinyProperty<number | null>( null ),
-      minimumHeightProperty: new TinyProperty<number | null>( null )
-    }, providedOptions );
-
-    super( ancestorNode );
-
-    this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
-      useDeepEquality: true
-    } );
-
-    this.preferredWidthProperty = options.preferredWidthProperty;
-    this.preferredHeightProperty = options.preferredHeightProperty;
-    this.minimumWidthProperty = options.minimumWidthProperty;
-    this.minimumHeightProperty = options.minimumHeightProperty;
+    super( ancestorNode, providedOptions );
 
     this.setConfigToBaseDefault();
-    this.mutateConfigurable( options );
-    mutate( this, GRID_CONSTRAINT_OPTION_KEYS, options );
+    this.mutateConfigurable( providedOptions );
+    mutate( this, GRID_CONSTRAINT_OPTION_KEYS, providedOptions );
 
     // Key configuration changes to relayout
     this.changedEmitter.addListener( this._updateLayoutListener );
-
-    this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
-    this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
   protected override layout(): void {
@@ -100,7 +66,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
     assert && assert( _.every( [ ...this.cells ], cell => !cell.node.isDisposed ) );
 
     const cells = [ ...this.cells ].filter( cell => {
-      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
+      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
     } );
     this.displayedCells = cells;
 
@@ -256,20 +222,6 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
     this.finishedLayoutEmitter.emit();
   }
 
-  get excludeInvisible(): boolean {
-    return this._excludeInvisible;
-  }
-
-  set excludeInvisible( value: boolean ) {
-    assert && assert( typeof value === 'boolean' );
-
-    if ( this._excludeInvisible !== value ) {
-      this._excludeInvisible = value;
-
-      this.updateLayoutAutomatically();
-    }
-  }
-
   get spacing(): number | number[] {
     assert && assert( this.xSpacing === this.ySpacing );
 
@@ -344,10 +296,6 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
    * Releases references
    */
   override dispose(): void {
-    // In case they're from external sources
-    this.preferredWidthProperty.unlink( this._updateLayoutListener );
-    this.preferredHeightProperty.unlink( this._updateLayoutListener );
-
     [ ...this.cells ].forEach( cell => this.removeCell( cell ) );
 
     super.dispose();
