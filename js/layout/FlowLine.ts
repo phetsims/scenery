@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * A poolable internal representation of a line for layout handling in FlowConstraint
