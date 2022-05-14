@@ -165,7 +165,7 @@
 
     <h2>FlowBox</h2>
 
-    <p>Simple container, defaults to horizontal currently:</p>
+    <p>Simple container, defaults to horizontal:</p>
 
     <div id="simple-example"></div>
     <script type="text/javascript">
@@ -318,7 +318,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Extra space can be allocated proportionally:</p>
+    <p>Extra space can be allocated proportionally (a node with 4 times the grow value will grow 4 times as fast):</p>
 
     <div id="grow-example"></div>
     <script type="text/javascript">
@@ -343,7 +343,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Maximums can be applied to constrain this:</p>
+    <p>Maximums can be applied to constrain this growing (it won't grow past the max content dimension):</p>
 
     <div id="maxContentWidth-example"></div>
     <script type="text/javascript">
@@ -387,7 +387,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Justification controls how extra space is allocated around cells:</p>
+    <p>Justification controls how extra space is allocated around cells (after any growing possible has been done):</p>
 
     <div id="justification-example"></div>
     <script type="text/javascript">
@@ -440,7 +440,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Wrapping will shift content that doesn't fit the preferred size into new rows/columns:</p>
+    <p>Wrapping will shift content that doesn't fit the preferred size into new rows/columns (try resizing it to be less wide:</p>
 
     <div id="wrap-example"></div>
     <script type="text/javascript">
@@ -715,7 +715,7 @@
           ]
         } );
         /*END*/
-      }, { resize: 'horizontal' } );
+      }, { resize: 'both' } );
     </script>
 
     <p>Dividers are also available for easy of use (dividers at the visible start/end and duplicates will be marked as invisible, while all other dividers will be marked as visible:</p>
