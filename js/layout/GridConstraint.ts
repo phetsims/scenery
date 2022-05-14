@@ -4,6 +4,9 @@
  * Main grid-layout logic. Usually used indirectly through GridBox, but can also be used directly (say, if nodes don't
  * have the same parent, or a GridBox can't be used).
  *
+ * Throughout the documentation for grid-related items, the term "line" refers to either a row or column (depending on
+ * the orientation).
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -23,12 +26,21 @@ const GRID_CONSTRAINT_OPTION_KEYS = [
 ];
 
 type SelfOptions = {
-  spacing?: number;
-  xSpacing?: number;
-  ySpacing?: number;
 
+  // Spacings are controlled in each dimension (setting `spacing`) will adjust both. If it's a number, it will be an
+  // extra gap in-between every row or column. If it's an array, it will specify the gap between successive rows/columns
+  // e.g. [ 5, 4 ] will have a spacing of 5 between the first and second lines, and 4 between the second and third
+  // lines. In that case, if there were a third line, it would have zero spacing between the second (any non-specified
+  // spacings for extra rows/columns will be zero).
+  spacing?: number | number[];
+  xSpacing?: number | number[];
+  ySpacing?: number | number[];
+
+  // The preferred width/height (ideally from a container's localPreferredWidth/localPreferredHeight.
   preferredWidthProperty?: IProperty<number | null>;
   preferredHeightProperty?: IProperty<number | null>;
+
+  // The minimum width/height (ideally from a container's localMinimumWidth/localMinimumHeight.
   minimumWidthProperty?: IProperty<number | null>;
   minimumHeightProperty?: IProperty<number | null>;
 };

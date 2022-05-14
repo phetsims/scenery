@@ -41,8 +41,6 @@ type SelfOptions = {
   // Whether line-wrapping is enabled. If so, the primary preferred dimension will determine where things are wrapped.
   wrap?: boolean;
 
-  excludeInvisible?: boolean;
-
   // The preferred width/height (ideally from a container's localPreferredWidth/localPreferredHeight.
   preferredWidthProperty?: IProperty<number | null>;
   preferredHeightProperty?: IProperty<number | null>;
