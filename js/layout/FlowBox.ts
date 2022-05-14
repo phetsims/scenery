@@ -24,7 +24,7 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 type SelfOptions = {
-  // Controls whether the FlowBox will retrigger layout automatically after the "first" layout during construction.
+  // Controls whether the FlowBox will re-trigger layout automatically after the "first" layout during construction.
   // The FlowBox will layout once after processing the options object, but if resize:false, then after that manual
   // layout calls will need to be done (with updateLayout())
   resize?: boolean;
@@ -34,7 +34,7 @@ export type FlowBoxOptions = SelfOptions & LayoutNodeOptions;
 
 export default class FlowBox extends LayoutNode<FlowConstraint> {
 
-  private readonly _cellMap: Map<Node, FlowCell>;
+  private readonly _cellMap: Map<Node, FlowCell> = new Map<Node, FlowCell>();
 
   // Listeners that we'll need to remove
   private readonly onChildInserted: ( node: Node, index: number ) => void;
@@ -64,10 +64,8 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
       spacing: DEFAULT_OPTIONS.spacing,
       align: DEFAULT_OPTIONS.align,
       stretch: DEFAULT_OPTIONS.stretch,
-      excludeInvisible: false // Should be handled by the options mutate above
+      excludeInvisible: false // Should be handled by the options mutate below
     } );
-
-    this._cellMap = new Map<Node, FlowCell>();
 
     this.onChildInserted = this.onFlowBoxChildInserted.bind( this );
     this.onChildRemoved = this.onFlowBoxChildRemoved.bind( this );

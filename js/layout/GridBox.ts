@@ -7,19 +7,49 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
+import Orientation from '../../../phet-core/js/Orientation.js';
 import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, ILayoutOptions, LayoutNode, LayoutNodeOptions, Node, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS, LAYOUT_NODE_OPTION_KEYS } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
   ...LAYOUT_NODE_OPTION_KEYS,
-  ...GRID_CONSTRAINT_OPTION_KEYS.filter( key => key !== 'excludeInvisible' )
+  ...GRID_CONSTRAINT_OPTION_KEYS.filter( key => key !== 'excludeInvisible' ),
+  'rows',
+  'columns'
 ];
 
+// Used for setting/getting rows/columns
+type LineArrays = ( Node | null )[][];
+
 type SelfOptions = {
-  // Controls whether the GridBox will retrigger layout automatically after the "first" layout during construction.
+  // Controls whether the GridBox will re-trigger layout automatically after the "first" layout during construction.
   // The GridBox will layout once after processing the options object, but if resize:false, then after that manual
   // layout calls will need to be done (with updateLayout())
   resize?: boolean;
+
+  // Sets the children of the GridBox and positions them using a 2-dimensional array of Node|null (null is a placeholder
+  // and does nothing). The first index is treated as a row, and the second is treated as a column, so that:
+  //
+  //   rows[ row ][ column ] = Node
+  //   rows[ y ][ x ] = Node
+  //
+  // Thus the following will have 2 rows that have 3 columns each:
+  //   rows: [ [ a, b, c ], [ d, e, f ] ]
+  //
+  // NOTE: This will mutate the layoutOptions of the Nodes themselves, and will also wipe out any existing children.
+  rows?: LineArrays;
+
+  // Sets the children of the GridBox and positions them using a 2-dimensional array of Node|null (null is a placeholder
+  // and does nothing). The first index is treated as a column, and the second is treated as a row, so that:
+  //
+  //   columns[ column ][ row ] = Node
+  //   columns[ x ][ y ] = Node
+  //
+  // Thus the following will have 2 columns that have 3 rows each:
+  //   columns: [ [ a, b, c ], [ d, e, f ] ]
+  //
+  // NOTE: This will mutate the layoutOptions of the Nodes themselves, and will also wipe out any existing children.
+  columns?: LineArrays;
 } & Omit<GridConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
 
 export type GridBoxOptions = SelfOptions & LayoutNodeOptions;
@@ -37,7 +67,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   private readonly onChildRemoved: ( node: Node ) => void;
 
   constructor( providedOptions?: GridBoxOptions ) {
-    const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions>, LayoutNodeOptions>()( {
+    const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions | 'rows' | 'columns'>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
 
@@ -52,7 +82,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
       minimumWidthProperty: this.localMinimumWidthProperty,
       minimumHeightProperty: this.localMinimumHeightProperty,
 
-      excludeInvisible: false // Should be handled by the options mutate above
+      excludeInvisible: false // Should be handled by the options mutate below
     } );
 
     this.onChildInserted = this.onGridBoxChildInserted.bind( this );
@@ -65,6 +95,84 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this._constraint.updateLayout();
 
     this.linkLayoutBounds();
+  }
+
+  /**
+   * Sets the children of the GridBox and adjusts them to be positioned in certain cells. It takes a 2-dimensional array
+   * of Node|null (where null is a placeholder that does nothing).
+   *
+   * For each cell, the first index into the array will be taken as the cell position in the provided orientation. The
+   * second index into the array will be taken as the cell position in the OPPOSITE orientation.
+   *
+   * See GridBox.rows or GridBox.columns for usages and more documentation.
+   */
+  setLines( orientation: Orientation, lineArrays: LineArrays ): void {
+    const children: Node[] = [];
+
+    for ( let i = 0; i < lineArrays.length; i++ ) {
+      const lineArray = lineArrays[ i ];
+      for ( let j = 0; j < lineArray.length; j++ ) {
+        const item = lineArray[ j ];
+        if ( item !== null ) {
+          children.push( item );
+          item.mutateLayoutOptions( {
+            [ orientation.coordinate ]: i,
+            [ orientation.opposite.coordinate ]: j
+          } );
+        }
+      }
+    }
+
+    this.children = children;
+  }
+
+  /**
+   * Returns the children of the GridBox in a 2-dimensional array of Node|null (where null is a placeholder that does
+   * nothing).
+   *
+   * For each cell, the first index into the array will be taken as the cell position in the provided orientation. The
+   * second index into the array will be taken as the cell position in the OPPOSITE orientation.
+   *
+   * See GridBox.rows or GridBox.columns for usages and more documentation.
+   */
+  getLines( orientation: Orientation ): LineArrays {
+    const lineArrays: LineArrays = [];
+
+    for ( const cell of this._cellMap.values() ) {
+      const i = cell.position.get( orientation );
+      const j = cell.position.get( orientation.opposite );
+
+      // Ensure we have enough lines
+      while ( lineArrays.length < i + 1 ) {
+        lineArrays.push( [] );
+      }
+
+      // null-pad lines
+      while ( lineArrays[ i ].length < j + 1 ) {
+        lineArrays[ i ].push( null );
+      }
+
+      // Finally the actual node!
+      lineArrays[ i ][ j ] = cell.node;
+    }
+
+    return lineArrays;
+  }
+
+  set rows( lineArrays: LineArrays ) {
+    this.setLines( Orientation.VERTICAL, lineArrays );
+  }
+
+  get rows(): LineArrays {
+    return this.getLines( Orientation.VERTICAL );
+  }
+
+  set columns( lineArrays: LineArrays ) {
+    this.setLines( Orientation.HORIZONTAL, lineArrays );
+  }
+
+  get columns(): LineArrays {
+    return this.getLines( Orientation.HORIZONTAL );
   }
 
   /**
