@@ -14,7 +14,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridConfigurableOptions, GridLine, LayoutAlign, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery } from '../imports.js';
+import { ExternalGridConfigurableOptions, GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridLine, LayoutAlign, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
@@ -45,7 +45,7 @@ type SelfOptions = {
   minimumHeightProperty?: IProperty<number | null>;
 };
 
-export type GridConstraintOptions = SelfOptions & GridConfigurableOptions & NodeLayoutAvailableConstraintOptions;
+export type GridConstraintOptions = SelfOptions & ExternalGridConfigurableOptions & NodeLayoutAvailableConstraintOptions;
 
 export default class GridConstraint extends GridConfigurable( NodeLayoutConstraint ) {
 

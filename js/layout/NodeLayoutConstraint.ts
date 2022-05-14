@@ -10,7 +10,7 @@
 import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { GridConfigurableOptions, LayoutConstraint, Node, scenery } from '../imports.js';
+import { LayoutConstraint, Node, scenery } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -28,7 +28,7 @@ type SelfOptions = {
   minimumHeightProperty?: IProperty<number | null>;
 };
 
-export type NodeLayoutConstraintOptions = SelfOptions & GridConfigurableOptions;
+export type NodeLayoutConstraintOptions = SelfOptions;
 
 // Type export designed for use with clients
 export type NodeLayoutAvailableConstraintOptions = Pick<NodeLayoutConstraintOptions, 'excludeInvisible'>;
@@ -51,7 +51,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     assert && assert( ancestorNode instanceof Node );
 
     // The omitted options are set to proper defaults below
-    const options = optionize<NodeLayoutConstraintOptions, Omit<SelfOptions, 'excludeInvisible' | 'spacing' | 'xSpacing' | 'ySpacing'>, GridConfigurableOptions>()( {
+    const options = optionize<NodeLayoutConstraintOptions, Omit<SelfOptions, 'excludeInvisible' | 'spacing' | 'xSpacing' | 'ySpacing'>, {}>()( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),

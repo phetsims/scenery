@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { FlowConfigurable, FlowConfigurableOptions, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
+import { ExternalFlowConfigurableOptions, FlowConfigurable, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
 
-export type FlowCellOptions = Omit<FlowConfigurableOptions, 'orientation'>;
+export type FlowCellOptions = Omit<ExternalFlowConfigurableOptions, 'orientation'>;
 
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
@@ -39,13 +39,13 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
   protected override onLayoutOptionsChange(): void {
     if ( this.node.layoutOptions ) {
-      this.setOptions( this.node.layoutOptions as FlowConfigurableOptions );
+      this.setOptions( this.node.layoutOptions as ExternalFlowConfigurableOptions );
     }
 
     super.onLayoutOptionsChange();
   }
 
-  private setOptions( options?: FlowConfigurableOptions ): void {
+  private setOptions( options?: ExternalFlowConfigurableOptions ): void {
     this.setConfigToInherit();
     this.mutateConfigurable( options );
   }

@@ -15,6 +15,8 @@ import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, scenery, VerticalLayoutAlign } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
+import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
@@ -71,6 +73,9 @@ export type FlowConfigurableOptions = {
   maxContentHeight?: number | null;
 };
 
+// We remove the null values for the values that won't actually take null
+export type ExternalFlowConfigurableOptions = WithoutNull<FlowConfigurableOptions, Exclude<keyof FlowConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
+
 const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
@@ -96,6 +101,10 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     }
 
     mutateConfigurable( options?: FlowConfigurableOptions ): void {
+      assertMutuallyExclusiveOptions( options, [ 'margin' ], [ 'xMargin', 'yMargin' ] );
+      assertMutuallyExclusiveOptions( options, [ 'xMargin' ], [ 'leftMargin', 'rightMargin' ] );
+      assertMutuallyExclusiveOptions( options, [ 'yMargin' ], [ 'topMargin', 'bottomMargin' ] );
+
       mutate( this, FLOW_CONFIGURABLE_OPTION_KEYS, options );
     }
 

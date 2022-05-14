@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, ILayoutOptions, LayoutNode, LayoutNodeOptions, Node, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS, LAYOUT_NODE_OPTION_KEYS } from '../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, ILayoutOptions, LayoutNode, LayoutNodeOptions, Node, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS, LAYOUT_NODE_OPTION_KEYS, NodeOptions } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -37,6 +38,7 @@ type SelfOptions = {
   //   rows: [ [ a, b, c ], [ d, e, f ] ]
   //
   // NOTE: This will mutate the layoutOptions of the Nodes themselves, and will also wipe out any existing children.
+  // NOTE: Don't use this option with either `children` or `columns` also being set
   rows?: LineArrays;
 
   // Sets the children of the GridBox and positions them using a 2-dimensional array of Node|null (null is a placeholder
@@ -49,6 +51,7 @@ type SelfOptions = {
   //   columns: [ [ a, b, c ], [ d, e, f ] ]
   //
   // NOTE: This will mutate the layoutOptions of the Nodes themselves, and will also wipe out any existing children.
+  // NOTE: Don't use this option with either `children` or `rows` also being set
   columns?: LineArrays;
 } & Omit<GridConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
 
@@ -222,6 +225,12 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this._constraint.removeCell( cell );
 
     cell.dispose();
+  }
+
+  override mutate( options?: NodeOptions ): this {
+    assertMutuallyExclusiveOptions( options, [ 'rows' ], [ 'columns' ], [ 'children' ] );
+
+    return super.mutate( options );
   }
 
   get spacing(): number | number[] {

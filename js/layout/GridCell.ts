@@ -9,7 +9,7 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
+import { ExternalGridConfigurableOptions, GridConfigurable, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
@@ -29,7 +29,7 @@ type SelfOptions = {
   wrap?: boolean;
 };
 
-export type GridCellOptions = SelfOptions & GridConfigurableOptions;
+export type GridCellOptions = SelfOptions & ExternalGridConfigurableOptions;
 
 export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
@@ -47,13 +47,13 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
   constructor( constraint: GridConstraint, node: Node, proxy: LayoutProxy | null ) {
 
-    const options = optionize<GridCellOptions, SelfOptions, GridConfigurableOptions>()( {
+    const options = optionize<GridCellOptions, SelfOptions, ExternalGridConfigurableOptions>()( {
       x: 0,
       y: 0,
       width: 1,
       height: 1,
       wrap: false
-    }, node.layoutOptions as GridConfigurableOptions );
+    }, node.layoutOptions as ExternalGridConfigurableOptions );
 
     assert && assert( typeof options.x === 'number' && Number.isInteger( options.x ) && isFinite( options.x ) && options.x >= 0 );
     assert && assert( typeof options.y === 'number' && Number.isInteger( options.y ) && isFinite( options.y ) && options.y >= 0 );
@@ -108,12 +108,12 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
   }
 
   protected override onLayoutOptionsChange(): void {
-    this.setOptions( this.node.layoutOptions as GridConfigurableOptions );
+    this.setOptions( this.node.layoutOptions as ExternalGridConfigurableOptions );
 
     super.onLayoutOptionsChange();
   }
 
-  private setOptions( options?: GridConfigurableOptions ): void {
+  private setOptions( options?: ExternalGridConfigurableOptions ): void {
     this.setConfigToInherit();
     this.mutateConfigurable( options );
   }

@@ -11,6 +11,8 @@ import Constructor from '../../../phet-core/js/types/Constructor.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import { HorizontalLayoutAlign, HorizontalLayoutAlignValues, LayoutAlign, scenery, VerticalLayoutAlign, VerticalLayoutAlignValues } from '../imports.js';
+import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',
@@ -72,6 +74,9 @@ export type GridConfigurableOptions = {
   maxContentHeight?: number | null;
 };
 
+// We remove the null values for the values that won't actually take null
+export type ExternalGridConfigurableOptions = WithoutNull<GridConfigurableOptions, Exclude<keyof GridConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
+
 const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
@@ -97,6 +102,12 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     }
 
     mutateConfigurable( options?: GridConfigurableOptions ): void {
+      assertMutuallyExclusiveOptions( options, [ 'stretch' ], [ 'xStretch', 'yStretch' ] );
+      assertMutuallyExclusiveOptions( options, [ 'grow' ], [ 'xGrow', 'yGrow' ] );
+      assertMutuallyExclusiveOptions( options, [ 'margin' ], [ 'xMargin', 'yMargin' ] );
+      assertMutuallyExclusiveOptions( options, [ 'xMargin' ], [ 'leftMargin', 'rightMargin' ] );
+      assertMutuallyExclusiveOptions( options, [ 'yMargin' ], [ 'topMargin', 'bottomMargin' ] );
+
       mutate( this, GRID_CONFIGURABLE_OPTION_KEYS, options );
     }
 
