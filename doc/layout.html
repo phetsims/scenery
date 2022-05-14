@@ -428,7 +428,6 @@
           } )
         ];
         /*END*/
-        // TODO: preferred width with align-content!!!
         const container = new ( scenery.WidthSizable( scenery.VBox ) )( {
           orientation: 'vertical',
           justify: 'top',
@@ -499,46 +498,56 @@
       }, { resize: 'none', useMinWidth: false } );
     </script>
 
-<!--    <p>justifyLines controls how lines are positioned in the secondary orientation:</p>-->
+    <p>justifyLines controls how lines are positioned in the secondary orientation:</p>
 
-<!--    <div id="justifyLines-example"></div>-->
-<!--    <script type="text/javascript">-->
-<!--      dynamicDemo( 'justifyLines-example', () => {-->
-<!--        /*START*/-->
-<!--        const boxes = [-->
-<!--          'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly', null-->
-<!--        ].map( justifyLines => {-->
-<!--          const createResizable = () => {-->
-<!--            const node = new ExampleExpandingRectangle( 0, 0, 10, 10, { fill: 'gray' } );-->
-<!--            node.localMinimumWidth = 10;-->
-<!--            node.localMinimumHeight = 10;-->
-<!--            return node;-->
-<!--          };-->
-<!--          return new scenery.FlowBox( {-->
-<!--            preferredWidth: 20,-->
-<!--            wrap: true,-->
-<!--            stretch: true,-->
-<!--            children: [-->
-<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 2 ] } ),-->
-<!--              createResizable(),-->
-<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 4 ] } ),-->
-<!--              createResizable(),-->
-<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 6 ] } ),-->
-<!--              createResizable(),-->
-<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 8 ] } ),-->
-<!--              createResizable()-->
-<!--            ],-->
-<!--            justifyLines: justifyLines-->
-<!--          } );-->
-<!--        } );-->
-<!--        /*END*/-->
-<!--        return new scenery.FlowBox( {-->
-<!--          orientation: 'horizontal',-->
-<!--          children: boxes,-->
-<!--          align: 'top'-->
-<!--        } );-->
-<!--      }, { resize: 'both', useMinWidth: false } );-->
-<!--    </script>-->
+    <div id="justifyLines-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'justifyLines-example', () => {
+        /*START*/
+        const boxes = [
+          'top',
+          'bottom',
+          'center',
+          'spaceBetween',
+          'spaceAround',
+          'spaceEvenly',
+          null
+        ].map( justifyLines => {
+          const createResizable = () => {
+            const node = new ExampleExpandingRectangle( 0, 0, 10, 10, { fill: 'gray' } );
+            node.localMinimumWidth = 10;
+            node.localMinimumHeight = 10;
+            return node;
+          };
+          return new scenery.FlowBox( {
+            preferredWidth: 20,
+            wrap: true,
+            stretch: true,
+            children: [
+              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 2 ] } ),
+              createResizable(),
+              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 4 ] } ),
+              createResizable(),
+              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 6 ] } ),
+              createResizable(),
+              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 8 ] } ),
+              createResizable()
+            ],
+            justifyLines: justifyLines
+          } );
+        } );
+        /*END*/
+        const container = new ( scenery.HeightSizable( scenery.HBox ) )( {
+          orientation: 'horizontal',
+          justify: 'left',
+          children: boxes
+        } );
+        container.preferredHeightProperty.link( preferredHeight => boxes.forEach( box => {
+          box.preferredHeight = preferredHeight;
+        } ) );
+        return container;
+      }, { resize: 'vertical' } );
+    </script>
 
     <p>Spacing can be added, that is applied between cells:</p>
 
