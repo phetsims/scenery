@@ -16,7 +16,9 @@ const GRIDBOX_OPTION_KEYS = [
   ...LAYOUT_NODE_OPTION_KEYS,
   ...GRID_CONSTRAINT_OPTION_KEYS.filter( key => key !== 'excludeInvisible' ),
   'rows',
-  'columns'
+  'columns',
+  'autoRows',
+  'autoColumns'
 ];
 
 // Used for setting/getting rows/columns
@@ -53,6 +55,16 @@ type SelfOptions = {
   // NOTE: This will mutate the layoutOptions of the Nodes themselves, and will also wipe out any existing children.
   // NOTE: Don't use this option with either `children` or `rows` also being set
   columns?: LineArrays;
+
+  // When non-null, the cells of this grid will be positioned/sized to be 1x1 cells, filling rows until a column has
+  // `autoRows` number of rows, then it will go to the next column. This should generally be used with `children` or
+  // adding/removing children in normal ways.
+  autoRows?: number | null;
+
+  // When non-null, the cells of this grid will be positioned/sized to be 1x1 cells, filling columns until a row has
+  // `autoColumns` number of columns, then it will go to the next row. This should generally be used with `children` or
+  // adding/removing children in normal ways.
+  autoColumns?: number | null;
 } & Omit<GridConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
 
 export type GridBoxOptions = SelfOptions & LayoutNodeOptions;
@@ -65,12 +77,19 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   private _nextX = 0;
   private _nextY = 0;
 
+  // For handling auto-wrapping features
+  private _autoRows: number | null = null;
+  private _autoColumns: number | null = null;
+
+  // So we don't kill performance while setting children with autoRows/autoColumns
+  private _autoLockCount = 0;
+
   // Listeners that we'll need to remove
   private readonly onChildInserted: ( node: Node, index: number ) => void;
   private readonly onChildRemoved: ( node: Node ) => void;
 
   constructor( providedOptions?: GridBoxOptions ) {
-    const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions | 'rows' | 'columns'>, LayoutNodeOptions>()( {
+    const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions | 'rows' | 'columns' | 'autoRows' | 'autoColumns'>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
 
@@ -178,6 +197,77 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return this.getLines( Orientation.HORIZONTAL );
   }
 
+  set autoRows( value: number | null ) {
+    assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 1 ) );
+
+    if ( this._autoRows !== value ) {
+      this._autoRows = value;
+
+      this.updateAutoRows();
+    }
+  }
+
+  get autoRows(): number | null {
+    return this._autoRows;
+  }
+
+  set autoColumns( value: number | null ) {
+    assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 1 ) );
+
+    if ( this._autoColumns !== value ) {
+      this._autoColumns = value;
+
+      this.updateAutoColumns();
+    }
+  }
+
+  get autoColumns(): number | null {
+    return this._autoColumns;
+  }
+
+  private updateAutoLines( orientation: Orientation, value: number | null ): void {
+    if ( value !== null && this._autoLockCount === 0 ) {
+      this.constraint.lock();
+
+      this.children.forEach( ( child, index ) => {
+        child.mutateLayoutOptions( {
+          [ orientation.coordinate ]: index % value,
+          [ orientation.opposite.coordinate ]: Math.floor( index / value ),
+          width: 1,
+          height: 1
+        } );
+      } );
+
+      this.constraint.unlock();
+      this.constraint.updateLayoutAutomatically();
+    }
+  }
+
+  private updateAutoRows(): void {
+    this.updateAutoLines( Orientation.VERTICAL, this.autoRows );
+  }
+
+  private updateAutoColumns(): void {
+    this.updateAutoLines( Orientation.HORIZONTAL, this.autoColumns );
+  }
+
+  override setChildren( children: Node[] ): this {
+
+    const oldChildren = this.getChildren(); // defensive copy
+
+    // Don't update autoRows/autoColumns settings while setting children, wait until after for performance
+    this._autoLockCount++;
+    super.setChildren( children );
+    this._autoLockCount--;
+
+    if ( !_.isEqual( oldChildren, children ) ) {
+      this.updateAutoRows();
+      this.updateAutoColumns();
+    }
+
+    return this;
+  }
+
   /**
    * Called when a child is inserted.
    */
@@ -210,6 +300,9 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this._cellMap.set( node, cell );
 
     this._constraint.addCell( cell );
+
+    this.updateAutoRows();
+    this.updateAutoColumns();
   }
 
   /**
@@ -225,10 +318,15 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this._constraint.removeCell( cell );
 
     cell.dispose();
+
+    this.updateAutoRows();
+    this.updateAutoColumns();
   }
 
   override mutate( options?: NodeOptions ): this {
-    assertMutuallyExclusiveOptions( options, [ 'rows' ], [ 'columns' ], [ 'children' ] );
+    // children can be used with one of autoRows/autoColumns, but otherwise these options are exclusive
+    assertMutuallyExclusiveOptions( options, [ 'rows' ], [ 'columns' ], [ 'children', 'autoRows', 'autoColumns' ] );
+    assertMutuallyExclusiveOptions( options, [ 'autoRows' ], [ 'autoColumns' ] );
 
     return super.mutate( options );
   }

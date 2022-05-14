@@ -25,7 +25,7 @@ type SelfOptions = {
   // How many rows this one cell spans
   height?: number;
 
-  // Whether
+  // TODO: doc
   wrap?: boolean;
 };
 
@@ -34,8 +34,8 @@ export type GridCellOptions = SelfOptions & ExternalGridConfigurableOptions;
 export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
   // These are only set initially, and ignored for the future
-  position: OrientationPair<number>;
-  size: OrientationPair<number>;
+  position!: OrientationPair<number>;
+  size!: OrientationPair<number>;
 
   // Set to be the bounds available for the cell
   lastAvailableBounds: Bounds2 = Bounds2.NOTHING.copy();
@@ -47,27 +47,11 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
   constructor( constraint: GridConstraint, node: Node, proxy: LayoutProxy | null ) {
 
-    const options = optionize<GridCellOptions, SelfOptions, ExternalGridConfigurableOptions>()( {
-      x: 0,
-      y: 0,
-      width: 1,
-      height: 1,
-      wrap: false
-    }, node.layoutOptions as ExternalGridConfigurableOptions );
-
-    assert && assert( typeof options.x === 'number' && Number.isInteger( options.x ) && isFinite( options.x ) && options.x >= 0 );
-    assert && assert( typeof options.y === 'number' && Number.isInteger( options.y ) && isFinite( options.y ) && options.y >= 0 );
-    assert && assert( typeof options.width === 'number' && Number.isInteger( options.width ) && isFinite( options.width ) && options.width >= 1 );
-    assert && assert( typeof options.height === 'number' && Number.isInteger( options.height ) && isFinite( options.height ) && options.height >= 1 );
-
     super( constraint, node, proxy );
 
     this.gridConstraint = constraint;
 
-    this.position = new OrientationPair( options.x, options.y );
-    this.size = new OrientationPair( options.width, options.height );
-
-    this.setOptions( options );
+    this.setOptions( node.layoutOptions as ExternalGridConfigurableOptions );
     this.onLayoutOptionsChange();
   }
 
@@ -113,8 +97,26 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     super.onLayoutOptionsChange();
   }
 
-  private setOptions( options?: ExternalGridConfigurableOptions ): void {
+  private setOptions( providedOptions?: ExternalGridConfigurableOptions ): void {
+
+    const options = optionize<GridCellOptions, SelfOptions, ExternalGridConfigurableOptions>()( {
+      x: 0,
+      y: 0,
+      width: 1,
+      height: 1,
+      wrap: false
+    }, providedOptions );
+
+    assert && assert( typeof options.x === 'number' && Number.isInteger( options.x ) && isFinite( options.x ) && options.x >= 0 );
+    assert && assert( typeof options.y === 'number' && Number.isInteger( options.y ) && isFinite( options.y ) && options.y >= 0 );
+    assert && assert( typeof options.width === 'number' && Number.isInteger( options.width ) && isFinite( options.width ) && options.width >= 1 );
+    assert && assert( typeof options.height === 'number' && Number.isInteger( options.height ) && isFinite( options.height ) && options.height >= 1 );
+
     this.setConfigToInherit();
+
+    this.position = new OrientationPair( options.x, options.y );
+    this.size = new OrientationPair( options.width, options.height );
+
     this.mutateConfigurable( options );
   }
 
