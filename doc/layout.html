@@ -450,6 +450,7 @@
         return new scenery.FlowBox( {
           wrap: true,
           justify: 'left',
+          justifyLines: 'top',
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
@@ -497,6 +498,47 @@
         } );
       }, { resize: 'none', useMinWidth: false } );
     </script>
+
+<!--    <p>justifyLines controls how lines are positioned in the secondary orientation:</p>-->
+
+<!--    <div id="justifyLines-example"></div>-->
+<!--    <script type="text/javascript">-->
+<!--      dynamicDemo( 'justifyLines-example', () => {-->
+<!--        /*START*/-->
+<!--        const boxes = [-->
+<!--          'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly', null-->
+<!--        ].map( justifyLines => {-->
+<!--          const createResizable = () => {-->
+<!--            const node = new ExampleExpandingRectangle( 0, 0, 10, 10, { fill: 'gray' } );-->
+<!--            node.localMinimumWidth = 10;-->
+<!--            node.localMinimumHeight = 10;-->
+<!--            return node;-->
+<!--          };-->
+<!--          return new scenery.FlowBox( {-->
+<!--            preferredWidth: 20,-->
+<!--            wrap: true,-->
+<!--            stretch: true,-->
+<!--            children: [-->
+<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 2 ] } ),-->
+<!--              createResizable(),-->
+<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 4 ] } ),-->
+<!--              createResizable(),-->
+<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 6 ] } ),-->
+<!--              createResizable(),-->
+<!--              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 8 ] } ),-->
+<!--              createResizable()-->
+<!--            ],-->
+<!--            justifyLines: justifyLines-->
+<!--          } );-->
+<!--        } );-->
+<!--        /*END*/-->
+<!--        return new scenery.FlowBox( {-->
+<!--          orientation: 'horizontal',-->
+<!--          children: boxes,-->
+<!--          align: 'top'-->
+<!--        } );-->
+<!--      }, { resize: 'both', useMinWidth: false } );-->
+<!--    </script>-->
 
     <p>Spacing can be added, that is applied between cells:</p>
 
@@ -727,31 +769,102 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <p>Can be constructed with computed indices (use wrap:true to go to the next line) as a shortcut:</p>
+    <p>Grids can be constructed by specifying all the children in rows (null for gaps):</p>
 
-    <div id="shortcut-example"></div>
+    <div id="rows-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'shortcut-example', () => {
+      dynamicDemo( 'rows-example', () => {
         /*START*/
         return new scenery.GridBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 75, 50, {
-              fill: colors[ 0 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 75, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { wrap: true }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ]
-            } )
+          rows: [
+            [
+              new scenery.Rectangle( 0, 0, 75, 50, {
+                fill: colors[ 0 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 75, {
+                fill: colors[ 2 ]
+              } ),
+              new scenery.Circle( 25, {
+                fill: colors[ 4 ]
+              } )
+            ],
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } ),
+              null,
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ]
+              } )
+            ]
           ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>or with colums:</p>
+
+    <div id="columns-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'columns-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          columns: [
+            [
+              new scenery.Rectangle( 0, 0, 75, 50, {
+                fill: colors[ 0 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 75, {
+                fill: colors[ 2 ]
+              } ),
+              new scenery.Circle( 25, {
+                fill: colors[ 4 ]
+              } )
+            ],
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } ),
+              null,
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ]
+              } )
+            ]
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>
+      Additionally, if a certain number of rows/columns are desired, autoRows/autoColumns can be used to wrap and
+      position the children based on this (auto-filling all spaces)
+    </p>
+
+    <div id="autoColumns-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'autoColumns-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          autoColumns: 3,
+          children: colors.map( color => {
+            return new scenery.Rectangle( 0, 0, 50, 50, { fill: color } );
+          } )
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <div id="autoRows-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'autoRows-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          autoRows: 3,
+          children: colors.map( color => {
+            return new scenery.Rectangle( 0, 0, 50, 50, { fill: color } );
+          } )
         } );
         /*END*/
       }, { resize: 'none', useMinHeight: true } );
@@ -765,23 +878,26 @@
         /*START*/
         return new scenery.GridBox( {
           grow: 1,
-          children: [
-            new scenery.Rectangle( 0, 0, 75, 50, {
-              fill: colors[ 0 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 75, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { wrap: true }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ]
-            } )
+          rows: [
+            [
+              new scenery.Rectangle( 0, 0, 75, 50, {
+                fill: colors[ 0 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 75, {
+                fill: colors[ 2 ]
+              } ),
+              new scenery.Circle( 25, {
+                fill: colors[ 4 ]
+              } ),
+            ],
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ]
+              } )
+            ]
           ]
         } );
         /*END*/
@@ -795,25 +911,28 @@
       dynamicDemo( 'grow-2-grid-example', () => {
         /*START*/
         return new scenery.GridBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 75, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { xGrow: 1 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 75, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { wrap: true }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { yGrow: 1 }
-            } )
+          rows: [
+            [
+              new scenery.Rectangle( 0, 0, 75, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { xGrow: 1 }
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 75, {
+                fill: colors[ 2 ]
+              } ),
+              new scenery.Circle( 25, {
+                fill: colors[ 4 ]
+              } ),
+            ],
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { yGrow: 1 }
+              } )
+            ]
           ]
         } );
         /*END*/
@@ -827,27 +946,30 @@
       dynamicDemo( 'preferred-grid-example', () => {
         /*START*/
         return new scenery.GridBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 0 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { wrap: true }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ]
-            } ),
-            new ExampleExpandingRectangle( {
-              fill: 'gray',
-              layoutOptions: { grow: 1, stretch: true }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ]
-            } )
+          rows: [
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ]
+              } ),
+              new scenery.Circle( 25, {
+                fill: colors[ 4 ]
+              } )
+            ],
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } ),
+              new ExampleExpandingRectangle( {
+                fill: 'gray',
+                layoutOptions: { grow: 1, stretch: true }
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ]
+              } )
+            ]
           ]
         } );
         /*END*/
@@ -862,25 +984,29 @@
         /*START*/
         return new scenery.GridBox( {
           grow: 1,
-          children: [
-            new scenery.Rectangle( 0, 0, 75, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { xAlign: 'left', yAlign: 'top' }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 75, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { wrap: true, yAlign: 'bottom' }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { yAlign: 'top' }
-            } )
+          rows: [
+            [
+              new scenery.Rectangle( 0, 0, 75, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { xAlign: 'left', yAlign: 'top' }
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 75, {
+                fill: colors[ 2 ]
+              } ),
+              new scenery.Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { yAlign: 'bottom' }
+              } ),
+            ],
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { yAlign: 'top' }
+              } )
+            ]
           ]
         } );
         /*END*/

@@ -24,9 +24,6 @@ type SelfOptions = {
 
   // How many rows this one cell spans
   height?: number;
-
-  // TODO: doc
-  wrap?: boolean;
 };
 
 export type GridCellOptions = SelfOptions & ExternalGridConfigurableOptions;
@@ -103,8 +100,7 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
       x: 0,
       y: 0,
       width: 1,
-      height: 1,
-      wrap: false
+      height: 1
     }, providedOptions );
 
     assert && assert( typeof options.x === 'number' && Number.isInteger( options.x ) && isFinite( options.x ) && options.x >= 0 );

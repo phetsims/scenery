@@ -9,7 +9,7 @@
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, ILayoutOptions, LayoutNode, LayoutNodeOptions, Node, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS, LAYOUT_NODE_OPTION_KEYS, NodeOptions } from '../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, Node, NodeOptions, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -72,10 +72,6 @@ export type GridBoxOptions = SelfOptions & LayoutNodeOptions;
 export default class GridBox extends LayoutNode<GridConstraint> {
 
   private readonly _cellMap: Map<Node, GridCell> = new Map<Node, GridCell>();
-
-  // For handling the shortcut-style API
-  private _nextX = 0;
-  private _nextY = 0;
 
   // For handling auto-wrapping features
   private _autoRows: number | null = null;
@@ -272,30 +268,6 @@ export default class GridBox extends LayoutNode<GridConstraint> {
    * Called when a child is inserted.
    */
   private onGridBoxChildInserted( node: Node, index: number ): void {
-    let layoutOptions = node.layoutOptions;
-
-    if ( !layoutOptions || ( typeof layoutOptions.x !== 'number' && typeof layoutOptions.y !== 'number' ) ) {
-      layoutOptions = optionize<ILayoutOptions, {}, ILayoutOptions>()( {
-        x: this._nextX,
-        y: this._nextY
-      }, layoutOptions || undefined );
-    }
-
-    if ( layoutOptions.wrap ) {
-      // TODO: how to handle wrapping with larger spans?
-      this._nextX = 0;
-      this._nextY++;
-    }
-    else {
-      this._nextX = layoutOptions.x! + ( layoutOptions.width || 1 );
-      this._nextY = layoutOptions.y!;
-    }
-
-    // Go to the next spot
-    while ( this._constraint.getCell( this._nextY, this._nextX ) ) {
-      this._nextX++;
-    }
-
     const cell = new GridCell( this._constraint, node, this._constraint.createLayoutProxy( node ) );
     this._cellMap.set( node, cell );
 
