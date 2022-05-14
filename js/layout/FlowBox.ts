@@ -8,12 +8,13 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, LayoutOrientation, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, SceneryConstants, HorizontalLayoutAlign, VerticalLayoutAlign, HorizontalLayoutJustification, VerticalLayoutJustification } from '../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, HorizontalLayoutJustification, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, scenery, SceneryConstants, VerticalLayoutAlign, VerticalLayoutJustification, WIDTH_SIZABLE_OPTION_KEYS, LAYOUT_NODE_OPTION_KEYS } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
-  'resize' // {boolean} - Whether we should update the layout when children change, see setResize for documentation
-].concat( FLOW_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
+  ...LAYOUT_NODE_OPTION_KEYS,
+  ...FLOW_CONSTRAINT_OPTION_KEYS.filter( key => key !== 'excludeInvisible' )
+];
 
 const DEFAULT_OPTIONS = {
   orientation: 'horizontal',
@@ -29,15 +30,14 @@ type SelfOptions = {
   resize?: boolean;
 } & Omit<FlowConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
 
-export type FlowBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+export type FlowBoxOptions = SelfOptions & LayoutNodeOptions;
 
-export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
+export default class FlowBox extends LayoutNode<FlowConstraint> {
 
-  private readonly _constraint: FlowConstraint;
   private readonly _cellMap: Map<Node, FlowCell>;
 
   constructor( providedOptions?: FlowBoxOptions ) {
-    const options = optionize<FlowBoxOptions, Omit<SelfOptions, keyof FlowConstraintOptions>, NodeOptions>()( {
+    const options = optionize<FlowBoxOptions, Omit<SelfOptions, keyof FlowConstraintOptions>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
       resize: true,
@@ -71,16 +71,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     this.mutate( options );
     this._constraint.updateLayout();
 
-    // Adjust the localBounds to be the laid-out area
-    this._constraint.layoutBoundsProperty.link( layoutBounds => {
-      this.localBounds = layoutBounds;
-    } );
-  }
-
-  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
-    super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
-
-    this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;
+    this.linkLayoutBounds();
   }
 
   /**
@@ -126,55 +117,11 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     this._constraint.updateLayoutAutomatically();
   }
 
-  /**
-   * Sets the children of the Node to be equivalent to the passed-in array of Nodes. Does this by removing all current
-   * children, and adding in children from the array.
-   *
-   * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
-   * are changes.
-   */
-  override setChildren( children: Node[] ): this {
-    // If the layout is already locked, we need to bail and only call Node's setChildren.
-    if ( this._constraint.isLocked ) {
-      return super.setChildren( children );
-    }
-
-    const oldChildren = this.getChildren(); // defensive copy
-
-    // Lock layout while the children are removed and added
-    this._constraint.lock();
-    super.setChildren( children );
-    this._constraint.unlock();
-
-    // Determine if the children array has changed. We'll gain a performance benefit by not triggering layout when
-    // the children haven't changed.
-    if ( !_.isEqual( oldChildren, children ) ) {
-      this._constraint.updateLayoutAutomatically();
-    }
-
-    return this;
-  }
-
-  /**
-   * Manually run the layout (for instance, if resize:false is currently set, or if there is other hackery going on).
-   */
-  updateLayout(): void {
-    this._constraint.updateLayout();
-  }
-
   getCell( node: Node ): FlowCell {
     const result = this._cellMap.get( node )!;
     assert && assert( result );
 
     return result;
-  }
-
-  get resize(): boolean {
-    return this._constraint.enabled;
-  }
-
-  set resize( value: boolean ) {
-    this._constraint.enabled = value;
   }
 
   get orientation(): LayoutOrientation {

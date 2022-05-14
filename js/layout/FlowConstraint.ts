@@ -7,14 +7,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import optionize from '../../../phet-core/js/optionize.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { Divider, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowConfigurableOptions, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutConstraint, LayoutJustification, Node, scenery, VerticalLayoutJustification } from '../imports.js';
+import { Divider, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowConfigurableOptions, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutJustification, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery, VerticalLayoutJustification } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
@@ -44,7 +41,6 @@ type SelfOptions = {
   // Whether line-wrapping is enabled. If so, the primary preferred dimension will determine where things are wrapped.
   wrap?: boolean;
 
-  // Whether invisible Nodes are excluded from the layout.
   excludeInvisible?: boolean;
 
   // The preferred width/height (ideally from a container's localPreferredWidth/localPreferredHeight.
@@ -56,9 +52,9 @@ type SelfOptions = {
   minimumHeightProperty?: IProperty<number | null>;
 };
 
-export type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions;
+export type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions & NodeLayoutAvailableConstraintOptions;
 
-export default class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
+export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstraint ) {
 
   private readonly cells: FlowCell[] = [];
   private _justify: LayoutJustification = LayoutJustification.SPACE_BETWEEN;
@@ -66,42 +62,15 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
   private _wrap = false;
   private _spacing = 0;
   private _lineSpacing = 0;
-  private _excludeInvisible = true;
-
-  readonly preferredWidthProperty: IProperty<number | null>;
-  readonly preferredHeightProperty: IProperty<number | null>;
-  readonly minimumWidthProperty: IProperty<number | null>;
-  readonly minimumHeightProperty: IProperty<number | null>;
-
-  // Reports out the used layout bounds (may be larger than actual bounds, since it
-  // will include margins, etc.)
-  readonly layoutBoundsProperty: IProperty<Bounds2>;
 
   constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
-    const options = optionize<FlowConstraintOptions, Pick<SelfOptions, 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>>()( {
-      // As options, so we could hook into a Node's preferred/minimum sizes if desired
-      preferredWidthProperty: new TinyProperty<number | null>( null ),
-      preferredHeightProperty: new TinyProperty<number | null>( null ),
-      minimumWidthProperty: new TinyProperty<number | null>( null ),
-      minimumHeightProperty: new TinyProperty<number | null>( null )
-    }, providedOptions );
-
-    super( ancestorNode );
-
-    this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
-      useDeepEquality: true
-    } );
-
-    this.preferredWidthProperty = options.preferredWidthProperty;
-    this.preferredHeightProperty = options.preferredHeightProperty;
-    this.minimumWidthProperty = options.minimumWidthProperty;
-    this.minimumHeightProperty = options.minimumHeightProperty;
+    super( ancestorNode, providedOptions );
 
     this.setConfigToBaseDefault();
-    this.mutateConfigurable( options );
-    mutate( this, FLOW_CONSTRAINT_OPTION_KEYS, options );
+    this.mutateConfigurable( providedOptions );
+    mutate( this, FLOW_CONSTRAINT_OPTION_KEYS, providedOptions );
 
     // Key configuration changes to relayout
     this.changedEmitter.addListener( this._updateLayoutListener );
@@ -109,9 +78,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.orientationChangedEmitter.addListener( () => this.cells.forEach( cell => {
       cell.orientation = this.orientation;
     } ) );
-
-    this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
-    this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
   protected override layout(): void {
@@ -153,7 +119,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     }
 
     const cells: FlowCell[] = this.cells.filter( cell => {
-      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
+      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
     } );
 
     if ( !cells.length ) {
@@ -448,20 +414,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     }
   }
 
-  get excludeInvisible(): boolean {
-    return this._excludeInvisible;
-  }
-
-  set excludeInvisible( value: boolean ) {
-    assert && assert( typeof value === 'boolean' );
-
-    if ( this._excludeInvisible !== value ) {
-      this._excludeInvisible = value;
-
-      this.updateLayoutAutomatically();
-    }
-  }
-
   insertCell( index: number, cell: FlowCell ): void {
     assert && assert( typeof index === 'number' );
     assert && assert( index >= 0 );
@@ -503,10 +455,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
    * Releases references
    */
   override dispose(): void {
-    // In case they're from external sources
-    this.preferredWidthProperty.unlink( this._updateLayoutListener );
-    this.preferredHeightProperty.unlink( this._updateLayoutListener );
-
     this.cells.forEach( cell => this.removeCell( cell ) );
 
     super.dispose();
