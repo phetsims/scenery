@@ -10,12 +10,10 @@ import { LayoutProxyProperty, Node, scenery, TransformTracker } from '../imports
 
 export default class TrackingLayoutProxyProperty extends LayoutProxyProperty {
 
-  private transformTracker: TransformTracker | null;
+  private transformTracker: TransformTracker | null = null;
 
   constructor( rootNode: Node, leafNode: Node, transformChanged: () => void ) {
     super( rootNode, leafNode );
-
-    this.transformTracker = null;
 
     this.link( proxy => {
       if ( this.transformTracker ) {

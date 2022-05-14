@@ -80,7 +80,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
 
     const minimumSizes = new OrientationPair( 0, 0 );
     const preferredSizes = new OrientationPair( this.preferredWidthProperty.value, this.preferredHeightProperty.value );
-    const layoutBounds = new Bounds2( 0, 0, 0, 0 ); // TODO: Bounds2.NOTHING.copy() once we have both dimensions handled
+    const layoutBounds = new Bounds2( 0, 0, 0, 0 );
 
     // Handle horizontal first, so if we re-wrap we can handle vertical later.
     [ Orientation.HORIZONTAL, Orientation.VERTICAL ].forEach( orientation => {
@@ -296,9 +296,14 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
    * Releases references
    */
   override dispose(): void {
+    // Lock during disposal to avoid layout calls
+    this.lock();
+
     [ ...this.cells ].forEach( cell => this.removeCell( cell ) );
 
     super.dispose();
+
+    this.unlock();
   }
 
   getIndices( orientation: Orientation ): number[] {
@@ -312,7 +317,6 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
   }
 
   getCell( row: number, column: number ): GridCell | null {
-    // TODO: If we have to do ridiculousness like this, just go back to array?
     return _.find( [ ...this.cells ], cell => cell.containsRow( row ) && cell.containsColumn( column ) ) || null;
   }
 

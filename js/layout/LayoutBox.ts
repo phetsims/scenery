@@ -81,19 +81,19 @@ export type LayoutBoxOptions = SelfOptions & NodeOptions;
 
 export default class LayoutBox extends Node {
 
-  private _orientation: LayoutBoxOrientation;
-  private _spacing: number;
-  private _align: LayoutBoxAlign;
-  private _resize: boolean;
+  private _orientation: LayoutBoxOrientation = 'vertical';
+  private _spacing: number = DEFAULT_SPACING;
+  private _align: LayoutBoxAlign = 'center';
+  private _resize = true;
 
   // If resize:true, will be called whenever a child has its bounds change
   private _updateLayoutListener: () => void;
 
   // Prevents layout() from running while true. Generally will be unlocked and laid out.
-  private _updateLayoutLocked: boolean;
+  private _updateLayoutLocked = false;
 
   // We'll ignore the resize flag while running the initial mutate.
-  private _layoutMutating: boolean;
+  private _layoutMutating = false;
 
   constructor( providedOptions?: LayoutBoxOptions ) {
     // NOTE: We don't need to give defaults for our self options, so that's {}'ed out
@@ -107,13 +107,7 @@ export default class LayoutBox extends Node {
 
     super();
 
-    this._orientation = 'vertical';
-    this._spacing = DEFAULT_SPACING;
-    this._align = 'center';
-    this._resize = true;
-
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
-    this._updateLayoutLocked = false;
 
     this.childInsertedEmitter.addListener( this.onLayoutBoxChildInserted.bind( this ) );
     this.childRemovedEmitter.addListener( this.onLayoutBoxChildRemoved.bind( this ) );

@@ -26,11 +26,15 @@ export type GridBoxOptions = SelfOptions & LayoutNodeOptions;
 
 export default class GridBox extends LayoutNode<GridConstraint> {
 
-  private readonly _cellMap: Map<Node, GridCell>;
+  private readonly _cellMap: Map<Node, GridCell> = new Map<Node, GridCell>();
 
   // For handling the shortcut-style API
-  private _nextX: number;
-  private _nextY: number;
+  private _nextX = 0;
+  private _nextY = 0;
+
+  // Listeners that we'll need to remove
+  private readonly onChildInserted: ( node: Node, index: number ) => void;
+  private readonly onChildRemoved: ( node: Node ) => void;
 
   constructor( providedOptions?: GridBoxOptions ) {
     const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions>, LayoutNodeOptions>()( {
@@ -42,7 +46,6 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
     super();
 
-    this._cellMap = new Map();
     this._constraint = new GridConstraint( this, {
       preferredWidthProperty: this.localPreferredWidthProperty,
       preferredHeightProperty: this.localPreferredHeightProperty,
@@ -52,11 +55,11 @@ export default class GridBox extends LayoutNode<GridConstraint> {
       excludeInvisible: false // Should be handled by the options mutate above
     } );
 
-    this._nextX = 0;
-    this._nextY = 0;
+    this.onChildInserted = this.onGridBoxChildInserted.bind( this );
+    this.onChildRemoved = this.onGridBoxChildRemoved.bind( this );
 
-    this.childInsertedEmitter.addListener( this.onGridBoxChildInserted.bind( this ) );
-    this.childRemovedEmitter.addListener( this.onGridBoxChildRemoved.bind( this ) );
+    this.childInsertedEmitter.addListener( this.onChildInserted );
+    this.childRemovedEmitter.addListener( this.onChildRemoved );
 
     this.mutate( options );
     this._constraint.updateLayout();
@@ -263,6 +266,19 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
   set maxContentHeight( value: number | null ) {
     this._constraint.maxContentHeight = value;
+  }
+
+  override dispose(): void {
+
+    this.childInsertedEmitter.removeListener( this.onChildInserted );
+    this.childRemovedEmitter.removeListener( this.onChildRemoved );
+
+    // Dispose our cells here. We won't be getting the children-removed listeners fired (we removed them above)
+    for ( const cell of this._cellMap.values() ) {
+      cell.dispose();
+    }
+
+    super.dispose();
   }
 }
 

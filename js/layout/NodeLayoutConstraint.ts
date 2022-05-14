@@ -1,7 +1,8 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * Supertype for LayoutConstraints that are based on an actual Node where the layout takes place
+ * Supertype for LayoutConstraints that are based on an actual Node where the layout takes place. Generally used with
+ * layout containers that are subtypes of LayoutNode.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -18,6 +19,9 @@ type SelfOptions = {
   // Whether invisible Nodes are excluded from the layout.
   excludeInvisible?: boolean;
 
+  // If available, the local versions of these Properties for the layout container should be passed in. We do the
+  // layout in the local coordinate frame of e.g. GridBox/FlowBox. It's named this way just for ease-of-use within
+  // this code.
   preferredWidthProperty?: IProperty<number | null>;
   preferredHeightProperty?: IProperty<number | null>;
   minimumWidthProperty?: IProperty<number | null>;
@@ -34,6 +38,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
   private _excludeInvisible = true;
 
   // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
+  // Layout nodes can use this to adjust their localBounds
   readonly layoutBoundsProperty: IProperty<Bounds2>;
 
   readonly preferredWidthProperty: IProperty<number | null>;
@@ -41,6 +46,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
   readonly minimumWidthProperty: IProperty<number | null>;
   readonly minimumHeightProperty: IProperty<number | null>;
 
+  // Recommended for ancestorNode to be the layout container, and that the layout container extends LayoutNode.
   constructor( ancestorNode: Node, providedOptions?: NodeLayoutConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
@@ -65,6 +71,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     this.minimumWidthProperty = options.minimumWidthProperty;
     this.minimumHeightProperty = options.minimumHeightProperty;
 
+    // If our preferred sizes change, we'll need to update our layout
     this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
@@ -87,7 +94,8 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
    * Releases references
    */
   override dispose(): void {
-    // In case they're from external sources
+    // In case they're from external sources (since these constraints can be used without a dedicated Node that is also
+    // being disposed.
     this.preferredWidthProperty.unlink( this._updateLayoutListener );
     this.preferredHeightProperty.unlink( this._updateLayoutListener );
 

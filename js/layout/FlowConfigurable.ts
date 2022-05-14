@@ -74,42 +74,25 @@ export type FlowConfigurableOptions = {
 const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
-    _orientation: Orientation;
+    _orientation: Orientation = Orientation.HORIZONTAL;
 
-    _align: LayoutAlign | null;
-    _stretch: boolean | null;
-    _leftMargin: number | null;
-    _rightMargin: number | null;
-    _topMargin: number | null;
-    _bottomMargin: number | null;
-    _grow: number | null;
-    _minContentWidth: number | null;
-    _minContentHeight: number | null;
-    _maxContentWidth: number | null;
-    _maxContentHeight: number | null;
+    _align: LayoutAlign | null = null;
+    _stretch: boolean | null = null;
+    _leftMargin: number | null = null;
+    _rightMargin: number | null = null;
+    _topMargin: number | null = null;
+    _bottomMargin: number | null = null;
+    _grow: number | null = null;
+    _minContentWidth: number | null = null;
+    _minContentHeight: number | null = null;
+    _maxContentWidth: number | null = null;
+    _maxContentHeight: number | null = null;
 
-    readonly changedEmitter: TinyEmitter;
-    readonly orientationChangedEmitter: TinyEmitter;
+    readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
+    readonly orientationChangedEmitter: TinyEmitter = new TinyEmitter<[]>();
 
     constructor( ...args: any[] ) {
       super( ...args );
-
-      this._orientation = Orientation.HORIZONTAL;
-
-      this._align = null;
-      this._stretch = null;
-      this._leftMargin = null;
-      this._rightMargin = null;
-      this._topMargin = null;
-      this._bottomMargin = null;
-      this._grow = null;
-      this._minContentWidth = null;
-      this._minContentHeight = null;
-      this._maxContentWidth = null;
-      this._maxContentHeight = null;
-
-      this.changedEmitter = new TinyEmitter();
-      this.orientationChangedEmitter = new TinyEmitter();
     }
 
     mutateConfigurable( options?: FlowConfigurableOptions ): void {

@@ -16,30 +16,25 @@ export default class LayoutConstraint {
   readonly ancestorNode: Node;
 
   // Prevents layout() from running while greater than zero. Generally will be unlocked and laid out.
-  private _layoutLockCount: number;
+  private _layoutLockCount = 0;
 
   // Whether there was a layout attempt during the lock
-  private _layoutAttemptDuringLock: boolean;
+  private _layoutAttemptDuringLock = false;
 
-  private _enabled: boolean;
+  private _enabled = true;
 
   protected readonly _updateLayoutListener: () => void;
 
-  private readonly _listenedNodes: Set<Node>;
+  private readonly _listenedNodes: Set<Node> = new Set<Node>();
 
   // scenery-internal
-  readonly finishedLayoutEmitter: TinyEmitter<[]>;
+  readonly finishedLayoutEmitter: TinyEmitter<[]> = new TinyEmitter<[]>();
 
   constructor( ancestorNode: Node ) {
     assert && assert( ancestorNode instanceof Node );
 
     this.ancestorNode = ancestorNode;
-    this._enabled = true;
-    this._layoutLockCount = 0;
-    this._layoutAttemptDuringLock = false;
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
-    this._listenedNodes = new Set();
-    this.finishedLayoutEmitter = new TinyEmitter();
   }
 
   /**

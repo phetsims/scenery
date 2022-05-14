@@ -35,22 +35,37 @@ const GRID_CONFIGURABLE_OPTION_KEYS = [
 ];
 
 export type GridConfigurableOptions = {
+  // Alignments control how the content of a cell is positioned within that cell's available area (thus it only applies
+  // if there is ADDITIONAL space, e.g. in a row/column with a larger item, or there is a preferred size on the GridBox.
   // NOTE: 'origin' aligns will only apply to cells that are 1 grid line in that orientation (width/height)
   xAlign?: HorizontalLayoutAlign | null;
   yAlign?: VerticalLayoutAlign | null;
-  stretch?: boolean;
+
+  // Stretch will control whether a resizable component (mixes in WidthSizable/HeightSizable) will expand to fill the
+  // available space within a cell's available area. Similarly to align, this only applies if there is additional space.
+  stretch?: boolean; // shortcut for xStretch/yStretch
   xStretch?: number | null;
   yStretch?: number | null;
-  grow?: number | null;
+
+  // Grow will control how additional empty space (above the minimum sizes that the grid could take) will be
+  // proportioned out to the rows and columns. Unlike stretch, this affects the size of the columns, and does not affect
+  // the individual cells.
+  grow?: number | null; // shortcut for xGrow/yGrow
   xGrow?: number | null;
   yGrow?: number | null;
-  margin?: number | null;
-  xMargin?: number | null;
-  yMargin?: number | null;
+
+  // Margins will control how much extra space is FORCED around content within a cell's available area. These margins do
+  // not collapse (each cell gets its own).
+  margin?: number | null; // shortcut for left/right/top/bottom margins
+  xMargin?: number | null; // shortcut for left/right margins
+  yMargin?: number | null; // shortcut for top/bottom margins
   leftMargin?: number | null;
   rightMargin?: number | null;
   topMargin?: number | null;
   bottomMargin?: number | null;
+
+  // Forces size minimums and maximums on the cells (which includes the margins).
+  // NOTE: For these, the nullable portion is actually part of the possible "value"
   minContentWidth?: number | null;
   minContentHeight?: number | null;
   maxContentWidth?: number | null;
@@ -60,42 +75,25 @@ export type GridConfigurableOptions = {
 const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
-    _xAlign: LayoutAlign | null;
-    _yAlign: LayoutAlign | null;
-    _xStretch: boolean | null;
-    _yStretch: boolean | null;
-    _leftMargin: number | null;
-    _rightMargin: number | null;
-    _topMargin: number | null;
-    _bottomMargin: number | null;
-    _xGrow: number | null;
-    _yGrow: number | null;
-    _minContentWidth: number | null;
-    _minContentHeight: number | null;
-    _maxContentWidth: number | null;
-    _maxContentHeight: number | null;
+    _xAlign: LayoutAlign | null = null;
+    _yAlign: LayoutAlign | null = null;
+    _xStretch: boolean | null = null;
+    _yStretch: boolean | null = null;
+    _leftMargin: number | null = null;
+    _rightMargin: number | null = null;
+    _topMargin: number | null = null;
+    _bottomMargin: number | null = null;
+    _xGrow: number | null = null;
+    _yGrow: number | null = null;
+    _minContentWidth: number | null = null;
+    _minContentHeight: number | null = null;
+    _maxContentWidth: number | null = null;
+    _maxContentHeight: number | null = null;
 
-    readonly changedEmitter: TinyEmitter;
+    readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
 
     constructor( ...args: any[] ) {
       super( ...args );
-
-      this._xAlign = null;
-      this._yAlign = null;
-      this._xStretch = null;
-      this._yStretch = null;
-      this._leftMargin = null;
-      this._rightMargin = null;
-      this._topMargin = null;
-      this._bottomMargin = null;
-      this._xGrow = null;
-      this._yGrow = null;
-      this._minContentWidth = null;
-      this._minContentHeight = null;
-      this._maxContentWidth = null;
-      this._maxContentHeight = null;
-
-      this.changedEmitter = new TinyEmitter();
     }
 
     mutateConfigurable( options?: GridConfigurableOptions ): void {

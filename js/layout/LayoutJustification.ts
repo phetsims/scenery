@@ -111,7 +111,6 @@ const verticalJustificationMap = {
   spaceBetween: LayoutJustification.SPACE_BETWEEN,
   spaceAround: LayoutJustification.SPACE_AROUND,
   spaceEvenly: LayoutJustification.SPACE_EVENLY
-
 };
 
 scenery.register( 'LayoutJustification', LayoutJustification );

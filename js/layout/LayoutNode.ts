@@ -30,7 +30,7 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
   }
 
   protected linkLayoutBounds(): void {
-    // Adjust the localBounds to be the laid-out area
+    // Adjust the localBounds to be the laid-out area (defined by the constraint)
     this._constraint.layoutBoundsProperty.link( layoutBounds => {
       this.localBounds = layoutBounds;
     } );
@@ -85,6 +85,15 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
    */
   get constraint(): Constraint {
     return this._constraint;
+  }
+
+  /**
+   * Releases references
+   */
+  override dispose(): void {
+    this._constraint.dispose();
+
+    super.dispose();
   }
 }
 

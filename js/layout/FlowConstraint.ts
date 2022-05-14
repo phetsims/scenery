@@ -455,9 +455,14 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
    * Releases references
    */
   override dispose(): void {
+    // Lock during disposal to avoid layout calls
+    this.lock();
+
     this.cells.forEach( cell => this.removeCell( cell ) );
 
     super.dispose();
+
+    this.unlock();
   }
 
   static create( ancestorNode: Node, options?: FlowConstraintOptions ): FlowConstraint {

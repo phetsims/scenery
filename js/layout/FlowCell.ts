@@ -12,7 +12,7 @@ export type FlowCellOptions = Omit<FlowConfigurableOptions, 'orientation'>;
 
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
-  _pendingSize: number; // scenery-internal
+  _pendingSize = 0; // scenery-internal
 
   flowConstraint: FlowConstraint;
 
@@ -20,7 +20,6 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
     super( constraint, node, proxy );
 
     this.flowConstraint = constraint;
-    this._pendingSize = 0;
 
     this.orientation = constraint.orientation;
     this.onLayoutOptionsChange();

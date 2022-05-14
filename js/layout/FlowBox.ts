@@ -36,6 +36,12 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
 
   private readonly _cellMap: Map<Node, FlowCell>;
 
+  // Listeners that we'll need to remove
+  private readonly onChildInserted: ( node: Node, index: number ) => void;
+  private readonly onChildRemoved: ( node: Node ) => void;
+  private readonly onChildrenReordered: ( minChangeIndex: number, maxChangeIndex: number ) => void;
+  private readonly onChildrenChanged: () => void;
+
   constructor( providedOptions?: FlowBoxOptions ) {
     const options = optionize<FlowBoxOptions, Omit<SelfOptions, keyof FlowConstraintOptions>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
@@ -63,10 +69,15 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
 
     this._cellMap = new Map<Node, FlowCell>();
 
-    this.childInsertedEmitter.addListener( this.onFlowBoxChildInserted.bind( this ) );
-    this.childRemovedEmitter.addListener( this.onFlowBoxChildRemoved.bind( this ) );
-    this.childrenReorderedEmitter.addListener( this.onFlowBoxChildrenReordered.bind( this ) );
-    this.childrenChangedEmitter.addListener( this.onFlowBoxChildrenChanged.bind( this ) );
+    this.onChildInserted = this.onFlowBoxChildInserted.bind( this );
+    this.onChildRemoved = this.onFlowBoxChildRemoved.bind( this );
+    this.onChildrenReordered = this.onFlowBoxChildrenReordered.bind( this );
+    this.onChildrenChanged = this.onFlowBoxChildrenChanged.bind( this );
+
+    this.childInsertedEmitter.addListener( this.onChildInserted );
+    this.childRemovedEmitter.addListener( this.onChildRemoved );
+    this.childrenReorderedEmitter.addListener( this.onChildrenReordered );
+    this.childrenChangedEmitter.addListener( this.onChildrenChanged );
 
     this.mutate( options );
     this._constraint.updateLayout();
@@ -294,8 +305,12 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
    * Releases references
    */
   override dispose(): void {
-    this._constraint.dispose();
+    this.childInsertedEmitter.removeListener( this.onChildInserted );
+    this.childRemovedEmitter.removeListener( this.onChildRemoved );
+    this.childrenReorderedEmitter.removeListener( this.onChildrenReordered );
+    this.childrenChangedEmitter.removeListener( this.onChildrenChanged );
 
+    // Dispose our cells here. We won't be getting the children-removed listeners fired (we removed them above)
     for ( const cell of this._cellMap.values() ) {
       cell.dispose();
     }
