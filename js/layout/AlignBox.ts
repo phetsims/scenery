@@ -138,7 +138,7 @@ export default class AlignBox extends WidthSizable( HeightSizable( Node ) ) {
     this.mutate( options );
 
     // Update alignBounds based on preferred sizes
-    Property.multilink( [ this.localPreferredWidthProperty, this.localPreferredHeightProperty ], ( preferredWidth: number | null, preferredHeight: number | null ) => {
+    Property.multilink( [ this.localPreferredWidthProperty, this.localPreferredHeightProperty ], ( preferredWidth, preferredHeight ) => {
       if ( preferredWidth !== null || preferredHeight !== null ) {
         const bounds = this._alignBounds || new Bounds2( 0, 0, 0, 0 );
 
