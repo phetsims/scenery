@@ -8,13 +8,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import { DerivedProperty1 } from '../../../axon/js/DerivedProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { LayoutProxy, Node, scenery, Trail, TrailsBetweenProperty } from '../imports.js';
 
-export default class LayoutProxyProperty extends DerivedProperty<LayoutProxy | null, [ Trail[] ]> {
+export default class LayoutProxyProperty extends DerivedProperty1<LayoutProxy | null, Trail[]> {
 
-  private readonly trailsBetweenProperty: TrailsBetweenProperty
+  private readonly trailsBetweenProperty: TrailsBetweenProperty;
 
   constructor( rootNode: Node, leafNode: Node ) {
 
