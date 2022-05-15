@@ -17,7 +17,8 @@ export const WIDTH_SIZABLE_OPTION_KEYS = [
   'preferredWidth',
   'minimumWidth',
   'localPreferredWidth',
-  'localMinimumWidth'
+  'localMinimumWidth',
+  'widthSizable'
 ];
 
 export type WidthSizableSelfOptions = {
@@ -43,6 +44,9 @@ export type WidthSizableSelfOptions = {
   // indicate what preferred sizes are possible.
   // NOTE: changing this or minimumWidth will adjust the other.
   localMinimumWidth?: number | null;
+
+  // Whether this component will have its preferred size set by things like layout containers.
+  widthSizable?: boolean;
 };
 
 const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
@@ -53,6 +57,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     readonly minimumWidthProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
     readonly localPreferredWidthProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
     readonly localMinimumWidthProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+    readonly isWidthResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
     // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the other
     _preferredWidthChanging = false;
@@ -119,8 +124,15 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       this.localMinimumWidthProperty.value = value;
     }
 
-    // Detection flag for this trait
-    get widthSizable(): boolean { return true; }
+    get widthSizable(): boolean {
+      return this.isWidthResizableProperty.value;
+    }
+
+    set widthSizable( value: boolean ) {
+      this.isWidthResizableProperty.value = value;
+    }
+
+    get mixesWidthSizable(): boolean { return true; }
 
     // Used internally, do not call (can't be private due to TypeScript mixin constraints)
     _updateLocalPreferredWidth(): void {
@@ -196,7 +208,10 @@ export type WidthSizableNode = InstanceType<ReturnType<typeof wrapper>>;
 const isWidthSizable = ( node: Node ): node is WidthSizableNode => {
   return node.widthSizable;
 };
+const mixesWidthSizable = ( node: Node ): node is WidthSizableNode => {
+  return node.mixesWidthSizable;
+};
 
 scenery.register( 'WidthSizable', WidthSizable );
 export default WidthSizable;
-export { isWidthSizable };
+export { isWidthSizable, mixesWidthSizable };

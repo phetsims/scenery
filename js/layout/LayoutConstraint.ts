@@ -8,7 +8,7 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import { scenery, LayoutProxy, Node, isWidthSizable, isHeightSizable } from '../imports.js';
+import { LayoutProxy, mixesHeightSizable, mixesWidthSizable, Node, scenery } from '../imports.js';
 
 export default class LayoutConstraint {
 
@@ -52,11 +52,13 @@ export default class LayoutConstraint {
 
     node.boundsProperty.lazyLink( this._updateLayoutListener );
     node.visibleProperty.lazyLink( this._updateLayoutListener );
-    if ( isWidthSizable( node ) ) {
+    if ( mixesWidthSizable( node ) ) {
       node.minimumWidthProperty.lazyLink( this._updateLayoutListener );
+      node.isWidthResizableProperty.lazyLink( this._updateLayoutListener );
     }
-    if ( isHeightSizable( node ) ) {
+    if ( mixesHeightSizable( node ) ) {
       node.minimumHeightProperty.lazyLink( this._updateLayoutListener );
+      node.isHeightResizableProperty.lazyLink( this._updateLayoutListener );
     }
 
     this._listenedNodes.add( node );
@@ -73,11 +75,13 @@ export default class LayoutConstraint {
 
     node.boundsProperty.unlink( this._updateLayoutListener );
     node.visibleProperty.unlink( this._updateLayoutListener );
-    if ( isWidthSizable( node ) ) {
+    if ( mixesWidthSizable( node ) ) {
       node.minimumWidthProperty.unlink( this._updateLayoutListener );
+      node.isWidthResizableProperty.unlink( this._updateLayoutListener );
     }
-    if ( isHeightSizable( node ) ) {
+    if ( mixesHeightSizable( node ) ) {
       node.minimumHeightProperty.unlink( this._updateLayoutListener );
+      node.isHeightResizableProperty.unlink( this._updateLayoutListener );
     }
 
     this._listenedNodes.delete( node );

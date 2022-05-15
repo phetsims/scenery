@@ -17,7 +17,8 @@ export const HEIGHT_SIZABLE_OPTION_KEYS = [
   'preferredHeight',
   'minimumHeight',
   'localPreferredHeight',
-  'localMinimumHeight'
+  'localMinimumHeight',
+  'heightSizable'
 ];
 
 export type HeightSizableSelfOptions = {
@@ -43,6 +44,9 @@ export type HeightSizableSelfOptions = {
   // indicate what preferred sizes are possible.
   // NOTE: changing this or minimumHeight will adjust the other.
   localMinimumHeight?: number | null;
+
+  // Whether this component will have its preferred size set by things like layout containers.
+  heightSizable?: boolean;
 };
 
 const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
@@ -53,6 +57,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     readonly minimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
     readonly localPreferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
     readonly localMinimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+    readonly isHeightResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
     // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the other
     _preferredHeightChanging = false;
@@ -119,8 +124,15 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.localMinimumHeightProperty.value = value;
     }
 
-    // Detection flag for this trait
-    get heightSizable(): boolean { return true; }
+    get heightSizable(): boolean {
+      return this.isHeightResizableProperty.value;
+    }
+
+    set heightSizable( value: boolean ) {
+      this.isHeightResizableProperty.value = value;
+    }
+
+    get mixesHeightSizable(): boolean { return true; }
 
     // Used internally, do not call (can't be private due to TypeScript mixin constraints)
     _updateLocalPreferredHeight(): void {
@@ -196,7 +208,10 @@ export type HeightSizableNode = InstanceType<ReturnType<typeof wrapper>>;
 const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
   return node.heightSizable;
 };
+const mixesHeightSizable = ( node: Node ): node is HeightSizableNode => {
+  return node.mixesHeightSizable;
+};
 
 scenery.register( 'HeightSizable', HeightSizable );
 export default HeightSizable;
-export { isHeightSizable };
+export { isHeightSizable, mixesHeightSizable };
