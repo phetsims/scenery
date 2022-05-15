@@ -26,7 +26,9 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
   protected _constraint!: Constraint;
 
   constructor( providedOptions?: LayoutNodeOptions ) {
-    super( providedOptions );
+    super();
+
+    this.mutate( providedOptions );
   }
 
   protected linkLayoutBounds(): void {

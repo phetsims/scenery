@@ -12,13 +12,15 @@ export type VDividerOptions = DividerOptions;
 
 export default class VDivider extends WidthSizable( Divider ) {
   constructor( options?: VDividerOptions ) {
-    super( options );
+    super();
 
     this.localPreferredWidthProperty.link( width => {
       if ( width !== null ) {
         this.x2 = width;
       }
     } );
+
+    this.mutate( options );
   }
 }
 

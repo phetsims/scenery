@@ -94,8 +94,8 @@
     }
 
     class ExampleExpandingRectangle extends scenery.WidthSizable( scenery.HeightSizable( scenery.Rectangle ) ) {
-      constructor( ...args ) {
-        super( ...args );
+      constructor( options ) {
+        super( {} );
 
         this.localMinimumWidth = 50;
         this.localMinimumHeight = 50;
@@ -110,6 +110,8 @@
             this.rectHeight = Math.max( this.localMinimumHeight, height );
           }
         } );
+
+        this.mutate( options );
       }
     }
 
@@ -473,7 +475,7 @@
           'center',
           'origin'
         ].map( align => {
-          const expandingRect = new ExampleExpandingRectangle( 0, 0, 50, 10, { fill: 'gray' } );
+          const expandingRect = new ExampleExpandingRectangle( { rectWidth: 50, rectHeight: 10, fill: 'gray' } );
           expandingRect.minimumHeight = 10;
           return new scenery.FlowBox( {
             children: [
@@ -498,7 +500,7 @@
       }, { resize: 'none', useMinWidth: false } );
     </script>
 
-    <p>justifyLines controls how lines are positioned in the secondary orientation:</p>
+    <p>justifyLines controls how lines are positioned in the secondary orientation (null will default to a stretch):</p>
 
     <div id="justifyLines-example"></div>
     <script type="text/javascript">
@@ -514,23 +516,23 @@
           null
         ].map( justifyLines => {
           const createResizable = () => {
-            const node = new ExampleExpandingRectangle( 0, 0, 10, 10, { fill: 'gray' } );
-            node.localMinimumWidth = 10;
-            node.localMinimumHeight = 10;
+            const node = new ExampleExpandingRectangle( { rectWidth: 20, rectHeight: 20, fill: 'gray' } );
+            node.localMinimumWidth = 20;
+            node.localMinimumHeight = 20;
             return node;
           };
           return new scenery.FlowBox( {
-            preferredWidth: 20,
+            preferredWidth: 40,
             wrap: true,
             stretch: true,
             children: [
-              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 2 ] } ),
+              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
               createResizable(),
-              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 4 ] } ),
+              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
               createResizable(),
-              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 6 ] } ),
+              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
               createResizable(),
-              new scenery.Rectangle( 0, 0, 10, 10, { fill: colors[ 8 ] } ),
+              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } ),
               createResizable()
             ],
             justifyLines: justifyLines
@@ -546,7 +548,7 @@
           box.preferredHeight = preferredHeight;
         } ) );
         return container;
-      }, { resize: 'vertical' } );
+      }, { resize: 'vertical', useMinHeight: true } );
     </script>
 
     <p>Spacing can be added, that is applied between cells:</p>
@@ -715,7 +717,7 @@
           ]
         } );
         /*END*/
-      }, { resize: 'both' } );
+      }, { resize: 'both', useMinHeight: true } );
     </script>
 
     <p>Dividers are also available for easy of use (dividers at the visible start/end and duplicates will be marked as invisible, while all other dividers will be marked as visible:</p>
@@ -740,6 +742,52 @@
         } );
         /*END*/
       }, { resize: 'horizontal' } );
+    </script>
+
+    <p>When using align:origin, the origin of the entire FlowBox will be at the origin of the first line:</p>
+
+    <div id="flowOrigin-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'flowOrigin-example', () => {
+        const originSize = 50;
+        const originNode = new scenery.Path( new kite.Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
+          stroke: 'rgba(0,0,0,0.3)'
+        } );
+        const normalText = ( str, options ) => new scenery.Text( str, phetCore.merge( {
+          font: new scenery.Font( { size: 12 } )
+        }, options ) );
+        const bigText = ( str, options ) => new scenery.Text( str, phetCore.merge( {
+          font: new scenery.Font( { size: 18, weight: 'bold' } )
+        }, options ) );
+        /*START*/
+        const box = new scenery.FlowBox( {
+          orientation: 'horizontal',
+          align: 'origin',
+          spacing: 5,
+          lineSpacing: 5,
+          children: [
+            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            bigText( 'Text' ),
+            normalText( 'Text' ),
+            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            bigText( 'Text' ),
+            normalText( 'text' ),
+            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            bigText( 'Text' ),
+            normalText( 'text' ),
+            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            bigText( 'Text' ),
+            normalText( 'text' )
+          ],
+          wrap: true,
+          preferredWidth: 170,
+          justify: 'left'
+        } );
+        /*END*/
+        return new scenery.AlignBox( new scenery.Node( {
+          children: [ originNode, box ]
+        } ) );
+      }, { resize: 'both' } );
     </script>
 
     <h2>GridBox</h2>
@@ -948,7 +996,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <p>Growing with cells that can adjust their size dynamically with preferred dimensions works well:</p>
+    <p>Use stretch (or xStretch/yStretch) to grow a cell dynamically with the preferred dimensions to match the row/column:</p>
 
     <div id="preferred-grid-example"></div>
     <script type="text/javascript">
@@ -973,6 +1021,45 @@
               } ),
               new ExampleExpandingRectangle( {
                 fill: 'gray',
+                layoutOptions: { grow: 1, stretch: true }
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ]
+              } )
+            ]
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
+    <p>Additionally, widthSizable/heightSizable can be used to turn off resizing in a component (particularly useful if you want to set a preferredWidth/preferredHeight on it that won't change):</p>
+
+    <div id="gridResizable-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'gridResizable-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          rows: [
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ]
+              } ),
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ]
+              } ),
+              new scenery.Circle( 25, {
+                fill: colors[ 4 ]
+              } )
+            ],
+            [
+              new scenery.Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } ),
+              new ExampleExpandingRectangle( {
+                fill: 'gray',
+                preferredWidth: 50,
+                widthSizable: false,
                 layoutOptions: { grow: 1, stretch: true }
               } ),
               new scenery.Rectangle( 0, 0, 50, 50, {
@@ -1244,6 +1331,33 @@
         } );
         /*END*/
       }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>When using align:origin, the origin of the entire GridBox will be at the origin of the first cell:</p>
+
+    <div id="gridOrigin-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'gridOrigin-example', () => {
+        const originSize = 50;
+        const originNode = new scenery.Path( new kite.Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
+          stroke: 'rgba(0,0,0,0.3)'
+        } );
+        /*START*/
+        const box = new scenery.GridBox( {
+          xAlign: 'origin',
+          yAlign: 'origin',
+          children: [
+            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { x: 0, y: 0 } } ),
+            new scenery.Circle( 10, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { x: 1, y: 0 } } ),
+            new scenery.Circle( 15, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { x: 0, y: 1 } } ),
+            new scenery.Circle( 25, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { x: 1, y: 1 } } )
+          ]
+        } );
+        /*END*/
+        return new scenery.AlignBox( new scenery.Node( {
+          children: [ originNode, box ]
+        } ) );
+      }, { resize: 'both' } );
     </script>
 
   </div>

@@ -12,13 +12,15 @@ export type HDividerOptions = DividerOptions;
 
 export default class HDivider extends HeightSizable( Divider ) {
   constructor( options?: HDividerOptions ) {
-    super( options );
+    super();
 
     this.localPreferredHeightProperty.link( height => {
       if ( height !== null ) {
         this.y2 = height;
       }
     } );
+
+    this.mutate( options );
   }
 }
 

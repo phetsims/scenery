@@ -45,10 +45,16 @@ export type WidthSizableSelfOptions = {
   // NOTE: changing this or minimumWidth will adjust the other.
   localMinimumWidth?: number | null;
 
-  // Whether this component will have its preferred size set by things like layout containers.
+  // Whether this component will have its preferred size set by things like layout containers. If this is set to false,
+  // it's recommended to set some sort of preferred size (so that it won't go to 0)
   widthSizable?: boolean;
 };
 
+// IMPORTANT: If you're mixing this in, typically don't pass options that WidthSizable would take through the
+// constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
+// values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
+// They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
+// is yet passing those options through.
 const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const clazz = class extends type {
 
@@ -63,6 +69,11 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     _preferredWidthChanging = false;
     _minimumWidthChanging = false;
 
+    // IMPORTANT: If you're mixing this in, typically don't pass options that WidthSizable would take through the
+    // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
+    // values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
+    // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
+    // is yet passing those options through.
     constructor( ...args: any[] ) {
       super( ...args );
 
@@ -83,10 +94,15 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     get preferredWidth(): number | null {
+      assert && assert( this.preferredWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
+
       return this.preferredWidthProperty.value;
     }
 
     set preferredWidth( value: number | null ) {
+      assert && assert( this.preferredWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
         'preferredWidth should be null or a non-negative finite number' );
 
@@ -94,10 +110,14 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     get localPreferredWidth(): number | null {
+      assert && assert( this.localPreferredWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.localPreferredWidthProperty.value;
     }
 
     set localPreferredWidth( value: number | null ) {
+      assert && assert( this.localPreferredWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
         'localPreferredWidth should be null or a non-negative finite number' );
 
@@ -105,30 +125,42 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     get minimumWidth(): number | null {
+      assert && assert( this.minimumWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.minimumWidthProperty.value;
     }
 
     set minimumWidth( value: number | null ) {
+      assert && assert( this.minimumWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       this.minimumWidthProperty.value = value;
     }
 
     get localMinimumWidth(): number | null {
+      assert && assert( this.localMinimumWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.localMinimumWidthProperty.value;
     }
 
     set localMinimumWidth( value: number | null ) {
+      assert && assert( this.localMinimumWidthProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       this.localMinimumWidthProperty.value = value;
     }
 
     get widthSizable(): boolean {
+      assert && assert( this.isWidthResizableProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.isWidthResizableProperty.value;
     }
 
     set widthSizable( value: boolean ) {
+      assert && assert( this.isWidthResizableProperty,
+        'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       this.isWidthResizableProperty.value = value;
     }
 
