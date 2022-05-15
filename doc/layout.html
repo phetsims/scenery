@@ -389,6 +389,34 @@
       }, { resize: 'horizontal' } );
     </script>
 
+    <p>Minimums and maximums also apply on the secondary axis:</p>
+
+    <div id="secondaryAxisContent-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'secondaryAxisContent-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: {
+                grow: 1,
+                minContentWidth: 50,
+                minContentHeight: 50,
+                maxContentHeight: 100,
+                stretch: true
+              }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
     <p>Justification controls how extra space is allocated around cells (after any growing possible has been done):</p>
 
     <div id="justification-example"></div>
@@ -781,6 +809,7 @@
           ],
           wrap: true,
           preferredWidth: 170,
+          widthSizable: false,
           justify: 'left'
         } );
         /*END*/
