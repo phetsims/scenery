@@ -65,7 +65,7 @@ type SelfOptions = {
   // `autoColumns` number of columns, then it will go to the next row. This should generally be used with `children` or
   // adding/removing children in normal ways.
   autoColumns?: number | null;
-} & Omit<GridConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
+} & Omit<GridConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty' | 'layoutOriginProperty'>;
 
 export type GridBoxOptions = SelfOptions & LayoutNodeOptions;
 
@@ -99,6 +99,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
       preferredHeightProperty: this.localPreferredHeightProperty,
       minimumWidthProperty: this.localMinimumWidthProperty,
       minimumHeightProperty: this.localMinimumHeightProperty,
+      layoutOriginProperty: this.layoutOriginProperty,
 
       excludeInvisible: false // Should be handled by the options mutate below
     } );

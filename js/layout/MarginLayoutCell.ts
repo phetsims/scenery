@@ -9,14 +9,7 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
-import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import { LayoutAlign, LayoutCell, LayoutConstraint, LayoutProxy, Node, scenery } from '../imports.js';
-
-const sizableFlagPair = new OrientationPair( 'widthSizable' as const, 'heightSizable' as const );
-const preferredSizePair = new OrientationPair( 'preferredWidth' as const, 'preferredHeight' as const );
-
-// Position changes smaller than this will be ignored
-const CHANGE_POSITION_THRESHOLD = 1e-9;
+import { LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, scenery } from '../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export interface MarginLayout {
@@ -30,7 +23,7 @@ export interface MarginLayout {
   _maxContentHeight: number | null;
 }
 
-export type MarginLayoutConstraint = LayoutConstraint & MarginLayout;
+export type MarginLayoutConstraint = NodeLayoutConstraint & MarginLayout;
 
 export default class MarginLayoutCell extends LayoutCell {
 
@@ -133,7 +126,7 @@ export default class MarginLayoutCell extends LayoutCell {
   }
 
   attemptPreferredSize( orientation: Orientation, value: number ): void {
-    if ( this.proxy[ sizableFlagPair.get( orientation ) ] ) {
+    if ( this.proxy[ orientation.sizable ] ) {
       const minimumSize = this.getMinimumSize( orientation );
       const maximumSize = this.getMaximumSize( orientation );
 
@@ -142,22 +135,18 @@ export default class MarginLayoutCell extends LayoutCell {
 
       value = Utils.clamp( value, minimumSize, maximumSize );
 
-      this.proxy[ preferredSizePair.get( orientation ) ] = value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation );
+      this._marginConstraint.setProxyPreferredSize( orientation, this.proxy, value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation ) );
     }
   }
 
   positionStart( orientation: Orientation, value: number ): void {
     const start = this.getEffectiveMinMargin( orientation ) + value;
 
-    if ( Math.abs( this.proxy[ orientation.minSide ] - start ) > CHANGE_POSITION_THRESHOLD ) {
-      this.proxy[ orientation.minSide ] = start;
-    }
+    this._marginConstraint.setProxyMinSide( orientation, this.proxy, start );
   }
 
   positionOrigin( orientation: Orientation, value: number ): void {
-    if ( Math.abs( this.proxy[ orientation.coordinate ] - value ) > CHANGE_POSITION_THRESHOLD ) {
-      this.proxy[ orientation.coordinate ] = value;
-    }
+    this._marginConstraint.setProxyOrigin( orientation, this.proxy, value );
   }
 
   /**

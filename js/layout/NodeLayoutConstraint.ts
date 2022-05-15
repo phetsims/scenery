@@ -10,10 +10,15 @@
 import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { LayoutConstraint, Node, scenery } from '../imports.js';
+import { LayoutConstraint, LayoutProxy, Node, scenery } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Orientation from '../../../phet-core/js/Orientation.js';
+
+// Position changes smaller than this will be ignored
+const CHANGE_POSITION_THRESHOLD = 1e-9;
 
 type SelfOptions = {
   // Whether invisible Nodes are excluded from the layout.
@@ -26,12 +31,15 @@ type SelfOptions = {
   preferredHeightProperty?: IProperty<number | null>;
   minimumWidthProperty?: IProperty<number | null>;
   minimumHeightProperty?: IProperty<number | null>;
+
+  // If provided, will position content at an offset from the normal origin
+  layoutOriginProperty?: IProperty<Vector2>;
 };
 
 export type NodeLayoutConstraintOptions = SelfOptions;
 
 // Type export designed for use with clients
-export type NodeLayoutAvailableConstraintOptions = Pick<NodeLayoutConstraintOptions, 'excludeInvisible'>;
+export type NodeLayoutAvailableConstraintOptions = Pick<NodeLayoutConstraintOptions, 'excludeInvisible' | 'layoutOriginProperty'>;
 
 export default class NodeLayoutConstraint extends LayoutConstraint {
 
@@ -45,6 +53,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
   readonly preferredHeightProperty: IProperty<number | null>;
   readonly minimumWidthProperty: IProperty<number | null>;
   readonly minimumHeightProperty: IProperty<number | null>;
+  readonly layoutOriginProperty: IProperty<Vector2>;
 
   // Recommended for ancestorNode to be the layout container, and that the layout container extends LayoutNode.
   constructor( ancestorNode: Node, providedOptions?: NodeLayoutConstraintOptions ) {
@@ -56,7 +65,8 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),
       minimumWidthProperty: new TinyProperty<number | null>( null ),
-      minimumHeightProperty: new TinyProperty<number | null>( null )
+      minimumHeightProperty: new TinyProperty<number | null>( null ),
+      layoutOriginProperty: new TinyProperty<Vector2>( Vector2.ZERO )
     }, providedOptions );
 
     super( ancestorNode );
@@ -70,10 +80,11 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     this.preferredHeightProperty = options.preferredHeightProperty;
     this.minimumWidthProperty = options.minimumWidthProperty;
     this.minimumHeightProperty = options.minimumHeightProperty;
+    this.layoutOriginProperty = options.layoutOriginProperty;
 
-    // If our preferred sizes change, we'll need to update our layout
     this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
+    this.layoutOriginProperty.lazyLink( this._updateLayoutListener );
   }
 
   get excludeInvisible(): boolean {
@@ -90,6 +101,22 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     }
   }
 
+  setProxyPreferredSize( orientation: Orientation, proxy: LayoutProxy, preferredSize: number ): void {
+    proxy[ orientation.preferredSize ] = preferredSize;
+  }
+
+  setProxyMinSide( orientation: Orientation, proxy: LayoutProxy, minSide: number ): void {
+    if ( Math.abs( proxy[ orientation.minSide ] - minSide ) > CHANGE_POSITION_THRESHOLD ) {
+      proxy[ orientation.minSide ] = minSide;
+    }
+  }
+
+  setProxyOrigin( orientation: Orientation, proxy: LayoutProxy, origin: number ): void {
+    if ( Math.abs( proxy[ orientation.coordinate ] - origin ) > CHANGE_POSITION_THRESHOLD ) {
+      proxy[ orientation.coordinate ] = origin;
+    }
+  }
+
   /**
    * Releases references
    */
@@ -98,6 +125,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     // being disposed.
     this.preferredWidthProperty.unlink( this._updateLayoutListener );
     this.preferredHeightProperty.unlink( this._updateLayoutListener );
+    this.layoutOriginProperty.unlink( this._updateLayoutListener );
 
     super.dispose();
   }

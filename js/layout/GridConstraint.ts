@@ -190,7 +190,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
       }
 
       // Layout
-      const startPosition = lines[ 0 ].hasOrigin() ? lines[ 0 ].minOrigin : 0;
+      const startPosition = ( lines[ 0 ].hasOrigin() ? lines[ 0 ].minOrigin : 0 ) + this.layoutOriginProperty.value[ orientation.coordinate ];
       layoutBounds[ orientation.minCoordinate ] = startPosition;
       layoutBounds[ orientation.maxCoordinate ] = startPosition + size;
       lines.forEach( ( line, arrayIndex ) => {

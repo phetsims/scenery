@@ -206,6 +206,9 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     const size = Math.max( minimumCurrentSize, preferredSize || 0 );
     const oppositeSize = Math.max( minimumCurrentOppositeSize, preferredOppositeSize || 0 );
 
+    const originPrimary = this.layoutOriginProperty.value[ orientation.coordinate ];
+    const originSecondary = this.layoutOriginProperty.value[ orientation.opposite.coordinate ];
+
     // Primary-direction layout
     lines.forEach( line => {
       const minimumContent = _.sum( line.cells.map( cell => cell.getMinimumSize( orientation ) ) );
@@ -246,7 +249,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
 
       const primarySpacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.cells.length );
 
-      let position = 0;
+      let position = originPrimary;
 
       line.cells.forEach( ( cell, index ) => {
         position += primarySpacingFunction( index );
@@ -260,7 +263,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
 
     // Secondary-direction layout
     const oppositeSpaceRemaining = oppositeSize - minimumCurrentOppositeSize;
-    const initialOppositePosition = lines[ 0 ].hasOrigin() ? lines[ 0 ].minOrigin : 0;
+    const initialOppositePosition = ( lines[ 0 ].hasOrigin() ? lines[ 0 ].minOrigin : 0 ) + originSecondary;
     let oppositePosition = initialOppositePosition;
     if ( this._justifyLines === null ) {
       // null justifyLines will result in expanding all of our lines into the remaining space.
@@ -290,8 +293,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
       cell.reposition( oppositeOrientation, line.size, line.position, cell.effectiveStretch, -line.minOrigin, cell.effectiveAlign );
     } ) );
 
-    const minCoordinate = 0;
-    const maxCoordinate = size;
+    const minCoordinate = originPrimary;
+    const maxCoordinate = originPrimary + size;
     const minOppositeCoordinate = initialOppositePosition;
     const maxOppositeCoordinate = initialOppositePosition + oppositeSize;
 

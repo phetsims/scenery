@@ -28,7 +28,7 @@ type SelfOptions = {
   // The FlowBox will layout once after processing the options object, but if resize:false, then after that manual
   // layout calls will need to be done (with updateLayout())
   resize?: boolean;
-} & Omit<FlowConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
+} & Omit<FlowConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty' | 'layoutOriginProperty'>;
 
 export type FlowBoxOptions = SelfOptions & LayoutNodeOptions;
 
@@ -59,6 +59,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
       preferredHeightProperty: this.localPreferredHeightProperty,
       minimumWidthProperty: this.localMinimumWidthProperty,
       minimumHeightProperty: this.localMinimumHeightProperty,
+      layoutOriginProperty: this.layoutOriginProperty,
 
       orientation: DEFAULT_OPTIONS.orientation,
       spacing: DEFAULT_OPTIONS.spacing,
