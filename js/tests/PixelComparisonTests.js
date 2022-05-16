@@ -3,6 +3,7 @@
 /**
  * PixelComparison tests
  *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
@@ -12,6 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import platform from '../../../phet-core/js/platform.js';
 import Display from '../display/Display.js';
+import { Color, FlowBox } from '../imports.js';
 import Circle from '../nodes/Circle.js';
 import Image from '../nodes/Image.js';
 import Node from '../nodes/Node.js';
@@ -37,6 +39,20 @@ function snapshotFromImage( image ) { // eslint-disable-line no-unused-vars
 }
 
 const testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
+const layoutTestedRenderers = [ 'svg' ];
+
+const colors = [
+  new Color( 62, 171, 3 ),
+  new Color( 23, 180, 77 ),
+  new Color( 24, 183, 138 ),
+  new Color( 23, 178, 194 ),
+  new Color( 20, 163, 238 ),
+  new Color( 71, 136, 255 ),
+  new Color( 171, 101, 255 ),
+  new Color( 228, 72, 235 ),
+  new Color( 252, 66, 186 ),
+  new Color( 252, 82, 127 )
+];
 
 // known clipping issues to fix
 const nonDomWebGLTestedRenderers = testedRenderers.filter( renderer => renderer !== 'dom' && renderer !== 'webgl' );
@@ -892,4 +908,264 @@ else {
     }, 'data:image/png;base64,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',
     2, [ 'canvas', 'webgl' ], true // asynchronous, don't test SVG/DOM, since foreignobject doesn't work with external images
   );
+
+  multipleRendererTest( 'Horizontal FlowBox',
+    ( scene, display ) => {
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ]
+      } ) );
+
+      display.width = 80;
+      display.height = 20;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAAAUCAYAAAAa2LrXAAAAAXNSR0IArs4c6QAAAIFJREFUWEft17ENgDAMRFFnBDrWYgemYQFGoaBjDzZgBCQygKuvuEI/9cnFkxX52nxsXxS+91kLp0Xs11Q6b7nP0nlNwDFPAcf8QkABmYB/IPNKaQEFZAKeMcwrpQUUkAnYRJhXSgsoIBKwiSCuHBZQQCZgE2FeVjkP6cGNEfDngB2rX59hAn6+QgAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'Vertical FlowBox',
+    ( scene, display ) => {
+      scene.addChild( new FlowBox( {
+        orientation: 'vertical',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ]
+      } ) );
+
+      display.width = 20;
+      display.height = 80;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAABQCAYAAAAZQFV3AAAAAXNSR0IArs4c6QAAAIRJREFUWEft1bENgDAMRFF7BwrmYReWYQ1KBkBiKCZACr1T2efyp7eLd47O1/sY1vichbImhjKhYYhhQYCzKaCFEV/Ot7dTWCinQigyoWGIYUGAsymgxU659tHbKSyUU3EMMcwLcDZ5sziBYYPhtz29ncJCORXHEMO8AGeTN5s6ha8nI/5V1Nxlxun/ewAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'Horizontal FlowBox with preferredWidth',
+    ( scene, display ) => {
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        preferredWidth: 100,
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ]
+      } ) );
+
+      display.width = 100;
+      display.height = 20;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAUCAYAAAB7wJiVAAAAAXNSR0IArs4c6QAAAMJJREFUaEPt1LENwjAQQNHcCBSRmIeOAZyKlhUYghEoKfEASEyUAjZAMkpvyJdsUf3UJ5/0TvmxvZ/L0PGb96eoPTdeX6lE3LqtisjPw2aqvZePZdmT+u0apnSJXHvvvXt09QsPAs4WHmRdyT9k3WiZMFnM6duUySJ+JgsomSyAZLIY0o8pk0UITRZQMlkAyWQxJJPV6GSyAKDJAkgmiyGZrEYnkwUATRZAMlkMyWQ1OpksAGiyAJLJYkgmq9Hpj8n6AOqtZ3AbBsTSAAAAAElFTkSuQmCC',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'Vertical FlowBox with preferredHeight',
+    ( scene, display ) => {
+      scene.addChild( new FlowBox( {
+        orientation: 'vertical',
+        preferredHeight: 100,
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ]
+      } ) );
+
+      display.width = 20;
+      display.height = 100;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAABkCAYAAACGqxDMAAAAAXNSR0IArs4c6QAAAMNJREFUaEPt2MENgkAQheGdHiSxHnqwBCjGMpSTFEBCT2oDJmvwQiDxwL53Ifzc52XzzSy7EOfhmpPxCQJlTQxlwoQhhgUCjE0B2qok9IhlAoG6qN+wuj0v+rrmhDjdX96rCIFyf2iKTJgwxLBA4JBj070fBVR/S/ynnnN1UxYr1EWjb7J3bPome68iBMptnrpMUzRGDDW/3xubOZQR92DYZu/nrYzGb5YdXJY+9eg9pAiUN05giOF2AcZmu9m6AkPd8AsRueAvTRZPNAAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox simple child-bounds update listening',
+    ( scene, display ) => {
+      const middleRect = new Rectangle( 0, 0, 20, 20, { fill: 'black' } );
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          middleRect,
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10
+      } ) );
+      middleRect.rectWidth = 10;
+
+      display.width = 110;
+      display.height = 40;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAAAoCAYAAAAfWs+KAAAAAXNSR0IArs4c6QAAASJJREFUeF7tmMENwkAMBC8SFfBKRfwpgB80k1YogAcSndBBSkAiSr7kJFteWTIa3oftzHqzB0PjU5LAUHJqhm4IV3QJEA7hihIoOjaOQ7iiBIqOjeMQriiBomPjuH8XbnxMX+UzfuarslybL0dTvftN+hjt/H6a+loPHV4nk5lMh9amCLePHuGsK9k5h+M6YHAcjtsIkHH7i0DGdd4cXE6CmYTjcNxGgMsJlxPXu4SfAy5cv4dxHI5zrRCOc+HCcfzlFVwYHBcESMaRca4VwnEuXGQcGRdcGBwXBEjGkXGuFcJxLlxknDnjglz5upgAwomBZpVDuCzS4j4IJwaaVQ7hskiL+yCcGGhWOYTLIi3ug3BioFnlEC6LtLgPwomBZpVbABhG3CliRo88AAAAAElFTkSuQmCC',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox manually repositioning child after layout',
+    ( scene, display ) => {
+      const middleRect = new Rectangle( 0, 0, 20, 20, { fill: 'black' } );
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          middleRect,
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10
+      } ) );
+      middleRect.x = 100;
+
+      display.width = 120;
+      display.height = 40;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAAoCAYAAAA16j4lAAAAAXNSR0IArs4c6QAAASBJREFUeF7tmrENwlAMBR2JCaiYiJ4B6GAZVmEACiQ2yQYZAQkKWpC+dJZimaPOT+y7PB4FU/hpTWBqvZ3LhYKbvwQKVnBzAs3XM8EKbk6g+XomWMHNCTRfzwQr+ENgd7u8Mlk8l1Pm7WI5blPvdz2nrhuH+Z463+axHwrn0EUK5m4UDBma4O8ATfCPF8uvaJg4O5gBtIMZvzDBEKAJZgBNMONngiG/MMGMoAlm/Eww5GeCIUATDAH6KxoCtIMZQBPM+NnBkJ8dDAGaYAjQDoYA7WAG0AQzfnYw5GcHQ4AmGAL8uw6GvDy+EoHhf3SsNJ+PhQQUDAFWP67g6obgfAqGAKsfV3B1Q3A+BUOA1Y8ruLohOJ+CIcDqxxVc3RCc7w3T5dwpcbbmTwAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox horizontal align (simple)',
+    ( scene, display ) => {
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 40, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ], layoutOptions: { align: 'top' } } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ], layoutOptions: { align: 'bottom' } } )
+        ],
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 100;
+      display.height = 60;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA8CAYAAACQPx/OAAAAAXNSR0IArs4c6QAAAbRJREFUeF7tmbFNBEEMRXclGoCIegiQCAkIyaAFiqABAkqgACSQCOiDnOBKOOnQxctJ/5/tkVnexd717Hu2d+Z2nvi1IjC3Wg2LmRDSrAgQgpBmBJothw5BSDMCzZZDhyCkGYFmy6FD/qqQ89fHXebat5u7zNtNm9uzVRSX/BAISa2fgzdDyBjOchaEyKjGBCJkDGc5C0JkVGMCETKGs5wFITKqMYEIGcNZzoIQGdWYwNUIefo8TSV28zzLbDITy0m7n9QREiyL7P+yEIKQIIHfL2dkHcDKOyRYb4ysIEDeIYwsq4QYWRauZTAjKwiQkdVsZH1fPcg7PMX9y/0u9Zv/9de7klaOOfm4lJ5XCtpnzT6pI4QOkat5H0iHWLiWwYysIEBGFiPLKiFGloWLkcUuK1gwbHuDABlZQYDssoIAs3dZweUsLt9evKWe/P/dyEJIkAAdsvJzSLA+GFl0CB1iNREvdQtXfTBC6hlbGRBi4aoPRkg9YytDeyHW0xB8NAH5m/rRGbjQIoAQC1d9MELqGVsZEGLhqg9GSD1jKwNCLFz1wQipZ2xlQIiFqz4YIfWMrQw/X8s2TECOWbIAAAAASUVORK5CYII=',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox vertical align (simple)',
+    ( scene, display ) => {
+      scene.addChild( new FlowBox( {
+        orientation: 'vertical',
+        children: [
+          new Rectangle( 0, 0, 40, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ], layoutOptions: { align: 'left' } } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ], layoutOptions: { align: 'right' } } )
+        ],
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 60;
+      display.height = 100;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAABkCAYAAADaIVPoAAAAAXNSR0IArs4c6QAAAaJJREFUeF7tmLENwkAQBG2JChAB9RAgUQAhIS1QBC0QElIAEgH1ECAqQAKBHYHf3mdf8suM4zv7b/Z2bbks/uwq/2zegoGHrjgKo/DACLDSAxP0axwUDik8PW4fOat/WWwk8aSi16AMnJncKBwQhJUmtGoChBah1S8BUpqUrgjwWuK1xGup3zQOPZ2UJqVJ6XZv8i2dWXYlD63J/pb0n9Z1NZY/elKylR/KwCZ2FDYBqu2sdIgUHlZ3KFCHh02AajsexsM1AUJLNQ2hVREgpc2NUdtJaVKalFbd0l5HaKXh2HkXQqsTUUfBYf1I+u9ruStlUZSzJ73Z64EMrGBvqUFhEyArbQLEwy5APGwSxMMmQDzsAsTDJkE8bALEwy5APGwSxMMmQDzsAsTDJsHkHlbPc5+dkv77Gp3n0ixSkTpETB0Dx9BqqEXhAEBW2twsuR0Py6iaC/EwHq4IEFqmleR2QktGRWi9CZDSpDQpbaZGZDspHQnss5zQIrR6Di1zg39u7+1b+ucTm40MbALMvh2Fs5fIPCAKmwCzb0fh7CUyD/gEUW9AdDuWjL4AAAAASUVORK5CYII=',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox resize:false',
+    ( scene, display ) => {
+      const circle = new Circle( 10, { fill: colors[ 4 ] } );
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          circle,
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10,
+        resize: false
+      } ) );
+      circle.radius = 5;
+
+      display.width = 100;
+      display.height = 40;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAoCAYAAAAIeF9DAAAAAXNSR0IArs4c6QAAAY1JREFUaEPtmT1KBEEQRqtB0NRhAm9ipplgaKqumXgAxUOIHsDUVRMPYCAImnkIc4NhTDVqWZxAZHS7eqaaWnibbnV39ffqm/4Lws+VAsFVNiQjAHFWBAABiDMFnKWDQwDiTAFn6eAQgDhTwFk6OGRRgazdn8Uxc3/bPh21GO4O46j57bw+jDldWXrcSppvUtAsM4AM4wOQYfoJDhkoIJ+sgQKyhvQL6HINqa/aXQlyJCLrXdovEuWyOahu/6oDHGLkkPr6/VxiPO7tPoSLZn/1pO8/gBgA6Zxx82/XUfb6nAIQCyDT9klENuZ0/dxMqs3fMQCxAfIhIstzuv5sJtUKQAqc1OtpC5DUQi9xUq/5ZKW/qRcB8r3dZVFPcUkJILM82Pam0Ch8ucjBMAFKKYckpNIbwrY3V7muHXdZC3SXlcMah+So9qMNDsEhqhJy/0Clmg3B2Qokv4dkj0BDlQIAUcllHwwQe41VIwBEJZd9MEDsNVaNABCVXPbBALHXWDUCQFRy2QcDxF5j1QhfrF4EOGGvGe0AAAAASUVORK5CYII=',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox invisible child',
+    ( scene, display ) => {
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ], visible: false } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 100;
+      display.height = 40;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAoCAYAAAAIeF9DAAAAAXNSR0IArs4c6QAAAQtJREFUaEPtmLENwlAMRH8khmAieoZhibTsQUsRiU2YhRRpIkGQf+4kDuml/nasdz7/OEPjiSIwRFVDMQ1BwpoAQRAkjEBYOTgEQcIIhJWDQxAkjEBYOTjkXwU53seXs/br7eJM187PyZrv8Dj9pFnLL0UQq96byRBkAw0OERuQkSUC5A75DJCRxchaCOAQHNI1ZLnUu3C9H+ZSFwEyshhZXS3EyOrCxchq/DoRO6YYzh7CHsIe8s0sOASH4BAcUrxQ18f47N0BbR3Cpi4CZFMXN3WRP+FFAuWvrGI+jokEEEQE6A5HEDdRMR+CiADd4QjiJirmQxARoDscQdxExXwIIgJ0hyOIm6iYbwatlIwpljwRmAAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox invisible=>visible child',
+    ( scene, display ) => {
+      const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ], visible: false } );
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          child,
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10
+      } ) );
+      child.visible = true;
+
+      display.width = 100;
+      display.height = 40;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAoCAYAAAAIeF9DAAAAAXNSR0IArs4c6QAAARBJREFUaEPtmbENAkEMBO8liqAaQnqhAJogpQA6ICWjAgohowQQMSCdNRsYaT4+W9asvWfdL8OvFYGlVTUWMxSkWRMoiII0I9CsHCdEQZoRaFaOE6IgzQg0K8cJ+VdB1pfDM1n78bxPphu7zSOa7366RfOtrtup5p869K5MQZg+CsL4DScEAtSyIEDvkO8AvUN+NJaWBSdOy4IAtSwtq9RCWlYJ1+dhLQsC1LK0rFILaVklXFqWb1mwYXzLggC1LAjQLQsCdMtyyyq1kJZVwuWW5ZYFGya+ZcF6DJ8kMP0/ZDKfxyABBYEA0+EKkiYK8ykIBJgOV5A0UZhPQSDAdLiCpInCfAoCAabDFSRNFOZ7AdrEtCkkRsN6AAAAAElFTkSuQmCC',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'FlowBox visible=>invisible child',
+    ( scene, display ) => {
+      const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } );
+      scene.addChild( new FlowBox( {
+        orientation: 'horizontal',
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+          child,
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10
+      } ) );
+      child.visible = false;
+
+      display.width = 100;
+      display.height = 40;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAoCAYAAAAIeF9DAAAAAXNSR0IArs4c6QAAAQtJREFUaEPtmLENwlAMRH8khmAieoZhibTsQUsRiU2YhRRpIkGQf+4kDuml/nasdz7/OEPjiSIwRFVDMQ1BwpoAQRAkjEBYOTgEQcIIhJWDQxAkjEBYOTjkXwU53seXs/br7eJM187PyZrv8Dj9pFnLL0UQq96byRBkAw0OERuQkSUC5A75DJCRxchaCOAQHNI1ZLnUu3C9H+ZSFwEyshhZXS3EyOrCxchq/DoRO6YYzh7CHsIe8s0sOASH4BAcUrxQ18f47N0BbR3Cpi4CZFMXN3WRP+FFAuWvrGI+jokEEEQE6A5HEDdRMR+CiADd4QjiJirmQxARoDscQdxExXwIIgJ0hyOIm6iYbwatlIwpljwRmAAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
 }

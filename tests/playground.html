@@ -23,6 +23,8 @@ an UI and Display made for visual testing and debugging.
   <script src="../../sherpa/lib/himalaya-1.1.0.js"></script>
   <script src="../../sherpa/lib/flatqueue-1.2.1.js"></script>
   <script src="../../sherpa/lib/he-1.1.1.js"></script>
+  <script src="../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
+  <script src="../../sherpa/lib/base64-js-1.2.0.js"></script>
 
   <script type="text/javascript">
     window.assertions.enableAssert();
@@ -565,6 +567,259 @@ an UI and Display made for visual testing and debugging.
 
     logging = !logging;
   };
+
+
+  window.snapshot = async () => {
+    const sceneryImports = await import( '../../chipper/dist/js/scenery/js/imports.js' );
+    const Bounds2 = await import( '../../chipper/dist/js/dot/js/Bounds2.js' );
+    const Vector2 = await import( '../../chipper/dist/js/dot/js/Vector2.js' );
+
+    const PDOMFuzzer = sceneryImports.PDOMFuzzer;
+    const PDOMInstance = sceneryImports.PDOMInstance;
+    const PDOMPeer = sceneryImports.PDOMPeer;
+    const PDOMTree = sceneryImports.PDOMTree;
+    const PDOMUtils = sceneryImports.PDOMUtils;
+    const Voicing = sceneryImports.Voicing;
+    const voicingManager = sceneryImports.voicingManager;
+    const Cursor = sceneryImports.Cursor;
+    const Reader = sceneryImports.Reader;
+    const DebugContext = sceneryImports.DebugContext;
+    const BackboneDrawable = sceneryImports.BackboneDrawable;
+    const Block = sceneryImports.Block;
+    const CanvasBlock = sceneryImports.CanvasBlock;
+    const CanvasSelfDrawable = sceneryImports.CanvasSelfDrawable;
+    const ChangeInterval = sceneryImports.ChangeInterval;
+    const DOMBlock = sceneryImports.DOMBlock;
+    const DOMSelfDrawable = sceneryImports.DOMSelfDrawable;
+    const Display = sceneryImports.Display;
+    const Drawable = sceneryImports.Drawable;
+    const Fittability = sceneryImports.Fittability;
+    const FittedBlock = sceneryImports.FittedBlock;
+    const GreedyStitcher = sceneryImports.GreedyStitcher;
+    const InlineCanvasCacheDrawable = sceneryImports.InlineCanvasCacheDrawable;
+    const Instance = sceneryImports.Instance;
+    const PaintObserver = sceneryImports.PaintObserver;
+    const PaintSVGState = sceneryImports.PaintSVGState;
+    const RebuildStitcher = sceneryImports.RebuildStitcher;
+    const RelativeTransform = sceneryImports.RelativeTransform;
+    const Renderer = sceneryImports.Renderer;
+    const SVGBlock = sceneryImports.SVGBlock;
+    const SVGGroup = sceneryImports.SVGGroup;
+    const SVGSelfDrawable = sceneryImports.SVGSelfDrawable;
+    const SelfDrawable = sceneryImports.SelfDrawable;
+    const SharedCanvasCacheDrawable = sceneryImports.SharedCanvasCacheDrawable;
+    const Stitcher = sceneryImports.Stitcher;
+    const WebGLBlock = sceneryImports.WebGLBlock;
+    const WebGLSelfDrawable = sceneryImports.WebGLSelfDrawable;
+    const CanvasNodeDrawable = sceneryImports.CanvasNodeDrawable;
+    const CircleCanvasDrawable = sceneryImports.CircleCanvasDrawable;
+    const CircleDOMDrawable = sceneryImports.CircleDOMDrawable;
+    const CircleSVGDrawable = sceneryImports.CircleSVGDrawable;
+    const CircleStatefulDrawable = sceneryImports.CircleStatefulDrawable;
+    const DOMDrawable = sceneryImports.DOMDrawable;
+    const ImageCanvasDrawable = sceneryImports.ImageCanvasDrawable;
+    const ImageDOMDrawable = sceneryImports.ImageDOMDrawable;
+    const ImageSVGDrawable = sceneryImports.ImageSVGDrawable;
+    const ImageStatefulDrawable = sceneryImports.ImageStatefulDrawable;
+    const ImageWebGLDrawable = sceneryImports.ImageWebGLDrawable;
+    const LineCanvasDrawable = sceneryImports.LineCanvasDrawable;
+    const LineSVGDrawable = sceneryImports.LineSVGDrawable;
+    const LineStatefulDrawable = sceneryImports.LineStatefulDrawable;
+    const LineStatelessDrawable = sceneryImports.LineStatelessDrawable;
+    const PaintableStatefulDrawable = sceneryImports.PaintableStatefulDrawable;
+    const PaintableStatelessDrawable = sceneryImports.PaintableStatelessDrawable;
+    const PathCanvasDrawable = sceneryImports.PathCanvasDrawable;
+    const PathSVGDrawable = sceneryImports.PathSVGDrawable;
+    const PathStatefulDrawable = sceneryImports.PathStatefulDrawable;
+    const RectangleCanvasDrawable = sceneryImports.RectangleCanvasDrawable;
+    const RectangleDOMDrawable = sceneryImports.RectangleDOMDrawable;
+    const RectangleSVGDrawable = sceneryImports.RectangleSVGDrawable;
+    const RectangleStatefulDrawable = sceneryImports.RectangleStatefulDrawable;
+    const RectangleWebGLDrawable = sceneryImports.RectangleWebGLDrawable;
+    const SpritesCanvasDrawable = sceneryImports.SpritesCanvasDrawable;
+    const SpritesWebGLDrawable = sceneryImports.SpritesWebGLDrawable;
+    const TextCanvasDrawable = sceneryImports.TextCanvasDrawable;
+    const TextDOMDrawable = sceneryImports.TextDOMDrawable;
+    const TextSVGDrawable = sceneryImports.TextSVGDrawable;
+    const TextStatefulDrawable = sceneryImports.TextStatefulDrawable;
+    const WebGLNodeDrawable = sceneryImports.WebGLNodeDrawable;
+    const BatchedDOMEvent = sceneryImports.BatchedDOMEvent;
+    const BrowserEvents = sceneryImports.BrowserEvents;
+    const ButtonListener = sceneryImports.ButtonListener;
+    const DownUpListener = sceneryImports.DownUpListener;
+    const Input = sceneryImports.Input;
+    const Mouse = sceneryImports.Mouse;
+    const Pen = sceneryImports.Pen;
+    const Pointer = sceneryImports.Pointer;
+    const SceneryEvent = sceneryImports.SceneryEvent;
+    const SimpleDragHandler = sceneryImports.SimpleDragHandler;
+    const Touch = sceneryImports.Touch;
+    const AlignBox = sceneryImports.AlignBox;
+    const AlignGroup = sceneryImports.AlignGroup;
+    const AlignPropertyBox = sceneryImports.AlignPropertyBox;
+    const Divider = sceneryImports.Divider;
+    const FlowBox = sceneryImports.FlowBox;
+    const FlowCell = sceneryImports.FlowCell;
+    const FlowConfigurable = sceneryImports.FlowConfigurable;
+    const FlowConstraint = sceneryImports.FlowConstraint;
+    const FlowLine = sceneryImports.FlowLine;
+    const GridBackgroundNode = sceneryImports.GridBackgroundNode;
+    const GridBox = sceneryImports.GridBox;
+    const GridCell = sceneryImports.GridCell;
+    const GridConfigurable = sceneryImports.GridConfigurable;
+    const GridConstraint = sceneryImports.GridConstraint;
+    const GridLine = sceneryImports.GridLine;
+    const HBox = sceneryImports.HBox;
+    const HDivider = sceneryImports.HDivider;
+    const HeightSizable = sceneryImports.HeightSizable;
+    const LayoutAlign = sceneryImports.LayoutAlign;
+    const LayoutBox = sceneryImports.LayoutBox;
+    const LayoutCell = sceneryImports.LayoutCell;
+    const LayoutConstraint = sceneryImports.LayoutConstraint;
+    const LayoutJustification = sceneryImports.LayoutJustification;
+    const LayoutNode = sceneryImports.LayoutNode;
+    const LayoutOrientation = sceneryImports.LayoutOrientation;
+    const LayoutProxy = sceneryImports.LayoutProxy;
+    const LayoutProxyProperty = sceneryImports.LayoutProxyProperty;
+    const ManualConstraint = sceneryImports.ManualConstraint;
+    const MarginLayoutCell = sceneryImports.MarginLayoutCell;
+    const NodeLayoutConstraint = sceneryImports.NodeLayoutConstraint;
+    const TrackingLayoutProxyProperty = sceneryImports.TrackingLayoutProxyProperty;
+    const VBox = sceneryImports.VBox;
+    const VDivider = sceneryImports.VDivider;
+    const WidthSizable = sceneryImports.WidthSizable;
+    const DragListener = sceneryImports.DragListener;
+    const FireListener = sceneryImports.FireListener;
+    const HandleDownListener = sceneryImports.HandleDownListener;
+    const KeyboardDragListener = sceneryImports.KeyboardDragListener;
+    const MultiListener = sceneryImports.MultiListener;
+    const PanZoomListener = sceneryImports.PanZoomListener;
+    const PressListener = sceneryImports.PressListener;
+    const CanvasNode = sceneryImports.CanvasNode;
+    const Circle = sceneryImports.Circle;
+    const DOM = sceneryImports.DOM;
+    const HStrut = sceneryImports.HStrut;
+    const Image = sceneryImports.Image;
+    const Leaf = sceneryImports.Leaf;
+    const Line = sceneryImports.Line;
+    const Node = sceneryImports.Node;
+    const Paintable = sceneryImports.Paintable;
+    const Path = sceneryImports.Path;
+    const Plane = sceneryImports.Plane;
+    const Rectangle = sceneryImports.Rectangle;
+    const RichText = sceneryImports.RichText;
+    const Spacer = sceneryImports.Spacer;
+    const Sprites = sceneryImports.Sprites;
+    const Text = sceneryImports.Text;
+    const VStrut = sceneryImports.VStrut;
+    const WebGLNode = sceneryImports.WebGLNode;
+    const CanvasNodeBoundsOverlay = sceneryImports.CanvasNodeBoundsOverlay;
+    const FittedBlockBoundsOverlay = sceneryImports.FittedBlockBoundsOverlay;
+    const HighlightOverlay = sceneryImports.HighlightOverlay;
+    const PointerAreaOverlay = sceneryImports.PointerAreaOverlay;
+    const PointerOverlay = sceneryImports.PointerOverlay;
+    const scenery = sceneryImports.scenery;
+    const Brightness = sceneryImports.Brightness;
+    const CanvasContextWrapper = sceneryImports.CanvasContextWrapper;
+    const Color = sceneryImports.Color;
+    const ColorDef = sceneryImports.ColorDef;
+    const Contrast = sceneryImports.Contrast;
+    const CountMap = sceneryImports.CountMap;
+    const DisplayedProperty = sceneryImports.DisplayedProperty;
+    const DropShadow = sceneryImports.DropShadow;
+    const Features = sceneryImports.Features;
+    const Filter = sceneryImports.Filter;
+    const Font = sceneryImports.Font;
+    const FullScreen = sceneryImports.FullScreen;
+    const GaussianBlur = sceneryImports.GaussianBlur;
+    const Gradient = sceneryImports.Gradient;
+    const Grayscale = sceneryImports.Grayscale;
+    const HueRotate = sceneryImports.HueRotate;
+    const Invert = sceneryImports.Invert;
+    const LinearGradient = sceneryImports.LinearGradient;
+    const Opacity = sceneryImports.Opacity;
+    const Paint = sceneryImports.Paint;
+    const PaintColorProperty = sceneryImports.PaintColorProperty;
+    const PaintDef = sceneryImports.PaintDef;
+    const Pattern = sceneryImports.Pattern;
+    const Picker = sceneryImports.Picker;
+    const RadialGradient = sceneryImports.RadialGradient;
+    const RendererSummary = sceneryImports.RendererSummary;
+    const Saturate = sceneryImports.Saturate;
+    const SceneImage = sceneryImports.SceneImage;
+    const sceneryCopy = sceneryImports.sceneryCopy;
+    const sceneryDeserialize = sceneryImports.sceneryDeserialize;
+    const scenerySerialize = sceneryImports.scenerySerialize;
+    const SceneryStyle = sceneryImports.SceneryStyle;
+    const Sepia = sceneryImports.Sepia;
+    const ShaderProgram = sceneryImports.ShaderProgram;
+    const Sprite = sceneryImports.Sprite;
+    const SpriteImage = sceneryImports.SpriteImage;
+    const SpriteInstance = sceneryImports.SpriteInstance;
+    const SpriteSheet = sceneryImports.SpriteSheet;
+    const TextBounds = sceneryImports.TextBounds;
+    const Trail = sceneryImports.Trail;
+    const TrailPointer = sceneryImports.TrailPointer;
+    const TrailsBetweenProperty = sceneryImports.TrailsBetweenProperty;
+    const TransformTracker = sceneryImports.TransformTracker;
+    const Utils = sceneryImports.Utils;
+
+    const colors = [
+      new Color( 62, 171, 3 ),
+      new Color( 23, 180, 77 ),
+      new Color( 24, 183, 138 ),
+      new Color( 23, 178, 194 ),
+      new Color( 20, 163, 238 ),
+      new Color( 71, 136, 255 ),
+      new Color( 171, 101, 255 ),
+      new Color( 228, 72, 235 ),
+      new Color( 252, 66, 186 ),
+      new Color( 252, 82, 127 )
+    ];
+
+    /*
+  multipleRendererTest( 'Simple Rectangle',
+    ( scene, display ) => {
+      display.width = 40;
+      display.height = 40;
+      scene.addChild( new Rectangle( 6, 6, 28, 28, {
+        fill: '#000000'
+      } ) );
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAcElEQVRYR+3YwQoAIQhFUfv/j572NQRiQTOc1ipyn0+kFpe/dnl/ocGqQgieJPhUiyfzX9VcSazBgTCCyZGbwhFEcCRgzVgzVVcgiGDE8uS3ZpiESZgkNwMO1hyvORpBBD938lcl25Lv+62KEcHfE+wTtBwp2K8YwAAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+     */
+
+    const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } );
+    scene.addChild( new FlowBox( {
+      orientation: 'horizontal',
+      children: [
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+        child,
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+      ],
+      x: 10,
+      y: 10
+    } ) );
+    child.visible = false;
+
+    display.width = 100;
+    display.height = 40;
+    display.updateDisplay();
+
+
+
+
+
+
+    display.foreignObjectRasterization( url => {
+      console.log( url );
+      // navigator.clipboard?.writeText( url );
+    } );
+  };
+
 </script>
 </body>
 </html>
