@@ -7,12 +7,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import Orientation from '../../../phet-core/js/Orientation.js';
-import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import mutate from '../../../phet-core/js/mutate.js';
-import { Divider, ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutJustification, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery, VerticalLayoutJustification } from '../imports.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
+import mutate from '../../../../phet-core/js/mutate.js';
+import { Divider, ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutJustification, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery, VerticalLayoutJustification } from '../../imports.js';
+import IProperty from '../../../../axon/js/IProperty.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
   ...FLOW_CONFIGURABLE_OPTION_KEYS,

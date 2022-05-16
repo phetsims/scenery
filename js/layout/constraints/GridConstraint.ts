@@ -10,12 +10,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import Orientation from '../../../phet-core/js/Orientation.js';
-import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import mutate from '../../../phet-core/js/mutate.js';
-import { ExternalGridConfigurableOptions, GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridLine, LayoutAlign, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery } from '../imports.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
+import mutate from '../../../../phet-core/js/mutate.js';
+import { ExternalGridConfigurableOptions, GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridLine, LayoutAlign, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery } from '../../imports.js';
+import IProperty from '../../../../axon/js/IProperty.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   ...GRID_CONFIGURABLE_OPTION_KEYS,

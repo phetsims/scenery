@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import Utils from '../../../dot/js/Utils.js';
-import Orientation from '../../../phet-core/js/Orientation.js';
-import { LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, scenery } from '../imports.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Utils from '../../../../dot/js/Utils.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import { LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, scenery } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export interface MarginLayout {

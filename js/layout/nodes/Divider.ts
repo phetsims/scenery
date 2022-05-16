@@ -7,8 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import optionize from '../../../phet-core/js/optionize.js';
-import { Line, LineOptions, scenery } from '../imports.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import { Line, LineOptions, scenery } from '../../imports.js';
 
 export type DividerOptions = LineOptions;
 

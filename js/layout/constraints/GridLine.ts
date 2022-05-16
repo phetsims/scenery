@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Pool from '../../../phet-core/js/Pool.js';
-import { GridCell, scenery } from '../imports.js';
+import Pool from '../../../../phet-core/js/Pool.js';
+import { GridCell, scenery } from '../../imports.js';
 
 export default class GridLine {
 

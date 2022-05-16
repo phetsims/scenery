@@ -7,8 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import { LayoutProxy, mixesHeightSizable, mixesWidthSizable, Node, scenery } from '../imports.js';
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
+import { LayoutProxy, mixesHeightSizable, mixesWidthSizable, Node, scenery } from '../../imports.js';
 
 export default class LayoutConstraint {
 

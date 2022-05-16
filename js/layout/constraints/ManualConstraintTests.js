@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Node from '../nodes/Node.js';
-import Rectangle from '../nodes/Rectangle.js';
+import Node from '../../nodes/Node.js';
+import Rectangle from '../../nodes/Rectangle.js';
 import ManualConstraint from './ManualConstraint.js';
 
 QUnit.module( 'ManualConstraint' );

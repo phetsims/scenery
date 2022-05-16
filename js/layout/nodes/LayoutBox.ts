@@ -11,9 +11,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import { Node, NodeOptions, scenery, SceneryConstants } from '../imports.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import { Node, NodeOptions, scenery, SceneryConstants } from '../../imports.js';
 
 // constants
 const DEFAULT_SPACING = 0;

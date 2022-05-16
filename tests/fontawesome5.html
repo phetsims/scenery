@@ -34,13 +34,8 @@ Unlike all the other tests, this test runs in unbuilt mode, and uses ES6 modules
 <div id="example-scene"></div>
 <script type="module">
 
-  import Node from '../js/nodes/Node.js';
-  import Path from '../js/nodes/Path.js';
-  import HBox from '../js/layout/HBox.ts';
-  import VBox from '../js/layout/VBox.ts';
-  import Display from '../js/display/Display.js';
-  import AlignGroup from '../js/layout/AlignGroup.ts';
-  import iconList from '../../sherpa/js/fontawesome-5/iconList.js';
+  import { Node, Path, HBox, VBox, Display, AlignGroup } from '../../chipper/dist/js/scenery/js/imports.js';
+  import iconList from '../../chipper/dist/js/sherpa/js/fontawesome-5/iconList.js';
 
   // Create a scene graph over the block-level element. Everything inside is replaced
   var scene = new Node();

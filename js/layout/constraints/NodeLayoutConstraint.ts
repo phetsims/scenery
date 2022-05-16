@@ -7,15 +7,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import { LayoutConstraint, LayoutProxy, Node, scenery } from '../imports.js';
-import IProperty from '../../../axon/js/IProperty.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import Tandem from '../../../tandem/js/Tandem.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import Orientation from '../../../phet-core/js/Orientation.js';
+import Property from '../../../../axon/js/Property.js';
+import TinyProperty from '../../../../axon/js/TinyProperty.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import { LayoutConstraint, LayoutProxy, Node, scenery } from '../../imports.js';
+import IProperty from '../../../../axon/js/IProperty.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
 
 // Position changes smaller than this will be ignored
 const CHANGE_POSITION_THRESHOLD = 1e-9;

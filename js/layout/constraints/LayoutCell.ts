@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Orientation from '../../../phet-core/js/Orientation.js';
-import { LayoutConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProperty } from '../imports.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import { LayoutConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProperty } from '../../imports.js';
 
 export default class LayoutCell {
 

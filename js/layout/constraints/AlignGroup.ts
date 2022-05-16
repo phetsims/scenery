@@ -19,14 +19,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IProperty from '../../../axon/js/IProperty.js';
-import NumberProperty from '../../../axon/js/NumberProperty.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import merge from '../../../phet-core/js/merge.js';
-import { optionize3 } from '../../../phet-core/js/optionize.js';
-import { scenery, Node, AlignBox } from '../imports.js';
-import { AlignBoxOptions } from './AlignBox.js';
+import IProperty from '../../../../axon/js/IProperty.js';
+import NumberProperty from '../../../../axon/js/NumberProperty.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
+import merge from '../../../../phet-core/js/merge.js';
+import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { scenery, Node, AlignBox } from '../../imports.js';
+import { AlignBoxOptions } from '../nodes/AlignBox.js';
 
 let globalId = 1;
 

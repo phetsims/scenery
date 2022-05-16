@@ -9,14 +9,14 @@
 // Disable for the whole file
 /* eslint-disable no-protected-jsdoc */
 
-import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Orientation from '../../../phet-core/js/Orientation.js';
-import memoize from '../../../phet-core/js/memoize.js';
-import mutate from '../../../phet-core/js/mutate.js';
-import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, scenery, VerticalLayoutAlign } from '../imports.js';
-import Constructor from '../../../phet-core/js/types/Constructor.js';
-import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
-import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import memoize from '../../../../phet-core/js/memoize.js';
+import mutate from '../../../../phet-core/js/mutate.js';
+import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, scenery, VerticalLayoutAlign } from '../../imports.js';
+import Constructor from '../../../../phet-core/js/types/Constructor.js';
+import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',

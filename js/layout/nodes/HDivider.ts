@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Divider, HeightSizable, DividerOptions } from '../imports.js';
+import { scenery, Divider, HeightSizable, DividerOptions } from '../../imports.js';
 
 export type HDividerOptions = DividerOptions;
 

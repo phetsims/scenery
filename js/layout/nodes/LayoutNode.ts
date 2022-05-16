@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IProperty from '../../../axon/js/IProperty.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import Vector2Property from '../../../dot/js/Vector2Property.js';
-import { HeightSizable, HeightSizableSelfOptions, Node, NodeLayoutConstraint, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
+import IProperty from '../../../../axon/js/IProperty.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
+import Vector2Property from '../../../../dot/js/Vector2Property.js';
+import { HeightSizable, HeightSizableSelfOptions, Node, NodeLayoutConstraint, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../../imports.js';
 
 type SelfOptions = {
   // Controls whether the layout container will re-trigger layout automatically after the "first" layout during

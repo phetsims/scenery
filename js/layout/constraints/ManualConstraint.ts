@@ -20,7 +20,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Node, LayoutConstraint, LayoutProxy } from '../imports.js';
+import { scenery, Node, LayoutConstraint, LayoutProxy } from '../../imports.js';
 
 // Turns a tuple of things into a tuple of LayoutProxies
 type LayoutProxyMap<T> = {

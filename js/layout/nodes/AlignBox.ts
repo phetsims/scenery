@@ -24,10 +24,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import { AlignGroup, HeightSizable, HeightSizableNode, HeightSizableSelfOptions, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, WidthSizable, WidthSizableNode, WidthSizableSelfOptions } from '../imports.js';
+import Property from '../../../../axon/js/Property.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import { AlignGroup, HeightSizable, HeightSizableNode, HeightSizableSelfOptions, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, WidthSizable, WidthSizableNode, WidthSizableSelfOptions } from '../../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation

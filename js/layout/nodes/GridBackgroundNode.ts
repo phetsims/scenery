@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import optionize from '../../../phet-core/js/optionize.js';
-import { GridCell, GridConstraint, Node, NodeOptions, Rectangle, scenery } from '../imports.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import { GridCell, GridConstraint, Node, NodeOptions, Rectangle, scenery } from '../../imports.js';
 
 type CreateCellBackground = ( gridCell: GridCell ) => Node | null;
 type SelfOptions = {

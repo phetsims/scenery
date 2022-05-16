@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import Orientation from '../../../phet-core/js/Orientation.js';
-import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import { ExternalGridConfigurableOptions, GridConfigurable, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
+import { ExternalGridConfigurableOptions, GridConfigurable, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
+import optionize from '../../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
   // Defines the column (or if width>1, the left-most column) index of the cell. x:0 is the left-most column.

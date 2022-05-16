@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Orientation from '../../../phet-core/js/Orientation.js';
-import Pool from '../../../phet-core/js/Pool.js';
-import { FlowCell, scenery } from '../imports.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
+import Pool from '../../../../phet-core/js/Pool.js';
+import { FlowCell, scenery } from '../../imports.js';
 
 export default class FlowLine {
 

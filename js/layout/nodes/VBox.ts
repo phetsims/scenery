@@ -6,8 +6,8 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import optionize from '../../../phet-core/js/optionize.js';
-import { scenery, LayoutBox, LayoutBoxOptions } from '../imports.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import { scenery, LayoutBox, LayoutBoxOptions } from '../../imports.js';
 
 export type VBoxOptions = Omit<LayoutBoxOptions, 'orientation'>;
 

@@ -6,10 +6,10 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import AlignGroup from './AlignGroup.js';
-import Circle from '../nodes/Circle.js';
-import Rectangle from '../nodes/Rectangle.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import AlignGroup from '../constraints/AlignGroup.js';
+import Circle from '../../nodes/Circle.js';
+import Rectangle from '../../nodes/Rectangle.js';
 
 QUnit.module( 'AlignBox' );
 

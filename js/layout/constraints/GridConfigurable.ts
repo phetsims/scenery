@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Constructor from '../../../phet-core/js/types/Constructor.js';
-import memoize from '../../../phet-core/js/memoize.js';
-import mutate from '../../../phet-core/js/mutate.js';
-import { HorizontalLayoutAlign, HorizontalLayoutAlignValues, LayoutAlign, scenery, VerticalLayoutAlign, VerticalLayoutAlignValues } from '../imports.js';
-import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
-import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
+import Constructor from '../../../../phet-core/js/types/Constructor.js';
+import memoize from '../../../../phet-core/js/memoize.js';
+import mutate from '../../../../phet-core/js/mutate.js';
+import { HorizontalLayoutAlign, HorizontalLayoutAlignValues, LayoutAlign, scenery, VerticalLayoutAlign, VerticalLayoutAlignValues } from '../../imports.js';
+import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',

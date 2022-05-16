@@ -7,8 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import optionize from '../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, scenery, SceneryConstants, VerticalLayoutAlign, VerticalLayoutJustification, WIDTH_SIZABLE_OPTION_KEYS } from '../imports.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, scenery, SceneryConstants, VerticalLayoutAlign, VerticalLayoutJustification, WIDTH_SIZABLE_OPTION_KEYS } from '../../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
