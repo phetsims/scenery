@@ -13,6 +13,9 @@ import memoize from '../../../phet-core/js/memoize.js';
 import { scenery, Node, REQUIRES_BOUNDS_OPTION_KEYS } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 
+// Position changes smaller than this will be ignored
+const CHANGE_POSITION_THRESHOLD = 1e-9;
+
 export const WIDTH_SIZABLE_OPTION_KEYS = [
   'preferredWidth',
   'minimumWidth',
@@ -25,7 +28,7 @@ export type WidthSizableSelfOptions = {
   // Sets the preferred width of the Node in the parent coordinate frame. Nodes that implement this will attempt to keep
   // their `node.width` at this value. If null, the node will likely set its configuration to the minimum width.
   // NOTE: changing this or localPreferredWidth will adjust the other.
-  // NOTE: preferredHeight is not guaranteed currently. The component may end up having a smaller or larger size
+  // NOTE: preferredWidth is not guaranteed currently. The component may end up having a smaller or larger size
   preferredWidth?: number | null;
 
   // Sets the minimum width of the Node in the parent coordinate frame. Usually not directly set by a client.
@@ -172,9 +175,16 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
       if ( !this._preferredWidthChanging ) {
         this._preferredWidthChanging = true;
-        this.localPreferredWidthProperty.value = ( node.matrix.isAligned() && this.preferredWidth !== null )
-                                                 ? Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) )
-                                                 : null;
+
+        const localPreferredWidth = ( node.matrix.isAligned() && this.preferredWidth !== null )
+                                     ? Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) )
+                                     : null;
+
+        if ( this.localPreferredWidthProperty.value === null ||
+             localPreferredWidth === null ||
+             Math.abs( this.localPreferredWidthProperty.value - localPreferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
+          this.localPreferredWidthProperty.value = localPreferredWidth;
+        }
         this._preferredWidthChanging = false;
       }
     }
@@ -185,9 +195,15 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
       if ( !this._preferredWidthChanging ) {
         this._preferredWidthChanging = true;
-        this.preferredWidthProperty.value = ( node.matrix.isAligned() && this.localPreferredWidth !== null )
-                                            ? Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) )
-                                            : null;
+
+        const preferredWidth = ( node.matrix.isAligned() && this.localPreferredWidth !== null )
+                                ? Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) )
+                                : null;
+        if ( this.preferredWidthProperty.value === null ||
+             preferredWidth === null ||
+             Math.abs( this.preferredWidthProperty.value - preferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
+          this.preferredWidthProperty.value = preferredWidth;
+        }
         this._preferredWidthChanging = false;
       }
     }
@@ -198,9 +214,16 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
       if ( !this._minimumWidthChanging ) {
         this._minimumWidthChanging = true;
-        this.localMinimumWidthProperty.value = ( node.matrix.isAligned() && this.minimumWidth !== null )
-                                               ? Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) )
-                                               : null;
+
+        const localMinimumWidth = ( node.matrix.isAligned() && this.minimumWidth !== null )
+                                   ? Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) )
+                                   : null;
+
+        if ( this.localMinimumWidthProperty.value === null ||
+             localMinimumWidth === null ||
+             Math.abs( this.localMinimumWidthProperty.value - localMinimumWidth ) > CHANGE_POSITION_THRESHOLD ) {
+          this.localMinimumWidthProperty.value = localMinimumWidth;
+        }
         this._minimumWidthChanging = false;
       }
     }
@@ -211,9 +234,16 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
       if ( !this._minimumWidthChanging ) {
         this._minimumWidthChanging = true;
-        this.minimumWidthProperty.value = ( node.matrix.isAligned() && this.localMinimumWidth !== null )
-                                          ? Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) )
-                                          : null;
+
+        const minimumWidth = ( node.matrix.isAligned() && this.localMinimumWidth !== null )
+                              ? Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) )
+                              : null;
+
+        if ( this.minimumWidthProperty.value === null ||
+             minimumWidth === null ||
+             Math.abs( this.minimumWidthProperty.value - minimumWidth ) > CHANGE_POSITION_THRESHOLD ) {
+          this.minimumWidthProperty.value = minimumWidth;
+        }
         this._minimumWidthChanging = false;
       }
     }

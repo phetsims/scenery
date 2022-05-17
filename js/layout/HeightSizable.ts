@@ -13,6 +13,9 @@ import memoize from '../../../phet-core/js/memoize.js';
 import { scenery, Node, REQUIRES_BOUNDS_OPTION_KEYS } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 
+// Position changes smaller than this will be ignored
+const CHANGE_POSITION_THRESHOLD = 1e-9;
+
 export const HEIGHT_SIZABLE_OPTION_KEYS = [
   'preferredHeight',
   'minimumHeight',
@@ -171,9 +174,16 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
       if ( !this._preferredHeightChanging ) {
         this._preferredHeightChanging = true;
-        this.localPreferredHeightProperty.value = ( node.matrix.isAligned() && this.preferredHeight !== null )
-                                                 ? Math.abs( node.transform.inverseDeltaY( this.preferredHeight ) )
-                                                 : null;
+
+        const localPreferredHeight = ( node.matrix.isAligned() && this.preferredHeight !== null )
+                                     ? Math.abs( node.transform.inverseDeltaY( this.preferredHeight ) )
+                                     : null;
+
+        if ( this.localPreferredHeightProperty.value === null ||
+             localPreferredHeight === null ||
+             Math.abs( this.localPreferredHeightProperty.value - localPreferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
+          this.localPreferredHeightProperty.value = localPreferredHeight;
+        }
         this._preferredHeightChanging = false;
       }
     }
@@ -184,9 +194,15 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
       if ( !this._preferredHeightChanging ) {
         this._preferredHeightChanging = true;
-        this.preferredHeightProperty.value = ( node.matrix.isAligned() && this.localPreferredHeight !== null )
-                                            ? Math.abs( node.transform.transformDeltaY( this.localPreferredHeight ) )
-                                            : null;
+
+        const preferredHeight = ( node.matrix.isAligned() && this.localPreferredHeight !== null )
+                                ? Math.abs( node.transform.transformDeltaY( this.localPreferredHeight ) )
+                                : null;
+        if ( this.preferredHeightProperty.value === null ||
+             preferredHeight === null ||
+             Math.abs( this.preferredHeightProperty.value - preferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
+          this.preferredHeightProperty.value = preferredHeight;
+        }
         this._preferredHeightChanging = false;
       }
     }
@@ -197,9 +213,16 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
       if ( !this._minimumHeightChanging ) {
         this._minimumHeightChanging = true;
-        this.localMinimumHeightProperty.value = ( node.matrix.isAligned() && this.minimumHeight !== null )
-                                               ? Math.abs( node.transform.inverseDeltaY( this.minimumHeight ) )
-                                               : null;
+
+        const localMinimumHeight = ( node.matrix.isAligned() && this.minimumHeight !== null )
+                                   ? Math.abs( node.transform.inverseDeltaY( this.minimumHeight ) )
+                                   : null;
+
+        if ( this.localMinimumHeightProperty.value === null ||
+             localMinimumHeight === null ||
+             Math.abs( this.localMinimumHeightProperty.value - localMinimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
+          this.localMinimumHeightProperty.value = localMinimumHeight;
+        }
         this._minimumHeightChanging = false;
       }
     }
@@ -210,9 +233,16 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
       if ( !this._minimumHeightChanging ) {
         this._minimumHeightChanging = true;
-        this.minimumHeightProperty.value = ( node.matrix.isAligned() && this.localMinimumHeight !== null )
-                                          ? Math.abs( node.transform.transformDeltaY( this.localMinimumHeight ) )
-                                          : null;
+
+        const minimumHeight = ( node.matrix.isAligned() && this.localMinimumHeight !== null )
+                              ? Math.abs( node.transform.transformDeltaY( this.localMinimumHeight ) )
+                              : null;
+
+        if ( this.minimumHeightProperty.value === null ||
+             minimumHeight === null ||
+             Math.abs( this.minimumHeightProperty.value - minimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
+          this.minimumHeightProperty.value = minimumHeight;
+        }
         this._minimumHeightChanging = false;
       }
     }

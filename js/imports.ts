@@ -118,13 +118,6 @@ export type { SpritesOptions } from './nodes/Sprites.js';
 export { default as WebGLNode } from './nodes/WebGLNode.js';
 export type { WebGLNodeOptions } from './nodes/WebGLNode.js';
 
-export { default as LayoutBox } from './layout/nodes/LayoutBox.js';
-export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign } from './layout/nodes/LayoutBox.js';
-export { default as HBox } from './layout/nodes/HBox.js';
-export type { HBoxOptions } from './layout/nodes/HBox.js';
-export { default as VBox } from './layout/nodes/VBox.js';
-export type { VBoxOptions } from './layout/nodes/VBox.js';
-
 export { default as Plane } from './nodes/Plane.js';
 export type { PlaneOptions } from './nodes/Plane.js';
 
@@ -274,6 +267,13 @@ export { default as AlignGroup } from './layout/constraints/AlignGroup.js';
 export type { AlignGroupOptions } from './layout/constraints/AlignGroup.js';
 export { default as AlignPropertyBox } from './layout/nodes/AlignPropertyBox.js';
 export type { AlignPropertyBoxOptions } from './layout/nodes/AlignPropertyBox.js';
+
+export { default as LayoutBox } from './layout/nodes/LayoutBox.js';
+export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign } from './layout/nodes/LayoutBox.js';
+export { default as HBox } from './layout/nodes/HBox.js';
+export type { HBoxOptions } from './layout/nodes/HBox.js';
+export { default as VBox } from './layout/nodes/VBox.js';
+export type { VBoxOptions } from './layout/nodes/VBox.js';
 
 export { default as RichText } from './nodes/RichText.js';
 export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks } from './nodes/RichText.js';

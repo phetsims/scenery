@@ -316,6 +316,16 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
 
     super.dispose();
   }
+
+  // LayoutBox Compatibility (see the ES5 setters/getters, or the options doc)
+  setOrientation( orientation: LayoutOrientation ): this { this.orientation = orientation; return this; }
+  getOrientation(): LayoutOrientation { return this.orientation; }
+  setSpacing( spacing: number ): this { this.spacing = spacing; return this; }
+  getSpacing(): number { return this.spacing; }
+  setAlign( align: HorizontalLayoutAlign | VerticalLayoutAlign ): this { this.align = align; return this; }
+  getAlign(): HorizontalLayoutAlign | VerticalLayoutAlign { return this.align; }
+  setResize( resize: boolean ): this { this.resize = resize; return this; }
+  isResize(): boolean { return this.resize; }
 }
 
 /**
