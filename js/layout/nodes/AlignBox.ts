@@ -64,7 +64,9 @@ type SelfOptions = {
   canShrink?: boolean;
 };
 
-export type AlignBoxOptions = SelfOptions & Omit<NodeOptions, 'children'> & WidthSizableSelfOptions & HeightSizableSelfOptions;
+type SuperOptions = NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+
+export type AlignBoxOptions = SelfOptions & Omit<SuperOptions, 'children'>;
 
 const SuperType = WidthSizable( HeightSizable( Node ) );
 
@@ -102,15 +104,20 @@ export default class AlignBox extends SuperType {
    * An individual container for an alignment group. Will maintain its size to match that of the group by overriding
    * its localBounds, and will position its content inside its localBounds by respecting its alignment and margins.
    *
-   * @param content - Content to align inside of the alignBox
+   * @param content - Content to align inside the alignBox
    * @param [providedOptions] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
    *                    above, and can be provided along-side options for Node
    */
   constructor( content: Node, providedOptions?: AlignBoxOptions ) {
 
-    const options = optionize<AlignBoxOptions, Pick<SelfOptions, 'canShrink'>, NodeOptions>()( {
+    const options = optionize<AlignBoxOptions, Pick<SelfOptions, 'canShrink'>, SuperOptions>()( {
       children: [ content ],
-      canShrink: false
+      canShrink: false,
+
+      // By default, don't set an AlignBox to be resizable, since it's used a lot to block out a certain amount of
+      // space.
+      widthSizable: false,
+      heightSizable: false
     }, providedOptions );
 
     super();
