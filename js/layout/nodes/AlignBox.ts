@@ -66,7 +66,9 @@ type SelfOptions = {
 
 export type AlignBoxOptions = SelfOptions & Omit<NodeOptions, 'children'> & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
-export default class AlignBox extends WidthSizable( HeightSizable( Node ) ) {
+const SuperType = WidthSizable( HeightSizable( Node ) );
+
+export default class AlignBox extends SuperType {
 
   // Our actual content
   private _content: Node;
@@ -710,6 +712,6 @@ class AlignBoxConstraint extends LayoutConstraint {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-AlignBox.prototype._mutatorKeys = ALIGNMENT_CONTAINER_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
+AlignBox.prototype._mutatorKeys = ALIGNMENT_CONTAINER_OPTION_KEYS.concat( SuperType.prototype._mutatorKeys );
 
 scenery.register( 'AlignBox', AlignBox );

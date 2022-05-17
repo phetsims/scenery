@@ -82,6 +82,10 @@ export { default as Picker } from './util/Picker.js';
 export { default as RendererSummary } from './util/RendererSummary.js';
 export { default as NodeProperty } from './util/NodeProperty.js';
 export { default as PDOMDisplaysInfo } from './accessibility/pdom/PDOMDisplaysInfo.js';
+export { default as WidthSizable, isWidthSizable, mixesWidthSizable, WIDTH_SIZABLE_OPTION_KEYS } from './layout/WidthSizable.js';
+export type { WidthSizableNode, WidthSizableSelfOptions } from './layout/WidthSizable.js';
+export { default as HeightSizable, isHeightSizable, mixesHeightSizable, HEIGHT_SIZABLE_OPTION_KEYS } from './layout/HeightSizable.js';
+export type { HeightSizableNode, HeightSizableSelfOptions } from './layout/HeightSizable.js';
 
 export { default as Trail } from './util/Trail.js';
 export { default as TrailPointer } from './util/TrailPointer.js';
@@ -226,10 +230,6 @@ export type { HorizontalLayoutAlign, VerticalLayoutAlign } from './layout/Layout
 export { default as LayoutJustification, HorizontalLayoutJustificationValues, VerticalLayoutJustificationValues } from './layout/LayoutJustification.js';
 export type { HorizontalLayoutJustification, VerticalLayoutJustification } from './layout/LayoutJustification.js';
 export type { default as ILayoutOptions } from './layout/ILayoutOptions.js';
-export { default as WidthSizable, isWidthSizable, mixesWidthSizable, WIDTH_SIZABLE_OPTION_KEYS } from './layout/WidthSizable.js';
-export type { WidthSizableNode, WidthSizableSelfOptions } from './layout/WidthSizable.js';
-export { default as HeightSizable, isHeightSizable, mixesHeightSizable, HEIGHT_SIZABLE_OPTION_KEYS } from './layout/HeightSizable.js';
-export type { HeightSizableNode, HeightSizableSelfOptions } from './layout/HeightSizable.js';
 export { default as Divider } from './layout/nodes/Divider.js';
 export type { DividerOptions } from './layout/nodes/Divider.js';
 export { default as HDivider } from './layout/nodes/HDivider.js';

@@ -9,10 +9,10 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import extendDefined from '../../../phet-core/js/extendDefined.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Renderer, Features, Gradient, Pattern, Path, Instance, PathOptions, IRectangleDrawable, CanvasSelfDrawable, DOMSelfDrawable, SVGSelfDrawable, WebGLSelfDrawable, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, CanvasContextWrapper } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, HeightSizable, HeightSizableSelfOptions, Instance, IRectangleDrawable, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, SVGSelfDrawable, WebGLSelfDrawable, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import merge from '../../../phet-core/js/merge.js';
 
 const RECTANGLE_OPTION_KEYS = [
   'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
@@ -38,9 +38,11 @@ type SelfOptions = {
   cornerYRadius?: number;
 };
 
-export type RectangleOptions = SelfOptions & Omit<PathOptions, 'shape'>;
+export type RectangleOptions = SelfOptions & Omit<PathOptions, 'shape'> & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
-export default class Rectangle extends Path {
+const SuperType = WidthSizable( HeightSizable( Path ) );
+
+export default class Rectangle extends SuperType {
   // X value of the left side of the rectangle
   _rectX: number;
 
@@ -95,8 +97,13 @@ export default class Rectangle extends Path {
   constructor( bounds: Bounds2, cornerRadiusX: number, cornerRadiusY: number, options?: RectangleOptions );
   constructor( x: number, y: number, width: number, height: number, options?: RectangleOptions );
   constructor( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions );
-  constructor( x?: number | Bounds2 | RectangleOptions, y?: number | RectangleOptions, width?: number, height?: number | RectangleOptions, cornerXRadius?: number | RectangleOptions, cornerYRadius?: number, options?: RectangleOptions ) {
+  constructor( x?: number | Bounds2 | RectangleOptions, y?: number | RectangleOptions, width?: number, height?: number | RectangleOptions, cornerXRadius?: number | RectangleOptions, cornerYRadius?: number, providedOptions?: RectangleOptions ) {
     super( null );
+
+    let options: RectangleOptions = {
+      widthSizable: false,
+      heightSizable: false
+    };
 
     this._rectX = 0;
     this._rectY = 0;
@@ -117,7 +124,7 @@ export default class Rectangle extends Path {
           assert && assert( y === undefined || Object.getPrototypeOf( y ) === Object.prototype,
             'Extra prototype on Node options object is a code smell' );
 
-          options = extendDefined( {
+          options = merge( options, {
             rectBounds: x
           }, y ); // Our options object would be at y
         }
@@ -130,7 +137,7 @@ export default class Rectangle extends Path {
           assert && assert( height === undefined || Object.getPrototypeOf( height ) === Object.prototype,
             'Extra prototype on Node options object is a code smell' );
 
-          options = extendDefined( {
+          options = merge( options, {
             rectBounds: x,
             cornerXRadius: y, // ignore Intellij warning, our cornerXRadius is the second parameter
             cornerYRadius: width // ignore Intellij warning, our cornerYRadius is the third parameter
@@ -139,7 +146,7 @@ export default class Rectangle extends Path {
       }
       // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
       else {
-        options = x;
+        options = merge( options, x );
       }
     }
     // new Rectangle( x, y, width, height, { ... } )
@@ -151,12 +158,12 @@ export default class Rectangle extends Path {
       assert && assert( cornerXRadius === undefined || Object.getPrototypeOf( cornerXRadius ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
-      options = extendDefined( {
+      options = merge( options, {
         rectX: x,
         rectY: y,
         rectWidth: width,
         rectHeight: height
-      }, cornerXRadius );
+      }, cornerXRadius as RectangleOptions );
     }
     // new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, { ... } )
     else {
@@ -167,15 +174,18 @@ export default class Rectangle extends Path {
       assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
-      options = extendDefined( {
+      options = merge( options, {
         rectX: x,
         rectY: y,
         rectWidth: width,
         rectHeight: height,
         cornerXRadius: cornerXRadius,
         cornerYRadius: cornerYRadius
-      }, options );
+      }, providedOptions );
     }
+
+    this.localPreferredWidthProperty.lazyLink( this.onPreferredWidth.bind( this ) );
+    this.localPreferredHeightProperty.lazyLink( this.onPreferredHeight.bind( this ) );
 
     this.mutate( options );
   }
@@ -630,6 +640,18 @@ export default class Rectangle extends Path {
     this.invalidateSupportedRenderers();
   }
 
+  private onPreferredWidth( preferredWidth: number | null ): void {
+    if ( preferredWidth !== null ) {
+      this.rectWidth = preferredWidth;
+    }
+  }
+
+  private onPreferredHeight( preferredHeight: number | null ): void {
+    if ( preferredHeight !== null ) {
+      this.rectHeight = preferredHeight;
+    }
+  }
+
   /**
    * Computes whether the provided point is "inside" (contained) in this Rectangle's self content, or "outside".
    *
@@ -937,7 +959,7 @@ export default class Rectangle extends Path {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-Rectangle.prototype._mutatorKeys = [ ...RECTANGLE_OPTION_KEYS, ...Path.prototype._mutatorKeys ];
+Rectangle.prototype._mutatorKeys = [ ...RECTANGLE_OPTION_KEYS, ...SuperType.prototype._mutatorKeys ];
 
 /**
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or

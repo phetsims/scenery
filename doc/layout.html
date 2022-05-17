@@ -93,28 +93,6 @@
       container.appendChild( code );
     }
 
-    class ExampleExpandingRectangle extends scenery.WidthSizable( scenery.HeightSizable( scenery.Rectangle ) ) {
-      constructor( options ) {
-        super( {} );
-
-        this.localMinimumWidth = 50;
-        this.localMinimumHeight = 50;
-
-        this.localPreferredWidthProperty.lazyLink( width => {
-          if ( width ) {
-            this.rectWidth = Math.max( this.localMinimumWidth, width );
-          }
-        } );
-        this.localPreferredHeightProperty.lazyLink( height => {
-          if ( height ) {
-            this.rectHeight = Math.max( this.localMinimumHeight, height );
-          }
-        } );
-
-        this.mutate( options );
-      }
-    }
-
     const colors = [
       new scenery.Color( 62, 171, 3 ),
       new scenery.Color( 23, 180, 77 ),
@@ -307,7 +285,11 @@
         return new scenery.FlowBox( {
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new ExampleExpandingRectangle( {
+            new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
               fill: 'gray',
               layoutOptions: { grow: 1 }
             } ),
@@ -329,12 +311,20 @@
         return new scenery.FlowBox( {
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new ExampleExpandingRectangle( {
+            new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
               fill: 'gray',
               layoutOptions: { grow: 1 }
             } ),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new ExampleExpandingRectangle( {
+            new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
               fill: 'gray',
               layoutOptions: { grow: 4 }
             } ),
@@ -354,7 +344,11 @@
         return new scenery.FlowBox( {
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new ExampleExpandingRectangle( {
+            new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
               fill: 'gray',
               layoutOptions: { grow: 1, maxContentWidth: 150 }
             } ),
@@ -376,7 +370,11 @@
         return new scenery.FlowBox( {
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new ExampleExpandingRectangle( {
+            new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
               fill: 'gray',
               layoutOptions: { grow: 1, minContentWidth: 100 }
             } ),
@@ -398,7 +396,11 @@
         return new scenery.FlowBox( {
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new ExampleExpandingRectangle( {
+            new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
               fill: 'gray',
               layoutOptions: {
                 grow: 1,
@@ -503,13 +505,19 @@
           'center',
           'origin'
         ].map( align => {
-          const expandingRect = new ExampleExpandingRectangle( { rectWidth: 50, rectHeight: 10, fill: 'gray' } );
-          expandingRect.minimumHeight = 10;
           return new scenery.FlowBox( {
             children: [
               new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 9 ] } ),
               new scenery.Rectangle( 0, 0, 50, 20, { fill: colors[ 6 ] } ),
-              expandingRect,
+              new scenery.Rectangle( {
+                widthSizable: true,
+                heightSizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 10,
+                rectWidth: 50,
+                rectHeight: 10,
+                fill: 'gray'
+              } ),
               new scenery.Rectangle( 0, 0, 50, 5, { fill: colors[ 4 ] } ),
               new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 2 ] } ),
               new scenery.Circle( 7, { fill: colors[ 0 ] } ),
@@ -544,9 +552,13 @@
           null
         ].map( justifyLines => {
           const createResizable = () => {
-            const node = new ExampleExpandingRectangle( { rectWidth: 20, rectHeight: 20, fill: 'gray' } );
-            node.localMinimumWidth = 20;
-            node.localMinimumHeight = 20;
+            const node = new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 20,
+              localMinimumHeight: 20,
+              fill: 'gray'
+            } );
             return node;
           };
           return new scenery.FlowBox( {
@@ -730,7 +742,11 @@
               fill: colors[ 4 ],
               layoutOptions: { align: 'top' }
             } ),
-            new ExampleExpandingRectangle( {
+            new scenery.Rectangle( {
+              widthSizable: true,
+              heightSizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
               fill: 'gray',
               layoutOptions: { stretch: true }
             } ),
@@ -1048,7 +1064,11 @@
               new scenery.Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
-              new ExampleExpandingRectangle( {
+              new scenery.Rectangle( {
+                widthSizable: true,
+                heightSizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
                 fill: 'gray',
                 layoutOptions: { grow: 1, stretch: true }
               } ),
@@ -1085,7 +1105,10 @@
               new scenery.Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
-              new ExampleExpandingRectangle( {
+              new scenery.Rectangle( {
+                widthSizable: true,
+                heightSizable: true,
+                localMinimumHeight: 50,
                 fill: 'gray',
                 preferredWidth: 50,
                 widthSizable: false,
