@@ -8,7 +8,7 @@
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, scenery, SceneryConstants, VerticalLayoutAlign, VerticalLayoutJustification, WIDTH_SIZABLE_OPTION_KEYS } from '../../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, scenery, SceneryConstants, VerticalLayoutAlign, VerticalLayoutJustification, WIDTH_SIZABLE_OPTION_KEYS, REQUIRES_BOUNDS_OPTION_KEYS } from '../../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -78,8 +78,20 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     this.childrenReorderedEmitter.addListener( this.onChildrenReordered );
     this.childrenChangedEmitter.addListener( this.onChildrenChanged );
 
-    this.mutate( options );
+    const nonBoundsOptions = _.omit( options, REQUIRES_BOUNDS_OPTION_KEYS ) as LayoutNodeOptions;
+    const boundsOptions = _.pick( options, REQUIRES_BOUNDS_OPTION_KEYS ) as LayoutNodeOptions;
+
+    // Before we layout, do non-bounds-related changes (in case we have resize:false), and prevent layout for
+    // performance gains.
+    this._constraint.lock();
+    this.mutate( nonBoundsOptions );
+    this._constraint.unlock();
+
+    // Update the layout (so that it is done once if we have resize:false)
     this._constraint.updateLayout();
+
+    // After we have our localBounds complete, now we can mutate things that rely on it.
+    this.mutate( boundsOptions );
 
     this.linkLayoutBounds();
   }

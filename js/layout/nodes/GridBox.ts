@@ -9,7 +9,7 @@
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, Node, NodeOptions, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS } from '../../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HEIGHT_SIZABLE_OPTION_KEYS, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, Node, NodeOptions, scenery, VerticalLayoutAlign, WIDTH_SIZABLE_OPTION_KEYS, REQUIRES_BOUNDS_OPTION_KEYS } from '../../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -110,8 +110,20 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this.childInsertedEmitter.addListener( this.onChildInserted );
     this.childRemovedEmitter.addListener( this.onChildRemoved );
 
-    this.mutate( options );
+    const nonBoundsOptions = _.omit( options, REQUIRES_BOUNDS_OPTION_KEYS ) as LayoutNodeOptions;
+    const boundsOptions = _.pick( options, REQUIRES_BOUNDS_OPTION_KEYS ) as LayoutNodeOptions;
+
+    // Before we layout, do non-bounds-related changes (in case we have resize:false), and prevent layout for
+    // performance gains.
+    this._constraint.lock();
+    this.mutate( nonBoundsOptions );
+    this._constraint.unlock();
+
+    // Update the layout (so that it is done once if we have resize:false)
     this._constraint.updateLayout();
+
+    // After we have our localBounds complete, now we can mutate things that rely on it.
+    this.mutate( boundsOptions );
 
     this.linkLayoutBounds();
   }
