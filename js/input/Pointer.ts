@@ -27,7 +27,6 @@ import IProperty from '../../../axon/js/IProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
-import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import { IInputListener, scenery, SceneryEvent, Trail } from '../imports.js';
@@ -454,13 +453,11 @@ Pointer.PointerIO = new IOType<Pointer>( 'PointerIO', {
   toStateObject: ( pointer: Pointer ) => {
     return {
       point: pointer.point.toStateObject(),
-      isDown: pointer.isDownProperty.value,
       type: pointer.type
     };
   },
   stateSchema: {
     point: Vector2.Vector2IO,
-    isDown: BooleanIO,
     type: StringIO
   }
 } );
