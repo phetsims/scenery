@@ -27,7 +27,7 @@
 import Property from '../../../../axon/js/Property.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import { AlignGroup, HeightSizable, HeightSizableNode, HeightSizableSelfOptions, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, WidthSizable, WidthSizableNode, WidthSizableSelfOptions } from '../../imports.js';
+import { AlignGroup, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
@@ -64,11 +64,11 @@ type SelfOptions = {
   canShrink?: boolean;
 };
 
-type SuperOptions = NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+type SuperOptions = NodeOptions & SizableOptions;
 
 export type AlignBoxOptions = SelfOptions & Omit<SuperOptions, 'children'>;
 
-const SuperType = WidthSizable( HeightSizable( Node ) );
+const SuperType = Sizable( Node );
 
 export default class AlignBox extends SuperType {
 

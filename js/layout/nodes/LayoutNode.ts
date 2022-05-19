@@ -9,7 +9,7 @@
 import IProperty from '../../../../axon/js/IProperty.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector2Property from '../../../../dot/js/Vector2Property.js';
-import { HeightSizable, HeightSizableSelfOptions, Node, NodeLayoutConstraint, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../../imports.js';
+import { Node, NodeLayoutConstraint, NodeOptions, scenery, Sizable, SizableOptions } from '../../imports.js';
 
 type SelfOptions = {
   // Controls whether the layout container will re-trigger layout automatically after the "first" layout during
@@ -26,11 +26,11 @@ type SelfOptions = {
 
 export const LAYOUT_NODE_OPTION_KEYS = [ 'resize', 'layoutOrigin' ] as const;
 
-type SuperOptions = NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+type SuperOptions = NodeOptions & SizableOptions;
 
 export type LayoutNodeOptions = SelfOptions & SuperOptions;
 
-export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint> extends WidthSizable( HeightSizable( Node ) ) {
+export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint> extends Sizable( Node ) {
 
   protected _constraint!: Constraint;
   readonly layoutOriginProperty: IProperty<Vector2> = new Vector2Property( Vector2.ZERO );

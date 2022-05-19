@@ -123,6 +123,7 @@ import './layout/constraints/NodeLayoutConstraint.js';
 import './layout/TrackingLayoutProxyProperty.js';
 import './layout/nodes/VBox.js';
 import './layout/nodes/VDivider.js';
+import './layout/Sizable.js';
 import './layout/WidthSizable.js';
 import './listeners/DragListener.js';
 import './listeners/FireListener.js';

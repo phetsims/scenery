@@ -24,7 +24,7 @@ export const HEIGHT_SIZABLE_OPTION_KEYS = [
   'heightSizable'
 ];
 
-export type HeightSizableSelfOptions = {
+export type HeightSizableOptions = {
   // Sets the preferred height of the Node in the parent coordinate frame. Nodes that implement this will attempt to keep
   // their `node.height` at this value. If null, the node will likely set its configuration to the minimum height.
   // NOTE: changing this or localPreferredHeight will adjust the other.

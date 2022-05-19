@@ -10,7 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, HeightSizable, HeightSizableSelfOptions, Instance, IRectangleDrawable, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, SVGSelfDrawable, WebGLSelfDrawable, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, IRectangleDrawable, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import merge from '../../../phet-core/js/merge.js';
 
@@ -38,9 +38,9 @@ type SelfOptions = {
   cornerYRadius?: number;
 };
 
-export type RectangleOptions = SelfOptions & Omit<PathOptions, 'shape'> & WidthSizableSelfOptions & HeightSizableSelfOptions;
+export type RectangleOptions = SelfOptions & Omit<PathOptions, 'shape'> & SizableOptions;
 
-const SuperType = WidthSizable( HeightSizable( Path ) );
+const SuperType = Sizable( Path );
 
 export default class Rectangle extends SuperType {
   // X value of the left side of the rectangle
@@ -953,7 +953,7 @@ export default class Rectangle extends SuperType {
 }
 
 /**
- * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+ * {Array.<string>} - String keys for all the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special

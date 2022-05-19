@@ -24,7 +24,7 @@ export const WIDTH_SIZABLE_OPTION_KEYS = [
   'widthSizable'
 ];
 
-export type WidthSizableSelfOptions = {
+export type WidthSizableOptions = {
   // Sets the preferred width of the Node in the parent coordinate frame. Nodes that implement this will attempt to keep
   // their `node.width` at this value. If null, the node will likely set its configuration to the minimum width.
   // NOTE: changing this or localPreferredWidth will adjust the other.
