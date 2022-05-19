@@ -351,7 +351,8 @@ export default class Input extends PhetioObject {
 
     const options = optionize<InputOptions, SelfOptions, PhetioObjectOptions>()( {
       phetioType: Input.InputIO,
-      tandem: Tandem.OPTIONAL
+      tandem: Tandem.OPTIONAL,
+      phetioDocumentation: 'Central point for user input events, such as mouse, touch'
     }, providedOptions );
 
     super( options );
