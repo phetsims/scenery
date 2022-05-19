@@ -332,6 +332,10 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     return _.find( [ ...this.cells ], cell => cell.containsRow( row ) && cell.containsColumn( column ) ) || null;
   }
 
+  getCellFromNode( node: Node ): GridCell | null {
+    return _.find( [ ...this.cells ], cell => cell.node === node ) || null;
+  }
+
   getCells( orientation: Orientation, index: number ): GridCell[] {
     return _.filter( [ ...this.cells ], cell => cell.containsIndex( orientation, index ) );
   }

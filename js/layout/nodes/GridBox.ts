@@ -22,7 +22,8 @@ const GRIDBOX_OPTION_KEYS = [
 ];
 
 // Used for setting/getting rows/columns
-type LineArrays = ( Node | null )[][];
+type LineArray = ( Node | null )[];
+type LineArrays = LineArray[];
 
 type SelfOptions = {
   // Controls whether the GridBox will re-trigger layout automatically after the "first" layout during construction.
@@ -204,6 +205,74 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
   get columns(): LineArrays {
     return this.getLines( Orientation.HORIZONTAL );
+  }
+
+  getNodeAt( row: number, column: number ): Node | null {
+    const cell = this.constraint.getCell( row, column );
+
+    return cell ? cell.node : null;
+  }
+
+  getRowOfNode( node: Node ): number {
+    assert && assert( this.children.includes( node ) );
+
+    return this.constraint.getCellFromNode( node )!.position.vertical;
+  }
+
+  getColumnOfNode( node: Node ): number {
+    assert && assert( this.children.includes( node ) );
+
+    return this.constraint.getCellFromNode( node )!.position.horizontal;
+  }
+
+  getNodesInRow( index: number ): Node[] {
+    return this.constraint.getCells( Orientation.VERTICAL, index ).map( cell => cell.node );
+  }
+
+  getNodesInColumn( index: number ): Node[] {
+    return this.constraint.getCells( Orientation.HORIZONTAL, index ).map( cell => cell.node );
+  }
+
+  addRow( row: LineArray ): this {
+
+    this.rows = [ ...this.rows, row ];
+
+    return this;
+  }
+
+  addColumn( column: LineArray ): this {
+
+    this.columns = [ ...this.columns, column ];
+
+    return this;
+  }
+
+  insertRow( index: number, row: LineArray ): this {
+
+    this.rows = [ ...this.rows.slice( 0, index ), row, ...this.rows.slice( index ) ];
+
+    return this;
+  }
+
+  insertColumn( index: number, column: LineArray ): this {
+
+    this.columns = [ ...this.columns.slice( 0, index ), column, ...this.columns.slice( index ) ];
+
+    return this;
+  }
+
+  removeRow( index: number ): this {
+
+    this.rows = [ ...this.rows.slice( 0, index ), ...this.rows.slice( index + 1 ) ];
+
+    return this;
+  }
+
+  removeColumn( index: number ): this {
+
+    this.columns = [ ...this.columns.slice( 0, index ), ...this.columns.slice( index + 1 ) ];
+
+    return this;
   }
 
   set autoRows( value: number | null ) {
