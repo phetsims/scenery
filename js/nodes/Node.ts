@@ -3476,6 +3476,260 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * Returns the width of this node's bounding box (in the local coordinate frame).
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalWidth(): number {
+    return this.getLocalBounds().getWidth();
+  }
+
+  /**
+   * See getLocalWidth() for more information
+   */
+  get localWidth(): number {
+    return this.getWidth();
+  }
+
+  /**
+   * Returns the height of this node's bounding box (in the local coordinate frame).
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalHeight(): number {
+    return this.getLocalBounds().getHeight();
+  }
+
+  /**
+   * See getLocalHeight() for more information
+   */
+  get localHeight(): number {
+    return this.getHeight();
+  }
+
+  /**
+   * Returns the X value of the left side of the bounding box of this Node (in the local coordinate frame).
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalLeft(): number {
+    return this.getLocalBounds().minX;
+  }
+
+  /**
+   * See getLeft() for more information
+   */
+  get localLeft(): number {
+    return this.getLocalLeft();
+  }
+
+  /**
+   * Returns the X value of the right side of the bounding box of this Node (in the local coordinate frame).
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalRight(): number {
+    return this.getLocalBounds().maxX;
+  }
+
+  /**
+   * See getRight() for more information
+   */
+  get localRight(): number {
+    return this.getLocalRight();
+  }
+
+  /**
+   * Returns the X value of this node's horizontal center (in the local coordinate frame)
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalCenterX(): number {
+    return this.getLocalBounds().getCenterX();
+  }
+
+  /**
+   * See getCenterX() for more information
+   */
+  get localCenterX(): number {
+    return this.getLocalCenterX();
+  }
+
+  /**
+   * Returns the Y value of this node's vertical center (in the local coordinate frame)
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalCenterY(): number {
+    return this.getLocalBounds().getCenterY();
+  }
+
+  /**
+   * See getCenterX() for more information
+   */
+  get localCenterY(): number {
+    return this.getLocalCenterY();
+  }
+
+  /**
+   * Returns the lowest Y value of this node's bounding box (in the local coordinate frame).
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalTop(): number {
+    return this.getLocalBounds().minY;
+  }
+
+  /**
+   * See getTop() for more information
+   */
+  get localTop(): number {
+    return this.getLocalTop();
+  }
+
+  /**
+   * Returns the highest Y value of this node's bounding box (in the local coordinate frame).
+   *
+   * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
+   */
+  getLocalBottom(): number {
+    return this.getLocalBounds().maxY;
+  }
+
+  /**
+   * See getLocalBottom() for more information
+   */
+  get localBottom(): number {
+    return this.getLocalBottom();
+  }
+
+  /**
+   * Returns the upper-left corner of this node's localBounds.
+   */
+  getLocalLeftTop(): Vector2 {
+    return this.getLocalBounds().getLeftTop();
+  }
+
+  /**
+   * See getLocalLeftTop() for more information
+   */
+  get localLeftTop(): Vector2 {
+    return this.getLocalLeftTop();
+  }
+
+  /**
+   * Returns the center-top location of this node's localBounds.
+   */
+  getLocalCenterTop(): Vector2 {
+    return this.getLocalBounds().getCenterTop();
+  }
+
+  /**
+   * See getLocalCenterTop() for more information
+   */
+  get localCenterTop(): Vector2 {
+    return this.getLocalCenterTop();
+  }
+
+  /**
+   * Returns the upper-right corner of this node's localBounds.
+   */
+  getLocalRightTop(): Vector2 {
+    return this.getLocalBounds().getRightTop();
+  }
+
+  /**
+   * See getLocalRightTop() for more information
+   */
+  get localRightTop(): Vector2 {
+    return this.getLocalRightTop();
+  }
+
+  /**
+   * Returns the center-left corner of this node's localBounds.
+   */
+  getLocalLeftCenter(): Vector2 {
+    return this.getLocalBounds().getLeftCenter();
+  }
+
+  /**
+   * See getLocalLeftCenter() for more information
+   */
+  get localLeftCenter(): Vector2 {
+    return this.getLocalLeftCenter();
+  }
+
+  /**
+   * Returns the center of this node's localBounds.
+   */
+  getLocalCenter(): Vector2 {
+    return this.getLocalBounds().getCenter();
+  }
+
+  /**
+   * See getLocalCenter() for more information
+   */
+  get localCenter(): Vector2 {
+    return this.getLocalCenter();
+  }
+
+  /**
+   * Returns the center-right of this node's localBounds.
+   */
+  getLocalRightCenter(): Vector2 {
+    return this.getLocalBounds().getRightCenter();
+  }
+
+  /**
+   * See getLocalRightCenter() for more information
+   */
+  get localRightCenter(): Vector2 {
+    return this.getLocalRightCenter();
+  }
+
+  /**
+   * Returns the lower-left corner of this node's localBounds.
+   */
+  getLocalLeftBottom(): Vector2 {
+    return this.getLocalBounds().getLeftBottom();
+  }
+
+  /**
+   * See getLocalLeftBottom() for more information
+   */
+  get localLeftBottom(): Vector2 {
+    return this.getLocalLeftBottom();
+  }
+
+  /**
+   * Returns the center-bottom of this node's localBounds.
+   */
+  getLocalCenterBottom(): Vector2 {
+    return this.getLocalBounds().getCenterBottom();
+  }
+
+  /**
+   * See getLocalCenterBottom() for more information
+   */
+  get localCenterBottom(): Vector2 {
+    return this.getLocalCenterBottom();
+  }
+
+  /**
+   * Returns the lower-right corner of this node's localBounds.
+   */
+  getLocalRightBottom(): Vector2 {
+    return this.getLocalBounds().getRightBottom();
+  }
+
+  /**
+   * See getLocalRightBottom() for more information
+   */
+  get localRightBottom(): Vector2 {
+    return this.getLocalRightBottom();
+  }
+
+  /**
    * Returns the unique integral ID for this node.
    */
   getId(): number {
