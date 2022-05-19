@@ -677,7 +677,7 @@ class AlignBoxConstraint extends LayoutConstraint {
       }
       else if ( box.xAlign === 'stretch' ) {
         assert && assert( isWidthSizable( content ), 'xAlign:stretch can only be used if WidthSizable is mixed into the content' );
-        ( content as WidthSizableNode ).preferredWidth = box.localBounds.width - box.leftMargin - box.rightMargin;
+        ( content as WidthSizableNode ).preferredWidth = box.localWidth - box.leftMargin - box.rightMargin;
         this.updateProperty( 'left', box.leftMargin );
       }
       else {
@@ -695,7 +695,7 @@ class AlignBoxConstraint extends LayoutConstraint {
       }
       else if ( box.yAlign === 'stretch' ) {
         assert && assert( isHeightSizable( content ), 'yAlign:stretch can only be used if HeightSizable is mixed into the content' );
-        ( content as HeightSizableNode ).preferredHeight = box.localBounds.height - box.topMargin - box.bottomMargin;
+        ( content as HeightSizableNode ).preferredHeight = box.localHeight - box.topMargin - box.bottomMargin;
         this.updateProperty( 'top', box.topMargin );
       }
       else {
@@ -707,8 +707,8 @@ class AlignBoxConstraint extends LayoutConstraint {
 
     // After the layout lock on purpose (we want these to be reentrant, especially if they change) - however only apply
     // this concept if we're capable of shrinking (we want the default to continue to block off the layoutBounds)
-    box.localMinimumWidth = this.canShrink ? minimumWidth : box.localBounds.width;
-    box.localMinimumHeight = this.canShrink ? minimumHeight : box.localBounds.height;
+    box.localMinimumWidth = this.canShrink ? minimumWidth : box.localWidth;
+    box.localMinimumHeight = this.canShrink ? minimumHeight : box.localHeight;
   }
 }
 

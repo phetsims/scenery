@@ -838,7 +838,7 @@ export default class RichText extends Node {
       else if ( element.tagName === 'u' ) {
         const underlineY = -node.top * this._underlineHeightScale;
         if ( isFinite( node.top ) ) {
-          node.addChild( new Line( node.localBounds.left, underlineY, node.localBounds.right, underlineY, {
+          node.addChild( new Line( node.localLeft, underlineY, node.localRight, underlineY, {
             stroke: fill,
             lineWidth: this._underlineLineWidth
           } ) );
@@ -848,7 +848,7 @@ export default class RichText extends Node {
       else if ( element.tagName === 's' ) {
         const strikethroughY = node.top * this._strikethroughHeightScale;
         if ( isFinite( node.top ) ) {
-          node.addChild( new Line( node.localBounds.left, strikethroughY, node.localBounds.right, strikethroughY, {
+          node.addChild( new Line( node.localLeft, strikethroughY, node.localRight, strikethroughY, {
             stroke: fill,
             lineWidth: this._strikethroughLineWidth
           } ) );
@@ -1668,12 +1668,12 @@ class RichTextElement extends RichTextCleanable( Node ) {
     else {
       if ( this.isLTR ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `LTR add ${this.rightSpacing} + ${leftElementSpacing}` );
-        element.left = this.localBounds.right + this.rightSpacing + leftElementSpacing;
+        element.left = this.localRight + this.rightSpacing + leftElementSpacing;
         this.rightSpacing = rightElementSpacing;
       }
       else {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `RTL add ${this.leftSpacing} + ${rightElementSpacing}` );
-        element.right = this.localBounds.left - this.leftSpacing - rightElementSpacing;
+        element.right = this.localLeft - this.leftSpacing - rightElementSpacing;
         this.leftSpacing = leftElementSpacing;
       }
       this.addChild( element );
