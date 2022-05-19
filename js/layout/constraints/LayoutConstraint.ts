@@ -8,7 +8,7 @@
  */
 
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import { LayoutProxy, mixesHeightSizable, mixesWidthSizable, Node, scenery } from '../../imports.js';
+import { HeightSizableNode, LayoutProxy, mixesHeightSizable, mixesWidthSizable, Node, scenery, SizableNode, WidthSizableNode } from '../../imports.js';
 
 export default class LayoutConstraint {
 
@@ -106,6 +106,24 @@ export default class LayoutConstraint {
 
   unlock(): void {
     this._layoutLockCount--;
+  }
+
+  validateLocalPreferredWidth( layoutContainer: WidthSizableNode ): void {
+    if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
+      layoutContainer.validateLocalPreferredWidth();
+    }
+  }
+
+  validateLocalPreferredHeight( layoutContainer: HeightSizableNode ): void {
+    if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
+      layoutContainer.validateLocalPreferredHeight();
+    }
+  }
+
+  validateLocalPreferredSize( layoutContainer: SizableNode ): void {
+    if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
+      layoutContainer.validateLocalPreferredSize();
+    }
   }
 
   /**

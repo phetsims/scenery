@@ -169,6 +169,17 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
     get mixesWidthSizable(): boolean { return true; }
 
+    validateLocalPreferredWidth(): void {
+      if ( assert ) {
+        const currentWidth = ( this as unknown as Node ).localWidth;
+        const effectiveMinimumWidth = this.localMinimumWidth === null ? currentWidth : this.localMinimumWidth;
+        const idealWidth = this.localPreferredWidth === null ? effectiveMinimumWidth : this.localPreferredWidth;
+
+        // Handle non-finite values with exact equality
+        assert( idealWidth === currentWidth || Math.abs( idealWidth - currentWidth ) < 1e-7 );
+      }
+    }
+
     // Used internally, do not call (can't be private due to TypeScript mixin constraints)
     _updateLocalPreferredWidth(): void {
       const node = this as unknown as Node;

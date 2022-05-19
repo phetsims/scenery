@@ -160,6 +160,13 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     get mixesSizable(): boolean { return true; }
 
+    validateLocalPreferredSize(): void {
+      if ( assert ) {
+        this.validateLocalPreferredWidth();
+        this.validateLocalPreferredHeight();
+      }
+    }
+
     mutate( options?: NodeOptions ): this {
 
       assertMutuallyExclusiveOptions( options, [ 'preferredSize' ], [ 'preferredWidth', 'preferredHeight' ] );

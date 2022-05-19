@@ -3488,7 +3488,7 @@ class Node extends ParallelDOM {
    * See getLocalWidth() for more information
    */
   get localWidth(): number {
-    return this.getWidth();
+    return this.getLocalWidth();
   }
 
   /**
@@ -3504,7 +3504,7 @@ class Node extends ParallelDOM {
    * See getLocalHeight() for more information
    */
   get localHeight(): number {
-    return this.getHeight();
+    return this.getLocalHeight();
   }
 
   /**

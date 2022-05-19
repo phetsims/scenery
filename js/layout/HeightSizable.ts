@@ -168,6 +168,17 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
     get mixesHeightSizable(): boolean { return true; }
 
+    validateLocalPreferredHeight(): void {
+      if ( assert ) {
+        const currentHeight = ( this as unknown as Node ).localHeight;
+        const effectiveMinimumHeight = this.localMinimumHeight === null ? currentHeight : this.localMinimumHeight;
+        const idealHeight = this.localPreferredHeight === null ? effectiveMinimumHeight : this.localPreferredHeight;
+
+        // Handle non-finite values with exact equality
+        assert( idealHeight === currentHeight || Math.abs( idealHeight - currentHeight ) < 1e-7 );
+      }
+    }
+
     // Used internally, do not call (can't be private due to TypeScript mixin constraints)
     _updateLocalPreferredHeight(): void {
       const node = this as unknown as Node;
