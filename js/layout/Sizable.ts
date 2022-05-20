@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * Provides a minimum and preferred height. The minimum height is set by the component, so that layout containers could
