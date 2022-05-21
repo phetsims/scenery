@@ -9,6 +9,7 @@
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Utils from '../../../../dot/js/Utils.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
+import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
 import { LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, scenery } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
@@ -28,6 +29,8 @@ export type MarginLayoutConstraint = NodeLayoutConstraint & MarginLayout;
 export default class MarginLayoutCell extends LayoutCell {
 
   private _marginConstraint: MarginLayoutConstraint;
+
+  private preferredSizeSet: OrientationPair<boolean> = new OrientationPair<boolean>( false, false );
 
   // These will get overridden, they're needed since mixins have many limitations and we'd have to have a ton of casts
   // without these existing.
@@ -136,6 +139,13 @@ export default class MarginLayoutCell extends LayoutCell {
       value = Utils.clamp( value, minimumSize, maximumSize );
 
       this._marginConstraint.setProxyPreferredSize( orientation, this.proxy, value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation ) );
+      this.preferredSizeSet.set( orientation, true );
+    }
+  }
+
+  unsetPreferredSize( orientation: Orientation ): void {
+    if ( this.proxy[ orientation.sizable ] ) {
+      this._marginConstraint.setProxyPreferredSize( orientation, this.proxy, null );
     }
   }
 
@@ -164,6 +174,17 @@ export default class MarginLayoutCell extends LayoutCell {
       this.effectiveRightMargin,
       this.effectiveBottomMargin
     );
+  }
+
+  override dispose(): void {
+    // Unset the specified preferred sizes that were set by our layout (when we're removed)
+    Orientation.enumeration.values.forEach( orientation => {
+      if ( this.preferredSizeSet.get( orientation ) ) {
+        this.unsetPreferredSize( orientation );
+      }
+    } );
+
+    super.dispose();
   }
 }
 

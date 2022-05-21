@@ -101,7 +101,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     }
   }
 
-  setProxyPreferredSize( orientation: Orientation, proxy: LayoutProxy, preferredSize: number ): void {
+  setProxyPreferredSize( orientation: Orientation, proxy: LayoutProxy, preferredSize: number | null ): void {
     proxy[ orientation.preferredSize ] = preferredSize;
   }
 
