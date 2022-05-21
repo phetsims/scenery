@@ -449,6 +449,30 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this._constraint.yGrow = value;
   }
 
+  get stretch(): boolean {
+    return this._constraint.stretch!;
+  }
+
+  set stretch( value: boolean ) {
+    this._constraint.stretch = value;
+  }
+
+  get xStretch(): boolean {
+    return this._constraint.xStretch!;
+  }
+
+  set xStretch( value: boolean ) {
+    this._constraint.xStretch = value;
+  }
+
+  get yStretch(): boolean {
+    return this._constraint.yStretch!;
+  }
+
+  set yStretch( value: boolean ) {
+    this._constraint.yStretch = value;
+  }
+
   get margin(): number {
     return this._constraint.margin!;
   }
