@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import StringProperty from '../../../axon/js/StringProperty.js';
+import StringProperty, { StringPropertyOptions } from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
@@ -22,6 +22,8 @@ import IProperty from '../../../axon/js/IProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, ITextDrawable, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable } from '../imports.js';
+import { PropertyOptions } from '../../../axon/js/Property.js';
+import { combineOptions } from '../../../phet-core/js/optionize.js';
 
 // constants
 const TEXT_OPTION_KEYS = [
@@ -56,6 +58,7 @@ type SelfOptions = {
   fontStretch?: string;
   fontStyle?: string;
   fontSize?: string | number;
+  textPropertyOptions?: PropertyOptions<string>;
 };
 export type TextOptions = SelfOptions & PaintableOptions & NodeOptions;
 
@@ -222,14 +225,16 @@ export default class Text extends Paintable( Node ) {
     super.initializePhetioObject( baseOptions, config );
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
-      this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => new StringProperty( this.text, merge( {
+      this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
+          return new StringProperty( this.text, combineOptions<StringPropertyOptions>( {
 
-          // by default, use the value from the Node
-          phetioReadOnly: this.phetioReadOnly,
-          tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
-          phetioDocumentation: 'Property for the displayed text'
-          // @ts-ignore --- how to handle this?
-        }, config.textPropertyOptions ) )
+            // by default, use the value from the Node
+            phetioReadOnly: this.phetioReadOnly,
+            tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
+            phetioDocumentation: 'Property for the displayed text'
+
+          }, config.textPropertyOptions ) );
+        }
       );
     }
   }

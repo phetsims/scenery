@@ -44,7 +44,7 @@ let globalID = 0;
 // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
 const truePredicate: ( ( ...args: any[] ) => true ) = _.constant( true );
 
-export type PressListenerDOMEvent = MouseEvent | TouchEvent | PointerEvent | KeyboardEvent;
+export type PressListenerDOMEvent = MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent;
 export type PressListenerEvent = SceneryEvent<PressListenerDOMEvent>;
 export type PressListenerCallback<Listener extends PressListener> = ( event: PressListenerEvent, listener: Listener ) => void;
 export type PressListenerNullableCallback<Listener extends PressListener> = ( event: PressListenerEvent | null, listener: Listener ) => void;

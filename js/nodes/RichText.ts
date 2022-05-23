@@ -65,13 +65,12 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { Color, FireListener, Font, IInputListener, IPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -172,15 +171,15 @@ type SelfOptions = {
   leading?: number;
 
   // Sets width of text before creating a new line
-  lineWrap?: number|null;
+  lineWrap?: number | null;
 
   // Sets forwarding of the textProperty, see setTextProperty() for more documentation
   textProperty?: IProperty<string> | null;
 
-  textPropertyOptions?: PropertyOptions<string> | null;
+  textPropertyOptions?: PropertyOptions<string>;
 
   // Sets the text to be displayed by this Node
-  text?: string|number;
+  text?: string | number;
 };
 
 export type RichTextOptions = SelfOptions & NodeOptions;
@@ -403,27 +402,26 @@ export default class RichText extends Node {
   /**
    * See documentation and comments in Node.initializePhetioObject
    */
-  override initializePhetioObject( baseOptions: any, config: RichTextOptions ): void {
+  override initializePhetioObject( baseOptions: any, providedOptions: RichTextOptions ): void {
 
-    config = merge( {
-      textPropertyOptions: null
-    }, config );
+    const options = optionize<RichTextOptions, {}, RichTextOptions>()( {}, providedOptions );
 
     // Track this, so we only override our textProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
-    super.initializePhetioObject( baseOptions, config );
+    super.initializePhetioObject( baseOptions, options );
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => new StringProperty( this.text, merge( {
+      this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
+        return new StringProperty( this.text, combineOptions<RichTextOptions>( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
-        }, config.textPropertyOptions ) )
-      );
+        }, options.textPropertyOptions ) );
+      } );
     }
   }
 
