@@ -98,7 +98,7 @@ class Drawable {
    * @protected
    */
   clean() {
-    // @public {Drawable|null} - what drawble we are being rendered (or put) into (will be filled in later)
+    // @public {Drawable|null} - what drawable we are being rendered (or put) into (will be filled in later)
     this.parentDrawable = null;
 
     // @public {BackboneDrawable|null} - a backbone reference (if applicable).

@@ -140,6 +140,7 @@
      */
     dispose() {
       this.shaderProgram.dispose();
+      this.gl.deleteBuffer( this.colorBuffer );
       this.gl.deleteBuffer( this.vertexBuffer );
 
       this.shaderProgram = null;
