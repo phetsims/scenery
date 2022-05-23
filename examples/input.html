@@ -207,7 +207,7 @@
   } );
   buttonNode.addInputListener( buttonListener );
 
-  axon.Property.multilink( [ buttonListener.isHoveringProperty, buttonListener.isPressedProperty ], function( isHovering, isPressed ) {
+  axon.Multilink.multilink( [ buttonListener.isHoveringProperty, buttonListener.isPressedProperty ], function( isHovering, isPressed ) {
     var isActive = isHovering || isPressed;
     buttonBackground.fill = isActive ? activeColor : inactiveColor;
     buttonText.text = ( isHovering ? 'hovering' : 'no-hover' ) + ' ' + ( isPressed ? 'pressed' : 'released' );

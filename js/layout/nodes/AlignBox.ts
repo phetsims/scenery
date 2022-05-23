@@ -24,7 +24,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../../axon/js/Property.js';
+import Multilink from '../../../../axon/js/Multilink.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import { AlignGroup, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
@@ -147,7 +147,7 @@ export default class AlignBox extends SuperType {
     this.mutate( options );
 
     // Update alignBounds based on preferred sizes
-    Property.multilink( [ this.localPreferredWidthProperty, this.localPreferredHeightProperty ], ( preferredWidth, preferredHeight ) => {
+    Multilink.multilink( [ this.localPreferredWidthProperty, this.localPreferredHeightProperty ], ( preferredWidth, preferredHeight ) => {
       if ( preferredWidth !== null || preferredHeight !== null ) {
         const bounds = this._alignBounds || new Bounds2( 0, 0, 0, 0 );
 
