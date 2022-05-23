@@ -68,7 +68,7 @@ export type SizableOptions = {
 // is yet passing those options through.
 const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );
-  const clazz = class extends SuperExtendedType {
+  const SizableMixin = class extends SuperExtendedType {
 
     // IMPORTANT: If you're mixing this in, typically don't pass options that Sizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
@@ -185,14 +185,14 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
     const existingKeys = SuperExtendedType.prototype._mutatorKeys;
     const newKeys = SIZABLE_SELF_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
-    clazz.prototype._mutatorKeys = [
+    SizableMixin.prototype._mutatorKeys = [
       ...existingKeys.slice( 0, indexOfBoundsBasedOptions ),
       ...newKeys,
       ...existingKeys.slice( indexOfBoundsBasedOptions )
     ];
   }
 
-  return clazz;
+  return SizableMixin;
 } );
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as Sizable

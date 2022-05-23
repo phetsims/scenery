@@ -59,7 +59,7 @@ export type WidthSizableOptions = {
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
 const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  const clazz = class extends type {
+  const WidthSizableMixin = class extends type {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
     readonly preferredWidthProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
@@ -265,14 +265,14 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     const existingKeys = type.prototype._mutatorKeys;
     const newKeys = WIDTH_SIZABLE_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
-    clazz.prototype._mutatorKeys = [
+    WidthSizableMixin.prototype._mutatorKeys = [
       ...existingKeys.slice( 0, indexOfBoundsBasedOptions ),
       ...newKeys,
       ...existingKeys.slice( indexOfBoundsBasedOptions )
     ];
   }
 
-  return clazz;
+  return WidthSizableMixin;
 } );
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as widthSizable
