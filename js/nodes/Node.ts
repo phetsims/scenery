@@ -1389,7 +1389,7 @@ class Node extends ParallelDOM {
       // variables here.
     }
 
-    if ( this._localBoundsDirty && !this._localBoundsOverridden ) {
+    if ( this._localBoundsDirty ) {
       wasDirtyBefore = true;
 
       sceneryLog && sceneryLog.bounds && sceneryLog.bounds( 'localBounds dirty' );
@@ -1398,17 +1398,21 @@ class Node extends ParallelDOM {
 
       const oldLocalBounds = scratchBounds2.set( ourLocalBounds ); // store old value in a temporary Bounds2
 
-      // local bounds are a union between our self bounds and child bounds
-      ourLocalBounds.set( ourSelfBounds ).includeBounds( ourChildBounds );
+      // Only adjust the local bounds if it is not overridden
+      if ( !this._localBoundsOverridden ) {
+        // local bounds are a union between our self bounds and child bounds
+        ourLocalBounds.set( ourSelfBounds ).includeBounds( ourChildBounds );
 
-      // apply clipping to the bounds if we have a clip area (all done in the local coordinate frame)
-      const clipArea = this.clipArea;
-      if ( clipArea ) {
-        ourLocalBounds.constrainBounds( clipArea.bounds );
+        // apply clipping to the bounds if we have a clip area (all done in the local coordinate frame)
+        const clipArea = this.clipArea;
+        if ( clipArea ) {
+          ourLocalBounds.constrainBounds( clipArea.bounds );
+        }
       }
 
       sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `localBounds: ${ourLocalBounds}` );
 
+      // NOTE: we need to update max dimensions still even if we are setting overridden localBounds
       // adjust our transform to match maximum bounds if necessary on a local bounds change
       if ( this._maxWidth !== null || this._maxHeight !== null ) {
         // needs to run before notifications below, otherwise reentrancy that hits this codepath will have its
