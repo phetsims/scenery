@@ -32,6 +32,8 @@ export default class LayoutCell {
       this.layoutProxyProperty = new TrackingLayoutProxyProperty( constraint.ancestorNode, node, () => constraint.updateLayoutAutomatically() );
       this.layoutProxyProperty.link( proxy => {
         this._proxy = proxy;
+
+        constraint.updateLayoutAutomatically();
       } );
     }
 

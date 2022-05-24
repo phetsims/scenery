@@ -20,7 +20,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Node, LayoutConstraint, LayoutProxy } from '../../imports.js';
+import { scenery, Node, LayoutConstraint, LayoutProxy, LayoutCell } from '../../imports.js';
 
 // Turns a tuple of things into a tuple of LayoutProxies
 type LayoutProxyMap<T> = {
@@ -31,10 +31,8 @@ type LayoutCallback<T extends any[]> = ( ...args: LayoutProxyMap<T> ) => void;
 export default class ManualConstraint<T extends Node[]> extends LayoutConstraint {
 
   private readonly nodes: T;
+  private readonly cells: LayoutCell[];
   private readonly layoutCallback: LayoutCallback<T>;
-
-  // Minimizing garbage created
-  private readonly proxyFactory: ( n: Node ) => LayoutProxy | null;
 
   constructor( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ) {
 
@@ -44,14 +42,20 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
 
     super( ancestorNode );
 
+    this.lock();
+
     this.nodes = nodes;
+
+    // Having cells will give us proxy Properties and listening for when it's added for free
+    this.cells = nodes.map( node => new LayoutCell( this, node, null ) );
+
     this.layoutCallback = layoutCallback;
-    this.proxyFactory = this.createLayoutProxy.bind( this );
 
     // Hook up to listen to these nodes
     this.nodes.forEach( node => this.addNode( node, false ) );
 
     // Run the layout manually at the start
+    this.unlock();
     this.updateLayout();
   }
 
@@ -60,23 +64,23 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
 
     assert && assert( _.every( this.nodes, node => !node.isDisposed ) );
 
-    const proxies = this.nodes.map( this.proxyFactory );
+    const isMissingProxy = _.some( this.cells, cell => !cell.isConnected() );
+    if ( !isMissingProxy ) {
+      const proxies = this.cells.map( cell => cell.proxy );
 
-    const hasNoNullProxy = _.every( proxies, proxy => proxy !== null );
-
-    if ( hasNoNullProxy ) {
       this.layoutCallback.apply( null, proxies as LayoutProxyMap<T> );
-    }
 
-    // Minimizing garbage created
-    for ( let i = 0; i < proxies.length; i++ ) {
-      const proxy = proxies[ i ];
-      proxy && proxy.dispose();
-    }
-
-    if ( hasNoNullProxy ) {
       this.finishedLayoutEmitter.emit();
     }
+  }
+
+  /**
+   * Releases references
+   */
+  override dispose(): void {
+    this.cells.forEach( cell => cell.dispose() );
+
+    super.dispose();
   }
 
   static create<T extends Node[]>( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ): ManualConstraint<T> {
