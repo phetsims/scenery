@@ -145,7 +145,13 @@
       <h1>Scenery Layout</h1>
     </div>
 
-    <p>Currently some examples. Resizing from the lower-right corner adjusts the preferred size</p>
+    <p>
+      If you have the main PhET libraries checked out (sun, etc.), there are a
+      <a href="../../sun/sun_en.html?brand=phet&ea&debugger&screens=4">number of examples</a> that show layout in action with
+      common components.
+    </p>
+
+    <p>NOTE: Many examples can be resized from the lower-right corner. This adjusts the preferred size of the container.</p>
 
     <h2>FlowBox</h2>
 
@@ -1808,60 +1814,198 @@
 
     <div id="manualConstraint-example"></div>
     <script type="text/javascript">
-      const createLabeledBox = ( label, fill, width, height ) => {
-        return new scenery.Rectangle( 0, 0, width, height, {
-          stroke: 'black',
-          fill: fill,
-          children: [
-            new scenery.Text( label, { font: new scenery.Font( { size: 8 } ), left: 3, bottom: height - 3 } )
-          ]
-        } );
-      };
-      let step;
-      let elapsedTime = 0;
-      dynamicDemo( 'manualConstraint-example', () => {
-        /*START*/
-        const background = new scenery.Rectangle( 0, 0, 400, 200, {
-          fill: '#ccc'
-        } );
-
-        const child1 = createLabeledBox( 'Child 1', colors[ 2 ], 50, 50 );
-        const child2 = createLabeledBox( 'Child 2', colors[ 4 ], 50, 50 );
-        const child3 = createLabeledBox( 'Child 3', colors[ 5 ], 50, 50 );
-
-        scenery.ManualConstraint.create( background, [ child1, child2 ], ( child1Proxy, child2Proxy ) => {
-          child2Proxy.leftCenter = child1Proxy.rightCenter;
-        } );
-        scenery.ManualConstraint.create( background, [ child2, child3 ], ( child2Proxy, child3Proxy ) => {
-          child3Proxy.left = child2Proxy.right;
-        } );
-        scenery.ManualConstraint.create( background, [ child1, child3 ], ( child1Proxy, child3Proxy ) => {
-          child3Proxy.centerY = child1Proxy.centerY;
-        } );
-
-        const nodes = [
-          new scenery.Node( { x: 50, y: 50, children: [ child1 ] } ),
-          new scenery.Node( { scale: 2, y: 20, children: [ child2 ] } ),
-          new scenery.Node( { matrix: dot.Matrix3.rowMajor(
-            0.5, 0, 0,
-            0, 1, 0,
-            0, 0, 1 ), children: [ child3 ] } )
-        ]
-
-        step = dt => {
-          elapsedTime += dt;
-          child1.translation = dot.Vector2.createPolar( 10, 2 * elapsedTime );
-
-          background.children = [
-            ...( elapsedTime % 3 < 2 ? [ nodes[ 0 ] ] : [] ),
-            ...( elapsedTime % 5 < 4 ? [ nodes[ 1 ] ] : [] ),
-            ...( elapsedTime % 7 < 5 ? [ nodes[ 2 ] ] : [] )
-          ];
+      ( () => {
+        const createLabeledBox = ( label, fill, width, height ) => {
+          return new scenery.Rectangle( 0, 0, width, height, {
+            stroke: 'black',
+            fill: fill,
+            children: [
+              new scenery.Text( label, { font: new scenery.Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+            ]
+          } );
         };
+        let step;
+        let elapsedTime = 0;
+        dynamicDemo( 'manualConstraint-example', () => {
+          /*START*/
+          const background = new scenery.Rectangle( 0, 0, 400, 200, {
+            fill: '#ccc'
+          } );
 
-        /*END*/
-        return background;
-      }, { resize: 'none', useMinHeight: true, useMinWidth: true, step: dt => step( dt ) } );
+          const child1 = createLabeledBox( 'Child 1', colors[ 2 ], 50, 50 );
+          const child2 = createLabeledBox( 'Child 2', colors[ 4 ], 50, 50 );
+          const child3 = createLabeledBox( 'Child 3', colors[ 5 ], 50, 50 );
+
+          scenery.ManualConstraint.create( background, [ child1, child2 ], ( child1Proxy, child2Proxy ) => {
+            child2Proxy.leftCenter = child1Proxy.rightCenter;
+          } );
+          scenery.ManualConstraint.create( background, [ child2, child3 ], ( child2Proxy, child3Proxy ) => {
+            child3Proxy.left = child2Proxy.right;
+          } );
+          scenery.ManualConstraint.create( background, [ child1, child3 ], ( child1Proxy, child3Proxy ) => {
+            child3Proxy.centerY = child1Proxy.centerY;
+          } );
+
+          const nodes = [
+            new scenery.Node( { x: 50, y: 50, children: [ child1 ] } ),
+            new scenery.Node( { scale: 2, y: 20, children: [ child2 ] } ),
+            new scenery.Node( { matrix: dot.Matrix3.rowMajor(
+              0.5, 0, 0,
+              0, 1, 0,
+              0, 0, 1 ), children: [ child3 ] } )
+          ]
+
+          step = dt => {
+            elapsedTime += dt;
+            child1.translation = dot.Vector2.createPolar( 10, 2 * elapsedTime );
+
+            background.children = [
+              ...( elapsedTime % 3 < 2 ? [ nodes[ 0 ] ] : [] ),
+              ...( elapsedTime % 5 < 4 ? [ nodes[ 1 ] ] : [] ),
+              ...( elapsedTime % 7 < 5 ? [ nodes[ 2 ] ] : [] )
+            ];
+          };
+
+          /*END*/
+          return background;
+        }, { resize: 'none', useMinHeight: true, useMinWidth: true, step: dt => step( dt ) } );
+      } )();
+    </script>
+
+    <h2>FlowConstraint</h2>
+
+    <p>
+      FlowBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
+      similar to ManualConstraint:
+    </p>
+
+    <div id="flowConstraint-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        const createLabeledBox = ( label, fill, width, height ) => {
+          return new scenery.Rectangle( 0, 0, width, height, {
+            stroke: 'black',
+            fill: fill,
+            children: [
+              new scenery.Text( label, { font: new scenery.Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+            ]
+          } );
+        };
+        dynamicDemo( 'flowConstraint-example', () => {
+          /*START*/
+          const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
+          const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
+          const thirdChild = createLabeledBox( 'Third child', '#aaf', 150, 30 );
+
+          const firstParent = new scenery.Node( {
+            children: [
+              firstChild,
+              createLabeledBox( 'First parent', null, 400, 200 )
+            ]
+          } );
+          const secondParent = new scenery.Node( {
+            children: [
+              secondChild,
+              createLabeledBox( 'Second parent', null, 400, 200 )
+            ],
+            scale: 0.75
+          } );
+          const thirdParent = new scenery.Node( {
+            children: [
+              thirdChild,
+              createLabeledBox( 'Third parent', null, 400, 200 )
+            ],
+            scale: 0.5
+          } );
+
+          const scene = new scenery.Node( {
+            children: [ firstParent, secondParent, thirdParent ]
+          } );
+
+          const constraint = new scenery.FlowConstraint( scene, {
+            layoutOriginProperty: new axon.Property( new dot.Vector2( 10, 10 ) ),
+            align: 'top'
+          } );
+          constraint.spacing = 10;
+          constraint.insertCell( 0, new scenery.FlowCell( constraint, firstChild, null ) );
+          constraint.insertCell( 1, new scenery.FlowCell( constraint, secondChild, null ) );
+          constraint.insertCell( 2, new scenery.FlowCell( constraint, thirdChild, null ) );
+          constraint.updateLayout();
+
+          /*END*/
+          return scene;
+        }, { resize: 'none' } );
+      } )();
+    </script>
+
+    <h2>GridConstraint</h2>
+
+    <p>
+      GridBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
+      similar to ManualConstraint:
+    </p>
+
+    <div id="gridConstraint-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        const createLabeledBox = ( label, fill, width, height ) => {
+          return new scenery.Rectangle( 0, 0, width, height, {
+            stroke: 'black',
+            fill: fill,
+            children: [
+              new scenery.Text( label, { font: new scenery.Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+            ]
+          } );
+        };
+        dynamicDemo( 'gridConstraint-example', () => {
+          /*START*/
+          const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
+          const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
+          const thirdChild = createLabeledBox( 'Third child', '#aaf', 150, 30 );
+          firstChild.layoutOptions = { x: 0, y: 0 };
+          secondChild.layoutOptions = { x: 1, y: 0 };
+          thirdChild.layoutOptions = { x: 0, y: 1 };
+
+          const firstParent = new scenery.Node( {
+            children: [
+              firstChild,
+              createLabeledBox( 'First parent', null, 400, 200 )
+            ]
+          } );
+          const secondParent = new scenery.Node( {
+            children: [
+              secondChild,
+              createLabeledBox( 'Second parent', null, 400, 200 )
+            ],
+            scale: 0.75
+          } );
+          const thirdParent = new scenery.Node( {
+            children: [
+              thirdChild,
+              createLabeledBox( 'Third parent', null, 400, 200 )
+            ],
+            scale: 0.5
+          } );
+
+          const scene = new scenery.Node( {
+            children: [ firstParent, secondParent, thirdParent ]
+          } );
+
+          const constraint = new scenery.GridConstraint( scene, {
+            layoutOriginProperty: new axon.Property( new dot.Vector2( 10, 10 ) ),
+            xAlign: 'left',
+            yAlign: 'top'
+          } );
+          constraint.spacing = 10;
+          constraint.addCell( new scenery.GridCell( constraint, firstChild, null ) );
+          constraint.addCell( new scenery.GridCell( constraint, secondChild, null ) );
+          constraint.addCell( new scenery.GridCell( constraint, thirdChild, null ) );
+          constraint.updateLayout();
+
+          /*END*/
+          return scene;
+        }, { resize: 'none' } );
+      } )();
     </script>
 
   </div>
