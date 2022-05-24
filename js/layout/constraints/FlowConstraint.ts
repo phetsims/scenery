@@ -258,6 +258,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         }
         cell.positionStart( orientation, position );
         position += cell._pendingSize;
+        assert && assert( this.spacing >= 0 || cell._pendingSize >= -this.spacing,
+          'Negative spacing more than a cell\'s size causes issues with layout' );
       } );
     } );
 
