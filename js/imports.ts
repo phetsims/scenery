@@ -240,6 +240,7 @@ export { default as MarginLayoutCell } from './layout/constraints/MarginLayoutCe
 export type { MarginLayout } from './layout/constraints/MarginLayoutCell.js';
 export { default as LayoutNode, LAYOUT_NODE_OPTION_KEYS } from './layout/nodes/LayoutNode.js';
 export type { LayoutNodeOptions } from './layout/nodes/LayoutNode.js';
+export { default as LayoutLine } from './layout/constraints/LayoutLine.js';
 export { default as NodeLayoutConstraint } from './layout/constraints/NodeLayoutConstraint.js';
 export type { NodeLayoutConstraintOptions, NodeLayoutAvailableConstraintOptions } from './layout/constraints/NodeLayoutConstraint.js';
 export { default as FlowConfigurable, FLOW_CONFIGURABLE_OPTION_KEYS } from './layout/constraints/FlowConfigurable.js';

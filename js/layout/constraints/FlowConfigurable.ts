@@ -1,7 +1,13 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * Mixin for storing options that can affect each cell.
+ * Mixin for storing options that can affect each cell. `null` for values usually means "inherit from the default".
+ *
+ * Handles a lot of conversion from internal Enumeration values (for performance) and external string representations.
+ * This is done primarily for performance and that style of internal enumeration pattern. If string comparisons are
+ * faster, that could be used instead.
+ *
+ * NOTE: Internal non-string representations are also orientation-agnostic
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

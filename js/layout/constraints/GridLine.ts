@@ -7,21 +7,17 @@
  */
 
 import Pool from '../../../../phet-core/js/Pool.js';
-import { GridCell, scenery } from '../../imports.js';
+import { GridCell, scenery, LayoutLine } from '../../imports.js';
 
-export default class GridLine {
+export default class GridLine extends LayoutLine {
 
   index!: number;
   cells!: GridCell[];
   grow!: number;
-  min!: number;
-  max!: number;
-  minOrigin!: number;
-  maxOrigin!: number;
-  size!: number;
-  position!: number;
 
   constructor( index: number, cells: GridCell[], grow: number ) {
+    super();
+
     this.initialize( index, cells, grow );
   }
 
@@ -31,16 +27,8 @@ export default class GridLine {
     this.cells = cells;
 
     this.grow = grow;
-    this.min = 0;
-    this.max = Number.POSITIVE_INFINITY;
-    this.minOrigin = Number.POSITIVE_INFINITY;
-    this.maxOrigin = Number.NEGATIVE_INFINITY;
-    this.size = 0;
-    this.position = 0;
-  }
 
-  hasOrigin(): boolean {
-    return isFinite( this.minOrigin ) && isFinite( this.maxOrigin );
+    this.initializeLayoutLine();
   }
 
   freeToPool(): void {

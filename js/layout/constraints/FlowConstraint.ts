@@ -66,6 +66,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
 
     super( ancestorNode, providedOptions );
 
+    // Set configuration to actual default values (instead of null) so that we will have guaranteed non-null
+    // (non-inherit) values for our computations.
     this.setConfigToBaseDefault();
     this.mutateConfigurable( providedOptions );
     mutate( this, FLOW_CONSTRAINT_OPTION_KEYS, providedOptions );
@@ -81,10 +83,10 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   protected override layout(): void {
     super.layout();
 
-    // The orientation along the laid-out lines
+    // The orientation along the laid-out lines - also known as the "primary" orientation
     const orientation = this._orientation;
 
-    // The perpendicular orientation, where alignment is handled
+    // The perpendicular orientation, where alignment is handled - also known as the "secondary" orientation
     const oppositeOrientation = this._orientation.opposite;
 
     assert && assert( _.every( this.cells, cell => !cell.node.isDisposed ) );
@@ -116,12 +118,15 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
       }
     }
 
+    // Filter to only cells used in the layout
     const cells: FlowCell[] = this.cells.filter( cell => {
       return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
     } );
 
     if ( !cells.length ) {
       this.layoutBoundsProperty.value = Bounds2.NOTHING;
+      this.minimumWidthProperty.value = null;
+      this.minimumHeightProperty.value = null;
       return;
     }
 
@@ -132,6 +137,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
     const maxMinimumCellSize: number = Math.max( ...cells.map( cell => cell.getMinimumSize( orientation ) || 0 ) );
 
+    // If we can't fit the content... just pretend like we have a larger preferred size!
     if ( maxMinimumCellSize > ( preferredSize || Number.POSITIVE_INFINITY ) ) {
       preferredSize = maxMinimumCellSize;
     }
@@ -146,14 +152,17 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         const cell = cells.shift()!;
         const cellSpace = cell.getMinimumSize( orientation );
 
+        // If we're the very first cell, don't create a new line
         if ( currentLineCells.length === 0 ) {
           currentLineCells.push( cell );
           availableSpace -= cellSpace;
         }
+        // Our cell fits! Epsilon for avoiding floating point issues
         else if ( this.spacing + cellSpace <= availableSpace + 1e-7 ) {
           currentLineCells.push( cell );
           availableSpace -= this.spacing + cellSpace;
         }
+        // We don't fit, create a new line
         else {
           lines.push( FlowLine.pool.create( orientation, currentLineCells ) );
           availableSpace = preferredSize || Number.POSITIVE_INFINITY;
@@ -171,6 +180,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
       lines.push( FlowLine.pool.create( orientation, cells ) );
     }
 
+    // Determine line opposite-orientation min/max sizes and origin sizes (how tall will a row have to be?)
     lines.forEach( line => {
       line.cells.forEach( cell => {
         line.min = Math.max( line.min, cell.getMinimumSize( oppositeOrientation ) );
@@ -185,6 +195,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         }
       } );
 
+      // If we have align:origin content, we need to see if the maximum origin span is larger than or line's
+      // minimum size.
       if ( isFinite( line.minOrigin ) && isFinite( line.maxOrigin ) ) {
         line.size = Math.max( line.min, line.maxOrigin - line.minOrigin );
       }
@@ -206,6 +218,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     const size = Math.max( minimumCurrentSize, preferredSize || 0 );
     const oppositeSize = Math.max( minimumCurrentOppositeSize, preferredOppositeSize || 0 );
 
+    // Our layout origin (usually the upper-left of the content in local coordinates, but could be different based on
+    // align:origin content.
     const originPrimary = this.layoutOriginProperty.value[ orientation.coordinate ];
     const originSecondary = this.layoutOriginProperty.value[ orientation.opposite.coordinate ];
 
@@ -217,20 +231,20 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
 
       // Initial pending sizes
       line.cells.forEach( cell => {
-        cell._pendingSize = cell.getMinimumSize( orientation );
+        cell.size = cell.getMinimumSize( orientation );
       } );
 
       // Grow potential sizes if possible
       let growableCells;
       while ( spaceRemaining > 1e-7 && ( growableCells = line.cells.filter( cell => {
         // Can the cell grow more?
-        return cell.effectiveGrow !== 0 && cell._pendingSize < cell.getMaximumSize( orientation ) - 1e-7;
+        return cell.effectiveGrow !== 0 && cell.size < cell.getMaximumSize( orientation ) - 1e-7;
       } ) ).length ) {
         // Total sum of "grow" values in cells that could potentially grow
         const totalGrow = _.sum( growableCells.map( cell => cell.effectiveGrow ) );
         const amountToGrow = Math.min(
           // Smallest amount that any of the cells couldn't grow past (note: proportional to effectiveGrow)
-          Math.min( ...growableCells.map( cell => ( cell.getMaximumSize( orientation ) - cell._pendingSize ) / cell.effectiveGrow ) ),
+          Math.min( ...growableCells.map( cell => ( cell.getMaximumSize( orientation ) - cell.size ) / cell.effectiveGrow ) ),
 
           // Amount each cell grows if all of our extra space fits in ALL the cells
           spaceRemaining / totalGrow
@@ -239,26 +253,32 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         assert && assert( amountToGrow > 1e-11 );
 
         growableCells.forEach( cell => {
-          cell._pendingSize += amountToGrow * cell.effectiveGrow!;
+          cell.size += amountToGrow * cell.effectiveGrow!;
         } );
         spaceRemaining -= amountToGrow * totalGrow;
       }
 
       // Update preferred dimension based on the pending size
-      line.cells.forEach( cell => cell.attemptPreferredSize( orientation, cell._pendingSize ) );
+      line.cells.forEach( cell => cell.attemptPreferredSize( orientation, cell.size ) );
 
+      // Gives additional spacing based on justification
       const primarySpacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.cells.length );
 
       let position = originPrimary;
-
       line.cells.forEach( ( cell, index ) => {
+        // Always include justify spacing
         position += primarySpacingFunction( index );
+
+        // Only include normal spacing between items
         if ( index > 0 ) {
           position += this.spacing;
         }
+
+        // ACTUALLY position it!
         cell.positionStart( orientation, position );
-        position += cell._pendingSize;
-        assert && assert( this.spacing >= 0 || cell._pendingSize >= -this.spacing,
+
+        position += cell.size;
+        assert && assert( this.spacing >= 0 || cell.size >= -this.spacing,
           'Negative spacing more than a cell\'s size causes issues with layout' );
       } );
     } );
@@ -295,22 +315,19 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
       cell.reposition( oppositeOrientation, line.size, line.position, cell.effectiveStretch, -line.minOrigin, cell.effectiveAlign );
     } ) );
 
+    // Determine the size we actually take up (localBounds for the FlowBox will use this)
     const minCoordinate = originPrimary;
     const maxCoordinate = originPrimary + size;
     const minOppositeCoordinate = initialOppositePosition;
     const maxOppositeCoordinate = initialOppositePosition + oppositeSize;
 
     // We're taking up these layout bounds (nodes could use them for localBounds)
-    this.layoutBoundsProperty.value = orientation === Orientation.HORIZONTAL ? new Bounds2(
+    this.layoutBoundsProperty.value = Bounds2.oriented(
+      orientation,
       minCoordinate,
       minOppositeCoordinate,
       maxCoordinate,
       maxOppositeCoordinate
-    ) : new Bounds2(
-      minOppositeCoordinate,
-      minCoordinate,
-      maxOppositeCoordinate,
-      maxCoordinate
     );
 
     // Tell others about our new "minimum" sizes

@@ -1,7 +1,7 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * A LayoutCell that has margins, and can be positioned and sized relative to those.
+ * A LayoutCell that has margins, and can be positioned and sized relative to those. Used for Flow/Grid layouts
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -52,7 +52,7 @@ export default class MarginLayoutCell extends LayoutCell {
   reposition( orientation: Orientation, lineSize: number, linePosition: number, stretch: boolean, originOffset: number, align: LayoutAlign ): void {
     // Mimicking https://www.w3.org/TR/css-flexbox-1/#align-items-property for baseline (for our origin)
     // Origin will sync all origin-based items (so their origin matches), and then position ALL of that as if it was
-    // align left or top (depending on the orientation).
+    // align:left or align:top (depending on the orientation).
 
     const preferredSize = ( stretch && this.isSizable( orientation ) ) ? lineSize : this.getMinimumSize( orientation );
 
@@ -68,18 +68,22 @@ export default class MarginLayoutCell extends LayoutCell {
     assert && assert( this.getCellBounds().isFinite() );
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveLeftMargin(): number {
     return this._leftMargin !== null ? this._leftMargin : this._marginConstraint._leftMargin!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveRightMargin(): number {
     return this._rightMargin !== null ? this._rightMargin : this._marginConstraint._rightMargin!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveTopMargin(): number {
     return this._topMargin !== null ? this._topMargin : this._marginConstraint._topMargin!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveBottomMargin(): number {
     return this._bottomMargin !== null ? this._bottomMargin : this._marginConstraint._bottomMargin!;
   }
@@ -92,10 +96,12 @@ export default class MarginLayoutCell extends LayoutCell {
     return orientation === Orientation.HORIZONTAL ? this.effectiveRightMargin : this.effectiveBottomMargin;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveMinContentWidth(): number | null {
     return this._minContentWidth !== null ? this._minContentWidth : this._marginConstraint._minContentWidth;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveMinContentHeight(): number | null {
     return this._minContentHeight !== null ? this._minContentHeight : this._marginConstraint._minContentHeight;
   }
@@ -104,10 +110,12 @@ export default class MarginLayoutCell extends LayoutCell {
     return orientation === Orientation.HORIZONTAL ? this.effectiveMinContentWidth : this.effectiveMinContentHeight;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveMaxContentWidth(): number | null {
     return this._maxContentWidth !== null ? this._maxContentWidth : this._marginConstraint._maxContentWidth;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveMaxContentHeight(): number | null {
     return this._maxContentHeight !== null ? this._maxContentHeight : this._marginConstraint._maxContentHeight;
   }
@@ -167,6 +175,9 @@ export default class MarginLayoutCell extends LayoutCell {
     return this.getCellBounds().shiftedXY( -this.proxy.x, -this.proxy.y );
   }
 
+  /**
+   * The current bounds of the cell (with margins included)
+   */
   getCellBounds(): Bounds2 {
     return this.proxy.bounds.withOffsets(
       this.effectiveLeftMargin,

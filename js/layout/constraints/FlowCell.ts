@@ -12,9 +12,10 @@ export type FlowCellOptions = Omit<ExternalFlowConfigurableOptions, 'orientation
 
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
-  _pendingSize = 0; // scenery-internal
+  // Set during FlowConstraint layout
+  size = 0;
 
-  flowConstraint: FlowConstraint;
+  private readonly flowConstraint: FlowConstraint;
 
   constructor( constraint: FlowConstraint, node: Node, proxy: LayoutProxy | null ) {
     super( constraint, node, proxy );
@@ -25,14 +26,17 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
     this.onLayoutOptionsChange();
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveAlign(): LayoutAlign {
     return this._align !== null ? this._align : this.flowConstraint._align!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveStretch(): boolean {
     return this._stretch !== null ? this._stretch : this.flowConstraint._stretch!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveGrow(): number {
     return this._grow !== null ? this._grow : this.flowConstraint._grow!;
   }

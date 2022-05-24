@@ -40,7 +40,7 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
   // Set to be the bounds used by the cell
   lastUsedBounds: Bounds2 = Bounds2.NOTHING.copy();
 
-  gridConstraint: GridConstraint;
+  private readonly gridConstraint: GridConstraint;
 
   constructor( constraint: GridConstraint, node: Node, proxy: LayoutProxy | null ) {
 
@@ -52,10 +52,12 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     this.onLayoutOptionsChange();
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveXAlign(): LayoutAlign {
     return this._xAlign !== null ? this._xAlign : this.gridConstraint._xAlign!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveYAlign(): LayoutAlign {
     return this._yAlign !== null ? this._yAlign : this.gridConstraint._yAlign!;
   }
@@ -64,10 +66,12 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     return orientation === Orientation.HORIZONTAL ? this.effectiveXAlign : this.effectiveYAlign;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveXGrow(): number {
     return this._xGrow !== null ? this._xGrow : this.gridConstraint._xGrow!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveYGrow(): number {
     return this._yGrow !== null ? this._yGrow : this.gridConstraint._yGrow!;
   }
@@ -76,10 +80,12 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     return orientation === Orientation.HORIZONTAL ? this.effectiveXGrow : this.effectiveYGrow;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveXStretch(): boolean {
     return this._xStretch !== null ? this._xStretch : this.gridConstraint._xStretch!;
   }
 
+  // The used value, with this cell's value taking precedence over the constraint's default
   get effectiveYStretch(): boolean {
     return this._yStretch !== null ? this._yStretch : this.gridConstraint._yStretch!;
   }
@@ -96,6 +102,7 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
   private setOptions( providedOptions?: ExternalGridConfigurableOptions ): void {
 
+    // We'll have defaults for cells (the width/height are especially relevant)
     const options = optionize<GridCellOptions, SelfOptions, ExternalGridConfigurableOptions>()( {
       x: 0,
       y: 0,
@@ -116,6 +123,8 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     this.mutateConfigurable( options );
   }
 
+  // Whether this cell contains the given row/column (based on the orientation). Due to width/height of the cell,
+  // this could be true for multiple indices.
   containsIndex( orientation: Orientation, index: number ): boolean {
     const position = this.position.get( orientation );
     const size = this.size.get( orientation );
@@ -130,6 +139,7 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     return this.containsIndex( Orientation.HORIZONTAL, column );
   }
 
+  // Returns the row/column indices that this cell spans (based on the orientation)
   getIndices( orientation: Orientation ): number[] {
     const position = this.position.get( orientation );
     const size = this.size.get( orientation );

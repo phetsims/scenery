@@ -31,7 +31,11 @@ type LayoutCallback<T extends any[]> = ( ...args: LayoutProxyMap<T> ) => void;
 export default class ManualConstraint<T extends Node[]> extends LayoutConstraint {
 
   private readonly nodes: T;
+
+  // Cells provide us LayoutProxy and connection tracking
   private readonly cells: LayoutCell[];
+
+  // The user-supplied callback that should be called to do layout
   private readonly layoutCallback: LayoutCallback<T>;
 
   constructor( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ) {
@@ -42,6 +46,7 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
 
     super( ancestorNode );
 
+    // Don't churn updates during construction
     this.lock();
 
     this.nodes = nodes;
@@ -51,7 +56,7 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
 
     this.layoutCallback = layoutCallback;
 
-    // Hook up to listen to these nodes
+    // Hook up to listen to these nodes (will be handled by LayoutConstraint disposal)
     this.nodes.forEach( node => this.addNode( node, false ) );
 
     // Run the layout manually at the start
@@ -64,6 +69,7 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
 
     assert && assert( _.every( this.nodes, node => !node.isDisposed ) );
 
+    // Don't do layout if something is missing
     const isMissingProxy = _.some( this.cells, cell => !cell.isConnected() );
     if ( !isMissingProxy ) {
       const proxies = this.cells.map( cell => cell.proxy );

@@ -8,20 +8,16 @@
 
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import Pool from '../../../../phet-core/js/Pool.js';
-import { FlowCell, scenery } from '../../imports.js';
+import { FlowCell, scenery, LayoutLine } from '../../imports.js';
 
-export default class FlowLine {
+export default class FlowLine extends LayoutLine {
 
   orientation!: Orientation;
   cells!: FlowCell[];
-  min!: number;
-  max!: number;
-  minOrigin!: number;
-  maxOrigin!: number;
-  size!: number;
-  position!: number;
 
   constructor( orientation: Orientation, cells: FlowCell[] ) {
+    super();
+
     this.initialize( orientation, cells );
   }
 
@@ -30,16 +26,7 @@ export default class FlowLine {
     this.orientation = orientation;
     this.cells = cells;
 
-    this.min = 0;
-    this.max = Number.POSITIVE_INFINITY;
-    this.minOrigin = Number.POSITIVE_INFINITY;
-    this.maxOrigin = Number.NEGATIVE_INFINITY;
-    this.size = 0;
-    this.position = 0;
-  }
-
-  hasOrigin(): boolean {
-    return isFinite( this.minOrigin ) && isFinite( this.maxOrigin );
+    this.initializeLayoutLine();
   }
 
   getMinimumSize( spacing: number ): number {

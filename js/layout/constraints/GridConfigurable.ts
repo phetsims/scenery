@@ -3,6 +3,10 @@
 /**
  * Mixin for storing options that can affect each cell.
  *
+ * Handles a lot of conversion from internal Enumeration values (for performance) and external string representations.
+ * This is done primarily for performance and that style of internal enumeration pattern. If string comparisons are
+ * faster, that could be used instead.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

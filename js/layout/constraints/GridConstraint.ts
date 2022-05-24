@@ -64,6 +64,8 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
 
     super( ancestorNode, providedOptions );
 
+    // Set configuration to actual default values (instead of null) so that we will have guaranteed non-null
+    // (non-inherit) values for our computations.
     this.setConfigToBaseDefault();
     this.mutateConfigurable( providedOptions );
     mutate( this, GRID_CONSTRAINT_OPTION_KEYS, providedOptions );
@@ -77,6 +79,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
 
     assert && assert( _.every( [ ...this.cells ], cell => !cell.node.isDisposed ) );
 
+    // Only grab the cells that will participate in layout
     const cells = [ ...this.cells ].filter( cell => {
       return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
     } );
@@ -84,8 +87,10 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
 
     if ( !cells.length ) {
       this.layoutBoundsProperty.value = Bounds2.NOTHING;
+      this.minimumWidthProperty.value = null;
+      this.minimumHeightProperty.value = null;
 
-      // Synchronize our displayedLines, if it's used for display
+      // Synchronize our displayedLines, if it's used for display (e.g. GridBackgroundNode)
       this.displayedLines.forEach( map => map.clear() );
       return;
     }
@@ -98,24 +103,31 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     [ Orientation.HORIZONTAL, Orientation.VERTICAL ].forEach( orientation => {
       const orientedSpacing = this._spacing.get( orientation );
 
-      // // index => GridLine
+      // index => GridLine
       const lineMap: Map<number, GridLine> = this.displayedLines.get( orientation );
 
       // Clear out the lineMap
       lineMap.forEach( line => line.freeToPool() );
       lineMap.clear();
 
+      // What are all the line indices used by displayed cells? There could be gaps. We pretend like those gaps
+      // don't exist (except for spacing)
       const lineIndices = _.sortedUniq( _.sortBy( _.flatten( cells.map( cell => cell.getIndices( orientation ) ) ) ) );
+
       const lines = lineIndices.map( index => {
+        // Recall, cells can include multiple lines in the same orientation if they have width/height>1
         const subCells = _.filter( cells, cell => cell.containsIndex( orientation, index ) );
 
+        // For now, we'll use the maximum grow value included in this line
         const grow = Math.max( ...subCells.map( cell => cell.getEffectiveGrow( orientation ) ) );
+
         const line = GridLine.pool.create( index, subCells, grow );
         lineMap.set( index, line );
 
         return line;
       } );
 
+      // Convert a simple spacing number (or a spacing array into a spacing array of the correct size.
       const lineSpacings = typeof orientedSpacing === 'number' ?
                            _.range( 0, lines.length - 1 ).map( () => orientedSpacing ) :
                            orientedSpacing.slice( 0, lines.length - 1 );
@@ -167,8 +179,11 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
         }
       } );
 
+      // Minimum size of our grid in this orientation
       const minSizeAndSpacing = _.sum( lines.map( line => line.size ) ) + _.sum( lineSpacings );
       minimumSizes.set( orientation, minSizeAndSpacing );
+
+      // Compute the size in this orientation (growing the size proportionally in lines as necessary)
       const size = Math.max( minSizeAndSpacing, preferredSizes.get( orientation ) || 0 );
       let sizeRemaining = size - minSizeAndSpacing;
       let growableLines;
@@ -176,6 +191,8 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
         return line.grow > 0 && line.size < line.max - 1e-7;
       } ) ).length ) {
         const totalGrow = _.sum( growableLines.map( line => line.grow ) );
+
+        // We could need to stop growing EITHER when a line hits its max OR when we run out of space remaining.
         const amountToGrow = Math.min(
           Math.min( ...growableLines.map( line => ( line.max - line.size ) / line.grow ) ),
           sizeRemaining / totalGrow
@@ -183,6 +200,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
 
         assert && assert( amountToGrow > 1e-11 );
 
+        // Grow proportionally to their grow values
         growableLines.forEach( line => {
           line.size += amountToGrow * line.grow;
         } );
@@ -194,6 +212,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
       layoutBounds[ orientation.minCoordinate ] = startPosition;
       layoutBounds[ orientation.maxCoordinate ] = startPosition + size;
       lines.forEach( ( line, arrayIndex ) => {
+        // Position all the lines
         line.position = startPosition + _.sum( lines.slice( 0, arrayIndex ).map( line => line.size ) ) + _.sum( lineSpacings.slice( 0, line.index ) );
       } );
       cells.forEach( cell => {
@@ -201,10 +220,15 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
         const cellSize = cell.size.get( orientation );
         const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
         const firstLine = lineMap.get( cellIndexPosition )!;
+
+        // If we're spanning multiple lines, we have to include the spacing that we've "absorbed"
         const cellSpacings = lineSpacings.slice( cellIndexPosition, cellIndexPosition + cellSize - 1 );
+
+        // Our size includes the line sizes and spacings
         const cellAvailableSize = _.sum( cellLines.map( line => line.size ) ) + _.sum( cellSpacings );
         const cellPosition = firstLine.position;
 
+        // Adjust preferred size and move the cell
         cell.reposition(
           orientation,
           cellAvailableSize,

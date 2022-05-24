@@ -11,12 +11,27 @@ import { LayoutConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProper
 
 export default class LayoutCell {
 
+  // We might need to notify the constraint it needs a layout
   private readonly _constraint: LayoutConstraint;
+
   private readonly _node: Node;
+
+  // Our proxy will be dynamically computed and updated (based on whether there is a valid ancestorNode=>node trail)
   private _proxy: LayoutProxy | null;
+
+  // Called when layoutOptions changes for our Node
   private readonly layoutOptionsListener: () => void;
+
+  // If we're not provided a (static) LayoutProxy in our constructor, we'll track and generate LayoutProxies with this.
   private readonly layoutProxyProperty: TrackingLayoutProxyProperty | null;
 
+  /**
+   * @param constraint
+   * @param node
+   * @param proxy - If not provided, LayoutProxies will be computed and updated based on the ancestorNode of the
+   *                constraint. This includes more work, and ideally should be avoided for things like FlowBox/GridBox
+   *                (but will be needed by ManualConstraint or other direct LayoutConstraint usage)
+   */
   constructor( constraint: LayoutConstraint, node: Node, proxy: LayoutProxy | null ) {
     if ( proxy ) {
       this.layoutProxyProperty = null;

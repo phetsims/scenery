@@ -21,13 +21,15 @@ export default class LayoutConstraint {
   // Whether there was a layout attempt during the lock
   private _layoutAttemptDuringLock = false;
 
+  // When we are disabled (say, a layout container has resize:false), we won't automatically do layout
   private _enabled = true;
 
   protected readonly _updateLayoutListener: () => void;
 
+  // Track Nodes we're listening to (for memory cleanup purposes)
   private readonly _listenedNodes: Set<Node> = new Set<Node>();
 
-  // scenery-internal
+  // scenery-internal - emits when we've finished layout
   readonly finishedLayoutEmitter: TinyEmitter<[]> = new TinyEmitter<[]>();
 
   constructor( ancestorNode: Node ) {
@@ -100,26 +102,47 @@ export default class LayoutConstraint {
     return this._layoutLockCount > 0;
   }
 
+  /**
+   * Locks the layout (so that automatic layout will NOT be triggered synchronously until unlock() is called and
+   * the lock count returns to 0. This is set up so that if we trigger multiple reentrancy, we will only attempt to
+   * re-layout once ALL of the layouts are finished).
+   */
   lock(): void {
     this._layoutLockCount++;
   }
 
+  /**
+   * Unlocks the layout. Generally (but not always), updateLayout() or updateLayoutAutomatically() should be called
+   * after this, as locks are generally used for this purpose.
+   */
   unlock(): void {
     this._layoutLockCount--;
   }
 
+  /**
+   * Here for manual validation (say, in the devtools) - While some layouts are going on, this may not be correct, so it
+   * could not be added to post-layout validation.
+   */
   validateLocalPreferredWidth( layoutContainer: WidthSizableNode ): void {
     if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
       layoutContainer.validateLocalPreferredWidth();
     }
   }
 
+  /**
+   * Here for manual validation (say, in the devtools) - While some layouts are going on, this may not be correct, so it
+   * could not be added to post-layout validation.
+   */
   validateLocalPreferredHeight( layoutContainer: HeightSizableNode ): void {
     if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
       layoutContainer.validateLocalPreferredHeight();
     }
   }
 
+  /**
+   * Here for manual validation (say, in the devtools) - While some layouts are going on, this may not be correct, so it
+   * could not be added to post-layout validation.
+   */
   validateLocalPreferredSize( layoutContainer: SizableNode ): void {
     if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
       layoutContainer.validateLocalPreferredSize();
@@ -133,6 +156,8 @@ export default class LayoutConstraint {
   updateLayout(): void {
     let count = 0;
 
+    // If we're locked AND someone tries to do layout, record this so we can attempt layout once we are not locked
+    // anymore. We have some infinite-loop detection here for common development errors.
     if ( this.isLocked ) {
       assert && count++;
       assert && assert( ++count < 500, 'Likely infinite loop detected, are we triggering layout within the layout?' );
@@ -141,6 +166,8 @@ export default class LayoutConstraint {
     else {
       this.lock();
 
+      // Run layout until we didn't get a layout attempt during our last attempt. This component's layout should now
+      // be correct and stable.
       do {
         this._layoutAttemptDuringLock = false;
         this.layout();
@@ -161,6 +188,9 @@ export default class LayoutConstraint {
     }
   }
 
+  /**
+   * Creates a LayoutProxy for a unique trail from our ancestorNode to this Node (or null if that's not possible)
+   */
   createLayoutProxy( node: Node ): LayoutProxy | null {
     assert && assert( node instanceof Node );
 

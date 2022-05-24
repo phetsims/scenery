@@ -46,7 +46,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
   private _excludeInvisible = true;
 
   // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
-  // Layout nodes can use this to adjust their localBounds
+  // Layout nodes can use this to adjust their localBounds. FlowBox/GridBox uses this for their localBounds.
   readonly layoutBoundsProperty: IProperty<Bounds2>;
 
   readonly preferredWidthProperty: IProperty<number | null>;
@@ -101,16 +101,19 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     }
   }
 
+  // Sets preferred size of content in a central location (so we could hook in animation in the future)
   setProxyPreferredSize( orientation: Orientation, proxy: LayoutProxy, preferredSize: number | null ): void {
     proxy[ orientation.preferredSize ] = preferredSize;
   }
 
+  // Sets position of content in a central location (so we could hook in animation in the future)
   setProxyMinSide( orientation: Orientation, proxy: LayoutProxy, minSide: number ): void {
     if ( Math.abs( proxy[ orientation.minSide ] - minSide ) > CHANGE_POSITION_THRESHOLD ) {
       proxy[ orientation.minSide ] = minSide;
     }
   }
 
+  // Sets origin-based position of content in a central location (so we could hook in animation in the future)
   setProxyOrigin( orientation: Orientation, proxy: LayoutProxy, origin: number ): void {
     if ( Math.abs( proxy[ orientation.coordinate ] - origin ) > CHANGE_POSITION_THRESHOLD ) {
       proxy[ orientation.coordinate ] = origin;
