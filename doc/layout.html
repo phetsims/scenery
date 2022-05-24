@@ -1922,11 +1922,15 @@
             children: [ firstParent, secondParent, thirdParent ]
           } );
 
+          // Directly create the constraint, specifying a layoutOrigin to position the content
           const constraint = new scenery.FlowConstraint( scene, {
             layoutOriginProperty: new axon.Property( new dot.Vector2( 10, 10 ) ),
-            align: 'top'
+            align: 'top',
+            spacing: 10,
           } );
-          constraint.spacing = 10;
+
+          // For Flow constraints, we need to know the order, so cells are inserted at specific indices. They can be
+          // removed later
           constraint.insertCell( 0, new scenery.FlowCell( constraint, firstChild, null ) );
           constraint.insertCell( 1, new scenery.FlowCell( constraint, secondChild, null ) );
           constraint.insertCell( 2, new scenery.FlowCell( constraint, thirdChild, null ) );
@@ -1991,12 +1995,15 @@
             children: [ firstParent, secondParent, thirdParent ]
           } );
 
+          // Directly create the constraint, specifying a layoutOrigin to position the content
           const constraint = new scenery.GridConstraint( scene, {
             layoutOriginProperty: new axon.Property( new dot.Vector2( 10, 10 ) ),
             xAlign: 'left',
-            yAlign: 'top'
+            yAlign: 'top',
+            spacing: 10
           } );
-          constraint.spacing = 10;
+
+          // For the grid, cells are created and added (they can be removed/disposed later).
           constraint.addCell( new scenery.GridCell( constraint, firstChild, null ) );
           constraint.addCell( new scenery.GridCell( constraint, secondChild, null ) );
           constraint.addCell( new scenery.GridCell( constraint, thirdChild, null ) );
