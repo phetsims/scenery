@@ -9,10 +9,6 @@ import { scenery, Color } from '../imports.js';
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-
-/**
- * @extends Property<Color>
- */
 export default class ColorProperty extends Property<Color> {
   constructor( color: Color, options?: PropertyOptions<Color> ) {
 
