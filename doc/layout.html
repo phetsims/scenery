@@ -1412,6 +1412,40 @@
       }, { resize: 'both' } );
     </script>
 
+    <h2>Sizables</h2>
+
+    <p>
+      Certain Node subtypes are "sizable": they can be adjusted to different <em>preferred</em> sizes/bounds, which are
+      equal to or larger than their <em>minimum</em> sizes. When the preferred size is set, the Node should adjust its
+      own layout so that it takes up that size. This includes FlowBox (VBox/HBox), GridBox, Panel, and a growing list of
+      Nodes.
+    </p>
+
+    <p>
+      Sizable nodes will either mix in WidthSizable, HeightSizable, or Sizable (indicating that both width and height
+      can be adjusted). This provides preferred and minimum sizes in BOTH local and parent coordinate frames (e.g.
+      `preferredWidth` / `localPreferredWidth`). These separate coordinate frame versions will be kept in sync (and are
+      backed by Properties).
+    </p>
+
+    <p>
+      Typically Nodes will compute their own minimum width/height. The local version of this (e.g. `localMinimumWidth`)
+      is considered the "primary" one, since Nodes usually do layout in their local coordinate frame. This means that
+      when a Node's transform changes, its minimum sizes will be adjusted to match the equivalent localMinimum sizes.
+    </p>
+
+    <p>
+      Typically layout containers (but also clients, manually) will set the preferred sizes on a Node. Thus the
+      parent version will be primary (e.g. when a sizable Node is transformed, its localPreferredWidth will be adjusted
+      to match the preferredWidth after the transformation).
+    </p>
+
+    <p>
+      Some Nodes by default have this "sizability" turned off, and clients can do this manually with
+      widthSizable/heightSizable/sizable:false. Layout containers should not attempt to set preferred sizes when the
+      Node is not considered "sizable".
+    </p>
+
   </div>
   <div class="span2"></div>
 </div>
