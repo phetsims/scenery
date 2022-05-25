@@ -114,7 +114,7 @@ import './layout/constraints/LayoutCell.js';
 import './layout/constraints/LayoutConstraint.js';
 import './layout/LayoutJustification.js';
 import './layout/nodes/LayoutNode.js';
-import './layout/LayoutLine.js';
+import './layout/constraints/LayoutLine.js';
 import './layout/LayoutOrientation.js';
 import './layout/LayoutProxy.js';
 import './layout/LayoutProxyProperty.js';

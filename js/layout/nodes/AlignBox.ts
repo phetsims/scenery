@@ -61,7 +61,6 @@ type SelfOptions = {
   topMargin?: number;
   bottomMargin?: number;
   group?: AlignGroup | null;
-  canShrink?: boolean;
 };
 
 type SuperOptions = NodeOptions & SizableOptions;
@@ -110,14 +109,8 @@ export default class AlignBox extends SuperType {
    */
   constructor( content: Node, providedOptions?: AlignBoxOptions ) {
 
-    const options = optionize<AlignBoxOptions, Pick<SelfOptions, 'canShrink'>, SuperOptions>()( {
-      children: [ content ],
-      canShrink: false,
-
-      // By default, don't set an AlignBox to be resizable, since it's used a lot to block out a certain amount of
-      // space.
-      widthSizable: false,
-      heightSizable: false
+    const options = optionize<AlignBoxOptions, {}, SuperOptions>()( {
+      children: [ content ]
     }, providedOptions );
 
     super();
@@ -139,10 +132,19 @@ export default class AlignBox extends SuperType {
 
     this.localBounds = new Bounds2( 0, 0, 0, 0 );
 
-    this.constraint = new AlignBoxConstraint( this, content, options.canShrink );
+    this.constraint = new AlignBoxConstraint( this, content );
 
     // Will be removed by dispose()
     this._content.boundsProperty.link( this._contentBoundsListener );
+
+    // First mutate to turn off sizability (we want to allow people to turn on single dimension sizability without
+    // hitting assertions that "sizable" and "widthSizable" shouldn't be specified at the same time, and having an
+    // ordered dependency.
+    this.mutate( {
+      // By default, don't set an AlignBox to be resizable, since it's used a lot to block out a certain amount of
+      // space.
+      sizable: false
+    } as NodeOptions );
 
     this.mutate( options );
 
@@ -604,16 +606,17 @@ class AlignBoxConstraint extends LayoutConstraint {
 
   private readonly alignBox: AlignBox;
   private readonly content: Node;
-  private readonly canShrink: boolean;
 
-  constructor( alignBox: AlignBox, content: Node, canShrink: boolean ) {
+  constructor( alignBox: AlignBox, content: Node ) {
     super( alignBox );
 
     this.alignBox = alignBox;
     this.content = content;
-    this.canShrink = canShrink;
 
     this.addNode( content );
+
+    alignBox.isWidthResizableProperty.lazyLink( this._updateLayoutListener );
+    alignBox.isHeightResizableProperty.lazyLink( this._updateLayoutListener );
   }
 
   /**
@@ -649,19 +652,26 @@ class AlignBoxConstraint extends LayoutConstraint {
       return;
     }
 
+    const totalXMargins = box.leftMargin + box.rightMargin;
+    const totalYMargins = box.topMargin + box.bottomMargin;
+
     // If we have alignBounds, use that.
     if ( box.alignBounds !== null ) {
       box.setAdjustedLocalBounds( box.alignBounds );
     }
     // Otherwise, we'll grab a Bounds2 anchored at the upper-left with our required dimensions.
     else {
-      const widthWithMargin = box.leftMargin + content.width + box.rightMargin;
-      const heightWithMargin = box.topMargin + content.height + box.bottomMargin;
+      const widthWithMargin = content.width + totalXMargins;
+      const heightWithMargin = content.height + totalYMargins;
       box.setAdjustedLocalBounds( new Bounds2( 0, 0, widthWithMargin, heightWithMargin ) );
     }
 
-    const minimumWidth = isFinite( content.width ) ? ( isWidthSizable( content ) ? content.minimumWidth || 0 : content.width ) : null;
-    const minimumHeight = isFinite( content.height ) ? ( isHeightSizable( content ) ? content.minimumHeight || 0 : content.height ) : null;
+    const minimumWidth = isFinite( content.width )
+                         ? ( isWidthSizable( content ) ? content.minimumWidth || 0 : content.width ) + totalXMargins
+                         : null;
+    const minimumHeight = isFinite( content.height )
+                          ? ( isHeightSizable( content ) ? content.minimumHeight || 0 : content.height ) + totalYMargins
+                          : null;
 
     // Don't try to lay out empty bounds
     if ( !content.localBounds.isEmpty() ) {
@@ -707,8 +717,8 @@ class AlignBoxConstraint extends LayoutConstraint {
 
     // After the layout lock on purpose (we want these to be reentrant, especially if they change) - however only apply
     // this concept if we're capable of shrinking (we want the default to continue to block off the layoutBounds)
-    box.localMinimumWidth = this.canShrink ? minimumWidth : box.localWidth;
-    box.localMinimumHeight = this.canShrink ? minimumHeight : box.localHeight;
+    box.localMinimumWidth = box.widthSizable ? minimumWidth : box.localWidth;
+    box.localMinimumHeight = box.heightSizable ? minimumHeight : box.localHeight;
   }
 }
 

@@ -2015,6 +2015,129 @@
       } )();
     </script>
 
+    <h2>AlignBox</h2>
+
+    <p>AlignBox on its own will position content within a specific bounding box (its <em>alignBounds</em>):</p>
+
+    <div id="simpleAlignBox-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        dynamicDemo( 'simpleAlignBox-example', () => {
+          /*START*/
+          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new scenery.AlignBox( rect, {
+            alignBounds: new dot.Bounds2( 0, 0, 100, 100 )
+          } );
+          /*END*/
+        }, { resize: 'none' } );
+      } )();
+    </script>
+
+    <p>Content can be aligned within this:</p>
+
+    <div id="alignBoxAlign-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        dynamicDemo( 'alignBoxAlign-example', () => {
+          /*START*/
+          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new scenery.AlignBox( rect, {
+            alignBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+            xAlign: 'left',
+            yAlign: 'bottom'
+          } );
+          /*END*/
+        }, { resize: 'none' } );
+      } )();
+    </script>
+
+    <p>And margins can be specified on each side:</p>
+
+    <div id="alignBoxMargins-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        dynamicDemo( 'alignBoxMargins-example', () => {
+          /*START*/
+          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new scenery.AlignBox( rect, {
+            alignBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+            xAlign: 'left',
+            yAlign: 'bottom',
+            leftMargin: 5,
+            bottomMargin: 10
+          } );
+          /*END*/
+        }, { resize: 'none' } );
+      } )();
+    </script>
+
+    <p>Margins can also be used on their own (without alignBounds/alignment) to just create a Node with larger bounds:</p>
+
+    <div id="alignBoxOnlyMargins-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        dynamicDemo( 'alignBoxOnlyMargins-example', () => {
+          /*START*/
+          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new scenery.AlignBox( rect, {
+            topMargin: 30,
+            xMargin: 10
+          } );
+          /*END*/
+        }, { resize: 'none' } );
+      } )();
+    </script>
+
+    <p>AlignBox can also be used with preferred dimensions instead of an explicit alignBounds:</p>
+
+    <div id="alignBoxPreferred-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        dynamicDemo( 'alignBoxPreferred-example', () => {
+          /*START*/
+          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new scenery.AlignBox( rect, {
+            preferredWidth: 100,
+            preferredHeight: 100,
+            xAlign: 'left',
+            yAlign: 'bottom'
+          } );
+          /*END*/
+        }, { resize: 'none' } );
+      } )();
+    </script>
+
+    <p>and can be dynamically resizable (off by default because it's usually not used for that purpose in legacy code):</p>
+
+    <div id="alignBoxSizable-example"></div>
+    <script type="text/javascript">
+      ( () => {
+        dynamicDemo( 'alignBoxSizable-example', () => {
+          /*START*/
+          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new scenery.AlignBox( rect, {
+            xAlign: 'left',
+            yAlign: 'bottom',
+            sizable: true,
+            margin: 10
+          } );
+          /*END*/
+        }, { resize: 'both', useMinWidth: true, useMinHeight: true } );
+      } )();
+    </script>
+
   </div>
   <div class="span2"></div>
 </div>
