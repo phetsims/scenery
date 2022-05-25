@@ -18,6 +18,8 @@ export default class Divider extends Line {
       layoutOptions: {
         stretch: true
       },
+
+      // Matches HSeparator/VSeparator as a default
       stroke: 'rgb(100,100,100)'
     }, providedOptions ) );
   }

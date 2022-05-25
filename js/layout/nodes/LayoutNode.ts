@@ -32,7 +32,7 @@ export type LayoutNodeOptions = SelfOptions & SuperOptions;
 
 export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint> extends Sizable( Node ) {
 
-  protected _constraint!: Constraint;
+  protected _constraint!: Constraint; // Can't be readonly because the subtype sets this
   readonly layoutOriginProperty: IProperty<Vector2> = new Vector2Property( Vector2.ZERO );
 
   constructor( providedOptions?: LayoutNodeOptions ) {

@@ -1,9 +1,8 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * Provides a minimum and preferred height. The minimum height is set by the component, so that layout containers could
- * know how "small" the component can be made. The preferred height is set by the layout container, and the component
- * should adjust its size so that it takes up that height.
+ * Provides a minimum and preferred width/height (both WidthSizable and HeightSizable, but with added features that
+ * allow convenience of working with both dimensions at once).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

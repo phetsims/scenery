@@ -34,6 +34,7 @@ export type FlowBoxOptions = SelfOptions & LayoutNodeOptions;
 
 export default class FlowBox extends LayoutNode<FlowConstraint> {
 
+  // Track the connection between Nodes and cells
   private readonly _cellMap: Map<Node, FlowCell> = new Map<Node, FlowCell>();
 
   // Listeners that we'll need to remove
@@ -81,7 +82,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     const nonBoundsOptions = _.omit( options, REQUIRES_BOUNDS_OPTION_KEYS ) as LayoutNodeOptions;
     const boundsOptions = _.pick( options, REQUIRES_BOUNDS_OPTION_KEYS ) as LayoutNodeOptions;
 
-    // Before we layout, do non-bounds-related changes (in case we have resize:false), and prevent layout for
+    // Before we do layout, do non-bounds-related changes (in case we have resize:false), and prevent layout for
     // performance gains.
     this._constraint.lock();
     this.mutate( nonBoundsOptions );

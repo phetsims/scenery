@@ -165,7 +165,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
    * For each cell, the first index into the array will be taken as the cell position in the provided orientation. The
    * second index into the array will be taken as the cell position in the OPPOSITE orientation.
    *
-   * See GridBox.rows or GridBox.columns for usages and more documentation.
+   * See GridBox.rows or GridBox.columns for usages
    */
   getLines( orientation: Orientation ): LineArrays {
     const lineArrays: LineArrays = [];
@@ -191,48 +191,82 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return lineArrays;
   }
 
+  /**
+   * Sets the children of the GridBox by specifying a two-dimensional array of Nodes (or null values as spacers).
+   * The inner arrays will be the rows of the grid.
+   * Mutates layoutOptions of the provided Nodes. See setLines() for more documentation.
+   */
   set rows( lineArrays: LineArrays ) {
     this.setLines( Orientation.VERTICAL, lineArrays );
   }
 
+  /**
+   * Returns a two-dimensional array of the child Nodes (with null as a spacer) where the inner arrays are the rows.
+   */
   get rows(): LineArrays {
     return this.getLines( Orientation.VERTICAL );
   }
 
+  /**
+   * Sets the children of the GridBox by specifying a two-dimensional array of Nodes (or null values as spacers).
+   * The inner arrays will be the columns of the grid.
+   * * Mutates layoutOptions of the provided Nodes. See setLines() for more documentation.
+   */
   set columns( lineArrays: LineArrays ) {
     this.setLines( Orientation.HORIZONTAL, lineArrays );
   }
 
+  /**
+   * Returns a two-dimensional array of the child Nodes (with null as a spacer) where the inner arrays are the columns.
+   */
   get columns(): LineArrays {
     return this.getLines( Orientation.HORIZONTAL );
   }
 
+  /**
+   * Returns the Node at a specific row/column intersection (or null if there are none)
+   */
   getNodeAt( row: number, column: number ): Node | null {
     const cell = this.constraint.getCell( row, column );
 
     return cell ? cell.node : null;
   }
 
+  /**
+   * Returns the row index of a child Node (or if it spans multiple rows, the first row)
+   */
   getRowOfNode( node: Node ): number {
     assert && assert( this.children.includes( node ) );
 
     return this.constraint.getCellFromNode( node )!.position.vertical;
   }
 
+  /**
+   * Returns the column index of a child Node (or if it spans multiple columns, the first row)
+   */
   getColumnOfNode( node: Node ): number {
     assert && assert( this.children.includes( node ) );
 
     return this.constraint.getCellFromNode( node )!.position.horizontal;
   }
 
+  /**
+   * Returns all the Nodes in a given row (by index)
+   */
   getNodesInRow( index: number ): Node[] {
     return this.constraint.getCells( Orientation.VERTICAL, index ).map( cell => cell.node );
   }
 
+  /**
+   * Returns all the Nodes in a given column (by index)
+   */
   getNodesInColumn( index: number ): Node[] {
     return this.constraint.getCells( Orientation.HORIZONTAL, index ).map( cell => cell.node );
   }
 
+  /**
+   * Adds an array of child Nodes (with null allowed as empty spacers) at the bottom of all existing rows.
+   */
   addRow( row: LineArray ): this {
 
     this.rows = [ ...this.rows, row ];
@@ -240,6 +274,9 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return this;
   }
 
+  /**
+   * Adds an array of child Nodes (with null allowed as empty spacers) at the right of all existing columns.
+   */
   addColumn( column: LineArray ): this {
 
     this.columns = [ ...this.columns, column ];
@@ -247,6 +284,9 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return this;
   }
 
+  /**
+   * Inserts a row of child Nodes at a given row index (see addRow for more information)
+   */
   insertRow( index: number, row: LineArray ): this {
 
     this.rows = [ ...this.rows.slice( 0, index ), row, ...this.rows.slice( index ) ];
@@ -254,6 +294,9 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return this;
   }
 
+  /**
+   * Inserts a column of child Nodes at a given column index (see addColumn for more information)
+   */
   insertColumn( index: number, column: LineArray ): this {
 
     this.columns = [ ...this.columns.slice( 0, index ), column, ...this.columns.slice( index ) ];
@@ -261,6 +304,9 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return this;
   }
 
+  /**
+   * Removes all child Nodes in a given row
+   */
   removeRow( index: number ): this {
 
     this.rows = [ ...this.rows.slice( 0, index ), ...this.rows.slice( index + 1 ) ];
@@ -268,6 +314,9 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return this;
   }
 
+    /**
+   * Removes all child Nodes in a given column
+   */
   removeColumn( index: number ): this {
 
     this.columns = [ ...this.columns.slice( 0, index ), ...this.columns.slice( index + 1 ) ];
@@ -303,6 +352,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return this._autoColumns;
   }
 
+  // Used for autoRows/autoColumns
   private updateAutoLines( orientation: Orientation, value: number | null ): void {
     if ( value !== null && this._autoLockCount === 0 ) {
       this.constraint.lock();

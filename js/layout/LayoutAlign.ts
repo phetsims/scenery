@@ -3,6 +3,9 @@
 /**
  * Rich enumeration for internal layout code
  *
+ * NOTE: This is orientation-agnostic for a reason, so that it's natural with GridBox, and FlowBox can switch
+ * orientation
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -26,8 +29,13 @@ export default class LayoutAlign extends EnumerationValue {
   static readonly CENTER = new LayoutAlign( 'center', 'center', 0.5 );
   static readonly ORIGIN = new LayoutAlign( 'origin', 'origin' );
 
+  // String enumeration types for the horizontal orientation
   readonly horizontal: HorizontalLayoutAlign;
+
+  // String enumeration types for the vertical orientation
   readonly vertical: VerticalLayoutAlign;
+
+  // A multiplier value used in the padding computation
   readonly padRatio: number;
 
   constructor( horizontal: HorizontalLayoutAlign, vertical: VerticalLayoutAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
@@ -46,6 +54,7 @@ export default class LayoutAlign extends EnumerationValue {
     return [ ...( orientation === Orientation.HORIZONTAL ? HorizontalLayoutAlignValues : VerticalLayoutAlignValues ), null ];
   }
 
+  // Converts a string union value into the internal Enumeration value
   static alignToInternal( orientation: Orientation, key: HorizontalLayoutAlign | VerticalLayoutAlign | null ): LayoutAlign | null {
     return orientation === Orientation.HORIZONTAL
            ? LayoutAlign.horizontalAlignToInternal( key as HorizontalLayoutAlign )
@@ -72,6 +81,7 @@ export default class LayoutAlign extends EnumerationValue {
     return verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ];
   }
 
+  // Converts an internal Enumeration value into a string union value.
   static internalToAlign( orientation: Orientation, align: LayoutAlign | null ): HorizontalLayoutAlign | VerticalLayoutAlign | null {
     if ( align === null ) {
       return null;

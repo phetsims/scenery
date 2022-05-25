@@ -3,6 +3,9 @@
 /**
  * Rich enumeration for internal layout code
  *
+ * NOTE: This is orientation-agnostic for a reason, so that it's natural with GridBox, and FlowBox can switch
+ * orientation
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -20,6 +23,8 @@ export type HorizontalLayoutJustification = typeof HorizontalLayoutJustification
 export const VerticalLayoutJustificationValues = [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
 export type VerticalLayoutJustification = typeof VerticalLayoutJustificationValues[number];
 
+// Given an amount of extra space remaining and a lineLength, creates a function that maps the cell index to how much
+// spacing (for justification) should be in front of that cell.
 type SpaceRemainingFunctionFactory = ( spaceRemaining: number, lineLength: number ) => ( ( index: number ) => number );
 
 export default class LayoutJustification extends EnumerationValue {
@@ -53,8 +58,13 @@ export default class LayoutJustification extends EnumerationValue {
     'spaceEvenly', 'spaceEvenly'
   );
 
+  // String enumeration types for the horizontal orientation
   readonly horizontal: HorizontalLayoutJustification;
+
+  // String enumeration types for the vertical orientation
   readonly vertical: VerticalLayoutJustification;
+
+  // See SpaceRemainingFunctionFactory for docs
   readonly spacingFunctionFactory: SpaceRemainingFunctionFactory;
 
   constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: HorizontalLayoutJustification, vertical: VerticalLayoutJustification ) {
@@ -73,6 +83,7 @@ export default class LayoutJustification extends EnumerationValue {
     return orientation === Orientation.HORIZONTAL ? HorizontalLayoutJustificationValues : VerticalLayoutJustificationValues;
   }
 
+  // Converts a string union value into the internal Enumeration value
   static justifyToInternal( orientation: Orientation, key: HorizontalLayoutJustification | VerticalLayoutJustification ): LayoutJustification {
     if ( orientation === Orientation.HORIZONTAL ) {
       assert && assert( horizontalJustificationMap[ key as 'left' | 'right' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ] );
@@ -86,6 +97,7 @@ export default class LayoutJustification extends EnumerationValue {
     }
   }
 
+  // Converts an internal Enumeration value into a string union value.
   static internalToJustify( orientation: Orientation, justify: LayoutJustification ): HorizontalLayoutJustification | VerticalLayoutJustification {
     if ( orientation === Orientation.HORIZONTAL ) {
       return justify.horizontal;
