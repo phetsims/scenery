@@ -136,7 +136,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Returns whether there is a fill applied to this Node.
      */
     hasFill(): boolean {
-      return this._fill !== null;
+      return this.getFillValue() !== null;
     }
 
     /**
@@ -195,7 +195,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Returns whether there is a stroke applied to this Node.
      */
     hasStroke(): boolean {
-      return this._stroke !== null;
+      return this.getStrokeValue() !== null;
     }
 
     /**
