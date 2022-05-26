@@ -153,14 +153,14 @@ export default class Image extends Imageable( Node ) {
 
   set imageBounds( value: Bounds2 | null ) { this.setImageBounds( value ); }
 
+  get imageBounds(): Bounds2 | null { return this._imageBounds; }
+
   /**
    * Returns the imageBounds, see setImageBounds for details.
    */
   getImageBounds(): Bounds2 | null {
     return this._imageBounds;
   }
-
-  get imageBounds(): Bounds2 | null { return this._imageBounds; }
 
   /**
    * Whether this Node itself is painted (displays something itself).

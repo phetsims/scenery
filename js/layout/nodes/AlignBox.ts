@@ -223,14 +223,14 @@ export default class AlignBox extends SuperType {
 
   set alignBounds( value: Bounds2 | null ) { this.setAlignBounds( value ); }
 
+  get alignBounds(): Bounds2 | null { return this.getAlignBounds(); }
+
   /**
    * Returns the current alignment bounds (if available, see setAlignBounds for details).
    */
   getAlignBounds(): Bounds2 | null {
     return this._alignBounds;
   }
-
-  get alignBounds(): Bounds2 | null { return this.getAlignBounds(); }
 
   /**
    * Sets the attachment to an AlignGroup. When attached, our alignBounds will be controlled by the group.
@@ -257,14 +257,14 @@ export default class AlignBox extends SuperType {
 
   set group( value: AlignGroup | null ) { this.setGroup( value ); }
 
+  get group(): AlignGroup | null { return this.getGroup(); }
+
   /**
    * Returns the attached alignment group (if one exists), or null otherwise.
    */
   getGroup(): AlignGroup | null {
     return this._group;
   }
-
-  get group(): AlignGroup | null { return this.getGroup(); }
 
   /**
    * Sets the horizontal alignment of this box.
@@ -284,14 +284,14 @@ export default class AlignBox extends SuperType {
 
   set xAlign( value: XAlign ) { this.setXAlign( value ); }
 
+  get xAlign(): XAlign { return this.getXAlign(); }
+
   /**
    * Returns the current horizontal alignment of this box.
    */
   getXAlign(): XAlign {
     return this._xAlign;
   }
-
-  get xAlign(): XAlign { return this.getXAlign(); }
 
   /**
    * Sets the vertical alignment of this box.
@@ -311,14 +311,14 @@ export default class AlignBox extends SuperType {
 
   set yAlign( value: YAlign ) { this.setYAlign( value ); }
 
+  get yAlign(): YAlign { return this.getYAlign(); }
+
   /**
    * Returns the current vertical alignment of this box.
    */
   getYAlign(): YAlign {
     return this._yAlign;
   }
-
-  get yAlign(): YAlign { return this.getYAlign(); }
 
   /**
    * Sets the margin of this box (setting margin values for all sides at once).
@@ -345,6 +345,8 @@ export default class AlignBox extends SuperType {
 
   set margin( value: number ) { this.setMargin( value ); }
 
+  get margin(): number { return this.getMargin(); }
+
   /**
    * Returns the current margin of this box (assuming all margin values are the same).
    */
@@ -355,8 +357,6 @@ export default class AlignBox extends SuperType {
       'Getting margin does not have a unique result if the left and right margins are different' );
     return this._leftMargin;
   }
-
-  get margin(): number { return this.getMargin(); }
 
   /**
    * Sets the horizontal margin of this box (setting both left and right margins at once).
@@ -380,6 +380,8 @@ export default class AlignBox extends SuperType {
 
   set xMargin( value: number ) { this.setXMargin( value ); }
 
+  get xMargin(): number { return this.getXMargin(); }
+
   /**
    * Returns the current horizontal margin of this box (assuming the left and right margins are the same).
    */
@@ -388,8 +390,6 @@ export default class AlignBox extends SuperType {
       'Getting xMargin does not have a unique result if the left and right margins are different' );
     return this._leftMargin;
   }
-
-  get xMargin(): number { return this.getXMargin(); }
 
   /**
    * Sets the vertical margin of this box (setting both top and bottom margins at once).
@@ -413,6 +413,8 @@ export default class AlignBox extends SuperType {
 
   set yMargin( value: number ) { this.setYMargin( value ); }
 
+  get yMargin(): number { return this.getYMargin(); }
+
   /**
    * Returns the current vertical margin of this box (assuming the top and bottom margins are the same).
    */
@@ -421,8 +423,6 @@ export default class AlignBox extends SuperType {
       'Getting yMargin does not have a unique result if the top and bottom margins are different' );
     return this._topMargin;
   }
-
-  get yMargin(): number { return this.getYMargin(); }
 
   /**
    * Sets the left margin of this box.
@@ -446,14 +446,14 @@ export default class AlignBox extends SuperType {
 
   set leftMargin( value: number ) { this.setLeftMargin( value ); }
 
+  get leftMargin(): number { return this.getLeftMargin(); }
+
   /**
    * Returns the current left margin of this box.
    */
   getLeftMargin(): number {
     return this._leftMargin;
   }
-
-  get leftMargin(): number { return this.getLeftMargin(); }
 
   /**
    * Sets the right margin of this box.
@@ -477,14 +477,14 @@ export default class AlignBox extends SuperType {
 
   set rightMargin( value: number ) { this.setRightMargin( value ); }
 
+  get rightMargin(): number { return this.getRightMargin(); }
+
   /**
    * Returns the current right margin of this box.
    */
   getRightMargin(): number {
     return this._rightMargin;
   }
-
-  get rightMargin(): number { return this.getRightMargin(); }
 
   /**
    * Sets the top margin of this box.
@@ -508,14 +508,14 @@ export default class AlignBox extends SuperType {
 
   set topMargin( value: number ) { this.setTopMargin( value ); }
 
+  get topMargin(): number { return this.getTopMargin(); }
+
   /**
    * Returns the current top margin of this box.
    */
   getTopMargin(): number {
     return this._topMargin;
   }
-
-  get topMargin(): number { return this.getTopMargin(); }
 
   /**
    * Sets the bottom margin of this box.
@@ -539,14 +539,14 @@ export default class AlignBox extends SuperType {
 
   set bottomMargin( value: number ) { this.setBottomMargin( value ); }
 
+  get bottomMargin(): number { return this.getBottomMargin(); }
+
   /**
    * Returns the current bottom margin of this box.
    */
   getBottomMargin(): number {
     return this._bottomMargin;
   }
-
-  get bottomMargin(): number { return this.getBottomMargin(); }
 
   /**
    * Returns the bounding box of this box's content. This will include any margins.

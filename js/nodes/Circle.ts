@@ -205,14 +205,14 @@ export default class Circle extends Path {
 
   set radius( value: number ) { this.setRadius( value ); }
 
+  get radius(): number { return this.getRadius(); }
+
   /**
    * Returns the radius of the circle.
    */
   getRadius(): number {
     return this._radius;
   }
-
-  get radius(): number { return this.getRadius(); }
 
   /**
    * Computes the bounds of the Circle, including any applied stroke. Overridden for efficiency.

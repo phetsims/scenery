@@ -337,14 +337,14 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
 
   set transform( transform ) { this.setTransform( transform ); }
 
+  get transform() { return this.getTransform(); }
+
   /**
    * Returns the transform of the listener.
    */
   public getTransform(): Transform3 | null {
     return this._transform;
   }
-
-  get transform() { return this.getTransform(); }
 
   /**
    * Getter for the dragVelocity property, see options.dragVelocity for more info.

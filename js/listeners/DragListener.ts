@@ -774,14 +774,14 @@ export default class DragListener extends PressListener implements IInputListene
 
   set transform( transform: Transform3 | null ) { this.setTransform( transform ); }
 
+  get transform(): Transform3 | null { return this.getTransform(); }
+
   /**
    * Returns the transform of the listener.
    */
   getTransform(): Transform3 | null {
     return this._transform;
   }
-
-  get transform(): Transform3 | null { return this.getTransform(); }
 
   /**
    * Interrupts the listener, releasing it (canceling behavior).

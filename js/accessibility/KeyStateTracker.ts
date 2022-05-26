@@ -406,9 +406,9 @@ class KeyStateTracker {
 
   set enabled( enabled ) { this.setEnabled( enabled ); }
 
-  public isEnabled(): boolean { return this._enabled; }
-
   get enabled(): boolean { return this.isEnabled(); }
+
+  public isEnabled(): boolean { return this._enabled; }
 
   /**
    * Detach listeners from the document that would update the state of this KeyStateTracker on key presses.

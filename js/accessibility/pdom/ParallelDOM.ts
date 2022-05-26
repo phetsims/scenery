@@ -710,6 +710,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set accessibleName( accessibleName: string | null ) { this.setAccessibleName( accessibleName ); }
 
+  get accessibleName(): string | null { return this.getAccessibleName(); }
+
   /**
    * Get the tag name of the DOM element representing this node for accessibility.
    *
@@ -718,8 +720,6 @@ export default class ParallelDOM extends PhetioObject {
   getAccessibleName(): string | null {
     return this._accessibleName;
   }
-
-  get accessibleName(): string | null { return this.getAccessibleName(); }
 
   /**
    * Remove this Node from the PDOM by clearing its pdom content. This can be useful when creating icons from
@@ -765,6 +765,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set accessibleNameBehavior( accessibleNameBehavior: PDOMBehaviorFunction ) { this.setAccessibleNameBehavior( accessibleNameBehavior ); }
 
+  get accessibleNameBehavior(): PDOMBehaviorFunction { return this.getAccessibleNameBehavior(); }
+
   /**
    * Get the help text of the interactive element.
    *
@@ -774,9 +776,6 @@ export default class ParallelDOM extends PhetioObject {
   getAccessibleNameBehavior(): PDOMBehaviorFunction {
     return this._accessibleNameBehavior;
   }
-
-  get accessibleNameBehavior(): PDOMBehaviorFunction { return this.getAccessibleNameBehavior(); }
-
 
   /**
    * Set the Node heading content. This by default will be a heading tag whose level is dependent on how many parents
@@ -797,6 +796,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set pdomHeading( pdomHeading: string | null ) { this.setPDOMHeading( pdomHeading ); }
 
+  get pdomHeading() { return this.getPDOMHeading(); }
+
   /**
    * Get the value of this Node's heading. Use null to clear the heading
    *
@@ -807,9 +808,6 @@ export default class ParallelDOM extends PhetioObject {
   getPDOMHeading(): string | null {
     return this._pdomHeading;
   }
-
-  get pdomHeading() { return this.getPDOMHeading(); }
-
 
   /**
    * Set the behavior of how `this.pdomHeading` is set in the PDOM. See default behavior function for more
@@ -830,6 +828,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set pdomHeadingBehavior( pdomHeadingBehavior: PDOMBehaviorFunction ) { this.setPDOMHeadingBehavior( pdomHeadingBehavior ); }
 
+  get pdomHeadingBehavior(): PDOMBehaviorFunction { return this.getPDOMHeadingBehavior(); }
+
   /**
    * Get the help text of the interactive element.
    *
@@ -840,9 +840,6 @@ export default class ParallelDOM extends PhetioObject {
   getPDOMHeadingBehavior(): PDOMBehaviorFunction {
     return this._pdomHeadingBehavior;
   }
-
-  get pdomHeadingBehavior(): PDOMBehaviorFunction { return this.getPDOMHeadingBehavior(); }
-
 
   /**
    * Get the tag name of the DOM element representing this node for accessibility.
@@ -909,6 +906,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set helpText( helpText: string | null ) { this.setHelpText( helpText ); }
 
+  get helpText(): string | null { return this.getHelpText(); }
+
   /**
    * Get the help text of the interactive element.
    *
@@ -918,8 +917,6 @@ export default class ParallelDOM extends PhetioObject {
   getHelpText(): string | null {
     return this._helpText;
   }
-
-  get helpText(): string | null { return this.getHelpText(); }
 
   /**
    * helpTextBehavior is a function that will set the appropriate options on this node to get the desired
@@ -940,6 +937,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set helpTextBehavior( helpTextBehavior: PDOMBehaviorFunction ) { this.setHelpTextBehavior( helpTextBehavior ); }
 
+  get helpTextBehavior(): PDOMBehaviorFunction { return this.getHelpTextBehavior(); }
+
   /**
    * Get the help text of the interactive element.
    *
@@ -949,8 +948,6 @@ export default class ParallelDOM extends PhetioObject {
   getHelpTextBehavior(): PDOMBehaviorFunction {
     return this._helpTextBehavior;
   }
-
-  get helpTextBehavior(): PDOMBehaviorFunction { return this.getHelpTextBehavior(); }
 
 
   /***********************************************************************************************************/
@@ -975,14 +972,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set tagName( tagName: string | null ) { this.setTagName( tagName ); }
 
+  get tagName(): string | null { return this.getTagName(); }
+
   /**
    * Get the tag name of the DOM element representing this node for accessibility.
    */
   getTagName(): string | null {
     return this._tagName;
   }
-
-  get tagName(): string | null { return this.getTagName(); }
 
   /**
    * Set the tag name for the accessible label sibling for this Node. DOM element tag names are read-only,
@@ -1002,14 +999,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set labelTagName( tagName: string | null ) { this.setLabelTagName( tagName ); }
 
+  get labelTagName(): string | null { return this.getLabelTagName(); }
+
   /**
    * Get the label sibling HTML tag name.
    */
   getLabelTagName(): string | null {
     return this._labelTagName;
   }
-
-  get labelTagName(): string | null { return this.getLabelTagName(); }
 
   /**
    * Set the tag name for the description sibling. HTML element tag names are read-only, so this will require creating
@@ -1032,14 +1029,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set descriptionTagName( tagName: string | null ) { this.setDescriptionTagName( tagName ); }
 
+  get descriptionTagName(): string | null { return this.getDescriptionTagName(); }
+
   /**
    * Get the HTML tag name for the description sibling.
    */
   getDescriptionTagName(): string | null {
     return this._descriptionTagName;
   }
-
-  get descriptionTagName(): string | null { return this.getDescriptionTagName(); }
 
   /**
    * Sets the type for an input element.  Element must have the INPUT tag name. The input attribute is not
@@ -1068,14 +1065,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set inputType( inputType: string | null ) { this.setInputType( inputType ); }
 
+  get inputType(): string | null { return this.getInputType(); }
+
   /**
    * Get the input type. Input type is only relevant if this Node's primary sibling has tag name "INPUT".
    */
   getInputType(): string | null {
     return this._inputType;
   }
-
-  get inputType(): string | null { return this.getInputType(); }
 
   /**
    * By default the label will be prepended before the primary sibling in the PDOM. This
@@ -1100,14 +1097,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set appendLabel( appendLabel: boolean ) { this.setAppendLabel( appendLabel ); }
 
+  get appendLabel(): boolean { return this.getAppendLabel(); }
+
   /**
    * Get whether the label sibling should be appended after the primary sibling.
    */
   getAppendLabel(): boolean {
     return this._appendLabel;
   }
-
-  get appendLabel(): boolean { return this.getAppendLabel(); }
 
   /**
    * By default the label will be prepended before the primary sibling in the PDOM. This
@@ -1132,15 +1129,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set appendDescription( appendDescription: boolean ) { this.setAppendDescription( appendDescription ); }
 
+  get appendDescription(): boolean { return this.getAppendDescription(); }
+
   /**
    * Get whether the description sibling should be appended after the primary sibling.
    */
   getAppendDescription(): boolean {
     return this._appendDescription;
   }
-
-  get appendDescription(): boolean { return this.getAppendDescription(); }
-
 
   /**
    * Set the container parent tag name. By specifying this container parent, an element will be created that
@@ -1168,14 +1164,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set containerTagName( tagName: string | null ) { this.setContainerTagName( tagName ); }
 
+  get containerTagName(): string | null { return this.getContainerTagName(); }
+
   /**
    * Get the tag name for the container parent element.
    */
   getContainerTagName(): string | null {
     return this._containerTagName;
   }
-
-  get containerTagName(): string | null { return this.getContainerTagName(); }
 
   /**
    * Set the content of the label sibling for the this node.  The label sibling will default to the value of
@@ -1207,14 +1203,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set labelContent( label: string | null ) { this.setLabelContent( label ); }
 
+  get labelContent(): string | null { return this.getLabelContent(); }
+
   /**
    * Get the content for this Node's label sibling DOM element.
    */
   getLabelContent(): string | null {
     return this._labelContent;
   }
-
-  get labelContent(): string | null { return this.getLabelContent(); }
 
   /**
    * Set the inner content for the primary sibling of the PDOMPeers of this Node. Will be set as textContent
@@ -1236,14 +1232,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set innerContent( content: string | null ) { this.setInnerContent( content ); }
 
+  get innerContent(): string | null { return this.getInnerContent(); }
+
   /**
    * Get the inner content, the string that is the innerHTML or innerText for the Node's primary sibling.
    */
   getInnerContent(): string | null {
     return this._innerContent;
   }
-
-  get innerContent(): string | null { return this.getInnerContent(); }
 
   /**
    * Set the description content for this Node's primary sibling. The description sibling tag name must support
@@ -1270,14 +1266,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set descriptionContent( textContent: string | null ) { this.setDescriptionContent( textContent ); }
 
+  get descriptionContent(): string | null { return this.getDescriptionContent(); }
+
   /**
    * Get the content for this Node's description sibling DOM Element.
    */
   getDescriptionContent(): string | null {
     return this._descriptionContent;
   }
-
-  get descriptionContent(): string | null { return this.getDescriptionContent(); }
 
   /**
    * Set the ARIA role for this Node's primary sibling. According to the W3C, the ARIA role is read-only for a DOM
@@ -1309,14 +1305,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set ariaRole( ariaRole: string | null ) { this.setAriaRole( ariaRole ); }
 
+  get ariaRole(): string | null { return this.getAriaRole(); }
+
   /**
    * Get the ARIA role representing this node.
    */
   getAriaRole(): string | null {
     return this._ariaRole;
   }
-
-  get ariaRole(): string | null { return this.getAriaRole(); }
 
   /**
    * Set the ARIA role for this node's container parent element.  According to the W3C, the ARIA role is read-only
@@ -1352,14 +1348,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set containerAriaRole( ariaRole: string | null ) { this.setContainerAriaRole( ariaRole ); }
 
+  get containerAriaRole(): string | null { return this.getContainerAriaRole(); }
+
   /**
    * Get the ARIA role assigned to the container parent element.
    */
   getContainerAriaRole(): string | null {
     return this._containerAriaRole;
   }
-
-  get containerAriaRole(): string | null { return this.getContainerAriaRole(); }
 
   /**
    * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
@@ -1382,6 +1378,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set ariaValueText( ariaValueText: string | null ) { this.setAriaValueText( ariaValueText ); }
 
+  get ariaValueText(): string | null { return this.getAriaValueText(); }
+
   /**
    * Get the value of the aria-valuetext attribute for this Node's primary sibling. If null, then the attribute
    * has not been set on the primary sibling.
@@ -1389,8 +1387,6 @@ export default class ParallelDOM extends PhetioObject {
   getAriaValueText(): string | null {
     return this._ariaValueText;
   }
-
-  get ariaValueText(): string | null { return this.getAriaValueText(); }
 
   /**
    * Sets the namespace for the primary element (relevant for MathML/SVG/etc.)
@@ -1418,14 +1414,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set pdomNamespace( value: string | null ) { this.setPDOMNamespace( value ); }
 
+  get pdomNamespace(): string | null { return this.getPDOMNamespace(); }
+
   /**
    * Returns the accessible namespace (see setPDOMNamespace for more information).
    */
   getPDOMNamespace(): string | null {
     return this._pdomNamespace;
   }
-
-  get pdomNamespace(): string | null { return this.getPDOMNamespace(); }
 
   /**
    * Sets the 'aria-label' attribute for labelling the Node's primary sibling. By using the
@@ -1451,14 +1447,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set ariaLabel( ariaLabel: string | null ) { this.setAriaLabel( ariaLabel ); }
 
+  get ariaLabel(): string | null { return this.getAriaLabel(); }
+
   /**
    * Get the value of the aria-label attribute for this Node's primary sibling.
    */
   getAriaLabel(): string | null {
     return this._ariaLabel;
   }
-
-  get ariaLabel(): string | null { return this.getAriaLabel(); }
 
   /**
    * Set the focus highlight for this node. By default, the focus highlight will be a pink rectangle that
@@ -1486,14 +1482,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set focusHighlight( focusHighlight: Highlight ) { this.setFocusHighlight( focusHighlight ); }
 
+  get focusHighlight(): Highlight { return this.getFocusHighlight(); }
+
   /**
    * Get the focus highlight for this node.
    */
   getFocusHighlight(): Highlight {
     return this._focusHighlight;
   }
-
-  get focusHighlight(): Highlight { return this.getFocusHighlight(); }
 
   /**
    * Setting a flag to break default and allow the focus highlight to be (z) layered into the scene graph.
@@ -1519,14 +1515,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set focusHighlightLayerable( focusHighlightLayerable: boolean ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); }
 
+  get focusHighlightLayerable(): boolean { return this.getFocusHighlightLayerable(); }
+
   /**
    * Get the flag for if this node is layerable in the scene graph (or if it is always on top, like the default).
    */
   getFocusHighlightLayerable(): boolean {
     return this._focusHighlightLayerable;
   }
-
-  get focusHighlightLayerable(): boolean { return this.getFocusHighlightLayerable(); }
 
   /**
    * Set whether or not this node has a group focus highlight. If this node has a group focus highlight, an extra
@@ -1543,14 +1539,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set groupFocusHighlight( groupHighlight: Node | boolean ) { this.setGroupFocusHighlight( groupHighlight ); }
 
+  get groupFocusHighlight(): Node | boolean { return this.getGroupFocusHighlight(); }
+
   /**
    * Get whether or not this node has a 'group' focus highlight, see setter for more information.
    */
   getGroupFocusHighlight(): Node | boolean {
     return this._groupFocusHighlight;
   }
-
-  get groupFocusHighlight(): Node | boolean { return this.getGroupFocusHighlight(); }
 
   /**
    * Very similar algorithm to setChildren in Node.js
@@ -1598,11 +1594,11 @@ export default class ParallelDOM extends PhetioObject {
 
   set ariaLabelledbyAssociations( ariaLabelledbyAssociations: Association[] ) { this.setAriaLabelledbyAssociations( ariaLabelledbyAssociations ); }
 
+  get ariaLabelledbyAssociations(): Association[] { return this.getAriaLabelledbyAssociations(); }
+
   getAriaLabelledbyAssociations(): Association[] {
     return this._ariaLabelledbyAssociations;
   }
-
-  get ariaLabelledbyAssociations(): Association[] { return this.getAriaLabelledbyAssociations(); }
 
   /**
    * Add an aria-labelledby association to this node. The data in the associationObject will be implemented like
@@ -1724,11 +1720,11 @@ export default class ParallelDOM extends PhetioObject {
 
   set ariaDescribedbyAssociations( ariaDescribedbyAssociations: Association[] ) { this.setAriaDescribedbyAssociations( ariaDescribedbyAssociations ); }
 
+  get ariaDescribedbyAssociations(): Association[] { return this.getAriaDescribedbyAssociations(); }
+
   getAriaDescribedbyAssociations(): Association[] {
     return this._ariaDescribedbyAssociations;
   }
-
-  get ariaDescribedbyAssociations(): Association[] { return this.getAriaDescribedbyAssociations(); }
 
   /**
    * Add an aria-describedby association to this node. The data in the associationObject will be implemented like
@@ -1859,11 +1855,11 @@ export default class ParallelDOM extends PhetioObject {
 
   set activeDescendantAssociations( activeDescendantAssociations: Association[] ) { this.setActiveDescendantAssociations( activeDescendantAssociations ); }
 
+  get activeDescendantAssociations(): Association[] { return this.getActiveDescendantAssociations(); }
+
   getActiveDescendantAssociations(): Association[] {
     return this._activeDescendantAssociations;
   }
-
-  get activeDescendantAssociations(): Association[] { return this.getActiveDescendantAssociations(); }
 
   /**
    * Add an aria-activeDescendant association to this node. The data in the associationObject will be implemented like
@@ -2023,6 +2019,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set pdomOrder( value: ( Node | null )[] | null ) { this.setPDOMOrder( value ); }
 
+  get pdomOrder(): ( Node | null )[] | null { return this.getPDOMOrder(); }
+
   /**
    * Returns the pdom (focus) order for this node.
    * If there is an existing array, this returns a copy of that array. This is important because clients may then
@@ -2034,8 +2032,6 @@ export default class ParallelDOM extends PhetioObject {
     }
     return this._pdomOrder;
   }
-
-  get pdomOrder(): ( Node | null )[] | null { return this.getPDOMOrder(); }
 
   /**
    * Returns whether this node has an pdomOrder that is effectively different than the default.
@@ -2127,14 +2123,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set pdomVisible( visible: boolean ) { this.setPDOMVisible( visible ); }
 
+  get pdomVisible(): boolean { return this.isPDOMVisible(); }
+
   /**
    * Get whether or not this node's representative DOM element is visible.
    */
   isPDOMVisible(): boolean {
     return this._pdomVisible;
   }
-
-  get pdomVisible(): boolean { return this.isPDOMVisible(); }
 
   /**
    * Returns true if any of the PDOMInstances for the Node are globally visible and displayed in the PDOM. A
@@ -2175,14 +2171,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set inputValue( value: string | number | null ) { this.setInputValue( value ); }
 
+  get inputValue(): string | number | null { return this.getInputValue(); }
+
   /**
    * Get the value of the element. Element must be a form element to support the value attribute.
    */
   getInputValue(): string | number | null {
     return this._inputValue;
   }
-
-  get inputValue(): string | number | null { return this.getInputValue(); }
 
   /**
    * Set whether or not the checked attribute appears on the dom elements associated with this Node's
@@ -2210,14 +2206,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set pdomChecked( checked: boolean ) { this.setPDOMChecked( checked ); }
 
+  get pdomChecked(): boolean { return this.getPDOMChecked(); }
+
   /**
    * Get whether or not the pdom input is 'checked'.
    */
   getPDOMChecked(): boolean {
     return this._pdomChecked;
   }
-
-  get pdomChecked(): boolean { return this.getPDOMChecked(); }
 
   /**
    * Get an array containing all pdom attributes that have been added to this Node's primary sibling.
@@ -2461,6 +2457,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set focusable( isFocusable: boolean | null ) { this.setFocusable( isFocusable ); }
 
+  get focusable(): boolean | null { return this.isFocusable(); }
+
   /**
    * Get whether or not the node is focusable. Use the focusOverride, and then default to browser defined
    * focusable elements.
@@ -2480,9 +2478,6 @@ export default class ParallelDOM extends PhetioObject {
       return PDOMUtils.tagIsDefaultFocusable( this._tagName );
     }
   }
-
-  get focusable(): boolean | null { return this.isFocusable(); }
-
 
   /**
    * Sets the source Node that controls positioning of the primary sibling. Transforms along the trail to this
@@ -2505,6 +2500,8 @@ export default class ParallelDOM extends PhetioObject {
 
   set pdomTransformSourceNode( node: Node | null ) { this.setPDOMTransformSourceNode( node ); }
 
+  get pdomTransformSourceNode(): Node | null { return this.getPDOMTransformSourceNode(); }
+
   /**
    * Get the source Node that controls positioning of the primary sibling in the global coordinate frame. See
    * setPDOMTransformSourceNode for more in depth information.
@@ -2512,8 +2509,6 @@ export default class ParallelDOM extends PhetioObject {
   getPDOMTransformSourceNode(): Node | null {
     return this._pdomTransformSourceNode;
   }
-
-  get pdomTransformSourceNode(): Node | null { return this.getPDOMTransformSourceNode(); }
 
   /**
    * Sets whether the PDOM sibling elements are positioned in the correct place in the viewport. Doing so is a
@@ -2535,14 +2530,14 @@ export default class ParallelDOM extends PhetioObject {
 
   set positionInPDOM( positionInPDOM: boolean ) { this.setPositionInPDOM( positionInPDOM ); }
 
+  get positionInPDOM(): boolean { return this.getPositionInPDOM(); }
+
   /**
    * Gets whether or not we are positioning the PDOM sibling elements. See setPositionInPDOM().
    */
   getPositionInPDOM(): boolean {
     return this._positionInPDOM;
   }
-
-  get positionInPDOM(): boolean { return this.getPositionInPDOM(); }
 
   /**
    * This function should be used sparingly as a workaround. If used, any DOM input events received from the label

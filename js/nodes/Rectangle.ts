@@ -325,14 +325,14 @@ export default class Rectangle extends SuperType {
 
   set rectX( value: number ) { this.setRectX( value ); }
 
+  get rectX(): number { return this.getRectX(); }
+
   /**
    * Returns the x coordinate of the left side of this rectangle (in the local coordinate frame).
    */
   getRectX(): number {
     return this._rectX;
   }
-
-  get rectX(): number { return this.getRectX(); }
 
   /**
    * Sets the y coordinate of the top side of this rectangle (in the local coordinate frame).
@@ -355,14 +355,14 @@ export default class Rectangle extends SuperType {
 
   set rectY( value: number ) { this.setRectY( value ); }
 
+  get rectY(): number { return this.getRectY(); }
+
   /**
    * Returns the y coordinate of the top side of this rectangle (in the local coordinate frame).
    */
   getRectY(): number {
     return this._rectY;
   }
-
-  get rectY(): number { return this.getRectY(); }
 
   /**
    * Sets the width of the rectangle (in the local coordinate frame).
@@ -385,14 +385,14 @@ export default class Rectangle extends SuperType {
 
   set rectWidth( value: number ) { this.setRectWidth( value ); }
 
+  get rectWidth(): number { return this.getRectWidth(); }
+
   /**
    * Returns the width of the rectangle (in the local coordinate frame).
    */
   getRectWidth(): number {
     return this._rectWidth;
   }
-
-  get rectWidth(): number { return this.getRectWidth(); }
 
   /**
    * Sets the height of the rectangle (in the local coordinate frame).
@@ -415,14 +415,14 @@ export default class Rectangle extends SuperType {
 
   set rectHeight( value: number ) { this.setRectHeight( value ); }
 
+  get rectHeight(): number { return this.getRectHeight(); }
+
   /**
    * Returns the height of the rectangle (in the local coordinate frame).
    */
   getRectHeight(): number {
     return this._rectHeight;
   }
-
-  get rectHeight(): number { return this.getRectHeight(); }
 
   /**
    * Sets the horizontal corner radius of the rectangle (in the local coordinate frame).
@@ -451,14 +451,14 @@ export default class Rectangle extends SuperType {
 
   set cornerXRadius( value: number ) { this.setCornerXRadius( value ); }
 
+  get cornerXRadius(): number { return this.getCornerXRadius(); }
+
   /**
    * Returns the horizontal corner radius of the rectangle (in the local coordinate frame).
    */
   getCornerXRadius(): number {
     return this._cornerXRadius;
   }
-
-  get cornerXRadius(): number { return this.getCornerXRadius(); }
 
   /**
    * Sets the vertical corner radius of the rectangle (in the local coordinate frame).
@@ -487,14 +487,14 @@ export default class Rectangle extends SuperType {
 
   set cornerYRadius( value: number ) { this.setCornerYRadius( value ); }
 
+  get cornerYRadius(): number { return this.getCornerYRadius(); }
+
   /**
    * Returns the vertical corner radius of the rectangle (in the local coordinate frame).
    */
   getCornerYRadius(): number {
     return this._cornerYRadius;
   }
-
-  get cornerYRadius(): number { return this.getCornerYRadius(); }
 
   /**
    * Sets the Rectangle's x/y/width/height from the Bounds2 passed in.
@@ -509,14 +509,14 @@ export default class Rectangle extends SuperType {
 
   set rectBounds( value: Bounds2 ) { this.setRectBounds( value ); }
 
+  get rectBounds(): Bounds2 { return this.getRectBounds(); }
+
   /**
    * Returns a new Bounds2 generated from this Rectangle's x/y/width/height.
    */
   getRectBounds(): Bounds2 {
     return Bounds2.rect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
   }
-
-  get rectBounds(): Bounds2 { return this.getRectBounds(); }
 
   /**
    * Sets the Rectangle's width/height from the Dimension2 size passed in.
@@ -532,14 +532,14 @@ export default class Rectangle extends SuperType {
 
   set rectSize( value: Dimension2 ) { this.setRectSize( value ); }
 
+  get rectSize(): Dimension2 { return this.getRectSize(); }
+
   /**
    * Returns a new Dimension2 generated from this Rectangle's width/height.
    */
   getRectSize(): Dimension2 {
     return new Dimension2( this._rectWidth, this._rectHeight );
   }
-
-  get rectSize(): Dimension2 { return this.getRectSize(); }
 
   /**
    * Sets the width of the rectangle while keeping its right edge (x + width) in the same position
@@ -820,6 +820,8 @@ export default class Rectangle extends SuperType {
 
   set cornerRadius( value: number ) { this.setCornerRadius( value ); }
 
+  get cornerRadius(): number { return this.getCornerRadius(); }
+
   /**
    * Returns the corner radius if both the horizontal and vertical corner radii are the same.
    *
@@ -831,8 +833,6 @@ export default class Rectangle extends SuperType {
 
     return this._cornerXRadius;
   }
-
-  get cornerRadius(): number { return this.getCornerRadius(); }
 
   /**
    * Returns whether a point is within a rounded rectangle.

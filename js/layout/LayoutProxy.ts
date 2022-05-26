@@ -412,6 +412,13 @@ export default class LayoutProxy {
     return preferredWidth === null ? null : Math.abs( this.trail!.getParentTransform().transformDeltaX( preferredWidth ) );
   }
 
+  set preferredWidth( preferredWidth: number | null ) {
+    assert && this.checkPreconditions();
+    assert && assert( isWidthSizable( this.node ) );
+
+    ( this.node as WidthSizableNode ).preferredWidth = preferredWidth === null ? null : Math.abs( this.trail!.getParentTransform().inverseDeltaX( preferredWidth ) );
+  }
+
   get preferredHeight(): number | null {
     assert && this.checkPreconditions();
     assert && assert( isHeightSizable( this.node ) );
@@ -419,13 +426,6 @@ export default class LayoutProxy {
     const preferredHeight = ( this.node as HeightSizableNode ).preferredHeight;
 
     return preferredHeight === null ? null : Math.abs( this.trail!.getParentTransform().transformDeltaY( preferredHeight ) );
-  }
-
-  set preferredWidth( preferredWidth: number | null ) {
-    assert && this.checkPreconditions();
-    assert && assert( isWidthSizable( this.node ) );
-
-    ( this.node as WidthSizableNode ).preferredWidth = preferredWidth === null ? null : Math.abs( this.trail!.getParentTransform().inverseDeltaX( preferredWidth ) );
   }
 
   set preferredHeight( preferredHeight: number | null ) {

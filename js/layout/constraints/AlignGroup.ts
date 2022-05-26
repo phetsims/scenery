@@ -162,14 +162,14 @@ export default class AlignGroup {
 
   set matchHorizontal( value: boolean ) { this.setMatchHorizontal( value ); }
 
+  get matchHorizontal(): boolean { return this.getMatchHorizontal(); }
+
   /**
    * Returns whether boxes currently are horizontally matched. See setMatchHorizontal() for details.
    */
   getMatchHorizontal(): boolean {
     return this._matchHorizontal;
   }
-
-  get matchHorizontal(): boolean { return this.getMatchHorizontal(); }
 
   /**
    * Sets whether the heights of the align boxes should all match. If false, each box will use its preferred height
@@ -190,14 +190,14 @@ export default class AlignGroup {
 
   set matchVertical( value: boolean ) { this.setMatchVertical( value ); }
 
+  get matchVertical(): boolean { return this.getMatchVertical(); }
+
   /**
    * Returns whether boxes currently are vertically matched. See setMatchVertical() for details.
    */
   getMatchVertical(): boolean {
     return this._matchVertical;
   }
-
-  get matchVertical(): boolean { return this.getMatchVertical(); }
 
   /**
    * Dispose all the boxes.

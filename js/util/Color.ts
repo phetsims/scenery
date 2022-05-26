@@ -58,7 +58,7 @@ export default class Color {
   private immutable?: boolean;
 
   // Fires when the color is changed
-  changeEmitter: TinyEmitter<[]>
+  changeEmitter: TinyEmitter<[]>;
 
   /**
    * Creates a Color with an initial value. Multiple different types of parameters are supported:
@@ -161,6 +161,8 @@ export default class Color {
 
   get red(): number { return this.getRed(); }
 
+  set red( value: number ) { this.setRed( value ); }
+
   /**
    * Sets the red value.
    *
@@ -169,8 +171,6 @@ export default class Color {
   setRed( value: number ): this {
     return this.setRGBA( value, this.g, this.b, this.a );
   }
-
-  set red( value: number ) { this.setRed( value ); }
 
   /**
    * Returns the green value as an integer between 0 and 255
@@ -181,6 +181,8 @@ export default class Color {
 
   get green(): number { return this.getGreen(); }
 
+  set green( value: number ) { this.setGreen( value ); }
+
   /**
    * Sets the green value.
    *
@@ -189,8 +191,6 @@ export default class Color {
   setGreen( value: number ): this {
     return this.setRGBA( this.r, value, this.b, this.a );
   }
-
-  set green( value: number ) { this.setGreen( value ); }
 
   /**
    * Returns the blue value as an integer between 0 and 255
@@ -201,6 +201,8 @@ export default class Color {
 
   get blue(): number { return this.getBlue(); }
 
+  set blue( value: number ) { this.setBlue( value ); }
+
   /**
    * Sets the blue value.
    *
@@ -209,8 +211,6 @@ export default class Color {
   setBlue( value: number ): this {
     return this.setRGBA( this.r, this.g, value, this.a );
   }
-
-  set blue( value: number ) { this.setBlue( value ); }
 
   /**
    * Returns the alpha value as a floating-point value between 0 and 1
@@ -221,6 +221,8 @@ export default class Color {
 
   get alpha(): number { return this.getAlpha(); }
 
+  set alpha( value: number ) { this.setAlpha( value ); }
+
   /**
    * Sets the alpha value.
    *
@@ -229,8 +231,6 @@ export default class Color {
   setAlpha( value: number ): this {
     return this.setRGBA( this.r, this.g, this.b, value );
   }
-
-  set alpha( value: number ) { this.setAlpha( value ); }
 
   /**
    * Sets the value of this Color using RGB integral between 0-255, alpha (float) between 0-1.

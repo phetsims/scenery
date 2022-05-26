@@ -271,6 +271,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set image( value: ImageableImage ) { this.setImage( value ); }
 
+    get image(): HTMLImageElement | HTMLCanvasElement { return this.getImage(); }
+
     /**
      * Returns the current image's representation as either a Canvas or img element.
        *
@@ -285,8 +287,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
       return this._image!;
     }
-
-    get image(): HTMLImageElement | HTMLCanvasElement { return this.getImage(); }
 
     /**
      * Triggers recomputation of the image's bounds and refreshes any displays output of the image.
@@ -348,6 +348,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set imageOpacity( value: number ) { this.setImageOpacity( value ); }
 
+    get imageOpacity(): number { return this.getImageOpacity(); }
+
     /**
      * Returns the opacity applied only to this image (not including children).
      *
@@ -356,8 +358,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     getImageOpacity(): number {
       return this._imageOpacity;
     }
-
-    get imageOpacity(): number { return this.getImageOpacity(); }
 
     /**
      * Provides an initial width for an image that has not loaded yet.
@@ -391,6 +391,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set initialWidth( value: number ) { this.setInitialWidth( value ); }
 
+    get initialWidth(): number { return this.getInitialWidth(); }
+
     /**
      * Returns the initialWidth value set from setInitialWidth().
      *
@@ -399,8 +401,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     getInitialWidth(): number {
       return this._initialWidth;
     }
-
-    get initialWidth(): number { return this.getInitialWidth(); }
 
     /**
      * Provides an initial height for an image that has not loaded yet.
@@ -434,6 +434,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set initialHeight( value: number ) { this.setInitialHeight( value ); }
 
+    get initialHeight(): number { return this.getInitialHeight(); }
+
     /**
      * Returns the initialHeight value set from setInitialHeight().
      *
@@ -442,8 +444,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     getInitialHeight(): number {
       return this._initialHeight;
     }
-
-    get initialHeight(): number { return this.getInitialHeight(); }
 
     /**
      * Sets whether mipmapping is supported.
@@ -470,6 +470,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set mipmap( value: boolean ) { this.setMipmap( value ); }
 
+    get mipmap(): boolean { return this.isMipmap(); }
+
     /**
      * Returns whether mipmapping is supported.
      *
@@ -478,8 +480,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     isMipmap(): boolean {
       return this._mipmap;
     }
-
-    get mipmap(): boolean { return this.isMipmap(); }
 
     /**
      * Sets how much level-of-detail is displayed for mipmapping.
@@ -509,6 +509,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set mipmapBias( value: number ) { this.setMipmapBias( value ); }
 
+    get mipmapBias(): number { return this.getMipmapBias(); }
+
     /**
      * Returns the current mipmap bias.
      *
@@ -517,8 +519,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     getMipmapBias(): number {
       return this._mipmapBias;
     }
-
-    get mipmapBias(): number { return this.getMipmapBias(); }
 
     /**
      * The number of initial mipmap levels to compute (if Scenery generates the mipmaps by setting mipmap:true on a
@@ -541,6 +541,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set mipmapInitialLevel( value: number ) { this.setMipmapInitialLevel( value ); }
 
+    get mipmapInitialLevel(): number { return this.getMipmapInitialLevel(); }
+
     /**
      * Returns the current initial mipmap level.
      *
@@ -549,8 +551,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     getMipmapInitialLevel(): number {
       return this._mipmapInitialLevel;
     }
-
-    get mipmapInitialLevel(): number { return this.getMipmapInitialLevel(); }
 
     /**
      * The maximum (lowest-resolution) level that Scenery will compute if it generates mipmaps (e.g. by setting
@@ -576,6 +576,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set mipmapMaxLevel( value: number ) { this.setMipmapMaxLevel( value ); }
 
+    get mipmapMaxLevel(): number { return this.getMipmapMaxLevel(); }
+
     /**
      * Returns the current maximum mipmap level.
      *
@@ -584,8 +586,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     getMipmapMaxLevel(): number {
       return this._mipmapMaxLevel;
     }
-
-    get mipmapMaxLevel(): number { return this.getMipmapMaxLevel(); }
 
     /**
      * Controls whether either any pixel in the image will be marked as contained (when false), or whether transparent
@@ -607,6 +607,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     set hitTestPixels( value: boolean ) { this.setHitTestPixels( value ); }
 
+    get hitTestPixels(): boolean { return this.getHitTestPixels(); }
+
     /**
      * Returns whether pixels are checked for hit testing.
      *
@@ -615,8 +617,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     getHitTestPixels(): boolean {
       return this._hitTestPixels;
     }
-
-    get hitTestPixels(): boolean { return this.getHitTestPixels(); }
 
     /**
      * Constructs the next available (uncomputed) mipmap level, as long as the previous level was larger than 1x1.

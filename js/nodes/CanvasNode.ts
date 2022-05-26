@@ -46,14 +46,14 @@ export default abstract class CanvasNode extends Node {
 
   set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
 
+  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
+
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
    */
   getCanvasBounds(): Bounds2 {
     return this.getSelfBounds();
   }
-
-  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
 
   /**
    * Whether this Node itself is painted (displays something itself).

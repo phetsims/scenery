@@ -379,14 +379,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingNameResponse( response: VoicingResponse ) { this.setVoicingNameResponse( response ); }
 
+    get voicingNameResponse(): ResolvedResponse { return this.getVoicingNameResponse(); }
+
     /**
      * Get the voicingNameResponse for this Node.
      */
     getVoicingNameResponse(): ResolvedResponse {
       return this._voicingResponsePacket.nameResponse;
     }
-
-    get voicingNameResponse(): ResolvedResponse { return this.getVoicingNameResponse(); }
 
     /**
      * Set the object response for this Node. This is usually the state information associated with this Node, such
@@ -399,14 +399,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingObjectResponse( response: VoicingResponse ) { this.setVoicingObjectResponse( response ); }
 
+    get voicingObjectResponse(): ResolvedResponse { return this.getVoicingObjectResponse(); }
+
     /**
      * Gets the object response for this Node.
      */
     getVoicingObjectResponse(): ResolvedResponse {
       return this._voicingResponsePacket.objectResponse;
     }
-
-    get voicingObjectResponse(): ResolvedResponse { return this.getVoicingObjectResponse(); }
 
     /**
      * Set the context response for this Node. This is usually the content that describes what has happened in
@@ -419,14 +419,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingContextResponse( response: VoicingResponse ) { this.setVoicingContextResponse( response ); }
 
+    get voicingContextResponse(): ResolvedResponse { return this.getVoicingContextResponse(); }
+
     /**
      * Gets the context response for this Node.
      */
     getVoicingContextResponse(): ResolvedResponse {
       return this._voicingResponsePacket.contextResponse;
     }
-
-    get voicingContextResponse(): ResolvedResponse { return this.getVoicingContextResponse(); }
 
     /**
      * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
@@ -439,14 +439,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingHintResponse( response: VoicingResponse ) { this.setVoicingHintResponse( response ); }
 
+    get voicingHintResponse(): ResolvedResponse { return this.getVoicingHintResponse(); }
+
     /**
      * Gets the hint response for this Node.
      */
     getVoicingHintResponse(): ResolvedResponse {
       return this._voicingResponsePacket.hintResponse;
     }
-
-    get voicingHintResponse(): ResolvedResponse { return this.getVoicingHintResponse(); }
 
     /**
      * Set whether or not all responses for this Node will ignore the Properties of responseCollector. If false,
@@ -459,14 +459,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); }
 
+    get voicingIgnoreVoicingManagerProperties(): boolean { return this.getVoicingIgnoreVoicingManagerProperties(); }
+
     /**
      * Get whether or not responses are ignoring responseCollector Properties.
      */
     getVoicingIgnoreVoicingManagerProperties(): boolean {
       return this._voicingResponsePacket.ignoreProperties;
     }
-
-    get voicingIgnoreVoicingManagerProperties(): boolean { return this.getVoicingIgnoreVoicingManagerProperties(); }
 
     /**
      * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
@@ -480,14 +480,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setVoicingResponsePatternCollection( patterns ); }
 
+    get voicingResponsePatternCollection(): ResponsePatternCollection { return this.getVoicingResponsePatternCollection(); }
+
     /**
      * Get the ResponsePatternCollection object that this Voicing Node is using to collect responses.
      */
     getVoicingResponsePatternCollection(): ResponsePatternCollection {
       return this._voicingResponsePacket.responsePatternCollection;
     }
-
-    get voicingResponsePatternCollection(): ResponsePatternCollection { return this.getVoicingResponsePatternCollection(); }
 
     /**
      * Sets the utterance through which voicing associated with this Node will be spoken. By default on initialize,
@@ -510,6 +510,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingUtterance( utterance: Utterance ) { this.setVoicingUtterance( utterance ); }
 
+    get voicingUtterance(): Utterance { return this.getVoicingUtterance(); }
+
     /**
      * Gets the utterance through which voicing associated with this Node will be spoken.
      */
@@ -517,8 +519,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       assertUtterance( this._voicingUtterance );
       return this._voicingUtterance;
     }
-
-    get voicingUtterance(): Utterance { return this.getVoicingUtterance(); }
 
     /**
      * Get the Property indicating that this Voicing Node can speak. True when this Voicing Node and all of its
@@ -539,15 +539,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     set voicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ) { this.setVoicingFocusListener( focusListener ); }
 
+    get voicingFocusListener(): SceneryListenerFunction<FocusEvent> | null { return this.getVoicingFocusListener(); }
+
     /**
      * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
      */
     getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null {
       return this._voicingFocusListener;
     }
-
-    get voicingFocusListener(): SceneryListenerFunction<FocusEvent> | null { return this.getVoicingFocusListener(); }
-
 
     /**
      * The default focus listener attached to this Node during initialization.

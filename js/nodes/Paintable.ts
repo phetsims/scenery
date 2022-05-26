@@ -123,14 +123,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set fill( value: IPaint ) { this.setFill( value ); }
 
+    get fill(): IPaint { return this.getFill(); }
+
     /**
      * Returns the fill (if any) for this Node.
      */
     getFill(): IPaint {
       return this._fill;
     }
-
-    get fill(): IPaint { return this.getFill(); }
 
     /**
      * Returns whether there is a fill applied to this Node.
@@ -182,14 +182,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set stroke( value: IPaint ) { this.setStroke( value ); }
 
+    get stroke(): IPaint { return this.getStroke(); }
+
     /**
      * Returns the stroke (if any) for this Node.
      */
     getStroke(): IPaint {
       return this._stroke;
     }
-
-    get stroke(): IPaint { return this.getStroke(); }
 
     /**
      * Returns whether there is a stroke applied to this Node.
@@ -235,14 +235,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set fillPickable( value: boolean ) { this.setFillPickable( value ); }
 
+    get fillPickable(): boolean { return this.isFillPickable(); }
+
     /**
      * Returns whether the fill is marked as pickable.
      */
     isFillPickable(): boolean {
       return this._fillPickable;
     }
-
-    get fillPickable(): boolean { return this.isFillPickable(); }
 
     /**
      * Sets whether the stroke is marked as pickable.
@@ -261,14 +261,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set strokePickable( value: boolean ) { this.setStrokePickable( value ); }
 
+    get strokePickable(): boolean { return this.isStrokePickable(); }
+
     /**
      * Returns whether the stroke is marked as pickable.
      */
     isStrokePickable(): boolean {
       return this._strokePickable;
     }
-
-    get strokePickable(): boolean { return this.isStrokePickable(); }
 
     /**
      * Sets the line width that will be applied to strokes on this Node.
@@ -291,14 +291,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set lineWidth( value: number ) { this.setLineWidth( value ); }
 
+    get lineWidth(): number { return this.getLineWidth(); }
+
     /**
      * Returns the line width that would be applied to strokes.
      */
     getLineWidth(): number {
       return this._lineDrawingStyles.lineWidth;
     }
-
-    get lineWidth(): number { return this.getLineWidth(); }
 
     /**
      * Sets the line cap style. There are three options:
@@ -324,14 +324,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set lineCap( value: LineCap ) { this.setLineCap( value ); }
 
+    get lineCap(): LineCap { return this.getLineCap(); }
+
     /**
      * Returns the line cap style (controls appearance at the start/end of paths)
      */
     getLineCap(): LineCap {
       return this._lineDrawingStyles.lineCap;
     }
-
-    get lineCap(): LineCap { return this.getLineCap(); }
 
     /**
      * Sets the line join style. There are three options:
@@ -358,14 +358,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set lineJoin( value: LineJoin ) { this.setLineJoin( value ); }
 
+    get lineJoin(): LineJoin { return this.getLineJoin(); }
+
     /**
      * Returns the current line join style (controls join appearance between drawn segments).
      */
     getLineJoin(): LineJoin {
       return this._lineDrawingStyles.lineJoin;
     }
-
-    get lineJoin(): LineJoin { return this.getLineJoin(); }
 
     /**
      * Sets the miterLimit value. This determines how sharp a corner with lineJoin: 'miter' will need to be before
@@ -388,14 +388,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set miterLimit( value: number ) { this.setMiterLimit( value ); }
 
+    get miterLimit(): number { return this.getMiterLimit(); }
+
     /**
      * Returns the miterLimit value.
      */
     getMiterLimit(): number {
       return this._lineDrawingStyles.miterLimit;
     }
-
-    get miterLimit(): number { return this.getMiterLimit(); }
 
     /**
      * Sets the line dash pattern. Should be an array of numbers "on" and "off" alternating. An empty array
@@ -419,14 +419,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set lineDash( value: number[] ) { this.setLineDash( value ); }
 
+    get lineDash(): number[] { return this.getLineDash(); }
+
     /**
      * Gets the line dash pattern. An empty array is the default, indicating no dashing.
      */
     getLineDash(): number[] {
       return this._lineDrawingStyles.lineDash;
     }
-
-    get lineDash(): number[] { return this.getLineDash(); }
 
     /**
      * Returns whether the stroke will be dashed.
@@ -456,14 +456,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set lineDashOffset( value: number ) { this.setLineDashOffset( value ); }
 
+    get lineDashOffset(): number { return this.getLineDashOffset(); }
+
     /**
      * Returns the offset of the line dash pattern from the start of the stroke.
      */
     getLineDashOffset(): number {
       return this._lineDrawingStyles.lineDashOffset;
     }
-
-    get lineDashOffset(): number { return this.getLineDashOffset(); }
 
     /**
      * Sets the LineStyles object (it determines stroke appearance). The passed-in object will be mutated as needed.
@@ -478,14 +478,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set lineStyles( value: LineStyles ) { this.setLineStyles( value ); }
 
+    get lineStyles(): LineStyles { return this.getLineStyles(); }
+
     /**
      * Returns the composite {LineStyles} object, that determines stroke appearance.
      */
     getLineStyles(): LineStyles {
       return this._lineDrawingStyles;
     }
-
-    get lineStyles(): LineStyles { return this.getLineStyles(); }
 
     /**
      * Sets the cached paints to the input array (a defensive copy). Note that it also filters out fills that are
@@ -510,14 +510,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
     set cachedPaints( value: IPaint[] ) { this.setCachedPaints( value ); }
 
+    get cachedPaints(): IPaint[] { return this.getCachedPaints(); }
+
     /**
      * Returns the cached paints.
      */
     getCachedPaints(): IPaint[] {
       return this._cachedPaints;
     }
-
-    get cachedPaints(): IPaint[] { return this.getCachedPaints(); }
 
     /**
      * Adds a cached paint. Does nothing if paint is just a normal fill (string, Color), but for gradients and

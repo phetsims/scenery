@@ -159,14 +159,14 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     set interactiveHighlight( interactiveHighlight: Highlight ) { this.setInteractiveHighlight( interactiveHighlight ); }
 
+    get interactiveHighlight(): Highlight { return this.getInteractiveHighlight(); }
+
     /**
      * Returns the interactive highlight for this Node.
      */
     getInteractiveHighlight(): Highlight {
       return this._interactiveHighlight;
     }
-
-    get interactiveHighlight(): Highlight { return this.getInteractiveHighlight(); }
 
     /**
      * Sets whether the highlight is layerable in the scene graph instead of above everything in the
@@ -188,14 +188,14 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     set interactiveHighlightLayerable( interactiveHighlightLayerable: boolean ) { this.setInteractiveHighlightLayerable( interactiveHighlightLayerable ); }
 
+    get interactiveHighlightLayerable() { return this.getInteractiveHighlightLayerable(); }
+
     /**
      * Get whether the interactive highlight is layerable in the scene graph.
      */
     getInteractiveHighlightLayerable(): boolean {
       return this._interactiveHighlightLayerable;
     }
-
-    get interactiveHighlightLayerable() { return this.getInteractiveHighlightLayerable(); }
 
     /**
      * Returns true if this Node is "activated" by a pointer, indicating that a Pointer is over it

@@ -148,6 +148,7 @@ export default abstract class Pointer {
   }
 
   set cursor( value: string | null ) { this.setCursor( value ); }
+  get cursor(): string | null { return this.getCursor(); }
 
   /**
    * Returns the current cursor override (or null if there is one). See setCursor().
@@ -155,8 +156,6 @@ export default abstract class Pointer {
   getCursor(): string | null {
     return this._cursor;
   }
-
-  get cursor(): string | null { return this.getCursor(); }
 
   /**
    * Returns a defensive copy of all listeners attached to this pointer. (scenery-internal)

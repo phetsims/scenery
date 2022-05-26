@@ -225,7 +225,7 @@ export default class Display {
   // "current" linked-list information so it is up-to-date, but needs to use the "old" information also. We move
   // updating the "current" => "old" linked-list information until after syncTree and stitching is complete, and is
   // taken care of in an updateDisplay pass.
-  private _drawablesToUpdateLinks: Drawable[]
+  private _drawablesToUpdateLinks: Drawable[];
 
   // We store information on {ChangeInterval}s that records change interval
   // information, that may contain references. We don't want to leave those references dangling after we don't need
@@ -777,6 +777,7 @@ export default class Display {
   }
 
   get width(): number { return this.getWidth(); }
+  set width( value: number ) { this.setWidth( value ); }
 
   /**
    * Sets the width that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
@@ -791,8 +792,6 @@ export default class Display {
     return this;
   }
 
-  set width( value: number ) { this.setWidth( value ); }
-
   /**
    * The height of the Display's DOM element
    */
@@ -801,6 +800,7 @@ export default class Display {
   }
 
   get height(): number { return this.getHeight(); }
+  set height( value: number ) { this.setHeight( value ); }
 
   /**
    * Sets the height that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
@@ -815,8 +815,6 @@ export default class Display {
     return this;
   }
 
-  set height( value: number ) { this.setHeight( value ); }
-
   /**
    * Will be applied to the root DOM element on updateDisplay(), and no sooner.
    */
@@ -829,12 +827,11 @@ export default class Display {
   }
 
   set backgroundColor( value: Color | string | null ) { this.setBackgroundColor( value ); }
+  get backgroundColor(): Color | string | null { return this.getBackgroundColor(); }
 
   getBackgroundColor(): Color | string | null {
     return this._backgroundColor;
   }
-
-  get backgroundColor(): Color | string | null { return this.getBackgroundColor(); }
 
   get interactive(): boolean { return this._interactive; }
 

@@ -186,14 +186,14 @@ export default class DOM extends Node {
 
   set element( value: HTMLElement ) { this.setElement( value ); }
 
+  get element(): HTMLElement { return this.getElement(); }
+
   /**
    * Returns the DOM element being displayed by this DOM node.
    */
   getElement(): HTMLElement {
     return this._element;
   }
-
-  get element(): HTMLElement { return this.getElement(); }
 
   /**
    * Sets the value of the preventTransform flag.
@@ -212,6 +212,8 @@ export default class DOM extends Node {
 
   set preventTransform( value: boolean ) { this.setPreventTransform( value ); }
 
+  get preventTransform(): boolean { return this.isTransformPrevented(); }
+
   /**
    * Returns the value of the preventTransform flag.
    *
@@ -220,8 +222,6 @@ export default class DOM extends Node {
   isTransformPrevented(): boolean {
     return this._preventTransform;
   }
-
-  get preventTransform(): boolean { return this.isTransformPrevented(); }
 }
 
 /**

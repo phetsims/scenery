@@ -77,14 +77,14 @@ export default class Sprites extends Node {
 
   set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
 
+  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
+
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
    */
   getCanvasBounds(): Bounds2 {
     return this.getSelfBounds();
   }
-
-  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
 
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local

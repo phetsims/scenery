@@ -389,6 +389,8 @@ export default class RichText extends Node {
 
   set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
 
+  get textProperty(): IProperty<string> { return this.getTextProperty(); }
+
   /**
    * Like Node.getVisibleProperty, but for the text string. Note this is not the same as the Property provided in
    * setTextProperty. Thus is the nature of TinyForwardingProperty.
@@ -396,8 +398,6 @@ export default class RichText extends Node {
   getTextProperty(): IProperty<string> {
     return this._textProperty;
   }
-
-  get textProperty(): IProperty<string> { return this.getTextProperty(); }
 
   /**
    * See documentation and comments in Node.initializePhetioObject
@@ -890,14 +890,14 @@ export default class RichText extends Node {
 
   set text( value: string | number ) { this.setText( value ); }
 
+  get text(): string { return this.getText(); }
+
   /**
    * Returns the text displayed by our node.
    */
   getText(): string {
     return this._textProperty.value;
   }
-
-  get text(): string { return this.getText(); }
 
   /**
    * Sets the method that is used to determine bounds from the text. See Text.setBoundsMethod for details
@@ -913,14 +913,14 @@ export default class RichText extends Node {
 
   set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
 
+  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
+
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
    */
   getBoundsMethod(): TextBoundsMethod {
     return this._boundsMethod;
   }
-
-  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Sets the font of our node.
@@ -938,14 +938,14 @@ export default class RichText extends Node {
 
   set font( value: Font | string ) { this.setFont( value ); }
 
+  get font(): Font | string { return this.getFont(); }
+
   /**
    * Returns the current Font
    */
   getFont(): Font | string {
     return this._font;
   }
-
-  get font(): Font | string { return this.getFont(); }
 
   /**
    * Sets the fill of our text.
@@ -960,14 +960,14 @@ export default class RichText extends Node {
 
   set fill( value: IPaint ) { this.setFill( value ); }
 
+  get fill(): IPaint { return this.getFill(); }
+
   /**
    * Returns the current fill.
    */
   getFill(): IPaint {
     return this._fill;
   }
-
-  get fill(): IPaint { return this.getFill(); }
 
   /**
    * Sets the stroke of our text.
@@ -982,14 +982,14 @@ export default class RichText extends Node {
 
   set stroke( value: IPaint ) { this.setStroke( value ); }
 
+  get stroke(): IPaint { return this.getStroke(); }
+
   /**
    * Returns the current stroke.
    */
   getStroke(): IPaint {
     return this._stroke;
   }
-
-  get stroke(): IPaint { return this.getStroke(); }
 
   /**
    * Sets the lineWidth of our text.
@@ -1004,14 +1004,14 @@ export default class RichText extends Node {
 
   set lineWidth( value: number ) { this.setLineWidth( value ); }
 
+  get lineWidth(): number { return this.getLineWidth(); }
+
   /**
    * Returns the current lineWidth.
    */
   getLineWidth(): number {
     return this._lineWidth;
   }
-
-  get lineWidth(): number { return this.getLineWidth(); }
 
   /**
    * Sets the scale (relative to 1) of any text under subscript (<sub>) elements.
@@ -1028,14 +1028,14 @@ export default class RichText extends Node {
 
   set subScale( value: number ) { this.setSubScale( value ); }
 
+  get subScale(): number { return this.getSubScale(); }
+
   /**
    * Returns the scale (relative to 1) of any text under subscript (<sub>) elements.
    */
   getSubScale(): number {
     return this._subScale;
   }
-
-  get subScale(): number { return this.getSubScale(); }
 
   /**
    * Sets the horizontal spacing before any subscript (<sub>) elements.
@@ -1052,14 +1052,14 @@ export default class RichText extends Node {
 
   set subXSpacing( value: number ) { this.setSubXSpacing( value ); }
 
+  get subXSpacing(): number { return this.getSubXSpacing(); }
+
   /**
    * Returns the horizontal spacing before any subscript (<sub>) elements.
    */
   getSubXSpacing(): number {
     return this._subXSpacing;
   }
-
-  get subXSpacing(): number { return this.getSubXSpacing(); }
 
   /**
    * Sets the adjustment offset to the vertical placement of any subscript (<sub>) elements.
@@ -1076,14 +1076,14 @@ export default class RichText extends Node {
 
   set subYOffset( value: number ) { this.setSubYOffset( value ); }
 
+  get subYOffset(): number { return this.getSubYOffset(); }
+
   /**
    * Returns the adjustment offset to the vertical placement of any subscript (<sub>) elements.
    */
   getSubYOffset(): number {
     return this._subYOffset;
   }
-
-  get subYOffset(): number { return this.getSubYOffset(); }
 
   /**
    * Sets the scale (relative to 1) of any text under superscript (<sup>) elements.
@@ -1100,14 +1100,14 @@ export default class RichText extends Node {
 
   set supScale( value: number ) { this.setSupScale( value ); }
 
+  get supScale(): number { return this.getSupScale(); }
+
   /**
    * Returns the scale (relative to 1) of any text under superscript (<sup>) elements.
    */
   getSupScale(): number {
     return this._supScale;
   }
-
-  get supScale(): number { return this.getSupScale(); }
 
   /**
    * Sets the horizontal spacing before any superscript (<sup>) elements.
@@ -1124,14 +1124,14 @@ export default class RichText extends Node {
 
   set supXSpacing( value: number ) { this.setSupXSpacing( value ); }
 
+  get supXSpacing(): number { return this.getSupXSpacing(); }
+
   /**
    * Returns the horizontal spacing before any superscript (<sup>) elements.
    */
   getSupXSpacing(): number {
     return this._supXSpacing;
   }
-
-  get supXSpacing(): number { return this.getSupXSpacing(); }
 
   /**
    * Sets the adjustment offset to the vertical placement of any superscript (<sup>) elements.
@@ -1148,14 +1148,14 @@ export default class RichText extends Node {
 
   set supYOffset( value: number ) { this.setSupYOffset( value ); }
 
+  get supYOffset(): number { return this.getSupYOffset(); }
+
   /**
    * Returns the adjustment offset to the vertical placement of any superscript (<sup>) elements.
    */
   getSupYOffset(): number {
     return this._supYOffset;
   }
-
-  get supYOffset(): number { return this.getSupYOffset(); }
 
   /**
    * Sets the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
@@ -1173,6 +1173,8 @@ export default class RichText extends Node {
 
   set capHeightScale( value: number ) { this.setCapHeightScale( value ); }
 
+  get capHeightScale(): number { return this.getCapHeightScale(); }
+
   /**
    * Returns the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
    * baseline to the top of the text bounds.
@@ -1180,8 +1182,6 @@ export default class RichText extends Node {
   getCapHeightScale(): number {
     return this._capHeightScale;
   }
-
-  get capHeightScale(): number { return this.getCapHeightScale(); }
 
   /**
    * Sets the lineWidth of underline lines.
@@ -1198,14 +1198,14 @@ export default class RichText extends Node {
 
   set underlineLineWidth( value: number ) { this.setUnderlineLineWidth( value ); }
 
+  get underlineLineWidth(): number { return this.getUnderlineLineWidth(); }
+
   /**
    * Returns the lineWidth of underline lines.
    */
   getUnderlineLineWidth(): number {
     return this._underlineLineWidth;
   }
-
-  get underlineLineWidth(): number { return this.getUnderlineLineWidth(); }
 
   /**
    * Sets the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
@@ -1223,6 +1223,8 @@ export default class RichText extends Node {
 
   set underlineHeightScale( value: number ) { this.setUnderlineHeightScale( value ); }
 
+  get underlineHeightScale(): number { return this.getUnderlineHeightScale(); }
+
   /**
    * Returns the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
@@ -1230,8 +1232,6 @@ export default class RichText extends Node {
   getUnderlineHeightScale(): number {
     return this._underlineHeightScale;
   }
-
-  get underlineHeightScale(): number { return this.getUnderlineHeightScale(); }
 
   /**
    * Sets the lineWidth of strikethrough lines.
@@ -1248,14 +1248,14 @@ export default class RichText extends Node {
 
   set strikethroughLineWidth( value: number ) { this.setStrikethroughLineWidth( value ); }
 
+  get strikethroughLineWidth(): number { return this.getStrikethroughLineWidth(); }
+
   /**
    * Returns the lineWidth of strikethrough lines.
    */
   getStrikethroughLineWidth(): number {
     return this._strikethroughLineWidth;
   }
-
-  get strikethroughLineWidth(): number { return this.getStrikethroughLineWidth(); }
 
   /**
    * Sets the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
@@ -1273,6 +1273,8 @@ export default class RichText extends Node {
 
   set strikethroughHeightScale( value: number ) { this.setStrikethroughHeightScale( value ); }
 
+  get strikethroughHeightScale(): number { return this.getStrikethroughHeightScale(); }
+
   /**
    * Returns the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
@@ -1280,8 +1282,6 @@ export default class RichText extends Node {
   getStrikethroughHeightScale(): number {
     return this._strikethroughHeightScale;
   }
-
-  get strikethroughHeightScale(): number { return this.getStrikethroughHeightScale(); }
 
   /**
    * Sets the color of links. If null, no fill will be overridden.
@@ -1296,14 +1296,14 @@ export default class RichText extends Node {
 
   set linkFill( value: IPaint ) { this.setLinkFill( value ); }
 
+  get linkFill(): IPaint { return this.getLinkFill(); }
+
   /**
    * Returns the color of links.
    */
   getLinkFill(): IPaint {
     return this._linkFill;
   }
-
-  get linkFill(): IPaint { return this.getLinkFill(); }
 
   /**
    * Sets whether link clicks will call event.handle().
@@ -1320,14 +1320,14 @@ export default class RichText extends Node {
 
   set linkEventsHandled( value: boolean ) { this.setLinkEventsHandled( value ); }
 
+  get linkEventsHandled(): boolean { return this.getLinkEventsHandled(); }
+
   /**
    * Returns whether link events will be handled.
    */
   getLinkEventsHandled(): boolean {
     return this._linkEventsHandled;
   }
-
-  get linkEventsHandled(): boolean { return this.getLinkEventsHandled(); }
 
   /**
    * Sets the map of href placeholder => actual href/callback used for links. However if set to true ({boolean}) as a
@@ -1368,14 +1368,14 @@ export default class RichText extends Node {
 
   set links( value: RichTextLinks ) { this.setLinks( value ); }
 
+  get links(): RichTextLinks { return this.getLinks(); }
+
   /**
    * Returns whether link events will be handled.
    */
   getLinks(): RichTextLinks {
     return this._links;
   }
-
-  get links(): RichTextLinks { return this.getLinks(); }
 
   /**
    * Sets the alignment of text (only relevant if there are multiple lines).
@@ -1392,14 +1392,14 @@ export default class RichText extends Node {
 
   set align( value: RichTextAlign ) { this.setAlign( value ); }
 
+  get align(): RichTextAlign { return this.getAlign(); }
+
   /**
    * Returns the current alignment of the text (only relevant if there are multiple lines).
    */
   getAlign(): RichTextAlign {
     return this._align;
   }
-
-  get align(): RichTextAlign { return this.getAlign(); }
 
   /**
    * Sets the leading (spacing between lines)
@@ -1416,14 +1416,14 @@ export default class RichText extends Node {
 
   set leading( value: number ) { this.setLeading( value ); }
 
+  get leading(): number { return this.getLeading(); }
+
   /**
    * Returns the leading (spacing between lines)
    */
   getLeading(): number {
     return this._leading;
   }
-
-  get leading(): number { return this.getLeading(); }
 
   /**
    * Sets the line wrap width for the text (or null if none is desired). Lines longer than this length will wrap
@@ -1443,14 +1443,14 @@ export default class RichText extends Node {
 
   set lineWrap( value: number | null ) { this.setLineWrap( value ); }
 
+  get lineWrap(): number | null { return this.getLineWrap(); }
+
   /**
    * Returns the line wrap width.
    */
   getLineWrap(): number | null {
     return this._lineWrap;
   }
-
-  get lineWrap(): number | null { return this.getLineWrap(); }
 
   override mutate( options?: RichTextOptions ): this {
     if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) && options.textProperty ) {

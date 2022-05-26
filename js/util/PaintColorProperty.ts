@@ -91,14 +91,14 @@ export default class PaintColorProperty extends Property<Color> {
 
   set paint( value ) { this.setPaint( value ); }
 
+  get paint(): IPaint { return this.getPaint(); }
+
   /**
    * Returns the current paint.
    */
   getPaint(): IPaint {
     return this._paint;
   }
-
-  get paint(): IPaint { return this.getPaint(); }
 
   /**
    * Sets the current value used for adjusting the brightness or darkness (luminance) of the color.
@@ -130,6 +130,8 @@ export default class PaintColorProperty extends Property<Color> {
 
   set luminanceFactor( value: number ) { this.setLuminanceFactor( value ); }
 
+  get luminanceFactor(): number { return this.getLuminanceFactor(); }
+
   /**
    * Returns the current value used for adjusting the brightness or darkness (luminance) of the color.
    *
@@ -138,8 +140,6 @@ export default class PaintColorProperty extends Property<Color> {
   getLuminanceFactor(): number {
     return this._luminanceFactor;
   }
-
-  get luminanceFactor(): number { return this.getLuminanceFactor(); }
 
   /**
    * Updates the value of this Property.

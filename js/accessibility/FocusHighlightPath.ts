@@ -206,14 +206,14 @@ class FocusHighlightPath extends Path {
 
   set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
 
+  get innerHighlightColor() { return this.getInnerHighlightColor(); }
+
   /**
    * Get the inner color of this focus highlight path.
    */
   public getInnerHighlightColor(): IPaint {
     return this._innerHighlightColor;
   }
-
-  get innerHighlightColor() { return this.getInnerHighlightColor(); }
 
   /**
    * Set the outer color of this focus highlight.
@@ -225,6 +225,7 @@ class FocusHighlightPath extends Path {
   }
 
   set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); }
+  get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**
    * Get the color of the outer highlight for this FocusHighlightPath
@@ -234,8 +235,6 @@ class FocusHighlightPath extends Path {
   getOuterHighlightColor(): IPaint {
     return this._outerHighlightColor;
   }
-
-  get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**
    * Return the trail to the transform source node being used for this focus highlight. So that we can observe

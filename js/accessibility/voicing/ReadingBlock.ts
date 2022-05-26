@@ -173,14 +173,14 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     set readingBlockTagName( tagName: string | null ) { this.setReadingBlockTagName( tagName ); }
 
+    get readingBlockTagName(): string | null { return this.getReadingBlockTagName(); }
+
     /**
      * Get the tagName for this Node (of ParallelDOM) when Reading Blocks are enabled.
      */
     getReadingBlockTagName(): string | null {
       return this._readingBlockTagName;
     }
-
-    get readingBlockTagName(): string | null { return this.getReadingBlockTagName(); }
 
     /**
      * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
@@ -191,14 +191,14 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     set readingBlockNameResponse( content: VoicingResponse ) { this.setReadingBlockNameResponse( content ); }
 
+    get readingBlockNameResponse(): ResolvedResponse { return this.getReadingBlockNameResponse(); }
+
     /**
      * Gets the content that is spoken whenever the ReadingBLock receives input that would initiate speech.
      */
     getReadingBlockNameResponse(): ResolvedResponse {
       return this._voicingResponsePacket.nameResponse;
     }
-
-    get readingBlockNameResponse(): ResolvedResponse { return this.getReadingBlockNameResponse(); }
 
     /**
      * Sets the hint response for this ReadingBlock. This is only spoken if "Helpful Hints" are enabled by the user.
@@ -209,6 +209,8 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     set readingBlockHintResponse( content: VoicingResponse ) { this.setReadingBlockHintResponse( content ); }
 
+    get readingBlockHintResponse(): ResolvedResponse { return this.getReadingBlockHintResponse(); }
+
     /**
      * Get the hint response for this ReadingBlock. This is additional content that is only read if "Helpful Hints"
      * are enabled.
@@ -216,8 +218,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     getReadingBlockHintResponse(): ResolvedResponse {
       return this._voicingResponsePacket.hintResponse;
     }
-
-    get readingBlockHintResponse(): ResolvedResponse { return this.getReadingBlockHintResponse(); }
 
     /**
      * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
@@ -231,14 +231,14 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     set readingBlockResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setReadingBlockResponsePatternCollection( patterns ); }
 
+    get readingBlockResponsePatternCollection(): ResponsePatternCollection { return this.getReadingBlockResponsePatternCollection(); }
+
     /**
      * Get the ResponsePatternCollection object that this ReadingBlock Node is using to collect responses.
      */
     getReadingBlockResponsePatternCollection(): ResponsePatternCollection {
       return this._voicingResponsePacket.responsePatternCollection;
     }
-
-    get readingBlockResponsePatternCollection(): ResponsePatternCollection { return this.getReadingBlockResponsePatternCollection(); }
 
     /**
      * ReadingBlock must take a ReadingBlockUtterance for its voicingUtterance. You generally shouldn't be using this.
@@ -251,14 +251,12 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     public override set voicingUtterance( utterance: ReadingBlockUtterance ) { super.voicingUtterance = utterance; }
 
+    public override get voicingUtterance(): ReadingBlockUtterance { return this.getVoicingUtterance(); }
+
     public override getVoicingUtterance(): ReadingBlockUtterance {
       const utterance = super.getVoicingUtterance();
       assertReadingBlockUtterance( utterance );
       return utterance;
-    }
-
-    public override get voicingUtterance(): ReadingBlockUtterance {
-      return this.getVoicingUtterance();
     }
 
     override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
@@ -295,6 +293,8 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     set readingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); }
 
+    get readingBlockActiveHighlight(): Highlight { return this._readingBlockActiveHighlight; }
+
     /**
      * Returns the highlight used to surround this Node when the Voicing framework is reading its
      * content.
@@ -302,8 +302,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     getReadingBlockActiveHighlight(): Highlight {
       return this._readingBlockActiveHighlight;
     }
-
-    get readingBlockActiveHighlight(): Highlight { return this._readingBlockActiveHighlight; }
 
     /**
      * Returns true if this ReadingBlock is "activated", indicating that it has received interaction

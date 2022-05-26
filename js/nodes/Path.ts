@@ -132,6 +132,8 @@ export default class Path extends Paintable( Node ) {
 
   set shape( value: Shape | string | null ) { this.setShape( value ); }
 
+  get shape(): Shape | null { return this.getShape(); }
+
   /**
    * Returns the shape that was set for this Path (or for subtypes like Line and Rectangle, will return an immutable
    * Shape that is equivalent in appearance).
@@ -142,8 +144,6 @@ export default class Path extends Paintable( Node ) {
   getShape(): Shape | null {
     return this._shape;
   }
-
-  get shape(): Shape | null { return this.getShape(); }
 
   /**
    * Returns a lazily-created Shape that has the appearance of the Path's shape but stroked using the current
@@ -284,14 +284,14 @@ export default class Path extends Paintable( Node ) {
 
   set boundsMethod( value: BoundsMethod ) { this.setBoundsMethod( value ); }
 
+  get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
+
   /**
    * Returns the current bounds method. See setBoundsMethod for details.
    */
   getBoundsMethod(): BoundsMethod {
     return this._boundsMethod;
   }
-
-  get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Computes the bounds of the Path (or subtype when overridden). Meant to be overridden in subtypes for more

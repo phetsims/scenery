@@ -142,6 +142,8 @@ export default class Text extends Paintable( Node ) {
 
   set text( value: string | number ) { this.setText( value ); }
 
+  get text(): string { return this.getText(); }
+
   /**
    * Returns the text displayed by our node.
    *
@@ -152,8 +154,6 @@ export default class Text extends Paintable( Node ) {
   getText(): string {
     return this._textProperty.value;
   }
-
-  get text(): string { return this.getText(); }
 
   /**
    * Returns a potentially modified version of this.text, where spaces are replaced with non-breaking spaces,
@@ -198,6 +198,8 @@ export default class Text extends Paintable( Node ) {
 
   set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
 
+  get textProperty(): IProperty<string> { return this.getTextProperty(); }
+
   /**
    * Like Node.getVisibleProperty(), but for the text string. Note this is not the same as the Property provided in
    * setTextProperty. Thus is the nature of TinyForwardingProperty.
@@ -205,8 +207,6 @@ export default class Text extends Paintable( Node ) {
   getTextProperty(): IProperty<string> {
     return this._textProperty;
   }
-
-  get textProperty(): IProperty<string> { return this.getTextProperty(); }
 
   /**
    * See documentation and comments in Node.initializePhetioObject
@@ -277,14 +277,14 @@ export default class Text extends Paintable( Node ) {
 
   set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
 
+  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
+
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
    */
   getBoundsMethod(): TextBoundsMethod {
     return this._boundsMethod;
   }
-
-  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Returns a bitmask representing the supported renderers for the current configuration of the Text node.
@@ -499,6 +499,8 @@ export default class Text extends Paintable( Node ) {
 
   set font( value: Font | string ) { this.setFont( value ); }
 
+  get font(): string { return this.getFont(); }
+
   /**
    * Returns a string representation of the current Font.
    *
@@ -511,8 +513,6 @@ export default class Text extends Paintable( Node ) {
   getFont(): string {
     return this._font.getFont();
   }
-
-  get font(): string { return this.getFont(); }
 
   /**
    * Sets the weight of this node's font.
@@ -529,6 +529,8 @@ export default class Text extends Paintable( Node ) {
 
   set fontWeight( value: FontWeight | number ) { this.setFontWeight( value ); }
 
+  get fontWeight(): FontWeight { return this.getFontWeight(); }
+
   /**
    * Returns the weight of this node's font, see setFontWeight() for details.
    *
@@ -537,8 +539,6 @@ export default class Text extends Paintable( Node ) {
   getFontWeight(): FontWeight {
     return this._font.getWeight();
   }
-
-  get fontWeight(): FontWeight { return this.getFontWeight(); }
 
   /**
    * Sets the family of this node's font.
@@ -556,14 +556,14 @@ export default class Text extends Paintable( Node ) {
 
   set fontFamily( value: string ) { this.setFontFamily( value ); }
 
+  get fontFamily(): string { return this.getFontFamily(); }
+
   /**
    * Returns the family of this node's font, see setFontFamily() for details.
    */
   getFontFamily(): string {
     return this._font.getFamily();
   }
-
-  get fontFamily(): string { return this.getFontFamily(); }
 
   /**
    * Sets the stretch of this node's font.
@@ -580,14 +580,14 @@ export default class Text extends Paintable( Node ) {
 
   set fontStretch( value: FontStretch ) { this.setFontStretch( value ); }
 
+  get fontStretch(): FontStretch { return this.getFontStretch(); }
+
   /**
    * Returns the stretch of this node's font, see setFontStretch() for details.
    */
   getFontStretch(): FontStretch {
     return this._font.getStretch();
   }
-
-  get fontStretch(): FontStretch { return this.getFontStretch(); }
 
   /**
    * Sets the style of this node's font.
@@ -602,14 +602,14 @@ export default class Text extends Paintable( Node ) {
 
   set fontStyle( value: FontStyle ) { this.setFontStyle( value ); }
 
+  get fontStyle(): FontStyle { return this.getFontStyle(); }
+
   /**
    * Returns the style of this node's font, see setFontStyle() for details.
    */
   getFontStyle(): FontStyle {
     return this._font.getStyle();
   }
-
-  get fontStyle(): FontStyle { return this.getFontStyle(); }
 
   /**
    * Sets the size of this node's font.
@@ -625,6 +625,8 @@ export default class Text extends Paintable( Node ) {
 
   set fontSize( value: string | number ) { this.setFontSize( value ); }
 
+  get fontSize(): string { return this.getFontSize(); }
+
   /**
    * Returns the size of this node's font, see setFontSize() for details.
    *
@@ -634,8 +636,6 @@ export default class Text extends Paintable( Node ) {
   getFontSize(): string {
     return this._font.getSize();
   }
-
-  get fontSize(): string { return this.getFontSize(); }
 
   /**
    * Whether this Node itself is painted (displays something itself).

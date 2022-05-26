@@ -1080,6 +1080,13 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getChildren() for more information
+   */
+  get children(): Node[] {
+    return this.getChildren();
+  }
+
+  /**
    * Returns a defensive copy of the array of direct children of this node, ordered by what is in front (nodes at
    * the end of the array are in front of nodes at the start).
    *
@@ -1088,13 +1095,6 @@ class Node extends ParallelDOM {
   getChildren(): Node[] {
     // TODO: ensure we are not triggering this in Scenery code when not necessary!
     return this._children.slice( 0 ); // create a defensive copy
-  }
-
-  /**
-   * See getChildren() for more information
-   */
-  get children(): Node[] {
-    return this.getChildren();
   }
 
   /**
@@ -1785,6 +1785,13 @@ class Node extends ParallelDOM {
     return this.getLocalBounds();
   }
 
+  /**
+   * See setLocalBounds() for more information
+   */
+  set localBounds( value: Bounds2 | null ) {
+    this.setLocalBounds( value );
+  }
+
   get localBoundsOverridden(): boolean {
     return this._localBoundsOverridden;
   }
@@ -1833,13 +1840,6 @@ class Node extends ParallelDOM {
     }
 
     return this; // allow chaining
-  }
-
-  /**
-   * See setLocalBounds() for more information
-   */
-  set localBounds( value: Bounds2 | null ) {
-    this.setLocalBounds( value );
   }
 
   /**
@@ -1932,17 +1932,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether accurate transformation bounds are used in bounds computation (see setTransformBounds).
-   */
-  getTransformBounds(): boolean {
-    return this._transformBounds;
-  }
-
-  /**
    * See getTransformBounds() for more information
    */
   get transformBounds(): boolean {
     return this.getTransformBounds();
+  }
+
+  /**
+   * Returns whether accurate transformation bounds are used in bounds computation (see setTransformBounds).
+   */
+  getTransformBounds(): boolean {
+    return this._transformBounds;
   }
 
   /**
@@ -2445,17 +2445,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the x coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
-   */
-  getX(): number {
-    return this._transform.getMatrix().m02();
-  }
-
-  /**
    * See getX() for more information
    */
   get x(): number {
     return this.getX();
+  }
+
+  /**
+   * Returns the x coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
+   */
+  getX(): number {
+    return this._transform.getMatrix().m02();
   }
 
   /**
@@ -2476,17 +2476,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
-   */
-  getY(): number {
-    return this._transform.getMatrix().m12();
-  }
-
-  /**
    * See getY() for more information
    */
   get y(): number {
     return this.getY();
+  }
+
+  /**
+   * Returns the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
+   */
+  getY(): number {
+    return this._transform.getMatrix().m12();
   }
 
   /**
@@ -2561,18 +2561,18 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getRotation() for more information
+   */
+  get rotation(): number {
+    return this.getRotation();
+  }
+
+  /**
    * Returns the rotation (in radians) that would be applied to a unit (1,0) vector when transformed with this Node's
    * transform.
    */
   getRotation(): number {
     return this._transform.getMatrix().getRotation();
-  }
-
-  /**
-   * See getRotation() for more information
-   */
-  get rotation(): number {
-    return this.getRotation();
   }
 
   /**
@@ -2621,18 +2621,18 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getTranslation() for more information
+   */
+  get translation(): Vector2 {
+    return this.getTranslation();
+  }
+
+  /**
    * Returns a vector of where this Node's local-coordinate origin will be transformed by it's own transform.
    */
   getTranslation(): Vector2 {
     const matrix = this._transform.getMatrix();
     return new Vector2( matrix.m02(), matrix.m12() );
-  }
-
-  /**
-   * See getTranslation() for more information
-   */
-  get translation(): Vector2 {
-    return this.getTranslation();
   }
 
   /**
@@ -2686,19 +2686,19 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getMatrix() for more information
+   */
+  get matrix(): Matrix3 {
+    return this.getMatrix();
+  }
+
+  /**
    * Returns a Matrix3 representing our Node's transform.
    *
    * NOTE: Do not mutate the returned matrix.
    */
   getMatrix(): Matrix3 {
     return this._transform.getMatrix();
-  }
-
-  /**
-   * See getMatrix() for more information
-   */
-  get matrix(): Matrix3 {
-    return this.getMatrix();
   }
 
   /**
@@ -2816,17 +2816,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the maximum width (if any) of the Node.
-   */
-  getMaxWidth(): number | null {
-    return this._maxWidth;
-  }
-
-  /**
    * See getMaxWidth() for more information
    */
   get maxWidth(): number | null {
     return this.getMaxWidth();
+  }
+
+  /**
+   * Returns the maximum width (if any) of the Node.
+   */
+  getMaxWidth(): number | null {
+    return this._maxWidth;
   }
 
   /**
@@ -2854,17 +2854,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the maximum height (if any) of the Node.
-   */
-  getMaxHeight(): number | null {
-    return this._maxHeight;
-  }
-
-  /**
    * See getMaxHeight() for more information
    */
   get maxHeight(): number | null {
     return this.getMaxHeight();
+  }
+
+  /**
+   * Returns the maximum height (if any) of the Node.
+   */
+  getMaxHeight(): number | null {
+    return this._maxHeight;
   }
 
   /**
@@ -2894,19 +2894,19 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getLeft() for more information
+   */
+  get left(): number {
+    return this.getLeft();
+  }
+
+  /**
    * Returns the X value of the left side of the bounding box of this Node (in the parent coordinate frame).
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
   getLeft(): number {
     return this.getBounds().minX;
-  }
-
-  /**
-   * See getLeft() for more information
-   */
-  get left(): number {
-    return this.getLeft();
   }
 
   /**
@@ -2935,19 +2935,19 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getRight() for more information
+   */
+  get right(): number {
+    return this.getRight();
+  }
+
+  /**
    * Returns the X value of the right side of the bounding box of this Node (in the parent coordinate frame).
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
   getRight(): number {
     return this.getBounds().maxX;
-  }
-
-  /**
-   * See getRight() for more information
-   */
-  get right(): number {
-    return this.getRight();
   }
 
   /**
@@ -2977,19 +2977,19 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getCenterX() for more information
+   */
+  get centerX(): number {
+    return this.getCenterX();
+  }
+
+  /**
    * Returns the X value of this node's horizontal center (in the parent coordinate frame)
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
   getCenterX(): number {
     return this.getBounds().getCenterX();
-  }
-
-  /**
-   * See getCenterX() for more information
-   */
-  get centerX(): number {
-    return this.getCenterX();
   }
 
   /**
@@ -3019,19 +3019,19 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getCenterX() for more information
+   */
+  get centerY(): number {
+    return this.getCenterY();
+  }
+
+  /**
    * Returns the Y value of this node's vertical center (in the parent coordinate frame)
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
   getCenterY(): number {
     return this.getBounds().getCenterY();
-  }
-
-  /**
-   * See getCenterX() for more information
-   */
-  get centerY(): number {
-    return this.getCenterY();
   }
 
   /**
@@ -3061,19 +3061,19 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getTop() for more information
+   */
+  get top(): number {
+    return this.getTop();
+  }
+
+  /**
    * Returns the lowest Y value of this node's bounding box (in the parent coordinate frame).
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
   getTop(): number {
     return this.getBounds().minY;
-  }
-
-  /**
-   * See getTop() for more information
-   */
-  get top(): number {
-    return this.getTop();
   }
 
   /**
@@ -3103,19 +3103,19 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getBottom() for more information
+   */
+  get bottom(): number {
+    return this.getBottom();
+  }
+
+  /**
    * Returns the highest Y value of this node's bounding box (in the parent coordinate frame).
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
   getBottom(): number {
     return this.getBounds().maxY;
-  }
-
-  /**
-   * See getBottom() for more information
-   */
-  get bottom(): number {
-    return this.getBottom();
   }
 
   /*
@@ -3154,17 +3154,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the upper-left corner of this node's bounds.
-   */
-  getLeftTop(): Vector2 {
-    return this.getBounds().getLeftTop();
-  }
-
-  /**
    * See getLeftTop() for more information
    */
   get leftTop(): Vector2 {
     return this.getLeftTop();
+  }
+
+  /**
+   * Returns the upper-left corner of this node's bounds.
+   */
+  getLeftTop(): Vector2 {
+    return this.getBounds().getLeftTop();
   }
 
   /**
@@ -3189,17 +3189,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the center-top location of this node's bounds.
-   */
-  getCenterTop(): Vector2 {
-    return this.getBounds().getCenterTop();
-  }
-
-  /**
    * See getCenterTop() for more information
    */
   get centerTop(): Vector2 {
     return this.getCenterTop();
+  }
+
+  /**
+   * Returns the center-top location of this node's bounds.
+   */
+  getCenterTop(): Vector2 {
+    return this.getBounds().getCenterTop();
   }
 
   /**
@@ -3224,17 +3224,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the upper-right corner of this node's bounds.
-   */
-  getRightTop(): Vector2 {
-    return this.getBounds().getRightTop();
-  }
-
-  /**
    * See getRightTop() for more information
    */
   get rightTop(): Vector2 {
     return this.getRightTop();
+  }
+
+  /**
+   * Returns the upper-right corner of this node's bounds.
+   */
+  getRightTop(): Vector2 {
+    return this.getBounds().getRightTop();
   }
 
   /**
@@ -3259,17 +3259,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the center-left corner of this node's bounds.
-   */
-  getLeftCenter(): Vector2 {
-    return this.getBounds().getLeftCenter();
-  }
-
-  /**
    * See getLeftCenter() for more information
    */
   get leftCenter(): Vector2 {
     return this.getLeftCenter();
+  }
+
+  /**
+   * Returns the center-left corner of this node's bounds.
+   */
+  getLeftCenter(): Vector2 {
+    return this.getBounds().getLeftCenter();
   }
 
   /**
@@ -3294,17 +3294,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the center of this node's bounds.
-   */
-  getCenter(): Vector2 {
-    return this.getBounds().getCenter();
-  }
-
-  /**
    * See getCenter() for more information
    */
   get center(): Vector2 {
     return this.getCenter();
+  }
+
+  /**
+   * Returns the center of this node's bounds.
+   */
+  getCenter(): Vector2 {
+    return this.getBounds().getCenter();
   }
 
   /**
@@ -3329,17 +3329,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the center-right of this node's bounds.
-   */
-  getRightCenter(): Vector2 {
-    return this.getBounds().getRightCenter();
-  }
-
-  /**
    * See getRightCenter() for more information
    */
   get rightCenter(): Vector2 {
     return this.getRightCenter();
+  }
+
+  /**
+   * Returns the center-right of this node's bounds.
+   */
+  getRightCenter(): Vector2 {
+    return this.getBounds().getRightCenter();
   }
 
   /**
@@ -3364,17 +3364,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the lower-left corner of this node's bounds.
-   */
-  getLeftBottom(): Vector2 {
-    return this.getBounds().getLeftBottom();
-  }
-
-  /**
    * See getLeftBottom() for more information
    */
   get leftBottom(): Vector2 {
     return this.getLeftBottom();
+  }
+
+  /**
+   * Returns the lower-left corner of this node's bounds.
+   */
+  getLeftBottom(): Vector2 {
+    return this.getBounds().getLeftBottom();
   }
 
   /**
@@ -3399,17 +3399,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the center-bottom of this node's bounds.
-   */
-  getCenterBottom(): Vector2 {
-    return this.getBounds().getCenterBottom();
-  }
-
-  /**
    * See getCenterBottom() for more information
    */
   get centerBottom(): Vector2 {
     return this.getCenterBottom();
+  }
+
+  /**
+   * Returns the center-bottom of this node's bounds.
+   */
+  getCenterBottom(): Vector2 {
+    return this.getBounds().getCenterBottom();
   }
 
   /**
@@ -3434,17 +3434,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the lower-right corner of this node's bounds.
-   */
-  getRightBottom(): Vector2 {
-    return this.getBounds().getRightBottom();
-  }
-
-  /**
    * See getRightBottom() for more information
    */
   get rightBottom(): Vector2 {
     return this.getRightBottom();
+  }
+
+  /**
+   * Returns the lower-right corner of this node's bounds.
+   */
+  getRightBottom(): Vector2 {
+    return this.getBounds().getRightBottom();
   }
 
   /**
@@ -3791,6 +3791,14 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getVisibleProperty() for more information
+   */
+  get visibleProperty(): IProperty<boolean> {
+    return this.getVisibleProperty();
+  }
+
+
+  /**
    * Get this Node's visibleProperty. Note! This is not the reciprocal of setVisibleProperty. Node.prototype._visibleProperty
    * is a TinyForwardingProperty, and is set up to listen to changes from the visibleProperty provided by
    * setVisibleProperty(), but the underlying reference does not change. This means the following:
@@ -3803,13 +3811,6 @@ class Node extends ParallelDOM {
    */
   getVisibleProperty(): IProperty<boolean> {
     return this._visibleProperty;
-  }
-
-  /**
-   * See getVisibleProperty() for more information
-   */
-  get visibleProperty(): IProperty<boolean> {
-    return this.getVisibleProperty();
   }
 
   /**
@@ -3832,17 +3833,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether this Node is visible.
-   */
-  isVisible(): boolean {
-    return this.visibleProperty.value;
-  }
-
-  /**
    * See isVisible() for more information
    */
   get visible(): boolean {
     return this.isVisible();
+  }
+
+  /**
+   * Returns whether this Node is visible.
+   */
+  isVisible(): boolean {
+    return this.visibleProperty.value;
   }
 
   /**
@@ -3859,15 +3860,15 @@ class Node extends ParallelDOM {
     this.setPhetioVisiblePropertyInstrumented( value );
   }
 
-  getPhetioVisiblePropertyInstrumented(): boolean {
-    return this._visibleProperty.getTargetPropertyInstrumented();
-  }
-
   /**
    * See getPhetioVisiblePropertyInstrumented() for more information
    */
   get phetioVisiblePropertyInstrumented(): boolean {
     return this.getPhetioVisiblePropertyInstrumented();
+  }
+
+  getPhetioVisiblePropertyInstrumented(): boolean {
+    return this._visibleProperty.getTargetPropertyInstrumented();
   }
 
   /**
@@ -3916,17 +3917,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the opacity of this node.
-   */
-  getOpacity(): number {
-    return this.opacityProperty.value;
-  }
-
-  /**
    * See getOpacity() for more information
    */
   get opacity(): number {
     return this.getOpacity();
+  }
+
+  /**
+   * Returns the opacity of this node.
+   */
+  getOpacity(): number {
+    return this.opacityProperty.value;
   }
 
   /**
@@ -3954,17 +3955,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the disabledOpacity of this node.
-   */
-  getDisabledOpacity(): number {
-    return this.disabledOpacityProperty.value;
-  }
-
-  /**
    * See getDisabledOpacity() for more information
    */
   get disabledOpacity(): number {
     return this.getDisabledOpacity();
+  }
+
+  /**
+   * Returns the disabledOpacity of this node.
+   */
+  getDisabledOpacity(): number {
+    return this.disabledOpacityProperty.value;
   }
 
   /**
@@ -4039,17 +4040,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the non-opacity filters for this Node.
-   */
-  getFilters(): Filter[] {
-    return this._filters.slice();
-  }
-
-  /**
    * See getFilters() for more information
    */
   get filters(): Filter[] {
     return this.getFilters();
+  }
+
+  /**
+   * Returns the non-opacity filters for this Node.
+   */
+  getFilters(): Filter[] {
+    return this._filters.slice();
   }
 
   /**
@@ -4071,6 +4072,13 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getPickableProperty() for more information
+   */
+  get pickableProperty(): IProperty<boolean | null> {
+    return this.getPickableProperty();
+  }
+
+  /**
    * Get this Node's pickableProperty. Note! This is not the reciprocal of setPickableProperty. Node.prototype._pickableProperty
    * is a TinyForwardingProperty, and is set up to listen to changes from the pickableProperty provided by
    * setPickableProperty(), but the underlying reference does not change. This means the following:
@@ -4083,13 +4091,6 @@ class Node extends ParallelDOM {
    */
   getPickableProperty(): IProperty<boolean | null> {
     return this._pickableProperty;
-  }
-
-  /**
-   * See getPickableProperty() for more information
-   */
-  get pickableProperty(): IProperty<boolean | null> {
-    return this.getPickableProperty();
   }
 
   /**
@@ -4137,17 +4138,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the pickability of this node.
-   */
-  isPickable(): boolean | null {
-    return this._pickableProperty.value;
-  }
-
-  /**
    * See isPickable() for more information
    */
   get pickable(): boolean | null {
     return this.isPickable();
+  }
+
+  /**
+   * Returns the pickability of this node.
+   */
+  isPickable(): boolean | null {
+    return this._pickableProperty.value;
   }
 
   /**
@@ -4201,6 +4202,13 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getEnabledProperty() for more information
+   */
+  get enabledProperty(): IProperty<boolean> {
+    return this.getEnabledProperty();
+  }
+
+  /**
    * Get this Node's enabledProperty. Note! This is not the reciprocal of setEnabledProperty. Node.prototype._enabledProperty
    * is a TinyForwardingProperty, and is set up to listen to changes from the enabledProperty provided by
    * setEnabledProperty(), but the underlying reference does not change. This means the following:
@@ -4213,13 +4221,6 @@ class Node extends ParallelDOM {
    */
   getEnabledProperty(): IProperty<boolean> {
     return this._enabledProperty;
-  }
-
-  /**
-   * See getEnabledProperty() for more information
-   */
-  get enabledProperty(): IProperty<boolean> {
-    return this.getEnabledProperty();
   }
 
   /**
@@ -4237,15 +4238,15 @@ class Node extends ParallelDOM {
     this.setPhetioEnabledPropertyInstrumented( value );
   }
 
-  getPhetioEnabledPropertyInstrumented(): boolean {
-    return this._enabledProperty.getTargetPropertyInstrumented();
-  }
-
   /**
    * See getPhetioEnabledPropertyInstrumented() for more information
    */
   get phetioEnabledPropertyInstrumented(): boolean {
     return this.getPhetioEnabledPropertyInstrumented();
+  }
+
+  getPhetioEnabledPropertyInstrumented(): boolean {
+    return this._enabledProperty.getTargetPropertyInstrumented();
   }
 
   /**
@@ -4266,17 +4267,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the enabled of this node.
-   */
-  isEnabled(): boolean {
-    return this._enabledProperty.value;
-  }
-
-  /**
    * See isEnabled() for more information
    */
   get enabled(): boolean {
     return this.isEnabled();
+  }
+
+  /**
+   * Returns the enabled of this node.
+   */
+  isEnabled(): boolean {
+    return this._enabledProperty.value;
   }
 
   /**
@@ -4315,6 +4316,13 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getInputEnabledProperty() for more information
+   */
+  get inputEnabledProperty(): IProperty<boolean> {
+    return this.getInputEnabledProperty();
+  }
+
+  /**
    * Get this Node's inputEnabledProperty. Note! This is not the reciprocal of setInputEnabledProperty. Node.prototype._inputEnabledProperty
    * is a TinyForwardingProperty, and is set up to listen to changes from the inputEnabledProperty provided by
    * setInputEnabledProperty(), but the underlying reference does not change. This means the following:
@@ -4327,13 +4335,6 @@ class Node extends ParallelDOM {
    */
   getInputEnabledProperty(): IProperty<boolean> {
     return this._inputEnabledProperty;
-  }
-
-  /**
-   * See getInputEnabledProperty() for more information
-   */
-  get inputEnabledProperty(): IProperty<boolean> {
-    return this.getInputEnabledProperty();
   }
 
   /**
@@ -4351,15 +4352,15 @@ class Node extends ParallelDOM {
     this.setPhetioInputEnabledPropertyInstrumented( value );
   }
 
-  getPhetioInputEnabledPropertyInstrumented(): boolean {
-    return this._inputEnabledProperty.getTargetPropertyInstrumented();
-  }
-
   /**
    * See getPhetioInputEnabledPropertyInstrumented() for more information
    */
   get phetioInputEnabledPropertyInstrumented(): boolean {
     return this.getPhetioInputEnabledPropertyInstrumented();
+  }
+
+  getPhetioInputEnabledPropertyInstrumented(): boolean {
+    return this._inputEnabledProperty.getTargetPropertyInstrumented();
   }
 
   /**
@@ -4385,17 +4386,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether input is enabled for this Node and its subtree. See setInputEnabled for more documentation.
-   */
-  isInputEnabled(): boolean {
-    return this.inputEnabledProperty.value;
-  }
-
-  /**
    * See isInputEnabled() for more information
    */
   get inputEnabled(): boolean {
     return this.isInputEnabled();
+  }
+
+  /**
+   * Returns whether input is enabled for this Node and its subtree. See setInputEnabled for more documentation.
+   */
+  isInputEnabled(): boolean {
+    return this.inputEnabledProperty.value;
   }
 
   /**
@@ -4428,17 +4429,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns a copy of all of our input listeners.
-   */
-  getInputListeners(): IInputListener[] {
-    return this._inputListeners.slice( 0 ); // defensive copy
-  }
-
-  /**
    * See getInputListeners() for more information
    */
   get inputListeners(): IInputListener[] {
     return this.getInputListeners();
+  }
+
+  /**
+   * Returns a copy of all of our input listeners.
+   */
+  getInputListeners(): IInputListener[] {
+    return this._inputListeners.slice( 0 ); // defensive copy
   }
 
   /**
@@ -4464,6 +4465,13 @@ class Node extends ParallelDOM {
    */
   set cursor( value: string | null ) {
     this.setCursor( value );
+  }
+
+  /**
+   * See getCursor() for more information
+   */
+  get cursor(): string | null {
+    return this.getCursor();
   }
 
   /**
@@ -4494,13 +4502,6 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * See getCursor() for more information
-   */
-  get cursor(): string | null {
-    return this.getCursor();
-  }
-
-  /**
    * Sets the hit-tested mouse area for this Node (see constructor for more advanced documentation). Use null for the
    * default behavior.
    */
@@ -4525,17 +4526,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the hit-tested mouse area for this node.
-   */
-  getMouseArea(): Shape | Bounds2 | null {
-    return this._mouseArea;
-  }
-
-  /**
    * See getMouseArea() for more information
    */
   get mouseArea(): Shape | Bounds2 | null {
     return this.getMouseArea();
+  }
+
+  /**
+   * Returns the hit-tested mouse area for this node.
+   */
+  getMouseArea(): Shape | Bounds2 | null {
+    return this._mouseArea;
   }
 
   /**
@@ -4563,17 +4564,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the hit-tested touch area for this node.
-   */
-  getTouchArea(): Shape | Bounds2 | null {
-    return this._touchArea;
-  }
-
-  /**
    * See getTouchArea() for more information
    */
   get touchArea(): Shape | Bounds2 | null {
     return this.getTouchArea();
+  }
+
+  /**
+   * Returns the hit-tested touch area for this node.
+   */
+  getTouchArea(): Shape | Bounds2 | null {
+    return this._touchArea;
   }
 
   /**
@@ -4601,17 +4602,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the clipped area for this node.
-   */
-  getClipArea(): Shape | null {
-    return this.clipAreaProperty.value;
-  }
-
-  /**
    * See getClipArea() for more information
    */
   get clipArea(): Shape | null {
     return this.getClipArea();
+  }
+
+  /**
+   * Returns the clipped area for this node.
+   */
+  getClipArea(): Shape | null {
+    return this.clipAreaProperty.value;
   }
 
   /**
@@ -4700,6 +4701,13 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See getRenderer() for more information
+   */
+  get renderer(): RendererType {
+    return this.getRenderer();
+  }
+
+  /**
    * Returns the preferred renderer (if any) of this node, as a string.
    */
   getRenderer(): RendererType {
@@ -4720,13 +4728,6 @@ class Node extends ParallelDOM {
     }
     assert && assert( false, 'Seems to be an invalid renderer?' );
     return null;
-  }
-
-  /**
-   * See getRenderer() for more information
-   */
-  get renderer(): RendererType {
-    return this.getRenderer();
   }
 
   /**
@@ -4751,17 +4752,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether the layerSplit performance flag is set.
-   */
-  isLayerSplit(): boolean {
-    return this._hints.layerSplit;
-  }
-
-  /**
    * See isLayerSplit() for more information
    */
   get layerSplit(): boolean {
     return this.isLayerSplit();
+  }
+
+  /**
+   * Returns whether the layerSplit performance flag is set.
+   */
+  isLayerSplit(): boolean {
+    return this._hints.layerSplit;
   }
 
   /**
@@ -4786,17 +4787,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether the usesOpacity performance flag is set.
-   */
-  getUsesOpacity(): boolean {
-    return this._hints.usesOpacity;
-  }
-
-  /**
    * See getUsesOpacity() for more information
    */
   get usesOpacity(): boolean {
     return this.getUsesOpacity();
+  }
+
+  /**
+   * Returns whether the usesOpacity performance flag is set.
+   */
+  getUsesOpacity(): boolean {
+    return this._hints.usesOpacity;
   }
 
   /**
@@ -4822,17 +4823,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether the cssTransform performance flag is set.
-   */
-  isCSSTransformed(): boolean {
-    return this._hints.cssTransform;
-  }
-
-  /**
    * See isCSSTransformed() for more information
    */
   get cssTransform(): boolean {
     return this.isCSSTransformed();
+  }
+
+  /**
+   * Returns whether the cssTransform performance flag is set.
+   */
+  isCSSTransformed(): boolean {
+    return this._hints.cssTransform;
   }
 
   /**
@@ -4857,17 +4858,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether the excludeInvisible performance flag is set.
-   */
-  isExcludeInvisible(): boolean {
-    return this._hints.excludeInvisible;
-  }
-
-  /**
    * See isExcludeInvisible() for more information
    */
   get excludeInvisible(): boolean {
     return this.isExcludeInvisible();
+  }
+
+  /**
+   * Returns whether the excludeInvisible performance flag is set.
+   */
+  isExcludeInvisible(): boolean {
+    return this._hints.excludeInvisible;
   }
 
   /**
@@ -4894,18 +4895,18 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * See isExcludeInvisibleChildrenFromBounds() for more information
+   */
+  get excludeInvisibleChildrenFromBounds(): boolean {
+    return this.isExcludeInvisibleChildrenFromBounds();
+  }
+
+  /**
    * Returns whether the excludeInvisibleChildrenFromBounds flag is set, see
    * setExcludeInvisibleChildrenFromBounds() for documentation.
    */
   isExcludeInvisibleChildrenFromBounds(): boolean {
     return this._excludeInvisibleChildrenFromBounds;
-  }
-
-  /**
-   * See isExcludeInvisibleChildrenFromBounds() for more information
-   */
-  get excludeInvisibleChildrenFromBounds(): boolean {
-    return this.isExcludeInvisibleChildrenFromBounds();
   }
 
   /**
@@ -4926,12 +4927,12 @@ class Node extends ParallelDOM {
     this.setLayoutOptions( value );
   }
 
-  getLayoutOptions(): ILayoutOptions | null {
-    return this._layoutOptions;
-  }
-
   get layoutOptions(): ILayoutOptions | null {
     return this.getLayoutOptions();
+  }
+
+  getLayoutOptions(): ILayoutOptions | null {
+    return this._layoutOptions;
   }
 
   mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {
@@ -4970,17 +4971,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns whether the preventFit performance flag is set.
-   */
-  isPreventFit(): boolean {
-    return this._hints.preventFit;
-  }
-
-  /**
    * See isPreventFit() for more information
    */
   get preventFit(): boolean {
     return this.isPreventFit();
+  }
+
+  /**
+   * Returns whether the preventFit performance flag is set.
+   */
+  isPreventFit(): boolean {
+    return this._hints.preventFit;
   }
 
   /**
@@ -5004,17 +5005,17 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns the value of the webglScale performance flag.
-   */
-  getWebGLScale(): number | null {
-    return this._hints.webglScale;
-  }
-
-  /**
    * See getWebGLScale() for more information
    */
   get webglScale(): number | null {
     return this.getWebGLScale();
+  }
+
+  /**
+   * Returns the value of the webglScale performance flag.
+   */
+  getWebGLScale(): number | null {
+    return this._hints.webglScale;
   }
 
   /*---------------------------------------------------------------------------*
@@ -6372,6 +6373,8 @@ class Node extends ParallelDOM {
 
   set voicingVisible( visible ) { this.setVoicingVisible( visible ); }
 
+  get voicingVisible() { return this.isVoicingVisible(); }
+
   /**
    * Returns whether this Node is voicingVisible. When true Utterances for this Node can be announced with the
    * Voicing feature, see Voicing.ts for more information.
@@ -6379,8 +6382,6 @@ class Node extends ParallelDOM {
   public isVoicingVisible(): boolean {
     return this.voicingVisibleProperty.value;
   }
-
-  get voicingVisible() { return this.isVoicingVisible(); }
 
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)

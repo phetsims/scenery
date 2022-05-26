@@ -224,14 +224,14 @@ export default class Line extends Path {
 
   set x1( value: number ) { this.setX1( value ); }
 
+  get x1(): number { return this.getX1(); }
+
   /**
    * Returns the x coordinate of the first point of the line.
    */
   getX1(): number {
     return this._x1;
   }
-
-  get x1(): number { return this.getX1(); }
 
   /**
    * Sets the y coordinate of the first point of the line.
@@ -252,14 +252,14 @@ export default class Line extends Path {
 
   set y1( value: number ) { this.setY1( value ); }
 
+  get y1(): number { return this.getY1(); }
+
   /**
    * Returns the y coordinate of the first point of the line.
    */
   getY1(): number {
     return this._y1;
   }
-
-  get y1(): number { return this.getY1(); }
 
   /**
    * Sets the x coordinate of the second point of the line.
@@ -280,14 +280,14 @@ export default class Line extends Path {
 
   set x2( value: number ) { this.setX2( value ); }
 
+  get x2(): number { return this.getX2(); }
+
   /**
    * Returns the x coordinate of the second point of the line.
    */
   getX2(): number {
     return this._x2;
   }
-
-  get x2(): number { return this.getX2(); }
 
   /**
    * Sets the y coordinate of the second point of the line.
@@ -308,14 +308,14 @@ export default class Line extends Path {
 
   set y2( value: number ) { this.setY2( value ); }
 
+  get y2(): number { return this.getY2(); }
+
   /**
    * Returns the y coordinate of the second point of the line.
    */
   getY2(): number {
     return this._y2;
   }
-
-  get y2(): number { return this.getY2(); }
 
   /**
    * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance

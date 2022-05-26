@@ -155,7 +155,7 @@ export default class LayoutBox extends Node {
     const layoutDimension = LAYOUT_DIMENSION[ this._orientation ];
 
     // The alignment (left/right/bottom/top/centerX/centerY) property name on the secondary axis
-    const layoutAlignment = ( LAYOUT_ALIGNMENT[ this._orientation ] as { [ prop in LayoutBoxAlign ]: string } )[ this._align ] as AlignResult; // eslint-disable-line
+    const layoutAlignment = ( LAYOUT_ALIGNMENT[ this._orientation ] as { [prop in LayoutBoxAlign]: string } )[ this._align ] as AlignResult; // eslint-disable-line
 
     // The bounds that children will be aligned in (on the secondary axis)
     const alignmentBounds = this.getAlignmentBounds();
@@ -287,6 +287,8 @@ export default class LayoutBox extends Node {
 
   set orientation( value: LayoutBoxOrientation ) { this.setOrientation( value ); }
 
+  get orientation(): LayoutBoxOrientation { return this.getOrientation(); }
+
   /**
    * Returns the current orientation.
    *
@@ -295,8 +297,6 @@ export default class LayoutBox extends Node {
   getOrientation(): LayoutBoxOrientation {
     return this._orientation;
   }
-
-  get orientation(): LayoutBoxOrientation { return this.getOrientation(); }
 
   /**
    * Sets spacing between items in the LayoutBox.
@@ -316,6 +316,8 @@ export default class LayoutBox extends Node {
 
   set spacing( value: number ) { this.setSpacing( value ); }
 
+  get spacing(): number { return this.getSpacing(); }
+
   /**
    * Gets the spacing between items in the LayoutBox.
    *
@@ -324,8 +326,6 @@ export default class LayoutBox extends Node {
   getSpacing(): number {
     return this._spacing;
   }
-
-  get spacing(): number { return this.getSpacing(); }
 
   /**
    * Sets the alignment of the LayoutBox.
@@ -367,6 +367,8 @@ export default class LayoutBox extends Node {
 
   set align( value: LayoutBoxAlign ) { this.setAlign( value ); }
 
+  get align(): LayoutBoxAlign { return this.getAlign(); }
+
   /**
    * Returns the current alignment.
    *
@@ -375,8 +377,6 @@ export default class LayoutBox extends Node {
   getAlign(): LayoutBoxAlign {
     return this._align;
   }
-
-  get align(): LayoutBoxAlign { return this.getAlign(); }
 
   /**
    * Sets whether this LayoutBox will trigger layout when children are added/removed/resized.
@@ -414,6 +414,8 @@ export default class LayoutBox extends Node {
 
   set resize( value: boolean ) { this.setResize( value ); }
 
+  get resize(): boolean { return this.isResize(); }
+
   /**
    * Returns whether this LayoutBox will trigger layout when children are added/removed/resized.
    *
@@ -422,8 +424,6 @@ export default class LayoutBox extends Node {
   isResize(): boolean {
     return this._resize;
   }
-
-  get resize(): boolean { return this.isResize(); }
 }
 
 /**
