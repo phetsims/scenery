@@ -8,7 +8,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { scenery, ShapeBasedOverlay, Display, Node, BackboneDrawable, Block, FittedBlock, Drawable, IOverlay } from '../imports.js';
+import { BackboneDrawable, Block, Display, Drawable, FittedBlock, IOverlay, Node, scenery, ShapeBasedOverlay } from '../imports.js';
 
 export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implements IOverlay {
   constructor( display: Display, rootNode: Node ) {
@@ -16,7 +16,8 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
   }
 
   addShapes(): void {
-    const self = this;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this; // eslint-disable-line
 
     function processBackbone( backbone: BackboneDrawable, matrix: Matrix3 ) {
       if ( backbone.willApplyTransform ) {

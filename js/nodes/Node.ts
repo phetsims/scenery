@@ -4940,9 +4940,13 @@ class Node extends ParallelDOM {
 
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable
   get widthSizable(): boolean { return false; }
+
   get heightSizable(): boolean { return false; }
+
   get mixesWidthSizable(): boolean { return false; }
+
   get mixesHeightSizable(): boolean { return false; }
+
   get mixesSizable(): boolean { return false; }
 
   /**
@@ -5030,6 +5034,8 @@ class Node extends ParallelDOM {
     // logic easier.
     if ( !predicate ) {
       const trail = new Trail();
+
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       let node: Node = this; // eslint-disable-line consistent-this
 
       while ( node ) {
@@ -5978,6 +5984,7 @@ class Node extends ParallelDOM {
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
   getLocalToGlobalMatrix(): Matrix3 {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: Node = this; // eslint-disable-line consistent-this
 
     // we need to apply the transformations in the reverse order, so we temporarily store them
@@ -6030,6 +6037,8 @@ class Node extends ParallelDOM {
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
   localToGlobalPoint( point: Vector2 ): Vector2 {
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: Node = this; // eslint-disable-line consistent-this
     const resultPoint = point.copy();
     while ( node ) {
@@ -6048,6 +6057,8 @@ class Node extends ParallelDOM {
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
   globalToLocalPoint( point: Vector2 ): Vector2 {
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: Node = this; // eslint-disable-line consistent-this
     // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
 

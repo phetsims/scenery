@@ -11,7 +11,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Node, Trail } from '../imports.js';
+import { Node, scenery, Trail } from '../imports.js';
 import { Shape } from '../../../kite/js/imports.js';
 
 export default class Picker {
@@ -698,6 +698,8 @@ export default class Picker {
 
       this.node._parents.forEach( parent => {
         const parentPicker = parent._picker;
+
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const childPicker = this; // eslint-disable-line consistent-this
 
         if ( !parentPicker.mouseInclusiveDirty ) {

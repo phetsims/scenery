@@ -1274,7 +1274,7 @@ export default class Display {
     let lastTime = 0;
     let timeElapsedInSeconds = 0;
 
-    const self = this;
+    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias
     ( function step() {
       // @ts-ignore LEGACY --- it would know to update just the DOM element's location if it's the second argument
       self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
