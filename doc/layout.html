@@ -197,6 +197,14 @@
       }, { resize: 'vertical' } );
     </script>
 
+    <p>
+      NOTE: For FlowBox, the orientation provided is typically called the <em>primary</em> orientation. This is the
+      orientation along which each Node in a line is positioned. The <em>secondary</em> orientation is the opposite one,
+      along which each Node is aligned. e.g. for an HBox, its primary orientation is horizontal, and its secondary
+      orientation is vertical (so its elements will be positioned with increasing x values, and its align will control
+      the y values).
+    </p>
+
     <p>For cases where the orientation needs to be determined programmatically, use FlowBox:</p>
 
     <div id="orientation-example"></div>
