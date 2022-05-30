@@ -153,9 +153,9 @@
 
     <p>NOTE: Many examples can be resized from the lower-right corner. This adjusts the preferred size of the container.</p>
 
-    <h2>FlowBox</h2>
+    <h2 id="FlowBox">FlowBox</h2>
 
-    <h3>orientation</h3>
+    <h3 id="FlowBox-orientation">orientation</h3>
 
     <p>
       For horizontal line-based layout, use HBox:
@@ -246,7 +246,7 @@
       }
     </script>
 
-    <p>Resizing/layout can be disabled with resize:false:</p>
+    <p id="FlowBox-resize">Resizing/layout can be disabled with resize:false:</p>
 
     <div id="locked-sizing-example"></div>
     <script type="text/javascript">
@@ -295,7 +295,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Invisible nodes can be forced into the layout:</p>
+    <p id="FlowBox-excludeInvisibleChildrenFromBounds">Invisible nodes can be forced into the layout:</p>
 
     <div id="force-vis-example"></div>
     <script type="text/javascript">
@@ -314,7 +314,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <h3>grow</h3>
+    <h3 id="FlowBox-grow">grow</h3>
 
     <p>Nodes with preferred sizes can be added, and the grow in layoutOptions will attempt to put extra space into that cell</p>
 
@@ -377,7 +377,7 @@
 
     <h3>Constraining dimensions</h3>
 
-    <p>Maximums can be applied to constrain this growing (it won't grow past the max content dimension):</p>
+    <p id="FlowBox-maxContent">Maximums can be applied to constrain this growing (it won't grow past the max content dimension):</p>
 
     <div id="maxContentWidth-example"></div>
     <script type="text/javascript">
@@ -403,7 +403,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Minimums can also force a certain expansion:</p>
+    <p id="FlowBox-minContent">Minimums can also force a certain expansion:</p>
 
     <div id="minContentWidth-example"></div>
     <script type="text/javascript">
@@ -461,7 +461,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3>justify</h3>
+    <h3 id="FlowBox-justify">justify</h3>
 
     <p>Justification controls how extra space is allocated around cells (after any growing possible has been done):</p>
 
@@ -515,7 +515,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <h3>wrap</h3>
+    <h3 id="FlowBox-wrap">wrap</h3>
 
     <p>Wrapping will shift content that doesn't fit the preferred size into new rows/columns (try resizing it to be less wide):</p>
 
@@ -538,7 +538,7 @@
       }, { resize: 'both', useMinWidth: false } );
     </script>
 
-    <h3>align</h3>
+    <h3 id="FlowBox-align">align</h3>
 
     <p>Alignment controls how cells are positioned in the secondary orientation:</p>
 
@@ -583,7 +583,7 @@
       }, { resize: 'none', useMinWidth: false } );
     </script>
 
-    <h3>justifyLines</h3>
+    <h3 id="FlowBox-justifyLines">justifyLines</h3>
 
     <p>justifyLines controls how lines are positioned in the secondary orientation (null will default to a stretch):</p>
 
@@ -641,7 +641,7 @@
       }, { resize: 'vertical', useMinHeight: true } );
     </script>
 
-    <h3>spacing</h3>
+    <h3 id="FlowBox-spacing">spacing</h3>
 
     <p>Spacing can be added, that is applied between cells:</p>
 
@@ -662,7 +662,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <h3>lineSpacing</h3>
+    <h3 id="FlowBox-lineSpacing">lineSpacing</h3>
 
     <p>Spacing between lines (rows/cols) can also be added, which applies when wrapped:</p>
 
@@ -684,7 +684,7 @@
       }, { resize: 'both', useMinWidth: false } );
     </script>
 
-    <h3>Margins</h3>
+    <h3 id="FlowBox-margins">Margins</h3>
 
     <p>Margins can also be added to every cell (margin affects all 4 sides, xMargin affects left/right, yMargin affects top/bottom):</p>
 
@@ -785,7 +785,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <h3>stretch</h3>
+    <h3 id="FlowBox-stretch">stretch</h3>
 
     <p>Stretch will have a resizable element take up the entire row/column size:</p>
 
@@ -850,7 +850,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <h2>GridBox</h2>
+    <h2 id="GridBox">GridBox</h2>
 
     <h3>Cell coordinates</h3>
 
@@ -888,7 +888,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>rows</h3>
+    <h3 id="GridBox-rows">rows</h3>
 
     <p>Grids can be constructed by specifying all the children in rows (null for gaps):</p>
 
@@ -924,7 +924,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>columns</h3>
+    <h3 id="GridBox-columns">columns</h3>
 
     <p>or with colums:</p>
 
@@ -960,7 +960,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>autoRows/autoColumn</h3>
+    <h3 id="GridBox-autoLines">autoRows/autoColumn</h3>
 
     <p>
       Additionally, if a certain number of rows/columns are desired, autoRows/autoColumns can be used to wrap and
@@ -995,7 +995,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>addRow/addColumn</h3>
+    <h3 id="GridBox-addLine">addRow/addColumn</h3>
 
     <p>
       Rows and columns can also be dynamically added in a similar way (rows will be below all current content, columns
@@ -1021,7 +1021,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>insertRow/insertColumn</h3>
+    <h3 id="GridBox-insertLine">insertRow/insertColumn</h3>
 
     <p>
       Rows and columns can also be directly inserted by index:
@@ -1051,7 +1051,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>removeRow/removeColumn</h3>
+    <h3 id="GridBox-removeLine">removeRow/removeColumn</h3>
 
     <p>
       Or removed by index:
@@ -1079,7 +1079,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>line/cell getters</h3>
+    <h3 id="GridBox-getters">line/cell getters</h3>
 
     <p>
       Assorted operations can get the row/column of a child Node, or get all of the Nodes contained within a specific
@@ -1137,7 +1137,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>grow</h3>
+    <h3 id="GridBox-grow">grow</h3>
 
     <p>Grids by default don't auto-expand all rows/columns in size to the preferred size, but they can with a similar style to FlowBox:</p>
 
@@ -1208,7 +1208,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3>stretch</h3>
+    <h3 id="GridBox-stretch">stretch</h3>
 
     <p>Use stretch (or xStretch/yStretch) to grow a cell dynamically with the preferred dimensions to match the row/column:</p>
 
@@ -1251,7 +1251,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3>sizable</h3>
+    <h3 id="GridBox-sizable">sizable</h3>
 
     <p>Additionally, widthSizable/heightSizable can be used to turn off resizing in a component (particularly useful if you want to set a preferredWidth/preferredHeight on it that won't change):</p>
 
@@ -1295,7 +1295,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3>align</h3>
+    <h3 id="GridBox-align">align</h3>
 
     <p>Cells can be aligned in a similar way to FlowBox, but in both dimensions:</p>
 
@@ -1334,7 +1334,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3>width/height</h3>
+    <h3 id="GridBox-layoutOptions-">width/height</h3>
 
     <p>Cells can take up more than one row/column with the width/height layout options:</p>
 
@@ -1383,7 +1383,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3>spacing</h3>
+    <h3 id="GridBox-spacing">spacing</h3>
 
     <p>Grids can have consistent internal spacing:</p>
 
@@ -1492,7 +1492,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h3>Margins</h3>
+    <h3 id="GridBox-margins">Margins</h3>
 
     <p>Similar to FlowBox, grids can have margins applied to all elements:</p>
 
@@ -1564,7 +1564,7 @@
       }, { resize: 'none', useMinHeight: true } );
     </script>
 
-    <h2>Sizables</h2>
+    <h2 id="Sizable">Sizables</h2>
 
     <p>
       Certain Node subtypes are "sizable": they can be adjusted to different <em>preferred</em> sizes/bounds, which are
@@ -1642,7 +1642,7 @@
       }, { resize: 'both', useMinWidth: true, useMinHeight: true } );
     </script>
 
-    <h2>layoutOptions</h2>
+    <h2 id="layoutOptions">layoutOptions</h2>
 
     <p>
       Layout options can be set on individual child Nodes of a layout container. These will override the container's
@@ -1670,7 +1670,7 @@
       }, { resize: 'both', useMinWidth: true, useMinHeight: true } );
     </script>
 
-    <h2>layoutOrigin</h2>
+    <h2 id="layoutOrigin">layoutOrigin</h2>
 
     <p>
       FlowBox/GridBox typically lay out content so that the origin (0,0) is at the upper-left. There are some exceptions
@@ -1795,7 +1795,7 @@
       }, { resize: 'none' } );
     </script>
 
-    <h2>ManualConstraint</h2>
+    <h2 id="ManualConstraint">ManualConstraint</h2>
 
     <p>
       ManualConstraint is for hooking up imperative-style layout code (e.g. `someNode.left = otherNode.right`) so that
@@ -1872,7 +1872,7 @@
       } )();
     </script>
 
-    <h2>FlowConstraint</h2>
+    <h2 id="FlowConstraint">FlowConstraint</h2>
 
     <p>
       FlowBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
@@ -1942,7 +1942,7 @@
       } )();
     </script>
 
-    <h2>GridConstraint</h2>
+    <h2 id="GridConstraint">GridConstraint</h2>
 
     <p>
       GridBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
@@ -2015,7 +2015,7 @@
       } )();
     </script>
 
-    <h2>AlignBox</h2>
+    <h2 id="AlignBox">AlignBox</h2>
 
     <p>AlignBox on its own will position content within a specific bounding box (its <em>alignBounds</em>):</p>
 
