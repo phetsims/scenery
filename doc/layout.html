@@ -334,8 +334,7 @@
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 50,
               localMinimumHeight: 50,
               fill: 'gray',
@@ -360,8 +359,7 @@
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 50,
               localMinimumHeight: 50,
               fill: 'gray',
@@ -369,8 +367,7 @@
             } ),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
             new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 50,
               localMinimumHeight: 50,
               fill: 'gray',
@@ -395,8 +392,7 @@
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 50,
               localMinimumHeight: 50,
               fill: 'gray',
@@ -421,8 +417,7 @@
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 50,
               localMinimumHeight: 50,
               fill: 'gray',
@@ -447,8 +442,7 @@
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 50,
               localMinimumHeight: 50,
               fill: 'gray',
@@ -564,15 +558,6 @@
             children: [
               new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 9 ] } ),
               new scenery.Rectangle( 0, 0, 50, 20, { fill: colors[ 6 ] } ),
-              new scenery.Rectangle( {
-                widthSizable: true,
-                heightSizable: true,
-                localMinimumWidth: 50,
-                localMinimumHeight: 10,
-                rectWidth: 50,
-                rectHeight: 10,
-                fill: 'gray'
-              } ),
               new scenery.Rectangle( 0, 0, 50, 5, { fill: colors[ 4 ] } ),
               new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 2 ] } ),
               new scenery.Circle( 7, { fill: colors[ 0 ] } ),
@@ -616,8 +601,7 @@
         ].map( justifyLines => {
           const createResizable = () => {
             const node = new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 20,
               localMinimumHeight: 20,
               fill: 'gray'
@@ -817,8 +801,7 @@
               layoutOptions: { align: 'top' }
             } ),
             new scenery.Rectangle( {
-              widthSizable: true,
-              heightSizable: true,
+              sizable: true,
               localMinimumWidth: 50,
               localMinimumHeight: 50,
               fill: 'gray',
@@ -895,6 +878,39 @@
             new scenery.Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { x: 1, y: 2 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>
+      The <strong>x</strong> value indicates the column (starting at index 0), and the <strong>y</strong> value
+      indicates the row (starting at index 0).
+    </p>
+
+    <p>
+      NOTE: Skipped rows/columns will be collapsed and won't apply (except for any spacing added):
+    </p>
+
+    <div id="skip-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'skip-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 75, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 75, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 50, y: 0 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 25, y: 102 }
             } )
           ]
         } );
@@ -1248,8 +1264,7 @@
                 fill: colors[ 6 ]
               } ),
               new scenery.Rectangle( {
-                widthSizable: true,
-                heightSizable: true,
+                sizable: true,
                 localMinimumWidth: 50,
                 localMinimumHeight: 50,
                 fill: 'gray',
@@ -1357,7 +1372,6 @@
       dynamicDemo( 'span-grid-example', () => {
         /*START*/
         return new scenery.GridBox( {
-          grow: 1,
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, {
               fill: colors[ 0 ],
@@ -1365,11 +1379,17 @@
             } ),
             new scenery.Rectangle( 0, 0, 100, 50, {
               fill: colors[ 2 ],
-              layoutOptions: { x: 1, y: 0, width: 2 }
+              sizable: true,
+              localMinimumWidth: 100,
+              localMinimumHeight: 50,
+              layoutOptions: { x: 1, y: 0, width: 2, stretch: true, grow: 1 }
             } ),
             new scenery.Rectangle( 0, 0, 100, 100, {
               fill: colors[ 4 ],
-              layoutOptions: { x: 0, y: 1, width: 2, height: 2 }
+              sizable: true,
+              localMinimumWidth: 100,
+              localMinimumHeight: 100,
+              layoutOptions: { x: 0, y: 1, width: 2, height: 2, stretch: true }
             } ),
             new scenery.Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
