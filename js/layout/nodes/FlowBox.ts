@@ -1,8 +1,35 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * A vertical/horizontal flow-based layout container. See scenery/docs/layout.html for details (preferably after
- * building scenery).
+ * A vertical/horizontal flow-based layout container.
+ *
+ * See https://phetsims.github.io/scenery/doc/layout#FlowBox for details
+ *
+ * FlowBox-only options:
+ *   - resize (see https://phetsims.github.io/scenery/doc/layout#FlowBox-resize)
+ *   - orientation (see https://phetsims.github.io/scenery/doc/layout#FlowBox-orientation)
+ *   - spacing (see https://phetsims.github.io/scenery/doc/layout#FlowBox-spacing)
+ *   - lineSpacing (see https://phetsims.github.io/scenery/doc/layout#FlowBox-lineSpacing)
+ *   - justify (see https://phetsims.github.io/scenery/doc/layout#FlowBox-justify)
+ *   - justifyLines (see https://phetsims.github.io/scenery/doc/layout#FlowBox-justifyLines)
+ *   - wrap (see https://phetsims.github.io/scenery/doc/layout#FlowBox-wrap)
+ *   - layoutOrigin (see https://phetsims.github.io/scenery/doc/layout#layoutOrigin)
+ *
+ * FlowBox and layoutOptions options:
+ *   - align (see https://phetsims.github.io/scenery/doc/layout#FlowBox-align)
+ *   - stretch (see https://phetsims.github.io/scenery/doc/layout#FlowBox-stretch)
+ *   - grow (see https://phetsims.github.io/scenery/doc/layout#FlowBox-grow)
+ *   - margin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
+ *   - xMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
+ *   - yMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
+ *   - leftMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
+ *   - rightMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
+ *   - topMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
+ *   - bottomMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
+ *   - minContentWidth (see https://phetsims.github.io/scenery/doc/layout#FlowBox-minContent)
+ *   - minContentHeight (see https://phetsims.github.io/scenery/doc/layout#FlowBox-minContent)
+ *   - maxContentWidth (see https://phetsims.github.io/scenery/doc/layout#FlowBox-maxContent)
+ *   - maxContentHeight (see https://phetsims.github.io/scenery/doc/layout#FlowBox-maxContent)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

@@ -583,6 +583,12 @@
       }, { resize: 'none', useMinWidth: false } );
     </script>
 
+    <p>
+      For horizontal boxes, the values are: 'left', 'right', 'center', 'origin'. For vertical boxes, the values are:
+      'top', 'bottom', 'center', 'origin'. See
+      <a href="https://github.com/phetsims/scenery/blob/master/js/layout/LayoutAlign.ts">LayoutAlign</a> for more details
+    </p>
+
     <h3 id="FlowBox-justifyLines">justifyLines</h3>
 
     <p>justifyLines controls how lines are positioned in the secondary orientation (null will default to a stretch):</p>
@@ -852,7 +858,7 @@
 
     <h2 id="GridBox">GridBox</h2>
 
-    <h3>Cell coordinates</h3>
+    <h3 id="GridBox-layoutOptions-location">Cell coordinates</h3>
 
     <p>Can be constructed with absolute coordinates (which can include gaps):</p>
 
@@ -1334,7 +1340,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3 id="GridBox-layoutOptions-">width/height</h3>
+    <h3 id="GridBox-layoutOptions-size">width/height</h3>
 
     <p>Cells can take up more than one row/column with the width/height layout options:</p>
 

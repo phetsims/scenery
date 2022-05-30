@@ -1,7 +1,47 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * A grid-based layout container. See scenery/docs/layout.html for details (preferably after building scenery).
+ * A grid-based layout container.
+ *
+ * See https://phetsims.github.io/scenery/doc/layout#GridBox for details
+ *
+ * GridBox-only options:
+ *   - rows (see https://phetsims.github.io/scenery/doc/layout#GridBox-rows)
+ *   - columns (see https://phetsims.github.io/scenery/doc/layout#GridBox-columns)
+ *   - autoRows (see https://phetsims.github.io/scenery/doc/layout#GridBox-autoLines)
+ *   - autoColumns (see https://phetsims.github.io/scenery/doc/layout#GridBox-autoLines)
+ *   - resize (see https://phetsims.github.io/scenery/doc/layout#GridBox-resize)
+ *   - spacing (see https://phetsims.github.io/scenery/doc/layout#GridBox-spacing)
+ *   - xSpacing (see https://phetsims.github.io/scenery/doc/layout#GridBox-spacing)
+ *   - ySpacing (see https://phetsims.github.io/scenery/doc/layout#GridBox-spacing)
+ *   - layoutOrigin (see https://phetsims.github.io/scenery/doc/layout#layoutOrigin)
+ *
+ * GridBox and layoutOptions options:
+ *   - xAlign (see https://phetsims.github.io/scenery/doc/layout#GridBox-align)
+ *   - yAlign (see https://phetsims.github.io/scenery/doc/layout#GridBox-align)
+ *   - stretch (see https://phetsims.github.io/scenery/doc/layout#GridBox-stretch)
+ *   - xStretch (see https://phetsims.github.io/scenery/doc/layout#GridBox-stretch)
+ *   - yStretch (see https://phetsims.github.io/scenery/doc/layout#GridBox-stretch)
+ *   - grow (see https://phetsims.github.io/scenery/doc/layout#GridBox-grow)
+ *   - xGrow (see https://phetsims.github.io/scenery/doc/layout#GridBox-grow)
+ *   - yGrow (see https://phetsims.github.io/scenery/doc/layout#GridBox-grow)
+ *   - margin (see https://phetsims.github.io/scenery/doc/layout#GridBox-margins)
+ *   - xMargin (see https://phetsims.github.io/scenery/doc/layout#GridBox-margins)
+ *   - yMargin (see https://phetsims.github.io/scenery/doc/layout#GridBox-margins)
+ *   - leftMargin (see https://phetsims.github.io/scenery/doc/layout#GridBox-margins)
+ *   - rightMargin (see https://phetsims.github.io/scenery/doc/layout#GridBox-margins)
+ *   - topMargin (see https://phetsims.github.io/scenery/doc/layout#GridBox-margins)
+ *   - bottomMargin (see https://phetsims.github.io/scenery/doc/layout#GridBox-margins)
+ *   - minContentWidth (see https://phetsims.github.io/scenery/doc/layout#GridBox-minContent)
+ *   - minContentHeight (see https://phetsims.github.io/scenery/doc/layout#GridBox-minContent)
+ *   - maxContentWidth (see https://phetsims.github.io/scenery/doc/layout#GridBox-maxContent)
+ *   - maxContentHeight (see https://phetsims.github.io/scenery/doc/layout#GridBox-maxContent)
+ *
+ * layoutOptions-only options:
+ *   - x (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-location)
+ *   - y (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-location)
+ *   - width (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-size)
+ *   - height (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-size)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

@@ -47,22 +47,27 @@ export type FlowConfigurableOptions = {
   // 'vertical', the y-values of the components will be adjusted to space them out); this is known as the "primary"
   // dimension. Items will be aligned/stretched in the opposite orientation (e.g. if it's 'vertical', the x-values of
   // the components will be adjusted by align and stretch); this is known as the "secondary" or "opposite" dimension.
+  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-orientation
   orientation?: LayoutOrientation | null;
 
   // Adjusts the position of elements in the "opposite" dimension, either to a specific side, the center, or so that all
   // the origins of items are aligned (similar to x=0 for a 'vertical' orientation).
+  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-align
   align?: HorizontalLayoutAlign | VerticalLayoutAlign | null;
 
   // Controls whether elements will attempt to expand in the "opposite" dimension to take up the full size of the
   // largest layout element.
+  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-stretch
   stretch?: boolean;
 
   // Controls whether elements will attempt to expand in the "primary" dimension. Elements will expand proportionally
   // based on the total grow sum (and will not expand at all if the grow is zero).
+  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-grow
   grow?: number | null;
 
   // Adds extra space for each cell in the layout (margin controls all 4 sides, xMargin controls left/right, yMargin
   // controls top/bottom).
+  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-margins
   margin?: number | null;
   xMargin?: number | null;
   yMargin?: number | null;
@@ -73,6 +78,8 @@ export type FlowConfigurableOptions = {
 
   // Forces size minimums and maximums on the cells (which includes the margins).
   // NOTE: For these, the nullable portion is actually part of the possible "value"
+  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-minContent and
+  // https://phetsims.github.io/scenery/doc/layout#FlowBox-maxContent
   minContentWidth?: number | null;
   minContentHeight?: number | null;
   maxContentWidth?: number | null;

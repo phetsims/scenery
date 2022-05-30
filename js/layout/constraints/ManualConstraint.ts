@@ -17,6 +17,8 @@
  * Notably in the callback, it uses LayoutProxy (which has the positional getters/setters of an object, and handles
  * coordinate transforms).
  *
+ * See https://phetsims.github.io/scenery/doc/layout#ManualConstraint for details
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
