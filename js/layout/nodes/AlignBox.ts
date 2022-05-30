@@ -45,16 +45,16 @@ const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'group' // {AlignGroup|null} - Share bounds with others, see setGroup() for more documentation
 ];
 
-export const XAlignValues = [ 'left', 'center', 'right', 'stretch' ] as const;
-export type XAlign = ( typeof XAlignValues )[number];
+export const AlignBoxXAlignValues = [ 'left', 'center', 'right', 'stretch' ] as const;
+export type AlignBoxXAlign = ( typeof AlignBoxXAlignValues )[number];
 
-export const YAlignValues = [ 'top', 'center', 'bottom', 'stretch' ] as const;
-export type YAlign = ( typeof YAlignValues )[number];
+export const AlignBoxYAlignValues = [ 'top', 'center', 'bottom', 'stretch' ] as const;
+export type AlignBoxYAlign = ( typeof AlignBoxYAlignValues )[number];
 
 type SelfOptions = {
   alignBounds?: Bounds2 | null;
-  xAlign?: XAlign;
-  yAlign?: YAlign;
+  xAlign?: AlignBoxXAlign;
+  yAlign?: AlignBoxYAlign;
   margin?: number;
   xMargin?: number;
   yMargin?: number;
@@ -84,8 +84,8 @@ export default class AlignBox extends SuperType {
   private _ySet = false;
 
   // How to align the content when the alignBounds are larger than our content with its margins.
-  private _xAlign: XAlign;
-  private _yAlign: YAlign;
+  private _xAlign: AlignBoxXAlign;
+  private _yAlign: AlignBoxYAlign;
 
   // How much space should be on each side.
   private _leftMargin: number;
@@ -271,8 +271,8 @@ export default class AlignBox extends SuperType {
   /**
    * Sets the horizontal alignment of this box.
    */
-  setXAlign( xAlign: XAlign ): this {
-    assert && assert( XAlignValues.includes( xAlign ), `xAlign should be one of: ${XAlignValues}` );
+  setXAlign( xAlign: AlignBoxXAlign ): this {
+    assert && assert( AlignBoxXAlignValues.includes( xAlign ), `xAlign should be one of: ${AlignBoxXAlignValues}` );
 
     if ( this._xAlign !== xAlign ) {
       this._xAlign = xAlign;
@@ -284,22 +284,22 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set xAlign( value: XAlign ) { this.setXAlign( value ); }
+  set xAlign( value: AlignBoxXAlign ) { this.setXAlign( value ); }
 
-  get xAlign(): XAlign { return this.getXAlign(); }
+  get xAlign(): AlignBoxXAlign { return this.getXAlign(); }
 
   /**
    * Returns the current horizontal alignment of this box.
    */
-  getXAlign(): XAlign {
+  getXAlign(): AlignBoxXAlign {
     return this._xAlign;
   }
 
   /**
    * Sets the vertical alignment of this box.
    */
-  setYAlign( yAlign: YAlign ): this {
-    assert && assert( YAlignValues.includes( yAlign ), `xAlign should be one of: ${YAlignValues}` );
+  setYAlign( yAlign: AlignBoxYAlign ): this {
+    assert && assert( AlignBoxYAlignValues.includes( yAlign ), `xAlign should be one of: ${AlignBoxYAlignValues}` );
 
     if ( this._yAlign !== yAlign ) {
       this._yAlign = yAlign;
@@ -311,14 +311,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set yAlign( value: YAlign ) { this.setYAlign( value ); }
+  set yAlign( value: AlignBoxYAlign ) { this.setYAlign( value ); }
 
-  get yAlign(): YAlign { return this.getYAlign(); }
+  get yAlign(): AlignBoxYAlign { return this.getYAlign(); }
 
   /**
    * Returns the current vertical alignment of this box.
    */
-  getYAlign(): YAlign {
+  getYAlign(): AlignBoxYAlign {
     return this._yAlign;
   }
 
