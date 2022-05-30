@@ -184,8 +184,8 @@ export default class Rectangle extends SuperType {
       }, providedOptions );
     }
 
-    this.localPreferredWidthProperty.lazyLink( this.onPreferredWidth.bind( this ) );
-    this.localPreferredHeightProperty.lazyLink( this.onPreferredHeight.bind( this ) );
+    this.localPreferredWidthProperty.lazyLink( this.updatePreferredSizes.bind( this ) );
+    this.localPreferredHeightProperty.lazyLink( this.updatePreferredSizes.bind( this ) );
 
     this.mutate( options );
   }
@@ -640,16 +640,23 @@ export default class Rectangle extends SuperType {
     this.invalidateSupportedRenderers();
   }
 
-  private onPreferredWidth( preferredWidth: number | null ): void {
-    if ( preferredWidth !== null ) {
-      this.rectWidth = preferredWidth;
+  private updatePreferredSizes(): void {
+    const width = this.localPreferredWidth;
+    const height = this.localPreferredHeight;
+
+    if ( width !== null ) {
+      this.rectWidth = this.hasStroke() ? width - this.lineWidth : width;
+    }
+    if ( height !== null ) {
+      this.rectHeight = this.hasStroke() ? height - this.lineWidth : height;
     }
   }
 
-  private onPreferredHeight( preferredHeight: number | null ): void {
-    if ( preferredHeight !== null ) {
-      this.rectHeight = preferredHeight;
-    }
+  // We need to detect stroke changes, since our preferred size computations depend on it.
+  override invalidateStroke(): void {
+    super.invalidateStroke();
+
+    this.updatePreferredSizes();
   }
 
   /**
