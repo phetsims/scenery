@@ -40,7 +40,7 @@ export default class LayoutConstraint {
   }
 
   /**
-   * Adds listeners to a Node, so that our layout updates will happen if this Node's properties
+   * Adds listeners to a Node, so that our layout updates will happen if this Node's Properties
    * (bounds/visibility/minimum size) change. Will be cleared on disposal of this type.
    */
   addNode( node: Node, addLock = true ): void {
