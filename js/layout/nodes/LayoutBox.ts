@@ -79,6 +79,9 @@ type SelfOptions = {
 };
 export type LayoutBoxOptions = SelfOptions & NodeOptions;
 
+/**
+ * @deprecated use FlowBox
+ */
 export default class LayoutBox extends Node {
 
   private _orientation: LayoutBoxOrientation = 'vertical';
