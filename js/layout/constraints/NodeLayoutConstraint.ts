@@ -8,6 +8,7 @@
  */
 
 import Property from '../../../../axon/js/Property.js';
+import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { LayoutConstraint, LayoutProxy, Node, scenery } from '../../imports.js';
@@ -60,7 +61,8 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     assert && assert( ancestorNode instanceof Node );
 
     // The omitted options are set to proper defaults below
-    const options = optionize<NodeLayoutConstraintOptions, Omit<SelfOptions, 'excludeInvisible' | 'spacing' | 'xSpacing' | 'ySpacing'>, {}>()( {
+    // @ts-ignore // TODO: Fix OmitStrict issue, https://github.com/phetsims/phet-core/issues/119
+    const options = optionize<NodeLayoutConstraintOptions, OmitStrict<SelfOptions, 'excludeInvisible' | 'spacing' | 'xSpacing' | 'ySpacing'>, {}>()( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),

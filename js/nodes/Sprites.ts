@@ -8,6 +8,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
@@ -32,7 +33,7 @@ type SelfOptions = {
 };
 
 // We don't specify a default for canvasBounds on purpose, so we'll omit this from the optionize type parameter.
-type SpecifiedSelfOptions = Omit<SelfOptions, 'canvasBounds'>;
+type SpecifiedSelfOptions = OmitStrict<SelfOptions, 'canvasBounds'>;
 
 export type SpritesOptions = SelfOptions & NodeOptions;
 

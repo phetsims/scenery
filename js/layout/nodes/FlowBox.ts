@@ -35,6 +35,7 @@
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';
+import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
 import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SceneryConstants, SIZABLE_OPTION_KEYS, VerticalLayoutAlign, VerticalLayoutJustification } from '../../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
@@ -50,12 +51,13 @@ const DEFAULT_OPTIONS = {
   stretch: false
 } as const;
 
+type ExcludeFlowConstraintOptions = 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty' | 'layoutOriginProperty';
 type SelfOptions = {
   // Controls whether the FlowBox will re-trigger layout automatically after the "first" layout during construction.
   // The FlowBox will layout once after processing the options object, but if resize:false, then after that manual
   // layout calls will need to be done (with updateLayout())
   resize?: boolean;
-} & Omit<FlowConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty' | 'layoutOriginProperty'>;
+} & OmitStrict<FlowConstraintOptions, ExcludeFlowConstraintOptions>;
 
 export type FlowBoxOptions = SelfOptions & LayoutNodeOptions;
 
@@ -71,7 +73,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   private readonly onChildrenChanged: () => void;
 
   constructor( providedOptions?: FlowBoxOptions ) {
-    const options = optionize<FlowBoxOptions, Omit<SelfOptions, keyof FlowConstraintOptions>, LayoutNodeOptions>()( {
+    const options = optionize<FlowBoxOptions, OmitStrict<SelfOptions, Exclude<keyof FlowConstraintOptions, ExcludeFlowConstraintOptions>>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
       resize: true,
@@ -358,13 +360,32 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   }
 
   // LayoutBox Compatibility (see the ES5 setters/getters, or the options doc)
-  setOrientation( orientation: LayoutOrientation ): this { this.orientation = orientation; return this; }
+  setOrientation( orientation: LayoutOrientation ): this {
+    this.orientation = orientation;
+    return this;
+  }
+
   getOrientation(): LayoutOrientation { return this.orientation; }
-  setSpacing( spacing: number ): this { this.spacing = spacing; return this; }
+
+  setSpacing( spacing: number ): this {
+    this.spacing = spacing;
+    return this;
+  }
+
   getSpacing(): number { return this.spacing; }
-  setAlign( align: HorizontalLayoutAlign | VerticalLayoutAlign ): this { this.align = align; return this; }
+
+  setAlign( align: HorizontalLayoutAlign | VerticalLayoutAlign ): this {
+    this.align = align;
+    return this;
+  }
+
   getAlign(): HorizontalLayoutAlign | VerticalLayoutAlign { return this.align; }
-  setResize( resize: boolean ): this { this.resize = resize; return this; }
+
+  setResize( resize: boolean ): this {
+    this.resize = resize;
+    return this;
+  }
+
   isResize(): boolean { return this.resize; }
 }
 

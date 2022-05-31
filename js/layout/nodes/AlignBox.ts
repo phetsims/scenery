@@ -27,6 +27,7 @@
  */
 
 import Multilink from '../../../../axon/js/Multilink.js';
+import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import { AlignGroup, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
@@ -67,7 +68,7 @@ type SelfOptions = {
 
 type SuperOptions = NodeOptions & SizableOptions;
 
-export type AlignBoxOptions = SelfOptions & Omit<SuperOptions, 'children'>;
+export type AlignBoxOptions = SelfOptions & OmitStrict<SuperOptions, 'children'>;
 
 const SuperType = Sizable( Node );
 

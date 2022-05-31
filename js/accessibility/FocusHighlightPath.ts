@@ -11,6 +11,7 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
+import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
@@ -54,7 +55,7 @@ type SelfOptions = {
 };
 
 // The stroke and linewidth of this path are set with outerLineWidth and outerStroke.
-export type FocusHighlightPathOptions = SelfOptions & Omit<PathOptions, 'stroke' | 'lineWidth'>;
+export type FocusHighlightPathOptions = SelfOptions & OmitStrict<PathOptions, 'stroke' | 'lineWidth'>;
 
 class FocusHighlightPath extends Path {
 

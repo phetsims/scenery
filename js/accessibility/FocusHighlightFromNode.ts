@@ -11,6 +11,7 @@
  */
 
 import IProperty from '../../../axon/js/IProperty.js';
+import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
@@ -32,7 +33,7 @@ type SelfOptions = {
 };
 
 // The transformSourceNode for this highlight will be the provided Node.
-type FocusHighlightFromNodeOptions = SelfOptions & Omit<FocusHighlightPathOptions, 'transformSourceNode'>;
+type FocusHighlightFromNodeOptions = SelfOptions & OmitStrict<FocusHighlightPathOptions, 'transformSourceNode'>;
 
 class FocusHighlightFromNode extends FocusHighlightPath {
 

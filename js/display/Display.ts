@@ -51,6 +51,7 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
+import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -304,7 +305,7 @@ export default class Display {
 
     //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
-    const options = optionize<DisplayOptions, Omit<DisplayOptions, 'container'>>()( {
+    const options = optionize<DisplayOptions, OmitStrict<DisplayOptions, 'container'>>()( {
       // {number} - Initial display width
       width: ( providedOptions && providedOptions.container && providedOptions.container.clientWidth ) || 640,
 

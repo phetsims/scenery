@@ -7,8 +7,9 @@
  */
 
 import { ExternalFlowConfigurableOptions, FlowConfigurable, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
+import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
 
-export type FlowCellOptions = Omit<ExternalFlowConfigurableOptions, 'orientation'>;
+export type FlowCellOptions = OmitStrict<ExternalFlowConfigurableOptions, 'orientation'>;
 
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 

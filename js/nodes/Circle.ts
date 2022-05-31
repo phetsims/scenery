@@ -7,11 +7,12 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import { scenery, Renderer, Path, Features, CircleCanvasDrawable, CircleDOMDrawable, CircleSVGDrawable, PathOptions, CanvasContextWrapper, Instance, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, ICircleDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, CircleCanvasDrawable, CircleDOMDrawable, CircleSVGDrawable, DOMSelfDrawable, Features, ICircleDrawable, Instance, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, VoicingOptions } from '../imports.js';
 
 const CIRCLE_OPTION_KEYS = [
   'radius' // {number} - see setRadius() for more documentation
@@ -21,7 +22,7 @@ type SelfOptions = {
   radius?: number;
 };
 
-export type CircleOptions = SelfOptions & Omit<PathOptions, 'shape'>;
+export type CircleOptions = SelfOptions & VoicingOptions & OmitStrict<PathOptions, 'shape'>;
 
 export default class Circle extends Path {
 
