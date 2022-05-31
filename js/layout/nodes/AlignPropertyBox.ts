@@ -21,7 +21,7 @@ export default class AlignPropertyBox extends AlignBox {
   /**
    * @param content - Content to align inside the alignBox
    * @param alignBoundsProperty
-   * @param [options]
+   * @param [providedOptions]
    */
   constructor( content: Node, alignBoundsProperty: IReadOnlyProperty<Bounds2>, providedOptions?: AlignPropertyBoxOptions ) {
     const options = optionize<AlignPropertyBoxOptions, {}, AlignBoxOptions>()( {
