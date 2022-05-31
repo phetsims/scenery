@@ -35,7 +35,7 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
   protected _constraint!: Constraint; // Can't be readonly because the subtype sets this
   readonly layoutOriginProperty: IProperty<Vector2> = new Vector2Property( Vector2.ZERO );
 
-  constructor( providedOptions?: LayoutNodeOptions ) {
+  protected constructor( providedOptions?: LayoutNodeOptions ) {
     super();
 
     this.mutate( providedOptions );
