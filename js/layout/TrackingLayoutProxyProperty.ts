@@ -1,7 +1,7 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * LayoutProxyProperty with an added transform tracking callback to notify when the transform changes.
+ * Extends LayoutProxyProperty with an added transform tracking callback to notify when the transform changes.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
