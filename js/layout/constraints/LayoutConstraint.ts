@@ -103,9 +103,9 @@ export default class LayoutConstraint {
   }
 
   /**
-   * Locks the layout (so that automatic layout will NOT be triggered synchronously until unlock() is called and
+   * Locks the layout, so that automatic layout will NOT be triggered synchronously until unlock() is called and
    * the lock count returns to 0. This is set up so that if we trigger multiple reentrancy, we will only attempt to
-   * re-layout once ALL of the layouts are finished).
+   * re-layout once ALL of the layouts are finished.
    */
   lock(): void {
     this._layoutLockCount++;
