@@ -70,7 +70,7 @@ export type GridConfigurableOptions = {
   topMargin?: number | null;
   bottomMargin?: number | null;
 
-  // Forces size minimums and maximums on the cells (which includes the margins).
+  // Forces size minimums and maximums on the cells (which does not include the margins).
   // NOTE: For these, the nullable portion is actually part of the possible "value"
   minContentWidth?: number | null;
   minContentHeight?: number | null;
