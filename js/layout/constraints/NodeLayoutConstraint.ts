@@ -61,8 +61,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     assert && assert( ancestorNode instanceof Node );
 
     // The omitted options are set to proper defaults below
-    // @ts-ignore // TODO: Fix StrictOmit issue, https://github.com/phetsims/phet-core/issues/119
-    const options = optionize<NodeLayoutConstraintOptions, StrictOmit<SelfOptions, 'excludeInvisible' | 'spacing' | 'xSpacing' | 'ySpacing'>, {}>()( {
+    const options = optionize<NodeLayoutConstraintOptions, StrictOmit<SelfOptions, 'excludeInvisible'>, {}>()( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),
