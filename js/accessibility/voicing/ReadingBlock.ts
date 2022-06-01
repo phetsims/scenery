@@ -21,7 +21,7 @@
 /* eslint-disable no-protected-jsdoc */
 
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
@@ -58,7 +58,7 @@ type UnsupportedVoicingOptions =
   'voicingResponsePatternCollection';
 
 export type ReadingBlockOptions = SelfOptions &
-  OmitStrict<VoicingOptions, UnsupportedVoicingOptions>;
+  StrictOmit<VoicingOptions, UnsupportedVoicingOptions>;
 
 // Use an assertion signature to narrow the type to ReadingBlockUtterance
 function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance is ReadingBlockUtterance {

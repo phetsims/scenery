@@ -7,7 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
@@ -31,7 +31,7 @@ type SelfOptions = {
   x2?: number;
   y2?: number;
 };
-export type LineOptions = SelfOptions & OmitStrict<PathOptions, 'shape'>;
+export type LineOptions = SelfOptions & StrictOmit<PathOptions, 'shape'>;
 
 export default class Line extends Path {
 

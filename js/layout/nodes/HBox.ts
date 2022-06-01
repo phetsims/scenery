@@ -7,10 +7,10 @@
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';
-import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { scenery, FlowBox, FlowBoxOptions } from '../../imports.js';
 
-export type HBoxOptions = OmitStrict<FlowBoxOptions, 'orientation'>;
+export type HBoxOptions = StrictOmit<FlowBoxOptions, 'orientation'>;
 
 export default class HBox extends FlowBox {
   constructor( providedOptions?: HBoxOptions ) {

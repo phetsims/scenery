@@ -47,7 +47,7 @@
  */
 
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
-import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SIZABLE_OPTION_KEYS, VerticalLayoutAlign } from '../../imports.js';
@@ -108,7 +108,7 @@ type SelfOptions = {
   // `autoColumns` number of columns, then it will go to the next row. This should generally be used with `children` or
   // adding/removing children in normal ways.
   autoColumns?: number | null;
-} & OmitStrict<GridConstraintOptions, GridConstraintExcludedOptions>;
+} & StrictOmit<GridConstraintOptions, GridConstraintExcludedOptions>;
 
 export type GridBoxOptions = SelfOptions & LayoutNodeOptions;
 
@@ -128,7 +128,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   private readonly onChildRemoved: ( node: Node ) => void;
 
   constructor( providedOptions?: GridBoxOptions ) {
-    const options = optionize<GridBoxOptions, OmitStrict<SelfOptions, Exclude<keyof GridConstraintOptions, GridConstraintExcludedOptions> | 'rows' | 'columns' | 'autoRows' | 'autoColumns'>,
+    const options = optionize<GridBoxOptions, StrictOmit<SelfOptions, Exclude<keyof GridConstraintOptions, GridConstraintExcludedOptions> | 'rows' | 'columns' | 'autoRows' | 'autoColumns'>,
       LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,

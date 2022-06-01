@@ -35,7 +35,7 @@
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';
-import OmitStrict from '../../../../phet-core/js/types/OmitStrict.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SceneryConstants, SIZABLE_OPTION_KEYS, VerticalLayoutAlign, VerticalLayoutJustification } from '../../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
@@ -57,7 +57,7 @@ type SelfOptions = {
   // The FlowBox will layout once after processing the options object, but if resize:false, then after that manual
   // layout calls will need to be done (with updateLayout())
   resize?: boolean;
-} & OmitStrict<FlowConstraintOptions, ExcludeFlowConstraintOptions>;
+} & StrictOmit<FlowConstraintOptions, ExcludeFlowConstraintOptions>;
 
 export type FlowBoxOptions = SelfOptions & LayoutNodeOptions;
 
@@ -73,7 +73,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   private readonly onChildrenChanged: () => void;
 
   constructor( providedOptions?: FlowBoxOptions ) {
-    const options = optionize<FlowBoxOptions, OmitStrict<SelfOptions, Exclude<keyof FlowConstraintOptions, ExcludeFlowConstraintOptions>>, LayoutNodeOptions>()( {
+    const options = optionize<FlowBoxOptions, StrictOmit<SelfOptions, Exclude<keyof FlowConstraintOptions, ExcludeFlowConstraintOptions>>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
       resize: true,

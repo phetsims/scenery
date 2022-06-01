@@ -7,7 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
@@ -22,7 +22,7 @@ type SelfOptions = {
   radius?: number;
 };
 
-export type CircleOptions = SelfOptions & VoicingOptions & OmitStrict<PathOptions, 'shape'>;
+export type CircleOptions = SelfOptions & VoicingOptions & StrictOmit<PathOptions, 'shape'>;
 
 export default class Circle extends Path {
 

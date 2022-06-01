@@ -7,7 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import OmitStrict from '../../../phet-core/js/types/OmitStrict.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -39,7 +39,7 @@ type SelfOptions = {
   cornerYRadius?: number;
 };
 
-export type RectangleOptions = SelfOptions & OmitStrict<PathOptions, 'shape'> & SizableOptions;
+export type RectangleOptions = SelfOptions & StrictOmit<PathOptions, 'shape'> & SizableOptions;
 
 const SuperType = Sizable( Path );
 
