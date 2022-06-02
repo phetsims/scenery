@@ -147,8 +147,6 @@ export default class Text extends Paintable( Node ) {
    * Returns the text displayed by our node.
    *
    * NOTE: If a number was provided to setText(), it will not be returned as a number here.
-   *
-   * @returns {string}
    */
   getText(): string {
     return this._textProperty.value;

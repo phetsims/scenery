@@ -209,7 +209,6 @@ export default class Image extends Imageable( Node ) {
    *
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
-   * @returns {CanvasSelfDrawable}
    */
   override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore - Poolable
@@ -221,7 +220,6 @@ export default class Image extends Imageable( Node ) {
    *
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
-   * @returns {WebGLSelfDrawable}
    */
   override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore - Poolable

@@ -279,8 +279,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
      * NOTE: If a URL or mipmap data was provided, this currently doesn't return the original input to setImage(), but
      *       instead provides the mapped result (or first mipmap level's image).
      *       TODO: return the original result instead.
-     *
-     * @returns {HTMLImageElement|HTMLCanvasElement}
      */
     getImage(): HTMLImageElement | HTMLCanvasElement {
       assert && assert( this._image !== null );
@@ -746,7 +744,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
      * Returns a matching Canvas element for the given level-of-detail. (scenery-internal)
      *
      * @param level - Non-negative integer representing the mipmap level
-     * @returns {HTMLCanvasElement} - Matching <canvas> for the level of detail
+     * @returns - Matching <canvas> for the level of detail
      */
     getMipmapCanvas( level: number ): HTMLCanvasElement {
       assert && assert( typeof level === 'number' &&

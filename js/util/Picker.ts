@@ -91,7 +91,6 @@ export default class Picker {
    * @param point
    * @param useMouse - Whether mouse-specific customizations (and acceleration) applies
    * @param useTouch - Whether touch-specific customizations (and acceleration) applies
-   * @returns {Trail|null}
    */
   hitTest( point: Vector2, useMouse: boolean, useTouch: boolean ): Trail | null {
     assert && assert( point, 'trailUnderPointer requires a point' );

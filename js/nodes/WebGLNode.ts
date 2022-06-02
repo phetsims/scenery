@@ -126,7 +126,6 @@ export default abstract class WebGLNode extends Node {
    * If WebGLNode subtypes want to support being picked or hit-tested, it should override this function.
    *
    * @param point - Considered to be in the local coordinate frame
-   * @returns {boolean}
    */
   override containsPointSelf( point: Vector2 ): boolean {
     return false;

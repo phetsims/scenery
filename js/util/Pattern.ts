@@ -46,8 +46,6 @@ export default class Pattern extends Paint {
 
   /**
    * Returns a string form of this object
-   *
-   * @returns {string}
    */
   override toString(): string {
     return `new scenery.Pattern( $( '<img src="${this.image.src}"/>' )[0] )`;

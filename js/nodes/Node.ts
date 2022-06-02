@@ -2111,7 +2111,7 @@ class Node extends ParallelDOM {
 
   // Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
   // Adapted from Picker.recursiveHitTest
-  // @returns {PhetioObject} -- may not be a Node.  For instance, ThreeIsometricNode hits Mass instances
+  // @returns - may not be a Node.  For instance, ThreeIsometricNode hits Mass instances
   getPhetioMouseHit( point: Vector2 ): PhetioObject | null {
 
     if ( !this.isPhetioMouseHittable( point ) ) {
@@ -5569,7 +5569,6 @@ class Node extends ParallelDOM {
    * @param [y] - The Y offset for where the upper-left of the content drawn into the Canvas
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
-   * @returns {Image}
    */
   toDataURLImageSynchronous( x?: number, y?: number, width?: number, height?: number ): Image {
 
