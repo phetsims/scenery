@@ -55,16 +55,13 @@ export default class ShaderProgram {
    * Initializes (or reinitializes) the WebGL state and uniform/attribute references.
    */
   initialize( gl: WebGLRenderingContext ): void {
-    // @private {WebGL2RenderingContext}
+
     this.gl = gl; // TODO: create them with separate contexts
 
-    // @private {boolean}
     this.used = false;
 
-    // @private {WebGLProgram}
     this.program = this.gl.createProgram()!;
 
-    // @private {WebGLShader}
     this.vertexShader = Utils.createShader( this.gl, this.vertexSource, this.gl.VERTEX_SHADER );
     this.fragmentShader = Utils.createShader( this.gl, this.fragmentSource, this.gl.FRAGMENT_SHADER );
 
@@ -103,7 +100,6 @@ export default class ShaderProgram {
       this.uniformLocations[ uniformName ] = this.gl.getUniformLocation( this.program, uniformName )!;
     } );
 
-    // @private {boolean}
     this.isInitialized = true;
   }
 

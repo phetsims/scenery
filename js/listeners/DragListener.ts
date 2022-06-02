@@ -208,7 +208,7 @@ export default class DragListener extends PressListener implements IInputListene
   // Handles watching ancestor transforms for callbacks.
   private _transformTracker: TransformTracker | null;
 
-  // @private {Function} - Listener passed to the transform tracker
+  // Listener passed to the transform tracker
   private _transformTrackerListener: () => void;
 
   // There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if

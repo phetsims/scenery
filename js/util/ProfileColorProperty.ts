@@ -28,7 +28,7 @@ export default class ProfileColorProperty extends ColorProperty {
   colorProfileMap: ColorProfileMap;
 
   // Treat as private
-  name: string;
+  readonly name: string;
 
   /**
    * @param namespace - namespace that this color belongs to
@@ -78,7 +78,6 @@ export default class ProfileColorProperty extends ColorProperty {
       this.value = Color.toColor( this.colorProfileMap[ colorProfileName ] || this.colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ] );
     } );
 
-    // @private to this file (read-only)
     this.name = `${namespace.name}${NAME_SEPARATOR}${colorName}`;
 
     // On initialization and when the color changes, send a message to the parent frame identifying the color value.

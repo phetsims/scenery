@@ -49,8 +49,8 @@ export default class Path extends Paintable( Node ) {
   // immutable, and if the Shape becomes immutable, then the listeners are removed.
   _invalidShapeListener: () => void;
 
-  // // @private {boolean} Whether our shape listener is attached to a shape.
-  _invalidShapeListenerAttached: boolean;
+  // Whether our shape listener is attached to a shape.
+  private _invalidShapeListenerAttached: boolean;
 
   /**
    * Creates a Path with a given shape specifier (a Shape, a string in the SVG path format, or null to indicate no

@@ -51,7 +51,6 @@ class SVGGradientStop implements IPoolable {
 
     this.update();
 
-    // @private {function} - persistent
     this.propertyListener = this.propertyListener || this.onPropertyChange.bind( this );
     this.colorListener = this.colorListener || this.markDirty.bind( this );
 

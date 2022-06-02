@@ -368,7 +368,7 @@ type RasterizedOptions = {
 };
 
 class Node extends ParallelDOM {
-  // NOTE: All member properties with names starting with '_' are assumed to be @private/protected!
+  // NOTE: All member properties with names starting with '_' are assumed to be private/protected!
 
   // Assigns a unique ID to this Node (allows trails to get a unique list of IDs)
   _id: number;

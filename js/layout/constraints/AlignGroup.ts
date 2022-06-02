@@ -45,16 +45,16 @@ const DEFAULT_OPTIONS = {
 
 export default class AlignGroup {
 
-  private _alignBoxes: AlignBox[];
+  private readonly _alignBoxes: AlignBox[];
   private _matchHorizontal: boolean;
   private _matchVertical: boolean;
 
   // Gets locked when certain layout is performed.
   private _resizeLock: boolean;
 
-  private _maxWidthProperty: NumberProperty;
-  private _maxHeightProperty: NumberProperty;
-  private id: number;
+  private readonly _maxWidthProperty: NumberProperty;
+  private readonly _maxHeightProperty: NumberProperty;
+  private readonly id: number;
 
   /**
    * Creates an alignment group that can be composed of multiple boxes.
@@ -73,25 +73,19 @@ export default class AlignGroup {
     assert && assert( typeof options.matchHorizontal === 'boolean' );
     assert && assert( typeof options.matchVertical === 'boolean' );
 
-    // @private {Array.<AlignBox>}
     this._alignBoxes = [];
 
-    // @private {boolean}
     this._matchHorizontal = options.matchHorizontal;
 
-    // @private {boolean}
     this._matchVertical = options.matchVertical;
 
-    // @private {boolean} - Gets locked when certain layout is performed.
+    // Gets locked when certain layout is performed.
     this._resizeLock = false;
 
-    // @private {Property.<boolean>}
     this._maxWidthProperty = new NumberProperty( 0 );
 
-    // @private {Property.<boolean>}
     this._maxHeightProperty = new NumberProperty( 0 );
 
-    // @private {number}
     this.id = globalId++;
   }
 

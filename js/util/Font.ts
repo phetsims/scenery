@@ -30,17 +30,17 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { scenery } from '../imports.js';
 
-// @private {Array.<string>} - Valid values for the 'style' property of Font
+// Valid values for the 'style' property of Font
 const VALID_STYLES = [ 'normal', 'italic', 'oblique' ];
 
-// @private {Array.<string>} - Valid values for the 'variant' property of Font
+// Valid values for the 'variant' property of Font
 const VALID_VARIANTS = [ 'normal', 'small-caps' ];
 
-// @private {Array.<string>} - Valid values for the 'weight' property of Font
+// Valid values for the 'weight' property of Font
 const VALID_WEIGHTS = [ 'normal', 'bold', 'bolder', 'lighter',
   '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
 
-// @private {Array.<string>} - Valid values for the 'stretch' property of Font
+// Valid values for the 'stretch' property of Font
 const VALID_STRETCHES = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
   'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
 
