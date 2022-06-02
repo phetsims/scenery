@@ -71,7 +71,7 @@
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
-import Property from '../../../axon/js/Property.js';
+import Property, { AbstractProperty } from '../../../axon/js/Property.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -250,9 +250,9 @@ export default class DragListener extends PressListener implements IInputListene
     assert && assert( typeof options.trackAncestors === 'boolean', 'trackAncestors should be a boolean' );
     assert && assert( typeof options.translateNode === 'boolean', 'translateNode should be a boolean' );
     assert && assert( options.transform === null || options.transform instanceof Transform3, 'transform, if provided, should be a Transform3' );
-    assert && assert( options.positionProperty === null || options.positionProperty instanceof Property, 'positionProperty, if provided, should be a Property' );
+    assert && assert( options.positionProperty === null || options.positionProperty instanceof AbstractProperty, 'positionProperty, if provided, should be a Property' );
     assert && assert( !( options as unknown as { dragBounds: Bounds2 } ).dragBounds, 'options.dragBounds was removed in favor of options.dragBoundsProperty' );
-    assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof Property, 'dragBoundsProperty, if provided, should be a Property' );
+    assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof AbstractProperty, 'dragBoundsProperty, if provided, should be a Property' );
     assert && assert( options.mapPosition === null || typeof options.mapPosition === 'function', 'mapPosition, if provided, should be a function' );
     assert && assert( options.offsetPosition === null || typeof options.offsetPosition === 'function', 'offsetPosition, if provided, should be a function' );
     assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );

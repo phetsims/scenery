@@ -166,7 +166,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
   // (read-only) - Whether the listener has focus (should appear to be over)
   isFocusedProperty: IProperty<boolean>;
 
-  private cursorProperty: IProperty<string | null>;
+  private cursorProperty: IReadOnlyProperty<string | null>;
 
   // (read-only) - The current pointer, or null when not pressed. There can be short periods of
   // time when this has a value when isPressedProperty.value is false, such as during the processing of a pointer

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
+import { AbstractProperty } from '../../../axon/js/Property.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import { scenery, Color, Paint, IColor } from '../imports.js';
 
@@ -25,7 +25,7 @@ export default abstract class Gradient extends Paint {
   private colorStopsDirty: boolean;
 
   // Used to check to see if colors have changed since last time
-  private lastColorStopValues: string[]
+  private lastColorStopValues: string[];
 
   /**
    * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
@@ -63,9 +63,9 @@ export default abstract class Gradient extends Paint {
     assert && assert( color === null ||
                       typeof color === 'string' ||
                       color instanceof Color ||
-                      ( color instanceof Property && ( color.value === null ||
-                                                       typeof color.value === 'string' ||
-                                                       color.value instanceof Color ) ),
+                      ( color instanceof AbstractProperty && ( color.value === null ||
+                                                               typeof color.value === 'string' ||
+                                                               color.value instanceof Color ) ),
       'Color should match the addColorStop type specification' );
 
     if ( this.lastStopRatio > ratio ) {
@@ -162,7 +162,7 @@ export default abstract class Gradient extends Paint {
    */
   static colorToString( color: IColor ): string {
     // to {Color|string|null}
-    if ( color instanceof Property ) {
+    if ( color instanceof AbstractProperty ) {
       color = color.value;
     }
 

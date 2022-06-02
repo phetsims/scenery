@@ -11,7 +11,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import Property from '../../../axon/js/Property.js';
+import { AbstractProperty } from '../../../axon/js/Property.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
 
@@ -68,7 +68,7 @@ const scenerySerialize = ( value: unknown ): any => {
       alpha: value.alpha
     };
   }
-  else if ( value instanceof Property ) {
+  else if ( value instanceof AbstractProperty ) {
     return {
       type: 'Property',
       value: scenerySerialize( value.value )

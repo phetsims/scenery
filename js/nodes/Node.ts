@@ -326,7 +326,7 @@ export type NodeOptions = {
   pickableProperty?: IReadOnlyProperty<boolean | null> | null;
   pickable?: boolean | null;
   phetioEnabledPropertyInstrumented?: boolean;
-  enabledProperty?: IProperty<boolean> | null;
+  enabledProperty?: IReadOnlyProperty<boolean> | null;
   enabled?: boolean;
   phetioInputEnabledPropertyInstrumented?: boolean;
   inputEnabledProperty?: IProperty<boolean> | null;

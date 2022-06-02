@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
+import { AbstractProperty } from '../../../axon/js/Property.js';
 import { LineStyles, LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin } from '../../../kite/js/imports.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
@@ -145,7 +145,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     getFillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
       const fill = this.getFill();
 
-      return fill instanceof Property ? fill.get() : fill;
+      return fill instanceof AbstractProperty ? fill.get() : fill;
     }
 
     get fillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getFillValue(); }
@@ -213,7 +213,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     getStrokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
       const stroke = this.getStroke();
 
-      return stroke instanceof Property ? stroke.get() : stroke;
+      return stroke instanceof AbstractProperty ? stroke.get() : stroke;
     }
 
     get strokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getStrokeValue(); }

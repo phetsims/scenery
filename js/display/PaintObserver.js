@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
+import { AbstractProperty } from '../../../axon/js/Property.js';
 import { scenery, Color, Gradient } from '../imports.js';
 
 class PaintObserver {
@@ -109,7 +109,7 @@ class PaintObserver {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachPrimary' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    if ( paint instanceof Property ) {
+    if ( paint instanceof AbstractProperty ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Property listener' );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
       this.secondaryLazyLinkProperty( paint );
@@ -148,7 +148,7 @@ class PaintObserver {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachPrimary' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    if ( paint instanceof Property ) {
+    if ( paint instanceof AbstractProperty ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Property listener' );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
       this.secondaryUnlinkProperty( paint );

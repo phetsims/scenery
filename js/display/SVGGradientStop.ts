@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
+import { AbstractProperty } from '../../../axon/js/Property.js';
 import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 import { ActiveSVGGradient, Color, IColor, scenery, svgns } from '../imports.js';
@@ -55,7 +55,7 @@ class SVGGradientStop implements IPoolable {
     this.propertyListener = this.propertyListener || this.onPropertyChange.bind( this );
     this.colorListener = this.colorListener || this.markDirty.bind( this );
 
-    if ( color instanceof Property ) {
+    if ( color instanceof AbstractProperty ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Property listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       color.lazyLink( this.propertyListener );
       if ( color.value instanceof Color ) {
@@ -121,7 +121,7 @@ class SVGGradientStop implements IPoolable {
     let color = this.color;
 
     // to {Color|string|null}
-    if ( color instanceof Property ) {
+    if ( color instanceof AbstractProperty ) {
       color = color.value;
     }
 
@@ -165,7 +165,7 @@ class SVGGradientStop implements IPoolable {
 
     const color = this.color;
 
-    if ( color instanceof Property ) {
+    if ( color instanceof AbstractProperty ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Property listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       if ( color.hasListener( this.propertyListener ) ) {
         color.unlink( this.propertyListener );
