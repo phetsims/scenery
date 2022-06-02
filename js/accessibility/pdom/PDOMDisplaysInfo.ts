@@ -29,8 +29,6 @@ export default class PDOMDisplaysInfo {
   /**
    * Tracks pdom display information for our given node.
    * (scenery-internal)
-   *
-   * @param {Node} node
    */
   constructor( node: Node ) {
     this.node = node;

@@ -1145,7 +1145,7 @@ export default class Input extends PhetioObject {
    * is not provided, or if relatedTarget is not under PDOM, or there is no associated Node with trail id on the
    * relatedTarget element. (scenery-internal)
    *
-   * @param {Event} domEvent - DOM Event, not a SceneryEvent!
+   * @param domEvent - DOM Event, not a SceneryEvent!
    */
   getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
     const relatedTargetElement = domEvent.relatedTarget;

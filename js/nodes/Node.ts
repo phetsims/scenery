@@ -1240,9 +1240,6 @@ class Node extends ParallelDOM {
   /**
    * Replace a child in this node's children array with another node. If the old child had DOM focus and
    * the new child is focusable, the new child will receive focus after it is added.
-   *
-   * @param {Node} oldChild
-   * @param {Node} newChild
    */
   replaceChild( oldChild: Node, newChild: Node ): this {
     assert && assert( oldChild instanceof Node, 'child to replace must be a Node' );

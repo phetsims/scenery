@@ -88,8 +88,8 @@ class FocusHighlightPath extends Path {
   public static GROUP_INNER_LINE_WIDTH = GROUP_INNER_LINE_WIDTH;
 
   /**
-   * @param {Shape} [shape] - the shape for the focus highlight
-   * @param {FocusHighlightPathOptions} [providedOptions]
+   * @param [shape] - the shape for the focus highlight
+   * @param [providedOptions]
    */
   constructor( shape: Shape | string | null, providedOptions?: FocusHighlightPathOptions ) {
 
@@ -240,7 +240,7 @@ class FocusHighlightPath extends Path {
    * transforms applied to the source node so that the focus highlight can update accordingly.
    * (scenery-internal)
    *
-   * @param {Trail} focusedTrail - Trail to focused Node, to help search unique Trail to the transformSourceNode
+   * @param focusedTrail - Trail to focused Node, to help search unique Trail to the transformSourceNode
    */
   public getUniqueHighlightTrail( focusedTrail: Trail ): Trail {
     assert && assert( this.transformSourceNode, 'getUniqueHighlightTrail requires a transformSourceNode' );

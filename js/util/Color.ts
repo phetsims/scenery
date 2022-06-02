@@ -74,10 +74,10 @@ export default class Color {
    * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
    * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
    *
-   * @param {number|Color|string|null} r - See above for the possible overloaded values
-   * @param {number} [g] - If provided, should be the green value (or the alpha value if a hex color is given)
-   * @param {number} [b] - If provided, should be the blue value
-   * @param {number} [a] - If provided, should be the alpha value
+   * @param r - See above for the possible overloaded values
+   * @param [g] - If provided, should be the green value (or the alpha value if a hex color is given)
+   * @param [b] - If provided, should be the blue value
+   * @param [a] - If provided, should be the alpha value
    */
   constructor( color: Color );
   constructor( string: string );

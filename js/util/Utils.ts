@@ -200,7 +200,7 @@ const Utils = {
   /**
    * Measures accurate bounds of a function that draws things to a Canvas.
    *
-   * @param {Object} [options]
+   * @param [options]
    */
   canvasAccurateBounds( renderToContext: ( context: CanvasRenderingContext2D ) => void, options?: { precision?: number; resolution?: number; initialScale?: number } ): Bounds2 & { minBounds: Bounds2; maxBounds: Bounds2; isConsistent: boolean; precision: number } {
     // how close to the actual bounds do we need to be?

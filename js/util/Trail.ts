@@ -45,7 +45,7 @@ export default class Trail {
   private immutable?: boolean;
 
   /**
-   * @param {Trail|Array.<Node>|Node} [nodes]
+   * @param [nodes]
    */
   constructor( nodes?: Trail | Node[] | Node ) {
     if ( assert ) {
@@ -904,9 +904,6 @@ export default class Trail {
    * spannedSubtrees( c, n ) -> subtree( a ); NOTE: if b is painted, that wouldn't work!
    * spannedSubtrees( h, l ) -> subtree( h ); subtree( i ); subtree( j ); self( l );
    * spannedSubtrees( c, i ) -> [b,f] --- wait, include e self?
-   *
-   * @param {Trail} a
-   * @param {Trail} b
    */
   static spannedSubtrees( a: Trail, b: Trail ): void {
     // assert && assert( a.nodes[0] === b.nodes[0], 'Spanned subtrees for a and b requires that a and b have the same root' );

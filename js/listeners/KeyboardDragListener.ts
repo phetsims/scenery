@@ -383,7 +383,6 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
 
   /**
    * Setter for the shiftDownDelta property, see options.shiftDownDelta for more info.
-   * @param {number|null} shiftDownDelta
    */
   set shiftDownDelta( shiftDownDelta: number ) { this._shiftDownDelta = shiftDownDelta; }
 
@@ -491,8 +490,6 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
    * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
    * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
-   *
-   * @param {SceneryEvent} event
    */
   public keyup( event: SceneryEvent ): void {
     const domEvent = event.domEvent as KeyboardEvent;

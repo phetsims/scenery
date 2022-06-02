@@ -207,8 +207,6 @@ export default class Text extends Paintable( Node ) {
 
   /**
    * See documentation and comments in Node.initializePhetioObject
-   * @param {Object} baseOptions
-   * @param {Object} config
    */
   protected override initializePhetioObject( baseOptions: any, config: TextOptions ): void {
 
