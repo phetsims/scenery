@@ -230,8 +230,6 @@ class FocusHighlightPath extends Path {
 
   /**
    * Get the color of the outer highlight for this FocusHighlightPath
-   *
-   * @returns {PaintDef}
    */
   getOuterHighlightColor(): IPaint {
     return this._outerHighlightColor;

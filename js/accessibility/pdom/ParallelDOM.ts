@@ -803,7 +803,6 @@ export default class ParallelDOM extends PhetioObject {
    *
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   * @returns {string|null}
    */
   getPDOMHeading(): string | null {
     return this._pdomHeading;
@@ -835,7 +834,6 @@ export default class ParallelDOM extends PhetioObject {
    *
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   * @returns {function}
    */
   getPDOMHeadingBehavior(): PDOMBehaviorFunction {
     return this._pdomHeadingBehavior;
@@ -846,7 +844,6 @@ export default class ParallelDOM extends PhetioObject {
    *
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   * @returns {number|null}
    */
   getHeadingLevel(): number | null {
     return this._headingLevel;
@@ -2462,8 +2459,6 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Get whether or not the node is focusable. Use the focusOverride, and then default to browser defined
    * focusable elements.
-   *
-   * @returns {boolean}
    */
   isFocusable(): boolean | null {
     if ( this._focusableOverride !== null ) {

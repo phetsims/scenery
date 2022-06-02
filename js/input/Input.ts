@@ -1146,7 +1146,6 @@ export default class Input extends PhetioObject {
    * relatedTarget element. (scenery-internal)
    *
    * @param {Event} domEvent - DOM Event, not a SceneryEvent!
-   * @returns {Trail|null}
    */
   getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
     const relatedTargetElement = domEvent.relatedTarget;
@@ -1883,7 +1882,7 @@ export default class Input extends PhetioObject {
    * the particular Event interface for the instance being serialized doesn't have a certain property, then it will be
    * set as `null`. See domEventPropertiesToSerialize for the full list of supported Event properties.
    *
-   * @returns {Object} - see domEventPropertiesToSerialize for list keys that are serialized
+   * @returns - see domEventPropertiesToSerialize for list keys that are serialized
    */
   static serializeDomEvent( domEvent: Event ): any {
     const entries: SerializedDOMEvent = {
