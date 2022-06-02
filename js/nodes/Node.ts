@@ -208,49 +208,49 @@ export const REQUIRES_BOUNDS_OPTION_KEYS = [
 
 // Node options, in the order they are executed in the constructor/mutate()
 const NODE_OPTION_KEYS = [
-  'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
-  'cursor', // {string|null} - CSS cursor to display when over this Node, see setCursor() for more documentation
+  'children', // List of children to add (in order), see setChildren for more documentation
+  'cursor', // CSS cursor to display when over this Node, see setCursor() for more documentation
 
-  'phetioVisiblePropertyInstrumented', // {boolean} - When true, create an instrumented visibleProperty when this Node is instrumented, see setPhetioVisiblePropertyInstrumented() for more documentation
-  'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
-  'visible', // {boolean} - Whether the Node is visible, see setVisible() for more documentation
+  'phetioVisiblePropertyInstrumented', // When true, create an instrumented visibleProperty when this Node is instrumented, see setPhetioVisiblePropertyInstrumented() for more documentation
+  'visibleProperty', // Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
+  'visible', // Whether the Node is visible, see setVisible() for more documentation
 
-  'pickableProperty', // {Property.<boolean|null>|null} - Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
-  'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
+  'pickableProperty', // Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
+  'pickable', // Whether the Node is pickable, see setPickable() for more documentation
 
-  'phetioEnabledPropertyInstrumented', // {boolean} - When true, create an instrumented enabledProperty when this Node is instrumented, see setPhetioEnabledPropertyInstrumented() for more documentation
-  'enabledProperty', // {Property.<boolean>|null} - Sets forwarding of the enabledProperty, see setEnabledProperty() for more documentation
-  'enabled', // {boolean} - Whether the Node is enabled, see setEnabled() for more documentation
+  'phetioEnabledPropertyInstrumented', // When true, create an instrumented enabledProperty when this Node is instrumented, see setPhetioEnabledPropertyInstrumented() for more documentation
+  'enabledProperty', // Sets forwarding of the enabledProperty, see setEnabledProperty() for more documentation
+  'enabled', // Whether the Node is enabled, see setEnabled() for more documentation
 
-  'phetioInputEnabledPropertyInstrumented', // {boolean} - When true, create an instrumented inputEnabledProperty when this Node is instrumented, see setPhetioInputEnabledPropertyInstrumented() for more documentation
-  'inputEnabledProperty', // {Property.<boolean>|null} - Sets forwarding of the inputEnabledProperty, see setInputEnabledProperty() for more documentation
+  'phetioInputEnabledPropertyInstrumented', // When true, create an instrumented inputEnabledProperty when this Node is instrumented, see setPhetioInputEnabledPropertyInstrumented() for more documentation
+  'inputEnabledProperty', // Sets forwarding of the inputEnabledProperty, see setInputEnabledProperty() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
-  'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
-  'opacity', // {number} - Opacity of this Node's subtree, see setOpacity() for more documentation
-  'disabledOpacity', // {number} - A multiplier to the opacity of this Node's subtree when the node is disabled, see setDisabledOpacity() for more documentation
-  'filters', // {Array.<Filter>} - Non-opacity filters, see setFilters() for more documentation
-  'matrix', // {Matrix3} - Transformation matrix of the Node, see setMatrix() for more documentation
-  'translation', // {Vector2} - x/y translation of the Node, see setTranslation() for more documentation
-  'x', // {number} - x translation of the Node, see setX() for more documentation
-  'y', // {number} - y translation of the Node, see setY() for more documentation
-  'rotation', // {number} - rotation (in radians) of the Node, see setRotation() for more documentation
-  'scale', // {number} - scale of the Node, see scale() for more documentation
-  'excludeInvisibleChildrenFromBounds', // {boolean} - Controls bounds depending on child visibility, see setExcludeInvisibleChildrenFromBounds() for more documentation
-  'layoutOptions', // {Object|null} - Provided to layout containers for options, see setLayoutOptions() for more documentation
-  'localBounds', // {Bounds2|null} - bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
-  'maxWidth', // {number|null} - Constrains width of this Node, see setMaxWidth() for more documentation
-  'maxHeight', // {number|null} - Constrains height of this Node, see setMaxHeight() for more documentation
-  'renderer', // {string|null} - The preferred renderer for this subtree, see setRenderer() for more documentation
-  'layerSplit', // {boolean} - Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
-  'usesOpacity', // {boolean} - Hint that opacity will be changed, see setUsesOpacity() for more documentation
-  'cssTransform', // {boolean} - Hint that can trigger using CSS transforms, see setCssTransform() for more documentation
-  'excludeInvisible', // {boolean} - If this is invisible, exclude from DOM, see setExcludeInvisible() for more documentation
-  'webglScale', // {number|null} - Hint to adjust WebGL scaling quality for this subtree, see setWebglScale() for more documentation
-  'preventFit', // {boolean} - Prevents layers from fitting this subtree, see setPreventFit() for more documentation
-  'mouseArea', // {Bounds2|Shape|null} - Changes the area the mouse can interact with, see setMouseArea() for more documentation
-  'touchArea', // {Bounds2|Shape|null} - Changes the area touches can interact with, see setTouchArea() for more documentation
-  'clipArea', // {Shape|null} - Makes things outside of a shape invisible, see setClipArea() for more documentation
-  'transformBounds', // {boolean} - Flag that makes bounds tighter, see setTransformBounds() for more documentation
+  'inputListeners', // The input listeners attached to the Node, see setInputListeners() for more documentation
+  'opacity', // Opacity of this Node's subtree, see setOpacity() for more documentation
+  'disabledOpacity', // A multiplier to the opacity of this Node's subtree when the node is disabled, see setDisabledOpacity() for more documentation
+  'filters', // Non-opacity filters, see setFilters() for more documentation
+  'matrix', // Transformation matrix of the Node, see setMatrix() for more documentation
+  'translation', // x/y translation of the Node, see setTranslation() for more documentation
+  'x', // x translation of the Node, see setX() for more documentation
+  'y', // y translation of the Node, see setY() for more documentation
+  'rotation', // rotation (in radians) of the Node, see setRotation() for more documentation
+  'scale', // scale of the Node, see scale() for more documentation
+  'excludeInvisibleChildrenFromBounds', // Controls bounds depending on child visibility, see setExcludeInvisibleChildrenFromBounds() for more documentation
+  'layoutOptions', // Provided to layout containers for options, see setLayoutOptions() for more documentation
+  'localBounds', // bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
+  'maxWidth', // Constrains width of this Node, see setMaxWidth() for more documentation
+  'maxHeight', // Constrains height of this Node, see setMaxHeight() for more documentation
+  'renderer', // The preferred renderer for this subtree, see setRenderer() for more documentation
+  'layerSplit', // Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
+  'usesOpacity', // Hint that opacity will be changed, see setUsesOpacity() for more documentation
+  'cssTransform', // Hint that can trigger using CSS transforms, see setCssTransform() for more documentation
+  'excludeInvisible', // If this is invisible, exclude from DOM, see setExcludeInvisible() for more documentation
+  'webglScale', // Hint to adjust WebGL scaling quality for this subtree, see setWebglScale() for more documentation
+  'preventFit', // Prevents layers from fitting this subtree, see setPreventFit() for more documentation
+  'mouseArea', // Changes the area the mouse can interact with, see setMouseArea() for more documentation
+  'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
+  'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
+  'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
   ...REQUIRES_BOUNDS_OPTION_KEYS
 ];
 
