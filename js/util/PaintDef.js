@@ -1,4 +1,4 @@
-// Copyright 2018-2021, University of Colorado Boulder
+// Copyright 2018-2022, University of Colorado Boulder
 
 /**
  * "definition" type for generalized paints (anything that can be passed in as a fill or stroke to a Path)
