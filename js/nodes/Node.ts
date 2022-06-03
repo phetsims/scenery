@@ -180,6 +180,7 @@ import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 let globalIdCounter = 1;
 
 const scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
+const scratchBounds2Extra = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
 const scratchMatrix3 = new Matrix3();
 
 const ENABLED_PROPERTY_TANDEM_NAME = EnabledProperty.TANDEM_NAME;
@@ -5287,7 +5288,7 @@ class Node extends ParallelDOM {
    * @param wrapper
    * @param [matrix] - Optional transform to be applied
    */
-  renderToCanvasSubtree( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
+  renderToCanvasSubtree( wrapper: CanvasContextWrapper, matrix?: Matrix3 ): void {
     matrix = matrix || Matrix3.identity();
 
     wrapper.resetStyles();
@@ -5296,7 +5297,11 @@ class Node extends ParallelDOM {
     for ( let i = 0; i < this._children.length; i++ ) {
       const child = this._children[ i ];
 
-      if ( child.isVisible() ) {
+      // Ignore invalid (empty) bounds, since this would show nothing (and we couldn't compute fitted bounds for it).
+      if ( child.isVisible() && child.bounds.isValid() ) {
+
+        // For anything filter-like, we'll need to create a Canvas, render our child's content into that Canvas,
+        // and then (applying the filter) render that into the Canvas provided.
         const requiresScratchCanvas = child.effectiveOpacity !== 1 || child.clipArea || child._filters.length;
 
         wrapper.context.save();
@@ -5304,14 +5309,32 @@ class Node extends ParallelDOM {
         matrix.canvasSetTransform( wrapper.context );
         if ( requiresScratchCanvas ) {
           const canvas = document.createElement( 'canvas' );
-          canvas.width = wrapper.canvas.width;
-          canvas.height = wrapper.canvas.height;
+
+          // We'll attempt to fit the Canvas to the content to minimize memory use, see
+          // https://github.com/phetsims/function-builder/issues/148
+
+          // We're going to ignore content outside our wrapper context's canvas.
+          // Added padding and round-out for cases where Canvas bounds might not be fully accurate
+          // The matrix already includes the child's transform (so we use localBounds).
+          // We won't go outside our parent canvas' bounds, since this would be a waste of memory (wouldn't be written)
+          // The round-out will make sure we have pixel alignment, so that we won't get blurs or aliasing/blitting
+          // effects when copying things over.
+          const childCanvasBounds = child.localBounds.transformed( matrix ).dilate( 4 ).roundOut().constrainBounds(
+            scratchBounds2Extra.setMinMax( 0, 0, wrapper.canvas.width, wrapper.canvas.height )
+          );
+
+          // We'll set our Canvas to the fitted width, and will handle the offsets below.
+          canvas.width = childCanvasBounds.width;
+          canvas.height = childCanvasBounds.height;
           const context = canvas.getContext( '2d' )!;
           const childWrapper = new CanvasContextWrapper( canvas, context );
 
-          matrix.canvasSetTransform( context );
+          // After our ancestor transform is applied, we'll need to apply another offset for fitted Canvas. We'll
+          // need to pass this to descendants AND apply it to the sub-context.
+          const subMatrix = matrix.copy().prependTranslation( -childCanvasBounds.minX, -childCanvasBounds.minY );
 
-          child.renderToCanvasSubtree( childWrapper, matrix );
+          subMatrix.canvasSetTransform( context );
+          child.renderToCanvasSubtree( childWrapper, subMatrix );
 
           wrapper.context.save();
           if ( child.clipArea ) {
@@ -5336,7 +5359,8 @@ class Node extends ParallelDOM {
             }
           }
 
-          wrapper.context.drawImage( canvas, 0, 0 );
+          // The inverse transform is applied to handle fitting
+          wrapper.context.drawImage( canvas, childCanvasBounds.minX, childCanvasBounds.minY );
           wrapper.context.restore();
           if ( setFilter ) {
             wrapper.context.filter = 'none';
