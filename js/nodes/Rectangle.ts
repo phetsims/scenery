@@ -99,8 +99,14 @@ export default class Rectangle extends SuperType {
   constructor( x: number, y: number, width: number, height: number, options?: RectangleOptions );
   constructor( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions );
   constructor( x?: number | Bounds2 | RectangleOptions, y?: number | RectangleOptions, width?: number, height?: number | RectangleOptions, cornerXRadius?: number | RectangleOptions, cornerYRadius?: number, providedOptions?: RectangleOptions ) {
-    super( null );
-    this.mutate( { sizable: false } as RectangleOptions );
+
+    // We'll want to default to sizable:false, but allow clients to pass in something conflicting like widthSizable:true
+    // in the super mutate. To avoid the exclusive options, we isolate this out here.
+    const initialOptions: RectangleOptions = {
+      sizable: false
+    };
+    super( null, initialOptions );
+
     let options: RectangleOptions = {};
 
     this._rectX = 0;

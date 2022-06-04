@@ -116,7 +116,14 @@ export default class AlignBox extends SuperType {
       children: [ content ]
     }, providedOptions );
 
-    super();
+    // We'll want to default to sizable:false, but allow clients to pass in something conflicting like widthSizable:true
+    // in the super mutate. To avoid the exclusive options, we isolate this out here.
+    const initialOptions: AlignBoxOptions = {
+      // By default, don't set an AlignBox to be resizable, since it's used a lot to block out a certain amount of
+      // space.
+      sizable: false
+    };
+    super( initialOptions );
 
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
@@ -139,15 +146,6 @@ export default class AlignBox extends SuperType {
 
     // Will be removed by dispose()
     this._content.boundsProperty.link( this._contentBoundsListener );
-
-    // First mutate to turn off sizability (we want to allow people to turn on single dimension sizability without
-    // hitting assertions that "sizable" and "widthSizable" shouldn't be specified at the same time, and having an
-    // ordered dependency.
-    this.mutate( {
-      // By default, don't set an AlignBox to be resizable, since it's used a lot to block out a certain amount of
-      // space.
-      sizable: false
-    } as NodeOptions );
 
     this.mutate( options );
 

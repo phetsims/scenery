@@ -97,6 +97,7 @@ export { default as Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FL
 export type { PaintableOptions, PaintableNode } from './nodes/Paintable.js';
 export { default as Imageable } from './nodes/Imageable.js';
 export type { ImageableOptions, Mipmap, ImageableImage } from './nodes/Imageable.js';
+export { default as DelayedMutate } from './util/DelayedMutate.js';
 
 export { default as Image } from './nodes/Image.js';
 export type { ImageOptions } from './nodes/Image.js';

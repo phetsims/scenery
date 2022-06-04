@@ -8,7 +8,7 @@
  */
 
 import memoize from '../../../phet-core/js/memoize.js';
-import { HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, WIDTH_SIZABLE_OPTION_KEYS, WidthSizable, WidthSizableOptions } from '../imports.js';
+import { HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, WIDTH_SIZABLE_OPTION_KEYS, WidthSizable, WidthSizableOptions, DelayedMutate } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
@@ -67,7 +67,7 @@ export type SizableOptions = {
 // is yet passing those options through.
 const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );
-  const SizableMixin = class extends SuperExtendedType {
+  const SizableMixin = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class extends SuperExtendedType {
 
     // IMPORTANT: If you're mixing this in, typically don't pass options that Sizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
@@ -166,7 +166,7 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       }
     }
 
-    mutate( options?: NodeOptions ): this {
+    override mutate( options?: NodeOptions ): this {
 
       assertMutuallyExclusiveOptions( options, [ 'preferredSize' ], [ 'preferredWidth', 'preferredHeight' ] );
       assertMutuallyExclusiveOptions( options, [ 'localPreferredSize' ], [ 'localPreferredWidth', 'localPreferredHeight' ] );
@@ -177,7 +177,7 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       // @ts-ignore
       return super.mutate( options );
     }
-  };
+  } );
 
   // If we're extending into a Node type, include option keys
   if ( SuperExtendedType.prototype._mutatorKeys ) {
