@@ -690,13 +690,13 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
 
 /**
- * Alert an Utterance to the voicingUtteranceQueue. The Utterance must have canAnnounceProperties and hopefully
+ * Alert an Utterance to the voicingUtteranceQueue. The Utterance must have voicingCanAnnounceProperties and hopefully
  * at least one of the Properties is a VoicingNode's canAnnounceProperty so that this Utterance is only announced
  * when the VoicingNode is globally visible and voicingVisible.
  * @static
  */
 Voicing.alertUtterance = ( utterance: Utterance ) => {
-  assert && assert( utterance.canAnnounceProperties.length > 0, 'canAnnounceProperties required, this Utterance might not be connected to Node in the scene graph.' );
+  assert && assert( utterance.voicingCanAnnounceProperties.length > 0, 'voicingCanAnnounceProperties required, this Utterance might not be connected to Node in the scene graph.' );
   voicingUtteranceQueue.addToBack( utterance );
 };
 
@@ -706,9 +706,9 @@ Voicing.alertUtterance = ( utterance: Utterance ) => {
  * @static
  */
 Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
-  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
   if ( !existingCanAnnounceProperties.includes( voicingNode.voicingCanSpeakProperty ) ) {
-    utterance.canAnnounceProperties = existingCanAnnounceProperties.concat( [ voicingNode.voicingCanSpeakProperty ] );
+    utterance.voicingCanAnnounceProperties = existingCanAnnounceProperties.concat( [ voicingNode.voicingCanSpeakProperty ] );
   }
 };
 
@@ -717,10 +717,10 @@ Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: Vo
  * @static
  */
 Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
-  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
   const index = existingCanAnnounceProperties.indexOf( voicingNode.voicingCanSpeakProperty );
   assert && assert( index > -1, 'voicingNode.voicingCanSpeakProperty is not on the Utterance, was it not registered?' );
-  utterance.canAnnounceProperties = existingCanAnnounceProperties.splice( index, 1 );
+  utterance.voicingCanAnnounceProperties = existingCanAnnounceProperties.splice( index, 1 );
 };
 
 /**
@@ -731,21 +731,21 @@ Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: 
  * @static
  */
 Voicing.registerUtteranceToNode = ( utterance: Utterance, node: Node ) => {
-  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
   if ( !existingCanAnnounceProperties.includes( node.visibleProperty ) ) {
-    utterance.canAnnounceProperties = utterance.canAnnounceProperties.concat( [ node.visibleProperty ] );
+    utterance.voicingCanAnnounceProperties = utterance.voicingCanAnnounceProperties.concat( [ node.visibleProperty ] );
   }
   if ( !existingCanAnnounceProperties.includes( node.voicingVisibleProperty ) ) {
-    utterance.canAnnounceProperties = utterance.canAnnounceProperties.concat( [ node.voicingVisibleProperty ] );
+    utterance.voicingCanAnnounceProperties = utterance.voicingCanAnnounceProperties.concat( [ node.voicingVisibleProperty ] );
   }
 };
 
 /**
- * Remove a Node's voicingVisibleProperty and visibleProperty from the canAnnounceProperties of the Utterance.
+ * Remove a Node's voicingVisibleProperty and visibleProperty from the voicingCanAnnounceProperties of the Utterance.
  * @static
  */
 Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
-  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
   assert && assert( existingCanAnnounceProperties.includes( node.visibleProperty ) && existingCanAnnounceProperties.includes( node.voicingVisibleProperty ),
     'visibleProperty and voicingVisibleProperty were not on the Utterance, was it not registered to the node?' );
 
@@ -755,7 +755,7 @@ Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
   const voicingVisiblePropertyIndex = withoutVisibleProperty.indexOf( node.voicingVisibleProperty );
   const withoutBothProperties = existingCanAnnounceProperties.splice( voicingVisiblePropertyIndex, 1 );
 
-  utterance.canAnnounceProperties = withoutBothProperties;
+  utterance.voicingCanAnnounceProperties = withoutBothProperties;
 };
 
 // Export a type that lets you check if your Node is composed with Voicing.
