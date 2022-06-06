@@ -2559,6 +2559,11 @@ export default class ParallelDOM extends PhetioObject {
       return;
     }
 
+    // No description should be alerted if an archetype of a PhET-iO dynamic element, see https://github.com/phetsims/joist/issues/817
+    if ( this.phetioIsArchetype ) {
+      return;
+    }
+
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
 
     // If you run into this assertion, talk to @jessegreenberg and @zepumph, because it is quite possible we would

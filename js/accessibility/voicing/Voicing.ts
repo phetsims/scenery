@@ -363,7 +363,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     speakContent( content: IAlertable ): void { // eslint-disable-line no-undef
 
       // don't send to utteranceQueue if response is empty
-      if ( content ) {
+      // don't send to utteranceQueue for PhET-iO dynamic element archetypes, https://github.com/phetsims/joist/issues/817
+      if ( content && !( this as unknown as Node ).phetioIsArchetype ) {
         voicingUtteranceQueue.addToBack( content );
       }
     }
