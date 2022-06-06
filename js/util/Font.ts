@@ -23,8 +23,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
@@ -284,7 +283,7 @@ export default class Font extends PhetioObject {
    */
   copy( options?: FontOptions ): Font {
     // TODO: get merge working in typescript
-    return new Font( merge( {
+    return new Font( combineOptions<FontOptions>( {
       style: this._style,
       variant: this._variant,
       weight: this._weight,

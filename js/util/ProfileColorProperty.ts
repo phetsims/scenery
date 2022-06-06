@@ -6,11 +6,11 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import merge from '../../../phet-core/js/merge.js';
 import Namespace from '../../../phet-core/js/Namespace.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { Color, colorProfileProperty, ColorProperty, scenery, SceneryConstants } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 // constant
 const NAME_SEPARATOR = '.';
@@ -36,18 +36,18 @@ export default class ProfileColorProperty extends ColorProperty {
    * @param colorProfileMap - object literal that maps keys (profile names) to ColorDef (that should be immutable)
    * @param [options]
    */
-  constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, options?: PropertyOptions<Color> ) {
+  constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, providedOptions?: PropertyOptions<Color> ) {
 
     assert && assert( namespace instanceof Namespace );
     assert && assert( typeof colorName === 'string' );
 
-    options = merge( {
+    const options = optionize<PropertyOptions<Color>, {}, PropertyOptions<Color>>()( {
       tandem: Tandem.OPTIONAL,
 
       // So that notifications won't occur when we change from different objects representing the same color.
       // We should never be mutating the Color objects used for ProfileColorProperty.
       useDeepEquality: true
-    }, options );
+    }, providedOptions );
 
     const tandem = options.tandem!;
 

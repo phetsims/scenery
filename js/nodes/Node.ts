@@ -172,7 +172,7 @@ import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
-import optionize, { optionize3 } from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
@@ -5723,7 +5723,7 @@ class Node extends ParallelDOM {
     function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ) {
       const imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
-      image = new Image( imageSource, merge( {}, options.imageOptions, {
+      image = new Image( imageSource, combineOptions<ImageOptions>( {}, options.imageOptions, {
         x: -x,
         y: -y,
         initialWidth: width,

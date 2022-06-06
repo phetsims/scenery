@@ -8,7 +8,6 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import merge from '../../../phet-core/js/merge.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
@@ -16,7 +15,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, IImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 
 // Image-specific options that can be passed in the constructor or mutate() call.
 const IMAGE_OPTION_KEYS = [
@@ -293,7 +292,7 @@ Image.prototype._mutatorKeys = [ ...IMAGE_OPTION_KEYS, ...Node.prototype._mutato
 Image.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, 'image', 'imageOpacity', 'mipmap' ];
 
 // {Object} - Initial values for most Node mutator options
-Image.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, Imageable.DEFAULT_OPTIONS );
+Image.DEFAULT_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_OPTIONS, Imageable.DEFAULT_OPTIONS );
 
 // NOTE: Not currently in use
 Image.ImageIO = new IOType( 'ImageIO', {

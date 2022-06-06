@@ -13,7 +13,7 @@ import { Shape } from '../../../kite/js/imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, IRectangleDrawable, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import merge from '../../../phet-core/js/merge.js';
+import { combineOptions } from '../../../phet-core/js/optionize.js';
 
 const RECTANGLE_OPTION_KEYS = [
   'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
@@ -128,7 +128,7 @@ export default class Rectangle extends SuperType {
           assert && assert( y === undefined || Object.getPrototypeOf( y ) === Object.prototype,
             'Extra prototype on Node options object is a code smell' );
 
-          options = merge( options, {
+          options = combineOptions<RectangleOptions>( options, {
             rectBounds: x
           }, y ); // Our options object would be at y
         }
@@ -141,16 +141,16 @@ export default class Rectangle extends SuperType {
           assert && assert( height === undefined || Object.getPrototypeOf( height ) === Object.prototype,
             'Extra prototype on Node options object is a code smell' );
 
-          options = merge( options, {
+          options = combineOptions<RectangleOptions>( options, {
             rectBounds: x,
             cornerXRadius: y, // ignore Intellij warning, our cornerXRadius is the second parameter
             cornerYRadius: width // ignore Intellij warning, our cornerYRadius is the third parameter
-          }, height ); // Our options object would be at height
+          }, height as RectangleOptions | undefined ); // Our options object would be at height
         }
       }
       // allow new Rectangle( { rectX: x, rectY: y, rectWidth: width, rectHeight: height, ... } )
       else {
-        options = merge( options, x );
+        options = combineOptions<RectangleOptions>( options, x );
       }
     }
     // new Rectangle( x, y, width, height, { ... } )
@@ -162,11 +162,11 @@ export default class Rectangle extends SuperType {
       assert && assert( cornerXRadius === undefined || Object.getPrototypeOf( cornerXRadius ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
-      options = merge( options, {
+      options = combineOptions<RectangleOptions>( options, {
         rectX: x,
-        rectY: y,
+        rectY: y as number,
         rectWidth: width,
-        rectHeight: height
+        rectHeight: height as number
       }, cornerXRadius as RectangleOptions );
     }
     // new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, { ... } )
@@ -178,12 +178,12 @@ export default class Rectangle extends SuperType {
       assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
-      options = merge( options, {
+      options = combineOptions<RectangleOptions>( options, {
         rectX: x,
-        rectY: y,
+        rectY: y as number,
         rectWidth: width,
-        rectHeight: height,
-        cornerXRadius: cornerXRadius,
+        rectHeight: height as number,
+        cornerXRadius: cornerXRadius as number,
         cornerYRadius: cornerYRadius
       }, providedOptions );
     }

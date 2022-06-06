@@ -8,11 +8,10 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import merge from '../../../phet-core/js/merge.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, Instance, IPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.
@@ -527,4 +526,4 @@ Path.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, ...PAI
 scenery.register( 'Path', Path );
 
 // {Object} - Initial values for most Node mutator options
-Path.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
+Path.DEFAULT_OPTIONS = combineOptions<PathOptions>( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );

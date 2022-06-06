@@ -10,9 +10,9 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, Imageable, ImageableOptions, ImageableImage } from '../imports.js';
+import { Imageable, ImageableImage, ImageableOptions, scenery } from '../imports.js';
 import mutate from '../../../phet-core/js/mutate.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );
@@ -41,7 +41,7 @@ export default class SpriteImage extends Imageable( Object ) {
     assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement );
     assert && assert( offset instanceof Vector2 );
 
-    const options = merge( {
+    const options = optionize<SpriteImageOptions, SelfOptions, ImageableOptions>()( {
       hitTestPixels: false,
       pickable: true,
       image: image

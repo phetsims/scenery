@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import { scenery, Utils } from '../imports.js';
 
 export type ShaderProgramOptions = {
@@ -38,7 +38,7 @@ export default class ShaderProgram {
   private isInitialized!: boolean;
 
   constructor( gl: WebGLRenderingContext, vertexSource: string, fragmentSource: string, providedOptions?: ShaderProgramOptions ) {
-    const options = merge( {
+    const options = optionize<ShaderProgramOptions>()( {
       attributes: [],
       uniforms: []
     }, providedOptions );

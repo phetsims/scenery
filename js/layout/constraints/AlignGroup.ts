@@ -23,9 +23,8 @@ import IProperty from '../../../../axon/js/IProperty.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
-import merge from '../../../../phet-core/js/merge.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
-import { scenery, Node, AlignBox } from '../../imports.js';
+import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
+import { AlignBox, Node, scenery } from '../../imports.js';
 import { AlignBoxOptions } from '../nodes/AlignBox.js';
 
 let globalId = 1;
@@ -132,7 +131,7 @@ export default class AlignGroup {
     assert && assert( content instanceof Node );
 
     // Setting the group should call our addAlignBox()
-    return new AlignBox( content, merge( {
+    return new AlignBox( content, combineOptions<AlignBoxOptions>( {
       group: this
     }, options ) );
   }
