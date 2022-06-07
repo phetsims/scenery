@@ -16,3 +16,19 @@ pre {
 h3 {
   font-size: 130%;
 }
+
+#apiList {
+  background-color: #eee;
+  position: relative;
+  border: 1px solid #bbb;
+  border-left: none;
+  padding: 10px;
+}
+
+.navlink {
+  font-weight: bold;
+}
+
+.sublink {
+  padding-left: 1em;
+}

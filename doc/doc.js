@@ -30,3 +30,16 @@ window.getCodeSnippet = func => {
   hljs.highlightElement( code ); // eslint-disable-line
   return pre;
 };
+
+window.generateAPIList = () => {
+  const apiList = document.getElementById( 'apiList' );
+
+  [ ...document.querySelectorAll( '.index' ) ].forEach( element => {
+    const anchor = document.createElement( 'a' );
+    anchor.classList.add( element.tagName === 'H2' ? 'navlink' : 'sublink' );
+    anchor.href = `#${element.id}`;
+    anchor.innerHTML = element.dataset.index ? element.dataset.index : element.innerHTML;
+    apiList.appendChild( anchor );
+    apiList.appendChild( document.createElement( 'br' ) );
+  } );
+};
