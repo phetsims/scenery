@@ -23,9 +23,14 @@
   <!-- For the styling -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
 
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+  <link rel="stylesheet" href="../../sherpa/lib/highlightjs-11.5.1-a11y-light.min.css">
+  <script src="../../sherpa/lib/highlightjs-11.5.1.min.js"></script>
+  <script src="./doc.js"></script>
+  <link rel="stylesheet" href="./doc.css">
+
+  <style>
+
+  </style>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../dist/scenery.min.js"></script>
@@ -46,7 +51,12 @@
       const scene = new scenery.Node();
       const box = getBox();
       scene.addChild( box );
-      const display = new scenery.Display( scene );
+      const display = new scenery.Display( scene, {
+        allowCSSHacks: false,
+
+        // so Display input does not interfere with documentation links
+        listenToOnlyElement: true
+      } );
       display.domElement.classList.add( 'exampleScene' );
       display.domElement.style.position = 'relative';
       display.domElement.style.resize = options.resize;
@@ -85,12 +95,7 @@
       } );
 
       container.appendChild( display.domElement );
-
-      const code = document.createElement( 'pre' );
-      code.classList.add( 'brush:' );
-      code.classList.add( 'js' );
-      code.innerHTML = getBox.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ];
-      container.appendChild( code );
+      container.appendChild( getCodeSnippet( getBox ) );
     }
 
     const colors = [
@@ -106,23 +111,6 @@
       new scenery.Color( 252, 82, 127 )
     ];
   </script>
-
-  <style type="text/css">
-
-    .exampleScene {
-      margin: 15px auto;
-      border: 1px solid black;
-      position: relative;
-      left: 0;
-      top: 0;
-    }
-
-    h3 {
-      font-size: 130%;
-    }
-
-  </style>
-
 </head>
 
 <body>
@@ -2180,9 +2168,5 @@
 <footer style="background-color: #191919;">
   <a class="brand" href="/scenery">Scenery</a>
 </footer>
-
-<script type="text/javascript">
-  SyntaxHighlighter.all();
-</script>
 </body>
 </html>

@@ -23,9 +23,10 @@
   <!-- For the styling -->
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
 
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+  <link rel="stylesheet" href="../../sherpa/lib/highlightjs-11.5.1-a11y-light.min.css">
+  <script src="../../sherpa/lib/highlightjs-11.5.1.min.js"></script>
+  <script src="./doc.js"></script>
+  <link rel="stylesheet" href="./doc.css">
 
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
@@ -51,24 +52,20 @@
         // so Display input does not interfere with documentation links
         listenToOnlyElement: true
       } );
+      $container.addClass( 'exampleScene' );
       $container[ 0 ].appendChild( display.domElement );
       draw( scene, display );
       display.updateDisplay();
-      var $code = $( '<pre class="brush: js"></pre>' );
-      $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
-      $container.after( $code );
+      // var $code = $( '<pre class="brush: js"></pre>' );
+      // $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
+
+      $container.after( getCodeSnippet( draw ) );
+
+      // $container.appendChild( getCodeSnippet( getBox ) );
     }
   </script>
 
   <style type="text/css">
-
-    .exampleScene {
-      margin: 15px auto;
-      border: 1px solid black;
-      position: relative;
-      left: 0;
-      top: 0;
-    }
 
     #sidebar {
       background-color: #eee;
@@ -503,7 +500,7 @@ window.assertions.disableAssertSlow();
       This can also be used when creating a Node:
     </p>
 
-    <div id="example-children" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-children" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-children', function( scene ) {
         /*START*/
@@ -599,7 +596,7 @@ window.assertions.disableAssertSlow();
         scenery-grabbing-pointer: attempts to use browser-prefixed 'grabbing' values (newer), but falls back to the 'pointer' if not available
       </li>
     </ul>
-    <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-cursor', function( scene, display ) {
         /*START*/
@@ -674,7 +671,7 @@ window.assertions.disableAssertSlow();
       clipArea affects the bounds of the Node, and pointers are not considered "over" a node if they are outside of its clipArea.
     </p>
 
-    <div id="example-clipArea" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-clipArea" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-clipArea', function( scene ) {
         scene.renderer = 'svg';
@@ -746,7 +743,7 @@ window.assertions.disableAssertSlow();
       the opacity (alpha) of the node itself, but also all of its children.
     </p>
 
-    <div id="example-opacity" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-opacity" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-opacity', function( scene ) {
         /*START*/
@@ -1144,7 +1141,7 @@ window.assertions.disableAssertSlow();
       <code>'round'</code> and <code>'square'</code>.
     </p>
 
-    <div id="example-lineCap" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-lineCap" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-lineCap', function( scene ) {
         scene.addChild( new scenery.Text( 'butt', {
@@ -1209,7 +1206,7 @@ window.assertions.disableAssertSlow();
       <code>'round'</code> and <code>'bevel'</code>.
     </p>
 
-    <div id="example-lineJoin" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-lineJoin" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-lineJoin', function( scene ) {
         scene.addChild( new scenery.Text( 'miter', {
@@ -1274,7 +1271,7 @@ window.assertions.disableAssertSlow();
       as an even-length array of dash lengths.
     </p>
 
-    <div id="example-lineDash" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-lineDash" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-lineDash', function( scene ) {
         /*START*/
@@ -1297,7 +1294,7 @@ window.assertions.disableAssertSlow();
       lineDashOffset</a>.
     </p>
 
-    <div id="example-lineDashOffset" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-lineDashOffset" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-lineDashOffset', function( scene ) {
         scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 16.5 )
@@ -1381,7 +1378,7 @@ window.assertions.disableAssertSlow();
       <code>options</code> is the normal <a href="#node-options">options parameter object</a>.
     </p>
 
-    <div id="example-image" class="exampleScene" style="width: 130px; height: 85px; margin: 0 auto;"></div>
+    <div id="example-image" class="exampleScene" style="width: 130px; height: 85px;"></div>
     <script type="text/javascript">
       docExample( 'example-image', function( scene, display ) {
         var url = 'https://phet.colorado.edu/sims/my-solar-system/my-solar-system-thumbnail.png';
@@ -1431,7 +1428,7 @@ window.assertions.disableAssertSlow();
       is the standard <a href="#node">Node</a> parameter object.
     </p>
 
-    <div id="example-text" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-text" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-text', function( scene ) {
         /*START*/
@@ -1589,7 +1586,7 @@ window.assertions.disableAssertSlow();
       <code>new scenery.DOM( element, [options] )</code>
     </p>
 
-    <div id="example-dom" class="exampleScene" style="width: 256px; height: 128px; margin: 0 auto;"></div>
+    <div id="example-dom" class="exampleScene" style="width: 256px; height: 128px;"></div>
     <script type="text/javascript">
       docExample( 'example-dom', function( scene ) {
         /*START*/
@@ -1632,7 +1629,7 @@ window.assertions.disableAssertSlow();
       (x1,y1), and then <a href="#linearGradient-addColorStop">color stops</a> can be added.
     </p>
 
-    <div id="example-linearGradient" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
+    <div id="example-linearGradient" class="exampleScene" style="width: 128px; height: 128px;"></div>
     <script type="text/javascript">
       docExample( 'example-linearGradient', function( scene ) {
         /*START*/
@@ -1694,7 +1691,7 @@ window.assertions.disableAssertSlow();
       This does not appear to be the case with Firefox 19 on Mac, but please refrain from those edge-case gradients.
     </p>
 
-    <div id="example-radialGradient" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
+    <div id="example-radialGradient" class="exampleScene" style="width: 128px; height: 128px;"></div>
     <script type="text/javascript">
       docExample( 'example-radialGradient', function( scene ) {
         /*START*/
@@ -1757,7 +1754,7 @@ window.assertions.disableAssertSlow();
       <code>new scenery.Pattern( image )</code> where <code>image</code> is an HTMLImageElement.
     </p>
 
-    <div id="example-pattern" class="exampleScene" style="width: 256px; height: 256px; margin: 0 auto;"></div>
+    <div id="example-pattern" class="exampleScene" style="width: 256px; height: 256px;"></div>
     <script type="text/javascript">
       docExample( 'example-pattern', function( scene, display ) {
         var loadedImg = document.createElement( 'img' );
@@ -1803,7 +1800,7 @@ window.assertions.disableAssertSlow();
       <code>new scenery.Rectangle( { rectX: _, rectY: _, rectWidth: _, rectHeight: _, ... } )</code>
     </p>
 
-    <div id="example-rectangle" class="exampleScene" style="width: 128px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-rectangle" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-rectangle', function( scene ) {
         /*START*/
@@ -1891,7 +1888,7 @@ window.assertions.disableAssertSlow();
       A Circle is created with <code>new scenery.Circle( radius, [options] )</code> with the specified radius.
     </p>
 
-    <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-circle', function( scene ) {
         /*START*/
@@ -1926,7 +1923,7 @@ window.assertions.disableAssertSlow();
       are supported.
     </p>
 
-    <div id="example-line" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <div id="example-line" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-line', function( scene ) {
         /*START*/
@@ -2126,8 +2123,5 @@ font.weight;                                 // 400 (the default)
   <a class="brand" href="/scenery">Scenery</a>
 </footer>
 
-<script type="text/javascript">
-  SyntaxHighlighter.all();
-</script>
 </body>
 </html>

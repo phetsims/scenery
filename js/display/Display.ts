@@ -1103,22 +1103,22 @@ export default class Display {
       this._domElement.style.overflow = 'hidden';
     }
 
-    // Prevents selection cursor issues in Safari, see https://github.com/phetsims/scenery/issues/476
-    document.onselectstart = () => false;
-
     // forward all pointer events
     // @ts-ignore legacy
     this._domElement.style.msTouchAction = 'none';
-
-    // prevent any default zooming behavior from a trackpad on IE11 and Edge, all should be handled by scenery - must
-    // be on the body, doesn't prevent behavior if on the display div
-    // @ts-ignore legacy
-    document.body.style.msContentZooming = 'none';
 
     // don't allow browser to switch between font smoothing methods for text (see https://github.com/phetsims/scenery/issues/431)
     Features.setStyle( this._domElement, Features.fontSmoothing, 'antialiased' );
 
     if ( this._allowCSSHacks ) {
+      // Prevents selection cursor issues in Safari, see https://github.com/phetsims/scenery/issues/476
+      document.onselectstart = () => false;
+
+      // prevent any default zooming behavior from a trackpad on IE11 and Edge, all should be handled by scenery - must
+      // be on the body, doesn't prevent behavior if on the display div
+      // @ts-ignore legacy
+      document.body.style.msContentZooming = 'none';
+
       // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js).
       // modified to only apply the proper prefixed version instead of spamming all of them, and doesn't use jQuery.
       Features.setStyle( this._domElement, Features.userDrag, 'none' );
