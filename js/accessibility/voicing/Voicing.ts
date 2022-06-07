@@ -37,6 +37,7 @@ import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
 
 // Helps enforce that the utterance is defined.
 function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {
@@ -362,9 +363,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     speakContent( content: IAlertable ): void { // eslint-disable-line no-undef
 
+      const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !( this as unknown as Node ).isInsidePhetioArchetype();
+
       // don't send to utteranceQueue if response is empty
       // don't send to utteranceQueue for PhET-iO dynamic element archetypes, https://github.com/phetsims/joist/issues/817
-      if ( content && !( this as unknown as Node ).phetioIsArchetype ) {
+      if ( content && notPhetioArchetype ) {
         voicingUtteranceQueue.addToBack( content );
       }
     }
