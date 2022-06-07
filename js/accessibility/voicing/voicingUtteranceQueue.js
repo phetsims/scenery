@@ -11,7 +11,9 @@
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { scenery, voicingManager } from '../../imports.js';
 
-const voicingUtteranceQueue = new UtteranceQueue( voicingManager );
+const voicingUtteranceQueue = new UtteranceQueue( voicingManager, {
+  featureSpecificAnnouncingControlPropertyName: 'voicingCanAnnounceProperty'
+} );
 
 // voicingUtteranceQueue should be disabled until requested
 voicingUtteranceQueue.enabled = false;

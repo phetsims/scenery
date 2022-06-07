@@ -66,7 +66,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { scenery, Color, Features, FullScreen, Trail, Utils, scenerySerialize, BackboneDrawable, ChangeInterval, DOMBlock, Drawable, DOMDrawable, Instance, Renderer, Node, PDOMInstance, PDOMSiblingStyle, PDOMUtils, globalKeyStateTracker, FocusManager, KeyboardUtils, PDOMTree, Input, CanvasNodeBoundsOverlay, FittedBlockBoundsOverlay, HighlightOverlay, HitAreaOverlay, PointerAreaOverlay, PointerOverlay, IInputListener, IOverlay, InputOptions, Block, WebGLBlock, CanvasBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, IInputListener, Input, InputOptions, Instance, IOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, Trail, Utils, WebGLBlock } from '../imports.js';
 
 export type DisplayOptions = {
   // Initial (or override) display width
@@ -446,7 +446,8 @@ export default class Display {
       phetioDocumentation: 'The Announcer responsible for announcing to aria-live for this Display.'
     } );
     this.descriptionUtteranceQueue = new UtteranceQueue( ariaLiveAnnouncer, {
-      initialize: this._accessible
+      initialize: this._accessible,
+      featureSpecificAnnouncingControlPropertyName: 'descriptionCanAnnounceProperty'
     } );
 
     this.focusManager = new FocusManager();
@@ -778,6 +779,7 @@ export default class Display {
   }
 
   get width(): number { return this.getWidth(); }
+
   set width( value: number ) { this.setWidth( value ); }
 
   /**
@@ -801,6 +803,7 @@ export default class Display {
   }
 
   get height(): number { return this.getHeight(); }
+
   set height( value: number ) { this.setHeight( value ); }
 
   /**
@@ -828,6 +831,7 @@ export default class Display {
   }
 
   set backgroundColor( value: Color | string | null ) { this.setBackgroundColor( value ); }
+
   get backgroundColor(): Color | string | null { return this.getBackgroundColor(); }
 
   getBackgroundColor(): Color | string | null {
