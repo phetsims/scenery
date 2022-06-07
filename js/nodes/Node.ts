@@ -151,8 +151,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import BooleanProperty from '../../../axon/js/BooleanProperty.js';
-import EnabledProperty from '../../../axon/js/EnabledProperty.js';
+import BooleanProperty, { BooleanPropertyOptions } from '../../../axon/js/BooleanProperty.js';
+import EnabledProperty, { EnabledPropertyOptions } from '../../../axon/js/EnabledProperty.js';
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
@@ -165,7 +165,6 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
-import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
@@ -353,7 +352,12 @@ export type NodeOptions = {
   clipArea?: Shape | null;
   transformBounds?: boolean;
 
-  // Implicitly defined not through mutate
+  // This option is used to create the instrumented, default PhET-iO visibleProperty. These options should not
+  // be provided if a `visibleProperty` was provided to this Node, though if they are, they will just be ignored.
+  // This grace is to support default options across the component hierarchy melding with usages providing a visibleProperty.
+  // This option is a bit buried because it can only be used when the Node is being instrumented, which is when
+  // the default, instrumented visibleProperty is conditionally created. We don't want to store these on the Node,
+  // and thus they aren't support through `mutate()`.
   visiblePropertyOptions?: PropertyOptions<boolean>;
   enabledPropertyOptions?: PropertyOptions<boolean>;
   inputEnabledPropertyOptions?: PropertyOptions<boolean>;
@@ -6321,19 +6325,6 @@ class Node extends ParallelDOM {
 
   protected override initializePhetioObject( baseOptions: any, config: NodeOptions ): void {
 
-    config = merge( {
-
-      // This option is used to create the instrumented, default PhET-iO visibleProperty. These options should not
-      // be provided if a `visibleProperty` was provided to this Node, though if they are, they will just be ignored.
-      // This grace is to support default options across the component hierarchy melding with usages providing a visibleProperty.
-      // This option is a bit buried because it can only be used when the Node is being instrumented, which is when
-      // the default, instrumented visibleProperty is conditionally created. We don't want to store these on the Node,
-      // and thus they aren't support through `mutate()`.
-      visiblePropertyOptions: null,
-      enabledPropertyOptions: null,
-      inputEnabledPropertyOptions: null
-    }, config );
-
     // Track this, so we only override our visibleProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
@@ -6345,7 +6336,7 @@ class Node extends ParallelDOM {
       // constructor or mutate), then it will be set as this.targetProperty there. Here we only create the default
       // instrumented one if another hasn't already been specified.
 
-      this._visibleProperty.initializePhetio( this, VISIBLE_PROPERTY_TANDEM_NAME, () => new BooleanProperty( this.visible, merge( {
+      this._visibleProperty.initializePhetio( this, VISIBLE_PROPERTY_TANDEM_NAME, () => new BooleanProperty( this.visible, combineOptions<BooleanPropertyOptions>( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
@@ -6354,7 +6345,7 @@ class Node extends ParallelDOM {
         }, config.visiblePropertyOptions ) )
       );
 
-      this._enabledProperty.initializePhetio( this, ENABLED_PROPERTY_TANDEM_NAME, () => new EnabledProperty( this.enabled, merge( {
+      this._enabledProperty.initializePhetio( this, ENABLED_PROPERTY_TANDEM_NAME, () => new EnabledProperty( this.enabled, combineOptions<EnabledPropertyOptions>( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
@@ -6364,7 +6355,7 @@ class Node extends ParallelDOM {
         }, config.enabledPropertyOptions ) )
       );
 
-      this._inputEnabledProperty.initializePhetio( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, () => new Property( this.inputEnabled, merge( {
+      this._inputEnabledProperty.initializePhetio( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, () => new Property( this.inputEnabled, combineOptions<PropertyOptions<boolean>>( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,

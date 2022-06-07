@@ -14,7 +14,7 @@ import Emitter from '../../../axon/js/Emitter.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import { Color, IPaint, Node, Path, PathOptions, scenery, Trail } from '../imports.js';
 
 // constants
@@ -122,7 +122,7 @@ class FocusHighlightPath extends Path {
     options.stroke = options.outerStroke;
     this.mutate( options );
 
-    const innerHighlightOptions = _.merge( {}, pathOptions, {
+    const innerHighlightOptions = combineOptions<PathOptions>( {}, pathOptions, {
       stroke: options.innerStroke
     } );
 

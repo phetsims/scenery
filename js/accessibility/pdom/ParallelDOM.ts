@@ -127,12 +127,12 @@ import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import merge from '../../../../phet-core/js/merge.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
+import optionize from '../../../../phet-core/js/optionize.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -285,6 +285,30 @@ type Association = {
   otherNode: Node;
   otherElementName: string;
   thisElementName: string;
+};
+
+type SetPDOMAttributeOptions = {
+  namespace?: string | null;
+  asProperty?: boolean;
+  elementName?: string;
+};
+
+type RemovePDOMAttributeOptions = {
+  namespace?: string | null;
+  elementName?: string;
+};
+
+type HasPDOMAttributeOptions = {
+  namespace?: string | null;
+  elementName?: string;
+};
+
+type SetPDOMClassOptions = {
+  elementName?: string;
+};
+
+type RemovePDOMClassOptions = {
+  elementName?: string;
 };
 
 /**
@@ -2227,16 +2251,16 @@ export default class ParallelDOM extends PhetioObject {
    *
    * @param attribute - string naming the attribute
    * @param value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
-   * @param [options]
+   * @param [providedOptions]
    */
-  setPDOMAttribute( attribute: string, value: string | boolean | number, options?: { namespace?: string | null; asProperty?: boolean; elementName?: string } ): void {
+  setPDOMAttribute( attribute: string, value: string | boolean | number, providedOptions?: SetPDOMAttributeOptions ): void {
     assert && assert( typeof attribute === 'string' );
     assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
-    assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
+    assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
     assert && typeof value === 'string' && validate( value, Validation.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
 
-    options = merge( {
+    const options = optionize<SetPDOMAttributeOptions>()( {
 
       // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
       // for setting certain attributes (e.g. MathML).
@@ -2246,7 +2270,7 @@ export default class ParallelDOM extends PhetioObject {
       asProperty: false,
 
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
-    }, options );
+    }, providedOptions );
 
     assert && assert( ASSOCIATION_ATTRIBUTES.indexOf( attribute ) < 0, 'setPDOMAttribute does not support association attributes' );
 
@@ -2288,21 +2312,21 @@ export default class ParallelDOM extends PhetioObject {
    * setPDOMAttribute for the option details.
    *
    * @param attribute - name of the attribute to remove
-   * @param [options]
+   * @param [providedOptions]
    */
-  removePDOMAttribute( attribute: string, options?: { namespace?: string | null; elementName?: string } ): void {
+  removePDOMAttribute( attribute: string, providedOptions?: RemovePDOMAttributeOptions ): void {
     assert && assert( typeof attribute === 'string' );
-    assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
+    assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
 
-    options = merge( {
+    const options = optionize<RemovePDOMAttributeOptions>()( {
 
       // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
       // for removing certain attributes (e.g. MathML).
       namespace: null,
 
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
-    }, options );
+    }, providedOptions );
 
     let attributeRemoved = false;
     for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
@@ -2339,21 +2363,21 @@ export default class ParallelDOM extends PhetioObject {
    * Remove a particular attribute, removing the associated semantic information from the DOM element.
    *
    * @param attribute - name of the attribute to remove
-   * @param [options]
+   * @param [providedOptions]
    */
-  hasPDOMAttribute( attribute: string, options?: { namespace?: string | null; elementName?: string } ): boolean {
+  hasPDOMAttribute( attribute: string, providedOptions?: HasPDOMAttributeOptions ): boolean {
     assert && assert( typeof attribute === 'string' );
-    assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
+    assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
 
-    options = merge( {
+    const options = optionize<HasPDOMAttributeOptions>()( {
 
       // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
       // for removing certain attributes (e.g. MathML).
       namespace: null,
 
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
-    }, options );
+    }, providedOptions );
 
     let attributeFound = false;
     for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
@@ -2371,12 +2395,12 @@ export default class ParallelDOM extends PhetioObject {
    * but some styling occasionally has an impact on semantics so it is necessary to set styles.
    * Add a class with this function and define the style in stylesheets (likely SceneryStyle).
    */
-  setPDOMClass( className: string, options?: { elementName?: string } ): void {
+  setPDOMClass( className: string, providedOptions?: SetPDOMClassOptions ): void {
     assert && assert( typeof className === 'string' );
 
-    options = merge( {
+    const options = optionize<SetPDOMClassOptions>()( {
       elementName: PDOMPeer.PRIMARY_SIBLING
-    }, options );
+    }, providedOptions );
 
     // if we already have the provided className set to the sibling, do nothing
     for ( let i = 0; i < this._pdomClasses.length; i++ ) {
@@ -2397,12 +2421,12 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Remove a class from the classList of one of the elements for this Node.
    */
-  removePDOMClass( className: string, options?: { elementName?: string } ): void {
+  removePDOMClass( className: string, providedOptions?: RemovePDOMClassOptions ): void {
     assert && assert( typeof className === 'string' );
 
-    options = merge( {
+    const options = optionize<RemovePDOMClassOptions>()( {
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
-    }, options );
+    }, providedOptions );
 
     let classRemoved = false;
     for ( let i = 0; i < this._pdomClasses.length; i++ ) {

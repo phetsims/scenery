@@ -12,7 +12,6 @@ import StringProperty, { StringPropertyOptions } from '../../../axon/js/StringPr
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
@@ -209,10 +208,6 @@ export default class Text extends Paintable( Node ) {
    * See documentation and comments in Node.initializePhetioObject
    */
   protected override initializePhetioObject( baseOptions: any, config: TextOptions ): void {
-
-    config = merge( {
-      textPropertyOptions: null
-    }, config );
 
     // Track this, so we only override our textProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
