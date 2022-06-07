@@ -133,6 +133,7 @@ import { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import optionize from '../../../../phet-core/js/optionize.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -2573,6 +2574,22 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
+   * Return true if this Node is a PhET-iO archetype or it is a Node descendant of a PhET-iO archetype.
+   * See https://github.com/phetsims/joist/issues/817
+   */
+  isInsidePhetioArchetype( node: Node = ( this as unknown as Node ) ): boolean {
+    if ( node.phetioIsArchetype ) {
+      return true;
+    }
+    for ( let i = 0; i < node.parents.length; i++ ) {
+      if ( this.isInsidePhetioArchetype( node.parents[ i ] ) ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Alert on all interactive description utteranceQueues located on each connected Display (see Node.getConnectedDisplays)
    */
   alertDescriptionUtterance( utterance: IAlertable ): void {
@@ -2584,7 +2601,7 @@ export default class ParallelDOM extends PhetioObject {
     }
 
     // No description should be alerted if an archetype of a PhET-iO dynamic element, see https://github.com/phetsims/joist/issues/817
-    if ( this.phetioIsArchetype ) {
+    if ( Tandem.PHET_IO_ENABLED && this.isInsidePhetioArchetype() ) {
       return;
     }
 
