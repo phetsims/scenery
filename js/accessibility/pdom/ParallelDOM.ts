@@ -2578,8 +2578,8 @@ export default class ParallelDOM extends PhetioObject {
    * See https://github.com/phetsims/joist/issues/817
    */
   isInsidePhetioArchetype( node: Node = ( this as unknown as Node ) ): boolean {
-    if ( node.phetioIsArchetype ) {
-      return true;
+    if ( node.isPhetioInstrumented() ) {
+      return node.phetioIsArchetype;
     }
     for ( let i = 0; i < node.parents.length; i++ ) {
       if ( this.isInsidePhetioArchetype( node.parents[ i ] ) ) {
