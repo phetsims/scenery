@@ -33,7 +33,8 @@ export type LayoutNodeOptions = SelfOptions & SuperOptions;
 export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint> extends Sizable( Node ) {
 
   protected _constraint!: Constraint; // Can't be readonly because the subtype sets this
-  readonly layoutOriginProperty: IProperty<Vector2> = new Vector2Property( Vector2.ZERO );
+
+  public readonly layoutOriginProperty: IProperty<Vector2> = new Vector2Property( Vector2.ZERO );
 
   protected constructor( providedOptions?: LayoutNodeOptions ) {
     super();
@@ -48,15 +49,16 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
     } );
   }
 
-  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
+  public override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;
   }
 
-  override setChildren( children: Node[] ): this {
+  public override setChildren( children: Node[] ): this {
 
-    // If the layout is already locked, we need to bail and only call Node's setChildren.
+    // If the layout is already locked, we need to bail and only call Node's setChildren. This is fine, our layout will
+    // be handled once whatever locked us unlocks (so we don't have to override to handle layout or locking/unlocking.
     if ( this.constraint.isLocked ) {
       return super.setChildren( children );
     }
@@ -80,30 +82,31 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
   /**
    * Manually run the layout (for instance, if resize:false is currently set, or if there is other hackery going on).
    */
-  updateLayout(): void {
+  public updateLayout(): void {
     this._constraint.updateLayout();
   }
 
-  get resize(): boolean {
+  public get resize(): boolean {
     return this._constraint.enabled;
   }
 
-  set resize( value: boolean ) {
+  public set resize( value: boolean ) {
     this._constraint.enabled = value;
   }
 
-  get layoutOrigin(): Vector2 {
+  public get layoutOrigin(): Vector2 {
     return this.layoutOriginProperty.value;
   }
 
-  set layoutOrigin( value: Vector2 ) {
+  public set layoutOrigin( value: Vector2 ) {
     this.layoutOriginProperty.value = value;
   }
 
   /**
-   * Manual access to the constraint
+   * Manual access to the constraint. This is needed by subtypes to lock/unlock or force layout updates, but may also
+   * be needed to read layout information out (for overlays, GridBackgroundNode, etc.)
    */
-  get constraint(): Constraint {
+  public get constraint(): Constraint {
     return this._constraint;
   }
 

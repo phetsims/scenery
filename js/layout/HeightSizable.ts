@@ -41,6 +41,7 @@ export type HeightSizableOptions = {
   // Sets the preferred height of the Node in the local coordinate frame.
   // NOTE: changing this or preferredHeight will adjust the other.
   // NOTE: when the Node's transform is updated, this value is recomputed based on preferredHeight
+  // NOTE: localPreferredHeight is not guaranteed currently. The component may end up having a smaller or larger size
   localPreferredHeight?: number | null;
 
   // Sets the minimum height of the Node in the local coordinate frame. Usually set by the resizable Node itself to
@@ -62,22 +63,23 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
   const HeightSizableMixin = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS, class extends type {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
-    readonly preferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    readonly minimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    readonly localPreferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    readonly localMinimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    readonly isHeightResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
+    public readonly preferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+    public readonly minimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+    public readonly localPreferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+    public readonly localMinimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+    public readonly isHeightResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
     // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the other
-    _preferredHeightChanging = false;
-    _minimumHeightChanging = false;
+    // (scenery-internal) - would be private, but can't be with mixin constraints
+    public _preferredHeightChanging = false;
+    public _minimumHeightChanging = false;
 
     // IMPORTANT: If you're mixing this in, typically don't pass options that HeightSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
     // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
     // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
     // is yet passing those options through.
-    constructor( ...args: any[] ) {
+    public constructor( ...args: any[] ) {
       super( ...args );
 
       const updatePreferred = this._updatePreferredHeight.bind( this );
@@ -96,13 +98,13 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       ( this as unknown as Node ).transformEmitter.addListener( updateMinimum );
     }
 
-    get preferredHeight(): number | null {
+    public get preferredHeight(): number | null {
       assert && assert( this.preferredHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.preferredHeightProperty.value;
     }
 
-    set preferredHeight( value: number | null ) {
+    public set preferredHeight( value: number | null ) {
       assert && assert( this.preferredHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
@@ -111,13 +113,13 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.preferredHeightProperty.value = value;
     }
 
-    get localPreferredHeight(): number | null {
+    public get localPreferredHeight(): number | null {
       assert && assert( this.localPreferredHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.localPreferredHeightProperty.value;
     }
 
-    set localPreferredHeight( value: number | null ) {
+    public set localPreferredHeight( value: number | null ) {
       assert && assert( this.localPreferredHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
@@ -126,13 +128,13 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.localPreferredHeightProperty.value = value;
     }
 
-    get minimumHeight(): number | null {
+    public get minimumHeight(): number | null {
       assert && assert( this.minimumHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.minimumHeightProperty.value;
     }
 
-    set minimumHeight( value: number | null ) {
+    public set minimumHeight( value: number | null ) {
       assert && assert( this.minimumHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
@@ -140,13 +142,13 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.minimumHeightProperty.value = value;
     }
 
-    get localMinimumHeight(): number | null {
+    public get localMinimumHeight(): number | null {
       assert && assert( this.localMinimumHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.localMinimumHeightProperty.value;
     }
 
-    set localMinimumHeight( value: number | null ) {
+    public set localMinimumHeight( value: number | null ) {
       assert && assert( this.localMinimumHeightProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
@@ -154,19 +156,19 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.localMinimumHeightProperty.value = value;
     }
 
-    get heightSizable(): boolean {
+    public get heightSizable(): boolean {
       assert && assert( this.isHeightResizableProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.isHeightResizableProperty.value;
     }
 
-    set heightSizable( value: boolean ) {
+    public set heightSizable( value: boolean ) {
       assert && assert( this.isHeightResizableProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       this.isHeightResizableProperty.value = value;
     }
 
-    get mixesHeightSizable(): boolean { return true; }
+    public get mixesHeightSizable(): boolean { return true; }
 
     validateLocalPreferredHeight(): void {
       if ( assert ) {
@@ -274,9 +276,12 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
   return HeightSizableMixin;
 } );
 
-// Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable
+// Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable.
+// We need to define an unused function with a concrete type, so that we can extract the return type of the function
+// and provide a type for a Node that mixes this type.
 const wrapper = () => HeightSizable( Node );
 export type HeightSizableNode = InstanceType<ReturnType<typeof wrapper>>;
+
 const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
   return node.heightSizable;
 };

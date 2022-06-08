@@ -12,16 +12,23 @@ import { FlowCell, scenery, LayoutLine } from '../../imports.js';
 
 export default class FlowLine extends LayoutLine {
 
-  orientation!: Orientation;
-  cells!: FlowCell[];
+  // (scenery-internal)
+  public orientation!: Orientation;
+  public cells!: FlowCell[];
 
-  constructor( orientation: Orientation, cells: FlowCell[] ) {
+  /**
+   * (scenery-internal)
+   */
+  public constructor( orientation: Orientation, cells: FlowCell[] ) {
     super();
 
     this.initialize( orientation, cells );
   }
 
-  initialize( orientation: Orientation, cells: FlowCell[] ): void {
+  /**
+   * (scenery-internal)
+   */
+  public initialize( orientation: Orientation, cells: FlowCell[] ): void {
 
     this.orientation = orientation;
     this.cells = cells;
@@ -29,15 +36,24 @@ export default class FlowLine extends LayoutLine {
     this.initializeLayoutLine();
   }
 
-  getMinimumSize( spacing: number ): number {
+  /**
+   * (scenery-internal)
+   */
+  public getMinimumSize( spacing: number ): number {
     return ( this.cells.length - 1 ) * spacing + _.sum( this.cells.map( cell => cell.getMinimumSize( this.orientation ) ) );
   }
 
-  freeToPool(): void {
+  /**
+   * (scenery-internal)
+   */
+  public freeToPool(): void {
     FlowLine.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool<typeof FlowLine, [Orientation, FlowCell[]]>( FlowLine, {
+  /**
+   * (scenery-internal)
+   */
+  public static readonly pool = new Pool<typeof FlowLine, [Orientation, FlowCell[]]>( FlowLine, {
     defaultArguments: [ Orientation.HORIZONTAL, [] ]
   } );
 }

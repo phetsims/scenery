@@ -60,25 +60,15 @@ export type SizableOptions = {
   sizable?: boolean;
 } & WidthSizableOptions & HeightSizableOptions;
 
-// IMPORTANT: If you're mixing this in, typically don't pass options that Sizable would take through the
-// constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
-// values yet. If you're making something Sizable, please use a later mutate() to pass these options through.
-// They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
-// is yet passing those options through.
 const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );
   const SizableMixin = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class extends SuperExtendedType {
 
-    // IMPORTANT: If you're mixing this in, typically don't pass options that Sizable would take through the
-    // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
-    // values yet. If you're making something Sizable, please use a later mutate() to pass these options through.
-    // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
-    // is yet passing those options through.
-    constructor( ...args: any[] ) {
+    public constructor( ...args: any[] ) {
       super( ...args );
     }
 
-    get preferredSize(): Dimension2 | null {
+    public get preferredSize(): Dimension2 | null {
       assert && assert( ( this.preferredWidth === null ) === ( this.preferredHeight === null ),
         'Cannot get a preferredSize when one of preferredWidth/preferredHeight is null' );
 
@@ -90,12 +80,12 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       }
     }
 
-    set preferredSize( value: Dimension2 | null ) {
+    public set preferredSize( value: Dimension2 | null ) {
       this.preferredWidth = value === null ? null : value.width;
       this.preferredHeight = value === null ? null : value.height;
     }
 
-    get localPreferredSize(): Dimension2 | null {
+    public get localPreferredSize(): Dimension2 | null {
       assert && assert( ( this.localPreferredWidth === null ) === ( this.localPreferredHeight === null ),
         'Cannot get a preferredSize when one of preferredWidth/preferredHeight is null' );
 
@@ -107,12 +97,12 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       }
     }
 
-    set localPreferredSize( value: Dimension2 | null ) {
+    public set localPreferredSize( value: Dimension2 | null ) {
       this.localPreferredWidth = value === null ? null : value.width;
       this.localPreferredHeight = value === null ? null : value.height;
     }
 
-    get minimumSize(): Dimension2 | null {
+    public get minimumSize(): Dimension2 | null {
       assert && assert( ( this.minimumWidth === null ) === ( this.minimumHeight === null ),
         'Cannot get a minimumSize when one of minimumWidth/minimumHeight is null' );
 
@@ -124,12 +114,12 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       }
     }
 
-    set minimumSize( value: Dimension2 | null ) {
+    public set minimumSize( value: Dimension2 | null ) {
       this.minimumWidth = value === null ? null : value.width;
       this.minimumHeight = value === null ? null : value.height;
     }
 
-    get localMinimumSize(): Dimension2 | null {
+    public get localMinimumSize(): Dimension2 | null {
       assert && assert( ( this.localMinimumWidth === null ) === ( this.localMinimumHeight === null ),
         'Cannot get a minimumSize when one of minimumWidth/minimumHeight is null' );
 
@@ -141,23 +131,23 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       }
     }
 
-    set localMinimumSize( value: Dimension2 | null ) {
+    public set localMinimumSize( value: Dimension2 | null ) {
       this.localMinimumWidth = value === null ? null : value.width;
       this.localMinimumHeight = value === null ? null : value.height;
     }
 
-    get sizable(): boolean {
+    public get sizable(): boolean {
       assert && assert( this.widthSizable === this.heightSizable,
         'widthSizable and heightSizable not the same, which is required for the sizable getter' );
       return this.widthSizable;
     }
 
-    set sizable( value: boolean ) {
+    public set sizable( value: boolean ) {
       this.widthSizable = value;
       this.heightSizable = value;
     }
 
-    get mixesSizable(): boolean { return true; }
+    public get mixesSizable(): boolean { return true; }
 
     validateLocalPreferredSize(): void {
       if ( assert ) {
@@ -195,8 +185,11 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 } );
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as Sizable
+// We need to define an unused function with a concrete type, so that we can extract the return type of the function
+// and provide a type for a Node that mixes this type.
 const wrapper = () => Sizable( Node );
 export type SizableNode = InstanceType<ReturnType<typeof wrapper>>;
+
 const isSizable = ( node: Node ): node is SizableNode => {
   return node.widthSizable && node.heightSizable;
 };

@@ -11,17 +11,24 @@ import { GridCell, scenery, LayoutLine } from '../../imports.js';
 
 export default class GridLine extends LayoutLine {
 
-  index!: number;
-  cells!: GridCell[];
-  grow!: number;
+  // (scenery-internal)
+  public index!: number;
+  public cells!: GridCell[];
+  public grow!: number;
 
-  constructor( index: number, cells: GridCell[], grow: number ) {
+  /**
+   * (scenery-internal)
+   */
+  public constructor( index: number, cells: GridCell[], grow: number ) {
     super();
 
     this.initialize( index, cells, grow );
   }
 
-  initialize( index: number, cells: GridCell[], grow: number ): void {
+  /**
+   * (scenery-internal)
+   */
+  public initialize( index: number, cells: GridCell[], grow: number ): void {
     this.index = index;
 
     this.cells = cells;
@@ -31,11 +38,17 @@ export default class GridLine extends LayoutLine {
     this.initializeLayoutLine();
   }
 
-  freeToPool(): void {
+  /**
+   * (scenery-internal)
+   */
+  public freeToPool(): void {
     GridLine.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool<typeof GridLine, [number, GridCell[], number]>( GridLine, {
+  /**
+   * (scenery-internal)
+   */
+  public static readonly pool = new Pool<typeof GridLine, [number, GridCell[], number]>( GridLine, {
     defaultArguments: [ 0, [], 0 ]
   } );
 }
