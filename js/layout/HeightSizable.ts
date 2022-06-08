@@ -12,6 +12,7 @@ import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import { scenery, Node, REQUIRES_BOUNDS_OPTION_KEYS, DelayedMutate } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 // Position changes smaller than this will be ignored
 const CHANGE_POSITION_THRESHOLD = 1e-9;
@@ -79,7 +80,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
     // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
     // is yet passing those options through.
-    public constructor( ...args: any[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
 
       const updatePreferred = this._updatePreferredHeight.bind( this );

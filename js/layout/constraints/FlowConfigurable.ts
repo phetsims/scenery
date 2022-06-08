@@ -23,6 +23,7 @@ import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, scenery, Vertica
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
@@ -109,7 +110,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
     readonly orientationChangedEmitter: TinyEmitter = new TinyEmitter<[]>();
 
-    constructor( ...args: any[] ) {
+    constructor( ...args: IntentionalAny[] ) {
       super( ...args );
     }
 

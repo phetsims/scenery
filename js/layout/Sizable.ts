@@ -12,6 +12,7 @@ import { HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, 
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 export const SIZABLE_SELF_OPTION_KEYS = [
   'preferredSize',
@@ -64,7 +65,7 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );
   const SizableMixin = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class extends SuperExtendedType {
 
-    public constructor( ...args: any[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
     }
 

@@ -22,13 +22,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import { scenery, Node, LayoutConstraint, LayoutProxy, LayoutCell } from '../../imports.js';
 
 // Turns a tuple of things into a tuple of LayoutProxies
 type LayoutProxyMap<T> = {
   [Property in keyof T]: LayoutProxy // eslint-disable-line
 };
-type LayoutCallback<T extends any[]> = ( ...args: LayoutProxyMap<T> ) => void;
+type LayoutCallback<T extends IntentionalAny[]> = ( ...args: LayoutProxyMap<T> ) => void;
 
 export default class ManualConstraint<T extends Node[]> extends LayoutConstraint {
 

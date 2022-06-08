@@ -17,6 +17,7 @@ import mutate from '../../../../phet-core/js/mutate.js';
 import { HorizontalLayoutAlign, HorizontalLayoutAlignValues, LayoutAlign, scenery, VerticalLayoutAlign, VerticalLayoutAlignValues } from '../../imports.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',
@@ -101,7 +102,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
     readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
 
-    constructor( ...args: any[] ) {
+    constructor( ...args: IntentionalAny[] ) {
       super( ...args );
     }
 
