@@ -61,7 +61,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   private _spacing = 0;
   private _lineSpacing = 0;
 
-  constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
+  public constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
     super( ancestorNode, providedOptions );
@@ -339,7 +339,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     lines.forEach( line => line.freeToPool() );
   }
 
-  get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
+  public get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
     const result = LayoutJustification.internalToJustify( this._orientation, this._justify );
 
     assert && assert( LayoutJustification.getAllowedJustificationValues( this._orientation ).includes( result ) );
@@ -347,7 +347,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     return result;
   }
 
-  set justify( value: HorizontalLayoutJustification | VerticalLayoutJustification ) {
+  public set justify( value: HorizontalLayoutJustification | VerticalLayoutJustification ) {
     assert && assert( LayoutJustification.getAllowedJustificationValues( this._orientation ).includes( value ),
       `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${LayoutJustification.getAllowedJustificationValues( this._orientation )}` );
 
@@ -363,7 +363,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     }
   }
 
-  get justifyLines(): HorizontalLayoutJustification | VerticalLayoutJustification | null {
+  public get justifyLines(): HorizontalLayoutJustification | VerticalLayoutJustification | null {
     if ( this._justifyLines === null ) {
       return null;
     }
@@ -376,7 +376,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     }
   }
 
-  set justifyLines( value: HorizontalLayoutJustification | VerticalLayoutJustification | null ) {
+  public set justifyLines( value: HorizontalLayoutJustification | VerticalLayoutJustification | null ) {
     assert && assert( value === null || LayoutJustification.getAllowedJustificationValues( this._orientation.opposite ).includes( value ),
       `justify ${value} not supported, with the orientation ${this._orientation.opposite}, the valid values are ${LayoutJustification.getAllowedJustificationValues( this._orientation.opposite )} or null` );
 
@@ -392,11 +392,11 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     }
   }
 
-  get wrap(): boolean {
+  public get wrap(): boolean {
     return this._wrap;
   }
 
-  set wrap( value: boolean ) {
+  public set wrap( value: boolean ) {
     assert && assert( typeof value === 'boolean' );
 
     if ( this._wrap !== value ) {
@@ -406,11 +406,11 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     }
   }
 
-  get spacing(): number {
+  public get spacing(): number {
     return this._spacing;
   }
 
-  set spacing( value: number ) {
+  public set spacing( value: number ) {
     assert && assert( typeof value === 'number' && isFinite( value ) );
 
     if ( this._spacing !== value ) {
@@ -420,11 +420,11 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     }
   }
 
-  get lineSpacing(): number {
+  public get lineSpacing(): number {
     return this._lineSpacing;
   }
 
-  set lineSpacing( value: number ) {
+  public set lineSpacing( value: number ) {
     assert && assert( typeof value === 'number' && isFinite( value ) );
 
     if ( this._lineSpacing !== value ) {
@@ -434,7 +434,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     }
   }
 
-  insertCell( index: number, cell: FlowCell ): void {
+  public insertCell( index: number, cell: FlowCell ): void {
     assert && assert( typeof index === 'number' );
     assert && assert( index >= 0 );
     assert && assert( index <= this.cells.length );
@@ -450,7 +450,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     this.updateLayoutAutomatically();
   }
 
-  removeCell( cell: FlowCell ): void {
+  public removeCell( cell: FlowCell ): void {
     assert && assert( cell instanceof FlowCell );
     assert && assert( _.includes( this.cells, cell ) );
 
@@ -461,20 +461,20 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     this.updateLayoutAutomatically();
   }
 
-  reorderCells( cells: FlowCell[], minChangeIndex: number, maxChangeIndex: number ): void {
+  public reorderCells( cells: FlowCell[], minChangeIndex: number, maxChangeIndex: number ): void {
     this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
 
     this.updateLayoutAutomatically();
   }
 
-  getPreferredProperty( orientation: Orientation ): IProperty<number | null> {
+  public getPreferredProperty( orientation: Orientation ): IProperty<number | null> {
     return orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty : this.preferredHeightProperty;
   }
 
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     // Lock during disposal to avoid layout calls
     this.lock();
 
@@ -485,7 +485,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     this.unlock();
   }
 
-  static create( ancestorNode: Node, options?: FlowConstraintOptions ): FlowConstraint {
+  public static create( ancestorNode: Node, options?: FlowConstraintOptions ): FlowConstraint {
     return new FlowConstraint( ancestorNode, options );
   }
 }

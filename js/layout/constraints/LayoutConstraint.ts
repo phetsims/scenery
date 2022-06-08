@@ -13,7 +13,7 @@ import { HeightSizableNode, LayoutProxy, mixesHeightSizable, mixesWidthSizable, 
 export default class LayoutConstraint {
 
   // The Node in whose local coordinate frame our layout computations are done.
-  readonly ancestorNode: Node;
+  public readonly ancestorNode: Node;
 
   // Prevents layout() from running while greater than zero. Generally will be unlocked and laid out.
   private _layoutLockCount = 0;
@@ -29,10 +29,13 @@ export default class LayoutConstraint {
   // Track Nodes we're listening to (for memory cleanup purposes)
   private readonly _listenedNodes: Set<Node> = new Set<Node>();
 
-  // scenery-internal - emits when we've finished layout
-  readonly finishedLayoutEmitter: TinyEmitter<[]> = new TinyEmitter<[]>();
+  // (scenery-internal) - emits when we've finished layout
+  public readonly finishedLayoutEmitter: TinyEmitter<[]> = new TinyEmitter<[]>();
 
-  constructor( ancestorNode: Node ) {
+  /**
+   * (scenery-internal)
+   */
+  public constructor( ancestorNode: Node ) {
     assert && assert( ancestorNode instanceof Node );
 
     this.ancestorNode = ancestorNode;
@@ -42,8 +45,9 @@ export default class LayoutConstraint {
   /**
    * Adds listeners to a Node, so that our layout updates will happen if this Node's Properties
    * (bounds/visibility/minimum size) change. Will be cleared on disposal of this type.
+   * (scenery-internal)
    */
-  addNode( node: Node, addLock = true ): void {
+  public addNode( node: Node, addLock = true ): void {
     assert && assert( node instanceof Node );
     assert && assert( !this._listenedNodes.has( node ) );
     assert && assert( !addLock || !node._activeParentLayoutConstraint, 'This node is already managed by a layout container - make sure to wrap it in a Node if DAG, removing it from an old layout container, etc.' );
@@ -66,7 +70,10 @@ export default class LayoutConstraint {
     this._listenedNodes.add( node );
   }
 
-  removeNode( node: Node ): void {
+  /**
+   * (scenery-internal)
+   */
+  public removeNode( node: Node ): void {
     assert && assert( node instanceof Node );
     assert && assert( this._listenedNodes.has( node ) );
 
@@ -98,7 +105,10 @@ export default class LayoutConstraint {
 
   }
 
-  get isLocked(): boolean {
+  /**
+   * (scenery-internal)
+   */
+  public get isLocked(): boolean {
     return this._layoutLockCount > 0;
   }
 
@@ -106,24 +116,27 @@ export default class LayoutConstraint {
    * Locks the layout, so that automatic layout will NOT be triggered synchronously until unlock() is called and
    * the lock count returns to 0. This is set up so that if we trigger multiple reentrancy, we will only attempt to
    * re-layout once ALL of the layouts are finished.
+   * (scenery-internal)
    */
-  lock(): void {
+  public lock(): void {
     this._layoutLockCount++;
   }
 
   /**
    * Unlocks the layout. Generally (but not always), updateLayout() or updateLayoutAutomatically() should be called
    * after this, as locks are generally used for this purpose.
+   * (scenery-internal)
    */
-  unlock(): void {
+  public unlock(): void {
     this._layoutLockCount--;
   }
 
   /**
    * Here for manual validation (say, in the devtools) - While some layouts are going on, this may not be correct, so it
    * could not be added to post-layout validation.
+   * (scenery-internal)
    */
-  validateLocalPreferredWidth( layoutContainer: WidthSizableNode ): void {
+  public validateLocalPreferredWidth( layoutContainer: WidthSizableNode ): void {
     if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
       layoutContainer.validateLocalPreferredWidth();
     }
@@ -132,8 +145,9 @@ export default class LayoutConstraint {
   /**
    * Here for manual validation (say, in the devtools) - While some layouts are going on, this may not be correct, so it
    * could not be added to post-layout validation.
+   * (scenery-internal)
    */
-  validateLocalPreferredHeight( layoutContainer: HeightSizableNode ): void {
+  public validateLocalPreferredHeight( layoutContainer: HeightSizableNode ): void {
     if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
       layoutContainer.validateLocalPreferredHeight();
     }
@@ -142,8 +156,9 @@ export default class LayoutConstraint {
   /**
    * Here for manual validation (say, in the devtools) - While some layouts are going on, this may not be correct, so it
    * could not be added to post-layout validation.
+   * (scenery-internal)
    */
-  validateLocalPreferredSize( layoutContainer: SizableNode ): void {
+  public validateLocalPreferredSize( layoutContainer: SizableNode ): void {
     if ( assert && layoutContainer.localBounds.isFinite() && !this._layoutAttemptDuringLock ) {
       layoutContainer.validateLocalPreferredSize();
     }
@@ -153,7 +168,7 @@ export default class LayoutConstraint {
    * Updates the layout of this constraint. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
    */
-  updateLayout(): void {
+  public updateLayout(): void {
     let count = 0;
 
     // If we're locked AND someone tries to do layout, record this so we can attempt layout once we are not locked
@@ -182,7 +197,7 @@ export default class LayoutConstraint {
   /**
    * Called when we attempt to automatically layout components. (scenery-internal)
    */
-  updateLayoutAutomatically(): void {
+  public updateLayoutAutomatically(): void {
     if ( this._enabled ) {
       this.updateLayout();
     }
@@ -190,8 +205,9 @@ export default class LayoutConstraint {
 
   /**
    * Creates a LayoutProxy for a unique trail from our ancestorNode to this Node (or null if that's not possible)
+   * (scenery-internal)
    */
-  createLayoutProxy( node: Node ): LayoutProxy | null {
+  public createLayoutProxy( node: Node ): LayoutProxy | null {
     assert && assert( node instanceof Node );
 
     const trails = node.getTrails( n => n === this.ancestorNode );
@@ -204,11 +220,11 @@ export default class LayoutConstraint {
     }
   }
 
-  get enabled(): boolean {
+  public get enabled(): boolean {
     return this._enabled;
   }
 
-  set enabled( value: boolean ) {
+  public set enabled( value: boolean ) {
     assert && assert( typeof value === 'boolean' );
 
     if ( this._enabled !== value ) {
@@ -221,7 +237,7 @@ export default class LayoutConstraint {
   /**
    * Releases references
    */
-  dispose(): void {
+  public dispose(): void {
     // Clean up listeners to any listened nodes
     const listenedNodes = [ ...this._listenedNodes.keys() ];
     for ( let i = 0; i < listenedNodes.length; i++ ) {

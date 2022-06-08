@@ -51,15 +51,15 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
 
   private readonly cells: Set<GridCell> = new Set();
 
-  // scenery-internal
-  displayedCells: GridCell[] = [];
+  // (scenery-internal)
+  public displayedCells: GridCell[] = [];
 
   // Looked up by index
   private displayedLines: OrientationPair<Map<number, GridLine>> = new OrientationPair( new Map(), new Map() );
 
   private _spacing: OrientationPair<number | number[]> = new OrientationPair<number | number[]>( 0, 0 );
 
-  constructor( ancestorNode: Node, providedOptions?: GridConstraintOptions ) {
+  public constructor( ancestorNode: Node, providedOptions?: GridConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
     super( ancestorNode, providedOptions );
@@ -258,13 +258,13 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     this.finishedLayoutEmitter.emit();
   }
 
-  get spacing(): number | number[] {
+  public get spacing(): number | number[] {
     assert && assert( this.xSpacing === this.ySpacing );
 
     return this.xSpacing;
   }
 
-  set spacing( value: number | number[] ) {
+  public set spacing( value: number | number[] ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
@@ -276,11 +276,11 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     }
   }
 
-  get xSpacing(): number | number[] {
+  public get xSpacing(): number | number[] {
     return this._spacing.get( Orientation.HORIZONTAL );
   }
 
-  set xSpacing( value: number | number[] ) {
+  public set xSpacing( value: number | number[] ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
@@ -291,11 +291,11 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     }
   }
 
-  get ySpacing(): number | number[] {
+  public get ySpacing(): number | number[] {
     return this._spacing.get( Orientation.VERTICAL );
   }
 
-  set ySpacing( value: number | number[] ) {
+  public set ySpacing( value: number | number[] ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
@@ -306,7 +306,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     }
   }
 
-  addCell( cell: GridCell ): void {
+  public addCell( cell: GridCell ): void {
     assert && assert( cell instanceof GridCell );
     assert && assert( !this.cells.has( cell ) );
 
@@ -317,7 +317,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     this.updateLayoutAutomatically();
   }
 
-  removeCell( cell: GridCell ): void {
+  public removeCell( cell: GridCell ): void {
     assert && assert( cell instanceof GridCell );
     assert && assert( this.cells.has( cell ) );
 
@@ -331,7 +331,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     // Lock during disposal to avoid layout calls
     this.lock();
 
@@ -342,7 +342,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     this.unlock();
   }
 
-  getIndices( orientation: Orientation ): number[] {
+  public getIndices( orientation: Orientation ): number[] {
     const result: number[] = [];
 
     this.cells.forEach( cell => {
@@ -352,19 +352,19 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     return _.sortedUniq( _.sortBy( result ) );
   }
 
-  getCell( row: number, column: number ): GridCell | null {
+  public getCell( row: number, column: number ): GridCell | null {
     return _.find( [ ...this.cells ], cell => cell.containsRow( row ) && cell.containsColumn( column ) ) || null;
   }
 
-  getCellFromNode( node: Node ): GridCell | null {
+  public getCellFromNode( node: Node ): GridCell | null {
     return _.find( [ ...this.cells ], cell => cell.node === node ) || null;
   }
 
-  getCells( orientation: Orientation, index: number ): GridCell[] {
+  public getCells( orientation: Orientation, index: number ): GridCell[] {
     return _.filter( [ ...this.cells ], cell => cell.containsIndex( orientation, index ) );
   }
 
-  static create( ancestorNode: Node, options?: GridConstraintOptions ): GridConstraint {
+  public static create( ancestorNode: Node, options?: GridConstraintOptions ): GridConstraint {
     return new GridConstraint( ancestorNode, options );
   }
 }

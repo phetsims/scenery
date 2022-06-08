@@ -85,28 +85,35 @@ export type ExternalGridConfigurableOptions = WithoutNull<GridConfigurableOption
 const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
-    _xAlign: LayoutAlign | null = null;
-    _yAlign: LayoutAlign | null = null;
-    _xStretch: boolean | null = null;
-    _yStretch: boolean | null = null;
-    _leftMargin: number | null = null;
-    _rightMargin: number | null = null;
-    _topMargin: number | null = null;
-    _bottomMargin: number | null = null;
-    _xGrow: number | null = null;
-    _yGrow: number | null = null;
-    _minContentWidth: number | null = null;
-    _minContentHeight: number | null = null;
-    _maxContentWidth: number | null = null;
-    _maxContentHeight: number | null = null;
+    // (scenery-internal) - considered private, but TypeScript mixins won't support private
+    public _xAlign: LayoutAlign | null = null;
+    public _yAlign: LayoutAlign | null = null;
+    public _xStretch: boolean | null = null;
+    public _yStretch: boolean | null = null;
+    public _leftMargin: number | null = null;
+    public _rightMargin: number | null = null;
+    public _topMargin: number | null = null;
+    public _bottomMargin: number | null = null;
+    public _xGrow: number | null = null;
+    public _yGrow: number | null = null;
+    public _minContentWidth: number | null = null;
+    public _minContentHeight: number | null = null;
+    public _maxContentWidth: number | null = null;
+    public _maxContentHeight: number | null = null;
 
-    readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
+    public readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
 
-    constructor( ...args: IntentionalAny[] ) {
+    /**
+     * (scenery-internal)
+     */
+    public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
     }
 
-    mutateConfigurable( options?: GridConfigurableOptions ): void {
+    /**
+     * (scenery-internal)
+     */
+    public mutateConfigurable( options?: GridConfigurableOptions ): void {
       assertMutuallyExclusiveOptions( options, [ 'stretch' ], [ 'xStretch', 'yStretch' ] );
       assertMutuallyExclusiveOptions( options, [ 'grow' ], [ 'xGrow', 'yGrow' ] );
       assertMutuallyExclusiveOptions( options, [ 'margin' ], [ 'xMargin', 'yMargin' ] );
@@ -116,7 +123,10 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       mutate( this, GRID_CONFIGURABLE_OPTION_KEYS, options );
     }
 
-    setConfigToBaseDefault(): void {
+    /**
+     * (scenery-internal)
+     */
+    public setConfigToBaseDefault(): void {
       this._xAlign = LayoutAlign.CENTER;
       this._yAlign = LayoutAlign.CENTER;
       this._xStretch = false;
@@ -137,6 +147,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
     /**
      * Resets values to their original state
+     * (scenery-internal)
      */
     setConfigToInherit(): void {
       this._xAlign = null;
@@ -157,7 +168,10 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this.changedEmitter.emit();
     }
 
-    get xAlign(): HorizontalLayoutAlign | null {
+    /**
+     * (scenery-internal)
+     */
+    public get xAlign(): HorizontalLayoutAlign | null {
       const result = this._xAlign === null ? null : this._xAlign.horizontal;
 
       assert && assert( result === null || typeof result === 'string' );
@@ -165,7 +179,10 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       return result;
     }
 
-    set xAlign( value: HorizontalLayoutAlign | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set xAlign( value: HorizontalLayoutAlign | null ) {
       assert && assert( value === null || HorizontalLayoutAlignValues.includes( value ),
         `align ${value} not supported, the valid values are ${HorizontalLayoutAlignValues} or null` );
 
@@ -181,7 +198,10 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get yAlign(): VerticalLayoutAlign | null {
+    /**
+     * (scenery-internal)
+     */
+    public get yAlign(): VerticalLayoutAlign | null {
       const result = this._yAlign === null ? null : this._yAlign.vertical;
 
       assert && assert( result === null || typeof result === 'string' );
@@ -189,7 +209,10 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       return result;
     }
 
-    set yAlign( value: VerticalLayoutAlign | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set yAlign( value: VerticalLayoutAlign | null ) {
       assert && assert( value === null || VerticalLayoutAlignValues.includes( value ),
         `align ${value} not supported, the valid values are ${VerticalLayoutAlignValues} or null` );
 
@@ -205,11 +228,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get leftMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get leftMargin(): number | null {
       return this._leftMargin;
     }
 
-    set leftMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set leftMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value ) {
@@ -219,11 +248,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get rightMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get rightMargin(): number | null {
       return this._rightMargin;
     }
 
-    set rightMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set rightMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._rightMargin !== value ) {
@@ -233,11 +268,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get topMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get topMargin(): number | null {
       return this._topMargin;
     }
 
-    set topMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set topMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._topMargin !== value ) {
@@ -247,11 +288,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get bottomMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get bottomMargin(): number | null {
       return this._bottomMargin;
     }
 
-    set bottomMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set bottomMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._bottomMargin !== value ) {
@@ -261,13 +308,19 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get grow(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get grow(): number | null {
       assert && assert( this._xGrow === this._yGrow );
 
       return this._xGrow;
     }
 
-    set grow( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set grow( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
 
       if ( this._xGrow !== value || this._yGrow !== value ) {
@@ -278,11 +331,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get xGrow(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get xGrow(): number | null {
       return this._xGrow;
     }
 
-    set xGrow( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set xGrow( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
 
       if ( this._xGrow !== value ) {
@@ -292,11 +351,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get yGrow(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get yGrow(): number | null {
       return this._yGrow;
     }
 
-    set yGrow( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set yGrow( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
 
       if ( this._yGrow !== value ) {
@@ -306,13 +371,19 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get stretch(): boolean | null {
+    /**
+     * (scenery-internal)
+     */
+    public get stretch(): boolean | null {
       assert && assert( this._xStretch === this._yStretch );
 
       return this._xStretch;
     }
 
-    set stretch( value: boolean | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set stretch( value: boolean | null ) {
       assert && assert( value === null || typeof value === 'boolean' );
 
       if ( this._xStretch !== value || this._yStretch !== value ) {
@@ -323,11 +394,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get xStretch(): boolean | null {
+    /**
+     * (scenery-internal)
+     */
+    public get xStretch(): boolean | null {
       return this._xStretch;
     }
 
-    set xStretch( value: boolean | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set xStretch( value: boolean | null ) {
       assert && assert( value === null || typeof value === 'boolean' );
 
       if ( this._xStretch !== value ) {
@@ -337,11 +414,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get yStretch(): boolean | null {
+    /**
+     * (scenery-internal)
+     */
+    public get yStretch(): boolean | null {
       return this._yStretch;
     }
 
-    set yStretch( value: boolean | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set yStretch( value: boolean | null ) {
       assert && assert( value === null || typeof value === 'boolean' );
 
       if ( this._yStretch !== value ) {
@@ -351,13 +434,19 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get xMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get xMargin(): number | null {
       assert && assert( this._leftMargin === this._rightMargin );
 
       return this._leftMargin;
     }
 
-    set xMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set xMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value || this._rightMargin !== value ) {
@@ -368,13 +457,19 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get yMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get yMargin(): number | null {
       assert && assert( this._topMargin === this._bottomMargin );
 
       return this._topMargin;
     }
 
-    set yMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set yMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._topMargin !== value || this._bottomMargin !== value ) {
@@ -385,7 +480,10 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get margin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get margin(): number | null {
       assert && assert(
       this._leftMargin === this._rightMargin &&
       this._leftMargin === this._topMargin &&
@@ -395,7 +493,10 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       return this._topMargin;
     }
 
-    set margin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set margin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value || this._rightMargin !== value || this._topMargin !== value || this._bottomMargin !== value ) {
@@ -408,11 +509,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get minContentWidth(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get minContentWidth(): number | null {
       return this._minContentWidth;
     }
 
-    set minContentWidth( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set minContentWidth( value: number | null ) {
       if ( this._minContentWidth !== value ) {
         this._minContentWidth = value;
 
@@ -420,11 +527,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get minContentHeight(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get minContentHeight(): number | null {
       return this._minContentHeight;
     }
 
-    set minContentHeight( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set minContentHeight( value: number | null ) {
       if ( this._minContentHeight !== value ) {
         this._minContentHeight = value;
 
@@ -432,11 +545,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get maxContentWidth(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get maxContentWidth(): number | null {
       return this._maxContentWidth;
     }
 
-    set maxContentWidth( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set maxContentWidth( value: number | null ) {
       if ( this._maxContentWidth !== value ) {
         this._maxContentWidth = value;
 
@@ -444,11 +563,17 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get maxContentHeight(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get maxContentHeight(): number | null {
       return this._maxContentHeight;
     }
 
-    set maxContentHeight( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set maxContentHeight( value: number | null ) {
       if ( this._maxContentHeight !== value ) {
         this._maxContentHeight = value;
 

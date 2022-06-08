@@ -67,7 +67,10 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
     this.updateLayout();
   }
 
-  override layout(): void {
+  /**
+   * (scenery-internal)
+   */
+  public override layout(): void {
     super.layout();
 
     assert && assert( _.every( this.nodes, node => !node.isDisposed ) );
@@ -86,13 +89,13 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     this.cells.forEach( cell => cell.dispose() );
 
     super.dispose();
   }
 
-  static create<T extends Node[]>( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ): ManualConstraint<T> {
+  public static create<T extends Node[]>( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ): ManualConstraint<T> {
     return new ManualConstraint( ancestorNode, nodes, layoutCallback );
   }
 }

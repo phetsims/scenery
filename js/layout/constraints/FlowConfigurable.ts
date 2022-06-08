@@ -93,28 +93,36 @@ export type ExternalFlowConfigurableOptions = WithoutNull<FlowConfigurableOption
 const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
 
-    _orientation: Orientation = Orientation.HORIZONTAL;
+    // (scenery-internal) - considered private, but TypeScript mixins won't support private
+    public _orientation: Orientation = Orientation.HORIZONTAL;
 
-    _align: LayoutAlign | null = null;
-    _stretch: boolean | null = null;
-    _leftMargin: number | null = null;
-    _rightMargin: number | null = null;
-    _topMargin: number | null = null;
-    _bottomMargin: number | null = null;
-    _grow: number | null = null;
-    _minContentWidth: number | null = null;
-    _minContentHeight: number | null = null;
-    _maxContentWidth: number | null = null;
-    _maxContentHeight: number | null = null;
+    // (scenery-internal) - considered private, but TypeScript mixins won't support private
+    public _align: LayoutAlign | null = null;
+    public _stretch: boolean | null = null;
+    public _leftMargin: number | null = null;
+    public _rightMargin: number | null = null;
+    public _topMargin: number | null = null;
+    public _bottomMargin: number | null = null;
+    public _grow: number | null = null;
+    public _minContentWidth: number | null = null;
+    public _minContentHeight: number | null = null;
+    public _maxContentWidth: number | null = null;
+    public _maxContentHeight: number | null = null;
 
-    readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
-    readonly orientationChangedEmitter: TinyEmitter = new TinyEmitter<[]>();
+    public readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
+    public readonly orientationChangedEmitter: TinyEmitter = new TinyEmitter<[]>();
 
-    constructor( ...args: IntentionalAny[] ) {
+    /**
+     * (scenery-internal)
+     */
+    public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
     }
 
-    mutateConfigurable( options?: FlowConfigurableOptions ): void {
+    /**
+     * (scenery-internal)
+     */
+    public mutateConfigurable( options?: FlowConfigurableOptions ): void {
       assertMutuallyExclusiveOptions( options, [ 'margin' ], [ 'xMargin', 'yMargin' ] );
       assertMutuallyExclusiveOptions( options, [ 'xMargin' ], [ 'leftMargin', 'rightMargin' ] );
       assertMutuallyExclusiveOptions( options, [ 'yMargin' ], [ 'topMargin', 'bottomMargin' ] );
@@ -122,7 +130,11 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       mutate( this, FLOW_CONFIGURABLE_OPTION_KEYS, options );
     }
 
-    setConfigToBaseDefault(): void {
+    /**
+     * Resets values to the "base" state
+     * (scenery-internal)
+     */
+    public setConfigToBaseDefault(): void {
       this._align = LayoutAlign.CENTER;
       this._stretch = false;
       this._leftMargin = 0;
@@ -140,8 +152,9 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
     /**
      * Resets values to their original state
+     * (scenery-internal)
      */
-    setConfigToInherit(): void {
+    public setConfigToInherit(): void {
       this._align = null;
       this._stretch = null;
       this._leftMargin = null;
@@ -157,11 +170,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this.changedEmitter.emit();
     }
 
-    get orientation(): LayoutOrientation {
+    /**
+     * (scenery-internal)
+     */
+    public get orientation(): LayoutOrientation {
       return this._orientation === Orientation.HORIZONTAL ? 'horizontal' : 'vertical';
     }
 
-    set orientation( value: LayoutOrientation ) {
+    /**
+     * (scenery-internal)
+     */
+    public set orientation( value: LayoutOrientation ) {
       assert && assert( value === 'horizontal' || value === 'vertical' );
 
       const enumOrientation = value === 'horizontal' ? Orientation.HORIZONTAL : Orientation.VERTICAL;
@@ -174,7 +193,10 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get align(): HorizontalLayoutAlign | VerticalLayoutAlign | null {
+    /**
+     * (scenery-internal)
+     */
+    public get align(): HorizontalLayoutAlign | VerticalLayoutAlign | null {
       const result = LayoutAlign.internalToAlign( this._orientation, this._align );
 
       assert && assert( result === null || typeof result === 'string' );
@@ -182,7 +204,10 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       return result;
     }
 
-    set align( value: HorizontalLayoutAlign | VerticalLayoutAlign | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set align( value: HorizontalLayoutAlign | VerticalLayoutAlign | null ) {
       assert && assert( LayoutAlign.getAllowedAligns( this._orientation.opposite ).includes( value ),
         `align ${value} not supported, with the orientation ${this._orientation}, the valid values are ${LayoutAlign.getAllowedAligns( this._orientation.opposite )}` );
 
@@ -198,11 +223,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get stretch(): boolean | null {
+    /**
+     * (scenery-internal)
+     */
+    public get stretch(): boolean | null {
       return this._stretch;
     }
 
-    set stretch( value: boolean | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set stretch( value: boolean | null ) {
       if ( this._stretch !== value ) {
         this._stretch = value;
 
@@ -210,11 +241,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get leftMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get leftMargin(): number | null {
       return this._leftMargin;
     }
 
-    set leftMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set leftMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value ) {
@@ -224,11 +261,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get rightMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get rightMargin(): number | null {
       return this._rightMargin;
     }
 
-    set rightMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set rightMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._rightMargin !== value ) {
@@ -238,11 +281,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get topMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get topMargin(): number | null {
       return this._topMargin;
     }
 
-    set topMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set topMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._topMargin !== value ) {
@@ -252,11 +301,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get bottomMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get bottomMargin(): number | null {
       return this._bottomMargin;
     }
 
-    set bottomMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set bottomMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._bottomMargin !== value ) {
@@ -266,11 +321,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get grow(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get grow(): number | null {
       return this._grow;
     }
 
-    set grow( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set grow( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
 
       if ( this._grow !== value ) {
@@ -280,13 +341,19 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get xMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get xMargin(): number | null {
       assert && assert( this._leftMargin === this._rightMargin );
 
       return this._leftMargin;
     }
 
-    set xMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set xMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value || this._rightMargin !== value ) {
@@ -297,13 +364,19 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get yMargin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get yMargin(): number | null {
       assert && assert( this._topMargin === this._bottomMargin );
 
       return this._topMargin;
     }
 
-    set yMargin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set yMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._topMargin !== value || this._bottomMargin !== value ) {
@@ -314,7 +387,10 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get margin(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get margin(): number | null {
       assert && assert(
       this._leftMargin === this._rightMargin &&
       this._leftMargin === this._topMargin &&
@@ -324,7 +400,10 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       return this._topMargin;
     }
 
-    set margin( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set margin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value || this._rightMargin !== value || this._topMargin !== value || this._bottomMargin !== value ) {
@@ -337,11 +416,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get minContentWidth(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get minContentWidth(): number | null {
       return this._minContentWidth;
     }
 
-    set minContentWidth( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set minContentWidth( value: number | null ) {
       if ( this._minContentWidth !== value ) {
         this._minContentWidth = value;
 
@@ -349,11 +434,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get minContentHeight(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get minContentHeight(): number | null {
       return this._minContentHeight;
     }
 
-    set minContentHeight( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set minContentHeight( value: number | null ) {
       if ( this._minContentHeight !== value ) {
         this._minContentHeight = value;
 
@@ -361,11 +452,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get maxContentWidth(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get maxContentWidth(): number | null {
       return this._maxContentWidth;
     }
 
-    set maxContentWidth( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set maxContentWidth( value: number | null ) {
       if ( this._maxContentWidth !== value ) {
         this._maxContentWidth = value;
 
@@ -373,11 +470,17 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       }
     }
 
-    get maxContentHeight(): number | null {
+    /**
+     * (scenery-internal)
+     */
+    public get maxContentHeight(): number | null {
       return this._maxContentHeight;
     }
 
-    set maxContentHeight( value: number | null ) {
+    /**
+     * (scenery-internal)
+     */
+    public set maxContentHeight( value: number | null ) {
       if ( this._maxContentHeight !== value ) {
         this._maxContentHeight = value;
 

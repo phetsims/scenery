@@ -48,16 +48,21 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
 
   // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
   // Layout nodes can use this to adjust their localBounds. FlowBox/GridBox uses this for their localBounds.
-  readonly layoutBoundsProperty: IProperty<Bounds2>;
+  // (scenery-internal)
+  public readonly layoutBoundsProperty: IProperty<Bounds2>;
 
-  readonly preferredWidthProperty: IProperty<number | null>;
-  readonly preferredHeightProperty: IProperty<number | null>;
-  readonly minimumWidthProperty: IProperty<number | null>;
-  readonly minimumHeightProperty: IProperty<number | null>;
-  readonly layoutOriginProperty: IProperty<Vector2>;
+  // (scenery-internal)
+  public readonly preferredWidthProperty: IProperty<number | null>;
+  public readonly preferredHeightProperty: IProperty<number | null>;
+  public readonly minimumWidthProperty: IProperty<number | null>;
+  public readonly minimumHeightProperty: IProperty<number | null>;
+  public readonly layoutOriginProperty: IProperty<Vector2>;
 
-  // Recommended for ancestorNode to be the layout container, and that the layout container extends LayoutNode.
-  constructor( ancestorNode: Node, providedOptions?: NodeLayoutConstraintOptions ) {
+  /**
+   * Recommended for ancestorNode to be the layout container, and that the layout container extends LayoutNode.
+   * (scenery-internal)
+   */
+  public constructor( ancestorNode: Node, providedOptions?: NodeLayoutConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
     // The omitted options are set to proper defaults below
@@ -88,11 +93,11 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     this.layoutOriginProperty.lazyLink( this._updateLayoutListener );
   }
 
-  get excludeInvisible(): boolean {
+  public get excludeInvisible(): boolean {
     return this._excludeInvisible;
   }
 
-  set excludeInvisible( value: boolean ) {
+  public set excludeInvisible( value: boolean ) {
     assert && assert( typeof value === 'boolean' );
 
     if ( this._excludeInvisible !== value ) {
@@ -102,20 +107,29 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     }
   }
 
-  // Sets preferred size of content in a central location (so we could hook in animation in the future)
-  setProxyPreferredSize( orientation: Orientation, proxy: LayoutProxy, preferredSize: number | null ): void {
+  /**
+   * Sets preferred size of content in a central location (so we could hook in animation in the future)
+   * (scenery-internal)
+   */
+  public setProxyPreferredSize( orientation: Orientation, proxy: LayoutProxy, preferredSize: number | null ): void {
     proxy[ orientation.preferredSize ] = preferredSize;
   }
 
-  // Sets position of content in a central location (so we could hook in animation in the future)
-  setProxyMinSide( orientation: Orientation, proxy: LayoutProxy, minSide: number ): void {
+  /**
+   * Sets position of content in a central location (so we could hook in animation in the future)
+   * (scenery-internal)
+   */
+  public setProxyMinSide( orientation: Orientation, proxy: LayoutProxy, minSide: number ): void {
     if ( Math.abs( proxy[ orientation.minSide ] - minSide ) > CHANGE_POSITION_THRESHOLD ) {
       proxy[ orientation.minSide ] = minSide;
     }
   }
 
-  // Sets origin-based position of content in a central location (so we could hook in animation in the future)
-  setProxyOrigin( orientation: Orientation, proxy: LayoutProxy, origin: number ): void {
+  /**
+   * Sets origin-based position of content in a central location (so we could hook in animation in the future)
+   * (scenery-internal)
+   */
+  public setProxyOrigin( orientation: Orientation, proxy: LayoutProxy, origin: number ): void {
     if ( Math.abs( proxy[ orientation.coordinate ] - origin ) > CHANGE_POSITION_THRESHOLD ) {
       proxy[ orientation.coordinate ] = origin;
     }
@@ -124,7 +138,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     // In case they're from external sources (since these constraints can be used without a dedicated Node that is also
     // being disposed.
     this.preferredWidthProperty.unlink( this._updateLayoutListener );
