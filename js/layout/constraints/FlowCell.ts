@@ -13,12 +13,12 @@ export type FlowCellOptions = StrictOmit<ExternalFlowConfigurableOptions, 'orien
 
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
-  // Set during FlowConstraint layout
-  size = 0;
+  // (scenery-internal) Set during FlowConstraint layout
+  public size = 0;
 
   private readonly flowConstraint: FlowConstraint;
 
-  constructor( constraint: FlowConstraint, node: Node, proxy: LayoutProxy | null ) {
+  public constructor( constraint: FlowConstraint, node: Node, proxy: LayoutProxy | null ) {
     super( constraint, node, proxy );
 
     this.flowConstraint = constraint;
@@ -28,17 +28,17 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
   }
 
   // The used value, with this cell's value taking precedence over the constraint's default
-  get effectiveAlign(): LayoutAlign {
+  public get effectiveAlign(): LayoutAlign {
     return this._align !== null ? this._align : this.flowConstraint._align!;
   }
 
   // The used value, with this cell's value taking precedence over the constraint's default
-  get effectiveStretch(): boolean {
+  public get effectiveStretch(): boolean {
     return this._stretch !== null ? this._stretch : this.flowConstraint._stretch!;
   }
 
   // The used value, with this cell's value taking precedence over the constraint's default
-  get effectiveGrow(): number {
+  public get effectiveGrow(): number {
     return this._grow !== null ? this._grow : this.flowConstraint._grow!;
   }
 

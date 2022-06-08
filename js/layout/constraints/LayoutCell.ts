@@ -9,6 +9,7 @@
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import { LayoutConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProperty } from '../../imports.js';
 
+// NOTE: This would be an abstract class, but that is incompatible with how mixin constraints work in TypeScript
 export default class LayoutCell {
 
   // We might need to notify the constraint it needs a layout
@@ -26,13 +27,20 @@ export default class LayoutCell {
   private readonly layoutProxyProperty: TrackingLayoutProxyProperty | null;
 
   /**
+   * NOTE: Consider this scenery-internal AND protected. It's effectively a protected constructor for an abstract type,
+   * but cannot be due to how mixins constrain things (TypeScript doesn't work with private/protected things like this)
+   *
+   * NOTE: Methods can be marked as protected, however!
+   *
+   * (scenery-internal)
+   *
    * @param constraint
    * @param node
    * @param proxy - If not provided, LayoutProxies will be computed and updated based on the ancestorNode of the
    *                constraint. This includes more work, and ideally should be avoided for things like FlowBox/GridBox
    *                (but will be needed by ManualConstraint or other direct LayoutConstraint usage)
    */
-  constructor( constraint: LayoutConstraint, node: Node, proxy: LayoutProxy | null ) {
+  public constructor( constraint: LayoutConstraint, node: Node, proxy: LayoutProxy | null ) {
     if ( proxy ) {
       this.layoutProxyProperty = null;
       this._proxy = proxy;
@@ -64,28 +72,40 @@ export default class LayoutCell {
 
   }
 
-  get node(): Node {
+  /**
+   * (scenery-internal)
+   */
+  public get node(): Node {
     return this._node;
   }
 
-  isConnected(): boolean {
+  /**
+   * (scenery-internal)
+   */
+  public isConnected(): boolean {
     return this._proxy !== null;
   }
 
-  get proxy(): LayoutProxy {
+  /**
+   * (scenery-internal)
+   */
+  public get proxy(): LayoutProxy {
     assert && assert( this._proxy );
 
     return this._proxy!;
   }
 
-  isSizable( orientation: Orientation ): boolean {
+  /**
+   * (scenery-internal)
+   */
+  public isSizable( orientation: Orientation ): boolean {
     return orientation === Orientation.HORIZONTAL ? this.proxy.widthSizable : this.proxy.heightSizable;
   }
 
   /**
    * Releases references
    */
-  dispose(): void {
+  public dispose(): void {
     this.layoutProxyProperty && this.layoutProxyProperty.dispose();
 
     this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );

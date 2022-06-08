@@ -16,7 +16,7 @@
  *   - ySpacing (see https://phetsims.github.io/scenery/doc/layout#GridBox-spacing)
  *   - layoutOrigin (see https://phetsims.github.io/scenery/doc/layout#layoutOrigin)
  *
- * GridBox and layoutOptions options:
+ * GridBox and layoutOptions options (can be set either in the GridBox itself, or within its child nodes' layoutOptions):
  *   - xAlign (see https://phetsims.github.io/scenery/doc/layout#GridBox-align)
  *   - yAlign (see https://phetsims.github.io/scenery/doc/layout#GridBox-align)
  *   - stretch (see https://phetsims.github.io/scenery/doc/layout#GridBox-stretch)
@@ -37,7 +37,7 @@
  *   - maxContentWidth (see https://phetsims.github.io/scenery/doc/layout#GridBox-maxContent)
  *   - maxContentHeight (see https://phetsims.github.io/scenery/doc/layout#GridBox-maxContent)
  *
- * layoutOptions-only options:
+ * layoutOptions-only options (can only be set within the child nodes' layoutOptions, NOT available on GridBox):
  *   - x (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-location)
  *   - y (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-location)
  *   - width (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-size)
@@ -102,11 +102,15 @@ type SelfOptions = {
   // When non-null, the cells of this grid will be positioned/sized to be 1x1 cells, filling rows until a column has
   // `autoRows` number of rows, then it will go to the next column. This should generally be used with `children` or
   // adding/removing children in normal ways.
+  // NOTE: This should be used with the `children` option and/or adding children manually (addChild, etc.)
+  // NOTE: This should NOT be used with autoColumns or rows/columns, as those also specify coordinate information
   autoRows?: number | null;
 
   // When non-null, the cells of this grid will be positioned/sized to be 1x1 cells, filling columns until a row has
   // `autoColumns` number of columns, then it will go to the next row. This should generally be used with `children` or
   // adding/removing children in normal ways.
+  // NOTE: This should be used with the `children` option and/or adding children manually (addChild, etc.)
+  // NOTE: This should NOT be used with autoRows or rows/columns, as those also specify coordinate information
   autoColumns?: number | null;
 } & StrictOmit<GridConstraintOptions, GridConstraintExcludedOptions>;
 
@@ -422,6 +426,15 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this.updateAutoLines( Orientation.HORIZONTAL, this.autoColumns );
   }
 
+  // Updates rows or columns, whichever is active at the moment (if any)
+  private updateAllAutoLines(): void {
+    assert && assert( this._autoRows === null || this._autoColumns === null,
+      'autoRows and autoColumns should not both be set when updating children' );
+
+    this.updateAutoRows();
+    this.updateAutoColumns();
+  }
+
   override setChildren( children: Node[] ): this {
 
     const oldChildren = this.getChildren(); // defensive copy
@@ -432,8 +445,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this._autoLockCount--;
 
     if ( !_.isEqual( oldChildren, children ) ) {
-      this.updateAutoRows();
-      this.updateAutoColumns();
+      this.updateAllAutoLines();
     }
 
     return this;
@@ -448,8 +460,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
     this._constraint.addCell( cell );
 
-    this.updateAutoRows();
-    this.updateAutoColumns();
+    this.updateAllAutoLines();
   }
 
   /**
@@ -466,8 +477,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
     cell.dispose();
 
-    this.updateAutoRows();
-    this.updateAutoColumns();
+    this.updateAllAutoLines();
   }
 
   override mutate( options?: NodeOptions ): this {

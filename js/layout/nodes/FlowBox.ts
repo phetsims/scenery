@@ -15,7 +15,7 @@
  *   - wrap (see https://phetsims.github.io/scenery/doc/layout#FlowBox-wrap)
  *   - layoutOrigin (see https://phetsims.github.io/scenery/doc/layout#layoutOrigin)
  *
- * FlowBox and layoutOptions options:
+ * FlowBox and layoutOptions options (can be set either in the FlowBox itself, or within its child nodes' layoutOptions):
  *   - align (see https://phetsims.github.io/scenery/doc/layout#FlowBox-align)
  *   - stretch (see https://phetsims.github.io/scenery/doc/layout#FlowBox-stretch)
  *   - grow (see https://phetsims.github.io/scenery/doc/layout#FlowBox-grow)
