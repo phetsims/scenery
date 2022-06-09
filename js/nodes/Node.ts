@@ -5312,8 +5312,6 @@ class Node extends ParallelDOM {
         matrix.multiplyMatrix( child._transform.getMatrix() );
         matrix.canvasSetTransform( wrapper.context );
         if ( requiresScratchCanvas ) {
-          const canvas = document.createElement( 'canvas' );
-
           // We'll attempt to fit the Canvas to the content to minimize memory use, see
           // https://github.com/phetsims/function-builder/issues/148
 
@@ -5327,47 +5325,51 @@ class Node extends ParallelDOM {
             scratchBounds2Extra.setMinMax( 0, 0, wrapper.canvas.width, wrapper.canvas.height )
           );
 
-          // We'll set our Canvas to the fitted width, and will handle the offsets below.
-          canvas.width = childCanvasBounds.width;
-          canvas.height = childCanvasBounds.height;
-          const context = canvas.getContext( '2d' )!;
-          const childWrapper = new CanvasContextWrapper( canvas, context );
+          if ( childCanvasBounds.width > 0 && childCanvasBounds.height > 0 ) {
+            const canvas = document.createElement( 'canvas' );
 
-          // After our ancestor transform is applied, we'll need to apply another offset for fitted Canvas. We'll
-          // need to pass this to descendants AND apply it to the sub-context.
-          const subMatrix = matrix.copy().prependTranslation( -childCanvasBounds.minX, -childCanvasBounds.minY );
+            // We'll set our Canvas to the fitted width, and will handle the offsets below.
+            canvas.width = childCanvasBounds.width;
+            canvas.height = childCanvasBounds.height;
+            const context = canvas.getContext( '2d' )!;
+            const childWrapper = new CanvasContextWrapper( canvas, context );
 
-          subMatrix.canvasSetTransform( context );
-          child.renderToCanvasSubtree( childWrapper, subMatrix );
+            // After our ancestor transform is applied, we'll need to apply another offset for fitted Canvas. We'll
+            // need to pass this to descendants AND apply it to the sub-context.
+            const subMatrix = matrix.copy().prependTranslation( -childCanvasBounds.minX, -childCanvasBounds.minY );
 
-          wrapper.context.save();
-          if ( child.clipArea ) {
-            wrapper.context.beginPath();
-            child.clipArea.writeToContext( wrapper.context );
-            wrapper.context.clip();
-          }
-          wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
-          wrapper.context.globalAlpha = child.effectiveOpacity;
+            subMatrix.canvasSetTransform( context );
+            child.renderToCanvasSubtree( childWrapper, subMatrix );
 
-          let setFilter = false;
-          if ( child._filters.length ) {
-            // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
-            // Performance bottleneck for not using this fallback style, so we're allowing it for Chrome even though
-            // the visual differences may be present, see https://github.com/phetsims/scenery/issues/1139
-            if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
-              wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
-              setFilter = true;
+            wrapper.context.save();
+            if ( child.clipArea ) {
+              wrapper.context.beginPath();
+              child.clipArea.writeToContext( wrapper.context );
+              wrapper.context.clip();
             }
-            else {
-              child._filters.forEach( filter => filter.applyCanvasFilter( childWrapper ) );
-            }
-          }
+            wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
+            wrapper.context.globalAlpha = child.effectiveOpacity;
 
-          // The inverse transform is applied to handle fitting
-          wrapper.context.drawImage( canvas, childCanvasBounds.minX, childCanvasBounds.minY );
-          wrapper.context.restore();
-          if ( setFilter ) {
-            wrapper.context.filter = 'none';
+            let setFilter = false;
+            if ( child._filters.length ) {
+              // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
+              // Performance bottleneck for not using this fallback style, so we're allowing it for Chrome even though
+              // the visual differences may be present, see https://github.com/phetsims/scenery/issues/1139
+              if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
+                wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
+                setFilter = true;
+              }
+              else {
+                child._filters.forEach( filter => filter.applyCanvasFilter( childWrapper ) );
+              }
+            }
+
+            // The inverse transform is applied to handle fitting
+            wrapper.context.drawImage( canvas, childCanvasBounds.minX, childCanvasBounds.minY );
+            wrapper.context.restore();
+            if ( setFilter ) {
+              wrapper.context.filter = 'none';
+            }
           }
         }
         else {
