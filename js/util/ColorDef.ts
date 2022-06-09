@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property, { AbstractProperty } from '../../../axon/js/Property.js';
+import Property, { ReadOnlyProperty } from '../../../axon/js/Property.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
@@ -23,7 +23,7 @@ const ColorDef = {
     return color === null ||
            typeof color === 'string' ||
            color instanceof Color ||
-           ( color instanceof AbstractProperty && (
+           ( color instanceof ReadOnlyProperty && (
              color.value === null ||
              typeof color.value === 'string' ||
              color.value instanceof Color
