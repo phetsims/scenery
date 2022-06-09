@@ -48,7 +48,7 @@ function assertUtterance( utterance: Utterance | null ): asserts utterance is Ut
 
 // An implementation class for Voicing.ts, only used in this class so that we know if we own the Utterance and can
 // therefore dispose it.
-class VoicingUtterance extends Utterance {
+class OwnedVoicingUtterance extends Utterance {
   constructor( providedOptions?: UtteranceOptions ) {
     super( providedOptions );
   }
@@ -186,7 +186,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       this._voicingFocusListener = this.defaultFocusListener;
 
       // Sets the default voicingUtterance and makes this.canSpeakProperty a dependency on its ability to announce.
-      this.setVoicingUtterance( new VoicingUtterance() );
+      this.setVoicingUtterance( new OwnedVoicingUtterance() );
 
       // A counter that keeps track of visible and voicingVisible Instances of this Node. As long as this value is
       // greater than zero, this Node can speak. See onInstanceVisibilityChange and onInstanceVoicingVisibilityChange
@@ -667,7 +667,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     _cleanVoicingUtterance(): void {
       assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
-      if ( this._voicingUtterance instanceof VoicingUtterance ) {
+      if ( this._voicingUtterance instanceof OwnedVoicingUtterance ) {
         this._voicingUtterance.dispose();
       }
       else {
