@@ -35,9 +35,9 @@ type SelfOptions = {
   imageBounds?: Bounds2 | null;
 };
 
-type SuperOptions = NodeOptions & ImageableOptions;
+type ParentOptions = NodeOptions & ImageableOptions;
 
-export type ImageOptions = SelfOptions & SuperOptions;
+export type ImageOptions = SelfOptions & ParentOptions;
 
 export default class Image extends Imageable( Node ) {
 
@@ -47,7 +47,7 @@ export default class Image extends Imageable( Node ) {
   constructor( image: ImageableImage, providedOptions?: ImageOptions ) {
 
     // rely on the setImage call from the super constructor to do the setup
-    const options = optionize<ImageOptions, {}, SuperOptions>()( {
+    const options = optionize<ImageOptions, {}, ParentOptions>()( {
       image: image
     }, providedOptions );
 
