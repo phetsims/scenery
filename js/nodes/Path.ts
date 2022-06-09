@@ -24,10 +24,13 @@ const DEFAULT_OPTIONS = {
 };
 
 type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
-export type PathOptions = {
+
+type SelfOptions = {
   shape?: Shape | string | null;
   boundsMethod?: BoundsMethod;
-} & PaintableOptions & NodeOptions;
+};
+type ParentOptions = PaintableOptions & NodeOptions;
+export type PathOptions = SelfOptions & ParentOptions;
 
 export default class Path extends Paintable( Node ) {
 
@@ -60,7 +63,7 @@ export default class Path extends Paintable( Node ) {
    * - boundsMethod: Determines how the bounds of a shape are determined.
    *
    * @param shape - The initial Shape to display. See setShape() for more details and documentation.
-   * @param [options] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
+   * @param [providedOptions] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
   constructor( shape: Shape | string | null, providedOptions?: PathOptions ) {

@@ -58,7 +58,8 @@ type SelfOptions = {
   fontSize?: string | number;
   textPropertyOptions?: PropertyOptions<string>;
 };
-export type TextOptions = SelfOptions & PaintableOptions & NodeOptions;
+type ParentOptions = PaintableOptions & NodeOptions;
+export type TextOptions = SelfOptions & ParentOptions;
 
 export default class Text extends Paintable( Node ) {
 
