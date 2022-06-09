@@ -368,7 +368,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // don't send to utteranceQueue if response is empty
       // don't send to utteranceQueue for PhET-iO dynamic element archetypes, https://github.com/phetsims/joist/issues/817
       if ( content && notPhetioArchetype ) {
-        voicingUtteranceQueue.addToBack( content );
+        voicingUtteranceQueue.addToBack( content ); // eslint-disable-line bad-sim-text
       }
     }
 
@@ -700,7 +700,7 @@ Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
  */
 Voicing.alertUtterance = ( utterance: Utterance ) => {
   assert && assert( utterance.voicingCanAnnounceProperties.length > 0, 'voicingCanAnnounceProperties required, this Utterance might not be connected to Node in the scene graph.' );
-  voicingUtteranceQueue.addToBack( utterance );
+  voicingUtteranceQueue.addToBack( utterance ); // eslint-disable-line bad-sim-text
 };
 
 /**
