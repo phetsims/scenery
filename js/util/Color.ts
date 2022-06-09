@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AbstractProperty } from '../../../axon/js/Property.js';
+import { ReadOnlyProperty } from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
@@ -656,7 +656,7 @@ export default class Color {
     if ( typeof paint === 'string' ) {
       Color.checkPaintString( paint );
     }
-    else if ( ( paint instanceof AbstractProperty ) && ( typeof paint.value === 'string' ) ) {
+    else if ( ( paint instanceof ReadOnlyProperty ) && ( typeof paint.value === 'string' ) ) {
       Color.checkPaintString( paint.value );
     }
   }

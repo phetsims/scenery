@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AbstractProperty } from '../../../axon/js/Property.js';
+import { ReadOnlyProperty } from '../../../axon/js/Property.js';
 import { scenery, Color, Gradient, Paint } from '../imports.js';
 
 const PaintDef = {
@@ -27,7 +27,7 @@ const PaintDef = {
            typeof paint === 'string' ||
            paint instanceof Color ||
            paint instanceof Paint ||
-           ( paint instanceof AbstractProperty && (
+           ( paint instanceof ReadOnlyProperty && (
              paint.value === null ||
              typeof paint.value === 'string' ||
              paint.value instanceof Color
@@ -48,7 +48,7 @@ const PaintDef = {
     if ( paint instanceof Color ) {
       return paint.copy();
     }
-    if ( paint instanceof AbstractProperty ) {
+    if ( paint instanceof ReadOnlyProperty ) {
       return PaintDef.toColor( paint.value );
     }
     if ( paint instanceof Gradient ) {

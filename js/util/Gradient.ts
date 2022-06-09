@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AbstractProperty } from '../../../axon/js/Property.js';
+import { ReadOnlyProperty } from '../../../axon/js/Property.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import { scenery, Color, Paint, IColor } from '../imports.js';
 
@@ -63,7 +63,7 @@ export default abstract class Gradient extends Paint {
     assert && assert( color === null ||
                       typeof color === 'string' ||
                       color instanceof Color ||
-                      ( color instanceof AbstractProperty && ( color.value === null ||
+                      ( color instanceof ReadOnlyProperty && ( color.value === null ||
                                                                typeof color.value === 'string' ||
                                                                color.value instanceof Color ) ),
       'Color should match the addColorStop type specification' );
@@ -162,7 +162,7 @@ export default abstract class Gradient extends Paint {
    */
   static colorToString( color: IColor ): string {
     // to {Color|string|null}
-    if ( color instanceof AbstractProperty ) {
+    if ( color instanceof ReadOnlyProperty ) {
       color = color.value;
     }
 

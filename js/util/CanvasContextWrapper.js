@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AbstractProperty } from '../../../axon/js/Property.js';
+import { ReadOnlyProperty } from '../../../axon/js/Property.js';
 import { scenery } from '../imports.js';
 
 class CanvasContextWrapper {
@@ -72,7 +72,7 @@ class CanvasContextWrapper {
    */
   setFillStyle( style ) {
     // turn {Property}s into their values when necessary
-    if ( style && style instanceof AbstractProperty ) {
+    if ( style && style instanceof ReadOnlyProperty ) {
       style = style.value;
     }
 
@@ -96,7 +96,7 @@ class CanvasContextWrapper {
    */
   setStrokeStyle( style ) {
     // turn {Property}s into their values when necessary
-    if ( style && style instanceof AbstractProperty ) {
+    if ( style && style instanceof ReadOnlyProperty ) {
       style = style.value;
     }
 
