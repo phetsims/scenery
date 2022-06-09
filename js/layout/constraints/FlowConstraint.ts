@@ -49,8 +49,8 @@ type SelfOptions = {
   minimumWidthProperty?: IProperty<number | null>;
   minimumHeightProperty?: IProperty<number | null>;
 };
-
-export type FlowConstraintOptions = SelfOptions & ExternalFlowConfigurableOptions & NodeLayoutAvailableConstraintOptions;
+type ParentOptions = ExternalFlowConfigurableOptions & NodeLayoutAvailableConstraintOptions;
+export type FlowConstraintOptions = SelfOptions & ParentOptions;
 
 export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstraint ) {
 

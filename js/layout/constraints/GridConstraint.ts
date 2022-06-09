@@ -44,8 +44,8 @@ type SelfOptions = {
   minimumWidthProperty?: IProperty<number | null>;
   minimumHeightProperty?: IProperty<number | null>;
 };
-
-export type GridConstraintOptions = SelfOptions & ExternalGridConfigurableOptions & NodeLayoutAvailableConstraintOptions;
+type ParentOptions = ExternalGridConfigurableOptions & NodeLayoutAvailableConstraintOptions;
+export type GridConstraintOptions = SelfOptions & ParentOptions;
 
 export default class GridConstraint extends GridConfigurable( NodeLayoutConstraint ) {
 
