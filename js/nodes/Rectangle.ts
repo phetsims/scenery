@@ -38,8 +38,8 @@ type SelfOptions = {
   cornerXRadius?: number;
   cornerYRadius?: number;
 };
-
-export type RectangleOptions = SelfOptions & StrictOmit<PathOptions, 'shape'> & SizableOptions;
+type ParentOptions = SizableOptions & PathOptions;
+export type RectangleOptions = SelfOptions & StrictOmit<ParentOptions, 'shape'>;
 
 const SuperType = Sizable( Path );
 

@@ -32,7 +32,8 @@ export const SIZABLE_OPTION_KEYS = [
   ...HEIGHT_SIZABLE_OPTION_KEYS
 ];
 
-export type SizableOptions = {
+type SelfOptions = {
+
   // Sets the preferred size of the Node in the parent coordinate frame. Nodes that implement this will attempt to keep
   // their `node.size` at this value. If null, the node will likely set its configuration to the minimum size.
   // NOTE: changing this or localPreferredHeight will adjust the other.
@@ -59,7 +60,9 @@ export type SizableOptions = {
   // Whether this component will have its preferred size set by things like layout containers. If this is set to false,
   // it's recommended to set some sort of preferred size (so that it won't go to 0)
   sizable?: boolean;
-} & WidthSizableOptions & HeightSizableOptions;
+};
+type ParentOptions = WidthSizableOptions & HeightSizableOptions;
+export type SizableOptions = SelfOptions & ParentOptions;
 
 const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );

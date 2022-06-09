@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Divider, HeightSizable, DividerOptions } from '../../imports.js';
+import { scenery, Divider, HeightSizable, DividerOptions, HeightSizableOptions } from '../../imports.js';
 
-export type HDividerOptions = DividerOptions;
+type SelfOptions = {};
+type ParentOptions = HeightSizableOptions & DividerOptions;
+export type HDividerOptions = SelfOptions & ParentOptions;
 
 export default class HDivider extends HeightSizable( Divider ) {
   constructor( options?: HDividerOptions ) {

@@ -66,9 +66,9 @@ type SelfOptions = {
   group?: AlignGroup | null;
 };
 
-type SuperOptions = NodeOptions & SizableOptions;
+type ParentOptions = NodeOptions & SizableOptions;
 
-export type AlignBoxOptions = SelfOptions & StrictOmit<SuperOptions, 'children'>;
+export type AlignBoxOptions = SelfOptions & StrictOmit<ParentOptions, 'children'>;
 
 const SuperType = Sizable( Node );
 
@@ -112,7 +112,7 @@ export default class AlignBox extends SuperType {
    */
   constructor( content: Node, providedOptions?: AlignBoxOptions ) {
 
-    const options = optionize<AlignBoxOptions, {}, SuperOptions>()( {
+    const options = optionize<AlignBoxOptions, {}, ParentOptions>()( {
       children: [ content ]
     }, providedOptions );
 

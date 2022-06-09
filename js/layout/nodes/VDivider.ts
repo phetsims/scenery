@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Divider, WidthSizable, DividerOptions } from '../../imports.js';
+import { scenery, Divider, WidthSizable, DividerOptions, WidthSizableOptions } from '../../imports.js';
 
-export type VDividerOptions = DividerOptions;
+type SelfOptions = {};
+type ParentOptions = WidthSizableOptions & DividerOptions;
+export type VDividerOptions = SelfOptions & ParentOptions;
 
 export default class VDivider extends WidthSizable( Divider ) {
   constructor( options?: VDividerOptions ) {

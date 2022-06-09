@@ -26,9 +26,9 @@ type SelfOptions = {
 
 export const LAYOUT_NODE_OPTION_KEYS = [ 'resize', 'layoutOrigin' ] as const;
 
-type SuperOptions = NodeOptions & SizableOptions;
+type ParentOptions = NodeOptions & SizableOptions;
 
-export type LayoutNodeOptions = SelfOptions & SuperOptions;
+export type LayoutNodeOptions = SelfOptions & ParentOptions;
 
 export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint> extends Sizable( Node ) {
 
