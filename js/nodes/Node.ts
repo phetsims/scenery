@@ -153,7 +153,7 @@
 
 import BooleanProperty, { BooleanPropertyOptions } from '../../../axon/js/BooleanProperty.js';
 import EnabledProperty, { EnabledPropertyOptions } from '../../../axon/js/EnabledProperty.js';
-import Property, { PropertyOptions } from '../../../axon/js/Property.js';
+import Property, { PropertyOptions, ReadOnlyProperty } from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -4171,10 +4171,10 @@ class Node extends ParallelDOM {
     // Only update linked elements if this Node is instrumented for PhET-iO
     if ( this.isPhetioInstrumented() ) {
 
-      oldProperty && oldProperty.isPhetioInstrumented() && oldProperty instanceof PhetioObject && this.removeLinkedElements( oldProperty );
+      oldProperty && oldProperty instanceof ReadOnlyProperty && oldProperty.isPhetioInstrumented() && oldProperty instanceof PhetioObject && this.removeLinkedElements( oldProperty );
 
       const tandem = this.tandem.createTandem( tandemName );
-      if ( newProperty && newProperty.isPhetioInstrumented() && newProperty instanceof PhetioObject && tandem !== newProperty.tandem ) {
+      if ( newProperty && newProperty instanceof ReadOnlyProperty && newProperty.isPhetioInstrumented() && newProperty instanceof PhetioObject && tandem !== newProperty.tandem ) {
         this.addLinkedElement( newProperty, { tandem: tandem } );
       }
     }
