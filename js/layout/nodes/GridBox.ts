@@ -195,8 +195,8 @@ export default class GridBox extends LayoutNode<GridConstraint> {
         if ( item !== null ) {
           children.push( item );
           item.mutateLayoutOptions( {
-            [ orientation.coordinate ]: i,
-            [ orientation.opposite.coordinate ]: j
+            [ orientation.line ]: i,
+            [ orientation.opposite.line ]: j
           } );
         }
       }
@@ -406,8 +406,8 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
       this.children.forEach( ( child, index ) => {
         child.mutateLayoutOptions( {
-          [ orientation.coordinate ]: index % value,
-          [ orientation.opposite.coordinate ]: Math.floor( index / value ),
+          [ orientation.line ]: index % value,
+          [ orientation.opposite.line ]: Math.floor( index / value ),
           width: 1,
           height: 1
         } );

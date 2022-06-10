@@ -13,11 +13,12 @@ import { ExternalGridConfigurableOptions, GridConfigurable, GridConstraint, Layo
 import optionize from '../../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
-  // Defines the column (or if width>1, the left-most column) index of the cell. x:0 is the left-most column.
-  x?: number;
 
-  // Defines the row (or if height>1, the top-most row) index of the cell. y:0 is the top-most row
-  y?: number;
+  // Defines the row (or if height>1, the top-most row) index of the cell. row:0 is the top-most row
+  row?: number;
+
+  // Defines the column (or if width>1, the left-most column) index of the cell. column:0 is the left-most column.
+  column?: number;
 
   // How many columns this one cell spans.
   width?: number;
@@ -134,20 +135,20 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
     // We'll have defaults for cells (the width/height are especially relevant)
     const options = optionize<GridCellOptions, SelfOptions, ExternalGridConfigurableOptions>()( {
-      x: 0,
-      y: 0,
+      column: 0,
+      row: 0,
       width: 1,
       height: 1
     }, providedOptions );
 
-    assert && assert( typeof options.x === 'number' && Number.isInteger( options.x ) && isFinite( options.x ) && options.x >= 0 );
-    assert && assert( typeof options.y === 'number' && Number.isInteger( options.y ) && isFinite( options.y ) && options.y >= 0 );
+    assert && assert( typeof options.column === 'number' && Number.isInteger( options.column ) && isFinite( options.column ) && options.column >= 0 );
+    assert && assert( typeof options.row === 'number' && Number.isInteger( options.row ) && isFinite( options.row ) && options.row >= 0 );
     assert && assert( typeof options.width === 'number' && Number.isInteger( options.width ) && isFinite( options.width ) && options.width >= 1 );
     assert && assert( typeof options.height === 'number' && Number.isInteger( options.height ) && isFinite( options.height ) && options.height >= 1 );
 
     this.setConfigToInherit();
 
-    this.position = new OrientationPair( options.x, options.y );
+    this.position = new OrientationPair( options.column, options.row );
     this.size = new OrientationPair( options.width, options.height );
 
     this.mutateConfigurable( options );
