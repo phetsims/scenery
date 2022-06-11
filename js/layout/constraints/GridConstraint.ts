@@ -54,8 +54,8 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
   // (scenery-internal)
   public displayedCells: GridCell[] = [];
 
-  // Looked up by index
-  private displayedLines: OrientationPair<Map<number, GridLine>> = new OrientationPair( new Map(), new Map() );
+  // (scenery-internal) Looked up by index
+  public displayedLines: OrientationPair<Map<number, GridLine>> = new OrientationPair( new Map(), new Map() );
 
   private _spacing: OrientationPair<number | number[]> = new OrientationPair<number | number[]>( 0, 0 );
 
@@ -229,7 +229,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
         const cellPosition = firstLine.position;
 
         // Adjust preferred size and move the cell
-        cell.reposition(
+        const cellBounds = cell.reposition(
           orientation,
           cellAvailableSize,
           cellPosition,
@@ -237,12 +237,6 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
           -firstLine.minOrigin,
           cell.getEffectiveAlign( orientation )
         );
-
-        const cellBounds = cell.getCellBounds();
-
-        cell.lastAvailableBounds[ orientation.minCoordinate ] = cellPosition;
-        cell.lastAvailableBounds[ orientation.maxCoordinate ] = cellPosition + cellAvailableSize;
-        cell.lastUsedBounds.set( cellBounds );
 
         layoutBounds[ orientation.minCoordinate ] = Math.min( layoutBounds[ orientation.minCoordinate ], cellBounds[ orientation.minCoordinate ] );
         layoutBounds[ orientation.maxCoordinate ] = Math.max( layoutBounds[ orientation.maxCoordinate ], cellBounds[ orientation.maxCoordinate ] );
@@ -336,6 +330,9 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
     this.lock();
 
     [ ...this.cells ].forEach( cell => this.removeCell( cell ) );
+
+    this.displayedLines.forEach( map => map.clear() );
+    this.displayedCells = [];
 
     super.dispose();
 

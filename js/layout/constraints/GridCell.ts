@@ -6,7 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
 import { ExternalGridConfigurableOptions, GridConfigurable, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
@@ -34,12 +33,6 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
   // (scenery-internal) These are only set initially, and ignored for the future
   public position!: OrientationPair<number>;
   public size!: OrientationPair<number>;
-
-  // (scenery-internal) Set to be the bounds available for the cell
-  public lastAvailableBounds: Bounds2 = Bounds2.NOTHING.copy();
-
-  // (scenery-internal) Set to be the bounds used by the cell
-  public lastUsedBounds: Bounds2 = Bounds2.NOTHING.copy();
 
   private readonly gridConstraint: GridConstraint;
 

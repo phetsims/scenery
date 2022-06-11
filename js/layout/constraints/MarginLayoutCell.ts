@@ -7,10 +7,12 @@
  */
 
 import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Utils from '../../../../dot/js/Utils.js';
+import { Shape } from '../../../../kite/js/imports.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
-import { LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, scenery } from '../../imports.js';
+import { Font, IColor, Text, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, Rectangle, scenery } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export interface MarginLayout {
@@ -45,6 +47,12 @@ export default class MarginLayoutCell extends LayoutCell {
   public _maxContentWidth!: number | null;
   public _maxContentHeight!: number | null;
 
+  // (scenery-internal) Set to be the bounds available for the cell
+  public lastAvailableBounds: Bounds2 = Bounds2.NOTHING.copy();
+
+  // (scenery-internal) Set to be the bounds used by the cell
+  public lastUsedBounds: Bounds2 = Bounds2.NOTHING.copy();
+
   /**
    * NOTE: Consider this scenery-internal AND protected. It's effectively a protected constructor for an abstract type,
    * but cannot be due to how mixins constrain things (TypeScript doesn't work with private/protected things like this)
@@ -60,8 +68,10 @@ export default class MarginLayoutCell extends LayoutCell {
   /**
    * Positions and sizes the cell (used for grid and flow layouts)
    * (scenery-internal)
+   *
+   * Returns the cell's bounds
    */
-  public reposition( orientation: Orientation, lineSize: number, linePosition: number, stretch: boolean, originOffset: number, align: LayoutAlign ): void {
+  public reposition( orientation: Orientation, lineSize: number, linePosition: number, stretch: boolean, originOffset: number, align: LayoutAlign ): Bounds2 {
     // Mimicking https://www.w3.org/TR/css-flexbox-1/#align-items-property for baseline (for our origin)
     // Origin will sync all origin-based items (so their origin matches), and then position ALL of that as if it was
     // align:left or align:top (depending on the orientation).
@@ -77,7 +87,15 @@ export default class MarginLayoutCell extends LayoutCell {
       this.positionStart( orientation, linePosition + ( lineSize - this.getCellBounds()[ orientation.size ] ) * align.padRatio );
     }
 
-    assert && assert( this.getCellBounds().isFinite() );
+    const cellBounds = this.getCellBounds();
+
+    assert && assert( cellBounds.isFinite() );
+
+    this.lastAvailableBounds[ orientation.minCoordinate ] = linePosition;
+    this.lastAvailableBounds[ orientation.maxCoordinate ] = linePosition + lineSize;
+    this.lastUsedBounds.set( cellBounds );
+
+    return cellBounds;
   }
 
   /**
@@ -272,6 +290,79 @@ export default class MarginLayoutCell extends LayoutCell {
     } );
 
     super.dispose();
+  }
+
+  public static createHelperNode( cells: MarginLayoutCell[], layoutBounds: Bounds2 ): Node {
+    const container = new Node();
+    const lineWidth = 0.4;
+
+    const availableCellsShape = Shape.union( cells.map( cell => Shape.bounds( cell.lastAvailableBounds ) ) );
+    const usedCellsShape = Shape.union( cells.map( cell => Shape.bounds( cell.lastUsedBounds ) ) );
+    const usedContentShape = Shape.union( cells.map( cell => Shape.bounds( cell.proxy.bounds ) ) );
+    const spacingShape = Shape.bounds( layoutBounds ).shapeDifference( availableCellsShape );
+    const emptyShape = availableCellsShape.shapeDifference( usedCellsShape );
+    const marginShape = usedCellsShape.shapeDifference( usedContentShape );
+
+    const createLabeledTexture = ( label: string, foreground: IColor, background: IColor ) => {
+      const text = new Text( label, {
+        font: new Font( { size: 6, family: 'monospace' } ),
+        fill: foreground
+      } );
+      const rectangle = Rectangle.bounds( text.bounds, {
+        fill: background,
+        children: [ text ]
+      } );
+      return new NodePattern(
+        rectangle,
+        4,
+        Math.floor( rectangle.left ),
+        Math.ceil( rectangle.top + 1 ),
+        Math.floor( rectangle.width ),
+        Math.floor( rectangle.height - 2 ),
+        Matrix3.rotation2( -Math.PI / 4 )
+      );
+    };
+
+    container.addChild( new Path( spacingShape, {
+      fill: createLabeledTexture( 'spacing', '#000', '#fff' ),
+      opacity: 0.6
+    } ) );
+    container.addChild( new Path( emptyShape, {
+      fill: createLabeledTexture( 'empty', '#aaa', '#000' ),
+      opacity: 0.6
+    } ) );
+    container.addChild( new Path( marginShape, {
+      fill: createLabeledTexture( 'margin', '#600', '#f00' ),
+      opacity: 0.6
+    } ) );
+
+    container.addChild( Rectangle.bounds( layoutBounds, {
+      stroke: 'white',
+      lineDash: [ 2, 2 ],
+      lineDashOffset: 2,
+      lineWidth: lineWidth
+    } ) );
+    container.addChild( Rectangle.bounds( layoutBounds, {
+      stroke: 'black',
+      lineDash: [ 2, 2 ],
+      lineWidth: lineWidth
+    } ) );
+
+    cells.forEach( cell => {
+      container.addChild( Rectangle.bounds( cell.getCellBounds(), {
+        stroke: 'rgba(0,255,0,1)',
+        lineWidth: lineWidth
+      } ) );
+    } );
+
+    cells.forEach( cell => {
+      container.addChild( Rectangle.bounds( cell.proxy.bounds, {
+        stroke: 'rgba(255,0,0,1)',
+        lineWidth: lineWidth
+      } ) );
+    } );
+
+    return container;
   }
 }
 

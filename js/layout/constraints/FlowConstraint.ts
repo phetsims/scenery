@@ -61,6 +61,9 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   private _spacing = 0;
   private _lineSpacing = 0;
 
+  // (scenery-internal)
+  public displayedCells: FlowCell[] = [];
+
   public constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
@@ -122,6 +125,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     const cells: FlowCell[] = this.cells.filter( cell => {
       return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
     } );
+
+    this.displayedCells = cells;
 
     if ( !cells.length ) {
       this.layoutBoundsProperty.value = Bounds2.NOTHING;
@@ -276,6 +281,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
 
         // ACTUALLY position it!
         cell.positionStart( orientation, position );
+        cell.lastAvailableBounds[ orientation.minCoordinate ] = position;
+        cell.lastAvailableBounds[ orientation.maxCoordinate ] = position + cell.size;
 
         position += cell.size;
         assert && assert( this.spacing >= 0 || cell.size >= -this.spacing - 1e-7,
@@ -479,6 +486,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     this.lock();
 
     this.cells.forEach( cell => this.removeCell( cell ) );
+    this.displayedCells = [];
 
     super.dispose();
 
