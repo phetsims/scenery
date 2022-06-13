@@ -422,17 +422,16 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       super.dispose();
     }
-
-
-    /**
-     * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
-     * the order they will be evaluated.
-     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-     *       cases that may apply.
-     */
-    protected override _mutatorKeys = READING_BLOCK_OPTION_KEYS.concat( ReadingBlockClass.prototype._mutatorKeys );
   }
 
+  /**
+   * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
+   * the order they will be evaluated.
+   *
+   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+   *       cases that may apply.
+   */
+  ReadingBlockClass.prototype._mutatorKeys = READING_BLOCK_OPTION_KEYS.concat( ReadingBlockClass.prototype._mutatorKeys );
   assert && assert( ReadingBlockClass.prototype._mutatorKeys.length === _.uniq( ReadingBlockClass.prototype._mutatorKeys ).length,
     'x mutator keys in ReadingBlock' );
 

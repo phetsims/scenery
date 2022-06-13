@@ -416,17 +416,16 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
       return descendantsUseVoicing;
     }
-
-    /**
-     * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
-     * the order they will be evaluated.
-     *
-     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-     *       cases that may apply.
-     */
-    protected _mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( InteractiveHighlightingClass.prototype._mutatorKeys );
   }
 
+  /**
+   * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
+   * the order they will be evaluated.
+   *
+   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+   *       cases that may apply.
+   */
+  InteractiveHighlightingClass.prototype._mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( InteractiveHighlightingClass.prototype._mutatorKeys );
   assert && assert( InteractiveHighlightingClass.prototype._mutatorKeys.length ===
                     _.uniq( InteractiveHighlightingClass.prototype._mutatorKeys ).length,
     'duplicate mutator keys in InteractiveHighlighting' );

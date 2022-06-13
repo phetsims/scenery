@@ -667,17 +667,16 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance!, this as unknown as VoicingNode );
       }
     }
-
-    /**
-     * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
-     * the order they will be evaluated.
-     *
-     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-     *       cases that may apply.
-     */
-    protected override _mutatorKeys = VOICING_OPTION_KEYS.concat( VoicingClass.prototype._mutatorKeys );
   }
 
+  /**
+   * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
+   * the order they will be evaluated.
+   *
+   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+   *       cases that may apply.
+   */
+  VoicingClass.prototype._mutatorKeys = VOICING_OPTION_KEYS.concat( VoicingClass.prototype._mutatorKeys );
   assert && assert( VoicingClass.prototype._mutatorKeys.length === _.uniq( VoicingClass.prototype._mutatorKeys ).length, 'duplicate mutator keys in Voicing' );
 
   return VoicingClass;
