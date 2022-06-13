@@ -9,9 +9,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// Disable for the whole file
-/* eslint-disable no-protected-jsdoc */
-
 import Orientation from '../../../phet-core/js/Orientation.js';
 import { scenery } from '../imports.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';

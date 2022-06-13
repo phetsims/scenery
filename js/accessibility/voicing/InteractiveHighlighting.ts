@@ -6,9 +6,6 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-// Disable for the whole file
-/* eslint-disable no-protected-jsdoc */
-
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -41,53 +38,51 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
   // @ts-ignore
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
 
-  const InteractiveHighlightingClass = class extends Type {
+  class InteractiveHighlightingClass extends Type {
 
     // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
     // because we do not want this to fire from bubbling. The highlight should be around this Node when it receives
     // input.
-    _activationListener: IInputListener;
+    private readonly _activationListener: IInputListener;
 
     // A reference to the Pointer so that we can add and remove listeners from it when necessary.
     // Since this is on the trait, only one pointer can have a listener for this Node that uses InteractiveHighlighting
     // at one time.
-    _pointer: null | Pointer;
+    private _pointer: null | Pointer;
 
-    // @protected
     // A map that collects all of the Displays that this InteractiveHighlighting Node is
     // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
     // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
     // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
     // (with updateDisplay) since Instances are added asynchronously.
-    displays: { [ key: string ]: Display };
+    protected displays: { [ key: string ]: Display };
 
     // The highlight that will surround this Node when it is activated and a Pointer is currently over it. When
     // null, the focus highlight will be used (as defined in ParallelDOM.js).
-    _interactiveHighlight: Highlight;
+    private _interactiveHighlight: Highlight;
 
     // If true, the highlight will be layerable in the scene graph instead of drawn
     // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
     // in the location you want in the scene graph. The interactiveHighlight will become visible when
     // this.interactiveHighlightActivated is true.
-    _interactiveHighlightLayerable: boolean;
+    private _interactiveHighlightLayerable: boolean;
 
-    // @protected
     // Emits an event when the interactive highlight changes for this Node
-    interactiveHighlightChangedEmitter: TinyEmitter;
+    public interactiveHighlightChangedEmitter: TinyEmitter;
 
     // When new instances of this Node are created, adds an entry to the map of Displays.
-    _changedInstanceListener: ( instance: Instance, added: boolean ) => void;
+    private readonly _changedInstanceListener: ( instance: Instance, added: boolean ) => void;
 
     // Listener that adds/removes other listeners that activate highlights when
     // the feature becomes enabled/disabled so that we don't do extra work related to highlighting unless
     // it is necessary.
-    _interactiveHighlightingEnabledListener: ( enabled: boolean ) => void;
+    private readonly _interactiveHighlightingEnabledListener: ( enabled: boolean ) => void;
 
     // Input listener that locks the HighlightOverlay so that there are no updates to the highlight
     // while the pointer is down over something that uses InteractiveHighlighting.
-    _pointerListener: IInputListener;
+    private readonly _pointerListener: IInputListener;
 
-    constructor( ...args: IntentionalAny[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
 
       const providedOptions = ( args[ optionsArgPosition ] || {} ) as InteractiveHighlightingOptions;
 
@@ -129,17 +124,17 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * Whether a Node composes InteractiveHighlighting.
      */
-    get isInteractiveHighlighting(): boolean {
+    public get isInteractiveHighlighting(): boolean {
       return true;
     }
 
-    static get _mixesInteractiveHighlighting(): boolean { return true;}
+    public static get _mixesInteractiveHighlighting(): boolean { return true;}
 
     /**
      * Set the interactive highlight for this node. By default, the highlight will be a pink rectangle that surrounds
      * the node's local bounds.
      */
-    setInteractiveHighlight( interactiveHighlight: Highlight ): void {
+    public setInteractiveHighlight( interactiveHighlight: Highlight ): void {
 
       if ( this._interactiveHighlight !== interactiveHighlight ) {
         this._interactiveHighlight = interactiveHighlight;
@@ -157,14 +152,14 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    set interactiveHighlight( interactiveHighlight: Highlight ) { this.setInteractiveHighlight( interactiveHighlight ); }
+    public set interactiveHighlight( interactiveHighlight: Highlight ) { this.setInteractiveHighlight( interactiveHighlight ); }
 
-    get interactiveHighlight(): Highlight { return this.getInteractiveHighlight(); }
+    public get interactiveHighlight(): Highlight { return this.getInteractiveHighlight(); }
 
     /**
      * Returns the interactive highlight for this Node.
      */
-    getInteractiveHighlight(): Highlight {
+    public getInteractiveHighlight(): Highlight {
       return this._interactiveHighlight;
     }
 
@@ -173,7 +168,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * highlight overlay. If layerable, you must provide a custom highlight and it must be a Node. The highlight
      * Node will always be invisible unless this Node is activated with a pointer.
      */
-    setInteractiveHighlightLayerable( interactiveHighlightLayerable: boolean ): void {
+    public setInteractiveHighlightLayerable( interactiveHighlightLayerable: boolean ): void {
       if ( this._interactiveHighlightLayerable !== interactiveHighlightLayerable ) {
         this._interactiveHighlightLayerable = interactiveHighlightLayerable;
 
@@ -186,14 +181,14 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    set interactiveHighlightLayerable( interactiveHighlightLayerable: boolean ) { this.setInteractiveHighlightLayerable( interactiveHighlightLayerable ); }
+    public set interactiveHighlightLayerable( interactiveHighlightLayerable: boolean ) { this.setInteractiveHighlightLayerable( interactiveHighlightLayerable ); }
 
-    get interactiveHighlightLayerable() { return this.getInteractiveHighlightLayerable(); }
+    public get interactiveHighlightLayerable() { return this.getInteractiveHighlightLayerable(); }
 
     /**
      * Get whether the interactive highlight is layerable in the scene graph.
      */
-    getInteractiveHighlightLayerable(): boolean {
+    public getInteractiveHighlightLayerable(): boolean {
       return this._interactiveHighlightLayerable;
     }
 
@@ -201,7 +196,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Returns true if this Node is "activated" by a pointer, indicating that a Pointer is over it
      * and this Node mixes InteractiveHighlighting so an interactive highlight should surround it.
      */
-    isInteractiveHighlightActivated(): boolean {
+    public isInteractiveHighlightActivated(): boolean {
       let activated = false;
 
       const trailIds = Object.keys( this.displays );
@@ -215,9 +210,9 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       return activated;
     }
 
-    get interactiveHighlightActivated(): boolean { return this.isInteractiveHighlightActivated(); }
+    public get interactiveHighlightActivated(): boolean { return this.isInteractiveHighlightActivated(); }
 
-    dispose(): void {
+    public dispose(): void {
       const thisNode = this as unknown as Node;
       thisNode.changedInstanceEmitter.removeListener( this._changedInstanceListener );
 
@@ -243,7 +238,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * When a Pointer enters this Node, signal to the Displays that the pointer is over this Node so that the
      * HighlightOverlay can be activated.
      */
-    _onPointerEntered( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+    private _onPointerEntered( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -256,7 +251,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    _onPointerMove( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+    private _onPointerMove( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -280,7 +275,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * When a pointer exits this Node, signal to the Displays that pointer focus has changed to deactivate
      * the HighlightOverlay.
      */
-    _onPointerExited( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+    private _onPointerExited( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -292,7 +287,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked
      */
-    _onPointerDown( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+    private _onPointerDown( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       if ( this._pointer === null ) {
         const displays = Object.values( this.displays );
@@ -321,7 +316,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      *
      * @param [event] - may be called during interrupt or cancel, in which case there is no event
      */
-    _onPointerRelease( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+    private _onPointerRelease( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -338,7 +333,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * If the pointer listener is cancelled or interrupted, clear focus and remove input listeners.
      */
-    _onPointerCancel( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+    private _onPointerCancel( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -354,7 +349,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Add or remove listeners related to activating interactive highlighting when the feature becomes enabled.
      * This way we prevent doing work related to interactive highlighting unless the feature is enabled.
      */
-    _onInteractiveHighlightingEnabledChange( enabled: boolean ): void {
+    private _onInteractiveHighlightingEnabledChange( enabled: boolean ): void {
       const thisNode = this as unknown as Node;
 
       const hasActivationListener = thisNode.hasInputListener( this._activationListener );
@@ -370,7 +365,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Add the Display to the collection when this Node is added to a scene graph. Also adds listeners to the
      * Display that turns on highlighting when the feature is enabled.
      */
-    onChangedInstance( instance: Instance, added: boolean ): void {
+    public onChangedInstance( instance: Instance, added: boolean ): void {
       assert && assert( instance.trail, 'should have a trail' );
 
       if ( added ) {
@@ -401,9 +396,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Returns true if any nodes from this Node to the leaf of the Trail use Voicing features in some way. In
      * general, we do not want to activate voicing features in this case because the leaf-most Nodes in the Trail
      * should be activated instead.
-     * @protected
      */
-    getDescendantsUseHighlighting( trail: Trail ): boolean {
+    protected getDescendantsUseHighlighting( trail: Trail ): boolean {
       const indexOfSelf = trail.nodes.indexOf( this as unknown as Node );
 
       // all the way to length, end not included in slice - and if start value is greater than index range
@@ -422,17 +416,17 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
       return descendantsUseVoicing;
     }
-  };
 
-  /**
-   * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
-   * the order they will be evaluated.
-   * @protected
-   *
-   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-   *       cases that may apply.
-   */
-  InteractiveHighlightingClass.prototype._mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( InteractiveHighlightingClass.prototype._mutatorKeys );
+    /**
+     * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
+     * the order they will be evaluated.
+     *
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    protected _mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( InteractiveHighlightingClass.prototype._mutatorKeys );
+  }
+
   assert && assert( InteractiveHighlightingClass.prototype._mutatorKeys.length ===
                     _.uniq( InteractiveHighlightingClass.prototype._mutatorKeys ).length,
     'duplicate mutator keys in InteractiveHighlighting' );

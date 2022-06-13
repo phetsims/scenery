@@ -17,9 +17,6 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-// Disable for the whole file
-/* eslint-disable no-protected-jsdoc */
-
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
@@ -88,35 +85,35 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  const ReadingBlockClass = class extends Voicing( Type, optionsArgPosition ) {
+  class ReadingBlockClass extends Voicing( Type, optionsArgPosition ) {
 
     // The tagName used for the ReadingBlock when "Voicing" is enabled, default
     // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
     // to some other tagName or set to null to remove the ReadingBlock from the focus order. If this is changed,
     // be sure that the ReadingBlock will still respond to `click` events when enabled.
-    _readingBlockTagName: string | null;
+    private _readingBlockTagName: string | null;
 
     // The tagName to apply to the Node when voicing is disabled.
-    _readingBlockDisabledTagName: string;
+    private readonly _readingBlockDisabledTagName: string;
 
     // The highlight that surrounds this ReadingBlock when it is "active" and
     // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
     // yellow highlight surrounds this Node's bounds.
-    _readingBlockActiveHighlight: Highlight;
+    private _readingBlockActiveHighlight: Highlight;
 
     // (scenery-internal) - Sends a message when the highlight for the ReadingBlock changes. Used
     // by the HighlightOverlay to redraw it if it changes while the highlight is active.
     readingBlockActiveHighlightChangedEmitter: TinyEmitter;
 
     // Updates the hit bounds of this Node when the local bounds change.
-    _localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>;
+    private readonly _localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>;
 
     // Triggers activation of the ReadingBlock, requesting speech of its content.
-    _readingBlockInputListener: IInputListener;
+    private readonly _readingBlockInputListener: IInputListener;
 
     // Controls whether the ReadingBlock should be interactive and focusable. At the time of this writing, that is true
     // for all ReadingBlocks when the voicingManager is fully enabled and can speak.
-    _readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>;
+    private readonly _readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>;
 
     constructor( ...args: IntentionalAny[] ) {
 
@@ -403,12 +400,12 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * If we created and own the voicingUtterance we can fully dispose of it.
      */
-    override _cleanVoicingUtterance(): void {
+    override cleanVoicingUtterance(): void {
       if ( this._voicingUtterance instanceof ReadingBlockUtterance ) {
         this._voicingUtterance.dispose();
       }
       else {
-        super._cleanVoicingUtterance();
+        super.cleanVoicingUtterance();
       }
     }
 
@@ -425,20 +422,19 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       super.dispose();
     }
-  };
 
 
-  /**
-   * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
-   * the order they will be evaluated.
-   * @protected
-   *
-   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-   *       cases that may apply.
-   */
-  ReadingBlockClass.prototype._mutatorKeys = READING_BLOCK_OPTION_KEYS.concat( ReadingBlockClass.prototype._mutatorKeys );
+    /**
+     * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
+     * the order they will be evaluated.
+     * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+     *       cases that may apply.
+     */
+    protected override _mutatorKeys = READING_BLOCK_OPTION_KEYS.concat( ReadingBlockClass.prototype._mutatorKeys );
+  }
+
   assert && assert( ReadingBlockClass.prototype._mutatorKeys.length === _.uniq( ReadingBlockClass.prototype._mutatorKeys ).length,
-    'duplicate mutator keys in ReadingBlock' );
+    'x mutator keys in ReadingBlock' );
 
   return ReadingBlockClass;
 };

@@ -12,9 +12,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// Disable for the whole file
-/* eslint-disable no-protected-jsdoc */
-
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import memoize from '../../../../phet-core/js/memoize.js';
