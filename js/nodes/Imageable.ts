@@ -13,6 +13,7 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, svgns, xlinkns } from '../imports.js';
+import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
@@ -44,7 +45,7 @@ const getScratchContext = () => {
   return scratchContext;
 };
 
-type Constructor<T = {}> = new ( ...args: any[] ) => T;
+type Constructor<T = EmptyObjectType> = new ( ...args: any[] ) => T;
 
 export type Mipmap = {
   width: number;
@@ -275,7 +276,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     /**
      * Returns the current image's representation as either a Canvas or img element.
-       *
+     *
      * NOTE: If a URL or mipmap data was provided, this currently doesn't return the original input to setImage(), but
      *       instead provides the mapped result (or first mipmap level's image).
      *       TODO: return the original result instead.
