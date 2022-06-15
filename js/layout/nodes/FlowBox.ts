@@ -35,8 +35,9 @@
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, LayoutOrientation, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SceneryConstants, SIZABLE_OPTION_KEYS, VerticalLayoutAlign, VerticalLayoutJustification, MarginLayoutCell } from '../../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutAlign, LayoutNode, LayoutNodeOptions, LayoutOrientation, MarginLayoutCell, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SceneryConstants, SIZABLE_OPTION_KEYS, VerticalLayoutAlign, VerticalLayoutJustification } from '../../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -389,7 +390,17 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   isResize(): boolean { return this.resize; }
 
   public getHelperNode(): Node {
-    const marginsNode = MarginLayoutCell.createHelperNode( this.constraint.displayedCells, this.constraint.layoutBoundsProperty.value );
+    const marginsNode = MarginLayoutCell.createHelperNode( this.constraint.displayedCells, this.constraint.layoutBoundsProperty.value, cell => {
+      let str = '';
+
+      const internalOrientation = cell.orientation === 'horizontal' ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+
+      str += `align: ${LayoutAlign.internalToAlign( internalOrientation, cell.effectiveAlign )}\n`;
+      str += `stretch: ${cell.effectiveStretch}\n`;
+      str += `grow: ${cell.effectiveGrow}\n`;
+
+      return str;
+    } );
 
     return marginsNode;
   }

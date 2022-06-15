@@ -50,7 +50,7 @@ import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutua
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, MarginLayoutCell, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SIZABLE_OPTION_KEYS, VerticalLayoutAlign } from '../../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, MarginLayoutCell, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SIZABLE_OPTION_KEYS, VerticalLayoutAlign, LayoutAlign } from '../../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -678,7 +678,26 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   }
 
   public getHelperNode(): Node {
-    const marginsNode = MarginLayoutCell.createHelperNode( this.constraint.displayedCells, this.constraint.layoutBoundsProperty.value );
+    const marginsNode = MarginLayoutCell.createHelperNode( this.constraint.displayedCells, this.constraint.layoutBoundsProperty.value, cell => {
+      let str = '';
+
+      str += `row: ${cell.position.vertical}\n`;
+      str += `column: ${cell.position.horizontal}\n`;
+      if ( cell.size.horizontal > 1 ) {
+        str += `width: ${cell.size.horizontal}\n`;
+      }
+      if ( cell.size.vertical > 1 ) {
+        str += `height: ${cell.size.vertical}\n`;
+      }
+      str += `xAlign: ${LayoutAlign.internalToAlign( Orientation.HORIZONTAL, cell.effectiveXAlign )}\n`;
+      str += `yAlign: ${LayoutAlign.internalToAlign( Orientation.VERTICAL, cell.effectiveYAlign )}\n`;
+      str += `xStretch: ${cell.effectiveXStretch}\n`;
+      str += `yStretch: ${cell.effectiveYStretch}\n`;
+      str += `xGrow: ${cell.effectiveXGrow}\n`;
+      str += `yGrow: ${cell.effectiveYGrow}\n`;
+
+      return str;
+    } );
 
     return marginsNode;
   }

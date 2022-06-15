@@ -12,7 +12,7 @@ import Utils from '../../../../dot/js/Utils.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
-import { Font, IColor, Text, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, Rectangle, scenery } from '../../imports.js';
+import { Font, IColor, Text, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, Rectangle, scenery, PressListener, RichText } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export interface MarginLayout {
@@ -292,7 +292,7 @@ export default class MarginLayoutCell extends LayoutCell {
     super.dispose();
   }
 
-  public static createHelperNode( cells: MarginLayoutCell[], layoutBounds: Bounds2 ): Node {
+  public static createHelperNode<Cell extends MarginLayoutCell>( cells: Cell[], layoutBounds: Bounds2, cellToText: ( cell: Cell ) => string ): Node {
     const container = new Node();
     const lineWidth = 0.4;
 
@@ -360,6 +360,56 @@ export default class MarginLayoutCell extends LayoutCell {
         stroke: 'rgba(255,0,0,1)',
         lineWidth: lineWidth
       } ) );
+    } );
+
+    cells.forEach( cell => {
+      const bounds = cell.getCellBounds();
+
+      const hoverListener = new PressListener();
+      container.addChild( Rectangle.bounds( bounds, {
+        inputListeners: [ hoverListener ]
+      } ) );
+
+      let str = cellToText( cell );
+
+      if ( cell.effectiveLeftMargin ) {
+        str += `leftMargin: ${cell.effectiveLeftMargin}\n`;
+      }
+      if ( cell.effectiveRightMargin ) {
+        str += `rightMargin: ${cell.effectiveRightMargin}\n`;
+      }
+      if ( cell.effectiveTopMargin ) {
+        str += `topMargin: ${cell.effectiveTopMargin}\n`;
+      }
+      if ( cell.effectiveBottomMargin ) {
+        str += `bottomMargin: ${cell.effectiveBottomMargin}\n`;
+      }
+      if ( cell.effectiveMinContentWidth ) {
+        str += `minContentWidth: ${cell.effectiveMinContentWidth}\n`;
+      }
+      if ( cell.effectiveMinContentHeight ) {
+        str += `minContentHeight: ${cell.effectiveMinContentHeight}\n`;
+      }
+      if ( cell.effectiveMaxContentWidth ) {
+        str += `maxContentWidth: ${cell.effectiveMaxContentWidth}\n`;
+      }
+      if ( cell.effectiveMaxContentHeight ) {
+        str += `maxContentHeight: ${cell.effectiveMaxContentHeight}\n`;
+      }
+      str += `layoutOptions: ${JSON.stringify( cell.node.layoutOptions, null, 2 ).replace( / /g, '&nbsp;' )}\n`;
+
+      const hoverText = new RichText( str.trim().replace( /\n/g, '<br>' ), {
+        font: new Font( { size: 12 } )
+      } );
+      const hoverNode = Rectangle.bounds( hoverText.bounds.dilated( 3 ), {
+        fill: 'rgba(255,255,255,0.8)',
+        children: [ hoverText ],
+        leftTop: bounds.leftTop
+      } );
+      container.addChild( hoverNode );
+      hoverListener.isOverProperty.link( isOver => {
+        hoverNode.visible = isOver;
+      } );
     } );
 
     return container;

@@ -66,7 +66,7 @@ export type SizableOptions = SelfOptions & ParentOptions;
 
 const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );
-  const SizableMixin = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class extends SuperExtendedType {
+  const SizableMixin = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class SizableMixin extends SuperExtendedType {
 
     public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
