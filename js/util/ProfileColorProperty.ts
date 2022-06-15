@@ -11,6 +11,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { Color, colorProfileProperty, ColorProperty, scenery, SceneryConstants } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
 
 // constant
 const NAME_SEPARATOR = '.';
@@ -41,7 +42,7 @@ export default class ProfileColorProperty extends ColorProperty {
     assert && assert( namespace instanceof Namespace );
     assert && assert( typeof colorName === 'string' );
 
-    const options = optionize<PropertyOptions<Color>, {}, PropertyOptions<Color>>()( {
+    const options = optionize<PropertyOptions<Color>, EmptyObjectType, PropertyOptions<Color>>()( {
       tandem: Tandem.OPTIONAL,
 
       // So that notifications won't occur when we change from different objects representing the same color.

@@ -7,6 +7,7 @@
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { scenery, FlowBox, FlowBoxOptions } from '../../imports.js';
 
@@ -16,7 +17,7 @@ export default class VBox extends FlowBox {
   constructor( providedOptions?: VBoxOptions ) {
     assert && assert( !providedOptions || !( providedOptions as FlowBoxOptions ).orientation, 'VBox sets orientation' );
 
-    super( optionize<VBoxOptions, {}, FlowBoxOptions>()( {
+    super( optionize<VBoxOptions, EmptyObjectType, FlowBoxOptions>()( {
       orientation: 'vertical'
     }, providedOptions ) );
   }

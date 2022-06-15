@@ -71,6 +71,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import { Color, FireListener, Font, IInputListener, IPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -404,7 +405,7 @@ export default class RichText extends Node {
    */
   override initializePhetioObject( baseOptions: any, providedOptions: RichTextOptions ): void {
 
-    const options = optionize<RichTextOptions, {}, RichTextOptions>()( {}, providedOptions );
+    const options = optionize<RichTextOptions, EmptyObjectType, RichTextOptions>()( {}, providedOptions );
 
     // Track this, so we only override our textProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
