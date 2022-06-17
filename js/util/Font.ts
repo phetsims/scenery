@@ -408,9 +408,11 @@ export default class Font extends PhetioObject {
     return new Font( options );
   }
 
-  static FontIO: IOType;
+  static FontIO: IOType<Font, FontState>;
   static DEFAULT: Font;
 }
+
+type FontState = Required<SelfOptions>;
 
 scenery.register( 'Font', Font );
 
@@ -426,7 +428,7 @@ Font.FontIO = new IOType( 'FontIO', {
                  '<li><strong>lineHeight:</strong> normal &mdash; normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal </li>' +
                  '<li><strong>family:</strong> sans-serif &mdash; comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes</li>' +
                  '</ul>',
-  toStateObject: ( font: Font ): Required<SelfOptions> => ( {
+  toStateObject: ( font: Font ): FontState => ( {
     style: font.getStyle(),
     variant: font.getVariant(),
     weight: font.getWeight(),
@@ -436,7 +438,7 @@ Font.FontIO = new IOType( 'FontIO', {
     family: font.getFamily()
   } ),
 
-  fromStateObject( stateObject: Required<SelfOptions> ) {
+  fromStateObject( stateObject: FontState ) {
     return new Font( stateObject );
   }
 } );

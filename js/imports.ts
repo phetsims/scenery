@@ -14,6 +14,7 @@
 export { default as scenery } from './scenery.js';
 export { default as SceneryConstants } from './SceneryConstants.js';
 export { default as Color } from './util/Color.js';
+export type { ColorState } from './util/Color.js';
 export { default as Features } from './util/Features.js';
 export { default as Font } from './util/Font.js';
 export type { FontOptions, FontStyle, FontWeight, FontStretch } from './util/Font.js';

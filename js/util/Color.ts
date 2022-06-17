@@ -1050,6 +1050,13 @@ Color.TRANSPARENT = Color.transparent = new Color( 0, 0, 0, 0 ).setImmutable();
 
 const scratchColor = new Color( 'blue' );
 
+export type ColorState = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
 Color.ColorIO = new IOType( 'ColorIO', {
   valueType: Color,
   documentation: 'A color, with rgba',
