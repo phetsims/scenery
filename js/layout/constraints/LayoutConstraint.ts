@@ -102,7 +102,7 @@ export default class LayoutConstraint {
    * NOTE: Cannot be marked as abstract due to how mixins work
    */
   protected layout(): void {
-
+    // See subclass for implementation
   }
 
   /**

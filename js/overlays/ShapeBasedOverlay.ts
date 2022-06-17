@@ -77,7 +77,7 @@ export default abstract class ShapeBasedOverlay implements IOverlay {
    * Releases references
    */
   dispose(): void {
-
+  // Nothing to dispose
   }
 }
 

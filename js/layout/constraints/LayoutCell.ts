@@ -69,7 +69,7 @@ export default class LayoutCell {
 
   // Can't be abstract, we're using mixins :(
   protected onLayoutOptionsChange(): void {
-
+    // Lint rule not needed here
   }
 
   /**

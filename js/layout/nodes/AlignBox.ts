@@ -101,7 +101,7 @@ export default class AlignBox extends SuperType {
   private readonly constraint: AlignBoxConstraint;
 
   // Callback for when bounds change (takes no arguments)
-  _contentBoundsListener = () => {};
+  _contentBoundsListener = _.noop;
 
   /**
    * An individual container for an alignment group. Will maintain its size to match that of the group by overriding

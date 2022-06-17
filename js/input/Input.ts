@@ -2010,7 +2010,7 @@ const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 
 Input.InputIO = new IOType<Input>( 'InputIO', {
   valueType: Input,
-  applyState: () => {},
+  applyState: _.noop,
   toStateObject: ( input: Input ) => {
     return {
       pointers: ArrayIOPointerIO.toStateObject( input.pointers )

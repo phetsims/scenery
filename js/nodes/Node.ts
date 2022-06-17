@@ -4644,7 +4644,7 @@ class Node extends ParallelDOM {
    * Meant to be overridden, so that it can be called to ensure that the renderer bitmask will be up-to-date.
    */
   invalidateSupportedRenderers(): void {
-
+    // see docs
   }
 
   /*---------------------------------------------------------------------------*
@@ -5272,7 +5272,7 @@ class Node extends ParallelDOM {
    * @param matrix - The transformation matrix already applied to the context.
    */
   protected canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
-
+    // See subclass for implementation
   }
 
   /**

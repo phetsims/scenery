@@ -135,6 +135,7 @@ export default class PointerOverlay implements IOverlay {
   /**
    */
   update(): void {
+    // Required for type 'IOverlay'
   }
 }
 
