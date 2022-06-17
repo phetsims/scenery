@@ -2028,7 +2028,7 @@ export default class Display {
     let instance = this._rootPDOMInstance;
     const indexStrings = indicesString.split( PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR );
     for ( let i = 0; i < indexStrings.length; i++ ) {
-      const digit = parseInt( indexStrings[ i ], 10 );
+      const digit = Number( indexStrings[ i ] );
       instance = instance.children[ digit ];
       if ( !instance ) {
         return null;

@@ -241,17 +241,17 @@ export default class Font extends PhetioObject {
   getNumericSize(): number {
     const pxMatch = this._size.match( /^(\d+)px$/ );
     if ( pxMatch ) {
-      return parseInt( pxMatch[ 1 ], 10 );
+      return Number( pxMatch[ 1 ] );
     }
 
     const ptMatch = this._size.match( /^(\d+)pt$/ );
     if ( ptMatch ) {
-      return 0.75 * parseInt( ptMatch[ 1 ], 10 );
+      return 0.75 * Number( ptMatch[ 1 ] );
     }
 
     const emMatch = this._size.match( /^(\d+)em$/ );
     if ( emMatch ) {
-      return parseInt( emMatch[ 1 ], 10 ) / 16;
+      return Number( emMatch[ 1 ] ) / 16;
     }
 
     return 12; // a guess?

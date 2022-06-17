@@ -41,7 +41,7 @@ function parseRGBNumber( str: string ): number {
     str = str.slice( 0, str.length - 1 );
   }
 
-  return Utils.roundSymmetric( parseInt( str, 10 ) * multiplier );
+  return Utils.roundSymmetric( Number( str ) * multiplier );
 }
 
 export default class Color {
@@ -807,9 +807,9 @@ export default class Color {
       regexp: new RegExp( `^hsl\\(${rawNumber},${rawNumber}%,${rawNumber}%\\)$` ),
       apply: ( color: Color, matches: RegExpExecArray ) => {
         color.setHSLA(
-          parseInt( matches[ 1 ], 10 ),
-          parseInt( matches[ 2 ], 10 ),
-          parseInt( matches[ 3 ], 10 ),
+          Number( matches[ 1 ] ),
+          Number( matches[ 2 ] ),
+          Number( matches[ 3 ] ),
           1 );
       }
     },
@@ -818,10 +818,10 @@ export default class Color {
       regexp: new RegExp( `^hsla\\(${rawNumber},${rawNumber}%,${rawNumber}%,${aNumber}\\)$` ),
       apply: ( color: Color, matches: RegExpExecArray ) => {
         color.setHSLA(
-          parseInt( matches[ 1 ], 10 ),
-          parseInt( matches[ 2 ], 10 ),
-          parseInt( matches[ 3 ], 10 ),
-          parseFloat( matches[ 4 ] ) );
+          Number( matches[ 1 ] ),
+          Number( matches[ 2 ] ),
+          Number( matches[ 3 ] ),
+          Number( matches[ 4 ] ) );
       }
     }
   ];

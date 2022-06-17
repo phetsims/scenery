@@ -971,7 +971,7 @@ export default class Trail {
    */
   static fromUniqueId( rootNode: Node, uniqueId: string ): Trail {
     const trailIds = uniqueId.split( ID_SEPARATOR );
-    const trailIdNumbers = trailIds.map( id => parseInt( id, 10 ) );
+    const trailIdNumbers = trailIds.map( id => Number( id ) );
 
     let currentNode = rootNode;
 
