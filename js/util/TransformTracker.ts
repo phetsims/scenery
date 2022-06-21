@@ -23,7 +23,7 @@ export type TransformTrackerOptions = SelfOptions;
 
 class TransformTracker {
 
-  trail: Trail;
+  private readonly trail: Trail;
 
   // this._matrices[ i ] will be equal to: trail.nodes[ 1 ].matrix * ... * trail.nodes[ i + 1 ].matrix
   // Will be initialized on first need.
@@ -36,15 +36,15 @@ class TransformTracker {
   private _listeners: ( () => void )[] = [];
 
   // Listeners to each Node in the trail (so we are notified of changes). Will be removed on disposal.
-  private _nodeTransformListeners: ( () => void )[] = [];
+  private readonly _nodeTransformListeners: ( () => void )[] = [];
 
-  private _isStatic: boolean;
+  private readonly _isStatic: boolean;
 
   /**
    * Creates a transform-tracking object, where it can send out updates on transform changes, and also efficiently
    * compute the transform.
    */
-  constructor( trail: Trail, providedOptions?: TransformTrackerOptions ) {
+  public constructor( trail: Trail, providedOptions?: TransformTrackerOptions ) {
 
     const options = optionize<TransformTrackerOptions, SelfOptions, EmptyObjectType>()( {
       isStatic: false
@@ -70,7 +70,7 @@ class TransformTracker {
   /**
    * Gets rid of all external references and listeners. This object is inoperable afterwards.
    */
-  dispose(): void {
+  public dispose(): void {
     for ( let j = 1; j < this.trail.length; j++ ) {
       const nodeTransformListener = this._nodeTransformListeners[ j - 1 ];
 
@@ -83,7 +83,7 @@ class TransformTracker {
   /**
    * Adds a listener function that will be synchronously called whenever the transform for this Trail changes.
    */
-  addListener( listener: () => void ): void {
+  public addListener( listener: () => void ): void {
     assert && assert( typeof listener === 'function' );
 
     this._listeners.push( listener );
@@ -92,7 +92,7 @@ class TransformTracker {
   /**
    * Removes a listener that was previously added with addListener().
    */
-  removeListener( listener: () => void ): void {
+  public removeListener( listener: () => void ): void {
     assert && assert( typeof listener === 'function' );
 
     const index = _.indexOf( this._listeners, listener );
@@ -133,7 +133,7 @@ class TransformTracker {
    *
    * NOTE: The matrix returned should not be mutated. Please make a copy if needed.
    */
-  getMatrix(): Matrix3 {
+  public getMatrix(): Matrix3 {
     if ( this._matrices === null ) {
       this._matrices = [];
 
@@ -169,7 +169,7 @@ class TransformTracker {
     return this._matrices[ numMatrices - 1 ];
   }
 
-  get matrix() { return this.getMatrix(); }
+  public get matrix() { return this.getMatrix(); }
 }
 
 scenery.register( 'TransformTracker', TransformTracker );

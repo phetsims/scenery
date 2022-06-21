@@ -49,7 +49,7 @@ class FocusHighlightFromNode extends FocusHighlightPath {
   // Listener that sets the shape of this highlight when the Node bounds change. Referenced so it can be removed later.
   private boundsListener: null | ( ( bounds: Bounds2 ) => void );
 
-  constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
+  public constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
 
     const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, FocusHighlightPathOptions>()( {
       useLocalBounds: true,

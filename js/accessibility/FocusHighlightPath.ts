@@ -91,7 +91,7 @@ class FocusHighlightPath extends Path {
    * @param [shape] - the shape for the focus highlight
    * @param [providedOptions]
    */
-  constructor( shape: Shape | string | null, providedOptions?: FocusHighlightPathOptions ) {
+  public constructor( shape: Shape | string | null, providedOptions?: FocusHighlightPathOptions ) {
 
     const options = optionize<FocusHighlightPathOptions, SelfOptions, PathOptions>()( {
       outerStroke: OUTER_FOCUS_COLOR,
@@ -205,9 +205,9 @@ class FocusHighlightPath extends Path {
     this.highlightChangedEmitter.emit();
   }
 
-  set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
+  public set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
 
-  get innerHighlightColor() { return this.getInnerHighlightColor(); }
+  public get innerHighlightColor() { return this.getInnerHighlightColor(); }
 
   /**
    * Get the inner color of this focus highlight path.
@@ -225,13 +225,13 @@ class FocusHighlightPath extends Path {
     this.highlightChangedEmitter.emit();
   }
 
-  set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); }
-  get outerHighlightColor() { return this.getOuterHighlightColor(); }
+  public set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); }
+  public get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**
    * Get the color of the outer highlight for this FocusHighlightPath
    */
-  getOuterHighlightColor(): IPaint {
+  public getOuterHighlightColor(): IPaint {
     return this._outerHighlightColor;
   }
 

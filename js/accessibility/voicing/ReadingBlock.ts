@@ -67,7 +67,7 @@ function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance 
 // An implementation class for ReadingBlock.ts, only used in this class so that we know if we own the Utterance and can
 // therefore dispose it.
 class OwnedReadingBlockUtterance extends ReadingBlockUtterance {
-  constructor( focus: Focus | null, providedOptions?: UtteranceOptions ) {
+  public constructor( focus: Focus | null, providedOptions?: UtteranceOptions ) {
     super( focus, providedOptions );
   }
 }
@@ -103,7 +103,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     // (scenery-internal) - Sends a message when the highlight for the ReadingBlock changes. Used
     // by the HighlightOverlay to redraw it if it changes while the highlight is active.
-    readingBlockActiveHighlightChangedEmitter: TinyEmitter;
+    public readingBlockActiveHighlightChangedEmitter: TinyEmitter;
 
     // Updates the hit bounds of this Node when the local bounds change.
     private readonly _localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>;
@@ -115,7 +115,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     // for all ReadingBlocks when the voicingManager is fully enabled and can speak.
     private readonly _readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>;
 
-    constructor( ...args: IntentionalAny[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
 
       const providedOptions = ( args[ optionsArgPosition ] || {} ) as ReadingBlockOptions;
 
@@ -156,7 +156,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * Whether a Node composes ReadingBlock.
      */
-    get isReadingBlock(): boolean {
+    public get isReadingBlock(): boolean {
       return true;
     }
 
@@ -164,56 +164,56 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Set the tagName for the node composing ReadingBlock. This is the tagName (of ParallelDOM) that will be applied
      * to this Node when Reading Blocks are enabled.
      */
-    setReadingBlockTagName( tagName: string | null ): void {
+    public setReadingBlockTagName( tagName: string | null ): void {
       this._readingBlockTagName = tagName;
       this._onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
     }
 
-    set readingBlockTagName( tagName: string | null ) { this.setReadingBlockTagName( tagName ); }
+    public set readingBlockTagName( tagName: string | null ) { this.setReadingBlockTagName( tagName ); }
 
-    get readingBlockTagName(): string | null { return this.getReadingBlockTagName(); }
+    public get readingBlockTagName(): string | null { return this.getReadingBlockTagName(); }
 
     /**
      * Get the tagName for this Node (of ParallelDOM) when Reading Blocks are enabled.
      */
-    getReadingBlockTagName(): string | null {
+    public getReadingBlockTagName(): string | null {
       return this._readingBlockTagName;
     }
 
     /**
      * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
      */
-    setReadingBlockNameResponse( content: VoicingResponse ): void {
+    public setReadingBlockNameResponse( content: VoicingResponse ): void {
       this._voicingResponsePacket.nameResponse = content;
     }
 
-    set readingBlockNameResponse( content: VoicingResponse ) { this.setReadingBlockNameResponse( content ); }
+    public set readingBlockNameResponse( content: VoicingResponse ) { this.setReadingBlockNameResponse( content ); }
 
-    get readingBlockNameResponse(): ResolvedResponse { return this.getReadingBlockNameResponse(); }
+    public get readingBlockNameResponse(): ResolvedResponse { return this.getReadingBlockNameResponse(); }
 
     /**
      * Gets the content that is spoken whenever the ReadingBLock receives input that would initiate speech.
      */
-    getReadingBlockNameResponse(): ResolvedResponse {
+    public getReadingBlockNameResponse(): ResolvedResponse {
       return this._voicingResponsePacket.nameResponse;
     }
 
     /**
      * Sets the hint response for this ReadingBlock. This is only spoken if "Helpful Hints" are enabled by the user.
      */
-    setReadingBlockHintResponse( content: VoicingResponse ): void {
+    public setReadingBlockHintResponse( content: VoicingResponse ): void {
       this._voicingResponsePacket.hintResponse = content;
     }
 
-    set readingBlockHintResponse( content: VoicingResponse ) { this.setReadingBlockHintResponse( content ); }
+    public set readingBlockHintResponse( content: VoicingResponse ) { this.setReadingBlockHintResponse( content ); }
 
-    get readingBlockHintResponse(): ResolvedResponse { return this.getReadingBlockHintResponse(); }
+    public get readingBlockHintResponse(): ResolvedResponse { return this.getReadingBlockHintResponse(); }
 
     /**
      * Get the hint response for this ReadingBlock. This is additional content that is only read if "Helpful Hints"
      * are enabled.
      */
-    getReadingBlockHintResponse(): ResolvedResponse {
+    public getReadingBlockHintResponse(): ResolvedResponse {
       return this._voicingResponsePacket.hintResponse;
     }
 
@@ -222,19 +222,19 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * additional content for each combination of response. See ResponsePatternCollection.js if you wish to use
      * a collection of string patterns that are not the default.
      */
-    setReadingBlockResponsePatternCollection( patterns: ResponsePatternCollection ): void {
+    public setReadingBlockResponsePatternCollection( patterns: ResponsePatternCollection ): void {
 
       this._voicingResponsePacket.responsePatternCollection = patterns;
     }
 
-    set readingBlockResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setReadingBlockResponsePatternCollection( patterns ); }
+    public set readingBlockResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setReadingBlockResponsePatternCollection( patterns ); }
 
-    get readingBlockResponsePatternCollection(): ResponsePatternCollection { return this.getReadingBlockResponsePatternCollection(); }
+    public get readingBlockResponsePatternCollection(): ResponsePatternCollection { return this.getReadingBlockResponsePatternCollection(); }
 
     /**
      * Get the ResponsePatternCollection object that this ReadingBlock Node is using to collect responses.
      */
-    getReadingBlockResponsePatternCollection(): ResponsePatternCollection {
+    public getReadingBlockResponsePatternCollection(): ResponsePatternCollection {
       return this._voicingResponsePacket.responsePatternCollection;
     }
 
@@ -257,31 +257,31 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       return utterance;
     }
 
-    override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
+    public override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
 
-    override getVoicingNameResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the name response via readingBlockNameResponse' ); }
+    public override getVoicingNameResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the name response via readingBlockNameResponse' ); }
 
-    override setVoicingObjectResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
+    public override setVoicingObjectResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
 
-    override getVoicingObjectResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
+    public override getVoicingObjectResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
 
-    override setVoicingContextResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
+    public override setVoicingContextResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
 
-    override getVoicingContextResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
+    public override getVoicingContextResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
 
-    override setVoicingHintResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the hint response via readingBlockHintResponse.' ); }
+    public override setVoicingHintResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the hint response via readingBlockHintResponse.' ); }
 
-    override getVoicingHintResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the hint response via readingBlockHintResponse.' ); }
+    public override getVoicingHintResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the hint response via readingBlockHintResponse.' ); }
 
-    override setVoicingResponsePatternCollection(): void { assert && assert( false, 'ReadingBlocks only support setting the response patterns via readingBlockResponsePatternCollection.' ); }
+    public override setVoicingResponsePatternCollection(): void { assert && assert( false, 'ReadingBlocks only support setting the response patterns via readingBlockResponsePatternCollection.' ); }
 
-    override getVoicingResponsePatternCollection(): any { assert && assert( false, 'ReadingBlocks only support getting the response patterns via readingBlockResponsePatternCollection.' ); }
+    public override getVoicingResponsePatternCollection(): any { assert && assert( false, 'ReadingBlocks only support getting the response patterns via readingBlockResponsePatternCollection.' ); }
 
     /**
      * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.
      * If a Node is provided, do not add this Node to the scene graph, it is added and made visible by the HighlightOverlay.
      */
-    setReadingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ): void {
+    public setReadingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ): void {
       if ( this._readingBlockActiveHighlight !== readingBlockActiveHighlight ) {
         this._readingBlockActiveHighlight = readingBlockActiveHighlight;
 
@@ -289,15 +289,15 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       }
     }
 
-    set readingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); }
+    public set readingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); }
 
-    get readingBlockActiveHighlight(): Highlight { return this._readingBlockActiveHighlight; }
+    public get readingBlockActiveHighlight(): Highlight { return this._readingBlockActiveHighlight; }
 
     /**
      * Returns the highlight used to surround this Node when the Voicing framework is reading its
      * content.
      */
-    getReadingBlockActiveHighlight(): Highlight {
+    public getReadingBlockActiveHighlight(): Highlight {
       return this._readingBlockActiveHighlight;
     }
 
@@ -305,7 +305,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Returns true if this ReadingBlock is "activated", indicating that it has received interaction
      * and the Voicing framework is speaking its content.
      */
-    isReadingBlockActivated(): boolean {
+    public isReadingBlockActivated(): boolean {
       let activated = false;
 
       const trailIds = Object.keys( this.displays );
@@ -320,7 +320,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       return activated;
     }
 
-    get readingBlockActivated(): boolean { return this.isReadingBlockActivated(); }
+    public get readingBlockActivated(): boolean { return this.isReadingBlockActivated(); }
 
     /**
      * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
@@ -328,7 +328,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      *
      * @param focusable - whether ReadingBlocks should be focusable
      */
-    _onReadingBlockFocusableChanged( focusable: boolean ): void {
+    private _onReadingBlockFocusableChanged( focusable: boolean ): void {
 
       const thisNode = this as unknown as Node;
 
@@ -353,7 +353,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * Update the hit areas for this Node whenever the bounds change.
      */
-    _onLocalBoundsChanged( localBounds: Bounds2 ): void {
+    private _onLocalBoundsChanged( localBounds: Bounds2 ): void {
       const thisNode = this as unknown as Node;
       thisNode.mouseArea = localBounds;
       thisNode.touchArea = localBounds;
@@ -364,7 +364,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * the displays so that HighlightOverlays know to activate a highlight while the voicingManager
      * is reading about this Node.
      */
-    _speakReadingBlockContentListener( event: SceneryEvent<Event> ): void {
+    private _speakReadingBlockContentListener( event: SceneryEvent<Event> ): void {
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
@@ -400,7 +400,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * If we created and own the voicingUtterance we can fully dispose of it.
      */
-    override cleanVoicingUtterance(): void {
+    protected override cleanVoicingUtterance(): void {
       if ( this._voicingUtterance instanceof ReadingBlockUtterance ) {
         this._voicingUtterance.dispose();
       }
@@ -409,7 +409,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       }
     }
 
-    override dispose(): void {
+    public override dispose(): void {
       const thisNode = ( this as unknown as Node );
       voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this._readingBlockFocusableChangeListener );
       thisNode.localBoundsProperty.unlink( this._localBoundsChangedListener );

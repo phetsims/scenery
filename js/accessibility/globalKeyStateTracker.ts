@@ -13,7 +13,7 @@ import { KeyStateTracker, scenery } from '../imports.js';
 import { KeyStateTrackerOptions } from './KeyStateTracker.js';
 
 class GlobalKeyStateTracker extends KeyStateTracker {
-  constructor( options?: KeyStateTrackerOptions ) {
+  public constructor( options?: KeyStateTrackerOptions ) {
     super( options );
     this.attachToWindow();
   }

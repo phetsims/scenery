@@ -71,7 +71,7 @@ class KeyStateTracker {
 
   private readonly disposeKeyStateTracker: () => void;
 
-  constructor( providedOptions?: KeyStateTrackerOptions ) {
+  public constructor( providedOptions?: KeyStateTrackerOptions ) {
 
     const options = optionize<KeyStateTrackerOptions>()( {
       tandem: Tandem.OPTIONAL
@@ -233,7 +233,7 @@ class KeyStateTracker {
   /**
    * Returns true if any of the movement keys are down (arrow keys or WASD keys).
    */
-  get movementKeysDown(): boolean {
+  public get movementKeysDown(): boolean {
     return this.isAnyKeyInListDown( KeyboardUtils.MOVEMENT_KEYS );
   }
 
@@ -288,28 +288,28 @@ class KeyStateTracker {
   /**
    * Returns true if the "Enter" key is currently down.
    */
-  get enterKeyDown(): boolean {
+  public get enterKeyDown(): boolean {
     return this.isKeyDown( KeyboardUtils.KEY_ENTER );
   }
 
   /**
    * Returns true if the shift key is currently down.
    */
-  get shiftKeyDown(): boolean {
+  public get shiftKeyDown(): boolean {
     return this.isAnyKeyInListDown( KeyboardUtils.SHIFT_KEYS );
   }
 
   /**
    * Returns true if the alt key is currently down.
    */
-  get altKeyDown(): boolean {
+  public get altKeyDown(): boolean {
     return this.isAnyKeyInListDown( KeyboardUtils.ALT_KEYS );
   }
 
   /**
    * Returns true if the control key is currently down.
    */
-  get ctrlKeyDown(): boolean {
+  public get ctrlKeyDown(): boolean {
     return this.isAnyKeyInListDown( KeyboardUtils.CONTROL_KEYS );
   }
 
@@ -404,9 +404,9 @@ class KeyStateTracker {
     }
   }
 
-  set enabled( enabled ) { this.setEnabled( enabled ); }
+  public set enabled( enabled ) { this.setEnabled( enabled ); }
 
-  get enabled(): boolean { return this.isEnabled(); }
+  public get enabled(): boolean { return this.isEnabled(); }
 
   public isEnabled(): boolean { return this._enabled; }
 

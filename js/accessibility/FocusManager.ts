@@ -42,46 +42,46 @@ export default class FocusManager {
   // This Property whose Focus Trail points to the Node under the pointer to
   // support features of Voicing and Interactive Highlights. Nodes that compose InteractiveHighlighting can
   // receive this Focus and a highlight may appear around it.
-  pointerFocusProperty: IProperty<Focus | null>;
+  public readonly pointerFocusProperty: IProperty<Focus | null>;
 
   // The Property that indicates which Node that uses ReadingBlock is currently
   // active. Used by the HighlightOverlay to highlight ReadingBlock Nodes whose content is being spoken.
-  readingBlockFocusProperty: IProperty<Focus | null>;
+  public readonly readingBlockFocusProperty: IProperty<Focus | null>;
 
   // A Property whose value is either null or a Focus with Trail and Display equal
   // to the pointerFocusProperty. When this Property has a value, the HighlightOverlay will wait to update the
   // highlight for the pointerFocusProperty. This is useful when the pointer has begun to interact with a Node
   // that uses InteractiveHighlighting, but the mouse has moved out of it or over another during interaction. Thehighlight
   // should remain on the Node receiving interaction and wait to update until interaction completes.
-  lockedPointerFocusProperty: IProperty<Focus | null>;
+  public readonly lockedPointerFocusProperty: IProperty<Focus | null>;
 
   // Controls whether or not highlights related to PDOM focus are visible.
-  pdomFocusHighlightsVisibleProperty: IProperty<boolean>;
+  public readonly pdomFocusHighlightsVisibleProperty: IProperty<boolean>;
 
   // Controls whether "Interactive Highlights" are visible.
-  interactiveHighlightsVisibleProperty: IProperty<boolean>;
+  public readonly interactiveHighlightsVisibleProperty: IProperty<boolean>;
 
   // Controls whether "Reading Block" highlights will be visible around Nodes
   // that use ReadingBlock.
-  readingBlockHighlightsVisibleProperty: IProperty<boolean>;
+  public readonly readingBlockHighlightsVisibleProperty: IProperty<boolean>;
 
   // Indicates whether any highlights should appear from pointer
   // input (mouse/touch). If false, we will try to avoid doing expensive work in PointerHighlighting.js.
-  pointerHighlightsVisibleProperty: IReadOnlyProperty<boolean>;
+  public readonly pointerHighlightsVisibleProperty: IReadOnlyProperty<boolean>;
 
   // Whenever the readingBlockFocusProperty's Focused Node is removed from
   // the scene graph or its Trail becomes invisible this removes focus.
-  private readingBlockFocusController: FocusDisplayedController;
+  private readonly readingBlockFocusController: FocusDisplayedController;
 
   // If the voicingManager starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
   // add listeners to clear it when the Node is removed or becomes invisible
-  private startSpeakingListener: SpeakingListener;
+  private readonly startSpeakingListener: SpeakingListener;
 
   // Whenever the voicingManager stops speaking an utterance for the ReadingBlock that has focus, clear it
-  private endSpeakingListener: SpeakingListener;
-  private pointerFocusDisplayedController: FocusDisplayedController;
+  private readonly endSpeakingListener: SpeakingListener;
+  private readonly pointerFocusDisplayedController: FocusDisplayedController;
 
-  constructor() {
+  public constructor() {
 
     this.pointerFocusProperty = new Property( null );
     this.readingBlockFocusProperty = new Property( null );
@@ -145,7 +145,7 @@ export default class FocusManager {
     } );
   }
 
-  dispose(): void {
+  public dispose(): void {
     this.readingBlockFocusController.dispose();
     this.pointerFocusDisplayedController.dispose();
     this.pointerHighlightsVisibleProperty.dispose();
@@ -161,7 +161,7 @@ export default class FocusManager {
    * Set the DOM focus. A DOM limitation is that there can only be one element with focus at a time so this must
    * be a static for the FocusManager.
    */
-  static set pdomFocus( value: Focus | null ) {
+  public static set pdomFocus( value: Focus | null ) {
     if ( FocusManager.pdomFocusProperty.value !== value ) {
 
       let previousFocus;
@@ -181,7 +181,7 @@ export default class FocusManager {
   /**
    * Get the Focus pointing to the Node whose Parallel DOM element has DOM focus.
    */
-  static get pdomFocus(): Focus | null {
+  public static get pdomFocus(): Focus | null {
     return FocusManager.pdomFocusProperty.value;
   }
 
@@ -189,7 +189,7 @@ export default class FocusManager {
    * Get the Node that currently has DOM focus, the leaf-most Node of the Focus Trail. Null if no
    * Node has focus.
    */
-  static getPDOMFocusedNode(): Node | null {
+  public static getPDOMFocusedNode(): Node | null {
     let focusedNode = null;
     const focus = FocusManager.pdomFocusProperty.get();
     if ( focus ) {
@@ -198,13 +198,13 @@ export default class FocusManager {
     return focusedNode;
   }
 
-  static get pdomFocusedNode() { return this.getPDOMFocusedNode(); }
+  public static get pdomFocusedNode() { return this.getPDOMFocusedNode(); }
 
   // Display has an axon `Property to indicate which component is focused (or null if no
   // scenery Node has focus). By passing the tandem and phetioTye, PhET-iO is able to interoperate (save, restore,
   // control, observe what is currently focused). See FocusManager.pdomFocus for setting the focus. Don't set the value
   // of this Property dir`ectly.
-  static readonly pdomFocusProperty = new Property<Focus | null>( null, {
+  public static readonly pdomFocusProperty = new Property<Focus | null>( null, {
     tandem: Tandem.GENERAL_MODEL.createTandem( 'pdomFocusProperty' ),
     phetioDocumentation: 'Stores the current focus in the Parallel DOM, null if nothing has focus. This is not updated ' +
                          'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +

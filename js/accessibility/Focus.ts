@@ -21,9 +21,9 @@ class Focus {
   // The Display containing the Trail to the focused Node.
   public readonly display: Display;
 
-  static FocusIO: IOType;
+  public static FocusIO: IOType;
 
-  constructor( display: Display, trail: Trail ) {
+  public constructor( display: Display, trail: Trail ) {
     this.display = display;
     this.trail = trail;
   }

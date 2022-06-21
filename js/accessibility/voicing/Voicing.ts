@@ -541,14 +541,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
      */
-    getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null {
+    public getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null {
       return this._voicingFocusListener;
     }
 
     /**
      * The default focus listener attached to this Node during initialization.
      */
-    defaultFocusListener(): void {
+    public defaultFocusListener(): void {
       this.voicingSpeakFullResponse( {
         contextResponse: null
       } );
