@@ -16,6 +16,7 @@ import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import { IPaint, scenery } from '../imports.js';
+import IColor from './IColor.js';
 
 // constants
 const clamp = Utils.clamp;
@@ -562,18 +563,21 @@ export default class Color {
   /**
    * Convenience function that converts a color spec to a color object if necessary, or simply returns the color object
    * if not.
+   *
+   * Please note there is no defensive copy when a color is passed in unlike PaintDef.
    */
-  static toColor( colorSpec: string | Color | null ): Color {
-    assert && assert( colorSpec === null || typeof colorSpec === 'string' || colorSpec instanceof Color );
-
+  static toColor( colorSpec: IColor ): Color {
     if ( colorSpec === null ) {
       return Color.TRANSPARENT;
     }
     else if ( colorSpec instanceof Color ) {
       return colorSpec;
     }
-    else {
+    else if ( typeof colorSpec === 'string' ) {
       return new Color( colorSpec );
+    }
+    else {
+      return Color.toColor( colorSpec.value );
     }
   }
 

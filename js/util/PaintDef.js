@@ -36,6 +36,7 @@ const PaintDef = {
 
   /**
    * Takes a snapshot of the given paint, returning the current color where possible.
+   * Unlike Color.toColor() this method makes a defensive copy for Color values.
    * @public
    *
    * @param {PaintDef} paint
