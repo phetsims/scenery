@@ -1,11 +1,11 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * A trait that is meant to be composed with Node, adding accessibility by defining content for the Parallel DOM.
+ * A superclass for Node, adding accessibility by defining content for the Parallel DOM.
  *
  * The Parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
  * accessible, assistive technologies require HTML markup, which is something that pure graphical content does not
- * include. This trait adds the accessible HTML content for any Node in the scene graph.
+ * include. This adds the accessible HTML content for any Node in the scene graph.
  *
  * Any Node can have pdom content, but they have to opt into it. The structure of the pdom content will
  * match the structure of the scene graph.
@@ -62,7 +62,7 @@
  * --------------------------------------------------------------------------------------------------------------------
  * #DOM SIBLINGS
  *
- * The API in this trait allows you to add additional structure to the accessible DOM content if necessary. Each node
+ * The API in this class allows you to add additional structure to the accessible DOM content if necessary. Each node
  * can have multiple DOM Elements associated with it. A Node can have a label DOM element, and a description DOM element.
  * These are called siblings. The Node's direct DOM element (the DOM element you create with the `tagName` option)
  * is called the "primary sibling." You can also have a container parent DOM element that surrounds all of these
@@ -108,7 +108,7 @@
  *     descriptionContent: 'This is a description for the input',
  *    });
  *
- * The ParallelDOM trait is smart enough to know when there needs to be a container parent to wrap multiple siblings,
+ * The ParallelDOM class is smart enough to know when there needs to be a container parent to wrap multiple siblings,
  * it is not necessary to use that option unless the desired tag name is  something other than 'div'.
  *
  * --------------------------------------------------------------------------------------------------------------------
@@ -535,7 +535,7 @@ export default class ParallelDOM extends PhetioObject {
   // PDOM specific enabled listener
   protected pdomBoundInputEnabledListener: ( enabled: boolean ) => void;
 
-  public constructor( options?: PhetioObjectOptions ) {
+  protected constructor( options?: PhetioObjectOptions ) {
 
     super( options );
 
