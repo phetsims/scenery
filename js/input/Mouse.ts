@@ -13,21 +13,21 @@ import { scenery, Pointer } from '../imports.js';
 export default class Mouse extends Pointer {
 
   // Since we need to track the mouse's pointer id occasionally
-  id: number | null;
+  public id: number | null;
 
   // @deprecated, see https://github.com/phetsims/scenery/issues/803
-  leftDown: boolean; // @deprecated
-  middleDown: boolean; // @deprecated
-  rightDown: boolean; // @deprecated
+  public leftDown: boolean; // @deprecated
+  public middleDown: boolean; // @deprecated
+  public rightDown: boolean; // @deprecated
 
   // Mouse wheel delta for the last event, see https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-  wheelDelta: Vector3;
+  public wheelDelta: Vector3;
 
   // Mouse wheel mode for the last event (0: pixels, 1: lines, 2: pages), see
   // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
-  wheelDeltaMode: number;
+  public wheelDeltaMode: number;
 
-  constructor( point: Vector2 ) {
+  public constructor( point: Vector2 ) {
     super( point, false, 'mouse' );
 
     this.id = null;
@@ -45,7 +45,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  down( point: Vector2, event: Event ): boolean {
+  public down( point: Vector2, event: Event ): boolean {
     assert && assert( event instanceof MouseEvent );
     const mouseEvent = event as MouseEvent;
 
@@ -75,7 +75,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  up( point: Vector2, event: Event ): boolean {
+  public up( point: Vector2, event: Event ): boolean {
     assert && assert( event instanceof MouseEvent );
     const mouseEvent = event as MouseEvent;
 
@@ -105,7 +105,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  move( point: Vector2, event: Event ): boolean {
+  public move( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse move at ${point.toString()}` );
 
@@ -118,7 +118,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  over( point: Vector2, event: Event ): boolean {
+  public over( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse over at ${point.toString()}` );
 
@@ -131,7 +131,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  out( point: Vector2, event: Event ): boolean {
+  public out( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
 
@@ -141,7 +141,7 @@ export default class Mouse extends Pointer {
   /**
    * Sets information in this Mouse for a given mouse wheel. (scenery-internal)
    */
-  wheel( event: Event ): void {
+  public wheel( event: Event ): void {
     assert && assert( event instanceof WheelEvent );
     const wheelEvent = event as WheelEvent;
 
@@ -152,7 +152,7 @@ export default class Mouse extends Pointer {
   /**
    * Returns an improved string representation of this object.
    */
-  override toString(): string {
+  public override toString(): string {
     return 'Mouse'; // there is only one
   }
 }

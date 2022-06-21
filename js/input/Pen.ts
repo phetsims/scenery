@@ -12,9 +12,9 @@ import { scenery, Pointer } from '../imports.js';
 export default class Pen extends Pointer {
 
   // For tracking which pen is which
-  id: number;
+  public id: number;
 
-  constructor( id: number, point: Vector2, event: Event ) {
+  public constructor( id: number, point: Vector2, event: Event ) {
     super( point, true, 'pen' ); // true: pen pointers always start in the down state
 
     this.id = id;
@@ -27,7 +27,7 @@ export default class Pen extends Pointer {
    *
    * @returns Whether the point changed
    */
-  move( point: Vector2, event: Event ): boolean {
+  public move( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -39,7 +39,7 @@ export default class Pen extends Pointer {
    *
    * @returns Whether the point changed
    */
-  end( point: Vector2, event: Event ): boolean {
+  public end( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -52,7 +52,7 @@ export default class Pen extends Pointer {
    *
    * @returns Whether the point changed
    */
-  cancel( point: Vector2, event: Event ): boolean {
+  public cancel( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -63,11 +63,11 @@ export default class Pen extends Pointer {
   /**
    * Returns an improved string representation of this object.
    */
-  override toString(): string {
+  public override toString(): string {
     return `Pen#${this.id}`;
   }
 
-  override isTouchLike(): boolean {
+  public override isTouchLike(): boolean {
     return true;
   }
 }

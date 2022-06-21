@@ -46,7 +46,7 @@ function assertUtterance( utterance: Utterance | null ): asserts utterance is Ut
 // An implementation class for Voicing.ts, only used in this class so that we know if we own the Utterance and can
 // therefore dispose it.
 class OwnedVoicingUtterance extends Utterance {
-  constructor( providedOptions?: UtteranceOptions ) {
+  public constructor( providedOptions?: UtteranceOptions ) {
     super( providedOptions );
   }
 }

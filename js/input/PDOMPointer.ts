@@ -16,16 +16,16 @@ export default class PDOMPointer extends Pointer {
   // (scenery-internal) - Prevent any "trusted" events from being dispatched to the KeyStateTracker. When
   // true, only scripted events are passed to the keyStateTracker. Otherwise, the modeled keyboard state when using
   // fuzzBoard will appear broken as both user and KeyboardFuzzer interact with display.
-  blockTrustedEvents: boolean;
+  public blockTrustedEvents: boolean;
 
-  private display: Display;
+  private readonly display: Display;
 
   // target of a user event, if focus changes in response to keydown listeners, listeners
   // on keyup are prevented because the key press was not intended for the newly focused node.
   // TODO: Can we do this for more than keydown/keyup? See https://github.com/phetsims/scenery/issues/942
   private keydownTargetNode: Node | null;
 
-  constructor( display: Display ) {
+  public constructor( display: Display ) {
     // We'll start with a defined Vector2, so that pointers always have points
     super( Vector2.ZERO, false, 'pdom' );
 

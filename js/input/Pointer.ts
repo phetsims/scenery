@@ -34,12 +34,12 @@ import IAttachableInputListener from './IAttachableInputListener.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
-  static readonly DRAG = new Intent();
+  public static readonly DRAG = new Intent();
 
   // listener attached to pointer is for dragging with a keyboard
-  static readonly KEYBOARD_DRAG = new Intent();
+  public static readonly KEYBOARD_DRAG = new Intent();
 
-  static readonly enumeration = new Enumeration( Intent, {
+  public static readonly enumeration = new Enumeration( Intent, {
     phetioDocumentation: 'entries when signifying Intent of the pointer'
   } );
 }
@@ -53,32 +53,32 @@ export interface ActivePointer extends Pointer {
 export default abstract class Pointer {
 
   // The location of the pointer in the global coordinate system.
-  point: Vector2;
+  public point: Vector2;
 
   // Each Pointer subtype should implement a "type" field that can be checked against for scenery input.
-  readonly type: PointerType;
+  public readonly type: PointerType;
 
   // The trail that the pointer is currently over (if it has yet been registered). If the pointer has not yet registered
   // a trail, it may be null. If the pointer wasn't over any specific trail, then a trail with only the display's
   // rootNode will be set.
-  trail: Trail | null;
+  public trail: Trail | null;
 
   // The subset of Pointer.trail that is Node.inputEnabled. See Trail.getLastInputEnabledIndex() for details. This is
   // kept separately so that it can be detected when inputEnabled changes.
-  inputEnabledTrail: Trail | null;
+  public inputEnabledTrail: Trail | null;
 
   // @deprecated Whether this pointer is 'down' (pressed).
   // Will be phased out in https://github.com/phetsims/scenery/issues/803 to something that is specific for the actual
   // mouse/pen button (since this doesn't generalize well to the left/right mouse buttons).
-  isDownProperty: IProperty<boolean>;
+  public isDownProperty: IProperty<boolean>;
 
   // Whether there is a main listener "attached" to this pointer. This signals that the
   // listener is "doing" something with the pointer, and that it should be interrupted if other actions need to take
   // over the pointer behavior.
-  attachedProperty: IProperty<boolean>;
+  public attachedProperty: IProperty<boolean>;
 
   // All attached listeners (will be activated in order).
-  private _listeners: IInputListener[];
+  private readonly _listeners: IInputListener[];
 
   // Our main "attached" listener, if there is one (otherwise null)
   private _attachedListener: IAttachableInputListener | null;
@@ -88,7 +88,7 @@ export default abstract class Pointer {
 
   // (scenery-internal) - Recorded and exposed so that it can be provided to events when there
   // is no "immediate" DOM event (e.g. when a node moves UNDER a pointer and triggers a touch-snag).
-  lastDOMEvent: Event | null;
+  public lastDOMEvent: Event | null;
 
   // A Pointer can be assigned an intent when a listener is attached to initiate or prevent
   // certain behavior for the life of the listener. Other listeners can observe the Intents on the Pointer and
@@ -101,7 +101,7 @@ export default abstract class Pointer {
   // so they can be removed on disposal
   private _listenerForDragReserve: IInputListener | null;
   private _listenerForKeyboardDragReserve: IInputListener | null;
-  static PointerIO: IOType<Pointer>;
+  public static PointerIO: IOType<Pointer>;
 
   /**
    * @param initialPoint
@@ -141,36 +141,36 @@ export default abstract class Pointer {
    *
    * NOTE: Consider setting this only for attached listeners in the future (or have a cursor field on pointers).
    */
-  setCursor( cursor: string | null ): this {
+  public setCursor( cursor: string | null ): this {
     this._cursor = cursor;
 
     return this;
   }
 
-  set cursor( value: string | null ) { this.setCursor( value ); }
-  get cursor(): string | null { return this.getCursor(); }
+  public set cursor( value: string | null ) { this.setCursor( value ); }
+  public get cursor(): string | null { return this.getCursor(); }
 
   /**
    * Returns the current cursor override (or null if there is one). See setCursor().
    */
-  getCursor(): string | null {
+  public getCursor(): string | null {
     return this._cursor;
   }
 
   /**
    * Returns a defensive copy of all listeners attached to this pointer. (scenery-internal)
    */
-  getListeners(): IInputListener[] {
+  public getListeners(): IInputListener[] {
     return this._listeners.slice();
   }
 
-  get listeners(): IInputListener[] { return this.getListeners(); }
+  public get listeners(): IInputListener[] { return this.getListeners(); }
 
   /**
    * Adds an input listener to this pointer. If the attach flag is true, then it will be set as the "attached"
    * listener.
    */
-  addInputListener( listener: IInputListener, attach?: boolean ): void {
+  public addInputListener( listener: IInputListener, attach?: boolean ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `addInputListener to ${this.toString()} attach:${attach}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
@@ -194,7 +194,7 @@ export default abstract class Pointer {
   /**
    * Removes an input listener from this pointer.
    */
-  removeInputListener( listener: IInputListener ): void {
+  public removeInputListener( listener: IInputListener ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `removeInputListener to ${this.toString()}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
@@ -216,16 +216,16 @@ export default abstract class Pointer {
   /**
    * Returns the listener attached to this pointer with attach(), or null if there isn't one.
    */
-  getAttachedListener(): IAttachableInputListener | null {
+  public getAttachedListener(): IAttachableInputListener | null {
     return this._attachedListener;
   }
 
-  get attachedListener(): IAttachableInputListener | null { return this.getAttachedListener(); }
+  public get attachedListener(): IAttachableInputListener | null { return this.getAttachedListener(); }
 
   /**
    * Returns whether this pointer has an attached (primary) listener.
    */
-  isAttached(): boolean {
+  public isAttached(): boolean {
     return this.attachedProperty.value;
   }
 
@@ -233,7 +233,7 @@ export default abstract class Pointer {
    * Some pointers are treated differently because they behave like a touch. This is not exclusive to `Touch and touch
    * events though. See https://github.com/phetsims/scenery/issues/1156
    */
-  isTouchLike(): boolean {
+  public isTouchLike(): boolean {
     return false;
   }
 
@@ -243,7 +243,7 @@ export default abstract class Pointer {
    * NOTE: Naming convention is for legacy code, would usually have pointer.down
    * TODO: improve name, .setDown( value ) with .down =
    */
-  set isDown( value: boolean ) {
+  public set isDown( value: boolean ) {
     this.isDownProperty.value = value;
   }
 
@@ -253,7 +253,7 @@ export default abstract class Pointer {
    * NOTE: Naming convention is for legacy code, would usually have pointer.down
    * TODO: improve name, .isDown() with .down
    */
-  get isDown(): boolean {
+  public get isDown(): boolean {
     return this.isDownProperty.value;
   }
 
@@ -262,7 +262,7 @@ export default abstract class Pointer {
    *
    * After this executes, this pointer should not be attached.
    */
-  interruptAttached(): void {
+  public interruptAttached(): void {
     if ( this.isAttached() ) {
       this._attachedListener!.interrupt(); // Any listener that uses the 'attach' API should have interrupt()
     }
@@ -271,7 +271,7 @@ export default abstract class Pointer {
   /**
    * Interrupts all listeners on this pointer.
    */
-  interruptAll(): void {
+  public interruptAll(): void {
     const listeners = this._listeners.slice();
     for ( let i = 0; i < listeners.length; i++ ) {
       const listener = listeners[ i ];
@@ -316,7 +316,7 @@ export default abstract class Pointer {
    * Note that the Intent can be changed by listeners up the dispatch phase or on the next press. See Intent enum
    * for valid entries.
    */
-  addIntent( intent: Intent ): void {
+  public addIntent( intent: Intent ): void {
     assert && assert( Intent.enumeration.includes( intent ), 'trying to set unsupported intent for Pointer' );
 
     if ( !this._intents.includes( intent ) ) {
@@ -329,7 +329,7 @@ export default abstract class Pointer {
   /**
    * Remove an Intent from the Pointer. See addIntent for more information.
    */
-  removeIntent( intent: Intent ): void {
+  public removeIntent( intent: Intent ): void {
     assert && assert( Intent.enumeration.includes( intent ), 'trying to set unsupported intent for Pointer' );
 
     if ( this._intents.includes( intent ) ) {
@@ -341,7 +341,7 @@ export default abstract class Pointer {
   /**
    * Returns whether or not this Pointer has been assigned the provided Intent.
    */
-  hasIntent( intent: Intent ): boolean {
+  public hasIntent( intent: Intent ): boolean {
     return this._intents.includes( intent );
   }
 
@@ -351,7 +351,7 @@ export default abstract class Pointer {
    * self removal) that clears the intent when the pointer receives an "up" event. Should generally be called on
    * the Pointer in response to a down event.
    */
-  reserveForDrag(): void {
+  public reserveForDrag(): void {
 
     // if the Pointer hasn't already been reserved for drag in Input event dispatch, in which
     // case it already has Intent and listener to remove Intent
@@ -378,7 +378,7 @@ export default abstract class Pointer {
    * removal) that clears the intent when the pointer receives a "keyup" or "blur" event. Should generally be called
    * on the Pointer in response to a keydown event.
    */
-  reserveForKeyboardDrag(): void {
+  public reserveForKeyboardDrag(): void {
 
     if ( !this._intents.includes( Intent.KEYBOARD_DRAG ) ) {
       this.addIntent( Intent.KEYBOARD_DRAG );
@@ -406,7 +406,7 @@ export default abstract class Pointer {
    * This is called when a capture starts on this pointer. We request it on pointerstart, and if received, we should
    * generally receive events outside the window.
    */
-  onGotPointerCapture(): void {
+  public onGotPointerCapture(): void {
     this._pointerCaptured = true;
   }
 
@@ -417,7 +417,7 @@ export default abstract class Pointer {
    * See https://github.com/phetsims/scenery/issues/1186 for more information. We'll want to interrupt the pointer
    * on this case regardless,
    */
-  onLostPointerCapture(): void {
+  public onLostPointerCapture(): void {
     if ( this._pointerCaptured ) {
       this.interruptAll();
     }
@@ -427,7 +427,7 @@ export default abstract class Pointer {
   /**
    * Releases references so it can be garbage collected.
    */
-  dispose(): void {
+  public dispose(): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Disposing ${this.toString()}` );
 
     // remove listeners that would clear intent on disposal
