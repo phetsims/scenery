@@ -5,6 +5,7 @@ import { Color } from '../imports.js';
 
 /**
  * Type representing a ColorDef
+ * Please see Color.toColor() for a way to transform these colors.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
