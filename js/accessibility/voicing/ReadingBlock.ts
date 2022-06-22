@@ -25,7 +25,7 @@ import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
+import { Focus, Highlight, Node, NodeOptions, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import Utterance, { UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
@@ -150,7 +150,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       // highlighted in the FocusOverlay when this Utterance is being announced.
       this.voicingUtterance = new OwnedReadingBlockUtterance( null );
 
-      ( this as unknown as Node ).mutate( readingBlockOptions );
+      ( this as unknown as Node ).mutate( readingBlockOptions as NodeOptions );
     }
 
     /**

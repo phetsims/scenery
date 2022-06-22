@@ -25,7 +25,7 @@ type SelfOptions = {
   interactiveHighlightLayerable?: boolean;
 };
 
-export type InteractiveHighlightingOptions = SelfOptions & NodeOptions;
+export type InteractiveHighlightingOptions = SelfOptions;
 
 /**
  * @param Type
@@ -118,7 +118,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         interrupt: boundPointerCancel
       };
 
-      ( this as unknown as Node ).mutate( interactiveHighlightingOptions );
+      ( this as unknown as Node ).mutate( interactiveHighlightingOptions as NodeOptions );
     }
 
     /**

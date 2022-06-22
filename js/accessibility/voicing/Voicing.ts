@@ -28,7 +28,7 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { IAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
-import { Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
+import { Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import { combineOptions } from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -163,7 +163,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // We only want to call this method, not any subtype implementation
       VoicingClass.prototype.initialize.call( this );
 
-      ( this as unknown as Node ).mutate( voicingOptions );
+      ( this as unknown as Node ).mutate( voicingOptions as NodeOptions );
     }
 
     // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
