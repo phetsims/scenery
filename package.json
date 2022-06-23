@@ -39,6 +39,16 @@
       "himalaya": "readonly",
       "sceneryLog": "readonly",
       "he": "readonly"
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/*.ts"
+        ],
+        "rules": {
+          "no-simple-type-checking-assertions": "off"
+        }
+      }
+    ]
   }
 }
