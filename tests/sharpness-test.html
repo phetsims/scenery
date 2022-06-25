@@ -86,7 +86,7 @@
   document.getElementById( 'mipmapCheckbox' ).addEventListener( 'click', updateMipmap );
 
   display.updateOnRequestAnimationFrame( function() {
-    imageContainer.setScaleMagnitude( Math.pow( 2, parseFloat( document.getElementById( 'scaleSlider' ).value ) / 10 ) );
+    imageContainer.setScaleMagnitude( Math.pow( 2, Number( document.getElementById( 'scaleSlider' ).value ) / 10 ) );
     display.updateDisplay();
   } );
 </script>

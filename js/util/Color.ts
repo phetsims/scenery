@@ -803,7 +803,7 @@ export default class Color {
           parseRGBNumber( matches[ 1 ] ),
           parseRGBNumber( matches[ 2 ] ),
           parseRGBNumber( matches[ 3 ] ),
-          parseFloat( matches[ 4 ] ) );
+          Number( matches[ 4 ] ) );
       }
     },
     {
