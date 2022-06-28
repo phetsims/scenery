@@ -271,10 +271,10 @@ export default class AlignGroup {
 
       // Match one orientation
       if ( this._matchVertical ) {
-        alignBounds = new Bounds2( 0, 0, contentBounds.width, maxHeight );
+        alignBounds = new Bounds2( 0, 0, isFinite( contentBounds.width ) ? contentBounds.width : maxWidth, maxHeight );
       }
       else if ( this._matchHorizontal ) {
-        alignBounds = new Bounds2( 0, 0, maxWidth, contentBounds.height );
+        alignBounds = new Bounds2( 0, 0, maxWidth, isFinite( contentBounds.height ) ? contentBounds.height : maxHeight );
       }
       // If not matching anything, just use its preferred size
       else {
