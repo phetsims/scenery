@@ -128,10 +128,10 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
       } );
 
       // Convert a simple spacing number (or a spacing array into a spacing array of the correct size.
+      const maxIndex = lineIndices[ lineIndices.length - 1 ];
       const lineSpacings = typeof orientedSpacing === 'number' ?
-                           _.range( 0, lines.length - 1 ).map( () => orientedSpacing ) :
-                           orientedSpacing.slice( 0, lines.length - 1 );
-      assert && assert( lineSpacings.length === lines.length - 1 );
+                           _.range( 0, maxIndex ).map( () => orientedSpacing ) :
+                           orientedSpacing.slice( 0, maxIndex );
 
       // Scan sizes for single-line cells first
       cells.forEach( cell => {
