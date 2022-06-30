@@ -104,6 +104,9 @@ type SelfOptions = {
   // adding/removing children in normal ways.
   // NOTE: This should be used with the `children` option and/or adding children manually (addChild, etc.)
   // NOTE: This should NOT be used with autoColumns or rows/columns, as those also specify coordinate information
+  // NOTE: This will only lay out children with valid bounds, and if excludeInvisibleChildrenFromBounds is true then it
+  // will ALSO be constrained to only visible children. It won't leave gaps for children that don't meet these
+  // constraints.
   autoRows?: number | null;
 
   // When non-null, the cells of this grid will be positioned/sized to be 1x1 cells, filling columns until a row has
@@ -111,6 +114,9 @@ type SelfOptions = {
   // adding/removing children in normal ways.
   // NOTE: This should be used with the `children` option and/or adding children manually (addChild, etc.)
   // NOTE: This should NOT be used with autoRows or rows/columns, as those also specify coordinate information
+  // NOTE: This will only lay out children with valid bounds, and if excludeInvisibleChildrenFromBounds is true then it
+  // will ALSO be constrained to only visible children. It won't leave gaps for children that don't meet these
+  // constraints.
   autoColumns?: number | null;
 } & StrictOmit<GridConstraintOptions, GridConstraintExcludedOptions>;
 

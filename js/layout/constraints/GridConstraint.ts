@@ -32,6 +32,8 @@ type SelfOptions = {
   // e.g. [ 5, 4 ] will have a spacing of 5 between the first and second lines, and 4 between the second and third
   // lines. In that case, if there were a third line, it would have zero spacing between the second (any non-specified
   // spacings for extra rows/columns will be zero).
+  // NOTE: If a line (row/column) is invisible (and excludeInvisible is set to true), then the spacing that is directly
+  // after (to the right/bottom of) that line will be ignored.
   spacing?: number | number[];
   xSpacing?: number | number[];
   ySpacing?: number | number[];
