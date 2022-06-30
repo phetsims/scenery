@@ -13,7 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import platform from '../../../phet-core/js/platform.js';
 import Display from '../display/Display.js';
-import { Color, FlowBox } from '../imports.js';
+import { Color, FlowBox, GridBox } from '../imports.js';
 import Circle from '../nodes/Circle.js';
 import Image from '../nodes/Image.js';
 import Node from '../nodes/Node.js';
@@ -1166,6 +1166,444 @@ else {
       display.updateDisplay();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAoCAYAAAAIeF9DAAAAAXNSR0IArs4c6QAAAQtJREFUaEPtmLENwlAMRH8khmAieoZhibTsQUsRiU2YhRRpIkGQf+4kDuml/nasdz7/OEPjiSIwRFVDMQ1BwpoAQRAkjEBYOTgEQcIIhJWDQxAkjEBYOTjkXwU53seXs/br7eJM187PyZrv8Dj9pFnLL0UQq96byRBkAw0OERuQkSUC5A75DJCRxchaCOAQHNI1ZLnUu3C9H+ZSFwEyshhZXS3EyOrCxchq/DoRO6YYzh7CHsIe8s0sOASH4BAcUrxQ18f47N0BbR3Cpi4CZFMXN3WRP+FFAuWvrGI+jokEEEQE6A5HEDdRMR+CiADd4QjiJirmQxARoDscQdxExXwIIgJ0hyOIm6iYbwatlIwpljwRmAAAAABJRU5ErkJggg==',
     DEFAULT_THRESHOLD, layoutTestedRenderers
+  );
+
+  multipleRendererTest( 'GridBox rows',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        rows: [
+          [
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } )
+          ],
+          [
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+          ]
+        ],
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 60;
+      display.height = 60;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAAXNSR0IArs4c6QAAAQNJREFUaEPtmMENgkAQRZfECjxZkXcL8KbN2IoFeDCxEzugBBMMkQsxmDFvD5PlcWbIzH87/wNdWdnVrWze4sCtE5ewhBtTwCPdGNCvcSS8RHh3uww16b/6U83Hlf64DcEL3TR25sCQj4ShgB7pBQHdYV16UkCXhiajS0MBdWld+qOAsWQsGUvQTqdyYwnqaCwZS8bS7yW6noeq/7QOzzvc2nn55rEPvVOEbhof7cCQj4ShgB5pGkvuMDyC7jAU0B12h/98tdS04M5pWlBATUvT0rT8Hp4pYCxBVzWWoIDVYwn2k6Y8/E8rTcewEQeGAqYvl3B6RLBBCUMB05dLOD0i2OAbsB/wPQ/vWw0AAAAASUVORK5CYII=',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox columns',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        columns: [
+          [
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } )
+          ],
+          [
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+          ]
+        ],
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 60;
+      display.height = 60;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAAXNSR0IArs4c6QAAAQVJREFUaEPtmLENwkAQBP8lSiCgIjqgFJogJSQgIHdK5goohIgWQBZOLGTr0Xxweo9jn3W387drO6eVXXll8yYHbp24hCXcmAIe6caA/owj4TnCu/vpXZP+uTvWfFw6XHIRvKKbhs4cGPKRMBTQIz0joDusS48K6NLQZHRpKKAurUt/FTCWjCVjCdrpWG4sQR2NJWPJWFpeou3tVfWf1vP6gFs7Ld/0+6J3iqKbhkc7MOQjYSigR5rGkjsMj6A7DAV0h93hP18tNS24c5oWFFDT0rQ0Lb+HJwoYS9BVjSUoYPVYgv2EKS/+pxWmY9iIA0MBw5dLODwi2KCEoYDhyyUcHhFs8ANuANw9S/6aDwAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox coordinates',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        children: [
+          new Rectangle( 0, 0, 75, 50, {
+            fill: colors[ 0 ],
+            layoutOptions: { column: 0, row: 0 }
+          } ),
+          new Rectangle( 0, 0, 50, 75, {
+            fill: colors[ 2 ],
+            layoutOptions: { column: 1, row: 0 }
+          } ),
+          new Rectangle( 0, 0, 50, 50, {
+            fill: colors[ 4 ],
+            layoutOptions: { column: 2, row: 0 }
+          } ),
+          new Rectangle( 0, 0, 50, 50, {
+            fill: colors[ 6 ],
+            layoutOptions: { column: 0, row: 1 }
+          } ),
+          new Rectangle( 0, 0, 50, 50, {
+            fill: colors[ 8 ],
+            layoutOptions: { column: 1, row: 2 }
+          } )
+        ]
+      } ) );
+
+      display.width = 75 + 50 + 50 + 20;
+      display.height = 75 + 50 + 50 + 20;
+      display.updateDisplay();
+    }, 'data:image/png;base64,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',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox autoColumns',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        autoColumns: 3,
+        children: colors.map( color => {
+          return new Rectangle( 0, 0, 20, 20, { fill: color } );
+        } ),
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 80;
+      display.height = 100;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABkCAYAAAAR+rcWAAAAAXNSR0IArs4c6QAAAgFJREFUeF7t2aFOA0EUheHdtAaJgofAoRAgSUD2HXgFgiM8TxMEDoPgBdBoQoLA1BJIybZqM5DMyT+taP7qe7fbb8907+z2nR8k0KNumzsBYQgEFBAKwHYTKCAUgO0mUEAoANtN4LYAz+aTJfyuUfvr3mXLw3X95LTp8T4urqvCVVU0nJmAf18fAf/JrQmEC1pAATMBbyKZV1EtoICZgHNg5lVUCyjgSsBB2kF6LeBdGP4lCChgJuBdOPNyjPF5oM8DozXj46yIqyxuDnjw8Nz0ncjP4gj+xHH78ft+0+M93vRVm4yqouHMBIT/gQIKGC1xl3DEVRYLKGAm4F048yqqBRQwE3CQzryKagEFXL9KqHVwJ+JOpDYrqzoH6YjLnUjnHAgTI6CAmYBzYOblID2/WjZ9J3Ly9gkvwbj98Oul6fGmT+dVM3JV0XBmAsJBWkABoyXuEo64ymIBBcwEvAtnXkW1gAJmAg7SmVdRLaCA2TsRdyLuRKI14yAdcbkT6ZwDYWIEFDATcA7MvBykv2e3Td+JTO/vql8nwGu10fbqHyEgHKQFFHAjS9klDFkFFBAKwHYTKCAUgO0mUEAoANtNoIBQALabQAGhAGw3gQJCAdhuAgWEArDdBG4LEH7PzrZXJ3BnBeAPE1BAKADbTaCAUAC2m0ABoQBsN4ECQgHY/gtXGOB09nx7YQAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox autoRows',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        autoRows: 3,
+        children: colors.map( color => {
+          return new Rectangle( 0, 0, 20, 20, { fill: color } );
+        } ),
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 100;
+      display.height = 80;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABQCAYAAADvCdDvAAAAAXNSR0IArs4c6QAAAiVJREFUeF7tmTFOA0EMRSciEidAUHAHTgAlHQWHoQ8tNRegoIqUJiAQSHAFUnIIxAkiENpmo81Edv4vBuWlHnsnz/a3vTsq/JoiMGrqNlymEJDGkoCAEJDGCDR2HSqEgDRGoLHrUCEEpDECjV2HCvmvATmb7v047/65/+50V27np1Z/l18Tq7/x7DqU/KFDfzcjIFp8CIjGr1AhIkAkSwRID1kPkB5SSSwkS6w4JEsEiGQhWakUQrJSuIaHkSwRIJKFZKVSCMlK4UKyeJclJgzvskSASJYIkClLBMiUxZSVSiEkK4WLKYspS0wY+5R1+HBh/aa+/L4T/+Kq+cf90urv+Pkg/GnC+eDwQwmIE3vdFwGpsKFCxAREskSA9BBxD6GHiBkYNKeH0EM6AkgWkhUUje4YU1YK1/AwU5YIEMlCslIphGSlcCFZhT1EzJigOXsIewh7yKZioUKoECqECgk21P4xxt4toPVNdm5TP3q6sX5TP1lciSFYNX98ebX6G7+dh/ur88HhhxIQJ/a6LwJSYUOFiAmIZIkA6SHi2156iJiBQXN6CD2kI4BkIVlB0eiOMWWlcA0PM2WJAJEsJCuVQkhWCheSVdhDxIwJmrOHsIewh2wqFiqECqFCqJBgQ+0fY+zdAlrfZOc2dZEX5kEC4aYe9McxkQABEQG6zQmIm6joj4CIAN3mBMRNVPRHQESAbnMC4iYq+iMgIkC3OQFxExX9/QK8zMxgZxcsEQAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox addRow/addColumn',
+    ( scene, display ) => {
+      const box = new GridBox( { x: 10, y: 10 } );
+      box.addRow( [
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } )
+      ] );
+      box.addColumn( [
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } )
+      ] );
+
+      scene.addChild( box );
+
+      display.width = 80;
+      display.height = 80;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAUFJREFUeF7t3MENwQAAhlFdQRws52YaaxjCUmICCXFG0uZrEXnO/bRef5GQGFYeSWBItXgFMI4AIMAoEHMLBBgFYm6BAKNAzC3wU4Db0+EWz7Vofj3vZ33+8249alyjDnpcGcDX9wfgm91aYHxDAwQ4TcCHyDSvp6MBAowCMbdAgFEg5hYIMArE3AIBRoGYWyDAKBBzCwQYBWJugf8OGF/f4vnmeJn1N5vZv1BdXCCeACDAKBBzCwQYBWJugQCjQMwtEGAUiLkFAowCMbdAgFEg5hYIMArE3AIBRoGYWyDAKBBzCwQYBWJugQCjQMwtEGAUiLkFAowCMbdAgFEg5hYIMArE3AIBRoGYWyDAKBBzCwQYBWJugQCjQMwtMAJ+Kx/910/fusBfPy/AeIcAAowCMbdAgFEg5hYIMArE3AIj4B2aSBhgSr+aTAAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox insertRow/insertColumn',
+    ( scene, display ) => {
+      const box = new GridBox( { x: 10, y: 10 } );
+      box.insertRow( 0, [
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } )
+      ] );
+      box.insertColumn( 1, [
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } )
+      ] );
+      box.insertRow( 2, [
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+        new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } )
+      ] );
+
+      scene.addChild( box );
+
+      display.width = 80;
+      display.height = 100;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABkCAYAAAAR+rcWAAAAAXNSR0IArs4c6QAAAdRJREFUeF7t2sFNw0AQBVBbogKUAy1RAEdu0AJF0ALcOFIALXGIqAApyMkJOUg7+gOJxMt5x1m//LV37MyTTyQwR9WKJ4BhCAACDAXCcgkEGAqE5RIIMBQIyyXwrwCv3h534Xd9K//c3nUebrrYPLce7/36YShcQ4OWmQE8/vsA/CG3EhguaIAAawJuIjWv1WiAAGsC9oE1r9VogAD3AjbSNtIHAXfh8JIAEGBNwF245mUb43mg54GlNeNxVolrPbgdMJzPqnzz8tH6jmV7ezncFHSey0m+dDkBgOHPCBBg7WFC6OUaCDDcBwIE2J0B18AOUfvAUBEgwIOAVi5MAkCANQG9cM1LKxd6AQSolevOgFauQ3S4E3m937W+w+iY/G8e4+ZpHrIZGrRMFGB4DQQIsLTiLeES13owQIChQFgugQBDgbBcAgGGAmG5BAIMBcJyCQQYCoTlEggwFAjLJRBgKBCWS+C5AYbzWZX7Z0IoChDgXmD4rVzoZQkDPC4ggWEyAAI8CPiLb5gEgABrAjbSNS/7wNALIEAb6e4M6IU7RHUioSJAgFq5MAP/FLBF7QwOcrJr4Bmce8sUAIaMAAGGAmG5BAIMBcJyCQQYCoTlEhgCfgHROnx0NRHmcwAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox consistent spacing',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        spacing: 5,
+        rows: _.range( 0, 6 ).map( i => _.range( 0, 6 ).map( j => {
+          return new Rectangle( 0, 0, 20, 20, { fill: colors[ ( i + j ) % 10 ] } );
+        } ) ),
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 165;
+      display.height = 165;
+      display.updateDisplay();
+    }, 'data:image/png;base64,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',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox x/y spacing',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        xSpacing: 5,
+        ySpacing: 2,
+        rows: _.range( 0, 6 ).map( i => _.range( 0, 6 ).map( j => {
+          return new Rectangle( 0, 0, 20, 20, { fill: colors[ ( i + j ) % 10 ] } );
+        } ) ),
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 165;
+      display.height = 150;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKUAAACWCAYAAAC/xUjZAAAAAXNSR0IArs4c6QAABY5JREFUeF7t3TGOHFUQxvFa2SdARibgLBsQ2CCBA0sbEvoKiAyRWVyB0OFKDgAJTOBgz+IAC+QT2Fo02o12XktfzbTdT6MfcY1f8/W/66uq16/3rPxHgckUOJvselwOBQqUIJhOAVBOd0tcECgxMJ0CoJzulrggUGJgOgVAOd0tcUGgxMB0CoByulvigmIozy/vXa8p19XFh721H/7x3aprvP329701vvjzl1XX+OebH/b/P367WnWNt0/O99Z48OLdqmv89/1ne2s8fn696hqvfjyLeIuCdjCCcvxIgjJPVaCsKpkyB0amrCr2nQPDvhe0Yt/sO3+MxpHsm323GGLf7LsFDPtm3y1gdN+5XOybfee0VBX7Zt8tYNg3+24Bw75zudg3+85pYd83Whme58ywb/ad01JV7DuXi32z75wW9s2+W7TsHi6vro0ls/dt77v7MN2NZ9/su8WQ4bnuuwUM+9Z9t4DRfedyrW7f+dIiKXCcAvEZneOW8WsK5ArEUDppOBb1lOu9y2frnma8+HXl04ygBGWe68aRoLQF2GJo1ITIlFXlQwFjjraaIYISlIuZDZQL0qgp1ZStemAQrKZUU7YYUlPal24Bw77ZdwsYc8pcLvbNvnNaqop9s+8WMOybfbeAYd+5XOybfee0sO8brXzQNGeGfbPvnJYTP9Rlm9E2o23GWwW8T9nKi/vBGp1cQI2ORienRaOj0WnRsuHXK9SUako1Zbem7D7d4ilwqAJxo3PoAn5Hga4CMZSOKoylPeXB9puv/131bzN++dfnEW9R0O52gBKU3Yx3Nx6UdltaDI1miDJlVT30J4mHIG31riMoQbmY2UC5II2aUk3ZqgcGwWpKNWWLITWlfekWMOybfbeAMafM5WLf7DunparYN/tuAcO+2XcLGPady8W+2XdOC/u+0cpfVciZYd/sO6flxN8Kt81om9E2460CXl1r5cX9YI1OLqBGR6OT06LR0ei0aNnw+KuaUk2ppuzWlN2nWzwFDlUgbnQOXcDvKNBVIIbSUYWxtKc82H7/1d+rnma8//pRxFsUtLsdoARlN+PdjQel3ZYWQ6MZokxZVQ9evFvVLgy2cy5BabCd07LhYFumlCkXQd3qrXBQghKU3eG57lv33ao5BsG6b913iyGNjkanBYyackEu9s2+W08S+x7LZU6ZY8S+2XdOiznlslbsm323niT2zb6PBYZ9s+8WQ7pv3XcLGO9T5nIZnhue57RUFftm3y1g2Df7bgHDvnO5VrfvfGmRFDhOgfiMznHL+DUFcgViKB1VGIt6yvXe+6c/rXo85f7LnyPeoqDd7QAlKPNcN44E5Yl/g+dTHFWQKavq8fPrVe1CZ5zntlFnDEpQLhK01WAblKAE5a0CGp3c4YaRuu9cQI2ORienparUlF6WaAGjplyQy5zSnLL1JA2C2Tf7bjHEvtl3Cxj2zb5bwOi+c7nYN/vOadF932jlQwE5M+ybfee0nPiHAmwz2ma0zWibsZUQF4M1OrmOGh2NTk6LRkej06JlwzPZ09eUXSHFU+BQBeJX1w5dwO8o0FUghtJRhbG0pzxDPL+8t+rxlKuLDxFvUdDudoASlN2MdzcelAbbLYZG4xqZsqoun617mtEMMecSlGaIOS0bzhBlSplyEdStXsAFJShB2d371n3rvls1xyBY9637bjGk0dHo9IB5/Whvnvwp9qXVlGpKNaWaspWsFoNtM+Y6qinVlDktu1no4Cu77Jt9s2/23Uok7HsFudg3+25hxL6NhHrAGAmN9bKjY0en9STZ0RnL5dW1HCP2zb5zWry61tJKMAU+igLxGZ2Psrp/lAIDBUAJi+kUAOV0t8QFgRID0ykAyuluiQsCJQamUwCU090SFwRKDEynACinuyUu6H/0DkE8oOqPzgAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox x/y spacing arrays',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        xSpacing: [ 0, 5, 10, 5, 0 ],
+        ySpacing: [ 5, 0, 10, 0, 5 ],
+        rows: _.range( 0, 6 ).map( i => _.range( 0, 6 ).map( j => {
+          return new Rectangle( 0, 0, 20, 20, { fill: colors[ ( i + j ) % 10 ] } );
+        } ) ),
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 160;
+      display.height = 160;
+      display.updateDisplay();
+    }, 'data:image/png;base64,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',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox x/y spacing arrays with invisible children',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        xSpacing: [ 0, 5, 10, 5, 0 ],
+        ySpacing: [ 5, 0, 10, 0, 5 ],
+        rows: _.range( 0, 6 ).map( i => _.range( 0, 6 ).map( j => {
+          return new Rectangle( 0, 0, 20, 20, { fill: colors[ ( i + j ) % 10 ], visible: i % 2 === 0 && j % 2 === 0 } );
+        } ) ),
+        x: 10,
+        y: 10
+      } ) );
+
+      display.width = 160;
+      display.height = 160;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAAAXNSR0IArs4c6QAAA/1JREFUeF7t3LGJVAEYhdFZNDRRDKzGwECwAEMzbcEWBBswMNzQAgQDA8uwAgPZCoS1gQkefA8uLMd85vLOfPMHu6w3F/8IDAVuhtumCVwEKIKpgACn/MYFqIGpgACn/MYFqIGpgACn/MYFqIGpgACn/MYPB/jy26P7M7l+P/l05ttd/rz5eOhZnt/enfocf989O7R76sM+oDc7jCfA65+6ANu3QYDN7yLABijA5ifA6CfACOgCNkABNj8XMPoJMAK6gA1QgM3PBYx+AoyALmADFGDzcwGjnwAjoAvYAAXY/FzA6CfACOgCNkABNj8XMPoJMAK6gA1QgM3PBYx+AoyALmADFGDzcwGjnwAjoAvYAAXY/FzA6Hc4wLjj5QSuCghQGFMBAU75jQtQA1MBAU75jR8O8MX3z6f+Qfe/v+9P1T/645BvH+5PfY63X28OG576wA/kzQ7jCfD6Jy7A9k0QYPO7CLABCrD5CTD6CTACuoANUIDNzwWMfgKMgC5gAxRg83MBo58AI6AL2AAF2PxcwOgnwAjoAjZAATY/FzD6CTACuoANUIDNzwWMfgKMgC5gAxRg83MBo58AI6AL2AAF2PxcwOgnwAjoAjZAATY/FzD6HQ4w7ng5gasCAhTGVECAU37jAtTAVECAU37jAtTAVECAU37jAtTAVECAU37jAtTAVOBwgM9v7079X6W+/Hp66oMf/Z3sv1c/Tn2Oxz9fHzY89YEfyJsdxhPg9U9cgO2bIMDmdxFgAxRg8xNg9BNgBHQBG6AAm58LGP0EGAFdwAYowObnAkY/AUZAF7ABCrD5uYDRT4AR0AVsgAJsfi5g9BNgBHQBG6AAm58LGP0EGAFdwAYowObnAkY/AUZAF7ABCrD5uYDRT4AR0AVsgAJsfi5g9DscYNzxcgJXBQQojKmAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xgWogamAAKf8xv8Difgwv8OJwyoAAAAASUVORK5CYII=',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox autoRows with invisible child',
+    ( scene, display ) => {
+      const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ], visible: false } );
+      scene.addChild( new GridBox( {
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          child,
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10,
+        autoColumns: 2
+      } ) );
+
+      display.width = 60;
+      display.height = 60;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAAXNSR0IArs4c6QAAAQJJREFUaEPtmMENglAQRD+JFXiyHg924Y1qbMjEgxVRAonGgAeDC5PMv7D/cd79MDM7s0BXGru6xvAWAGdXHIVROBkDjHQyQRdwUDhS+HS/vWqqPw59zePKcD1K4klFnycDsKkPCpsEMtIBgXiYlJ4ZIKXNkCGlTQJJaVJ6YoC1xFpiLZlxOrezlkweWUusJdbSuonG86PqP63D8yK/A5j2/mmXbwpgk3YUNglU2xnpiCk8rM5QUIeHTQLVdjyMh7+fc7xpqa75X0doefzJ3YQWoUVoyXZZLSS06vC4eQqhRWhtDsm+CuSR3hes+GkBnEXJCAcKo3AyBhjpZIIu4DSn8Buc2sg9J4KCUQAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox autoRows with child made invisible later',
+    ( scene, display ) => {
+      const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } );
+      scene.addChild( new GridBox( {
+        children: [
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+          child,
+          new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+        ],
+        x: 10,
+        y: 10,
+        autoColumns: 2
+      } ) );
+      child.visible = false;
+
+      display.width = 60;
+      display.height = 60;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAAXNSR0IArs4c6QAAAQJJREFUaEPtmMENglAQRD+JFXiyHg924Y1qbMjEgxVRAonGgAeDC5PMv7D/cd79MDM7s0BXGru6xvAWAGdXHIVROBkDjHQyQRdwUDhS+HS/vWqqPw59zePKcD1K4klFnycDsKkPCpsEMtIBgXiYlJ4ZIKXNkCGlTQJJaVJ6YoC1xFpiLZlxOrezlkweWUusJdbSuonG86PqP63D8yK/A5j2/mmXbwpgk3YUNglU2xnpiCk8rM5QUIeHTQLVdjyMh7+fc7xpqa75X0doefzJ3YQWoUVoyXZZLSS06vC4eQqhRWhtDsm+CuSR3hes+GkBnEXJCAcKo3AyBhjpZIIu4DSn8Buc2sg9J4KCUQAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox preferred size grow',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        rows: [
+          [
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } )
+          ],
+          [
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+            new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
+          ]
+        ],
+        x: 10,
+        y: 10,
+        grow: 1,
+        preferredWidth: 80,
+        preferredHeight: 60
+      } ) );
+
+      display.width = 100;
+      display.height = 80;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABQCAYAAADvCdDvAAAAAXNSR0IArs4c6QAAAdJJREFUeF7t2rFJREEURuF5YAViYD0GggUYGtqCRdiC4YYWIBhYj4FYgbCyNZwTXJiz+R3u+/4370/2WP1GCRyjtmmZVSDDXoICKZBhAsPW6YYUyDCBYet0QwpkmMCwdbohBTJMYNg63ZACGSYwbJ1uSIEMExi2jn5Dbj9ez+Yzfj+8qDvenH7V/X6ertX91MMuQRQIex0LhPmtbggE7JMFAesQCFiHMMA6hPnVIdBv1SFQsA6BgHUIA6xDmF8dAv3qEApYh0DBOoQB1iHMrw6BfnUIBaxDoGAdwgDrEOZXh0C//TqEgu0+r3+ydgelz18gVFCeLxAZlB5XIFRQni8QGZQeVyBUUJ4vEBmUHlcgVFCeLxAZlB6nB/L+fFb/Xf74dqg7/t19qvtdfd2r+6mHXd6OAmF3pECY3+qGQMA+WRCwDoGAdQgDrEOYXx0C/VYdAgXrEAhYhzDAOoT51SHQrw6hgHUIFKxDGGAdwvzqEOhXh1DAOgQK1iEMsA5hfnUI9NuvQyjY7vP6J2t3UPr8BUIF5fkCkUHpcQVCBeX5ApFB6XEFQgXl+QKRQelxBUIF5fkCkUHpcQVCBeX5ApFB6XEFQgXl+QKRQelxBUIF5fl/L+1AYHHDS7oAAAAASUVORK5CYII=',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox preferred size asymmetric grow',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        x: 10,
+        y: 10,
+        preferredWidth: 100,
+        preferredHeight: 100,
+        rows: [
+          [
+            new Rectangle( 0, 0, 30, 20, {
+              fill: colors[ 0 ],
+              layoutOptions: { xGrow: 1 }
+            } ),
+            new Rectangle( 0, 0, 20, 30, {
+              fill: colors[ 2 ]
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 4 ]
+            } )
+          ],
+          [
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 6 ]
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 8 ],
+              layoutOptions: { yGrow: 1 }
+            } )
+          ]
+        ]
+      } ) );
+
+      display.width = 120;
+      display.height = 120;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAAAXNSR0IArs4c6QAAAwtJREFUeF7tnLFNA0EQRc+CCoiohoAAiQIckkELFEELlOACkAgIqIbAJRgZITLbZ2Zv93vnvh/x3NzMf/PHy53lxcCftQIL6+5obgCw+RAAGMDmCpi3h4MBbK6AeXs4GMDmCpi3h4MBbK7ASHvXby/blp1/3T93MVOXm7YUTpULwCplk+QFcBIQqjIArFI2SV4AF4C4WV00PbBEb/25/J58xmgNeLN+jJYdils/XIV6CwWF7ngkCMDDAODaKTpwPQ4eTvM+GAfjYIF/hwEH4+DRweKQVeA5VjQrumBc4qGsaFY0Kzrul/FIVjQrusUc7eVgRbOiWdEtrMWKZkW3mCNW9AEVedkwMlo86CjwHCuaFV0wLvFQTtGcojlFx/3Cg45jWvHCv8Uk7eRgRZ9oRQvYyVO2PkXzxXc5srIbALhMr9lFA3h2yMoKBnCZXrOLBvDskJ1nwSd5Fn2e0uboGsA5OMiqALBM2hyJAZyDg6wKAMukzZEYwDk4yKoAsEzaHIkBnIODrAoAy6TNkRjAOTjIqgCwTNociQGcg4OsCgDLpM2RGMA5OMiqALBM2hyJAZyDg6wKAMukzZEYwDk4yKoAsEzaHIkBnIODrAoAy6TNkRjAOTjIqgCwTNociQGcg4Osim6AV0/bpr8Cv3xdNO1lc/vetL7Lj7um9UUnostNf4sDcBRRXRyAR/TDwXWDhYMr9YtejoNxcHRWyuL4DC7Ta2o0DsbBU2fn+HU4WKPrblYcjIM1k4aDNbri4KCu/B8cFGosDAdXChi8nM9gPoODo1IYhoMLBZsYjoNx8MTR+ecyHKzRlVN0UFdO0UGhOEX/KcAL/8qB4RsdhwXkkMUhq9JaXN5VgW4O7tr1Gd0cwOawAQxgcwXM28PBADZXwLw9HAxgcwXM28PBADZXwLw9HAxgcwXM28PBADZXwLw9HAxgcwXM28PBADZXwLw9HAxgcwXM28PBADZXwLw9HAxgcwXM28PBADZXwLw9HAxgcwXM28PBADZXwLw9HAxgcwXM28PBADZXwLy9H5++kIgc8xF6AAAAAElFTkSuQmCC',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox preferred size stretch',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        x: 10,
+        y: 10,
+        preferredWidth: 80,
+        preferredHeight: 80,
+        rows: [
+          [
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 0 ]
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 2 ]
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 4 ]
+            } )
+          ],
+          [
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 6 ]
+            } ),
+            new Rectangle( {
+              sizable: true,
+              localMinimumWidth: 20,
+              localMinimumHeight: 20,
+              fill: 'gray',
+              layoutOptions: { grow: 1, stretch: true }
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 8 ]
+            } )
+          ]
+        ]
+      } ) );
+
+      display.width = 100;
+      display.height = 100;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAApxJREFUeF7tm7tNA0EURW1BBYgAiU4ICJEogJCQFogIlpQ2CF0AGYF7oAcCRAfIyEvgxGvP1b1PHotD/D7jc+bteHfNfMZfVwTmXa2GxcwQ0tkmQAhCOiPQ2XKYEIR0RqCz5TAhCOmMQGfLYUKOVcj14mSVXPvy7qdpM1y8vUT7ft4+NvU9f/2O9v26P2vq2xS0FoEQbzsiZIIfEzIBhkvWdjBcsiY2DGfIBBgO9QkwHOoc6iMBJoQJGQlwhnCGjAT4lsW3rD8C3IdwHzIS4E6dO/WRAM+yeJal3ThxhnCGcIbsmhkmhAlhQpiQDYH4tyztyN4fPQxD9J31/o5axDAMzU8xtMq7ow/SdL0khJhnSHIXIGSaJhMywYZLVnoEzXoIMQGm0xGSJmrWQ4gJMJ2OkDRRsx5CTIDpdISkiZr1EGICTKcjJE3UrIcQE2A6HSFpomY9hJgA0+kISRM16yHEBJhOR0iaqFkPISbAdHr3QhYPq+g78I/L5zTDaL2n5VW03un7TdPLwKag9coQ4vlBiMdvxoSYANPpCEkTNeshxASYTkdImqhZDyEmwHQ6QtJEzXoIMQGm0xGSJmrWQ4gJMJ2OkDRRsx5CTIDpdISkiZr1EGICTKcjJE3UrIcQE2A6HSFpomY9hJgA0+ndC0l/YP4tejvR5nfqCEkTQIhEtPufAUmfpiGYSxYT0rBNNiFMiISrPhgh9YylDgiRcNUHI6SesdQBIRKu+mCE1DOWOiBEwlUfjJB6xlIHhEi46oMRUs9Y6oAQCVd9MELqGUsdECLhqg9GSD1jqQNCJFz1wf9OSD3S4+xwsHfqx4mrftUIqWcsdUCIhKs+GCH1jKUOCJFw1QcjpJ6x1AEhEq76YITUM5Y6IETCVR/8C5rVHIMJTH11AAAAAElFTkSuQmCC',
+    DEFAULT_THRESHOLD, testedRenderers
+  );
+
+  multipleRendererTest( 'GridBox preferred size align',
+    ( scene, display ) => {
+      scene.addChild( new GridBox( {
+        grow: 1,
+        x: 10,
+        y: 10,
+        preferredWidth: 80,
+        preferredHeight: 80,
+        rows: [
+          [
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 0 ],
+              layoutOptions: { xAlign: 'left', yAlign: 'top' }
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 2 ]
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 4 ],
+              layoutOptions: { yAlign: 'bottom' }
+            } )
+          ],
+          [
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 6 ]
+            } ),
+            new Rectangle( 0, 0, 20, 20, {
+              fill: colors[ 8 ],
+              layoutOptions: { yAlign: 'top' }
+            } )
+          ]
+        ]
+      } ) );
+
+      display.width = 100;
+      display.height = 100;
+      display.updateDisplay();
+    }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAnNJREFUeF7tmrFNxEAURL2CBgiQqIaAAIkCfBEpLVAEJRAS4gKQCAiohgA6APl0EgFIPjRr7Q6DeBfPef69tz9Y68rAJ4pAiZqGYQaEhB0ChCAkjEDYOGwIQsIIhI3DhiAkjEDYOGzIXxVyOh3MLWd/Hj84DAtAZSgIaXkc9z8LIR7OcgtCZFSeIEI8nOUWhMioPEGEeDjLLQiRUXmCCPFwllsQIqPyBOOFnDzcNH1D8HJxLf9mj4LvLfJwv3VTR8ieY4EQz76wIR7OcgtCZFSeIEI8nOUWhMioPEGEeDjLLQiRUXmCCPFwlltkIfITGwddF8Pju7dxLuW+2filTK+XR5va5yHkkxhCxKPDhoigXDGEuEiLPQgRQbliCHGRFnsQIoJyxRDiIi32IEQE5YohxEU6rIeLIUIWCcS/OnF5Y0NcpMUehIigXDGEuEiLPQgRQbliCHGRFnsQIoJyxRDiIi32IEQE9X722PTf74dP59F3r+jhds4QIp5cVwwhLtJiD0JEUK4YQlykxR6EiKBcMYS4SIs9CBFBuWIIcZEWexAigJqu5t2/xEchqkXKsBlvy7QURoiAECECpJWRVa9OELKStvA1hAiQnBGEOGkLXQgRIDkjCHHSFroQIkByRhDipC10IUSA5IzEC3HCSOhCSIKFLzMgBCELBH54uRjGq/s4bEh3xHUFCKnj1T2NkO6I6woQUserexoh3RHXFSCkjlf39Coh3af6xwUICZOPEISEEQgbhw1BSBiBsHHYEISEEQgbhw1BSBiBsHHYEISEEQgbhw1BSBiBsHHYEISEEQgbhw1BSBiBsHHYEISEEQgbZwsQ4sx0SKWj3AAAAABJRU5ErkJggg==',
+    DEFAULT_THRESHOLD, testedRenderers
   );
 
 }

@@ -347,6 +347,10 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
    * Releases references
    */
   override dispose(): void {
+
+    // Lock our layout forever
+    this._constraint.lock();
+
     this.childInsertedEmitter.removeListener( this.onChildInserted );
     this.childRemovedEmitter.removeListener( this.onChildRemoved );
     this.childrenReorderedEmitter.removeListener( this.onChildrenReordered );

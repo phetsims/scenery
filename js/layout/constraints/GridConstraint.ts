@@ -127,11 +127,11 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
         return line;
       } );
 
-      // Convert a simple spacing number (or a spacing array into a spacing array of the correct size.
-      const maxIndex = lineIndices[ lineIndices.length - 1 ];
-      const lineSpacings = typeof orientedSpacing === 'number' ?
-                           _.range( 0, maxIndex ).map( () => orientedSpacing ) :
-                           orientedSpacing.slice( 0, maxIndex );
+      // Convert a simple spacing number (or a spacing array) into a spacing array of the correct size, only including
+      // spacings AFTER our actually-visible lines. We'll also skip the spacing after the last line, as it won't be used
+      const lineSpacings = lines.slice( 0, -1 ).map( line => {
+        return typeof orientedSpacing === 'number' ? orientedSpacing : orientedSpacing[ line.index ];
+      } );
 
       // Scan sizes for single-line cells first
       cells.forEach( cell => {
@@ -213,19 +213,38 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
       layoutBounds[ orientation.maxCoordinate ] = startPosition + size;
       lines.forEach( ( line, arrayIndex ) => {
         // Position all the lines
-        line.position = startPosition + _.sum( lines.slice( 0, arrayIndex ).map( line => line.size ) ) + _.sum( lineSpacings.slice( 0, line.index ) );
+        const totalPreviousLineSizes = _.sum( lines.slice( 0, arrayIndex ).map( line => line.size ) );
+        const totalPreviousSpacings = _.sum( lineSpacings.slice( 0, arrayIndex ) );
+        line.position = startPosition + totalPreviousLineSizes + totalPreviousSpacings;
       } );
       cells.forEach( cell => {
-        const cellIndexPosition = cell.position.get( orientation );
-        const cellSize = cell.size.get( orientation );
-        const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
-        const firstLine = lineMap.get( cellIndexPosition )!;
+        // The line index of the first line our cell is composed of.
+        const cellFirstIndexPosition = cell.position.get( orientation );
 
-        // If we're spanning multiple lines, we have to include the spacing that we've "absorbed"
-        const cellSpacings = lineSpacings.slice( cellIndexPosition, cellIndexPosition + cellSize - 1 );
+        // The size of our cell (width/height)
+        const cellSize = cell.size.get( orientation );
+
+        // The line index of the last line our cell is composed of.
+        const cellLastIndexPosition = cellFirstIndexPosition + cellSize - 1;
+
+        // All the lines our cell is composed of.
+        const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
+
+        const firstLine = lineMap.get( cellFirstIndexPosition )!;
+
+        // If we're spanning multiple lines, we have to include the spacing that we've "absorbed" (if we have a cell
+        // that spans columns 2 and 3, we'll need to include the spacing between 2 and 3.
+        let interiorAbsorbedSpacing = 0;
+        if ( cellFirstIndexPosition !== cellLastIndexPosition ) {
+          lines.slice( 0, -1 ).forEach( ( line, lineIndex ) => {
+            if ( line.index >= cellFirstIndexPosition && line.index < cellLastIndexPosition ) {
+              interiorAbsorbedSpacing += lineSpacings[ lineIndex ];
+            }
+          } );
+        }
 
         // Our size includes the line sizes and spacings
-        const cellAvailableSize = _.sum( cellLines.map( line => line.size ) ) + _.sum( cellSpacings );
+        const cellAvailableSize = _.sum( cellLines.map( line => line.size ) ) + interiorAbsorbedSpacing;
         const cellPosition = firstLine.position;
 
         // Adjust preferred size and move the cell

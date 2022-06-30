@@ -791,22 +791,72 @@ an UI and Display made for visual testing and debugging.
   );
      */
 
-    const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } );
-    scene.addChild( new FlowBox( {
-      orientation: 'horizontal',
-      children: [
-        new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
-        new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
-        child,
-        new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } )
-      ],
-      x: 10,
-      y: 10
-    } ) );
-    child.visible = false;
+    // scene.addChild( new GridBox( {
+    //   xSpacing: [ 0, 5, 10, 5, 0 ],
+    //   ySpacing: [ 5, 0, 10, 0, 5 ],
+    //   rows: _.range( 0, 6 ).map( i => _.range( 0, 6 ).map( j => {
+    //     return new Rectangle( 0, 0, 20, 20, { fill: colors[ ( i + j ) % 10 ], visible: i % 2 === 0 && j % 2 === 0 } );
+    //   } ) ),
+    //   x: 10,
+    //   y: 10
+    // } ) );
+    //
+    // display.width = 160;
+    // display.height = 160;
+    // display.updateDisplay();
 
-    display.width = 100;
-    display.height = 40;
+    scene.addChild( new GridBox( {
+      x: 10,
+      y: 10,
+      preferredWidth: 100,
+      preferredHeight: 100,
+      children: [
+        new Rectangle( 0, 0, 15, 15, {
+          fill: colors[ 0 ],
+          layoutOptions: { column: 0, row: 0 }
+        } ),
+        new Rectangle( 0, 0, 30, 15, {
+          fill: colors[ 2 ],
+          sizable: true,
+          localMinimumWidth: 30,
+          localMinimumHeight: 15,
+          layoutOptions: { column: 1, row: 0, width: 2, stretch: true, grow: 1 }
+        } ),
+        new Rectangle( 0, 0, 30, 30, {
+          fill: colors[ 4 ],
+          sizable: true,
+          localMinimumWidth: 30,
+          localMinimumHeight: 100,
+          layoutOptions: { column: 0, row: 1, width: 2, height: 2, stretch: true }
+        } ),
+        new Rectangle( 0, 0, 15, 15, {
+          fill: colors[ 6 ],
+          layoutOptions: { column: 2, row: 1 }
+        } ),
+        new Rectangle( 0, 0, 15, 15, {
+          fill: colors[ 8 ],
+          layoutOptions: { column: 2, row: 2 }
+        } ),
+        new Rectangle( 0, 0, 15, 15, {
+          fill: colors[ 0 ],
+          layoutOptions: { column: 0, row: 3 }
+        } ),
+        new Rectangle( 0, 0, 15, 15, {
+          fill: colors[ 1 ],
+          layoutOptions: { column: 1, row: 3 }
+        } ),
+        new Rectangle( 0, 0, 15, 15, {
+          fill: colors[ 2 ],
+          layoutOptions: { column: 2, row: 3 }
+        } )
+      ]
+    } ) );
+
+    // Well, eeek
+    debugger;
+
+    display.width = 120;
+    display.height = 120;
     display.updateDisplay();
 
 

@@ -50,7 +50,7 @@ import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutua
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutNode, LayoutNodeOptions, MarginLayoutCell, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SIZABLE_OPTION_KEYS, VerticalLayoutAlign, LayoutAlign } from '../../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutAlign, LayoutNode, LayoutNodeOptions, MarginLayoutCell, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SIZABLE_OPTION_KEYS, VerticalLayoutAlign } from '../../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -130,6 +130,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   // Listeners that we'll need to remove
   private readonly onChildInserted: ( node: Node, index: number ) => void;
   private readonly onChildRemoved: ( node: Node ) => void;
+  private readonly onChildVisibilityToggled: () => void;
 
   constructor( providedOptions?: GridBoxOptions ) {
     const options = optionize<GridBoxOptions, StrictOmit<SelfOptions, Exclude<keyof GridConstraintOptions, GridConstraintExcludedOptions> | 'rows' | 'columns' | 'autoRows' | 'autoColumns'>,
@@ -154,6 +155,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
     this.onChildInserted = this.onGridBoxChildInserted.bind( this );
     this.onChildRemoved = this.onGridBoxChildRemoved.bind( this );
+    this.onChildVisibilityToggled = this.updateAllAutoLines.bind( this );
 
     this.childInsertedEmitter.addListener( this.onChildInserted );
     this.childRemovedEmitter.addListener( this.onChildRemoved );
@@ -402,19 +404,42 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   // Used for autoRows/autoColumns
   private updateAutoLines( orientation: Orientation, value: number | null ): void {
     if ( value !== null && this._autoLockCount === 0 ) {
+      let updatedCount = 0;
+
       this.constraint.lock();
 
-      this.children.forEach( ( child, index ) => {
-        child.mutateLayoutOptions( {
-          [ orientation.line ]: index % value,
-          [ orientation.opposite.line ]: Math.floor( index / value ),
-          width: 1,
-          height: 1
-        } );
+      this.children.filter( child => {
+        return child.bounds.isValid() && ( !this._constraint.excludeInvisible || child.visible );
+      } ).forEach( ( child, index ) => {
+        const primary = index % value;
+        const secondary = Math.floor( index / value );
+        const width = 1;
+        const height = 1;
+
+        // We guard to see if we actually have to update anything (so we can avoid triggering an auto-layout)
+        if ( !child.layoutOptions ||
+             child.layoutOptions[ orientation.line ] !== primary ||
+             child.layoutOptions[ orientation.opposite.line ] !== secondary ||
+             child.layoutOptions.width !== width ||
+             child.layoutOptions.height !== height
+        ) {
+          updatedCount++;
+          child.mutateLayoutOptions( {
+            [ orientation.line ]: index % value,
+            [ orientation.opposite.line ]: Math.floor( index / value ),
+            width: 1,
+            height: 1
+          } );
+        }
+
       } );
 
       this.constraint.unlock();
-      this.constraint.updateLayoutAutomatically();
+
+      // Only trigger an automatic layout IF we actually adjusted something.
+      if ( updatedCount > 0 ) {
+        this.constraint.updateLayoutAutomatically();
+      }
     }
   }
 
@@ -455,6 +480,8 @@ export default class GridBox extends LayoutNode<GridConstraint> {
    * Called when a child is inserted.
    */
   private onGridBoxChildInserted( node: Node, index: number ): void {
+    node.visibleProperty.lazyLink( this.onChildVisibilityToggled );
+
     const cell = new GridCell( this._constraint, node, this._constraint.createLayoutProxy( node ) );
     this._cellMap.set( node, cell );
 
@@ -465,6 +492,9 @@ export default class GridBox extends LayoutNode<GridConstraint> {
 
   /**
    * Called when a child is removed.
+   *
+   * NOTE: This is NOT called on disposal. Any additional cleanup (to prevent memory leaks) should be included in the
+   * dispose() function
    */
   private onGridBoxChildRemoved( node: Node ): void {
 
@@ -478,12 +508,17 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     cell.dispose();
 
     this.updateAllAutoLines();
+
+    node.visibleProperty.unlink( this.onChildVisibilityToggled );
   }
 
-  override mutate( options?: NodeOptions ): this {
+  override mutate( options?: GridBoxOptions ): this {
     // children can be used with one of autoRows/autoColumns, but otherwise these options are exclusive
     assertMutuallyExclusiveOptions( options, [ 'rows' ], [ 'columns' ], [ 'children', 'autoRows', 'autoColumns' ] );
-    assertMutuallyExclusiveOptions( options, [ 'autoRows' ], [ 'autoColumns' ] );
+    if ( options ) {
+      assert && assert( typeof options.autoRows !== 'number' || typeof options.autoColumns !== 'number',
+        'autoRows and autoColumns should not be specified both as non-null at the same time' );
+    }
 
     return super.mutate( options );
   }
@@ -664,7 +699,17 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this._constraint.maxContentHeight = value;
   }
 
+
+  public override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
+    super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
+
+    this.updateAllAutoLines();
+  }
+
   override dispose(): void {
+
+    // Lock our layout forever
+    this._constraint.lock();
 
     this.childInsertedEmitter.removeListener( this.onChildInserted );
     this.childRemovedEmitter.removeListener( this.onChildRemoved );
@@ -672,6 +717,8 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     // Dispose our cells here. We won't be getting the children-removed listeners fired (we removed them above)
     for ( const cell of this._cellMap.values() ) {
       cell.dispose();
+
+      cell.node.visibleProperty.unlink( this.onChildVisibilityToggled );
     }
 
     super.dispose();
