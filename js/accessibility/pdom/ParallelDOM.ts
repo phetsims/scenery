@@ -982,6 +982,9 @@ export default class ParallelDOM extends PhetioObject {
    * Set the tag name for the primary sibling in the PDOM. DOM element tag names are read-only, so this
    * function will create a new DOM element each time it is called for the Node's PDOMPeer and
    * reset the pdom content.
+   *
+   * This is the "entry point" for Parallel DOM content. When a Node has a tagName it will appear in the Parallel DOM
+   * and other attributes can be set. Without it, nothing will appear in the Parallel DOM.
    */
   public setTagName( tagName: string | null ): void {
     assert && assert( tagName === null || typeof tagName === 'string' );
