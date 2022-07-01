@@ -153,6 +153,8 @@ export type { TransformTrackerOptions } from './util/TransformTracker.js';
 export { default as TrailVisibilityTracker } from './util/TrailVisibilityTracker.js';
 
 export { default as AriaHasPopUpMutator } from './accessibility/pdom/AriaHasPopUpMutator.js';
+export { default as FocusableHeadingNode } from './accessibility/pdom/FocusableHeadingNode.js';
+export type { FocusableHeadingNodeOptions } from './accessibility/pdom/FocusableHeadingNode.js';
 export { default as Cursor } from './accessibility/reader/Cursor.js';
 export { default as Reader } from './accessibility/reader/Reader.js';
 export { default as KeyStateTracker } from './accessibility/KeyStateTracker.js';
