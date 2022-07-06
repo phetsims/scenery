@@ -230,17 +230,16 @@
     <div id="dynamic-example"></div>
     <script type="text/javascript">
       {
-        let circle;
         let step;
         dynamicDemo( 'dynamic-example', () => {
           /*START*/
-          circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
+          const circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
           let time = 0;
           step = dt => {
             time += dt;
             circle.radius = 25 + 10 * Math.sin( 4 * time );
           };
-          return new scenery.HBox( {
+          const box = new scenery.HBox( {
             children: [
               new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
               new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
@@ -249,6 +248,23 @@
             ]
           } );
           /*END*/
+          const foreground = new scenery.Rectangle( {
+            stroke: 'black',
+            lineWidth: 2
+          } );
+          box.boundsProperty.link( bounds => {
+            foreground.rectBounds = bounds;
+          } );
+          const visualNode = new scenery.Node( {
+            children: [ box, foreground ]
+          } );
+          const alignBox = new scenery.AlignBox( visualNode, {
+            alignBounds: new dot.Bounds2( 0, 0, 230, 80 ),
+            xAlign: 'left',
+            yAlign: 'top',
+            margin: 5
+          } );
+          return alignBox;
         }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
       }
     </script>
