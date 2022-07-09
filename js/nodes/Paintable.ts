@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ReadOnlyProperty } from '../../../axon/js/Property.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import { LineStyles, LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin } from '../../../kite/js/imports.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';

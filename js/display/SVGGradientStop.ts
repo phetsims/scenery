@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ReadOnlyProperty } from '../../../axon/js/Property.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 import { ActiveSVGGradient, Color, IColor, scenery, svgns } from '../imports.js';

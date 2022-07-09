@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ReadOnlyProperty } from '../../../axon/js/Property.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import { scenery, Color, Paint, IColor } from '../imports.js';
 

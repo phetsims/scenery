@@ -71,7 +71,7 @@
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
-import Property, { ReadOnlyProperty } from '../../../axon/js/Property.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -81,6 +81,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { IInputListener, Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerNullableCallback, PressListenerOptions, scenery, SceneryEvent, TransformTracker } from '../imports.js';
+import Property from '../../../axon/js/Property.js';
 
 // Scratch vectors used to prevent allocations
 const scratchVector2A = new Vector2( 0, 0 );

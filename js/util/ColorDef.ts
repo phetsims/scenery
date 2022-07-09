@@ -7,7 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property, { ReadOnlyProperty } from '../../../axon/js/Property.js';
+import Property from '../../../axon/js/Property.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
