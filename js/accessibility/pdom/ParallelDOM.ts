@@ -473,7 +473,7 @@ export default class ParallelDOM extends PhetioObject {
   // (and optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
   // (first children first, last children last) determined by the children array.
   // See setPDOMOrder() for more documentation.
-  private _pdomOrder: ( Node | null )[] | null
+  private _pdomOrder: ( Node | null )[] | null;
 
   // If this node is specified in another node's pdomOrder, then this will have the value of that other (PDOM parent)
   // Node. Otherwise it's null.
@@ -500,7 +500,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // If true, any DOM events received on the label sibling
   // will not dispatch SceneryEvents through the scene graph, see setExcludeLabelSiblingFromInput() - scenery internal
-  private excludeLabelSiblingFromInput: boolean
+  private excludeLabelSiblingFromInput: boolean;
 
   // HIGHER LEVEL API INITIALIZATION
 
