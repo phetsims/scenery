@@ -31,6 +31,8 @@ export default class ProfileColorProperty extends ColorProperty {
   // Treat as private
   readonly name: string;
 
+  public static readonly TANDEM_NAME_SUFFIX = 'ColorProperty';
+
   /**
    * @param namespace - namespace that this color belongs to
    * @param colorName - name of the color, unique within namespace
@@ -66,9 +68,9 @@ export default class ProfileColorProperty extends ColorProperty {
     super( Color.toColor( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ] ), options );
 
     assert && assert( !this.isPhetioInstrumented() ||
-                      tandem.name.endsWith( 'ColorProperty' ) ||
+                      tandem.name.endsWith( ProfileColorProperty.TANDEM_NAME_SUFFIX ) ||
                       tandem.name === 'colorProperty',
-      `Property tandem.name must end with ColorProperty: ${tandem.phetioID}` );
+      `Property tandem.name must end with ${ProfileColorProperty.TANDEM_NAME_SUFFIX}: ${tandem.phetioID}` );
 
     this.colorProfileMap = colorProfileMap;
 
