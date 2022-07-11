@@ -46,7 +46,7 @@ export type HighlightOverlayOptions = {
   // Controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
   // are shown when pointerFocusProperty changes
   readingBlockHighlightsVisibleProperty?: IProperty<boolean>;
-}
+};
 
 export default class HighlightOverlay implements IOverlay {
 

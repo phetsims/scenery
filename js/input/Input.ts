@@ -237,7 +237,7 @@ type SerializedDOMEvent = {
   constructorName: string; // used to get the constructor from the window object, see Input.deserializeDOMEvent
 } & {
   [key in SerializedPropertiesForDeserialization]?: any; // eslint-disable-line no-unused-vars
-}
+};
 
 // A list of keys on events that need to be serialized into HTMLElements
 const EVENT_KEY_VALUES_AS_ELEMENTS: SerializedPropertiesForDeserialization[] = [ 'target', 'relatedTarget' ];
@@ -256,7 +256,7 @@ const PDOM_CLICK_DELAY = 80;
 
 type SelfOptions = EmptyObjectType;
 
-export type InputOptions = SelfOptions & PickOptional<PhetioObjectOptions, 'tandem'>
+export type InputOptions = SelfOptions & PickOptional<PhetioObjectOptions, 'tandem'>;
 
 type EventListenerOptions = { capture?: boolean; passive?: boolean; once?: boolean } | boolean;
 

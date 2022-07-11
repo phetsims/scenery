@@ -1059,7 +1059,7 @@ export type ColorState = {
   g: number;
   b: number;
   a: number;
-}
+};
 
 Color.ColorIO = new IOType( 'ColorIO', {
   valueType: Color,

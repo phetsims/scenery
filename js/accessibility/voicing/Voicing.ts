@@ -103,7 +103,7 @@ export type SpeakingOptions = {
   [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( VoicingResponse | undefined ) ?
                                                  ResolvedResponse :
                                                  ResponsePacketOptions[PropertyName];
-}
+};
 
 /**
  * @param Type
