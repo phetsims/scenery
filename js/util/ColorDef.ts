@@ -14,7 +14,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
 import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { scenery, Color, IColor } from '../imports.js';
+import { Color, IColor, scenery } from '../imports.js';
 
 const ColorDef = {
   /**
@@ -48,7 +48,7 @@ const ColorDef = {
   },
 
   // phet-io IOType for serialization and documentation
-  ColorDefIO: <IOType><unknown>null // Defined below, typed here
+  ColorDefIO: null as unknown as IOType // Defined below, typed here
 };
 
 ColorDef.ColorDefIO = new IOType( 'ColorDefIO', {

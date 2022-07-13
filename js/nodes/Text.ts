@@ -698,22 +698,22 @@ export default class Text extends Paintable( Node ) {
     };
 
     // Root node (no direction, so we preserve root LTR/RTLs)
-    const root = <EmbedNode>{
+    const root = {
       dir: null,
       children: [],
       parent: null
-    };
+    } as EmbedNode;
     let current: EmbedNode = root;
     for ( let i = 0; i < string.length; i++ ) {
       const chr = string.charAt( i );
 
       // Push a direction
       if ( chr === LTR || chr === RTL ) {
-        const node = <EmbedNode>{
+        const node = {
           dir: chr,
           children: [],
           parent: current
-        };
+        } as EmbedNode;
         current.children.push( node );
         current = node;
       }

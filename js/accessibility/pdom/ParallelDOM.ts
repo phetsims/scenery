@@ -2301,11 +2301,11 @@ export default class ParallelDOM extends PhetioObject {
       }
     }
 
-    this._pdomAttributes.push( <PDOMAttribute>{
+    this._pdomAttributes.push( {
       attribute: attribute,
       value: value,
       options: options
-    } );
+    } as PDOMAttribute );
 
     for ( let j = 0; j < this._pdomInstances.length; j++ ) {
       const peer = this._pdomInstances[ j ].peer;
