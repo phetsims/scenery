@@ -31,9 +31,9 @@ export default class ShaderProgram {
   private vertexShader!: WebGLShader;
   private fragmentShader!: WebGLShader;
 
-  uniformLocations!: { [ key: string ]: WebGLUniformLocation };
-  attributeLocations!: { [ key: string ]: number };
-  activeAttributes!: { [ key: string ]: boolean }; // whether they are enabled
+  uniformLocations!: Record<string, WebGLUniformLocation>;
+  attributeLocations!: Record<string, number>;
+  activeAttributes!: Record<string, boolean>; // whether they are enabled
 
   private isInitialized!: boolean;
 

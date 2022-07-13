@@ -19,9 +19,7 @@ const NAME_SEPARATOR = '.';
 // static instances are tracked for iframe communication with the HTML color editor
 const instances: ProfileColorProperty[] = [];
 
-type ColorProfileMap = {
-  [ key: string ]: Color | string;
-};
+type ColorProfileMap = Record<string, Color | string>;
 
 export default class ProfileColorProperty extends ColorProperty {
 

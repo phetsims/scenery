@@ -55,7 +55,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
     // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
     // (with updateDisplay) since Instances are added asynchronously.
-    protected displays: { [ key: string ]: Display };
+    protected displays: Record<string, Display>;
 
     // The highlight that will surround this Node when it is activated and a Pointer is currently over it. When
     // null, the focus highlight will be used (as defined in ParallelDOM.js).

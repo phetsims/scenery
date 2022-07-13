@@ -104,7 +104,7 @@ const RICH_TEXT_OPTION_KEYS = [
 
 export type RichTextAlign = 'left' | 'center' | 'right';
 export type RichTextHref = ( () => void ) | string;
-type RichTextLinksObject = { [ key: string ]: string };
+type RichTextLinksObject = Record<string, string>;
 export type RichTextLinks = RichTextLinksObject | boolean;
 
 type SelfOptions = {
@@ -247,9 +247,9 @@ const himalayaGetAttribute = ( attribute: string, element: HimalayaElementNode |
 /**
  * Turn a string of style like "font-sie:6; font-weight:6; favorite-number:6" into a may of style key/values (trimmed of whitespace)
  */
-const himalayaStyleStringToMap = ( styleString: string ): { [ key: string ]: string } => {
+const himalayaStyleStringToMap = ( styleString: string ): Record<string, string> => {
   const styleElements = styleString.split( ';' );
-  const styleMap: { [ key: string ]: string } = {};
+  const styleMap: Record<string, string> = {};
   styleElements.forEach( styleKeyValue => {
     if ( styleKeyValue.length > 0 ) {
       const keyValueTuple = styleKeyValue.split( ':' );
@@ -309,7 +309,7 @@ export default class RichText extends Node {
   private _linkEventsHandled: boolean;
 
   // If an object, values are either {string} or {function}
-  private _links: { [ key: string ]: string } | boolean;
+  private _links: Record<string, string> | boolean;
 
   private _align: RichTextAlign;
   private _leading: number;
@@ -727,7 +727,7 @@ export default class RichText extends Node {
         }
 
         // Font
-        const fontOptions: { [ key: string ]: string } = {};
+        const fontOptions: Record<string, string> = {};
         for ( let i = 0; i < FONT_STYLE_KEYS.length; i++ ) {
           const styleKey = FONT_STYLE_KEYS[ i ];
           if ( css[ styleKey ] ) {

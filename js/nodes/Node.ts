@@ -5180,7 +5180,7 @@ class Node extends ParallelDOM {
    */
   getTopologicallySortedNodes(): Node[] {
     // see http://en.wikipedia.org/wiki/Topological_sorting
-    const edges: { [ key: string ]: { [ key: string ]: boolean } } = {};
+    const edges: Record<string, Record<string, boolean>> = {};
     const s: Node[] = [];
     const l: Node[] = [];
     let n: Node;
@@ -5225,7 +5225,7 @@ class Node extends ParallelDOM {
 
     // see http://en.wikipedia.org/wiki/Topological_sorting
     // TODO: remove duplication with above handling?
-    const edges: { [ key: string ]: { [ key: string ]: boolean } } = {};
+    const edges: Record<string, Record<string, boolean>> = {};
     const s: Node[] = [];
     const l: Node[] = [];
     let n: Node;

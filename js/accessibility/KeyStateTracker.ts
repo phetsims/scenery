@@ -34,9 +34,7 @@ type KeyStateInfo = {
 };
 
 // The type for the keyState Object, keys are the KeyboardEvent.code for the pressed key.
-type KeyState = {
-  [ key: string ]: KeyStateInfo;
-};
+type KeyState = Record<string, KeyStateInfo>;
 
 export type KeyStateTrackerOptions = PickOptional<PhetioObject, 'tandem'>;
 

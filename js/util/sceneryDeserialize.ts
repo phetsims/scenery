@@ -194,7 +194,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
     return node;
   }
   else if ( value.type === 'Subtree' ) {
-    const nodeMap: { [ key: string ]: Node } = {};
+    const nodeMap: Record<string, Node> = {};
     const nodes = value.nodes.map( sceneryDeserialize );
 
     // Index them

@@ -830,7 +830,7 @@ export default class Color {
     }
   ];
 
-  static basicColorKeywords: { [ key: string ]: string } = {
+  static basicColorKeywords: Record<string, string> = {
     aqua: '00ffff',
     black: '000000',
     blue: '0000ff',
@@ -849,7 +849,7 @@ export default class Color {
     yellow: 'ffff00'
   };
 
-  static colorKeywords: { [ key: string ]: string } = {
+  static colorKeywords: Record<string, string> = {
     aliceblue: 'f0f8ff',
     antiquewhite: 'faebd7',
     aqua: '00ffff',

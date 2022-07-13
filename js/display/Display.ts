@@ -151,7 +151,7 @@ export type DisplayOptions = {
 const CUSTOM_CURSORS = {
   'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
   'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
-} as { [ key: string ]: string[] };
+} as Record<string, string[]>;
 
 let globalIdCounter = 1;
 
@@ -180,7 +180,7 @@ export default class Display {
   _preserveDrawingBuffer: boolean;
 
   // (scenery-internal) map from Node ID to Instance, for fast lookup
-  _sharedCanvasInstances: { [ nodeID: number ]: Instance };
+  _sharedCanvasInstances: Record<number, Instance>;
 
   // (scenery-internal) - We have a monotonically-increasing frame ID, generally for use with a pattern
   // where we can mark objects with this to note that they are either up-to-date or need refreshing due to this
@@ -1486,7 +1486,7 @@ export default class Display {
     // @ts-ignore TODO BackboneDrawable
     result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone! )}<br/>` ) : '';
 
-    const drawableCountMap: { [ key: string ]: number } = {}; // {string} drawable constructor name => {number} count of seen
+    const drawableCountMap: Record<string, number> = {}; // {string} drawable constructor name => {number} count of seen
     // increment the count in our map
     function countRetainedDrawable( drawable: Drawable ) {
       const name = drawable.constructor.name;
@@ -1869,7 +1869,7 @@ export default class Display {
     // Scan our drawable tree for Canvases. We'll rasterize them here (to data URLs) so we can replace them later in
     // the HTML tree (with images) before putting that in the foreignObject. That way, we can actually display
     // things rendered in Canvas in our rasterization.
-    const canvasUrlMap: { [ key: string ]: string } = {};
+    const canvasUrlMap: Record<string, string> = {};
 
     let unknownIds = 0;
 
