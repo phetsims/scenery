@@ -19,10 +19,12 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Node, TrailPointer, PDOMUtils } from '../imports.js';
+import { Node, PDOMUtils, scenery, TrailPointer } from '../imports.js';
 
 // constants
 const ID_SEPARATOR = PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR;
+
+export type TrailCallback = ( ( trail: Trail ) => boolean ) | ( ( trail: Trail ) => void );
 
 export default class Trail {
 
@@ -626,7 +628,7 @@ export default class Trail {
   /**
    * Calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
    */
-  eachTrailUnder( callback: ( trail: Trail ) => boolean | void ): void {
+  eachTrailUnder( callback: TrailCallback ): void {
     // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
     new TrailPointer( this, true ).eachTrailBetween( new TrailPointer( this, false ), callback );
   }

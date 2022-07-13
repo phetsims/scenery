@@ -13,9 +13,12 @@
  */
 
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
-import { scenery, Trail, Node } from '../imports.js';
+import { Node, scenery, Trail } from '../imports.js';
+import { TrailCallback } from './Trail.js';
 
 export type ActiveTrailPointer = WithoutNull<TrailPointer, 'trail'>;
+
+type ActiveTrailPointerCallback = ( ( trailPointer: ActiveTrailPointer ) => boolean ) | ( ( trailPointer: ActiveTrailPointer ) => void );
 
 export default class TrailPointer {
 
@@ -253,7 +256,7 @@ export default class TrailPointer {
    * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
    * 'before' if applicable
    */
-  eachTrailBetween( other: TrailPointer, callback: ( node: Trail ) => boolean | void ): void {
+  eachTrailBetween( other: TrailPointer, callback: TrailCallback ): void {
     // this should trigger on all pointers that have the 'before' flag, except a pointer equal to 'other'.
 
     // since we exclude endpoints in the depthFirstUntil call, we need to fire this off first
@@ -278,7 +281,7 @@ export default class TrailPointer {
    * If the callback returns a truthy value, the subtree for the current pointer will be skipped
    * (applies only to before-pointers)
    */
-  depthFirstUntil( other: TrailPointer, callback: ( trailPointer: ActiveTrailPointer ) => boolean | void, excludeEndpoints: boolean ): void {
+  depthFirstUntil( other: TrailPointer, callback: ActiveTrailPointerCallback, excludeEndpoints: boolean ): void {
     assert && assert( this.isActive() && other.isActive() );
     const activeSelf = this as ActiveTrailPointer;
     const activeOther = other as ActiveTrailPointer;
@@ -298,7 +301,7 @@ export default class TrailPointer {
 
     while ( !pointer.equalsNested( other ) ) {
       assert && assert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
-      let skipSubtree: boolean | void = false;
+      let skipSubtree: boolean | void = false; // eslint-disable-line @typescript-eslint/no-invalid-void-type
 
       if ( first ) {
         // start point
