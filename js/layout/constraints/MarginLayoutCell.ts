@@ -224,7 +224,13 @@ export default class MarginLayoutCell extends LayoutCell {
 
       value = Utils.clamp( value, minimumSize, maximumSize );
 
-      this._marginConstraint.setProxyPreferredSize( orientation, this.proxy, value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation ) );
+      let preferredSize = value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation );
+      const maxSize = this.proxy.getMax( orientation );
+      if ( maxSize !== null ) {
+        preferredSize = Math.min( maxSize, preferredSize );
+      }
+
+      this._marginConstraint.setProxyPreferredSize( orientation, this.proxy, preferredSize );
 
       // Record that we set
       this.preferredSizeSet.set( orientation, true );

@@ -474,6 +474,35 @@ export default class LayoutProxy {
     return orientation === Orientation.HORIZONTAL ? this.minimumWidth : this.minimumHeight;
   }
 
+  public get maxWidth(): number | null {
+    assert && this.checkPreconditions();
+
+    if ( this.node.maxWidth === null ) {
+      return null;
+    }
+    else {
+      return Math.abs( this.trail!.getParentTransform().transformDeltaX( this.node.maxWidth ) );
+    }
+  }
+
+  public get maxHeight(): number | null {
+    assert && this.checkPreconditions();
+
+    if ( this.node.maxHeight === null ) {
+      return null;
+    }
+    else {
+      return Math.abs( this.trail!.getParentTransform().transformDeltaY( this.node.maxHeight ) );
+    }
+  }
+
+  /**
+   * Returns either the maxWidth or maxHeight depending on the orientation
+   */
+  public getMax( orientation: Orientation ): number | null {
+    return orientation === Orientation.HORIZONTAL ? this.maxWidth : this.maxHeight;
+  }
+
   /**
    * Releases references, and frees it to the pool.
    */
