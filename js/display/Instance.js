@@ -101,7 +101,7 @@ class Instance {
     // same value to instance A's map (referencing this instance). In order to clean up and prevent leaks, the
     // instance references are provided in this.branchIndexReferences (on both ends), so that when one instance is
     // disposed it can remove the references bidirectionally.
-    this.branchIndexMap = {} || this.branchIndexMap; // eslint-disable-line no-constant-binary-expression
+    this.branchIndexMap = this.branchIndexMap || {};
 
     // @public {Array.<Instance>} - All instances where we have entries in our map. See docs for branchIndexMap.
     this.branchIndexReferences = cleanArray( this.branchIndexReferences );
