@@ -10,59 +10,58 @@
  * @author Jesse Greenberg
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, TrailVisibilityTracker } from '../imports.js';
+import IProperty from '../../../axon/js/IProperty.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { Focus, Instance, Node, scenery, TrailVisibilityTracker } from '../imports.js';
+
+type FocusDisplayedControllerOptions = {
+  onRemoveFocus: () => void;
+};
 
 class FocusDisplayedController {
+  private node: Node | null;
+  private visibilityTracker: TrailVisibilityTracker | null;
+  private focusProperty: IProperty<Focus | null> | null;
+  private readonly onRemoveFocus: () => void;
+  private readonly boundVisibilityListener: () => void;
+  private readonly boundInstancesChangedListener: ( instance: Instance ) => void;
+  private readonly boundFocusListener: ( focus: any ) => void;
 
-  /**
-   * @param {Property.<Focus>} focusProperty
-   * @param {Object} [options]
-   */
-  constructor( focusProperty, options ) {
+  constructor( focusProperty: IProperty<Focus | null>, providedOptions?: FocusDisplayedControllerOptions ) {
 
-    options = merge( {
+    const options = optionize<FocusDisplayedControllerOptions>()( {
 
       // @function - Extra work to do after the focusProperty is set to null because
       // the focused Node is no longer displayed (it has become invisible or has
       // been removed from the scene graph).
-      onRemoveFocus: () => {}
-    }, options );
+      onRemoveFocus: _.noop
+    }, providedOptions );
     assert && assert( typeof options.onRemoveFocus === 'function', 'invalid type for onRemoveFocus' );
 
-    // @private {Node|null} - last Node of the Trail that is focused, referenced so we
-    // can add and remove listeners from it
+    // last Node of the Trail that is focused, referenced so we can add and remove listeners from it
     this.node = null;
 
-    // @private {TrailVisibilityTracker|null} - Observables the Trail to the Node and
-    // notifies when it has become invisible
+    // Observables the Trail to the Node and notifies when it has become invisible
     this.visibilityTracker = null;
 
-    // @private} {Property.<Focus>}
     this.focusProperty = focusProperty;
-
-    // @private {function}
     this.onRemoveFocus = options.onRemoveFocus;
 
-    // @private {function} - Bound functions that are called when the displayed state
+    // Bound functions that are called when the displayed state
     // of the Node changes.
     this.boundVisibilityListener = this.handleTrailVisibilityChange.bind( this );
     this.boundInstancesChangedListener = this.handleInstancesChange.bind( this );
 
-    // @private {function} - Handles changes to focus, adding or removing listeners
+    // Handles changes to focus, adding or removing listeners
     this.boundFocusListener = this.handleFocusChange.bind( this );
     this.focusProperty.link( this.boundFocusListener );
-
   }
 
   /**
    * When Focus changes, remove any listeners that were attached from last Focus and
    * add new listeners if focus has a new value.
-   * @private
-   *
-   * @param {Focus} focus
    */
-  handleFocusChange( focus ) {
+  private handleFocusChange( focus: Focus ): void {
     this.removeDisplayedListeners();
 
     if ( focus ) {
@@ -72,11 +71,10 @@ class FocusDisplayedController {
 
   /**
    * When the Trail becomes invisible, Focus should be set to null.
-   * @private
    */
-  handleTrailVisibilityChange() {
+  private handleTrailVisibilityChange(): void {
     if ( this.visibilityTracker && !this.visibilityTracker.trailVisibleProperty.value ) {
-      this.focusProperty.value = null;
+      this.focusProperty!.value = null;
       this.onRemoveFocus();
     }
   }
@@ -84,13 +82,10 @@ class FocusDisplayedController {
   /**
    * If there are no more Instances for the Node with focus it has been removed from
    * the scene graph and so Focus should be set to null.
-   * @private
-   *
-   * @param {Instance} instance
    */
-  handleInstancesChange( instance ) {
-    if ( instance.node.instances.length === 0 ) {
-      this.focusProperty.value = null;
+  private handleInstancesChange( instance: Instance ): void {
+    if ( instance.node && instance.node.instances.length === 0 ) {
+      this.focusProperty!.value = null;
       this.onRemoveFocus();
     }
   }
@@ -98,11 +93,8 @@ class FocusDisplayedController {
   /**
    * Add listeners that watch when the Displayed state of the Node with Focus has changed,
    * including visibility of the trail and attachment to a scene graph.
-   * @private
-   *
-   * @param {Focus} focus
    */
-  addDisplayedListeners( focus ) {
+  private addDisplayedListeners( focus: Focus ): void {
     assert && assert( this.visibilityTracker === null, 'creating a new TrailVisibilityTracker but the last one was not disposed' );
     assert && assert( this.node === null, 'Still a reference to the previously focused Node, possible memory leak' );
 
@@ -116,9 +108,8 @@ class FocusDisplayedController {
   /**
    * Remove any listeners that were added to observables that fire when the Node's displayed
    * state may have changed.
-   * @private
    */
-  removeDisplayedListeners() {
+  private removeDisplayedListeners(): void {
     if ( this.visibilityTracker ) {
       this.visibilityTracker.removeListener( this.boundVisibilityListener );
       this.visibilityTracker.dispose();
@@ -130,14 +121,11 @@ class FocusDisplayedController {
     }
   }
 
-  /**
-   * @public
-   */
-  dispose() {
+  public dispose(): void {
 
     // this disposes the TrailVisibilityTracker and removes any listeners on the Node
     this.removeDisplayedListeners();
-    this.focusProperty.unlink( this.boundFocusListener );
+    this.focusProperty!.unlink( this.boundFocusListener );
 
     this.node = null;
     this.visibilityTracker = null;

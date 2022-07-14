@@ -6,21 +6,31 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
-import Trail from '../util/Trail.js';
+import { Display, Node, Trail } from '../imports.js';
 
 QUnit.module( 'Focus' );
 
+type EqualityItem = {
+  trail?: Trail;
+  children: Node[];
+};
+
+type NestedEqualityItem = {
+  trail?: Trail;
+  children: NestedEqualityItem[];
+};
+
 // Arrays of items of the type { trail: {Trail}, children: {Array.<Item>} }
-function nestedEquality( assert, a, b ) {
+function nestedEquality( assert: Assert, a: EqualityItem[], b: NestedEqualityItem[] ) {
   assert.equal( a.length, b.length );
 
   for ( let i = 0; i < a.length; i++ ) {
     const aItem = a[ i ];
     const bItem = b[ i ];
 
-    assert.ok( aItem.trail.equals( bItem.trail ) );
+    if ( aItem.trail && bItem.trail ) {
+      assert.ok( aItem.trail.equals( bItem.trail ) );
+    }
 
     nestedEquality( assert, aItem.children, bItem.children );
   }
@@ -264,7 +274,9 @@ QUnit.test( 'setting pdomOrder', assert => {
   // reverse accessible order
   rootNode.pdomOrder = [ d, c, b, a ];
 
-  const divRoot = display._rootPDOMInstance.peer.primarySibling;
+  assert.ok( display._rootPDOMInstance, 'should exist' );
+
+  const divRoot = display._rootPDOMInstance!.peer.primarySibling;
   const divA = a.pdomInstances[ 0 ].peer.primarySibling;
   const divB = b.pdomInstances[ 0 ].peer.primarySibling;
   const divC = c.pdomInstances[ 0 ].peer.primarySibling;
@@ -275,8 +287,7 @@ QUnit.test( 'setting pdomOrder', assert => {
   assert.ok( divRoot.children[ 2 ] === divB, 'divB should be third child' );
   assert.ok( divRoot.children[ 3 ] === divA, 'divA should be fourth child' );
   display.dispose();
-  display.domElement.parentElement.removeChild( display.domElement );
-
+  display.domElement.parentElement!.removeChild( display.domElement );
 } );
 
 QUnit.test( 'setting pdomOrder before setting accessible content', assert => {
@@ -298,7 +309,7 @@ QUnit.test( 'setting pdomOrder before setting accessible content', assert => {
   c.tagName = 'div';
   d.tagName = 'div';
 
-  const divRoot = display._rootPDOMInstance.peer.primarySibling;
+  const divRoot = display._rootPDOMInstance!.peer.primarySibling;
   const divA = a.pdomInstances[ 0 ].peer.primarySibling;
   const divB = b.pdomInstances[ 0 ].peer.primarySibling;
   const divC = c.pdomInstances[ 0 ].peer.primarySibling;
@@ -309,7 +320,7 @@ QUnit.test( 'setting pdomOrder before setting accessible content', assert => {
   assert.ok( divRoot.children[ 2 ] === divB, 'divB should be third child' );
   assert.ok( divRoot.children[ 3 ] === divA, 'divA should be fourth child' );
   display.dispose();
-  display.domElement.parentElement.removeChild( display.domElement );
+  display.domElement.parentElement!.removeChild( display.domElement );
 
 } );
 
@@ -345,7 +356,7 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   assert.ok( divB.children[ 0 ] === divE, 'div E should be first child of div B' );
   assert.ok( divB.children[ 1 ] === divC, 'div C should be second child of div B' );
   display.dispose();
-  display.domElement.parentElement.removeChild( display.domElement );
+  display.domElement.parentElement!.removeChild( display.domElement );
 
 } );
 
@@ -375,6 +386,5 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   assert.ok( divA.children[ 0 ] === divE, 'div E should be first child of div B' );
   assert.ok( divA.children[ 1 ] === divC, 'div C should be second child of div B' );
   display.dispose();
-  display.domElement.parentElement.removeChild( display.domElement );
-
+  display.domElement.parentElement!.removeChild( display.domElement );
 } );

@@ -7,17 +7,17 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, FocusHighlightFromNode, FocusHighlightPath } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, FocusHighlightPath, Node, scenery } from '../imports.js';
+
+type SelfOptions = EmptyObjectType;
+type GroupFocusHighlightFromNodeOptions = FocusHighlightFromNodeOptions;
 
 class GroupFocusHighlightFromNode extends FocusHighlightFromNode {
-  /**
-   * @param {Node|null} node
-   * @param {Object} [options]
-   */
-  constructor( node, options ) {
+  constructor( node: Node | null, providedOptions?: GroupFocusHighlightFromNodeOptions ) {
 
-    options = merge( {
+    const options = optionize<GroupFocusHighlightFromNodeOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
       outerStroke: FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR,
       innerStroke: FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR,
 
@@ -25,7 +25,7 @@ class GroupFocusHighlightFromNode extends FocusHighlightFromNode {
       innerLineWidth: FocusHighlightPath.GROUP_INNER_LINE_WIDTH,
 
       useGroupDilation: true
-    }, options );
+    }, providedOptions );
 
     super( node, options );
   }

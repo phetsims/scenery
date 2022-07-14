@@ -44,6 +44,7 @@ const CONTROL_KEYS = [ KEY_CONTROL_LEFT, KEY_CONTROL_RIGHT ];
 const ALT_KEYS = [ KEY_ALT_LEFT, KEY_ALT_RIGHT ];
 
 const DOM_EVENT_VALIDATOR = { valueType: Event };
+const ALL_KEYS: string[] = [];
 
 /**
  * @extends {Object}
@@ -120,24 +121,16 @@ const KeyboardUtils = {
   ALT_KEYS: ALT_KEYS,
 
   /**
-   * Returns whether or not the key corresponds to pressing an arrow key
-   * @public
-   *
-   * @param {Event} domEvent
-   * @returns {boolean}
+   * Returns whether the key corresponds to pressing an arrow key
    */
-  isArrowKey( domEvent ) {
+  isArrowKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isAnyKeyEvent( domEvent, ARROW_KEYS );
   },
 
   /**
    * Returns true if key is one of keys used for range inputs
-   * @public
-   *
-   * @param {Event} domEvent
-   * @returns {boolean}
    */
-  isRangeKey( domEvent ) {
+  isRangeKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isArrowKey( domEvent ) ||
            KeyboardUtils.isAnyKeyEvent( domEvent, [
              KeyboardUtils.KEY_PAGE_UP,
@@ -149,22 +142,16 @@ const KeyboardUtils = {
 
   /**
    * Returns whether or not the key corresponds to pressing a number key
-   * @public
-   *
-   * @param {Event} domEvent
-   * @returns {boolean}
    */
-  isNumberKey( domEvent ) {
+  isNumberKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isAnyKeyEvent( domEvent, NUMBER_KEYS );
   },
 
   /**
    * For number keys, return the number of the key, or null if not a number
-   * @param {Event} domEvent
-   * @returns {null|number}
    */
-  getNumberFromCode( domEvent ) {
-    if ( KeyboardUtils.isNumberKey( domEvent ) ) {
+  getNumberFromCode( domEvent: Event | null ): null | number {
+    if ( KeyboardUtils.isNumberKey( domEvent ) && domEvent instanceof KeyboardEvent ) {
       return Number( domEvent.code.replace( 'Digit', '' ) );
     }
     return null;
@@ -173,83 +160,54 @@ const KeyboardUtils = {
   /**
    * Event.code distinguishes between left and right shift keys. If all you care about is the presence
    * of a shift key you can use this.
-   * @public
-   *
-   * @param domEvent
-   * @returns {*}
    */
-  isShiftKey( domEvent ) {
+  isShiftKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isAnyKeyEvent( domEvent, SHIFT_KEYS );
   },
 
   /**
    * Event.code distinguishes between left and right alt keys. If all you care about is the presence
    * of the alt key you can use this.
-   * @public
-   *
-   * @param domEvent
-   * @returns {*}
    */
-  isAltKey( domEvent ) {
+  isAltKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isAnyKeyEvent( domEvent, ALT_KEYS );
   },
 
   /**
    * Event.code distinguishes between left and right control keys. If all you care about is the presence
    * of a control key you can use this.
-   * @public
-   *
-   * @param domEvent
-   * @returns {*}
    */
-  isControlKey( domEvent ) {
+  isControlKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isAnyKeyEvent( domEvent, CONTROL_KEYS );
   },
 
   /**
    * Returns whether or not the key corresponds to one of the WASD movement keys.
-   * @public
-   *
-   * @param {Event} domEvent
-   * @returns {boolean}
    */
-  isWASDKey( domEvent ) {
+  isWASDKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isAnyKeyEvent( domEvent, WASD_KEYS );
   },
 
   /**
    * Returns true if the key indicates a 'movement' key in keyboard dragging
-   * @public
-   *
-   * @param {Event} domEvent
-   * @returns {boolean}
    */
-  isMovementKey( domEvent ) {
+  isMovementKey( domEvent: Event | null ): boolean {
     return KeyboardUtils.isAnyKeyEvent( domEvent, KeyboardUtils.MOVEMENT_KEYS );
   },
 
   /**
    * If the domEvent corresponds to any of the provided keys in the list.
-   * @public
-   *
-   * @param {Event} domEvent
-   * @param {string[]} keyboardUtilsKeys
-   * @returns {boolean}
    */
-  isAnyKeyEvent( domEvent, keyboardUtilsKeys ) {
+  isAnyKeyEvent( domEvent: Event | null, keyboardUtilsKeys: string[] ): boolean {
     validate( domEvent, DOM_EVENT_VALIDATOR );
-    return keyboardUtilsKeys.includes( KeyboardUtils.getEventCode( domEvent ) );
+    const code = KeyboardUtils.getEventCode( domEvent );
+    return code ? keyboardUtilsKeys.includes( code ) : false;
   },
 
   /**
    * Whether or not the event was of the provided KeyboardUtils string.
-   * @public
-   *
-   * @param {Event} domEvent
-   * @param {string} keyboardUtilsKey
-   * @returns {boolean}
    */
-  isKeyEvent( domEvent, keyboardUtilsKey ) {
+  isKeyEvent( domEvent: Event | null, keyboardUtilsKey: string ): boolean {
     return KeyboardUtils.getEventCode( domEvent ) === keyboardUtilsKey;
   },
 
@@ -262,27 +220,24 @@ const KeyboardUtils = {
    *    // You pressed the A key!
    *  }
    *
-   * @public
-   * @param {Event} domEvent
-   * @returns {string|null} - null if there is no `code` property on the provided Event.
+   * @returns - null if there is no `code` property on the provided Event.
    */
-  getEventCode( domEvent ) {
-    validate( domEvent, DOM_EVENT_VALIDATOR );
-    return domEvent.code ? domEvent.code : null;
-  }
+  getEventCode( domEvent: Event | null ): string | null {
+    return domEvent instanceof KeyboardEvent && domEvent.code ? domEvent.code : null;
+  },
+
+  ALL_KEYS: ALL_KEYS
 };
 
-const ALL_KEYS = [];
 for ( const keyKey in KeyboardUtils ) {
 
-  // No functions or key-groups allowed
+  // @ts-ignore No functions or key-groups allowed
   if ( KeyboardUtils.hasOwnProperty( keyKey ) && typeof KeyboardUtils[ keyKey ] === 'string' ) {
-    ALL_KEYS.push( KeyboardUtils[ keyKey ] );
+
+    // @ts-ignore
+    ALL_KEYS.push( KeyboardUtils[ keyKey ] as string );
   }
 }
-
-// @public - Not really all of them, but all that are in the above list. If you see one you wish was in here, then add it!
-KeyboardUtils.ALL_KEYS = ALL_KEYS;
 
 scenery.register( 'KeyboardUtils', KeyboardUtils );
 

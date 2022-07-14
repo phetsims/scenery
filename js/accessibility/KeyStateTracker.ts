@@ -219,12 +219,13 @@ class KeyStateTracker {
   /**
    * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener(). Only updated when
    * enabled.
+   * (tests)
    *
    * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
    * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
    * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
    */
-  private keyupUpdate( domEvent: KeyboardEvent ): void {
+  public _keyupUpdate( domEvent: KeyboardEvent ): void {
     this.enabled && this.keyupUpdateAction.execute( domEvent );
   }
 
@@ -363,7 +364,7 @@ class KeyStateTracker {
     };
 
     this.documentKeyupListener = event => {
-      this.keyupUpdate( event );
+      this._keyupUpdate( event );
     };
 
     const addListenersToDocument = () => {

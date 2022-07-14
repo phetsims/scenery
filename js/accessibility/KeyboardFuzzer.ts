@@ -8,11 +8,17 @@
  */
 
 import stepTimer from '../../../axon/js/stepTimer.js';
+import { TimerListener } from '../../../axon/js/Timer.js';
 import Random from '../../../dot/js/Random.js';
-import { scenery, globalKeyStateTracker, KeyboardUtils, PDOMUtils } from '../imports.js';
+import { Display, globalKeyStateTracker, KeyboardUtils, PDOMUtils, scenery } from '../imports.js';
+
+type KeyupListener = ( () => void ) & {
+  timeout: TimerListener;
+};
+
 
 // uppercase matters
-const keyboardTestingSchema = {
+const keyboardTestingSchema: Record<string, string[]> = {
   INPUT: [ ...KeyboardUtils.ARROW_KEYS, KeyboardUtils.KEY_PAGE_UP, KeyboardUtils.KEY_PAGE_DOWN,
     KeyboardUtils.KEY_HOME, KeyboardUtils.KEY_END, KeyboardUtils.KEY_ENTER, KeyboardUtils.KEY_SPACE ],
   DIV: [ ...KeyboardUtils.ARROW_KEYS, ...KeyboardUtils.WASD_KEYS ],
@@ -31,29 +37,26 @@ const CLICK_EVENT_THRESHOLD = DO_KNOWN_KEYS_THRESHOLD + 0.10; // 10 percent of t
 const KEY_DOWN = 'keydown';
 const KEY_UP = 'keyup';
 
-/**
- *
- * @param {Object} [options]
- * @constructor
- */
 class KeyboardFuzzer {
-  constructor( display, seed ) {
+  private readonly display: Display;
+  private readonly random: Random;
+  private readonly numberOfComponentsTested: number;
+  private keyupListeners: KeyupListener[];
+  private currentElement: Element | null;
 
-    // @private
+  constructor( display: Display, seed: number ) {
+
     this.display = display;
     this.random = new Random( { seed: seed } );
     this.numberOfComponentsTested = 10;
     this.keyupListeners = [];
-
-    // @private {HTMLElement}
     this.currentElement = null;
   }
 
   /**
-   * @private
    * Randomly decide if we should focus the next element, or stay focused on the current element
    */
-  chooseNextElement() {
+  private chooseNextElement(): void {
     if ( this.currentElement === null ) {
       this.currentElement = document.activeElement;
     }
@@ -71,10 +74,7 @@ class KeyboardFuzzer {
     }
   }
 
-  /**
-   * @private
-   */
-  clearListeners() {
+  private clearListeners(): void {
     this.keyupListeners.forEach( listener => {
       assert && assert( typeof listener.timeout === 'function', 'should have an attached timeout' );
       stepTimer.clearTimeout( listener.timeout );
@@ -83,27 +83,19 @@ class KeyboardFuzzer {
     } );
   }
 
-  /**
-   * @private
-   * @param {HTMLElement} element
-   */
-  triggerClickEvent( element ) {
+  private triggerClickEvent( element: Element ): void {
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'triggering click' );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
-    element.click();
+    element instanceof HTMLElement && element.click();
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
   }
 
   /**
    * Trigger a keydown/keyup pair. The keyup is triggered with a timeout.
-   * @private
-   *
-   * @param {HTMLElement} element
-   * @param {string} code
    */
-  triggerKeyDownUpEvents( element, code ) {
+  private triggerKeyDownUpEvents( element: Element, code: string ): void {
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger keydown/up: ${code}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
@@ -113,7 +105,7 @@ class KeyboardFuzzer {
 
     const randomTimeForKeypress = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
 
-    const keyupListener = () => {
+    const keyupListener: KeyupListener = () => {
       this.triggerDOMEvent( KEY_UP, element, code );
       if ( this.keyupListeners.includes( keyupListener ) ) {
         this.keyupListeners.splice( this.keyupListeners.indexOf( keyupListener ), 1 );
@@ -128,10 +120,8 @@ class KeyboardFuzzer {
 
   /**
    * Trigger a keydown/keyup pair with a random KeyboardEvent.code.
-   * @private
-   * @param {HTMLElement} element
    */
-  triggerRandomKeyDownUpEvents( element ) {
+  private triggerRandomKeyDownUpEvents( element: Element ): void {
 
     const randomCode = ALL_KEYS[ Math.floor( this.random.nextDouble() * ( ALL_KEYS.length - 1 ) ) ];
 
@@ -147,16 +137,17 @@ class KeyboardFuzzer {
    * A random event creator that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
    * related keyboard navigation and alternate input implementation.
    *
-   * @public
    * TODO: NOTE: Right now this is a very experimental implementation. Tread wearily
    * TODO: @param keyboardPressesPerFocusedItem {number} - basically would be the same as fuzzRate, but handling
    * TODO:     the keydown events for a focused item
    */
-  fuzzBoardEvents( fuzzRate ) {
+  public fuzzBoardEvents( fuzzRate: number ): void {
 
-    const pdomPointer = this.display._input.pdomPointer;
-    if ( pdomPointer && !pdomPointer.blockTrustedEvents ) {
-      pdomPointer.blockTrustedEvents = true;
+    if ( this.display && this.display._input && this.display._input.pdomPointer ) {
+      const pdomPointer = this.display._input.pdomPointer;
+      if ( pdomPointer && !pdomPointer.blockTrustedEvents ) {
+        pdomPointer.blockTrustedEvents = true;
+      }
     }
 
     for ( let i = 0; i < this.numberOfComponentsTested; i++ ) {
@@ -172,7 +163,7 @@ class KeyboardFuzzer {
         // get active element, focus might have changed in the last press
         const elementWithFocus = document.activeElement;
 
-        if ( keyboardTestingSchema[ elementWithFocus.tagName.toUpperCase() ] ) {
+        if ( elementWithFocus && keyboardTestingSchema[ elementWithFocus.tagName.toUpperCase() ] ) {
 
           const randomNumber = this.random.nextDouble();
           if ( randomNumber < DO_KNOWN_KEYS_THRESHOLD ) {
@@ -188,7 +179,7 @@ class KeyboardFuzzer {
           }
         }
         else {
-          this.triggerRandomKeyDownUpEvents( elementWithFocus );
+          elementWithFocus && this.triggerRandomKeyDownUpEvents( elementWithFocus );
         }
         // TODO: What about other types of events, not just keydown/keyup??!?!
         // TODO: what about application role elements
@@ -200,12 +191,8 @@ class KeyboardFuzzer {
 
   /**
    * Taken from example in http://output.jsbin.com/awenaq/3,
-   * @param {string} event
-   * @param {HTMLElement} element
-   * @param {string} code
-   * @private
    */
-  triggerDOMEvent( event, element, code ) {
+  private triggerDOMEvent( event: string, element: Element, code: string ): void {
     const eventObj = new KeyboardEvent( event, {
       bubbles: true,
       code: code,
