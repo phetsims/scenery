@@ -7,32 +7,31 @@
  * @author Jesse Greenberg
  */
 
-import merge from '../../../../phet-core/js/merge.js';
-import { scenery, FocusHighlightFromNode } from '../../imports.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
+import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, Node, scenery } from '../../imports.js';
 
 // constants
 const ACTIVATED_HIGHLIGHT_COLOR = 'rgba(255,255,0,0.5)';
 
+
+type SelfOptions = EmptyObjectType;
+type ActivatedReadingBlockHighlightOptions = SelfOptions & FocusHighlightFromNodeOptions;
+
 class ActivatedReadingBlockHighlight extends FocusHighlightFromNode {
+  public static readonly ACTIVATED_HIGHLIGHT_COLOR = ACTIVATED_HIGHLIGHT_COLOR;
 
-  /**
-   * @param {Node|null} node
-   * @param {Object} [options]
-   */
-  constructor( node, options ) {
+  constructor( node: Node | null, providedOptions?: ActivatedReadingBlockHighlightOptions ) {
 
-    options = merge( {
+    const options = optionize<ActivatedReadingBlockHighlightOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
       innerStroke: null,
       outerStroke: null,
       fill: ACTIVATED_HIGHLIGHT_COLOR
-    }, options );
+    }, providedOptions );
 
     super( node, options );
   }
 }
-
-// @public
-ActivatedReadingBlockHighlight.ACTIVATED_HIGHLIGHT_COLOR = ACTIVATED_HIGHLIGHT_COLOR;
 
 scenery.register( 'ActivatedReadingBlockHighlight', ActivatedReadingBlockHighlight );
 export default ActivatedReadingBlockHighlight;

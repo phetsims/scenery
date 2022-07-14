@@ -9,35 +9,36 @@
  * @author Jesse Greenberg
  */
 
-import SpeechSynthesisAnnouncer from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
+import SpeechSynthesisAnnouncer, { SpeechSynthesisAnnouncerOptions, SpeechSynthesisInitializeOptions } from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import merge from '../../../../phet-core/js/merge.js';
 import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
+import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import Emitter from '../../../../axon/js/Emitter.js';
+
+type SelfOptions = EmptyObjectType;
+type VoicingManagerOptions = SelfOptions & SpeechSynthesisAnnouncerOptions;
+
 
 class VoicingManager extends SpeechSynthesisAnnouncer {
-  constructor( options ) {
+  constructor( providedOptions?: VoicingManagerOptions ) {
 
-    options = merge( {
+    const options = optionize<VoicingManagerOptions, SelfOptions, SpeechSynthesisAnnouncerOptions>()( {
 
       // {boolean} - All VoicingManager instances should respect responseCollector's current state.
       respectResponseCollectorProperties: true,
 
       // phet-io
       tandem: Tandem.OPTIONAL
-    }, options );
+    }, providedOptions );
 
     super( options );
   }
 
   /**
    * The initialization with some additional scenery-specific work for voicingManager.
-   * @override
-   * @public
-   *
-   * @param {Emitter} userGestureEmitter
-   * @param {Object} [options]
    */
-  initialize( userGestureEmitter, options ) {
+  public override initialize( userGestureEmitter: Emitter, options?: SpeechSynthesisInitializeOptions ): void {
     super.initialize( userGestureEmitter, options );
 
     // The control key will stop the synth from speaking if there is an active utterance. This key was decided because

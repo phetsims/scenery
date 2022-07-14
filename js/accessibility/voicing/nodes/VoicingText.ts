@@ -7,17 +7,18 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import merge from '../../../../../phet-core/js/merge.js';
-import { ReadingBlock, ReadingBlockHighlight, scenery, Text } from '../../../imports.js';
+import optionize, { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../../../phet-core/js/types/EmptyObjectType.js';
+import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, scenery, Text, TextOptions } from '../../../imports.js';
+
+type SelfOptions = EmptyObjectType;
+type ParentOptions = ReadingBlockOptions & TextOptions;
+type VoicingTextOptions = SelfOptions & ParentOptions;
 
 class VoicingText extends ReadingBlock( Text, 1 ) {
 
-  /**
-   * @param {string} text
-   * @param {Object} [options]
-   */
-  constructor( text, options ) {
-    options = merge( {
+  constructor( text: string, providedOptions?: VoicingTextOptions ) {
+    let options = optionize<VoicingTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be spoken that is different from the
       // visually displayed text
@@ -26,10 +27,10 @@ class VoicingText extends ReadingBlock( Text, 1 ) {
       // pdom
       tagName: 'p',
       innerContent: text
-    }, options );
+    }, providedOptions );
 
-    // Options that use other options
-    options = merge( options, {
+    // Options that use other options, should be the same type as options
+    options = combineOptions<typeof options>( options, {
       readingBlockNameResponse: options.readingBlockNameResponse || text
     } );
 

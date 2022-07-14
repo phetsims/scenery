@@ -33,7 +33,7 @@ type SelfOptions = {
 };
 
 // The transformSourceNode for this highlight will be the provided Node.
-type FocusHighlightFromNodeOptions = SelfOptions & StrictOmit<FocusHighlightPathOptions, 'transformSourceNode'>;
+export type FocusHighlightFromNodeOptions = SelfOptions & StrictOmit<FocusHighlightPathOptions, 'transformSourceNode'>;
 
 class FocusHighlightFromNode extends FocusHighlightPath {
 

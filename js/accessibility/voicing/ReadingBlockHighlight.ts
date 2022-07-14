@@ -9,16 +9,20 @@
  * @author Jesse Greenberg
  */
 
-import merge from '../../../../phet-core/js/merge.js';
-import { scenery, FocusHighlightFromNode } from '../../imports.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
+import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, Node, scenery } from '../../imports.js';
+
+type SelfOptions = EmptyObjectType;
+type ReadingBlockHighlightOptions = SelfOptions & FocusHighlightFromNodeOptions;
 
 class ReadingBlockHighlight extends FocusHighlightFromNode {
-  constructor( node, options ) {
+  constructor( node: Node, providedOptions?: ReadingBlockHighlightOptions ) {
 
-    options = merge( {
+    const options = optionize<ReadingBlockHighlightOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
       outerStroke: 'grey',
       innerStroke: 'black'
-    }, options );
+    }, providedOptions );
 
     super( node, options );
   }

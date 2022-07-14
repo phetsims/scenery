@@ -118,10 +118,12 @@ export default class FocusManager {
     this.endSpeakingListener = ( text, utterance ) => {
       if ( utterance instanceof ReadingBlockUtterance && this.readingBlockFocusProperty.value ) {
 
+        assert && assert( utterance.readingBlockFocus, 'should be non null focus' );
+
         // only clear the readingBlockFocusProperty if the ReadingBlockUtterance has a Focus that matches the
         // current value for readingBlockFocusProperty so that the highlight doesn't disappear every time
         // the speaker stops talking
-        if ( utterance.readingBlockFocus.trail.equals( this.readingBlockFocusProperty.value.trail ) ) {
+        if ( utterance.readingBlockFocus!.trail.equals( this.readingBlockFocusProperty.value.trail ) ) {
           this.readingBlockFocusProperty.value = null;
         }
       }

@@ -8,19 +8,18 @@
  * @author Jesse Greenberg
  */
 
-import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import { scenery } from '../../imports.js';
+import Utterance, { UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
+import { Focus, scenery } from '../../imports.js';
+
+export type ReadingBlockUtteranceOptions = UtteranceOptions;
 
 class ReadingBlockUtterance extends Utterance {
+  public readingBlockFocus: Focus | null;
 
-  /**
-   * @param {Focus|null} focus
-   * @param {Object} [options]
-   */
-  constructor( focus, options ) {
+  constructor( focus: Focus | null, options?: ReadingBlockUtteranceOptions ) {
     super( options );
 
-    // @public {Focus|null} - Can be set and change to support reusing this ReadingBlockUtterance.
+    // Can be set and change to support reusing this ReadingBlockUtterance.
     this.readingBlockFocus = focus;
   }
 }

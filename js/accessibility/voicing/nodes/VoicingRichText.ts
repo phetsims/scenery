@@ -8,16 +8,18 @@
  */
 
 import merge from '../../../../../phet-core/js/merge.js';
-import { ReadingBlock, ReadingBlockHighlight, RichText, scenery } from '../../../imports.js';
+import optionize from '../../../../../phet-core/js/optionize.js';
+import EmptyObjectType from '../../../../../phet-core/js/types/EmptyObjectType.js';
+import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, RichText, RichTextOptions, scenery } from '../../../imports.js';
+
+type SelfOptions = EmptyObjectType;
+type ParentOptions = ReadingBlockOptions & RichTextOptions;
+type VoicingRichTextOptions = SelfOptions & ParentOptions;
 
 class VoicingRichText extends ReadingBlock( RichText, 1 ) {
 
-  /**
-   * @param {string} text
-   * @param {Object} [options]
-   */
-  constructor( text, options ) {
-    options = merge( {
+  constructor( text: string, options?: VoicingRichTextOptions ) {
+    options = optionize<VoicingRichTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be read that is different from the
       // visually displayed text

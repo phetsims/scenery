@@ -25,10 +25,10 @@ import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { Focus, Highlight, Node, NodeOptions, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
+import { Focus, Highlight, Node, NodeOptions, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
-import Utterance, { UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
+import Utterance from '../../../../utterance-queue/js/Utterance.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -67,7 +67,7 @@ function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance 
 // An implementation class for ReadingBlock.ts, only used in this class so that we know if we own the Utterance and can
 // therefore dispose it.
 class OwnedReadingBlockUtterance extends ReadingBlockUtterance {
-  public constructor( focus: Focus | null, providedOptions?: UtteranceOptions ) {
+  public constructor( focus: Focus | null, providedOptions?: ReadingBlockUtteranceOptions ) {
     super( focus, providedOptions );
   }
 }
@@ -144,7 +144,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
       // a different behavior.
-      ( this as unknown as Node ).focusHighlight = new ReadingBlockHighlight( this );
+      ( this as unknown as Node ).focusHighlight = new ReadingBlockHighlight( this as unknown as Node );
 
       // All ReadingBlocks use a ReadingBlockUtterance with Focus and Trail data to this Node so that it can be
       // highlighted in the FocusOverlay when this Utterance is being announced.
