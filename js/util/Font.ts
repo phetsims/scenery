@@ -291,7 +291,7 @@ export default class Font extends PhetioObject {
       size: this._size,
       lineHeight: this._lineHeight,
       family: this._family
-    }, options ) as FontOptions );
+    }, options ) );
   }
 
   /**

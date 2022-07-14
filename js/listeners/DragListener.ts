@@ -347,7 +347,7 @@ export default class DragListener extends PressListener implements IInputListene
       this.attachTransformTracker();
 
       assert && assert( pressedListener.pointer.point !== null );
-      const point = pressedListener.pointer.point!;
+      const point = pressedListener.pointer.point;
 
       // Compute the parent point corresponding to the pointer's position
       const parentPoint = this.globalToParentPoint( this._localPoint.set( point ) );

@@ -257,7 +257,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
         }
 
         // We ruled out the string | Mipmap cases above
-        this._image = image as HTMLImageElement | HTMLCanvasElement;
+        this._image = image;
 
         // If our image is an HTML image that hasn't loaded yet, attach a load listener.
         if ( this._image instanceof HTMLImageElement && ( !this._image.width || !this._image.height ) ) {

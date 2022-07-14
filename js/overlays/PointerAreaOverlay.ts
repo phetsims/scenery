@@ -26,10 +26,10 @@ export default class PointerAreaOverlay extends ShapeBasedOverlay implements IOv
         const transform = trail.getTransform();
 
         if ( node.mouseArea ) {
-          this.addShape( transform.transformShape( node.mouseArea instanceof Bounds2 ? Shape.bounds( node.mouseArea as Bounds2 ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );
+          this.addShape( transform.transformShape( node.mouseArea instanceof Bounds2 ? Shape.bounds( node.mouseArea ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );
         }
         if ( node.touchArea ) {
-          this.addShape( transform.transformShape( node.touchArea instanceof Bounds2 ? Shape.bounds( node.touchArea as Bounds2 ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
+          this.addShape( transform.transformShape( node.touchArea instanceof Bounds2 ? Shape.bounds( node.touchArea ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
         }
       }
       return false;

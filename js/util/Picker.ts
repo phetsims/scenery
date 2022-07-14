@@ -416,7 +416,7 @@ export default class Picker {
     // do this before the transformation to the parent coordinate frame (the mouseArea is in the local coordinate frame)
     if ( pointerArea ) {
       // we accept either Bounds2, or a Shape (in which case, we take the Shape's bounds)
-      mutableBounds.includeBounds( pointerArea instanceof Bounds2 ? ( pointerArea as Bounds2 ) : ( pointerArea as unknown as Shape ).bounds );
+      mutableBounds.includeBounds( pointerArea instanceof Bounds2 ? ( pointerArea ) : ( pointerArea as unknown as Shape ).bounds );
     }
 
     const clipArea = this.node.clipArea;
@@ -679,7 +679,7 @@ export default class Picker {
         node._picker.audit();
       } );
 
-      const localAssertSlow = assertSlow!;
+      const localAssertSlow = assertSlow;
 
       const expectedSelfPruned = this.node.pickable === false || !this.node.isVisible();
       const expectedSelfInclusive = this.node.pickable === true || this.node._inputListeners.length > 0;

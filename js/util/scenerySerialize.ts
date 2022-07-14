@@ -19,8 +19,8 @@ const scenerySerialize = ( value: unknown ): any => {
   if ( value instanceof Vector2 ) {
     return {
       type: 'Vector2',
-      x: ( value as Vector2 ).x,
-      y: ( value as Vector2 ).y
+      x: ( value ).x,
+      y: ( value ).y
     };
   }
   else if ( value instanceof Matrix3 ) {
@@ -38,7 +38,7 @@ const scenerySerialize = ( value: unknown ): any => {
     };
   }
   else if ( value instanceof Bounds2 ) {
-    const bounds = value as Bounds2;
+    const bounds = value;
     return {
       type: 'Bounds2',
       maxX: bounds.maxX,
