@@ -835,9 +835,7 @@ Text.TextIO = new IOType( 'TextIO', {
     setFontOptions: {
       returnType: VoidIO,
       parameterTypes: [ Font.FontIO ],
-      implementation: function( this: Text, font: Font ) {
-        this.setFont( font );
-      },
+      implementation: Text.prototype.setFont,
       documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
                      'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.',
       invocableForReadOnlyElements: false
@@ -846,18 +844,14 @@ Text.TextIO = new IOType( 'TextIO', {
     getFontOptions: {
       returnType: Font.FontIO,
       parameterTypes: [],
-      implementation: function( this: Text ) {
-        return this.getFont();
-      },
+      implementation: Text.prototype.getFont,
       documentation: 'Gets font options for this TextIO instance as an object'
     },
 
     setMaxWidth: {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
-      implementation: function( this: Text, maxWidth: number ) {
-        this.setMaxWidth( maxWidth );
-      },
+      implementation: Text.prototype.setMaxWidth,
       documentation: 'Sets the maximum width of text box. ' +
                      'If the text width exceeds maxWidth, it is scaled down to fit.',
       invocableForReadOnlyElements: false
@@ -866,9 +860,7 @@ Text.TextIO = new IOType( 'TextIO', {
     getMaxWidth: {
       returnType: NumberIO,
       parameterTypes: [],
-      implementation: function( this: Text ) {
-        return this.maxWidth;
-      },
+      implementation: Text.prototype.getMaxWidth,
       documentation: 'Gets the maximum width of text box'
     }
   }
