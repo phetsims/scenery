@@ -507,6 +507,9 @@ export default class Path extends Paintable( Node ) {
 
     super.dispose();
   }
+
+  // Initial values for most Node mutator options
+  static DEFAULT_PATH_OPTIONS = combineOptions<PathOptions>( {}, Node.DEFAULT_NODE_OPTIONS, DEFAULT_OPTIONS );
 }
 
 /**
@@ -528,6 +531,3 @@ Path.prototype._mutatorKeys = [ ...PAINTABLE_OPTION_KEYS, ...PATH_OPTION_KEYS, .
 Path.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, ...PAINTABLE_DRAWABLE_MARK_FLAGS, 'shape' ];
 
 scenery.register( 'Path', Path );
-
-// {Object} - Initial values for most Node mutator options
-Path.DEFAULT_OPTIONS = combineOptions<PathOptions>( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );

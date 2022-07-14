@@ -408,6 +408,8 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
 
     return marginsNode;
   }
+
+  static DEFAULT_FLOW_BOX_OPTIONS = DEFAULT_OPTIONS;
 }
 
 /**
@@ -418,8 +420,5 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
  *       cases that may apply.
  */
 FlowBox.prototype._mutatorKeys = [ ...SIZABLE_OPTION_KEYS, ...FLOWBOX_OPTION_KEYS, ...Node.prototype._mutatorKeys ];
-
-// {Object}
-FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'FlowBox', FlowBox );

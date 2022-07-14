@@ -109,7 +109,7 @@ class FocusHighlightPath extends Path {
     // emitted whenever this highlight changes
     this.highlightChangedEmitter = new Emitter();
 
-    const pathOptions = _.pick( options, Path.DEFAULT_OPTIONS ) as PathOptions;
+    const pathOptions = _.pick( options, Object.keys( Path.DEFAULT_PATH_OPTIONS ) ) as PathOptions;
 
     // Path cannot take null for lineWidth.
     this.innerLineWidth = options.innerLineWidth;
@@ -226,6 +226,7 @@ class FocusHighlightPath extends Path {
   }
 
   public set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); }
+
   public get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**

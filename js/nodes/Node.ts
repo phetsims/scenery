@@ -6515,6 +6515,10 @@ class Node extends ParallelDOM {
   }
 
   static NodeIO: IOType;
+
+  // A mapping of all of the default options provided to Node
+  static DEFAULT_NODE_OPTIONS = DEFAULT_OPTIONS;
+
 }
 
 Node.prototype._mutatorKeys = ACCESSIBILITY_OPTION_KEYS.concat( NODE_OPTION_KEYS );
@@ -6528,8 +6532,6 @@ Node.prototype._mutatorKeys = ACCESSIBILITY_OPTION_KEYS.concat( NODE_OPTION_KEYS
  * Should be overridden by subtypes.
  */
 Node.prototype.drawableMarkFlags = [];
-// {Object} - A mapping of all of the default options provided to Node
-Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 // {Object} - A mapping of all of options that require Bounds to be applied properly. Most often these should be set through `mutate` in the end of the construcor instead of being passed through `super()`
 Node.REQUIRES_BOUNDS_OPTION_KEYS = REQUIRES_BOUNDS_OPTION_KEYS;

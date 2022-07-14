@@ -273,6 +273,9 @@ export default class Image extends Imageable( Node ) {
   }
 
   static ImageIO: IOType;
+
+  // Initial values for most Node mutator options
+  static DEFAULT_IMAGE_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_NODE_OPTIONS, Imageable.DEFAULT_OPTIONS );
 }
 
 /**
@@ -292,9 +295,6 @@ Image.prototype._mutatorKeys = [ ...IMAGE_OPTION_KEYS, ...Node.prototype._mutato
  * @override
  */
 Image.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, 'image', 'imageOpacity', 'mipmap' ];
-
-// {Object} - Initial values for most Node mutator options
-Image.DEFAULT_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_OPTIONS, Imageable.DEFAULT_OPTIONS );
 
 // NOTE: Not currently in use
 Image.ImageIO = new IOType( 'ImageIO', {

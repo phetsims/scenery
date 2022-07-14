@@ -143,7 +143,7 @@ const scenerySerialize = ( value: unknown ): any => {
       'preventFit'
     ].forEach( simpleKey => {
       // @ts-ignore
-      if ( node[ simpleKey ] !== Node.DEFAULT_OPTIONS[ simpleKey ] ) {
+      if ( node[ simpleKey ] !== Node.DEFAULT_NODE_OPTIONS[ simpleKey ] ) {
         // @ts-ignore
         options[ simpleKey ] = node[ simpleKey ];
       }
@@ -174,7 +174,7 @@ const scenerySerialize = ( value: unknown ): any => {
       'touchArea'
     ].forEach( serializedKey => {
       // @ts-ignore
-      if ( node[ serializedKey ] !== Node.DEFAULT_OPTIONS[ serializedKey ] ) {
+      if ( node[ serializedKey ] !== Node.DEFAULT_NODE_OPTIONS[ serializedKey ] ) {
         // @ts-ignore
         setup[ serializedKey ] = scenerySerialize( node[ serializedKey ] );
       }
@@ -204,7 +204,7 @@ const scenerySerialize = ( value: unknown ): any => {
     if ( Path && node instanceof Path ) {
       serialization.type = 'Path';
       setup.path = scenerySerialize( node.shape );
-      if ( node.boundsMethod !== Path.DEFAULT_OPTIONS.boundsMethod ) {
+      if ( node.boundsMethod !== Path.DEFAULT_PATH_OPTIONS.boundsMethod ) {
         options.boundsMethod = node.boundsMethod;
       }
     }
@@ -253,7 +253,7 @@ const scenerySerialize = ( value: unknown ): any => {
         'mipmapMaxLevel'
       ].forEach( simpleKey => {
         // @ts-ignore
-        if ( node[ simpleKey ] !== Image.DEFAULT_OPTIONS[ simpleKey ] ) {
+        if ( node[ simpleKey ] !== Image.DEFAULT_IMAGE_OPTIONS[ simpleKey ] ) {
           // @ts-ignore
           options[ simpleKey ] = node[ simpleKey ];
         }

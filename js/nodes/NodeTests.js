@@ -203,11 +203,11 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
   QUnit.test( 'Node instrumented enabledProperty', assert => testInstrumentedNodeProperty( assert, 'enabled',
     'enabledProperty', 'setEnabledProperty',
-    Node.DEFAULT_OPTIONS.phetioEnabledPropertyInstrumented, 'phetioEnabledPropertyInstrumented' ) );
+    Node.DEFAULT_NODE_OPTIONS.phetioEnabledPropertyInstrumented, 'phetioEnabledPropertyInstrumented' ) );
 
   QUnit.test( 'Node instrumented inputEnabledProperty', assert => testInstrumentedNodeProperty( assert, 'inputEnabled',
     'inputEnabledProperty', 'setInputEnabledProperty',
-    Node.DEFAULT_OPTIONS.phetioInputEnabledPropertyInstrumented, 'phetioInputEnabledPropertyInstrumented' ) );
+    Node.DEFAULT_NODE_OPTIONS.phetioInputEnabledPropertyInstrumented, 'phetioInputEnabledPropertyInstrumented' ) );
 
   /**
    * Factor out a way to test added Properties to Node and their PhET-iO instrumentation
