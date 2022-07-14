@@ -14,16 +14,16 @@ import Constructor from '../../../phet-core/js/types/Constructor.js';
 const Leaf = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Leaf' );
 
-  return class extends type {
-    constructor( ...args: any[] ) {
+  return class LeafMixin extends type {
+    public constructor( ...args: any[] ) {
       super( ...args );
     }
 
-    insertChild( index: number, node: Node ): void {
+    public insertChild( index: number, node: Node ): void {
       throw new Error( 'Attempt to insert child into Leaf' );
     }
 
-    removeChildWithIndex( node: Node, indexOfChild: number ): void {
+    public removeChildWithIndex( node: Node, indexOfChild: number ): void {
       throw new Error( 'Attempt to remove child from Leaf' );
     }
   };

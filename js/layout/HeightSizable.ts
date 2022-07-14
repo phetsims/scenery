@@ -71,9 +71,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     public readonly isHeightResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
     // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the other
-    // (scenery-internal) - would be private, but can't be with mixin constraints
-    public _preferredHeightChanging = false;
-    public _minimumHeightChanging = false;
+    private _preferredHeightChanging = false;
+    private _minimumHeightChanging = false;
 
     // IMPORTANT: If you're mixing this in, typically don't pass options that HeightSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the

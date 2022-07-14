@@ -68,18 +68,21 @@ const PAINTABLE_DRAWABLE_MARK_FLAGS = [ 'fill', 'stroke', 'lineWidth', 'lineOpti
 const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
 
-  return class extends type {
+  return class PaintableMixin extends type {
 
-    _fill: IPaint;
-    _fillPickable: boolean;
+    // (scenery-internal)
+    public _fill: IPaint;
+    public _fillPickable: boolean;
 
-    _stroke: IPaint;
-    _strokePickable: boolean;
+    // (scenery-internal)
+    public _stroke: IPaint;
+    public _strokePickable: boolean;
 
-    _cachedPaints: Paint[];
-    _lineDrawingStyles: LineStyles;
+    // (scenery-internal)
+    public _cachedPaints: Paint[];
+    public _lineDrawingStyles: LineStyles;
 
-    constructor( ...args: any[] ) {
+    public constructor( ...args: any[] ) {
       super( ...args );
 
       assertHasProperties( this, [ '_drawables' ] );
@@ -103,7 +106,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * provided for a single-color flat appearance, and can be wrapped with an Axon Property. Gradients and patterns
      * can also be provided.
      */
-    setFill( fill: IPaint ): this {
+    public setFill( fill: IPaint ): this {
       assert && assert( PaintDef.isPaintDef( fill ), 'Invalid fill type' );
 
       if ( assert && typeof fill === 'string' ) {
@@ -121,34 +124,34 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set fill( value: IPaint ) { this.setFill( value ); }
+    public set fill( value: IPaint ) { this.setFill( value ); }
 
-    get fill(): IPaint { return this.getFill(); }
+    public get fill(): IPaint { return this.getFill(); }
 
     /**
      * Returns the fill (if any) for this Node.
      */
-    getFill(): IPaint {
+    public getFill(): IPaint {
       return this._fill;
     }
 
     /**
      * Returns whether there is a fill applied to this Node.
      */
-    hasFill(): boolean {
+    public hasFill(): boolean {
       return this.getFillValue() !== null;
     }
 
     /**
      * Returns a property-unwrapped fill if applicable.
      */
-    getFillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
+    public getFillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
       const fill = this.getFill();
 
       return fill instanceof ReadOnlyProperty ? fill.get() : fill;
     }
 
-    get fillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getFillValue(); }
+    public get fillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getFillValue(); }
 
     /**
      * Sets the stroke color for the Node.
@@ -162,7 +165,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * provided for a single-color flat appearance, and can be wrapped with an Axon Property. Gradients and patterns
      * can also be provided.
      */
-    setStroke( stroke: IPaint ): this {
+    public setStroke( stroke: IPaint ): this {
       assert && assert( PaintDef.isPaintDef( stroke ), 'Invalid stroke type' );
 
       if ( assert && typeof stroke === 'string' ) {
@@ -180,28 +183,28 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set stroke( value: IPaint ) { this.setStroke( value ); }
+    public set stroke( value: IPaint ) { this.setStroke( value ); }
 
-    get stroke(): IPaint { return this.getStroke(); }
+    public get stroke(): IPaint { return this.getStroke(); }
 
     /**
      * Returns the stroke (if any) for this Node.
      */
-    getStroke(): IPaint {
+    public getStroke(): IPaint {
       return this._stroke;
     }
 
     /**
      * Returns whether there is a stroke applied to this Node.
      */
-    hasStroke(): boolean {
+    public hasStroke(): boolean {
       return this.getStrokeValue() !== null;
     }
 
     /**
      * Returns whether there will appear to be a stroke for this Node. Properly handles the lineWidth:0 case.
      */
-    hasPaintableStroke(): boolean {
+    public hasPaintableStroke(): boolean {
       // Should not be stroked if the lineWidth is 0, see https://github.com/phetsims/scenery/issues/658
       // and https://github.com/phetsims/scenery/issues/523
       return this.hasStroke() && this.getLineWidth() > 0;
@@ -210,18 +213,18 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Returns a property-unwrapped stroke if applicable.
      */
-    getStrokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
+    public getStrokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
       const stroke = this.getStroke();
 
       return stroke instanceof ReadOnlyProperty ? stroke.get() : stroke;
     }
 
-    get strokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getStrokeValue(); }
+    public get strokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getStrokeValue(); }
 
     /**
      * Sets whether the fill is marked as pickable.
      */
-    setFillPickable( pickable: boolean ): this {
+    public setFillPickable( pickable: boolean ): this {
       assert && assert( typeof pickable === 'boolean' );
 
       if ( this._fillPickable !== pickable ) {
@@ -233,21 +236,21 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set fillPickable( value: boolean ) { this.setFillPickable( value ); }
+    public set fillPickable( value: boolean ) { this.setFillPickable( value ); }
 
-    get fillPickable(): boolean { return this.isFillPickable(); }
+    public get fillPickable(): boolean { return this.isFillPickable(); }
 
     /**
      * Returns whether the fill is marked as pickable.
      */
-    isFillPickable(): boolean {
+    public isFillPickable(): boolean {
       return this._fillPickable;
     }
 
     /**
      * Sets whether the stroke is marked as pickable.
      */
-    setStrokePickable( pickable: boolean ): this {
+    public setStrokePickable( pickable: boolean ): this {
       assert && assert( typeof pickable === 'boolean', `strokePickable should be a boolean, not ${pickable}` );
 
       if ( this._strokePickable !== pickable ) {
@@ -259,21 +262,21 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set strokePickable( value: boolean ) { this.setStrokePickable( value ); }
+    public set strokePickable( value: boolean ) { this.setStrokePickable( value ); }
 
-    get strokePickable(): boolean { return this.isStrokePickable(); }
+    public get strokePickable(): boolean { return this.isStrokePickable(); }
 
     /**
      * Returns whether the stroke is marked as pickable.
      */
-    isStrokePickable(): boolean {
+    public isStrokePickable(): boolean {
       return this._strokePickable;
     }
 
     /**
      * Sets the line width that will be applied to strokes on this Node.
      */
-    setLineWidth( lineWidth: number ): this {
+    public setLineWidth( lineWidth: number ): this {
       assert && assert( typeof lineWidth === 'number', `lineWidth should be a number, not ${lineWidth}` );
       assert && assert( lineWidth >= 0, `lineWidth should be non-negative instead of ${lineWidth}` );
 
@@ -289,14 +292,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set lineWidth( value: number ) { this.setLineWidth( value ); }
+    public set lineWidth( value: number ) { this.setLineWidth( value ); }
 
-    get lineWidth(): number { return this.getLineWidth(); }
+    public get lineWidth(): number { return this.getLineWidth(); }
 
     /**
      * Returns the line width that would be applied to strokes.
      */
-    getLineWidth(): number {
+    public getLineWidth(): number {
       return this._lineDrawingStyles.lineWidth;
     }
 
@@ -306,7 +309,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * - 'round' draws a semicircular arc around the end point
      * - 'square' draws a square outline around the end point (like butt, but extended by 1/2 line width out)
      */
-    setLineCap( lineCap: LineCap ): this {
+    public setLineCap( lineCap: LineCap ): this {
       assert && assert( lineCap === 'butt' || lineCap === 'round' || lineCap === 'square',
         `lineCap should be one of "butt", "round" or "square", not ${lineCap}` );
 
@@ -322,14 +325,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set lineCap( value: LineCap ) { this.setLineCap( value ); }
+    public set lineCap( value: LineCap ) { this.setLineCap( value ); }
 
-    get lineCap(): LineCap { return this.getLineCap(); }
+    public get lineCap(): LineCap { return this.getLineCap(); }
 
     /**
      * Returns the line cap style (controls appearance at the start/end of paths)
      */
-    getLineCap(): LineCap {
+    public getLineCap(): LineCap {
       return this._lineDrawingStyles.lineCap;
     }
 
@@ -340,7 +343,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * - 'round' draws a circular arc to connect the two stroked areas.
      * - 'bevel' connects with a single line segment.
      */
-    setLineJoin( lineJoin: LineJoin ): this {
+    public setLineJoin( lineJoin: LineJoin ): this {
       assert && assert( lineJoin === 'miter' || lineJoin === 'round' || lineJoin === 'bevel',
         `lineJoin should be one of "miter", "round" or "bevel", not ${lineJoin}` );
 
@@ -356,14 +359,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set lineJoin( value: LineJoin ) { this.setLineJoin( value ); }
+    public set lineJoin( value: LineJoin ) { this.setLineJoin( value ); }
 
-    get lineJoin(): LineJoin { return this.getLineJoin(); }
+    public get lineJoin(): LineJoin { return this.getLineJoin(); }
 
     /**
      * Returns the current line join style (controls join appearance between drawn segments).
      */
-    getLineJoin(): LineJoin {
+    public getLineJoin(): LineJoin {
       return this._lineDrawingStyles.lineJoin;
     }
 
@@ -371,7 +374,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Sets the miterLimit value. This determines how sharp a corner with lineJoin: 'miter' will need to be before
      * it gets cut off to the 'bevel' behavior.
      */
-    setMiterLimit( miterLimit: number ): this {
+    public setMiterLimit( miterLimit: number ): this {
       assert && assert( typeof miterLimit === 'number' && isFinite( miterLimit ), 'miterLimit should be a finite number' );
 
       if ( this._lineDrawingStyles.miterLimit !== miterLimit ) {
@@ -386,14 +389,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set miterLimit( value: number ) { this.setMiterLimit( value ); }
+    public set miterLimit( value: number ) { this.setMiterLimit( value ); }
 
-    get miterLimit(): number { return this.getMiterLimit(); }
+    public get miterLimit(): number { return this.getMiterLimit(); }
 
     /**
      * Returns the miterLimit value.
      */
-    getMiterLimit(): number {
+    public getMiterLimit(): number {
       return this._lineDrawingStyles.miterLimit;
     }
 
@@ -401,7 +404,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Sets the line dash pattern. Should be an array of numbers "on" and "off" alternating. An empty array
      * indicates no dashing.
      */
-    setLineDash( lineDash: number[] ): this {
+    public setLineDash( lineDash: number[] ): this {
       assert && assert( Array.isArray( lineDash ) && lineDash.every( n => typeof n === 'number' && isFinite( n ) && n >= 0 ),
         'lineDash should be an array of finite non-negative numbers' );
 
@@ -417,28 +420,28 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set lineDash( value: number[] ) { this.setLineDash( value ); }
+    public set lineDash( value: number[] ) { this.setLineDash( value ); }
 
-    get lineDash(): number[] { return this.getLineDash(); }
+    public get lineDash(): number[] { return this.getLineDash(); }
 
     /**
      * Gets the line dash pattern. An empty array is the default, indicating no dashing.
      */
-    getLineDash(): number[] {
+    public getLineDash(): number[] {
       return this._lineDrawingStyles.lineDash;
     }
 
     /**
      * Returns whether the stroke will be dashed.
      */
-    hasLineDash(): boolean {
+    public hasLineDash(): boolean {
       return !!this._lineDrawingStyles.lineDash.length;
     }
 
     /**
      * Sets the offset of the line dash pattern from the start of the stroke. Defaults to 0.
      */
-    setLineDashOffset( lineDashOffset: number ): this {
+    public setLineDashOffset( lineDashOffset: number ): this {
       assert && assert( typeof lineDashOffset === 'number' && isFinite( lineDashOffset ),
         `lineDashOffset should be a number, not ${lineDashOffset}` );
 
@@ -454,21 +457,21 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set lineDashOffset( value: number ) { this.setLineDashOffset( value ); }
+    public set lineDashOffset( value: number ) { this.setLineDashOffset( value ); }
 
-    get lineDashOffset(): number { return this.getLineDashOffset(); }
+    public get lineDashOffset(): number { return this.getLineDashOffset(); }
 
     /**
      * Returns the offset of the line dash pattern from the start of the stroke.
      */
-    getLineDashOffset(): number {
+    public getLineDashOffset(): number {
       return this._lineDrawingStyles.lineDashOffset;
     }
 
     /**
      * Sets the LineStyles object (it determines stroke appearance). The passed-in object will be mutated as needed.
      */
-    setLineStyles( lineStyles: LineStyles ): this {
+    public setLineStyles( lineStyles: LineStyles ): this {
       assert && assert( lineStyles instanceof LineStyles );
 
       this._lineDrawingStyles = lineStyles;
@@ -476,14 +479,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set lineStyles( value: LineStyles ) { this.setLineStyles( value ); }
+    public set lineStyles( value: LineStyles ) { this.setLineStyles( value ); }
 
-    get lineStyles(): LineStyles { return this.getLineStyles(); }
+    public get lineStyles(): LineStyles { return this.getLineStyles(); }
 
     /**
      * Returns the composite {LineStyles} object, that determines stroke appearance.
      */
-    getLineStyles(): LineStyles {
+    public getLineStyles(): LineStyles {
       return this._lineDrawingStyles;
     }
 
@@ -497,7 +500,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      *
      * Also note that duplicate paints are acceptable, and don't need to be filtered out before-hand.
      */
-    setCachedPaints( paints: IPaint[] ): this {
+    public setCachedPaints( paints: IPaint[] ): this {
       this._cachedPaints = paints.filter( ( paint: IPaint ): paint is Paint => paint instanceof Paint );
 
       const stateLen = ( this as unknown as Node )._drawables.length;
@@ -508,14 +511,14 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       return this;
     }
 
-    set cachedPaints( value: IPaint[] ) { this.setCachedPaints( value ); }
+    public set cachedPaints( value: IPaint[] ) { this.setCachedPaints( value ); }
 
-    get cachedPaints(): IPaint[] { return this.getCachedPaints(); }
+    public get cachedPaints(): IPaint[] { return this.getCachedPaints(); }
 
     /**
      * Returns the cached paints.
      */
-    getCachedPaints(): IPaint[] {
+    public getCachedPaints(): IPaint[] {
       return this._cachedPaints;
     }
 
@@ -529,7 +532,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      *
      * Also note that duplicate paints are acceptable, and don't need to be filtered out before-hand.
      */
-    addCachedPaint( paint: IPaint ): void {
+    public addCachedPaint( paint: IPaint ): void {
       if ( paint instanceof Paint ) {
         this._cachedPaints.push( paint );
 
@@ -549,7 +552,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
      * SVG-side whenever the switch is made).
      */
-    removeCachedPaint( paint: IPaint ): void {
+    public removeCachedPaint( paint: IPaint ): void {
       if ( paint instanceof Paint ) {
         assert && assert( _.includes( this._cachedPaints, paint ) );
 
@@ -565,7 +568,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Applies the fill to a Canvas context wrapper, before filling. (scenery-internal)
      */
-    beforeCanvasFill( wrapper: CanvasContextWrapper ): void {
+    public beforeCanvasFill( wrapper: CanvasContextWrapper ): void {
       assert && assert( this.getFillValue() !== null );
 
       const fillValue = this.getFillValue()!;
@@ -582,7 +585,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Un-applies the fill to a Canvas context wrapper, after filling. (scenery-internal)
      */
-    afterCanvasFill( wrapper: CanvasContextWrapper ): void {
+    public afterCanvasFill( wrapper: CanvasContextWrapper ): void {
       const fillValue = this.getFillValue();
 
       // @ts-ignore
@@ -594,7 +597,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Applies the stroke to a Canvas context wrapper, before stroking. (scenery-internal)
      */
-    beforeCanvasStroke( wrapper: CanvasContextWrapper ): void {
+    public beforeCanvasStroke( wrapper: CanvasContextWrapper ): void {
       const strokeValue = this.getStrokeValue();
 
       // TODO: is there a better way of not calling so many things on each stroke?
@@ -617,7 +620,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Un-applies the stroke to a Canvas context wrapper, after stroking. (scenery-internal)
      */
-    afterCanvasStroke( wrapper: CanvasContextWrapper ): void {
+    public afterCanvasStroke( wrapper: CanvasContextWrapper ): void {
       const strokeValue = this.getStrokeValue();
 
       // @ts-ignore - for performance
@@ -629,7 +632,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * If applicable, returns the CSS color for the fill.
      */
-    getCSSFill(): string {
+    public getCSSFill(): string {
       const fillValue = this.getFillValue();
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
@@ -640,7 +643,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * If applicable, returns the CSS color for the stroke.
      */
-    getSimpleCSSStroke(): string {
+    public getSimpleCSSStroke(): string {
       const strokeValue = this.getStrokeValue();
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
@@ -654,7 +657,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * @param spaces - Whitespace to add
      * @param result
      */
-    appendFillablePropString( spaces: string, result: string ): string {
+    public appendFillablePropString( spaces: string, result: string ): string {
       if ( this._fill ) {
         if ( result ) {
           result += ',\n';
@@ -676,7 +679,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * @param spaces - Whitespace to add
      * @param result
      */
-    appendStrokablePropString( spaces: string, result: string ): string {
+    public appendStrokablePropString( spaces: string, result: string ): string {
       function addProp( key: string, value: any, nowrap?: boolean ) {
         if ( result ) {
           result += ',\n';
@@ -724,7 +727,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      *
      * @returns - Renderer bitmask, see Renderer for details
      */
-    getFillRendererBitmask(): number {
+    public getFillRendererBitmask(): number {
       let bitmask = 0;
 
       // Safari 5 has buggy issues with SVG gradients
@@ -764,7 +767,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      *
      * @returns - Renderer bitmask, see Renderer for details
      */
-    getStrokeRendererBitmask(): number {
+    public getStrokeRendererBitmask(): number {
       let bitmask = 0;
 
       bitmask |= Renderer.bitmaskCanvas;
@@ -784,7 +787,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Invalidates our current fill, triggering recomputation of anything that depended on the old fill's value
      */
-    invalidateFill(): void {
+    public invalidateFill(): void {
       const thisNode = this as unknown as Node;
 
       thisNode.invalidateSupportedRenderers();
@@ -798,7 +801,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Invalidates our current stroke, triggering recomputation of anything that depended on the old stroke's value
      */
-    invalidateStroke(): void {
+    public invalidateStroke(): void {
       const thisNode = this as unknown as Node;
 
       thisNode.invalidateSupportedRenderers();

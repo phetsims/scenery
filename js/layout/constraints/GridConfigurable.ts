@@ -83,9 +83,9 @@ export type GridConfigurableOptions = {
 export type ExternalGridConfigurableOptions = WithoutNull<GridConfigurableOptions, Exclude<keyof GridConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
 
 const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  return class extends type {
+  return class GridConfigurableMixin extends type {
 
-    // (scenery-internal) - considered private, but TypeScript mixins won't support private
+    // (scenery-internal)
     public _xAlign: LayoutAlign | null = null;
     public _yAlign: LayoutAlign | null = null;
     public _xStretch: boolean | null = null;

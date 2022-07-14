@@ -88,12 +88,11 @@ export type FlowConfigurableOptions = {
 export type ExternalFlowConfigurableOptions = WithoutNull<FlowConfigurableOptions, Exclude<keyof FlowConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
 
 const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  return class extends type {
+  return class FlowConfirableMixin extends type {
 
-    // (scenery-internal) - considered private, but TypeScript mixins won't support private
-    public _orientation: Orientation = Orientation.HORIZONTAL;
+    protected _orientation: Orientation = Orientation.HORIZONTAL;
 
-    // (scenery-internal) - considered private, but TypeScript mixins won't support private
+    // (scenery-internal)
     public _align: LayoutAlign | null = null;
     public _stretch: boolean | null = null;
     public _leftMargin: number | null = null;

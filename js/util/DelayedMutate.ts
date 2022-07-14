@@ -43,13 +43,13 @@ const DelayedMutate = <SuperType extends Constructor>( name: string, keys: strin
   const pendingOptionsKey = `_${name}PendingOptions` as '_fakePendingOptionsType';
   const isConstructedKey = `_${name}IsConstructed` as '_fakeIsConstructedType';
 
-  return class DelayedMutate extends type {
+  return class DelayedMutateMixin extends type {
 
     // We need to store different fields in each class, so we use computed properties
     private [ isConstructedKey ]: boolean;
     private [ pendingOptionsKey ]: NodeOptions | undefined;
 
-    constructor( ...args: any[] ) {
+    public constructor( ...args: any[] ) {
       super( ...args );
 
       // Mark ourself as constructed, so further mutates will use all of the options
@@ -63,7 +63,7 @@ const DelayedMutate = <SuperType extends Constructor>( name: string, keys: strin
     }
 
     // Typescript doesn't want an override here, but we're overriding it
-    mutate( options?: NodeOptions ): this {
+    public mutate( options?: NodeOptions ): this {
 
       // If we're not constructed, we need to save the options for later
       // NOTE: If we haven't SET the constructed field yet, then it will be undefined (and falsy), so we do a check

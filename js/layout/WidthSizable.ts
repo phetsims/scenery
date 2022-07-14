@@ -71,9 +71,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     public readonly isWidthResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
     // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the other
-    // (scenery-internal) - would be private, but can't be with mixin constraints
-    public _preferredWidthChanging = false;
-    public _minimumWidthChanging = false;
+    private _preferredWidthChanging = false;
+    private _minimumWidthChanging = false;
 
     // IMPORTANT: If you're mixing this in, typically don't pass options that WidthSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the

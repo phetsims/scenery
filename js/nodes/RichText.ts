@@ -1560,15 +1560,15 @@ scenery.register( 'RichText', RichText );
 const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
 
-  return class extends type {
-    get isCleanable(): boolean {
+  return class RichTextCleanableMixin extends type {
+    public get isCleanable(): boolean {
       return true;
     }
 
     /**
      * Releases references
      */
-    clean(): void {
+    public clean(): void {
       const thisNode = this as unknown as RichTextCleanableNode;
 
       // Remove all children (and recursively clean)
