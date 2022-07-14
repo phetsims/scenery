@@ -882,7 +882,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     if ( this._pointer ) {
       assert && assert( this._pointer.listeners.includes( this._pointerListener ),
         'A reference to the Pointer means it should have the pointerListener' );
-      this._pointer!.removeInputListener( this._pointerListener );
+      this._pointer.removeInputListener( this._pointerListener );
       this._pointer = null;
     }
   }

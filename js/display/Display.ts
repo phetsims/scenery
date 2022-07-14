@@ -1166,7 +1166,7 @@ export default class Display {
         this._pointerOverlay = null;
       }
       else {
-        this._pointerOverlay = new PointerOverlay( this, this._rootNode! );
+        this._pointerOverlay = new PointerOverlay( this, this._rootNode );
         this.addOverlay( this._pointerOverlay );
       }
     }
@@ -1187,7 +1187,7 @@ export default class Display {
         this._pointerAreaOverlay = null;
       }
       else {
-        this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode! );
+        this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode );
         this.addOverlay( this._pointerAreaOverlay );
       }
     }
@@ -1208,8 +1208,8 @@ export default class Display {
         this._hitAreaOverlay = null;
       }
       else {
-        this._hitAreaOverlay = new HitAreaOverlay( this, this._rootNode! );
-        this.addOverlay( this._hitAreaOverlay! );
+        this._hitAreaOverlay = new HitAreaOverlay( this, this._rootNode );
+        this.addOverlay( this._hitAreaOverlay );
       }
     }
   }
@@ -1229,7 +1229,7 @@ export default class Display {
         this._canvasAreaBoundsOverlay = null;
       }
       else {
-        this._canvasAreaBoundsOverlay = new CanvasNodeBoundsOverlay( this, this._rootNode! );
+        this._canvasAreaBoundsOverlay = new CanvasNodeBoundsOverlay( this, this._rootNode );
         this.addOverlay( this._canvasAreaBoundsOverlay );
       }
     }
@@ -1250,7 +1250,7 @@ export default class Display {
         this._fittedBlockBoundsOverlay = null;
       }
       else {
-        this._fittedBlockBoundsOverlay = new FittedBlockBoundsOverlay( this, this._rootNode! );
+        this._fittedBlockBoundsOverlay = new FittedBlockBoundsOverlay( this, this._rootNode );
         this.addOverlay( this._fittedBlockBoundsOverlay );
       }
     }
@@ -1484,7 +1484,7 @@ export default class Display {
     }
 
     // @ts-ignore TODO BackboneDrawable
-    result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone! )}<br/>` ) : '';
+    result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone )}<br/>` ) : '';
 
     const drawableCountMap: Record<string, number> = {}; // {string} drawable constructor name => {number} count of seen
     // increment the count in our map
@@ -1752,7 +1752,7 @@ export default class Display {
     if ( this._rootBackbone ) {
       result += '<div style="font-weight: bold;">Root Drawable Tree</div>';
       // @ts-ignore TODO BackboneDrawable
-      printDrawableSubtree( this._rootBackbone! );
+      printDrawableSubtree( this._rootBackbone );
     }
 
     //OHTWO TODO: add shared cache drawable trees

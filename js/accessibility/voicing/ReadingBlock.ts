@@ -368,7 +368,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
-      const readingBlockUtterance = this.voicingUtterance as ReadingBlockUtterance;
+      const readingBlockUtterance = this.voicingUtterance;
 
       const content = this.collectResponse( {
         nameResponse: this.getReadingBlockNameResponse(),

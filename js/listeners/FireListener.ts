@@ -65,7 +65,7 @@ export default class FireListener extends PressListener implements IInputListene
     this._fireOnDown = options.fireOnDown;
 
     this.firedEmitter = new Emitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ]>( {
-      tandem: options.tandem!.createTandem( 'firedEmitter' ),
+      tandem: options.tandem.createTandem( 'firedEmitter' ),
       // @ts-ignore TODO EventType
       phetioEventType: EventType.USER,
       phetioReadOnly: options.phetioReadOnly,

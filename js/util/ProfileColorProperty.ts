@@ -50,7 +50,7 @@ export default class ProfileColorProperty extends ColorProperty {
       useDeepEquality: true
     }, providedOptions );
 
-    const tandem = options.tandem!;
+    const tandem = options.tandem;
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)

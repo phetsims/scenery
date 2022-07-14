@@ -70,7 +70,7 @@ export default class BatchedDOMEvent implements IPoolable {
         // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
         const touch = touchEvent.changedTouches.item( i )!;
 
-        callback.call( input, touch!.identifier, input.pointFromEvent( touch ), touchEvent );
+        callback.call( input, touch.identifier, input.pointFromEvent( touch ), touchEvent );
       }
     }
     else if ( this.type === BatchedDOMEventType.MOUSE_TYPE ) {

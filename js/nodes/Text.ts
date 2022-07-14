@@ -167,7 +167,7 @@ export default class Text extends Paintable( Node ) {
       }
     }
 
-    return this._cachedRenderedText!;
+    return this._cachedRenderedText;
   }
 
   get renderedText(): string { return this.getRenderedText(); }

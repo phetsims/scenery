@@ -258,7 +258,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         assert && assert( amountToGrow > 1e-11 );
 
         growableCells.forEach( cell => {
-          cell.size += amountToGrow * cell.effectiveGrow!;
+          cell.size += amountToGrow * cell.effectiveGrow;
         } );
         spaceRemaining -= amountToGrow * totalGrow;
       }

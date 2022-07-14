@@ -63,9 +63,9 @@ export default class LayoutAlign extends EnumerationValue {
       return null;
     }
 
-    assert && assert( horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ] );
+    assert && assert( horizontalAlignMap[ key ] );
 
-    return horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ];
+    return horizontalAlignMap[ key ];
   }
 
   static verticalAlignToInternal( key: VerticalLayoutAlign | null ): LayoutAlign | null {
@@ -73,9 +73,9 @@ export default class LayoutAlign extends EnumerationValue {
       return null;
     }
 
-    assert && assert( verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ] );
+    assert && assert( verticalAlignMap[ key ] );
 
-    return verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ];
+    return verticalAlignMap[ key ];
   }
 
   // Converts an internal Enumeration value into a string union value.
