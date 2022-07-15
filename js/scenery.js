@@ -8,6 +8,8 @@
  * dependencies. Please use the 'main' module for that purpose if all of Scenery is desired.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ *
+ * TODO: When converting to TypeScript, please see ts-ignore in SimDisplay
  */
 
 import extend from '../../phet-core/js/extend.js';

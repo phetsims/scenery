@@ -19,7 +19,7 @@ class AnimatedPanZoomSingleton {
 
   /**
    * @public
-   * @param {Node} targetNode
+   * @param {../nodes/Node} targetNode
    * @param {Object} [options]
    */
   initialize( targetNode, options ) {
