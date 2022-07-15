@@ -237,7 +237,7 @@ export default class Circle extends Path {
   public override containsPointSelf( point: Vector2 ): boolean {
     const magSq = point.x * point.x + point.y * point.y;
     let result = true;
-    let iRadius;
+    let iRadius: number;
     if ( this._strokePickable ) {
       iRadius = this.getLineWidth() / 2;
       const outerRadius = this._radius + iRadius;
@@ -255,7 +255,7 @@ export default class Circle extends Path {
       }
     }
     else if ( this._strokePickable ) {
-      const innerRadius = this._radius - ( iRadius as number );
+      const innerRadius = this._radius - ( iRadius! );
       return result && magSq >= innerRadius * innerRadius;
     }
     else {

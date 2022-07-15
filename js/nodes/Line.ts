@@ -153,7 +153,7 @@ export default class Line extends Path {
       // setPoint1( x1, y1 );
       assert && assert( x1 !== undefined && y1 !== undefined, 'parameters need to be defined' );
       this._x1 = x1;
-      this._y1 = y1 as number;
+      this._y1 = y1!;
     }
     else {
 
@@ -185,7 +185,7 @@ export default class Line extends Path {
       // setPoint2( x2, y2 );
       assert && assert( x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
       this._x2 = x2;
-      this._y2 = y2 as number;
+      this._y2 = y2!;
     }
     else {
       // setPoint2( Vector2 )

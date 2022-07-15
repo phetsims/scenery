@@ -75,7 +75,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
     return paint;
   }
   else if ( _.includes( nodeTypes, value.type ) ) {
-    let node;
+    let node: any;
 
     const setup = value.setup;
 
@@ -128,8 +128,8 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
         } );
         node = new Image( mipmapData );
       }
-      ( node as Image ).initialWidth = setup.width;
-      ( node as Image ).initialHeight = setup.height;
+      ( node! ).initialWidth = setup.width;
+      ( node! ).initialHeight = setup.height;
     }
     else if ( value.type === 'CanvasNode' || value.type === 'WebGLNode' ) {
       // TODO: Record Canvas/WebGL calls? (conditionals would be harder!)
@@ -161,19 +161,19 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
     }
 
     if ( setup.clipArea ) {
-      ( node as Node ).clipArea = sceneryDeserialize( setup.clipArea );
+      ( node! ).clipArea = sceneryDeserialize( setup.clipArea );
     }
     if ( setup.mouseArea ) {
-      ( node as Node ).mouseArea = sceneryDeserialize( setup.mouseArea );
+      ( node! ).mouseArea = sceneryDeserialize( setup.mouseArea );
     }
     if ( setup.touchArea ) {
-      ( node as Node ).touchArea = sceneryDeserialize( setup.touchArea );
+      ( node! ).touchArea = sceneryDeserialize( setup.touchArea );
     }
     if ( setup.matrix ) {
-      ( node as Node ).matrix = sceneryDeserialize( setup.matrix );
+      ( node! ).matrix = sceneryDeserialize( setup.matrix );
     }
     if ( setup.localBounds ) {
-      ( node as Node ).localBounds = sceneryDeserialize( setup.localBounds );
+      ( node! ).localBounds = sceneryDeserialize( setup.localBounds );
     }
 
     // Paintable, if they exist
@@ -187,9 +187,9 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
       ( node as Path | Text ).lineDash = sceneryDeserialize( setup.lineDash );
     }
 
-    ( node as Node ).mutate( value.options );
+    ( node! ).mutate( value.options );
 
-    ( node as Node )._serialization = value;
+    ( node! )._serialization = value;
 
     return node;
   }

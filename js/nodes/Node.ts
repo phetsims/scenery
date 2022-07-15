@@ -2626,7 +2626,7 @@ class Node extends ParallelDOM {
       assert && assert( typeof a === 'number' && isFinite( a ), 'Parameters to setTranslation should be finite numbers' );
       assert && assert( typeof b === 'number' && isFinite( b ), 'Parameters to setTranslation should be finite numbers' );
       dx = a - tx;
-      dy = b as number - ty;
+      dy = b! - ty;
     }
     else {
       assert && assert( a instanceof Vector2 && a.isFinite(), 'Should be a finite Vector2' );
