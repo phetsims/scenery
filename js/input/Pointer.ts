@@ -431,10 +431,10 @@ export default abstract class Pointer {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Disposing ${this.toString()}` );
 
     // remove listeners that would clear intent on disposal
-    if ( this._listenerForDragReserve && this._listeners.indexOf( this._listenerForDragReserve ) >= 0 ) {
+    if ( this._listenerForDragReserve && this._listeners.includes( this._listenerForDragReserve ) ) {
       this.removeInputListener( this._listenerForDragReserve );
     }
-    if ( this._listenerForKeyboardDragReserve && this._listeners.indexOf( this._listenerForKeyboardDragReserve ) >= 0 ) {
+    if ( this._listenerForKeyboardDragReserve && this._listeners.includes( this._listenerForKeyboardDragReserve ) ) {
       this.removeInputListener( this._listenerForKeyboardDragReserve );
     }
 

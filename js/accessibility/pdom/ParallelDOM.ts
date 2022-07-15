@@ -695,7 +695,7 @@ export default class ParallelDOM extends PhetioObject {
       this._inputType && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
       this._pdomChecked && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
       this._inputValue && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
-      this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType!.toUpperCase() ) >= 0, `inputType does not support checked attribute: ${this._inputType}` );
+      this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.includes( this._inputType!.toUpperCase() ), `inputType does not support checked attribute: ${this._inputType}` );
       this._focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
       this._tagName!.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
 
@@ -2221,7 +2221,7 @@ export default class ParallelDOM extends PhetioObject {
       assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'Cannot set checked on a non input tag.' );
     }
     if ( this._inputType ) {
-      assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, `inputType does not support checked: ${this._inputType}` );
+      assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.includes( this._inputType.toUpperCase() ), `inputType does not support checked: ${this._inputType}` );
     }
 
     if ( this._pdomChecked !== checked ) {
@@ -2280,7 +2280,7 @@ export default class ParallelDOM extends PhetioObject {
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
     }, providedOptions );
 
-    assert && assert( ASSOCIATION_ATTRIBUTES.indexOf( attribute ) < 0, 'setPDOMAttribute does not support association attributes' );
+    assert && assert( !ASSOCIATION_ATTRIBUTES.includes( attribute ), 'setPDOMAttribute does not support association attributes' );
 
     // if the pdom attribute already exists in the list, remove it - no need
     // to remove from the peers, existing attributes will simply be replaced in the DOM
