@@ -14,8 +14,9 @@ import { Shape } from '../../../kite/js/imports.js';
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
-const scenerySerialize = ( value: unknown ): any => {
+const scenerySerialize = ( value: unknown ): IntentionalAny => {
   if ( value instanceof Vector2 ) {
     return {
       type: 'Vector2',
@@ -75,7 +76,7 @@ const scenerySerialize = ( value: unknown ): any => {
     };
   }
   else if ( Paint && value instanceof Paint ) {
-    const paintSerialization: any = {};
+    const paintSerialization: IntentionalAny = {};
 
     if ( value.transformMatrix ) {
       paintSerialization.transformMatrix = scenerySerialize( value.transformMatrix );
@@ -112,8 +113,8 @@ const scenerySerialize = ( value: unknown ): any => {
   else if ( value instanceof Node ) {
     const node = value;
 
-    const options: any = {};
-    const setup: any = {
+    const options: IntentionalAny = {};
+    const setup: IntentionalAny = {
       // maxWidth
       // maxHeight
       // clipArea
@@ -190,7 +191,7 @@ const scenerySerialize = ( value: unknown ): any => {
     } );
     setup.hasInputListeners = node.inputListeners.length > 0;
 
-    const serialization: any = {
+    const serialization: IntentionalAny = {
       id: node.id,
       type: 'Node',
       types: inheritance( node.constructor ).map( type => type.name ).filter( name => {
@@ -379,7 +380,7 @@ const scenerySerialize = ( value: unknown ): any => {
   }
 };
 
-const serializeConnectedNodes = ( rootNode: Node ): any => {
+const serializeConnectedNodes = ( rootNode: Node ): IntentionalAny => {
   return rootNode.getSubtreeNodes().map( scenerySerialize );
 };
 

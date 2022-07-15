@@ -17,6 +17,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -210,7 +211,7 @@ export default class Text extends Paintable( Node ) {
   /**
    * See documentation and comments in Node.initializePhetioObject
    */
-  protected override initializePhetioObject( baseOptions: any, config: TextOptions ): void {
+  protected override initializePhetioObject( baseOptions: Partial<PhetioObjectOptions>, config: TextOptions ): void {
 
     // Track this, so we only override our textProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
@@ -435,14 +436,14 @@ export default class Text extends Paintable( Node ) {
    *
    * This is needed since we have to handle HTML text differently.
    */
-  public getDOMTextNode(): any {
+  public getDOMTextNode(): Element {
     if ( this._isHTML ) {
       const span = document.createElement( 'span' );
       span.innerHTML = this.text;
       return span;
     }
     else {
-      return document.createTextNode( this.renderedText );
+      return document.createTextNode( this.renderedText ) as unknown as Element;
     }
   }
 

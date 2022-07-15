@@ -408,7 +408,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       // speak the content for this Node
       let descendantsUseVoicing = false;
       for ( let i = 0; i < childToLeafNodes.length; i++ ) {
-        if ( ( childToLeafNodes[ i ] as any ).isInteractiveHighlighting ) {
+        if ( ( childToLeafNodes[ i ] as InteractiveHighlightingNode ).isInteractiveHighlighting ) {
           descendantsUseVoicing = true;
           break;
         }

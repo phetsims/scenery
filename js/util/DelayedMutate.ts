@@ -31,6 +31,7 @@
 import { Node, NodeOptions, scenery } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 /**
  * @param name - A unique name for each call, which customizes the internal key names used to track state
@@ -49,7 +50,7 @@ const DelayedMutate = <SuperType extends Constructor>( name: string, keys: strin
     private [ isConstructedKey ]: boolean;
     private [ pendingOptionsKey ]: NodeOptions | undefined;
 
-    public constructor( ...args: any[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
 
       // Mark ourself as constructed, so further mutates will use all of the options

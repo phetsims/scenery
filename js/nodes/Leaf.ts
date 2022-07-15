@@ -9,13 +9,14 @@
 import inheritance from '../../../phet-core/js/inheritance.js';
 import { scenery, Node } from '../imports.js';
 import memoize from '../../../phet-core/js/memoize.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 
 const Leaf = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Leaf' );
 
   return class LeafMixin extends type {
-    public constructor( ...args: any[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
     }
 

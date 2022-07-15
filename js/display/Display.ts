@@ -66,7 +66,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, IInputListener, Input, InputOptions, Instance, IOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, Trail, Utils, WebGLBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, IInputListener, Input, InputOptions, Instance, IOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, Trail, Utils, WebGLBlock } from '../imports.js';
 
 export type DisplayOptions = {
   // Initial (or override) display width
@@ -1718,33 +1718,33 @@ export default class Display {
       let div = `<div style="margin-left: ${depth * 20}px">`;
 
       div += drawableSummary( drawable );
-      if ( ( drawable as any ).instance ) {
-        div += ` <span style="color: #0a0;">(${( drawable as any ).instance.trail.toPathString()})</span>`;
-        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( ( drawable as any ).instance )}`;
+      if ( ( drawable as unknown as SelfDrawable ).instance ) {
+        div += ` <span style="color: #0a0;">(${( drawable as unknown as SelfDrawable ).instance.trail.toPathString()})</span>`;
+        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( ( drawable as unknown as SelfDrawable ).instance )}`;
       }
-      else if ( ( drawable as any ).backboneInstance ) {
-        div += ` <span style="color: #a00;">(${( drawable as any ).backboneInstance.trail.toPathString()})</span>`;
-        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( ( drawable as any ).backboneInstance )}`;
+      else if ( ( drawable as unknown as BackboneDrawable ).backboneInstance ) {
+        div += ` <span style="color: #a00;">(${( drawable as unknown as BackboneDrawable ).backboneInstance.trail.toPathString()})</span>`;
+        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( ( drawable as unknown as BackboneDrawable ).backboneInstance )}`;
       }
 
       div += '</div>';
       result += div;
 
-      if ( ( drawable as any ).blocks ) {
+      if ( ( drawable as unknown as BackboneDrawable ).blocks ) {
         // we're a backbone
         depth += 1;
-        _.each( ( drawable as any ).blocks, childDrawable => {
+        _.each( ( drawable as unknown as BackboneDrawable ).blocks, childDrawable => {
           printDrawableSubtree( childDrawable );
         } );
         depth -= 1;
       }
-      else if ( ( drawable as any ).firstDrawable && ( drawable as any ).lastDrawable ) {
+      else if ( ( drawable as unknown as Block ).firstDrawable && ( drawable as unknown as Block ).lastDrawable ) {
         // we're a block
         depth += 1;
-        for ( let childDrawable = ( drawable as any ).firstDrawable; childDrawable !== ( drawable as any ).lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+        for ( let childDrawable = ( drawable as unknown as Block ).firstDrawable; childDrawable !== ( drawable as unknown as Block ).lastDrawable; childDrawable = childDrawable.nextDrawable ) {
           printDrawableSubtree( childDrawable );
         }
-        printDrawableSubtree( ( drawable as any ).lastDrawable ); // wasn't hit in our simplified (and safer) loop
+        printDrawableSubtree( ( drawable as unknown as Block ).lastDrawable! ); // wasn't hit in our simplified (and safer) loop
         depth -= 1;
       }
     }
@@ -1922,7 +1922,7 @@ export default class Display {
     doc.documentElement.appendChild( document.createElement( 'style' ) ).innerHTML = `.${PDOMSiblingStyle.ROOT_CLASS_NAME} { display:none; } `;
 
     // Replace each <canvas> with an <img> that has src=canvas.toDataURL() and the same style
-    let displayCanvases: any[] | HTMLCollection = doc.documentElement.getElementsByTagName( 'canvas' );
+    let displayCanvases: HTMLElement[] | HTMLCollection = doc.documentElement.getElementsByTagName( 'canvas' );
     displayCanvases = Array.prototype.slice.call( displayCanvases ); // don't use a live HTMLCollection copy!
     for ( let i = 0; i < displayCanvases.length; i++ ) {
       const displayCanvas = displayCanvases[ i ];

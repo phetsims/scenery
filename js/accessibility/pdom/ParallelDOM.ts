@@ -143,7 +143,7 @@ const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
 // see setPDOMHeadingBehavior for more details
-const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node: Node, options: any, heading: string ) => {
+const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, heading: string ) => {
 
   options.labelTagName = `h${node.headingLevel}`; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
   options.labelContent = heading;
@@ -272,14 +272,14 @@ export type ParallelDOMOptions = {
 
 type PDOMAttribute = {
   attribute: string;
-  value: any;
+  value: string | boolean | number;
   namespace: string | null;
-  options?: any;
+  options: SetPDOMAttributeOptions;
 };
 
 type PDOMClass = {
   className: string;
-  options: any; // TODO: type
+  options: SetPDOMClassOptions;
 };
 
 type Association = {
@@ -2877,7 +2877,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomInstances.splice( index, 1 );
   }
 
-  public static BASIC_ACCESSIBLE_NAME_BEHAVIOR( node: Node, options: any, accessibleName: string ): any {
+  public static BASIC_ACCESSIBLE_NAME_BEHAVIOR( node: Node, options: ParallelDOMOptions, accessibleName: string ): ParallelDOMOptions {
     if ( node.tagName === 'input' ) {
       options.labelTagName = 'label';
       options.labelContent = accessibleName;
@@ -2891,14 +2891,14 @@ export default class ParallelDOM extends PhetioObject {
     return options;
   }
 
-  public static HELP_TEXT_BEFORE_CONTENT( node: Node, options: any, helpText: string ): any {
+  public static HELP_TEXT_BEFORE_CONTENT( node: Node, options: ParallelDOMOptions, helpText: string ): ParallelDOMOptions {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
     options.appendDescription = false;
     return options;
   }
 
-  public static HELP_TEXT_AFTER_CONTENT( node: Node, options: any, helpText: string ): any {
+  public static HELP_TEXT_AFTER_CONTENT( node: Node, options: ParallelDOMOptions, helpText: string ): ParallelDOMOptions {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
     options.appendDescription = true;

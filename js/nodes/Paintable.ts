@@ -7,14 +7,15 @@
  */
 
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
-import { LineStyles, LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin } from '../../../kite/js/imports.js';
+import { LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin, LineStyles } from '../../../kite/js/imports.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import platform from '../../../phet-core/js/platform.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { scenery, Renderer, Color, PaintDef, Node, IPaint, Paint, LinearGradient, Pattern, RadialGradient, CanvasContextWrapper, Gradient, IPaintableDrawable, Path, Text } from '../imports.js';
+import { CanvasContextWrapper, Color, Gradient, IPaint, IPaintableDrawable, LinearGradient, Node, Paint, PaintDef, Path, Pattern, RadialGradient, Renderer, scenery, Text } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 const isSafari5 = platform.safari5;
 
@@ -82,7 +83,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     public _cachedPaints: Paint[];
     public _lineDrawingStyles: LineStyles;
 
-    public constructor( ...args: any[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
 
       assertHasProperties( this, [ '_drawables' ] );
@@ -680,7 +681,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * @param result
      */
     public appendStrokablePropString( spaces: string, result: string ): string {
-      function addProp( key: string, value: any, nowrap?: boolean ) {
+      function addProp( key: string, value: string, nowrap?: boolean ) {
         if ( result ) {
           result += ',\n';
         }

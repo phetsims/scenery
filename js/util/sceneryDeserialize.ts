@@ -12,9 +12,10 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { Color, Gradient, LinearGradient, Paint, Pattern, RadialGradient, scenery, Image, Text, Node, Path, Circle, Line, Rectangle, DOM, Mipmap } from '../imports.js';
 
-const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): any => {
+const sceneryDeserialize = ( value: { type: string; [ key: string ]: IntentionalAny } ): IntentionalAny => {
   const nodeTypes = [
     'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
   ];
@@ -63,7 +64,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
         paint = new RadialGradient( start.x, start.y, value.startRadius, end.x, end.y, value.endRadius );
       }
 
-      value.stops.forEach( ( stop: any ) => {
+      value.stops.forEach( ( stop: IntentionalAny ) => {
         ( paint as Gradient ).addColorStop( stop.ratio, sceneryDeserialize( stop.stop ) );
       } );
     }
@@ -75,7 +76,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
     return paint;
   }
   else if ( _.includes( nodeTypes, value.type ) ) {
-    let node: any;
+    let node: IntentionalAny;
 
     const setup = value.setup;
 
@@ -106,7 +107,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): an
       }
       else if ( setup.imageType === 'mipmapData' ) {
         const mipmapData = setup.mipmapData.map( ( level: Mipmap[0] ) => {
-          const result: any = {
+          const result: IntentionalAny = {
             width: level.width,
             height: level.height,
             url: level.url

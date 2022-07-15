@@ -236,7 +236,7 @@ const domEventPropertiesSetInConstructor: SerializedPropertiesForDeserialization
 type SerializedDOMEvent = {
   constructorName: string; // used to get the constructor from the window object, see Input.deserializeDOMEvent
 } & {
-  [key in SerializedPropertiesForDeserialization]?: any; // eslint-disable-line no-unused-vars
+  [key in SerializedPropertiesForDeserialization]?: unknown; // eslint-disable-line no-unused-vars
 };
 
 // A list of keys on events that need to be serialized into HTMLElements
@@ -1885,32 +1885,32 @@ export default class Input extends PhetioObject {
    *
    * @returns - see domEventPropertiesToSerialize for list keys that are serialized
    */
-  public static serializeDomEvent( domEvent: Event ): any {
+  public static serializeDomEvent( domEvent: Event ): SerializedDOMEvent {
     const entries: SerializedDOMEvent = {
       constructorName: domEvent.constructor.name
     };
 
     domEventPropertiesToSerialize.forEach( property => {
 
-      const domEventProperty = domEvent[ property as keyof Event ] as any;
+      const domEventProperty: Event[ keyof Event ] | Element = domEvent[ property as keyof Event ];
 
       // We serialize many Event APIs into a single object, so be graceful if properties don't exist.
       if ( domEventProperty === undefined || domEventProperty === null ) {
         entries[ property ] = null;
       }
 
-      else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
+      else if ( domEventProperty instanceof Element && EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
 
                 // If false, then this target isn't a PDOM element, so we can skip this serialization
                 domEventProperty.hasAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID ) ) {
 
         // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
+        entries[ property ] = {
+          [ PDOMUtils.DATA_PDOM_UNIQUE_ID ]: domEventProperty.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID ),
 
-        entries[ property ] = {};
-        entries[ property ][ PDOMUtils.DATA_PDOM_UNIQUE_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
-
-        // Have the ID also
-        entries[ property ].id = domEventProperty.getAttribute( 'id' );
+          // Have the ID also
+          id: domEventProperty.getAttribute( 'id' )
+        };
       }
       else {
 
@@ -1932,6 +1932,7 @@ export default class Input extends PhetioObject {
     // serialize the relatedTarget back into an event Object, so that it can be passed to the init config in the Event
     // constructor
     if ( configForConstructor.relatedTarget ) {
+      // @ts-ignore
       const htmlElement = document.getElementById( configForConstructor.relatedTarget.id );
       assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
       configForConstructor.relatedTarget = htmlElement;
@@ -1948,8 +1949,12 @@ export default class Input extends PhetioObject {
         // Special case for target since we can't set that read-only property. Instead use a substitute key.
         if ( key === 'target' ) {
 
-          assert && eventObject.target && eventObject.target.id &&
-          assert( document.getElementById( eventObject.target.id ), 'target should exist in the PDOM to support playback.' );
+          if ( assert ) {
+            const target = eventObject.target as { id?: string } | undefined;
+            if ( target && target.id ) {
+              assert( document.getElementById( target.id ), 'target should exist in the PDOM to support playback.' );
+            }
+          }
 
           // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};

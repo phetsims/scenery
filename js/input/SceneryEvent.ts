@@ -132,7 +132,7 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
 SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
   valueType: SceneryEvent,
   documentation: 'An event, with a "point" field',
-  toStateObject: ( event: SceneryEvent<any> ) => {
+  toStateObject: ( event: SceneryEvent ) => {
 
     // Note: If changing the contents of this object, please document it in the public documentation string.
     return {

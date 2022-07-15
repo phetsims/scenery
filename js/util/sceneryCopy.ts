@@ -9,7 +9,7 @@
 
 import { scenery, sceneryDeserialize, scenerySerialize } from '../imports.js';
 
-const sceneryCopy = ( value: any ) => {
+const sceneryCopy = ( value: unknown ) => {
   return sceneryDeserialize( scenerySerialize( value ) );
 };
 

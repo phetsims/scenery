@@ -37,12 +37,13 @@ import { Display, IInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, T
 import IProperty from '../../../axon/js/IProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 // global
 let globalID = 0;
 
 // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
-const truePredicate: ( ( ...args: any[] ) => true ) = _.constant( true );
+const truePredicate: ( ( ...args: IntentionalAny[] ) => true ) = _.constant( true );
 
 export type PressListenerDOMEvent = MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent;
 export type PressListenerEvent = SceneryEvent<PressListenerDOMEvent>;
@@ -1051,12 +1052,10 @@ export default class PressListener extends EnabledComponent implements IInputLis
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
-  public static phetioAPI: any;
+  public static phetioAPI = {
+    pressAction: { phetioType: PhetioAction.PhetioActionIO( [ SceneryEvent.SceneryEventIO ] ) },
+    releaseAction: { phetioType: PhetioAction.PhetioActionIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ) }
+  };
 }
 
 scenery.register( 'PressListener', PressListener );
-
-PressListener.phetioAPI = {
-  pressAction: { phetioType: PhetioAction.PhetioActionIO( [ SceneryEvent.SceneryEventIO ] ) },
-  releaseAction: { phetioType: PhetioAction.PhetioActionIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ) }
-};
