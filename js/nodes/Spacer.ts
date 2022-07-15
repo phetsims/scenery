@@ -20,7 +20,7 @@ export default class Spacer extends Leaf( Node ) {
    * @param height - The height of the spacer
    * @param [options] - Passed to Node
    */
-  constructor( width: number, height: number, options?: SpacerOptions ) {
+  public constructor( width: number, height: number, options?: SpacerOptions ) {
     assert && assert( typeof width === 'number' && isFinite( width ), 'width should be a finite number' );
     assert && assert( typeof height === 'number' && isFinite( height ), 'height should be a finite number' );
 

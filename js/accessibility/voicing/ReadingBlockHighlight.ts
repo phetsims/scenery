@@ -17,7 +17,7 @@ type SelfOptions = EmptyObjectType;
 type ReadingBlockHighlightOptions = SelfOptions & FocusHighlightFromNodeOptions;
 
 class ReadingBlockHighlight extends FocusHighlightFromNode {
-  constructor( node: Node, providedOptions?: ReadingBlockHighlightOptions ) {
+  public constructor( node: Node, providedOptions?: ReadingBlockHighlightOptions ) {
 
     const options = optionize<ReadingBlockHighlightOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
       outerStroke: 'grey',

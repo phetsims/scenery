@@ -171,7 +171,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
     public get mixesWidthSizable(): boolean { return true; }
 
-    validateLocalPreferredWidth(): void {
+    public validateLocalPreferredWidth(): void {
       if ( assert ) {
         const currentWidth = ( this as unknown as Node ).localWidth;
         const effectiveMinimumWidth = this.localMinimumWidth === null ? currentWidth : this.localMinimumWidth;
@@ -182,8 +182,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updateLocalPreferredWidth(): void {
+    private _updateLocalPreferredWidth(): void {
       const node = this as unknown as Node;
 
       if ( !this._preferredWidthChanging ) {
@@ -202,8 +201,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updatePreferredWidth(): void {
+    private _updatePreferredWidth(): void {
       const node = this as unknown as Node;
 
       if ( !this._preferredWidthChanging ) {
@@ -221,8 +219,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updateLocalMinimumWidth(): void {
+    private _updateLocalMinimumWidth(): void {
       const node = this as unknown as Node;
 
       if ( !this._minimumWidthChanging ) {
@@ -241,8 +238,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updateMinimumWidth(): void {
+    private _updateMinimumWidth(): void {
       const node = this as unknown as Node;
 
       if ( !this._minimumWidthChanging ) {

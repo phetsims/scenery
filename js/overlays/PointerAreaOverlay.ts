@@ -11,11 +11,11 @@ import { Shape } from '../../../kite/js/imports.js';
 import { scenery, Trail, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
 export default class PointerAreaOverlay extends ShapeBasedOverlay implements IOverlay {
-  constructor( display: Display, rootNode: Node ) {
+  public constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'mouseTouchAreaOverlay' );
   }
 
-  addShapes(): void {
+  public addShapes(): void {
     new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
       if ( !node.isVisible() ) {

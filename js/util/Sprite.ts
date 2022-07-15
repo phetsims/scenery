@@ -14,9 +14,9 @@ import { scenery, SpriteImage } from '../imports.js';
 
 export default class Sprite {
 
-  imageProperty: IProperty<SpriteImage>;
+  public readonly imageProperty: IProperty<SpriteImage>;
 
-  constructor( spriteImage: SpriteImage ) {
+  public constructor( spriteImage: SpriteImage ) {
     assert && assert( spriteImage instanceof SpriteImage );
 
     this.imageProperty = new Property( spriteImage );
@@ -25,14 +25,14 @@ export default class Sprite {
   /**
    * Returns a Shape that represents the hit-testable area of this Sprite.
    */
-  getShape(): Shape {
+  public getShape(): Shape {
     return this.imageProperty.value.getShape();
   }
 
   /**
    * Returns whether a given point is considered "inside" the Sprite
    */
-  containsPoint( point: Vector2 ): boolean {
+  public containsPoint( point: Vector2 ): boolean {
     return this.imageProperty.value.containsPoint( point );
   }
 }

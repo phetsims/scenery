@@ -44,7 +44,7 @@ class KeyboardFuzzer {
   private keyupListeners: KeyupListener[];
   private currentElement: Element | null;
 
-  constructor( display: Display, seed: number ) {
+  public constructor( display: Display, seed: number ) {
 
     this.display = display;
     this.random = new Random( { seed: seed } );

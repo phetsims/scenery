@@ -17,7 +17,7 @@ type VoicingRichTextOptions = SelfOptions & ParentOptions;
 
 class VoicingRichText extends ReadingBlock( RichText, 1 ) {
 
-  constructor( text: string, options?: VoicingRichTextOptions ) {
+  public constructor( text: string, options?: VoicingRichTextOptions ) {
     options = optionize<VoicingRichTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be read that is different from the

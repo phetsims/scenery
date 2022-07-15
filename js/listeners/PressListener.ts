@@ -139,48 +139,48 @@ export default class PressListener extends EnabledComponent implements IInputLis
 
   // Contains all pointers that are over our button. Tracked by adding with 'enter' events and removing with 'exit'
   // events.
-  overPointers: ObservableArray<Pointer>;
+  public readonly overPointers: ObservableArray<Pointer>;
 
   // (read-only) - Tracks whether this listener is "pressed" or not.
-  isPressedProperty: IProperty<boolean>;
+  public readonly isPressedProperty: IProperty<boolean>;
 
   // (read-only) - It will be set to true when at least one pointer is over the listener.
   // This is not effected by PDOM focus.
-  isOverProperty: IProperty<boolean>;
+  public readonly isOverProperty: IProperty<boolean>;
 
   // (read-only) - True when either isOverProperty is true, or when focused and the
   // related Display is showing its focusHighlights, see this.validateOver() for details.
-  looksOverProperty: IProperty<boolean>;
+  public readonly looksOverProperty: IProperty<boolean>;
 
   // (read-only) - It will be set to true when either:
   //   1. The listener is pressed and the pointer that is pressing is over the listener.
   //   2. There is at least one unpressed pointer that is over the listener.
-  isHoveringProperty: IProperty<boolean>;
+  public readonly isHoveringProperty: IProperty<boolean>;
 
   // (read-only) - It will be set to true when either:
   //   1. The listener is pressed.
   //   2. There is at least one unpressed pointer that is over the listener.
   // This is essentially true when ( isPressed || isHovering ).
-  isHighlightedProperty: IProperty<boolean>;
+  public readonly isHighlightedProperty: IProperty<boolean>;
 
   // (read-only) - Whether the listener has focus (should appear to be over)
-  isFocusedProperty: IProperty<boolean>;
+  public readonly isFocusedProperty: IProperty<boolean>;
 
-  private cursorProperty: IReadOnlyProperty<string | null>;
+  private readonly cursorProperty: IReadOnlyProperty<string | null>;
 
   // (read-only) - The current pointer, or null when not pressed. There can be short periods of
   // time when this has a value when isPressedProperty.value is false, such as during the processing of a pointer
   // release, but these periods should be very brief.
-  pointer: Pointer | null;
+  public pointer: Pointer | null;
 
   // (read-only) - The Trail for the press, with no descendant nodes past the currentTarget
   // or targetNode (if provided). Will generally be null when not pressed, though there can be short periods of time
   // where this has a value when isPressedProperty.value is false, such as during the processing of a release, but
   // these periods should be very brief.
-  pressedTrail: Trail | null;
+  public pressedTrail: Trail | null;
 
   //(read-only) - Whether the last press was interrupted. Will be valid until the next press.
-  interrupted: boolean;
+  public interrupted: boolean;
 
   // For the collapseDragEvents feature, this will hold the last pending drag event to trigger a call to drag() with,
   // if one has been skipped.
@@ -196,13 +196,13 @@ export default class PressListener extends EnabledComponent implements IInputLis
   private _isHighlightedListener: () => void;
 
   // (read-only) - Whether or not a press is being processed from a pdom click input event from the PDOM.
-  pdomClickingProperty: IProperty<boolean>;
+  public readonly pdomClickingProperty: IProperty<boolean>;
 
   // (read-only) - This Property was added to support input from the PDOM. It tracks whether
   // or not the button should "look" down. This will be true if downProperty is true or if a pdom click is in
   // progress. For a click event from the pdom, the listeners are fired right away but the button will look down for
   // as long as a11yLooksPressedInterval. See PressListener.click() for more details.
-  looksPressedProperty: IReadOnlyProperty<boolean>;
+  public readonly looksPressedProperty: IReadOnlyProperty<boolean>;
 
   // When pdom clicking begins, this will be added to a timeout so that the
   // pdomClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
@@ -226,12 +226,12 @@ export default class PressListener extends EnabledComponent implements IInputLis
   // To support looksOverProperty being true based on focus, we need to monitor the display from which
   // the event has come from to see if that display is showing its focusHighlights, see
   // Display.prototype.focusManager.FocusManager.pdomFocusHighlightsVisibleProperty for details.
-  display: Display | null;
+  public display: Display | null;
 
   // we need the same exact function to add and remove as a listener
   private boundInvalidateOverListener: () => void;
 
-  constructor( providedOptions?: PressListenerOptions<PressListener> ) {
+  public constructor( providedOptions?: PressListenerOptions<PressListener> ) {
     const options = optionize<PressListenerOptions<PressListener>, SelfOptions<PressListener>, EnabledComponentOptions>()( {
 
       press: _.noop,
@@ -397,39 +397,39 @@ export default class PressListener extends EnabledComponent implements IInputLis
   /**
    * Whether this listener is currently activated with a press.
    */
-  get isPressed(): boolean {
+  public get isPressed(): boolean {
     return this.isPressedProperty.value;
   }
 
-  get cursor(): string | null {
+  public get cursor(): string | null {
     return this.cursorProperty.value;
   }
 
-  get attach(): boolean {
+  public get attach(): boolean {
     return this._attach;
   }
 
-  get targetNode(): Node | null {
+  public get targetNode(): Node | null {
     return this._targetNode;
   }
 
   /**
    * The main node that this listener is responsible for dragging.
    */
-  getCurrentTarget(): Node {
+  public getCurrentTarget(): Node {
     assert && assert( this.isPressed, 'We have no currentTarget if we are not pressed' );
 
     return ( this as PressedPressListener ).pressedTrail.lastNode();
   }
 
-  get currentTarget(): Node {
+  public get currentTarget(): Node {
     return this.getCurrentTarget();
   }
 
   /**
    * Returns whether a press can be started with a particular event.
    */
-  canPress( event: PressListenerEvent ): boolean {
+  public canPress( event: PressListenerEvent ): boolean {
     return !!this.enabledProperty.value &&
            !this.isPressed &&
            this._canStartPress( event, this ) &&
@@ -444,7 +444,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * Returns whether this PressListener can be clicked from keyboard input. This copies part of canPress, but
    * we didn't want to use canClick in canPress because canClick could be overridden in subtypes.
    */
-  canClick(): boolean {
+  public canClick(): boolean {
     // If this listener is already involved in pressing something (or our options predicate returns false) we can't
     // press something.
     return this.enabledProperty.value && !this.isPressed && this._canStartPress( null, this );
@@ -466,7 +466,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ): boolean {
+  public press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ): boolean {
     assert && assert( event, 'An event is required' );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} press` );
@@ -499,7 +499,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * @param [event] - scenery event if there was one. We can't guarantee an event, in part to support interrupting.
    * @param [callback] - called at the end of the release
    */
-  release( event?: PressListenerEvent, callback?: () => void ): void {
+  public release( event?: PressListenerEvent, callback?: () => void ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} release` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -518,7 +518,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * (scenery-internal, effectively protected)
    */
-  drag( event: PressListenerEvent ): void {
+  public drag( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} drag` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -537,7 +537,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
-  interrupt(): void {
+  public interrupt(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} interrupt` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -590,7 +590,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * This will clear the list of pointers considered "over" the Node, so that when it is placed back in, the state
    * will be correct, and another "enter" event will not be missing an "exit".
    */
-  clearOverPointers(): void {
+  public clearOverPointers(): void {
     this.overPointers.clear(); // We have listeners that will trigger the proper refreshes
   }
 
@@ -598,7 +598,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * If collapseDragEvents is set to true, this step() should be called every frame so that the collapsed drag
    * can be fired.
    */
-  step(): void {
+  public step(): void {
     this.flushCollapsedDrag();
   }
 
@@ -616,7 +616,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
     this._pointerListener.createPanTargetBounds = createDragPanTargetBounds;
   }
 
-  set createPanTargetBounds( createDragPanTargetBounds: ( () => Bounds2 ) | null ) { this.setCreatePanTargetBounds( createDragPanTargetBounds ); }
+  public set createPanTargetBounds( createDragPanTargetBounds: ( () => Bounds2 ) | null ) { this.setCreatePanTargetBounds( createDragPanTargetBounds ); }
 
   /**
    * A convenient way to create and set the callback that will return a Bounds2 in the global coordinate frame for the
@@ -629,7 +629,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
     this.setCreatePanTargetBounds( () => trail.localToGlobalBounds( trail.lastNode().localBounds ) );
   }
 
-  set createPanTargetBoundsFromTrail( trail: Trail ) { this.setCreatePanTargetBoundsFromTrail( trail ); }
+  public set createPanTargetBoundsFromTrail( trail: Trail ) { this.setCreatePanTargetBoundsFromTrail( trail ); }
 
   /**
    * If there is a pending collapsed drag waiting, we'll fire that drag (usually before other events or during a step)
@@ -762,7 +762,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly. See the press method instead.
    */
-  down( event: PressListenerEvent ): void {
+  public down( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} down` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -776,7 +776,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly.
    */
-  up( event: PressListenerEvent ): void {
+  public up( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} up` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -792,7 +792,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly.
    */
-  enter( event: PressListenerEvent ): void {
+  public enter( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} enter` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -805,7 +805,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * Called with `move` events (part of the listener API). It is necessary to check for `over` state changes on move
    * in case a pointer listener gets interrupted and resumes movement over a target. (scenery-internal)
    */
-  move( event: PressListenerEvent ): void {
+  public move( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} move` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -819,7 +819,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly.
    */
-  exit( event: PressListenerEvent ): void {
+  public exit( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} exit` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -837,7 +837,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly.
    */
-  pointerUp( event: PressListenerEvent ): void {
+  public pointerUp( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer up` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -858,7 +858,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly.
    */
-  pointerCancel( event: PressListenerEvent ): void {
+  public pointerCancel( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer cancel` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -879,7 +879,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly.
    */
-  pointerMove( event: PressListenerEvent ): void {
+  public pointerMove( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer move` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -905,7 +905,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    *
    * NOTE: Do not call directly.
    */
-  pointerInterrupt(): void {
+  public pointerInterrupt(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer interrupt` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -929,7 +929,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * @param [callback] optionally called immediately after press, but only on successful click
    * @returns success - Returns whether the press was actually started
    */
-  click( event: PressListenerEvent | null, callback?: () => void ): boolean {
+  public click( event: PressListenerEvent | null, callback?: () => void ): boolean {
     if ( this.canClick() ) {
       this.interrupted = false; // clears the flag (don't set to false before here)
 
@@ -976,7 +976,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * Focus listener, called when this is treated as an accessible input listener and its target is focused. (scenery-internal)
    * @pdom
    */
-  focus( event: SceneryEvent<FocusEvent> ): void {
+  public focus( event: SceneryEvent<FocusEvent> ): void {
 
     // Get the Display related to this accessible event.
     const accessibleDisplays = event.trail.rootNode().getRootedDisplays().filter( display => display.isAccessible() );
@@ -996,7 +996,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
    * Blur listener, called when this is treated as an accessible input listener.
    * @pdom
    */
-  blur(): void {
+  public blur(): void {
     if ( this.display ) {
       if ( this.display.focusManager.pdomFocusHighlightsVisibleProperty.hasListener( this.boundInvalidateOverListener ) ) {
         this.display.focusManager.pdomFocusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
@@ -1011,7 +1011,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
   /**
    * Disposes the listener, releasing references. It should not be used after this.
    */
-  override dispose(): void {
+  public override dispose(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} dispose` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -1051,7 +1051,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
-  static phetioAPI: any;
+  public static phetioAPI: any;
 }
 
 scenery.register( 'PressListener', PressListener );

@@ -378,76 +378,81 @@ class Node extends ParallelDOM {
   // NOTE: All member properties with names starting with '_' are assumed to be private/protected!
 
   // Assigns a unique ID to this Node (allows trails to get a unique list of IDs)
-  _id: number;
+  public _id: number;
 
   // All of the Instances tracking this Node
-  _instances: Instance[];
+  private readonly _instances: Instance[];
 
-  // All displays where this Node is the root.
-  _rootedDisplays: Display[];
+  // All displays where this Node is the root. (scenery-internal)
+  public readonly _rootedDisplays: Display[];
 
   // Drawable states that need to be updated on mutations. Generally added by SVG and
   // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
-  _drawables: Drawable[];
+  // (scenery-internal)
+  public readonly _drawables: Drawable[];
 
   // Whether this Node (and its children) will be visible when the scene is updated.
   // Visible Nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
-  _visibleProperty: TinyForwardingProperty<boolean>;
+  private readonly _visibleProperty: TinyForwardingProperty<boolean>;
 
   // Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
-  opacityProperty: TinyProperty<number>;
+  public readonly opacityProperty: TinyProperty<number>;
 
   // Disabled opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
   // Combined with the normal opacity ONLY when the node is disabled.
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
-  disabledOpacityProperty: TinyProperty<number>;
+  public readonly disabledOpacityProperty: TinyProperty<number>;
 
   // See setPickable() and setPickableProperty()
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
-  _pickableProperty: TinyForwardingProperty<boolean | null>;
+  private readonly _pickableProperty: TinyForwardingProperty<boolean | null>;
 
   // See setEnabled() and setEnabledProperty()
-  _enabledProperty: TinyForwardingProperty<boolean>;
+  private readonly _enabledProperty: TinyForwardingProperty<boolean>;
 
   // Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
   // fired.
-  _inputEnabledProperty: TinyForwardingProperty<boolean>;
+  private readonly _inputEnabledProperty: TinyForwardingProperty<boolean>;
 
   // This Node and all children will be clipped by this shape (in addition to any
   // other clipping shapes). The shape should be in the local coordinate frame.
   // NOTE: This is fired synchronously when the clipArea of the Node is toggled
-  clipAreaProperty: TinyProperty<Shape | null>;
+  public readonly clipAreaProperty: TinyProperty<Shape | null>;
 
   // Whether this Node and its subtree can announce content with Voicing and SpeechSynthesis. Though
   // related to Voicing it exists in Node because it is useful to set voicingVisible on a subtree where the
   // root does not compose Voicing. This is not ideal but the entirety of Voicing cannot be composed into every
   // Node because it would produce incorrect behaviors and have a massive memory footprint. See setVoicingVisible()
   // and Voicing.ts for more information about Voicing.
-  voicingVisibleProperty: TinyProperty<boolean>;
+  public readonly voicingVisibleProperty: TinyProperty<boolean>;
 
   // Areas for hit intersection. If set on a Node, no descendants can handle events.
-  _mouseArea: Shape | Bounds2 | null; // for mouse position in the local coordinate frame
-  _touchArea: Shape | Bounds2 | null; // for touch and pen position in the local coordinate frame
+  // (scenery-internal)
+  public _mouseArea: Shape | Bounds2 | null; // for mouse position in the local coordinate frame
+  public _touchArea: Shape | Bounds2 | null; // for touch and pen position in the local coordinate frame
 
   // The CSS cursor to be displayed over this Node. null should be the default (inherit) value.
-  _cursor: string | null;
+  private _cursor: string | null;
 
   // Ordered array of child Nodes.
-  _children: Node[];
+  // (scenery-internal)
+  public _children: Node[];
 
   // Unordered array of parent Nodes.
-  _parents: Node[];
+  // (scenery-internal)
+  public _parents: Node[];
 
   // Whether we will do more accurate (and tight) bounds computations for rotations and shears.
-  _transformBounds: boolean;
+  private _transformBounds: boolean;
 
   // Set up the transform reference. we add a listener so that the transform itself can be modified directly
   // by reference, triggering the event notifications for Scenery The reference to the Transform3 will never change.
-  _transform: Transform3;
-  _transformListener: () => void;
+  // (scenery-internal)
+  public _transform: Transform3;
+  public _transformListener: () => void;
 
   // Maximum dimensions for the Node's local bounds before a corrective scaling factor is applied to maintain size.
   // The maximum dimensions are always compared to local bounds, and applied "before" the Node's transform.
@@ -466,71 +471,79 @@ class Node extends ParallelDOM {
   // happen when bounds are validated (validateBounds()), which does not happen synchronously on a child's size
   // change. It does happen at least once in updateDisplay() before rendering, and calling validateBounds() can force
   // a re-check and transform.
-  _maxWidth: number | null;
-  _maxHeight: number | null;
+  private _maxWidth: number | null;
+  private _maxHeight: number | null;
 
   // Scale applied due to the maximum dimension constraints.
-  _appliedScaleFactor: number;
+  private _appliedScaleFactor: number;
 
-  // For user input handling (mouse/touch).
-  _inputListeners: IInputListener[];
+  // For user input handling (mouse/touch). (scenery-internal)
+  public _inputListeners: IInputListener[];
 
   // [mutable] Bounds for this Node and its children in the "parent" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the Node
   // is changed.
-  boundsProperty: TinyStaticProperty<Bounds2>;
+  public readonly boundsProperty: TinyStaticProperty<Bounds2>;
 
   // [mutable] Bounds for this Node and its children in the "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the localBounds of
   // the Node is changed.
-  localBoundsProperty: TinyStaticProperty<Bounds2>;
+  public readonly localBoundsProperty: TinyStaticProperty<Bounds2>;
 
   // [mutable] Bounds just for children of this Node (and sub-trees), in the "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the childBounds of the
   // Node is changed.
-  childBoundsProperty: TinyStaticProperty<Bounds2>;
+  public readonly childBoundsProperty: TinyStaticProperty<Bounds2>;
 
   // [mutable] Bounds just for this Node, in the "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
   // like the other bounds Properties, which usually fire asynchronously
-  selfBoundsProperty: TinyStaticProperty<Bounds2>;
+  public readonly selfBoundsProperty: TinyStaticProperty<Bounds2>;
 
   // Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom
   // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
   // overridden value.
-  _localBoundsOverridden: boolean;
+  // (scenery-internal)
+  public _localBoundsOverridden: boolean;
 
   // [mutable] Whether invisible children will be excluded from this Node's bounds
-  _excludeInvisibleChildrenFromBounds: boolean;
+  private _excludeInvisibleChildrenFromBounds: boolean;
 
   // Options that can be provided to layout managers to adjust positioning for this node.
-  _layoutOptions: ILayoutOptions | null;
+  private _layoutOptions: ILayoutOptions | null;
 
   // Whether bounds needs to be recomputed to be valid.
-  _boundsDirty: boolean;
+  // (scenery-internal)
+  public _boundsDirty: boolean;
 
   // Whether localBounds needs to be recomputed to be valid.
-  _localBoundsDirty: boolean;
+  // (scenery-internal)
+  public _localBoundsDirty: boolean;
 
   // Whether selfBounds needs to be recomputed to be valid.
-  _selfBoundsDirty: boolean;
+  // (scenery-internal)
+  public _selfBoundsDirty: boolean;
 
   // Whether childBounds needs to be recomputed to be valid.
-  _childBoundsDirty: boolean;
-  _filters: Filter[];
+  // (scenery-internal)
+  public _childBoundsDirty: boolean;
 
-  _originalBounds?: Bounds2; // If assertions are enabled
-  _originalLocalBounds?: Bounds2; // If assertions are enabled
-  _originalSelfBounds?: Bounds2; // If assertions are enabled
-  _originalChildBounds?: Bounds2; // If assertions are enabled
+  // (scenery-internal)
+  public _filters: Filter[];
+
+  private _originalBounds?: Bounds2; // If assertions are enabled
+  private _originalLocalBounds?: Bounds2; // If assertions are enabled
+  private _originalSelfBounds?: Bounds2; // If assertions are enabled
+  private _originalChildBounds?: Bounds2; // If assertions are enabled
 
   // Where rendering-specific settings are stored. They are generally modified internally, so there is no ES5 setter
   // for hints.
-  _hints: {
+  // (scenery-internal)
+  public _hints: {
     // What type of renderer should be forced for this Node. Uses the internal bitmask structure declared in
     // scenery.js and Renderer.js.
     renderer: number;
@@ -564,49 +577,51 @@ class Node extends ParallelDOM {
   // This is fired only once for any single operation that may change the children of a Node.
   // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
   // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
-  childrenChangedEmitter: TinyEmitter;
+  public readonly childrenChangedEmitter: TinyEmitter;
 
   // For every single added child Node, emits with {Node} Node, {number} indexOfChild
-  childInsertedEmitter: TinyEmitter<[ node: Node, indexOfChild: number ]>;
+  public readonly childInsertedEmitter: TinyEmitter<[ node: Node, indexOfChild: number ]>;
 
   // For every single removed child Node, emits with {Node} Node, {number} indexOfChild
-  childRemovedEmitter: TinyEmitter<[ node: Node, indexOfChild: number ]>;
+  public readonly childRemovedEmitter: TinyEmitter<[ node: Node, indexOfChild: number ]>;
 
   // Provides a given range that may be affected by the reordering
-  childrenReorderedEmitter: TinyEmitter<[ minChangedIndex: number, maxChangedIndex: number ]>;
+  public readonly childrenReorderedEmitter: TinyEmitter<[ minChangedIndex: number, maxChangedIndex: number ]>;
 
   // Fired whenever a parent is added
-  parentAddedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
+  public readonly parentAddedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
 
   // Fired whenever a parent is removed
-  parentRemovedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
+  public readonly parentRemovedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
 
   // Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
   // change to a Node's translation/rotation/scale/etc. will trigger this event.
-  transformEmitter: TinyEmitter;
+  public readonly transformEmitter: TinyEmitter;
 
   // Should be emitted when we need to check full metadata updates directly on Instances,
   // to see if we need to change drawable types, etc.
-  instanceRefreshEmitter: TinyEmitter;
+  public readonly instanceRefreshEmitter: TinyEmitter;
 
   // Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
   // things that could affect descendants)
-  rendererSummaryRefreshEmitter: TinyEmitter;
+  public readonly rendererSummaryRefreshEmitter: TinyEmitter;
 
   // Emitted to when we change filters (either opacity or generalized filters)
-  filterChangeEmitter: TinyEmitter;
+  public readonly filterChangeEmitter: TinyEmitter;
 
   // Fired when an instance is changed (added/removed)
-  changedInstanceEmitter: TinyEmitter<[ instance: Instance, added: boolean ]>;
+  public readonly changedInstanceEmitter: TinyEmitter<[ instance: Instance, added: boolean ]>;
 
   // Fired when layoutOptions changes
-  layoutOptionsChangedEmitter: TinyEmitter;
+  public readonly layoutOptionsChangedEmitter: TinyEmitter;
 
   // A bitmask which specifies which renderers this Node (and only this Node, not its subtree) supports.
-  _rendererBitmask: number;
+  // (scenery-internal)
+  public _rendererBitmask: number;
 
   // A bitmask-like summary of what renderers and options are supported by this Node and all of its descendants
-  _rendererSummary: RendererSummary;
+  // (scenery-internal)
+  public _rendererSummary: RendererSummary;
 
   // So we can traverse only the subtrees that require bounds validation for events firing.
   // This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose
@@ -617,27 +632,33 @@ class Node extends ParallelDOM {
   // boundsEventCount down to 0 will allow A to decrease its count by 1, without having to check its other children
   // (if we were just using a boolean value, this operation would require A to check if any OTHER children besides
   // B had bounds listeners)
-  _boundsEventCount: number;
+  // (scenery-internal)
+  public _boundsEventCount: number;
 
   // This signals that we can validateBounds() on this subtree and we don't have to traverse further
-  _boundsEventSelfCount: number;
+  // (scenery-internal)
+  public _boundsEventSelfCount: number;
 
   // Subcomponent dedicated to hit testing
-  _picker: Picker;
+  // (scenery-internal)
+  public _picker: Picker;
 
   // There are certain specific cases (in this case due to a11y) where we need
   // to know that a Node is getting removed from its parent BUT that process has not completed yet. It would be ideal
   // to not need this.
-  _isGettingRemovedFromParent: boolean;
+  // (scenery-internal)
+  public _isGettingRemovedFromParent: boolean;
 
-  static REQUIRES_BOUNDS_OPTION_KEYS: string[];
+  public static REQUIRES_BOUNDS_OPTION_KEYS: string[];
 
   // Used by sceneryDeserialize
-  _serialization?: IntentionalAny;
+  // (scenery-internal)
+  public _serialization?: IntentionalAny;
 
   // Tracks any layout constraint, so that we can avoid having multiple layout constraints on the same node
   // (and avoid the infinite loops that can happen if that is triggered).
-  _activeParentLayoutConstraint: LayoutConstraint | null = null;
+  // (scenery-internal)
+  public _activeParentLayoutConstraint: LayoutConstraint | null = null;
 
   // This is an array of property (setter) names for Node.mutate(), which are also used when creating
   // Nodes with parameter objects.
@@ -654,7 +675,8 @@ class Node extends ParallelDOM {
   //       occurring "after" the rotation / scaling
   // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
   //       changes of bounds that may happen beforehand
-  _mutatorKeys!: string[];
+  // (scenery-internal)
+  public _mutatorKeys!: string[];
 
   // List of all dirty flags that should be available on drawables created from this Node (or
   // subtype). Given a flag (e.g. radius), it indicates the existence of a function
@@ -662,7 +684,7 @@ class Node extends ParallelDOM {
   // (scenery-internal)
   //
   // Should be overridden by subtypes.
-  drawableMarkFlags!: string[];
+  public drawableMarkFlags!: string[];
 
   /**
    * Creates a Node with options.
@@ -696,7 +718,7 @@ class Node extends ParallelDOM {
    * instead of setting the setter (node.scale = ..., which would override the function), it will instead call
    * the method directly (e.g. node.scale( ... )).
    */
-  constructor( options?: NodeOptions ) {
+  public constructor( options?: NodeOptions ) {
 
     super();
 
@@ -820,7 +842,7 @@ class Node extends ParallelDOM {
    * @param node - The new child to insert.
    * @param [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
-  insertChild( index: number, node: Node, isComposite?: boolean ): this {
+  public insertChild( index: number, node: Node, isComposite?: boolean ): this {
     assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
     assert && assert( node instanceof Node,
       `addChild/insertChild requires the child to be a Node. Constructor: ${
@@ -866,7 +888,7 @@ class Node extends ParallelDOM {
    * @param node
    * @param [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
-  addChild( node: Node, isComposite?: boolean ): this {
+  public addChild( node: Node, isComposite?: boolean ): this {
     this.insertChild( this._children.length, node, isComposite );
 
     return this; // allow chaining
@@ -879,7 +901,7 @@ class Node extends ParallelDOM {
    * @param node
    * @param [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
-  removeChild( node: Node, isComposite?: boolean ): this {
+  public removeChild( node: Node, isComposite?: boolean ): this {
     assert && assert( node && node instanceof Node, 'Need to call node.removeChild() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
 
@@ -897,7 +919,7 @@ class Node extends ParallelDOM {
    * @param index
    * @param [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
-  removeChildAt( index: number, isComposite?: boolean ): this {
+  public removeChildAt( index: number, isComposite?: boolean ): this {
     assert && assert( index >= 0 );
     assert && assert( index < this._children.length );
 
@@ -917,7 +939,7 @@ class Node extends ParallelDOM {
    * @param indexOfChild - Should satisfy this.children[ indexOfChild ] === node
    * @param [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
-  removeChildWithIndex( node: Node, indexOfChild: number, isComposite?: boolean ): void {
+  public removeChildWithIndex( node: Node, indexOfChild: number, isComposite?: boolean ): void {
     assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
     assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
@@ -960,7 +982,7 @@ class Node extends ParallelDOM {
    * @param node - The child Node to move in the order
    * @param index - The desired index (into the children array) of the child.
    */
-  moveChildToIndex( node: Node, index: number ): this {
+  public moveChildToIndex( node: Node, index: number ): this {
     assert && assert( node && node instanceof Node, 'Need to call node.moveChildToIndex() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to moveChildToIndex with a node that was not a child.' );
     assert && assert( typeof index === 'number' && index % 1 === 0 && index >= 0 && index < this._children.length,
@@ -987,7 +1009,7 @@ class Node extends ParallelDOM {
   /**
    * Removes all children from this Node.
    */
-  removeAllChildren(): this {
+  public removeAllChildren(): this {
     this.setChildren( [] );
 
     return this; // allow chaining
@@ -998,7 +1020,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: Overridden in LayoutBox
    */
-  setChildren( children: Node[] ): this {
+  public setChildren( children: Node[] ): this {
     // The implementation is split into basically three stages:
     // 1. Remove current children that are not in the new children array.
     // 2. Reorder children that exist both before/after the change.
@@ -1082,14 +1104,14 @@ class Node extends ParallelDOM {
   /**
    * See setChildren() for more information
    */
-  set children( value: Node[] ) {
+  public set children( value: Node[] ) {
     this.setChildren( value );
   }
 
   /**
    * See getChildren() for more information
    */
-  get children(): Node[] {
+  public get children(): Node[] {
     return this.getChildren();
   }
 
@@ -1099,7 +1121,7 @@ class Node extends ParallelDOM {
    *
    * Making changes to the returned result will not affect this node's children.
    */
-  getChildren(): Node[] {
+  public getChildren(): Node[] {
     // TODO: ensure we are not triggering this in Scenery code when not necessary!
     return this._children.slice( 0 ); // create a defensive copy
   }
@@ -1107,7 +1129,7 @@ class Node extends ParallelDOM {
   /**
    * Returns a count of children, without needing to make a defensive copy.
    */
-  getChildrenCount(): number {
+  public getChildrenCount(): number {
     return this._children.length;
   }
 
@@ -1117,21 +1139,21 @@ class Node extends ParallelDOM {
    *
    * NOTE: Modifying the returned array will not in any way modify this node's parents.
    */
-  getParents(): Node[] {
+  public getParents(): Node[] {
     return this._parents.slice( 0 ); // create a defensive copy
   }
 
   /**
    * See getParents() for more information
    */
-  get parents(): Node[] {
+  public get parents(): Node[] {
     return this.getParents();
   }
 
   /**
    * Returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents).
    */
-  getParent(): Node | null {
+  public getParent(): Node | null {
     assert && assert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
     return this._parents.length ? this._parents[ 0 ] : null;
   }
@@ -1139,14 +1161,14 @@ class Node extends ParallelDOM {
   /**
    * See getParent() for more information
    */
-  get parent(): Node | null {
+  public get parent(): Node | null {
     return this.getParent();
   }
 
   /**
    * Gets the child at a specific index into the children array.
    */
-  getChildAt( index: number ): Node {
+  public getChildAt( index: number ): Node {
     return this._children[ index ];
   }
 
@@ -1156,7 +1178,7 @@ class Node extends ParallelDOM {
    * @param parent - Should be a parent of this node.
    * @returns - An index such that this.parents[ index ] === parent
    */
-  indexOfParent( parent: Node ): number {
+  public indexOfParent( parent: Node ): number {
     return _.indexOf( this._parents, parent );
   }
 
@@ -1166,14 +1188,14 @@ class Node extends ParallelDOM {
    * @param child - Should be a child of this node.
    * @returns - An index such that this.children[ index ] === child
    */
-  indexOfChild( child: Node ): number {
+  public indexOfChild( child: Node ): number {
     return _.indexOf( this._children, child );
   }
 
   /**
    * Moves this Node to the front (end) of all of its parents children array.
    */
-  moveToFront(): this {
+  public moveToFront(): this {
     _.each( this._parents.slice(), parent => parent.moveChildToFront( this ) );
 
     return this; // allow chaining
@@ -1184,14 +1206,14 @@ class Node extends ParallelDOM {
    *
    * @param child - Our child to move to the front.
    */
-  moveChildToFront( child: Node ): this {
+  public moveChildToFront( child: Node ): this {
     return this.moveChildToIndex( child, this._children.length - 1 );
   }
 
   /**
    * Move this node one index forward in each of its parents.  If the Node is already at the front, this is a no-op.
    */
-  moveForward(): this {
+  public moveForward(): this {
     this._parents.forEach( parent => parent.moveChildForward( this ) ); // TODO: Do we need slice like moveToFront has?
     return this; // chaining
   }
@@ -1199,7 +1221,7 @@ class Node extends ParallelDOM {
   /**
    * Moves the specified child forward by one index.  If the child is already at the front, this is a no-op.
    */
-  moveChildForward( child: Node ): this {
+  public moveChildForward( child: Node ): this {
     const index = this.indexOfChild( child );
     if ( index < this.getChildrenCount() - 1 ) {
       this.moveChildToIndex( child, index + 1 );
@@ -1210,7 +1232,7 @@ class Node extends ParallelDOM {
   /**
    * Move this node one index backward in each of its parents.  If the Node is already at the back, this is a no-op.
    */
-  moveBackward(): this {
+  public moveBackward(): this {
     this._parents.forEach( parent => parent.moveChildBackward( this ) ); // TODO: Do we need slice like moveToFront has?
     return this; // chaining
   }
@@ -1218,7 +1240,7 @@ class Node extends ParallelDOM {
   /**
    * Moves the specified child forward by one index.  If the child is already at the back, this is a no-op.
    */
-  moveChildBackward( child: Node ): this {
+  public moveChildBackward( child: Node ): this {
     const index = this.indexOfChild( child );
     if ( index > 0 ) {
       this.moveChildToIndex( child, index - 1 );
@@ -1229,7 +1251,7 @@ class Node extends ParallelDOM {
   /**
    * Moves this Node to the back (front) of all of its parents children array.
    */
-  moveToBack(): this {
+  public moveToBack(): this {
     _.each( this._parents.slice(), parent => parent.moveChildToBack( this ) );
 
     return this; // allow chaining
@@ -1240,7 +1262,7 @@ class Node extends ParallelDOM {
    *
    * @param child - Our child to move to the back.
    */
-  moveChildToBack( child: Node ): this {
+  public moveChildToBack( child: Node ): this {
     return this.moveChildToIndex( child, 0 );
   }
 
@@ -1248,7 +1270,7 @@ class Node extends ParallelDOM {
    * Replace a child in this node's children array with another node. If the old child had DOM focus and
    * the new child is focusable, the new child will receive focus after it is added.
    */
-  replaceChild( oldChild: Node, newChild: Node ): this {
+  public replaceChild( oldChild: Node, newChild: Node ): this {
     assert && assert( oldChild instanceof Node, 'child to replace must be a Node' );
     assert && assert( newChild instanceof Node, 'new child must be a Node' );
     assert && assert( this.hasChild( oldChild ), 'Attempted to replace a node that was not a child.' );
@@ -1272,7 +1294,7 @@ class Node extends ParallelDOM {
   /**
    * Removes this Node from all of its parents.
    */
-  detach(): this {
+  public detach(): this {
     _.each( this._parents.slice( 0 ), parent => parent.removeChild( this ) );
 
     return this; // allow chaining
@@ -1310,7 +1332,7 @@ class Node extends ParallelDOM {
    *
    * @returns - Was the self-bounds potentially updated?
    */
-  validateSelfBounds(): boolean {
+  public validateSelfBounds(): boolean {
     // validate bounds of ourself if necessary
     if ( this._selfBoundsDirty ) {
       const oldSelfBounds = scratchBounds2.set( this.selfBoundsProperty._value );
@@ -1337,7 +1359,7 @@ class Node extends ParallelDOM {
    *
    * @returns - Was something potentially updated?
    */
-  validateBounds(): boolean {
+  public validateBounds(): boolean {
 
     sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `validateBounds #${this._id}` );
     sceneryLog && sceneryLog.bounds && sceneryLog.push();
@@ -1579,7 +1601,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: this should pass by (ignore) any overridden localBounds, to trigger listeners below.
    */
-  validateWatchedBounds(): void {
+  public validateWatchedBounds(): void {
     // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this
     // until they are all clean. Otherwise, side-effects could occur from bounds validations
     // TODO: consider a way to prevent infinite loops here that occur due to bounds listeners triggering cycles
@@ -1594,7 +1616,7 @@ class Node extends ParallelDOM {
    *
    * @returns - Whether there could have been any changes.
    */
-  watchedBoundsScan(): boolean {
+  public watchedBoundsScan(): boolean {
     if ( this._boundsEventSelfCount !== 0 ) {
       // we are a root that should be validated. return whether we updated anything
       return this.validateBounds();
@@ -1617,7 +1639,7 @@ class Node extends ParallelDOM {
   /**
    * Marks the bounds of this Node as invalid, so they are recomputed before being accessed again.
    */
-  invalidateBounds(): void {
+  public invalidateBounds(): void {
     // TODO: sometimes we won't need to invalidate local bounds! it's not too much of a hassle though?
     this._boundsDirty = true;
     this._localBoundsDirty = true;
@@ -1632,7 +1654,7 @@ class Node extends ParallelDOM {
   /**
    * Recursively tag all ancestors with _childBoundsDirty (scenery-internal)
    */
-  invalidateChildBounds(): void {
+  public invalidateChildBounds(): void {
     // don't bother updating if we've already been tagged
     if ( !this._childBoundsDirty ) {
       this._childBoundsDirty = true;
@@ -1647,7 +1669,7 @@ class Node extends ParallelDOM {
   /**
    * Should be called to notify that our selfBounds needs to change to this new value.
    */
-  invalidateSelf( newSelfBounds?: Bounds2 ): void {
+  public invalidateSelf( newSelfBounds?: Bounds2 ): void {
     assert && assert( newSelfBounds === undefined || newSelfBounds instanceof Bounds2,
       'invalidateSelf\'s newSelfBounds, if provided, needs to be Bounds2' );
 
@@ -1701,7 +1723,7 @@ class Node extends ParallelDOM {
    *
    * @returns - Whether potentialChild is actually our child.
    */
-  hasChild( potentialChild: Node ): boolean {
+  public hasChild( potentialChild: Node ): boolean {
     assert && assert( potentialChild && ( potentialChild instanceof Node ), 'hasChild needs to be called with a Node' );
     const isOurChild = _.includes( this._children, potentialChild );
     assert && assert( isOurChild === _.includes( potentialChild._parents, this ), 'child-parent reference should match parent-child reference' );
@@ -1711,7 +1733,7 @@ class Node extends ParallelDOM {
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  getSelfShape(): Shape {
+  public getSelfShape(): Shape {
     const selfBounds = this.selfBounds;
     if ( selfBounds.isEmpty() ) {
       return new Shape();
@@ -1727,14 +1749,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: Do NOT mutate the returned value!
    */
-  getSelfBounds(): Bounds2 {
+  public getSelfBounds(): Bounds2 {
     return this.selfBoundsProperty.value;
   }
 
   /**
    * See getSelfBounds() for more information
    */
-  get selfBounds(): Bounds2 {
+  public get selfBounds(): Bounds2 {
     return this.getSelfBounds();
   }
 
@@ -1744,14 +1766,14 @@ class Node extends ParallelDOM {
    *
    * Override this to provide different behavior.
    */
-  getSafeSelfBounds(): Bounds2 {
+  public getSafeSelfBounds(): Bounds2 {
     return this.selfBoundsProperty.value;
   }
 
   /**
    * See getSafeSelfBounds() for more information
    */
-  get safeSelfBounds(): Bounds2 {
+  public get safeSelfBounds(): Bounds2 {
     return this.getSafeSelfBounds();
   }
 
@@ -1761,14 +1783,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: Do NOT mutate the returned value!
    */
-  getChildBounds(): Bounds2 {
+  public getChildBounds(): Bounds2 {
     return this.childBoundsProperty.value;
   }
 
   /**
    * See getChildBounds() for more information
    */
-  get childBounds(): Bounds2 {
+  public get childBounds(): Bounds2 {
     return this.getChildBounds();
   }
 
@@ -1778,25 +1800,25 @@ class Node extends ParallelDOM {
    *
    * NOTE: Do NOT mutate the returned value!
    */
-  getLocalBounds(): Bounds2 {
+  public getLocalBounds(): Bounds2 {
     return this.localBoundsProperty.value;
   }
 
   /**
    * See getLocalBounds() for more information
    */
-  get localBounds(): Bounds2 {
+  public get localBounds(): Bounds2 {
     return this.getLocalBounds();
   }
 
   /**
    * See setLocalBounds() for more information
    */
-  set localBounds( value: Bounds2 | null ) {
+  public set localBounds( value: Bounds2 | null ) {
     this.setLocalBounds( value );
   }
 
-  get localBoundsOverridden(): boolean {
+  public get localBoundsOverridden(): boolean {
     return this._localBoundsOverridden;
   }
 
@@ -1806,7 +1828,7 @@ class Node extends ParallelDOM {
    * again. To revert to having Scenery compute the localBounds, set this to null.  The bounds should not be reduced
    * smaller than the visible bounds on the screen.
    */
-  setLocalBounds( localBounds: Bounds2 | null ): this {
+  public setLocalBounds( localBounds: Bounds2 | null ): this {
     assert && assert( localBounds === null || localBounds instanceof Bounds2, 'localBounds override should be set to either null or a Bounds2' );
     assert && assert( localBounds === null || !isNaN( localBounds.minX ), 'minX for localBounds should not be NaN' );
     assert && assert( localBounds === null || !isNaN( localBounds.minY ), 'minY for localBounds should not be NaN' );
@@ -1850,7 +1872,7 @@ class Node extends ParallelDOM {
    * Meant to be overridden in sub-types that have more accurate bounds determination for when we are transformed.
    * Usually rotation is significant here, so that transformed bounds for non-rectangular shapes will be different.
    */
-  getTransformedSelfBounds( matrix: Matrix3 ): Bounds2 {
+  public getTransformedSelfBounds( matrix: Matrix3 ): Bounds2 {
     // assume that we take up the entire rectangular bounds by default
     return this.selfBounds.transformed( matrix );
   }
@@ -1862,7 +1884,7 @@ class Node extends ParallelDOM {
    * This should include the "full" bounds that guarantee everything rendered should be inside (e.g. Text, where the
    * normal bounds may not be sufficient).
    */
-  getTransformedSafeSelfBounds( matrix: Matrix3 ): Bounds2 {
+  public getTransformedSafeSelfBounds( matrix: Matrix3 ): Bounds2 {
     return this.safeSelfBounds.transformed( matrix );
   }
 
@@ -1877,7 +1899,7 @@ class Node extends ParallelDOM {
    * @param [matrix] - If provided, will return the bounds assuming the content is transformed with the
    *                             given matrix.
    */
-  getSafeTransformedVisibleBounds( matrix?: Matrix3 ): Bounds2 {
+  public getSafeTransformedVisibleBounds( matrix?: Matrix3 ): Bounds2 {
     const localMatrix = ( matrix || Matrix3.IDENTITY ).timesMatrix( this.matrix );
 
     const bounds = Bounds2.NOTHING.copy();
@@ -1900,7 +1922,7 @@ class Node extends ParallelDOM {
   /**
    * See getSafeTransformedVisibleBounds() for more information -- This is called without any initial parameter
    */
-  get safeTransformedVisibleBounds(): Bounds2 {
+  public get safeTransformedVisibleBounds(): Bounds2 {
     return this.getSafeTransformedVisibleBounds();
   }
 
@@ -1916,7 +1938,7 @@ class Node extends ParallelDOM {
    *
    * @param transformBounds - Whether accurate transform bounds should be used.
    */
-  setTransformBounds( transformBounds: boolean ): this {
+  public setTransformBounds( transformBounds: boolean ): this {
     assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
 
     if ( this._transformBounds !== transformBounds ) {
@@ -1931,21 +1953,21 @@ class Node extends ParallelDOM {
   /**
    * See setTransformBounds() for more information
    */
-  set transformBounds( value: boolean ) {
+  public set transformBounds( value: boolean ) {
     this.setTransformBounds( value );
   }
 
   /**
    * See getTransformBounds() for more information
    */
-  get transformBounds(): boolean {
+  public get transformBounds(): boolean {
     return this.getTransformBounds();
   }
 
   /**
    * Returns whether accurate transformation bounds are used in bounds computation (see setTransformBounds).
    */
-  getTransformBounds(): boolean {
+  public getTransformBounds(): boolean {
     return this._transformBounds;
   }
 
@@ -1955,21 +1977,21 @@ class Node extends ParallelDOM {
    * NOTE: Do NOT mutate the returned value!
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getBounds(): Bounds2 {
+  public getBounds(): Bounds2 {
     return this.boundsProperty.value;
   }
 
   /**
    * See getBounds() for more information
    */
-  get bounds(): Bounds2 {
+  public get bounds(): Bounds2 {
     return this.getBounds();
   }
 
   /**
    * Like getLocalBounds() in the "local" coordinate frame, but includes only visible nodes.
    */
-  getVisibleLocalBounds(): Bounds2 {
+  public getVisibleLocalBounds(): Bounds2 {
     // defensive copy, since we use mutable modifications below
     const bounds = this.selfBounds.copy();
 
@@ -1985,14 +2007,14 @@ class Node extends ParallelDOM {
   /**
    * See getVisibleLocalBounds() for more information
    */
-  get visibleLocalBounds(): Bounds2 {
+  public get visibleLocalBounds(): Bounds2 {
     return this.getVisibleLocalBounds();
   }
 
   /**
    * Like getBounds() in the "parent" coordinate frame, but includes only visible nodes
    */
-  getVisibleBounds(): Bounds2 {
+  public getVisibleBounds(): Bounds2 {
     if ( this.isVisible() ) {
       return this.getVisibleLocalBounds().transform( this.getMatrix() );
     }
@@ -2004,7 +2026,7 @@ class Node extends ParallelDOM {
   /**
    * See getVisibleBounds() for more information
    */
-  get visibleBounds(): Bounds2 {
+  public get visibleBounds(): Bounds2 {
     return this.getVisibleBounds();
   }
 
@@ -2041,7 +2063,7 @@ class Node extends ParallelDOM {
    * @param [isTouch] - Whether touchAreas should be used.
    * @returns - Returns null if the point is not contained in the subtree.
    */
-  hitTest( point: Vector2, isMouse?: boolean, isTouch?: boolean ): Trail | null {
+  public hitTest( point: Vector2, isMouse?: boolean, isTouch?: boolean ): Trail | null {
     assert && assert( point instanceof Vector2 && point.isFinite(), 'The point should be a finite Vector2' );
     assert && assert( isMouse === undefined || typeof isMouse === 'boolean',
       'If isMouse is provided, it should be a boolean' );
@@ -2056,7 +2078,7 @@ class Node extends ParallelDOM {
    *
    * See hitTest() for more details about what will be returned.
    */
-  trailUnderPointer( pointer: Pointer ): Trail | null {
+  public trailUnderPointer( pointer: Pointer ): Trail | null {
     return pointer.point === null ? null : this.hitTest( pointer.point, pointer instanceof Mouse, pointer.isTouchLike() );
   }
 
@@ -2067,7 +2089,7 @@ class Node extends ParallelDOM {
    *
    * @returns - Whether the point is contained.
    */
-  containsPoint( point: Vector2 ): boolean {
+  public containsPoint( point: Vector2 ): boolean {
     return this.hitTest( point ) !== null;
   }
 
@@ -2076,7 +2098,7 @@ class Node extends ParallelDOM {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  public containsPointSelf( point: Vector2 ): boolean {
     // if self bounds are not null default to checking self bounds
     return this.selfBounds.containsPoint( point );
   }
@@ -2086,12 +2108,12 @@ class Node extends ParallelDOM {
    *
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  intersectsBoundsSelf( bounds: Bounds2 ): boolean {
+  public intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     // if self bounds are not null, child should override this
     return this.selfBounds.intersectsBounds( bounds );
   }
 
-  isPhetioMouseHittable( point: Vector2 ): boolean {
+  public isPhetioMouseHittable( point: Vector2 ): boolean {
 
     // invisible things cannot be autoselected
     if ( !this.visible ) {
@@ -2116,7 +2138,7 @@ class Node extends ParallelDOM {
   // Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
   // Adapted from Picker.recursiveHitTest
   // @returns - may not be a Node.  For instance, ThreeIsometricNode hits Mass instances
-  getPhetioMouseHit( point: Vector2 ): PhetioObject | null {
+  public getPhetioMouseHit( point: Vector2 ): PhetioObject | null {
 
     if ( !this.isPhetioMouseHittable( point ) ) {
       return null;
@@ -2158,7 +2180,7 @@ class Node extends ParallelDOM {
   /**
    * Whether this Node itself is painted (displays something itself). Meant to be overridden.
    */
-  isPainted(): boolean {
+  public isPainted(): boolean {
     // Normal nodes don't render anything
     return false;
   }
@@ -2169,28 +2191,28 @@ class Node extends ParallelDOM {
    *
    * If this value would potentially change, please trigger the event 'selfBoundsValid'.
    */
-  areSelfBoundsValid(): boolean {
+  public areSelfBoundsValid(): boolean {
     return true;
   }
 
   /**
    * Returns whether this Node has any parents at all.
    */
-  hasParent(): boolean {
+  public hasParent(): boolean {
     return this._parents.length !== 0;
   }
 
   /**
    * Returns whether this Node has any children at all.
    */
-  hasChildren(): boolean {
+  public hasChildren(): boolean {
     return this._children.length > 0;
   }
 
   /**
    * Returns whether a child should be included for layout (if this Node is a layout container).
    */
-  isChildIncludedInLayout( child: Node ): boolean {
+  public isChildIncludedInLayout( child: Node ): boolean {
     assert && assert( child instanceof Node );
 
     return child.bounds.isValid() && ( !this._excludeInvisibleChildrenFromBounds || child.visible );
@@ -2199,7 +2221,7 @@ class Node extends ParallelDOM {
   /**
    * Calls the callback on nodes recursively in a depth-first manner.
    */
-  walkDepthFirst( callback: ( node: Node ) => void ): void {
+  public walkDepthFirst( callback: ( node: Node ) => void ): void {
     callback( this );
     const length = this._children.length;
     for ( let i = 0; i < length; i++ ) {
@@ -2218,7 +2240,7 @@ class Node extends ParallelDOM {
    * - cursor {string|null}: If node.cursor is null, any non-null cursor of an input listener will effectively
    *                         "override" it. NOTE: this can be implemented as an es5 getter, if the cursor can change
    */
-  addInputListener( listener: IInputListener ): this {
+  public addInputListener( listener: IInputListener ): this {
     assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
     assert && assert( listener !== null, 'Input listener cannot be null' );
     assert && assert( listener !== undefined, 'Input listener cannot be undefined' );
@@ -2235,7 +2257,7 @@ class Node extends ParallelDOM {
   /**
    * Removes an input listener that was previously added with addInputListener.
    */
-  removeInputListener( listener: IInputListener ): this {
+  public removeInputListener( listener: IInputListener ): this {
     const index = _.indexOf( this._inputListeners, listener );
 
     // ensure the listener is in our list (ignore assertion for disposal, see https://github.com/phetsims/sun/issues/394)
@@ -2254,7 +2276,7 @@ class Node extends ParallelDOM {
    *
    * More efficient than checking node.inputListeners, as that includes a defensive copy.
    */
-  hasInputListener( listener: IInputListener ): boolean {
+  public hasInputListener( listener: IInputListener ): boolean {
     for ( let i = 0; i < this._inputListeners.length; i++ ) {
       if ( this._inputListeners[ i ] === listener ) {
         return true;
@@ -2266,7 +2288,7 @@ class Node extends ParallelDOM {
   /**
    * Interrupts all input listeners that are attached to this node.
    */
-  interruptInput(): this {
+  public interruptInput(): this {
     const listenersCopy = this.inputListeners;
 
     for ( let i = 0; i < listenersCopy.length; i++ ) {
@@ -2281,7 +2303,7 @@ class Node extends ParallelDOM {
   /**
    * Interrupts all input listeners that are attached to either this node, or a descendant node.
    */
-  interruptSubtreeInput(): this {
+  public interruptSubtreeInput(): this {
     this.interruptInput();
 
     const children = this._children.slice();
@@ -2311,7 +2333,7 @@ class Node extends ParallelDOM {
    * @param y - The y coordinate
    * @param [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
-  translate( v: Vector2, prependInstead?: boolean ): void;
+  public translate( v: Vector2, prependInstead?: boolean ): void;
   translate( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line
   translate( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) { // eslint-disable-line
     if ( typeof x === 'number' ) {
@@ -2356,7 +2378,7 @@ class Node extends ParallelDOM {
    *            - (x,y invocation): {number} y - scale for the y-dimension
    * @param [prependInstead] - (x,y invocation) Whether the transform should be prepended (defaults to false)
    */
-  scale( s: number, prependInstead?: boolean ): void;
+  public scale( s: number, prependInstead?: boolean ): void;
   scale( s: Vector2, prependInstead?: boolean ): void; // eslint-disable-line
   scale( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line
   scale( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) { // eslint-disable-line
@@ -2400,7 +2422,7 @@ class Node extends ParallelDOM {
    * @param angle - The angle (in radians) to rotate by
    * @param [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
-  rotate( angle: number, prependInstead?: boolean ): void {
+  public rotate( angle: number, prependInstead?: boolean ): void {
     assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
     assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean' );
     if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
@@ -2420,7 +2442,7 @@ class Node extends ParallelDOM {
    * @param point - In the parent coordinate frame
    * @param angle - In radians
    */
-  rotateAround( point: Vector2, angle: number ): this {
+  public rotateAround( point: Vector2, angle: number ): this {
     assert && assert( point instanceof Vector2 && point.isFinite(), 'point should be a finite Vector2' );
     assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
 
@@ -2434,7 +2456,7 @@ class Node extends ParallelDOM {
   /**
    * Shifts the x coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
    */
-  setX( x: number ): this {
+  public setX( x: number ): this {
     assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
 
     this.translate( x - this.getX(), 0, true );
@@ -2444,28 +2466,28 @@ class Node extends ParallelDOM {
   /**
    * See setX() for more information
    */
-  set x( value: number ) {
+  public set x( value: number ) {
     this.setX( value );
   }
 
   /**
    * See getX() for more information
    */
-  get x(): number {
+  public get x(): number {
     return this.getX();
   }
 
   /**
    * Returns the x coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
    */
-  getX(): number {
+  public getX(): number {
     return this._transform.getMatrix().m02();
   }
 
   /**
    * Shifts the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
    */
-  setY( y: number ): this {
+  public setY( y: number ): this {
     assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
 
     this.translate( 0, y - this.getY(), true );
@@ -2475,21 +2497,21 @@ class Node extends ParallelDOM {
   /**
    * See setY() for more information
    */
-  set y( value: number ) {
+  public set y( value: number ) {
     this.setY( value );
   }
 
   /**
    * See getY() for more information
    */
-  get y(): number {
+  public get y(): number {
     return this.getY();
   }
 
   /**
    * Returns the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
    */
-  getY(): number {
+  public getY(): number {
     return this._transform.getMatrix().m12();
   }
 
@@ -2508,7 +2530,7 @@ class Node extends ParallelDOM {
    * @param a - Scale for both axes, or scale for x-axis if using the 2-parameter call
    * @param [b] - Scale for the Y axis (only for the 2-parameter call)
    */
-  setScaleMagnitude( s: number ): this;
+  public setScaleMagnitude( s: number ): this;
   setScaleMagnitude( v: Vector2 ): this; // eslint-disable-line
   setScaleMagnitude( sx: number, sy: number ): this; // eslint-disable-line
   setScaleMagnitude( a: number | Vector2, b?: number ): this { // eslint-disable-line
@@ -2539,7 +2561,7 @@ class Node extends ParallelDOM {
    * It is equivalent to:
    * ( T(1,0).magnitude(), T(0,1).magnitude() ) where T() transforms points with our transform.
    */
-  getScaleVector(): Vector2 {
+  public getScaleVector(): Vector2 {
     return this._transform.getMatrix().getScaleVector();
   }
 
@@ -2549,7 +2571,7 @@ class Node extends ParallelDOM {
    *
    * @param rotation - In radians
    */
-  setRotation( rotation: number ): this {
+  public setRotation( rotation: number ): this {
     assert && assert( typeof rotation === 'number' && isFinite( rotation ),
       'rotation should be a finite number' );
 
@@ -2560,14 +2582,14 @@ class Node extends ParallelDOM {
   /**
    * See setRotation() for more information
    */
-  set rotation( value: number ) {
+  public set rotation( value: number ) {
     this.setRotation( value );
   }
 
   /**
    * See getRotation() for more information
    */
-  get rotation(): number {
+  public get rotation(): number {
     return this.getRotation();
   }
 
@@ -2575,7 +2597,7 @@ class Node extends ParallelDOM {
    * Returns the rotation (in radians) that would be applied to a unit (1,0) vector when transformed with this Node's
    * transform.
    */
-  getRotation(): number {
+  public getRotation(): number {
     return this._transform.getMatrix().getRotation();
   }
 
@@ -2590,7 +2612,7 @@ class Node extends ParallelDOM {
    * @param a - X translation - or Vector with x/y translation in components
    * @param [b] - Y translation
    */
-  setTranslation( x: number, y: number ): this;
+  public setTranslation( x: number, y: number ): this;
   setTranslation( v: Vector2 ): this; // eslint-disable-line
   setTranslation( a: number | Vector2, b?: number ): this { // eslint-disable-line
     const m = this._transform.getMatrix();
@@ -2620,21 +2642,21 @@ class Node extends ParallelDOM {
   /**
    * See setTranslation() for more information - this should only be used with Vector2
    */
-  set translation( value: Vector2 ) {
+  public set translation( value: Vector2 ) {
     this.setTranslation( value );
   }
 
   /**
    * See getTranslation() for more information
    */
-  get translation(): Vector2 {
+  public get translation(): Vector2 {
     return this.getTranslation();
   }
 
   /**
    * Returns a vector of where this Node's local-coordinate origin will be transformed by it's own transform.
    */
-  getTranslation(): Vector2 {
+  public getTranslation(): Vector2 {
     const matrix = this._transform.getMatrix();
     return new Vector2( matrix.m02(), matrix.m12() );
   }
@@ -2643,7 +2665,7 @@ class Node extends ParallelDOM {
    * Appends a transformation matrix to this Node's transform. Appending means this transform is conceptually applied
    * first before the rest of the Node's current transform (i.e. applied in the local coordinate frame).
    */
-  appendMatrix( matrix: Matrix3 ): void {
+  public appendMatrix( matrix: Matrix3 ): void {
     assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
     this._transform.append( matrix );
@@ -2653,7 +2675,7 @@ class Node extends ParallelDOM {
    * Prepends a transformation matrix to this Node's transform. Prepending means this transform is conceptually applied
    * after the rest of the Node's current transform (i.e. applied in the parent coordinate frame).
    */
-  prependMatrix( matrix: Matrix3 ): void {
+  public prependMatrix( matrix: Matrix3 ): void {
     assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
     this._transform.prepend( matrix );
@@ -2663,7 +2685,7 @@ class Node extends ParallelDOM {
    * Prepends an (x,y) translation to our Node's transform in an efficient manner without allocating a matrix.
    * see https://github.com/phetsims/scenery/issues/119
    */
-  prependTranslation( x: number, y: number ): void {
+  public prependTranslation( x: number, y: number ): void {
     assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
     assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
 
@@ -2675,7 +2697,7 @@ class Node extends ParallelDOM {
   /**
    * Changes this Node's transform to match the passed-in transformation matrix.
    */
-  setMatrix( matrix: Matrix3 ): void {
+  public setMatrix( matrix: Matrix3 ): void {
     assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
 
@@ -2685,14 +2707,14 @@ class Node extends ParallelDOM {
   /**
    * See setMatrix() for more information
    */
-  set matrix( value: Matrix3 ) {
+  public set matrix( value: Matrix3 ) {
     this.setMatrix( value );
   }
 
   /**
    * See getMatrix() for more information
    */
-  get matrix(): Matrix3 {
+  public get matrix(): Matrix3 {
     return this.getMatrix();
   }
 
@@ -2701,14 +2723,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: Do not mutate the returned matrix.
    */
-  getMatrix(): Matrix3 {
+  public getMatrix(): Matrix3 {
     return this._transform.getMatrix();
   }
 
   /**
    * Returns a reference to our Node's transform
    */
-  getTransform(): Transform3 {
+  public getTransform(): Transform3 {
     // for now, return an actual copy. we can consider listening to changes in the future
     return this._transform;
   }
@@ -2716,14 +2738,14 @@ class Node extends ParallelDOM {
   /**
    * See getTransform() for more information
    */
-  get transform(): Transform3 {
+  public get transform(): Transform3 {
     return this.getTransform();
   }
 
   /**
    * Resets our Node's transform to an identity transform (i.e. no transform is applied).
    */
-  resetTransform(): void {
+  public resetTransform(): void {
     this.setMatrix( Matrix3.IDENTITY );
   }
 
@@ -2743,7 +2765,7 @@ class Node extends ParallelDOM {
   /**
    * Called when our summary bitmask changes (scenery-internal)
    */
-  onSummaryChange( oldBitmask: number, newBitmask: number ): void {
+  public onSummaryChange( oldBitmask: number, newBitmask: number ): void {
     // Defined in ParallelDOM.js
     this._pdomDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
   }
@@ -2798,7 +2820,7 @@ class Node extends ParallelDOM {
   /**
    * Sets the maximum width of the Node (see constructor for documentation on how maximum dimensions work).
    */
-  setMaxWidth( maxWidth: number | null ): void {
+  public setMaxWidth( maxWidth: number | null ): void {
     assert && assert( maxWidth === null || ( typeof maxWidth === 'number' && maxWidth > 0 ),
       'maxWidth should be null (no constraint) or a positive number' );
 
@@ -2815,28 +2837,28 @@ class Node extends ParallelDOM {
   /**
    * See setMaxWidth() for more information
    */
-  set maxWidth( value: number | null ) {
+  public set maxWidth( value: number | null ) {
     this.setMaxWidth( value );
   }
 
   /**
    * See getMaxWidth() for more information
    */
-  get maxWidth(): number | null {
+  public get maxWidth(): number | null {
     return this.getMaxWidth();
   }
 
   /**
    * Returns the maximum width (if any) of the Node.
    */
-  getMaxWidth(): number | null {
+  public getMaxWidth(): number | null {
     return this._maxWidth;
   }
 
   /**
    * Sets the maximum height of the Node (see constructor for documentation on how maximum dimensions work).
    */
-  setMaxHeight( maxHeight: number | null ): void {
+  public setMaxHeight( maxHeight: number | null ): void {
     assert && assert( maxHeight === null || ( typeof maxHeight === 'number' && maxHeight > 0 ),
       'maxHeight should be null (no constraint) or a positive number' );
 
@@ -2853,21 +2875,21 @@ class Node extends ParallelDOM {
   /**
    * See setMaxHeight() for more information
    */
-  set maxHeight( value: number | null ) {
+  public set maxHeight( value: number | null ) {
     this.setMaxHeight( value );
   }
 
   /**
    * See getMaxHeight() for more information
    */
-  get maxHeight(): number | null {
+  public get maxHeight(): number | null {
     return this.getMaxHeight();
   }
 
   /**
    * Returns the maximum height (if any) of the Node.
    */
-  getMaxHeight(): number | null {
+  public getMaxHeight(): number | null {
     return this._maxHeight;
   }
 
@@ -2879,7 +2901,7 @@ class Node extends ParallelDOM {
    *
    * @param left - After this operation, node.left should approximately equal this value.
    */
-  setLeft( left: number ): this {
+  public setLeft( left: number ): this {
     assert && assert( typeof left === 'number' );
 
     const currentLeft = this.getLeft();
@@ -2893,14 +2915,14 @@ class Node extends ParallelDOM {
   /**
    * See setLeft() for more information
    */
-  set left( value: number ) {
+  public set left( value: number ) {
     this.setLeft( value );
   }
 
   /**
    * See getLeft() for more information
    */
-  get left(): number {
+  public get left(): number {
     return this.getLeft();
   }
 
@@ -2909,7 +2931,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLeft(): number {
+  public getLeft(): number {
     return this.getBounds().minX;
   }
 
@@ -2921,7 +2943,7 @@ class Node extends ParallelDOM {
    *
    * @param right - After this operation, node.right should approximately equal this value.
    */
-  setRight( right: number ): this {
+  public setRight( right: number ): this {
     assert && assert( typeof right === 'number' );
 
     const currentRight = this.getRight();
@@ -2934,14 +2956,14 @@ class Node extends ParallelDOM {
   /**
    * See setRight() for more information
    */
-  set right( value: number ) {
+  public set right( value: number ) {
     this.setRight( value );
   }
 
   /**
    * See getRight() for more information
    */
-  get right(): number {
+  public get right(): number {
     return this.getRight();
   }
 
@@ -2950,7 +2972,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getRight(): number {
+  public getRight(): number {
     return this.getBounds().maxX;
   }
 
@@ -2962,7 +2984,7 @@ class Node extends ParallelDOM {
    *
    * @param x - After this operation, node.centerX should approximately equal this value.
    */
-  setCenterX( x: number ): this {
+  public setCenterX( x: number ): this {
     assert && assert( typeof x === 'number' );
 
     const currentCenterX = this.getCenterX();
@@ -2976,14 +2998,14 @@ class Node extends ParallelDOM {
   /**
    * See setCenterX() for more information
    */
-  set centerX( value: number ) {
+  public set centerX( value: number ) {
     this.setCenterX( value );
   }
 
   /**
    * See getCenterX() for more information
    */
-  get centerX(): number {
+  public get centerX(): number {
     return this.getCenterX();
   }
 
@@ -2992,7 +3014,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getCenterX(): number {
+  public getCenterX(): number {
     return this.getBounds().getCenterX();
   }
 
@@ -3004,7 +3026,7 @@ class Node extends ParallelDOM {
    *
    * @param y - After this operation, node.centerY should approximately equal this value.
    */
-  setCenterY( y: number ): this {
+  public setCenterY( y: number ): this {
     assert && assert( typeof y === 'number' );
 
     const currentCenterY = this.getCenterY();
@@ -3018,14 +3040,14 @@ class Node extends ParallelDOM {
   /**
    * See setCenterY() for more information
    */
-  set centerY( value: number ) {
+  public set centerY( value: number ) {
     this.setCenterY( value );
   }
 
   /**
    * See getCenterX() for more information
    */
-  get centerY(): number {
+  public get centerY(): number {
     return this.getCenterY();
   }
 
@@ -3034,7 +3056,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getCenterY(): number {
+  public getCenterY(): number {
     return this.getBounds().getCenterY();
   }
 
@@ -3046,7 +3068,7 @@ class Node extends ParallelDOM {
    *
    * @param top - After this operation, node.top should approximately equal this value.
    */
-  setTop( top: number ): this {
+  public setTop( top: number ): this {
     assert && assert( typeof top === 'number' );
 
     const currentTop = this.getTop();
@@ -3060,14 +3082,14 @@ class Node extends ParallelDOM {
   /**
    * See setTop() for more information
    */
-  set top( value: number ) {
+  public set top( value: number ) {
     this.setTop( value );
   }
 
   /**
    * See getTop() for more information
    */
-  get top(): number {
+  public get top(): number {
     return this.getTop();
   }
 
@@ -3076,7 +3098,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getTop(): number {
+  public getTop(): number {
     return this.getBounds().minY;
   }
 
@@ -3088,7 +3110,7 @@ class Node extends ParallelDOM {
    *
    * @param bottom - After this operation, node.bottom should approximately equal this value.
    */
-  setBottom( bottom: number ): this {
+  public setBottom( bottom: number ): this {
     assert && assert( typeof bottom === 'number' );
 
     const currentBottom = this.getBottom();
@@ -3102,14 +3124,14 @@ class Node extends ParallelDOM {
   /**
    * See setBottom() for more information
    */
-  set bottom( value: number ) {
+  public set bottom( value: number ) {
     this.setBottom( value );
   }
 
   /**
    * See getBottom() for more information
    */
-  get bottom(): number {
+  public get bottom(): number {
     return this.getBottom();
   }
 
@@ -3118,7 +3140,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getBottom(): number {
+  public getBottom(): number {
     return this.getBounds().maxY;
   }
 
@@ -3139,7 +3161,7 @@ class Node extends ParallelDOM {
   /**
    * Sets the position of the upper-left corner of this node's bounds to the specified point.
    */
-  setLeftTop( leftTop: Vector2 ): this {
+  public setLeftTop( leftTop: Vector2 ): this {
     assert && assert( leftTop instanceof Vector2 && leftTop.isFinite(), 'leftTop should be a finite Vector2' );
 
     const currentLeftTop = this.getLeftTop();
@@ -3153,28 +3175,28 @@ class Node extends ParallelDOM {
   /**
    * See setLeftTop() for more information
    */
-  set leftTop( value: Vector2 ) {
+  public set leftTop( value: Vector2 ) {
     this.setLeftTop( value );
   }
 
   /**
    * See getLeftTop() for more information
    */
-  get leftTop(): Vector2 {
+  public get leftTop(): Vector2 {
     return this.getLeftTop();
   }
 
   /**
    * Returns the upper-left corner of this node's bounds.
    */
-  getLeftTop(): Vector2 {
+  public getLeftTop(): Vector2 {
     return this.getBounds().getLeftTop();
   }
 
   /**
    * Sets the position of the center-top location of this node's bounds to the specified point.
    */
-  setCenterTop( centerTop: Vector2 ): this {
+  public setCenterTop( centerTop: Vector2 ): this {
     assert && assert( centerTop instanceof Vector2 && centerTop.isFinite(), 'centerTop should be a finite Vector2' );
 
     const currentCenterTop = this.getCenterTop();
@@ -3188,28 +3210,28 @@ class Node extends ParallelDOM {
   /**
    * See setCenterTop() for more information
    */
-  set centerTop( value: Vector2 ) {
+  public set centerTop( value: Vector2 ) {
     this.setCenterTop( value );
   }
 
   /**
    * See getCenterTop() for more information
    */
-  get centerTop(): Vector2 {
+  public get centerTop(): Vector2 {
     return this.getCenterTop();
   }
 
   /**
    * Returns the center-top location of this node's bounds.
    */
-  getCenterTop(): Vector2 {
+  public getCenterTop(): Vector2 {
     return this.getBounds().getCenterTop();
   }
 
   /**
    * Sets the position of the upper-right corner of this node's bounds to the specified point.
    */
-  setRightTop( rightTop: Vector2 ): this {
+  public setRightTop( rightTop: Vector2 ): this {
     assert && assert( rightTop instanceof Vector2 && rightTop.isFinite(), 'rightTop should be a finite Vector2' );
 
     const currentRightTop = this.getRightTop();
@@ -3223,28 +3245,28 @@ class Node extends ParallelDOM {
   /**
    * See setRightTop() for more information
    */
-  set rightTop( value: Vector2 ) {
+  public set rightTop( value: Vector2 ) {
     this.setRightTop( value );
   }
 
   /**
    * See getRightTop() for more information
    */
-  get rightTop(): Vector2 {
+  public get rightTop(): Vector2 {
     return this.getRightTop();
   }
 
   /**
    * Returns the upper-right corner of this node's bounds.
    */
-  getRightTop(): Vector2 {
+  public getRightTop(): Vector2 {
     return this.getBounds().getRightTop();
   }
 
   /**
    * Sets the position of the center-left of this node's bounds to the specified point.
    */
-  setLeftCenter( leftCenter: Vector2 ): this {
+  public setLeftCenter( leftCenter: Vector2 ): this {
     assert && assert( leftCenter instanceof Vector2 && leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
 
     const currentLeftCenter = this.getLeftCenter();
@@ -3258,28 +3280,28 @@ class Node extends ParallelDOM {
   /**
    * See setLeftCenter() for more information
    */
-  set leftCenter( value: Vector2 ) {
+  public set leftCenter( value: Vector2 ) {
     this.setLeftCenter( value );
   }
 
   /**
    * See getLeftCenter() for more information
    */
-  get leftCenter(): Vector2 {
+  public get leftCenter(): Vector2 {
     return this.getLeftCenter();
   }
 
   /**
    * Returns the center-left corner of this node's bounds.
    */
-  getLeftCenter(): Vector2 {
+  public getLeftCenter(): Vector2 {
     return this.getBounds().getLeftCenter();
   }
 
   /**
    * Sets the center of this node's bounds to the specified point.
    */
-  setCenter( center: Vector2 ): this {
+  public setCenter( center: Vector2 ): this {
     assert && assert( center instanceof Vector2 && center.isFinite(), 'center should be a finite Vector2' );
 
     const currentCenter = this.getCenter();
@@ -3293,28 +3315,28 @@ class Node extends ParallelDOM {
   /**
    * See setCenter() for more information
    */
-  set center( value: Vector2 ) {
+  public set center( value: Vector2 ) {
     this.setCenter( value );
   }
 
   /**
    * See getCenter() for more information
    */
-  get center(): Vector2 {
+  public get center(): Vector2 {
     return this.getCenter();
   }
 
   /**
    * Returns the center of this node's bounds.
    */
-  getCenter(): Vector2 {
+  public getCenter(): Vector2 {
     return this.getBounds().getCenter();
   }
 
   /**
    * Sets the position of the center-right of this node's bounds to the specified point.
    */
-  setRightCenter( rightCenter: Vector2 ): this {
+  public setRightCenter( rightCenter: Vector2 ): this {
     assert && assert( rightCenter instanceof Vector2 && rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
 
     const currentRightCenter = this.getRightCenter();
@@ -3328,28 +3350,28 @@ class Node extends ParallelDOM {
   /**
    * See setRightCenter() for more information
    */
-  set rightCenter( value: Vector2 ) {
+  public set rightCenter( value: Vector2 ) {
     this.setRightCenter( value );
   }
 
   /**
    * See getRightCenter() for more information
    */
-  get rightCenter(): Vector2 {
+  public get rightCenter(): Vector2 {
     return this.getRightCenter();
   }
 
   /**
    * Returns the center-right of this node's bounds.
    */
-  getRightCenter(): Vector2 {
+  public getRightCenter(): Vector2 {
     return this.getBounds().getRightCenter();
   }
 
   /**
    * Sets the position of the lower-left corner of this node's bounds to the specified point.
    */
-  setLeftBottom( leftBottom: Vector2 ): this {
+  public setLeftBottom( leftBottom: Vector2 ): this {
     assert && assert( leftBottom instanceof Vector2 && leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
 
     const currentLeftBottom = this.getLeftBottom();
@@ -3363,28 +3385,28 @@ class Node extends ParallelDOM {
   /**
    * See setLeftBottom() for more information
    */
-  set leftBottom( value: Vector2 ) {
+  public set leftBottom( value: Vector2 ) {
     this.setLeftBottom( value );
   }
 
   /**
    * See getLeftBottom() for more information
    */
-  get leftBottom(): Vector2 {
+  public get leftBottom(): Vector2 {
     return this.getLeftBottom();
   }
 
   /**
    * Returns the lower-left corner of this node's bounds.
    */
-  getLeftBottom(): Vector2 {
+  public getLeftBottom(): Vector2 {
     return this.getBounds().getLeftBottom();
   }
 
   /**
    * Sets the position of the center-bottom of this node's bounds to the specified point.
    */
-  setCenterBottom( centerBottom: Vector2 ): this {
+  public setCenterBottom( centerBottom: Vector2 ): this {
     assert && assert( centerBottom instanceof Vector2 && centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
 
     const currentCenterBottom = this.getCenterBottom();
@@ -3398,28 +3420,28 @@ class Node extends ParallelDOM {
   /**
    * See setCenterBottom() for more information
    */
-  set centerBottom( value: Vector2 ) {
+  public set centerBottom( value: Vector2 ) {
     this.setCenterBottom( value );
   }
 
   /**
    * See getCenterBottom() for more information
    */
-  get centerBottom(): Vector2 {
+  public get centerBottom(): Vector2 {
     return this.getCenterBottom();
   }
 
   /**
    * Returns the center-bottom of this node's bounds.
    */
-  getCenterBottom(): Vector2 {
+  public getCenterBottom(): Vector2 {
     return this.getBounds().getCenterBottom();
   }
 
   /**
    * Sets the position of the lower-right corner of this node's bounds to the specified point.
    */
-  setRightBottom( rightBottom: Vector2 ): this {
+  public setRightBottom( rightBottom: Vector2 ): this {
     assert && assert( rightBottom instanceof Vector2 && rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
 
     const currentRightBottom = this.getRightBottom();
@@ -3433,21 +3455,21 @@ class Node extends ParallelDOM {
   /**
    * See setRightBottom() for more information
    */
-  set rightBottom( value: Vector2 ) {
+  public set rightBottom( value: Vector2 ) {
     this.setRightBottom( value );
   }
 
   /**
    * See getRightBottom() for more information
    */
-  get rightBottom(): Vector2 {
+  public get rightBottom(): Vector2 {
     return this.getRightBottom();
   }
 
   /**
    * Returns the lower-right corner of this node's bounds.
    */
-  getRightBottom(): Vector2 {
+  public getRightBottom(): Vector2 {
     return this.getBounds().getRightBottom();
   }
 
@@ -3456,14 +3478,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getWidth(): number {
+  public getWidth(): number {
     return this.getBounds().getWidth();
   }
 
   /**
    * See getWidth() for more information
    */
-  get width(): number {
+  public get width(): number {
     return this.getWidth();
   }
 
@@ -3472,14 +3494,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getHeight(): number {
+  public getHeight(): number {
     return this.getBounds().getHeight();
   }
 
   /**
    * See getHeight() for more information
    */
-  get height(): number {
+  public get height(): number {
     return this.getHeight();
   }
 
@@ -3488,14 +3510,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalWidth(): number {
+  public getLocalWidth(): number {
     return this.getLocalBounds().getWidth();
   }
 
   /**
    * See getLocalWidth() for more information
    */
-  get localWidth(): number {
+  public get localWidth(): number {
     return this.getLocalWidth();
   }
 
@@ -3504,14 +3526,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalHeight(): number {
+  public getLocalHeight(): number {
     return this.getLocalBounds().getHeight();
   }
 
   /**
    * See getLocalHeight() for more information
    */
-  get localHeight(): number {
+  public get localHeight(): number {
     return this.getLocalHeight();
   }
 
@@ -3520,14 +3542,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalLeft(): number {
+  public getLocalLeft(): number {
     return this.getLocalBounds().minX;
   }
 
   /**
    * See getLeft() for more information
    */
-  get localLeft(): number {
+  public get localLeft(): number {
     return this.getLocalLeft();
   }
 
@@ -3536,14 +3558,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalRight(): number {
+  public getLocalRight(): number {
     return this.getLocalBounds().maxX;
   }
 
   /**
    * See getRight() for more information
    */
-  get localRight(): number {
+  public get localRight(): number {
     return this.getLocalRight();
   }
 
@@ -3552,14 +3574,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalCenterX(): number {
+  public getLocalCenterX(): number {
     return this.getLocalBounds().getCenterX();
   }
 
   /**
    * See getCenterX() for more information
    */
-  get localCenterX(): number {
+  public get localCenterX(): number {
     return this.getLocalCenterX();
   }
 
@@ -3568,14 +3590,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalCenterY(): number {
+  public getLocalCenterY(): number {
     return this.getLocalBounds().getCenterY();
   }
 
   /**
    * See getCenterX() for more information
    */
-  get localCenterY(): number {
+  public get localCenterY(): number {
     return this.getLocalCenterY();
   }
 
@@ -3584,14 +3606,14 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalTop(): number {
+  public getLocalTop(): number {
     return this.getLocalBounds().minY;
   }
 
   /**
    * See getTop() for more information
    */
-  get localTop(): number {
+  public get localTop(): number {
     return this.getLocalTop();
   }
 
@@ -3600,154 +3622,154 @@ class Node extends ParallelDOM {
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getLocalBottom(): number {
+  public getLocalBottom(): number {
     return this.getLocalBounds().maxY;
   }
 
   /**
    * See getLocalBottom() for more information
    */
-  get localBottom(): number {
+  public get localBottom(): number {
     return this.getLocalBottom();
   }
 
   /**
    * Returns the upper-left corner of this node's localBounds.
    */
-  getLocalLeftTop(): Vector2 {
+  public getLocalLeftTop(): Vector2 {
     return this.getLocalBounds().getLeftTop();
   }
 
   /**
    * See getLocalLeftTop() for more information
    */
-  get localLeftTop(): Vector2 {
+  public get localLeftTop(): Vector2 {
     return this.getLocalLeftTop();
   }
 
   /**
    * Returns the center-top location of this node's localBounds.
    */
-  getLocalCenterTop(): Vector2 {
+  public getLocalCenterTop(): Vector2 {
     return this.getLocalBounds().getCenterTop();
   }
 
   /**
    * See getLocalCenterTop() for more information
    */
-  get localCenterTop(): Vector2 {
+  public get localCenterTop(): Vector2 {
     return this.getLocalCenterTop();
   }
 
   /**
    * Returns the upper-right corner of this node's localBounds.
    */
-  getLocalRightTop(): Vector2 {
+  public getLocalRightTop(): Vector2 {
     return this.getLocalBounds().getRightTop();
   }
 
   /**
    * See getLocalRightTop() for more information
    */
-  get localRightTop(): Vector2 {
+  public get localRightTop(): Vector2 {
     return this.getLocalRightTop();
   }
 
   /**
    * Returns the center-left corner of this node's localBounds.
    */
-  getLocalLeftCenter(): Vector2 {
+  public getLocalLeftCenter(): Vector2 {
     return this.getLocalBounds().getLeftCenter();
   }
 
   /**
    * See getLocalLeftCenter() for more information
    */
-  get localLeftCenter(): Vector2 {
+  public get localLeftCenter(): Vector2 {
     return this.getLocalLeftCenter();
   }
 
   /**
    * Returns the center of this node's localBounds.
    */
-  getLocalCenter(): Vector2 {
+  public getLocalCenter(): Vector2 {
     return this.getLocalBounds().getCenter();
   }
 
   /**
    * See getLocalCenter() for more information
    */
-  get localCenter(): Vector2 {
+  public get localCenter(): Vector2 {
     return this.getLocalCenter();
   }
 
   /**
    * Returns the center-right of this node's localBounds.
    */
-  getLocalRightCenter(): Vector2 {
+  public getLocalRightCenter(): Vector2 {
     return this.getLocalBounds().getRightCenter();
   }
 
   /**
    * See getLocalRightCenter() for more information
    */
-  get localRightCenter(): Vector2 {
+  public get localRightCenter(): Vector2 {
     return this.getLocalRightCenter();
   }
 
   /**
    * Returns the lower-left corner of this node's localBounds.
    */
-  getLocalLeftBottom(): Vector2 {
+  public getLocalLeftBottom(): Vector2 {
     return this.getLocalBounds().getLeftBottom();
   }
 
   /**
    * See getLocalLeftBottom() for more information
    */
-  get localLeftBottom(): Vector2 {
+  public get localLeftBottom(): Vector2 {
     return this.getLocalLeftBottom();
   }
 
   /**
    * Returns the center-bottom of this node's localBounds.
    */
-  getLocalCenterBottom(): Vector2 {
+  public getLocalCenterBottom(): Vector2 {
     return this.getLocalBounds().getCenterBottom();
   }
 
   /**
    * See getLocalCenterBottom() for more information
    */
-  get localCenterBottom(): Vector2 {
+  public get localCenterBottom(): Vector2 {
     return this.getLocalCenterBottom();
   }
 
   /**
    * Returns the lower-right corner of this node's localBounds.
    */
-  getLocalRightBottom(): Vector2 {
+  public getLocalRightBottom(): Vector2 {
     return this.getLocalBounds().getRightBottom();
   }
 
   /**
    * See getLocalRightBottom() for more information
    */
-  get localRightBottom(): Vector2 {
+  public get localRightBottom(): Vector2 {
     return this.getLocalRightBottom();
   }
 
   /**
    * Returns the unique integral ID for this node.
    */
-  getId(): number {
+  public getId(): number {
     return this._id;
   }
 
   /**
    * See getId() for more information
    */
-  get id(): number {
+  public get id(): number {
     return this.getId();
   }
 
@@ -3783,21 +3805,21 @@ class Node extends ParallelDOM {
    * If you need to "delay" setting an instrumented visibleProperty to this node, pass phetioVisiblePropertyInstrumented
    * to instrumentation call to this Node (where Tandem is provided).
    */
-  setVisibleProperty( newTarget: IProperty<boolean> | null ): this {
+  public setVisibleProperty( newTarget: IProperty<boolean> | null ): this {
     return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget );
   }
 
   /**
    * See setVisibleProperty() for more information
    */
-  set visibleProperty( property: IProperty<boolean> | null ) {
+  public set visibleProperty( property: IProperty<boolean> | null ) {
     this.setVisibleProperty( property );
   }
 
   /**
    * See getVisibleProperty() for more information
    */
-  get visibleProperty(): IProperty<boolean> {
+  public get visibleProperty(): IProperty<boolean> {
     return this.getVisibleProperty();
   }
 
@@ -3813,7 +3835,7 @@ class Node extends ParallelDOM {
    *
    * Please use this with caution. See setVisibleProperty() for more information.
    */
-  getVisibleProperty(): IProperty<boolean> {
+  public getVisibleProperty(): IProperty<boolean> {
     return this._visibleProperty;
   }
 
@@ -3821,7 +3843,7 @@ class Node extends ParallelDOM {
    * Sets whether this Node is visible.  DO NOT override this as a way of adding additional behavior when a Node's
    * visibility changes, add a listener to this.visibleProperty instead.
    */
-  setVisible( visible: boolean ): this {
+  public setVisible( visible: boolean ): this {
     assert && assert( typeof visible === 'boolean', 'Node visibility should be a boolean value' );
 
     this.visibleProperty.set( visible );
@@ -3832,46 +3854,46 @@ class Node extends ParallelDOM {
   /**
    * See setVisible() for more information
    */
-  set visible( value: boolean ) {
+  public set visible( value: boolean ) {
     this.setVisible( value );
   }
 
   /**
    * See isVisible() for more information
    */
-  get visible(): boolean {
+  public get visible(): boolean {
     return this.isVisible();
   }
 
   /**
    * Returns whether this Node is visible.
    */
-  isVisible(): boolean {
+  public isVisible(): boolean {
     return this.visibleProperty.value;
   }
 
   /**
    * Use this to automatically create a forwarded, PhET-iO instrumented visibleProperty internal to Node.
    */
-  setPhetioVisiblePropertyInstrumented( phetioVisiblePropertyInstrumented: boolean ): this {
+  public setPhetioVisiblePropertyInstrumented( phetioVisiblePropertyInstrumented: boolean ): this {
     return this._visibleProperty.setTargetPropertyInstrumented( phetioVisiblePropertyInstrumented, this );
   }
 
   /**
    * See setPhetioVisiblePropertyInstrumented() for more information
    */
-  set phetioVisiblePropertyInstrumented( value: boolean ) {
+  public set phetioVisiblePropertyInstrumented( value: boolean ) {
     this.setPhetioVisiblePropertyInstrumented( value );
   }
 
   /**
    * See getPhetioVisiblePropertyInstrumented() for more information
    */
-  get phetioVisiblePropertyInstrumented(): boolean {
+  public get phetioVisiblePropertyInstrumented(): boolean {
     return this.getPhetioVisiblePropertyInstrumented();
   }
 
-  getPhetioVisiblePropertyInstrumented(): boolean {
+  public getPhetioVisiblePropertyInstrumented(): boolean {
     return this._visibleProperty.getTargetPropertyInstrumented();
   }
 
@@ -3879,7 +3901,7 @@ class Node extends ParallelDOM {
    * Swap the visibility of this node with another node. The Node that is made visible will receive keyboard focus
    * if it is focusable and the previously visible Node had focus.
    */
-  swapVisibility( otherNode: Node ): this {
+  public swapVisibility( otherNode: Node ): this {
     assert && assert( this.visible !== otherNode.visible );
 
     const visibleNode = this.visible ? this : otherNode;
@@ -3903,7 +3925,7 @@ class Node extends ParallelDOM {
    * outside of that range throw an Error.
    * @throws Error if opacity out of range
    */
-  setOpacity( opacity: number ): void {
+  public setOpacity( opacity: number ): void {
     assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
     if ( opacity < 0 || opacity > 1 ) {
@@ -3916,21 +3938,21 @@ class Node extends ParallelDOM {
   /**
    * See setOpacity() for more information
    */
-  set opacity( value: number ) {
+  public set opacity( value: number ) {
     this.setOpacity( value );
   }
 
   /**
    * See getOpacity() for more information
    */
-  get opacity(): number {
+  public get opacity(): number {
     return this.getOpacity();
   }
 
   /**
    * Returns the opacity of this node.
    */
-  getOpacity(): number {
+  public getOpacity(): number {
     return this.opacityProperty.value;
   }
 
@@ -3939,7 +3961,7 @@ class Node extends ParallelDOM {
    * Values outside of that range throw an Error.
    * @throws Error if disabledOpacity out of range
    */
-  setDisabledOpacity( disabledOpacity: number ): this {
+  public setDisabledOpacity( disabledOpacity: number ): this {
     assert && assert( typeof disabledOpacity === 'number' && isFinite( disabledOpacity ), 'disabledOpacity should be a finite number' );
 
     if ( disabledOpacity < 0 || disabledOpacity > 1 ) {
@@ -3954,35 +3976,35 @@ class Node extends ParallelDOM {
   /**
    * See setDisabledOpacity() for more information
    */
-  set disabledOpacity( value: number ) {
+  public set disabledOpacity( value: number ) {
     this.setDisabledOpacity( value );
   }
 
   /**
    * See getDisabledOpacity() for more information
    */
-  get disabledOpacity(): number {
+  public get disabledOpacity(): number {
     return this.getDisabledOpacity();
   }
 
   /**
    * Returns the disabledOpacity of this node.
    */
-  getDisabledOpacity(): number {
+  public getDisabledOpacity(): number {
     return this.disabledOpacityProperty.value;
   }
 
   /**
    * Returns the opacity actually applied to the node.
    */
-  getEffectiveOpacity(): number {
+  public getEffectiveOpacity(): number {
     return this.opacityProperty.value * ( this.enabledProperty.value ? 1 : this.disabledOpacityProperty.value );
   }
 
   /**
    * See getDisabledOpacity() for more information
    */
-  get effectiveOpacity(): number {
+  public get effectiveOpacity(): number {
     return this.getEffectiveOpacity();
   }
 
@@ -4024,7 +4046,7 @@ class Node extends ParallelDOM {
    *
    * Filter.js has more information in general on filters.
    */
-  setFilters( filters: Filter[] ): void {
+  public setFilters( filters: Filter[] ): void {
     assert && assert( Array.isArray( filters ), 'filters should be an array' );
     assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
 
@@ -4039,21 +4061,21 @@ class Node extends ParallelDOM {
   /**
    * See setFilters() for more information
    */
-  set filters( value: Filter[] ) {
+  public set filters( value: Filter[] ) {
     this.setFilters( value );
   }
 
   /**
    * See getFilters() for more information
    */
-  get filters(): Filter[] {
+  public get filters(): Filter[] {
     return this.getFilters();
   }
 
   /**
    * Returns the non-opacity filters for this Node.
    */
-  getFilters(): Filter[] {
+  public getFilters(): Filter[] {
     return this._filters.slice();
   }
 
@@ -4064,21 +4086,21 @@ class Node extends ParallelDOM {
    *
    * PhET-iO Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
    */
-  setPickableProperty( newTarget: IProperty<boolean | null> | null ): this {
+  public setPickableProperty( newTarget: IProperty<boolean | null> | null ): this {
     return this._pickableProperty.setTargetProperty( this, null, newTarget );
   }
 
   /**
    * See setPickableProperty() for more information
    */
-  set pickableProperty( property: IProperty<boolean | null> | null ) {
+  public set pickableProperty( property: IProperty<boolean | null> | null ) {
     this.setPickableProperty( property );
   }
 
   /**
    * See getPickableProperty() for more information
    */
-  get pickableProperty(): IProperty<boolean | null> {
+  public get pickableProperty(): IProperty<boolean | null> {
     return this.getPickableProperty();
   }
 
@@ -4093,7 +4115,7 @@ class Node extends ParallelDOM {
    *
    * Please use this with caution. See setPickableProperty() for more information.
    */
-  getPickableProperty(): IProperty<boolean | null> {
+  public getPickableProperty(): IProperty<boolean | null> {
     return this._pickableProperty;
   }
 
@@ -4127,7 +4149,7 @@ class Node extends ParallelDOM {
    * For a visual example of how pickability interacts with input listeners and visibility, see the notes at the
    * bottom of http://phetsims.github.io/scenery/doc/implementation-notes, or scenery/assets/pickability.svg.
    */
-  setPickable( pickable: boolean | null ): this {
+  public setPickable( pickable: boolean | null ): this {
     assert && assert( pickable === null || typeof pickable === 'boolean' );
     this._pickableProperty.set( pickable );
 
@@ -4137,21 +4159,21 @@ class Node extends ParallelDOM {
   /**
    * See setPickable() for more information
    */
-  set pickable( value: boolean | null ) {
+  public set pickable( value: boolean | null ) {
     this.setPickable( value );
   }
 
   /**
    * See isPickable() for more information
    */
-  get pickable(): boolean | null {
+  public get pickable(): boolean | null {
     return this.isPickable();
   }
 
   /**
    * Returns the pickability of this node.
    */
-  isPickable(): boolean | null {
+  public isPickable(): boolean | null {
     return this._pickableProperty.value;
   }
 
@@ -4167,7 +4189,7 @@ class Node extends ParallelDOM {
   /**
    * Handles linking and checking child PhET-iO Properties such as visibleProperty and enabledProperty.
    */
-  updateLinkedElementForProperty<T>( tandemName: string, oldProperty?: IProperty<T> | null, newProperty?: IProperty<T> | null ): void {
+  public updateLinkedElementForProperty<T>( tandemName: string, oldProperty?: IProperty<T> | null, newProperty?: IProperty<T> | null ): void {
     assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
 
     // Only update linked elements if this Node is instrumented for PhET-iO
@@ -4194,21 +4216,21 @@ class Node extends ParallelDOM {
    * If you need to "delay" setting an instrumented enabledProperty to this node, pass phetioEnabledPropertyInstrumented
    * to instrumentation call to this Node (where Tandem is provided).
    */
-  setEnabledProperty( newTarget: IProperty<boolean> | null ): this {
+  public setEnabledProperty( newTarget: IProperty<boolean> | null ): this {
     return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget );
   }
 
   /**
    * See setEnabledProperty() for more information
    */
-  set enabledProperty( property: IProperty<boolean> | null ) {
+  public set enabledProperty( property: IProperty<boolean> | null ) {
     this.setEnabledProperty( property );
   }
 
   /**
    * See getEnabledProperty() for more information
    */
-  get enabledProperty(): IProperty<boolean> {
+  public get enabledProperty(): IProperty<boolean> {
     return this.getEnabledProperty();
   }
 
@@ -4223,7 +4245,7 @@ class Node extends ParallelDOM {
    *
    * Please use this with caution. See setEnabledProperty() for more information.
    */
-  getEnabledProperty(): IProperty<boolean> {
+  public getEnabledProperty(): IProperty<boolean> {
     return this._enabledProperty;
   }
 
@@ -4231,32 +4253,32 @@ class Node extends ParallelDOM {
    * Use this to automatically create a forwarded, PhET-iO instrumented enabledProperty internal to Node. This is different
    * from visible because enabled by default doesn't not create this forwarded Property.
    */
-  setPhetioEnabledPropertyInstrumented( phetioEnabledPropertyInstrumented: boolean ): this {
+  public setPhetioEnabledPropertyInstrumented( phetioEnabledPropertyInstrumented: boolean ): this {
     return this._enabledProperty.setTargetPropertyInstrumented( phetioEnabledPropertyInstrumented, this );
   }
 
   /**
    * See setPhetioEnabledPropertyInstrumented() for more information
    */
-  set phetioEnabledPropertyInstrumented( value: boolean ) {
+  public set phetioEnabledPropertyInstrumented( value: boolean ) {
     this.setPhetioEnabledPropertyInstrumented( value );
   }
 
   /**
    * See getPhetioEnabledPropertyInstrumented() for more information
    */
-  get phetioEnabledPropertyInstrumented(): boolean {
+  public get phetioEnabledPropertyInstrumented(): boolean {
     return this.getPhetioEnabledPropertyInstrumented();
   }
 
-  getPhetioEnabledPropertyInstrumented(): boolean {
+  public getPhetioEnabledPropertyInstrumented(): boolean {
     return this._enabledProperty.getTargetPropertyInstrumented();
   }
 
   /**
    * Sets whether this Node is enabled
    */
-  setEnabled( enabled: boolean ): this {
+  public setEnabled( enabled: boolean ): this {
     assert && assert( enabled === null || typeof enabled === 'boolean' );
     this._enabledProperty.set( enabled );
 
@@ -4266,21 +4288,21 @@ class Node extends ParallelDOM {
   /**
    * See setEnabled() for more information
    */
-  set enabled( value: boolean ) {
+  public set enabled( value: boolean ) {
     this.setEnabled( value );
   }
 
   /**
    * See isEnabled() for more information
    */
-  get enabled(): boolean {
+  public get enabled(): boolean {
     return this.isEnabled();
   }
 
   /**
    * Returns the enabled of this node.
    */
-  isEnabled(): boolean {
+  public isEnabled(): boolean {
     return this._enabledProperty.value;
   }
 
@@ -4308,21 +4330,21 @@ class Node extends ParallelDOM {
    * If you need to "delay" setting an instrumented inputEnabledProperty to this node, pass phetioInputEnabledPropertyInstrumented
    * to instrumentation call to this Node (where Tandem is provided).
    */
-  setInputEnabledProperty( newTarget: IProperty<boolean> | null ): this {
+  public setInputEnabledProperty( newTarget: IProperty<boolean> | null ): this {
     return this._inputEnabledProperty.setTargetProperty( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, newTarget );
   }
 
   /**
    * See setInputEnabledProperty() for more information
    */
-  set inputEnabledProperty( property: IProperty<boolean> | null ) {
+  public set inputEnabledProperty( property: IProperty<boolean> | null ) {
     this.setInputEnabledProperty( property );
   }
 
   /**
    * See getInputEnabledProperty() for more information
    */
-  get inputEnabledProperty(): IProperty<boolean> {
+  public get inputEnabledProperty(): IProperty<boolean> {
     return this.getInputEnabledProperty();
   }
 
@@ -4337,7 +4359,7 @@ class Node extends ParallelDOM {
    *
    * Please use this with caution. See setInputEnabledProperty() for more information.
    */
-  getInputEnabledProperty(): IProperty<boolean> {
+  public getInputEnabledProperty(): IProperty<boolean> {
     return this._inputEnabledProperty;
   }
 
@@ -4345,25 +4367,25 @@ class Node extends ParallelDOM {
    * Use this to automatically create a forwarded, PhET-iO instrumented inputEnabledProperty internal to Node. This is different
    * from visible because inputEnabled by default doesn't not create this forwarded Property.
    */
-  setPhetioInputEnabledPropertyInstrumented( phetioInputEnabledPropertyInstrumented: boolean ): this {
+  public setPhetioInputEnabledPropertyInstrumented( phetioInputEnabledPropertyInstrumented: boolean ): this {
     return this._inputEnabledProperty.setTargetPropertyInstrumented( phetioInputEnabledPropertyInstrumented, this );
   }
 
   /**
    * See setPhetioInputEnabledPropertyInstrumented() for more information
    */
-  set phetioInputEnabledPropertyInstrumented( value: boolean ) {
+  public set phetioInputEnabledPropertyInstrumented( value: boolean ) {
     this.setPhetioInputEnabledPropertyInstrumented( value );
   }
 
   /**
    * See getPhetioInputEnabledPropertyInstrumented() for more information
    */
-  get phetioInputEnabledPropertyInstrumented(): boolean {
+  public get phetioInputEnabledPropertyInstrumented(): boolean {
     return this.getPhetioInputEnabledPropertyInstrumented();
   }
 
-  getPhetioInputEnabledPropertyInstrumented(): boolean {
+  public getPhetioInputEnabledPropertyInstrumented(): boolean {
     return this._inputEnabledProperty.getTargetPropertyInstrumented();
   }
 
@@ -4376,7 +4398,7 @@ class Node extends ParallelDOM {
    * checked when determining what cursor will be shown. Instead, if a pointer (e.g. mouse) is over a descendant,
    * this Node's cursor will be checked first, then ancestors will be checked as normal.
    */
-  setInputEnabled( inputEnabled: boolean ): void {
+  public setInputEnabled( inputEnabled: boolean ): void {
     assert && assert( typeof inputEnabled === 'boolean' );
 
     this.inputEnabledProperty.value = inputEnabled;
@@ -4385,21 +4407,21 @@ class Node extends ParallelDOM {
   /**
    * See setInputEnabled() for more information
    */
-  set inputEnabled( value: boolean ) {
+  public set inputEnabled( value: boolean ) {
     this.setInputEnabled( value );
   }
 
   /**
    * See isInputEnabled() for more information
    */
-  get inputEnabled(): boolean {
+  public get inputEnabled(): boolean {
     return this.isInputEnabled();
   }
 
   /**
    * Returns whether input is enabled for this Node and its subtree. See setInputEnabled for more documentation.
    */
-  isInputEnabled(): boolean {
+  public isInputEnabled(): boolean {
     return this.inputEnabledProperty.value;
   }
 
@@ -4409,7 +4431,7 @@ class Node extends ParallelDOM {
    * This is equivalent to removing all current input listeners with removeInputListener() and adding all new
    * listeners (in order) with addInputListener().
    */
-  setInputListeners( inputListeners: IInputListener[] ): this {
+  public setInputListeners( inputListeners: IInputListener[] ): this {
     assert && assert( Array.isArray( inputListeners ) );
 
     // Remove all old input listeners
@@ -4428,21 +4450,21 @@ class Node extends ParallelDOM {
   /**
    * See setInputListeners() for more information
    */
-  set inputListeners( value: IInputListener[] ) {
+  public set inputListeners( value: IInputListener[] ) {
     this.setInputListeners( value );
   }
 
   /**
    * See getInputListeners() for more information
    */
-  get inputListeners(): IInputListener[] {
+  public get inputListeners(): IInputListener[] {
     return this.getInputListeners();
   }
 
   /**
    * Returns a copy of all of our input listeners.
    */
-  getInputListeners(): IInputListener[] {
+  public getInputListeners(): IInputListener[] {
     return this._inputListeners.slice( 0 ); // defensive copy
   }
 
@@ -4455,7 +4477,7 @@ class Node extends ParallelDOM {
    * e-resize n-resize w-resize s-resize nw-resize ne-resize se-resize sw-resize ew-resize ns-resize nesw-resize nwse-resize
    * context-menu cell col-resize row-resize all-scroll url( ... ) --> does it support data URLs?
    */
-  setCursor( cursor: string | null ): void {
+  public setCursor( cursor: string | null ): void {
     assert && assert( typeof cursor === 'string' || cursor === null );
 
     // TODO: consider a mapping of types to set reasonable defaults
@@ -4467,21 +4489,21 @@ class Node extends ParallelDOM {
   /**
    * See setCursor() for more information
    */
-  set cursor( value: string | null ) {
+  public set cursor( value: string | null ) {
     this.setCursor( value );
   }
 
   /**
    * See getCursor() for more information
    */
-  get cursor(): string | null {
+  public get cursor(): string | null {
     return this.getCursor();
   }
 
   /**
    * Returns the CSS cursor string for this node, or null if there is no cursor specified.
    */
-  getCursor(): string | null {
+  public getCursor(): string | null {
     return this._cursor;
   }
 
@@ -4489,7 +4511,7 @@ class Node extends ParallelDOM {
    * Returns the CSS cursor that could be applied either by this Node itself, or from any of its input listeners'
    * preferences. (scenery-internal)
    */
-  getEffectiveCursor(): string | null {
+  public getEffectiveCursor(): string | null {
     if ( this._cursor ) {
       return this._cursor;
     }
@@ -4509,7 +4531,7 @@ class Node extends ParallelDOM {
    * Sets the hit-tested mouse area for this Node (see constructor for more advanced documentation). Use null for the
    * default behavior.
    */
-  setMouseArea( area: Shape | Bounds2 | null ): this {
+  public setMouseArea( area: Shape | Bounds2 | null ): this {
     assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
 
     if ( this._mouseArea !== area ) {
@@ -4525,21 +4547,21 @@ class Node extends ParallelDOM {
   /**
    * See setMouseArea() for more information
    */
-  set mouseArea( value: Shape | Bounds2 | null ) {
+  public set mouseArea( value: Shape | Bounds2 | null ) {
     this.setMouseArea( value );
   }
 
   /**
    * See getMouseArea() for more information
    */
-  get mouseArea(): Shape | Bounds2 | null {
+  public get mouseArea(): Shape | Bounds2 | null {
     return this.getMouseArea();
   }
 
   /**
    * Returns the hit-tested mouse area for this node.
    */
-  getMouseArea(): Shape | Bounds2 | null {
+  public getMouseArea(): Shape | Bounds2 | null {
     return this._mouseArea;
   }
 
@@ -4547,7 +4569,7 @@ class Node extends ParallelDOM {
    * Sets the hit-tested touch area for this Node (see constructor for more advanced documentation). Use null for the
    * default behavior.
    */
-  setTouchArea( area: Shape | Bounds2 | null ): this {
+  public setTouchArea( area: Shape | Bounds2 | null ): this {
     assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
 
     if ( this._touchArea !== area ) {
@@ -4563,21 +4585,21 @@ class Node extends ParallelDOM {
   /**
    * See setTouchArea() for more information
    */
-  set touchArea( value: Shape | Bounds2 | null ) {
+  public set touchArea( value: Shape | Bounds2 | null ) {
     this.setTouchArea( value );
   }
 
   /**
    * See getTouchArea() for more information
    */
-  get touchArea(): Shape | Bounds2 | null {
+  public get touchArea(): Shape | Bounds2 | null {
     return this.getTouchArea();
   }
 
   /**
    * Returns the hit-tested touch area for this node.
    */
-  getTouchArea(): Shape | Bounds2 | null {
+  public getTouchArea(): Shape | Bounds2 | null {
     return this._touchArea;
   }
 
@@ -4585,7 +4607,7 @@ class Node extends ParallelDOM {
    * Sets a clipped shape where only content in our local coordinate frame that is inside the clip area will be shown
    * (anything outside is fully transparent).
    */
-  setClipArea( shape: Shape | null ): void {
+  public setClipArea( shape: Shape | null ): void {
     assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
 
     if ( this.clipArea !== shape ) {
@@ -4601,28 +4623,28 @@ class Node extends ParallelDOM {
   /**
    * See setClipArea() for more information
    */
-  set clipArea( value: Shape | null ) {
+  public set clipArea( value: Shape | null ) {
     this.setClipArea( value );
   }
 
   /**
    * See getClipArea() for more information
    */
-  get clipArea(): Shape | null {
+  public get clipArea(): Shape | null {
     return this.getClipArea();
   }
 
   /**
    * Returns the clipped area for this node.
    */
-  getClipArea(): Shape | null {
+  public getClipArea(): Shape | null {
     return this.clipAreaProperty.value;
   }
 
   /**
    * Returns whether this Node has a clip area.
    */
-  hasClipArea(): boolean {
+  public hasClipArea(): boolean {
     return this.clipArea !== null;
   }
 
@@ -4644,7 +4666,7 @@ class Node extends ParallelDOM {
   /**
    * Meant to be overridden, so that it can be called to ensure that the renderer bitmask will be up-to-date.
    */
-  invalidateSupportedRenderers(): void {
+  public invalidateSupportedRenderers(): void {
     // see docs
   }
 
@@ -4670,7 +4692,7 @@ class Node extends ParallelDOM {
    * - 'dom'
    * - 'webgl'
    */
-  setRenderer( renderer: RendererType ): void {
+  public setRenderer( renderer: RendererType ): void {
     assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
       'Renderer input should be null, or one of: "canvas", "svg", "dom" or "webgl".' );
 
@@ -4700,21 +4722,21 @@ class Node extends ParallelDOM {
   /**
    * See setRenderer() for more information
    */
-  set renderer( value: RendererType ) {
+  public set renderer( value: RendererType ) {
     this.setRenderer( value );
   }
 
   /**
    * See getRenderer() for more information
    */
-  get renderer(): RendererType {
+  public get renderer(): RendererType {
     return this.getRenderer();
   }
 
   /**
    * Returns the preferred renderer (if any) of this node, as a string.
    */
-  getRenderer(): RendererType {
+  public getRenderer(): RendererType {
     if ( this._hints.renderer === 0 ) {
       return null;
     }
@@ -4738,7 +4760,7 @@ class Node extends ParallelDOM {
    * Sets whether or not Scenery will try to put this Node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
    * layer, different from other siblings or other nodes. Can be used for performance purposes.
    */
-  setLayerSplit( split: boolean ): void {
+  public setLayerSplit( split: boolean ): void {
     assert && assert( typeof split === 'boolean' );
 
     if ( split !== this._hints.layerSplit ) {
@@ -4751,21 +4773,21 @@ class Node extends ParallelDOM {
   /**
    * See setLayerSplit() for more information
    */
-  set layerSplit( value: boolean ) {
+  public set layerSplit( value: boolean ) {
     this.setLayerSplit( value );
   }
 
   /**
    * See isLayerSplit() for more information
    */
-  get layerSplit(): boolean {
+  public get layerSplit(): boolean {
     return this.isLayerSplit();
   }
 
   /**
    * Returns whether the layerSplit performance flag is set.
    */
-  isLayerSplit(): boolean {
+  public isLayerSplit(): boolean {
     return this._hints.layerSplit;
   }
 
@@ -4773,7 +4795,7 @@ class Node extends ParallelDOM {
    * Sets whether or not Scenery will take into account that this Node plans to use opacity. Can have performance
    * gains if there need to be multiple layers for this node's descendants.
    */
-  setUsesOpacity( usesOpacity: boolean ): void {
+  public setUsesOpacity( usesOpacity: boolean ): void {
     assert && assert( typeof usesOpacity === 'boolean' );
 
     if ( usesOpacity !== this._hints.usesOpacity ) {
@@ -4786,21 +4808,21 @@ class Node extends ParallelDOM {
   /**
    * See setUsesOpacity() for more information
    */
-  set usesOpacity( value: boolean ) {
+  public set usesOpacity( value: boolean ) {
     this.setUsesOpacity( value );
   }
 
   /**
    * See getUsesOpacity() for more information
    */
-  get usesOpacity(): boolean {
+  public get usesOpacity(): boolean {
     return this.getUsesOpacity();
   }
 
   /**
    * Returns whether the usesOpacity performance flag is set.
    */
-  getUsesOpacity(): boolean {
+  public getUsesOpacity(): boolean {
     return this._hints.usesOpacity;
   }
 
@@ -4809,7 +4831,7 @@ class Node extends ParallelDOM {
    * DOM element that is transformed with CSS transforms. It can have potential speedups, since the browser may not
    * have to re-rasterize contents when it is animated.
    */
-  setCSSTransform( cssTransform: boolean ): void {
+  public setCSSTransform( cssTransform: boolean ): void {
     assert && assert( typeof cssTransform === 'boolean' );
 
     if ( cssTransform !== this._hints.cssTransform ) {
@@ -4822,21 +4844,21 @@ class Node extends ParallelDOM {
   /**
    * See setCSSTransform() for more information
    */
-  set cssTransform( value: boolean ) {
+  public set cssTransform( value: boolean ) {
     this.setCSSTransform( value );
   }
 
   /**
    * See isCSSTransformed() for more information
    */
-  get cssTransform(): boolean {
+  public get cssTransform(): boolean {
     return this.isCSSTransformed();
   }
 
   /**
    * Returns whether the cssTransform performance flag is set.
    */
-  isCSSTransformed(): boolean {
+  public isCSSTransformed(): boolean {
     return this._hints.cssTransform;
   }
 
@@ -4844,7 +4866,7 @@ class Node extends ParallelDOM {
    * Sets a performance flag for whether layers/DOM elements should be excluded (or included) when things are
    * invisible. The default is false, and invisible content is in the DOM, but hidden.
    */
-  setExcludeInvisible( excludeInvisible: boolean ): void {
+  public setExcludeInvisible( excludeInvisible: boolean ): void {
     assert && assert( typeof excludeInvisible === 'boolean' );
 
     if ( excludeInvisible !== this._hints.excludeInvisible ) {
@@ -4857,21 +4879,21 @@ class Node extends ParallelDOM {
   /**
    * See setExcludeInvisible() for more information
    */
-  set excludeInvisible( value: boolean ) {
+  public set excludeInvisible( value: boolean ) {
     this.setExcludeInvisible( value );
   }
 
   /**
    * See isExcludeInvisible() for more information
    */
-  get excludeInvisible(): boolean {
+  public get excludeInvisible(): boolean {
     return this.isExcludeInvisible();
   }
 
   /**
    * Returns whether the excludeInvisible performance flag is set.
    */
-  isExcludeInvisible(): boolean {
+  public isExcludeInvisible(): boolean {
     return this._hints.excludeInvisible;
   }
 
@@ -4881,7 +4903,7 @@ class Node extends ParallelDOM {
    * The default is for child nodes bounds' to be included in this node's bounds, but that would in general be a
    * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
    */
-  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
+  public setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
     assert && assert( typeof excludeInvisibleChildrenFromBounds === 'boolean' );
 
     if ( excludeInvisibleChildrenFromBounds !== this._excludeInvisibleChildrenFromBounds ) {
@@ -4894,14 +4916,14 @@ class Node extends ParallelDOM {
   /**
    * See setExcludeInvisibleChildrenFromBounds() for more information
    */
-  set excludeInvisibleChildrenFromBounds( value: boolean ) {
+  public set excludeInvisibleChildrenFromBounds( value: boolean ) {
     this.setExcludeInvisibleChildrenFromBounds( value );
   }
 
   /**
    * See isExcludeInvisibleChildrenFromBounds() for more information
    */
-  get excludeInvisibleChildrenFromBounds(): boolean {
+  public get excludeInvisibleChildrenFromBounds(): boolean {
     return this.isExcludeInvisibleChildrenFromBounds();
   }
 
@@ -4909,14 +4931,14 @@ class Node extends ParallelDOM {
    * Returns whether the excludeInvisibleChildrenFromBounds flag is set, see
    * setExcludeInvisibleChildrenFromBounds() for documentation.
    */
-  isExcludeInvisibleChildrenFromBounds(): boolean {
+  public isExcludeInvisibleChildrenFromBounds(): boolean {
     return this._excludeInvisibleChildrenFromBounds;
   }
 
   /**
    * Sets options that are provided to layout managers in order to customize positioning of this node.
    */
-  setLayoutOptions( layoutOptions: ILayoutOptions | null ): void {
+  public setLayoutOptions( layoutOptions: ILayoutOptions | null ): void {
     assert && assert( layoutOptions === null || ( typeof layoutOptions === 'object' && Object.getPrototypeOf( layoutOptions ) === Object.prototype ),
       'layoutOptions should be null or an plain options-style object' );
 
@@ -4927,37 +4949,37 @@ class Node extends ParallelDOM {
     }
   }
 
-  set layoutOptions( value: ILayoutOptions | null ) {
+  public set layoutOptions( value: ILayoutOptions | null ) {
     this.setLayoutOptions( value );
   }
 
-  get layoutOptions(): ILayoutOptions | null {
+  public get layoutOptions(): ILayoutOptions | null {
     return this.getLayoutOptions();
   }
 
-  getLayoutOptions(): ILayoutOptions | null {
+  public getLayoutOptions(): ILayoutOptions | null {
     return this._layoutOptions;
   }
 
-  mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {
+  public mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {
     this.layoutOptions = optionize3<ILayoutOptions, EmptyObjectType, ILayoutOptions>()( {}, this.layoutOptions || {}, layoutOptions );
   }
 
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable
-  get widthSizable(): boolean { return false; }
+  public get widthSizable(): boolean { return false; }
 
-  get heightSizable(): boolean { return false; }
+  public get heightSizable(): boolean { return false; }
 
-  get mixesWidthSizable(): boolean { return false; }
+  public get mixesWidthSizable(): boolean { return false; }
 
-  get mixesHeightSizable(): boolean { return false; }
+  public get mixesHeightSizable(): boolean { return false; }
 
-  get mixesSizable(): boolean { return false; }
+  public get mixesSizable(): boolean { return false; }
 
   /**
    * Sets the preventFit performance flag.
    */
-  setPreventFit( preventFit: boolean ): void {
+  public setPreventFit( preventFit: boolean ): void {
     assert && assert( typeof preventFit === 'boolean' );
 
     if ( preventFit !== this._hints.preventFit ) {
@@ -4970,28 +4992,28 @@ class Node extends ParallelDOM {
   /**
    * See setPreventFit() for more information
    */
-  set preventFit( value: boolean ) {
+  public set preventFit( value: boolean ) {
     this.setPreventFit( value );
   }
 
   /**
    * See isPreventFit() for more information
    */
-  get preventFit(): boolean {
+  public get preventFit(): boolean {
     return this.isPreventFit();
   }
 
   /**
    * Returns whether the preventFit performance flag is set.
    */
-  isPreventFit(): boolean {
+  public isPreventFit(): boolean {
     return this._hints.preventFit;
   }
 
   /**
    * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
    */
-  setWebGLScale( webglScale: number | null ): void {
+  public setWebGLScale( webglScale: number | null ): void {
     assert && assert( webglScale === null || ( typeof webglScale === 'number' && isFinite( webglScale ) ) );
 
     if ( webglScale !== this._hints.webglScale ) {
@@ -5004,21 +5026,21 @@ class Node extends ParallelDOM {
   /**
    * See setWebGLScale() for more information
    */
-  set webglScale( value: number | null ) {
+  public set webglScale( value: number | null ) {
     this.setWebGLScale( value );
   }
 
   /**
    * See getWebGLScale() for more information
    */
-  get webglScale(): number | null {
+  public get webglScale(): number | null {
     return this.getWebGLScale();
   }
 
   /**
    * Returns the value of the webglScale performance flag.
    */
-  getWebGLScale(): number | null {
+  public getWebGLScale(): number | null {
     return this._hints.webglScale;
   }
 
@@ -5033,7 +5055,7 @@ class Node extends ParallelDOM {
    *
    * @param [predicate] - If supplied, we will only return trails rooted at a Node that satisfies predicate( node ) == true
    */
-  getUniqueTrail( predicate?: ( node: Node ) => boolean ): Trail {
+  public getUniqueTrail( predicate?: ( node: Node ) => boolean ): Trail {
 
     // Without a predicate, we'll be able to bail out the instant we hit a Node with 2+ parents, and it makes the
     // logic easier.
@@ -5068,7 +5090,7 @@ class Node extends ParallelDOM {
    * Returns a Trail rooted at rootNode and ends at this node. Throws an assertion if the number of trails that match
    * this condition isn't exactly 1.
    */
-  getUniqueTrailTo( rootNode: Node ): Trail {
+  public getUniqueTrailTo( rootNode: Node ): Trail {
     return this.getUniqueTrail( node => rootNode === node );
   }
 
@@ -5078,7 +5100,7 @@ class Node extends ParallelDOM {
    *
    * @param [predicate] - If supplied, we will only return Trails rooted at nodes that satisfy predicate( node ) == true.
    */
-  getTrails( predicate?: ( node: Node ) => boolean ): Trail[] {
+  public getTrails( predicate?: ( node: Node ) => boolean ): Trail[] {
     predicate = predicate || Node.defaultTrailPredicate;
 
     const trails: Trail[] = [];
@@ -5091,7 +5113,7 @@ class Node extends ParallelDOM {
   /**
    * Returns an array of all Trails rooted at rootNode and end at this node.
    */
-  getTrailsTo( rootNode: Node ): Trail[] {
+  public getTrailsTo( rootNode: Node ): Trail[] {
     return this.getTrails( node => node === rootNode );
   }
 
@@ -5101,7 +5123,7 @@ class Node extends ParallelDOM {
    *
    * @param [predicate] - If supplied, we will only return Trails ending at nodes that satisfy predicate( node ) == true.
    */
-  getLeafTrails( predicate?: ( node: Node ) => boolean ): Trail[] {
+  public getLeafTrails( predicate?: ( node: Node ) => boolean ): Trail[] {
     predicate = predicate || Node.defaultLeafTrailPredicate;
 
     const trails: Trail[] = [];
@@ -5114,7 +5136,7 @@ class Node extends ParallelDOM {
   /**
    * Returns an array of all Trails rooted at this Node and end with leafNode.
    */
-  getLeafTrailsTo( leafNode: Node ): Trail[] {
+  public getLeafTrailsTo( leafNode: Node ): Trail[] {
     return this.getLeafTrails( node => node === leafNode );
   }
 
@@ -5124,7 +5146,7 @@ class Node extends ParallelDOM {
    *
    * @param [predicate] - If supplied, we will return a Trail that ends with a Node that satisfies predicate( node ) == true
    */
-  getUniqueLeafTrail( predicate?: ( node: Node ) => boolean ): Trail {
+  public getUniqueLeafTrail( predicate?: ( node: Node ) => boolean ): Trail {
     const trails = this.getLeafTrails( predicate );
 
     assert && assert( trails.length === 1,
@@ -5137,7 +5159,7 @@ class Node extends ParallelDOM {
    * Returns a Trail rooted at this Node and ending at leafNode. If more than one trail matches this description,
    * an assertion will be fired.
    */
-  getUniqueLeafTrailTo( leafNode: Node ): Trail {
+  public getUniqueLeafTrailTo( leafNode: Node ): Trail {
     return this.getUniqueLeafTrail( node => node === leafNode );
   }
 
@@ -5145,7 +5167,7 @@ class Node extends ParallelDOM {
    * Returns all nodes in the connected component, returned in an arbitrary order, including nodes that are ancestors
    * of this node.
    */
-  getConnectedNodes(): Node[] {
+  public getConnectedNodes(): Node[] {
     const result: Node[] = [];
     let fresh = this._children.concat( this._parents ).concat( this );
     while ( fresh.length ) {
@@ -5162,7 +5184,7 @@ class Node extends ParallelDOM {
    * Returns all nodes in the subtree with this Node as its root, returned in an arbitrary order. Like
    * getConnectedNodes, but doesn't include parents.
    */
-  getSubtreeNodes(): Node[] {
+  public getSubtreeNodes(): Node[] {
     const result: Node[] = [];
     let fresh = this._children.concat( this );
     while ( fresh.length ) {
@@ -5178,7 +5200,7 @@ class Node extends ParallelDOM {
   /**
    * Returns all nodes that are connected to this node, sorted in topological order.
    */
-  getTopologicallySortedNodes(): Node[] {
+  public getTopologicallySortedNodes(): Node[] {
     // see http://en.wikipedia.org/wiki/Topological_sorting
     const edges: Record<string, Record<string, boolean>> = {};
     const s: Node[] = [];
@@ -5218,7 +5240,7 @@ class Node extends ParallelDOM {
   /**
    * Returns whether this.addChild( child ) will not cause circular references.
    */
-  canAddChild( child: Node ): boolean {
+  public canAddChild( child: Node ): boolean {
     if ( this === child || _.includes( this._children, child ) ) {
       return false;
     }
@@ -5282,7 +5304,7 @@ class Node extends ParallelDOM {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  renderToCanvasSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
+  public renderToCanvasSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     if ( this.isPainted() && ( this._rendererBitmask & Renderer.bitmaskCanvas ) ) {
       this.canvasPaintSelf( wrapper, matrix );
     }
@@ -5294,7 +5316,7 @@ class Node extends ParallelDOM {
    * @param wrapper
    * @param [matrix] - Optional transform to be applied
    */
-  renderToCanvasSubtree( wrapper: CanvasContextWrapper, matrix?: Matrix3 ): void {
+  public renderToCanvasSubtree( wrapper: CanvasContextWrapper, matrix?: Matrix3 ): void {
     matrix = matrix || Matrix3.identity();
 
     wrapper.resetStyles();
@@ -5387,7 +5409,7 @@ class Node extends ParallelDOM {
    * @deprecated
    * Render this Node to the Canvas (clearing it first)
    */
-  renderToCanvas( canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, callback: () => void, backgroundColor: string ): void {
+  public renderToCanvas( canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, callback: () => void, backgroundColor: string ): void {
 
     assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use Node.rasterized() instead' );
 
@@ -5416,7 +5438,7 @@ class Node extends ParallelDOM {
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
    */
-  toCanvas( callback: ( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
+  public toCanvas( callback: ( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
     assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -5465,7 +5487,7 @@ class Node extends ParallelDOM {
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
    */
-  toDataURL( callback: ( dataURI: string, x: number, y: number, width: number, height: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
+  public toDataURL( callback: ( dataURI: string, x: number, y: number, width: number, height: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
     assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -5492,7 +5514,7 @@ class Node extends ParallelDOM {
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
    */
-  toImage( callback: ( image: HTMLImageElement, x: number, y: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
+  public toImage( callback: ( image: HTMLImageElement, x: number, y: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
 
     assert && deprecationWarning( 'Node.toImage() is deprecated, please use Node.rasterized() instead' );
 
@@ -5532,7 +5554,7 @@ class Node extends ParallelDOM {
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
    */
-  toImageNodeAsynchronous( callback: ( image: Node ) => void, x?: number, y?: number, width?: number, height?: number ): void {
+  public toImageNodeAsynchronous( callback: ( image: Node ) => void, x?: number, y?: number, width?: number, height?: number ): void {
 
     assert && deprecationWarning( 'Node.toImageNodeAsyncrhonous() is deprecated, please use Node.rasterized() instead' );
 
@@ -5563,7 +5585,7 @@ class Node extends ParallelDOM {
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
    */
-  toCanvasNodeSynchronous( x?: number, y?: number, width?: number, height?: number ): Node {
+  public toCanvasNodeSynchronous( x?: number, y?: number, width?: number, height?: number ): Node {
 
     assert && deprecationWarning( 'Node.toCanvasNodeSynchronous() is deprecated, please use Node.rasterized() instead' );
 
@@ -5599,7 +5621,7 @@ class Node extends ParallelDOM {
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
    */
-  toDataURLImageSynchronous( x?: number, y?: number, width?: number, height?: number ): Image {
+  public toDataURLImageSynchronous( x?: number, y?: number, width?: number, height?: number ): Image {
 
     assert && deprecationWarning( 'Node.toDataURLImageSychronous() is deprecated, please use Node.rasterized() instead' );
 
@@ -5630,7 +5652,7 @@ class Node extends ParallelDOM {
    * @param [width] - The width of the Canvas output
    * @param [height] - The height of the Canvas output
    */
-  toDataURLNodeSynchronous( x?: number, y?: number, width?: number, height?: number ): Node {
+  public toDataURLNodeSynchronous( x?: number, y?: number, width?: number, height?: number ): Node {
 
     assert && deprecationWarning( 'Node.toDataURLNodeSynchronous() is deprecated, please use Node.rasterized() instead' );
 
@@ -5653,7 +5675,7 @@ class Node extends ParallelDOM {
    *
    * @param [options] - See below options. This is also passed directly to the created Image object.
    */
-  rasterized( providedOptions?: RasterizedOptions ): Node {
+  public rasterized( providedOptions?: RasterizedOptions ): Node {
     const options = optionize<RasterizedOptions, RasterizedOptions>()( {
       // {number} - Controls the resolution of the image relative to the local view units. For example, if our Node is
       // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
@@ -5785,7 +5807,7 @@ class Node extends ParallelDOM {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  public createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     throw new Error( 'createDOMDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
   }
 
@@ -5798,7 +5820,7 @@ class Node extends ParallelDOM {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  public createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     throw new Error( 'createSVGDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
   }
 
@@ -5811,7 +5833,7 @@ class Node extends ParallelDOM {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     throw new Error( 'createCanvasDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
   }
 
@@ -5824,7 +5846,7 @@ class Node extends ParallelDOM {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  public createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     throw new Error( 'createWebGLDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
   }
 
@@ -5835,21 +5857,21 @@ class Node extends ParallelDOM {
   /**
    * Returns a reference to the instances array. (scenery-internal)
    */
-  getInstances(): Instance[] {
+  public getInstances(): Instance[] {
     return this._instances;
   }
 
   /**
    * See getInstances() for more information (scenery-internal)
    */
-  get instances(): Instance[] {
+  public get instances(): Instance[] {
     return this.getInstances();
   }
 
   /**
    * Adds an Instance reference to our array. (scenery-internal)
    */
-  addInstance( instance: Instance ): void {
+  public addInstance( instance: Instance ): void {
     assert && assert( instance instanceof Instance );
     this._instances.push( instance );
 
@@ -5859,7 +5881,7 @@ class Node extends ParallelDOM {
   /**
    * Removes an Instance reference from our array. (scenery-internal)
    */
-  removeInstance( instance: Instance ): void {
+  public removeInstance( instance: Instance ): void {
     assert && assert( instance instanceof Instance );
     const index = _.indexOf( this._instances, instance );
     assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
@@ -5874,7 +5896,7 @@ class Node extends ParallelDOM {
    *
    * @param [display] - if provided, only check if was visible on this particular Display
    */
-  wasVisuallyDisplayed( display?: Display ): boolean {
+  public wasVisuallyDisplayed( display?: Display ): boolean {
     for ( let i = 0; i < this._instances.length; i++ ) {
       const instance = this._instances[ i ];
 
@@ -5893,21 +5915,21 @@ class Node extends ParallelDOM {
   /**
    * Returns a reference to the display array. (scenery-internal)
    */
-  getRootedDisplays(): Display[] {
+  public getRootedDisplays(): Display[] {
     return this._rootedDisplays;
   }
 
   /**
    * See getRootedDisplays() for more information (scenery-internal)
    */
-  get rootedDisplays(): Display[] {
+  public get rootedDisplays(): Display[] {
     return this.getRootedDisplays();
   }
 
   /**
    * Adds an display reference to our array. (scenery-internal)
    */
-  addRootedDisplay( display: Display ): void {
+  public addRootedDisplay( display: Display ): void {
     assert && assert( display instanceof Display );
     this._rootedDisplays.push( display );
 
@@ -5918,7 +5940,7 @@ class Node extends ParallelDOM {
   /**
    * Removes a Display reference from our array. (scenery-internal)
    */
-  removeRootedDisplay( display: Display ): void {
+  public removeRootedDisplay( display: Display ): void {
     assert && assert( display instanceof Display );
     const index = _.indexOf( this._rootedDisplays, display );
     assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
@@ -5945,7 +5967,7 @@ class Node extends ParallelDOM {
    * Get a list of the displays that are connected to this Node. Gathered by looking up the scene graph ancestors and
    * collected all rooted Displays along the way.
    */
-  getConnectedDisplays(): Display[] {
+  public getConnectedDisplays(): Display[] {
     return _.uniq( this.getRecursiveConnectedDisplays( [] ) );
   }
 
@@ -5957,7 +5979,7 @@ class Node extends ParallelDOM {
    * Returns a point transformed from our local coordinate frame into our parent coordinate frame. Applies our node's
    * transform to it.
    */
-  localToParentPoint( point: Vector2 ): Vector2 {
+  public localToParentPoint( point: Vector2 ): Vector2 {
     return this._transform.transformPosition2( point );
   }
 
@@ -5966,7 +5988,7 @@ class Node extends ParallelDOM {
    * rotation, the resulting bounding box will include every point that could have been in the original bounding box
    * (and it can be expanded).
    */
-  localToParentBounds( bounds: Bounds2 ): Bounds2 {
+  public localToParentBounds( bounds: Bounds2 ): Bounds2 {
     return this._transform.transformBounds2( bounds );
   }
 
@@ -5974,7 +5996,7 @@ class Node extends ParallelDOM {
    * Returns a point transformed from our parent coordinate frame into our local coordinate frame. Applies the inverse
    * of our node's transform to it.
    */
-  parentToLocalPoint( point: Vector2 ): Vector2 {
+  public parentToLocalPoint( point: Vector2 ): Vector2 {
     return this._transform.inversePosition2( point );
   }
 
@@ -5983,7 +6005,7 @@ class Node extends ParallelDOM {
    * rotation, the resulting bounding box will include every point that could have been in the original bounding box
    * (and it can be expanded).
    */
-  parentToLocalBounds( bounds: Bounds2 ): Bounds2 {
+  public parentToLocalBounds( bounds: Bounds2 ): Bounds2 {
     return this._transform.inverseBounds2( bounds );
   }
 
@@ -5992,7 +6014,7 @@ class Node extends ParallelDOM {
    * local coordinate frame to our parent coordinate frame.
    * @returns - The same bounds object.
    */
-  transformBoundsFromLocalToParent( bounds: Bounds2 ): Bounds2 {
+  public transformBoundsFromLocalToParent( bounds: Bounds2 ): Bounds2 {
     return bounds.transform( this._transform.getMatrix() );
   }
 
@@ -6001,7 +6023,7 @@ class Node extends ParallelDOM {
    * parent coordinate frame to our local coordinate frame.
    * @returns - The same bounds object.
    */
-  transformBoundsFromParentToLocal( bounds: Bounds2 ): Bounds2 {
+  public transformBoundsFromParentToLocal( bounds: Bounds2 ): Bounds2 {
     return bounds.transform( this._transform.getInverse() );
   }
 
@@ -6012,7 +6034,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  getLocalToGlobalMatrix(): Matrix3 {
+  public getLocalToGlobalMatrix(): Matrix3 {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: Node = this; // eslint-disable-line consistent-this
 
@@ -6044,7 +6066,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  getUniqueTransform(): Transform3 {
+  public getUniqueTransform(): Transform3 {
     return new Transform3( this.getLocalToGlobalMatrix() );
   }
 
@@ -6055,7 +6077,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  getGlobalToLocalMatrix(): Matrix3 {
+  public getGlobalToLocalMatrix(): Matrix3 {
     return this.getLocalToGlobalMatrix().invert();
   }
 
@@ -6065,7 +6087,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  localToGlobalPoint( point: Vector2 ): Vector2 {
+  public localToGlobalPoint( point: Vector2 ): Vector2 {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: Node = this; // eslint-disable-line consistent-this
@@ -6085,7 +6107,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  globalToLocalPoint( point: Vector2 ): Vector2 {
+  public globalToLocalPoint( point: Vector2 ): Vector2 {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: Node = this; // eslint-disable-line consistent-this
@@ -6116,7 +6138,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  localToGlobalBounds( bounds: Bounds2 ): Bounds2 {
+  public localToGlobalBounds( bounds: Bounds2 ): Bounds2 {
     // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
     // it also seems to be a bit faster this way
     return bounds.transformed( this.getLocalToGlobalMatrix() );
@@ -6130,7 +6152,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  globalToLocalBounds( bounds: Bounds2 ): Bounds2 {
+  public globalToLocalBounds( bounds: Bounds2 ): Bounds2 {
     // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
     return bounds.transformed( this.getGlobalToLocalMatrix() );
   }
@@ -6141,7 +6163,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  parentToGlobalPoint( point: Vector2 ): Vector2 {
+  public parentToGlobalPoint( point: Vector2 ): Vector2 {
     assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].localToGlobalPoint( point ) : point;
   }
@@ -6154,7 +6176,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  parentToGlobalBounds( bounds: Bounds2 ): Bounds2 {
+  public parentToGlobalBounds( bounds: Bounds2 ): Bounds2 {
     assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].localToGlobalBounds( bounds ) : bounds;
   }
@@ -6165,7 +6187,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  globalToParentPoint( point: Vector2 ): Vector2 {
+  public globalToParentPoint( point: Vector2 ): Vector2 {
     assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].globalToLocalPoint( point ) : point;
   }
@@ -6178,7 +6200,7 @@ class Node extends ParallelDOM {
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    */
-  globalToParentBounds( bounds: Bounds2 ): Bounds2 {
+  public globalToParentBounds( bounds: Bounds2 ): Bounds2 {
     assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].globalToLocalBounds( bounds ) : bounds;
   }
@@ -6191,7 +6213,7 @@ class Node extends ParallelDOM {
    *
    * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
    */
-  getGlobalBounds(): Bounds2 {
+  public getGlobalBounds(): Bounds2 {
     assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
     return this.parentToGlobalBounds( this.getBounds() );
   }
@@ -6199,7 +6221,7 @@ class Node extends ParallelDOM {
   /**
    * See getGlobalBounds() for more information
    */
-  get globalBounds(): Bounds2 {
+  public get globalBounds(): Bounds2 {
     return this.getGlobalBounds();
   }
 
@@ -6211,7 +6233,7 @@ class Node extends ParallelDOM {
    *
    * TODO: Possible to be well-defined and have multiple instances of each.
    */
-  boundsOf( node: Node ): Bounds2 {
+  public boundsOf( node: Node ): Bounds2 {
     return this.globalToLocalBounds( node.getGlobalBounds() );
   }
 
@@ -6223,7 +6245,7 @@ class Node extends ParallelDOM {
    *
    * TODO: Possible to be well-defined and have multiple instances of each.
    */
-  boundsTo( node: Node ): Bounds2 {
+  public boundsTo( node: Node ): Bounds2 {
     return node.globalToLocalBounds( this.getGlobalBounds() );
   }
 
@@ -6234,7 +6256,7 @@ class Node extends ParallelDOM {
   /**
    * Adds the drawable to our list of drawables to notify of visual changes. (scenery-internal)
    */
-  attachDrawable( drawable: Drawable ): this {
+  public attachDrawable( drawable: Drawable ): this {
     this._drawables.push( drawable );
     return this; // allow chaining
   }
@@ -6242,7 +6264,7 @@ class Node extends ParallelDOM {
   /**
    * Removes the drawable from our list of drawables to notify of visual changes. (scenery-internal)
    */
-  detachDrawable( drawable: Drawable ): this {
+  public detachDrawable( drawable: Drawable ): this {
     const index = _.indexOf( this._drawables, drawable );
 
     assert && assert( index >= 0, 'Invalid operation: trying to detach a non-referenced drawable' );
@@ -6270,7 +6292,7 @@ class Node extends ParallelDOM {
    * Additionally, some keys are actually direct function names, like 'scale'. mutate( { scale: 2 } ) will call
    * node.scale( 2 ) instead of activating an ES5 setter directly.
    */
-  mutate( options?: NodeOptions ): this {
+  public mutate( options?: NodeOptions ): this {
 
     if ( !options ) {
       return this;
@@ -6386,9 +6408,9 @@ class Node extends ParallelDOM {
     }
   }
 
-  set voicingVisible( visible ) { this.setVoicingVisible( visible ); }
+  public set voicingVisible( visible ) { this.setVoicingVisible( visible ); }
 
-  get voicingVisible() { return this.isVoicingVisible(); }
+  public get voicingVisible() { return this.isVoicingVisible(); }
 
   /**
    * Returns whether this Node is voicingVisible. When true Utterances for this Node can be announced with the
@@ -6401,14 +6423,14 @@ class Node extends ParallelDOM {
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  getDebugHTMLExtras(): string {
+  public getDebugHTMLExtras(): string {
     return '';
   }
 
   /**
    * Makes this Node's subtree available for inspection.
    */
-  inspect(): void {
+  public inspect(): void {
     localStorage.scenerySnapshot = JSON.stringify( {
       type: 'Subtree',
       rootNodeId: this.id,
@@ -6422,7 +6444,7 @@ class Node extends ParallelDOM {
    * @param spaces - Whitespace to add
    * @param [includeChildren]
    */
-  override toString( spaces: string, includeChildren?: boolean ): string {
+  public override toString( spaces: string, includeChildren?: boolean ): string {
     return `${this.constructor.name}#${this.id}`;
   }
 
@@ -6430,7 +6452,7 @@ class Node extends ParallelDOM {
    * Performs checks to see if the internal state of Instance references is correct at a certain point in/after the
    * Display's updateDisplay(). (scenery-internal)
    */
-  auditInstanceSubtreeForDisplay( display: Display ): void {
+  public auditInstanceSubtreeForDisplay( display: Display ): void {
     if ( assertSlow ) {
       const numInstances = this._instances.length;
       for ( let i = 0; i < numInstances; i++ ) {
@@ -6461,7 +6483,7 @@ class Node extends ParallelDOM {
   /**
    * Disposes the node, releasing all references that it maintained.
    */
-  override dispose(): void {
+  public override dispose(): void {
 
     // remove all PDOM input listeners
     this.disposeParallelDOM();
@@ -6486,7 +6508,7 @@ class Node extends ParallelDOM {
    * NOTE: Use with caution, as you should not re-use any Node touched by this. Not compatible with most DAG
    *       techniques.
    */
-  disposeSubtree(): void {
+  public disposeSubtree(): void {
     if ( !this.isDisposed ) {
       // makes a copy before disposing
       const children = this.children;
@@ -6503,21 +6525,21 @@ class Node extends ParallelDOM {
   /**
    * A default for getTrails() searches, returns whether the Node has no parents.
    */
-  static defaultTrailPredicate( node: Node ): boolean {
+  public static defaultTrailPredicate( node: Node ): boolean {
     return node._parents.length === 0;
   }
 
   /**
    * A default for getLeafTrails() searches, returns whether the Node has no parents.
    */
-  static defaultLeafTrailPredicate( node: Node ): boolean {
+  public static defaultLeafTrailPredicate( node: Node ): boolean {
     return node._children.length === 0;
   }
 
-  static NodeIO: IOType;
+  public static NodeIO: IOType;
 
   // A mapping of all of the default options provided to Node
-  static DEFAULT_NODE_OPTIONS = DEFAULT_OPTIONS;
+  public static DEFAULT_NODE_OPTIONS = DEFAULT_OPTIONS;
 
 }
 

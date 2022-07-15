@@ -22,31 +22,31 @@ type ActiveTrailPointerCallback = ( ( trailPointer: ActiveTrailPointer ) => bool
 
 export default class TrailPointer {
 
-  trail: Trail | null;
-  isBefore!: boolean;
-  isAfter!: boolean;
+  public trail: Trail | null;
+  public isBefore!: boolean;
+  public isAfter!: boolean;
 
   /**
    * @param trail
    * @param isBefore - whether this points to before the node (and its children) have been rendered, or after
    */
-  constructor( trail: Trail, isBefore: boolean ) {
+  public constructor( trail: Trail, isBefore: boolean ) {
     assert && assert( trail instanceof Trail, 'trail is not a trail' );
 
     this.trail = trail;
     this.setBefore( isBefore );
   }
 
-  isActive(): this is ActiveTrailPointer {
+  public isActive(): this is ActiveTrailPointer {
     return !!this.trail;
   }
 
-  copy(): TrailPointer {
+  public copy(): TrailPointer {
     assert && assert( this.isActive() );
     return new TrailPointer( ( this as ActiveTrailPointer ).trail.copy(), this.isBefore );
   }
 
-  setBefore( isBefore: boolean ): void {
+  public setBefore( isBefore: boolean ): void {
     this.isBefore = isBefore;
     this.isAfter = !isBefore;
   }
@@ -54,7 +54,7 @@ export default class TrailPointer {
   /**
    * Return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
    */
-  getRenderSwappedPointer(): TrailPointer | null {
+  public getRenderSwappedPointer(): TrailPointer | null {
     assert && assert( this.isActive() );
     const activeSelf = this as ActiveTrailPointer;
 
@@ -68,11 +68,11 @@ export default class TrailPointer {
     }
   }
 
-  getRenderBeforePointer(): TrailPointer | null {
+  public getRenderBeforePointer(): TrailPointer | null {
     return this.isBefore ? this : this.getRenderSwappedPointer();
   }
 
-  getRenderAfterPointer(): TrailPointer | null {
+  public getRenderAfterPointer(): TrailPointer | null {
     return this.isAfter ? this : this.getRenderSwappedPointer();
   }
 
@@ -80,7 +80,7 @@ export default class TrailPointer {
    * In the render order, will return 0 if the pointers are equivalent, -1 if this pointer is before the
    * other pointer, and 1 if this pointer is after the other pointer.
    */
-  compareRender( other: TrailPointer ): number {
+  public compareRender( other: TrailPointer ): number {
     assert && assert( other !== null );
 
     const a = this.getRenderBeforePointer();
@@ -108,7 +108,7 @@ export default class TrailPointer {
    *
    * TODO: optimization?
    */
-  compareNested( other: TrailPointer ): number {
+  public compareNested( other: TrailPointer ): number {
     assert && assert( other );
 
     assert && assert( this.isActive() && other.isActive() );
@@ -141,11 +141,11 @@ export default class TrailPointer {
     }
   }
 
-  equalsRender( other: TrailPointer ): boolean {
+  public equalsRender( other: TrailPointer ): boolean {
     return this.compareRender( other ) === 0;
   }
 
-  equalsNested( other: TrailPointer ): boolean {
+  public equalsNested( other: TrailPointer ): boolean {
     return this.compareNested( other ) === 0;
   }
 
@@ -153,7 +153,7 @@ export default class TrailPointer {
    * Will return false if this pointer has gone off of the beginning or end of the tree (will be marked with isAfter or
    * isBefore though)
    */
-  hasTrail(): boolean {
+  public hasTrail(): boolean {
     return !!this.trail;
   }
 
@@ -162,7 +162,7 @@ export default class TrailPointer {
    *
    * TODO: refactor with "Side"-like handling
    */
-  nestedForwards(): this | null {
+  public nestedForwards(): this | null {
     assert && assert( this.isActive() );
     const activeSelf = this as ActiveTrailPointer;
 
@@ -205,7 +205,7 @@ export default class TrailPointer {
   /**
    * Moves this pointer backwards one step in the nested order
    */
-  nestedBackwards(): this | null {
+  public nestedBackwards(): this | null {
     assert && assert( this.isActive() );
     const activeSelf = this as ActiveTrailPointer;
 
@@ -248,7 +248,7 @@ export default class TrailPointer {
    * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
    * 'before' if applicable
    */
-  eachNodeBetween( other: TrailPointer, callback: ( node: Node ) => void ): void {
+  public eachNodeBetween( other: TrailPointer, callback: ( node: Node ) => void ): void {
     this.eachTrailBetween( other, ( trail: Trail ) => callback( trail.lastNode() ) );
   }
 
@@ -256,7 +256,7 @@ export default class TrailPointer {
    * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
    * 'before' if applicable
    */
-  eachTrailBetween( other: TrailPointer, callback: TrailCallback ): void {
+  public eachTrailBetween( other: TrailPointer, callback: TrailCallback ): void {
     // this should trigger on all pointers that have the 'before' flag, except a pointer equal to 'other'.
 
     // since we exclude endpoints in the depthFirstUntil call, we need to fire this off first
@@ -281,7 +281,7 @@ export default class TrailPointer {
    * If the callback returns a truthy value, the subtree for the current pointer will be skipped
    * (applies only to before-pointers)
    */
-  depthFirstUntil( other: TrailPointer, callback: ActiveTrailPointerCallback, excludeEndpoints: boolean ): void {
+  public depthFirstUntil( other: TrailPointer, callback: ActiveTrailPointerCallback, excludeEndpoints: boolean ): void {
     assert && assert( this.isActive() && other.isActive() );
     const activeSelf = this as ActiveTrailPointer;
     const activeOther = other as ActiveTrailPointer;
@@ -338,7 +338,7 @@ export default class TrailPointer {
   /**
    * Returns a string form of this object
    */
-  toString(): string {
+  public toString(): string {
     assert && assert( this.isActive() );
 
     return `[${this.isBefore ? 'before' : 'after'} ${( this as ActiveTrailPointer ).trail.toString().slice( 1 )}`;
@@ -347,7 +347,7 @@ export default class TrailPointer {
   /**
    * Same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
    */
-  static compareNested( trailA: Trail, isBeforeA: boolean, trailB: Trail, isBeforeB: boolean ): number {
+  public static compareNested( trailA: Trail, isBeforeA: boolean, trailB: Trail, isBeforeB: boolean ): number {
     const comparison = trailA.compare( trailB );
 
     if ( comparison === 0 ) {

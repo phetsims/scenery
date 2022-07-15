@@ -41,7 +41,7 @@ export default class FireListener extends PressListener implements IInputListene
   private firedEmitter: Emitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ]>;
   private _timer?: CallbackTimer;
 
-  constructor( providedOptions?: FireListenerOptions<FireListener> ) {
+  public constructor( providedOptions?: FireListenerOptions<FireListener> ) {
     const options = optionize<FireListenerOptions<FireListener>, SelfOptions, PressListenerOptions<FireListener>>()( {
       fire: _.noop,
       fireOnDown: false,
@@ -94,7 +94,7 @@ export default class FireListener extends PressListener implements IInputListene
    *
    * NOTE: This is safe to call on the listener externally.
    */
-  fire( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ): void {
+  public fire( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -115,7 +115,7 @@ export default class FireListener extends PressListener implements IInputListene
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  override press( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent>, targetNode?: Node, callback?: () => void ): boolean {
+  public override press( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent>, targetNode?: Node, callback?: () => void ): boolean {
     return super.press( event, targetNode, () => {
       // This function is only called on success
       if ( this._fireOnDown ) {
@@ -138,7 +138,7 @@ export default class FireListener extends PressListener implements IInputListene
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  override release( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent>, callback?: () => void ): void {
+  public override release( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent>, callback?: () => void ): void {
     super.release( event, () => {
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       const shouldFire = !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted;
@@ -166,7 +166,7 @@ export default class FireListener extends PressListener implements IInputListene
    * @param [event]
    * @param [callback] - called at the end of the click
    */
-  override click( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null, callback?: () => void ): boolean {
+  public override click( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null, callback?: () => void ): boolean {
     return super.click( event, () => {
 
       // don't click if listener was interrupted before this callback
@@ -185,13 +185,13 @@ export default class FireListener extends PressListener implements IInputListene
    *
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
-  override interrupt(): void {
+  public override interrupt(): void {
     super.interrupt();
 
     this._timer && this._timer.stop( false ); // Stop the timer, don't fire if we haven't already
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.firedEmitter.dispose();
     this._timer && this._timer.dispose();
 

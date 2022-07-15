@@ -21,21 +21,21 @@ export const VerticalLayoutAlignValues = [ 'top', 'bottom', 'center', 'origin' ]
 export type VerticalLayoutAlign = typeof VerticalLayoutAlignValues[number];
 
 export default class LayoutAlign extends EnumerationValue {
-  static readonly START = new LayoutAlign( 'left', 'top', 0 );
-  static readonly END = new LayoutAlign( 'right', 'bottom', 1 );
-  static readonly CENTER = new LayoutAlign( 'center', 'center', 0.5 );
-  static readonly ORIGIN = new LayoutAlign( 'origin', 'origin' );
+  public static readonly START = new LayoutAlign( 'left', 'top', 0 );
+  public static readonly END = new LayoutAlign( 'right', 'bottom', 1 );
+  public static readonly CENTER = new LayoutAlign( 'center', 'center', 0.5 );
+  public static readonly ORIGIN = new LayoutAlign( 'origin', 'origin' );
 
   // String enumeration types for the horizontal orientation
-  readonly horizontal: HorizontalLayoutAlign;
+  public readonly horizontal: HorizontalLayoutAlign;
 
   // String enumeration types for the vertical orientation
-  readonly vertical: VerticalLayoutAlign;
+  public readonly vertical: VerticalLayoutAlign;
 
   // A multiplier value used in the padding computation
-  readonly padRatio: number;
+  public readonly padRatio: number;
 
-  constructor( horizontal: HorizontalLayoutAlign, vertical: VerticalLayoutAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
+  public constructor( horizontal: HorizontalLayoutAlign, vertical: VerticalLayoutAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
     super();
 
     this.horizontal = horizontal;
@@ -43,22 +43,22 @@ export default class LayoutAlign extends EnumerationValue {
     this.padRatio = padRatio;
   }
 
-  static readonly enumeration = new Enumeration( LayoutAlign, {
+  public static readonly enumeration = new Enumeration( LayoutAlign, {
     phetioDocumentation: 'Alignment for layout containers'
   } );
 
-  static getAllowedAligns( orientation: Orientation ): readonly ( string | null )[] {
+  public static getAllowedAligns( orientation: Orientation ): readonly ( string | null )[] {
     return [ ...( orientation === Orientation.HORIZONTAL ? HorizontalLayoutAlignValues : VerticalLayoutAlignValues ), null ];
   }
 
   // Converts a string union value into the internal Enumeration value
-  static alignToInternal( orientation: Orientation, key: HorizontalLayoutAlign | VerticalLayoutAlign | null ): LayoutAlign | null {
+  public static alignToInternal( orientation: Orientation, key: HorizontalLayoutAlign | VerticalLayoutAlign | null ): LayoutAlign | null {
     return orientation === Orientation.HORIZONTAL
            ? LayoutAlign.horizontalAlignToInternal( key as HorizontalLayoutAlign )
            : LayoutAlign.verticalAlignToInternal( key as VerticalLayoutAlign );
   }
 
-  static horizontalAlignToInternal( key: HorizontalLayoutAlign | null ): LayoutAlign | null {
+  public static horizontalAlignToInternal( key: HorizontalLayoutAlign | null ): LayoutAlign | null {
     if ( key === null ) {
       return null;
     }
@@ -68,7 +68,7 @@ export default class LayoutAlign extends EnumerationValue {
     return horizontalAlignMap[ key ];
   }
 
-  static verticalAlignToInternal( key: VerticalLayoutAlign | null ): LayoutAlign | null {
+  public static verticalAlignToInternal( key: VerticalLayoutAlign | null ): LayoutAlign | null {
     if ( key === null ) {
       return null;
     }
@@ -79,7 +79,7 @@ export default class LayoutAlign extends EnumerationValue {
   }
 
   // Converts an internal Enumeration value into a string union value.
-  static internalToAlign( orientation: Orientation, align: LayoutAlign | null ): HorizontalLayoutAlign | VerticalLayoutAlign | null {
+  public static internalToAlign( orientation: Orientation, align: LayoutAlign | null ): HorizontalLayoutAlign | VerticalLayoutAlign | null {
     if ( align === null ) {
       return null;
     }

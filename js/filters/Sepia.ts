@@ -11,12 +11,12 @@ import { scenery, ColorMatrixFilter } from '../imports.js';
 
 export default class Sepia extends ColorMatrixFilter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * @param [amount] - The amount of the effect, from 0 (none) to 1 (full sepia)
    */
-  constructor( amount = 1 ) {
+  public constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Sepia amount should be a number' );
     assert && assert( isFinite( amount ), 'Sepia amount should be finite' );
     assert && assert( amount >= 0, 'Sepia amount should be non-negative' );
@@ -37,15 +37,15 @@ export default class Sepia extends ColorMatrixFilter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  override getCSSFilterString(): string {
+  public override getCSSFilterString(): string {
     return `sepia(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
-  static FULL: Sepia;
+  public static FULL: Sepia;
 }
 
 Sepia.FULL = new Sepia( 1 );

@@ -39,16 +39,16 @@ class LineSVGDrawable extends LineStatefulDrawable( SVGSelfDrawable ) {
     const line = this.svgElement;
 
     if ( this.dirtyX1 ) {
-      line.setAttribute( 'x1', this.node._x1 );
+      line.setAttribute( 'x1', this.node.x1 );
     }
     if ( this.dirtyY1 ) {
-      line.setAttribute( 'y1', this.node._y1 );
+      line.setAttribute( 'y1', this.node.y1 );
     }
     if ( this.dirtyX2 ) {
-      line.setAttribute( 'x2', this.node._x2 );
+      line.setAttribute( 'x2', this.node.x2 );
     }
     if ( this.dirtyY2 ) {
-      line.setAttribute( 'y2', this.node._y2 );
+      line.setAttribute( 'y2', this.node.y2 );
     }
 
     // Apply any fill/stroke changes to our element.

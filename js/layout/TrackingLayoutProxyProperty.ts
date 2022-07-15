@@ -12,7 +12,7 @@ export default class TrackingLayoutProxyProperty extends LayoutProxyProperty {
 
   private transformTracker: TransformTracker | null = null;
 
-  constructor( rootNode: Node, leafNode: Node, transformChanged: () => void ) {
+  public constructor( rootNode: Node, leafNode: Node, transformChanged: () => void ) {
     super( rootNode, leafNode );
 
     this.link( proxy => {
@@ -30,7 +30,7 @@ export default class TrackingLayoutProxyProperty extends LayoutProxyProperty {
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     this.transformTracker && this.transformTracker.dispose();
 
     super.dispose();

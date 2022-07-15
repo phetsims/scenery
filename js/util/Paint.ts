@@ -14,12 +14,12 @@ let globalId = 1;
 export default abstract class Paint {
 
   // (scenery-internal)
-  id: string;
+  public id: string;
 
   // (scenery-internal)
-  transformMatrix: Matrix3 | null;
+  public transformMatrix: Matrix3 | null;
 
-  constructor() {
+  public constructor() {
     this.id = `paint${globalId++}`;
     this.transformMatrix = null;
   }
@@ -27,7 +27,7 @@ export default abstract class Paint {
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
    */
-  abstract getCanvasStyle(): string | CanvasGradient | CanvasPattern;
+  public abstract getCanvasStyle(): string | CanvasGradient | CanvasPattern;
 
   /**
    * Sets how this paint (pattern/gradient) is transformed, compared with the local coordinate frame of where it is
@@ -35,7 +35,7 @@ export default abstract class Paint {
    * NOTE: This should only be used before the pattern/gradient is ever displayed.
    * TODO: Catch if this is violated?
    */
-  setTransformMatrix( transformMatrix: Matrix3 ): this {
+  public setTransformMatrix( transformMatrix: Matrix3 ): this {
     if ( this.transformMatrix !== transformMatrix ) {
       this.transformMatrix = transformMatrix;
     }
@@ -45,16 +45,16 @@ export default abstract class Paint {
   /**
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
-  abstract createSVGPaint( svgBlock: SVGBlock ): SVGGradient | SVGPattern;
+  public abstract createSVGPaint( svgBlock: SVGBlock ): SVGGradient | SVGPattern;
 
   /**
    * Returns a string form of this object
    */
-  toString(): string {
+  public toString(): string {
     return this.id;
   }
 
-  isPaint!: boolean;
+  public isPaint!: boolean;
 }
 
 // TODO: can we remove this in favor of type checks?

@@ -40,17 +40,19 @@ export default class Path extends Paintable( Node ) {
   //       like in Rectangle. This is because usually the actual Shape is already implied by other parameters,
   //       so it is best to not have to compute it on changes.
   // NOTE: Please use hasShape() to determine if we are actually drawing things, as it is subtype-safe.
-  _shape: Shape | null;
+  // (scenery-internal)
+  public _shape: Shape | null;
 
   // This stores a stroked copy of the Shape which is lazily computed. This can be required for computing bounds
   // of a Shape with a stroke.
-  _strokedShape: Shape | null;
+  private _strokedShape: Shape | null;
 
-  _boundsMethod: BoundsMethod;
+  // (scenery-internal)
+  public _boundsMethod: BoundsMethod;
 
   // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
   // immutable, and if the Shape becomes immutable, then the listeners are removed.
-  _invalidShapeListener: () => void;
+  private readonly _invalidShapeListener: () => void;
 
   // Whether our shape listener is attached to a shape.
   private _invalidShapeListenerAttached: boolean;
@@ -67,7 +69,7 @@ export default class Path extends Paintable( Node ) {
    * @param [providedOptions] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( shape: Shape | string | null, providedOptions?: PathOptions ) {
+  public constructor( shape: Shape | string | null, providedOptions?: PathOptions ) {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
@@ -108,7 +110,7 @@ export default class Path extends Paintable( Node ) {
    *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
    *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
    */
-  setShape( shape: Shape | string | null ): this {
+  public setShape( shape: Shape | string | null ): this {
     assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
       'A path\'s shape should either be null, a string, or a Shape' );
 
@@ -133,9 +135,9 @@ export default class Path extends Paintable( Node ) {
     return this;
   }
 
-  set shape( value: Shape | string | null ) { this.setShape( value ); }
+  public set shape( value: Shape | string | null ) { this.setShape( value ); }
 
-  get shape(): Shape | null { return this.getShape(); }
+  public get shape(): Shape | null { return this.getShape(); }
 
   /**
    * Returns the shape that was set for this Path (or for subtypes like Line and Rectangle, will return an immutable
@@ -144,7 +146,7 @@ export default class Path extends Paintable( Node ) {
    * It is best to generally assume modifications to the Shape returned is not supported. If there is no shape
    * currently, null will be returned.
    */
-  getShape(): Shape | null {
+  public getShape(): Shape | null {
     return this._shape;
   }
 
@@ -155,7 +157,7 @@ export default class Path extends Paintable( Node ) {
    * NOTE: It is invalid to call this on a Path that does not currently have a Shape (usually a Path where
    *       the shape is set to null).
    */
-  getStrokedShape(): Shape {
+  public getStrokedShape(): Shape {
     assert && assert( this.hasShape(), 'We cannot stroke a non-existing shape' );
 
     // Lazily compute the stroked shape. It should be set to null when we need to recompute it
@@ -184,7 +186,7 @@ export default class Path extends Paintable( Node ) {
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be the shape, properties of the strokes or fills, etc.)
    */
-  override invalidateSupportedRenderers(): void {
+  public override invalidateSupportedRenderers(): void {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
   }
 
@@ -270,7 +272,7 @@ export default class Path extends Paintable( Node ) {
    * - 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
    * - 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
    */
-  setBoundsMethod( boundsMethod: BoundsMethod ): this {
+  public setBoundsMethod( boundsMethod: BoundsMethod ): this {
     assert && assert( boundsMethod === 'accurate' ||
                       boundsMethod === 'unstroked' ||
                       boundsMethod === 'tightPadding' ||
@@ -285,14 +287,14 @@ export default class Path extends Paintable( Node ) {
     return this;
   }
 
-  set boundsMethod( value: BoundsMethod ) { this.setBoundsMethod( value ); }
+  public set boundsMethod( value: BoundsMethod ) { this.setBoundsMethod( value ); }
 
-  get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
+  public get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Returns the current bounds method. See setBoundsMethod for details.
    */
-  getBoundsMethod(): BoundsMethod {
+  public getBoundsMethod(): BoundsMethod {
     return this._boundsMethod;
   }
 
@@ -301,7 +303,7 @@ export default class Path extends Paintable( Node ) {
    * efficient bounds computations (but this will work as a fallback). Includes the stroked region if there is a
    * stroke applied to the Path.
    */
-  computeShapeBounds(): Bounds2 {
+  public computeShapeBounds(): Bounds2 {
     const shape = this.getShape();
     // boundsMethod: 'none' will return no bounds
     if ( this._boundsMethod === 'none' || !shape ) {
@@ -345,7 +347,7 @@ export default class Path extends Paintable( Node ) {
    *
    * If this value would potentially change, please trigger the event 'selfBoundsValid'.
    */
-  override areSelfBoundsValid(): boolean {
+  public override areSelfBoundsValid(): boolean {
     if ( this._boundsMethod === 'accurate' || this._boundsMethod === 'safePadding' ) {
       return true;
     }
@@ -360,7 +362,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Returns our self bounds when our rendered self is transformed by the matrix.
    */
-  override getTransformedSelfBounds( matrix: Matrix3 ): Bounds2 {
+  public override getTransformedSelfBounds( matrix: Matrix3 ): Bounds2 {
     assert && assert( this.hasShape() );
 
     return ( this._stroke ? this.getStrokedShape() : this.getShape() )!.getBoundsWithTransform( matrix );
@@ -369,7 +371,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Returns our safe self bounds when our rendered self is transformed by the matrix.
    */
-  override getTransformedSafeSelfBounds( matrix: Matrix3 ): Bounds2 {
+  public override getTransformedSafeSelfBounds( matrix: Matrix3 ): Bounds2 {
     return this.getTransformedSelfBounds( matrix );
   }
 
@@ -377,7 +379,7 @@ export default class Path extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
    * anything that depended on the old stroke's value. (scenery-internal)
    */
-  override invalidateStroke(): void {
+  public override invalidateStroke(): void {
     this.invalidatePath();
 
     this.rendererSummaryRefreshEmitter.emit(); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
@@ -388,7 +390,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
    */
-  hasShape(): boolean {
+  public hasShape(): boolean {
     return !!this._shape;
   }
 
@@ -410,7 +412,7 @@ export default class Path extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return PathSVGDrawable.createFromPool( renderer, instance );
   }
@@ -421,7 +423,7 @@ export default class Path extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return PathCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -429,7 +431,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted(): boolean {
+  public override isPainted(): boolean {
     // Always true for Path nodes
     return true;
   }
@@ -439,7 +441,7 @@ export default class Path extends Paintable( Node ) {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     let result = false;
     if ( !this.hasShape() ) {
       return result;
@@ -460,7 +462,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  override getSelfShape(): Shape {
+  public override getSelfShape(): Shape {
     return Shape.union( [
       ...( ( this.hasShape() && this._fillPickable ) ? [ this.getShape()! ] : [] ),
       ...( ( this.hasShape() && this._strokePickable ) ? [ this.getStrokedShape() ] : [] )
@@ -472,7 +474,7 @@ export default class Path extends Paintable( Node ) {
    *
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
+  public override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     // TODO: should a shape's stroke be included?
     return this._shape ? this._shape.intersectsBounds( bounds ) : false;
   }
@@ -493,14 +495,14 @@ export default class Path extends Paintable( Node ) {
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  override getDebugHTMLExtras(): string {
+  public override getDebugHTMLExtras(): string {
     return this._shape ? ` (<span style="color: #88f" onclick="window.open( 'data:text/plain;charset=utf-8,' + encodeURIComponent( '${this._shape.getSVGPath()}' ) );">path</span>)` : '';
   }
 
   /**
    * Disposes the path, releasing shape listeners if needed (and preventing new listeners from being added).
    */
-  override dispose(): void {
+  public override dispose(): void {
     if ( this._invalidShapeListenerAttached ) {
       this.detachShapeListener();
     }
@@ -509,7 +511,7 @@ export default class Path extends Paintable( Node ) {
   }
 
   // Initial values for most Node mutator options
-  static DEFAULT_PATH_OPTIONS = combineOptions<PathOptions>( {}, Node.DEFAULT_NODE_OPTIONS, DEFAULT_OPTIONS );
+  public static DEFAULT_PATH_OPTIONS = combineOptions<PathOptions>( {}, Node.DEFAULT_NODE_OPTIONS, DEFAULT_OPTIONS );
 }
 
 /**

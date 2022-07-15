@@ -59,7 +59,7 @@ export default class PaintColorProperty extends Property<Color> {
 
   private _paintObserver: PaintObserver;
 
-  constructor( paint: IPaint, providedOptions?: PaintColorPropertyOptions ) {
+  public constructor( paint: IPaint, providedOptions?: PaintColorPropertyOptions ) {
     const initialColor = PaintDef.toColor( paint );
 
     const options = optionize<PaintColorPropertyOptions, SelfOptions, PropertyOptions<Color>>()( {
@@ -82,21 +82,21 @@ export default class PaintColorProperty extends Property<Color> {
   /**
    * Sets the current paint of the PaintColorProperty.
    */
-  setPaint( paint: IPaint ): void {
+  public setPaint( paint: IPaint ): void {
     assert && assert( PaintDef.isPaintDef( paint ) );
 
     this._paint = paint;
     this._paintObserver.setPrimary( paint );
   }
 
-  set paint( value ) { this.setPaint( value ); }
+  public set paint( value ) { this.setPaint( value ); }
 
-  get paint(): IPaint { return this.getPaint(); }
+  public get paint(): IPaint { return this.getPaint(); }
 
   /**
    * Returns the current paint.
    */
-  getPaint(): IPaint {
+  public getPaint(): IPaint {
     return this._paint;
   }
 
@@ -118,7 +118,7 @@ export default class PaintColorProperty extends Property<Color> {
    * With intermediate values basically "interpolated". This uses the `Color` colorUtilsBrightness method to adjust
    * the paint.
    */
-  setLuminanceFactor( luminanceFactor: number ): void {
+  public setLuminanceFactor( luminanceFactor: number ): void {
     assert && assert( typeof luminanceFactor === 'number' && luminanceFactor >= -1 && luminanceFactor <= 1 );
 
     if ( this.luminanceFactor !== luminanceFactor ) {
@@ -128,16 +128,16 @@ export default class PaintColorProperty extends Property<Color> {
     }
   }
 
-  set luminanceFactor( value: number ) { this.setLuminanceFactor( value ); }
+  public set luminanceFactor( value: number ) { this.setLuminanceFactor( value ); }
 
-  get luminanceFactor(): number { return this.getLuminanceFactor(); }
+  public get luminanceFactor(): number { return this.getLuminanceFactor(); }
 
   /**
    * Returns the current value used for adjusting the brightness or darkness (luminance) of the color.
    *
    * See setLuminanceFactor() for more information.
    */
-  getLuminanceFactor(): number {
+  public getLuminanceFactor(): number {
     return this._luminanceFactor;
   }
 
@@ -151,7 +151,7 @@ export default class PaintColorProperty extends Property<Color> {
   /**
    * Releases references.
    */
-  override dispose(): void {
+  public override dispose(): void {
     this.paint = null;
 
     super.dispose();

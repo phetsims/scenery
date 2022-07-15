@@ -29,8 +29,8 @@ class LineCanvasDrawable extends LineStatelessDrawable( CanvasSelfDrawable ) {
     const context = wrapper.context;
 
     context.beginPath();
-    context.moveTo( node._x1, node._y1 );
-    context.lineTo( node._x2, node._y2 );
+    context.moveTo( node.x1, node.y1 );
+    context.lineTo( node.x2, node.y2 );
 
     if ( node.hasPaintableStroke() ) {
       node.beforeCanvasStroke( wrapper ); // defined in Paintable

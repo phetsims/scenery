@@ -24,7 +24,7 @@ export default class AlignPropertyBox extends AlignBox {
    * @param alignBoundsProperty
    * @param [providedOptions]
    */
-  constructor( content: Node, alignBoundsProperty: IReadOnlyProperty<Bounds2>, providedOptions?: AlignPropertyBoxOptions ) {
+  public constructor( content: Node, alignBoundsProperty: IReadOnlyProperty<Bounds2>, providedOptions?: AlignPropertyBoxOptions ) {
     const options = optionize<AlignPropertyBoxOptions, EmptyObjectType, AlignBoxOptions>()( {
       alignBounds: alignBoundsProperty.value
     }, providedOptions );
@@ -39,7 +39,7 @@ export default class AlignPropertyBox extends AlignBox {
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     this.alignBoundsProperty.unlink( this._alignBoundsPropertyListener );
 
     super.dispose();

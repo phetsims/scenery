@@ -37,7 +37,7 @@ export default class SpriteSheet {
 
   private useMipmaps: boolean;
   private gl: WebGLRenderingContext | null;
-  texture: WebGLTexture | null;
+  public texture: WebGLTexture | null;
 
   // The top-level bounding box for texture content. All sprites will have coordinate bounding
   // boxes that are included in these bounds.
@@ -64,7 +64,7 @@ export default class SpriteSheet {
    * @param useMipmaps - Whether built-in WebGL mipmapping should be used. Higher quality, but may be slower
    *                     to add images (since mipmaps need to be updated).
    */
-  constructor( useMipmaps: boolean ) {
+  public constructor( useMipmaps: boolean ) {
     this.useMipmaps = useMipmaps;
 
     // Will be passed in with initializeContext
@@ -98,7 +98,7 @@ export default class SpriteSheet {
    * NOTE: Should be safe to call with a different context (will recreate a different texture) should this be needed
    *       for things like context loss.
    */
-  initializeContext( gl: WebGLRenderingContext ): void {
+  public initializeContext( gl: WebGLRenderingContext ): void {
     this.gl = gl;
 
     this.createTexture();
@@ -137,7 +137,7 @@ export default class SpriteSheet {
   /**
    * Updates a pre-existing texture with our current Canvas.
    */
-  updateTexture(): void {
+  public updateTexture(): void {
     assert && assert( this.gl, 'SpriteSheet needs context to updateTexture()' );
 
     if ( this.dirty ) {
@@ -163,7 +163,7 @@ export default class SpriteSheet {
    * @param width - Passed in, since it may not be fully loaded yet?
    * @param height - Passed in, since it may not be fully loaded yet?
    */
-  addImage( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number ): Sprite | null {
+  public addImage( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number ): Sprite | null {
     let i;
 
     // check used cache
@@ -230,7 +230,7 @@ export default class SpriteSheet {
    * Removes an image from our spritesheet. (Removes one from the amount it is used, and if it is 0, gets actually
    * removed).
    */
-  removeImage( image: HTMLCanvasElement | HTMLImageElement ): void {
+  public removeImage( image: HTMLCanvasElement | HTMLImageElement ): void {
     // find the used sprite (and its index)
     let usedSprite: Sprite;
     let i;
@@ -257,7 +257,7 @@ export default class SpriteSheet {
    * Whether the sprite for the specified image is handled by this spritesheet. It can be either used or unused, but
    * addImage() calls with the specified image should be extremely fast (no need to modify the Canvas or texture).
    */
-  containsImage( image: HTMLCanvasElement | HTMLImageElement ): boolean {
+  public containsImage( image: HTMLCanvasElement | HTMLImageElement ): boolean {
     let i;
 
     // check used cache
@@ -306,10 +306,10 @@ export default class SpriteSheet {
     this.context.drawImage( image, sourceX, sourceY, width, height, destinationX, destinationY, width, height );
   }
 
-  static Sprite: typeof Sprite;
+  public static Sprite: typeof Sprite;
 
   // the size of a sprite sheet
-  static MAX_DIMENSION: typeof MAX_DIMENSION;
+  public static MAX_DIMENSION: typeof MAX_DIMENSION;
 }
 
 scenery.register( 'SpriteSheet', SpriteSheet );
@@ -317,26 +317,26 @@ scenery.register( 'SpriteSheet', SpriteSheet );
 class Sprite {
 
   // The containing SpriteSheet
-  readonly spriteSheet: SpriteSheet;
+  public readonly spriteSheet: SpriteSheet;
 
   // Contains the actual image bounds in our Canvas (plus padding), and is used to deallocate (need to clear that area).
   // (dot-internal)
-  readonly bin: Bin;
+  public readonly bin: Bin;
 
   // Normalized bounds between [0,1] for the full texture (for GLSL texture lookups).
-  readonly uvBounds: Bounds2;
+  public readonly uvBounds: Bounds2;
 
   // Image element used. (dot-internal)
-  readonly image: HTMLCanvasElement | HTMLImageElement;
+  public readonly image: HTMLCanvasElement | HTMLImageElement;
 
   // Reference count for number of addChild() calls minus removeChild() calls. If the count is 0, it should be in the
   // 'unusedSprites' array, otherwise it should be in the 'usedSprites' array. (dot-internal)
-  count: number;
+  public count: number;
 
   /**
    * A reference to a specific part of the texture that can be used.
    */
-  constructor( spriteSheet: SpriteSheet, bin: Bin, uvBounds: Bounds2, image: HTMLCanvasElement | HTMLImageElement, initialCount: number ) {
+  public constructor( spriteSheet: SpriteSheet, bin: Bin, uvBounds: Bounds2, image: HTMLCanvasElement | HTMLImageElement, initialCount: number ) {
     this.spriteSheet = spriteSheet;
     this.bin = bin;
     this.uvBounds = uvBounds;

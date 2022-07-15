@@ -113,7 +113,7 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     this._constraint.dispose();
 
     super.dispose();

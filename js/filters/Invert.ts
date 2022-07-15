@@ -11,12 +11,12 @@ import { scenery, Filter, CanvasContextWrapper } from '../imports.js';
 
 export default class Invert extends Filter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * @param [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
-  constructor( amount = 1 ) {
+  public constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Invert amount should be a number' );
     assert && assert( isFinite( amount ), 'Invert amount should be finite' );
     assert && assert( amount >= 0, 'Invert amount should be non-negative' );
@@ -32,21 +32,21 @@ export default class Invert extends Filter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  getCSSFilterString(): string {
+  public getCSSFilterString(): string {
     return `invert(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
-  static FULL: Invert;
+  public static FULL: Invert;
 
-  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+  public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
     throw new Error( 'unimplemented' );
   }
 
-  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+  public applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     throw new Error( 'unimplemented' );
   }
 }

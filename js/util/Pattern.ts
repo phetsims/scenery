@@ -13,13 +13,13 @@ import { scenery, Paint, SVGPattern, SVGBlock } from '../imports.js';
 
 export default class Pattern extends Paint {
 
-  image: HTMLImageElement;
-  canvasPattern: CanvasPattern;
+  public image: HTMLImageElement;
+  public canvasPattern: CanvasPattern;
 
   /**
    * @param image - The image to use as a repeated pattern.
    */
-  constructor( image: HTMLImageElement ) {
+  public constructor( image: HTMLImageElement ) {
     super();
 
     this.image = image;
@@ -33,25 +33,25 @@ export default class Pattern extends Paint {
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
    */
-  getCanvasStyle(): CanvasPattern {
+  public getCanvasStyle(): CanvasPattern {
     return this.canvasPattern;
   }
 
   /**
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
-  createSVGPaint( svgBlock: SVGBlock ): SVGPattern {
+  public createSVGPaint( svgBlock: SVGBlock ): SVGPattern {
     return SVGPattern.pool.create( this );
   }
 
   /**
    * Returns a string form of this object
    */
-  override toString(): string {
+  public override toString(): string {
     return `new scenery.Pattern( $( '<img src="${this.image.src}"/>' )[0] )`;
   }
 
-  isPattern!: boolean;
+  public isPattern!: boolean;
 }
 
 Pattern.prototype.isPattern = true;

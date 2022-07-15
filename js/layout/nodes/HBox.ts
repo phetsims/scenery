@@ -14,7 +14,7 @@ import { scenery, FlowBox, FlowBoxOptions } from '../../imports.js';
 export type HBoxOptions = StrictOmit<FlowBoxOptions, 'orientation'>;
 
 export default class HBox extends FlowBox {
-  constructor( providedOptions?: HBoxOptions ) {
+  public constructor( providedOptions?: HBoxOptions ) {
     assert && assert( !providedOptions || !( providedOptions as FlowBoxOptions ).orientation, 'HBox sets orientation' );
 
     super( optionize<HBoxOptions, EmptyObjectType, FlowBoxOptions>()( {

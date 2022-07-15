@@ -11,12 +11,12 @@ import { scenery, ColorMatrixFilter } from '../imports.js';
 
 export default class Grayscale extends ColorMatrixFilter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * @param [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
-  constructor( amount = 1 ) {
+  public constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Grayscale amount should be a number' );
     assert && assert( isFinite( amount ), 'Grayscale amount should be finite' );
     assert && assert( amount >= 0, 'Grayscale amount should be non-negative' );
@@ -44,16 +44,16 @@ export default class Grayscale extends ColorMatrixFilter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  override getCSSFilterString(): string {
+  public override getCSSFilterString(): string {
     return `grayscale(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
   // Turns things fully gray-scale (instead of partially)
-  static FULL: Grayscale;
+  public static FULL: Grayscale;
 }
 
 Grayscale.FULL = new Grayscale( 1 );

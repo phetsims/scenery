@@ -45,22 +45,28 @@ const SuperType = Sizable( Path );
 
 export default class Rectangle extends SuperType {
   // X value of the left side of the rectangle
-  _rectX: number;
+  // (scenery-internal)
+  public _rectX: number;
 
   // Y value of the top side of the rectangle
-  _rectY: number;
+  // (scenery-internal)
+  public _rectY: number;
 
   // Width of the rectangle
-  _rectWidth: number;
+  // (scenery-internal)
+  public _rectWidth: number;
 
   // Height of the rectangle
-  _rectHeight: number;
+  // (scenery-internal)
+  public _rectHeight: number;
 
   // X radius of rounded corners
-  _cornerXRadius: number;
+  // (scenery-internal)
+  public _cornerXRadius: number;
 
   // Y radius of rounded corners
-  _cornerYRadius: number;
+  // (scenery-internal)
+  public _cornerYRadius: number;
 
   /**
    *
@@ -93,12 +99,12 @@ export default class Rectangle extends SuperType {
    * @param [options] - Rectangle-specific options are documented in RECTANGLE_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( options?: RectangleOptions );
-  constructor( bounds: Bounds2, options?: RectangleOptions );
-  constructor( bounds: Bounds2, cornerRadiusX: number, cornerRadiusY: number, options?: RectangleOptions );
-  constructor( x: number, y: number, width: number, height: number, options?: RectangleOptions );
-  constructor( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions );
-  constructor( x?: number | Bounds2 | RectangleOptions, y?: number | RectangleOptions, width?: number, height?: number | RectangleOptions, cornerXRadius?: number | RectangleOptions, cornerYRadius?: number, providedOptions?: RectangleOptions ) {
+  public constructor( options?: RectangleOptions );
+  public constructor( bounds: Bounds2, options?: RectangleOptions );
+  public constructor( bounds: Bounds2, cornerRadiusX: number, cornerRadiusY: number, options?: RectangleOptions );
+  public constructor( x: number, y: number, width: number, height: number, options?: RectangleOptions );
+  public constructor( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions );
+  public constructor( x?: number | Bounds2 | RectangleOptions, y?: number | RectangleOptions, width?: number, height?: number | RectangleOptions, cornerXRadius?: number | RectangleOptions, cornerYRadius?: number, providedOptions?: RectangleOptions ) {
 
     // We'll want to default to sizable:false, but allow clients to pass in something conflicting like widthSizable:true
     // in the super mutate. To avoid the exclusive options, we isolate this out here.
@@ -215,7 +221,7 @@ export default class Rectangle extends SuperType {
    *
    * @returns - Renderer bitmask, see Renderer for details
    */
-  override getStrokeRendererBitmask(): number {
+  public override getStrokeRendererBitmask(): number {
     let bitmask = super.getStrokeRendererBitmask();
     const stroke = this.getStroke();
     // DOM stroke handling doesn't YET support gradients, patterns, or dashes (with the current implementation, it shouldn't be too hard)
@@ -238,7 +244,7 @@ export default class Rectangle extends SuperType {
    *
    * @returns - Renderer bitmask, see Renderer for details
    */
-  override getPathRendererBitmask(): number {
+  public override getPathRendererBitmask(): number {
     let bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
 
     const maximumArcSize = this.getMaximumArcSize();
@@ -270,7 +276,7 @@ export default class Rectangle extends SuperType {
    * @param [cornerXRadius] - The horizontal radius of curved corners (0 for sharp corners)
    * @param [cornerYRadius] - The vertical radius of curved corners (0 for sharp corners)
    */
-  setRect( x: number, y: number, width: number, height: number, cornerXRadius?: number, cornerYRadius?: number ): this {
+  public setRect( x: number, y: number, width: number, height: number, cornerXRadius?: number, cornerYRadius?: number ): this {
     const hasXRadius = cornerXRadius !== undefined;
     const hasYRadius = cornerYRadius !== undefined;
 
@@ -311,7 +317,7 @@ export default class Rectangle extends SuperType {
   /**
    * Sets the x coordinate of the left side of this rectangle (in the local coordinate frame).
    */
-  setRectX( x: number ): this {
+  public setRectX( x: number ): this {
     assert && assert( typeof x === 'number' && isFinite( x ), 'rectX should be a finite number' );
 
     if ( this._rectX !== x ) {
@@ -327,21 +333,21 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectX( value: number ) { this.setRectX( value ); }
+  public set rectX( value: number ) { this.setRectX( value ); }
 
-  get rectX(): number { return this.getRectX(); }
+  public get rectX(): number { return this.getRectX(); }
 
   /**
    * Returns the x coordinate of the left side of this rectangle (in the local coordinate frame).
    */
-  getRectX(): number {
+  public getRectX(): number {
     return this._rectX;
   }
 
   /**
    * Sets the y coordinate of the top side of this rectangle (in the local coordinate frame).
    */
-  setRectY( y: number ): this {
+  public setRectY( y: number ): this {
     assert && assert( typeof y === 'number' && isFinite( y ), 'rectY should be a finite number' );
 
     if ( this._rectY !== y ) {
@@ -357,21 +363,21 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectY( value: number ) { this.setRectY( value ); }
+  public set rectY( value: number ) { this.setRectY( value ); }
 
-  get rectY(): number { return this.getRectY(); }
+  public get rectY(): number { return this.getRectY(); }
 
   /**
    * Returns the y coordinate of the top side of this rectangle (in the local coordinate frame).
    */
-  getRectY(): number {
+  public getRectY(): number {
     return this._rectY;
   }
 
   /**
    * Sets the width of the rectangle (in the local coordinate frame).
    */
-  setRectWidth( width: number ): this {
+  public setRectWidth( width: number ): this {
     assert && assert( typeof width === 'number' && isFinite( width ), 'rectWidth should be a finite number' );
 
     if ( this._rectWidth !== width ) {
@@ -387,21 +393,21 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectWidth( value: number ) { this.setRectWidth( value ); }
+  public set rectWidth( value: number ) { this.setRectWidth( value ); }
 
-  get rectWidth(): number { return this.getRectWidth(); }
+  public get rectWidth(): number { return this.getRectWidth(); }
 
   /**
    * Returns the width of the rectangle (in the local coordinate frame).
    */
-  getRectWidth(): number {
+  public getRectWidth(): number {
     return this._rectWidth;
   }
 
   /**
    * Sets the height of the rectangle (in the local coordinate frame).
    */
-  setRectHeight( height: number ): this {
+  public setRectHeight( height: number ): this {
     assert && assert( typeof height === 'number' && isFinite( height ), 'rectHeight should be a finite number' );
 
     if ( this._rectHeight !== height ) {
@@ -417,14 +423,14 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectHeight( value: number ) { this.setRectHeight( value ); }
+  public set rectHeight( value: number ) { this.setRectHeight( value ); }
 
-  get rectHeight(): number { return this.getRectHeight(); }
+  public get rectHeight(): number { return this.getRectHeight(); }
 
   /**
    * Returns the height of the rectangle (in the local coordinate frame).
    */
-  getRectHeight(): number {
+  public getRectHeight(): number {
     return this._rectHeight;
   }
 
@@ -437,7 +443,7 @@ export default class Rectangle extends SuperType {
    * If the cornerXRadius and cornerYRadius are different, the corners will be elliptical arcs, and the horizontal
    * radius will be equal to cornerXRadius (or a smaller radius if the rectangle is too small).
    */
-  setCornerXRadius( radius: number ): this {
+  public setCornerXRadius( radius: number ): this {
     assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerXRadius should be a finite number' );
 
     if ( this._cornerXRadius !== radius ) {
@@ -453,14 +459,14 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set cornerXRadius( value: number ) { this.setCornerXRadius( value ); }
+  public set cornerXRadius( value: number ) { this.setCornerXRadius( value ); }
 
-  get cornerXRadius(): number { return this.getCornerXRadius(); }
+  public get cornerXRadius(): number { return this.getCornerXRadius(); }
 
   /**
    * Returns the horizontal corner radius of the rectangle (in the local coordinate frame).
    */
-  getCornerXRadius(): number {
+  public getCornerXRadius(): number {
     return this._cornerXRadius;
   }
 
@@ -473,7 +479,7 @@ export default class Rectangle extends SuperType {
    * If the cornerXRadius and cornerYRadius are different, the corners will be elliptical arcs, and the vertical
    * radius will be equal to cornerYRadius (or a smaller radius if the rectangle is too small).
    */
-  setCornerYRadius( radius: number ): this {
+  public setCornerYRadius( radius: number ): this {
     assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerYRadius should be a finite number' );
 
     if ( this._cornerYRadius !== radius ) {
@@ -489,21 +495,21 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set cornerYRadius( value: number ) { this.setCornerYRadius( value ); }
+  public set cornerYRadius( value: number ) { this.setCornerYRadius( value ); }
 
-  get cornerYRadius(): number { return this.getCornerYRadius(); }
+  public get cornerYRadius(): number { return this.getCornerYRadius(); }
 
   /**
    * Returns the vertical corner radius of the rectangle (in the local coordinate frame).
    */
-  getCornerYRadius(): number {
+  public getCornerYRadius(): number {
     return this._cornerYRadius;
   }
 
   /**
    * Sets the Rectangle's x/y/width/height from the Bounds2 passed in.
    */
-  setRectBounds( bounds: Bounds2 ): this {
+  public setRectBounds( bounds: Bounds2 ): this {
     assert && assert( bounds instanceof Bounds2 );
 
     this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
@@ -511,21 +517,21 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectBounds( value: Bounds2 ) { this.setRectBounds( value ); }
+  public set rectBounds( value: Bounds2 ) { this.setRectBounds( value ); }
 
-  get rectBounds(): Bounds2 { return this.getRectBounds(); }
+  public get rectBounds(): Bounds2 { return this.getRectBounds(); }
 
   /**
    * Returns a new Bounds2 generated from this Rectangle's x/y/width/height.
    */
-  getRectBounds(): Bounds2 {
+  public getRectBounds(): Bounds2 {
     return Bounds2.rect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
   }
 
   /**
    * Sets the Rectangle's width/height from the Dimension2 size passed in.
    */
-  setRectSize( size: Dimension2 ): this {
+  public setRectSize( size: Dimension2 ): this {
     assert && assert( size instanceof Dimension2 );
 
     this.setRectWidth( size.width );
@@ -534,21 +540,21 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectSize( value: Dimension2 ) { this.setRectSize( value ); }
+  public set rectSize( value: Dimension2 ) { this.setRectSize( value ); }
 
-  get rectSize(): Dimension2 { return this.getRectSize(); }
+  public get rectSize(): Dimension2 { return this.getRectSize(); }
 
   /**
    * Returns a new Dimension2 generated from this Rectangle's width/height.
    */
-  getRectSize(): Dimension2 {
+  public getRectSize(): Dimension2 {
     return new Dimension2( this._rectWidth, this._rectHeight );
   }
 
   /**
    * Sets the width of the rectangle while keeping its right edge (x + width) in the same position
    */
-  setRectWidthFromRight( width: number ): this {
+  public setRectWidthFromRight( width: number ): this {
     assert && assert( typeof width === 'number' );
 
     if ( this._rectWidth !== width ) {
@@ -560,14 +566,14 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectWidthFromRight( value: number ) { this.setRectWidthFromRight( value ); }
+  public set rectWidthFromRight( value: number ) { this.setRectWidthFromRight( value ); }
 
-  get rectWidthFromRight(): number { return this.getRectWidth(); } // because JSHint complains
+  public get rectWidthFromRight(): number { return this.getRectWidth(); } // because JSHint complains
 
   /**
    * Sets the height of the rectangle while keeping its bottom edge (y + height) in the same position
    */
-  setRectHeightFromBottom( height: number ): this {
+  public setRectHeightFromBottom( height: number ): this {
     assert && assert( typeof height === 'number' );
 
     if ( this._rectHeight !== height ) {
@@ -579,22 +585,22 @@ export default class Rectangle extends SuperType {
     return this;
   }
 
-  set rectHeightFromBottom( value: number ) { this.setRectHeightFromBottom( value ); }
+  public set rectHeightFromBottom( value: number ) { this.setRectHeightFromBottom( value ); }
 
-  get rectHeightFromBottom(): number { return this.getRectHeight(); } // because JSHint complains
+  public get rectHeightFromBottom(): number { return this.getRectHeight(); } // because JSHint complains
 
   /**
    * Returns whether this rectangle has any rounding applied at its corners. If either the x or y corner radius is 0,
    * then there is no rounding applied.
    */
-  isRounded(): boolean {
+  public isRounded(): boolean {
     return this._cornerXRadius !== 0 && this._cornerYRadius !== 0;
   }
 
   /**
    * Computes the bounds of the Rectangle, including any applied stroke. Overridden for efficiency.
    */
-  override computeShapeBounds(): Bounds2 {
+  public override computeShapeBounds(): Bounds2 {
     let bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
     if ( this._stroke ) {
       // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
@@ -657,7 +663,7 @@ export default class Rectangle extends SuperType {
   }
 
   // We need to detect stroke changes, since our preferred size computations depend on it.
-  override invalidateStroke(): void {
+  public override invalidateStroke(): void {
     super.invalidateStroke();
 
     this.updatePreferredSizes();
@@ -672,7 +678,7 @@ export default class Rectangle extends SuperType {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     const x = this._rectX;
     const y = this._rectY;
     const width = this._rectWidth;
@@ -720,7 +726,7 @@ export default class Rectangle extends SuperType {
    *
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
+  public override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     return !this.computeShapeBounds().intersection( bounds ).isEmpty();
   }
 
@@ -742,7 +748,7 @@ export default class Rectangle extends SuperType {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore
     return RectangleDOMDrawable.createFromPool( renderer, instance );
   }
@@ -753,7 +759,7 @@ export default class Rectangle extends SuperType {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return RectangleSVGDrawable.createFromPool( renderer, instance );
   }
@@ -764,7 +770,7 @@ export default class Rectangle extends SuperType {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return RectangleCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -775,7 +781,7 @@ export default class Rectangle extends SuperType {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore
     return RectangleWebGLDrawable.createFromPool( renderer, instance );
   }
@@ -790,7 +796,7 @@ export default class Rectangle extends SuperType {
    *
    * @param shape - Throws an error if it is not null.
    */
-  override setShape( shape: Shape | string | null ): this {
+  public override setShape( shape: Shape | string | null ): this {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Rectangle to something non-null' );
     }
@@ -806,7 +812,7 @@ export default class Rectangle extends SuperType {
    *
    * NOTE: This is created lazily, so don't call it if you don't have to!
    */
-  override getShape(): Shape {
+  public override getShape(): Shape {
     if ( !this._shape ) {
       this._shape = this.createRectangleShape();
     }
@@ -816,29 +822,29 @@ export default class Rectangle extends SuperType {
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
    */
-  override hasShape(): boolean {
+  public override hasShape(): boolean {
     return true;
   }
 
   /**
    * Sets both of the corner radii to the same value, so that the rounded corners will be circular arcs.
    */
-  setCornerRadius( cornerRadius: number ): this {
+  public setCornerRadius( cornerRadius: number ): this {
     this.setCornerXRadius( cornerRadius );
     this.setCornerYRadius( cornerRadius );
     return this;
   }
 
-  set cornerRadius( value: number ) { this.setCornerRadius( value ); }
+  public set cornerRadius( value: number ) { this.setCornerRadius( value ); }
 
-  get cornerRadius(): number { return this.getCornerRadius(); }
+  public get cornerRadius(): number { return this.getCornerRadius(); }
 
   /**
    * Returns the corner radius if both the horizontal and vertical corner radii are the same.
    *
    * NOTE: If there are different horizontal and vertical corner radii, this will fail an assertion and return the horizontal radius.
    */
-  getCornerRadius(): number {
+  public getCornerRadius(): number {
     assert && assert( this._cornerXRadius === this._cornerYRadius,
       'getCornerRadius() invalid if x/y radii are different' );
 
@@ -856,7 +862,7 @@ export default class Rectangle extends SuperType {
    * @param arcHeight - Vertical corner radius of the rectangle
    * @param point - The point that may or may not be in the rounded rectangle
    */
-  static intersects( x: number, y: number, width: number, height: number, arcWidth: number, arcHeight: number, point: Vector2 ): boolean {
+  public static intersects( x: number, y: number, width: number, height: number, arcWidth: number, arcHeight: number, point: Vector2 ): boolean {
     const result = point.x >= x &&
                    point.x <= x + width &&
                    point.y >= y &&
@@ -921,7 +927,7 @@ export default class Rectangle extends SuperType {
    *
    * See Rectangle's constructor for detailed parameter information.
    */
-  static rect( x: number, y: number, width: number, height: number, options?: RectangleOptions ): Rectangle {
+  public static rect( x: number, y: number, width: number, height: number, options?: RectangleOptions ): Rectangle {
     return new Rectangle( x, y, width, height, 0, 0, options );
   }
 
@@ -930,7 +936,7 @@ export default class Rectangle extends SuperType {
    *
    * See Rectangle's constructor for detailed parameter information.
    */
-  static roundedRect( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions ): Rectangle {
+  public static roundedRect( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions ): Rectangle {
     return new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options );
   }
 
@@ -939,7 +945,7 @@ export default class Rectangle extends SuperType {
    *
    * See Rectangle's constructor for detailed parameter information.
    */
-  static bounds( bounds: Bounds2, options?: RectangleOptions ): Rectangle {
+  public static bounds( bounds: Bounds2, options?: RectangleOptions ): Rectangle {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, options );
   }
 
@@ -949,7 +955,7 @@ export default class Rectangle extends SuperType {
    *
    * See Rectangle's constructor for detailed parameter information.
    */
-  static roundedBounds( bounds: Bounds2, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions ): Rectangle {
+  public static roundedBounds( bounds: Bounds2, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions ): Rectangle {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, cornerXRadius, cornerYRadius, options );
   }
 
@@ -958,7 +964,7 @@ export default class Rectangle extends SuperType {
    *
    * See Rectangle's constructor for detailed parameter information.
    */
-  static dimension( dimension: Dimension2, options?: RectangleOptions ): Rectangle {
+  public static dimension( dimension: Dimension2, options?: RectangleOptions ): Rectangle {
     return new Rectangle( 0, 0, dimension.width, dimension.height, 0, 0, options );
   }
 }

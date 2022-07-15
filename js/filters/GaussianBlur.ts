@@ -15,13 +15,13 @@ import { scenery, Filter, svgns, CanvasContextWrapper } from '../imports.js';
 
 export default class GaussianBlur extends Filter {
 
-  standardDeviation: number;
+  private readonly standardDeviation: number;
 
   /**
    * @param standardDeviation
    * @param [filterRegionPercentage]
    */
-  constructor( standardDeviation: number, filterRegionPercentage = 15 ) {
+  public constructor( standardDeviation: number, filterRegionPercentage = 15 ) {
     assert && assert( typeof standardDeviation === 'number', 'GaussianBlur standardDeviation should be a number' );
     assert && assert( isFinite( standardDeviation ), 'GaussianBlur standardDeviation should be finite' );
     assert && assert( standardDeviation >= 0, 'GaussianBlur standardDeviation should be non-negative' );
@@ -38,7 +38,7 @@ export default class GaussianBlur extends Filter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  getCSSFilterString(): string {
+  public getCSSFilterString(): string {
     return `blur(${toSVGNumber( this.standardDeviation )}px)`;
   }
 
@@ -48,7 +48,7 @@ export default class GaussianBlur extends Filter {
    * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
    * SVG filter object.
    */
-  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+  public applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     // e.g. <feGaussianBlur stdDeviation="[radius radius]" edgeMode="[edge mode]" >
     const feGaussianBlur = document.createElementNS( svgns, 'feGaussianBlur' );
     feGaussianBlur.setAttribute( 'stdDeviation', toSVGNumber( this.standardDeviation ) );
@@ -62,15 +62,15 @@ export default class GaussianBlur extends Filter {
     svgFilter.appendChild( feGaussianBlur );
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
-  override isSVGCompatible(): boolean {
+  public override isSVGCompatible(): boolean {
     return true;
   }
 
-  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+  public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
     throw new Error( 'unimplemented' );
   }
 }

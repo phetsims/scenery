@@ -16,10 +16,10 @@ import { scenery, ColorDef, Filter, PaintDef, IColor, CanvasContextWrapper } fro
 
 export default class DropShadow extends Filter {
 
-  offset: Vector2;
-  blurRadius: number;
-  color: IColor;
-  private colorCSS: string;
+  private readonly offset: Vector2;
+  private readonly blurRadius: number;
+  private readonly color: IColor;
+  private readonly colorCSS: string;
 
   /**
    * @param offset
@@ -27,7 +27,7 @@ export default class DropShadow extends Filter {
    * @param color
    * @param [filterRegionPercentage]
    */
-  constructor( offset: Vector2, blurRadius: number, color: IColor, filterRegionPercentage = 15 ) {
+  public constructor( offset: Vector2, blurRadius: number, color: IColor, filterRegionPercentage = 15 ) {
     assert && assert( offset instanceof Vector2, 'DropShadow offset should be a Vector2' );
     assert && assert( offset.isFinite(), 'DropShadow offset should be finite' );
     assert && assert( typeof blurRadius === 'number', 'DropShadow blurRadius should be a number' );
@@ -52,19 +52,19 @@ export default class DropShadow extends Filter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  getCSSFilterString(): string {
+  public getCSSFilterString(): string {
     return `drop-shadow(${toSVGNumber( this.offset.x )}px ${toSVGNumber( this.offset.y )}px ${toSVGNumber( this.blurRadius )}px ${this.colorCSS})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
-  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+  public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
     throw new Error( 'unimplemented' );
   }
 
-  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+  public applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     throw new Error( 'unimplemented' );
   }
 }

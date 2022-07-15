@@ -11,14 +11,14 @@ import { scenery, Filter, CanvasContextWrapper } from '../imports.js';
 
 export default class Opacity extends Filter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * NOTE: Generally prefer setting a Node's opacity, unless this is required for stacking of filters.
    *
    * @param amount - The amount of opacity, from 0 (invisible) to 1 (fully visible)
    */
-  constructor( amount: number ) {
+  public constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'Opacity amount should be a number' );
     assert && assert( isFinite( amount ), 'Opacity amount should be finite' );
     assert && assert( amount >= 0, 'Opacity amount should be non-negative' );
@@ -34,19 +34,19 @@ export default class Opacity extends Filter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  getCSSFilterString(): string {
+  public getCSSFilterString(): string {
     return `opacity(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
-  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+  public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
     throw new Error( 'unimplemented' );
   }
 
-  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+  public applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     throw new Error( 'unimplemented' );
   }
 }

@@ -101,7 +101,7 @@ export default class AlignBox extends SuperType {
   private readonly constraint: AlignBoxConstraint;
 
   // Callback for when bounds change (takes no arguments)
-  _contentBoundsListener = _.noop;
+  public _contentBoundsListener = _.noop;
 
   /**
    * An individual container for an alignment group. Will maintain its size to match that of the group by overriding
@@ -111,7 +111,7 @@ export default class AlignBox extends SuperType {
    * @param [providedOptions] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
    *                    above, and can be provided along-side options for Node
    */
-  constructor( content: Node, providedOptions?: AlignBoxOptions ) {
+  public constructor( content: Node, providedOptions?: AlignBoxOptions ) {
 
     const options = optionize<AlignBoxOptions, EmptyObjectType, ParentOptions>()( {
       children: [ content ]
@@ -181,7 +181,7 @@ export default class AlignBox extends SuperType {
    * layout. content.getBounds() should trigger it, but invalidateAligment() is the preferred method for forcing a
    * re-check.
    */
-  invalidateAlignment(): void {
+  public invalidateAlignment(): void {
     sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} invalidateAlignment` );
     sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
@@ -203,7 +203,7 @@ export default class AlignBox extends SuperType {
    *
    * NOTE: If the group is a valid AlignGroup, it will be responsible for setting the alignBounds.
    */
-  setAlignBounds( alignBounds: Bounds2 | null ): this {
+  public setAlignBounds( alignBounds: Bounds2 | null ): this {
     assert && assert( alignBounds === null || ( alignBounds instanceof Bounds2 && !alignBounds.isEmpty() && alignBounds.isFinite() ),
       'alignBounds should be a non-empty finite Bounds2' );
 
@@ -223,21 +223,21 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set alignBounds( value: Bounds2 | null ) { this.setAlignBounds( value ); }
+  public set alignBounds( value: Bounds2 | null ) { this.setAlignBounds( value ); }
 
-  get alignBounds(): Bounds2 | null { return this.getAlignBounds(); }
+  public get alignBounds(): Bounds2 | null { return this.getAlignBounds(); }
 
   /**
    * Returns the current alignment bounds (if available, see setAlignBounds for details).
    */
-  getAlignBounds(): Bounds2 | null {
+  public getAlignBounds(): Bounds2 | null {
     return this._alignBounds;
   }
 
   /**
    * Sets the attachment to an AlignGroup. When attached, our alignBounds will be controlled by the group.
    */
-  setGroup( group: AlignGroup | null ): this {
+  public setGroup( group: AlignGroup | null ): this {
     assert && assert( group === null || group instanceof AlignGroup, 'group should be an AlignGroup' );
 
     if ( this._group !== group ) {
@@ -257,21 +257,21 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set group( value: AlignGroup | null ) { this.setGroup( value ); }
+  public set group( value: AlignGroup | null ) { this.setGroup( value ); }
 
-  get group(): AlignGroup | null { return this.getGroup(); }
+  public get group(): AlignGroup | null { return this.getGroup(); }
 
   /**
    * Returns the attached alignment group (if one exists), or null otherwise.
    */
-  getGroup(): AlignGroup | null {
+  public getGroup(): AlignGroup | null {
     return this._group;
   }
 
   /**
    * Sets the horizontal alignment of this box.
    */
-  setXAlign( xAlign: AlignBoxXAlign ): this {
+  public setXAlign( xAlign: AlignBoxXAlign ): this {
     assert && assert( AlignBoxXAlignValues.includes( xAlign ), `xAlign should be one of: ${AlignBoxXAlignValues}` );
 
     if ( this._xAlign !== xAlign ) {
@@ -284,21 +284,21 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set xAlign( value: AlignBoxXAlign ) { this.setXAlign( value ); }
+  public set xAlign( value: AlignBoxXAlign ) { this.setXAlign( value ); }
 
-  get xAlign(): AlignBoxXAlign { return this.getXAlign(); }
+  public get xAlign(): AlignBoxXAlign { return this.getXAlign(); }
 
   /**
    * Returns the current horizontal alignment of this box.
    */
-  getXAlign(): AlignBoxXAlign {
+  public getXAlign(): AlignBoxXAlign {
     return this._xAlign;
   }
 
   /**
    * Sets the vertical alignment of this box.
    */
-  setYAlign( yAlign: AlignBoxYAlign ): this {
+  public setYAlign( yAlign: AlignBoxYAlign ): this {
     assert && assert( AlignBoxYAlignValues.includes( yAlign ), `xAlign should be one of: ${AlignBoxYAlignValues}` );
 
     if ( this._yAlign !== yAlign ) {
@@ -311,14 +311,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set yAlign( value: AlignBoxYAlign ) { this.setYAlign( value ); }
+  public set yAlign( value: AlignBoxYAlign ) { this.setYAlign( value ); }
 
-  get yAlign(): AlignBoxYAlign { return this.getYAlign(); }
+  public get yAlign(): AlignBoxYAlign { return this.getYAlign(); }
 
   /**
    * Returns the current vertical alignment of this box.
    */
-  getYAlign(): AlignBoxYAlign {
+  public getYAlign(): AlignBoxYAlign {
     return this._yAlign;
   }
 
@@ -328,7 +328,7 @@ export default class AlignBox extends SuperType {
    * This margin is the minimum amount of horizontal space that will exist between the content the sides of this
    * box.
    */
-  setMargin( margin: number ): this {
+  public setMargin( margin: number ): this {
     assert && assert( typeof margin === 'number' && isFinite( margin ) && margin >= 0,
       'margin should be a finite non-negative number' );
 
@@ -345,14 +345,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set margin( value: number ) { this.setMargin( value ); }
+  public set margin( value: number ) { this.setMargin( value ); }
 
-  get margin(): number { return this.getMargin(); }
+  public get margin(): number { return this.getMargin(); }
 
   /**
    * Returns the current margin of this box (assuming all margin values are the same).
    */
-  getMargin(): number {
+  public getMargin(): number {
     assert && assert( this._leftMargin === this._rightMargin &&
     this._leftMargin === this._topMargin &&
     this._leftMargin === this._bottomMargin,
@@ -366,7 +366,7 @@ export default class AlignBox extends SuperType {
    * This margin is the minimum amount of horizontal space that will exist between the content and the left and
    * right sides of this box.
    */
-  setXMargin( xMargin: number ): this {
+  public setXMargin( xMargin: number ): this {
     assert && assert( typeof xMargin === 'number' && isFinite( xMargin ) && xMargin >= 0,
       'xMargin should be a finite non-negative number' );
 
@@ -380,14 +380,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set xMargin( value: number ) { this.setXMargin( value ); }
+  public set xMargin( value: number ) { this.setXMargin( value ); }
 
-  get xMargin(): number { return this.getXMargin(); }
+  public get xMargin(): number { return this.getXMargin(); }
 
   /**
    * Returns the current horizontal margin of this box (assuming the left and right margins are the same).
    */
-  getXMargin(): number {
+  public getXMargin(): number {
     assert && assert( this._leftMargin === this._rightMargin,
       'Getting xMargin does not have a unique result if the left and right margins are different' );
     return this._leftMargin;
@@ -399,7 +399,7 @@ export default class AlignBox extends SuperType {
    * This margin is the minimum amount of vertical space that will exist between the content and the top and
    * bottom sides of this box.
    */
-  setYMargin( yMargin: number ): this {
+  public setYMargin( yMargin: number ): this {
     assert && assert( typeof yMargin === 'number' && isFinite( yMargin ) && yMargin >= 0,
       'yMargin should be a finite non-negative number' );
 
@@ -413,14 +413,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set yMargin( value: number ) { this.setYMargin( value ); }
+  public set yMargin( value: number ) { this.setYMargin( value ); }
 
-  get yMargin(): number { return this.getYMargin(); }
+  public get yMargin(): number { return this.getYMargin(); }
 
   /**
    * Returns the current vertical margin of this box (assuming the top and bottom margins are the same).
    */
-  getYMargin(): number {
+  public getYMargin(): number {
     assert && assert( this._topMargin === this._bottomMargin,
       'Getting yMargin does not have a unique result if the top and bottom margins are different' );
     return this._topMargin;
@@ -432,7 +432,7 @@ export default class AlignBox extends SuperType {
    * This margin is the minimum amount of horizontal space that will exist between the content and the left side of
    * the box.
    */
-  setLeftMargin( leftMargin: number ): this {
+  public setLeftMargin( leftMargin: number ): this {
     assert && assert( typeof leftMargin === 'number' && isFinite( leftMargin ) && leftMargin >= 0,
       'leftMargin should be a finite non-negative number' );
 
@@ -446,14 +446,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set leftMargin( value: number ) { this.setLeftMargin( value ); }
+  public set leftMargin( value: number ) { this.setLeftMargin( value ); }
 
-  get leftMargin(): number { return this.getLeftMargin(); }
+  public get leftMargin(): number { return this.getLeftMargin(); }
 
   /**
    * Returns the current left margin of this box.
    */
-  getLeftMargin(): number {
+  public getLeftMargin(): number {
     return this._leftMargin;
   }
 
@@ -463,7 +463,7 @@ export default class AlignBox extends SuperType {
    * This margin is the minimum amount of horizontal space that will exist between the content and the right side of
    * the container.
    */
-  setRightMargin( rightMargin: number ): this {
+  public setRightMargin( rightMargin: number ): this {
     assert && assert( typeof rightMargin === 'number' && isFinite( rightMargin ) && rightMargin >= 0,
       'rightMargin should be a finite non-negative number' );
 
@@ -477,14 +477,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set rightMargin( value: number ) { this.setRightMargin( value ); }
+  public set rightMargin( value: number ) { this.setRightMargin( value ); }
 
-  get rightMargin(): number { return this.getRightMargin(); }
+  public get rightMargin(): number { return this.getRightMargin(); }
 
   /**
    * Returns the current right margin of this box.
    */
-  getRightMargin(): number {
+  public getRightMargin(): number {
     return this._rightMargin;
   }
 
@@ -494,7 +494,7 @@ export default class AlignBox extends SuperType {
    * This margin is the minimum amount of vertical space that will exist between the content and the top side of the
    * container.
    */
-  setTopMargin( topMargin: number ): this {
+  public setTopMargin( topMargin: number ): this {
     assert && assert( typeof topMargin === 'number' && isFinite( topMargin ) && topMargin >= 0,
       'topMargin should be a finite non-negative number' );
 
@@ -508,14 +508,14 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set topMargin( value: number ) { this.setTopMargin( value ); }
+  public set topMargin( value: number ) { this.setTopMargin( value ); }
 
-  get topMargin(): number { return this.getTopMargin(); }
+  public get topMargin(): number { return this.getTopMargin(); }
 
   /**
    * Returns the current top margin of this box.
    */
-  getTopMargin(): number {
+  public getTopMargin(): number {
     return this._topMargin;
   }
 
@@ -525,7 +525,7 @@ export default class AlignBox extends SuperType {
    * This margin is the minimum amount of vertical space that will exist between the content and the bottom side of the
    * container.
    */
-  setBottomMargin( bottomMargin: number ): this {
+  public setBottomMargin( bottomMargin: number ): this {
     assert && assert( typeof bottomMargin === 'number' && isFinite( bottomMargin ) && bottomMargin >= 0,
       'bottomMargin should be a finite non-negative number' );
 
@@ -539,21 +539,21 @@ export default class AlignBox extends SuperType {
     return this;
   }
 
-  set bottomMargin( value: number ) { this.setBottomMargin( value ); }
+  public set bottomMargin( value: number ) { this.setBottomMargin( value ); }
 
-  get bottomMargin(): number { return this.getBottomMargin(); }
+  public get bottomMargin(): number { return this.getBottomMargin(); }
 
   /**
    * Returns the current bottom margin of this box.
    */
-  getBottomMargin(): number {
+  public getBottomMargin(): number {
     return this._bottomMargin;
   }
 
   /**
    * Returns the bounding box of this box's content. This will include any margins.
    */
-  getContentBounds(): Bounds2 {
+  public getContentBounds(): Bounds2 {
     sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} getContentBounds` );
     sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
@@ -568,7 +568,7 @@ export default class AlignBox extends SuperType {
   }
 
   // scenery-internal, designed so that we can ignore adjusting certain dimensions
-  setAdjustedLocalBounds( bounds: Bounds2 ): void {
+  public setAdjustedLocalBounds( bounds: Bounds2 ): void {
     if ( this._xSet && this._ySet ) {
       this.localBounds = bounds;
     }
@@ -590,7 +590,7 @@ export default class AlignBox extends SuperType {
   /**
    * Disposes this box, releasing listeners and any references to an AlignGroup
    */
-  override dispose(): void {
+  public override dispose(): void {
     // Remove our listener
     this._content.boundsProperty.unlink( this._contentBoundsListener );
 
@@ -609,7 +609,7 @@ class AlignBoxConstraint extends LayoutConstraint {
   private readonly alignBox: AlignBox;
   private readonly content: Node;
 
-  constructor( alignBox: AlignBox, content: Node ) {
+  public constructor( alignBox: AlignBox, content: Node ) {
     super( alignBox );
 
     this.alignBox = alignBox;

@@ -73,7 +73,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   private readonly onChildrenReordered: ( minChangeIndex: number, maxChangeIndex: number ) => void;
   private readonly onChildrenChanged: () => void;
 
-  constructor( providedOptions?: FlowBoxOptions ) {
+  public constructor( providedOptions?: FlowBoxOptions ) {
     const options = optionize<FlowBoxOptions, StrictOmit<SelfOptions, Exclude<keyof FlowConstraintOptions, ExcludeFlowConstraintOptions>>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
@@ -170,183 +170,183 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     this._constraint.updateLayoutAutomatically();
   }
 
-  getCell( node: Node ): FlowCell {
+  public getCell( node: Node ): FlowCell {
     const result = this._cellMap.get( node )!;
     assert && assert( result );
 
     return result;
   }
 
-  get orientation(): LayoutOrientation {
+  public get orientation(): LayoutOrientation {
     return this._constraint.orientation;
   }
 
-  set orientation( value: LayoutOrientation ) {
+  public set orientation( value: LayoutOrientation ) {
     this._constraint.orientation = value;
   }
 
-  get spacing(): number {
+  public get spacing(): number {
     return this._constraint.spacing;
   }
 
-  set spacing( value: number ) {
+  public set spacing( value: number ) {
     this._constraint.spacing = value;
   }
 
-  get lineSpacing(): number {
+  public get lineSpacing(): number {
     return this._constraint.lineSpacing;
   }
 
-  set lineSpacing( value: number ) {
+  public set lineSpacing( value: number ) {
     this._constraint.lineSpacing = value;
   }
 
-  get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
+  public get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
     return this._constraint.justify;
   }
 
-  set justify( value: HorizontalLayoutJustification | VerticalLayoutJustification ) {
+  public set justify( value: HorizontalLayoutJustification | VerticalLayoutJustification ) {
     this._constraint.justify = value;
   }
 
-  get justifyLines(): HorizontalLayoutJustification | VerticalLayoutJustification | null {
+  public get justifyLines(): HorizontalLayoutJustification | VerticalLayoutJustification | null {
     return this._constraint.justifyLines;
   }
 
-  set justifyLines( value: HorizontalLayoutJustification | VerticalLayoutJustification | null ) {
+  public set justifyLines( value: HorizontalLayoutJustification | VerticalLayoutJustification | null ) {
     this._constraint.justifyLines = value;
   }
 
-  get wrap(): boolean {
+  public get wrap(): boolean {
     return this._constraint.wrap;
   }
 
-  set wrap( value: boolean ) {
+  public set wrap( value: boolean ) {
     this._constraint.wrap = value;
   }
 
-  get align(): HorizontalLayoutAlign | VerticalLayoutAlign {
+  public get align(): HorizontalLayoutAlign | VerticalLayoutAlign {
     assert && assert( typeof this._constraint.align === 'string' );
 
     return this._constraint.align!;
   }
 
-  set align( value: HorizontalLayoutAlign | VerticalLayoutAlign ) {
+  public set align( value: HorizontalLayoutAlign | VerticalLayoutAlign ) {
     assert && assert( typeof value === 'string', 'FlowBox align should be a string' );
 
     this._constraint.align = value;
   }
 
-  get stretch(): boolean {
+  public get stretch(): boolean {
     assert && assert( typeof this._constraint.stretch === 'boolean' );
 
     return this._constraint.stretch!;
   }
 
-  set stretch( value: boolean ) {
+  public set stretch( value: boolean ) {
     this._constraint.stretch = value;
   }
 
-  get grow(): number {
+  public get grow(): number {
     return this._constraint.grow!;
   }
 
-  set grow( value: number ) {
+  public set grow( value: number ) {
     this._constraint.grow = value;
   }
 
-  get margin(): number {
+  public get margin(): number {
     return this._constraint.margin!;
   }
 
-  set margin( value: number ) {
+  public set margin( value: number ) {
     this._constraint.margin = value;
   }
 
-  get xMargin(): number {
+  public get xMargin(): number {
     return this._constraint.xMargin!;
   }
 
-  set xMargin( value: number ) {
+  public set xMargin( value: number ) {
     this._constraint.xMargin = value;
   }
 
-  get yMargin(): number {
+  public get yMargin(): number {
     return this._constraint.yMargin!;
   }
 
-  set yMargin( value: number ) {
+  public set yMargin( value: number ) {
     this._constraint.yMargin = value;
   }
 
-  get leftMargin(): number {
+  public get leftMargin(): number {
     return this._constraint.leftMargin!;
   }
 
-  set leftMargin( value: number ) {
+  public set leftMargin( value: number ) {
     this._constraint.leftMargin = value;
   }
 
-  get rightMargin(): number {
+  public get rightMargin(): number {
     return this._constraint.rightMargin!;
   }
 
-  set rightMargin( value: number ) {
+  public set rightMargin( value: number ) {
     this._constraint.rightMargin = value;
   }
 
-  get topMargin(): number {
+  public get topMargin(): number {
     return this._constraint.topMargin!;
   }
 
-  set topMargin( value: number ) {
+  public set topMargin( value: number ) {
     this._constraint.topMargin = value;
   }
 
-  get bottomMargin(): number {
+  public get bottomMargin(): number {
     return this._constraint.bottomMargin!;
   }
 
-  set bottomMargin( value: number ) {
+  public set bottomMargin( value: number ) {
     this._constraint.bottomMargin = value;
   }
 
-  get minContentWidth(): number | null {
+  public get minContentWidth(): number | null {
     return this._constraint.minContentWidth;
   }
 
-  set minContentWidth( value: number | null ) {
+  public set minContentWidth( value: number | null ) {
     this._constraint.minContentWidth = value;
   }
 
-  get minContentHeight(): number | null {
+  public get minContentHeight(): number | null {
     return this._constraint.minContentHeight;
   }
 
-  set minContentHeight( value: number | null ) {
+  public set minContentHeight( value: number | null ) {
     this._constraint.minContentHeight = value;
   }
 
-  get maxContentWidth(): number | null {
+  public get maxContentWidth(): number | null {
     return this._constraint.maxContentWidth;
   }
 
-  set maxContentWidth( value: number | null ) {
+  public set maxContentWidth( value: number | null ) {
     this._constraint.maxContentWidth = value;
   }
 
-  get maxContentHeight(): number | null {
+  public get maxContentHeight(): number | null {
     return this._constraint.maxContentHeight;
   }
 
-  set maxContentHeight( value: number | null ) {
+  public set maxContentHeight( value: number | null ) {
     this._constraint.maxContentHeight = value;
   }
 
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
 
     // Lock our layout forever
     this._constraint.lock();
@@ -365,33 +365,33 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   }
 
   // LayoutBox Compatibility (see the ES5 setters/getters, or the options doc)
-  setOrientation( orientation: LayoutOrientation ): this {
+  public setOrientation( orientation: LayoutOrientation ): this {
     this.orientation = orientation;
     return this;
   }
 
-  getOrientation(): LayoutOrientation { return this.orientation; }
+  public getOrientation(): LayoutOrientation { return this.orientation; }
 
-  setSpacing( spacing: number ): this {
+  public setSpacing( spacing: number ): this {
     this.spacing = spacing;
     return this;
   }
 
-  getSpacing(): number { return this.spacing; }
+  public getSpacing(): number { return this.spacing; }
 
-  setAlign( align: HorizontalLayoutAlign | VerticalLayoutAlign ): this {
+  public setAlign( align: HorizontalLayoutAlign | VerticalLayoutAlign ): this {
     this.align = align;
     return this;
   }
 
-  getAlign(): HorizontalLayoutAlign | VerticalLayoutAlign { return this.align; }
+  public getAlign(): HorizontalLayoutAlign | VerticalLayoutAlign { return this.align; }
 
-  setResize( resize: boolean ): this {
+  public setResize( resize: boolean ): this {
     this.resize = resize;
     return this;
   }
 
-  isResize(): boolean { return this.resize; }
+  public isResize(): boolean { return this.resize; }
 
   public getHelperNode(): Node {
     const marginsNode = MarginLayoutCell.createHelperNode( this.constraint.displayedCells, this.constraint.layoutBoundsProperty.value, cell => {
@@ -409,7 +409,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     return marginsNode;
   }
 
-  static DEFAULT_FLOW_BOX_OPTIONS = DEFAULT_OPTIONS;
+  public static DEFAULT_FLOW_BOX_OPTIONS = DEFAULT_OPTIONS;
 }
 
 /**

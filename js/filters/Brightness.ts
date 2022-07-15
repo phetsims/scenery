@@ -11,12 +11,12 @@ import { scenery, ColorMatrixFilter } from '../imports.js';
 
 export default class Brightness extends ColorMatrixFilter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * @param amount - How bright to be, from 0 (dark), 1 (normal), or larger values to brighten
    */
-  constructor( amount: number ) {
+  public constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'Brightness amount should be a number' );
     assert && assert( isFinite( amount ), 'Brightness amount should be finite' );
     assert && assert( amount >= 0, 'Brightness amount should be non-negative' );
@@ -36,16 +36,16 @@ export default class Brightness extends ColorMatrixFilter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  override getCSSFilterString(): string {
+  public override getCSSFilterString(): string {
     return `brightness(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
   // Fully darkens the content
-  static BLACKEN: Brightness;
+  public static BLACKEN: Brightness;
 }
 
 Brightness.BLACKEN = new Brightness( 0 );

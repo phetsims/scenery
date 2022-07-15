@@ -67,7 +67,7 @@ export default class Picker {
   // Used to minimize garbage created in the hit-testing process
   private scratchVector: Vector2;
 
-  constructor( node: Node ) {
+  public constructor( node: Node ) {
     this.node = node;
     this.selfPruned = false;
     this.selfInclusive = false;
@@ -92,7 +92,7 @@ export default class Picker {
    * @param useMouse - Whether mouse-specific customizations (and acceleration) applies
    * @param useTouch - Whether touch-specific customizations (and acceleration) applies
    */
-  hitTest( point: Vector2, useMouse: boolean, useTouch: boolean ): Trail | null {
+  public hitTest( point: Vector2, useMouse: boolean, useTouch: boolean ): Trail | null {
     assert && assert( point, 'trailUnderPointer requires a point' );
 
     sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `-------------- ${this.node.constructor.name}#${this.node.id}` );
@@ -442,7 +442,7 @@ export default class Picker {
    *
    * @param childNode - Our picker node's new child node.
    */
-  onInsertChild( childNode: Node ): void {
+  public onInsertChild( childNode: Node ): void {
     // If the child is selfPruned, we don't have to update any metadata.
     if ( !childNode._picker.selfPruned ) {
       const hasPickable = childNode._picker.subtreePickableCount > 0;
@@ -466,7 +466,7 @@ export default class Picker {
    *
    * @param childNode - Our picker node's child that will be removed.
    */
-  onRemoveChild( childNode: Node ): void {
+  public onRemoveChild( childNode: Node ): void {
     // If the child is selfPruned, we don't have to update any metadata.
     if ( !childNode._picker.selfPruned ) {
       const hasPickable = childNode._picker.subtreePickableCount > 0;
@@ -485,7 +485,7 @@ export default class Picker {
   /**
    * Called from Node when an input listener is added to our node. (scenery-internal)
    */
-  onAddInputListener(): void {
+  public onAddInputListener(): void {
     // Update flags that depend on listener count
     this.checkSelfInclusive();
     this.checkSubtreePrunable();
@@ -499,7 +499,7 @@ export default class Picker {
   /**
    * Called from Node when an input listener is removed from our node. (scenery-internal)
    */
-  onRemoveInputListener(): void {
+  public onRemoveInputListener(): void {
     // Update flags that depend on listener count
     this.checkSelfInclusive();
     this.checkSubtreePrunable();
@@ -513,7 +513,7 @@ export default class Picker {
   /**
    * Called when the 'pickable' value of our Node is changed. (scenery-internal)
    */
-  onPickableChange( oldPickable: boolean | null, pickable: boolean | null ): void {
+  public onPickableChange( oldPickable: boolean | null, pickable: boolean | null ): void {
     // Update flags that depend on our pickable setting.
     this.checkSelfPruned();
     this.checkSelfInclusive();
@@ -532,7 +532,7 @@ export default class Picker {
   /**
    * Called when the visibility of our Node is changed. (scenery-internal)
    */
-  onVisibilityChange(): void {
+  public onVisibilityChange(): void {
     // Update flags that depend on our visibility.
     this.checkSelfPruned();
     this.checkSubtreePrunable();
@@ -541,7 +541,7 @@ export default class Picker {
   /**
    * Called when the mouseArea of the Node is changed. (scenery-internal)
    */
-  onMouseAreaChange(): void {
+  public onMouseAreaChange(): void {
     // Bounds can depend on the mouseArea, so we'll invalidate those.
     // TODO: Consider bounds invalidation that only does the 'mouse' flags, since we don't need to invalidate touches.
     this.invalidate( true );
@@ -550,7 +550,7 @@ export default class Picker {
   /**
    * Called when the mouseArea of the Node is changed. (scenery-internal)
    */
-  onTouchAreaChange(): void {
+  public onTouchAreaChange(): void {
     // Bounds can depend on the touchArea, so we'll invalidate those.
     // TODO: Consider bounds invalidation that only does the 'touch' flags, since we don't need to invalidate mice.
     this.invalidate( true );
@@ -559,7 +559,7 @@ export default class Picker {
   /**
    * Called when the transform of the Node is changed. (scenery-internal)
    */
-  onTransformChange(): void {
+  public onTransformChange(): void {
     // Can affect our bounds
     this.invalidate( true );
   }
@@ -567,7 +567,7 @@ export default class Picker {
   /**
    * Called when the transform of the Node is changed. (scenery-internal)
    */
-  onSelfBoundsDirty(): void {
+  public onSelfBoundsDirty(): void {
     // Can affect our bounds
     this.invalidate( true );
   }
@@ -575,7 +575,7 @@ export default class Picker {
   /**
    * Called when the transform of the Node is changed. (scenery-internal)
    */
-  onClipAreaChange(): void {
+  public onClipAreaChange(): void {
     // Can affect our bounds.
     this.invalidate( true );
   }
@@ -673,7 +673,7 @@ export default class Picker {
    * Runs a number of consistency tests when assertSlow is enabled. Verifies most conditions, and helps to catch
    * bugs earlier when they are initially triggered. (scenery-internal)
    */
-  audit(): void {
+  public audit(): void {
     if ( assertSlow ) {
       this.node._children.forEach( node => {
         node._picker.audit();

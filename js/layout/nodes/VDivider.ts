@@ -14,7 +14,7 @@ type ParentOptions = WidthSizableOptions & DividerOptions;
 export type VDividerOptions = SelfOptions & ParentOptions;
 
 export default class VDivider extends WidthSizable( Divider ) {
-  constructor( options?: VDividerOptions ) {
+  public constructor( options?: VDividerOptions ) {
     super();
 
     this.localPreferredWidthProperty.link( width => {

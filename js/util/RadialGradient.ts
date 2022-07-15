@@ -14,19 +14,24 @@ import { scenery, Gradient, SVGRadialGradient, ColorDef, SVGBlock, GradientStop 
 
 export default class RadialGradient extends Gradient {
 
-  start: Vector2;
-  end: Vector2;
-  startRadius: number;
-  endRadius: number;
+  public start: Vector2;
+  public end: Vector2;
+
+  // (scenery-internal)
+  public startRadius: number;
+  public endRadius: number;
 
   // linear function from radius to point on the line from start to end
-  focalPoint: Vector2;
+  // (scenery-internal)
+  public focalPoint: Vector2;
 
-  startIsLarger: boolean;
-  largePoint: Vector2;
+  // (scenery-internal)
+  public startIsLarger: boolean;
+  public largePoint: Vector2;
 
-  minRadius: number;
-  maxRadius: number;
+  // (scenery-internal)
+  public minRadius: number;
+  public maxRadius: number;
 
   /**
    * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
@@ -40,7 +45,7 @@ export default class RadialGradient extends Gradient {
    * @param y1 - Y coordinate of the end point (ratio 1) in the local coordinate frame
    * @param r1 - Radius of the end point (ratio 1) in the local coordinate frame
    */
-  constructor( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number ) {
+  public constructor( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number ) {
     super();
 
     this.start = new Vector2( x0, y0 );
@@ -81,7 +86,7 @@ export default class RadialGradient extends Gradient {
   /**
    * Returns a fresh gradient given the starting parameters
    */
-  createCanvasGradient(): CanvasGradient {
+  public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
     // @ts-ignore TODO scenery namespace
     return scenery.scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
@@ -90,7 +95,7 @@ export default class RadialGradient extends Gradient {
   /**
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
-  createSVGPaint( svgBlock: SVGBlock ): SVGRadialGradient {
+  public createSVGPaint( svgBlock: SVGBlock ): SVGRadialGradient {
     return SVGRadialGradient.pool.create( svgBlock, this );
   }
 
@@ -99,7 +104,7 @@ export default class RadialGradient extends Gradient {
    *
    * NOTE: SVG has certain stop requirements, so we need to remap/reverse in some cases.
    */
-  override getSVGStops(): GradientStop[] {
+  public override getSVGStops(): GradientStop[] {
     const startIsLarger = this.startIsLarger;
     const maxRadius = this.maxRadius;
     const minRadius = this.minRadius;
@@ -139,7 +144,7 @@ export default class RadialGradient extends Gradient {
   /**
    * Returns a string form of this object
    */
-  override toString(): string {
+  public override toString(): string {
     let result = `new scenery.RadialGradient( ${this.start.x}, ${this.start.y}, ${this.startRadius}, ${this.end.x}, ${this.end.y}, ${this.endRadius} )`;
 
     _.each( this.stops, stop => {
@@ -149,7 +154,7 @@ export default class RadialGradient extends Gradient {
     return result;
   }
 
-  isRadialGradient!: boolean;
+  public isRadialGradient!: boolean;
 }
 
 RadialGradient.prototype.isRadialGradient = true;

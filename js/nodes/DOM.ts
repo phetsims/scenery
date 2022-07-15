@@ -30,10 +30,10 @@ export default class DOM extends Node {
   private _element!: HTMLElement;
 
   // Container div that will have our main element as a child (so we can position and mutate it).
-  _container: HTMLDivElement; // scenery-internal
+  public readonly _container: HTMLDivElement; // scenery-internal
 
   // jQuery selection so that we can properly determine size information
-  private _$container: JQuery<HTMLDivElement>;
+  private readonly _$container: JQuery<HTMLDivElement>;
 
   // Flag that indicates whether we are updating/invalidating ourself due to changes to the DOM element. The flag is
   // needed so that updates to our element that we make in the update/invalidate section doesn't trigger an infinite
@@ -48,7 +48,7 @@ export default class DOM extends Node {
    * @param [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( element: Element | JQuery<HTMLElement>, options?: DOMOptions ) {
+  public constructor( element: Element | JQuery<HTMLElement>, options?: DOMOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
     assert && assert( element instanceof window.Element || element.jquery,
@@ -104,7 +104,7 @@ export default class DOM extends Node {
    * This should be called after the DOM element's bounds may have changed, to properly update the bounding box
    * in Scenery.
    */
-  invalidateDOM(): void {
+  public invalidateDOM(): void {
     // prevent this from being executed as a side-effect from inside one of its own calls
     if ( this.invalidateDOMLock ) {
       return;
@@ -150,7 +150,7 @@ export default class DOM extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore Poolable
     return DOMDrawable.createFromPool( renderer, instance );
   }
@@ -158,7 +158,7 @@ export default class DOM extends Node {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted(): boolean {
+  public override isPainted(): boolean {
     // Always true for DOM nodes
     return true;
   }
@@ -166,7 +166,7 @@ export default class DOM extends Node {
   /**
    * Changes the DOM element of this DOM node to another element.
    */
-  setElement( element: HTMLElement ): this {
+  public setElement( element: HTMLElement ): this {
     assert && assert( !this._element, 'We should only ever attach one DOMElement to a DOM node' );
 
     if ( this._element !== element ) {
@@ -184,14 +184,14 @@ export default class DOM extends Node {
     return this; // allow chaining
   }
 
-  set element( value: HTMLElement ) { this.setElement( value ); }
+  public set element( value: HTMLElement ) { this.setElement( value ); }
 
-  get element(): HTMLElement { return this.getElement(); }
+  public get element(): HTMLElement { return this.getElement(); }
 
   /**
    * Returns the DOM element being displayed by this DOM node.
    */
-  getElement(): HTMLElement {
+  public getElement(): HTMLElement {
     return this._element;
   }
 
@@ -202,7 +202,7 @@ export default class DOM extends Node {
    * instead it will be at the upper-left (0,0) of the Scenery Display. The client will be responsible for sizing or
    * positioning this element instead.
    */
-  setPreventTransform( preventTransform: boolean ): void {
+  public setPreventTransform( preventTransform: boolean ): void {
     assert && assert( typeof preventTransform === 'boolean' );
 
     if ( this._preventTransform !== preventTransform ) {
@@ -210,16 +210,16 @@ export default class DOM extends Node {
     }
   }
 
-  set preventTransform( value: boolean ) { this.setPreventTransform( value ); }
+  public set preventTransform( value: boolean ) { this.setPreventTransform( value ); }
 
-  get preventTransform(): boolean { return this.isTransformPrevented(); }
+  public get preventTransform(): boolean { return this.isTransformPrevented(); }
 
   /**
    * Returns the value of the preventTransform flag.
    *
    * See the setPreventTransform documentation for more information on the flag.
    */
-  isTransformPrevented(): boolean {
+  public isTransformPrevented(): boolean {
     return this._preventTransform;
   }
 }

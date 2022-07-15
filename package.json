@@ -46,8 +46,7 @@
           "**/*.ts"
         ],
         "rules": {
-          "no-simple-type-checking-assertions": "off",
-          "@typescript-eslint/explicit-member-accessibility": "off"
+          "no-simple-type-checking-assertions": "off"
         }
       }
     ]

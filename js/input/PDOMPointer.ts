@@ -121,7 +121,7 @@ export default class PDOMPointer extends Pointer {
     } );
   }
 
-  updateTrail( trail: Trail ): Trail {
+  public updateTrail( trail: Trail ): Trail {
 
     // overwrite this.trail if we don't have a trail yet, or if the new trail doesn't equal the old one.
     if ( !( this.trail && this.trail.equals( trail ) ) ) {

@@ -22,32 +22,32 @@ import EventIO from './EventIO.js';
 export default class SceneryEvent<DOMEvent extends Event = Event> {
 
   // Whether this SceneryEvent has been 'handled'. If so, it will not bubble further.
-  handled: boolean;
+  public handled: boolean;
 
   // Whether this SceneryEvent has been 'aborted'. If so, no further listeners with it will fire.
-  aborted: boolean;
+  public aborted: boolean;
 
   // Path to the leaf-most node "hit" by the event, ordered list, from root to leaf
-  readonly trail: Trail;
+  public readonly trail: Trail;
 
   // What event was triggered on the listener, e.g. 'move'
-  readonly type: string;
+  public readonly type: string;
 
   // The pointer that triggered this event
-  readonly pointer: Pointer;
+  public readonly pointer: Pointer;
 
   // Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
-  readonly domEvent: DOMEvent | null;
+  public readonly domEvent: DOMEvent | null;
 
   // Whatever node you attached the listener to, or null when firing events on a Pointer
-  currentTarget: Node | null;
+  public currentTarget: Node | null;
 
   // Leaf-most node in trail
-  target: Node;
+  public target: Node;
 
   // Whether this is the 'primary' mode for the pointer. Always true for touches, and will be true
   // for the mouse if it is the primary (left) mouse button.
-  isPrimary: boolean;
+  public isPrimary: boolean;
 
   /**
    * @param trail - The trail to the node picked/hit by this input event.
@@ -55,7 +55,7 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
    * @param pointer - The pointer that triggered this event
    * @param domEvent - The original DOM Event that caused this SceneryEvent to fire.
    */
-  constructor( trail: Trail, type: string, pointer: Pointer, domEvent: DOMEvent | null ) {
+  public constructor( trail: Trail, type: string, pointer: Pointer, domEvent: DOMEvent | null ) {
     assert && assert( trail instanceof Trail, 'SceneryEvent\'s trail parameter should be a {Trail}' );
     assert && assert( typeof type === 'string', 'SceneryEvent\'s type should be a {string}' );
     assert && assert( pointer instanceof Pointer, 'SceneryEvent\'s pointer parameter should be a {Pointer}' );
@@ -82,7 +82,7 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
   /**
    * like DOM SceneryEvent.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
    */
-  handle(): void {
+  public handle(): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'handled event' );
     this.handled = true;
   }
@@ -90,7 +90,7 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
   /**
    * like DOM SceneryEvent.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
    */
-  abort(): void {
+  public abort(): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'aborted event' );
     this.aborted = true;
   }
@@ -100,7 +100,7 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
    * pdom-related events supported by scenery. These events are exclusively supported by the ParallelDOM for Interactive
    * description.
    */
-  isFromPDOM(): boolean {
+  public isFromPDOM(): boolean {
     return this.pointer instanceof PDOMPointer;
   }
 
@@ -120,13 +120,13 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
    * NOTE: This ignores non-left mouse buttons (as this is the typical behavior). Custom checks should be done if this
    *       is not suitable.
    */
-  canStartPress(): boolean {
+  public canStartPress(): boolean {
     // If the pointer is already attached (some other press probably), it can't start a press.
     // Additionally, we generally want to ignore non-left mouse buttons.
     return !this.pointer.isAttached() && ( !( this.pointer instanceof Mouse ) || ( this.domEvent as unknown as MouseEvent ).button === 0 );
   }
 
-  static SceneryEventIO: IOType;
+  public static SceneryEventIO: IOType;
 }
 
 SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {

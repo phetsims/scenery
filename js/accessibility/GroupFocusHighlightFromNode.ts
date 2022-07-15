@@ -15,7 +15,7 @@ type SelfOptions = EmptyObjectType;
 type GroupFocusHighlightFromNodeOptions = FocusHighlightFromNodeOptions;
 
 class GroupFocusHighlightFromNode extends FocusHighlightFromNode {
-  constructor( node: Node | null, providedOptions?: GroupFocusHighlightFromNodeOptions ) {
+  public constructor( node: Node | null, providedOptions?: GroupFocusHighlightFromNodeOptions ) {
 
     const options = optionize<GroupFocusHighlightFromNodeOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
       outerStroke: FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR,

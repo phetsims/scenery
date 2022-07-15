@@ -17,7 +17,7 @@ type VoicingTextOptions = SelfOptions & ParentOptions;
 
 class VoicingText extends ReadingBlock( Text, 1 ) {
 
-  constructor( text: string, providedOptions?: VoicingTextOptions ) {
+  public constructor( text: string, providedOptions?: VoicingTextOptions ) {
     let options = optionize<VoicingTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be spoken that is different from the
