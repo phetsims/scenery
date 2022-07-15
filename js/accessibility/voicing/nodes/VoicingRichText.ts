@@ -7,8 +7,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import merge from '../../../../../phet-core/js/merge.js';
-import optionize from '../../../../../phet-core/js/optionize.js';
+import optionize, { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import EmptyObjectType from '../../../../../phet-core/js/types/EmptyObjectType.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, RichText, RichTextOptions, scenery } from '../../../imports.js';
 
@@ -35,7 +34,7 @@ class VoicingRichText extends ReadingBlock( RichText, 1 ) {
     }, options );
 
     // Options that use other options
-    options = merge( options, {
+    options = combineOptions<VoicingRichTextOptions>( options, {
       readingBlockNameResponse: options.readingBlockNameResponse || text
     } );
 
