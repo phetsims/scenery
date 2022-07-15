@@ -60,7 +60,7 @@ export default class DropShadow extends Filter {
     return true;
   }
 
-  public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+  public applyCanvasFilter(): void {
     throw new Error( 'unimplemented' );
   }
 
