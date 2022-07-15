@@ -18,7 +18,7 @@ export default class VStrut extends Spacer {
    * @param height - Height of the strut
    * @param [options] - Passed to Spacer/Node
    */
-  constructor( height: number, options?: VStrutOptions ) {
+  public constructor( height: number, options?: VStrutOptions ) {
     super( 0, height, options );
   }
 }

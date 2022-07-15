@@ -26,9 +26,9 @@ export type SpriteImageOptions = SelfOptions & ImageableOptions;
 
 export default class SpriteImage extends Imageable( Object ) {
 
-  readonly id: number;
-  readonly offset: Vector2;
-  readonly pickable: boolean;
+  public readonly id: number;
+  public readonly offset: Vector2;
+  public readonly pickable: boolean;
   private shape: Shape | null; // lazily-constructed
   private imageData: ImageData | null;
 
@@ -37,7 +37,7 @@ export default class SpriteImage extends Imageable( Object ) {
    * @param offset - A 2d offset from the upper-left of the image which is considered the "center".
    * @param [providedOptions]
    */
-  constructor( image: ImageableImage, offset: Vector2, providedOptions?: SpriteImageOptions ) {
+  public constructor( image: ImageableImage, offset: Vector2, providedOptions?: SpriteImageOptions ) {
     assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement );
     assert && assert( offset instanceof Vector2 );
 
@@ -61,18 +61,18 @@ export default class SpriteImage extends Imageable( Object ) {
     mutate( this, Object.keys( Imageable.DEFAULT_OPTIONS ), options );
   }
 
-  get width(): number {
+  public get width(): number {
     return this.imageWidth;
   }
 
-  get height(): number {
+  public get height(): number {
     return this.imageHeight;
   }
 
   /**
    * Returns a Shape that represents the hit-testable area of this SpriteImage.
    */
-  getShape(): Shape {
+  public getShape(): Shape {
     if ( !this.pickable ) {
       return new Shape();
     }
@@ -115,7 +115,7 @@ export default class SpriteImage extends Imageable( Object ) {
   /**
    * Returns whether a given point is considered "inside" the SpriteImage.
    */
-  containsPoint( point: Vector2 ): boolean {
+  public containsPoint( point: Vector2 ): boolean {
 
     if ( !this.pickable ) {
       return false;

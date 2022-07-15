@@ -15,26 +15,26 @@ const useFakeGamma = platform.chromium;
 
 export default class ColorMatrixFilter extends Filter {
 
-  m00: number;
-  m01: number;
-  m02: number;
-  m03: number;
-  m04: number;
-  m10: number;
-  m11: number;
-  m12: number;
-  m13: number;
-  m14: number;
-  m20: number;
-  m21: number;
-  m22: number;
-  m23: number;
-  m24: number;
-  m30: number;
-  m31: number;
-  m32: number;
-  m33: number;
-  m34: number;
+  private m00: number;
+  private m01: number;
+  private m02: number;
+  private m03: number;
+  private m04: number;
+  private m10: number;
+  private m11: number;
+  private m12: number;
+  private m13: number;
+  private m14: number;
+  private m20: number;
+  private m21: number;
+  private m22: number;
+  private m23: number;
+  private m24: number;
+  private m30: number;
+  private m31: number;
+  private m32: number;
+  private m33: number;
+  private m34: number;
 
   /**
    * NOTE: It is possible but not generally recommended to create custom ColorMatrixFilter types. They should be
@@ -53,7 +53,7 @@ export default class ColorMatrixFilter extends Filter {
    * [ m30 m31 m32 m33 m34 ]   [ a ]
    *                           [ 1 ]
    */
-  constructor( m00: number, m01: number, m02: number, m03: number, m04: number,
+  public constructor( m00: number, m01: number, m02: number, m03: number, m04: number,
                m10: number, m11: number, m12: number, m13: number, m14: number,
                m20: number, m21: number, m22: number, m23: number, m24: number,
                m30: number, m31: number, m32: number, m33: number, m34: number ) {
@@ -112,7 +112,7 @@ export default class ColorMatrixFilter extends Filter {
    * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
    * SVG filter object.
    */
-  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+  public applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     Filter.applyColorMatrix(
       `${toSVGNumber( this.m00 )} ${toSVGNumber( this.m01 )} ${toSVGNumber( this.m02 )} ${toSVGNumber( this.m03 )} ${toSVGNumber( this.m04 )} ` +
       `${toSVGNumber( this.m10 )} ${toSVGNumber( this.m11 )} ${toSVGNumber( this.m12 )} ${toSVGNumber( this.m13 )} ${toSVGNumber( this.m14 )} ` +
@@ -127,7 +127,7 @@ export default class ColorMatrixFilter extends Filter {
    * filtered content. Usually this would be by using getImageData/putImageData, however redrawing or other operations
    * are also possible.
    */
-  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+  public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
     assert && assert( wrapper instanceof CanvasContextWrapper );
 
     const width = wrapper.canvas.width;
@@ -171,15 +171,15 @@ export default class ColorMatrixFilter extends Filter {
     wrapper.context.putImageData( imageData, 0, 0 );
   }
 
-  override isSVGCompatible(): boolean {
+  public override isSVGCompatible(): boolean {
     return true;
   }
 
-  override isCanvasCompatible(): boolean {
+  public override isCanvasCompatible(): boolean {
     return super.isCanvasCompatible() || isImageDataSupported;
   }
 
-  getCSSFilterString(): string {
+  public getCSSFilterString(): string {
     throw new Error( 'unimplemented' );
   }
 }

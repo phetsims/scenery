@@ -158,7 +158,7 @@ export default class HighlightOverlay implements IOverlay {
   private readonly readingBlockFocusListener: ( focus: Focus | null ) => void;
   private readonly readingBlockHighlightChangeListener: () => void;
 
-  constructor( display: Display, focusRootNode: Node, providedOptions?: HighlightOverlayOptions ) {
+  public constructor( display: Display, focusRootNode: Node, providedOptions?: HighlightOverlayOptions ) {
 
     const options = optionize<HighlightOverlayOptions>()( {
 

@@ -43,7 +43,7 @@ export default class Sprites extends Node {
   private _spriteInstances: SpriteInstance[];
   private _hitTestSprites: boolean;
 
-  constructor( providedOptions?: SpritesOptions ) {
+  public constructor( providedOptions?: SpritesOptions ) {
 
     const options = optionize<SpritesOptions, SpecifiedSelfOptions, NodeOptions>()( {
       sprites: [],
@@ -72,18 +72,18 @@ export default class Sprites extends Node {
    * These bounds should always cover at least the area where the Sprites will draw in. If this is violated, this
    * node may be partially or completely invisible in Scenery's output.
    */
-  setCanvasBounds( selfBounds: Bounds2 ): void {
+  public setCanvasBounds( selfBounds: Bounds2 ): void {
     this.invalidateSelf( selfBounds );
   }
 
-  set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
+  public set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
 
-  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
+  public get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
 
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
    */
-  getCanvasBounds(): Bounds2 {
+  public getCanvasBounds(): Bounds2 {
     return this.getSelfBounds();
   }
 
@@ -104,7 +104,7 @@ export default class Sprites extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore Pooling
     return SpritesCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -115,7 +115,7 @@ export default class Sprites extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore Pooling
     return SpritesWebGLDrawable.createFromPool( renderer, instance );
   }
@@ -125,7 +125,7 @@ export default class Sprites extends Node {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     const inBounds = super.containsPointSelf( point );
     if ( !inBounds ) {
       return false;
@@ -142,7 +142,7 @@ export default class Sprites extends Node {
   /**
    * Finds which sprite instance is on top under a certain point (or null if none are).
    */
-  getSpriteInstanceFromPoint( point: Vector2 ): SpriteInstance | null {
+  public getSpriteInstanceFromPoint( point: Vector2 ): SpriteInstance | null {
     for ( let i = this._spriteInstances.length - 1; i >= 0; i-- ) {
       if ( this._spriteInstances[ i ].containsPoint( point ) ) {
         return this._spriteInstances[ i ];
@@ -154,7 +154,7 @@ export default class Sprites extends Node {
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  override getSelfShape(): Shape {
+  public override getSelfShape(): Shape {
     if ( this._hitTestSprites ) {
       return Shape.union( this._spriteInstances.map( instance => instance.getShape() ) );
     }
@@ -166,7 +166,7 @@ export default class Sprites extends Node {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted(): boolean {
+  public override isPainted(): boolean {
     // Always true for Sprites nodes
     return true;
   }
@@ -177,7 +177,7 @@ export default class Sprites extends Node {
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
-  invalidatePaint(): void {
+  public invalidatePaint(): void {
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       this._drawables[ i ].markDirty();

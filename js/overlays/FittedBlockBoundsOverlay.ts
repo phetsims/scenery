@@ -11,11 +11,11 @@ import { Shape } from '../../../kite/js/imports.js';
 import { BackboneDrawable, Block, Display, Drawable, FittedBlock, IOverlay, Node, scenery, ShapeBasedOverlay } from '../imports.js';
 
 export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implements IOverlay {
-  constructor( display: Display, rootNode: Node ) {
+  public constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'canvasNodeBoundsOverlay' );
   }
 
-  addShapes(): void {
+  public addShapes(): void {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this; // eslint-disable-line
 

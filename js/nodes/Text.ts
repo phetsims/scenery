@@ -64,19 +64,21 @@ export type TextOptions = SelfOptions & ParentOptions;
 export default class Text extends Paintable( Node ) {
 
   // The text to display
-  _textProperty: TinyForwardingProperty<string>;
+  private readonly _textProperty: TinyForwardingProperty<string>;
 
   // The font with which to display the text.
-  _font: Font;
+  // (scenery-internal)
+  public _font: Font;
 
-  _boundsMethod: TextBoundsMethod;
+  // (scenery-internal)
+  public _boundsMethod: TextBoundsMethod;
 
   // Whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
-  _isHTML: boolean;
+  private _isHTML: boolean;
 
   // The actual string displayed (can have non-breaking spaces and embedding marks rewritten).
   // When this is null, its value needs to be recomputed
-  _cachedRenderedText: string | null;
+  private _cachedRenderedText: string | null;
 
   // (phet-io) - property name avoids namespace of the Node setter
   private textTandem: Tandem;
@@ -86,7 +88,7 @@ export default class Text extends Paintable( Node ) {
    * @param [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( text: string | number, options?: TextOptions ) {
+  public constructor( text: string | number, options?: TextOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
@@ -113,7 +115,7 @@ export default class Text extends Paintable( Node ) {
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
 
-  override mutate( options?: TextOptions ): this {
+  public override mutate( options?: TextOptions ): this {
     // @ts-ignore
     if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
       // @ts-ignore
@@ -127,7 +129,7 @@ export default class Text extends Paintable( Node ) {
    *
    * @param text - The text to display. If it's a number, it will be cast to a string
    */
-  setText( text: string | number ): this {
+  public setText( text: string | number ): this {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
@@ -139,16 +141,16 @@ export default class Text extends Paintable( Node ) {
     return this;
   }
 
-  set text( value: string | number ) { this.setText( value ); }
+  public set text( value: string | number ) { this.setText( value ); }
 
-  get text(): string { return this.getText(); }
+  public get text(): string { return this.getText(); }
 
   /**
    * Returns the text displayed by our node.
    *
    * NOTE: If a number was provided to setText(), it will not be returned as a number here.
    */
-  getText(): string {
+  public getText(): string {
     return this._textProperty.value;
   }
 
@@ -156,7 +158,7 @@ export default class Text extends Paintable( Node ) {
    * Returns a potentially modified version of this.text, where spaces are replaced with non-breaking spaces,
    * and embedding marks are potentially simplified.
    */
-  getRenderedText(): string {
+  public getRenderedText(): string {
     if ( this._cachedRenderedText === null ) {
       // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
       this._cachedRenderedText = this.text.replace( ' ', '\xA0' );
@@ -170,7 +172,7 @@ export default class Text extends Paintable( Node ) {
     return this._cachedRenderedText;
   }
 
-  get renderedText(): string { return this.getRenderedText(); }
+  public get renderedText(): string { return this.getRenderedText(); }
 
   /**
    * Called when our text Property changes values.
@@ -189,19 +191,19 @@ export default class Text extends Paintable( Node ) {
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
-  setTextProperty( newTarget: IProperty<string> | null ): this {
+  public setTextProperty( newTarget: IProperty<string> | null ): this {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
+  public set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
 
-  get textProperty(): IProperty<string> { return this.getTextProperty(); }
+  public get textProperty(): IProperty<string> { return this.getTextProperty(); }
 
   /**
    * Like Node.getVisibleProperty(), but for the text string. Note this is not the same as the Property provided in
    * setTextProperty. Thus is the nature of TinyForwardingProperty.
    */
-  getTextProperty(): IProperty<string> {
+  public getTextProperty(): IProperty<string> {
     return this._textProperty;
   }
 
@@ -248,7 +250,7 @@ export default class Text extends Paintable( Node ) {
    *       and fast/canvasCanvas/hybrid will always return the same vertical bounds (top and bottom) for a given font
    *       when the text isn't the empty string.
    */
-  setBoundsMethod( method: TextBoundsMethod ): this {
+  public setBoundsMethod( method: TextBoundsMethod ): this {
     assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
     if ( method !== this._boundsMethod ) {
       this._boundsMethod = method;
@@ -266,14 +268,14 @@ export default class Text extends Paintable( Node ) {
     return this;
   }
 
-  set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
+  public set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
 
-  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
+  public get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
    */
-  getBoundsMethod(): TextBoundsMethod {
+  public getBoundsMethod(): TextBoundsMethod {
     return this._boundsMethod;
   }
 
@@ -304,7 +306,7 @@ export default class Text extends Paintable( Node ) {
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be isHTML, boundsMethod, etc.)
    */
-  override invalidateSupportedRenderers(): void {
+  public override invalidateSupportedRenderers(): void {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
   }
 
@@ -365,7 +367,7 @@ export default class Text extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
    * anything that depended on the old stroke's value. (scenery-internal)
    */
-  override invalidateStroke(): void {
+  public override invalidateStroke(): void {
     // stroke can change both the bounds and renderer
     this.invalidateText();
 
@@ -376,7 +378,7 @@ export default class Text extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current fill, triggering recomputation of
    * anything that depended on the old fill's value. (scenery-internal)
    */
-  override invalidateFill(): void {
+  public override invalidateFill(): void {
     // fill type can change the renderer (gradient/fill not supported by DOM)
     this.invalidateText();
 
@@ -401,7 +403,7 @@ export default class Text extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore
     return TextDOMDrawable.createFromPool( renderer, instance );
   }
@@ -412,7 +414,7 @@ export default class Text extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return TextSVGDrawable.createFromPool( renderer, instance );
   }
@@ -423,7 +425,7 @@ export default class Text extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return TextCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -433,7 +435,7 @@ export default class Text extends Paintable( Node ) {
    *
    * This is needed since we have to handle HTML text differently.
    */
-  getDOMTextNode(): any {
+  public getDOMTextNode(): any {
     if ( this._isHTML ) {
       const span = document.createElement( 'span' );
       span.innerHTML = this.text;
@@ -451,7 +453,7 @@ export default class Text extends Paintable( Node ) {
    * We need to add additional padding around the text when the text is in a container that could clip things badly
    * if the text is larger than the normal bounds computation.
    */
-  override getSafeSelfBounds(): Bounds2 {
+  public override getSafeSelfBounds(): Bounds2 {
     const expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
 
     const selfBounds = this.getSelfBounds();
@@ -467,7 +469,7 @@ export default class Text extends Paintable( Node ) {
    * is basically the CSS3 font shortcut format. If a string is provided, it will be wrapped with a new (immutable)
    * Scenery Font object.
    */
-  setFont( font: Font | string ): this {
+  public setFont( font: Font | string ): this {
     assert && assert( font instanceof Font || typeof font === 'string',
       'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
@@ -488,9 +490,9 @@ export default class Text extends Paintable( Node ) {
     return this;
   }
 
-  set font( value: Font | string ) { this.setFont( value ); }
+  public set font( value: Font | string ) { this.setFont( value ); }
 
-  get font(): string { return this.getFont(); }
+  public get font(): string { return this.getFont(); }
 
   /**
    * Returns a string representation of the current Font.
@@ -501,7 +503,7 @@ export default class Text extends Paintable( Node ) {
    * NOTE: If a Font object was provided to setFont(), this will not currently return it.
    * TODO: Can we refactor so we can have access to (a) the Font object, and possibly (b) the initially provided value.
    */
-  getFont(): string {
+  public getFont(): string {
     return this._font.getFont();
   }
 
@@ -512,22 +514,22 @@ export default class Text extends Paintable( Node ) {
    *   'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900',
    *   or a number that when cast to a string will be one of the strings above.
    */
-  setFontWeight( weight: FontWeight | number ): this {
+  public setFontWeight( weight: FontWeight | number ): this {
     return this.setFont( this._font.copy( {
       weight: weight
     } ) );
   }
 
-  set fontWeight( value: FontWeight | number ) { this.setFontWeight( value ); }
+  public set fontWeight( value: FontWeight | number ) { this.setFontWeight( value ); }
 
-  get fontWeight(): FontWeight { return this.getFontWeight(); }
+  public get fontWeight(): FontWeight { return this.getFontWeight(); }
 
   /**
    * Returns the weight of this node's font, see setFontWeight() for details.
    *
    * NOTE: If a numeric weight was passed in, it has been cast to a string, and a string will be returned here.
    */
-  getFontWeight(): FontWeight {
+  public getFontWeight(): FontWeight {
     return this._font.getWeight();
   }
 
@@ -539,20 +541,20 @@ export default class Text extends Paintable( Node ) {
    *                 is any question about escaping (such as spaces in a font name), the family should be
    *                 surrounded by double quotes.
    */
-  setFontFamily( family: string ): this {
+  public setFontFamily( family: string ): this {
     return this.setFont( this._font.copy( {
       family: family
     } ) );
   }
 
-  set fontFamily( value: string ) { this.setFontFamily( value ); }
+  public set fontFamily( value: string ) { this.setFontFamily( value ); }
 
-  get fontFamily(): string { return this.getFontFamily(); }
+  public get fontFamily(): string { return this.getFontFamily(); }
 
   /**
    * Returns the family of this node's font, see setFontFamily() for details.
    */
-  getFontFamily(): string {
+  public getFontFamily(): string {
     return this._font.getFamily();
   }
 
@@ -563,20 +565,20 @@ export default class Text extends Paintable( Node ) {
    *   'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
    *   'semi-expanded', 'expanded', 'extra-expanded' or 'ultra-expanded'
    */
-  setFontStretch( stretch: FontStretch ): this {
+  public setFontStretch( stretch: FontStretch ): this {
     return this.setFont( this._font.copy( {
       stretch: stretch
     } ) );
   }
 
-  set fontStretch( value: FontStretch ) { this.setFontStretch( value ); }
+  public set fontStretch( value: FontStretch ) { this.setFontStretch( value ); }
 
-  get fontStretch(): FontStretch { return this.getFontStretch(); }
+  public get fontStretch(): FontStretch { return this.getFontStretch(); }
 
   /**
    * Returns the stretch of this node's font, see setFontStretch() for details.
    */
-  getFontStretch(): FontStretch {
+  public getFontStretch(): FontStretch {
     return this._font.getStretch();
   }
 
@@ -585,20 +587,20 @@ export default class Text extends Paintable( Node ) {
    *
    * The font style supports the following options: 'normal', 'italic' or 'oblique'
    */
-  setFontStyle( style: FontStyle ): this {
+  public setFontStyle( style: FontStyle ): this {
     return this.setFont( this._font.copy( {
       style: style
     } ) );
   }
 
-  set fontStyle( value: FontStyle ) { this.setFontStyle( value ); }
+  public set fontStyle( value: FontStyle ) { this.setFontStyle( value ); }
 
-  get fontStyle(): FontStyle { return this.getFontStyle(); }
+  public get fontStyle(): FontStyle { return this.getFontStyle(); }
 
   /**
    * Returns the style of this node's font, see setFontStyle() for details.
    */
-  getFontStyle(): FontStyle {
+  public getFontStyle(): FontStyle {
     return this._font.getStyle();
   }
 
@@ -608,15 +610,15 @@ export default class Text extends Paintable( Node ) {
    * The size can either be a number (created as a quantity of 'px'), or any general CSS font-size string (for
    * example, '30pt', '5em', etc.)
    */
-  setFontSize( size: string | number ): this {
+  public setFontSize( size: string | number ): this {
     return this.setFont( this._font.copy( {
       size: size
     } ) );
   }
 
-  set fontSize( value: string | number ) { this.setFontSize( value ); }
+  public set fontSize( value: string | number ) { this.setFontSize( value ); }
 
-  get fontSize(): string { return this.getFontSize(); }
+  public get fontSize(): string { return this.getFontSize(); }
 
   /**
    * Returns the size of this node's font, see setFontSize() for details.
@@ -624,14 +626,14 @@ export default class Text extends Paintable( Node ) {
    * NOTE: If a numeric size was passed in, it has been converted to a string with 'px', and a string will be
    * returned here.
    */
-  getFontSize(): string {
+  public getFontSize(): string {
     return this._font.getSize();
   }
 
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted(): boolean {
+  public override isPainted(): boolean {
     // Always true for Text nodes
     return true;
   }
@@ -642,18 +644,18 @@ export default class Text extends Paintable( Node ) {
    *
    * If this value would potentially change, please trigger the event 'selfBoundsValid'.
    */
-  override areSelfBoundsValid(): boolean {
+  public override areSelfBoundsValid(): boolean {
     return this._boundsMethod === 'accurate';
   }
 
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  override getDebugHTMLExtras(): string {
+  public override getDebugHTMLExtras(): string {
     return ` "${escapeHTML( this.renderedText )}"${this._isHTML ? ' (html)' : ''}`;
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     super.dispose();
 
     this._textProperty.dispose();
@@ -664,7 +666,7 @@ export default class Text extends Paintable( Node ) {
    *
    * @returns - With embedding marks replaced.
    */
-  static embeddedDebugString( string: string ): string {
+  public static embeddedDebugString( string: string ): string {
     return string.replace( /\u202a/g, '[LTR]' ).replace( /\u202b/g, '[RTL]' ).replace( /\u202c/g, '[POP]' );
   }
 
@@ -686,7 +688,7 @@ export default class Text extends Paintable( Node ) {
    *
    * TODO: A stack-based implementation that doesn't create a bunch of objects/closures would be nice for performance.
    */
-  static simplifyEmbeddingMarks( string: string ): string {
+  public static simplifyEmbeddingMarks( string: string ): string {
     // First, we'll convert the string into a tree form, where each node is either a string object OR an object of the
     // node type { dir: {LTR||RTL}, children: {Array.<node>}, parent: {null|node} }. Thus each LTR...POP and RTL...POP
     // become a node with their interiors becoming children.
@@ -794,7 +796,7 @@ export default class Text extends Paintable( Node ) {
     return stringify( simplify( root ) );
   }
 
-  static TextIO: IOType;
+  public static TextIO: IOType;
 }
 
 /**

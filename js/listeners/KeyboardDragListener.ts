@@ -179,7 +179,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   // A reference to the Pointer during a drag operation so that we can add/remove the _pointerListener.
   private _pointer: PDOMPointer | null;
 
-  constructor( providedOptions?: KeyboardDragListenerOptions ) {
+  public constructor( providedOptions?: KeyboardDragListenerOptions ) {
 
     const options = optionize<KeyboardDragListenerOptions, SelfOptions, EnabledComponentOptions>()( {
       dragVelocity: 600,
@@ -326,7 +326,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     return this._dragBoundsProperty.value;
   }
 
-  get dragBounds() { return this.getDragBounds(); }
+  public get dragBounds() { return this.getDragBounds(); }
 
   /**
    * Sets the drag transform of the listener.
@@ -335,9 +335,9 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     this._transform = transform;
   }
 
-  set transform( transform ) { this.setTransform( transform ); }
+  public set transform( transform ) { this.setTransform( transform ); }
 
-  get transform() { return this.getTransform(); }
+  public get transform() { return this.getTransform(); }
 
   /**
    * Returns the transform of the listener.
@@ -349,74 +349,74 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   /**
    * Getter for the dragVelocity property, see options.dragVelocity for more info.
    */
-  get dragVelocity(): number { return this._dragVelocity; }
+  public get dragVelocity(): number { return this._dragVelocity; }
 
   /**
    * Setter for the dragVelocity property, see options.dragVelocity for more info.
    */
-  set dragVelocity( dragVelocity: number ) { this._dragVelocity = dragVelocity; }
+  public set dragVelocity( dragVelocity: number ) { this._dragVelocity = dragVelocity; }
 
   /**
    * Getter for the shiftDragVelocity property, see options.shiftDragVelocity for more info.
    */
-  get shiftDragVelocity(): number { return this._shiftDragVelocity; }
+  public get shiftDragVelocity(): number { return this._shiftDragVelocity; }
 
   /**
    * Setter for the shiftDragVelocity property, see options.shiftDragVelocity for more info.
    */
-  set shiftDragVelocity( shiftDragVelocity: number ) { this._shiftDragVelocity = shiftDragVelocity; }
+  public set shiftDragVelocity( shiftDragVelocity: number ) { this._shiftDragVelocity = shiftDragVelocity; }
 
   /**
    * Getter for the downDelta property, see options.downDelta for more info.
    */
-  get downDelta(): number { return this._downDelta; }
+  public get downDelta(): number { return this._downDelta; }
 
   /**
    * Setter for the downDelta property, see options.downDelta for more info.
    */
-  set downDelta( downDelta: number ) { this._downDelta = downDelta; }
+  public set downDelta( downDelta: number ) { this._downDelta = downDelta; }
 
   /**
    * Getter for the shiftDownDelta property, see options.shiftDownDelta for more info.
    */
-  get shiftDownDelta(): number { return this._shiftDownDelta; }
+  public get shiftDownDelta(): number { return this._shiftDownDelta; }
 
   /**
    * Setter for the shiftDownDelta property, see options.shiftDownDelta for more info.
    */
-  set shiftDownDelta( shiftDownDelta: number ) { this._shiftDownDelta = shiftDownDelta; }
+  public set shiftDownDelta( shiftDownDelta: number ) { this._shiftDownDelta = shiftDownDelta; }
 
   /**
    * Getter for the moveOnHoldDelay property, see options.moveOnHoldDelay for more info.
    */
-  get moveOnHoldDelay(): number { return this._moveOnHoldDelay; }
+  public get moveOnHoldDelay(): number { return this._moveOnHoldDelay; }
 
   /**
    * Setter for the moveOnHoldDelay property, see options.moveOnHoldDelay for more info.
    */
-  set moveOnHoldDelay( moveOnHoldDelay: number ) { this._moveOnHoldDelay = moveOnHoldDelay; }
+  public set moveOnHoldDelay( moveOnHoldDelay: number ) { this._moveOnHoldDelay = moveOnHoldDelay; }
 
   /**
    * Getter for the moveOnHoldInterval property, see options.moveOnHoldInterval for more info.
    */
-  get moveOnHoldInterval(): number { return this._moveOnHoldInterval; }
+  public get moveOnHoldInterval(): number { return this._moveOnHoldInterval; }
 
   /**
    * Setter for the moveOnHoldInterval property, see options.moveOnHoldInterval for more info.
    */
-  set moveOnHoldInterval( moveOnHoldInterval: number ) { this._moveOnHoldInterval = moveOnHoldInterval; }
+  public set moveOnHoldInterval( moveOnHoldInterval: number ) { this._moveOnHoldInterval = moveOnHoldInterval; }
 
   /**
    * Getter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
    */
-  get hotkeyHoldInterval(): number { return this._hotkeyHoldInterval; }
+  public get hotkeyHoldInterval(): number { return this._hotkeyHoldInterval; }
 
   /**
    * Setter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
    */
-  set hotkeyHoldInterval( hotkeyHoldInterval: number ) { this._hotkeyHoldInterval = hotkeyHoldInterval; }
+  public set hotkeyHoldInterval( hotkeyHoldInterval: number ) { this._hotkeyHoldInterval = hotkeyHoldInterval; }
 
-  get isPressed(): boolean {
+  public get isPressed(): boolean {
     return !!this._pointer;
   }
 
@@ -798,7 +798,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
            this.upMovementKeysDown() || this.downMovementKeysDown();
   }
 
-  get movementKeysDown() { return this.getMovementKeysDown(); }
+  public get movementKeysDown() { return this.getMovementKeysDown(); }
 
   /**
    * Returns true if the enter key is currently pressed down.
@@ -842,7 +842,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   /**
    * See setHotkeys() for more information.
    */
-  set hotkeys( hotkeys: Hotkey[] ) {
+  public set hotkeys( hotkeys: Hotkey[] ) {
     this.setHotkeys( hotkeys );
   }
 

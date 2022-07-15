@@ -17,7 +17,7 @@ export type GradientStop = {
 
 export default abstract class Gradient extends Paint {
 
-  stops: GradientStop[]; // (scenery-internal)
+  public stops: GradientStop[]; // (scenery-internal)
   private lastStopRatio: number;
   private canvasGradient: CanvasGradient | null; // lazily created
 
@@ -30,7 +30,7 @@ export default abstract class Gradient extends Paint {
   /**
    * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
    */
-  constructor() {
+  public constructor() {
     super();
 
     assert && assert( this.constructor.name !== 'Gradient',
@@ -57,7 +57,7 @@ export default abstract class Gradient extends Paint {
    * @param color
    * @returns - for chaining
    */
-  addColorStop( ratio: number, color: IColor ): this {
+  public addColorStop( ratio: number, color: IColor ): this {
     assert && assert( typeof ratio === 'number', 'Ratio needs to be a number' );
     assert && assert( ratio >= 0 && ratio <= 1, 'Ratio needs to be between 0,1 inclusively' );
     assert && assert( color === null ||
@@ -90,12 +90,12 @@ export default abstract class Gradient extends Paint {
   /**
    * Subtypes should return a fresh CanvasGradient type.
    */
-  abstract createCanvasGradient(): CanvasGradient;
+  public abstract createCanvasGradient(): CanvasGradient;
 
   /**
    * Returns stops suitable for direct SVG use.
    */
-  getSVGStops(): GradientStop[] {
+  public getSVGStops(): GradientStop[] {
     return this.stops;
   }
 
@@ -103,7 +103,7 @@ export default abstract class Gradient extends Paint {
    * Forces a re-check of whether colors have changed, so that the Canvas gradient can be regenerated if
    * necessary.
    */
-  invalidateCanvasGradient(): void {
+  public invalidateCanvasGradient(): void {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `Invalidated Canvas Gradient for #${this.id}` );
     this.colorStopsDirty = true;
   }
@@ -130,7 +130,7 @@ export default abstract class Gradient extends Paint {
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
    */
-  getCanvasStyle(): CanvasGradient {
+  public getCanvasStyle(): CanvasGradient {
     // Check if we need to regenerate the Canvas gradient
     if ( !this.canvasGradient || ( this.colorStopsDirty && this.haveCanvasColorStopsChanged() ) ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `Regenerating Canvas Gradient for #${this.id}` );
@@ -160,7 +160,7 @@ export default abstract class Gradient extends Paint {
   /**
    * Returns the current value of the generally-allowed color types for Gradient, as a string.
    */
-  static colorToString( color: IColor ): string {
+  public static colorToString( color: IColor ): string {
     // to {Color|string|null}
     if ( color instanceof ReadOnlyProperty ) {
       color = color.value;
@@ -179,7 +179,7 @@ export default abstract class Gradient extends Paint {
     return color as string;
   }
 
-  isGradient!: boolean;
+  public isGradient!: boolean;
 }
 
 Gradient.prototype.isGradient = true;

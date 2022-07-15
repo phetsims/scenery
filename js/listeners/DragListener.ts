@@ -171,7 +171,7 @@ const isPressedListener = ( listener: DragListener ): listener is PressedDragLis
 export default class DragListener extends PressListener implements IInputListener {
 
   // Alias for isPressedProperty (as this name makes more sense for dragging)
-  isUserControlledProperty: IProperty<boolean>;
+  public isUserControlledProperty: IProperty<boolean>;
 
   private _allowTouchSnag: RequiredOption<SelfOptions<DragListener>, 'allowTouchSnag'>;
   private _applyOffset: RequiredOption<SelfOptions<DragListener>, 'applyOffset'>;
@@ -222,7 +222,7 @@ export default class DragListener extends PressListener implements IInputListene
   private _dragAction: PhetioAction<[ PressListenerEvent ]>;
 
 
-  constructor( providedOptions?: DragListenerOptions<PressedDragListener> ) {
+  public constructor( providedOptions?: DragListenerOptions<PressedDragListener> ) {
     const options = optionize<DragListenerOptions<PressedDragListener>, SelfOptions<PressedDragListener>, PressListenerOptions<PressedDragListener>>()( {
       positionProperty: null,
       start: null,
@@ -329,7 +329,7 @@ export default class DragListener extends PressListener implements IInputListene
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  override press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ): boolean {
+  public override press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ): boolean {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -383,7 +383,7 @@ export default class DragListener extends PressListener implements IInputListene
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  override release( event?: PressListenerEvent, callback?: () => void ): void {
+  public override release( event?: PressListenerEvent, callback?: () => void ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -404,7 +404,7 @@ export default class DragListener extends PressListener implements IInputListene
    * input would pick up the component then immediately release it. But occasionally that is desirable and can be
    * controlled with the allowClick option.
    */
-  override canClick(): boolean {
+  public override canClick(): boolean {
     return super.canClick() && this._allowClick;
   }
 
@@ -415,7 +415,7 @@ export default class DragListener extends PressListener implements IInputListene
    * components that have drag functionality but can still be activated with a single click event.
    * (scenery-internal) (part of the scenery listener API)
    */
-  override click( event: PressListenerEvent, callback?: () => void ): boolean {
+  public override click( event: PressListenerEvent, callback?: () => void ): boolean {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener click' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -442,7 +442,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Called when move events are fired on the attached pointer listener during a drag.
    */
-  override drag( event: PressListenerEvent ): void {
+  public override drag( event: PressListenerEvent ): void {
     assert && assert( isPressedListener( this ) );
     const pressedListener = this as PressedDragListener;
 
@@ -467,7 +467,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * Should be safe to be called externally with an event.
    */
-  tryTouchSnag( event: PressListenerEvent ): void {
+  public tryTouchSnag( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -481,47 +481,47 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Returns a defensive copy of the local-coordinate-frame point of the drag.
    */
-  getGlobalPoint(): Vector2 {
+  public getGlobalPoint(): Vector2 {
     return this._globalPoint.copy();
   }
 
-  get globalPoint(): Vector2 { return this.getGlobalPoint(); }
+  public get globalPoint(): Vector2 { return this.getGlobalPoint(); }
 
   /**
    * Returns a defensive copy of the local-coordinate-frame point of the drag.
    */
-  getLocalPoint(): Vector2 {
+  public getLocalPoint(): Vector2 {
     return this._localPoint.copy();
   }
 
-  get localPoint(): Vector2 { return this.getLocalPoint(); }
+  public get localPoint(): Vector2 { return this.getLocalPoint(); }
 
   /**
    * Returns a defensive copy of the parent-coordinate-frame point of the drag.
    */
-  getParentPoint(): Vector2 {
+  public getParentPoint(): Vector2 {
     return this._parentPoint.copy();
   }
 
-  get parentPoint(): Vector2 { return this.getParentPoint(); }
+  public get parentPoint(): Vector2 { return this.getParentPoint(); }
 
   /**
    * Returns a defensive copy of the model-coordinate-frame point of the drag.
    */
-  getModelPoint(): Vector2 {
+  public getModelPoint(): Vector2 {
     return this._modelPoint.copy();
   }
 
-  get modelPoint(): Vector2 { return this.getModelPoint(); }
+  public get modelPoint(): Vector2 { return this.getModelPoint(); }
 
   /**
    * Returns a defensive copy of the model-coordinate-frame delta.
    */
-  getModelDelta(): Vector2 {
+  public getModelDelta(): Vector2 {
     return this._modelDelta.copy();
   }
 
-  get modelDelta(): Vector2 { return this.getModelDelta(); }
+  public get modelDelta(): Vector2 { return this.getModelDelta(); }
 
   /**
    * Maps a point from the global coordinate frame to our drag target's parent coordinate frame.
@@ -664,7 +664,7 @@ export default class DragListener extends PressListener implements IInputListene
    * Should be called when something that changes the output positions of the drag occurs (most often, a drag event
    * itself).
    */
-  reposition( globalPoint: Vector2 ): void {
+  public reposition( globalPoint: Vector2 ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener reposition' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -704,7 +704,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * NOTE: Do not call directly. See the press method instead.
    */
-  touchenter( event: PressListenerEvent ): void {
+  public touchenter( event: PressListenerEvent ): void {
     this.tryTouchSnag( event );
   }
 
@@ -713,7 +713,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * NOTE: Do not call directly. See the press method instead.
    */
-  touchmove( event: PressListenerEvent ): void {
+  public touchmove( event: PressListenerEvent ): void {
     this.tryTouchSnag( event );
   }
 
@@ -758,29 +758,29 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Returns the drag bounds of the listener.
    */
-  getDragBounds(): Bounds2 | null {
+  public getDragBounds(): Bounds2 | null {
     return this._dragBoundsProperty.value;
   }
 
-  get dragBounds(): Bounds2 | null { return this.getDragBounds(); }
+  public get dragBounds(): Bounds2 | null { return this.getDragBounds(); }
 
   /**
    * Sets the drag transform of the listener.
    */
-  setTransform( transform: Transform3 | null ): void {
+  public setTransform( transform: Transform3 | null ): void {
     assert && assert( transform === null || transform instanceof Transform3 );
 
     this._transform = transform;
   }
 
-  set transform( transform: Transform3 | null ) { this.setTransform( transform ); }
+  public set transform( transform: Transform3 | null ) { this.setTransform( transform ); }
 
-  get transform(): Transform3 | null { return this.getTransform(); }
+  public get transform(): Transform3 | null { return this.getTransform(); }
 
   /**
    * Returns the transform of the listener.
    */
-  getTransform(): Transform3 | null {
+  public getTransform(): Transform3 | null {
     return this._transform;
   }
 
@@ -792,7 +792,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
-  override interrupt(): void {
+  public override interrupt(): void {
     if ( this.pointer && this.pointer.isTouchLike() ) {
       this._lastInterruptedTouchLikePointer = this.pointer;
     }
@@ -803,7 +803,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Returns whether a press can be started with a particular event.
    */
-  override canPress( event: PressListenerEvent ): boolean {
+  public override canPress( event: PressListenerEvent ): boolean {
     if ( event.pointer === this._lastInterruptedTouchLikePointer ) {
       return false;
     }
@@ -814,7 +814,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Disposes the listener, releasing references. It should not be used after this.
    */
-  override dispose(): void {
+  public override dispose(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener dispose' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -833,7 +833,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * See https://github.com/phetsims/scenery/issues/639
    */
-  static createForwardingListener( down: ( event: PressListenerEvent ) => void, providedOptions?: CreateForwardingListenerOptions ): IInputListener {
+  public static createForwardingListener( down: ( event: PressListenerEvent ) => void, providedOptions?: CreateForwardingListenerOptions ): IInputListener {
 
     const options = optionize<CreateForwardingListenerOptions, CreateForwardingListenerOptions>()( {
       allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999

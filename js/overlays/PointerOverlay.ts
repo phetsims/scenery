@@ -15,16 +15,16 @@ import { scenery, PDOMPointer, svgns, Utils, Display, Node, Pointer, IOverlay } 
 
 export default class PointerOverlay implements IOverlay {
 
-  display: Display;
-  rootNode: Node;
+  protected display: Display;
+  protected rootNode: Node;
 
-  pointerSVGContainer: HTMLDivElement;
+  protected pointerSVGContainer: HTMLDivElement;
 
-  domElement: HTMLDivElement;
+  public domElement: HTMLDivElement;
 
   private pointerAdded: ( pointer: Pointer ) => void;
 
-  constructor( display: Display, rootNode: Node ) {
+  public constructor( display: Display, rootNode: Node ) {
     this.display = display;
     this.rootNode = rootNode;
 
@@ -128,13 +128,13 @@ export default class PointerOverlay implements IOverlay {
   /**
    * Releases references
    */
-  dispose(): void {
+  public dispose(): void {
     this.display._input!.pointerAddedEmitter.removeListener( this.pointerAdded );
   }
 
   /**
    */
-  update(): void {
+  public update(): void {
     // Required for type 'IOverlay'
   }
 }

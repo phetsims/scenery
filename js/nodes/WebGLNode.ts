@@ -65,7 +65,7 @@ export default abstract class WebGLNode extends Node {
    * @param [options] - WebGLNode-specific options are documented in LINE_OPTION_KEYS above, and can be
    *                    provided along-side options for Node
    */
-  constructor( painterType: WebGLNodePainterType, options?: WebGLNodeOptions ) {
+  public constructor( painterType: WebGLNodePainterType, options?: WebGLNodeOptions ) {
     super( options );
 
     assert && assert( typeof painterType === 'function', 'Painter type now required by WebGLNode' );
@@ -82,27 +82,27 @@ export default abstract class WebGLNode extends Node {
    * These bounds should always cover at least the area where the WebGLNode will draw in. If this is violated, this
    * node may be partially or completely invisible in Scenery's output.
    */
-  setCanvasBounds( selfBounds: Bounds2 ): this {
+  public setCanvasBounds( selfBounds: Bounds2 ): this {
     this.invalidateSelf( selfBounds );
 
     return this;
   }
 
-  set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
+  public set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
 
-  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
+  public get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
 
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
    */
-  getCanvasBounds(): Bounds2 {
+  public getCanvasBounds(): Bounds2 {
     return this.getSelfBounds();
   }
 
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted(): boolean {
+  public override isPainted(): boolean {
     // Always true for WebGL nodes
     return true;
   }
@@ -113,7 +113,7 @@ export default abstract class WebGLNode extends Node {
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
-  invalidatePaint(): void {
+  public invalidatePaint(): void {
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       this._drawables[ i ].markDirty();
@@ -127,14 +127,14 @@ export default abstract class WebGLNode extends Node {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     return false;
   }
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  override getSelfShape(): Shape {
+  public override getSelfShape(): Shape {
     return new Shape();
   }
 
@@ -156,7 +156,7 @@ export default abstract class WebGLNode extends Node {
    * @param wrapper
    * @param matrix - The current transformation matrix associated with the wrapper
    */
-  override renderToCanvasSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
+  public override renderToCanvasSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     const width = wrapper.canvas.width;
     const height = wrapper.canvas.height;
 
@@ -199,16 +199,16 @@ export default abstract class WebGLNode extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore TODO: pooling
     return WebGLNodeDrawable.createFromPool( renderer, instance );
   }
 
   // Return code from painter.paint() when nothing was painted to the WebGL context.
-  static PAINTED_NOTHING: 0;
+  public static PAINTED_NOTHING: 0;
 
   // Return code from painter.paint() when something was painted to the WebGL context.
-  static PAINTED_SOMETHING: 1;
+  public static PAINTED_SOMETHING: 1;
 }
 
 /**

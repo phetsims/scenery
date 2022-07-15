@@ -21,12 +21,12 @@ const scratchVector = new Vector2( 0, 0 );
 const scratchMatrix = Matrix3.IDENTITY.copy();
 
 export class SpriteInstanceTransformType extends EnumerationValue {
-  static readonly TRANSLATION = new SpriteInstanceTransformType();
-  static readonly TRANSLATION_AND_SCALE = new SpriteInstanceTransformType();
-  static readonly TRANSLATION_AND_ROTATION = new SpriteInstanceTransformType();
-  static readonly AFFINE = new SpriteInstanceTransformType();
+  public static readonly TRANSLATION = new SpriteInstanceTransformType();
+  public static readonly TRANSLATION_AND_SCALE = new SpriteInstanceTransformType();
+  public static readonly TRANSLATION_AND_ROTATION = new SpriteInstanceTransformType();
+  public static readonly AFFINE = new SpriteInstanceTransformType();
 
-  static readonly enumeration = new Enumeration( SpriteInstanceTransformType, {
+  public static readonly enumeration = new Enumeration( SpriteInstanceTransformType, {
     phetioDocumentation: 'Defines the available transform type for a SpriteInstance'
   } );
 }
@@ -35,19 +35,19 @@ export default class SpriteInstance {
 
   // This should be set to a `Sprite` object which is the sprite that should be displayed.
   // This field is expected to be set by the client whenever it needs to change.
-  sprite: Sprite | null;
+  public sprite: Sprite | null;
 
   // Please just mutate the given Matrix3 for performance. If the matrix represents something
   // other than just a translation, please update the `transformType` to the type that represents the possible
   // values.
-  matrix: Matrix3;
+  public matrix: Matrix3;
 
-  transformType: SpriteInstanceTransformType;
+  public transformType: SpriteInstanceTransformType;
 
   // The general opacity/alpha of the displayed sprite (see Node's opacity)
-  alpha: number;
+  public alpha: number;
 
-  constructor() {
+  public constructor() {
 
     this.sprite = null;
     this.matrix = new Matrix3().setToAffine( 1, 0, 0, 0, 1, 0 ); // initialized to trigger the affine flag
@@ -67,7 +67,7 @@ export default class SpriteInstance {
   /**
    * Returns a Shape that represents the hit-testable area of this SpriteInstance.
    */
-  getShape(): Shape {
+  public getShape(): Shape {
     if ( this.sprite ) {
       return this.sprite.getShape().transformed( this.matrix );
     }
@@ -79,7 +79,7 @@ export default class SpriteInstance {
   /**
    * Returns whether a given point is considered "inside" the SpriteInstance
    */
-  containsPoint( point: Vector2 ): boolean {
+  public containsPoint( point: Vector2 ): boolean {
     if ( !this.sprite ) {
       return false;
     }
@@ -105,11 +105,11 @@ export default class SpriteInstance {
     return this.sprite.containsPoint( position );
   }
 
-  freeToPool(): void {
+  public freeToPool(): void {
     SpriteInstance.pool.freeToPool( this );
   }
 
-  static pool = new Pool( SpriteInstance, {
+  public static pool = new Pool( SpriteInstance, {
     maxSize: 1000
   } );
 }

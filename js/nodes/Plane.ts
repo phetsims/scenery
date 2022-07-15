@@ -15,7 +15,7 @@ import { scenery, Rectangle, RectangleOptions } from '../imports.js';
 export type PlaneOptions = RectangleOptions;
 
 export default class Plane extends Rectangle {
-  constructor( options?: PlaneOptions ) {
+  public constructor( options?: PlaneOptions ) {
     super( -2000, -2000, 6000, 6000, options );
   }
 }

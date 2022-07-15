@@ -149,7 +149,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
      * Resets values to their original state
      * (scenery-internal)
      */
-    setConfigToInherit(): void {
+    public setConfigToInherit(): void {
       this._xAlign = null;
       this._yAlign = null;
       this._xStretch = null;

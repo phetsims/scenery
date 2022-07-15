@@ -13,8 +13,8 @@ import { scenery, Gradient, SVGLinearGradient, SVGBlock, ColorDef } from '../imp
 
 export default class LinearGradient extends Gradient {
 
-  start: Vector2;
-  end: Vector2;
+  public start: Vector2;
+  public end: Vector2;
 
   /**
    * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
@@ -24,7 +24,7 @@ export default class LinearGradient extends Gradient {
    * @param x1 - X coordinate of the end point (ratio 1) in the local coordinate frame
    * @param y1 - Y coordinate of the end point (ratio 1) in the local coordinate frame
    */
-  constructor( x0: number, y0: number, x1: number, y1: number ) {
+  public constructor( x0: number, y0: number, x1: number, y1: number ) {
     assert && assert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
 
     super();
@@ -37,7 +37,7 @@ export default class LinearGradient extends Gradient {
   /**
    * Returns a fresh gradient given the starting parameters
    */
-  createCanvasGradient(): CanvasGradient {
+  public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
     // @ts-ignore TODO scenery namespace
     return scenery.scratchContext.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
@@ -46,14 +46,14 @@ export default class LinearGradient extends Gradient {
   /**
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
-  createSVGPaint( svgBlock: SVGBlock ): SVGLinearGradient {
+  public createSVGPaint( svgBlock: SVGBlock ): SVGLinearGradient {
     return SVGLinearGradient.pool.create( svgBlock, this );
   }
 
   /**
    * Returns a string form of this object
    */
-  override toString(): string {
+  public override toString(): string {
     let result = `new scenery.LinearGradient( ${this.start.x}, ${this.start.y}, ${this.end.x}, ${this.end.y} )`;
 
     _.each( this.stops, stop => {
@@ -63,7 +63,7 @@ export default class LinearGradient extends Gradient {
     return result;
   }
 
-  isLinearGradient!: boolean;
+  public isLinearGradient!: boolean;
 }
 
 LinearGradient.prototype.isLinearGradient = true;

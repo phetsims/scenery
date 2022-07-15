@@ -14,7 +14,7 @@ import { Line, LineOptions, scenery } from '../../imports.js';
 export type DividerOptions = LineOptions;
 
 export default class Divider extends Line {
-  constructor( providedOptions?: LineOptions ) {
+  public constructor( providedOptions?: LineOptions ) {
     super( optionize<LineOptions, EmptyObjectType, LineOptions>()( {
       layoutOptions: {
         stretch: true

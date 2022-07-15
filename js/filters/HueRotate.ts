@@ -12,12 +12,12 @@ import { scenery, ColorMatrixFilter } from '../imports.js';
 
 export default class HueRotate extends ColorMatrixFilter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * @param amount - In radians, the amount of hue to color-shift
    */
-  constructor( amount: number ) {
+  public constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'HueRotate amount should be a number' );
     assert && assert( isFinite( amount ), 'HueRotate amount should be finite' );
     assert && assert( amount >= 0, 'HueRotate amount should be non-negative' );
@@ -50,11 +50,11 @@ export default class HueRotate extends ColorMatrixFilter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  override getCSSFilterString(): string {
+  public override getCSSFilterString(): string {
     return `hue-rotate(${toSVGNumber( Utils.toDegrees( this.amount ) )}deg)`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 }

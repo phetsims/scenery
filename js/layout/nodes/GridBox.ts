@@ -138,7 +138,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   private readonly onChildRemoved: ( node: Node ) => void;
   private readonly onChildVisibilityToggled: () => void;
 
-  constructor( providedOptions?: GridBoxOptions ) {
+  public constructor( providedOptions?: GridBoxOptions ) {
     const options = optionize<GridBoxOptions, StrictOmit<SelfOptions, Exclude<keyof GridConstraintOptions, GridConstraintExcludedOptions> | 'rows' | 'columns' | 'autoRows' | 'autoColumns'>,
       LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
@@ -193,7 +193,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
    *
    * See GridBox.rows or GridBox.columns for usages and more documentation.
    */
-  setLines( orientation: Orientation, lineArrays: LineArrays ): void {
+  public setLines( orientation: Orientation, lineArrays: LineArrays ): void {
     const children: Node[] = [];
 
     for ( let i = 0; i < lineArrays.length; i++ ) {
@@ -222,7 +222,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
    *
    * See GridBox.rows or GridBox.columns for usages
    */
-  getLines( orientation: Orientation ): LineArrays {
+  public getLines( orientation: Orientation ): LineArrays {
     const lineArrays: LineArrays = [];
 
     for ( const cell of this._cellMap.values() ) {
@@ -251,14 +251,14 @@ export default class GridBox extends LayoutNode<GridConstraint> {
    * The inner arrays will be the rows of the grid.
    * Mutates layoutOptions of the provided Nodes. See setLines() for more documentation.
    */
-  set rows( lineArrays: LineArrays ) {
+  public set rows( lineArrays: LineArrays ) {
     this.setLines( Orientation.VERTICAL, lineArrays );
   }
 
   /**
    * Returns a two-dimensional array of the child Nodes (with null as a spacer) where the inner arrays are the rows.
    */
-  get rows(): LineArrays {
+  public get rows(): LineArrays {
     return this.getLines( Orientation.VERTICAL );
   }
 
@@ -267,21 +267,21 @@ export default class GridBox extends LayoutNode<GridConstraint> {
    * The inner arrays will be the columns of the grid.
    * * Mutates layoutOptions of the provided Nodes. See setLines() for more documentation.
    */
-  set columns( lineArrays: LineArrays ) {
+  public set columns( lineArrays: LineArrays ) {
     this.setLines( Orientation.HORIZONTAL, lineArrays );
   }
 
   /**
    * Returns a two-dimensional array of the child Nodes (with null as a spacer) where the inner arrays are the columns.
    */
-  get columns(): LineArrays {
+  public get columns(): LineArrays {
     return this.getLines( Orientation.HORIZONTAL );
   }
 
   /**
    * Returns the Node at a specific row/column intersection (or null if there are none)
    */
-  getNodeAt( row: number, column: number ): Node | null {
+  public getNodeAt( row: number, column: number ): Node | null {
     const cell = this.constraint.getCell( row, column );
 
     return cell ? cell.node : null;
@@ -290,7 +290,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Returns the row index of a child Node (or if it spans multiple rows, the first row)
    */
-  getRowOfNode( node: Node ): number {
+  public getRowOfNode( node: Node ): number {
     assert && assert( this.children.includes( node ) );
 
     return this.constraint.getCellFromNode( node )!.position.vertical;
@@ -299,7 +299,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Returns the column index of a child Node (or if it spans multiple columns, the first row)
    */
-  getColumnOfNode( node: Node ): number {
+  public getColumnOfNode( node: Node ): number {
     assert && assert( this.children.includes( node ) );
 
     return this.constraint.getCellFromNode( node )!.position.horizontal;
@@ -308,21 +308,21 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Returns all the Nodes in a given row (by index)
    */
-  getNodesInRow( index: number ): Node[] {
+  public getNodesInRow( index: number ): Node[] {
     return this.constraint.getCells( Orientation.VERTICAL, index ).map( cell => cell.node );
   }
 
   /**
    * Returns all the Nodes in a given column (by index)
    */
-  getNodesInColumn( index: number ): Node[] {
+  public getNodesInColumn( index: number ): Node[] {
     return this.constraint.getCells( Orientation.HORIZONTAL, index ).map( cell => cell.node );
   }
 
   /**
    * Adds an array of child Nodes (with null allowed as empty spacers) at the bottom of all existing rows.
    */
-  addRow( row: LineArray ): this {
+  public addRow( row: LineArray ): this {
 
     this.rows = [ ...this.rows, row ];
 
@@ -332,7 +332,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Adds an array of child Nodes (with null allowed as empty spacers) at the right of all existing columns.
    */
-  addColumn( column: LineArray ): this {
+  public addColumn( column: LineArray ): this {
 
     this.columns = [ ...this.columns, column ];
 
@@ -342,7 +342,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Inserts a row of child Nodes at a given row index (see addRow for more information)
    */
-  insertRow( index: number, row: LineArray ): this {
+  public insertRow( index: number, row: LineArray ): this {
 
     this.rows = [ ...this.rows.slice( 0, index ), row, ...this.rows.slice( index ) ];
 
@@ -352,7 +352,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Inserts a column of child Nodes at a given column index (see addColumn for more information)
    */
-  insertColumn( index: number, column: LineArray ): this {
+  public insertColumn( index: number, column: LineArray ): this {
 
     this.columns = [ ...this.columns.slice( 0, index ), column, ...this.columns.slice( index ) ];
 
@@ -362,7 +362,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Removes all child Nodes in a given row
    */
-  removeRow( index: number ): this {
+  public removeRow( index: number ): this {
 
     this.rows = [ ...this.rows.slice( 0, index ), ...this.rows.slice( index + 1 ) ];
 
@@ -372,14 +372,14 @@ export default class GridBox extends LayoutNode<GridConstraint> {
   /**
    * Removes all child Nodes in a given column
    */
-  removeColumn( index: number ): this {
+  public removeColumn( index: number ): this {
 
     this.columns = [ ...this.columns.slice( 0, index ), ...this.columns.slice( index + 1 ) ];
 
     return this;
   }
 
-  set autoRows( value: number | null ) {
+  public set autoRows( value: number | null ) {
     assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 1 ) );
 
     if ( this._autoRows !== value ) {
@@ -389,11 +389,11 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     }
   }
 
-  get autoRows(): number | null {
+  public get autoRows(): number | null {
     return this._autoRows;
   }
 
-  set autoColumns( value: number | null ) {
+  public set autoColumns( value: number | null ) {
     assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 1 ) );
 
     if ( this._autoColumns !== value ) {
@@ -403,7 +403,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     }
   }
 
-  get autoColumns(): number | null {
+  public get autoColumns(): number | null {
     return this._autoColumns;
   }
 
@@ -466,7 +466,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this.updateAutoColumns();
   }
 
-  override setChildren( children: Node[] ): this {
+  public override setChildren( children: Node[] ): this {
 
     const oldChildren = this.getChildren(); // defensive copy
 
@@ -518,7 +518,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     node.visibleProperty.unlink( this.onChildVisibilityToggled );
   }
 
-  override mutate( options?: GridBoxOptions ): this {
+  public override mutate( options?: GridBoxOptions ): this {
     // children can be used with one of autoRows/autoColumns, but otherwise these options are exclusive
     assertMutuallyExclusiveOptions( options, [ 'rows' ], [ 'columns' ], [ 'children', 'autoRows', 'autoColumns' ] );
     if ( options ) {
@@ -529,179 +529,179 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     return super.mutate( options );
   }
 
-  get spacing(): number | number[] {
+  public get spacing(): number | number[] {
     return this._constraint.spacing;
   }
 
-  set spacing( value: number | number[] ) {
+  public set spacing( value: number | number[] ) {
     this._constraint.spacing = value;
   }
 
-  get xSpacing(): number | number[] {
+  public get xSpacing(): number | number[] {
     return this._constraint.xSpacing;
   }
 
-  set xSpacing( value: number | number[] ) {
+  public set xSpacing( value: number | number[] ) {
     this._constraint.xSpacing = value;
   }
 
-  get ySpacing(): number | number[] {
+  public get ySpacing(): number | number[] {
     return this._constraint.ySpacing;
   }
 
-  set ySpacing( value: number | number[] ) {
+  public set ySpacing( value: number | number[] ) {
     this._constraint.ySpacing = value;
   }
 
-  get xAlign(): HorizontalLayoutAlign {
+  public get xAlign(): HorizontalLayoutAlign {
     return this._constraint.xAlign!;
   }
 
-  set xAlign( value: HorizontalLayoutAlign ) {
+  public set xAlign( value: HorizontalLayoutAlign ) {
     this._constraint.xAlign = value;
   }
 
-  get yAlign(): VerticalLayoutAlign {
+  public get yAlign(): VerticalLayoutAlign {
     return this._constraint.yAlign!;
   }
 
-  set yAlign( value: VerticalLayoutAlign ) {
+  public set yAlign( value: VerticalLayoutAlign ) {
     this._constraint.yAlign = value;
   }
 
-  get grow(): number {
+  public get grow(): number {
     return this._constraint.grow!;
   }
 
-  set grow( value: number ) {
+  public set grow( value: number ) {
     this._constraint.grow = value;
   }
 
-  get xGrow(): number {
+  public get xGrow(): number {
     return this._constraint.xGrow!;
   }
 
-  set xGrow( value: number ) {
+  public set xGrow( value: number ) {
     this._constraint.xGrow = value;
   }
 
-  get yGrow(): number {
+  public get yGrow(): number {
     return this._constraint.yGrow!;
   }
 
-  set yGrow( value: number ) {
+  public set yGrow( value: number ) {
     this._constraint.yGrow = value;
   }
 
-  get stretch(): boolean {
+  public get stretch(): boolean {
     return this._constraint.stretch!;
   }
 
-  set stretch( value: boolean ) {
+  public set stretch( value: boolean ) {
     this._constraint.stretch = value;
   }
 
-  get xStretch(): boolean {
+  public get xStretch(): boolean {
     return this._constraint.xStretch!;
   }
 
-  set xStretch( value: boolean ) {
+  public set xStretch( value: boolean ) {
     this._constraint.xStretch = value;
   }
 
-  get yStretch(): boolean {
+  public get yStretch(): boolean {
     return this._constraint.yStretch!;
   }
 
-  set yStretch( value: boolean ) {
+  public set yStretch( value: boolean ) {
     this._constraint.yStretch = value;
   }
 
-  get margin(): number {
+  public get margin(): number {
     return this._constraint.margin!;
   }
 
-  set margin( value: number ) {
+  public set margin( value: number ) {
     this._constraint.margin = value;
   }
 
-  get xMargin(): number {
+  public get xMargin(): number {
     return this._constraint.xMargin!;
   }
 
-  set xMargin( value: number ) {
+  public set xMargin( value: number ) {
     this._constraint.xMargin = value;
   }
 
-  get yMargin(): number {
+  public get yMargin(): number {
     return this._constraint.yMargin!;
   }
 
-  set yMargin( value: number ) {
+  public set yMargin( value: number ) {
     this._constraint.yMargin = value;
   }
 
-  get leftMargin(): number {
+  public get leftMargin(): number {
     return this._constraint.leftMargin!;
   }
 
-  set leftMargin( value: number ) {
+  public set leftMargin( value: number ) {
     this._constraint.leftMargin = value;
   }
 
-  get rightMargin(): number {
+  public get rightMargin(): number {
     return this._constraint.rightMargin!;
   }
 
-  set rightMargin( value: number ) {
+  public set rightMargin( value: number ) {
     this._constraint.rightMargin = value;
   }
 
-  get topMargin(): number {
+  public get topMargin(): number {
     return this._constraint.topMargin!;
   }
 
-  set topMargin( value: number ) {
+  public set topMargin( value: number ) {
     this._constraint.topMargin = value;
   }
 
-  get bottomMargin(): number {
+  public get bottomMargin(): number {
     return this._constraint.bottomMargin!;
   }
 
-  set bottomMargin( value: number ) {
+  public set bottomMargin( value: number ) {
     this._constraint.bottomMargin = value;
   }
 
-  get minContentWidth(): number | null {
+  public get minContentWidth(): number | null {
     return this._constraint.minContentWidth;
   }
 
-  set minContentWidth( value: number | null ) {
+  public set minContentWidth( value: number | null ) {
     this._constraint.minContentWidth = value;
   }
 
-  get minContentHeight(): number | null {
+  public get minContentHeight(): number | null {
     return this._constraint.minContentHeight;
   }
 
-  set minContentHeight( value: number | null ) {
+  public set minContentHeight( value: number | null ) {
     this._constraint.minContentHeight = value;
   }
 
-  get maxContentWidth(): number | null {
+  public get maxContentWidth(): number | null {
     return this._constraint.maxContentWidth;
   }
 
-  set maxContentWidth( value: number | null ) {
+  public set maxContentWidth( value: number | null ) {
     this._constraint.maxContentWidth = value;
   }
 
-  get maxContentHeight(): number | null {
+  public get maxContentHeight(): number | null {
     return this._constraint.maxContentHeight;
   }
 
-  set maxContentHeight( value: number | null ) {
+  public set maxContentHeight( value: number | null ) {
     this._constraint.maxContentHeight = value;
   }
 
@@ -712,7 +712,7 @@ export default class GridBox extends LayoutNode<GridConstraint> {
     this.updateAllAutoLines();
   }
 
-  override dispose(): void {
+  public override dispose(): void {
 
     // Lock our layout forever
     this._constraint.lock();

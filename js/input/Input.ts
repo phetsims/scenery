@@ -262,28 +262,28 @@ type EventListenerOptions = { capture?: boolean; passive?: boolean; once?: boole
 
 export default class Input extends PhetioObject {
 
-  display: Display;
-  rootNode: Node;
+  public readonly display: Display;
+  public readonly rootNode: Node;
 
-  attachToWindow: boolean;
-  batchDOMEvents: boolean;
-  assumeFullWindow: boolean;
-  passiveEvents: boolean | null;
+  public readonly attachToWindow: boolean;
+  public readonly batchDOMEvents: boolean;
+  public readonly assumeFullWindow: boolean;
+  public readonly passiveEvents: boolean | null;
 
   // Pointer for accessibility, only created lazily on first pdom event.
-  pdomPointer: PDOMPointer | null;
+  public pdomPointer: PDOMPointer | null;
 
   // Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets.
-  mouse: Mouse | null;
+  public mouse: Mouse | null;
 
   // All active pointers.
-  pointers: Pointer[];
+  public pointers: Pointer[];
 
-  pointerAddedEmitter: TinyEmitter<[ Pointer ]>;
+  public pointerAddedEmitter: TinyEmitter<[ Pointer ]>;
 
   // Whether we are currently firing events. We need to track this to handle re-entrant cases
   // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
-  currentlyFiringEvents: boolean;
+  public currentlyFiringEvents: boolean;
 
   private batchedEvents: BatchedDOMEvent[];
 
@@ -295,33 +295,33 @@ export default class Input extends PhetioObject {
 
   // Emits pointer validation to the input stream for playback
   // This is a high frequency event that is necessary for reproducible playbacks
-  private validatePointersAction: PhetioAction;
+  private readonly validatePointersAction: PhetioAction;
 
-  private mouseUpAction: PhetioAction<[ Vector2, MouseEvent ]>;
-  private mouseDownAction: PhetioAction<[ number, Vector2, MouseEvent ]>;
-  private mouseMoveAction: PhetioAction<[ Vector2, MouseEvent ]>;
-  private mouseOverAction: PhetioAction<[ Vector2, MouseEvent ]>;
-  private mouseOutAction: PhetioAction<[ Vector2, MouseEvent ]>;
-  private wheelScrollAction: PhetioAction<[ WheelEvent ]>;
-  private touchStartAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private touchEndAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private touchMoveAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private touchCancelAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private penStartAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
-  private penEndAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
-  private penMoveAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
-  private penCancelAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
-  private gotPointerCaptureAction: PhetioAction<[ number, Event ]>;
-  private lostPointerCaptureAction: PhetioAction<[ number, Event ]>;
+  private readonly mouseUpAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private readonly mouseDownAction: PhetioAction<[ number, Vector2, MouseEvent ]>;
+  private readonly mouseMoveAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private readonly mouseOverAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private readonly mouseOutAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private readonly wheelScrollAction: PhetioAction<[ WheelEvent ]>;
+  private readonly touchStartAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private readonly touchEndAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private readonly touchMoveAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private readonly touchCancelAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private readonly penStartAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private readonly penEndAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private readonly penMoveAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private readonly penCancelAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private readonly gotPointerCaptureAction: PhetioAction<[ number, Event ]>;
+  private readonly lostPointerCaptureAction: PhetioAction<[ number, Event ]>;
 
   // If accessible
-  private focusinAction?: PhetioAction<[ FocusEvent ]>;
-  private focusoutAction?: PhetioAction<[ FocusEvent ]>;
-  private clickAction?: PhetioAction<[ MouseEvent ]>;
-  private inputAction?: PhetioAction<[ Event | InputEvent ]>;
-  private changeAction?: PhetioAction<[ Event ]>;
-  private keydownAction?: PhetioAction<[ KeyboardEvent ]>;
-  private keyupAction?: PhetioAction<[ KeyboardEvent ]>;
+  private readonly focusinAction?: PhetioAction<[ FocusEvent ]>;
+  private readonly focusoutAction?: PhetioAction<[ FocusEvent ]>;
+  private readonly clickAction?: PhetioAction<[ MouseEvent ]>;
+  private readonly inputAction?: PhetioAction<[ Event | InputEvent ]>;
+  private readonly changeAction?: PhetioAction<[ Event ]>;
+  private readonly keydownAction?: PhetioAction<[ KeyboardEvent ]>;
+  private readonly keyupAction?: PhetioAction<[ KeyboardEvent ]>;
 
   // Same event options for all DOM listeners, used when we connect listeners
   private accessibleEventOptions?: EventListenerOptions;
@@ -330,8 +330,8 @@ export default class Input extends PhetioObject {
   // fire one of the above Actions and finally dispatch a corresponding SceneryEvent to scenery targets.
   // Event listeners are not added until initializeEvents, and are stored in this Map so they can be removed
   // again in detachEvents.
-  private pdomEventListenerMap?: Map<string, ( event: Event ) => void>;
-  static InputIO: IOType<Input>;
+  private readonly pdomEventListenerMap?: Map<string, ( event: Event ) => void>;
+  public static InputIO: IOType<Input>;
 
   /**
    * @param display
@@ -344,7 +344,7 @@ export default class Input extends PhetioObject {
    *
    * @param [providedOptions]
    */
-  constructor( display: Display, attachToWindow: boolean, batchDOMEvents: boolean, assumeFullWindow: boolean, passiveEvents: boolean | null, providedOptions?: InputOptions ) {
+  public constructor( display: Display, attachToWindow: boolean, batchDOMEvents: boolean, assumeFullWindow: boolean, passiveEvents: boolean | null, providedOptions?: InputOptions ) {
     assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( typeof batchDOMEvents === 'boolean' );
@@ -864,7 +864,7 @@ export default class Input extends PhetioObject {
   /**
    * Interrupts any input actions that are currently taking place (should stop drags, etc.)
    */
-  interruptPointers(): void {
+  public interruptPointers(): void {
     _.each( this.pointers, pointer => {
       pointer.interruptAll();
     } );
@@ -880,7 +880,7 @@ export default class Input extends PhetioObject {
    *                                     only allow certain operations in the callback for a user gesture (e.g. like
    *                                     a mouseup to open a window).
    */
-  batchEvent( domEvent: Event, batchType: BatchedDOMEventType, callback: BatchedDOMEventCallback, triggerImmediate: boolean ): void {
+  public batchEvent( domEvent: Event, batchType: BatchedDOMEventType, callback: BatchedDOMEventCallback, triggerImmediate: boolean ): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.batchEvent' );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
@@ -908,7 +908,7 @@ export default class Input extends PhetioObject {
   /**
    * Fires all of our events that were batched into the batchedEvents array. (scenery-internal)
    */
-  fireBatchedEvents(): void {
+  public fireBatchedEvents(): void {
     sceneryLog && sceneryLog.InputEvent && this.currentlyFiringEvents && sceneryLog.InputEvent(
       'REENTRANCE DETECTED' );
     // Don't re-entrantly enter our loop, see https://github.com/phetsims/balloons-and-static-electricity/issues/406
@@ -944,7 +944,7 @@ export default class Input extends PhetioObject {
    * otherwise it can cause incorrect state in certain types of listeners (e.g. ones that count how many pointers
    * are over them).
    */
-  clearBatchedEvents(): void {
+  public clearBatchedEvents(): void {
     this.batchedEvents.length = 0;
   }
 
@@ -952,14 +952,14 @@ export default class Input extends PhetioObject {
    * Checks all pointers to see whether they are still "over" the same nodes (trail). If not, it will fire the usual
    * enter/exit events. (scenery-internal)
    */
-  validatePointers(): void {
+  public validatePointers(): void {
     this.validatePointersAction.execute();
   }
 
   /**
    * Removes all non-Mouse pointers from internal tracking. (scenery-internal)
    */
-  removeTemporaryPointers(): void {
+  public removeTemporaryPointers(): void {
     // TODO: Just null this out, instead of creating a fake event?
     const fakeDomEvent = {
       eek: 'This is a fake DOM event created in removeTemporaryPointers(), called from a Scenery exit event. Our attempt to masquerade seems unsuccessful! :('
@@ -980,7 +980,7 @@ export default class Input extends PhetioObject {
   /**
    * Hooks up DOM listeners to whatever type of object we are going to listen to. (scenery-internal)
    */
-  connectListeners(): void {
+  public connectListeners(): void {
     BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
 
     if ( this.display._accessible ) {
@@ -995,7 +995,7 @@ export default class Input extends PhetioObject {
   /**
    * Removes DOM listeners from whatever type of object we were listening to. (scenery-internal)
    */
-  disconnectListeners(): void {
+  public disconnectListeners(): void {
     BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
 
     if ( this.display._accessible ) {
@@ -1010,7 +1010,7 @@ export default class Input extends PhetioObject {
   /**
    * Extract a {Vector2} global coordinate point from an arbitrary DOM event. (scenery-internal)
    */
-  pointFromEvent( domEvent: MouseEvent | WindowTouch ): Vector2 {
+  public pointFromEvent( domEvent: MouseEvent | WindowTouch ): Vector2 {
     const position = Vector2.pool.create( domEvent.clientX, domEvent.clientY );
     if ( !this.assumeFullWindow ) {
       const domBounds = this.display.domElement.getBoundingClientRect();
@@ -1148,7 +1148,7 @@ export default class Input extends PhetioObject {
    *
    * @param domEvent - DOM Event, not a SceneryEvent!
    */
-  getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
+  public getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
     const relatedTargetElement = domEvent.relatedTarget;
 
     if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement as HTMLElement ) ) {
@@ -1205,7 +1205,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  mouseDown( id: number, point: Vector2, event: MouseEvent | PointerEvent ): void {
+  public mouseDown( id: number, point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseDown('${id}', ${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseDownAction.execute( id, point, event );
@@ -1218,7 +1218,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  mouseUp( point: Vector2, event: MouseEvent | PointerEvent ): void {
+  public mouseUp( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseUp(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseUpAction.execute( point, event );
@@ -1231,7 +1231,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  mouseMove( point: Vector2, event: MouseEvent | PointerEvent ): void {
+  public mouseMove( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseMove(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseMoveAction.execute( point, event );
@@ -1241,7 +1241,7 @@ export default class Input extends PhetioObject {
   /**
    * Triggers a logical mouseover event (this does NOT correspond to the Scenery event, since this is for the display) (scenery-internal)
    */
-  mouseOver( point: Vector2, event: MouseEvent | PointerEvent ): void {
+  public mouseOver( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOver(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOverAction.execute( point, event );
@@ -1251,7 +1251,7 @@ export default class Input extends PhetioObject {
   /**
    * Triggers a logical mouseout event (this does NOT correspond to the Scenery event, since this is for the display) (scenery-internal)
    */
-  mouseOut( point: Vector2, event: MouseEvent | PointerEvent ): void {
+  public mouseOut( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOut(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOutAction.execute( point, event );
@@ -1261,7 +1261,7 @@ export default class Input extends PhetioObject {
   /**
    * Triggers a logical mouse-wheel/scroll event. (scenery-internal)
    */
-  wheel( event: WheelEvent ): void {
+  public wheel( event: WheelEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `wheel(${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.wheelScrollAction.execute( event );
@@ -1274,7 +1274,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchStart( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
+  public touchStart( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1289,7 +1289,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchEnd( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
+  public touchEnd( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1304,7 +1304,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchMove( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
+  public touchMove( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchMoveAction.execute( id, point, event );
@@ -1317,7 +1317,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerCancel) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchCancel( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
+  public touchCancel( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchCancelAction.execute( id, point, event );
@@ -1330,7 +1330,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penStart( id: number, point: Vector2, event: PointerEvent ): void {
+  public penStart( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penStartAction.execute( id, point, event );
@@ -1343,7 +1343,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penEnd( id: number, point: Vector2, event: PointerEvent ): void {
+  public penEnd( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penEndAction.execute( id, point, event );
@@ -1356,7 +1356,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penMove( id: number, point: Vector2, event: PointerEvent ): void {
+  public penMove( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penMoveAction.execute( id, point, event );
@@ -1369,7 +1369,7 @@ export default class Input extends PhetioObject {
    * NOTE: This may also be called from the pointer event handler (pointerCancel) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penCancel( id: number, point: Vector2, event: PointerEvent ): void {
+  public penCancel( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penCancelAction.execute( id, point, event );
@@ -1379,7 +1379,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointerdown event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerDown( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerDown( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
     // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
     // http://news.qooxdoo.org/mouse-capturing.
@@ -1411,7 +1411,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointerup event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerUp( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerUp( id: number, type: string, point: Vector2, event: PointerEvent ): void {
 
     // update this outside of the Action executions so that PhET-iO event playback does not override it
     this.upTimeStamp = event.timeStamp;
@@ -1437,7 +1437,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointercancel event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerCancel( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerCancel( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     type = this.handleUnknownPointerType( type, id );
     switch( type ) {
       case 'mouse':
@@ -1461,7 +1461,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a gotpointercapture event, forwarding it to the proper logical event. (scenery-internal)
    */
-  gotPointerCapture( id: number, type: string, point: Vector2, event: Event ): void {
+  public gotPointerCapture( id: number, type: string, point: Vector2, event: Event ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.gotPointerCaptureAction.execute( id, event );
@@ -1471,7 +1471,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a lostpointercapture event, forwarding it to the proper logical event. (scenery-internal)
    */
-  lostPointerCapture( id: number, type: string, point: Vector2, event: Event ): void {
+  public lostPointerCapture( id: number, type: string, point: Vector2, event: Event ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.lostPointerCaptureAction.execute( id, event );
@@ -1481,7 +1481,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointermove event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerMove( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerMove( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     type = this.handleUnknownPointerType( type, id );
     switch( type ) {
       case 'mouse':
@@ -1503,7 +1503,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointerover event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerOver( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerOver( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1511,7 +1511,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointerout event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerOut( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerOut( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1519,7 +1519,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointerenter event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerEnter( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerEnter( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1527,7 +1527,7 @@ export default class Input extends PhetioObject {
   /**
    * Handles a pointerleave event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerLeave( id: number, type: string, point: Vector2, event: PointerEvent ): void {
+  public pointerLeave( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1885,7 +1885,7 @@ export default class Input extends PhetioObject {
    *
    * @returns - see domEventPropertiesToSerialize for list keys that are serialized
    */
-  static serializeDomEvent( domEvent: Event ): any {
+  public static serializeDomEvent( domEvent: Event ): any {
     const entries: SerializedDOMEvent = {
       constructorName: domEvent.constructor.name
     };
@@ -1925,7 +1925,7 @@ export default class Input extends PhetioObject {
   /**
    * From a serialized dom event, return a recreated window.Event (scenery-internal)
    */
-  static deserializeDomEvent( eventObject: SerializedDOMEvent ): Event {
+  public static deserializeDomEvent( eventObject: SerializedDOMEvent ): Event {
     const constructorName = eventObject.constructorName || 'Event';
 
     const configForConstructor = _.pick( eventObject, domEventPropertiesSetInConstructor );
@@ -1987,7 +1987,7 @@ export default class Input extends PhetioObject {
   /**
    * Maps the current MS pointer types onto the pointer spec. (scenery-internal)
    */
-  static msPointerType( event: PointerEvent ): string {
+  public static msPointerType( event: PointerEvent ): string {
     // @ts-ignore -- legacy API
     if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
       return 'touch';

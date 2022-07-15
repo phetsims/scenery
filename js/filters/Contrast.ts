@@ -11,12 +11,12 @@ import { scenery, ColorMatrixFilter } from '../imports.js';
 
 export default class Contrast extends ColorMatrixFilter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * @param amount - The amount of the effect, from 0 (gray), 1 (normal), or above for high-contrast
    */
-  constructor( amount: number ) {
+  public constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'Contrast amount should be a number' );
     assert && assert( isFinite( amount ), 'Contrast amount should be finite' );
     assert && assert( amount >= 0, 'Contrast amount should be non-negative' );
@@ -36,16 +36,16 @@ export default class Contrast extends ColorMatrixFilter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  override getCSSFilterString(): string {
+  public override getCSSFilterString(): string {
     return `contrast(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 
   // Turns the content gray
-  static GRAY: Contrast;
+  public static GRAY: Contrast;
 }
 
 Contrast.GRAY = new Contrast( 0 );

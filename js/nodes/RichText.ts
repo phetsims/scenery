@@ -280,7 +280,7 @@ const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 export default class RichText extends Node {
 
   // The text to display. We'll initialize this by mutating.
-  _textProperty: TinyForwardingProperty<string>;
+  private readonly _textProperty: TinyForwardingProperty<string>;
 
   private _font: Font | string;
   private _boundsMethod: TextBoundsMethod;
@@ -326,7 +326,7 @@ export default class RichText extends Node {
   // Normal layout container of lines (separate, so we can clear it easily)
   private lineContainer: Node;
 
-  constructor( text: string | number, providedOptions?: RichTextOptions ) {
+  public constructor( text: string | number, providedOptions?: RichTextOptions ) {
 
     // We only fill in some defaults, since the other defaults are defined below (and mutate is relied on)
     const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill' | 'text'>, NodeOptions>()( {
@@ -384,26 +384,26 @@ export default class RichText extends Node {
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
-  setTextProperty( newTarget: IProperty<string> | null ): this {
+  public setTextProperty( newTarget: IProperty<string> | null ): this {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
+  public set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
 
-  get textProperty(): IProperty<string> { return this.getTextProperty(); }
+  public get textProperty(): IProperty<string> { return this.getTextProperty(); }
 
   /**
    * Like Node.getVisibleProperty, but for the text string. Note this is not the same as the Property provided in
    * setTextProperty. Thus is the nature of TinyForwardingProperty.
    */
-  getTextProperty(): IProperty<string> {
+  public getTextProperty(): IProperty<string> {
     return this._textProperty;
   }
 
   /**
    * See documentation and comments in Node.initializePhetioObject
    */
-  override initializePhetioObject( baseOptions: any, providedOptions: RichTextOptions ): void {
+  public override initializePhetioObject( baseOptions: any, providedOptions: RichTextOptions ): void {
 
     const options = optionize<RichTextOptions, EmptyObjectType, RichTextOptions>()( {}, providedOptions );
 
@@ -564,7 +564,7 @@ export default class RichText extends Node {
   /**
    * Releases references.
    */
-  override dispose(): void {
+  public override dispose(): void {
     this.freeChildrenToPool();
 
     super.dispose();
@@ -877,7 +877,7 @@ export default class RichText extends Node {
    *
    * @param text - The text to display. If it's a number, it will be cast to a string
    */
-  setText( text: string | number ): this {
+  public setText( text: string | number ): this {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
@@ -889,21 +889,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set text( value: string | number ) { this.setText( value ); }
+  public set text( value: string | number ) { this.setText( value ); }
 
-  get text(): string { return this.getText(); }
+  public get text(): string { return this.getText(); }
 
   /**
    * Returns the text displayed by our node.
    */
-  getText(): string {
+  public getText(): string {
     return this._textProperty.value;
   }
 
   /**
    * Sets the method that is used to determine bounds from the text. See Text.setBoundsMethod for details
    */
-  setBoundsMethod( method: TextBoundsMethod ): this {
+  public setBoundsMethod( method: TextBoundsMethod ): this {
     assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
     if ( method !== this._boundsMethod ) {
       this._boundsMethod = method;
@@ -912,21 +912,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
+  public set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
 
-  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
+  public get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
    */
-  getBoundsMethod(): TextBoundsMethod {
+  public getBoundsMethod(): TextBoundsMethod {
     return this._boundsMethod;
   }
 
   /**
    * Sets the font of our node.
    */
-  setFont( font: Font | string ): this {
+  public setFont( font: Font | string ): this {
     assert && assert( font instanceof Font || typeof font === 'string',
       'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
@@ -937,21 +937,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set font( value: Font | string ) { this.setFont( value ); }
+  public set font( value: Font | string ) { this.setFont( value ); }
 
-  get font(): Font | string { return this.getFont(); }
+  public get font(): Font | string { return this.getFont(); }
 
   /**
    * Returns the current Font
    */
-  getFont(): Font | string {
+  public getFont(): Font | string {
     return this._font;
   }
 
   /**
    * Sets the fill of our text.
    */
-  setFill( fill: IPaint ): this {
+  public setFill( fill: IPaint ): this {
     if ( this._fill !== fill ) {
       this._fill = fill;
       this.rebuildRichText();
@@ -959,21 +959,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set fill( value: IPaint ) { this.setFill( value ); }
+  public set fill( value: IPaint ) { this.setFill( value ); }
 
-  get fill(): IPaint { return this.getFill(); }
+  public get fill(): IPaint { return this.getFill(); }
 
   /**
    * Returns the current fill.
    */
-  getFill(): IPaint {
+  public getFill(): IPaint {
     return this._fill;
   }
 
   /**
    * Sets the stroke of our text.
    */
-  setStroke( stroke: IPaint ): this {
+  public setStroke( stroke: IPaint ): this {
     if ( this._stroke !== stroke ) {
       this._stroke = stroke;
       this.rebuildRichText();
@@ -981,21 +981,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set stroke( value: IPaint ) { this.setStroke( value ); }
+  public set stroke( value: IPaint ) { this.setStroke( value ); }
 
-  get stroke(): IPaint { return this.getStroke(); }
+  public get stroke(): IPaint { return this.getStroke(); }
 
   /**
    * Returns the current stroke.
    */
-  getStroke(): IPaint {
+  public getStroke(): IPaint {
     return this._stroke;
   }
 
   /**
    * Sets the lineWidth of our text.
    */
-  setLineWidth( lineWidth: number ): this {
+  public setLineWidth( lineWidth: number ): this {
     if ( this._lineWidth !== lineWidth ) {
       this._lineWidth = lineWidth;
       this.rebuildRichText();
@@ -1003,21 +1003,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set lineWidth( value: number ) { this.setLineWidth( value ); }
+  public set lineWidth( value: number ) { this.setLineWidth( value ); }
 
-  get lineWidth(): number { return this.getLineWidth(); }
+  public get lineWidth(): number { return this.getLineWidth(); }
 
   /**
    * Returns the current lineWidth.
    */
-  getLineWidth(): number {
+  public getLineWidth(): number {
     return this._lineWidth;
   }
 
   /**
    * Sets the scale (relative to 1) of any text under subscript (<sub>) elements.
    */
-  setSubScale( subScale: number ): this {
+  public setSubScale( subScale: number ): this {
     assert && assert( typeof subScale === 'number' && isFinite( subScale ) && subScale > 0 );
 
     if ( this._subScale !== subScale ) {
@@ -1027,21 +1027,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set subScale( value: number ) { this.setSubScale( value ); }
+  public set subScale( value: number ) { this.setSubScale( value ); }
 
-  get subScale(): number { return this.getSubScale(); }
+  public get subScale(): number { return this.getSubScale(); }
 
   /**
    * Returns the scale (relative to 1) of any text under subscript (<sub>) elements.
    */
-  getSubScale(): number {
+  public getSubScale(): number {
     return this._subScale;
   }
 
   /**
    * Sets the horizontal spacing before any subscript (<sub>) elements.
    */
-  setSubXSpacing( subXSpacing: number ): this {
+  public setSubXSpacing( subXSpacing: number ): this {
     assert && assert( typeof subXSpacing === 'number' && isFinite( subXSpacing ) );
 
     if ( this._subXSpacing !== subXSpacing ) {
@@ -1051,21 +1051,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set subXSpacing( value: number ) { this.setSubXSpacing( value ); }
+  public set subXSpacing( value: number ) { this.setSubXSpacing( value ); }
 
-  get subXSpacing(): number { return this.getSubXSpacing(); }
+  public get subXSpacing(): number { return this.getSubXSpacing(); }
 
   /**
    * Returns the horizontal spacing before any subscript (<sub>) elements.
    */
-  getSubXSpacing(): number {
+  public getSubXSpacing(): number {
     return this._subXSpacing;
   }
 
   /**
    * Sets the adjustment offset to the vertical placement of any subscript (<sub>) elements.
    */
-  setSubYOffset( subYOffset: number ): this {
+  public setSubYOffset( subYOffset: number ): this {
     assert && assert( typeof subYOffset === 'number' && isFinite( subYOffset ) );
 
     if ( this._subYOffset !== subYOffset ) {
@@ -1075,21 +1075,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set subYOffset( value: number ) { this.setSubYOffset( value ); }
+  public set subYOffset( value: number ) { this.setSubYOffset( value ); }
 
-  get subYOffset(): number { return this.getSubYOffset(); }
+  public get subYOffset(): number { return this.getSubYOffset(); }
 
   /**
    * Returns the adjustment offset to the vertical placement of any subscript (<sub>) elements.
    */
-  getSubYOffset(): number {
+  public getSubYOffset(): number {
     return this._subYOffset;
   }
 
   /**
    * Sets the scale (relative to 1) of any text under superscript (<sup>) elements.
    */
-  setSupScale( supScale: number ): this {
+  public setSupScale( supScale: number ): this {
     assert && assert( typeof supScale === 'number' && isFinite( supScale ) && supScale > 0 );
 
     if ( this._supScale !== supScale ) {
@@ -1099,21 +1099,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set supScale( value: number ) { this.setSupScale( value ); }
+  public set supScale( value: number ) { this.setSupScale( value ); }
 
-  get supScale(): number { return this.getSupScale(); }
+  public get supScale(): number { return this.getSupScale(); }
 
   /**
    * Returns the scale (relative to 1) of any text under superscript (<sup>) elements.
    */
-  getSupScale(): number {
+  public getSupScale(): number {
     return this._supScale;
   }
 
   /**
    * Sets the horizontal spacing before any superscript (<sup>) elements.
    */
-  setSupXSpacing( supXSpacing: number ): this {
+  public setSupXSpacing( supXSpacing: number ): this {
     assert && assert( typeof supXSpacing === 'number' && isFinite( supXSpacing ) );
 
     if ( this._supXSpacing !== supXSpacing ) {
@@ -1123,21 +1123,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set supXSpacing( value: number ) { this.setSupXSpacing( value ); }
+  public set supXSpacing( value: number ) { this.setSupXSpacing( value ); }
 
-  get supXSpacing(): number { return this.getSupXSpacing(); }
+  public get supXSpacing(): number { return this.getSupXSpacing(); }
 
   /**
    * Returns the horizontal spacing before any superscript (<sup>) elements.
    */
-  getSupXSpacing(): number {
+  public getSupXSpacing(): number {
     return this._supXSpacing;
   }
 
   /**
    * Sets the adjustment offset to the vertical placement of any superscript (<sup>) elements.
    */
-  setSupYOffset( supYOffset: number ): this {
+  public setSupYOffset( supYOffset: number ): this {
     assert && assert( typeof supYOffset === 'number' && isFinite( supYOffset ) );
 
     if ( this._supYOffset !== supYOffset ) {
@@ -1147,14 +1147,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  set supYOffset( value: number ) { this.setSupYOffset( value ); }
+  public set supYOffset( value: number ) { this.setSupYOffset( value ); }
 
-  get supYOffset(): number { return this.getSupYOffset(); }
+  public get supYOffset(): number { return this.getSupYOffset(); }
 
   /**
    * Returns the adjustment offset to the vertical placement of any superscript (<sup>) elements.
    */
-  getSupYOffset(): number {
+  public getSupYOffset(): number {
     return this._supYOffset;
   }
 
@@ -1162,7 +1162,7 @@ export default class RichText extends Node {
    * Sets the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
    * baseline to the top of the text bounds.
    */
-  setCapHeightScale( capHeightScale: number ): this {
+  public setCapHeightScale( capHeightScale: number ): this {
     assert && assert( typeof capHeightScale === 'number' && isFinite( capHeightScale ) && capHeightScale > 0 );
 
     if ( this._capHeightScale !== capHeightScale ) {
@@ -1172,22 +1172,22 @@ export default class RichText extends Node {
     return this;
   }
 
-  set capHeightScale( value: number ) { this.setCapHeightScale( value ); }
+  public set capHeightScale( value: number ) { this.setCapHeightScale( value ); }
 
-  get capHeightScale(): number { return this.getCapHeightScale(); }
+  public get capHeightScale(): number { return this.getCapHeightScale(); }
 
   /**
    * Returns the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
    * baseline to the top of the text bounds.
    */
-  getCapHeightScale(): number {
+  public getCapHeightScale(): number {
     return this._capHeightScale;
   }
 
   /**
    * Sets the lineWidth of underline lines.
    */
-  setUnderlineLineWidth( underlineLineWidth: number ): this {
+  public setUnderlineLineWidth( underlineLineWidth: number ): this {
     assert && assert( typeof underlineLineWidth === 'number' && isFinite( underlineLineWidth ) && underlineLineWidth > 0 );
 
     if ( this._underlineLineWidth !== underlineLineWidth ) {
@@ -1197,14 +1197,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  set underlineLineWidth( value: number ) { this.setUnderlineLineWidth( value ); }
+  public set underlineLineWidth( value: number ) { this.setUnderlineLineWidth( value ); }
 
-  get underlineLineWidth(): number { return this.getUnderlineLineWidth(); }
+  public get underlineLineWidth(): number { return this.getUnderlineLineWidth(); }
 
   /**
    * Returns the lineWidth of underline lines.
    */
-  getUnderlineLineWidth(): number {
+  public getUnderlineLineWidth(): number {
     return this._underlineLineWidth;
   }
 
@@ -1212,7 +1212,7 @@ export default class RichText extends Node {
    * Sets the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
    */
-  setUnderlineHeightScale( underlineHeightScale: number ): this {
+  public setUnderlineHeightScale( underlineHeightScale: number ): this {
     assert && assert( typeof underlineHeightScale === 'number' && isFinite( underlineHeightScale ) && underlineHeightScale > 0 );
 
     if ( this._underlineHeightScale !== underlineHeightScale ) {
@@ -1222,22 +1222,22 @@ export default class RichText extends Node {
     return this;
   }
 
-  set underlineHeightScale( value: number ) { this.setUnderlineHeightScale( value ); }
+  public set underlineHeightScale( value: number ) { this.setUnderlineHeightScale( value ); }
 
-  get underlineHeightScale(): number { return this.getUnderlineHeightScale(); }
+  public get underlineHeightScale(): number { return this.getUnderlineHeightScale(); }
 
   /**
    * Returns the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
    */
-  getUnderlineHeightScale(): number {
+  public getUnderlineHeightScale(): number {
     return this._underlineHeightScale;
   }
 
   /**
    * Sets the lineWidth of strikethrough lines.
    */
-  setStrikethroughLineWidth( strikethroughLineWidth: number ): this {
+  public setStrikethroughLineWidth( strikethroughLineWidth: number ): this {
     assert && assert( typeof strikethroughLineWidth === 'number' && isFinite( strikethroughLineWidth ) && strikethroughLineWidth > 0 );
 
     if ( this._strikethroughLineWidth !== strikethroughLineWidth ) {
@@ -1247,14 +1247,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  set strikethroughLineWidth( value: number ) { this.setStrikethroughLineWidth( value ); }
+  public set strikethroughLineWidth( value: number ) { this.setStrikethroughLineWidth( value ); }
 
-  get strikethroughLineWidth(): number { return this.getStrikethroughLineWidth(); }
+  public get strikethroughLineWidth(): number { return this.getStrikethroughLineWidth(); }
 
   /**
    * Returns the lineWidth of strikethrough lines.
    */
-  getStrikethroughLineWidth(): number {
+  public getStrikethroughLineWidth(): number {
     return this._strikethroughLineWidth;
   }
 
@@ -1262,7 +1262,7 @@ export default class RichText extends Node {
    * Sets the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
    */
-  setStrikethroughHeightScale( strikethroughHeightScale: number ): this {
+  public setStrikethroughHeightScale( strikethroughHeightScale: number ): this {
     assert && assert( typeof strikethroughHeightScale === 'number' && isFinite( strikethroughHeightScale ) && strikethroughHeightScale > 0 );
 
     if ( this._strikethroughHeightScale !== strikethroughHeightScale ) {
@@ -1272,22 +1272,22 @@ export default class RichText extends Node {
     return this;
   }
 
-  set strikethroughHeightScale( value: number ) { this.setStrikethroughHeightScale( value ); }
+  public set strikethroughHeightScale( value: number ) { this.setStrikethroughHeightScale( value ); }
 
-  get strikethroughHeightScale(): number { return this.getStrikethroughHeightScale(); }
+  public get strikethroughHeightScale(): number { return this.getStrikethroughHeightScale(); }
 
   /**
    * Returns the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
    */
-  getStrikethroughHeightScale(): number {
+  public getStrikethroughHeightScale(): number {
     return this._strikethroughHeightScale;
   }
 
   /**
    * Sets the color of links. If null, no fill will be overridden.
    */
-  setLinkFill( linkFill: IPaint ): this {
+  public setLinkFill( linkFill: IPaint ): this {
     if ( this._linkFill !== linkFill ) {
       this._linkFill = linkFill;
       this.rebuildRichText();
@@ -1295,21 +1295,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set linkFill( value: IPaint ) { this.setLinkFill( value ); }
+  public set linkFill( value: IPaint ) { this.setLinkFill( value ); }
 
-  get linkFill(): IPaint { return this.getLinkFill(); }
+  public get linkFill(): IPaint { return this.getLinkFill(); }
 
   /**
    * Returns the color of links.
    */
-  getLinkFill(): IPaint {
+  public getLinkFill(): IPaint {
     return this._linkFill;
   }
 
   /**
    * Sets whether link clicks will call event.handle().
    */
-  setLinkEventsHandled( linkEventsHandled: boolean ): this {
+  public setLinkEventsHandled( linkEventsHandled: boolean ): this {
     assert && assert( typeof linkEventsHandled === 'boolean' );
 
     if ( this._linkEventsHandled !== linkEventsHandled ) {
@@ -1319,14 +1319,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  set linkEventsHandled( value: boolean ) { this.setLinkEventsHandled( value ); }
+  public set linkEventsHandled( value: boolean ) { this.setLinkEventsHandled( value ); }
 
-  get linkEventsHandled(): boolean { return this.getLinkEventsHandled(); }
+  public get linkEventsHandled(): boolean { return this.getLinkEventsHandled(); }
 
   /**
    * Returns whether link events will be handled.
    */
-  getLinkEventsHandled(): boolean {
+  public getLinkEventsHandled(): boolean {
     return this._linkEventsHandled;
   }
 
@@ -1357,7 +1357,7 @@ export default class RichText extends Node {
    *
    * See https://github.com/phetsims/scenery-phet/issues/316 for more information.
    */
-  setLinks( links: RichTextLinks ): this {
+  public setLinks( links: RichTextLinks ): this {
     assert && assert( links !== false || Object.getPrototypeOf( links ) === Object.prototype );
 
     if ( this._links !== links ) {
@@ -1367,21 +1367,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set links( value: RichTextLinks ) { this.setLinks( value ); }
+  public set links( value: RichTextLinks ) { this.setLinks( value ); }
 
-  get links(): RichTextLinks { return this.getLinks(); }
+  public get links(): RichTextLinks { return this.getLinks(); }
 
   /**
    * Returns whether link events will be handled.
    */
-  getLinks(): RichTextLinks {
+  public getLinks(): RichTextLinks {
     return this._links;
   }
 
   /**
    * Sets the alignment of text (only relevant if there are multiple lines).
    */
-  setAlign( align: RichTextAlign ): this {
+  public setAlign( align: RichTextAlign ): this {
     assert && assert( align === 'left' || align === 'center' || align === 'right' );
 
     if ( this._align !== align ) {
@@ -1391,21 +1391,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  set align( value: RichTextAlign ) { this.setAlign( value ); }
+  public set align( value: RichTextAlign ) { this.setAlign( value ); }
 
-  get align(): RichTextAlign { return this.getAlign(); }
+  public get align(): RichTextAlign { return this.getAlign(); }
 
   /**
    * Returns the current alignment of the text (only relevant if there are multiple lines).
    */
-  getAlign(): RichTextAlign {
+  public getAlign(): RichTextAlign {
     return this._align;
   }
 
   /**
    * Sets the leading (spacing between lines)
    */
-  setLeading( leading: number ): this {
+  public setLeading( leading: number ): this {
     assert && assert( typeof leading === 'number' && isFinite( leading ) );
 
     if ( this._leading !== leading ) {
@@ -1415,14 +1415,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  set leading( value: number ) { this.setLeading( value ); }
+  public set leading( value: number ) { this.setLeading( value ); }
 
-  get leading(): number { return this.getLeading(); }
+  public get leading(): number { return this.getLeading(); }
 
   /**
    * Returns the leading (spacing between lines)
    */
-  getLeading(): number {
+  public getLeading(): number {
     return this._leading;
   }
 
@@ -1432,7 +1432,7 @@ export default class RichText extends Node {
    *
    * @param lineWrap - If it's a number, it should be greater than 0.
    */
-  setLineWrap( lineWrap: number | null ): this {
+  public setLineWrap( lineWrap: number | null ): this {
     assert && assert( lineWrap === null || ( typeof lineWrap === 'number' && isFinite( lineWrap ) && lineWrap > 0 ) );
 
     if ( this._lineWrap !== lineWrap ) {
@@ -1442,18 +1442,18 @@ export default class RichText extends Node {
     return this;
   }
 
-  set lineWrap( value: number | null ) { this.setLineWrap( value ); }
+  public set lineWrap( value: number | null ) { this.setLineWrap( value ); }
 
-  get lineWrap(): number | null { return this.getLineWrap(); }
+  public get lineWrap(): number | null { return this.getLineWrap(); }
 
   /**
    * Returns the line wrap width.
    */
-  getLineWrap(): number | null {
+  public getLineWrap(): number | null {
     return this._lineWrap;
   }
 
-  override mutate( options?: RichTextOptions ): this {
+  public override mutate( options?: RichTextOptions ): this {
     if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) && options.textProperty ) {
       assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
     }
@@ -1467,7 +1467,7 @@ export default class RichText extends Node {
    * NOTE: Does an approximation of some font values (using <b> or <i>), and cannot force the lack of those if it is
    * included in bold/italic exterior tags.
    */
-  static stringWithFont( str: string, font: Font ): string {
+  public static stringWithFont( str: string, font: Font ): string {
     // TODO: ES6 string interpolation.
     return `${'<span style=\'' +
            'font-style: '}${font.style};` +
@@ -1483,7 +1483,7 @@ export default class RichText extends Node {
   /**
    * Stringifies an HTML subtree defined by the given element.
    */
-  static himalayaElementToString( element: HimalayaNode, isLTR: boolean ): string {
+  public static himalayaElementToString( element: HimalayaNode, isLTR: boolean ): string {
     if ( isTextNode( element ) ) {
       return RichText.contentToString( element.content, isLTR );
     }
@@ -1506,7 +1506,7 @@ export default class RichText extends Node {
    * Stringifies an HTML subtree defined by the given element, but removing certain tags that we don't need for
    * accessibility (like <a>, <span>, etc.), and adding in tags we do want (see ACCESSIBLE_TAGS).
    */
-  static himalayaElementToAccessibleString( element: HimalayaNode, isLTR: boolean ): string {
+  public static himalayaElementToAccessibleString( element: HimalayaNode, isLTR: boolean ): string {
     if ( isTextNode( element ) ) {
       return RichText.contentToString( element.content, isLTR );
     }
@@ -1537,13 +1537,13 @@ export default class RichText extends Node {
    *
    * See https://github.com/phetsims/scenery-phet/issues/315
    */
-  static contentToString( content: string, isLTR: boolean ): string {
+  public static contentToString( content: string, isLTR: boolean ): string {
     // @ts-ignore - we should get a string from this
     const unescapedContent: string = he.decode( content );
     return isLTR ? ( `\u202a${unescapedContent}\u202c` ) : ( `\u202b${unescapedContent}\u202c` );
   }
 
-  static RichTextIO: IOType;
+  public static RichTextIO: IOType;
 }
 
 /**
@@ -1594,8 +1594,8 @@ class RichTextElement extends RichTextCleanable( Node ) {
   private isLTR!: boolean;
 
   // The amount of local-coordinate spacing to apply on each side
-  leftSpacing!: number;
-  rightSpacing!: number;
+  public leftSpacing!: number;
+  public rightSpacing!: number;
 
   /**
    * A container of other RichText elements and leaves.
@@ -1603,7 +1603,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
    * @param isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be
    *                          right-to-left).
    */
-  constructor( isLTR: boolean ) {
+  public constructor( isLTR: boolean ) {
     super();
 
     this.initialize( isLTR );
@@ -1612,7 +1612,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
   /**
    * Sets up state
    */
-  initialize( isLTR: boolean ): this {
+  public initialize( isLTR: boolean ): this {
     this.isLTR = isLTR;
     this.leftSpacing = 0;
     this.rightSpacing = 0;
@@ -1625,7 +1625,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
    *
    * @returns- Whether the item was actually added.
    */
-  addElement( element: RichTextElement | RichTextLeaf ): boolean {
+  public addElement( element: RichTextElement | RichTextLeaf ): boolean {
 
     const hadChild = this.children.length > 0;
     const hasElement = element.width > 0;
@@ -1684,7 +1684,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
   /**
    * Adds an amount of spacing to the "before" side.
    */
-  addExtraBeforeSpacing( amount: number ): void {
+  public addExtraBeforeSpacing( amount: number ): void {
     if ( this.isLTR ) {
       this.leftSpacing += amount;
     }
@@ -1693,23 +1693,23 @@ class RichTextElement extends RichTextCleanable( Node ) {
     }
   }
 
-  freeToPool(): void {
+  public freeToPool(): void {
     RichTextElement.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool( RichTextElement );
+  public static readonly pool = new Pool( RichTextElement );
 
 }
 
 class RichTextLeaf extends RichTextCleanable( Text ) {
 
-  leftSpacing!: number;
-  rightSpacing!: number;
+  public leftSpacing!: number;
+  public rightSpacing!: number;
 
   /**
    * A leaf (text) node.
    */
-  constructor( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ) {
+  public constructor( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ) {
     super( '' );
 
     this.initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth );
@@ -1718,7 +1718,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * Set up this text's state
    */
-  initialize( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ): this {
+  public initialize( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ): this {
 
     // Grab all spaces at the (logical) start
     let whitespaceBefore = '';
@@ -1754,7 +1754,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
    */
-  override clean(): void {
+  public override clean(): void {
     super.clean();
 
     this.fill = null;
@@ -1765,15 +1765,15 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
    * Whether this leaf will fit in the specified amount of space (including, if required, the amount of spacing on
    * the side).
    */
-  fitsIn( widthAvailable: number, hasAddedLeafToLine: boolean, isContainerLTR: boolean ): boolean {
+  public fitsIn( widthAvailable: number, hasAddedLeafToLine: boolean, isContainerLTR: boolean ): boolean {
     return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
   }
 
-  freeToPool(): void {
+  public freeToPool(): void {
     RichTextLeaf.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool( RichTextLeaf );
+  public static readonly pool = new Pool( RichTextLeaf );
 }
 
 class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
@@ -1784,7 +1784,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
   /**
    * A link node
    */
-  constructor( innerContent: string, href: RichTextHref ) {
+  public constructor( innerContent: string, href: RichTextHref ) {
     super();
 
     this.fireListener = null;
@@ -1805,7 +1805,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
    * Set up this state. First construction does not need to use super.initialize() because the constructor has done
    * that for us. But repeated initialization with Poolable will need to initialize super again.
    */
-  override initialize( innerContent: string, href: RichTextHref, initializeSuper = true ): this {
+  public override initialize( innerContent: string, href: RichTextHref, initializeSuper = true ): this {
 
     if ( initializeSuper ) {
       super.initialize();
@@ -1861,7 +1861,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
    */
-  override clean(): void {
+  public override clean(): void {
     super.clean();
 
     this.fireListener && this.removeInputListener( this.fireListener );
@@ -1872,11 +1872,11 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
     }
   }
 
-  freeToPool(): void {
+  public freeToPool(): void {
     RichTextLink.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool( RichTextLink );
+  public static readonly pool = new Pool( RichTextLink );
 }
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {

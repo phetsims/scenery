@@ -11,7 +11,7 @@ import { Color, scenery } from '../imports.js';
  * @author Sam Reid (PhET Interactive Simulations)
  */
 export default class ColorProperty extends Property<Color> {
-  constructor( color: Color, providedOptions?: PropertyOptions<Color> ) {
+  public constructor( color: Color, providedOptions?: PropertyOptions<Color> ) {
 
     // client cannot specify superclass options that are controlled by this type
     if ( providedOptions ) {

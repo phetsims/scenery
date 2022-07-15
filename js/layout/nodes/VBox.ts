@@ -14,7 +14,7 @@ import { scenery, FlowBox, FlowBoxOptions } from '../../imports.js';
 export type VBoxOptions = StrictOmit<FlowBoxOptions, 'orientation'>;
 
 export default class VBox extends FlowBox {
-  constructor( providedOptions?: VBoxOptions ) {
+  public constructor( providedOptions?: VBoxOptions ) {
     assert && assert( !providedOptions || !( providedOptions as FlowBoxOptions ).orientation, 'VBox sets orientation' );
 
     super( optionize<VBoxOptions, EmptyObjectType, FlowBoxOptions>()( {

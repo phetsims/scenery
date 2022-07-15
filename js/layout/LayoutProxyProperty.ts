@@ -16,7 +16,7 @@ export default class LayoutProxyProperty extends DerivedProperty1<LayoutProxy | 
 
   private readonly trailsBetweenProperty: TrailsBetweenProperty;
 
-  constructor( rootNode: Node, leafNode: Node ) {
+  public constructor( rootNode: Node, leafNode: Node ) {
 
     const trailsBetweenProperty = new TrailsBetweenProperty( rootNode, leafNode );
 
@@ -32,7 +32,7 @@ export default class LayoutProxyProperty extends DerivedProperty1<LayoutProxy | 
     } );
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.trailsBetweenProperty.dispose();
 
     super.dispose();

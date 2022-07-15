@@ -11,12 +11,12 @@ import { scenery, ColorMatrixFilter } from '../imports.js';
 
 export default class Saturate extends ColorMatrixFilter {
 
-  amount: number;
+  private readonly amount: number;
 
   /**
    * @param amount - The amount of the effect, from 0 (no saturation), 1 (normal), or higher to over-saturate
    */
-  constructor( amount: number ) {
+  public constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'Saturate amount should be a number' );
     assert && assert( isFinite( amount ), 'Saturate amount should be finite' );
     assert && assert( amount >= 0, 'Saturate amount should be non-negative' );
@@ -37,11 +37,11 @@ export default class Saturate extends ColorMatrixFilter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  override getCSSFilterString(): string {
+  public override getCSSFilterString(): string {
     return `saturate(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible(): boolean {
+  public override isDOMCompatible(): boolean {
     return true;
   }
 }

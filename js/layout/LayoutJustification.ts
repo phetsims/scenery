@@ -25,46 +25,46 @@ export type VerticalLayoutJustification = typeof VerticalLayoutJustificationValu
 type SpaceRemainingFunctionFactory = ( spaceRemaining: number, lineLength: number ) => ( ( index: number ) => number );
 
 export default class LayoutJustification extends EnumerationValue {
-  static readonly START = new LayoutJustification(
+  public static readonly START = new LayoutJustification(
     () => () => 0,
     'left', 'top'
   );
 
-  static readonly END = new LayoutJustification(
+  public static readonly END = new LayoutJustification(
     spaceRemaining => index => index === 0 ? spaceRemaining : 0,
     'right', 'bottom'
   );
 
-  static readonly CENTER = new LayoutJustification(
+  public static readonly CENTER = new LayoutJustification(
     spaceRemaining => index => index === 0 ? spaceRemaining / 2 : 0,
     'center', 'center'
   );
 
-  static readonly SPACE_BETWEEN = new LayoutJustification(
+  public static readonly SPACE_BETWEEN = new LayoutJustification(
     ( spaceRemaining, lineLength ) => index => index !== 0 ? ( spaceRemaining / ( lineLength - 1 ) ) : 0,
     'spaceBetween', 'spaceBetween'
   );
 
-  static readonly SPACE_AROUND = new LayoutJustification(
+  public static readonly SPACE_AROUND = new LayoutJustification(
     ( spaceRemaining, lineLength ) => index => ( index !== 0 ? 2 : 1 ) * spaceRemaining / ( 2 * lineLength ),
     'spaceAround', 'spaceAround'
   );
 
-  static readonly SPACE_EVENLY = new LayoutJustification(
+  public static readonly SPACE_EVENLY = new LayoutJustification(
     ( spaceRemaining, lineLength ) => index => spaceRemaining / ( lineLength + 1 ),
     'spaceEvenly', 'spaceEvenly'
   );
 
   // String enumeration types for the horizontal orientation
-  readonly horizontal: HorizontalLayoutJustification;
+  public readonly horizontal: HorizontalLayoutJustification;
 
   // String enumeration types for the vertical orientation
-  readonly vertical: VerticalLayoutJustification;
+  public readonly vertical: VerticalLayoutJustification;
 
   // See SpaceRemainingFunctionFactory for docs
-  readonly spacingFunctionFactory: SpaceRemainingFunctionFactory;
+  public readonly spacingFunctionFactory: SpaceRemainingFunctionFactory;
 
-  constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: HorizontalLayoutJustification, vertical: VerticalLayoutJustification ) {
+  public constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: HorizontalLayoutJustification, vertical: VerticalLayoutJustification ) {
     super();
 
     this.spacingFunctionFactory = spacingFunctionFactory;
@@ -72,16 +72,16 @@ export default class LayoutJustification extends EnumerationValue {
     this.vertical = vertical;
   }
 
-  static readonly enumeration = new Enumeration( LayoutJustification, {
+  public static readonly enumeration = new Enumeration( LayoutJustification, {
     phetioDocumentation: 'Justify for layout containers'
   } );
 
-  static getAllowedJustificationValues( orientation: Orientation ): readonly string[] {
+  public static getAllowedJustificationValues( orientation: Orientation ): readonly string[] {
     return orientation === Orientation.HORIZONTAL ? HorizontalLayoutJustificationValues : VerticalLayoutJustificationValues;
   }
 
   // Converts a string union value into the internal Enumeration value
-  static justifyToInternal( orientation: Orientation, key: HorizontalLayoutJustification | VerticalLayoutJustification ): LayoutJustification {
+  public static justifyToInternal( orientation: Orientation, key: HorizontalLayoutJustification | VerticalLayoutJustification ): LayoutJustification {
     if ( orientation === Orientation.HORIZONTAL ) {
       assert && assert( horizontalJustificationMap[ key as 'left' | 'right' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ] );
 
@@ -95,7 +95,7 @@ export default class LayoutJustification extends EnumerationValue {
   }
 
   // Converts an internal Enumeration value into a string union value.
-  static internalToJustify( orientation: Orientation, justify: LayoutJustification ): HorizontalLayoutJustification | VerticalLayoutJustification {
+  public static internalToJustify( orientation: Orientation, justify: LayoutJustification ): HorizontalLayoutJustification | VerticalLayoutJustification {
     if ( orientation === Orientation.HORIZONTAL ) {
       return justify.horizontal;
     }

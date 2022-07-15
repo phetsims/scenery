@@ -170,7 +170,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
     public get mixesHeightSizable(): boolean { return true; }
 
-    validateLocalPreferredHeight(): void {
+    public validateLocalPreferredHeight(): void {
       if ( assert ) {
         const currentHeight = ( this as unknown as Node ).localHeight;
         const effectiveMinimumHeight = this.localMinimumHeight === null ? currentHeight : this.localMinimumHeight;
@@ -181,8 +181,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updateLocalPreferredHeight(): void {
+    private _updateLocalPreferredHeight(): void {
       const node = this as unknown as Node;
 
       if ( !this._preferredHeightChanging ) {
@@ -201,8 +200,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updatePreferredHeight(): void {
+    private _updatePreferredHeight(): void {
       const node = this as unknown as Node;
 
       if ( !this._preferredHeightChanging ) {
@@ -220,8 +218,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updateLocalMinimumHeight(): void {
+    private _updateLocalMinimumHeight(): void {
       const node = this as unknown as Node;
 
       if ( !this._minimumHeightChanging ) {
@@ -240,8 +237,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // Used internally, do not call (can't be private due to TypeScript mixin constraints)
-    _updateMinimumHeight(): void {
+    private _updateMinimumHeight(): void {
       const node = this as unknown as Node;
 
       if ( !this._minimumHeightChanging ) {

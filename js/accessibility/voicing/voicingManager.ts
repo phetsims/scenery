@@ -21,7 +21,7 @@ type VoicingManagerOptions = SelfOptions & SpeechSynthesisAnnouncerOptions;
 
 
 class VoicingManager extends SpeechSynthesisAnnouncer {
-  constructor( providedOptions?: VoicingManagerOptions ) {
+  public constructor( providedOptions?: VoicingManagerOptions ) {
 
     const options = optionize<VoicingManagerOptions, SelfOptions, SpeechSynthesisAnnouncerOptions>()( {
 

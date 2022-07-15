@@ -11,10 +11,10 @@ import { Display, scenery, svgns, Node, IOverlay } from '../imports.js';
 
 export default abstract class ShapeBasedOverlay implements IOverlay {
 
-  display: Display;
-  rootNode: Node;
-  svg: SVGElement;
-  domElement: SVGElement;
+  protected display: Display;
+  protected rootNode: Node;
+  protected svg: SVGElement;
+  public domElement: SVGElement;
 
   protected constructor( display: Display, rootNode: Node, name: string ) {
     this.display = display;
@@ -42,7 +42,7 @@ export default abstract class ShapeBasedOverlay implements IOverlay {
     this.domElement = svg;
   }
 
-  addShape( shape: Shape, color: string, isOffset: boolean ): void {
+  public addShape( shape: Shape, color: string, isOffset: boolean ): void {
     const path = document.createElementNS( svgns, 'path' );
     let svgPath = shape.getSVGPath();
 
@@ -63,7 +63,7 @@ export default abstract class ShapeBasedOverlay implements IOverlay {
     this.svg.appendChild( path );
   }
 
-  update(): void {
+  public update(): void {
     while ( this.svg.childNodes.length ) {
       this.svg.removeChild( this.svg.childNodes[ this.svg.childNodes.length - 1 ] );
     }
@@ -71,12 +71,12 @@ export default abstract class ShapeBasedOverlay implements IOverlay {
     this.addShapes();
   }
 
-  abstract addShapes(): void;
+  public abstract addShapes(): void;
 
   /**
    * Releases references
    */
-  dispose(): void {
+  public dispose(): void {
   // Nothing to dispose
   }
 }

@@ -16,7 +16,7 @@ export type ReadingBlockUtteranceOptions = UtteranceOptions;
 class ReadingBlockUtterance extends Utterance {
   public readingBlockFocus: Focus | null;
 
-  constructor( focus: Focus | null, options?: ReadingBlockUtteranceOptions ) {
+  public constructor( focus: Focus | null, options?: ReadingBlockUtteranceOptions ) {
     super( options );
 
     // Can be set and change to support reusing this ReadingBlockUtterance.

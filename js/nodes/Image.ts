@@ -44,9 +44,9 @@ export type ImageOptions = SelfOptions & ParentOptions;
 export default class Image extends Imageable( Node ) {
 
   // If non-null, determines what is considered "inside" the image for containment and hit-testing.
-  _imageBounds: Bounds2 | null;
+  private _imageBounds: Bounds2 | null;
 
-  constructor( image: ImageableImage, providedOptions?: ImageOptions ) {
+  public constructor( image: ImageableImage, providedOptions?: ImageOptions ) {
 
     // rely on the setImage call from the super constructor to do the setup
     const options = optionize<ImageOptions, EmptyObjectType, ParentOptions>()( {
@@ -71,7 +71,7 @@ export default class Image extends Imageable( Node ) {
    * This should be done when the underlying image has changed appearance (usually the case with a Canvas changing,
    * but this is also triggered by our actual image reference changing).
    */
-  override invalidateImage(): void {
+  public override invalidateImage(): void {
     if ( this._image ) {
       this.invalidateSelf( this._imageBounds || new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     }
@@ -92,7 +92,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Recomputes what renderers are supported, given the current image information.
    */
-  override invalidateSupportedRenderers(): void {
+  public override invalidateSupportedRenderers(): void {
 
     // Canvas is always permitted
     let r = Renderer.bitmaskCanvas;
@@ -124,7 +124,7 @@ export default class Image extends Imageable( Node ) {
    *
    * @param imageOpacity - Should be a number between 0 (transparent) and 1 (opaque), just like normal opacity.
    */
-  override setImageOpacity( imageOpacity: number ): void {
+  public override setImageOpacity( imageOpacity: number ): void {
     const changed = this._imageOpacity !== imageOpacity;
 
     super.setImageOpacity( imageOpacity );
@@ -144,7 +144,7 @@ export default class Image extends Imageable( Node ) {
    * NOTE: This is accomplished by using any provided imageBounds as the node's own selfBounds. This will affect layout,
    * hit-testing, and anything else using the bounds of this node.
    */
-  setImageBounds( imageBounds: Bounds2 | null ): void {
+  public setImageBounds( imageBounds: Bounds2 | null ): void {
     if ( this._imageBounds !== imageBounds ) {
       this._imageBounds = imageBounds;
 
@@ -152,21 +152,21 @@ export default class Image extends Imageable( Node ) {
     }
   }
 
-  set imageBounds( value: Bounds2 | null ) { this.setImageBounds( value ); }
+  public set imageBounds( value: Bounds2 | null ) { this.setImageBounds( value ); }
 
-  get imageBounds(): Bounds2 | null { return this._imageBounds; }
+  public get imageBounds(): Bounds2 | null { return this._imageBounds; }
 
   /**
    * Returns the imageBounds, see setImageBounds for details.
    */
-  getImageBounds(): Bounds2 | null {
+  public getImageBounds(): Bounds2 | null {
     return this._imageBounds;
   }
 
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted(): boolean {
+  public override isPainted(): boolean {
     // Always true for Image nodes
     return true;
   }
@@ -189,7 +189,7 @@ export default class Image extends Imageable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore - Poolable
     return ImageDOMDrawable.createFromPool( renderer, instance );
   }
@@ -200,7 +200,7 @@ export default class Image extends Imageable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore - Poolable
     return ImageSVGDrawable.createFromPool( renderer, instance );
   }
@@ -211,7 +211,7 @@ export default class Image extends Imageable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore - Poolable
     return ImageCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -222,7 +222,7 @@ export default class Image extends Imageable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore - Poolable
     return ImageWebGLDrawable.createFromPool( renderer, instance );
   }
@@ -232,7 +232,7 @@ export default class Image extends Imageable( Node ) {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     const inBounds = Node.prototype.containsPointSelf.call( this, point );
 
     if ( !inBounds || !this._hitTestPixels || !this._hitTestImageData ) {
@@ -245,7 +245,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  override getSelfShape(): Shape {
+  public override getSelfShape(): Shape {
     if ( this._hitTestPixels && this._hitTestImageData ) {
       // If we're hit-testing pixels, return that shape included.
       return Imageable.hitTestDataToShape( this._hitTestImageData, this.imageWidth, this.imageHeight );
@@ -259,7 +259,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Triggers recomputation of mipmaps (as long as mipmapping is enabled)
    */
-  override invalidateMipmaps(): void {
+  public override invalidateMipmaps(): void {
     const markDirty = this._image && this._mipmap && !this._mipmapData;
 
     super.invalidateMipmaps();
@@ -272,10 +272,10 @@ export default class Image extends Imageable( Node ) {
     }
   }
 
-  static ImageIO: IOType;
+  public static ImageIO: IOType;
 
   // Initial values for most Node mutator options
-  static DEFAULT_IMAGE_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_NODE_OPTIONS, Imageable.DEFAULT_OPTIONS );
+  public static DEFAULT_IMAGE_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_NODE_OPTIONS, Imageable.DEFAULT_OPTIONS );
 }
 
 /**

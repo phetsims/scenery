@@ -18,7 +18,7 @@ export default class HStrut extends Spacer {
    * @param width - Width of the strut
    * @param [options] - Passed to Spacer/Node
    */
-  constructor( width: number, options?: HStrutOptions ) {
+  public constructor( width: number, options?: HStrutOptions ) {
     super( width, 0, options );
   }
 }

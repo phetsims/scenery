@@ -36,21 +36,21 @@ export type LineOptions = SelfOptions & StrictOmit<PathOptions, 'shape'>;
 export default class Line extends Path {
 
   // The x coordinate of the start point (point 1)
-  _x1: number;
+  private _x1: number;
 
   // The Y coordinate of the start point (point 1)
-  _y1: number;
+  private _y1: number;
 
   // The x coordinate of the start point (point 2)
-  _x2: number;
+  private _x2: number;
 
   // The y coordinate of the start point (point 2)
-  _y2: number;
+  private _y2: number;
 
-  constructor( options?: LineOptions );
-  constructor( p1: Vector2, p2: Vector2, options?: LineOptions );
-  constructor( x1: number, y1: number, x2: number, y2: number, options?: LineOptions );
-  constructor( x1?: number | Vector2 | LineOptions, y1?: number | Vector2, x2?: number | LineOptions, y2?: number, options?: LineOptions ) {
+  public constructor( options?: LineOptions );
+  public constructor( p1: Vector2, p2: Vector2, options?: LineOptions );
+  public constructor( x1: number, y1: number, x2: number, y2: number, options?: LineOptions );
+  public constructor( x1?: number | Vector2 | LineOptions, y1?: number | Vector2, x2?: number | LineOptions, y2?: number, options?: LineOptions ) {
     super( null );
 
     this._x1 = 0;
@@ -120,7 +120,7 @@ export default class Line extends Path {
    * @param x2 - the end x coordinate
    * @param y2 - the end y coordinate
    */
-  setLine( x1: number, y1: number, x2: number, y2: number ): this {
+  public setLine( x1: number, y1: number, x2: number, y2: number ): this {
     assert && assert( x1 !== undefined &&
     y1 !== undefined &&
     x2 !== undefined &&
@@ -145,7 +145,7 @@ export default class Line extends Path {
   /**
    * Set the line's first point's x and y values
    */
-  setPoint1( p1: Vector2 ): this;
+  public setPoint1( p1: Vector2 ): this;
   setPoint1( x1: number, y1: number ): this; // eslint-disable-line
   setPoint1( x1: number | Vector2, y1?: number ): this {  // eslint-disable-line
     if ( typeof x1 === 'number' ) {
@@ -171,14 +171,14 @@ export default class Line extends Path {
     return this;
   }
 
-  set p1( point: Vector2 ) { this.setPoint1( point ); }
+  public set p1( point: Vector2 ) { this.setPoint1( point ); }
 
-  get p1(): Vector2 { return new Vector2( this._x1, this._y1 ); }
+  public get p1(): Vector2 { return new Vector2( this._x1, this._y1 ); }
 
   /**
    * Set the line's second point's x and y values
    */
-  setPoint2( p1: Vector2 ): this;
+  public setPoint2( p1: Vector2 ): this;
   setPoint2( x2: number, y2: number ): this; // eslint-disable-line
   setPoint2( x2: number | Vector2, y2?: number ): this {  // eslint-disable-line
     if ( typeof x2 === 'number' ) {
@@ -202,14 +202,14 @@ export default class Line extends Path {
     return this;
   }
 
-  set p2( point: Vector2 ) { this.setPoint2( point ); }
+  public set p2( point: Vector2 ) { this.setPoint2( point ); }
 
-  get p2(): Vector2 { return new Vector2( this._x2, this._y2 ); }
+  public get p2(): Vector2 { return new Vector2( this._x2, this._y2 ); }
 
   /**
    * Sets the x coordinate of the first point of the line.
    */
-  setX1( x1: number ): this {
+  public setX1( x1: number ): this {
     if ( this._x1 !== x1 ) {
       this._x1 = x1;
 
@@ -223,21 +223,21 @@ export default class Line extends Path {
     return this;
   }
 
-  set x1( value: number ) { this.setX1( value ); }
+  public set x1( value: number ) { this.setX1( value ); }
 
-  get x1(): number { return this.getX1(); }
+  public get x1(): number { return this.getX1(); }
 
   /**
    * Returns the x coordinate of the first point of the line.
    */
-  getX1(): number {
+  public getX1(): number {
     return this._x1;
   }
 
   /**
    * Sets the y coordinate of the first point of the line.
    */
-  setY1( y1: number ): this {
+  public setY1( y1: number ): this {
     if ( this._y1 !== y1 ) {
       this._y1 = y1;
 
@@ -251,21 +251,21 @@ export default class Line extends Path {
     return this;
   }
 
-  set y1( value: number ) { this.setY1( value ); }
+  public set y1( value: number ) { this.setY1( value ); }
 
-  get y1(): number { return this.getY1(); }
+  public get y1(): number { return this.getY1(); }
 
   /**
    * Returns the y coordinate of the first point of the line.
    */
-  getY1(): number {
+  public getY1(): number {
     return this._y1;
   }
 
   /**
    * Sets the x coordinate of the second point of the line.
    */
-  setX2( x2: number ): this {
+  public setX2( x2: number ): this {
     if ( this._x2 !== x2 ) {
       this._x2 = x2;
 
@@ -279,21 +279,21 @@ export default class Line extends Path {
     return this;
   }
 
-  set x2( value: number ) { this.setX2( value ); }
+  public set x2( value: number ) { this.setX2( value ); }
 
-  get x2(): number { return this.getX2(); }
+  public get x2(): number { return this.getX2(); }
 
   /**
    * Returns the x coordinate of the second point of the line.
    */
-  getX2(): number {
+  public getX2(): number {
     return this._x2;
   }
 
   /**
    * Sets the y coordinate of the second point of the line.
    */
-  setY2( y2: number ): this {
+  public setY2( y2: number ): this {
     if ( this._y2 !== y2 ) {
       this._y2 = y2;
 
@@ -307,14 +307,14 @@ export default class Line extends Path {
     return this;
   }
 
-  set y2( value: number ) { this.setY2( value ); }
+  public set y2( value: number ) { this.setY2( value ); }
 
-  get y2(): number { return this.getY2(); }
+  public get y2(): number { return this.getY2(); }
 
   /**
    * Returns the y coordinate of the second point of the line.
    */
-  getY2(): number {
+  public getY2(): number {
     return this._y2;
   }
 
@@ -349,7 +349,7 @@ export default class Line extends Path {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     if ( this._strokePickable ) {
       return super.containsPointSelf( point );
     }
@@ -373,7 +373,7 @@ export default class Line extends Path {
   /**
    * Computes the bounds of the Line, including any applied stroke. Overridden for efficiency.
    */
-  override computeShapeBounds(): Bounds2 {
+  public override computeShapeBounds(): Bounds2 {
     // optimized form for a single line segment (no joins, just two caps)
     if ( this._stroke ) {
       const lineCap = this.getLineCap();
@@ -432,7 +432,7 @@ export default class Line extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return LineSVGDrawable.createFromPool( renderer, instance );
   }
@@ -443,7 +443,7 @@ export default class Line extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return LineCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -454,7 +454,7 @@ export default class Line extends Path {
    *
    * Throws an error if it is not null.
    */
-  override setShape( shape: Shape | null ): this {
+  public override setShape( shape: Shape | null ): this {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Line to something non-null' );
     }
@@ -471,7 +471,7 @@ export default class Line extends Path {
    *
    * NOTE: This is created lazily, so don't call it if you don't have to!
    */
-  override getShape(): Shape {
+  public override getShape(): Shape {
     if ( !this._shape ) {
       this._shape = this.createLineShape();
     }
@@ -481,7 +481,7 @@ export default class Line extends Path {
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
    */
-  override hasShape(): boolean {
+  public override hasShape(): boolean {
     return true;
   }
 
@@ -492,7 +492,7 @@ export default class Line extends Path {
    *
    * See Renderer for more information on the bitmasks
    */
-  override getFillRendererBitmask(): number {
+  public override getFillRendererBitmask(): number {
     return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskWebGL;
   }
 }

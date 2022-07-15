@@ -12,12 +12,12 @@ import { Node, scenery, Trail } from '../imports.js';
 
 export default class TrailsBetweenProperty extends TinyProperty<Trail[]> {
 
-  readonly rootNode: Node;
-  readonly leafNode: Node;
-  readonly listenedNodeSet: Set<Node> = new Set<Node>();
+  public readonly rootNode: Node;
+  public readonly leafNode: Node;
+  public readonly listenedNodeSet: Set<Node> = new Set<Node>();
   private readonly _trailUpdateListener: () => void;
 
-  constructor( rootNode: Node, leafNode: Node ) {
+  public constructor( rootNode: Node, leafNode: Node ) {
     super( [] );
 
     this.rootNode = rootNode;
@@ -100,7 +100,7 @@ export default class TrailsBetweenProperty extends TinyProperty<Trail[]> {
     node.parentRemovedEmitter.removeListener( this._trailUpdateListener );
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     this.listenedNodeSet.forEach( node => this.removeNodeListener( node ) );
 
     super.dispose();

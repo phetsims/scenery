@@ -27,7 +27,7 @@ type SelfOptions = {
 export type CanvasNodeOptions = SelfOptions & NodeOptions;
 
 export default abstract class CanvasNode extends Node {
-  constructor( options?: CanvasNodeOptions ) {
+  public constructor( options?: CanvasNodeOptions ) {
     super( options );
 
     // This shouldn't change, as we only support one renderer
@@ -40,25 +40,25 @@ export default abstract class CanvasNode extends Node {
    * These bounds should always cover at least the area where the CanvasNode will draw in. If this is violated, this
    * node may be partially or completely invisible in Scenery's output.
    */
-  setCanvasBounds( selfBounds: Bounds2 ): void {
+  public setCanvasBounds( selfBounds: Bounds2 ): void {
     this.invalidateSelf( selfBounds );
   }
 
-  set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
+  public set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
 
-  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
+  public get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
 
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
    */
-  getCanvasBounds(): Bounds2 {
+  public getCanvasBounds(): Bounds2 {
     return this.getSelfBounds();
   }
 
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted(): boolean {
+  public override isPainted(): boolean {
     // Always true for CanvasNode
     return true;
   }
@@ -70,7 +70,7 @@ export default abstract class CanvasNode extends Node {
    * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
    * Ideally, this function should have no outside effects other than painting to the Canvas provided.
    */
-  abstract paintCanvas( context: CanvasRenderingContext2D ): void;
+  public abstract paintCanvas( context: CanvasRenderingContext2D ): void;
 
   /**
    * Should be called when this node needs to be repainted. When not called, Scenery assumes that this node does
@@ -78,7 +78,7 @@ export default abstract class CanvasNode extends Node {
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
-  invalidatePaint(): void {
+  public invalidatePaint(): void {
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       this._drawables[ i ].markDirty();
@@ -103,14 +103,14 @@ export default abstract class CanvasNode extends Node {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     return false;
   }
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  override getSelfShape(): Shape {
+  public override getSelfShape(): Shape {
     return new Shape();
   }
 
@@ -120,7 +120,7 @@ export default abstract class CanvasNode extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return CanvasNodeDrawable.createFromPool( renderer, instance );
   }

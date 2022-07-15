@@ -15,28 +15,28 @@ import { Input, scenery } from '../imports.js';
 export type BatchedDOMEventCallback = ( ...args: any[] ) => void;
 
 export class BatchedDOMEventType extends EnumerationValue {
-  static readonly POINTER_TYPE = new BatchedDOMEventType();
-  static readonly MS_POINTER_TYPE = new BatchedDOMEventType();
-  static readonly TOUCH_TYPE = new BatchedDOMEventType();
-  static readonly MOUSE_TYPE = new BatchedDOMEventType();
-  static readonly WHEEL_TYPE = new BatchedDOMEventType();
+  public static readonly POINTER_TYPE = new BatchedDOMEventType();
+  public static readonly MS_POINTER_TYPE = new BatchedDOMEventType();
+  public static readonly TOUCH_TYPE = new BatchedDOMEventType();
+  public static readonly MOUSE_TYPE = new BatchedDOMEventType();
+  public static readonly WHEEL_TYPE = new BatchedDOMEventType();
 
-  static readonly enumeration = new Enumeration( BatchedDOMEventType, {
+  public static readonly enumeration = new Enumeration( BatchedDOMEventType, {
     phetioDocumentation: 'The type of batched event'
   } );
 }
 
 export default class BatchedDOMEvent implements IPoolable {
 
-  domEvent!: Event | null;
-  type!: BatchedDOMEventType | null;
-  callback!: BatchedDOMEventCallback | null;
+  private domEvent!: Event | null;
+  private type!: BatchedDOMEventType | null;
+  private callback!: BatchedDOMEventCallback | null;
 
-  constructor( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ) {
+  public constructor( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ) {
     this.initialize( domEvent, type, callback );
   }
 
-  initialize( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ): void {
+  public initialize( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ): void {
     // called multiple times due to pooling, this should be re-entrant
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
 
@@ -45,7 +45,7 @@ export default class BatchedDOMEvent implements IPoolable {
     this.callback = callback;
   }
 
-  run( input: Input ): void {
+  public run( input: Input ): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Running batched event' );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
@@ -95,18 +95,18 @@ export default class BatchedDOMEvent implements IPoolable {
   /**
    * Releases references
    */
-  dispose(): void {
+  public dispose(): void {
     // clear our references
     this.domEvent = null;
     this.callback = null;
     this.freeToPool();
   }
 
-  freeToPool(): void {
+  public freeToPool(): void {
     BatchedDOMEvent.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool( BatchedDOMEvent );
+  public static readonly pool = new Pool( BatchedDOMEvent );
 }
 
 scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );

@@ -21,7 +21,7 @@ type ActivatedReadingBlockHighlightOptions = SelfOptions & FocusHighlightFromNod
 class ActivatedReadingBlockHighlight extends FocusHighlightFromNode {
   public static readonly ACTIVATED_HIGHLIGHT_COLOR = ACTIVATED_HIGHLIGHT_COLOR;
 
-  constructor( node: Node | null, providedOptions?: ActivatedReadingBlockHighlightOptions ) {
+  public constructor( node: Node | null, providedOptions?: ActivatedReadingBlockHighlightOptions ) {
 
     const options = optionize<ActivatedReadingBlockHighlightOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
       innerStroke: null,

@@ -40,9 +40,9 @@ export default class Circle extends Path {
    * @param  [options] - Circle-specific options are documented in CIRCLE_OPTION_KEYS above, and can be provided
    *                     along-side options for Node
    */
-  constructor( options?: CircleOptions );
-  constructor( radius: number, options?: CircleOptions );
-  constructor( radius?: number | CircleOptions, options?: CircleOptions ) {
+  public constructor( options?: CircleOptions );
+  public constructor( radius: number, options?: CircleOptions );
+  public constructor( radius?: number | CircleOptions, options?: CircleOptions ) {
     super( null );
 
     this._radius = 0;
@@ -72,7 +72,7 @@ export default class Circle extends Path {
    *
    * We can support the DOM renderer if there is a solid-styled stroke (which otherwise wouldn't be supported).
    */
-  override getStrokeRendererBitmask(): number {
+  public override getStrokeRendererBitmask(): number {
     let bitmask = super.getStrokeRendererBitmask();
     // @ts-ignore TODO isGradient/isPattern better handling
     if ( this.hasStroke() && !this.getStroke()!.isGradient && !this.getStroke()!.isPattern && this.getLineWidth() <= this.getRadius() ) {
@@ -84,7 +84,7 @@ export default class Circle extends Path {
   /**
    * Determines the allowed renderers that are allowed (or excluded) based on the current Path. (scenery-internal)
    */
-  override getPathRendererBitmask(): number {
+  public override getPathRendererBitmask(): number {
     // If we can use CSS borderRadius, we can support the DOM renderer.
     return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
   }
@@ -116,7 +116,7 @@ export default class Circle extends Path {
    *
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
+  public override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     // TODO: handle intersection with somewhat-infinite bounds!
     let x = Math.abs( bounds.centerX );
     let y = Math.abs( bounds.centerY );
@@ -157,7 +157,7 @@ export default class Circle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore TODO: pooling
     return CircleDOMDrawable.createFromPool( renderer, instance );
   }
@@ -168,7 +168,7 @@ export default class Circle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore TODO: pooling
     return CircleSVGDrawable.createFromPool( renderer, instance );
   }
@@ -179,7 +179,7 @@ export default class Circle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore TODO: pooling
     return CircleCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -187,7 +187,7 @@ export default class Circle extends Path {
   /**
    * Sets the radius of the circle.
    */
-  setRadius( radius: number ): this {
+  public setRadius( radius: number ): this {
     assert && assert( typeof radius === 'number', 'Circle.radius must be a number' );
     assert && assert( radius >= 0, 'A circle needs a non-negative radius' );
     assert && assert( isFinite( radius ), 'A circle needs a finite radius' );
@@ -204,21 +204,21 @@ export default class Circle extends Path {
     return this;
   }
 
-  set radius( value: number ) { this.setRadius( value ); }
+  public set radius( value: number ) { this.setRadius( value ); }
 
-  get radius(): number { return this.getRadius(); }
+  public get radius(): number { return this.getRadius(); }
 
   /**
    * Returns the radius of the circle.
    */
-  getRadius(): number {
+  public getRadius(): number {
     return this._radius;
   }
 
   /**
    * Computes the bounds of the Circle, including any applied stroke. Overridden for efficiency.
    */
-  override computeShapeBounds(): Bounds2 {
+  public override computeShapeBounds(): Bounds2 {
     let bounds = new Bounds2( -this._radius, -this._radius, this._radius, this._radius );
     if ( this._stroke ) {
       // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
@@ -234,7 +234,7 @@ export default class Circle extends Path {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  override containsPointSelf( point: Vector2 ): boolean {
+  public override containsPointSelf( point: Vector2 ): boolean {
     const magSq = point.x * point.x + point.y * point.y;
     let result = true;
     let iRadius;
@@ -269,7 +269,7 @@ export default class Circle extends Path {
    *
    * @param shape - Throws an error if it is not null.
    */
-  override setShape( shape: Shape | null ): this {
+  public override setShape( shape: Shape | null ): this {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Circle to something non-null' );
     }
@@ -286,7 +286,7 @@ export default class Circle extends Path {
    *
    * NOTE: This is created lazily, so don't call it if you don't have to!
    */
-  override getShape(): Shape {
+  public override getShape(): Shape {
     if ( !this._shape ) {
       this._shape = this.createCircleShape();
     }
@@ -296,7 +296,7 @@ export default class Circle extends Path {
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
    */
-  override hasShape(): boolean {
+  public override hasShape(): boolean {
     // Always true for this Path subtype
     return true;
   }

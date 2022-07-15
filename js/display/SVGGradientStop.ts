@@ -18,24 +18,24 @@ export type ActiveSVGGradientStop = WithoutNull<SVGGradientStop, 'svgGradient'>;
 class SVGGradientStop implements IPoolable {
 
   // persistent
-  svgElement!: SVGStopElement;
+  public svgElement!: SVGStopElement;
 
   // transient
-  svgGradient!: ActiveSVGGradient | null;
-  color!: IColor;
+  public svgGradient!: ActiveSVGGradient | null;
+  public color!: IColor;
 
-  ratio!: number;
+  public ratio!: number;
   private dirty!: boolean;
   private propertyListener!: () => void;
   private colorListener!: () => void;
 
-  constructor( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ) {
+  public constructor( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ) {
     this.initialize( svgGradient, ratio, color );
   }
 
-  isActiveSVGGradientStop(): this is ActiveSVGGradientStop { return !!this.svgGradient; }
+  public isActiveSVGGradientStop(): this is ActiveSVGGradientStop { return !!this.svgGradient; }
 
-  initialize( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ): this {
+  public initialize( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ): this {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] initialize: ${svgGradient.gradient.id} : ${ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -104,7 +104,7 @@ class SVGGradientStop implements IPoolable {
   /**
    * Updates the color stop to whatever the current color should be.
    */
-  update(): void {
+  public update(): void {
     if ( !this.dirty ) {
       return;
     }
@@ -155,7 +155,7 @@ class SVGGradientStop implements IPoolable {
   /**
    * Disposes, so that it can be reused from the pool.
    */
-  dispose(): void {
+  public dispose(): void {
     assert && assert( this.isActiveSVGGradientStop() );
     const activeSelf = this as ActiveSVGGradientStop;
 
@@ -187,11 +187,11 @@ class SVGGradientStop implements IPoolable {
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
 
-  freeToPool(): void {
+  public freeToPool(): void {
     SVGGradientStop.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool( SVGGradientStop );
+  public static readonly pool = new Pool( SVGGradientStop );
 }
 
 scenery.register( 'SVGGradientStop', SVGGradientStop );

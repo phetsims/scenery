@@ -14,7 +14,7 @@ type ParentOptions = HeightSizableOptions & DividerOptions;
 export type HDividerOptions = SelfOptions & ParentOptions;
 
 export default class HDivider extends HeightSizable( Divider ) {
-  constructor( options?: HDividerOptions ) {
+  public constructor( options?: HDividerOptions ) {
     super();
 
     this.localPreferredHeightProperty.link( height => {

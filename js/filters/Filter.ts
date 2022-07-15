@@ -34,13 +34,13 @@ let globalId = 1;
 export default abstract class Filter {
 
   // (scenery-internal)
-  id: string;
+  public readonly id: string;
 
   // Can be mutated by subtypes, determines what filter region increases should be used for when SVG is used for
   // rendering.
-  filterRegionPercentageIncrease: number;
+  public filterRegionPercentageIncrease: number;
 
-  constructor() {
+  public constructor() {
     this.id = `filter${globalId++}`;
     this.filterRegionPercentageIncrease = 0;
   }
@@ -50,7 +50,7 @@ export default abstract class Filter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  abstract getCSSFilterString(): string;
+  public abstract getCSSFilterString(): string;
 
   /**
    * Appends filter sub-elements into the SVG filter element provided. Should include an in=${inName} for all inputs,
@@ -58,44 +58,44 @@ export default abstract class Filter {
    * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
    * SVG filter object.
    */
-  abstract applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void;
+  public abstract applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void;
 
   /**
    * Given a specific canvas/context wrapper, this method should mutate its state so that the canvas now holds the
    * filtered content. Usually this would be by using getImageData/putImageData, however redrawing or other operations
    * are also possible.
    */
-  abstract applyCanvasFilter( wrapper: CanvasContextWrapper ): void;
+  public abstract applyCanvasFilter( wrapper: CanvasContextWrapper ): void;
 
-  isDOMCompatible(): boolean {
+  public isDOMCompatible(): boolean {
     // TODO: We can browser-check on things like color matrix? But we want to disallow things that we can't guarantee we
     // can support?
     return false;
   }
 
-  isSVGCompatible(): boolean {
+  public isSVGCompatible(): boolean {
     return false;
   }
 
-  isCanvasCompatible(): boolean {
+  public isCanvasCompatible(): boolean {
     return Features.canvasFilter ? this.isDOMCompatible() : false;
   }
 
-  isWebGLCompatible(): boolean {
+  public isWebGLCompatible(): boolean {
     return false;
   }
 
   /**
    * Returns a string form of this object
    */
-  toString(): string {
+  public toString(): string {
     return this.id;
   }
 
   /**
    * Applies a color matrix effect into an existing SVG filter.
    */
-  static applyColorMatrix( matrixValues: string, svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+  public static applyColorMatrix( matrixValues: string, svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     const feColorMatrix = document.createElementNS( svgns, 'feColorMatrix' );
 
     feColorMatrix.setAttribute( 'type', 'matrix' );

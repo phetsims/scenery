@@ -31,13 +31,13 @@ export default class ShaderProgram {
   private vertexShader!: WebGLShader;
   private fragmentShader!: WebGLShader;
 
-  uniformLocations!: Record<string, WebGLUniformLocation>;
-  attributeLocations!: Record<string, number>;
-  activeAttributes!: Record<string, boolean>; // whether they are enabled
+  public uniformLocations!: Record<string, WebGLUniformLocation>;
+  public attributeLocations!: Record<string, number>;
+  public activeAttributes!: Record<string, boolean>; // whether they are enabled
 
   private isInitialized!: boolean;
 
-  constructor( gl: WebGLRenderingContext, vertexSource: string, fragmentSource: string, providedOptions?: ShaderProgramOptions ) {
+  public constructor( gl: WebGLRenderingContext, vertexSource: string, fragmentSource: string, providedOptions?: ShaderProgramOptions ) {
     const options = optionize<ShaderProgramOptions>()( {
       attributes: [],
       uniforms: []
@@ -54,7 +54,7 @@ export default class ShaderProgram {
   /**
    * Initializes (or reinitializes) the WebGL state and uniform/attribute references.
    */
-  initialize( gl: WebGLRenderingContext ): void {
+  public initialize( gl: WebGLRenderingContext ): void {
 
     this.gl = gl; // TODO: create them with separate contexts
 
@@ -105,7 +105,7 @@ export default class ShaderProgram {
 
   /**
    */
-  use(): void {
+  public use(): void {
     if ( this.used ) { return; }
 
     this.used = true;
@@ -120,7 +120,7 @@ export default class ShaderProgram {
     } );
   }
 
-  activateAttribute( attributeName: string ): void {
+  public activateAttribute( attributeName: string ): void {
     // guarded so we don't enable twice
     if ( !this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = true;
@@ -131,11 +131,11 @@ export default class ShaderProgram {
     }
   }
 
-  enableVertexAttribArray( attributeName: string ): void {
+  public enableVertexAttribArray( attributeName: string ): void {
     this.gl.enableVertexAttribArray( this.attributeLocations[ attributeName ] );
   }
 
-  unuse(): void {
+  public unuse(): void {
     if ( !this.used ) { return; }
 
     this.used = false;
@@ -147,11 +147,11 @@ export default class ShaderProgram {
     } );
   }
 
-  disableVertexAttribArray( attributeName: string ): void {
+  public disableVertexAttribArray( attributeName: string ): void {
     this.gl.disableVertexAttribArray( this.attributeLocations[ attributeName ] );
   }
 
-  deactivateAttribute( attributeName: string ): void {
+  public deactivateAttribute( attributeName: string ): void {
     // guarded so we don't disable twice
     if ( this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = false;
@@ -165,7 +165,7 @@ export default class ShaderProgram {
   /**
    * Releases references
    */
-  dispose(): void {
+  public dispose(): void {
     this.gl.deleteProgram( this.program );
   }
 }

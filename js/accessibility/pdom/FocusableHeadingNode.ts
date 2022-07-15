@@ -32,7 +32,7 @@ class FocusableHeadingNode extends Node {
   // Removes listeners and makes eligible for garbage collection.
   private readonly disposeFocusableHeadingNode: () => void;
 
-  constructor( providedOptions?: FocusableHeadingNodeOptions ) {
+  public constructor( providedOptions?: FocusableHeadingNodeOptions ) {
     const options = optionize<FocusableHeadingNodeOptions, SelfOptions, ParentOptions>()( {
       headingLevel: 1
     }, providedOptions );

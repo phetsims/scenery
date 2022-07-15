@@ -22,7 +22,7 @@ export default class GridBackgroundNode extends Node {
   private readonly createCellBackground: CreateCellBackground;
   private readonly layoutListener: () => void;
 
-  constructor( constraint: GridConstraint, providedOptions?: GridBackgroundNodeOptions ) {
+  public constructor( constraint: GridConstraint, providedOptions?: GridBackgroundNodeOptions ) {
     assert && assert( constraint instanceof GridConstraint );
 
     const options = optionize<GridBackgroundNodeOptions, SelfOptions, NodeOptions>()( {
@@ -52,7 +52,7 @@ export default class GridBackgroundNode extends Node {
   /**
    * Releases references
    */
-  override dispose(): void {
+  public override dispose(): void {
     this.constraint.finishedLayoutEmitter.removeListener( this.layoutListener );
 
     super.dispose();

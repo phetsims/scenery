@@ -24,10 +24,11 @@ type ColorProfileMap = Record<string, Color | string>;
 export default class ProfileColorProperty extends ColorProperty {
 
   // values are mutated by the HTML color wrapper.
-  colorProfileMap: ColorProfileMap;
+  // (scenery-internal)
+  public readonly colorProfileMap: ColorProfileMap;
 
   // Treat as private
-  readonly name: string;
+  public readonly name: string;
 
   public static readonly TANDEM_NAME_SUFFIX = 'ColorProperty';
 
@@ -37,7 +38,7 @@ export default class ProfileColorProperty extends ColorProperty {
    * @param colorProfileMap - object literal that maps keys (profile names) to ColorDef (that should be immutable)
    * @param [options]
    */
-  constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, providedOptions?: PropertyOptions<Color> ) {
+  public constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, providedOptions?: PropertyOptions<Color> ) {
 
     assert && assert( namespace instanceof Namespace );
     assert && assert( typeof colorName === 'string' );
@@ -104,7 +105,7 @@ export default class ProfileColorProperty extends ColorProperty {
     instances.push( this );
   }
 
-  override dispose(): void {
+  public override dispose(): void {
     arrayRemove( instances, this );
     super.dispose();
   }

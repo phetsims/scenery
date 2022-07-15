@@ -12,14 +12,14 @@ import { Pattern, scenery, svgns, xlinkns } from '../imports.js';
 export default class SVGPattern implements IPoolable {
 
   // persistent
-  definition!: SVGPatternElement;
+  public definition!: SVGPatternElement;
   private imageElement!: SVGImageElement;
 
-  constructor( pattern: Pattern ) {
+  public constructor( pattern: Pattern ) {
     this.initialize( pattern );
   }
 
-  initialize( pattern: Pattern ): this {
+  public initialize( pattern: Pattern ): this {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGPattern] initialize: ${pattern.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -65,22 +65,22 @@ export default class SVGPattern implements IPoolable {
   /**
    * Called from SVGBlock, matches other paints.
    */
-  update(): void {
+  public update(): void {
     // Nothing
   }
 
   /**
    * Disposes, so that it can be reused from the pool.
    */
-  dispose(): void {
+  public dispose(): void {
     this.freeToPool();
   }
 
-  freeToPool(): void {
+  public freeToPool(): void {
     SVGPattern.pool.freeToPool( this );
   }
 
-  static readonly pool = new Pool( SVGPattern );
+  public static readonly pool = new Pool( SVGPattern );
 }
 
 scenery.register( 'SVGPattern', SVGPattern );

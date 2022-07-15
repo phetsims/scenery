@@ -15,22 +15,22 @@ export type ActiveSVGGradient = WithoutNull<SVGGradient, 'svgBlock' | 'gradient'
 export default abstract class SVGGradient {
 
   // transient (scenery-internal)
-  svgBlock!: SVGBlock | null;
-  gradient!: Gradient | null;
-  stops!: SVGGradientStop[];
+  public svgBlock!: SVGBlock | null;
+  public gradient!: Gradient | null;
+  public stops!: SVGGradientStop[];
 
   // persistent
-  definition!: SVGGradientElement;
+  public definition!: SVGGradientElement;
 
   private dirty!: boolean;
 
-  constructor( svgBlock: SVGBlock, gradient: Gradient ) {
+  public constructor( svgBlock: SVGBlock, gradient: Gradient ) {
     this.initialize( svgBlock, gradient );
   }
 
-  isActiveSVGGradient(): this is ActiveSVGGradient { return !!this.svgBlock; }
+  public isActiveSVGGradient(): this is ActiveSVGGradient { return !!this.svgBlock; }
 
-  initialize( svgBlock: SVGBlock, gradient: Gradient ): void {
+  public initialize( svgBlock: SVGBlock, gradient: Gradient ): void {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] initialize ${gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -76,7 +76,7 @@ export default abstract class SVGGradient {
   /**
    * Called from SVGGradientStop when a stop needs to change the actual color.
    */
-  markDirty(): void {
+  public markDirty(): void {
     if ( !this.dirty ) {
       assert && assert( this.isActiveSVGGradient() );
       const activeGradient = this as ActiveSVGGradient;
@@ -95,7 +95,7 @@ export default abstract class SVGGradient {
   /**
    * Called from SVGBlock when we need to update our color stops.
    */
-  update(): void {
+  public update(): void {
     if ( !this.dirty ) {
       return;
     }
@@ -114,7 +114,7 @@ export default abstract class SVGGradient {
   /**
    * Disposes, so that it can be reused from the pool.
    */
-  dispose(): void {
+  public dispose(): void {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] dispose ${this.gradient!.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -134,7 +134,7 @@ export default abstract class SVGGradient {
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
 
-  abstract freeToPool(): void;
+  public abstract freeToPool(): void;
 }
 
 scenery.register( 'SVGGradient', SVGGradient );

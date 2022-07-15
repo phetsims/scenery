@@ -99,7 +99,7 @@ export default class LayoutBox extends Node {
   // We'll ignore the resize flag while running the initial mutate.
   private _layoutMutating = false;
 
-  constructor( providedOptions?: LayoutBoxOptions ) {
+  public constructor( providedOptions?: LayoutBoxOptions ) {
     // NOTE: We don't need to give defaults for our self options, so that's {}'ed out
     const options = optionize<LayoutBoxOptions, EmptyObjectType, NodeOptions>()( {
 
@@ -181,7 +181,7 @@ export default class LayoutBox extends Node {
    * Updates the layout of this LayoutBox. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
    */
-  updateLayout(): void {
+  public updateLayout(): void {
     // Since we trigger bounds changes in our children during layout, we don't want to trigger layout off of those
     // changes, causing a stack overflow.
     if ( !this._updateLayoutLocked ) {
@@ -236,7 +236,7 @@ export default class LayoutBox extends Node {
    * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
    * are changes.
    */
-  override setChildren( children: Node[] ): this {
+  public override setChildren( children: Node[] ): this {
     // If the layout is already locked, we need to bail and only call Node's setChildren.
     if ( this._updateLayoutLocked ) {
       return super.setChildren( children );
@@ -264,7 +264,7 @@ export default class LayoutBox extends Node {
    * The default is for child nodes bounds' to be included in this node's bounds, but that would in general be a
    * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
    */
-  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
+  public override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     // If we have invisible children, we'll likely need to update our layout,
@@ -277,7 +277,7 @@ export default class LayoutBox extends Node {
   /**
    * Sets the orientation of the LayoutBox (the axis along which nodes will be placed, separated by spacing).
    */
-  setOrientation( orientation: LayoutBoxOrientation ): this {
+  public setOrientation( orientation: LayoutBoxOrientation ): this {
     assert && assert( this._orientation === 'vertical' || this._orientation === 'horizontal' );
 
     if ( this._orientation !== orientation ) {
@@ -289,23 +289,23 @@ export default class LayoutBox extends Node {
     return this;
   }
 
-  set orientation( value: LayoutBoxOrientation ) { this.setOrientation( value ); }
+  public set orientation( value: LayoutBoxOrientation ) { this.setOrientation( value ); }
 
-  get orientation(): LayoutBoxOrientation { return this.getOrientation(); }
+  public get orientation(): LayoutBoxOrientation { return this.getOrientation(); }
 
   /**
    * Returns the current orientation.
    *
    * See setOrientation for more documentation on the orientation.
    */
-  getOrientation(): LayoutBoxOrientation {
+  public getOrientation(): LayoutBoxOrientation {
     return this._orientation;
   }
 
   /**
    * Sets spacing between items in the LayoutBox.
    */
-  setSpacing( spacing: number ): this {
+  public setSpacing( spacing: number ): this {
     assert && assert( typeof spacing === 'number' && isFinite( spacing ),
       'spacing must be a finite number' );
 
@@ -318,16 +318,16 @@ export default class LayoutBox extends Node {
     return this;
   }
 
-  set spacing( value: number ) { this.setSpacing( value ); }
+  public set spacing( value: number ) { this.setSpacing( value ); }
 
-  get spacing(): number { return this.getSpacing(); }
+  public get spacing(): number { return this.getSpacing(); }
 
   /**
    * Gets the spacing between items in the LayoutBox.
    *
    * See setSpacing() for more documentation on spacing.
    */
-  getSpacing(): number {
+  public getSpacing(): number {
     return this._spacing;
   }
 
@@ -348,7 +348,7 @@ export default class LayoutBox extends Node {
    * - bottom
    * - origin - The y value of each child will be set to 0.
    */
-  setAlign( align: LayoutBoxAlign ): this {
+  public setAlign( align: LayoutBoxAlign ): this {
     if ( assert ) {
       if ( this._orientation === 'vertical' ) {
         assert( this._align === 'left' || this._align === 'center' || this._align === 'right' || this._align === 'origin',
@@ -369,16 +369,16 @@ export default class LayoutBox extends Node {
     return this;
   }
 
-  set align( value: LayoutBoxAlign ) { this.setAlign( value ); }
+  public set align( value: LayoutBoxAlign ) { this.setAlign( value ); }
 
-  get align(): LayoutBoxAlign { return this.getAlign(); }
+  public get align(): LayoutBoxAlign { return this.getAlign(); }
 
   /**
    * Returns the current alignment.
    *
    * See setAlign for more documentation on the orientation.
    */
-  getAlign(): LayoutBoxAlign {
+  public getAlign(): LayoutBoxAlign {
     return this._align;
   }
 
@@ -387,7 +387,7 @@ export default class LayoutBox extends Node {
    *
    * Layout will always still be triggered on orientation/align/spacing changes.
    */
-  setResize( resize: boolean ): this {
+  public setResize( resize: boolean ): this {
     assert && assert( typeof resize === 'boolean', 'resize should be a boolean' );
 
     if ( this._resize !== resize ) {
@@ -416,16 +416,16 @@ export default class LayoutBox extends Node {
     return this;
   }
 
-  set resize( value: boolean ) { this.setResize( value ); }
+  public set resize( value: boolean ) { this.setResize( value ); }
 
-  get resize(): boolean { return this.isResize(); }
+  public get resize(): boolean { return this.isResize(); }
 
   /**
    * Returns whether this LayoutBox will trigger layout when children are added/removed/resized.
    *
    * See setResize() for more documentation on spacing.
    */
-  isResize(): boolean {
+  public isResize(): boolean {
     return this._resize;
   }
 }

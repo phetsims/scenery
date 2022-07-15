@@ -27,7 +27,7 @@ class FocusDisplayedController {
   private readonly boundInstancesChangedListener: ( instance: Instance ) => void;
   private readonly boundFocusListener: ( focus: any ) => void;
 
-  constructor( focusProperty: IProperty<Focus | null>, providedOptions?: FocusDisplayedControllerOptions ) {
+  public constructor( focusProperty: IProperty<Focus | null>, providedOptions?: FocusDisplayedControllerOptions ) {
 
     const options = optionize<FocusDisplayedControllerOptions>()( {
 
