@@ -1959,7 +1959,7 @@ export default class Display {
         replacedImages++;
         hasReplacedImages = true;
 
-        ( () => {
+        ( () => { // eslint-disable-line @typescript-eslint/no-loop-func
           // Closure variables need to be stored for each individual SVG image.
           const refImage = new window.Image();
           const svgImage = displaySVGImage;

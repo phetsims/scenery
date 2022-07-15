@@ -12,7 +12,7 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, ColorDef, Filter, PaintDef, IColor, CanvasContextWrapper } from '../imports.js';
+import { ColorDef, Filter, IColor, PaintDef, scenery } from '../imports.js';
 
 export default class DropShadow extends Filter {
 
