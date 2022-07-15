@@ -76,7 +76,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: Intentional
     return paint;
   }
   else if ( _.includes( nodeTypes, value.type ) ) {
-    let node: any;
+    let node: IntentionalAny;
 
     const setup = value.setup;
 
