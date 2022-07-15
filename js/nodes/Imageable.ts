@@ -14,6 +14,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, svgns, xlinkns } from '../imports.js';
 import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
@@ -45,7 +46,7 @@ const getScratchContext = () => {
   return scratchContext;
 };
 
-type Constructor<T = EmptyObjectType> = new ( ...args: any[] ) => T;
+type Constructor<T = EmptyObjectType> = new ( ...args: IntentionalAny[] ) => T;
 
 export type Mipmap = {
   width: number;
@@ -125,7 +126,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     // For compatibility
     public isDisposed?: boolean;
 
-    public constructor( ...args: any[] ) {
+    public constructor( ...args: IntentionalAny[] ) {
 
       super( ...args );
 

@@ -20,7 +20,7 @@ const ColorDef = {
   /**
    * Returns whether the parameter is considered to be a ColorDef.
    */
-  isColorDef( color: any ): color is IColor {
+  isColorDef( color: unknown ): color is IColor {
     return color === null ||
            typeof color === 'string' ||
            color instanceof Color ||

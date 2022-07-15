@@ -25,7 +25,7 @@ class FocusDisplayedController {
   private readonly onRemoveFocus: () => void;
   private readonly boundVisibilityListener: () => void;
   private readonly boundInstancesChangedListener: ( instance: Instance ) => void;
-  private readonly boundFocusListener: ( focus: any ) => void;
+  private readonly boundFocusListener: ( focus: Focus | null ) => void;
 
   public constructor( focusProperty: IProperty<Focus | null>, providedOptions?: FocusDisplayedControllerOptions ) {
 
@@ -61,7 +61,7 @@ class FocusDisplayedController {
    * When Focus changes, remove any listeners that were attached from last Focus and
    * add new listeners if focus has a new value.
    */
-  private handleFocusChange( focus: Focus ): void {
+  private handleFocusChange( focus: Focus | null ): void {
     this.removeDisplayedListeners();
 
     if ( focus ) {

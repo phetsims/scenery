@@ -166,7 +166,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
-import PhetioObject from '../../../tandem/js/PhetioObject.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
@@ -6349,7 +6349,7 @@ class Node extends ParallelDOM {
     return this; // allow chaining
   }
 
-  protected override initializePhetioObject( baseOptions: any, config: NodeOptions ): void {
+  protected override initializePhetioObject( baseOptions: Partial<PhetioObjectOptions>, config: NodeOptions ): void {
 
     // Track this, so we only override our visibleProperty once.
     const wasInstrumented = this.isPhetioInstrumented();

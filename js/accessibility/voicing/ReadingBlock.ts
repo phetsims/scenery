@@ -259,23 +259,23 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     public override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
 
-    public override getVoicingNameResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the name response via readingBlockNameResponse' ); }
+    public override getVoicingNameResponse(): IntentionalAny { assert && assert( false, 'ReadingBlocks only support getting the name response via readingBlockNameResponse' ); }
 
     public override setVoicingObjectResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
 
-    public override getVoicingObjectResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
+    public override getVoicingObjectResponse(): IntentionalAny { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
 
     public override setVoicingContextResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
 
-    public override getVoicingContextResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
+    public override getVoicingContextResponse(): IntentionalAny { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
 
     public override setVoicingHintResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the hint response via readingBlockHintResponse.' ); }
 
-    public override getVoicingHintResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the hint response via readingBlockHintResponse.' ); }
+    public override getVoicingHintResponse(): IntentionalAny { assert && assert( false, 'ReadingBlocks only support getting the hint response via readingBlockHintResponse.' ); }
 
     public override setVoicingResponsePatternCollection(): void { assert && assert( false, 'ReadingBlocks only support setting the response patterns via readingBlockResponsePatternCollection.' ); }
 
-    public override getVoicingResponsePatternCollection(): any { assert && assert( false, 'ReadingBlocks only support getting the response patterns via readingBlockResponsePatternCollection.' ); }
+    public override getVoicingResponsePatternCollection(): IntentionalAny { assert && assert( false, 'ReadingBlocks only support getting the response patterns via readingBlockResponsePatternCollection.' ); }
 
     /**
      * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.

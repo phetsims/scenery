@@ -72,6 +72,7 @@ import { Color, FireListener, Font, IInputListener, IPaint, Line, Node, NodeOpti
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -191,6 +192,7 @@ type HimalayaAttribute = {
 };
 type HimalayaNode = {
   type: 'element' | 'comment' | 'text';
+  innerContent: string;
 };
 type HimalayaElementNode = {
   type: 'element';
@@ -317,7 +319,7 @@ export default class RichText extends Node {
 
   // We need to consolidate links (that could be split across multiple lines) under one "link" node, so we track created
   // link fragments here so they can get pieced together later.
-  private _linkItems: { element: any; node: Node; href: string }[];
+  private _linkItems: { element: HimalayaNode; node: Node; href: string }[];
 
   // Whether something has been added to this line yet. We don't want to infinite-loop out if something is longer than
   // our lineWrap, so we'll place one item on its own on an otherwise empty line.
@@ -403,7 +405,7 @@ export default class RichText extends Node {
   /**
    * See documentation and comments in Node.initializePhetioObject
    */
-  public override initializePhetioObject( baseOptions: any, providedOptions: RichTextOptions ): void {
+  public override initializePhetioObject( baseOptions: Partial<PhetioObjectOptions>, providedOptions: RichTextOptions ): void {
 
     const options = optionize<RichTextOptions, EmptyObjectType, RichTextOptions>()( {}, providedOptions );
 
