@@ -37,7 +37,7 @@ function parseRGBNumber( str: string ): number {
   let multiplier = 1;
 
   // if it's a percentage, strip it off and handle it that way
-  if ( str.charAt( str.length - 1 ) === '%' ) {
+  if ( str.endsWith( '%' ) ) {
     multiplier = 2.55;
     str = str.slice( 0, str.length - 1 );
   }
@@ -285,7 +285,7 @@ export default class Color {
       // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
       // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
       let alpha = this.a.toFixed( 20 ); // eslint-disable-line bad-sim-text
-      while ( alpha.length >= 2 && alpha[ alpha.length - 1 ] === '0' && alpha[ alpha.length - 2 ] !== '.' ) {
+      while ( alpha.length >= 2 && alpha.endsWith( '0' ) && alpha[ alpha.length - 2 ] !== '.' ) {
         alpha = alpha.slice( 0, alpha.length - 1 );
       }
 

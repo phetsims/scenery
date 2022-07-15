@@ -744,7 +744,7 @@ export default class RichText extends Node {
 
         // Try extracting the href from the links object
         if ( href !== null && this._links !== true ) {
-          if ( href.indexOf( '{{' ) === 0 && href.indexOf( '}}' ) === href.length - 2 ) {
+          if ( href.startsWith( '{{' ) && href.indexOf( '}}' ) === href.length - 2 ) {
             // @ts-ignore TODO
             href = this._links[ href.slice( 2, -2 ) ];
           }
@@ -1722,14 +1722,14 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
 
     // Grab all spaces at the (logical) start
     let whitespaceBefore = '';
-    while ( content[ 0 ] === ' ' ) {
+    while ( content.startsWith( ' ' ) ) {
       whitespaceBefore += ' ';
       content = content.slice( 1 );
     }
 
     // Grab all spaces at the (logical) end
     let whitespaceAfter = '';
-    while ( content[ content.length - 1 ] === ' ' ) {
+    while ( content.endsWith( ' ' ) ) {
       whitespaceAfter = ' ';
       content = content.slice( 0, content.length - 1 );
     }
