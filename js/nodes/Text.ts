@@ -15,8 +15,6 @@ import extendDefined from '../../../phet-core/js/extendDefined.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
@@ -833,38 +831,5 @@ Text.TextIO = new IOType( 'TextIO', {
   valueType: Text,
   supertype: Node.NodeIO,
   documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
-                 'the current string value.',
-  methods: {
-    setFontOptions: {
-      returnType: VoidIO,
-      parameterTypes: [ Font.FontIO ],
-      implementation: Text.prototype.setFont,
-      documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
-                     'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.',
-      invocableForReadOnlyElements: false
-    },
-
-    getFontOptions: {
-      returnType: Font.FontIO,
-      parameterTypes: [],
-      implementation: Text.prototype.getFont,
-      documentation: 'Gets font options for this TextIO instance as an object'
-    },
-
-    setMaxWidth: {
-      returnType: VoidIO,
-      parameterTypes: [ NumberIO ],
-      implementation: Text.prototype.setMaxWidth,
-      documentation: 'Sets the maximum width of text box. ' +
-                     'If the text width exceeds maxWidth, it is scaled down to fit.',
-      invocableForReadOnlyElements: false
-    },
-
-    getMaxWidth: {
-      returnType: NumberIO,
-      parameterTypes: [],
-      implementation: Text.prototype.getMaxWidth,
-      documentation: 'Gets the maximum width of text box'
-    }
-  }
+                 'the current string value.'
 } );
