@@ -82,7 +82,6 @@ export default class FocusManager {
   private readonly pointerFocusDisplayedController: FocusDisplayedController;
 
   public constructor() {
-
     this.pointerFocusProperty = new Property( null );
     this.readingBlockFocusProperty = new Property( null );
     this.lockedPointerFocusProperty = new Property( null );

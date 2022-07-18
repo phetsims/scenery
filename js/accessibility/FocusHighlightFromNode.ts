@@ -44,10 +44,10 @@ class FocusHighlightFromNode extends FocusHighlightPath {
 
   // Property for a Node's bounds which are currently being observed with the boundsListener. Referenced so that
   // we can remove the listener later.
-  private observedBoundsProperty: null | IProperty<Bounds2>;
+  private observedBoundsProperty: null | IProperty<Bounds2> = null;
 
   // Listener that sets the shape of this highlight when the Node bounds change. Referenced so it can be removed later.
-  private boundsListener: null | ( ( bounds: Bounds2 ) => void );
+  private boundsListener: null | ( ( bounds: Bounds2 ) => void ) = null;
 
   public constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
 
@@ -64,8 +64,6 @@ class FocusHighlightFromNode extends FocusHighlightPath {
     this.useLocalBounds = options.useLocalBounds;
     this.useGroupDilation = options.useGroupDilation;
     this.dilationCoefficient = options.dilationCoefficient;
-    this.observedBoundsProperty = null;
-    this.boundsListener = null;
 
     if ( node ) {
       this.setShapeFromNode( node );

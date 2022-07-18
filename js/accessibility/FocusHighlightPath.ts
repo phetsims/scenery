@@ -64,7 +64,7 @@ class FocusHighlightPath extends Path {
   private _outerHighlightColor: IPaint;
 
   // Emits whenever this highlight changes.
-  public highlightChangedEmitter: Emitter;
+  public highlightChangedEmitter = new Emitter();
 
   // See option for documentation.
   public transformSourceNode: Node | null;
@@ -106,16 +106,12 @@ class FocusHighlightPath extends Path {
     this._innerHighlightColor = options.innerStroke;
     this._outerHighlightColor = options.outerStroke;
 
-    // emitted whenever this highlight changes
-    this.highlightChangedEmitter = new Emitter();
-
     const pathOptions = _.pick( options, Object.keys( Path.DEFAULT_PATH_OPTIONS ) ) as PathOptions;
 
     // Path cannot take null for lineWidth.
     this.innerLineWidth = options.innerLineWidth;
     this.outerLineWidth = options.outerLineWidth;
 
-    // {Node|null} - see options for documentation
     this.transformSourceNode = options.transformSourceNode;
 
     // Assign the 'outer' specific options, and mutate the whole path for pr
