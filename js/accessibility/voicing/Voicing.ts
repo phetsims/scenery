@@ -136,7 +136,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     // Called when `canVoiceEmitter` emits for an Instance.
     private readonly _boundInstanceCanVoiceChangeListener: ( canSpeak: boolean ) => void;
 
-    // Called when instances of this Node change.
+    // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
+    // canSpeakProperty.
     private _boundInstancesChangedListener!: ( instance: Instance, added: boolean ) => void;
 
     // Input listener that speaks content on focus. This is the only input listener added
@@ -174,23 +175,15 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // @ts-ignore
       super.initialize && super.initialize( args );
 
-      // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
-      // voicingVisible.
       this._voicingCanSpeakProperty = new TinyProperty<boolean>( true );
-
       this._voicingResponsePacket = new ResponsePacket();
       this._voicingFocusListener = this.defaultFocusListener;
 
       // Sets the default voicingUtterance and makes this.canSpeakProperty a dependency on its ability to announce.
       this.setVoicingUtterance( new OwnedVoicingUtterance() );
 
-      // A counter that keeps track of visible and voicingVisible Instances of this Node. As long as this value is
-      // greater than zero, this Node can speak. See onInstanceVisibilityChange and onInstanceVoicingVisibilityChange
-      // for more details.
       this._voicingCanSpeakCount = 0;
 
-      // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
-      // canSpeakProperty.
       this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
       ( this as unknown as Node ).changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
 

@@ -14,12 +14,12 @@ import { Focus, scenery } from '../../imports.js';
 export type ReadingBlockUtteranceOptions = UtteranceOptions;
 
 class ReadingBlockUtterance extends Utterance {
+
+  // Can be set and change to support reusing this ReadingBlockUtterance.
   public readingBlockFocus: Focus | null;
 
   public constructor( focus: Focus | null, options?: ReadingBlockUtteranceOptions ) {
     super( options );
-
-    // Can be set and change to support reusing this ReadingBlockUtterance.
     this.readingBlockFocus = focus;
   }
 }

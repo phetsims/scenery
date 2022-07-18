@@ -25,7 +25,7 @@ class VoicingManager extends SpeechSynthesisAnnouncer {
 
     const options = optionize<VoicingManagerOptions, SelfOptions, SpeechSynthesisAnnouncerOptions>()( {
 
-      // {boolean} - All VoicingManager instances should respect responseCollector's current state.
+      // All VoicingManager instances should respect responseCollector's current state.
       respectResponseCollectorProperties: true,
 
       // phet-io
