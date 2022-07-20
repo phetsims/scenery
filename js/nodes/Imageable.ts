@@ -13,7 +13,6 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, svgns, xlinkns } from '../imports.js';
-import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import IEmitter from '../../../axon/js/IEmitter.js';
 
@@ -47,7 +46,7 @@ const getScratchContext = () => {
   return scratchContext;
 };
 
-type Constructor<T = EmptyObjectType> = new ( ...args: IntentionalAny[] ) => T;
+type Constructor<T = object> = new ( ...args: IntentionalAny[] ) => T;
 
 export type Mipmap = {
   width: number;
