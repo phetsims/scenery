@@ -19,6 +19,7 @@ import { EventIO, KeyboardUtils, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
+import IEmitter from '../../../axon/js/IEmitter.js';
 
 // Type describing the state of a single key in the KeyState.
 type KeyStateInfo = {
@@ -56,8 +57,8 @@ class KeyStateTracker {
 
   // Emits events when keyup/keydown updates are received. These will emit after any updates to the
   // keyState so that keyState is correct in time for listeners. Note the valueType is a native KeyboardEvent event.
-  public readonly keydownEmitter: Emitter<[ KeyboardEvent ]> = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
-  public readonly keyupEmitter: Emitter<[ KeyboardEvent ]> = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
+  public readonly keydownEmitter: IEmitter<[ KeyboardEvent ]> = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
+  public readonly keyupEmitter: IEmitter<[ KeyboardEvent ]> = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
 
   // Action which updates the KeyStateTracker, when it is time to do so - the update is wrapped by an Action so that
   // the KeyStateTracker state is captured for PhET-iO.

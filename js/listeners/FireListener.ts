@@ -11,6 +11,7 @@
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import Emitter from '../../../axon/js/Emitter.js';
+import IEmitter from '../../../axon/js/IEmitter.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
@@ -38,7 +39,7 @@ export type FireListenerOptions<Listener extends FireListener> = SelfOptions & P
 export default class FireListener extends PressListener implements IInputListener {
 
   private _fireOnDown: boolean;
-  private firedEmitter: Emitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ]>;
+  private firedEmitter: IEmitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ]>;
   private _timer?: CallbackTimer;
 
   public constructor( providedOptions?: FireListenerOptions<FireListener> ) {

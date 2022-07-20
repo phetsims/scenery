@@ -34,6 +34,7 @@ import { IInputListener, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent
 import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import IEmitter from '../../../axon/js/IEmitter.js';
 
 type PressedKeyTiming = {
 
@@ -167,7 +168,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   private dragEndAction: PhetioAction<[ SceneryEvent ]>;
 
   // @deprecated - Use the drag option instead.
-  public dragEmitter: Emitter;
+  public dragEmitter: IEmitter;
 
   // Implements disposal
   private readonly _disposeKeyboardDragListener: () => void;
