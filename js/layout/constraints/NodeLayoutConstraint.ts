@@ -14,7 +14,6 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { LayoutConstraint, LayoutProxy, Node, scenery } from '../../imports.js';
 import IProperty from '../../../../axon/js/IProperty.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
@@ -67,7 +66,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     assert && assert( ancestorNode instanceof Node );
 
     // The omitted options are set to proper defaults below
-    const options = optionize<NodeLayoutConstraintOptions, StrictOmit<SelfOptions, 'excludeInvisible'>, EmptyObjectType>()( {
+    const options = optionize<NodeLayoutConstraintOptions, StrictOmit<SelfOptions, 'excludeInvisible'>>()( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),

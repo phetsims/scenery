@@ -11,7 +11,6 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
 import { scenery, Trail } from '../imports.js';
 
 type SelfOptions = {
@@ -46,7 +45,7 @@ class TransformTracker {
    */
   public constructor( trail: Trail, providedOptions?: TransformTrackerOptions ) {
 
-    const options = optionize<TransformTrackerOptions, SelfOptions, EmptyObjectType>()( {
+    const options = optionize<TransformTrackerOptions, SelfOptions>()( {
       isStatic: false
     }, providedOptions );
 

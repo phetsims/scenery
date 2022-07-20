@@ -232,8 +232,8 @@ export default class PressListener extends EnabledComponent implements IInputLis
   // we need the same exact function to add and remove as a listener
   private boundInvalidateOverListener: () => void;
 
-  public constructor( providedOptions?: PressListenerOptions<PressListener> ) {
-    const options = optionize<PressListenerOptions<PressListener>, SelfOptions<PressListener>, EnabledComponentOptions>()( {
+  public constructor( providedOptions?: PressListenerOptions ) {
+    const options = optionize<PressListenerOptions, SelfOptions<PressListener>, EnabledComponentOptions>()( {
 
       press: _.noop,
       release: _.noop,

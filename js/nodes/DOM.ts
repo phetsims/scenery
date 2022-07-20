@@ -23,7 +23,7 @@ type SelfOptions = {
 export type DOMOptions = SelfOptions & NodeOptions;
 
 // User-defined type guard
-const isJQueryElement = ( element: Element | JQuery<HTMLElement> ): element is JQuery<HTMLElement> => !!( element && ( element as JQuery<HTMLElement> ).jquery );
+const isJQueryElement = ( element: Element | JQuery ): element is JQuery => !!( element && ( element as JQuery ).jquery );
 
 export default class DOM extends Node {
 
@@ -48,7 +48,7 @@ export default class DOM extends Node {
    * @param [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  public constructor( element: Element | JQuery<HTMLElement>, options?: DOMOptions ) {
+  public constructor( element: Element | JQuery, options?: DOMOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
     assert && assert( element instanceof window.Element || element.jquery,

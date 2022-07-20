@@ -365,7 +365,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * the displays so that HighlightOverlays know to activate a highlight while the voicingManager
      * is reading about this Node.
      */
-    private _speakReadingBlockContentListener( event: SceneryEvent<Event> ): void {
+    private _speakReadingBlockContentListener( event: SceneryEvent ): void {
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 

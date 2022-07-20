@@ -25,7 +25,7 @@ export default interface IInputListener {
 
   click?: SceneryListenerFunction<MouseEvent>;
   input?: SceneryListenerFunction<Event | InputEvent>;
-  change?: SceneryListenerFunction<Event>;
+  change?: SceneryListenerFunction;
 
   down?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
   mousedown?: SceneryListenerFunction<MouseEvent | PointerEvent>;
