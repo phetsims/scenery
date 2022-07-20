@@ -12,7 +12,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import { scenery, Path, Renderer, LineCanvasDrawable, LineSVGDrawable, PathOptions, ILineDrawable, CanvasContextWrapper, Instance, SVGSelfDrawable, CanvasSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, ILineDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position

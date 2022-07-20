@@ -1,8 +1,7 @@
 // Copyright 2020-2022, University of Colorado Boulder
 
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { Color, scenery } from '../imports.js';
 
 /**

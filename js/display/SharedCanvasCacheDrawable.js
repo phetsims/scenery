@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Drawable } from '../imports.js';
+import { Drawable, scenery } from '../imports.js';
 
 class SharedCanvasCacheDrawable extends Drawable {
   /**

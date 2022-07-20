@@ -10,7 +10,7 @@ import animationFrameTimer from '../../../../axon/js/animationFrameTimer.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, ShaderProgram, SpriteSheet, Renderer, WebGLSelfDrawable } from '../../imports.js';
+import { Renderer, scenery, ShaderProgram, SpriteSheet, WebGLSelfDrawable } from '../../imports.js';
 
 // constants
 const COMPONENTS = 5; // { X Y U V A }

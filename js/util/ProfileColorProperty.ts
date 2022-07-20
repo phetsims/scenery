@@ -10,8 +10,7 @@ import Namespace from '../../../phet-core/js/Namespace.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { Color, colorProfileProperty, ColorProperty, scenery, SceneryConstants } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 
 // constant
 const NAME_SEPARATOR = '.';

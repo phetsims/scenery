@@ -13,7 +13,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { Color, Gradient, LinearGradient, Paint, Pattern, RadialGradient, scenery, Image, Text, Node, Path, Circle, Line, Rectangle, DOM, Mipmap } from '../imports.js';
+import { Circle, Color, DOM, Gradient, Image, Line, LinearGradient, Mipmap, Node, Paint, Path, Pattern, RadialGradient, Rectangle, scenery, Text } from '../imports.js';
 
 const sceneryDeserialize = ( value: { type: string; [ key: string ]: IntentionalAny } ): IntentionalAny => {
   const nodeTypes = [

@@ -8,7 +8,7 @@
  * @author Jesse Greenberg
  */
 
-import { scenery, AnimatedPanZoomListener } from '../imports.js';
+import { AnimatedPanZoomListener, scenery } from '../imports.js';
 
 class AnimatedPanZoomSingleton {
   constructor() {

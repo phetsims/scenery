@@ -8,8 +8,7 @@
 
 import IReadOnlyProperty from '../../../../axon/js/IReadOnlyProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import optionize from '../../../../phet-core/js/optionize.js';
-import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { AlignBox, AlignBoxOptions, Node, scenery } from '../../imports.js';
 
 export type AlignPropertyBoxOptions = AlignBoxOptions;

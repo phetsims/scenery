@@ -7,7 +7,7 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { Pattern, scenery, Node } from '../imports.js';
+import { Node, Pattern, scenery } from '../imports.js';
 
 export default class NodePattern extends Pattern {
   public constructor( node: Node, resolution: number, x: number, y: number, width: number, height: number, matrix = Matrix3.IDENTITY ) {

@@ -7,9 +7,9 @@
  */
 
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import AlignGroup from '../constraints/AlignGroup.js';
 import Circle from '../../nodes/Circle.js';
 import Rectangle from '../../nodes/Rectangle.js';
+import AlignGroup from '../constraints/AlignGroup.js';
 
 QUnit.module( 'AlignBox' );
 

@@ -70,8 +70,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { Color, FireListener, Font, IInputListener, IPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
-import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters

@@ -23,7 +23,7 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { scenery, Node, LayoutConstraint, LayoutProxy, LayoutCell } from '../../imports.js';
+import { LayoutCell, LayoutConstraint, LayoutProxy, Node, scenery } from '../../imports.js';
 
 // Turns a tuple of things into a tuple of LayoutProxies
 type LayoutProxyMap<T> = {

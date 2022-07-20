@@ -13,7 +13,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { scenery, Node, Renderer, SpritesCanvasDrawable, SpritesWebGLDrawable, Sprite, SpriteInstance, NodeOptions, CanvasContextWrapper, Instance, CanvasSelfDrawable, WebGLSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Renderer, scenery, Sprite, SpriteInstance, SpritesCanvasDrawable, SpritesWebGLDrawable, WebGLSelfDrawable } from '../imports.js';
 
 type SelfOptions = {
   // Provide a fixed set of Sprite objects that will be used for this node. Currently, it cannot be modified after

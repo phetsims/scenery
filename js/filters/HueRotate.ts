@@ -8,7 +8,7 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Utils from '../../../dot/js/Utils.js';
-import { scenery, ColorMatrixFilter } from '../imports.js';
+import { ColorMatrixFilter, scenery } from '../imports.js';
 
 export default class HueRotate extends ColorMatrixFilter {
 

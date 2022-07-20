@@ -6,15 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { scenery, Mouse, SceneryEvent } from '../imports.js';
+import { Mouse, scenery, SceneryEvent } from '../imports.js';
 
 /**
  * @deprecated - please use DragListener for new code

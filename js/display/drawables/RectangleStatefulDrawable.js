@@ -13,7 +13,7 @@
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import memoize from '../../../../phet-core/js/memoize.js';
-import { scenery, SelfDrawable, PaintableStatefulDrawable } from '../../imports.js';
+import { PaintableStatefulDrawable, scenery, SelfDrawable } from '../../imports.js';
 
 const RectangleStatefulDrawable = memoize( type => {
   assert && assert( _.includes( inheritance( type ), SelfDrawable ) );

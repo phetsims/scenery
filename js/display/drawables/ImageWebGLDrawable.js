@@ -8,7 +8,7 @@
 
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, Renderer, WebGLSelfDrawable, ImageStatefulDrawable } from '../../imports.js';
+import { ImageStatefulDrawable, Renderer, scenery, WebGLSelfDrawable } from '../../imports.js';
 
 // For alignment, we keep things to 8 components, aligned on 4-byte boundaries.
 // See https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/TechniquesforWorkingwithVertexData/TechniquesforWorkingwithVertexData.html#//apple_ref/doc/uid/TP40008793-CH107-SW15

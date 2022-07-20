@@ -18,7 +18,7 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { scenery, Drawable } from '../imports.js';
+import { Drawable, scenery } from '../imports.js';
 
 class ChangeInterval {
   /**

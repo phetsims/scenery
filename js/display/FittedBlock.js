@@ -9,7 +9,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { scenery, Block } from '../imports.js';
+import { Block, scenery } from '../imports.js';
 
 const scratchBounds2 = Bounds2.NOTHING.copy();
 

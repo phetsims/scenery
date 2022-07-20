@@ -8,7 +8,7 @@
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { scenery, CountMap, svgns, Utils, FittedBlock, SVGGroup } from '../imports.js';
+import { CountMap, FittedBlock, scenery, SVGGroup, svgns, Utils } from '../imports.js';
 
 class SVGBlock extends FittedBlock {
   /**

@@ -9,7 +9,7 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Pointer } from '../imports.js';
+import { Pointer, scenery } from '../imports.js';
 
 export default class Touch extends Pointer {
 

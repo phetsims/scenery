@@ -9,7 +9,7 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Gradient, SVGLinearGradient, SVGBlock, ColorDef } from '../imports.js';
+import { ColorDef, Gradient, scenery, SVGBlock, SVGLinearGradient } from '../imports.js';
 
 export default class LinearGradient extends Gradient {
 

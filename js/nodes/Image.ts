@@ -15,8 +15,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, IImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
-import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 
 
 // Image-specific options that can be passed in the constructor or mutate() call.

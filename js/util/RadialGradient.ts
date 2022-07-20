@@ -10,7 +10,7 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
-import { scenery, Gradient, SVGRadialGradient, ColorDef, SVGBlock, GradientStop } from '../imports.js';
+import { ColorDef, Gradient, GradientStop, scenery, SVGBlock, SVGRadialGradient } from '../imports.js';
 
 export default class RadialGradient extends Gradient {
 

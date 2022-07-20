@@ -7,7 +7,7 @@
  */
 
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
-import { scenery, Color, Gradient } from '../imports.js';
+import { Color, Gradient, scenery } from '../imports.js';
 
 class PaintObserver {
   /**

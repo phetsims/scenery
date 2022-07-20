@@ -15,7 +15,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, PaintSVGState, SelfDrawable } from '../imports.js';
+import { PaintSVGState, scenery, SelfDrawable } from '../imports.js';
 
 class SVGSelfDrawable extends SelfDrawable {
   /**

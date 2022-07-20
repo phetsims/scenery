@@ -20,7 +20,7 @@ import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { scenery, DownUpListener } from '../imports.js';
+import { DownUpListener, scenery } from '../imports.js';
 
 /**
  * @deprecated - please use FireListener for new code (set up for the `fire` callback to be easy, and has Properties

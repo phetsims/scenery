@@ -7,7 +7,7 @@
  */
 
 import inheritance from '../../../phet-core/js/inheritance.js';
-import { scenery, Node } from '../imports.js';
+import { Node, scenery } from '../imports.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';

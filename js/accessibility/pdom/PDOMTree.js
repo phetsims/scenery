@@ -7,7 +7,7 @@
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import { scenery, Node, Trail, PartialPDOMTrail, PDOMInstance, FocusManager } from '../../imports.js';
+import { FocusManager, Node, PartialPDOMTrail, PDOMInstance, scenery, Trail } from '../../imports.js';
 
 // globals (for restoring focus)
 let focusedNode = null;

@@ -12,8 +12,7 @@
 import SpeechSynthesisAnnouncer, { SpeechSynthesisAnnouncerOptions, SpeechSynthesisInitializeOptions } from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
-import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import optionize from '../../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import IEmitter from '../../../../axon/js/IEmitter.js';
 
 type SelfOptions = EmptySelfOptions;

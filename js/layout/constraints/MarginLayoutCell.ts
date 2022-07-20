@@ -12,7 +12,7 @@ import Utils from '../../../../dot/js/Utils.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
-import { Font, IColor, Text, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, Rectangle, scenery, PressListener, RichText } from '../../imports.js';
+import { Font, IColor, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, Text } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export interface MarginLayout {

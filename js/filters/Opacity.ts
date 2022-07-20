@@ -7,7 +7,7 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import { scenery, Filter, CanvasContextWrapper } from '../imports.js';
+import { CanvasContextWrapper, Filter, scenery } from '../imports.js';
 
 export default class Opacity extends Filter {
 

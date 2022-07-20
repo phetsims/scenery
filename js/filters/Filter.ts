@@ -27,7 +27,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Features, svgns, CanvasContextWrapper } from '../imports.js';
+import { CanvasContextWrapper, Features, scenery, svgns } from '../imports.js';
 
 let globalId = 1;
 

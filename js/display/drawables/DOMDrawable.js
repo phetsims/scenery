@@ -7,7 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, Utils, DOMSelfDrawable } from '../../imports.js';
+import { DOMSelfDrawable, scenery, Utils } from '../../imports.js';
 
 class DOMDrawable extends DOMSelfDrawable {
   /**

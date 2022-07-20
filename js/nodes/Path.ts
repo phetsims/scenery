@@ -11,8 +11,7 @@ import { Shape } from '../../../kite/js/imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, Instance, IPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
-import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.

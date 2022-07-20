@@ -7,8 +7,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import optionize, { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
+import optionize, { combineOptions, EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, scenery, Text, TextOptions } from '../../../imports.js';
 
 type SelfOptions = EmptySelfOptions;

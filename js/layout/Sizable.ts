@@ -8,7 +8,7 @@
  */
 
 import memoize from '../../../phet-core/js/memoize.js';
-import { HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, WIDTH_SIZABLE_OPTION_KEYS, WidthSizable, WidthSizableOptions, DelayedMutate } from '../imports.js';
+import { DelayedMutate, HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, NodeOptions, REQUIRES_BOUNDS_OPTION_KEYS, scenery, WIDTH_SIZABLE_OPTION_KEYS, WidthSizable, WidthSizableOptions } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';

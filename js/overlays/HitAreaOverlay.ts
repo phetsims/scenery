@@ -7,7 +7,7 @@
  */
 
 import { Shape } from '../../../kite/js/imports.js';
-import { scenery, Trail, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
+import { Display, IOverlay, Node, scenery, ShapeBasedOverlay, Trail } from '../imports.js';
 
 export default class HitAreaOverlay extends ShapeBasedOverlay implements IOverlay {
   public constructor( display: Display, rootNode: Node ) {

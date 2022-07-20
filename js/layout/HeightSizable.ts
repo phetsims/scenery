@@ -10,7 +10,7 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { scenery, Node, REQUIRES_BOUNDS_OPTION_KEYS, DelayedMutate } from '../imports.js';
+import { DelayedMutate, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 

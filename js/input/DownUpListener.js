@@ -9,7 +9,7 @@
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
-import { scenery, Trail, Mouse, SceneryEvent } from '../imports.js';
+import { Mouse, scenery, SceneryEvent, Trail } from '../imports.js';
 
 /**
  * @deprecated - use PressListener instead

@@ -8,8 +8,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
-import { LineStyles } from '../../../kite/js/imports.js';
+import { LineStyles, Shape } from '../../../kite/js/imports.js';
 import snapshotEquals from '../tests/snapshotEquals.js';
 import Node from './Node.js';
 import Path from './Path.js';

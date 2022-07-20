@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Node, Display, Renderer } from '../../imports.js';
+import { Display, Node, Renderer, scenery } from '../../imports.js';
 
 export default class PDOMDisplaysInfo {
 
