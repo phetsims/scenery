@@ -12,6 +12,7 @@ import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import { Display, Focus, IInputListener, Instance, Node, NodeOptions, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
+import IEmitter from '../../../../axon/js/IEmitter.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -68,7 +69,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     private _interactiveHighlightLayerable: boolean;
 
     // Emits an event when the interactive highlight changes for this Node
-    public interactiveHighlightChangedEmitter: TinyEmitter;
+    public interactiveHighlightChangedEmitter: IEmitter;
 
     // When new instances of this Node are created, adds an entry to the map of Displays.
     private readonly _changedInstanceListener: ( instance: Instance, added: boolean ) => void;

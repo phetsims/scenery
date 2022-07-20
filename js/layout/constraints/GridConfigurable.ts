@@ -18,6 +18,7 @@ import { HorizontalLayoutAlign, HorizontalLayoutAlignValues, LayoutAlign, scener
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import IEmitter from '../../../../axon/js/IEmitter.js';
 
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',
@@ -101,7 +102,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     public _maxContentWidth: number | null = null;
     public _maxContentHeight: number | null = null;
 
-    public readonly changedEmitter: TinyEmitter = new TinyEmitter<[]>();
+    public readonly changedEmitter: IEmitter = new TinyEmitter();
 
     /**
      * (scenery-internal)

@@ -177,6 +177,7 @@ import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import IEmitter from '../../../axon/js/IEmitter.js';
 
 let globalIdCounter = 1;
 
@@ -577,43 +578,43 @@ class Node extends ParallelDOM {
   // This is fired only once for any single operation that may change the children of a Node.
   // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
   // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
-  public readonly childrenChangedEmitter: TinyEmitter;
+  public readonly childrenChangedEmitter: IEmitter;
 
   // For every single added child Node, emits with {Node} Node, {number} indexOfChild
-  public readonly childInsertedEmitter: TinyEmitter<[ node: Node, indexOfChild: number ]>;
+  public readonly childInsertedEmitter: IEmitter<[ node: Node, indexOfChild: number ]>;
 
   // For every single removed child Node, emits with {Node} Node, {number} indexOfChild
-  public readonly childRemovedEmitter: TinyEmitter<[ node: Node, indexOfChild: number ]>;
+  public readonly childRemovedEmitter: IEmitter<[ node: Node, indexOfChild: number ]>;
 
   // Provides a given range that may be affected by the reordering
-  public readonly childrenReorderedEmitter: TinyEmitter<[ minChangedIndex: number, maxChangedIndex: number ]>;
+  public readonly childrenReorderedEmitter: IEmitter<[ minChangedIndex: number, maxChangedIndex: number ]>;
 
   // Fired whenever a parent is added
-  public readonly parentAddedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
+  public readonly parentAddedEmitter: IEmitter<[ node: Node ]> = new TinyEmitter();
 
   // Fired whenever a parent is removed
-  public readonly parentRemovedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
+  public readonly parentRemovedEmitter: IEmitter<[ node: Node ]> = new TinyEmitter();
 
   // Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
   // change to a Node's translation/rotation/scale/etc. will trigger this event.
-  public readonly transformEmitter: TinyEmitter;
+  public readonly transformEmitter: IEmitter;
 
   // Should be emitted when we need to check full metadata updates directly on Instances,
   // to see if we need to change drawable types, etc.
-  public readonly instanceRefreshEmitter: TinyEmitter;
+  public readonly instanceRefreshEmitter: IEmitter;
 
   // Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
   // things that could affect descendants)
-  public readonly rendererSummaryRefreshEmitter: TinyEmitter;
+  public readonly rendererSummaryRefreshEmitter: IEmitter;
 
   // Emitted to when we change filters (either opacity or generalized filters)
-  public readonly filterChangeEmitter: TinyEmitter;
+  public readonly filterChangeEmitter: IEmitter;
 
   // Fired when an instance is changed (added/removed)
-  public readonly changedInstanceEmitter: TinyEmitter<[ instance: Instance, added: boolean ]>;
+  public readonly changedInstanceEmitter: IEmitter<[ instance: Instance, added: boolean ]>;
 
   // Fired when layoutOptions changes
-  public readonly layoutOptionsChangedEmitter: TinyEmitter;
+  public readonly layoutOptionsChangedEmitter: IEmitter;
 
   // A bitmask which specifies which renderers this Node (and only this Node, not its subtree) supports.
   // (scenery-internal)

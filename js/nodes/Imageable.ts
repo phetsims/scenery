@@ -15,6 +15,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, svgns, xlinkns } from '../imports.js';
 import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import IEmitter from '../../../axon/js/IEmitter.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
@@ -121,7 +122,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     protected _hitTestImageData: ImageData | null;
 
     // Emits when mipmaps are (re)generated
-    public mipmapEmitter: TinyEmitter<[]>;
+    public mipmapEmitter: IEmitter;
 
     // For compatibility
     public isDisposed?: boolean;

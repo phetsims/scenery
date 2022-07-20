@@ -174,6 +174,7 @@ import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObje
 import IOType from '../../../tandem/js/types/IOType.js';
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
+import IEmitter from '../../../axon/js/IEmitter.js';
 
 // This is the list of keys that get serialized AND deserialized. NOTE: Do not add or change this without
 // consulting the PhET-iO IOType schema for this in EventIO
@@ -279,7 +280,7 @@ export default class Input extends PhetioObject {
   // All active pointers.
   public pointers: Pointer[];
 
-  public pointerAddedEmitter: TinyEmitter<[ Pointer ]>;
+  public pointerAddedEmitter: IEmitter<[ Pointer ]>;
 
   // Whether we are currently firing events. We need to track this to handle re-entrant cases
   // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
