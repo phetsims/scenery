@@ -2,7 +2,7 @@
 
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { Color, scenery } from '../imports.js';
 
 /**
@@ -19,7 +19,7 @@ export default class ColorProperty extends Property<Color> {
       assert && assert( !providedOptions.hasOwnProperty( 'phetioType' ), 'ColorProperty sets phetioType' );
     }
 
-    const options = optionize<PropertyOptions<Color>, EmptyObjectType, PropertyOptions<Color>>()( {
+    const options = optionize<PropertyOptions<Color>, EmptySelfOptions, PropertyOptions<Color>>()( {
       valueType: Color,
       phetioType: Property.PropertyIO( Color.ColorIO )
     }, providedOptions );

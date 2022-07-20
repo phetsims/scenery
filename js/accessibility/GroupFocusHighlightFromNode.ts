@@ -8,10 +8,10 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, FocusHighlightPath, Node, scenery } from '../imports.js';
 
-type SelfOptions = EmptyObjectType;
+type SelfOptions = EmptySelfOptions;
 type GroupFocusHighlightFromNodeOptions = FocusHighlightFromNodeOptions;
 
 class GroupFocusHighlightFromNode extends FocusHighlightFromNode {

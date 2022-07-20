@@ -30,7 +30,7 @@ import Multilink from '../../../../axon/js/Multilink.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { AlignGroup, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
@@ -113,7 +113,7 @@ export default class AlignBox extends SuperType {
    */
   public constructor( content: Node, providedOptions?: AlignBoxOptions ) {
 
-    const options = optionize<AlignBoxOptions, EmptyObjectType, ParentOptions>()( {
+    const options = optionize<AlignBoxOptions, EmptySelfOptions, ParentOptions>()( {
       children: [ content ]
     }, providedOptions );
 

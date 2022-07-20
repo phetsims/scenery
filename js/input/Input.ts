@@ -163,7 +163,7 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -255,7 +255,7 @@ type TargetSubstitudeAugmentedEvent = Event & {
 // sending a mouseup event and a click event.
 const PDOM_CLICK_DELAY = 80;
 
-type SelfOptions = EmptyObjectType;
+type SelfOptions = EmptySelfOptions;
 
 export type InputOptions = SelfOptions & PickOptional<PhetioObjectOptions, 'tandem'>;
 

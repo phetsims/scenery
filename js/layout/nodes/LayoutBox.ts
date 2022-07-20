@@ -13,7 +13,7 @@
 
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { Node, NodeOptions, scenery, SceneryConstants } from '../../imports.js';
 
 // constants
@@ -101,7 +101,7 @@ export default class LayoutBox extends Node {
 
   public constructor( providedOptions?: LayoutBoxOptions ) {
     // NOTE: We don't need to give defaults for our self options, so that's {}'ed out
-    const options = optionize<LayoutBoxOptions, EmptyObjectType, NodeOptions>()( {
+    const options = optionize<LayoutBoxOptions, EmptySelfOptions, NodeOptions>()( {
 
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,

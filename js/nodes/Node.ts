@@ -173,7 +173,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
@@ -4963,7 +4963,7 @@ class Node extends ParallelDOM {
   }
 
   public mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {
-    this.layoutOptions = optionize3<ILayoutOptions, EmptyObjectType, ILayoutOptions>()( {}, this.layoutOptions || {}, layoutOptions );
+    this.layoutOptions = optionize3<ILayoutOptions, EmptySelfOptions, ILayoutOptions>()( {}, this.layoutOptions || {}, layoutOptions );
   }
 
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable

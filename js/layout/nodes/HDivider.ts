@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { scenery, Divider, HeightSizable, DividerOptions, HeightSizableOptions } from '../../imports.js';
 
-type SelfOptions = EmptyObjectType;
+type SelfOptions = EmptySelfOptions;
 type ParentOptions = HeightSizableOptions & DividerOptions;
 export type HDividerOptions = SelfOptions & ParentOptions;
 

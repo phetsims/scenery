@@ -16,7 +16,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, IImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 
 
 // Image-specific options that can be passed in the constructor or mutate() call.
@@ -49,7 +49,7 @@ export default class Image extends Imageable( Node ) {
   public constructor( image: ImageableImage, providedOptions?: ImageOptions ) {
 
     // rely on the setImage call from the super constructor to do the setup
-    const options = optionize<ImageOptions, EmptyObjectType, ParentOptions>()( {
+    const options = optionize<ImageOptions, EmptySelfOptions, ParentOptions>()( {
       image: image
     }, providedOptions );
 

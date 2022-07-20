@@ -8,10 +8,10 @@
  */
 
 import optionize, { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, scenery, Text, TextOptions } from '../../../imports.js';
 
-type SelfOptions = EmptyObjectType;
+type SelfOptions = EmptySelfOptions;
 type ParentOptions = ReadingBlockOptions & TextOptions;
 type VoicingTextOptions = SelfOptions & ParentOptions;
 

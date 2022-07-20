@@ -8,14 +8,14 @@
  */
 
 import optionize from '../../../../phet-core/js/optionize.js';
-import EmptyObjectType from '../../../../phet-core/js/types/EmptyObjectType.js';
+import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { Line, LineOptions, scenery } from '../../imports.js';
 
 export type DividerOptions = LineOptions;
 
 export default class Divider extends Line {
   public constructor( providedOptions?: LineOptions ) {
-    super( optionize<LineOptions, EmptyObjectType, LineOptions>()( {
+    super( optionize<LineOptions, EmptySelfOptions, LineOptions>()( {
       layoutOptions: {
         stretch: true
       },
