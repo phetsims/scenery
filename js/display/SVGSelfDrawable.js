@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2022, University of Colorado Boulder
 
 /**
  * Represents an SVG visual element, and is responsible for tracking changes to the visual element, and then applying

@@ -1,4 +1,4 @@
-// Copyright 2014-2021, University of Colorado Boulder
+// Copyright 2014-2022, University of Colorado Boulder
 
 /**
  * Stitcher that only rebuilds the parts necessary, and attempts greedy block matching as an optimization.

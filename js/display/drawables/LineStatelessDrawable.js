@@ -1,4 +1,4 @@
-// Copyright 2016-2021, University of Colorado Boulder
+// Copyright 2016-2022, University of Colorado Boulder
 
 /**
  * A trait for drawables for Line that does not store the line's state, as it just needs to track dirtyness overall.
