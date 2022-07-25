@@ -28,7 +28,8 @@ class VoicingManager extends SpeechSynthesisAnnouncer {
       respectResponseCollectorProperties: true,
 
       // phet-io
-      tandem: Tandem.OPTIONAL
+      tandem: Tandem.OPTIONAL,
+      phetioDocumentation: 'Announcer that manages the voicing feature, providing audio responses via WebAudio.'
     }, providedOptions );
 
     super( options );
