@@ -72,6 +72,10 @@ export default class Path extends Paintable( Node ) {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
+    if ( shape || providedOptions?.shape ) {
+      assert && assert( !shape || !providedOptions?.shape, 'Do not define shape twice. Check constructor and providedOptions.' );
+    }
+
     const options = optionize<PathOptions, SelfOptions, ParentOptions>()( {
       shape: shape,
       boundsMethod: DEFAULT_OPTIONS.boundsMethod
