@@ -81,6 +81,8 @@ export default class FocusManager {
   private readonly endSpeakingListener: SpeakingListener;
   private readonly pointerFocusDisplayedController: FocusDisplayedController;
 
+  private readonly voicingFullyEnabledListener: ( enabled: boolean ) => void;
+
   public constructor() {
     this.pointerFocusProperty = new Property( null );
     this.readingBlockFocusProperty = new Property( null );
@@ -90,9 +92,10 @@ export default class FocusManager {
     this.readingBlockHighlightsVisibleProperty = new BooleanProperty( false );
 
     // TODO: perhaps remove once reading blocks are set up to listen instead to Node.canSpeakProperty (voicingVisible), https://github.com/phetsims/scenery/issues/1343
-    voicingManager.voicingFullyEnabledProperty.link( enabled => {
+    this.voicingFullyEnabledListener = enabled => {
       this.readingBlockHighlightsVisibleProperty.value = enabled;
-    } );
+    };
+    voicingManager.voicingFullyEnabledProperty.link( this.voicingFullyEnabledListener );
 
     this.pointerHighlightsVisibleProperty = new DerivedProperty(
       [ this.interactiveHighlightsVisibleProperty, this.readingBlockHighlightsVisibleProperty ],
@@ -156,6 +159,8 @@ export default class FocusManager {
 
     // @ts-ignore
     voicingManager.endSpeakingEmitter.removeListener( this.endSpeakingListener );
+
+    voicingManager.voicingFullyEnabledProperty.unlink( this.voicingFullyEnabledListener );
   }
 
   /**
