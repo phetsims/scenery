@@ -139,7 +139,6 @@ class Instance {
     this.visibleEmitter = new TinyEmitter();
     this.relativeVisibleEmitter = new TinyEmitter();
     this.selfVisibleEmitter = new TinyEmitter();
-    this.voicingVisibleEmitter = new TinyEmitter();
     this.canVoiceEmitter = new TinyEmitter();
 
     this.cleanInstance( display, trail );
@@ -1564,9 +1563,6 @@ class Instance {
     if ( this.selfVisible !== wasSelfVisible ) {
       this.selfVisibleEmitter.emit();
     }
-    if ( this.voicingVisible !== wasVoicingVisible ) {
-      this.voicingVisibleEmitter.emit();
-    }
 
     // An Instance can voice when it is globally visible and voicingVisible. Notify when this state has changed
     // based on these dependencies.
@@ -1824,7 +1820,6 @@ class Instance {
     this.visibleEmitter.removeAllListeners();
     this.relativeVisibleEmitter.removeAllListeners();
     this.selfVisibleEmitter.removeAllListeners();
-    this.voicingVisibleEmitter.removeAllListeners();
 
     this.freeToPool();
 
