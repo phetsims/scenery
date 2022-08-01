@@ -265,7 +265,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     /**
      * By default, speak the object response. But accepts all other responses through options. Respects responseCollector
-     * Properties, so the name response may not be spoken if responseCollector.objectResponseEnabledProperty is false.
+     * Properties, so the object response may not be spoken if responseCollector.objectResponseEnabledProperty is false.
      */
     public voicingSpeakObjectResponse( providedOptions?: SpeakingOptions ): void {
 
@@ -282,7 +282,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     /**
      * By default, speak the context response. But accepts all other responses through options. Respects
-     * responseCollector Properties, so the name response may not be spoken if
+     * responseCollector Properties, so the context response may not be spoken if
      * responseCollector.contextResponseEnabledProperty is false.
      */
     public voicingSpeakContextResponse( providedOptions?: SpeakingOptions ): void {
