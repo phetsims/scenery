@@ -632,8 +632,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * voicingCanSpeakProperty.
      */
     private addOrRemoveInstanceListeners( instance: Instance, added: boolean ): void {
-      assert && assert( instance.voicingVisibleEmitter, 'Instance must be initialized.' );
-      assert && assert( instance.visibleEmitter, 'Instance must be initialized.' );
+      assert && assert( instance.canVoiceEmitter, 'Instance must be initialized.' );
 
       if ( added ) {
         // @ts-ignore - Emitters in Instance need typing
