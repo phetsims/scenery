@@ -1820,6 +1820,7 @@ class Instance {
     this.visibleEmitter.removeAllListeners();
     this.relativeVisibleEmitter.removeAllListeners();
     this.selfVisibleEmitter.removeAllListeners();
+    this.canVoiceEmitter.removeAllListeners();
 
     this.freeToPool();
 
