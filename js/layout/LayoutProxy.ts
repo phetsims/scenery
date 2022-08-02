@@ -485,6 +485,12 @@ export default class LayoutProxy {
     }
   }
 
+  public set maxWidth( value: number | null ) {
+    assert && this.checkPreconditions();
+
+    this.node.maxWidth = value === null ? null : Math.abs( this.trail!.getParentTransform().inverseDeltaX( value ) );
+  }
+
   public get maxHeight(): number | null {
     assert && this.checkPreconditions();
 
@@ -494,6 +500,12 @@ export default class LayoutProxy {
     else {
       return Math.abs( this.trail!.getParentTransform().transformDeltaY( this.node.maxHeight ) );
     }
+  }
+
+  public set maxHeight( value: number | null ) {
+    assert && this.checkPreconditions();
+
+    this.node.maxHeight = value === null ? null : Math.abs( this.trail!.getParentTransform().inverseDeltaY( value ) );
   }
 
   /**
