@@ -14,13 +14,13 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
 import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { Color, IColor, scenery } from '../imports.js';
+import { Color, TColor, scenery } from '../imports.js';
 
 const ColorDef = {
   /**
    * Returns whether the parameter is considered to be a ColorDef.
    */
-  isColorDef( color: unknown ): color is IColor {
+  isColorDef( color: unknown ): color is TColor {
     return color === null ||
            typeof color === 'string' ||
            color instanceof Color ||
@@ -31,7 +31,7 @@ const ColorDef = {
            ) );
   },
 
-  scenerySerialize( color: IColor ): string {
+  scenerySerialize( color: TColor ): string {
     if ( color === null ) {
       return 'null';
     }

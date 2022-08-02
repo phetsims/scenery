@@ -12,7 +12,7 @@ import Utils from '../../../../dot/js/Utils.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
-import { Font, IColor, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, Text } from '../../imports.js';
+import { Font, TColor, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, Text } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export interface MarginLayout {
@@ -309,7 +309,7 @@ export default class MarginLayoutCell extends LayoutCell {
     const emptyShape = availableCellsShape.shapeDifference( usedCellsShape );
     const marginShape = usedCellsShape.shapeDifference( usedContentShape );
 
-    const createLabeledTexture = ( label: string, foreground: IColor, background: IColor ) => {
+    const createLabeledTexture = ( label: string, foreground: TColor, background: TColor ) => {
       const text = new Text( label, {
         font: new Font( { size: 6, family: 'monospace' } ),
         fill: foreground

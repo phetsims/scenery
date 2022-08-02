@@ -59,7 +59,7 @@ export { default as Filter } from './filters/Filter.js';
 
 export { default as ColorDef } from './util/ColorDef.js';
 export { default as PaintDef } from './util/PaintDef.js';
-export type { default as IColor } from './util/IColor.js';
+export type { default as TColor } from './util/TColor.js';
 export type { default as IPaint } from './util/IPaint.js';
 
 // Filters

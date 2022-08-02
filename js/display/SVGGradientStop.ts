@@ -9,7 +9,7 @@
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
-import { ActiveSVGGradient, Color, IColor, scenery, svgns } from '../imports.js';
+import { ActiveSVGGradient, Color, TColor, scenery, svgns } from '../imports.js';
 
 const scratchColor = new Color( 'transparent' );
 
@@ -22,20 +22,20 @@ class SVGGradientStop implements IPoolable {
 
   // transient
   public svgGradient!: ActiveSVGGradient | null;
-  public color!: IColor;
+  public color!: TColor;
 
   public ratio!: number;
   private dirty!: boolean;
   private propertyListener!: () => void;
   private colorListener!: () => void;
 
-  public constructor( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ) {
+  public constructor( svgGradient: ActiveSVGGradient, ratio: number, color: TColor ) {
     this.initialize( svgGradient, ratio, color );
   }
 
   public isActiveSVGGradientStop(): this is ActiveSVGGradientStop { return !!this.svgGradient; }
 
-  public initialize( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ): this {
+  public initialize( svgGradient: ActiveSVGGradient, ratio: number, color: TColor ): this {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] initialize: ${svgGradient.gradient.id} : ${ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 

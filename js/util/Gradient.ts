@@ -8,11 +8,11 @@
 
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import { Color, IColor, Paint, scenery } from '../imports.js';
+import { Color, TColor, Paint, scenery } from '../imports.js';
 
 export type GradientStop = {
   ratio: number;
-  color: IColor;
+  color: TColor;
 };
 
 export default abstract class Gradient extends Paint {
@@ -57,7 +57,7 @@ export default abstract class Gradient extends Paint {
    * @param color
    * @returns - for chaining
    */
-  public addColorStop( ratio: number, color: IColor ): this {
+  public addColorStop( ratio: number, color: TColor ): this {
     assert && assert( typeof ratio === 'number', 'Ratio needs to be a number' );
     assert && assert( ratio >= 0 && ratio <= 1, 'Ratio needs to be between 0,1 inclusively' );
     assert && assert( color === null ||
@@ -160,7 +160,7 @@ export default abstract class Gradient extends Paint {
   /**
    * Returns the current value of the generally-allowed color types for Gradient, as a string.
    */
-  public static colorToString( color: IColor ): string {
+  public static colorToString( color: TColor ): string {
     // to {Color|string|null}
     if ( color instanceof ReadOnlyProperty ) {
       color = color.value;

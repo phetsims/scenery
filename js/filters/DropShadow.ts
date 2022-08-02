@@ -12,13 +12,13 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { ColorDef, Filter, IColor, PaintDef, scenery } from '../imports.js';
+import { ColorDef, Filter, TColor, PaintDef, scenery } from '../imports.js';
 
 export default class DropShadow extends Filter {
 
   private readonly offset: Vector2;
   private readonly blurRadius: number;
-  private readonly color: IColor;
+  private readonly color: TColor;
   private readonly colorCSS: string;
 
   /**
@@ -27,7 +27,7 @@ export default class DropShadow extends Filter {
    * @param color
    * @param [filterRegionPercentage]
    */
-  public constructor( offset: Vector2, blurRadius: number, color: IColor, filterRegionPercentage = 15 ) {
+  public constructor( offset: Vector2, blurRadius: number, color: TColor, filterRegionPercentage = 15 ) {
     assert && assert( offset instanceof Vector2, 'DropShadow offset should be a Vector2' );
     assert && assert( offset.isFinite(), 'DropShadow offset should be finite' );
     assert && assert( typeof blurRadius === 'number', 'DropShadow blurRadius should be a number' );
