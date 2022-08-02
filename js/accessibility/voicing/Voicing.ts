@@ -27,7 +27,7 @@
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import Utterance, { IAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
+import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 import { Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import { combineOptions } from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
@@ -327,14 +327,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Combine all types of response into a single alertable, potentially depending on the current state of
      * responseCollector Properties (filtering what kind of responses to present in the resolved response).
      */
-    protected collectResponse( providedOptions?: SpeakingOptions ): IAlertable {
+    protected collectResponse( providedOptions?: SpeakingOptions ): TAlertable {
       const options = combineOptions<SpeakingOptions>( {
         ignoreProperties: this._voicingResponsePacket.ignoreProperties,
         responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
         utterance: this.voicingUtterance
       }, providedOptions );
 
-      let response: IAlertable = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
+      let response: TAlertable = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
 
       if ( options.utterance ) {
         options.utterance.alert = response;
@@ -347,7 +347,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Use the provided function to create content to speak in response to input. The content is then added to the
      * back of the voicing UtteranceQueue.
      */
-    protected speakContent( content: IAlertable ): void { // eslint-disable-line no-undef
+    protected speakContent( content: TAlertable ): void { // eslint-disable-line no-undef
 
       const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !( this as unknown as Node ).isInsidePhetioArchetype();
 

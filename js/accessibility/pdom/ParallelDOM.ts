@@ -129,7 +129,7 @@ import { Shape } from '../../../../kite/js/imports.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
+import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import optionize from '../../../../phet-core/js/optionize.js';
@@ -2600,7 +2600,7 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Alert on all interactive description utteranceQueues located on each connected Display (see Node.getConnectedDisplays)
    */
-  public alertDescriptionUtterance( utterance: IAlertable ): void {
+  public alertDescriptionUtterance( utterance: TAlertable ): void {
 
     // No description should be alerted if setting PhET-iO state, see https://github.com/phetsims/scenery/issues/1397
     if ( _.hasIn( window, 'phet.phetio.phetioEngine.phetioStateEngine' ) &&
