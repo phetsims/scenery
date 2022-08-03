@@ -117,6 +117,7 @@ import './layout/constraints/LayoutLine.js';
 import './layout/constraints/ManualConstraint.js';
 import './layout/constraints/MarginLayoutCell.js';
 import './layout/constraints/NodeLayoutConstraint.js';
+import './layout/constraints/RelaxedManualConstraint.js';
 import './layout/HeightSizable.js';
 import './layout/LayoutAlign.js';
 import './layout/LayoutJustification.js';

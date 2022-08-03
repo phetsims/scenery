@@ -515,6 +515,14 @@ export default class LayoutProxy {
     return orientation === Orientation.HORIZONTAL ? this.maxWidth : this.maxHeight;
   }
 
+  public get visible(): boolean {
+    return this.node.visible;
+  }
+
+  public set visible( value: boolean ) {
+    this.node.visible = value;
+  }
+
   /**
    * Releases references, and frees it to the pool.
    */

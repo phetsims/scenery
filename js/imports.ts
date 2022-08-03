@@ -270,6 +270,7 @@ export type { GridBoxOptions } from './layout/nodes/GridBox.js';
 export { default as GridBackgroundNode } from './layout/nodes/GridBackgroundNode.js';
 export type { GridBackgroundNodeOptions } from './layout/nodes/GridBackgroundNode.js';
 export { default as ManualConstraint } from './layout/constraints/ManualConstraint.js';
+export { default as RelaxedManualConstraint } from './layout/constraints/RelaxedManualConstraint.js';
 export { default as AlignBox, AlignBoxXAlignValues, AlignBoxYAlignValues } from './layout/nodes/AlignBox.js';
 export type { AlignBoxOptions, AlignBoxXAlign, AlignBoxYAlign } from './layout/nodes/AlignBox.js';
 export { default as AlignGroup } from './layout/constraints/AlignGroup.js';
