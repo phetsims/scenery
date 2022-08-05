@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default interface IImageDrawable {
+type IImageDrawable = {
   markPaintDirty(): void;
   markDirtyImage(): void;
   markDirtyImageOpacity(): void;
   markDirtyMipmap(): void;
-} // eslint-disable-line
+};
+export default IImageDrawable // eslint-disable-line

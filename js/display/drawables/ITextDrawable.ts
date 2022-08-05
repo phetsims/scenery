@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default interface ITextDrawable {
+type ITextDrawable = {
   markPaintDirty(): void;
   markDirtyText(): void;
   markDirtyFont(): void;
   markDirtyBounds(): void;
-} // eslint-disable-line
+};
+export default ITextDrawable // eslint-disable-line

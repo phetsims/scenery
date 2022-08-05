@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default interface IOverlay {
+type IOverlay = {
   get domElement(): HTMLElement | SVGElement;
   update: () => void;
-} // eslint-disable-line
+};
+export default IOverlay // eslint-disable-line

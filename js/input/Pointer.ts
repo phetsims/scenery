@@ -46,9 +46,9 @@ export class Intent extends EnumerationValue {
 
 type PointerType = 'pdom' | 'touch' | 'mouse' | 'pen';
 
-export interface ActivePointer extends Pointer {
+export type ActivePointer = {
   point: Vector2;
-}
+} & Pointer;
 
 export default abstract class Pointer {
 

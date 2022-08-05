@@ -8,7 +8,7 @@
 
 import { IPathDrawable } from '../../imports.js';
 
-interface ILineDrawable extends IPathDrawable {
+type ILineDrawable = {
   markDirtyLine(): void;
   markDirtyP1(): void;
   markDirtyP2(): void;
@@ -16,6 +16,6 @@ interface ILineDrawable extends IPathDrawable {
   markDirtyY1(): void;
   markDirtyX2(): void;
   markDirtyY2(): void;
-}
+} & IPathDrawable;
 
 export default ILineDrawable;

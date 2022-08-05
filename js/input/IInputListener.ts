@@ -11,7 +11,7 @@ import { SceneryEvent } from '../imports.js';
 
 export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
 
-export default interface IInputListener {
+type IInputListener = {
   interrupt?: () => void;
   cursor?: string | null;
 
@@ -79,4 +79,5 @@ export default interface IInputListener {
   // While dragging, the AnimatedPanZoomListener will try to keep these bounds in view. Intended to be
   // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
   createPanTargetBounds?: ( () => Bounds2 ) | null;
-} // eslint-disable-line
+};
+export default IInputListener // eslint-disable-line

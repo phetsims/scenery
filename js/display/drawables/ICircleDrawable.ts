@@ -8,6 +8,7 @@
 
 import { IPathDrawable } from '../../imports.js';
 
-export default interface ICircleDrawable extends IPathDrawable {
+type ICircleDrawable = {
   markDirtyRadius(): void;
-} // eslint-disable-line
+} & IPathDrawable;
+export default ICircleDrawable // eslint-disable-line

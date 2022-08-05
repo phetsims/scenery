@@ -15,7 +15,7 @@ import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
 import { Font, TColor, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, Text } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
-export interface MarginLayout {
+export type MarginLayout = {
   _leftMargin: number | null;
   _rightMargin: number | null;
   _topMargin: number | null;
@@ -24,7 +24,7 @@ export interface MarginLayout {
   _minContentHeight: number | null;
   _maxContentWidth: number | null;
   _maxContentHeight: number | null;
-}
+};
 
 export type MarginLayoutConstraint = NodeLayoutConstraint & MarginLayout;
 

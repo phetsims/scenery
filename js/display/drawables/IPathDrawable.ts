@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default interface IPathDrawable {
+type IPathDrawable = {
   markPaintDirty(): void;
   markDirtyShape(): void;
-} // eslint-disable-line
+};
+export default IPathDrawable // eslint-disable-line
