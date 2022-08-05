@@ -417,6 +417,10 @@ class PDOMPeer {
       const dataObject = this.node.pdomAttributes[ i ];
       this.setAttributeToElement( dataObject.attribute, dataObject.value, dataObject.options );
     }
+
+    // Manually support options that map to attributes. This covers that case where behavior functions want to change
+    // these, but they aren't in node.pdomAttributes. It will do double work in some cases, but it is pretty minor for the
+    // complexity it saves. https://github.com/phetsims/scenery/issues/1436
     if ( pdomOptions.ariaLabel ) {
       this.setAttributeToElement( 'aria-label', pdomOptions.ariaLabel );
     }
