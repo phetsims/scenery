@@ -415,14 +415,13 @@ class PDOMPeer {
 
     for ( let i = 0; i < this.node.pdomAttributes.length; i++ ) {
       const dataObject = this.node.pdomAttributes[ i ];
-      const attribute = dataObject.attribute;
-      let value = dataObject.value;
-
-      // allow overriding of aria-label for accessibleName setter
-      if ( attribute === 'aria-label' && pdomOptions && typeof pdomOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
-        value = pdomOptions.ariaLabel;
-      }
-      this.setAttributeToElement( attribute, value, dataObject.options );
+      this.setAttributeToElement( dataObject.attribute, dataObject.value, dataObject.options );
+    }
+    if ( pdomOptions.ariaLabel ) {
+      this.setAttributeToElement( 'aria-label', pdomOptions.ariaLabel );
+    }
+    if ( pdomOptions.ariaRole ) {
+      this.setAttributeToElement( 'role', pdomOptions.ariaRole );
     }
   }
 
