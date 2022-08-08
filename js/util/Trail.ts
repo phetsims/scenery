@@ -158,7 +158,7 @@ export default class Trail {
    */
   public isPickable(): boolean {
     // it won't be if it or any ancestor is pickable: false, or is invisible
-    if ( _.some( this.nodes, node => node.pickable === false || node.visible === false ) ) { return false; }
+    if ( _.some( this.nodes, node => node.pickable === false || !node.visible ) ) { return false; }
 
     // if there is any listener or pickable: true, it will be pickable
     if ( _.some( this.nodes, node => node._inputListeners.length > 0 || node.pickableProperty.value === true ) ) { return true; }

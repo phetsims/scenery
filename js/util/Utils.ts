@@ -472,7 +472,7 @@ const Utils = {
   checkWebGLSupport( extensions?: string[] ): boolean {
 
     // The webgl check can be shut off, please see docs at webglEnabled declaration site
-    if ( webglEnabled === false ) {
+    if ( !webglEnabled ) {
       return false;
     }
     const canvas = document.createElement( 'canvas' );
