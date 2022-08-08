@@ -1752,14 +1752,13 @@ QUnit.test( 'accessibleName option', assert => {
 
   const c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
   rootNode.addChild( c );
-  const accessibleNameBehavior = ( node, options, accessibleName ) => {
-
+  const cAccessibleNameBehavior = ( node, options, accessibleName ) => {
     options.ariaLabel = accessibleName;
     return options;
   };
-  c.accessibleNameBehavior = accessibleNameBehavior;
+  c.accessibleNameBehavior = cAccessibleNameBehavior;
 
-  assert.ok( c.accessibleNameBehavior === accessibleNameBehavior, 'getter works' );
+  assert.ok( c.accessibleNameBehavior === cAccessibleNameBehavior, 'getter works' );
 
   let cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
   assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
@@ -1776,10 +1775,36 @@ QUnit.test( 'accessibleName option', assert => {
   cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
   assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
 
+
+  const d = new Node( { containerTagName: 'div', tagName: 'div' } );
+  rootNode.addChild( d );
+  const dAccessibleNameBehavior = ( node, options, accessibleName ) => {
+
+    options.ariaLabel = accessibleName;
+    return options;
+  };
+  d.accessibleNameBehavior = dAccessibleNameBehavior;
+
+  assert.ok( d.accessibleNameBehavior === dAccessibleNameBehavior, 'getter works' );
+  let dLabelElement = getPrimarySiblingElementByNode( d ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+  assert.ok( dLabelElement.getAttribute( 'aria-label' ) === null, 'accessibleNameBehavior should not work until there is accessible name' );
+  const accessibleNameDescription = 'accessible name description';
+  d.accessibleName = accessibleNameDescription;
+  dLabelElement = getPrimarySiblingElementByNode( d ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+  assert.ok( dLabelElement.getAttribute( 'aria-label' ) === accessibleNameDescription, 'accessible name setter' );
+
+  d.accessibleName = '';
+
+  dLabelElement = getPrimarySiblingElementByNode( d ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+  assert.ok( dLabelElement.getAttribute( 'aria-label' ) === '', 'accessibleNameBehavior should work for empty string' );
+
+  d.accessibleName = null;
+  dLabelElement = getPrimarySiblingElementByNode( d ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+  assert.ok( dLabelElement.getAttribute( 'aria-label' ) === null, 'accessibleNameBehavior should not work until there is accessible name' );
+
   pdomAuditRootNode( rootNode );
   display.dispose();
   display.domElement.parentElement.removeChild( display.domElement );
-
 } );
 
 
