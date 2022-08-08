@@ -62,26 +62,26 @@ type SelfOptions = {
 
   // How much the position Property will change in view coordinates every moveOnHoldInterval. Object will
   // move in discrete steps at this interval. If you would like smoother "animated" motion use dragVelocity
-  // instead. downDelta produces a UX that is more typical for applications but dragVelocity is better for video
-  // game-like components. downDelta and dragVelocity are mutually exclusive options.
-  downDelta?: number;
+  // instead. dragDelta produces a UX that is more typical for applications but dragVelocity is better for video
+  // game-like components. dragDelta and dragVelocity are mutually exclusive options.
+  dragDelta?: number;
 
   // How much the PositionProperty will change in view coordinates every moveOnHoldInterval while the shift modifier
   // key is pressed. Shift modifier should produce more fine-grained motion so this value needs to be less than
-  // downDelta if provided. Object will move in discrete steps. If you would like smoother "animated" motion use
-  // dragVelocity options instead. downDelta options produce a UX that is more typical for applications but dragVelocity
-  // is better for game-like components. downDelta and dragVelocity are mutually exclusive options.
-  shiftDownDelta?: number;
+  // dragDelta if provided. Object will move in discrete steps. If you would like smoother "animated" motion use
+  // dragVelocity options instead. dragDelta options produce a UX that is more typical for applications but dragVelocity
+  // is better for game-like components. dragDelta and dragVelocity are mutually exclusive options.
+  shiftDragDelta?: number;
 
   // While a direction key is held down, the target will move by this amount in view coordinates every second.
-  // This is an alternative way to control motion with keyboard than downDelta and produces smoother motion for
-  // the object. dragVelocity and downDelta options are mutually exclusive. See downDelta for more information.
+  // This is an alternative way to control motion with keyboard than dragDelta and produces smoother motion for
+  // the object. dragVelocity and dragDelta options are mutually exclusive. See dragDelta for more information.
   dragVelocity?: number;
 
   // While a direction key is held down with the shift modifier key, the target will move by this amount in view
   // coordinates every second. Shift modifier should produce more fine-grained motion so this value needs to be less
-  // than dragVelocity if provided. This is an alternative way to control motion with keyboard than downDelta and
-  // produces smoother motion for the object. dragVelocity and downDelta options are mutually exclusive. See downDelta
+  // than dragVelocity if provided. This is an alternative way to control motion with keyboard than dragDelta and
+  // produces smoother motion for the object. dragVelocity and dragDelta options are mutually exclusive. See dragDelta
   // for more information.
   shiftDragVelocity?: number;
 
@@ -140,8 +140,8 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   private _positionProperty: IProperty<Vector2> | null;
   private _dragVelocity: number;
   private _shiftDragVelocity: number;
-  private _downDelta: number;
-  private _shiftDownDelta: number;
+  private _dragDelta: number;
+  private _shiftDragDelta: number;
   private _moveOnHoldDelay: number;
   private _moveOnHoldInterval: number;
   private _hotkeyHoldInterval: number;
@@ -190,19 +190,19 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   private _pointer: PDOMPointer | null;
 
   // Whether we are using a velocity implementation or delta implementation for dragging. See options
-  // downDelta and dragVelocity for more information.
+  // dragDelta and dragVelocity for more information.
   private readonly useDragVelocity: boolean;
 
   public constructor( providedOptions?: KeyboardDragListenerOptions ) {
 
-    // Use either dragVelocity or downDelta, cannot use both at the same time.
-    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'dragVelocity', 'shiftDragVelocity' ], [ 'downDelta', 'shiftDownDelta' ] );
+    // Use either dragVelocity or dragDelta, cannot use both at the same time.
+    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'dragVelocity', 'shiftDragVelocity' ], [ 'dragDelta', 'shiftDragDelta' ] );
 
     const options = optionize<KeyboardDragListenerOptions, SelfOptions, EnabledComponentOptions>()( {
 
       // default moves the object roughly 600 view coordinates every second, assuming 60 fps
-      downDelta: 10,
-      shiftDownDelta: 5,
+      dragDelta: 10,
+      shiftDragDelta: 5,
       dragVelocity: 0,
       shiftDragVelocity: 0,
       positionProperty: null,
@@ -222,7 +222,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     }, providedOptions );
 
     assert && assert( options.shiftDragVelocity <= options.dragVelocity, 'shiftDragVelocity should be less than or equal to shiftDragVelocity, it is intended to provide more fine-grained control' );
-    assert && assert( options.shiftDownDelta <= options.downDelta, 'shiftDownDelta should be less than or equal to downDelta, it is intended to provide more fine-grained control' );
+    assert && assert( options.shiftDragDelta <= options.dragDelta, 'shiftDragDelta should be less than or equal to dragDelta, it is intended to provide more fine-grained control' );
 
     super( options );
 
@@ -235,8 +235,8 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     this._positionProperty = options.positionProperty;
     this._dragVelocity = options.dragVelocity;
     this._shiftDragVelocity = options.shiftDragVelocity;
-    this._downDelta = options.downDelta;
-    this._shiftDownDelta = options.shiftDownDelta;
+    this._dragDelta = options.dragDelta;
+    this._shiftDragDelta = options.shiftDragDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
     this._moveOnHoldInterval = options.moveOnHoldInterval;
     this._hotkeyHoldInterval = options.hotkeyHoldInterval;
@@ -250,7 +250,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     // while holding the hotkey should result in a delay of this much. in ms
     this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval;
 
-    // for readability - since dragVelocity and downDelta are mutually exclusive, a value for either one of these
+    // for readability - since dragVelocity and dragDelta are mutually exclusive, a value for either one of these
     // indicates dragging implementation should use velocity
     this.useDragVelocity = options.dragVelocity > 0 || options.shiftDragVelocity > 0;
 
@@ -284,11 +284,11 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
         }
       }
 
-      // initial movement on down should only be used for downDelta implementation
+      // initial movement on down should only be used for dragDelta implementation
       if ( !this.useDragVelocity ) {
 
         // move object on first down before a delay
-        const positionDelta = this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta;
+        const positionDelta = this.shiftKeyDown() ? this._shiftDragDelta : this._dragDelta;
         this.updatePosition( positionDelta );
       }
     }, {
@@ -395,24 +395,24 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   public set shiftDragVelocity( shiftDragVelocity: number ) { this._shiftDragVelocity = shiftDragVelocity; }
 
   /**
-   * Getter for the downDelta property, see options.downDelta for more info.
+   * Getter for the dragDelta property, see options.dragDelta for more info.
    */
-  public get downDelta(): number { return this._downDelta; }
+  public get dragDelta(): number { return this._dragDelta; }
 
   /**
-   * Setter for the downDelta property, see options.downDelta for more info.
+   * Setter for the dragDelta property, see options.dragDelta for more info.
    */
-  public set downDelta( downDelta: number ) { this._downDelta = downDelta; }
+  public set dragDelta( dragDelta: number ) { this._dragDelta = dragDelta; }
 
   /**
-   * Getter for the shiftDownDelta property, see options.shiftDownDelta for more info.
+   * Getter for the shiftDragDelta property, see options.shiftDragDelta for more info.
    */
-  public get shiftDownDelta(): number { return this._shiftDownDelta; }
+  public get shiftDragDelta(): number { return this._shiftDragDelta; }
 
   /**
-   * Setter for the shiftDownDelta property, see options.shiftDownDelta for more info.
+   * Setter for the shiftDragDelta property, see options.shiftDragDelta for more info.
    */
-  public set shiftDownDelta( shiftDownDelta: number ) { this._shiftDownDelta = shiftDownDelta; }
+  public set shiftDragDelta( shiftDragDelta: number ) { this._shiftDragDelta = shiftDragDelta; }
 
   /**
    * Getter for the moveOnHoldDelay property, see options.moveOnHoldDelay for more info.
@@ -621,7 +621,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
           movable = true;
         }
 
-        positionDelta = movable ? ( this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta ) : 0;
+        positionDelta = movable ? ( this.shiftKeyDown() ? this._shiftDragDelta : this._dragDelta ) : 0;
       }
 
       if ( positionDelta > 0 ) {
