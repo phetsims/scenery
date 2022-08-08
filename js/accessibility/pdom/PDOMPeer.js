@@ -419,12 +419,13 @@ class PDOMPeer {
     }
 
     // Manually support options that map to attributes. This covers that case where behavior functions want to change
-    // these, but they aren't in node.pdomAttributes. It will do double work in some cases, but it is pretty minor for the
-    // complexity it saves. https://github.com/phetsims/scenery/issues/1436
-    if ( pdomOptions.ariaLabel ) {
+    // these, but they aren't in node.pdomAttributes. It will do double work in some cases, but it is pretty minor for
+    // the complexity it saves. https://github.com/phetsims/scenery/issues/1436. Empty strings should be settable for
+    // these attributes but null and undefined are ignored.
+    if ( typeof pdomOptions.ariaLabel === 'string' ) {
       this.setAttributeToElement( 'aria-label', pdomOptions.ariaLabel );
     }
-    if ( pdomOptions.ariaRole ) {
+    if ( typeof pdomOptions.ariaRole === 'string' ) {
       this.setAttributeToElement( 'role', pdomOptions.ariaRole );
     }
   }
