@@ -6408,9 +6408,9 @@ class Node extends ParallelDOM {
     }
   }
 
-  public set voicingVisible( visible ) { this.setVoicingVisible( visible ); }
+  public set voicingVisible( visible: boolean ) { this.setVoicingVisible( visible ); }
 
-  public get voicingVisible() { return this.isVoicingVisible(); }
+  public get voicingVisible(): boolean { return this.isVoicingVisible(); }
 
   /**
    * Returns whether this Node is voicingVisible. When true Utterances for this Node can be announced with the

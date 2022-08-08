@@ -46,7 +46,7 @@ const KeyboardZoomUtils = {
   /**
    * Returns true if the keyboard command indicates a "zoom reset". This is ctrl + 0 on Win and cmd + 0 on mac.
    */
-  isZoomResetCommand: ( event: Event ) => {
+  isZoomResetCommand: ( event: Event ): boolean => {
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
 
     // @ts-ignore

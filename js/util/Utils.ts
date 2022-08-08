@@ -41,7 +41,7 @@ const Utils = {
    * Prepares a DOM element for use with applyPreparedTransform(). Applies some CSS styles that are required, but
    * that we don't want to set while animating.
    */
-  prepareForTransform( element: HTMLElement | SVGElement ) {
+  prepareForTransform( element: HTMLElement | SVGElement ): void {
     element.style[ transformOriginProperty ] = 'top left';
   },
 
@@ -49,7 +49,7 @@ const Utils = {
    * Applies the CSS transform of the matrix to the element, with optional forcing of acceleration.
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
    */
-  applyPreparedTransform( matrix: Matrix3, element: HTMLElement | SVGElement ) {
+  applyPreparedTransform( matrix: Matrix3, element: HTMLElement | SVGElement ): void {
     // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
     element.style[ transformProperty ] = matrix.getCSSTransform();
   },
@@ -58,7 +58,7 @@ const Utils = {
    * Applies a CSS transform value string to a DOM element.
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
    */
-  setTransform( transformString: string, element: HTMLElement | SVGElement ) {
+  setTransform( transformString: string, element: HTMLElement | SVGElement ): void {
     assert && assert( typeof transformString === 'string' );
 
     element.style[ transformProperty ] = transformString;
@@ -67,7 +67,7 @@ const Utils = {
   /**
    * Removes a CSS transform from a DOM element.
    */
-  unsetTransform( element: HTMLElement | SVGElement ) {
+  unsetTransform( element: HTMLElement | SVGElement ): void {
     element.style[ transformProperty ] = '';
   },
 
@@ -75,7 +75,7 @@ const Utils = {
    * Ensures that window.requestAnimationFrame and window.cancelAnimationFrame use a native implementation if possible,
    * otherwise using a simple setTimeout internally. See https://github.com/phetsims/scenery/issues/426
    */
-  polyfillRequestAnimationFrame() {
+  polyfillRequestAnimationFrame(): void {
     if ( !window.requestAnimationFrame || !window.cancelAnimationFrame ) {
       // Fallback implementation if no prefixed version is available
       if ( !Features.requestAnimationFrame || !Features.cancelAnimationFrame ) {
@@ -157,7 +157,7 @@ const Utils = {
    * very conservative, with an effective 1px extra range to allow for differences in anti-aliasing
    * for performance concerns, this does not support skews / rotations / anything but translation and scaling
    */
-  scanBounds( imageData: ImageData, resolution: number, transform: Transform3 ) {
+  scanBounds( imageData: ImageData, resolution: number, transform: Transform3 ): { minBounds: Bounds2; maxBounds: Bounds2 } {
 
     // entry will be true if any pixel with the given x or y value is non-rgba(0,0,0,0)
     const dirtyX = _.map( _.range( resolution ), () => false );
@@ -199,8 +199,6 @@ const Utils = {
 
   /**
    * Measures accurate bounds of a function that draws things to a Canvas.
-   *
-   * @param [options]
    */
   canvasAccurateBounds( renderToContext: ( context: CanvasRenderingContext2D ) => void, options?: { precision?: number; resolution?: number; initialScale?: number } ): Bounds2 & { minBounds: Bounds2; maxBounds: Bounds2; isConsistent: boolean; precision: number } {
     // how close to the actual bounds do we need to be?
@@ -230,7 +228,7 @@ const Utils = {
     }
 
     // TODO: Don't use Transform3 unless it is necessary
-    function scan( transform: Transform3 ) {
+    function scan( transform: Transform3 ): { minBounds: Bounds2; maxBounds: Bounds2 } {
       // save/restore, in case the render tries to do any funny stuff like clipping, etc.
       context.save();
       transform.matrix.canvasSetTransform( context );
@@ -443,7 +441,7 @@ const Utils = {
     return shader;
   },
 
-  applyWebGLContextDefaults( gl: WebGLRenderingContext ) {
+  applyWebGLContextDefaults( gl: WebGLRenderingContext ): void {
     // What color gets set when we call gl.clear()
     gl.clearColor( 0, 0, 0, 0 );
 
@@ -462,7 +460,7 @@ const Utils = {
   /**
    * Set whether webgl should be enabled, see docs for webglEnabled
    */
-  setWebGLEnabled( _webglEnabled: boolean ) {
+  setWebGLEnabled( _webglEnabled: boolean ): void {
     webglEnabled = _webglEnabled;
   },
 
@@ -483,7 +481,7 @@ const Utils = {
     try {
       // @ts-ignore
       const gl: WebGLRenderingContext | null = !!window.WebGLRenderingContext &&
-                 ( canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ) );
+                                               ( canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ) );
 
       if ( !gl ) {
         return false;
@@ -513,7 +511,7 @@ const Utils = {
     try {
       // @ts-ignore
       const gl: WebGLRenderingContext | null = !!window.WebGLRenderingContext &&
-                 ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) );
+                                               ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) );
 
       if ( !gl ) {
         return false;
@@ -543,7 +541,7 @@ const Utils = {
    *
    * NOTE: Only use this for debugging. Should not be called normally.
    */
-  loseContext( gl: WebGLRenderingContext ) {
+  loseContext( gl: WebGLRenderingContext ): void {
     const extension = gl.getExtension( 'WEBGL_lose_context' );
     if ( extension ) {
       extension.loseContext();

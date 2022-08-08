@@ -201,9 +201,9 @@ class FocusHighlightPath extends Path {
     this.highlightChangedEmitter.emit();
   }
 
-  public set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
+  public set innerHighlightColor( color: IPaint ) { this.setInnerHighlightColor( color ); }
 
-  public get innerHighlightColor() { return this.getInnerHighlightColor(); }
+  public get innerHighlightColor(): IPaint { return this.getInnerHighlightColor(); }
 
   /**
    * Get the inner color of this focus highlight path.
@@ -221,9 +221,9 @@ class FocusHighlightPath extends Path {
     this.highlightChangedEmitter.emit();
   }
 
-  public set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); }
+  public set outerHighlightColor( color: IPaint ) { this.setOuterHighlightColor( color ); }
 
-  public get outerHighlightColor() { return this.getOuterHighlightColor(); }
+  public get outerHighlightColor(): IPaint { return this.getOuterHighlightColor(); }
 
   /**
    * Get the color of the outer highlight for this FocusHighlightPath

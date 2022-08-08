@@ -354,7 +354,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     return this._dragBoundsProperty.value;
   }
 
-  public get dragBounds() { return this.getDragBounds(); }
+  public get dragBounds(): Bounds2 | null { return this.getDragBounds(); }
 
   /**
    * Sets the drag transform of the listener.
@@ -363,9 +363,9 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     this._transform = transform;
   }
 
-  public set transform( transform ) { this.setTransform( transform ); }
+  public set transform( transform: Transform3 | null ) { this.setTransform( transform ); }
 
-  public get transform() { return this.getTransform(); }
+  public get transform(): Transform3 | null { return this.getTransform(); }
 
   /**
    * Returns the transform of the listener.
@@ -844,7 +844,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
            this.upMovementKeysDown() || this.downMovementKeysDown();
   }
 
-  public get movementKeysDown() { return this.getMovementKeysDown(); }
+  public get movementKeysDown(): boolean { return this.getMovementKeysDown(); }
 
   /**
    * Returns true if the enter key is currently pressed down.

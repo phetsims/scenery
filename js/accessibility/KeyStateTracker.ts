@@ -404,7 +404,7 @@ class KeyStateTracker {
     }
   }
 
-  public set enabled( enabled ) { this.setEnabled( enabled ); }
+  public set enabled( enabled: boolean ) { this.setEnabled( enabled ); }
 
   public get enabled(): boolean { return this.isEnabled(); }
 

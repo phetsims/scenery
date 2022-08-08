@@ -89,7 +89,7 @@ export default class PaintColorProperty extends Property<Color> {
     this._paintObserver.setPrimary( paint );
   }
 
-  public set paint( value ) { this.setPaint( value ); }
+  public set paint( value: IPaint ) { this.setPaint( value ); }
 
   public get paint(): IPaint { return this.getPaint(); }
 

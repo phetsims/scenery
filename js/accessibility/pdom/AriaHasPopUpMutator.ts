@@ -18,7 +18,7 @@ const AriaHasPopUpMutator = {
    * @param node - Node whose ParallelDOM.js fields will change
    * @param value - Valid value for aria-haspopup attribute, or false to remove the attribute
    */
-  mutateNode( node: Node, value: boolean | string ) {
+  mutateNode( node: Node, value: boolean | string ): void {
     if ( value ) {
       node.setPDOMAttribute( 'aria-haspopup', value );
     }

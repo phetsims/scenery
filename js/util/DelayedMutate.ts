@@ -38,7 +38,7 @@ import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
  * @param keys - An array of the mutate option names that should be delayed
  * @param type - The class we're mixing into
  */
-const DelayedMutate = <SuperType extends Constructor>( name: string, keys: string[], type: SuperType ) => {
+const DelayedMutate = <SuperType extends Constructor>( name: string, keys: string[], type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
   // We typecast these to strings to satisfy the type-checker without large amounts of grief. It doesn't seem to be
   // able to parse that we're using the same keys for each call of this.
   const pendingOptionsKey = `_${name}PendingOptions` as '_fakePendingOptionsType';

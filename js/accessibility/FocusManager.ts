@@ -204,7 +204,7 @@ export default class FocusManager {
     return focusedNode;
   }
 
-  public static get pdomFocusedNode() { return this.getPDOMFocusedNode(); }
+  public static get pdomFocusedNode(): Node | null { return this.getPDOMFocusedNode(); }
 
   // Display has an axon `Property to indicate which component is focused (or null if no
   // scenery Node has focus). By passing the tandem and phetioTye, PhET-iO is able to interoperate (save, restore,

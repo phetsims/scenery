@@ -82,7 +82,7 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
  * @param Type
  * @param optionsArgPosition - zero-indexed number that the options argument is provided at
  */
-const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => {
+const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 

@@ -168,7 +168,7 @@ class TransformTracker {
     return this._matrices[ numMatrices - 1 ];
   }
 
-  public get matrix() { return this.getMatrix(); }
+  public get matrix(): Matrix3 { return this.getMatrix(); }
 }
 
 scenery.register( 'TransformTracker', TransformTracker );

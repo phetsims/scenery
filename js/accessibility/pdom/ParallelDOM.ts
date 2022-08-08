@@ -824,7 +824,7 @@ export default class ParallelDOM extends PhetioObject {
 
   public set pdomHeading( pdomHeading: string | null ) { this.setPDOMHeading( pdomHeading ); }
 
-  public get pdomHeading() { return this.getPDOMHeading(); }
+  public get pdomHeading(): string | null { return this.getPDOMHeading(); }
 
   /**
    * Get the value of this Node's heading. Use null to clear the heading
@@ -1706,7 +1706,7 @@ export default class ParallelDOM extends PhetioObject {
     return this._nodesThatAreAriaLabelledbyThisNode;
   }
 
-  public get nodesThatAreAriaLabelledbyThisNode() { return this.getNodesThatAreAriaLabelledbyThisNode(); }
+  public get nodesThatAreAriaLabelledbyThisNode(): Node[] { return this.getNodesThatAreAriaLabelledbyThisNode(); }
 
   public setAriaDescribedbyAssociations( ariaDescribedbyAssociations: Association[] ): void {
     let associationObject;
@@ -1840,7 +1840,7 @@ export default class ParallelDOM extends PhetioObject {
     return this._nodesThatAreAriaDescribedbyThisNode;
   }
 
-  public get nodesThatAreAriaDescribedbyThisNode() { return this.getNodesThatAreAriaDescribedbyThisNode(); }
+  public get nodesThatAreAriaDescribedbyThisNode(): Node[] { return this.getNodesThatAreAriaDescribedbyThisNode(); }
 
   public setActiveDescendantAssociations( activeDescendantAssociations: Association[] ): void {
 

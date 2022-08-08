@@ -71,7 +71,7 @@ export type ImageableOptions = {
   hitTestPixels?: boolean;
 };
 
-const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
+const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
   return class ImageableMixin extends type {
 
     // (scenery-internal) Internal stateful value, see setImage()

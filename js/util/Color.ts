@@ -759,14 +759,14 @@ export default class Color {
     {
       // 'transparent'
       regexp: /^transparent$/,
-      apply: ( color: Color, matches: RegExpExecArray ) => {
+      apply: ( color: Color, matches: RegExpExecArray ): void => {
         color.setRGBA( 0, 0, 0, 0 );
       }
     },
     {
       // short hex form, a la '#fff'
       regexp: /^#(\w{1})(\w{1})(\w{1})$/,
-      apply: ( color: Color, matches: RegExpExecArray ) => {
+      apply: ( color: Color, matches: RegExpExecArray ): void => {
         color.setRGBA(
           parseInt( matches[ 1 ] + matches[ 1 ], 16 ),
           parseInt( matches[ 2 ] + matches[ 2 ], 16 ),
@@ -777,7 +777,7 @@ export default class Color {
     {
       // long hex form, a la '#ffffff'
       regexp: /^#(\w{2})(\w{2})(\w{2})$/,
-      apply: ( color: Color, matches: RegExpExecArray ) => {
+      apply: ( color: Color, matches: RegExpExecArray ): void => {
         color.setRGBA(
           parseInt( matches[ 1 ], 16 ),
           parseInt( matches[ 2 ], 16 ),
@@ -788,7 +788,7 @@ export default class Color {
     {
       // rgb(...)
       regexp: new RegExp( `^rgb\\(${rgbNumber},${rgbNumber},${rgbNumber}\\)$` ),
-      apply: ( color: Color, matches: RegExpExecArray ) => {
+      apply: ( color: Color, matches: RegExpExecArray ): void => {
         color.setRGBA(
           parseRGBNumber( matches[ 1 ] ),
           parseRGBNumber( matches[ 2 ] ),
@@ -799,7 +799,7 @@ export default class Color {
     {
       // rgba(...)
       regexp: new RegExp( `^rgba\\(${rgbNumber},${rgbNumber},${rgbNumber},${aNumber}\\)$` ),
-      apply: ( color: Color, matches: RegExpExecArray ) => {
+      apply: ( color: Color, matches: RegExpExecArray ): void => {
         color.setRGBA(
           parseRGBNumber( matches[ 1 ] ),
           parseRGBNumber( matches[ 2 ] ),
@@ -810,7 +810,7 @@ export default class Color {
     {
       // hsl(...)
       regexp: new RegExp( `^hsl\\(${rawNumber},${rawNumber}%,${rawNumber}%\\)$` ),
-      apply: ( color: Color, matches: RegExpExecArray ) => {
+      apply: ( color: Color, matches: RegExpExecArray ): void => {
         color.setHSLA(
           Number( matches[ 1 ] ),
           Number( matches[ 2 ] ),
@@ -821,7 +821,7 @@ export default class Color {
     {
       // hsla(...)
       regexp: new RegExp( `^hsla\\(${rawNumber},${rawNumber}%,${rawNumber}%,${aNumber}\\)$` ),
-      apply: ( color: Color, matches: RegExpExecArray ) => {
+      apply: ( color: Color, matches: RegExpExecArray ): void => {
         color.setHSLA(
           Number( matches[ 1 ] ),
           Number( matches[ 2 ] ),
