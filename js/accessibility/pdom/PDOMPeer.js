@@ -406,6 +406,20 @@ class PDOMPeer {
   }
 
   /**
+   * @param {string} key
+   * @param {*} value
+   * @private
+   */
+  handleAttributeWithPDOMOption( key, value ) {
+    if ( typeof value === 'string' ) {
+      this.setAttributeToElement( key, value );
+    }
+    else {
+      this.removeAttributeFromElement( key );
+    }
+  }
+
+  /**
    * Set all pdom attributes onto the peer elements from the model's stored data objects
    * @private
    *
@@ -422,12 +436,8 @@ class PDOMPeer {
     // these, but they aren't in node.pdomAttributes. It will do double work in some cases, but it is pretty minor for
     // the complexity it saves. https://github.com/phetsims/scenery/issues/1436. Empty strings should be settable for
     // these attributes but null and undefined are ignored.
-    if ( typeof pdomOptions.ariaLabel === 'string' ) {
-      this.setAttributeToElement( 'aria-label', pdomOptions.ariaLabel );
-    }
-    if ( typeof pdomOptions.ariaRole === 'string' ) {
-      this.setAttributeToElement( 'role', pdomOptions.ariaRole );
-    }
+    this.handleAttributeWithPDOMOption( 'aria-label', pdomOptions.ariaLabel );
+    this.handleAttributeWithPDOMOption( 'role', pdomOptions.ariaRole );
   }
 
   /**
