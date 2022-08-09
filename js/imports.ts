@@ -230,7 +230,7 @@ export { default as LayoutAlign, HorizontalLayoutAlignValues, VerticalLayoutAlig
 export type { HorizontalLayoutAlign, VerticalLayoutAlign } from './layout/LayoutAlign.js';
 export { default as LayoutJustification, HorizontalLayoutJustificationValues, VerticalLayoutJustificationValues } from './layout/LayoutJustification.js';
 export type { HorizontalLayoutJustification, VerticalLayoutJustification } from './layout/LayoutJustification.js';
-export type { default as ILayoutOptions } from './layout/ILayoutOptions.js';
+export type { default as TLayoutOptions } from './layout/TLayoutOptions.js';
 export { default as Divider } from './layout/nodes/Divider.js';
 export type { DividerOptions } from './layout/nodes/Divider.js';
 export { default as HDivider } from './layout/nodes/HDivider.js';

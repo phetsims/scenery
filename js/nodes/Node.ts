@@ -171,7 +171,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
-import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
+import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, TLayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -338,7 +338,7 @@ export type NodeOptions = {
   disabledOpacity?: number;
   filters?: Filter[];
   excludeInvisibleChildrenFromBounds?: boolean;
-  layoutOptions?: ILayoutOptions | null;
+  layoutOptions?: TLayoutOptions | null;
   localBounds?: Bounds2 | null;
   maxWidth?: number | null;
   maxHeight?: number | null;
@@ -514,7 +514,7 @@ class Node extends ParallelDOM {
   private _excludeInvisibleChildrenFromBounds: boolean;
 
   // Options that can be provided to layout managers to adjust positioning for this node.
-  private _layoutOptions: ILayoutOptions | null;
+  private _layoutOptions: TLayoutOptions | null;
 
   // Whether bounds needs to be recomputed to be valid.
   // (scenery-internal)
@@ -4938,7 +4938,7 @@ class Node extends ParallelDOM {
   /**
    * Sets options that are provided to layout managers in order to customize positioning of this node.
    */
-  public setLayoutOptions( layoutOptions: ILayoutOptions | null ): void {
+  public setLayoutOptions( layoutOptions: TLayoutOptions | null ): void {
     assert && assert( layoutOptions === null || ( typeof layoutOptions === 'object' && Object.getPrototypeOf( layoutOptions ) === Object.prototype ),
       'layoutOptions should be null or an plain options-style object' );
 
@@ -4949,20 +4949,20 @@ class Node extends ParallelDOM {
     }
   }
 
-  public set layoutOptions( value: ILayoutOptions | null ) {
+  public set layoutOptions( value: TLayoutOptions | null ) {
     this.setLayoutOptions( value );
   }
 
-  public get layoutOptions(): ILayoutOptions | null {
+  public get layoutOptions(): TLayoutOptions | null {
     return this.getLayoutOptions();
   }
 
-  public getLayoutOptions(): ILayoutOptions | null {
+  public getLayoutOptions(): TLayoutOptions | null {
     return this._layoutOptions;
   }
 
-  public mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {
-    this.layoutOptions = optionize3<ILayoutOptions, EmptySelfOptions, ILayoutOptions>()( {}, this.layoutOptions || {}, layoutOptions );
+  public mutateLayoutOptions( layoutOptions?: TLayoutOptions ): void {
+    this.layoutOptions = optionize3<TLayoutOptions, EmptySelfOptions, TLayoutOptions>()( {}, this.layoutOptions || {}, layoutOptions );
   }
 
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable
