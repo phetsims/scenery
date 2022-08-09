@@ -12,7 +12,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, CircleCanvasDrawable, CircleDOMDrawable, CircleSVGDrawable, DOMSelfDrawable, Features, ICircleDrawable, Instance, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, VoicingOptions } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, CircleCanvasDrawable, CircleDOMDrawable, CircleSVGDrawable, DOMSelfDrawable, Features, TCircleDrawable, Instance, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, VoicingOptions } from '../imports.js';
 
 const CIRCLE_OPTION_KEYS = [
   'radius' // {number} - see setRadius() for more documentation
@@ -198,7 +198,7 @@ export default class Circle extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as ICircleDrawable ).markDirtyRadius();
+        ( this._drawables[ i ] as unknown as TCircleDrawable ).markDirtyRadius();
       }
     }
     return this;

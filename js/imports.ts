@@ -321,7 +321,7 @@ export type { default as IPathDrawable } from './display/drawables/IPathDrawable
 export type { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
 export type { default as IRectangleDrawable } from './display/drawables/IRectangleDrawable.js';
 export type { default as ILineDrawable } from './display/drawables/ILineDrawable.js';
-export type { default as ICircleDrawable } from './display/drawables/ICircleDrawable.js';
+export type { default as TCircleDrawable } from './display/drawables/TCircleDrawable.js';
 
 // Concrete drawables
 export { default as CanvasNodeDrawable } from './display/drawables/CanvasNodeDrawable.js';
