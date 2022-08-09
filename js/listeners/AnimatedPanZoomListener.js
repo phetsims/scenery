@@ -94,9 +94,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // then user likely trying to pull an object back into view so we prevent panning during drag
     this._draggingInDragBounds = false;
 
-    // @private {IInputListener[]} - A collection of listeners Pointers with attached listeners that are down. Used
+    // @private {TInputListener[]} - A collection of listeners Pointers with attached listeners that are down. Used
     // primarily to determine if the attached listener defines any unique behavior that should happen during a drag,
-    // such as panning to keep custom Bounds in view. See IInputListener.createPanTargetBounds.
+    // such as panning to keep custom Bounds in view. See TInputListener.createPanTargetBounds.
     this._attachedPointers = [];
 
     // @private {boolean} - Certain calculations can only be done once available pan bounds are finite.

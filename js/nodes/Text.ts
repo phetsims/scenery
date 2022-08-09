@@ -19,7 +19,7 @@ import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, ITextDrawable, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, TTextDrawable, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable } from '../imports.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
@@ -181,7 +181,7 @@ export default class Text extends Paintable( Node ) {
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyText();
+      ( this._drawables[ i ] as unknown as TTextDrawable ).markDirtyText();
     }
 
     this.invalidateText();
@@ -257,7 +257,7 @@ export default class Text extends Paintable( Node ) {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyBounds();
+        ( this._drawables[ i ] as unknown as TTextDrawable ).markDirtyBounds();
       }
 
       this.invalidateText();
@@ -319,7 +319,7 @@ export default class Text extends Paintable( Node ) {
     // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyBounds();
+      ( this._drawables[ i ] as unknown as TTextDrawable ).markDirtyBounds();
     }
 
     // we may have changed renderers if parameters were changed!
@@ -481,7 +481,7 @@ export default class Text extends Paintable( Node ) {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyFont();
+        ( this._drawables[ i ] as unknown as TTextDrawable ).markDirtyFont();
       }
 
       this.invalidateText();

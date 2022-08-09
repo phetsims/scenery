@@ -186,8 +186,8 @@ export { default as PDOMInstance } from './accessibility/pdom/PDOMInstance.js';
 export { default as PDOMTree } from './accessibility/pdom/PDOMTree.js';
 export { default as PDOMFuzzer } from './accessibility/pdom/PDOMFuzzer.js';
 
-export type { default as IInputListener } from './input/IInputListener.js';
-export type { SceneryListenerFunction } from './input/IInputListener.js';
+export type { default as TInputListener } from './input/TInputListener.js';
+export type { SceneryListenerFunction } from './input/TInputListener.js';
 export { default as Pointer, Intent } from './input/Pointer.js';
 export { default as Mouse } from './input/Mouse.js';
 export { default as Touch } from './input/Touch.js';
@@ -318,7 +318,7 @@ export { default as TextStatefulDrawable } from './display/drawables/TextStatefu
 export type { default as TImageDrawable } from './display/drawables/TImageDrawable.js';
 export type { default as TPaintableDrawable } from './display/drawables/TPaintableDrawable.js';
 export type { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
-export type { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
+export type { default as TTextDrawable } from './display/drawables/TTextDrawable.js';
 export type { default as IRectangleDrawable } from './display/drawables/IRectangleDrawable.js';
 export type { default as ILineDrawable } from './display/drawables/ILineDrawable.js';
 export type { default as TCircleDrawable } from './display/drawables/TCircleDrawable.js';

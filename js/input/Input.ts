@@ -168,7 +168,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Features, IInputListener, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, Touch, Trail, WindowTouch } from '../imports.js';
+import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Features, TInputListener, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, Touch, Trail, WindowTouch } from '../imports.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
@@ -1798,7 +1798,7 @@ export default class Input extends PhetioObject {
    * @param type
    * @param inputEvent
    */
-  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: IInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent> ): void {
+  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: TInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent> ): void {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.handled ) {
@@ -1810,20 +1810,20 @@ export default class Input extends PhetioObject {
     for ( let i = 0; i < listeners.length; i++ ) {
       const listener = listeners[ i ];
 
-      if ( !inputEvent.aborted && listener[ specificType as keyof IInputListener ] ) {
+      if ( !inputEvent.aborted && listener[ specificType as keyof TInputListener ] ) {
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( specificType );
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-        ( listener[ specificType as keyof IInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
+        ( listener[ specificType as keyof TInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
       }
 
-      if ( !inputEvent.aborted && listener[ type as keyof IInputListener ] ) {
+      if ( !inputEvent.aborted && listener[ type as keyof TInputListener ] ) {
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( type );
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-        ( listener[ type as keyof IInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
+        ( listener[ type as keyof TInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
       }

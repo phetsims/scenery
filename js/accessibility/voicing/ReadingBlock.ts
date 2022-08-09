@@ -26,7 +26,7 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import { Focus, Highlight, Node, NodeOptions, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
-import IInputListener from '../../input/IInputListener.js';
+import TInputListener from '../../input/TInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import IEmitter from '../../../../axon/js/IEmitter.js';
@@ -110,7 +110,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     private readonly _localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>;
 
     // Triggers activation of the ReadingBlock, requesting speech of its content.
-    private readonly _readingBlockInputListener: IInputListener;
+    private readonly _readingBlockInputListener: TInputListener;
 
     // Controls whether the ReadingBlock should be interactive and focusable. At the time of this writing, that is true
     // for all ReadingBlocks when the voicingManager is fully enabled and can speak.

@@ -30,7 +30,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { IInputListener, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent } from '../imports.js';
+import { TInputListener, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -129,7 +129,7 @@ type SelfOptions = {
 
 export type KeyboardDragListenerOptions = SelfOptions & EnabledComponentOptions;
 
-class KeyboardDragListener extends EnabledComponent implements IInputListener {
+class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
   // See options for documentation
   private _start: ( ( event: SceneryEvent ) => void ) | null;
@@ -184,7 +184,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
 
   // A listener added to the pointer when dragging starts so that we can attach a listener and provide a channel of
   // communication to the AnimatedPanZoomListener to define custom behavior for screen panning during a drag operation.
-  private readonly _pointerListener: IInputListener;
+  private readonly _pointerListener: TInputListener;
 
   // A reference to the Pointer during a drag operation so that we can add/remove the _pointerListener.
   private _pointer: PDOMPointer | null;

@@ -33,7 +33,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { Display, IInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
+import { Display, TInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -118,7 +118,7 @@ export type PressListenerOptions<Listener extends PressListener = PressListener>
 export type PressedPressListener = WithoutNull<PressListener, 'pointer' | 'pressedTrail'>;
 const isPressedListener = ( listener: PressListener ): listener is PressedPressListener => listener.isPressed;
 
-export default class PressListener extends EnabledComponent implements IInputListener {
+export default class PressListener extends EnabledComponent implements TInputListener {
 
   // Unique global ID for this listener
   private _id: number;
@@ -212,7 +212,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
   private _pdomClickingTimeoutListener: ( () => void ) | null;
 
   // The listener that gets added to the pointer when we are pressed
-  private _pointerListener: IInputListener;
+  private _pointerListener: TInputListener;
 
   // Executed on press event
   // The main implementation of "press" handling is implemented as a callback to the PhetioAction, so things are nested

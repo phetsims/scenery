@@ -29,8 +29,8 @@ import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { IInputListener, scenery, SceneryEvent, Trail } from '../imports.js';
 import TAttachableInputListener from './TAttachableInputListener.js';
+import { TInputListener, scenery, SceneryEvent, Trail } from '../imports.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
@@ -78,7 +78,7 @@ export default abstract class Pointer {
   public attachedProperty: IProperty<boolean>;
 
   // All attached listeners (will be activated in order).
-  private readonly _listeners: IInputListener[];
+  private readonly _listeners: TInputListener[];
 
   // Our main "attached" listener, if there is one (otherwise null)
   private _attachedListener: TAttachableInputListener | null;
@@ -99,8 +99,8 @@ export default abstract class Pointer {
 
   // Listeners attached to this pointer that clear the this._intent after input in reserveForDrag functions, referenced
   // so they can be removed on disposal
-  private _listenerForDragReserve: IInputListener | null;
-  private _listenerForKeyboardDragReserve: IInputListener | null;
+  private _listenerForDragReserve: TInputListener | null;
+  private _listenerForKeyboardDragReserve: TInputListener | null;
   public static PointerIO: IOType<Pointer>;
 
   /**
@@ -160,17 +160,17 @@ export default abstract class Pointer {
   /**
    * Returns a defensive copy of all listeners attached to this pointer. (scenery-internal)
    */
-  public getListeners(): IInputListener[] {
+  public getListeners(): TInputListener[] {
     return this._listeners.slice();
   }
 
-  public get listeners(): IInputListener[] { return this.getListeners(); }
+  public get listeners(): TInputListener[] { return this.getListeners(); }
 
   /**
    * Adds an input listener to this pointer. If the attach flag is true, then it will be set as the "attached"
    * listener.
    */
-  public addInputListener( listener: IInputListener, attach?: boolean ): void {
+  public addInputListener( listener: TInputListener, attach?: boolean ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `addInputListener to ${this.toString()} attach:${attach}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
@@ -194,7 +194,7 @@ export default abstract class Pointer {
   /**
    * Removes an input listener from this pointer.
    */
-  public removeInputListener( listener: IInputListener ): void {
+  public removeInputListener( listener: TInputListener ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `removeInputListener to ${this.toString()}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
