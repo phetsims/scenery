@@ -407,7 +407,7 @@ class PDOMPeer {
 
   /**
    * Set the new attribute to the element if the value is a string. It will otherwise be null or undefined and should
-   * then be removed from the element.
+   * then be removed from the element. This allows empty strings to be set as values.
    *
    * @param {string} key
    * @param {string|null|undefined} value
