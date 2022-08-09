@@ -30,7 +30,7 @@ import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import { IInputListener, scenery, SceneryEvent, Trail } from '../imports.js';
-import IAttachableInputListener from './IAttachableInputListener.js';
+import TAttachableInputListener from './TAttachableInputListener.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
@@ -81,7 +81,7 @@ export default abstract class Pointer {
   private readonly _listeners: IInputListener[];
 
   // Our main "attached" listener, if there is one (otherwise null)
-  private _attachedListener: IAttachableInputListener | null;
+  private _attachedListener: TAttachableInputListener | null;
 
   // See setCursor() for more information.
   private _cursor: string | null;
@@ -185,7 +185,7 @@ export default abstract class Pointer {
 
     if ( attach ) {
       assert && assert( listener.interrupt, 'Interrupt should exist on attached listeners' );
-      this.attach( listener as IAttachableInputListener );
+      this.attach( listener as TAttachableInputListener );
     }
 
     sceneryLog && sceneryLog.Pointer && sceneryLog.pop();
@@ -205,7 +205,7 @@ export default abstract class Pointer {
 
     // If this listener is our attached listener, also detach it
     if ( this.isAttached() && listener === this._attachedListener ) {
-      this.detach( listener as IAttachableInputListener );
+      this.detach( listener as TAttachableInputListener );
     }
 
     this._listeners.splice( index, 1 );
@@ -216,11 +216,11 @@ export default abstract class Pointer {
   /**
    * Returns the listener attached to this pointer with attach(), or null if there isn't one.
    */
-  public getAttachedListener(): IAttachableInputListener | null {
+  public getAttachedListener(): TAttachableInputListener | null {
     return this._attachedListener;
   }
 
-  public get attachedListener(): IAttachableInputListener | null { return this.getAttachedListener(); }
+  public get attachedListener(): TAttachableInputListener | null { return this.getAttachedListener(); }
 
   /**
    * Returns whether this pointer has an attached (primary) listener.
@@ -282,7 +282,7 @@ export default abstract class Pointer {
   /**
    * Marks the pointer as attached to this listener.
    */
-  private attach( listener: IAttachableInputListener ): void {
+  private attach( listener: TAttachableInputListener ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Attaching to ${this.toString()}` );
 
     assert && assert( !this.isAttached(), 'Attempted to attach to an already attached pointer' );
@@ -294,7 +294,7 @@ export default abstract class Pointer {
   /**
    * Marks the pointer as detached from a previously attached listener.
    */
-  private detach( listener: IAttachableInputListener ): void {
+  private detach( listener: TAttachableInputListener ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Detaching from ${this.toString()}` );
 
     assert && assert( this.isAttached(), 'Cannot detach a listener if one is not attached' );

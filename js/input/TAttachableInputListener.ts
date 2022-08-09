@@ -8,8 +8,8 @@
 
 import { IInputListener } from '../imports.js';
 
-type IAttachableInputListener = {
+type TAttachableInputListener = {
   // Has to be interruptable
   interrupt: () => void;
 } & IInputListener;
-export default IAttachableInputListener // eslint-disable-line
+export default TAttachableInputListener // eslint-disable-line
