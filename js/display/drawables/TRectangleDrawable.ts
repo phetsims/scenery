@@ -8,7 +8,7 @@
 
 import { IPathDrawable } from '../../imports.js';
 
-type IRectangleDrawable = {
+type TRectangleDrawable = {
   markDirtyRectangle(): void;
   markDirtyX(): void;
   markDirtyY(): void;
@@ -17,4 +17,4 @@ type IRectangleDrawable = {
   markDirtyCornerXRadius(): void;
   markDirtyCornerYRadius(): void;
 } & IPathDrawable;
-export default IRectangleDrawable // eslint-disable-line
+export default TRectangleDrawable // eslint-disable-line
