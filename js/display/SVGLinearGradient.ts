@@ -8,10 +8,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import { LinearGradient, scenery, SVGBlock, SVGGradient, svgns } from '../imports.js';
 
-export default class SVGLinearGradient extends SVGGradient implements IPoolable {
+export default class SVGLinearGradient extends SVGGradient implements TPoolable {
   public override initialize( svgBlock: SVGBlock, gradient: LinearGradient ): void {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGLinearGradient] initialize ${gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();

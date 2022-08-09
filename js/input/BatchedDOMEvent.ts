@@ -9,7 +9,7 @@
 
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
-import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { Input, scenery } from '../imports.js';
 
@@ -27,7 +27,7 @@ export class BatchedDOMEventType extends EnumerationValue {
   } );
 }
 
-export default class BatchedDOMEvent implements IPoolable {
+export default class BatchedDOMEvent implements TPoolable {
 
   private domEvent!: Event | null;
   private type!: BatchedDOMEventType | null;

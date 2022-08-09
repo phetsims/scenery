@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import { Pattern, scenery, svgns, xlinkns } from '../imports.js';
 
-export default class SVGPattern implements IPoolable {
+export default class SVGPattern implements TPoolable {
 
   // persistent
   public definition!: SVGPatternElement;

@@ -7,7 +7,7 @@
  */
 
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
-import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 import { ActiveSVGGradient, Color, TColor, scenery, svgns } from '../imports.js';
 
@@ -15,7 +15,7 @@ const scratchColor = new Color( 'transparent' );
 
 export type ActiveSVGGradientStop = WithoutNull<SVGGradientStop, 'svgGradient'>;
 
-class SVGGradientStop implements IPoolable {
+class SVGGradientStop implements TPoolable {
 
   // persistent
   public svgElement!: SVGStopElement;
