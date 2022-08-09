@@ -16,7 +16,7 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { IPaint, scenery } from '../imports.js';
+import { TPaint, scenery } from '../imports.js';
 import TColor from './TColor.js';
 
 // constants
@@ -657,7 +657,7 @@ export default class Color {
   /**
    * A Paint of the type that Paintable accepts as fills or strokes
    */
-  public static checkPaint( paint: IPaint ): void {
+  public static checkPaint( paint: TPaint ): void {
     if ( typeof paint === 'string' ) {
       Color.checkPaintString( paint );
     }

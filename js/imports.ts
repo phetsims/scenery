@@ -60,7 +60,7 @@ export { default as Filter } from './filters/Filter.js';
 export { default as ColorDef } from './util/ColorDef.js';
 export { default as PaintDef } from './util/PaintDef.js';
 export type { default as TColor } from './util/TColor.js';
-export type { default as IPaint } from './util/IPaint.js';
+export type { default as TPaint } from './util/TPaint.js';
 
 // Filters
 export { default as ColorMatrixFilter } from './filters/ColorMatrixFilter.js';
@@ -316,7 +316,7 @@ export { default as TextStatefulDrawable } from './display/drawables/TextStatefu
 
 // Interfaces
 export type { default as IImageDrawable } from './display/drawables/IImageDrawable.js';
-export type { default as IPaintableDrawable } from './display/drawables/IPaintableDrawable.js';
+export type { default as TPaintableDrawable } from './display/drawables/TPaintableDrawable.js';
 export type { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
 export type { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
 export type { default as IRectangleDrawable } from './display/drawables/IRectangleDrawable.js';

@@ -12,18 +12,18 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, IOverlay, IPaint, Node, scenery, Trail, TransformTracker } from '../imports.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, IOverlay, TPaint, Node, scenery, Trail, TransformTracker } from '../imports.js';
 import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import IProperty from '../../../axon/js/IProperty.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.
-let outerHighlightColor: IPaint = FocusHighlightPath.OUTER_FOCUS_COLOR;
-let innerHighlightColor: IPaint = FocusHighlightPath.INNER_FOCUS_COLOR;
+let outerHighlightColor: TPaint = FocusHighlightPath.OUTER_FOCUS_COLOR;
+let innerHighlightColor: TPaint = FocusHighlightPath.INNER_FOCUS_COLOR;
 
-let innerGroupHighlightColor: IPaint = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
-let outerGroupHighlightColor: IPaint = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
+let innerGroupHighlightColor: TPaint = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
+let outerGroupHighlightColor: TPaint = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
 // Type for the "mode" of a particular highlight, signifying behavior for handling the active highlight.
 type HighlightMode = null | 'bounds' | 'node' | 'shape' | 'invisible';
@@ -850,56 +850,56 @@ export default class HighlightOverlay implements IOverlay {
   /**
    * Set the inner color of all focus highlights.
    */
-  public static setInnerHighlightColor( color: IPaint ): void {
+  public static setInnerHighlightColor( color: TPaint ): void {
     innerHighlightColor = color;
   }
 
   /**
    * Get the inner color of all focus highlights.
    */
-  public static getInnerHighlightColor(): IPaint {
+  public static getInnerHighlightColor(): TPaint {
     return innerHighlightColor;
   }
 
   /**
    * Set the outer color of all focus highlights.
    */
-  public static setOuterHilightColor( color: IPaint ): void {
+  public static setOuterHilightColor( color: TPaint ): void {
     outerHighlightColor = color;
   }
 
   /**
    * Get the outer color of all focus highlights.
    */
-  public static getOuterHighlightColor(): IPaint {
+  public static getOuterHighlightColor(): TPaint {
     return outerHighlightColor;
   }
 
   /**
    * Set the inner color of all group focus highlights.
    */
-  public static setInnerGroupHighlightColor( color: IPaint ): void {
+  public static setInnerGroupHighlightColor( color: TPaint ): void {
     innerGroupHighlightColor = color;
   }
 
   /**
    * Get the inner color of all group focus highlights
    */
-  public static getInnerGroupHighlightColor(): IPaint {
+  public static getInnerGroupHighlightColor(): TPaint {
     return innerGroupHighlightColor;
   }
 
   /**
    * Set the outer color of all group focus highlight.
    */
-  public static setOuterGroupHighlightColor( color: IPaint ): void {
+  public static setOuterGroupHighlightColor( color: TPaint ): void {
     outerGroupHighlightColor = color;
   }
 
   /**
    * Get the outer color of all group focus highlights.
    */
-  public static getOuterGroupHighlightColor(): IPaint {
+  public static getOuterGroupHighlightColor(): TPaint {
     return outerGroupHighlightColor;
   }
 }

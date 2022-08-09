@@ -9,6 +9,6 @@ import { Color, Paint } from '../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-type IPaint = Paint | IReadOnlyProperty<Color | string | null> | IReadOnlyProperty<Color | string> | IReadOnlyProperty<Color> | Color | string | null;
+type TPaint = Paint | IReadOnlyProperty<Color | string | null> | IReadOnlyProperty<Color | string> | IReadOnlyProperty<Color> | Color | string | null;
 
-export default IPaint;
+export default TPaint;

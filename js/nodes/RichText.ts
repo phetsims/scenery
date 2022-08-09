@@ -68,7 +68,7 @@ import memoize from '../../../phet-core/js/memoize.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { Color, FireListener, Font, IInputListener, IPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
+import { Color, FireListener, Font, IInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
@@ -115,10 +115,10 @@ type SelfOptions = {
   font?: Font | string;
 
   // Sets the fill of the text
-  fill?: IPaint;
+  fill?: TPaint;
 
   // Sets the stroke around the text
-  stroke?: IPaint;
+  stroke?: TPaint;
 
   // Sets the lineWidth around the text
   lineWidth?: number;
@@ -157,7 +157,7 @@ type SelfOptions = {
   strikethroughHeightScale?: number;
 
   // Sets the fill for links within the text
-  linkFill?: IPaint;
+  linkFill?: TPaint;
 
   // Sets whether link clicks will call event.handle()
   linkEventsHandled?: boolean;
@@ -285,8 +285,8 @@ export default class RichText extends Node {
 
   private _font: Font | string;
   private _boundsMethod: TextBoundsMethod;
-  private _fill: IPaint;
-  private _stroke: IPaint;
+  private _fill: TPaint;
+  private _stroke: TPaint;
   private _lineWidth: number;
 
   private _subScale: number;
@@ -305,7 +305,7 @@ export default class RichText extends Node {
   private _strikethroughLineWidth: number;
   private _strikethroughHeightScale: number;
 
-  private _linkFill: IPaint;
+  private _linkFill: TPaint;
 
   private _linkEventsHandled: boolean;
 
@@ -627,7 +627,7 @@ export default class RichText extends Node {
    * @param widthAvailable - How much width we have available before forcing a line break (for lineWrap)
    * @returns - Whether a line break was reached
    */
-  private appendElement( containerNode: RichTextElement, element: HimalayaNode, font: Font | string, fill: IPaint, isLTR: boolean, widthAvailable: number ): string {
+  private appendElement( containerNode: RichTextElement, element: HimalayaNode, font: Font | string, fill: TPaint, isLTR: boolean, widthAvailable: number ): string {
     let lineBreakState = LineBreakState.NONE;
 
     // {Node|Text} - The main Node for the element that we are adding
@@ -952,7 +952,7 @@ export default class RichText extends Node {
   /**
    * Sets the fill of our text.
    */
-  public setFill( fill: IPaint ): this {
+  public setFill( fill: TPaint ): this {
     if ( this._fill !== fill ) {
       this._fill = fill;
       this.rebuildRichText();
@@ -960,21 +960,21 @@ export default class RichText extends Node {
     return this;
   }
 
-  public set fill( value: IPaint ) { this.setFill( value ); }
+  public set fill( value: TPaint ) { this.setFill( value ); }
 
-  public get fill(): IPaint { return this.getFill(); }
+  public get fill(): TPaint { return this.getFill(); }
 
   /**
    * Returns the current fill.
    */
-  public getFill(): IPaint {
+  public getFill(): TPaint {
     return this._fill;
   }
 
   /**
    * Sets the stroke of our text.
    */
-  public setStroke( stroke: IPaint ): this {
+  public setStroke( stroke: TPaint ): this {
     if ( this._stroke !== stroke ) {
       this._stroke = stroke;
       this.rebuildRichText();
@@ -982,14 +982,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  public set stroke( value: IPaint ) { this.setStroke( value ); }
+  public set stroke( value: TPaint ) { this.setStroke( value ); }
 
-  public get stroke(): IPaint { return this.getStroke(); }
+  public get stroke(): TPaint { return this.getStroke(); }
 
   /**
    * Returns the current stroke.
    */
-  public getStroke(): IPaint {
+  public getStroke(): TPaint {
     return this._stroke;
   }
 
@@ -1288,7 +1288,7 @@ export default class RichText extends Node {
   /**
    * Sets the color of links. If null, no fill will be overridden.
    */
-  public setLinkFill( linkFill: IPaint ): this {
+  public setLinkFill( linkFill: TPaint ): this {
     if ( this._linkFill !== linkFill ) {
       this._linkFill = linkFill;
       this.rebuildRichText();
@@ -1296,14 +1296,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  public set linkFill( value: IPaint ) { this.setLinkFill( value ); }
+  public set linkFill( value: TPaint ) { this.setLinkFill( value ); }
 
-  public get linkFill(): IPaint { return this.getLinkFill(); }
+  public get linkFill(): TPaint { return this.getLinkFill(); }
 
   /**
    * Returns the color of links.
    */
-  public getLinkFill(): IPaint {
+  public getLinkFill(): TPaint {
     return this._linkFill;
   }
 
@@ -1710,7 +1710,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * A leaf (text) node.
    */
-  public constructor( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ) {
+  public constructor( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: TPaint, stroke: TPaint, lineWidth: number ) {
     super( '' );
 
     this.initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth );
@@ -1719,7 +1719,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * Set up this text's state
    */
-  public initialize( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ): this {
+  public initialize( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: TPaint, stroke: TPaint, lineWidth: number ): this {
 
     // Grab all spaces at the (logical) start
     let whitespaceBefore = '';

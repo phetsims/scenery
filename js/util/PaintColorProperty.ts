@@ -37,7 +37,7 @@
 
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { Color, IPaint, PaintDef, PaintObserver, scenery } from '../imports.js';
+import { Color, TPaint, PaintDef, PaintObserver, scenery } from '../imports.js';
 
 type SelfOptions = {
   // 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
@@ -49,7 +49,7 @@ export type PaintColorPropertyOptions = SelfOptions & PropertyOptions<Color>;
 
 export default class PaintColorProperty extends Property<Color> {
 
-  private _paint: IPaint;
+  private _paint: TPaint;
 
   // See setLuminanceFactor() for more information.
   private _luminanceFactor: number;
@@ -59,7 +59,7 @@ export default class PaintColorProperty extends Property<Color> {
 
   private _paintObserver: PaintObserver;
 
-  public constructor( paint: IPaint, providedOptions?: PaintColorPropertyOptions ) {
+  public constructor( paint: TPaint, providedOptions?: PaintColorPropertyOptions ) {
     const initialColor = PaintDef.toColor( paint );
 
     const options = optionize<PaintColorPropertyOptions, SelfOptions, PropertyOptions<Color>>()( {
@@ -82,21 +82,21 @@ export default class PaintColorProperty extends Property<Color> {
   /**
    * Sets the current paint of the PaintColorProperty.
    */
-  public setPaint( paint: IPaint ): void {
+  public setPaint( paint: TPaint ): void {
     assert && assert( PaintDef.isPaintDef( paint ) );
 
     this._paint = paint;
     this._paintObserver.setPrimary( paint );
   }
 
-  public set paint( value: IPaint ) { this.setPaint( value ); }
+  public set paint( value: TPaint ) { this.setPaint( value ); }
 
-  public get paint(): IPaint { return this.getPaint(); }
+  public get paint(): TPaint { return this.getPaint(); }
 
   /**
    * Returns the current paint.
    */
-  public getPaint(): IPaint {
+  public getPaint(): TPaint {
     return this._paint;
   }
 

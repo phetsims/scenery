@@ -15,7 +15,7 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { Color, IPaint, Node, Path, PathOptions, scenery, Trail } from '../imports.js';
+import { Color, TPaint, Node, Path, PathOptions, scenery, Trail } from '../imports.js';
 
 // constants
 // default inner and outer strokes for the focus highlight
@@ -41,8 +41,8 @@ const GROUP_INNER_LINE_WIDTH = 2;
 type SelfOptions = {
 
   // strokes for each highlight
-  outerStroke?: IPaint;
-  innerStroke?: IPaint;
+  outerStroke?: TPaint;
+  innerStroke?: TPaint;
 
   // lineWidth for each highlight. If null, the lineWidth will be calculated from the transform of
   // the Node of this highlight (or the transformSourceNode).
@@ -60,8 +60,8 @@ export type FocusHighlightPathOptions = SelfOptions & StrictOmit<PathOptions, 's
 class FocusHighlightPath extends Path {
 
   // The highlight is composed of an "inner" and "outer" path to look nice. These hold each color.
-  private _innerHighlightColor: IPaint;
-  private _outerHighlightColor: IPaint;
+  private _innerHighlightColor: TPaint;
+  private _outerHighlightColor: TPaint;
 
   // Emits whenever this highlight changes.
   public highlightChangedEmitter = new Emitter();
@@ -195,40 +195,40 @@ class FocusHighlightPath extends Path {
   /**
    * Set the inner color of this focus highlight.
    */
-  public setInnerHighlightColor( color: IPaint ): void {
+  public setInnerHighlightColor( color: TPaint ): void {
     this._innerHighlightColor = color;
     this.innerHighlightPath.setStroke( color );
     this.highlightChangedEmitter.emit();
   }
 
-  public set innerHighlightColor( color: IPaint ) { this.setInnerHighlightColor( color ); }
+  public set innerHighlightColor( color: TPaint ) { this.setInnerHighlightColor( color ); }
 
-  public get innerHighlightColor(): IPaint { return this.getInnerHighlightColor(); }
+  public get innerHighlightColor(): TPaint { return this.getInnerHighlightColor(); }
 
   /**
    * Get the inner color of this focus highlight path.
    */
-  public getInnerHighlightColor(): IPaint {
+  public getInnerHighlightColor(): TPaint {
     return this._innerHighlightColor;
   }
 
   /**
    * Set the outer color of this focus highlight.
    */
-  public setOuterHighlightColor( color: IPaint ): void {
+  public setOuterHighlightColor( color: TPaint ): void {
     this._outerHighlightColor = color;
     this.setStroke( color );
     this.highlightChangedEmitter.emit();
   }
 
-  public set outerHighlightColor( color: IPaint ) { this.setOuterHighlightColor( color ); }
+  public set outerHighlightColor( color: TPaint ) { this.setOuterHighlightColor( color ); }
 
-  public get outerHighlightColor(): IPaint { return this.getOuterHighlightColor(); }
+  public get outerHighlightColor(): TPaint { return this.getOuterHighlightColor(); }
 
   /**
    * Get the color of the outer highlight for this FocusHighlightPath
    */
-  public getOuterHighlightColor(): IPaint {
+  public getOuterHighlightColor(): TPaint {
     return this._outerHighlightColor;
   }
 
