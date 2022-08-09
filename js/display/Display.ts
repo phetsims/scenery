@@ -66,7 +66,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, IInputListener, Input, InputOptions, Instance, IOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, Trail, Utils, WebGLBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, IInputListener, Input, InputOptions, Instance, TOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, Trail, Utils, WebGLBlock } from '../imports.js';
 import IEmitter from '../../../axon/js/IEmitter.js';
 
 export type DisplayOptions = {
@@ -255,7 +255,7 @@ export default class Display {
   private _passiveEvents: boolean | null;
 
   // Overlays currently being displayed.
-  private _overlays: IOverlay[];
+  private _overlays: TOverlay[];
 
   private _pointerOverlay: PointerOverlay | null;
   private _pointerAreaOverlay: PointerAreaOverlay | null;
@@ -860,7 +860,7 @@ export default class Display {
    * Adds an overlay to the Display. Each overlay should have a .domElement (the DOM element that will be used for
    * display) and an .update() method.
    */
-  public addOverlay( overlay: IOverlay ): void {
+  public addOverlay( overlay: TOverlay ): void {
     this._overlays.push( overlay );
     this._domElement.appendChild( overlay.domElement );
 
@@ -872,7 +872,7 @@ export default class Display {
   /**
    * Removes an overlay from the display.
    */
-  public removeOverlay( overlay: IOverlay ): void {
+  public removeOverlay( overlay: TOverlay ): void {
     this._domElement.removeChild( overlay.domElement );
     this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
   }

@@ -8,9 +8,9 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { BackboneDrawable, Block, Display, Drawable, FittedBlock, IOverlay, Node, scenery, ShapeBasedOverlay } from '../imports.js';
+import { BackboneDrawable, Block, Display, Drawable, FittedBlock, TOverlay, Node, scenery, ShapeBasedOverlay } from '../imports.js';
 
-export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implements IOverlay {
+export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implements TOverlay {
   public constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'canvasNodeBoundsOverlay' );
   }

@@ -11,9 +11,9 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Display, IOverlay, Node, PDOMPointer, Pointer, scenery, svgns, Utils } from '../imports.js';
+import { Display, TOverlay, Node, PDOMPointer, Pointer, scenery, svgns, Utils } from '../imports.js';
 
-export default class PointerOverlay implements IOverlay {
+export default class PointerOverlay implements TOverlay {
 
   protected display: Display;
   protected rootNode: Node;
@@ -135,7 +135,7 @@ export default class PointerOverlay implements IOverlay {
   /**
    */
   public update(): void {
-    // Required for type 'IOverlay'
+    // Required for type 'TOverlay'
   }
 }
 

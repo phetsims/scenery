@@ -379,7 +379,7 @@ export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js'
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
 
 export { default as Instance } from './display/Instance.js';
-export type { default as IOverlay } from './overlays/IOverlay.js';
+export type { default as TOverlay } from './overlays/TOverlay.js';
 export { default as Display } from './display/Display.js';
 export type{ DisplayOptions } from './display/Display.js';
 
