@@ -1,6 +1,6 @@
 // Copyright 2021, University of Colorado Boulder
 
-import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import { Color, Paint } from '../imports.js';
 
 /**
@@ -9,6 +9,6 @@ import { Color, Paint } from '../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-type TPaint = Paint | IReadOnlyProperty<Color | string | null> | IReadOnlyProperty<Color | string> | IReadOnlyProperty<Color> | Color | string | null;
+type TPaint = Paint | TReadOnlyProperty<Color | string | null> | TReadOnlyProperty<Color | string> | TReadOnlyProperty<Color> | Color | string | null;
 
 export default TPaint;

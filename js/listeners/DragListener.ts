@@ -70,7 +70,7 @@
 
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import IProperty from '../../../axon/js/IProperty.js';
-import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
@@ -110,7 +110,7 @@ type SelfOptions<Listener extends DragListener> = {
   transform?: Transform3 | null;
 
   // If provided, the model position will be constrained to be inside these bounds.
-  dragBoundsProperty?: IReadOnlyProperty<Bounds2 | null> | null;
+  dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
 
   // If true, unattached touches that move across our node will trigger a press(). This helps sometimes
   // for small draggable objects.

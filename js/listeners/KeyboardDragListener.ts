@@ -33,7 +33,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import { IInputListener, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import IEmitter from '../../../axon/js/IEmitter.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
@@ -94,7 +94,7 @@ type SelfOptions = {
   transform?: Transform3 | null;
 
   // If provided, the model position will be constrained to be inside these bounds, in model coordinates
-  dragBoundsProperty?: IReadOnlyProperty<Bounds2 | null> | null;
+  dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
 
   // Called when keyboard drag is started (on initial press).
   start?: ( ( event: SceneryEvent ) => void ) | null;
@@ -135,7 +135,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   private _start: ( ( event: SceneryEvent ) => void ) | null;
   private _drag: ( ( viewDelta: Vector2 ) => void ) | null;
   private _end: ( ( event: SceneryEvent ) => void ) | null;
-  private _dragBoundsProperty: IReadOnlyProperty<Bounds2 | null>;
+  private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _transform: Transform3 | null;
   private _positionProperty: IProperty<Vector2> | null;
   private _dragVelocity: number;

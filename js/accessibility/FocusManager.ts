@@ -28,7 +28,7 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import IProperty from '../../../axon/js/IProperty.js';
-import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Property from '../../../axon/js/Property.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -67,7 +67,7 @@ export default class FocusManager {
 
   // Indicates whether any highlights should appear from pointer
   // input (mouse/touch). If false, we will try to avoid doing expensive work in PointerHighlighting.js.
-  public readonly pointerHighlightsVisibleProperty: IReadOnlyProperty<boolean>;
+  public readonly pointerHighlightsVisibleProperty: TReadOnlyProperty<boolean>;
 
   // Whenever the readingBlockFocusProperty's Focused Node is removed from
   // the scene graph or its Trail becomes invisible this removes focus.

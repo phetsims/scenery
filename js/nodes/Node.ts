@@ -175,7 +175,7 @@ import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Di
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
-import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import IEmitter from '../../../axon/js/IEmitter.js';
 
 let globalIdCounter = 1;
@@ -323,12 +323,12 @@ export type NodeOptions = {
   children?: Node[];
   cursor?: string | null;
   phetioVisiblePropertyInstrumented?: boolean;
-  visibleProperty?: IReadOnlyProperty<boolean> | null;
+  visibleProperty?: TReadOnlyProperty<boolean> | null;
   visible?: boolean;
-  pickableProperty?: IReadOnlyProperty<boolean | null> | null;
+  pickableProperty?: TReadOnlyProperty<boolean | null> | null;
   pickable?: boolean | null;
   phetioEnabledPropertyInstrumented?: boolean;
-  enabledProperty?: IReadOnlyProperty<boolean> | null;
+  enabledProperty?: TReadOnlyProperty<boolean> | null;
   enabled?: boolean;
   phetioInputEnabledPropertyInstrumented?: boolean;
   inputEnabledProperty?: IProperty<boolean> | null;

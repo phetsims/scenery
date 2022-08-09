@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IReadOnlyProperty from '../../../../axon/js/IReadOnlyProperty.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { AlignBox, AlignBoxOptions, Node, scenery } from '../../imports.js';
@@ -15,7 +15,7 @@ export type AlignPropertyBoxOptions = AlignBoxOptions;
 
 export default class AlignPropertyBox extends AlignBox {
 
-  private readonly alignBoundsProperty: IReadOnlyProperty<Bounds2>;
+  private readonly alignBoundsProperty: TReadOnlyProperty<Bounds2>;
   private readonly _alignBoundsPropertyListener: ( b: Bounds2 ) => void;
 
   /**
@@ -23,7 +23,7 @@ export default class AlignPropertyBox extends AlignBox {
    * @param alignBoundsProperty
    * @param [providedOptions]
    */
-  public constructor( content: Node, alignBoundsProperty: IReadOnlyProperty<Bounds2>, providedOptions?: AlignPropertyBoxOptions ) {
+  public constructor( content: Node, alignBoundsProperty: TReadOnlyProperty<Bounds2>, providedOptions?: AlignPropertyBoxOptions ) {
     const options = optionize<AlignPropertyBoxOptions, EmptySelfOptions, AlignBoxOptions>()( {
       alignBounds: alignBoundsProperty.value
     }, providedOptions );

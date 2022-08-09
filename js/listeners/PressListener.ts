@@ -36,7 +36,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import { Display, IInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 // global
@@ -167,7 +167,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
   // (read-only) - Whether the listener has focus (should appear to be over)
   public readonly isFocusedProperty: IProperty<boolean>;
 
-  private readonly cursorProperty: IReadOnlyProperty<string | null>;
+  private readonly cursorProperty: TReadOnlyProperty<string | null>;
 
   // (read-only) - The current pointer, or null when not pressed. There can be short periods of
   // time when this has a value when isPressedProperty.value is false, such as during the processing of a pointer
@@ -203,7 +203,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
   // or not the button should "look" down. This will be true if downProperty is true or if a pdom click is in
   // progress. For a click event from the pdom, the listeners are fired right away but the button will look down for
   // as long as a11yLooksPressedInterval. See PressListener.click() for more details.
-  public readonly looksPressedProperty: IReadOnlyProperty<boolean>;
+  public readonly looksPressedProperty: TReadOnlyProperty<boolean>;
 
   // When pdom clicking begins, this will be added to a timeout so that the
   // pdomClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
