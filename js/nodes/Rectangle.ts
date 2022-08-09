@@ -11,7 +11,7 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, IRectangleDrawable, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, TRectangleDrawable, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
@@ -307,7 +307,7 @@ export default class Rectangle extends SuperType {
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyRectangle();
+      ( this._drawables[ i ] as unknown as TRectangleDrawable ).markDirtyRectangle();
     }
     this.invalidateRectangle();
 
@@ -325,7 +325,7 @@ export default class Rectangle extends SuperType {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyX();
+        ( this._drawables[ i ] as unknown as TRectangleDrawable ).markDirtyX();
       }
 
       this.invalidateRectangle();
@@ -355,7 +355,7 @@ export default class Rectangle extends SuperType {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyY();
+        ( this._drawables[ i ] as unknown as TRectangleDrawable ).markDirtyY();
       }
 
       this.invalidateRectangle();
@@ -385,7 +385,7 @@ export default class Rectangle extends SuperType {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyWidth();
+        ( this._drawables[ i ] as unknown as TRectangleDrawable ).markDirtyWidth();
       }
 
       this.invalidateRectangle();
@@ -415,7 +415,7 @@ export default class Rectangle extends SuperType {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyHeight();
+        ( this._drawables[ i ] as unknown as TRectangleDrawable ).markDirtyHeight();
       }
 
       this.invalidateRectangle();
@@ -451,7 +451,7 @@ export default class Rectangle extends SuperType {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyCornerXRadius();
+        ( this._drawables[ i ] as unknown as TRectangleDrawable ).markDirtyCornerXRadius();
       }
 
       this.invalidateRectangle();
@@ -487,7 +487,7 @@ export default class Rectangle extends SuperType {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyCornerYRadius();
+        ( this._drawables[ i ] as unknown as TRectangleDrawable ).markDirtyCornerYRadius();
       }
 
       this.invalidateRectangle();
