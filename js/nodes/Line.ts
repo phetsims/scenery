@@ -12,7 +12,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, ILineDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, TLineDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position
@@ -134,7 +134,7 @@ export default class Line extends Path {
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       const state = this._drawables[ i ];
-      ( state as unknown as ILineDrawable ).markDirtyLine();
+      ( state as unknown as TLineDrawable ).markDirtyLine();
     }
 
     this.invalidateLine();
@@ -164,7 +164,7 @@ export default class Line extends Path {
     }
     const numDrawables = this._drawables.length;
     for ( let i = 0; i < numDrawables; i++ ) {
-      ( this._drawables[ i ] as unknown as ILineDrawable ).markDirtyP1();
+      ( this._drawables[ i ] as unknown as TLineDrawable ).markDirtyP1();
     }
     this.invalidateLine();
 
@@ -195,7 +195,7 @@ export default class Line extends Path {
     }
     const numDrawables = this._drawables.length;
     for ( let i = 0; i < numDrawables; i++ ) {
-      ( this._drawables[ i ] as unknown as ILineDrawable ).markDirtyP2();
+      ( this._drawables[ i ] as unknown as TLineDrawable ).markDirtyP2();
     }
     this.invalidateLine();
 
@@ -215,7 +215,7 @@ export default class Line extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as ILineDrawable ).markDirtyX1();
+        ( this._drawables[ i ] as unknown as TLineDrawable ).markDirtyX1();
       }
 
       this.invalidateLine();
@@ -243,7 +243,7 @@ export default class Line extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as ILineDrawable ).markDirtyY1();
+        ( this._drawables[ i ] as unknown as TLineDrawable ).markDirtyY1();
       }
 
       this.invalidateLine();
@@ -271,7 +271,7 @@ export default class Line extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as ILineDrawable ).markDirtyX2();
+        ( this._drawables[ i ] as unknown as TLineDrawable ).markDirtyX2();
       }
 
       this.invalidateLine();
@@ -299,7 +299,7 @@ export default class Line extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as ILineDrawable ).markDirtyY2();
+        ( this._drawables[ i ] as unknown as TLineDrawable ).markDirtyY2();
       }
 
       this.invalidateLine();

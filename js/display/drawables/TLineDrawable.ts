@@ -8,7 +8,7 @@
 
 import { TPathDrawable } from '../../imports.js';
 
-type ILineDrawable = {
+type TLineDrawable = {
   markDirtyLine(): void;
   markDirtyP1(): void;
   markDirtyP2(): void;
@@ -18,4 +18,4 @@ type ILineDrawable = {
   markDirtyY2(): void;
 } & TPathDrawable;
 
-export default ILineDrawable;
+export default TLineDrawable;

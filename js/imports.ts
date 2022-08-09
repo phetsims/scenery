@@ -320,7 +320,7 @@ export type { default as TPaintableDrawable } from './display/drawables/TPaintab
 export type { default as TPathDrawable } from './display/drawables/TPathDrawable.js';
 export type { default as TTextDrawable } from './display/drawables/TTextDrawable.js';
 export type { default as TRectangleDrawable } from './display/drawables/TRectangleDrawable.js';
-export type { default as ILineDrawable } from './display/drawables/ILineDrawable.js';
+export type { default as TLineDrawable } from './display/drawables/TLineDrawable.js';
 export type { default as TCircleDrawable } from './display/drawables/TCircleDrawable.js';
 
 // Concrete drawables
