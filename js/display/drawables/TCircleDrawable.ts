@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IPathDrawable } from '../../imports.js';
+import { TPathDrawable } from '../../imports.js';
 
 type TCircleDrawable = {
   markDirtyRadius(): void;
-} & IPathDrawable;
+} & TPathDrawable;
 export default TCircleDrawable // eslint-disable-line

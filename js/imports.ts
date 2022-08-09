@@ -317,7 +317,7 @@ export { default as TextStatefulDrawable } from './display/drawables/TextStatefu
 // Interfaces
 export type { default as TImageDrawable } from './display/drawables/TImageDrawable.js';
 export type { default as TPaintableDrawable } from './display/drawables/TPaintableDrawable.js';
-export type { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
+export type { default as TPathDrawable } from './display/drawables/TPathDrawable.js';
 export type { default as TTextDrawable } from './display/drawables/TTextDrawable.js';
 export type { default as TRectangleDrawable } from './display/drawables/TRectangleDrawable.js';
 export type { default as ILineDrawable } from './display/drawables/ILineDrawable.js';

@@ -10,7 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, IPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, Instance, TPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 
 const PATH_OPTION_KEYS = [
@@ -205,7 +205,7 @@ export default class Path extends Paintable( Node ) {
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      ( this._drawables[ i ] as unknown as IPathDrawable ).markDirtyShape(); // subtypes of Path may not have this, but it's called during construction
+      ( this._drawables[ i ] as unknown as TPathDrawable ).markDirtyShape(); // subtypes of Path may not have this, but it's called during construction
     }
 
     // Disconnect our Shape listener if our Shape has become immutable.
