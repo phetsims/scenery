@@ -66,7 +66,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, IInputListener, Input, InputOptions, Instance, TOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, Trail, Utils, WebGLBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, TInputListener, Input, InputOptions, Instance, TOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, Trail, Utils, WebGLBlock } from '../imports.js';
 import IEmitter from '../../../axon/js/IEmitter.js';
 
 export type DisplayOptions = {
@@ -243,7 +243,7 @@ export default class Display {
   private _requestAnimationFrameID: number;
 
   // Listeners that will be called for every event.
-  private _inputListeners: IInputListener[];
+  private _inputListeners: TInputListener[];
 
   // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
   private _interactive: boolean;
@@ -1330,7 +1330,7 @@ export default class Display {
   /**
    * Adds an input listener.
    */
-  public addInputListener( listener: IInputListener ): this {
+  public addInputListener( listener: TInputListener ): this {
     assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Display' );
 
     // don't allow listeners to be added multiple times
@@ -1343,7 +1343,7 @@ export default class Display {
   /**
    * Removes an input listener that was previously added with addInputListener.
    */
-  public removeInputListener( listener: IInputListener ): this {
+  public removeInputListener( listener: TInputListener ): this {
     // ensure the listener is in our list
     assert && assert( _.includes( this._inputListeners, listener ) );
 
@@ -1357,7 +1357,7 @@ export default class Display {
    *
    * More efficient than checking display.inputListeners, as that includes a defensive copy.
    */
-  public hasInputListener( listener: IInputListener ): boolean {
+  public hasInputListener( listener: TInputListener ): boolean {
     for ( let i = 0; i < this._inputListeners.length; i++ ) {
       if ( this._inputListeners[ i ] === listener ) {
         return true;
@@ -1369,11 +1369,11 @@ export default class Display {
   /**
    * Returns a copy of all of our input listeners.
    */
-  public getInputListeners(): IInputListener[] {
+  public getInputListeners(): TInputListener[] {
     return this._inputListeners.slice( 0 ); // defensive copy
   }
 
-  public get inputListeners(): IInputListener[] { return this.getInputListeners(); }
+  public get inputListeners(): TInputListener[] { return this.getInputListeners(); }
 
   /**
    * Interrupts all input listeners that are attached to this Display.
@@ -2145,7 +2145,7 @@ export default class Display {
   /**
    * Adds an input listener to be fired for ANY Display
    */
-  public static addInputListener( listener: IInputListener ): void {
+  public static addInputListener( listener: TInputListener ): void {
     assert && assert( !_.includes( Display.inputListeners, listener ), 'Input listener already registered' );
 
     // don't allow listeners to be added multiple times
@@ -2157,7 +2157,7 @@ export default class Display {
   /**
    * Removes an input listener that was previously added with Display.addInputListener.
    */
-  public static removeInputListener( listener: IInputListener ): void {
+  public static removeInputListener( listener: TInputListener ): void {
     // ensure the listener is in our list
     assert && assert( _.includes( Display.inputListeners, listener ) );
 
@@ -2185,7 +2185,7 @@ export default class Display {
 
   // Listeners that will be called for every event on ANY Display, see
   // https://github.com/phetsims/scenery/issues/1149. Do not directly modify this!
-  public static inputListeners: IInputListener[];
+  public static inputListeners: TInputListener[];
 }
 
 scenery.register( 'Display', Display );

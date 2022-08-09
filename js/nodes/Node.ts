@@ -171,7 +171,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
-import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, TLayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
+import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, TInputListener, TLayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -333,7 +333,7 @@ export type NodeOptions = {
   phetioInputEnabledPropertyInstrumented?: boolean;
   inputEnabledProperty?: IProperty<boolean> | null;
   inputEnabled?: boolean;
-  inputListeners?: IInputListener[];
+  inputListeners?: TInputListener[];
   opacity?: number;
   disabledOpacity?: number;
   filters?: Filter[];
@@ -478,7 +478,7 @@ class Node extends ParallelDOM {
   private _appliedScaleFactor: number;
 
   // For user input handling (mouse/touch). (scenery-internal)
-  public _inputListeners: IInputListener[];
+  public _inputListeners: TInputListener[];
 
   // [mutable] Bounds for this Node and its children in the "parent" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
@@ -2240,7 +2240,7 @@ class Node extends ParallelDOM {
    * - cursor {string|null}: If node.cursor is null, any non-null cursor of an input listener will effectively
    *                         "override" it. NOTE: this can be implemented as an es5 getter, if the cursor can change
    */
-  public addInputListener( listener: IInputListener ): this {
+  public addInputListener( listener: TInputListener ): this {
     assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
     assert && assert( listener !== null, 'Input listener cannot be null' );
     assert && assert( listener !== undefined, 'Input listener cannot be undefined' );
@@ -2257,7 +2257,7 @@ class Node extends ParallelDOM {
   /**
    * Removes an input listener that was previously added with addInputListener.
    */
-  public removeInputListener( listener: IInputListener ): this {
+  public removeInputListener( listener: TInputListener ): this {
     const index = _.indexOf( this._inputListeners, listener );
 
     // ensure the listener is in our list (ignore assertion for disposal, see https://github.com/phetsims/sun/issues/394)
@@ -2276,7 +2276,7 @@ class Node extends ParallelDOM {
    *
    * More efficient than checking node.inputListeners, as that includes a defensive copy.
    */
-  public hasInputListener( listener: IInputListener ): boolean {
+  public hasInputListener( listener: TInputListener ): boolean {
     for ( let i = 0; i < this._inputListeners.length; i++ ) {
       if ( this._inputListeners[ i ] === listener ) {
         return true;
@@ -4431,7 +4431,7 @@ class Node extends ParallelDOM {
    * This is equivalent to removing all current input listeners with removeInputListener() and adding all new
    * listeners (in order) with addInputListener().
    */
-  public setInputListeners( inputListeners: IInputListener[] ): this {
+  public setInputListeners( inputListeners: TInputListener[] ): this {
     assert && assert( Array.isArray( inputListeners ) );
 
     // Remove all old input listeners
@@ -4450,21 +4450,21 @@ class Node extends ParallelDOM {
   /**
    * See setInputListeners() for more information
    */
-  public set inputListeners( value: IInputListener[] ) {
+  public set inputListeners( value: TInputListener[] ) {
     this.setInputListeners( value );
   }
 
   /**
    * See getInputListeners() for more information
    */
-  public get inputListeners(): IInputListener[] {
+  public get inputListeners(): TInputListener[] {
     return this.getInputListeners();
   }
 
   /**
    * Returns a copy of all of our input listeners.
    */
-  public getInputListeners(): IInputListener[] {
+  public getInputListeners(): TInputListener[] {
     return this._inputListeners.slice( 0 ); // defensive copy
   }
 

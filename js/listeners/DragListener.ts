@@ -80,7 +80,7 @@ import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { IInputListener, Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerNullableCallback, PressListenerOptions, scenery, SceneryEvent, TransformTracker } from '../imports.js';
+import { TInputListener, Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerNullableCallback, PressListenerOptions, scenery, SceneryEvent, TransformTracker } from '../imports.js';
 import Property from '../../../axon/js/Property.js';
 
 // Scratch vectors used to prevent allocations
@@ -168,7 +168,7 @@ type CreateForwardingListenerOptions = {
 export type PressedDragListener = DragListener & PressedPressListener;
 const isPressedListener = ( listener: DragListener ): listener is PressedDragListener => listener.isPressed;
 
-export default class DragListener extends PressListener implements IInputListener {
+export default class DragListener extends PressListener implements TInputListener {
 
   // Alias for isPressedProperty (as this name makes more sense for dragging)
   public isUserControlledProperty: IProperty<boolean>;
@@ -833,7 +833,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * See https://github.com/phetsims/scenery/issues/639
    */
-  public static createForwardingListener( down: ( event: PressListenerEvent ) => void, providedOptions?: CreateForwardingListenerOptions ): IInputListener {
+  public static createForwardingListener( down: ( event: PressListenerEvent ) => void, providedOptions?: CreateForwardingListenerOptions ): TInputListener {
 
     const options = optionize<CreateForwardingListenerOptions, CreateForwardingListenerOptions>()( {
       allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999

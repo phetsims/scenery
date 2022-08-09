@@ -10,7 +10,7 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import { Display, Focus, IInputListener, Instance, Node, NodeOptions, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
+import { Display, Focus, TInputListener, Instance, Node, NodeOptions, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import IEmitter from '../../../../axon/js/IEmitter.js';
 
@@ -44,7 +44,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
     // because we do not want this to fire from bubbling. The highlight should be around this Node when it receives
     // input.
-    private readonly _activationListener: IInputListener;
+    private readonly _activationListener: TInputListener;
 
     // A reference to the Pointer so that we can add and remove listeners from it when necessary.
     // Since this is on the trait, only one pointer can have a listener for this Node that uses InteractiveHighlighting
@@ -81,7 +81,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     // Input listener that locks the HighlightOverlay so that there are no updates to the highlight
     // while the pointer is down over something that uses InteractiveHighlighting.
-    private readonly _pointerListener: IInputListener;
+    private readonly _pointerListener: TInputListener;
 
     public constructor( ...args: IntentionalAny[] ) {
 

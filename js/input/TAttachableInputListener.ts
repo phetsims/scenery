@@ -6,10 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IInputListener } from '../imports.js';
+import { TInputListener } from '../imports.js';
 
 type TAttachableInputListener = {
   // Has to be interruptable
   interrupt: () => void;
-} & IInputListener;
+} & TInputListener;
 export default TAttachableInputListener // eslint-disable-line
+

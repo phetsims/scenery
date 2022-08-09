@@ -68,7 +68,7 @@ import memoize from '../../../phet-core/js/memoize.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { Color, FireListener, Font, IInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
+import { Color, FireListener, Font, TInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
@@ -1780,7 +1780,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
 class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
 
   private fireListener: FireListener | null;
-  private accessibleInputListener: IInputListener | null;
+  private accessibleInputListener: TInputListener | null;
 
   /**
    * A link node

@@ -11,7 +11,7 @@ import { SceneryEvent } from '../imports.js';
 
 export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
 
-type IInputListener = {
+type TInputListener = {
   interrupt?: () => void;
   cursor?: string | null;
 
@@ -80,4 +80,4 @@ type IInputListener = {
   // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
   createPanTargetBounds?: ( () => Bounds2 ) | null;
 };
-export default IInputListener // eslint-disable-line
+export default TInputListener // eslint-disable-line
