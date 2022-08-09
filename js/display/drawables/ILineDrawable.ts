@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IPathDrawable } from '../../imports.js';
+import { TPathDrawable } from '../../imports.js';
 
 type ILineDrawable = {
   markDirtyLine(): void;
@@ -16,6 +16,6 @@ type ILineDrawable = {
   markDirtyY1(): void;
   markDirtyX2(): void;
   markDirtyY2(): void;
-} & IPathDrawable;
+} & TPathDrawable;
 
 export default ILineDrawable;

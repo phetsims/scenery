@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IPathDrawable } from '../../imports.js';
+import { TPathDrawable } from '../../imports.js';
 
 type TRectangleDrawable = {
   markDirtyRectangle(): void;
@@ -16,5 +16,5 @@ type TRectangleDrawable = {
   markDirtyHeight(): void;
   markDirtyCornerXRadius(): void;
   markDirtyCornerYRadius(): void;
-} & IPathDrawable;
+} & TPathDrawable;
 export default TRectangleDrawable // eslint-disable-line
