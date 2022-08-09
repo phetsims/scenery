@@ -14,7 +14,7 @@ import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, IImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, TImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 
 
@@ -80,7 +80,7 @@ export default class Image extends Imageable( Node ) {
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      ( this._drawables[ i ] as unknown as IImageDrawable ).markDirtyImage();
+      ( this._drawables[ i ] as unknown as TImageDrawable ).markDirtyImage();
     }
 
     super.invalidateImage();
@@ -131,7 +131,7 @@ export default class Image extends Imageable( Node ) {
     if ( changed ) {
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IImageDrawable ).markDirtyImageOpacity();
+        ( this._drawables[ i ] as unknown as TImageDrawable ).markDirtyImageOpacity();
       }
     }
   }
@@ -266,7 +266,7 @@ export default class Image extends Imageable( Node ) {
     if ( markDirty ) {
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( this._drawables[ i ] as unknown as IImageDrawable ).markDirtyMipmap();
+        ( this._drawables[ i ] as unknown as TImageDrawable ).markDirtyMipmap();
       }
     }
   }

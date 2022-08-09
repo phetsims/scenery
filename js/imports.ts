@@ -315,7 +315,7 @@ export { default as RectangleStatefulDrawable } from './display/drawables/Rectan
 export { default as TextStatefulDrawable } from './display/drawables/TextStatefulDrawable.js';
 
 // Interfaces
-export type { default as IImageDrawable } from './display/drawables/IImageDrawable.js';
+export type { default as TImageDrawable } from './display/drawables/TImageDrawable.js';
 export type { default as TPaintableDrawable } from './display/drawables/TPaintableDrawable.js';
 export type { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
 export type { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
