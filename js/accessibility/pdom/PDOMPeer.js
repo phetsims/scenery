@@ -406,8 +406,11 @@ class PDOMPeer {
   }
 
   /**
+   * Set the new attribute to the element if the value is a string. It will otherwise be null or undefined and should
+   * then be removed from the element.
+   *
    * @param {string} key
-   * @param {*} value
+   * @param {string|null|undefined} value
    * @private
    */
   handleAttributeWithPDOMOption( key, value ) {
