@@ -6386,7 +6386,7 @@ class Node extends ParallelDOM {
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( INPUT_ENABLED_PROPERTY_TANDEM_NAME ),
-          phetioType: Property.PropertyIO( BooleanIO ),
+          phetioValueType: BooleanIO,
           phetioFeatured: true, // Since this property is opt-in, we typically only opt-in when it should be featured
           phetioDocumentation: 'Sets whether the element will have input enabled, and hence be interactive.'
         }, config.inputEnabledPropertyOptions ) )

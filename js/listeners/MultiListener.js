@@ -111,7 +111,7 @@ class MultiListener {
     // @protected {Property.<Matrix3>} - The matrix applied to the targetNode in response to various
     // input for the MultiListener
     this.matrixProperty = new Property( targetNode.matrix.copy(), {
-      phetioType: Property.PropertyIO( Matrix3.Matrix3IO ),
+      phetioValueType: Matrix3.Matrix3IO,
       tandem: options.tandem.createTandem( 'matrixProperty' )
     } );
 

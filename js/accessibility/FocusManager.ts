@@ -215,7 +215,7 @@ export default class FocusManager {
     phetioDocumentation: 'Stores the current focus in the Parallel DOM, null if nothing has focus. This is not updated ' +
                          'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
                          'applies to simulations that support alternative input.',
-    phetioType: Property.PropertyIO( NullableIO( Focus.FocusIO ) ),
+    phetioValueType: NullableIO( Focus.FocusIO ),
     phetioState: false,
     phetioFeatured: true,
     phetioReadOnly: true

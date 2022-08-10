@@ -20,7 +20,7 @@ export default class ColorProperty extends Property<Color> {
 
     const options = optionize<PropertyOptions<Color>, EmptySelfOptions, PropertyOptions<Color>>()( {
       valueType: Color,
-      phetioType: Property.PropertyIO( Color.ColorIO )
+      phetioValueType: Color.ColorIO
     }, providedOptions );
     super( color, options );
   }
