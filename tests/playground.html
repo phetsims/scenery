@@ -356,23 +356,61 @@ an UI and Display made for visual testing and debugging.
   };
 
   window.displayTest = function() {
-    setTimeout( function() {
-      window.n = new scenery.Node( {
+    setTimeout( async function() {
+      const sceneryImports = await import( '../../chipper/dist/js/scenery/js/imports.js' );
+
+      const GridBox = sceneryImports.GridBox;
+      const Rectangle = sceneryImports.Rectangle;
+      const Color = sceneryImports.Color;
+
+      const colors = [
+        new Color( 62, 171, 3 ),
+        new Color( 23, 180, 77 ),
+        new Color( 24, 183, 138 ),
+        new Color( 23, 178, 194 ),
+        new Color( 20, 163, 238 ),
+        new Color( 71, 136, 255 ),
+        new Color( 171, 101, 255 ),
+        new Color( 228, 72, 235 ),
+        new Color( 252, 66, 186 ),
+        new Color( 252, 82, 127 )
+      ];
+
+      const box = new GridBox( {
+        x: 10,
+        y: 10,
+        preferredWidth: 100,
+        preferredHeight: 100,
         children: [
-          new scenery.Rectangle( 0, 0, 100, 50, { fill: 'rgb(200,0,0)' } ),
-          new scenery.Rectangle( 0, 50, 100, 50, { fill: 'rgb(0,200,0)', filters: [ new scenery.Grayscale( 1 ) ] } ),
-          new scenery.Rectangle( 0, 100, 100, 50, { fill: 'rgb(0,0,200)' } )
-        ],
-        // filters: [
-        //   new scenery.Grayscale( 1 ),
-        //   // new scenery.Contrast( 2 ),
-        //   // new scenery.GaussianBlur( 3, 20 )
-        // ],
-        renderer: 'canvas',
-        preventFit: true
+          new Rectangle( 0, 0, 30, 15, {
+            fill: colors[ 2 ],
+            sizable: true,
+            localMinimumWidth: 30,
+            localMinimumHeight: 15,
+            layoutOptions: { column: 1, row: 0, stretch: true, grow: 1 }
+          } ),
+          new Rectangle( 0, 0, 30, 30, {
+            fill: colors[ 4 ],
+            sizable: true,
+            localMinimumWidth: 30,
+            localMinimumHeight: 100,
+            layoutOptions: { column: 0, row: 1, width: 2, height: 2, stretch: true }
+          } ),
+          new Rectangle( 0, 0, 15, 15, {
+            fill: colors[ 0 ],
+            layoutOptions: { column: 0, row: 3 }
+          } )
+        ]
       } );
-      scene.addChild( n );
+
+      console.log( box.height );
+
+      scene.addChild( box );
+
+      display.width = 120;
+      display.height = 120;
       display.updateDisplay();
+
     }, 400 );
   };
 
