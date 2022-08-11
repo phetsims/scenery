@@ -25,7 +25,7 @@ import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { Focus, Highlight, Node, NodeOptions, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
+import { DelayedMutate, Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import TInputListener from '../../input/TInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
@@ -78,15 +78,11 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
 } );
 
-/**
- * @param Type
- * @param optionsArgPosition - zero-indexed number that the options argument is provided at
- */
-const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  class ReadingBlockClass extends Voicing( Type, optionsArgPosition ) {
+  const ReadingBlockClass = DelayedMutate( 'ReadingBlock', READING_BLOCK_OPTION_KEYS, class ReadingBlockClass extends Voicing( Type ) {
 
     // The tagName used for the ReadingBlock when "Voicing" is enabled, default
     // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
@@ -117,12 +113,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     private readonly _readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>;
 
     public constructor( ...args: IntentionalAny[] ) {
-
-      const providedOptions = ( args[ optionsArgPosition ] || {} ) as ReadingBlockOptions;
-
-      const readingBlockOptions = _.pick( providedOptions, READING_BLOCK_OPTION_KEYS );
-      args[ optionsArgPosition ] = _.omit( providedOptions, READING_BLOCK_OPTION_KEYS );
-
       super( ...args );
 
       this._readingBlockTagName = 'button';
@@ -150,8 +140,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       // All ReadingBlocks use a ReadingBlockUtterance with Focus and Trail data to this Node so that it can be
       // highlighted in the FocusOverlay when this Utterance is being announced.
       this.voicingUtterance = new OwnedReadingBlockUtterance( null );
-
-      ( this as unknown as Node ).mutate( readingBlockOptions as NodeOptions );
     }
 
     /**
@@ -423,7 +411,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       super.dispose();
     }
-  }
+  } );
 
   /**
    * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
@@ -440,7 +428,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 };
 
 // Export a type that lets you check if your Node is composed with ReadingBlock
-const wrapper = () => ReadingBlock( Node, 0 );
+const wrapper = () => ReadingBlock( Node );
 export type ReadingBlockNode = InstanceType<ReturnType<typeof wrapper>>;
 
 scenery.register( 'ReadingBlock', ReadingBlock );

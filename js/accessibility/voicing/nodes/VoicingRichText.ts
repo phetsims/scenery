@@ -14,7 +14,7 @@ type SelfOptions = EmptySelfOptions;
 type ParentOptions = ReadingBlockOptions & RichTextOptions;
 type VoicingRichTextOptions = SelfOptions & ParentOptions;
 
-class VoicingRichText extends ReadingBlock( RichText, 1 ) {
+class VoicingRichText extends ReadingBlock( RichText ) {
 
   public constructor( text: string, options?: VoicingRichTextOptions ) {
     options = optionize<VoicingRichTextOptions, SelfOptions, ParentOptions>()( {

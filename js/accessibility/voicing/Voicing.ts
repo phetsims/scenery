@@ -28,7 +28,7 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
-import { Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
+import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import { combineOptions } from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -105,15 +105,11 @@ export type SpeakingOptions = {
                                                  ResponsePacketOptions[PropertyName];
 };
 
-/**
- * @param Type
- * @param optionsArgPosition - zero-indexed number that the options argument is provided at
- */
-const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  class VoicingClass extends InteractiveHighlighting( Type, optionsArgPosition ) {
+  const VoicingClass = DelayedMutate( 'Voicing', VOICING_OPTION_KEYS, class VoicingClass extends InteractiveHighlighting( Type ) {
 
     // ResponsePacket that holds all the supported responses to be Voiced
     protected _voicingResponsePacket!: ResponsePacket;
@@ -146,12 +142,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     private _speakContentOnFocusListener!: { focus: SceneryListenerFunction<FocusEvent> };
 
     public constructor( ...args: IntentionalAny[] ) {
-
-      const providedOptions = ( args[ optionsArgPosition ] || {} ) as VoicingOptions;
-
-      const voicingOptions = _.pick( providedOptions, VOICING_OPTION_KEYS );
-      args[ optionsArgPosition ] = _.omit( providedOptions, VOICING_OPTION_KEYS );
-
       super( ...args );
 
       // Bind the listeners on construction to be added to observables on initialize and removed on clean/dispose.
@@ -163,8 +153,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // We only want to call this method, not any subtype implementation
       VoicingClass.prototype.initialize.call( this );
-
-      ( this as unknown as Node ).mutate( voicingOptions as NodeOptions );
     }
 
     // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
@@ -659,7 +647,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance!, this as unknown as VoicingNode );
       }
     }
-  }
+  } );
 
   /**
    * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
@@ -746,7 +734,7 @@ Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
 };
 
 // Export a type that lets you check if your Node is composed with Voicing.
-const wrapper = () => Voicing( Node, 0 );
+const wrapper = () => Voicing( Node );
 export type VoicingNode = InstanceType<ReturnType<typeof wrapper>>;
 
 scenery.register( 'Voicing', Voicing );

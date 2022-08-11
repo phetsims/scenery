@@ -1777,7 +1777,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   public static readonly pool = new Pool( RichTextLeaf );
 }
 
-class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
+class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
 
   private fireListener: FireListener | null;
   private accessibleInputListener: TInputListener | null;

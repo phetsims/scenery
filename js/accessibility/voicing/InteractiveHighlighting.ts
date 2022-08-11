@@ -10,7 +10,7 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import { Display, Focus, TInputListener, Instance, Node, NodeOptions, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
+import { DelayedMutate, Display, Focus, Instance, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import IEmitter from '../../../../axon/js/IEmitter.js';
 
@@ -28,18 +28,13 @@ type SelfOptions = {
 
 export type InteractiveHighlightingOptions = SelfOptions;
 
-/**
- * @param Type
- * @param optionsArgPosition - zero-indexed number that the options argument is provided at
- */
-const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
-  assert && assert( typeof optionsArgPosition === 'number', 'Must provide an index to access options arg from (zero-indexed)' );
+const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
 
   // @ts-ignore
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
 
-  class InteractiveHighlightingClass extends Type {
+  const InteractiveHighlightingClass = DelayedMutate( 'InteractiveHighlightingClass', INTERACTIVE_HIGHLIGHTING_OPTIONS, class InteractiveHighlightingClass extends Type {
 
     // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
     // because we do not want this to fire from bubbling. The highlight should be around this Node when it receives
@@ -84,12 +79,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     private readonly _pointerListener: TInputListener;
 
     public constructor( ...args: IntentionalAny[] ) {
-
-      const providedOptions = ( args[ optionsArgPosition ] || {} ) as InteractiveHighlightingOptions;
-
-      const interactiveHighlightingOptions = _.pick( providedOptions, INTERACTIVE_HIGHLIGHTING_OPTIONS );
-      args[ optionsArgPosition ] = _.omit( providedOptions, INTERACTIVE_HIGHLIGHTING_OPTIONS );
-
       super( ...args );
 
       this._activationListener = {
@@ -118,8 +107,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         cancel: boundPointerCancel,
         interrupt: boundPointerCancel
       };
-
-      ( this as unknown as Node ).mutate( interactiveHighlightingOptions as NodeOptions );
     }
 
     /**
@@ -417,7 +404,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
       return descendantsUseVoicing;
     }
-  }
+  } );
 
   /**
    * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
@@ -435,7 +422,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 };
 
 // Provides a way to determine if a Node is composed with InteractiveHighlighting by type
-const wrapper = () => InteractiveHighlighting( Node, 0 );
+const wrapper = () => InteractiveHighlighting( Node );
 export type InteractiveHighlightingNode = InstanceType<ReturnType<typeof wrapper>>;
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
