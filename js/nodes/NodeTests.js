@@ -250,12 +250,12 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
       // uninstrumentedNode => no property (before startup)
     let uninstrumented = new Node();
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === undefined );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === undefined );
     testNodeAndProperty( uninstrumented, uninstrumented[ nodeProperty ] );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { [ nodeProperty ]: uninstrumentedProperty } );
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === uninstrumentedProperty );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === uninstrumentedProperty );
     testNodeAndProperty( uninstrumented, uninstrumentedProperty );
 
     //uninstrumentedNode => instrumented property (before startup)
@@ -263,7 +263,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       [ nodeProperty ]: instrumentedProperty
     } );
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === instrumentedProperty );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
 
     //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
@@ -272,7 +272,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ nodeProperty ]: instrumentedProperty
     } );
     uninstrumented.mutate( { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ) } );
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === instrumentedProperty );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
     uninstrumented.dispose();
 
@@ -281,12 +281,12 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // uninstrumentedNode => no property (before startup)
     uninstrumented = new Node();
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === undefined );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === undefined );
     testNodeAndProperty( uninstrumented, uninstrumented[ nodeProperty ] );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { [ nodeProperty ]: uninstrumentedProperty } );
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === uninstrumentedProperty );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === uninstrumentedProperty );
     testNodeAndProperty( uninstrumented, uninstrumentedProperty );
 
     //uninstrumentedNode => instrumented property (before startup)
@@ -294,7 +294,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       [ nodeProperty ]: instrumentedProperty
     } );
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === instrumentedProperty );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
 
     //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
@@ -304,7 +304,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     } );
 
     uninstrumented.mutate( { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ) } );
-    assert.ok( uninstrumented[ nodeProperty ].targetProperty === instrumentedProperty );
+    assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
     uninstrumented.dispose();
     apiValidation.simHasStarted = false;
@@ -319,8 +319,8 @@ if ( Tandem.PHET_IO_ENABLED ) {
         tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
         [ phetioNodePropertyInstrumentedKeyName ]: true
       } );
-    assert.ok( instrumented[ nodeProperty ].targetProperty === instrumented[ nodeProperty ].ownedPhetioProperty );
-    assert.ok( instrumented.linkedElements.length === 0, `no linked elements for default ${nodeProperty}` );
+    assert.ok( instrumented[ nodeProperty ][ 'targetProperty' ] === instrumented[ nodeProperty ].ownedPhetioProperty );
+    assert.ok( instrumented[ 'linkedElements' ].length === 0, `no linked elements for default ${nodeProperty}` );
     testNodeAndProperty( instrumented, instrumented[ nodeProperty ] );
     instrumented.dispose();
 
@@ -341,9 +341,9 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     instrumented.mutate( { [ nodeProperty ]: instrumentedProperty } );
-    assert.ok( instrumented[ nodeProperty ].targetProperty === instrumentedProperty );
-    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
-    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedProperty,
+    assert.ok( instrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
+    assert.ok( instrumented[ 'linkedElements' ].length === 1, 'added linked element' );
+    assert.ok( instrumented[ 'linkedElements' ][ 0 ].element === instrumentedProperty,
       `added linked element should be for ${nodeProperty}` );
     testNodeAndProperty( instrumented, instrumentedProperty );
     instrumented.dispose();
@@ -352,9 +352,9 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ nodeProperty ]: instrumentedProperty
     } );
-    assert.ok( instrumented[ nodeProperty ].targetProperty === instrumentedProperty );
-    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
-    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedProperty,
+    assert.ok( instrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
+    assert.ok( instrumented[ 'linkedElements' ].length === 1, 'added linked element' );
+    assert.ok( instrumented[ 'linkedElements' ][ 0 ].element === instrumentedProperty,
       `added linked element should be for ${nodeProperty}` );
     testNodeAndProperty( instrumented, instrumentedProperty );
     instrumented.dispose();
@@ -384,8 +384,8 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated1` ),
       [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
-    assert.ok( instrumented1[ nodeProperty ].targetProperty === instrumented1[ nodeProperty ].ownedPhetioProperty );
-    assert.ok( instrumented1.linkedElements.length === 0, `no linked elements for default ${nodeProperty}` );
+    assert.ok( instrumented1[ nodeProperty ][ 'targetProperty' ] === instrumented1[ nodeProperty ].ownedPhetioProperty );
+    assert.ok( instrumented1[ 'linkedElements' ].length === 0, `no linked elements for default ${nodeProperty}` );
     testNodeAndProperty( instrumented1, instrumented1[ nodeProperty ] );
 
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (after startup)

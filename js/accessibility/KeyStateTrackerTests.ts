@@ -61,38 +61,38 @@ QUnit.module( 'KeyStateTracker', {
 QUnit.test( 'basic state tracking of keys', assert => {
 
   // mock sending "keydown" events to the tracker
-  testTracker.keydownUpdate( tabKeyDownEvent );
+  testTracker[ 'keydownUpdate' ]( tabKeyDownEvent );
   assert.ok( testTracker.isKeyDown( tabKeyDownEvent.code ), 'tab key should be down in tracker' );
 
-  testTracker._keyupUpdate( tabKeyUpEvent );
+  testTracker[ 'keyupUpdate' ]( tabKeyUpEvent );
   assert.ok( !testTracker.isKeyDown( tabKeyUpEvent.code ), 'tab key should be up in tracker' );
 
-  testTracker.keydownUpdate( spaceKeyDownEvent );
+  testTracker[ 'keydownUpdate' ]( spaceKeyDownEvent );
   assert.ok( testTracker.isAnyKeyInListDown( [ spaceKeyDownEvent.code, tabKeyDownEvent.code ] ), 'tab or space are down' );
   assert.ok( !testTracker.areKeysDown( [ tabKeyDownEvent.code, spaceKeyDownEvent.code ] ), 'tab and space are not down' );
 
-  testTracker.keydownUpdate( tabKeyDownEvent );
+  testTracker[ 'keydownUpdate' ]( tabKeyDownEvent );
   assert.ok( testTracker.isAnyKeyInListDown( [ tabKeyDownEvent.code, spaceKeyDownEvent.code ] ), 'tab and/or space are down' );
   assert.ok( testTracker.areKeysDown( [ tabKeyDownEvent.code, spaceKeyDownEvent.code ] ), 'tab and space are down' );
 
-  testTracker.keydownUpdate( spaceKeyUpEvent );
+  testTracker[ 'keydownUpdate' ]( spaceKeyUpEvent );
 } );
 
 
 QUnit.test( 'tracking of shift key', assert => {
 
   // mock sending "keydown" events to the tracker
-  testTracker.keydownUpdate( shiftTabKeyDownEvent );
+  testTracker[ 'keydownUpdate' ]( shiftTabKeyDownEvent );
   assert.ok( testTracker.shiftKeyDown, 'tab key with shift modifier should produce a keystate with shift key down' );
 
-  testTracker.keydownUpdate( shiftKeyLeftDownEvent );
-  testTracker.keydownUpdate( shiftTabKeyDownEvent );
+  testTracker[ 'keydownUpdate' ]( shiftKeyLeftDownEvent );
+  testTracker[ 'keydownUpdate' ]( shiftTabKeyDownEvent );
   assert.ok( testTracker.isKeyDown( tabKeyDownEvent.code ), 'tab key should be down in tracker' );
   assert.ok( testTracker.isKeyDown( shiftKeyLeftDownEvent.code ), 'shift key should be down in tracker' );
   assert.ok( testTracker.shiftKeyDown, 'shift key should be down in tracker getter' );
 
-  testTracker._keyupUpdate( shiftKeyLeftUpEvent );
-  testTracker._keyupUpdate( tabKeyUpEvent );
+  testTracker[ 'keyupUpdate' ]( shiftKeyLeftUpEvent );
+  testTracker[ 'keyupUpdate' ]( tabKeyUpEvent );
 
 
   assert.ok( !testTracker.isKeyDown( shiftKeyLeftUpEvent.code ), 'shift key should not be down in tracker' );
@@ -101,8 +101,8 @@ QUnit.test( 'tracking of shift key', assert => {
 
   assert.ok( !testTracker.keysAreDown(), 'no keys should be down' );
 
-  testTracker.keydownUpdate( tabKeyDownEvent );
-  testTracker._keyupUpdate( shiftTabKeyUpEvent );
+  testTracker[ 'keydownUpdate' ]( tabKeyDownEvent );
+  testTracker[ 'keyupUpdate' ]( shiftTabKeyUpEvent );
   assert.ok( !testTracker.isKeyDown( tabKeyDownEvent.code ), 'tab key should not be down in tracker' );
 
   // KeyStateTracker should correctly update when modifier keys like "shift" are attached to the event - if shift
@@ -121,7 +121,7 @@ QUnit.test( 'test tracking with time', async assert => {
   const secondPressTime = 71;
   const totalPressTime = firstPressTime + secondPressTime;
 
-  testTracker.keydownUpdate( spaceKeyDownEvent );
+  testTracker[ 'keydownUpdate' ]( spaceKeyDownEvent );
   let currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.code );
   assert.ok( currentTimeDown === 0, 'should be zero, has not been down any time' );
 
@@ -135,7 +135,7 @@ QUnit.test( 'test tracking with time', async assert => {
 
       assert.ok( currentTimeDown >= totalPressTime, `key pressed for ${secondPressTime} more ms.` );
 
-      testTracker._keyupUpdate( spaceKeyUpEvent );
+      testTracker[ 'keyupUpdate' ]( spaceKeyUpEvent );
       done();
     }, secondPressTime );
   }, firstPressTime );
@@ -146,7 +146,7 @@ QUnit.test( 'KeyStateTracker.enabled', async assert => {
 
   const keyStateTracker = new KeyStateTracker();
 
-  keyStateTracker.keydownUpdate( tabKeyDownEvent );
+  keyStateTracker[ 'keydownUpdate' ]( tabKeyDownEvent );
 
   assert.ok( keyStateTracker.enabled, 'default enabled' );
   assert.ok( keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key down' );
@@ -158,17 +158,17 @@ QUnit.test( 'KeyStateTracker.enabled', async assert => {
   assert.ok( !keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key down cleared upon disabled' );
   assert.ok( !keyStateTracker.keysAreDown(), 'no keys down' );
 
-  keyStateTracker.keydownUpdate( tabKeyDownEvent );
+  keyStateTracker[ 'keydownUpdate' ]( tabKeyDownEvent );
   assert.ok( !keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key not registered when disabled' );
 
-  keyStateTracker.keydownUpdate( shiftTabKeyDownEvent );
+  keyStateTracker[ 'keydownUpdate' ]( shiftTabKeyDownEvent );
 
   assert.ok( !keyStateTracker.isKeyDown( KeyboardUtils.KEY_SHIFT_LEFT ), 'shift key should not be down' );
 
 
   keyStateTracker.enabled = true;
 
-  keyStateTracker.keydownUpdate( shiftTabKeyDownEvent );
+  keyStateTracker[ 'keydownUpdate' ]( shiftTabKeyDownEvent );
 
   assert.ok( keyStateTracker.isKeyDown( KeyboardUtils.KEY_SHIFT_LEFT ), 'shift key should be down' );
   assert.ok( keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key should  be down' );
