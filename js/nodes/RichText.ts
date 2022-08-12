@@ -1562,9 +1562,7 @@ const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperT
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
 
   return class RichTextCleanableMixin extends type {
-    public get isCleanable(): boolean {
-      return true;
-    }
+    public readonly isCleanable: boolean = true;
 
     /**
      * Releases references
