@@ -67,7 +67,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, TInputListener, Input, InputOptions, Instance, TOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, Trail, Utils, WebGLBlock } from '../imports.js';
-import IEmitter from '../../../axon/js/IEmitter.js';
+import TEmitter from '../../../axon/js/TEmitter.js';
 
 export type DisplayOptions = {
   // Initial (or override) display width
@@ -2181,7 +2181,7 @@ export default class Display {
   // that we can trigger browser actions that are only allowed as a result.
   // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
   // information.
-  public static userGestureEmitter: IEmitter;
+  public static userGestureEmitter: TEmitter;
 
   // Listeners that will be called for every event on ANY Display, see
   // https://github.com/phetsims/scenery/issues/1149. Do not directly modify this!

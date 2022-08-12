@@ -29,7 +29,7 @@ import { DelayedMutate, Focus, Highlight, Node, PDOMInstance, ReadingBlockHighli
 import TInputListener from '../../input/TInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import IEmitter from '../../../../axon/js/IEmitter.js';
+import TEmitter from '../../../../axon/js/TEmitter.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -100,7 +100,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
 
     // (scenery-internal) - Sends a message when the highlight for the ReadingBlock changes. Used
     // by the HighlightOverlay to redraw it if it changes while the highlight is active.
-    public readingBlockActiveHighlightChangedEmitter: IEmitter;
+    public readingBlockActiveHighlightChangedEmitter: TEmitter;
 
     // Updates the hit bounds of this Node when the local bounds change.
     private readonly _localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>;

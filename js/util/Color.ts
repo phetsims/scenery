@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IEmitter from '../../../axon/js/IEmitter.js';
+import TEmitter from '../../../axon/js/TEmitter.js';
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -60,7 +60,7 @@ export default class Color {
   private immutable?: boolean;
 
   // Fires when the color is changed
-  public readonly changeEmitter: IEmitter;
+  public readonly changeEmitter: TEmitter;
 
   /**
    * Creates a Color with an initial value. Multiple different types of parameters are supported:

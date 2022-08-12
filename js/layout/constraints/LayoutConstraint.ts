@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IEmitter from '../../../../axon/js/IEmitter.js';
+import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import { HeightSizableNode, LayoutProxy, mixesHeightSizable, mixesWidthSizable, Node, scenery, SizableNode, WidthSizableNode } from '../../imports.js';
 
@@ -31,7 +31,7 @@ export default class LayoutConstraint {
   private readonly _listenedNodes: Set<Node> = new Set<Node>();
 
   // (scenery-internal) - emits when we've finished layout
-  public readonly finishedLayoutEmitter: IEmitter = new TinyEmitter();
+  public readonly finishedLayoutEmitter: TEmitter = new TinyEmitter();
 
   /**
    * (scenery-internal)

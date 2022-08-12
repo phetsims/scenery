@@ -21,7 +21,7 @@ import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import IEmitter from '../../../../axon/js/IEmitter.js';
+import TEmitter from '../../../../axon/js/TEmitter.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
@@ -106,8 +106,8 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     public _maxContentWidth: number | null = null;
     public _maxContentHeight: number | null = null;
 
-    public readonly changedEmitter: IEmitter = new TinyEmitter();
-    public readonly orientationChangedEmitter: IEmitter = new TinyEmitter();
+    public readonly changedEmitter: TEmitter = new TinyEmitter();
+    public readonly orientationChangedEmitter: TEmitter = new TinyEmitter();
 
     /**
      * (scenery-internal)

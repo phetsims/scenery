@@ -134,7 +134,7 @@ import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, sc
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import IEmitter from '../../../../axon/js/IEmitter.js';
+import TEmitter from '../../../../axon/js/TEmitter.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -528,10 +528,10 @@ export default class ParallelDOM extends PhetioObject {
   private _pdomHeadingBehavior: PDOMBehaviorFunction;
 
   // Emits an event when the focus highlight is changed.
-  public readonly focusHighlightChangedEmitter: IEmitter;
+  public readonly focusHighlightChangedEmitter: TEmitter;
 
   // Fired when the PDOM Displays for this Node have changed (see PDOMInstance)
-  public readonly pdomDisplaysEmitter: IEmitter;
+  public readonly pdomDisplaysEmitter: TEmitter;
 
   // PDOM specific enabled listener
   protected pdomBoundInputEnabledListener: ( enabled: boolean ) => void;
