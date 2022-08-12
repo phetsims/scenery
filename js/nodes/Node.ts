@@ -5216,7 +5216,7 @@ class Node extends ParallelDOM {
       }
     } );
 
-    function handleChild( m: Node ) {
+    function handleChild( m: Node ): void {
       delete edges[ n.id ][ m.id ];
       if ( _.every( edges, children => !children[ m.id ] ) ) {
         // there are no more edges to m
@@ -5261,7 +5261,7 @@ class Node extends ParallelDOM {
       }
     } );
     edges[ this.id ][ child.id ] = true; // add in our 'new' edge
-    function handleChild( m: Node ) {
+    function handleChild( m: Node ): void {
       delete edges[ n.id ][ m.id ];
       if ( _.every( edges, children => !children[ m.id ] ) ) {
         // there are no more edges to m
@@ -5750,7 +5750,7 @@ class Node extends ParallelDOM {
     let image: Image | null = null;
 
     // NOTE: This callback is executed SYNCHRONOUSLY
-    function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ) {
+    function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ): void {
       const imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
       image = new Image( imageSource, combineOptions<ImageOptions>( {}, options.imageOptions, {

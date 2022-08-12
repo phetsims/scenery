@@ -18,7 +18,7 @@ export default class NodePattern extends Pattern {
     const imageElement = document.createElement( 'img' );
 
     // NOTE: This callback is executed SYNCHRONOUSLY
-    function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ) {
+    function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ): void {
       imageElement.src = canvas.toDataURL();
     }
     const tmpNode = new Node( {

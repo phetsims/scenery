@@ -681,7 +681,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * @param result
      */
     public appendStrokablePropString( spaces: string, result: string ): string {
-      function addProp( key: string, value: string, nowrap?: boolean ) {
+      function addProp( key: string, value: string, nowrap?: boolean ): void {
         if ( result ) {
           result += ',\n';
         }

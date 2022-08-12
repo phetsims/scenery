@@ -917,7 +917,7 @@ export default class Display {
    * BackboneDrawables (which would be DOM).
    */
   public getUsedRenderersBitmask(): number {
-    function renderersUnderBackbone( backbone: BackboneDrawable ) {
+    function renderersUnderBackbone( backbone: BackboneDrawable ): number {
       let bitmask = 0;
       _.each( backbone.blocks, block => {
         if ( block instanceof DOMBlock && block.domDrawable instanceof BackboneDrawable ) {
@@ -1446,7 +1446,7 @@ export default class Display {
     result += `<div style="${headerStyle}">Display (${this.id}) Summary</div>`;
     result += `${this.size.toString()} frame:${this._frameId} input:${!!this._input} cursor:${this._lastCursor}<br/>`;
 
-    function nodeCount( node: Node ) {
+    function nodeCount( node: Node ): number {
       let count = 1; // for us
       for ( let i = 0; i < node.children.length; i++ ) {
         count += nodeCount( node.children[ i ] );
@@ -1456,7 +1456,7 @@ export default class Display {
 
     result += `Nodes: ${nodeCount( this._rootNode )}<br/>`;
 
-    function instanceCount( instance: Instance ) {
+    function instanceCount( instance: Instance ): number {
       let count = 1; // for us
       for ( let i = 0; i < instance.children.length; i++ ) {
         count += instanceCount( instance.children[ i ] );
@@ -1466,7 +1466,7 @@ export default class Display {
 
     result += this._baseInstance ? ( `Instances: ${instanceCount( this._baseInstance )}<br/>` ) : '';
 
-    function drawableCount( drawable: Drawable ) {
+    function drawableCount( drawable: Drawable ): number {
       let count = 1; // for us
       if ( ( drawable as unknown as BackboneDrawable ).blocks ) {
         // we're a backbone
@@ -1489,7 +1489,7 @@ export default class Display {
 
     const drawableCountMap: Record<string, number> = {}; // {string} drawable constructor name => {number} count of seen
     // increment the count in our map
-    function countRetainedDrawable( drawable: Drawable ) {
+    function countRetainedDrawable( drawable: Drawable ): void {
       const name = drawable.constructor.name;
       if ( drawableCountMap[ name ] ) {
         drawableCountMap[ name ]++;
@@ -1499,7 +1499,7 @@ export default class Display {
       }
     }
 
-    function retainedDrawableCount( instance: Instance ) {
+    function retainedDrawableCount( instance: Instance ): number {
       let count = 0;
       if ( instance.selfDrawable ) {
         countRetainedDrawable( instance.selfDrawable );
@@ -1525,7 +1525,7 @@ export default class Display {
       result += `&nbsp;&nbsp;&nbsp;&nbsp;${drawableName}: ${drawableCountMap[ drawableName ]}<br/>`;
     }
 
-    function blockSummary( block: Block ) {
+    function blockSummary( block: Block ): string {
       // ensure we are a block
       if ( !block.firstDrawable || !block.lastDrawable ) {
         return '';
@@ -1563,10 +1563,10 @@ export default class Display {
       }
     }
 
-    function instanceSummary( instance: Instance ) {
+    function instanceSummary( instance: Instance ): string {
       let iSummary = '';
 
-      function addQualifier( text: string ) {
+      function addQualifier( text: string ): void {
         iSummary += ` <span style="color: #008">${text}</span>`;
       }
 
@@ -1667,7 +1667,7 @@ export default class Display {
       return iSummary;
     }
 
-    function drawableSummary( drawable: Drawable ) {
+    function drawableSummary( drawable: Drawable ): string {
       let drawableString = drawable.toString();
       if ( drawable.visible ) {
         drawableString = `<strong>${drawableString}</strong>`;
@@ -1681,10 +1681,10 @@ export default class Display {
       return drawableString;
     }
 
-    function printInstanceSubtree( instance: Instance ) {
+    function printInstanceSubtree( instance: Instance ): void {
       let div = `<div style="margin-left: ${depth * 20}px">`;
 
-      function addDrawable( name: string, drawable: Drawable ) {
+      function addDrawable( name: string, drawable: Drawable ): void {
         div += ` <span style="color: #888">${name}:${drawableSummary( drawable )}</span>`;
       }
 
@@ -1715,7 +1715,7 @@ export default class Display {
       printInstanceSubtree( instance );
     } );
 
-    function printDrawableSubtree( drawable: Drawable ) {
+    function printDrawableSubtree( drawable: Drawable ): void {
       let div = `<div style="margin-left: ${depth * 20}px">`;
 
       div += drawableSummary( drawable );
@@ -1829,7 +1829,7 @@ export default class Display {
 
     recurse( this._rootPDOMInstance!, '' );
 
-    function recurse( instance: PDOMInstance, indentation: string ) {
+    function recurse( instance: PDOMInstance, indentation: string ): void {
       result += `${indentation + escapeHTML( `${instance.isRootInstance ? '' : instance.node!.tagName} ${instance.toString()}` )}<br>`;
       instance.children.forEach( ( child: PDOMInstance ) => {
         recurse( child, indentation + indent );
@@ -1874,14 +1874,14 @@ export default class Display {
 
     let unknownIds = 0;
 
-    function addCanvas( canvas: HTMLCanvasElement ) {
+    function addCanvas( canvas: HTMLCanvasElement ): void {
       if ( !canvas.id ) {
         canvas.id = `unknown-canvas-${unknownIds++}`;
       }
       canvasUrlMap[ canvas.id ] = canvas.toDataURL();
     }
 
-    function scanForCanvases( drawable: Drawable ) {
+    function scanForCanvases( drawable: Drawable ): void {
       if ( drawable instanceof BackboneDrawable ) {
         // we're a backbone
         _.each( drawable.blocks, childDrawable => {

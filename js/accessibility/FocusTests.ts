@@ -21,7 +21,7 @@ type NestedEqualityItem = {
 };
 
 // Arrays of items of the type { trail: {Trail}, children: {Array.<Item>} }
-function nestedEquality( assert: Assert, a: EqualityItem[], b: NestedEqualityItem[] ) {
+function nestedEquality( assert: Assert, a: EqualityItem[], b: NestedEqualityItem[] ): void {
   assert.equal( a.length, b.length );
 
   for ( let i = 0; i < a.length; i++ ) {

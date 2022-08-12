@@ -2692,7 +2692,7 @@ export default class ParallelDOM extends PhetioObject {
     // pushed and poppped, so that the top array on this stack is where we should insert our next child item.
     const nestedChildStack = [ result ];
 
-    function addTrailsForNode( node: Node, overridePruning: boolean ) {
+    function addTrailsForNode( node: Node, overridePruning: boolean ): void {
       // If subtrees were specified with pdomOrder, they should be skipped from the ordering of ancestor subtrees,
       // otherwise we could end up having multiple references to the same trail (which should be disallowed).
       let pruneCount = 0;

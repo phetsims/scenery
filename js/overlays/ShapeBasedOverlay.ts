@@ -29,7 +29,7 @@ export default abstract class ShapeBasedOverlay implements TOverlay {
     svg.style[ 'pointer-events' ] = 'none';
     this.svg = svg;
 
-    function resize( width: number, height: number ) {
+    function resize( width: number, height: number ): void {
       svg.setAttribute( 'width', '' + width );
       svg.setAttribute( 'height', '' + height );
       svg.style.clip = `rect(0px,${width}px,${height}px,0px)`;

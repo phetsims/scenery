@@ -19,7 +19,7 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this; // eslint-disable-line
 
-    function processBackbone( backbone: BackboneDrawable, matrix: Matrix3 ) {
+    function processBackbone( backbone: BackboneDrawable, matrix: Matrix3 ): void {
       if ( backbone.willApplyTransform ) {
         matrix = matrix.timesMatrix( backbone.backboneInstance.relativeTransform.matrix );
       }
@@ -28,7 +28,7 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
       } );
     }
 
-    function processBlock( block: Block, matrix: Matrix3 ) {
+    function processBlock( block: Block, matrix: Matrix3 ): void {
       if ( block instanceof FittedBlock && !block.fitBounds!.isEmpty() ) {
         self.addShape( Shape.bounds( block.fitBounds! ).transformed( matrix ), 'rgba(255,0,0,0.8)', true );
       }
@@ -40,7 +40,7 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
       }
     }
 
-    function processDrawable( drawable: Drawable, matrix: Matrix3 ) {
+    function processDrawable( drawable: Drawable, matrix: Matrix3 ): void {
       // How we detect backbones (for now)
       if ( drawable instanceof BackboneDrawable ) {
         processBackbone( drawable, matrix );

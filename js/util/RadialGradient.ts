@@ -10,7 +10,7 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
-import { ColorDef, Gradient, GradientStop, scenery, SVGBlock, SVGRadialGradient } from '../imports.js';
+import { ColorDef, Gradient, GradientStop, scenery, SVGBlock, SVGRadialGradient, TColor } from '../imports.js';
 
 export default class RadialGradient extends Gradient {
 
@@ -111,11 +111,11 @@ export default class RadialGradient extends Gradient {
 
     //TODO: replace with dot.Utils.linear
     // maps x linearly from [a0,b0] => [a1,b1]
-    function linearMap( a0: number, b0: number, a1: number, b1: number, x: number ) {
+    function linearMap( a0: number, b0: number, a1: number, b1: number, x: number ): number {
       return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );
     }
 
-    function mapStop( stop: GradientStop ) {
+    function mapStop( stop: GradientStop ): { ratio: number; color: TColor } {
       // flip the stops if the start has a larger radius
       let ratio = startIsLarger ? 1 - stop.ratio : stop.ratio;
 

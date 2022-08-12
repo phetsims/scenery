@@ -14,7 +14,7 @@ import platform from '../../../phet-core/js/platform.js';
 import { Features, scenery } from '../imports.js';
 
 // convenience function
-function p( x: number, y: number ) {
+function p( x: number, y: number ): Vector2 {
   return new Vector2( x, y );
 }
 
@@ -238,7 +238,7 @@ const Utils = {
       const data = context.getImageData( 0, 0, resolution, resolution );
       const minMaxBounds = Utils.scanBounds( data, resolution, transform );
 
-      function snapshotToCanvas( snapshot: ImageData ) {
+      function snapshotToCanvas( snapshot: ImageData ): void {
         const canvas = document.createElement( 'canvas' );
         canvas.width = resolution;
         canvas.height = resolution;
@@ -262,7 +262,7 @@ const Utils = {
     }
 
     // attempts to map the bounds specified to the entire testing canvas (minus a fine border), so we can nail down the location quickly
-    function idealTransform( bounds: Bounds2 ) {
+    function idealTransform( bounds: Bounds2 ): Transform3 {
       // so that the bounds-edge doesn't land squarely on the boundary
       const borderSize = 2;
 

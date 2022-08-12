@@ -731,7 +731,7 @@ export default class Text extends Paintable( Node ) {
     assert && assert( current === root, `Bad nesting of embedding marks: ${Text.embeddedDebugString( string )}` );
 
     // Remove redundant nesting (e.g. [LTR][LTR]...[POP][POP])
-    function collapseNesting( node: EmbedNode ) {
+    function collapseNesting( node: EmbedNode ): void {
       for ( let i = node.children.length - 1; i >= 0; i-- ) {
         const child = node.children[ i ];
         if ( typeof child !== 'string' && node.dir === child.dir ) {
@@ -741,7 +741,7 @@ export default class Text extends Paintable( Node ) {
     }
 
     // Remove overridden nesting (e.g. [LTR][RTL]...[POP][POP]), since the outer one is not needed
-    function collapseUnnecessary( node: EmbedNode ) {
+    function collapseUnnecessary( node: EmbedNode ): void {
       if ( node.children.length === 1 && typeof node.children[ 0 ] !== 'string' && node.children[ 0 ].dir ) {
         node.dir = node.children[ 0 ].dir;
         node.children = node.children[ 0 ].children;
@@ -749,7 +749,7 @@ export default class Text extends Paintable( Node ) {
     }
 
     // Collapse adjacent matching dirs, e.g. [LTR]...[POP][LTR]...[POP]
-    function collapseAdjacent( node: EmbedNode ) {
+    function collapseAdjacent( node: EmbedNode ): void {
       for ( let i = node.children.length - 1; i >= 1; i-- ) {
         const previousChild = node.children[ i - 1 ];
         const child = node.children[ i ];
@@ -764,7 +764,7 @@ export default class Text extends Paintable( Node ) {
     }
 
     // Simplifies the tree using the above functions
-    function simplify( node: EmbedNode | string ) {
+    function simplify( node: EmbedNode | string ): string | EmbedNode {
       if ( typeof node !== 'string' ) {
         for ( let i = 0; i < node.children.length; i++ ) {
           simplify( node.children[ i ] );
