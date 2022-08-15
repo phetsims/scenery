@@ -47,7 +47,6 @@
         ],
         "rules": {
           "no-simple-type-checking-assertions": "off",
-          "@typescript-eslint/no-explicit-any": "error"
         }
       }
     ]
