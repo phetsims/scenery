@@ -10,10 +10,8 @@ import phetCore from './phetCore.js';
 
 /**
  * Opens the URL in a new window or tab.
- *
- * @param {string} url
  */
-function openPopup( url ) {
+function openPopup( url: string ): void {
 
   // Don't allow openPopup IF we have query parameters AND allowLinks is false,
   // see https://github.com/phetsims/joist/issues/830
