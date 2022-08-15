@@ -7,6 +7,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import IProperty from '../../../../../axon/js/IProperty.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, scenery, Text, TextOptions } from '../../../imports.js';
 
@@ -16,7 +17,10 @@ type VoicingTextOptions = SelfOptions & ParentOptions;
 
 class VoicingText extends ReadingBlock( Text ) {
 
-  public constructor( text: string, providedOptions?: VoicingTextOptions ) {
+  public constructor( text: string | IProperty<string>, providedOptions?: VoicingTextOptions ) {
+
+    const initialText = typeof text === 'string' ? text : text.value;
+
     let options = optionize<VoicingTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be spoken that is different from the
@@ -25,20 +29,30 @@ class VoicingText extends ReadingBlock( Text ) {
 
       // pdom
       tagName: 'p',
-      innerContent: text
+      innerContent: initialText
     }, providedOptions );
 
     // Options that use other options, should be the same type as options
     options = combineOptions<typeof options>( options, {
-      readingBlockNameResponse: options.readingBlockNameResponse || text
+      readingBlockNameResponse: options.readingBlockNameResponse || initialText
     } );
 
-    super( text );
+    super( initialText );
 
     // unique highlight for non-interactive components
     this.focusHighlight = new ReadingBlockHighlight( this );
 
     this.mutate( options );
+
+    if ( typeof text !== 'string' ) {
+      this.textProperty = text;
+
+      // TODO: We might be memory leaking here, we'll want to dispose for https://github.com/phetsims/chipper/issues/1302
+      text.link( string => {
+        this.innerContent = string;
+        this.readingBlockNameResponse = options.readingBlockHintResponse || string;
+      } );
+    }
   }
 }
 
