@@ -63,7 +63,6 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
    * (scenery-internal)
    */
   public constructor( ancestorNode: Node, providedOptions?: NodeLayoutConstraintOptions ) {
-    assert && assert( ancestorNode instanceof Node );
 
     // The omitted options are set to proper defaults below
     const options = optionize<NodeLayoutConstraintOptions, StrictOmit<SelfOptions, 'excludeInvisible'>>()( {
@@ -98,8 +97,6 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
   }
 
   public set excludeInvisible( value: boolean ) {
-    assert && assert( typeof value === 'boolean' );
-
     if ( this._excludeInvisible !== value ) {
       this._excludeInvisible = value;
 

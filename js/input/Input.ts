@@ -345,10 +345,6 @@ export default class Input extends PhetioObject {
    * @param [providedOptions]
    */
   public constructor( display: Display, attachToWindow: boolean, batchDOMEvents: boolean, assumeFullWindow: boolean, passiveEvents: boolean | null, providedOptions?: InputOptions ) {
-    assert && assert( display instanceof Display );
-    assert && assert( typeof attachToWindow === 'boolean' );
-    assert && assert( typeof batchDOMEvents === 'boolean' );
-    assert && assert( typeof assumeFullWindow === 'boolean' );
 
     const options = optionize<InputOptions, SelfOptions, PhetioObjectOptions>()( {
       phetioType: Input.InputIO,
@@ -586,7 +582,6 @@ export default class Input extends PhetioObject {
     this.penEndAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
-        assert && assert( pen instanceof Pen );
         const pointChanged = pen.end( point, event );
         this.upEvent<PointerEvent>( pen, event, pointChanged );
         this.removePointer( pen );
@@ -606,7 +601,6 @@ export default class Input extends PhetioObject {
     this.penMoveAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
-        assert && assert( pen instanceof Pen );
         pen.move( point, event );
         this.moveEvent<PointerEvent>( pen, event );
       }
@@ -626,7 +620,6 @@ export default class Input extends PhetioObject {
     this.penCancelAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
-        assert && assert( pen instanceof Pen );
         const pointChanged = pen.cancel( point, event );
         this.cancelEvent<PointerEvent>( pen, event, pointChanged );
         this.removePointer( pen );
@@ -1567,9 +1560,6 @@ export default class Input extends PhetioObject {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `upEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-    assert && assert( pointer instanceof Pointer );
-    assert && assert( typeof pointChanged === 'boolean' );
-
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents<DOMEvent>( pointer, event, pointChanged );
 
@@ -1598,9 +1588,6 @@ export default class Input extends PhetioObject {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `downEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-    assert && assert( pointer instanceof Pointer );
-    assert && assert( typeof pointChanged === 'boolean' );
-
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents<DOMEvent>( pointer, event, pointChanged );
 
@@ -1616,8 +1603,6 @@ export default class Input extends PhetioObject {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `moveEvent ${pointer.toString()}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-    assert && assert( pointer instanceof Pointer );
-
     // Always treat move events as "point changed"
     this.branchChangeEvents<DOMEvent>( pointer, event, true );
 
@@ -1630,9 +1615,6 @@ export default class Input extends PhetioObject {
   private cancelEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `cancelEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-    assert && assert( pointer instanceof Pointer );
-    assert && assert( typeof pointChanged === 'boolean' );
 
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents<DOMEvent>( pointer, event, pointChanged );
@@ -1662,9 +1644,6 @@ export default class Input extends PhetioObject {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
       `branchChangeEvents: ${pointer.toString()} sendMove:${sendMove}` );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-    assert && assert( pointer instanceof Pointer );
-    assert && assert( typeof sendMove === 'boolean' );
 
     const trail = this.getPointerTrail( pointer );
 
@@ -1799,7 +1778,6 @@ export default class Input extends PhetioObject {
    * @param inputEvent
    */
   private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: TInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent> ): void {
-    assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.handled ) {
       return;
@@ -1841,7 +1819,6 @@ export default class Input extends PhetioObject {
    * @param [fireOnInputDisabled]
    */
   private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean, fireOnInputDisabled = false ): void {
-    assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.aborted || inputEvent.handled ) {
       return;

@@ -128,7 +128,6 @@ export default class AlignGroup {
    * Creates an alignment box with the given content and options.
    */
   public createBox( content: Node, options?: AlignBoxOptions ): AlignBox {
-    assert && assert( content instanceof Node );
 
     // Setting the group should call our addAlignBox()
     return new AlignBox( content, combineOptions<AlignBoxOptions>( {
@@ -141,7 +140,6 @@ export default class AlignGroup {
    * (usually equal to the content width + horizontal margins).
    */
   public setMatchHorizontal( matchHorizontal: boolean ): this {
-    assert && assert( typeof matchHorizontal === 'boolean' );
 
     if ( this._matchHorizontal !== matchHorizontal ) {
       this._matchHorizontal = matchHorizontal;
@@ -169,7 +167,6 @@ export default class AlignGroup {
    * (usually equal to the content height + vertical margins).
    */
   public setMatchVertical( matchVertical: boolean ): this {
-    assert && assert( typeof matchVertical === 'boolean' );
 
     if ( this._matchVertical !== matchVertical ) {
       this._matchVertical = matchVertical;

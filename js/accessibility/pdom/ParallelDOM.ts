@@ -1114,7 +1114,6 @@ export default class ParallelDOM extends PhetioObject {
    * </container>
    */
   public setAppendLabel( appendLabel: boolean ): void {
-    assert && assert( typeof appendLabel === 'boolean' );
 
     if ( this._appendLabel !== appendLabel ) {
       this._appendLabel = appendLabel;
@@ -1146,7 +1145,6 @@ export default class ParallelDOM extends PhetioObject {
    * </container>
    */
   public setAppendDescription( appendDescription: boolean ): void {
-    assert && assert( typeof appendDescription === 'boolean' );
 
     if ( this._appendDescription !== appendDescription ) {
       this._appendDescription = appendDescription;
@@ -1498,7 +1496,7 @@ export default class ParallelDOM extends PhetioObject {
       if ( this._focusHighlightLayerable ) {
 
         // if focus highlight is layerable, it must be a node in the scene graph
-        assert && assert( focusHighlight instanceof Node );
+        assert && assert( focusHighlight instanceof Node ); // eslint-disable-line no-simple-type-checking-assertions
 
         // the highlight starts off invisible, HighlightOverlay will make it visible when this Node has DOM focus
         ( focusHighlight as Node ).visible = false;
@@ -1669,7 +1667,6 @@ export default class ParallelDOM extends PhetioObject {
    * Remove the reference to the node that is using this Node's ID as an aria-labelledby value (scenery-internal)
    */
   public removeNodeThatIsAriaLabelledByThisNode( node: Node ): void {
-    assert && assert( node instanceof Node );
     const indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
     assert && assert( indexOfNode >= 0 );
     this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
@@ -1802,7 +1799,6 @@ export default class ParallelDOM extends PhetioObject {
    * Remove the reference to the node that is using this Node's ID as an aria-describedby value (scenery-internal)
    */
   public removeNodeThatIsAriaDescribedByThisNode( node: Node ): void {
-    assert && assert( node instanceof Node );
     const indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
     assert && assert( indexOfNode >= 0 );
     this._nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
@@ -1927,7 +1923,6 @@ export default class ParallelDOM extends PhetioObject {
    * Remove the reference to the node that is using this Node's ID as an aria-activeDescendant value (scenery-internal)
    */
   private removeNodeThatIsActiveDescendantThisNode( node: Node ): void {
-    assert && assert( node instanceof Node );
     const indexOfNode = _.indexOf( this._nodesThatAreActiveDescendantToThisNode, node );
     assert && assert( indexOfNode >= 0 );
     this._nodesThatAreActiveDescendantToThisNode.splice( indexOfNode, 1 );
@@ -2143,7 +2138,6 @@ export default class ParallelDOM extends PhetioObject {
    * order.
    */
   public setPDOMVisible( visible: boolean ): void {
-    assert && assert( typeof visible === 'boolean' );
     if ( this._pdomVisible !== visible ) {
       this._pdomVisible = visible;
 
@@ -2216,7 +2210,6 @@ export default class ParallelDOM extends PhetioObject {
    * is considered selected to the browser and assistive technology.
    */
   public setPDOMChecked( checked: boolean ): void {
-    assert && assert( typeof checked === 'boolean' );
 
     if ( this._tagName ) {
       assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'Cannot set checked on a non input tag.' );
@@ -2263,7 +2256,6 @@ export default class ParallelDOM extends PhetioObject {
    * @param [providedOptions]
    */
   public setPDOMAttribute( attribute: string, value: string | boolean | number, providedOptions?: SetPDOMAttributeOptions ): void {
-    assert && assert( typeof attribute === 'string' );
     assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
     assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
@@ -2324,7 +2316,6 @@ export default class ParallelDOM extends PhetioObject {
    * @param [providedOptions]
    */
   public removePDOMAttribute( attribute: string, providedOptions?: RemovePDOMAttributeOptions ): void {
-    assert && assert( typeof attribute === 'string' );
     assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
 
@@ -2375,7 +2366,6 @@ export default class ParallelDOM extends PhetioObject {
    * @param [providedOptions]
    */
   public hasPDOMAttribute( attribute: string, providedOptions?: HasPDOMAttributeOptions ): boolean {
-    assert && assert( typeof attribute === 'string' );
     assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
 
@@ -2405,7 +2395,6 @@ export default class ParallelDOM extends PhetioObject {
    * Add a class with this function and define the style in stylesheets (likely SceneryStyle).
    */
   public setPDOMClass( className: string, providedOptions?: SetPDOMClassOptions ): void {
-    assert && assert( typeof className === 'string' );
 
     const options = optionize<SetPDOMClassOptions>()( {
       elementName: PDOMPeer.PRIMARY_SIBLING
@@ -2431,7 +2420,6 @@ export default class ParallelDOM extends PhetioObject {
    * Remove a class from the classList of one of the elements for this Node.
    */
   public removePDOMClass( className: string, providedOptions?: RemovePDOMClassOptions ): void {
-    assert && assert( typeof className === 'string' );
 
     const options = optionize<RemovePDOMClassOptions>()( {
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
@@ -2864,7 +2852,6 @@ export default class ParallelDOM extends PhetioObject {
    * Adds an PDOMInstance reference to our array. (scenery-internal)
    */
   public addPDOMInstance( pdomInstance: PDOMInstance ): void {
-    assert && assert( pdomInstance instanceof PDOMInstance );
     this._pdomInstances.push( pdomInstance );
   }
 
@@ -2872,7 +2859,6 @@ export default class ParallelDOM extends PhetioObject {
    * Removes an PDOMInstance reference from our array. (scenery-internal)
    */
   public removePDOMInstance( pdomInstance: PDOMInstance ): void {
-    assert && assert( pdomInstance instanceof PDOMInstance );
     const index = _.indexOf( this._pdomInstances, pdomInstance );
     assert && assert( index !== -1, 'Cannot remove an PDOMInstance from a Node if it was not there' );
     this._pdomInstances.splice( index, 1 );

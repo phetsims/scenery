@@ -43,9 +43,7 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
 
   public constructor( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ) {
 
-    assert && assert( ancestorNode instanceof Node );
     assert && assert( Array.isArray( nodes ) && _.every( nodes, node => node instanceof Node ) );
-    assert && assert( typeof layoutCallback === 'function' );
 
     super( ancestorNode );
 

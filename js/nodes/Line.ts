@@ -62,7 +62,6 @@ export default class Line extends Path {
     if ( typeof x1 === 'object' ) {
       if ( x1 instanceof Vector2 ) {
         // assumes Line( Vector2, Vector2, options ), where x2 is our options
-        assert && assert( y1 instanceof Vector2 );
         assert && assert( x2 === undefined || typeof x2 === 'object' );
         assert && assert( x2 === undefined || Object.getPrototypeOf( x2 ) === Object.prototype,
           'Extra prototype on Node options object is a code smell' );

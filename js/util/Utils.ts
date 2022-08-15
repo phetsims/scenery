@@ -59,8 +59,6 @@ const Utils = {
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
    */
   setTransform( transformString: string, element: HTMLElement | SVGElement ): void {
-    assert && assert( typeof transformString === 'string' );
-
     element.style[ transformProperty ] = transformString;
   },
 

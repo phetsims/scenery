@@ -23,7 +23,6 @@ export default class GridBackgroundNode extends Node {
   private readonly layoutListener: () => void;
 
   public constructor( constraint: GridConstraint, providedOptions?: GridBackgroundNodeOptions ) {
-    assert && assert( constraint instanceof GridConstraint );
 
     const options = optionize<GridBackgroundNodeOptions, SelfOptions, NodeOptions>()( {
       createCellBackground: ( cell: GridCell ) => {

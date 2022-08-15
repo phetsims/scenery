@@ -2213,8 +2213,6 @@ class Node extends ParallelDOM {
    * Returns whether a child should be included for layout (if this Node is a layout container).
    */
   public isChildIncludedInLayout( child: Node ): boolean {
-    assert && assert( child instanceof Node );
-
     return child.bounds.isValid() && ( !this._excludeInvisibleChildrenFromBounds || child.visible );
   }
 
@@ -2902,8 +2900,6 @@ class Node extends ParallelDOM {
    * @param left - After this operation, node.left should approximately equal this value.
    */
   public setLeft( left: number ): this {
-    assert && assert( typeof left === 'number' );
-
     const currentLeft = this.getLeft();
     if ( isFinite( currentLeft ) ) {
       this.translate( left - currentLeft, 0, true );
@@ -2944,8 +2940,6 @@ class Node extends ParallelDOM {
    * @param right - After this operation, node.right should approximately equal this value.
    */
   public setRight( right: number ): this {
-    assert && assert( typeof right === 'number' );
-
     const currentRight = this.getRight();
     if ( isFinite( currentRight ) ) {
       this.translate( right - currentRight, 0, true );
@@ -2985,8 +2979,6 @@ class Node extends ParallelDOM {
    * @param x - After this operation, node.centerX should approximately equal this value.
    */
   public setCenterX( x: number ): this {
-    assert && assert( typeof x === 'number' );
-
     const currentCenterX = this.getCenterX();
     if ( isFinite( currentCenterX ) ) {
       this.translate( x - currentCenterX, 0, true );
@@ -3027,8 +3019,6 @@ class Node extends ParallelDOM {
    * @param y - After this operation, node.centerY should approximately equal this value.
    */
   public setCenterY( y: number ): this {
-    assert && assert( typeof y === 'number' );
-
     const currentCenterY = this.getCenterY();
     if ( isFinite( currentCenterY ) ) {
       this.translate( 0, y - currentCenterY, true );
@@ -3069,8 +3059,6 @@ class Node extends ParallelDOM {
    * @param top - After this operation, node.top should approximately equal this value.
    */
   public setTop( top: number ): this {
-    assert && assert( typeof top === 'number' );
-
     const currentTop = this.getTop();
     if ( isFinite( currentTop ) ) {
       this.translate( 0, top - currentTop, true );
@@ -3111,8 +3099,6 @@ class Node extends ParallelDOM {
    * @param bottom - After this operation, node.bottom should approximately equal this value.
    */
   public setBottom( bottom: number ): this {
-    assert && assert( typeof bottom === 'number' );
-
     const currentBottom = this.getBottom();
     if ( isFinite( currentBottom ) ) {
       this.translate( 0, bottom - currentBottom, true );
@@ -4399,8 +4385,6 @@ class Node extends ParallelDOM {
    * this Node's cursor will be checked first, then ancestors will be checked as normal.
    */
   public setInputEnabled( inputEnabled: boolean ): void {
-    assert && assert( typeof inputEnabled === 'boolean' );
-
     this.inputEnabledProperty.value = inputEnabled;
   }
 
@@ -4761,8 +4745,6 @@ class Node extends ParallelDOM {
    * layer, different from other siblings or other nodes. Can be used for performance purposes.
    */
   public setLayerSplit( split: boolean ): void {
-    assert && assert( typeof split === 'boolean' );
-
     if ( split !== this._hints.layerSplit ) {
       this._hints.layerSplit = split;
 
@@ -4796,8 +4778,6 @@ class Node extends ParallelDOM {
    * gains if there need to be multiple layers for this node's descendants.
    */
   public setUsesOpacity( usesOpacity: boolean ): void {
-    assert && assert( typeof usesOpacity === 'boolean' );
-
     if ( usesOpacity !== this._hints.usesOpacity ) {
       this._hints.usesOpacity = usesOpacity;
 
@@ -4832,8 +4812,6 @@ class Node extends ParallelDOM {
    * have to re-rasterize contents when it is animated.
    */
   public setCSSTransform( cssTransform: boolean ): void {
-    assert && assert( typeof cssTransform === 'boolean' );
-
     if ( cssTransform !== this._hints.cssTransform ) {
       this._hints.cssTransform = cssTransform;
 
@@ -4867,8 +4845,6 @@ class Node extends ParallelDOM {
    * invisible. The default is false, and invisible content is in the DOM, but hidden.
    */
   public setExcludeInvisible( excludeInvisible: boolean ): void {
-    assert && assert( typeof excludeInvisible === 'boolean' );
-
     if ( excludeInvisible !== this._hints.excludeInvisible ) {
       this._hints.excludeInvisible = excludeInvisible;
 
@@ -4904,8 +4880,6 @@ class Node extends ParallelDOM {
    * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
    */
   public setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
-    assert && assert( typeof excludeInvisibleChildrenFromBounds === 'boolean' );
-
     if ( excludeInvisibleChildrenFromBounds !== this._excludeInvisibleChildrenFromBounds ) {
       this._excludeInvisibleChildrenFromBounds = excludeInvisibleChildrenFromBounds;
 
@@ -4980,8 +4954,6 @@ class Node extends ParallelDOM {
    * Sets the preventFit performance flag.
    */
   public setPreventFit( preventFit: boolean ): void {
-    assert && assert( typeof preventFit === 'boolean' );
-
     if ( preventFit !== this._hints.preventFit ) {
       this._hints.preventFit = preventFit;
 
@@ -5439,7 +5411,6 @@ class Node extends ParallelDOM {
    * @param [height] - The height of the Canvas output
    */
   public toCanvas( callback: ( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
-    assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
     assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
@@ -5488,7 +5459,6 @@ class Node extends ParallelDOM {
    * @param [height] - The height of the Canvas output
    */
   public toDataURL( callback: ( dataURI: string, x: number, y: number, width: number, height: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
-    assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
     assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
@@ -5518,7 +5488,6 @@ class Node extends ParallelDOM {
 
     assert && deprecationWarning( 'Node.toImage() is deprecated, please use Node.rasterized() instead' );
 
-    assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
     assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
@@ -5558,7 +5527,6 @@ class Node extends ParallelDOM {
 
     assert && deprecationWarning( 'Node.toImageNodeAsyncrhonous() is deprecated, please use Node.rasterized() instead' );
 
-    assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
     assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
@@ -5872,7 +5840,6 @@ class Node extends ParallelDOM {
    * Adds an Instance reference to our array. (scenery-internal)
    */
   public addInstance( instance: Instance ): void {
-    assert && assert( instance instanceof Instance );
     this._instances.push( instance );
 
     this.changedInstanceEmitter.emit( instance, true );
@@ -5882,7 +5849,6 @@ class Node extends ParallelDOM {
    * Removes an Instance reference from our array. (scenery-internal)
    */
   public removeInstance( instance: Instance ): void {
-    assert && assert( instance instanceof Instance );
     const index = _.indexOf( this._instances, instance );
     assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
     this._instances.splice( index, 1 );
@@ -5930,7 +5896,6 @@ class Node extends ParallelDOM {
    * Adds an display reference to our array. (scenery-internal)
    */
   public addRootedDisplay( display: Display ): void {
-    assert && assert( display instanceof Display );
     this._rootedDisplays.push( display );
 
     // Defined in ParallelDOM.js
@@ -5941,7 +5906,6 @@ class Node extends ParallelDOM {
    * Removes a Display reference from our array. (scenery-internal)
    */
   public removeRootedDisplay( display: Display ): void {
-    assert && assert( display instanceof Display );
     const index = _.indexOf( this._rootedDisplays, display );
     assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
     this._rootedDisplays.splice( index, 1 );

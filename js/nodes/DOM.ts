@@ -203,8 +203,6 @@ export default class DOM extends Node {
    * positioning this element instead.
    */
   public setPreventTransform( preventTransform: boolean ): void {
-    assert && assert( typeof preventTransform === 'boolean' );
-
     if ( this._preventTransform !== preventTransform ) {
       this._preventTransform = preventTransform;
     }

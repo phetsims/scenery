@@ -17,8 +17,6 @@ export default class Sprite {
   public readonly imageProperty: IProperty<SpriteImage>;
 
   public constructor( spriteImage: SpriteImage ) {
-    assert && assert( spriteImage instanceof SpriteImage );
-
     this.imageProperty = new Property( spriteImage );
   }
 

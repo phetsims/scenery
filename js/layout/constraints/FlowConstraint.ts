@@ -65,8 +65,6 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   public displayedCells: FlowCell[] = [];
 
   public constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
-    assert && assert( ancestorNode instanceof Node );
-
     super( ancestorNode, providedOptions );
 
     // Set configuration to actual default values (instead of null) so that we will have guaranteed non-null
@@ -361,8 +359,6 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     // remapping align values to an independent set, so they aren't orientation-dependent
     const mappedValue = LayoutJustification.justifyToInternal( this._orientation, value );
 
-    assert && assert( mappedValue instanceof LayoutJustification );
-
     if ( this._justify !== mappedValue ) {
       this._justify = mappedValue;
 
@@ -404,8 +400,6 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   }
 
   public set wrap( value: boolean ) {
-    assert && assert( typeof value === 'boolean' );
-
     if ( this._wrap !== value ) {
       this._wrap = value;
 
@@ -442,10 +436,8 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   }
 
   public insertCell( index: number, cell: FlowCell ): void {
-    assert && assert( typeof index === 'number' );
     assert && assert( index >= 0 );
     assert && assert( index <= this.cells.length );
-    assert && assert( cell instanceof FlowCell );
     assert && assert( !_.includes( this.cells, cell ) );
 
     cell.orientation = this.orientation;
@@ -458,7 +450,6 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   }
 
   public removeCell( cell: FlowCell ): void {
-    assert && assert( cell instanceof FlowCell );
     assert && assert( _.includes( this.cells, cell ) );
 
     arrayRemove( this.cells, cell );

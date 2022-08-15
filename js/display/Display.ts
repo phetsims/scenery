@@ -634,7 +634,6 @@ export default class Display {
 
     if ( this._overlays.length ) {
       let zIndex = this._rootBackbone!.lastZIndex!;
-      assert && assert( typeof zIndex === 'number' );
       for ( let i = 0; i < this._overlays.length; i++ ) {
         // layer the overlays properly
         const overlay = this._overlays[ i ];
@@ -756,7 +755,6 @@ export default class Display {
    * Changes the size that the Display's DOM element will be after the next updateDisplay()
    */
   public setSize( size: Dimension2 ): void {
-    assert && assert( size instanceof Dimension2 );
     assert && assert( size.width % 1 === 0, 'Display.width should be an integer' );
     assert && assert( size.width > 0, 'Display.width should be greater than zero' );
     assert && assert( size.height % 1 === 0, 'Display.height should be an integer' );
@@ -961,8 +959,6 @@ export default class Display {
    * (scenery-internal)
    */
   public markDrawableChangedBlock( drawable: Drawable ): void {
-    assert && assert( drawable instanceof Drawable );
-
     sceneryLog && sceneryLog.Display && sceneryLog.Display( `markDrawableChangedBlock: ${drawable.toString()}` );
     this._drawablesToChangeBlock.push( drawable );
   }
@@ -991,8 +987,6 @@ export default class Display {
    * (scenery-internal)
    */
   public markDrawableForDisposal( drawable: Drawable ): void {
-    assert && assert( drawable instanceof Drawable );
-
     sceneryLog && sceneryLog.Display && sceneryLog.Display( `markDrawableForDisposal: ${drawable.toString()}` );
     this._drawablesToDispose.push( drawable );
   }
@@ -1001,8 +995,6 @@ export default class Display {
    * (scenery-internal)
    */
   public markDrawableForLinksUpdate( drawable: Drawable ): void {
-    assert && assert( drawable instanceof Drawable );
-
     this._drawablesToUpdateLinks.push( drawable );
   }
 
@@ -1011,8 +1003,6 @@ export default class Display {
    * (scenery-internal)
    */
   public markChangeIntervalToDispose( changeInterval: ChangeInterval ): void {
-    assert && assert( changeInterval instanceof ChangeInterval );
-
     this._changeIntervalsToDispose.push( changeInterval );
   }
 
@@ -1156,8 +1146,6 @@ export default class Display {
    * TODO: reduce code duplication for handling overlays
    */
   public setPointerDisplayVisible( visibility: boolean ): void {
-    assert && assert( typeof visibility === 'boolean' );
-
     const hasOverlay = !!this._pointerOverlay;
 
     if ( visibility !== hasOverlay ) {
@@ -1177,8 +1165,6 @@ export default class Display {
    * TODO: reduce code duplication for handling overlays
    */
   public setPointerAreaDisplayVisible( visibility: boolean ): void {
-    assert && assert( typeof visibility === 'boolean' );
-
     const hasOverlay = !!this._pointerAreaOverlay;
 
     if ( visibility !== hasOverlay ) {
@@ -1198,8 +1184,6 @@ export default class Display {
    * TODO: reduce code duplication for handling overlays
    */
   public setHitAreaDisplayVisible( visibility: boolean ): void {
-    assert && assert( typeof visibility === 'boolean' );
-
     const hasOverlay = !!this._hitAreaOverlay;
 
     if ( visibility !== hasOverlay ) {
@@ -1219,8 +1203,6 @@ export default class Display {
    * TODO: reduce code duplication for handling overlays
    */
   public setCanvasNodeBoundsVisible( visibility: boolean ): void {
-    assert && assert( typeof visibility === 'boolean' );
-
     const hasOverlay = !!this._canvasAreaBoundsOverlay;
 
     if ( visibility !== hasOverlay ) {
@@ -1240,8 +1222,6 @@ export default class Display {
    * TODO: reduce code duplication for handling overlays
    */
   public setFittedBlockBoundsVisible( visibility: boolean ): void {
-    assert && assert( typeof visibility === 'boolean' );
-
     const hasOverlay = !!this._fittedBlockBoundsOverlay;
 
     if ( visibility !== hasOverlay ) {

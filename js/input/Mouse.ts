@@ -46,7 +46,7 @@ export default class Mouse extends Pointer {
    * @returns - Whether the point changed
    */
   public down( point: Vector2, event: Event ): boolean {
-    assert && assert( event instanceof MouseEvent );
+    assert && assert( event instanceof MouseEvent ); // eslint-disable-line no-simple-type-checking-assertions
     const mouseEvent = event as MouseEvent;
 
     const pointChanged = this.hasPointChanged( point );
@@ -76,7 +76,7 @@ export default class Mouse extends Pointer {
    * @returns - Whether the point changed
    */
   public up( point: Vector2, event: Event ): boolean {
-    assert && assert( event instanceof MouseEvent );
+    assert && assert( event instanceof MouseEvent ); // eslint-disable-line no-simple-type-checking-assertions
     const mouseEvent = event as MouseEvent;
 
     const pointChanged = this.hasPointChanged( point );
@@ -142,7 +142,7 @@ export default class Mouse extends Pointer {
    * Sets information in this Mouse for a given mouse wheel. (scenery-internal)
    */
   public wheel( event: Event ): void {
-    assert && assert( event instanceof WheelEvent );
+    assert && assert( event instanceof WheelEvent ); // eslint-disable-line no-simple-type-checking-assertions
     const wheelEvent = event as WheelEvent;
 
     this.wheelDelta.setXYZ( wheelEvent.deltaX, wheelEvent.deltaY, wheelEvent.deltaZ );

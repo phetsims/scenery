@@ -510,8 +510,6 @@ export default class Rectangle extends SuperType {
    * Sets the Rectangle's x/y/width/height from the Bounds2 passed in.
    */
   public setRectBounds( bounds: Bounds2 ): this {
-    assert && assert( bounds instanceof Bounds2 );
-
     this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
 
     return this;
@@ -532,8 +530,6 @@ export default class Rectangle extends SuperType {
    * Sets the Rectangle's width/height from the Dimension2 size passed in.
    */
   public setRectSize( size: Dimension2 ): this {
-    assert && assert( size instanceof Dimension2 );
-
     this.setRectWidth( size.width );
     this.setRectHeight( size.height );
 
@@ -555,8 +551,6 @@ export default class Rectangle extends SuperType {
    * Sets the width of the rectangle while keeping its right edge (x + width) in the same position
    */
   public setRectWidthFromRight( width: number ): this {
-    assert && assert( typeof width === 'number' );
-
     if ( this._rectWidth !== width ) {
       const right = this._rectX + this._rectWidth;
       this.setRectWidth( width );
@@ -574,8 +568,6 @@ export default class Rectangle extends SuperType {
    * Sets the height of the rectangle while keeping its bottom edge (y + height) in the same position
    */
   public setRectHeightFromBottom( height: number ): this {
-    assert && assert( typeof height === 'number' );
-
     if ( this._rectHeight !== height ) {
       const bottom = this._rectY + this._rectHeight;
       this.setRectHeight( height );

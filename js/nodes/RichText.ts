@@ -1311,8 +1311,6 @@ export default class RichText extends Node {
    * Sets whether link clicks will call event.handle().
    */
   public setLinkEventsHandled( linkEventsHandled: boolean ): this {
-    assert && assert( typeof linkEventsHandled === 'boolean' );
-
     if ( this._linkEventsHandled !== linkEventsHandled ) {
       this._linkEventsHandled = linkEventsHandled;
       this.rebuildRichText();

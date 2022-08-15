@@ -83,8 +83,6 @@ class TransformTracker {
    * Adds a listener function that will be synchronously called whenever the transform for this Trail changes.
    */
   public addListener( listener: () => void ): void {
-    assert && assert( typeof listener === 'function' );
-
     this._listeners.push( listener );
   }
 
@@ -92,8 +90,6 @@ class TransformTracker {
    * Removes a listener that was previously added with addListener().
    */
   public removeListener( listener: () => void ): void {
-    assert && assert( typeof listener === 'function' );
-
     const index = _.indexOf( this._listeners, listener );
     assert && assert( index >= 0, 'TransformTracker listener not found' );
 

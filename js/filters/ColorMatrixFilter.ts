@@ -128,8 +128,6 @@ export default class ColorMatrixFilter extends Filter {
    * are also possible.
    */
   public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
-    assert && assert( wrapper instanceof CanvasContextWrapper );
-
     const width = wrapper.canvas.width;
     const height = wrapper.canvas.height;
 

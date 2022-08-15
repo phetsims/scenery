@@ -62,8 +62,6 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
   private _spacing: OrientationPair<number | number[]> = new OrientationPair<number | number[]>( 0, 0 );
 
   public constructor( ancestorNode: Node, providedOptions?: GridConstraintOptions ) {
-    assert && assert( ancestorNode instanceof Node );
-
     super( ancestorNode, providedOptions );
 
     // Set configuration to actual default values (instead of null) so that we will have guaranteed non-null
@@ -322,7 +320,6 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
   }
 
   public addCell( cell: GridCell ): void {
-    assert && assert( cell instanceof GridCell );
     assert && assert( !this.cells.has( cell ) );
 
     this.cells.add( cell );
@@ -333,7 +330,6 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
   }
 
   public removeCell( cell: GridCell ): void {
-    assert && assert( cell instanceof GridCell );
     assert && assert( this.cells.has( cell ) );
 
     this.cells.delete( cell );

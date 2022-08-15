@@ -110,10 +110,6 @@ export default abstract class Pointer {
    */
   protected constructor( initialPoint: Vector2, initialDownState: boolean, type: PointerType ) {
     assert && assert( initialPoint === null || initialPoint instanceof Vector2 );
-    assert && assert( typeof initialDownState === 'boolean' );
-
-    assert && assert( typeof type === 'string' );
-
     assert && assert( Object.getPrototypeOf( this ) !== Pointer.prototype, 'Pointer is an abstract class' );
 
     this.point = initialPoint;

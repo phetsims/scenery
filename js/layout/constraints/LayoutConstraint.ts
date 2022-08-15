@@ -37,8 +37,6 @@ export default class LayoutConstraint {
    * (scenery-internal)
    */
   public constructor( ancestorNode: Node ) {
-    assert && assert( ancestorNode instanceof Node );
-
     this.ancestorNode = ancestorNode;
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
   }
@@ -49,7 +47,6 @@ export default class LayoutConstraint {
    * (scenery-internal)
    */
   public addNode( node: Node, addLock = true ): void {
-    assert && assert( node instanceof Node );
     assert && assert( !this._listenedNodes.has( node ) );
     assert && assert( !addLock || !node._activeParentLayoutConstraint, 'This node is already managed by a layout container - make sure to wrap it in a Node if DAG, removing it from an old layout container, etc.' );
 
@@ -75,7 +72,6 @@ export default class LayoutConstraint {
    * (scenery-internal)
    */
   public removeNode( node: Node ): void {
-    assert && assert( node instanceof Node );
     assert && assert( this._listenedNodes.has( node ) );
 
     // Optional, since we might not have added the "lock" in addNode
@@ -209,8 +205,6 @@ export default class LayoutConstraint {
    * (scenery-internal)
    */
   public createLayoutProxy( node: Node ): LayoutProxy | null {
-    assert && assert( node instanceof Node );
-
     const trails = node.getTrails( n => n === this.ancestorNode );
 
     if ( trails.length === 1 ) {
@@ -226,8 +220,6 @@ export default class LayoutConstraint {
   }
 
   public set enabled( value: boolean ) {
-    assert && assert( typeof value === 'boolean' );
-
     if ( this._enabled !== value ) {
       this._enabled = value;
 

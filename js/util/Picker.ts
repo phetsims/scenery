@@ -223,7 +223,6 @@ export default class Picker {
    * @param [ignoreSelfDirty] - If true, will invalidate parents even if we were dirty.
    */
   private invalidate( andExclusive: boolean, ignoreSelfDirty?: boolean ): void {
-    assert && assert( typeof andExclusive === 'boolean' );
 
     // Track whether a 'dirty' flag was changed from false=>true (or if ignoreSelfDirty is passed).
     let wasNotDirty = !!ignoreSelfDirty || !this.mouseInclusiveDirty || !this.touchInclusiveDirty;

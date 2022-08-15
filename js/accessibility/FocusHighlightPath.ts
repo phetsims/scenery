@@ -298,7 +298,6 @@ class FocusHighlightPath extends Path {
    * space between the edge of the component and the beginning (inside edge) of the focusHighlight
    */
   public static getDilationCoefficient( node: Node ): number {
-    assert && assert( node instanceof Node );
     const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds

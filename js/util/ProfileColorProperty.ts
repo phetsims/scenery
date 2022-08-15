@@ -39,9 +39,6 @@ export default class ProfileColorProperty extends ColorProperty {
    */
   public constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, providedOptions?: PropertyOptions<Color> ) {
 
-    assert && assert( namespace instanceof Namespace );
-    assert && assert( typeof colorName === 'string' );
-
     const options = optionize<PropertyOptions<Color>, EmptySelfOptions, PropertyOptions<Color>>()( {
       tandem: Tandem.OPTIONAL,
 

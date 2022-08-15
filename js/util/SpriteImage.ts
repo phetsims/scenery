@@ -39,7 +39,6 @@ export default class SpriteImage extends Imageable( Object ) {
    */
   public constructor( image: ImageableImage, offset: Vector2, providedOptions?: SpriteImageOptions ) {
     assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement );
-    assert && assert( offset instanceof Vector2 );
 
     const options = optionize<SpriteImageOptions, SelfOptions, ImageableOptions>()( {
       hitTestPixels: false,

@@ -26,10 +26,7 @@ export default class RelaxedManualConstraint<T extends Node[]> extends LayoutCon
   private readonly layoutCallback: LayoutCallback<T>;
 
   public constructor( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ) {
-
-    assert && assert( ancestorNode instanceof Node );
     assert && assert( Array.isArray( nodes ) && _.every( nodes, node => node instanceof Node ) );
-    assert && assert( typeof layoutCallback === 'function' );
 
     super( ancestorNode );
 

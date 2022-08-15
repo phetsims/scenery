@@ -456,8 +456,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * @param mipmap - Whether mipmapping is supported
      */
     public setMipmap( mipmap: boolean ): this {
-      assert && assert( typeof mipmap === 'boolean' );
-
       if ( this._mipmap !== mipmap ) {
         this._mipmap = mipmap;
 
@@ -495,8 +493,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      *   mipmapLevel = Utils.roundSymmetric( computedMipmapLevel + mipmapBias )
      */
     public setMipmapBias( bias: number ): this {
-      assert && assert( typeof bias === 'number' );
-
       if ( this._mipmapBias !== bias ) {
         this._mipmapBias = bias;
 

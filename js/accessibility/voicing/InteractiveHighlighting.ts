@@ -128,7 +128,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         if ( this._interactiveHighlightLayerable ) {
 
           // if focus highlight is layerable, it must be a node for the scene graph
-          assert && assert( interactiveHighlight instanceof Node );
+          assert && assert( interactiveHighlight instanceof Node ); // eslint-disable-line no-simple-type-checking-assertions
 
           // make sure the highlight is invisible, the HighlightOverlay will manage visibility
           ( interactiveHighlight as Node ).visible = false;

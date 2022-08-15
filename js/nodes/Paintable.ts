@@ -226,8 +226,6 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Sets whether the fill is marked as pickable.
      */
     public setFillPickable( pickable: boolean ): this {
-      assert && assert( typeof pickable === 'boolean' );
-
       if ( this._fillPickable !== pickable ) {
         this._fillPickable = pickable;
 
@@ -473,8 +471,6 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Sets the LineStyles object (it determines stroke appearance). The passed-in object will be mutated as needed.
      */
     public setLineStyles( lineStyles: LineStyles ): this {
-      assert && assert( lineStyles instanceof LineStyles );
-
       this._lineDrawingStyles = lineStyles;
       this.invalidateStroke();
       return this;

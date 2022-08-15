@@ -133,7 +133,6 @@ export default class Color {
     }
     // support for set( hex ) and set( hex, alpha )
     else if ( b === undefined ) {
-      assert && assert( typeof r === 'number' );
       assert && assert( g === undefined || typeof g === 'number' );
 
       const red = ( r >> 16 ) & 0xFF;
@@ -144,9 +143,6 @@ export default class Color {
     }
     // support for set( r, g, b ) and set( r, g, b, a )
     else {
-      assert && assert( typeof r === 'number' );
-      assert && assert( typeof g === 'number' );
-      assert && assert( typeof b === 'number' );
       assert && assert( a === undefined || typeof a === 'number' );
       this.setRGBA( r, g!, b, ( a === undefined ) ? 1 : a );
     }
@@ -255,8 +251,6 @@ export default class Color {
    * @param ratio - Not necessarily constrained in [0, 1]
    */
   public blend( otherColor: Color, ratio: number ): Color {
-    assert && assert( otherColor instanceof Color );
-
     const gamma = 2.4;
     const linearRedA = Math.pow( this.r, gamma );
     const linearRedB = Math.pow( otherColor.r, gamma );
@@ -738,8 +732,6 @@ export default class Color {
    * Whether the specified CSS string is a valid CSS color string
    */
   public static isCSSColorString( cssString: string ): boolean {
-    assert && assert( typeof cssString === 'string' );
-
     const str = Color.preprocessCSS( cssString );
 
     // run through the available text formats

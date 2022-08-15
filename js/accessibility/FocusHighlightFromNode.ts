@@ -78,7 +78,6 @@ class FocusHighlightFromNode extends FocusHighlightPath {
    * ParallelDOM.setGroupFocusHighlight() for more information on group highlights.
    */
   public setShapeFromNode( node: Node ): void {
-    assert && assert( node instanceof Node );
 
     // cleanup the previous listener
     if ( this.observedBoundsProperty ) {
