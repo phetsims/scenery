@@ -29,7 +29,7 @@ export default class ProfileColorProperty extends ColorProperty {
   // Treat as private
   public readonly name: string;
 
-  public static readonly TANDEM_NAME_SUFFIX = 'ColorProperty';
+  public static override readonly TANDEM_NAME_SUFFIX = 'ColorProperty';
 
   /**
    * @param namespace - namespace that this color belongs to
