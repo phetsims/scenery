@@ -7,7 +7,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import IProperty from '../../../../../axon/js/IProperty.js';
+import TReadOnlyProperty from '../../../../../axon/js/TReadOnlyProperty.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, RichText, RichTextOptions, scenery } from '../../../imports.js';
 
@@ -17,7 +17,7 @@ export type VoicingRichTextOptions = SelfOptions & ParentOptions;
 
 class VoicingRichText extends ReadingBlock( RichText ) {
 
-  public constructor( text: string | IProperty<string>, providedOptions?: VoicingRichTextOptions ) {
+  public constructor( text: string | TReadOnlyProperty<string>, providedOptions?: VoicingRichTextOptions ) {
 
     const initialText = typeof text === 'string' ? text : text.value;
 
@@ -49,7 +49,9 @@ class VoicingRichText extends ReadingBlock( RichText ) {
     this.mutate( options );
 
     if ( typeof text !== 'string' ) {
-      this.textProperty = text;
+      this.mutate( {
+        textProperty: text
+      } );
 
       // TODO: We might be memory leaking here, we'll want to dispose for https://github.com/phetsims/chipper/issues/1302
       text.link( string => {
