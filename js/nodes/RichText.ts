@@ -72,6 +72,7 @@ import { Color, FireListener, Font, TInputListener, TPaint, Line, Node, NodeOpti
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -175,7 +176,7 @@ type SelfOptions = {
   lineWrap?: number | null;
 
   // Sets forwarding of the textProperty, see setTextProperty() for more documentation
-  textProperty?: IProperty<string> | null;
+  textProperty?: TReadOnlyProperty<string> | null;
 
   textPropertyOptions?: PropertyOptions<string>;
 
@@ -327,15 +328,21 @@ export default class RichText extends Node {
   // Normal layout container of lines (separate, so we can clear it easily)
   private lineContainer: Node;
 
-  public constructor( text: string | number, providedOptions?: RichTextOptions ) {
+  public constructor( text: string | number | TReadOnlyProperty<string>, providedOptions?: RichTextOptions ) {
 
     // We only fill in some defaults, since the other defaults are defined below (and mutate is relied on)
-    const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill' | 'text'>, NodeOptions>()( {
+    const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill'>, NodeOptions>()( {
       fill: '#000000',
-      text: text,
       tandem: Tandem.OPTIONAL,
       phetioType: RichText.RichTextIO
     }, providedOptions );
+
+    if ( typeof text === 'string' || typeof text === 'number' ) {
+      options.text = text;
+    }
+    else {
+      options.textProperty = text;
+    }
 
     super();
 

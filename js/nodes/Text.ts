@@ -22,6 +22,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, TTextDrawable, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable } from '../imports.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 // constants
 const TEXT_OPTION_KEYS = [
@@ -47,7 +48,7 @@ const useDOMAsFastBounds = window.navigator.userAgent.includes( 'like Gecko) Ver
 export type TextBoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
 type SelfOptions = {
   boundsMethod?: TextBoundsMethod;
-  textProperty?: IProperty<string> | null;
+  textProperty?: TReadOnlyProperty<string> | null;
   text?: string | number;
   font?: Font | string;
   fontWeight?: string | number;
@@ -87,7 +88,7 @@ export default class Text extends Paintable( Node ) {
    * @param [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  public constructor( text: string | number, options?: TextOptions ) {
+  public constructor( text: string | number | TReadOnlyProperty<string>, options?: TextOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
@@ -102,10 +103,16 @@ export default class Text extends Paintable( Node ) {
 
     const definedOptions = extendDefined( {
       fill: '#000000', // Default to black filled text
-      text: text,
       tandem: Tandem.OPTIONAL,
       phetioType: Text.TextIO
     }, options );
+
+    if ( typeof text === 'string' || typeof text === 'number' ) {
+      definedOptions.text = text;
+    }
+    else {
+      definedOptions.textProperty = text;
+    }
 
     this.textTandem = definedOptions.tandem;
 
