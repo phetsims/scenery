@@ -10,7 +10,7 @@
  * @author Jesse Greenberg
  */
 
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { Focus, Instance, Node, scenery, TrailVisibilityTracker } from '../imports.js';
 
@@ -30,7 +30,7 @@ class FocusDisplayedController {
   private visibilityTracker: TrailVisibilityTracker | null = null;
 
   // When there is value, we will watch and update when there are changes to the displayed state of the Focus trail.
-  private focusProperty: IProperty<Focus | null> | null;
+  private focusProperty: TProperty<Focus | null> | null;
   private readonly onRemoveFocus: () => void;
 
   // Bound functions that are called when the displayed state of the Node changes.
@@ -40,7 +40,7 @@ class FocusDisplayedController {
   // Handles changes to focus, adding or removing listeners
   private readonly boundFocusListener: ( focus: Focus | null ) => void;
 
-  public constructor( focusProperty: IProperty<Focus | null>, providedOptions?: FocusDisplayedControllerOptions ) {
+  public constructor( focusProperty: TProperty<Focus | null>, providedOptions?: FocusDisplayedControllerOptions ) {
 
     const options = optionize<FocusDisplayedControllerOptions>()( {
       onRemoveFocus: _.noop

@@ -10,7 +10,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
@@ -44,7 +44,7 @@ class FocusHighlightFromNode extends FocusHighlightPath {
 
   // Property for a Node's bounds which are currently being observed with the boundsListener. Referenced so that
   // we can remove the listener later.
-  private observedBoundsProperty: null | IProperty<Bounds2> = null;
+  private observedBoundsProperty: null | TProperty<Bounds2> = null;
 
   // Listener that sets the shape of this highlight when the Node bounds change. Referenced so it can be removed later.
   private boundsListener: null | ( ( bounds: Bounds2 ) => void ) = null;

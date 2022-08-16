@@ -57,7 +57,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
@@ -392,19 +392,19 @@ export default class RichText extends Node {
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
-  public setTextProperty( newTarget: IProperty<string> | null ): this {
+  public setTextProperty( newTarget: TProperty<string> | null ): this {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  public set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
+  public set textProperty( property: TProperty<string> | null ) { this.setTextProperty( property ); }
 
-  public get textProperty(): IProperty<string> { return this.getTextProperty(); }
+  public get textProperty(): TProperty<string> { return this.getTextProperty(); }
 
   /**
    * Like Node.getVisibleProperty, but for the text string. Note this is not the same as the Property provided in
    * setTextProperty. Thus is the nature of TinyForwardingProperty.
    */
-  public getTextProperty(): IProperty<string> {
+  public getTextProperty(): TProperty<string> {
     return this._textProperty;
   }
 

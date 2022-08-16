@@ -27,7 +27,7 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Property from '../../../axon/js/Property.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -42,28 +42,28 @@ export default class FocusManager {
   // This Property whose Focus Trail points to the Node under the pointer to
   // support features of Voicing and Interactive Highlights. Nodes that compose InteractiveHighlighting can
   // receive this Focus and a highlight may appear around it.
-  public readonly pointerFocusProperty: IProperty<Focus | null>;
+  public readonly pointerFocusProperty: TProperty<Focus | null>;
 
   // The Property that indicates which Node that uses ReadingBlock is currently
   // active. Used by the HighlightOverlay to highlight ReadingBlock Nodes whose content is being spoken.
-  public readonly readingBlockFocusProperty: IProperty<Focus | null>;
+  public readonly readingBlockFocusProperty: TProperty<Focus | null>;
 
   // A Property whose value is either null or a Focus with Trail and Display equal
   // to the pointerFocusProperty. When this Property has a value, the HighlightOverlay will wait to update the
   // highlight for the pointerFocusProperty. This is useful when the pointer has begun to interact with a Node
   // that uses InteractiveHighlighting, but the mouse has moved out of it or over another during interaction. Thehighlight
   // should remain on the Node receiving interaction and wait to update until interaction completes.
-  public readonly lockedPointerFocusProperty: IProperty<Focus | null>;
+  public readonly lockedPointerFocusProperty: TProperty<Focus | null>;
 
   // Controls whether or not highlights related to PDOM focus are visible.
-  public readonly pdomFocusHighlightsVisibleProperty: IProperty<boolean>;
+  public readonly pdomFocusHighlightsVisibleProperty: TProperty<boolean>;
 
   // Controls whether "Interactive Highlights" are visible.
-  public readonly interactiveHighlightsVisibleProperty: IProperty<boolean>;
+  public readonly interactiveHighlightsVisibleProperty: TProperty<boolean>;
 
   // Controls whether "Reading Block" highlights will be visible around Nodes
   // that use ReadingBlock.
-  public readonly readingBlockHighlightsVisibleProperty: IProperty<boolean>;
+  public readonly readingBlockHighlightsVisibleProperty: TProperty<boolean>;
 
   // Indicates whether any highlights should appear from pointer
   // input (mouse/touch). If false, we will try to avoid doing expensive work in PointerHighlighting.js.

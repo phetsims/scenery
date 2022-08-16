@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import Property from '../../../axon/js/Property.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
@@ -14,7 +14,7 @@ import { scenery, SpriteImage } from '../imports.js';
 
 export default class Sprite {
 
-  public readonly imageProperty: IProperty<SpriteImage>;
+  public readonly imageProperty: TProperty<SpriteImage>;
 
   public constructor( spriteImage: SpriteImage ) {
     this.imageProperty = new Property( spriteImage );

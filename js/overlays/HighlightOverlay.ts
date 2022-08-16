@@ -15,7 +15,7 @@ import optionize from '../../../phet-core/js/optionize.js';
 import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, TOverlay, TPaint, Node, scenery, Trail, TransformTracker } from '../imports.js';
 import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.
@@ -38,14 +38,14 @@ export type Highlight = Node | Shape | null | 'invisible';
 export type HighlightOverlayOptions = {
 
   // Controls whether highlights related to DOM focus are visible
-  pdomFocusHighlightsVisibleProperty?: IProperty<boolean>;
+  pdomFocusHighlightsVisibleProperty?: TProperty<boolean>;
 
   // Controls whether highlights related to Interactive Highlights are visible
-  interactiveHighlightsVisibleProperty?: IProperty<boolean>;
+  interactiveHighlightsVisibleProperty?: TProperty<boolean>;
 
   // Controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
   // are shown when pointerFocusProperty changes
-  readingBlockHighlightsVisibleProperty?: IProperty<boolean>;
+  readingBlockHighlightsVisibleProperty?: TProperty<boolean>;
 };
 
 export default class HighlightOverlay implements TOverlay {
@@ -115,13 +115,13 @@ export default class HighlightOverlay implements TOverlay {
   private readingBlockTransformTracker: null | TransformTracker = null;
 
   // See HighlightOverlayOptions for documentation.
-  private readonly pdomFocusHighlightsVisibleProperty: IProperty<boolean>;
+  private readonly pdomFocusHighlightsVisibleProperty: TProperty<boolean>;
 
   // See HighlightOverlayOptions for documentation.
-  private readonly interactiveHighlightsVisibleProperty: IProperty<boolean>;
+  private readonly interactiveHighlightsVisibleProperty: TProperty<boolean>;
 
   // See HighlightOverlayOptions for documentation.
-  private readonly readingBlockHighlightsVisibleProperty: IProperty<boolean>;
+  private readonly readingBlockHighlightsVisibleProperty: TProperty<boolean>;
 
   // Display that manages all highlights
   private readonly focusDisplay: Display;
@@ -283,7 +283,7 @@ export default class HighlightOverlay implements TOverlay {
    * @param layerable - Is the highlight layerable in the scene graph?
    * @param visibleProperty - Property controlling the visibility for the provided highlight
    */
-  private activateHighlight( trail: Trail, node: Node, nodeHighlight: Highlight, layerable: boolean, visibleProperty: IProperty<boolean> ): void {
+  private activateHighlight( trail: Trail, node: Node, nodeHighlight: Highlight, layerable: boolean, visibleProperty: TProperty<boolean> ): void {
     this.trail = trail;
     this.node = node;
 

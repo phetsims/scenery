@@ -12,7 +12,7 @@ import Orientation from '../../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import mutate from '../../../../phet-core/js/mutate.js';
 import { Divider, ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutJustification, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery, VerticalLayoutJustification } from '../../imports.js';
-import IProperty from '../../../../axon/js/IProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
   ...FLOW_CONFIGURABLE_OPTION_KEYS,
@@ -42,12 +42,12 @@ type SelfOptions = {
   wrap?: boolean;
 
   // The preferred width/height (ideally from a container's localPreferredWidth/localPreferredHeight.
-  preferredWidthProperty?: IProperty<number | null>;
-  preferredHeightProperty?: IProperty<number | null>;
+  preferredWidthProperty?: TProperty<number | null>;
+  preferredHeightProperty?: TProperty<number | null>;
 
   // The minimum width/height (ideally from a container's localMinimumWidth/localMinimumHeight.
-  minimumWidthProperty?: IProperty<number | null>;
-  minimumHeightProperty?: IProperty<number | null>;
+  minimumWidthProperty?: TProperty<number | null>;
+  minimumHeightProperty?: TProperty<number | null>;
 };
 type ParentOptions = ExternalFlowConfigurableOptions & NodeLayoutAvailableConstraintOptions;
 export type FlowConstraintOptions = SelfOptions & ParentOptions;
@@ -465,7 +465,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     this.updateLayoutAutomatically();
   }
 
-  public getPreferredProperty( orientation: Orientation ): IProperty<number | null> {
+  public getPreferredProperty( orientation: Orientation ): TProperty<number | null> {
     return orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty : this.preferredHeightProperty;
   }
 

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IProperty from '../../../../axon/js/IProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector2Property from '../../../../dot/js/Vector2Property.js';
 import { Node, NodeLayoutConstraint, NodeOptions, scenery, Sizable, SizableOptions } from '../../imports.js';
@@ -34,7 +34,7 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
 
   protected _constraint!: Constraint; // Can't be readonly because the subtype sets this
 
-  public readonly layoutOriginProperty: IProperty<Vector2> = new Vector2Property( Vector2.ZERO );
+  public readonly layoutOriginProperty: TProperty<Vector2> = new Vector2Property( Vector2.ZERO );
 
   protected constructor( providedOptions?: LayoutNodeOptions ) {
     super();

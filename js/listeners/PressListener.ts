@@ -34,7 +34,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import { Display, TInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
@@ -143,29 +143,29 @@ export default class PressListener extends EnabledComponent implements TInputLis
   public readonly overPointers: ObservableArray<Pointer>;
 
   // (read-only) - Tracks whether this listener is "pressed" or not.
-  public readonly isPressedProperty: IProperty<boolean>;
+  public readonly isPressedProperty: TProperty<boolean>;
 
   // (read-only) - It will be set to true when at least one pointer is over the listener.
   // This is not effected by PDOM focus.
-  public readonly isOverProperty: IProperty<boolean>;
+  public readonly isOverProperty: TProperty<boolean>;
 
   // (read-only) - True when either isOverProperty is true, or when focused and the
   // related Display is showing its focusHighlights, see this.validateOver() for details.
-  public readonly looksOverProperty: IProperty<boolean>;
+  public readonly looksOverProperty: TProperty<boolean>;
 
   // (read-only) - It will be set to true when either:
   //   1. The listener is pressed and the pointer that is pressing is over the listener.
   //   2. There is at least one unpressed pointer that is over the listener.
-  public readonly isHoveringProperty: IProperty<boolean>;
+  public readonly isHoveringProperty: TProperty<boolean>;
 
   // (read-only) - It will be set to true when either:
   //   1. The listener is pressed.
   //   2. There is at least one unpressed pointer that is over the listener.
   // This is essentially true when ( isPressed || isHovering ).
-  public readonly isHighlightedProperty: IProperty<boolean>;
+  public readonly isHighlightedProperty: TProperty<boolean>;
 
   // (read-only) - Whether the listener has focus (should appear to be over)
-  public readonly isFocusedProperty: IProperty<boolean>;
+  public readonly isFocusedProperty: TProperty<boolean>;
 
   private readonly cursorProperty: TReadOnlyProperty<string | null>;
 
@@ -197,7 +197,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
   private _isHighlightedListener: () => void;
 
   // (read-only) - Whether or not a press is being processed from a pdom click input event from the PDOM.
-  public readonly pdomClickingProperty: IProperty<boolean>;
+  public readonly pdomClickingProperty: TProperty<boolean>;
 
   // (read-only) - This Property was added to support input from the PDOM. It tracks whether
   // or not the button should "look" down. This will be true if downProperty is true or if a pdom click is in

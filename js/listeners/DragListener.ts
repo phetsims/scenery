@@ -69,7 +69,7 @@
  */
 
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -94,7 +94,7 @@ type SelfOptions<Listener extends DragListener> = {
   // frame (applying any provided transforms as needed). Typically, DURING a drag this Property should not be
   // modified externally (as the next drag event will probably undo the change), but it's completely fine to modify
   // this Property at any other time.
-  positionProperty?: IProperty<Vector2> | null;
+  positionProperty?: TProperty<Vector2> | null;
 
   // Called as start( event: {SceneryEvent}, listener: {DragListener} ) when the drag is started.
   // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
@@ -171,7 +171,7 @@ const isPressedListener = ( listener: DragListener ): listener is PressedDragLis
 export default class DragListener extends PressListener implements TInputListener {
 
   // Alias for isPressedProperty (as this name makes more sense for dragging)
-  public isUserControlledProperty: IProperty<boolean>;
+  public isUserControlledProperty: TProperty<boolean>;
 
   private _allowTouchSnag: RequiredOption<SelfOptions<DragListener>, 'allowTouchSnag'>;
   private _applyOffset: RequiredOption<SelfOptions<DragListener>, 'applyOffset'>;

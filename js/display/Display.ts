@@ -52,7 +52,7 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -162,7 +162,7 @@ export default class Display {
   public readonly id: number;
 
   // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
-  public readonly sizeProperty: IProperty<Dimension2>;
+  public readonly sizeProperty: TProperty<Dimension2>;
 
   // data structure for managing aria-live alerts the this Display instance
   public descriptionUtteranceQueue: UtteranceQueue;

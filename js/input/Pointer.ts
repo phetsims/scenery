@@ -23,7 +23,7 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
@@ -70,12 +70,12 @@ export default abstract class Pointer {
   // @deprecated Whether this pointer is 'down' (pressed).
   // Will be phased out in https://github.com/phetsims/scenery/issues/803 to something that is specific for the actual
   // mouse/pen button (since this doesn't generalize well to the left/right mouse buttons).
-  public isDownProperty: IProperty<boolean>;
+  public isDownProperty: TProperty<boolean>;
 
   // Whether there is a main listener "attached" to this pointer. This signals that the
   // listener is "doing" something with the pointer, and that it should be interrupted if other actions need to take
   // over the pointer behavior.
-  public attachedProperty: IProperty<boolean>;
+  public attachedProperty: TProperty<boolean>;
 
   // All attached listeners (will be activated in order).
   private readonly _listeners: TInputListener[];

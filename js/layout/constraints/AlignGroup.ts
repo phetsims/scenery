@@ -19,7 +19,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IProperty from '../../../../axon/js/IProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
@@ -100,11 +100,11 @@ export default class AlignGroup {
   /**
    * Returns the Property holding the current maximum width of the grouped content.
    */
-  public getMaxWidthProperty(): IProperty<number> {
+  public getMaxWidthProperty(): TProperty<number> {
     return this._maxWidthProperty;
   }
 
-  public get maxWidthProperty(): IProperty<number> { return this.getMaxWidthProperty(); }
+  public get maxWidthProperty(): TProperty<number> { return this.getMaxWidthProperty(); }
 
   /**
    * Returns the current maximum height of the grouped content.
@@ -118,11 +118,11 @@ export default class AlignGroup {
   /**
    * Returns the Property holding the current maximum height of the grouped content.
    */
-  public getMaxHeightProperty(): IProperty<number> {
+  public getMaxHeightProperty(): TProperty<number> {
     return this._maxHeightProperty;
   }
 
-  public get maxHeightProperty(): IProperty<number> { return this.getMaxHeightProperty(); }
+  public get maxHeightProperty(): TProperty<number> { return this.getMaxHeightProperty(); }
 
   /**
    * Creates an alignment box with the given content and options.

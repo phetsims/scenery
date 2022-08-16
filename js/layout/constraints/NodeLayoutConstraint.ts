@@ -12,7 +12,7 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { LayoutConstraint, LayoutProxy, Node, scenery } from '../../imports.js';
-import IProperty from '../../../../axon/js/IProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
@@ -28,13 +28,13 @@ type SelfOptions = {
   // If available, the local versions of these Properties for the layout container should be passed in. We do the
   // layout in the local coordinate frame of e.g. GridBox/FlowBox. It's named this way just for ease-of-use within
   // this code.
-  preferredWidthProperty?: IProperty<number | null>;
-  preferredHeightProperty?: IProperty<number | null>;
-  minimumWidthProperty?: IProperty<number | null>;
-  minimumHeightProperty?: IProperty<number | null>;
+  preferredWidthProperty?: TProperty<number | null>;
+  preferredHeightProperty?: TProperty<number | null>;
+  minimumWidthProperty?: TProperty<number | null>;
+  minimumHeightProperty?: TProperty<number | null>;
 
   // If provided, will position content at an offset from the normal origin
-  layoutOriginProperty?: IProperty<Vector2>;
+  layoutOriginProperty?: TProperty<Vector2>;
 };
 
 export type NodeLayoutConstraintOptions = SelfOptions;
@@ -49,14 +49,14 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
   // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
   // Layout nodes can use this to adjust their localBounds. FlowBox/GridBox uses this for their localBounds.
   // (scenery-internal)
-  public readonly layoutBoundsProperty: IProperty<Bounds2>;
+  public readonly layoutBoundsProperty: TProperty<Bounds2>;
 
   // (scenery-internal)
-  public readonly preferredWidthProperty: IProperty<number | null>;
-  public readonly preferredHeightProperty: IProperty<number | null>;
-  public readonly minimumWidthProperty: IProperty<number | null>;
-  public readonly minimumHeightProperty: IProperty<number | null>;
-  public readonly layoutOriginProperty: IProperty<Vector2>;
+  public readonly preferredWidthProperty: TProperty<number | null>;
+  public readonly preferredHeightProperty: TProperty<number | null>;
+  public readonly minimumWidthProperty: TProperty<number | null>;
+  public readonly minimumHeightProperty: TProperty<number | null>;
+  public readonly layoutOriginProperty: TProperty<Vector2>;
 
   /**
    * Recommended for ancestorNode to be the layout container, and that the layout container extends LayoutNode.

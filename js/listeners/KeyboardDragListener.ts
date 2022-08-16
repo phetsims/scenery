@@ -31,7 +31,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
-import IProperty from '../../../axon/js/IProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
@@ -87,7 +87,7 @@ type SelfOptions = {
 
   // If provided, it will be synchronized with the drag position in the model frame, applying provided transforms as
   // needed. Most useful when used with transform option
-  positionProperty?: IProperty<Vector2> | null;
+  positionProperty?: TProperty<Vector2> | null;
 
   // If provided, this will be the conversion between the view and model coordinate frames. Usually most useful when
   // paired with the positionProperty.
@@ -137,7 +137,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   private _end: ( ( event: SceneryEvent ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _transform: Transform3 | null;
-  private _positionProperty: IProperty<Vector2> | null;
+  private _positionProperty: TProperty<Vector2> | null;
   private _dragVelocity: number;
   private _shiftDragVelocity: number;
   private _dragDelta: number;
