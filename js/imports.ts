@@ -289,6 +289,7 @@ export { default as RichText } from './nodes/RichText.js';
 export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks } from './nodes/RichText.js';
 
 export { default as VoicingText } from './accessibility/voicing/nodes/VoicingText.js';
+export type { VoicingTextOptions } from './accessibility/voicing/nodes/VoicingText.js';
 export { default as VoicingRichText } from './accessibility/voicing/nodes/VoicingRichText.js';
 
 export { default as scenerySerialize, serializeConnectedNodes } from './util/scenerySerialize.js';
