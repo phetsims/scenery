@@ -30,7 +30,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { TInputListener, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent } from '../imports.js';
+import { KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -576,6 +576,8 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
    * @param dt - in seconds
    */
   private step( dt: number ): void {
+
+    // dt is in seconds and we convert to ms
     const ms = dt * 1000;
 
     // no-op unless a key is down
@@ -587,9 +589,12 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         }
       }
 
-      // dt is in seconds and we convert to ms
-      this.moveOnHoldDelayCounter += ms;
-      this.moveOnHoldIntervalCounter += ms;
+      // Movement delay counters should only increment if movement keys are pressed down. They will get reset
+      // every up event.
+      if ( this.movementKeysDown ) {
+        this.moveOnHoldDelayCounter += ms;
+        this.moveOnHoldIntervalCounter += ms;
+      }
 
       // update timer for keygroup if one is being held down
       if ( this.currentHotkey ) {
