@@ -13,7 +13,7 @@ import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, scenery, Text
 
 type SelfOptions = EmptySelfOptions;
 type ParentOptions = ReadingBlockOptions & TextOptions;
-type VoicingTextOptions = SelfOptions & ParentOptions;
+export type VoicingTextOptions = SelfOptions & ParentOptions;
 
 class VoicingText extends ReadingBlock( Text ) {
 
