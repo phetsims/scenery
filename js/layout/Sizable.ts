@@ -151,7 +151,7 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       this.heightSizable = value;
     }
 
-    public readonly mixesSizable: boolean = true;
+    public get mixesSizable(): boolean { return true; }
 
     public validateLocalPreferredSize(): void {
       if ( assert ) {

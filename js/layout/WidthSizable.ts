@@ -169,7 +169,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       this.isWidthResizableProperty.value = value;
     }
 
-    public readonly mixesWidthSizable: boolean = true;
+    public get mixesWidthSizable(): boolean { return true; }
 
     public validateLocalPreferredWidth(): void {
       if ( assert ) {
@@ -189,8 +189,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
         this._preferredWidthChanging = true;
 
         const localPreferredWidth = ( node.matrix.isAligned() && this.preferredWidth !== null )
-                                    ? Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) )
-                                    : null;
+                                     ? Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) )
+                                     : null;
 
         if ( this.localPreferredWidthProperty.value === null ||
              localPreferredWidth === null ||
@@ -208,8 +208,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
         this._preferredWidthChanging = true;
 
         const preferredWidth = ( node.matrix.isAligned() && this.localPreferredWidth !== null )
-                               ? Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) )
-                               : null;
+                                ? Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) )
+                                : null;
         if ( this.preferredWidthProperty.value === null ||
              preferredWidth === null ||
              Math.abs( this.preferredWidthProperty.value - preferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
@@ -226,8 +226,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
         this._minimumWidthChanging = true;
 
         const localMinimumWidth = ( node.matrix.isAligned() && this.minimumWidth !== null )
-                                  ? Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) )
-                                  : null;
+                                   ? Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) )
+                                   : null;
 
         if ( this.localMinimumWidthProperty.value === null ||
              localMinimumWidth === null ||
@@ -245,8 +245,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
         this._minimumWidthChanging = true;
 
         const minimumWidth = ( node.matrix.isAligned() && this.localMinimumWidth !== null )
-                             ? Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) )
-                             : null;
+                              ? Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) )
+                              : null;
 
         if ( this.minimumWidthProperty.value === null ||
              minimumWidth === null ||

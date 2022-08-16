@@ -538,7 +538,9 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
     /**
      * Whether or not a Node composes Voicing.
      */
-    public readonly isVoicing: boolean = true;
+    public get isVoicing(): boolean {
+      return true;
+    }
 
     /**
      * Detaches references that ensure this components of this Trait are eligible for garbage collection.

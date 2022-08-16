@@ -4940,15 +4940,15 @@ class Node extends ParallelDOM {
   }
 
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable
-  public readonly widthSizable: boolean = false;
+  public get widthSizable(): boolean { return false; }
 
-  public readonly heightSizable: boolean = false;
+  public get heightSizable(): boolean { return false; }
 
-  public readonly mixesWidthSizable: boolean = false;
+  public get mixesWidthSizable(): boolean { return false; }
 
-  public readonly mixesHeightSizable: boolean = false;
+  public get mixesHeightSizable(): boolean { return false; }
 
-  public readonly mixesSizable: boolean = false;
+  public get mixesSizable(): boolean { return false; }
 
   /**
    * Sets the preventFit performance flag.

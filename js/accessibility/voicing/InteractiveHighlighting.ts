@@ -112,9 +112,11 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * Whether a Node composes InteractiveHighlighting.
      */
-    public readonly isInteractiveHighlighting: boolean = true;
+    public get isInteractiveHighlighting(): boolean {
+      return true;
+    }
 
-    public static readonly _mixesInteractiveHighlighting: boolean = true;
+    public static get _mixesInteractiveHighlighting(): boolean { return true;}
 
     /**
      * Set the interactive highlight for this node. By default, the highlight will be a pink rectangle that surrounds

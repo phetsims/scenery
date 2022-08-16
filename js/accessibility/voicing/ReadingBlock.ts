@@ -145,7 +145,9 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
     /**
      * Whether a Node composes ReadingBlock.
      */
-    public readonly isReadingBlock: boolean = true;
+    public get isReadingBlock(): boolean {
+      return true;
+    }
 
     /**
      * Set the tagName for the node composing ReadingBlock. This is the tagName (of ParallelDOM) that will be applied
