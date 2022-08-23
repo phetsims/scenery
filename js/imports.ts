@@ -291,6 +291,7 @@ export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks } from
 export { default as VoicingText } from './accessibility/voicing/nodes/VoicingText.js';
 export type { VoicingTextOptions } from './accessibility/voicing/nodes/VoicingText.js';
 export { default as VoicingRichText } from './accessibility/voicing/nodes/VoicingRichText.js';
+export type { VoicingRichTextOptions } from './accessibility/voicing/nodes/VoicingRichText.js';
 
 export { default as scenerySerialize, serializeConnectedNodes } from './util/scenerySerialize.js';
 export { default as sceneryDeserialize } from './util/sceneryDeserialize.js';
