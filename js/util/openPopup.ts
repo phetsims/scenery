@@ -1,4 +1,4 @@
-// Copyright 2019-2022, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * Opens a URL in a popup window or tab if possible.
@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import phetCore from './phetCore.js';
+import scenery from '../scenery.js';
+import { allowLinksProperty } from '../imports.js';
 
 /**
  * Opens the URL in a new window or tab.
@@ -15,7 +16,7 @@ function openPopup( url: string ): void {
 
   // Don't allow openPopup IF we have query parameters AND allowLinks is false,
   // see https://github.com/phetsims/joist/issues/830
-  if ( !( window?.phet?.chipper?.queryParameters ) || ( window?.phet?.chipper?.queryParameters?.allowLinks ) ) {
+  if ( allowLinksProperty.value ) {
     const popupWindow = window.open( url, '_blank' ); // open in a new window/tab
 
     // We can't guarantee the presence of a window object, since if it isn't opened then it will return null.
@@ -25,5 +26,5 @@ function openPopup( url: string ): void {
   }
 }
 
-phetCore.register( 'openPopup', openPopup );
+scenery.register( 'openPopup', openPopup );
 export default openPopup;

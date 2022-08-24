@@ -31,6 +31,8 @@ export { default as FullScreen } from './util/FullScreen.js';
 export { default as CountMap } from './util/CountMap.js';
 export { default as DisplayedProperty } from './util/DisplayedProperty.js';
 export { default as SceneImage } from './util/SceneImage.js';
+export { default as allowLinksProperty } from './util/allowLinksProperty.js';
+export { default as openPopup } from './util/openPopup.js';
 export type { default as WindowTouch } from './input/WindowTouch.js';
 
 export { default as SpriteInstance, SpriteInstanceTransformType } from './util/SpriteInstance.js';
