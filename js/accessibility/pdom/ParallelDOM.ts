@@ -135,6 +135,9 @@ import { Highlight } from '../../overlays/HighlightOverlay.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
+import TinyProperty from '../../../../axon/js/TinyProperty.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -144,11 +147,19 @@ const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
 // see setPDOMHeadingBehavior for more details
-const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, heading: string ) => {
+const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, heading: string | TReadOnlyProperty<string> ) => {
 
   options.labelTagName = `h${node.headingLevel}`; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
   options.labelContent = heading;
   return options;
+};
+
+const unwrapProperty = ( valueOrProperty: string | TReadOnlyProperty<string> | null ): string | null => {
+  const result = valueOrProperty === null ? null : ( typeof valueOrProperty === 'string' ? valueOrProperty : valueOrProperty.value );
+
+  assert && assert( result === null || typeof result === 'string' );
+
+  return result;
 };
 
 // these elements are typically associated with forms, and support certain attributes
@@ -226,11 +237,11 @@ export type ParallelDOMOptions = {
   /*
    * Higher Level API Functions
    */
-  accessibleName?: string | null;
+  accessibleName?: string | TReadOnlyProperty<string> | null;
   accessibleNameBehavior?: PDOMBehaviorFunction;
-  helpText?: string | null;
+  helpText?: string | TReadOnlyProperty<string> | null;
   helpTextBehavior?: PDOMBehaviorFunction;
-  pdomHeading?: string | null;
+  pdomHeading?: string | TReadOnlyProperty<string> | null;
   pdomHeadingBehavior?: PDOMBehaviorFunction;
 
   /*
@@ -239,21 +250,21 @@ export type ParallelDOMOptions = {
   containerTagName?: string | null;
   containerAriaRole?: string | null;
 
-  innerContent?: string | null;
+  innerContent?: string | TReadOnlyProperty<string> | null;
   inputType?: string | null;
-  inputValue?: string | null | number;
+  inputValue?: string | TReadOnlyProperty<string> | null | number;
   pdomChecked?: boolean;
   pdomNamespace?: string | null;
-  ariaLabel?: string | null;
+  ariaLabel?: string | TReadOnlyProperty<string> | null;
   ariaRole?: string | null;
-  ariaValueText?: string | null;
+  ariaValueText?: string | TReadOnlyProperty<string> | null;
 
   labelTagName?: string | null;
-  labelContent?: string | null;
+  labelContent?: string | TReadOnlyProperty<string> | null;
   appendLabel?: boolean;
 
   descriptionTagName?: string | null;
-  descriptionContent?: string | null;
+  descriptionContent?: string | TReadOnlyProperty<string> | null;
   appendDescription?: boolean;
 
   focusHighlight?: Highlight;
@@ -273,7 +284,7 @@ export type ParallelDOMOptions = {
 
 type PDOMAttribute = {
   attribute: string;
-  value: string | boolean | number;
+  value: string | TReadOnlyProperty<string> | boolean | number;
   namespace: string | null;
   options: SetPDOMAttributeOptions;
 };
@@ -323,7 +334,7 @@ type RemovePDOMClassOptions = {
  * this list for execution after this Node is fully created. See discussion in https://github.com/phetsims/sun/issues/503#issuecomment-676541373
  * @returns the options that have been mutated by the behavior function.
  */
-export type PDOMBehaviorFunction = ( node: Node, options: ParallelDOMOptions, value: string, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
+export type PDOMBehaviorFunction = ( node: Node, options: ParallelDOMOptions, value: string | TReadOnlyProperty<string>, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
 
 export default class ParallelDOM extends PhetioObject {
 
@@ -726,8 +737,9 @@ export default class ParallelDOM extends PhetioObject {
    *
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public setAccessibleName( accessibleName: string | null ): void {
-    assert && assert( accessibleName === null || typeof accessibleName === 'string' );
+  public setAccessibleName( providedAccessibleName: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const accessibleName = unwrapProperty( providedAccessibleName );
 
     if ( this._accessibleName !== accessibleName ) {
       this._accessibleName = accessibleName;
@@ -736,7 +748,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleName( accessibleName: string | null ) { this.setAccessibleName( accessibleName ); }
+  public set accessibleName( accessibleName: string | TReadOnlyProperty<string> | null ) { this.setAccessibleName( accessibleName ); }
 
   public get accessibleName(): string | null { return this.getAccessibleName(); }
 
@@ -812,8 +824,9 @@ export default class ParallelDOM extends PhetioObject {
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public setPDOMHeading( pdomHeading: string | null ): void {
-    assert && assert( pdomHeading === null || typeof pdomHeading === 'string' );
+  public setPDOMHeading( providedPdomHeading: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const pdomHeading = unwrapProperty( providedPdomHeading );
 
     if ( this._pdomHeading !== pdomHeading ) {
       this._pdomHeading = pdomHeading;
@@ -822,7 +835,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set pdomHeading( pdomHeading: string | null ) { this.setPDOMHeading( pdomHeading ); }
+  public set pdomHeading( pdomHeading: string | TReadOnlyProperty<string> | null ) { this.setPDOMHeading( pdomHeading ); }
 
   public get pdomHeading(): string | null { return this.getPDOMHeading(); }
 
@@ -918,8 +931,9 @@ export default class ParallelDOM extends PhetioObject {
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public setHelpText( helpText: string | null ): void {
-    assert && assert( helpText === null || typeof helpText === 'string' );
+  public setHelpText( providedHelpText: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const helpText = unwrapProperty( providedHelpText );
 
     if ( this._helpText !== helpText ) {
 
@@ -929,7 +943,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set helpText( helpText: string | null ) { this.setHelpText( helpText ); }
+  public set helpText( helpText: string | TReadOnlyProperty<string> | null ) { this.setHelpText( helpText ); }
 
   public get helpText(): string | null { return this.getHelpText(); }
 
@@ -1209,8 +1223,9 @@ export default class ParallelDOM extends PhetioObject {
    *
    * Passing a null label value will not clear the whole label sibling, just the inner content of the DOM Element.
    */
-  public setLabelContent( label: string | null ): void {
-    assert && assert( label === null || typeof label === 'string', 'label must be null or string' );
+  public setLabelContent( providedLabel: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const label = unwrapProperty( providedLabel );
 
     if ( this._labelContent !== label ) {
       this._labelContent = label;
@@ -1227,7 +1242,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set labelContent( label: string | null ) { this.setLabelContent( label ); }
+  public set labelContent( label: string | TReadOnlyProperty<string> | null ) { this.setLabelContent( label ); }
 
   public get labelContent(): string | null { return this.getLabelContent(); }
 
@@ -1243,8 +1258,9 @@ export default class ParallelDOM extends PhetioObject {
    * unless content is html which uses exclusively formatting tags. A node with inner content cannot
    * have accessible descendants because this content will override the HTML of descendants of this node.
    */
-  public setInnerContent( content: string | null ): void {
-    assert && assert( content === null || typeof content === 'string' );
+  public setInnerContent( providedContent: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const content = unwrapProperty( providedContent );
 
     if ( this._innerContent !== content ) {
       this._innerContent = content;
@@ -1256,7 +1272,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set innerContent( content: string | null ) { this.setInnerContent( content ); }
+  public set innerContent( content: string | TReadOnlyProperty<string> | null ) { this.setInnerContent( content ); }
 
   public get innerContent(): string | null { return this.getInnerContent(); }
 
@@ -1272,8 +1288,9 @@ export default class ParallelDOM extends PhetioObject {
    * innerHTML and textContent. If a description element does not exist yet, a default
    * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
    */
-  public setDescriptionContent( descriptionContent: string | null ): void {
-    assert && assert( descriptionContent === null || typeof descriptionContent === 'string', 'description must be null or string' );
+  public setDescriptionContent( providedDescriptionContent: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const descriptionContent = unwrapProperty( providedDescriptionContent );
 
     if ( this._descriptionContent !== descriptionContent ) {
       this._descriptionContent = descriptionContent;
@@ -1290,7 +1307,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set descriptionContent( textContent: string | null ) { this.setDescriptionContent( textContent ); }
+  public set descriptionContent( textContent: string | TReadOnlyProperty<string> | null ) { this.setDescriptionContent( textContent ); }
 
   public get descriptionContent(): string | null { return this.getDescriptionContent(); }
 
@@ -1387,8 +1404,9 @@ export default class ParallelDOM extends PhetioObject {
    * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
    * clear this attribute.
    */
-  public setAriaValueText( ariaValueText: string | null ): void {
-    assert && assert( ariaValueText === null || typeof ariaValueText === 'string' );
+  public setAriaValueText( providedAriaValueText: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const ariaValueText = unwrapProperty( providedAriaValueText );
 
     if ( this._ariaValueText !== ariaValueText ) {
       this._ariaValueText = ariaValueText;
@@ -1402,7 +1420,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set ariaValueText( ariaValueText: string | null ) { this.setAriaValueText( ariaValueText ); }
+  public set ariaValueText( ariaValueText: string | TReadOnlyProperty<string> | null ) { this.setAriaValueText( ariaValueText ); }
 
   public get ariaValueText(): string | null { return this.getAriaValueText(); }
 
@@ -1454,10 +1472,11 @@ export default class ParallelDOM extends PhetioObject {
    * 'aria-label' attribute, the label will be read on focus, but can not be found with the
    * virtual cursor. This is one way to set a DOM Element's Accessible Name.
    *
-   * @param ariaLabel - the text for the aria label attribute
+   * @param providedAriaLabel - the text for the aria label attribute
    */
-  public setAriaLabel( ariaLabel: string | null ): void {
-    assert && assert( ariaLabel === null || typeof ariaLabel === 'string' );
+  public setAriaLabel( providedAriaLabel: string | TReadOnlyProperty<string> | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    const ariaLabel = unwrapProperty( providedAriaLabel );
 
     if ( this._ariaLabel !== ariaLabel ) {
       this._ariaLabel = ariaLabel;
@@ -1471,7 +1490,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set ariaLabel( ariaLabel: string | null ) { this.setAriaLabel( ariaLabel ); }
+  public set ariaLabel( ariaLabel: string | TReadOnlyProperty<string> | null ) { this.setAriaLabel( ariaLabel ); }
 
   public get ariaLabel(): string | null { return this.getAriaLabel(); }
 
@@ -2176,7 +2195,11 @@ export default class ParallelDOM extends PhetioObject {
    * Set the value of an input element.  Element must be a form element to support the value attribute. The input
    * value is converted to string since input values are generally string for HTML.
    */
-  public setInputValue( value: string | number | null ): void {
+  public setInputValue( value: string | TReadOnlyProperty<string> | number | null ): void {
+    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
+    if ( value instanceof ReadOnlyProperty || value instanceof TinyProperty ) {
+      value = value.value;
+    }
     assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
     assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
 
@@ -2193,7 +2216,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set inputValue( value: string | number | null ) { this.setInputValue( value ); }
+  public set inputValue( value: string | TReadOnlyProperty<string> | number | null ) { this.setInputValue( value ); }
 
   public get inputValue(): string | number | null { return this.getInputValue(); }
 
@@ -2864,7 +2887,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomInstances.splice( index, 1 );
   }
 
-  public static BASIC_ACCESSIBLE_NAME_BEHAVIOR( node: Node, options: ParallelDOMOptions, accessibleName: string ): ParallelDOMOptions {
+  public static BASIC_ACCESSIBLE_NAME_BEHAVIOR( node: Node, options: ParallelDOMOptions, accessibleName: string | TReadOnlyProperty<string> ): ParallelDOMOptions {
     if ( node.tagName === 'input' ) {
       options.labelTagName = 'label';
       options.labelContent = accessibleName;
@@ -2878,14 +2901,14 @@ export default class ParallelDOM extends PhetioObject {
     return options;
   }
 
-  public static HELP_TEXT_BEFORE_CONTENT( node: Node, options: ParallelDOMOptions, helpText: string ): ParallelDOMOptions {
+  public static HELP_TEXT_BEFORE_CONTENT( node: Node, options: ParallelDOMOptions, helpText: string | TReadOnlyProperty<string> ): ParallelDOMOptions {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
     options.appendDescription = false;
     return options;
   }
 
-  public static HELP_TEXT_AFTER_CONTENT( node: Node, options: ParallelDOMOptions, helpText: string ): ParallelDOMOptions {
+  public static HELP_TEXT_AFTER_CONTENT( node: Node, options: ParallelDOMOptions, helpText: string | TReadOnlyProperty<string> ): ParallelDOMOptions {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
     options.appendDescription = true;

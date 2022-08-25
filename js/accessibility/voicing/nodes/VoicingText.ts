@@ -29,7 +29,7 @@ class VoicingText extends ReadingBlock( Text ) {
 
       // pdom
       tagName: 'p',
-      innerContent: initialText
+      innerContent: text
     }, providedOptions );
 
     // Options that use other options, should be the same type as options
@@ -37,7 +37,7 @@ class VoicingText extends ReadingBlock( Text ) {
       readingBlockNameResponse: options.readingBlockNameResponse || initialText
     } );
 
-    super( initialText );
+    super( text );
 
     // unique highlight for non-interactive components
     this.focusHighlight = new ReadingBlockHighlight( this );
@@ -45,13 +45,8 @@ class VoicingText extends ReadingBlock( Text ) {
     this.mutate( options );
 
     if ( typeof text !== 'string' ) {
-      this.mutate( {
-        textProperty: text
-      } );
-
       // TODO: We might be memory leaking here, we'll want to dispose for https://github.com/phetsims/chipper/issues/1302
       text.link( string => {
-        this.innerContent = string;
         this.readingBlockNameResponse = options.readingBlockHintResponse || string;
       } );
     }
