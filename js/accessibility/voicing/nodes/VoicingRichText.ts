@@ -8,7 +8,7 @@
  */
 
 import TReadOnlyProperty from '../../../../../axon/js/TReadOnlyProperty.js';
-import optionize, { combineOptions, EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, RichText, RichTextOptions, scenery } from '../../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
@@ -19,16 +19,14 @@ class VoicingRichText extends ReadingBlock( RichText ) {
 
   public constructor( text: string | TReadOnlyProperty<string>, providedOptions?: VoicingRichTextOptions ) {
 
-    const initialText = typeof text === 'string' ? text : text.value;
-
-    let options = optionize<VoicingRichTextOptions, SelfOptions, ParentOptions>()( {
+    const options = optionize<VoicingRichTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be read that is different from the
       // visually displayed text
-      readingBlockNameResponse: null,
+      readingBlockNameResponse: text,
 
       // pdom
-      innerContent: initialText,
+      innerContent: text,
 
       // voicing
       // default tag name for a ReadingBlock, but there are cases where you may want to override this (such as
@@ -36,29 +34,11 @@ class VoicingRichText extends ReadingBlock( RichText ) {
       readingBlockTagName: 'button'
     }, providedOptions );
 
-    // Options that use other options
-    // @ts-ignore
-    options = combineOptions<VoicingRichTextOptions>( options, {
-      readingBlockNameResponse: options.readingBlockNameResponse || initialText
-    } );
-
-    super( initialText );
+    super( text );
 
     this.focusHighlight = new ReadingBlockHighlight( this );
 
     this.mutate( options );
-
-    if ( typeof text !== 'string' ) {
-      this.mutate( {
-        textProperty: text
-      } );
-
-      // TODO: We might be memory leaking here, we'll want to dispose for https://github.com/phetsims/chipper/issues/1302
-      text.link( string => {
-        this.innerContent = string;
-        this.readingBlockNameResponse = options.readingBlockHintResponse || string;
-      } );
-    }
   }
 }
 

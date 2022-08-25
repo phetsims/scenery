@@ -8,7 +8,7 @@
  */
 
 import TReadOnlyProperty from '../../../../../axon/js/TReadOnlyProperty.js';
-import optionize, { combineOptions, EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, scenery, Text, TextOptions } from '../../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
@@ -19,23 +19,16 @@ class VoicingText extends ReadingBlock( Text ) {
 
   public constructor( text: string | TReadOnlyProperty<string>, providedOptions?: VoicingTextOptions ) {
 
-    const initialText = typeof text === 'string' ? text : text.value;
-
-    let options = optionize<VoicingTextOptions, SelfOptions, ParentOptions>()( {
+    const options = optionize<VoicingTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be spoken that is different from the
       // visually displayed text
-      readingBlockNameResponse: null,
+      readingBlockNameResponse: text,
 
       // pdom
       tagName: 'p',
       innerContent: text
     }, providedOptions );
-
-    // Options that use other options, should be the same type as options
-    options = combineOptions<typeof options>( options, {
-      readingBlockNameResponse: options.readingBlockNameResponse || initialText
-    } );
 
     super( text );
 
@@ -43,13 +36,6 @@ class VoicingText extends ReadingBlock( Text ) {
     this.focusHighlight = new ReadingBlockHighlight( this );
 
     this.mutate( options );
-
-    if ( typeof text !== 'string' ) {
-      // TODO: We might be memory leaking here, we'll want to dispose for https://github.com/phetsims/chipper/issues/1302
-      text.link( string => {
-        this.readingBlockNameResponse = options.readingBlockHintResponse || string;
-      } );
-    }
   }
 }
 
