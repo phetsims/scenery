@@ -78,7 +78,7 @@ export { default as Saturate } from './filters/Saturate.js';
 export { default as Sepia } from './filters/Sepia.js';
 
 export { default as ParallelDOM, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
-export type { ParallelDOMOptions, PDOMBehaviorFunction } from './accessibility/pdom/ParallelDOM.js';
+export type { ParallelDOMOptions, PDOMValueType, PDOMBehaviorFunction } from './accessibility/pdom/ParallelDOM.js';
 export { default as Node, REQUIRES_BOUNDS_OPTION_KEYS } from './nodes/Node.js';
 export type { NodeOptions, NodeBoundsBasedTranslationOptions, NodeTranslationOptions, NodeTransformOptions, RendererType } from './nodes/Node.js';
 export { default as Picker } from './util/Picker.js';
