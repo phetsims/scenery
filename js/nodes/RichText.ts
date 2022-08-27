@@ -564,6 +564,8 @@ export default class RichText extends Node {
     while ( this.lineContainer._children.length ) {
       const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ] as RichTextCleanableNode;
       this.lineContainer.removeChild( child );
+
+      //TODO https://github.com/phetsims/scenery/issues/1444 temporary workaround
       child.clean && child.clean();
     }
   }
