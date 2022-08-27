@@ -564,7 +564,7 @@ export default class RichText extends Node {
     while ( this.lineContainer._children.length ) {
       const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ] as RichTextCleanableNode;
       this.lineContainer.removeChild( child );
-      child.clean();
+      child.clean && child.clean();
     }
   }
 
