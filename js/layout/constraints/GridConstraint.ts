@@ -51,13 +51,13 @@ export type GridConstraintOptions = SelfOptions & ParentOptions;
 
 export default class GridConstraint extends GridConfigurable( NodeLayoutConstraint ) {
 
-  private readonly cells: Set<GridCell> = new Set();
+  private readonly cells = new Set<GridCell>();
 
   // (scenery-internal)
   public displayedCells: GridCell[] = [];
 
   // (scenery-internal) Looked up by index
-  public displayedLines: OrientationPair<Map<number, GridLine>> = new OrientationPair( new Map(), new Map() );
+  public displayedLines = new OrientationPair<Map<number, GridLine>>( new Map(), new Map() );
 
   private _spacing: OrientationPair<number | number[]> = new OrientationPair<number | number[]>( 0, 0 );
 
