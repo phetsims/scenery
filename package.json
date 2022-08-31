@@ -26,6 +26,7 @@
     "finalizeJS": "scenery.Utils.polyfillRequestAnimationFrame();",
     "preload": [
       "../sherpa/lib/himalaya-1.1.0.js",
+      "../sherpa/lib/linebreak-1.1.0.js",
       "../sherpa/lib/flatqueue-1.2.1.js"
     ],
     "supportsOutputJS": true
@@ -37,6 +38,7 @@
     },
     "globals": {
       "himalaya": "readonly",
+      "LineBreaker": "readonly",
       "sceneryLog": "readonly",
       "he": "readonly"
     }

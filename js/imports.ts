@@ -33,6 +33,8 @@ export { default as DisplayedProperty } from './util/DisplayedProperty.js';
 export { default as SceneImage } from './util/SceneImage.js';
 export { default as allowLinksProperty } from './util/allowLinksProperty.js';
 export { default as openPopup } from './util/openPopup.js';
+export { default as getLineBreakRanges } from './util/getLineBreakRanges.js';
+export type { GetLineBreaksOptions } from './util/getLineBreakRanges.js';
 export type { default as WindowTouch } from './input/WindowTouch.js';
 
 export { default as SpriteInstance, SpriteInstanceTransformType } from './util/SpriteInstance.js';

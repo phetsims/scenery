@@ -61,13 +61,14 @@ import TProperty from '../../../axon/js/TProperty.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
+import Range from '../../../dot/js/Range.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { Color, FireListener, Font, TInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut, openPopup } from '../imports.js';
+import { Color, FireListener, Font, TInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut, openPopup, getLineBreakRanges } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
@@ -653,31 +654,43 @@ export default class RichText extends Node {
 
       // Handle wrapping if required. Container spacing cuts into our available width
       if ( !( node as RichTextLeaf ).fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) ) {
-        // Didn't fit, lets break into words to see what we can fit
-        const words = element.content.split( ' ' );
+        // Didn't fit, lets break into words to see what we can fit. We'll create ranges for all the individual
+        // elements we could split the lines into. If we split into different lines, we can ignore the characters
+        // in-between, however if not, we need to include them.
+        const ranges = getLineBreakRanges( element.content );
 
-        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Overflow leafAdded:${this._hasAddedLeafToLine}, words: ${words.length}` );
+        // Convert a group of ranges into a string (grab the content from the string).
+        const rangesToString = ( ranges: Range[] ): string => {
+          if ( ranges.length === 0 ) {
+            return '';
+          }
+          else {
+            return element.content.slice( ranges[ 0 ].min, ranges[ ranges.length - 1 ].max );
+          }
+        };
+
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Overflow leafAdded:${this._hasAddedLeafToLine}, words: ${ranges.length}` );
 
         // If we need to add something (and there is only a single word), then add it
-        if ( this._hasAddedLeafToLine || words.length > 1 ) {
+        if ( this._hasAddedLeafToLine || ranges.length > 1 ) {
           sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Skipping words' );
 
-          const skippedWords = [];
+          const skippedRanges: Range[] = [];
           let success = false;
-          skippedWords.unshift( words.pop() ); // We didn't fit with the last one!
+          skippedRanges.unshift( ranges.pop()! ); // We didn't fit with the last one!
 
           // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
-          while ( words.length ) {
-            node = RichTextLeaf.pool.create( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
+          while ( ranges.length ) {
+            node = RichTextLeaf.pool.create( rangesToString( ranges ), isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
             // If we haven't added anything to the line and we are down to the first word, we need to just add it.
             if ( !( node as RichTextLeaf ).fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
-                 ( this._hasAddedLeafToLine || words.length > 1 ) ) {
-              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Skipping word ${words[ words.length - 1 ]}` );
-              skippedWords.unshift( words.pop() );
+                 ( this._hasAddedLeafToLine || ranges.length > 1 ) ) {
+              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Skipping word ${rangesToString( [ ranges[ ranges.length - 1 ] ] )}` );
+              skippedRanges.unshift( ranges.pop()! );
             }
             else {
-              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Success with ${words.join( ' ' )}` );
+              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Success with ${rangesToString( ranges )}` );
               success = true;
               break;
             }
@@ -686,7 +699,7 @@ export default class RichText extends Node {
           // If we haven't added anything yet to this line, we'll permit the overflow
           if ( success ) {
             lineBreakState = LineBreakState.INCOMPLETE;
-            element.content = skippedWords.join( ' ' );
+            element.content = rangesToString( skippedRanges );
             sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Remaining content: ${element.content}` );
           }
           else {

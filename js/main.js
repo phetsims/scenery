@@ -179,6 +179,7 @@ import './util/DisplayedProperty.js';
 import './util/Features.js';
 import './util/Font.js';
 import './util/FullScreen.js';
+import './util/getLineBreakRanges.js';
 import './util/Gradient.js';
 import './util/LinearGradient.js';
 import './util/openPopup.js';
