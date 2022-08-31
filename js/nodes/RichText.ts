@@ -68,7 +68,7 @@ import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { Color, FireListener, Font, TInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut, openPopup, getLineBreakRanges } from '../imports.js';
+import { Color, FireListener, Font, TInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut, openPopup, getLineBreakRanges, allowLinksProperty } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
@@ -1873,6 +1873,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
       this.addInputListener( this.fireListener );
       this.setPDOMAttribute( 'href', href );
       this.setPDOMAttribute( 'target', '_blank' );
+      allowLinksProperty.link( allowLinks => {this.visible = allowLinks;} );
     }
 
     return this;
