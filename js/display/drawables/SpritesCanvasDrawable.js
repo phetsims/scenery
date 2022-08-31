@@ -42,7 +42,7 @@ class SpritesCanvasDrawable extends CanvasSelfDrawable {
       }
 
       // If it's a translation only, we can add the offsets to the drawImage call directly (higher performance)
-      if ( spriteInstance.transformType === SpriteInstanceTransformType.TRANSLATION ) {
+      if ( spriteInstance.transformType === SpriteInstanceTransformType.TRANSLATION && matrix.isTranslation() ) {
         if ( hasMipmaps ) {
           const level = spriteImage.getMipmapLevelFromScale( baseMipmapScale, Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT );
           const canvas = spriteImage.getMipmapCanvas( level );
