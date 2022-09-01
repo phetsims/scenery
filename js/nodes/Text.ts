@@ -19,7 +19,7 @@ import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, TTextDrawable, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable, TTextDrawable } from '../imports.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
