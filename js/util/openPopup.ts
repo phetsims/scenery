@@ -11,12 +11,14 @@ import { allowLinksProperty } from '../imports.js';
 
 /**
  * Opens the URL in a new window or tab.
+ * @param url
+ * @param allowPopups - Don't allow openPopup IF we have query parameters AND allowLinks is false,
+ *                   - see https://github.com/phetsims/joist/issues/830
+ *                   - But individual cases (such as screenshot) can override this to be always allowed
  */
-function openPopup( url: string ): void {
+function openPopup( url: string, allowPopups = allowLinksProperty.value ): void {
 
-  // Don't allow openPopup IF we have query parameters AND allowLinks is false,
-  // see https://github.com/phetsims/joist/issues/830
-  if ( allowLinksProperty.value ) {
+  if ( allowPopups ) {
     const popupWindow = window.open( url, '_blank' ); // open in a new window/tab
 
     // We can't guarantee the presence of a window object, since if it isn't opened then it will return null.
