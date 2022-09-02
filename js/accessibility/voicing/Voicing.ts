@@ -35,6 +35,7 @@ import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 
 // Helps enforce that the utterance is defined.
 function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {
@@ -101,7 +102,7 @@ export type SpeakingOptions = {
   // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
   // match on the properties because they are optional (marked with `?`)
   [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( VoicingResponse | undefined ) ?
-                                                 ResolvedResponse :
+                                                 ResolvedResponse | TReadOnlyProperty<string> :
                                                  ResponsePacketOptions[PropertyName];
 };
 
