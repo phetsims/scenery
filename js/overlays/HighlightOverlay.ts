@@ -12,7 +12,7 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, TOverlay, TPaint, Node, scenery, Trail, TransformTracker } from '../imports.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
 import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import TProperty from '../../../axon/js/TProperty.js';
@@ -393,8 +393,10 @@ export default class HighlightOverlay implements TOverlay {
       this.interactiveHighlightsVisibleProperty
     );
 
-    // handle changes to the highlight while it is active
+    // handle changes to the highlight while it is active - Since the highlight can fall back to the focus highlight
+    // watch for updates to redraw when that highlight changes as well
     node.interactiveHighlightChangedEmitter.addListener( this.interactiveHighlightListener );
+    node.focusHighlightChangedEmitter.addListener( this.interactiveHighlightListener );
   }
 
   /**
@@ -509,8 +511,13 @@ export default class HighlightOverlay implements TOverlay {
     }
 
     const activeInteractiveHighlightingNode = activeNode as InteractiveHighlightingNode;
-    if ( activeInteractiveHighlightingNode.isInteractiveHighlighting && activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
-      activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
+    if ( activeInteractiveHighlightingNode.isInteractiveHighlighting ) {
+      if ( activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
+        activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
+      }
+      if ( activeInteractiveHighlightingNode.focusHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
+        activeInteractiveHighlightingNode.focusHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
+      }
     }
 
     // remove all 'group' focus highlights
