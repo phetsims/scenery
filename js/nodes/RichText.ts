@@ -425,8 +425,8 @@ export default class RichText extends Node {
       this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
         return new StringProperty( this.text, combineOptions<RichTextOptions>( {
 
-          // by default, use the value from the Node
-          phetioReadOnly: this.phetioReadOnly,
+          // by default, texts should be readonly. Editable texts most likely pass in editable Properties from i18n model Properties, see https://github.com/phetsims/scenery/issues/1443
+          phetioReadOnly: true,
           tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
         }, options.textPropertyOptions ) );
