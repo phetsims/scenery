@@ -124,7 +124,7 @@ export type { RectangleOptions } from './nodes/Rectangle.js';
 export { default as Sprites } from './nodes/Sprites.js';
 export type { SpritesOptions } from './nodes/Sprites.js';
 export { default as WebGLNode } from './nodes/WebGLNode.js';
-export type { WebGLNodeOptions } from './nodes/WebGLNode.js';
+export type { WebGLNodeOptions, WebGLNodePainter, WebGLNodePainterResult } from './nodes/WebGLNode.js';
 
 export { default as Plane } from './nodes/Plane.js';
 export type { PlaneOptions } from './nodes/Plane.js';

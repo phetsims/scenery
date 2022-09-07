@@ -26,9 +26,10 @@ type SelfOptions = {
 };
 
 export type WebGLNodeOptions = SelfOptions & NodeOptions;
+export type WebGLNodePainterResult = 0 | 1;
 
-type WebGLNodePainter = {
-  paint: ( modelViewMatrix: Matrix3, projectionMatrix: Matrix3 ) => 0 | 1;
+export type WebGLNodePainter = {
+  paint: ( modelViewMatrix: Matrix3, projectionMatrix: Matrix3 ) => WebGLNodePainterResult;
   dispose: () => void;
 };
 // NOTE: the `node` will be the `this` type, but there doesn't seem to be a good way to annotate that
