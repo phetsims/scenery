@@ -10,6 +10,10 @@
     "grunt": "~1.5.3"
   },
   "phet": {
+    "supportedBrands": [
+      "phet",
+      "adapted-from-phet"
+    ],
     "generatedUnitTests": true,
     "requirejsNamespace": "SCENERY",
     "buildStandalone": true,
