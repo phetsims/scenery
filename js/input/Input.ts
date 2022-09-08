@@ -1936,7 +1936,7 @@ export default class Input extends PhetioObject {
           // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};
 
-          // TODO: only needed until https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailFromPDOMEvent() too
+          // This may not be needed since https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailFromPDOMEvent() too
           // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute = function( key ) {
             return this[ key ];
