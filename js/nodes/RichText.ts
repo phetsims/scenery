@@ -334,7 +334,8 @@ export default class RichText extends Node {
     const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill'>, NodeOptions>()( {
       fill: '#000000',
       tandem: Tandem.OPTIONAL,
-      phetioType: RichText.RichTextIO
+      phetioType: RichText.RichTextIO,
+      phetioVisiblePropertyInstrumented: false
     }, providedOptions );
 
     if ( typeof text === 'string' || typeof text === 'number' ) {

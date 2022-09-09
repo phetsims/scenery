@@ -104,7 +104,8 @@ export default class Text extends Paintable( Node ) {
     const definedOptions = extendDefined( {
       fill: '#000000', // Default to black filled text
       tandem: Tandem.OPTIONAL,
-      phetioType: Text.TextIO
+      phetioType: Text.TextIO,
+      phetioVisiblePropertyInstrumented: false
     }, options );
 
     if ( typeof text === 'string' || typeof text === 'number' ) {
