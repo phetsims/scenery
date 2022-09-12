@@ -333,7 +333,10 @@ export default class RichText extends Node {
     // We only fill in some defaults, since the other defaults are defined below (and mutate is relied on)
     const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill'>, NodeOptions>()( {
       fill: '#000000',
+
+      // phet-io
       tandem: Tandem.OPTIONAL,
+      tandemNameSuffix: 'Text',
       phetioType: RichText.RichTextIO,
       phetioVisiblePropertyInstrumented: false
     }, providedOptions );
