@@ -1802,17 +1802,15 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
 
 class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
 
-  private fireListener: FireListener | null;
-  private accessibleInputListener: TInputListener | null;
+  private fireListener: FireListener | null = null;
+  private accessibleInputListener: TInputListener | null = null;
+  private allowLinksListener: ( ( allowLinks: boolean ) => void ) | null = null;
 
   /**
    * A link node
    */
   public constructor( innerContent: string, href: RichTextHref ) {
     super();
-
-    this.fireListener = null;
-    this.accessibleInputListener = null;
 
     // Voicing was already initialized in the super call, we do not want to initialize super again. But we do want to
     // initialize the RichText portion of the implementation.
@@ -1877,7 +1875,11 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
       this.addInputListener( this.fireListener );
       this.setPDOMAttribute( 'href', href );
       this.setPDOMAttribute( 'target', '_blank' );
-      allowLinksProperty.link( allowLinks => {this.visible = allowLinks;} );
+
+      this.allowLinksListener = ( allowLinks: boolean ) => {
+        this.visible = allowLinks;
+      };
+      allowLinksProperty.link( this.allowLinksListener );
     }
 
     return this;
@@ -1894,6 +1896,10 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
     if ( this.accessibleInputListener ) {
       this.removeInputListener( this.accessibleInputListener );
       this.accessibleInputListener = null;
+    }
+    if ( this.allowLinksListener ) {
+      allowLinksProperty.unlink( this.allowLinksListener );
+      this.allowLinksListener = null;
     }
   }
 
