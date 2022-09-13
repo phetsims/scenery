@@ -11,7 +11,7 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import mutate from '../../../../phet-core/js/mutate.js';
-import { Divider, ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutJustification, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery, VerticalLayoutJustification } from '../../imports.js';
+import { Separator, ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutJustification, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery, VerticalLayoutJustification } from '../../imports.js';
 import TProperty from '../../../../axon/js/TProperty.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
@@ -97,7 +97,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     let firstVisibleNonDividerIndex = 0;
     for ( ; firstVisibleNonDividerIndex < this.cells.length; firstVisibleNonDividerIndex++ ) {
       const cell = this.cells[ firstVisibleNonDividerIndex ];
-      if ( cell.node instanceof Divider ) {
+      if ( cell.node instanceof Separator ) {
         cell.node.visible = false;
       }
       else if ( cell.node.visible ) {
@@ -110,7 +110,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     let hasVisibleNonDivider = false;
     for ( let i = this.cells.length - 1; i > firstVisibleNonDividerIndex; i-- ) {
       const cell = this.cells[ i ];
-      if ( cell.node instanceof Divider ) {
+      if ( cell.node instanceof Separator ) {
         cell.node.visible = hasVisibleNonDivider;
         hasVisibleNonDivider = false;
       }

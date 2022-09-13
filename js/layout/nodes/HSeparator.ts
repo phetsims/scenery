@@ -7,14 +7,14 @@
  */
 
 import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { Divider, DividerOptions, scenery, WidthSizable, WidthSizableOptions } from '../../imports.js';
+import { Separator, SeparatorOptions, scenery, WidthSizable, WidthSizableOptions } from '../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
-type ParentOptions = WidthSizableOptions & DividerOptions;
-export type VDividerOptions = SelfOptions & ParentOptions;
+type ParentOptions = WidthSizableOptions & SeparatorOptions;
+export type HSeparatorOptions = SelfOptions & ParentOptions;
 
-export default class VDivider extends WidthSizable( Divider ) {
-  public constructor( options?: VDividerOptions ) {
+export default class HSeparator extends WidthSizable( Separator ) {
+  public constructor( options?: HSeparatorOptions ) {
     super();
 
     this.localPreferredWidthProperty.link( width => {
@@ -27,4 +27,4 @@ export default class VDivider extends WidthSizable( Divider ) {
   }
 }
 
-scenery.register( 'VDivider', VDivider );
+scenery.register( 'HSeparator', HSeparator );

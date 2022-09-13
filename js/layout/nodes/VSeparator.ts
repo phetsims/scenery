@@ -7,14 +7,14 @@
  */
 
 import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { Divider, DividerOptions, HeightSizable, HeightSizableOptions, scenery } from '../../imports.js';
+import { Separator, SeparatorOptions, HeightSizable, HeightSizableOptions, scenery } from '../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
-type ParentOptions = HeightSizableOptions & DividerOptions;
-export type HDividerOptions = SelfOptions & ParentOptions;
+type ParentOptions = HeightSizableOptions & SeparatorOptions;
+export type VSeparatorOptions = SelfOptions & ParentOptions;
 
-export default class HDivider extends HeightSizable( Divider ) {
-  public constructor( options?: HDividerOptions ) {
+export default class VSeparator extends HeightSizable( Separator ) {
+  public constructor( options?: VSeparatorOptions ) {
     super();
 
     this.localPreferredHeightProperty.link( height => {
@@ -27,4 +27,4 @@ export default class HDivider extends HeightSizable( Divider ) {
   }
 }
 
-scenery.register( 'HDivider', HDivider );
+scenery.register( 'VSeparator', VSeparator );

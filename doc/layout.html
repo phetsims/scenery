@@ -836,27 +836,27 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3 class="index">Dividers</h3>
+    <h3 class="index">Separators</h3>
 
-    <p>Dividers are also available for easy of use (dividers at the visible start/end and duplicates will be marked as
-      invisible, while all other dividers will be marked as visible):</p>
+    <p>Separators are also available for easy of use (separators at the visible start/end and duplicates will be marked as
+      invisible, while all other separators will be marked as visible):</p>
 
-    <div id="divider-example"></div>
+    <div id="separators-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'divider-example', () => {
+      dynamicDemo( 'separators-example', () => {
         /*START*/
         return new scenery.HBox( {
           margin: 5,
           children: [
-            new scenery.HDivider(),
+            new scenery.VSeparator(),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.HDivider(),
-            new scenery.HDivider(),
+            new scenery.VSeparator(),
+            new scenery.VSeparator(),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
             new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.HDivider(),
+            new scenery.VSeparator(),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } ),
-            new scenery.HDivider()
+            new scenery.VSeparator()
           ]
         } );
         /*END*/

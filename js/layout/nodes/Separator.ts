@@ -10,19 +10,19 @@
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { Line, LineOptions, scenery } from '../../imports.js';
 
-export type DividerOptions = LineOptions;
+export type SeparatorOptions = LineOptions;
 
-export default class Divider extends Line {
+export default class Separator extends Line {
   public constructor( providedOptions?: LineOptions ) {
     super( optionize<LineOptions, EmptySelfOptions, LineOptions>()( {
       layoutOptions: {
         stretch: true
       },
 
-      // Matches HSeparator/VSeparator as a default
+      // Matches HSeparatorDeprecated/VSeparatorDeprecated as a default
       stroke: 'rgb(100,100,100)'
     }, providedOptions ) );
   }
 }
 
-scenery.register( 'Divider', Divider );
+scenery.register( 'Separator', Separator );

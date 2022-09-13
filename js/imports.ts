@@ -235,12 +235,12 @@ export type { HorizontalLayoutAlign, VerticalLayoutAlign } from './layout/Layout
 export { default as LayoutJustification, HorizontalLayoutJustificationValues, VerticalLayoutJustificationValues } from './layout/LayoutJustification.js';
 export type { HorizontalLayoutJustification, VerticalLayoutJustification } from './layout/LayoutJustification.js';
 export type { default as TLayoutOptions } from './layout/TLayoutOptions.js';
-export { default as Divider } from './layout/nodes/Divider.js';
-export type { DividerOptions } from './layout/nodes/Divider.js';
-export { default as HDivider } from './layout/nodes/HDivider.js';
-export type { HDividerOptions } from './layout/nodes/HDivider.js';
-export { default as VDivider } from './layout/nodes/VDivider.js';
-export type { VDividerOptions } from './layout/nodes/VDivider.js';
+export { default as Separator } from './layout/nodes/Separator.js';
+export type { SeparatorOptions } from './layout/nodes/Separator.js';
+export { default as VSeparator } from './layout/nodes/VSeparator.js';
+export type { VSeparatorOptions } from './layout/nodes/VSeparator.js';
+export { default as HSeparator } from './layout/nodes/HSeparator.js';
+export type { HSeparatorOptions } from './layout/nodes/HSeparator.js';
 export { default as LayoutProxy } from './layout/LayoutProxy.js';
 export { default as LayoutProxyProperty } from './layout/LayoutProxyProperty.js';
 export { default as TrackingLayoutProxyProperty } from './layout/TrackingLayoutProxyProperty.js';
