@@ -68,11 +68,12 @@ import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { Color, FireListener, Font, TInputListener, TPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut, openPopup, getLineBreakRanges, allowLinksProperty } from '../imports.js';
+import { allowLinksProperty, Color, FireListener, Font, getLineBreakRanges, Line, Node, NodeOptions, openPopup, scenery, Text, TextBoundsMethod, TInputListener, TPaint, Voicing } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -491,7 +492,7 @@ export default class RichText extends Node {
         }
         // Otherwise if it's a blank line, add in a strut (<br><br> should result in a blank line)
         else {
-          this.appendLine( new VStrut( scratchText.setText( 'X' ).setFont( this._font ).height ) );
+          this.appendLine( RichTextVerticalSpacer.pool.create( scratchText.setText( 'X' ).setFont( this._font ).height ) );
         }
 
         // Set up a new line
@@ -570,8 +571,7 @@ export default class RichText extends Node {
       const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ] as RichTextCleanableNode;
       this.lineContainer.removeChild( child );
 
-      //TODO https://github.com/phetsims/scenery/issues/1444 temporary workaround
-      child.clean && child.clean();
+      child.clean();
     }
   }
 
@@ -1908,6 +1908,30 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
   }
 
   public static readonly pool = new Pool( RichTextLink );
+}
+
+class RichTextVerticalSpacer extends RichTextCleanable( Node ) {
+  public constructor( height: number ) {
+    super();
+
+    this.initialize( height );
+  }
+
+  /**
+   * Set up this text's state
+   */
+  public initialize( height: number ): this {
+
+    this.localBounds = new Bounds2( 0, 0, 0, height );
+
+    return this;
+  }
+
+  public freeToPool(): void {
+    RichTextVerticalSpacer.pool.freeToPool( this );
+  }
+
+  public static readonly pool = new Pool( RichTextVerticalSpacer );
 }
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {
