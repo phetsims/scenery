@@ -66,7 +66,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, TInputListener, Input, InputOptions, Instance, TOverlay, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, Trail, Utils, WebGLBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 
 export type DisplayOptions = {
@@ -98,6 +98,10 @@ export type DisplayOptions = {
 
   // Enables accessibility features
   accessibility?: boolean;
+
+  // {boolean} - Enables Interactive Highlights in the HighlightOverlay. These are highlights that surround
+  // interactive components when using mouse or touch which improves low vision access.
+  supportsInteractiveHighlights?: boolean;
 
   // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
   interactive?: boolean;
@@ -334,6 +338,9 @@ export default class Display {
       // {boolean} - Enables accessibility features
       accessibility: true,
 
+      // {boolean} - See declaration.
+      supportsInteractiveHighlights: false,
+
       // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
       interactive: true,
 
@@ -453,7 +460,8 @@ export default class Display {
 
     this.focusManager = new FocusManager();
 
-    if ( this._accessible ) {
+    // Features that require the HighlightOverlay
+    if ( this._accessible || options.supportsInteractiveHighlights ) {
       this._focusRootNode = new Node();
       this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, {
         pdomFocusHighlightsVisibleProperty: this.focusManager.pdomFocusHighlightsVisibleProperty,
@@ -461,7 +469,9 @@ export default class Display {
         readingBlockHighlightsVisibleProperty: this.focusManager.readingBlockHighlightsVisibleProperty
       } );
       this.addOverlay( this._focusOverlay );
+    }
 
+    if ( this._accessible ) {
       this.blockFocusCallbacks = false;
 
       // @ts-ignore TODO: PDOMInstance
