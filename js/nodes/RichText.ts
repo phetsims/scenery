@@ -100,7 +100,7 @@ const RICH_TEXT_OPTION_KEYS = [
   'align',
   'leading',
   'lineWrap',
-  'textProperty',
+  'stringProperty',
   'text'
 ];
 
@@ -176,10 +176,10 @@ type SelfOptions = {
   // Sets width of text before creating a new line
   lineWrap?: number | null;
 
-  // Sets forwarding of the textProperty, see setTextProperty() for more documentation
-  textProperty?: TReadOnlyProperty<string> | null;
+  // Sets forwarding of the stringProperty, see setStringProperty() for more documentation
+  stringProperty?: TReadOnlyProperty<string> | null;
 
-  textPropertyOptions?: PropertyOptions<string>;
+  stringPropertyOptions?: PropertyOptions<string>;
 
   // Sets the text to be displayed by this Node
   text?: string | number;
@@ -213,7 +213,7 @@ const DEFAULT_FONT = new Font( {
   size: 20
 } );
 
-const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
+const TEXT_PROPERTY_TANDEM_NAME = 'stringProperty';
 
 // Tags that should be included in accessible innerContent, see https://github.com/phetsims/joist/issues/430
 const ACCESSIBLE_TAGS = [
@@ -283,7 +283,7 @@ const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 export default class RichText extends Node {
 
   // The text to display. We'll initialize this by mutating.
-  private readonly _textProperty: TinyForwardingProperty<string>;
+  private readonly _stringProperty: TinyForwardingProperty<string>;
 
   private _font: Font | string;
   private _boundsMethod: TextBoundsMethod;
@@ -346,12 +346,12 @@ export default class RichText extends Node {
       options.text = text;
     }
     else {
-      options.textProperty = text;
+      options.stringProperty = text;
     }
 
     super();
 
-    this._textProperty = new TinyForwardingProperty( '', true, this.onTextPropertyChange.bind( this ) );
+    this._stringProperty = new TinyForwardingProperty( '', true, this.onStringPropertyChange.bind( this ) );
     this._font = DEFAULT_FONT;
     this._boundsMethod = 'hybrid';
     this._fill = '#000000';
@@ -390,27 +390,27 @@ export default class RichText extends Node {
   /**
    * Called when our text Property changes values.
    */
-  private onTextPropertyChange(): void {
+  private onStringPropertyChange(): void {
     this.rebuildRichText();
   }
 
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
-  public setTextProperty( newTarget: TProperty<string> | null ): this {
-    return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
+  public setStringProperty( newTarget: TProperty<string> | null ): this {
+    return this._stringProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  public set textProperty( property: TProperty<string> | null ) { this.setTextProperty( property ); }
+  public set stringProperty( property: TProperty<string> | null ) { this.setStringProperty( property ); }
 
-  public get textProperty(): TProperty<string> { return this.getTextProperty(); }
+  public get stringProperty(): TProperty<string> { return this.getStringProperty(); }
 
   /**
    * Like Node.getVisibleProperty, but for the text string. Note this is not the same as the Property provided in
-   * setTextProperty. Thus is the nature of TinyForwardingProperty.
+   * setStringProperty. Thus is the nature of TinyForwardingProperty.
    */
-  public getTextProperty(): TProperty<string> {
-    return this._textProperty;
+  public getStringProperty(): TProperty<string> {
+    return this._stringProperty;
   }
 
   /**
@@ -420,21 +420,21 @@ export default class RichText extends Node {
 
     const options = optionize<RichTextOptions, EmptySelfOptions, RichTextOptions>()( {}, providedOptions );
 
-    // Track this, so we only override our textProperty once.
+    // Track this, so we only override our stringProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
     super.initializePhetioObject( baseOptions, options );
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
+      this._stringProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
         return new StringProperty( this.text, combineOptions<RichTextOptions>( {
 
           // by default, texts should be readonly. Editable texts most likely pass in editable Properties from i18n model Properties, see https://github.com/phetsims/scenery/issues/1443
           phetioReadOnly: true,
           tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
-        }, options.textPropertyOptions ) );
+        }, options.stringPropertyOptions ) );
       } );
     }
   }
@@ -583,7 +583,7 @@ export default class RichText extends Node {
 
     super.dispose();
 
-    this._textProperty.dispose();
+    this._stringProperty.dispose();
   }
 
   /**
@@ -910,7 +910,7 @@ export default class RichText extends Node {
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = `${text}`;
 
-    this._textProperty.set( text );
+    this._stringProperty.set( text );
 
     return this;
   }
@@ -923,7 +923,7 @@ export default class RichText extends Node {
    * Returns the text displayed by our node.
    */
   public getText(): string {
-    return this._textProperty.value;
+    return this._stringProperty.value;
   }
 
   /**
@@ -1478,8 +1478,8 @@ export default class RichText extends Node {
   }
 
   public override mutate( options?: RichTextOptions ): this {
-    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) && options.textProperty ) {
-      assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
+    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) && options.stringProperty ) {
+      assert && assert( options.stringProperty.value === options.text, 'If both text and stringProperty are provided, then values should match' );
     }
 
     return super.mutate( options );

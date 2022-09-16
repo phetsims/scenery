@@ -15,13 +15,13 @@ QUnit.test( 'Mutually exclusive options', assert => {
 
   assert.ok( true, 'always true, even when assertions are not on.' );
 
-  const textProperty = new StringProperty( 'oh boy, here we go.' );
+  const stringProperty = new StringProperty( 'oh boy, here we go.' );
   window.assert && assert.throws( () => {
     return new Text( {
       text: 'hi',
-      textProperty: textProperty
+      stringProperty: stringProperty
     } );
-  }, 'text and textProperty values do not match' );
+  }, 'text and stringProperty values do not match' );
 
 } );
 

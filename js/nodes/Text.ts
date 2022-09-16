@@ -27,7 +27,7 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 // constants
 const TEXT_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined for text, see setBoundsMethod() for more documentation
-  'textProperty', // {Property.<string>|null} - Sets forwarding of the textProperty, see setTextProperty() for more documentation
+  'stringProperty', // {Property.<string>|null} - Sets forwarding of the stringProperty, see setStringProperty() for more documentation
   'text', // {string|number} - Sets the text to be displayed, see setText() for more documentation
   'font', // {Font|string} - Sets the font used for the text, see setFont() for more documentation
   'fontWeight', // {string|number} - Sets the weight of the current font, see setFont() for more documentation
@@ -37,7 +37,7 @@ const TEXT_OPTION_KEYS = [
   'fontSize' // {string|number} - Sets the size of the current font, see setFont() for more documentation
 ];
 
-const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
+const TEXT_PROPERTY_TANDEM_NAME = 'stringProperty';
 
 // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
 // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
@@ -48,7 +48,7 @@ const useDOMAsFastBounds = window.navigator.userAgent.includes( 'like Gecko) Ver
 export type TextBoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
 type SelfOptions = {
   boundsMethod?: TextBoundsMethod;
-  textProperty?: TReadOnlyProperty<string> | null;
+  stringProperty?: TReadOnlyProperty<string> | null;
   text?: string | number;
   font?: Font | string;
   fontWeight?: string | number;
@@ -56,7 +56,7 @@ type SelfOptions = {
   fontStretch?: string;
   fontStyle?: string;
   fontSize?: string | number;
-  textPropertyOptions?: PropertyOptions<string>;
+  stringPropertyOptions?: PropertyOptions<string>;
 };
 type ParentOptions = PaintableOptions & NodeOptions;
 export type TextOptions = SelfOptions & ParentOptions;
@@ -64,7 +64,7 @@ export type TextOptions = SelfOptions & ParentOptions;
 export default class Text extends Paintable( Node ) {
 
   // The text to display
-  private readonly _textProperty: TinyForwardingProperty<string>;
+  private readonly _stringProperty: TinyForwardingProperty<string>;
 
   // The font with which to display the text.
   // (scenery-internal)
@@ -95,7 +95,7 @@ export default class Text extends Paintable( Node ) {
     super();
 
     // We'll initialize this by mutating.
-    this._textProperty = new TinyForwardingProperty( '', true, this.onTextPropertyChange.bind( this ) );
+    this._stringProperty = new TinyForwardingProperty( '', true, this.onStringPropertyChange.bind( this ) );
     this._font = Font.DEFAULT;
     this._boundsMethod = 'hybrid';
     this._isHTML = false; // TODO: clean this up
@@ -115,7 +115,7 @@ export default class Text extends Paintable( Node ) {
       definedOptions.text = text;
     }
     else {
-      definedOptions.textProperty = text;
+      definedOptions.stringProperty = text;
     }
 
     this.textTandem = definedOptions.tandem;
@@ -127,9 +127,9 @@ export default class Text extends Paintable( Node ) {
 
   public override mutate( options?: TextOptions ): this {
     // @ts-ignore
-    if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
+    if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) ) {
       // @ts-ignore
-      assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
+      assert && assert( options.stringProperty.value === options.text, 'If both text and stringProperty are provided, then values should match' );
     }
     return super.mutate( options );
   }
@@ -146,7 +146,7 @@ export default class Text extends Paintable( Node ) {
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = `${text}`;
 
-    this._textProperty.set( text );
+    this._stringProperty.set( text );
 
     return this;
   }
@@ -161,7 +161,7 @@ export default class Text extends Paintable( Node ) {
    * NOTE: If a number was provided to setText(), it will not be returned as a number here.
    */
   public getText(): string {
-    return this._textProperty.value;
+    return this._stringProperty.value;
   }
 
   /**
@@ -187,7 +187,7 @@ export default class Text extends Paintable( Node ) {
   /**
    * Called when our text Property changes values.
    */
-  private onTextPropertyChange(): void {
+  private onStringPropertyChange(): void {
     this._cachedRenderedText = null;
 
     const stateLen = this._drawables.length;
@@ -201,20 +201,20 @@ export default class Text extends Paintable( Node ) {
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
-  public setTextProperty( newTarget: TProperty<string> | null ): this {
-    return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
+  public setStringProperty( newTarget: TProperty<string> | null ): this {
+    return this._stringProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  public set textProperty( property: TProperty<string> | null ) { this.setTextProperty( property ); }
+  public set stringProperty( property: TProperty<string> | null ) { this.setStringProperty( property ); }
 
-  public get textProperty(): TProperty<string> { return this.getTextProperty(); }
+  public get stringProperty(): TProperty<string> { return this.getStringProperty(); }
 
   /**
    * Like Node.getVisibleProperty(), but for the text string. Note this is not the same as the Property provided in
-   * setTextProperty. Thus is the nature of TinyForwardingProperty.
+   * setStringProperty. Thus is the nature of TinyForwardingProperty.
    */
-  public getTextProperty(): TProperty<string> {
-    return this._textProperty;
+  public getStringProperty(): TProperty<string> {
+    return this._stringProperty;
   }
 
   /**
@@ -222,13 +222,13 @@ export default class Text extends Paintable( Node ) {
    */
   protected override initializePhetioObject( baseOptions: Partial<PhetioObjectOptions>, config: TextOptions ): void {
 
-    // Track this, so we only override our textProperty once.
+    // Track this, so we only override our stringProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
     super.initializePhetioObject( baseOptions, config );
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
-      this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
+      this._stringProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
           return new StringProperty( this.text, combineOptions<StringPropertyOptions>( {
 
             // by default, texts should be readonly. Editable texts most likely pass in editable Properties from i18n model Properties, see https://github.com/phetsims/scenery/issues/1443
@@ -236,7 +236,7 @@ export default class Text extends Paintable( Node ) {
             tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
             phetioDocumentation: 'Property for the displayed text'
 
-          }, config.textPropertyOptions ) );
+          }, config.stringPropertyOptions ) );
         }
       );
     }
@@ -668,7 +668,7 @@ export default class Text extends Paintable( Node ) {
   public override dispose(): void {
     super.dispose();
 
-    this._textProperty.dispose();
+    this._stringProperty.dispose();
   }
 
   /**
