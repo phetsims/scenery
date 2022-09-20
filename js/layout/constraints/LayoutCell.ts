@@ -18,6 +18,7 @@ export default class LayoutCell {
   private readonly _node: Node;
 
   // Our proxy will be dynamically computed and updated (based on whether there is a valid ancestorNode=>node trail)
+  // Generally used to compute layout in the node's parent coordinate frame.
   private _proxy: LayoutProxy | null;
 
   // Called when layoutOptions changes for our Node
