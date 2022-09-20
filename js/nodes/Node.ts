@@ -1018,7 +1018,7 @@ class Node extends ParallelDOM {
   /**
    * Sets the children of the Node to be equivalent to the passed-in array of Nodes.
    *
-   * NOTE: Overridden in LayoutBox
+   * NOTE: Meant to be overridden in some cases
    */
   public setChildren( children: Node[] ): this {
     // The implementation is split into basically three stages:

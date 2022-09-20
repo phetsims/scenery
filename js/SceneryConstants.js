@@ -11,7 +11,7 @@ import { scenery } from './imports.js';
 const SceneryConstants = {
 
   // Opacity that is typically applied to a UI component in its disabled state, to make it look grayed out.
-  // This was moved here from SunConstants because it's needed by LayoutBox.
+  // This was moved here from SunConstants because it's needed by FlowBox.
   // See https://github.com/phetsims/scenery/issues/1153
   DISABLED_OPACITY: 0.45,
 

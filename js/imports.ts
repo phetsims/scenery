@@ -282,8 +282,6 @@ export type { AlignGroupOptions } from './layout/constraints/AlignGroup.js';
 export { default as AlignPropertyBox } from './layout/nodes/AlignPropertyBox.js';
 export type { AlignPropertyBoxOptions } from './layout/nodes/AlignPropertyBox.js';
 
-export { default as LayoutBox } from './layout/nodes/LayoutBox.js';
-export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign } from './layout/nodes/LayoutBox.js';
 export { default as HBox } from './layout/nodes/HBox.js';
 export type { HBoxOptions } from './layout/nodes/HBox.js';
 export { default as VBox } from './layout/nodes/VBox.js';

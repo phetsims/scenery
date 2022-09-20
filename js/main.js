@@ -132,7 +132,6 @@ import './layout/nodes/GridBackgroundNode.js';
 import './layout/nodes/GridBox.js';
 import './layout/nodes/HBox.js';
 import './layout/nodes/VSeparator.js';
-import './layout/nodes/LayoutBox.js';
 import './layout/nodes/LayoutNode.js';
 import './layout/nodes/VBox.js';
 import './layout/nodes/HSeparator.js';
