@@ -74,6 +74,12 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     private _preferredHeightChanging = false;
     private _minimumHeightChanging = false;
 
+    // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
+    protected _updatePreferredHeightListener: () => void;
+    protected _updateLocalPreferredHeightListener: () => void;
+    protected _updateMinimumHeightListener: () => void;
+    protected _updateLocalMinimumHeightListener: () => void;
+
     // IMPORTANT: If you're mixing this in, typically don't pass options that HeightSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
     // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
@@ -82,20 +88,20 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
 
-      const updatePreferred = this._updatePreferredHeight.bind( this );
-      const updateLocalPreferred = this._updateLocalPreferredHeight.bind( this );
-      const updateMinimum = this._updateMinimumHeight.bind( this );
-      const updateLocalMinimum = this._updateLocalMinimumHeight.bind( this );
+      this._updatePreferredHeightListener = this._updatePreferredHeight.bind( this );
+      this._updateLocalPreferredHeightListener = this._updateLocalPreferredHeight.bind( this );
+      this._updateMinimumHeightListener = this._updateMinimumHeight.bind( this );
+      this._updateLocalMinimumHeightListener = this._updateLocalMinimumHeight.bind( this );
 
       // Update the opposite of parent/local when one changes
-      this.preferredHeightProperty.lazyLink( updateLocalPreferred );
-      this.localPreferredHeightProperty.lazyLink( updatePreferred );
-      this.minimumHeightProperty.lazyLink( updateLocalMinimum );
-      this.localMinimumHeightProperty.lazyLink( updateMinimum );
+      this.preferredHeightProperty.lazyLink( this._updateLocalPreferredHeightListener );
+      this.localPreferredHeightProperty.lazyLink( this._updatePreferredHeightListener );
+      this.minimumHeightProperty.lazyLink( this._updateLocalMinimumHeightListener );
+      this.localMinimumHeightProperty.lazyLink( this._updateMinimumHeightListener );
 
       // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
-      ( this as unknown as Node ).transformEmitter.addListener( updateLocalPreferred );
-      ( this as unknown as Node ).transformEmitter.addListener( updateMinimum );
+      ( this as unknown as Node ).transformEmitter.addListener( this._updateLocalPreferredHeightListener );
+      ( this as unknown as Node ).transformEmitter.addListener( this._updateMinimumHeightListener );
     }
 
     public get preferredHeight(): number | null {
@@ -181,15 +187,20 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    private _updateLocalPreferredHeight(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculateLocalPreferredHeight(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.preferredHeight !== null )
+             ? Math.abs( node.transform.inverseDeltaY( this.preferredHeight ) )
+             : null;
+    }
+
+    private _updateLocalPreferredHeight(): void {
       if ( !this._preferredHeightChanging ) {
         this._preferredHeightChanging = true;
 
-        const localPreferredHeight = ( node.matrix.isAligned() && this.preferredHeight !== null )
-                                     ? Math.abs( node.transform.inverseDeltaY( this.preferredHeight ) )
-                                     : null;
+        const localPreferredHeight = this._calculateLocalPreferredHeight();
 
         if ( this.localPreferredHeightProperty.value === null ||
              localPreferredHeight === null ||
@@ -200,15 +211,21 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    private _updatePreferredHeight(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculatePreferredHeight(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.localPreferredHeight !== null )
+             ? Math.abs( node.transform.transformDeltaY( this.localPreferredHeight ) )
+             : null;
+    }
+
+    private _updatePreferredHeight(): void {
       if ( !this._preferredHeightChanging ) {
         this._preferredHeightChanging = true;
 
-        const preferredHeight = ( node.matrix.isAligned() && this.localPreferredHeight !== null )
-                                ? Math.abs( node.transform.transformDeltaY( this.localPreferredHeight ) )
-                                : null;
+        const preferredHeight = this._calculatePreferredHeight();
+
         if ( this.preferredHeightProperty.value === null ||
              preferredHeight === null ||
              Math.abs( this.preferredHeightProperty.value - preferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
@@ -218,15 +235,20 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    private _updateLocalMinimumHeight(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculateLocalMinimumHeight(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.minimumHeight !== null )
+             ? Math.abs( node.transform.inverseDeltaY( this.minimumHeight ) )
+             : null;
+    }
+
+    private _updateLocalMinimumHeight(): void {
       if ( !this._minimumHeightChanging ) {
         this._minimumHeightChanging = true;
 
-        const localMinimumHeight = ( node.matrix.isAligned() && this.minimumHeight !== null )
-                                   ? Math.abs( node.transform.inverseDeltaY( this.minimumHeight ) )
-                                   : null;
+        const localMinimumHeight = this._calculateLocalMinimumHeight();
 
         if ( this.localMinimumHeightProperty.value === null ||
              localMinimumHeight === null ||
@@ -237,15 +259,20 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    private _updateMinimumHeight(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculateMinimumHeight(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.localMinimumHeight !== null )
+             ? Math.abs( node.transform.transformDeltaY( this.localMinimumHeight ) )
+             : null;
+    }
+
+    private _updateMinimumHeight(): void {
       if ( !this._minimumHeightChanging ) {
         this._minimumHeightChanging = true;
 
-        const minimumHeight = ( node.matrix.isAligned() && this.localMinimumHeight !== null )
-                              ? Math.abs( node.transform.transformDeltaY( this.localMinimumHeight ) )
-                              : null;
+        const minimumHeight = this._calculateMinimumHeight();
 
         if ( this.minimumHeightProperty.value === null ||
              minimumHeight === null ||

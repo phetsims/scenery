@@ -70,6 +70,21 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
+
+      // We've added code to conditionally update the preferred/minimum opposite dimensions, so we'll need to
+      // cross-link the listeners we've created in WidthSizable/HeightSizable
+
+      this.preferredWidthProperty.lazyLink( this._updateLocalPreferredHeightListener );
+      this.preferredHeightProperty.lazyLink( this._updateLocalPreferredWidthListener );
+
+      this.localPreferredWidthProperty.lazyLink( this._updatePreferredHeightListener );
+      this.localPreferredHeightProperty.lazyLink( this._updatePreferredWidthListener );
+
+      this.minimumWidthProperty.lazyLink( this._updateLocalMinimumHeightListener );
+      this.minimumHeightProperty.lazyLink( this._updateLocalMinimumWidthListener );
+
+      this.localMinimumWidthProperty.lazyLink( this._updateMinimumHeightListener );
+      this.localMinimumHeightProperty.lazyLink( this._updateMinimumWidthListener );
     }
 
     public get preferredSize(): Dimension2 | null {
@@ -170,6 +185,152 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
       // @ts-ignore
       return super.mutate( options );
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculateLocalPreferredWidth(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.preferredWidth !== null ) {
+            return Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) );
+          }
+        }
+        // If we're height-sizable and we have an orientation swap, set the correct preferred width!
+        else if ( this.preferredHeight !== null ) {
+          return Math.abs( node.transform.getInverse().m01() * this.preferredHeight );
+        }
+      }
+
+      return null;
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculateLocalPreferredHeight(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.preferredHeight !== null ) {
+            return Math.abs( node.transform.inverseDeltaY( this.preferredHeight ) );
+          }
+        }
+        // If we're width-sizable and we have an orientation swap, set the correct preferred height!
+        else if ( this.preferredWidth !== null ) {
+          return Math.abs( node.transform.getInverse().m10() * this.preferredWidth );
+        }
+      }
+
+      return null;
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculatePreferredWidth(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.localPreferredWidth !== null ) {
+            return Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) );
+          }
+        }
+        else if ( this.localPreferredHeight !== null ) {
+          return Math.abs( node.transform.matrix.m01() * this.localPreferredHeight );
+        }
+      }
+
+      return null;
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculatePreferredHeight(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.localPreferredHeight !== null ) {
+            return Math.abs( node.transform.transformDeltaY( this.localPreferredHeight ) );
+          }
+        }
+        else if ( this.localPreferredWidth !== null ) {
+          return Math.abs( node.transform.matrix.m10() * this.localPreferredWidth );
+        }
+      }
+
+      return null;
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculateLocalMinimumWidth(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.minimumWidth !== null ) {
+            return Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) );
+          }
+        }
+        else if ( this.minimumHeight !== null ) {
+          return Math.abs( node.transform.getInverse().m01() * this.minimumHeight );
+        }
+      }
+
+      return null;
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculateLocalMinimumHeight(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.minimumHeight !== null ) {
+            return Math.abs( node.transform.inverseDeltaY( this.minimumHeight ) );
+          }
+        }
+        else if ( this.minimumWidth !== null ) {
+          return Math.abs( node.transform.getInverse().m10() * this.minimumWidth );
+        }
+      }
+
+      return null;
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculateMinimumWidth(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.localMinimumWidth !== null ) {
+            return Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) );
+          }
+        }
+        else if ( this.localMinimumHeight !== null ) {
+          return Math.abs( node.transform.matrix.m01() * this.localMinimumHeight );
+        }
+      }
+
+      return null;
+    }
+
+    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+    protected override _calculateMinimumHeight(): number | null {
+      const node = this as unknown as Node;
+
+      if ( node.matrix.isAxisAligned() ) {
+        if ( node.matrix.isAligned() ) {
+          if ( this.localMinimumHeight !== null ) {
+            return Math.abs( node.transform.transformDeltaY( this.localMinimumHeight ) );
+          }
+        }
+        else if ( this.localMinimumWidth !== null ) {
+          return Math.abs( node.transform.matrix.m10() * this.localMinimumWidth );
+        }
+      }
+
+      return null;
     }
   } );
 

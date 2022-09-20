@@ -74,6 +74,12 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     private _preferredWidthChanging = false;
     private _minimumWidthChanging = false;
 
+    // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
+    protected _updatePreferredWidthListener: () => void;
+    protected _updateLocalPreferredWidthListener: () => void;
+    protected _updateMinimumWidthListener: () => void;
+    protected _updateLocalMinimumWidthListener: () => void;
+
     // IMPORTANT: If you're mixing this in, typically don't pass options that WidthSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
     // values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
@@ -82,20 +88,20 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
 
-      const updatePreferred = this._updatePreferredWidth.bind( this );
-      const updateLocalPreferred = this._updateLocalPreferredWidth.bind( this );
-      const updateMinimum = this._updateMinimumWidth.bind( this );
-      const updateLocalMinimum = this._updateLocalMinimumWidth.bind( this );
+      this._updatePreferredWidthListener = this._updatePreferredWidth.bind( this );
+      this._updateLocalPreferredWidthListener = this._updateLocalPreferredWidth.bind( this );
+      this._updateMinimumWidthListener = this._updateMinimumWidth.bind( this );
+      this._updateLocalMinimumWidthListener = this._updateLocalMinimumWidth.bind( this );
 
       // Update the opposite of parent/local when one changes
-      this.preferredWidthProperty.lazyLink( updateLocalPreferred );
-      this.localPreferredWidthProperty.lazyLink( updatePreferred );
-      this.minimumWidthProperty.lazyLink( updateLocalMinimum );
-      this.localMinimumWidthProperty.lazyLink( updateMinimum );
+      this.preferredWidthProperty.lazyLink( this._updateLocalPreferredWidthListener );
+      this.localPreferredWidthProperty.lazyLink( this._updatePreferredWidthListener );
+      this.minimumWidthProperty.lazyLink( this._updateLocalMinimumWidthListener );
+      this.localMinimumWidthProperty.lazyLink( this._updateMinimumWidthListener );
 
       // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
-      ( this as unknown as Node ).transformEmitter.addListener( updateLocalPreferred );
-      ( this as unknown as Node ).transformEmitter.addListener( updateMinimum );
+      ( this as unknown as Node ).transformEmitter.addListener( this._updateLocalPreferredWidthListener );
+      ( this as unknown as Node ).transformEmitter.addListener( this._updateMinimumWidthListener );
     }
 
     public get preferredWidth(): number | null {
@@ -182,15 +188,20 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    private _updateLocalPreferredWidth(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculateLocalPreferredWidth(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.preferredWidth !== null )
+             ? Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) )
+             : null;
+    }
+
+    private _updateLocalPreferredWidth(): void {
       if ( !this._preferredWidthChanging ) {
         this._preferredWidthChanging = true;
 
-        const localPreferredWidth = ( node.matrix.isAligned() && this.preferredWidth !== null )
-                                     ? Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) )
-                                     : null;
+        const localPreferredWidth = this._calculateLocalPreferredWidth();
 
         if ( this.localPreferredWidthProperty.value === null ||
              localPreferredWidth === null ||
@@ -201,15 +212,21 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    private _updatePreferredWidth(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculatePreferredWidth(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.localPreferredWidth !== null )
+             ? Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) )
+             : null;
+    }
+
+    private _updatePreferredWidth(): void {
       if ( !this._preferredWidthChanging ) {
         this._preferredWidthChanging = true;
 
-        const preferredWidth = ( node.matrix.isAligned() && this.localPreferredWidth !== null )
-                                ? Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) )
-                                : null;
+        const preferredWidth = this._calculatePreferredWidth();
+
         if ( this.preferredWidthProperty.value === null ||
              preferredWidth === null ||
              Math.abs( this.preferredWidthProperty.value - preferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
@@ -219,15 +236,20 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    private _updateLocalMinimumWidth(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculateLocalMinimumWidth(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.minimumWidth !== null )
+             ? Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) )
+             : null;
+    }
+
+    private _updateLocalMinimumWidth(): void {
       if ( !this._minimumWidthChanging ) {
         this._minimumWidthChanging = true;
 
-        const localMinimumWidth = ( node.matrix.isAligned() && this.minimumWidth !== null )
-                                   ? Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) )
-                                   : null;
+        const localMinimumWidth = this._calculateLocalMinimumWidth();
 
         if ( this.localMinimumWidthProperty.value === null ||
              localMinimumWidth === null ||
@@ -238,15 +260,20 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    private _updateMinimumWidth(): void {
+    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    protected _calculateMinimumWidth(): number | null {
       const node = this as unknown as Node;
 
+      return ( node.matrix.isAligned() && this.localMinimumWidth !== null )
+             ? Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) )
+             : null;
+    }
+
+    private _updateMinimumWidth(): void {
       if ( !this._minimumWidthChanging ) {
         this._minimumWidthChanging = true;
 
-        const minimumWidth = ( node.matrix.isAligned() && this.localMinimumWidth !== null )
-                              ? Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) )
-                              : null;
+        const minimumWidth = this._calculateMinimumWidth();
 
         if ( this.minimumWidthProperty.value === null ||
              minimumWidth === null ||
