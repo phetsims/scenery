@@ -70,9 +70,12 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     public readonly localMinimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
     public readonly isHeightResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
-    // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the other
-    private _preferredHeightChanging = false;
-    private _minimumHeightChanging = false;
+    // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the others.
+    // We want to lock out all other local or non-local preferred minimum sizes, whether in HeightSizable or WidthSizable
+    // NOTE: We are merging declarations between HeightSizable and WidthSizable. If Sizable is used these flags
+    // will be shared by both HeightSizable and WidthSizable.
+    protected _preferredSizeChanging = false;
+    protected _minimumSizeChanging = false;
 
     // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
     protected _updatePreferredHeightListener: () => void;
@@ -101,6 +104,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
       // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
       ( this as unknown as Node ).transformEmitter.addListener( this._updateLocalPreferredHeightListener );
+      // On a transform change this should update the minimum
       ( this as unknown as Node ).transformEmitter.addListener( this._updateMinimumHeightListener );
     }
 
@@ -199,8 +203,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     private _updateLocalPreferredHeight(): void {
       assert && ( this as unknown as Node ).auditMaxDimensions();
 
-      if ( !this._preferredHeightChanging ) {
-        this._preferredHeightChanging = true;
+      if ( !this._preferredSizeChanging ) {
+        this._preferredSizeChanging = true;
 
         const localPreferredHeight = this._calculateLocalPreferredHeight();
 
@@ -209,7 +213,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
              Math.abs( this.localPreferredHeightProperty.value - localPreferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
           this.localPreferredHeightProperty.value = localPreferredHeight;
         }
-        this._preferredHeightChanging = false;
+        this._preferredSizeChanging = false;
       }
     }
 
@@ -223,8 +227,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     }
 
     private _updatePreferredHeight(): void {
-      if ( !this._preferredHeightChanging ) {
-        this._preferredHeightChanging = true;
+      if ( !this._preferredSizeChanging ) {
+        this._preferredSizeChanging = true;
 
         const preferredHeight = this._calculatePreferredHeight();
 
@@ -233,7 +237,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
              Math.abs( this.preferredHeightProperty.value - preferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
           this.preferredHeightProperty.value = preferredHeight;
         }
-        this._preferredHeightChanging = false;
+        this._preferredSizeChanging = false;
       }
     }
 
@@ -247,8 +251,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     }
 
     private _updateLocalMinimumHeight(): void {
-      if ( !this._minimumHeightChanging ) {
-        this._minimumHeightChanging = true;
+      if ( !this._minimumSizeChanging ) {
+        this._minimumSizeChanging = true;
 
         const localMinimumHeight = this._calculateLocalMinimumHeight();
 
@@ -257,7 +261,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
              Math.abs( this.localMinimumHeightProperty.value - localMinimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
           this.localMinimumHeightProperty.value = localMinimumHeight;
         }
-        this._minimumHeightChanging = false;
+        this._minimumSizeChanging = false;
       }
     }
 
@@ -271,8 +275,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     }
 
     private _updateMinimumHeight(): void {
-      if ( !this._minimumHeightChanging ) {
-        this._minimumHeightChanging = true;
+      if ( !this._minimumSizeChanging ) {
+        this._minimumSizeChanging = true;
 
         const minimumHeight = this._calculateMinimumHeight();
 
@@ -281,7 +285,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
              Math.abs( this.minimumHeightProperty.value - minimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
           this.minimumHeightProperty.value = minimumHeight;
         }
-        this._minimumHeightChanging = false;
+        this._minimumSizeChanging = false;
       }
     }
   } );

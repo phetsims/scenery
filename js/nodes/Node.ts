@@ -2807,10 +2807,10 @@ class Node extends ParallelDOM {
    */
   public auditMaxDimensions(): void {
     assert && assert( this._maxWidth === null || !isWidthSizable( this ) || this.preferredWidth === null || this._maxWidth >= this.preferredWidth - 1e-7,
-        'If maxWidth and preferredWidth are both non-null, maxWidth should NOT be smaller than the preferredWidth. If that happens, it would trigger an infinite loop' );
+      'If maxWidth and preferredWidth are both non-null, maxWidth should NOT be smaller than the preferredWidth. If that happens, it would trigger an infinite loop' );
 
     assert && assert( this._maxHeight === null || !isHeightSizable( this ) || this.preferredHeight === null || this._maxHeight >= this.preferredHeight - 1e-7,
-        'If maxHeight and preferredHeight are both non-null, maxHeight should NOT be smaller than the preferredHeight. If that happens, it would trigger an infinite loop' );
+      'If maxHeight and preferredHeight are both non-null, maxHeight should NOT be smaller than the preferredHeight. If that happens, it would trigger an infinite loop' );
   }
 
   /**

@@ -70,9 +70,12 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     public readonly localMinimumWidthProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
     public readonly isWidthResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
-    // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the other
-    private _preferredWidthChanging = false;
-    private _minimumWidthChanging = false;
+    // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the others.
+    // We want to lock out all other local or non-local preferred minimum sizes, whether in HeightSizable or WidthSizable
+    // NOTE: We are merging declarations between HeightSizable and WidthSizable. If Sizable is used these flags
+    // will be shared by both HeightSizable and WidthSizable.
+    protected _preferredSizeChanging = false;
+    protected _minimumSizeChanging = false;
 
     // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
     protected _updatePreferredWidthListener: () => void;
@@ -101,6 +104,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
       // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
       ( this as unknown as Node ).transformEmitter.addListener( this._updateLocalPreferredWidthListener );
+      // On a transform change this should update the minimum
       ( this as unknown as Node ).transformEmitter.addListener( this._updateMinimumWidthListener );
     }
 
@@ -200,8 +204,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     private _updateLocalPreferredWidth(): void {
       assert && ( this as unknown as Node ).auditMaxDimensions();
 
-      if ( !this._preferredWidthChanging ) {
-        this._preferredWidthChanging = true;
+      if ( !this._preferredSizeChanging ) {
+        this._preferredSizeChanging = true;
 
         const localPreferredWidth = this._calculateLocalPreferredWidth();
 
@@ -210,7 +214,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
              Math.abs( this.localPreferredWidthProperty.value - localPreferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
           this.localPreferredWidthProperty.value = localPreferredWidth;
         }
-        this._preferredWidthChanging = false;
+        this._preferredSizeChanging = false;
       }
     }
 
@@ -224,8 +228,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     private _updatePreferredWidth(): void {
-      if ( !this._preferredWidthChanging ) {
-        this._preferredWidthChanging = true;
+      if ( !this._preferredSizeChanging ) {
+        this._preferredSizeChanging = true;
 
         const preferredWidth = this._calculatePreferredWidth();
 
@@ -234,7 +238,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
              Math.abs( this.preferredWidthProperty.value - preferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
           this.preferredWidthProperty.value = preferredWidth;
         }
-        this._preferredWidthChanging = false;
+        this._preferredSizeChanging = false;
       }
     }
 
@@ -248,8 +252,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     private _updateLocalMinimumWidth(): void {
-      if ( !this._minimumWidthChanging ) {
-        this._minimumWidthChanging = true;
+      if ( !this._minimumSizeChanging ) {
+        this._minimumSizeChanging = true;
 
         const localMinimumWidth = this._calculateLocalMinimumWidth();
 
@@ -258,7 +262,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
              Math.abs( this.localMinimumWidthProperty.value - localMinimumWidth ) > CHANGE_POSITION_THRESHOLD ) {
           this.localMinimumWidthProperty.value = localMinimumWidth;
         }
-        this._minimumWidthChanging = false;
+        this._minimumSizeChanging = false;
       }
     }
 
@@ -272,8 +276,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     private _updateMinimumWidth(): void {
-      if ( !this._minimumWidthChanging ) {
-        this._minimumWidthChanging = true;
+      if ( !this._minimumSizeChanging ) {
+        this._minimumSizeChanging = true;
 
         const minimumWidth = this._calculateMinimumWidth();
 
@@ -282,7 +286,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
              Math.abs( this.minimumWidthProperty.value - minimumWidth ) > CHANGE_POSITION_THRESHOLD ) {
           this.minimumWidthProperty.value = minimumWidth;
         }
-        this._minimumWidthChanging = false;
+        this._minimumSizeChanging = false;
       }
     }
   } );
