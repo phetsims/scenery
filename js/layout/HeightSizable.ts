@@ -197,6 +197,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     }
 
     private _updateLocalPreferredHeight(): void {
+      assert && ( this as unknown as Node ).auditMaxDimensions();
+
       if ( !this._preferredHeightChanging ) {
         this._preferredHeightChanging = true;
 

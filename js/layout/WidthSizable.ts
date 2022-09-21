@@ -198,6 +198,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     private _updateLocalPreferredWidth(): void {
+      assert && ( this as unknown as Node ).auditMaxDimensions();
+
       if ( !this._preferredWidthChanging ) {
         this._preferredWidthChanging = true;
 

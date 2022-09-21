@@ -171,7 +171,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, TInputListener, TLayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
+import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, TInputListener, TLayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable, isWidthSizable, isHeightSizable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -2773,6 +2773,8 @@ class Node extends ParallelDOM {
    * dimensions (maxWidth and maxHeight). See documentation in constructor for detailed behavior.
    */
   private updateMaxDimension( localBounds: Bounds2 ): void {
+    assert && this.auditMaxDimensions();
+
     const currentScale = this._appliedScaleFactor;
     let idealScale = 1;
 
@@ -2797,6 +2799,18 @@ class Node extends ParallelDOM {
 
       this.scale( scaleAdjustment );
     }
+  }
+
+  /**
+   * Scenery-internal method for verifying maximum dimensions are NOT smaller than preferred dimensions
+   * NOTE: This has to be public due to mixins not able to access protected/private methods
+   */
+  public auditMaxDimensions(): void {
+    assert && assert( this._maxWidth === null || !isWidthSizable( this ) || this.preferredWidth === null || this._maxWidth >= this.preferredWidth - 1e-7,
+        'If maxWidth and preferredWidth are both non-null, maxWidth should NOT be smaller than the preferredWidth. If that happens, it would trigger an infinite loop' );
+
+    assert && assert( this._maxHeight === null || !isHeightSizable( this ) || this.preferredHeight === null || this._maxHeight >= this.preferredHeight - 1e-7,
+        'If maxHeight and preferredHeight are both non-null, maxHeight should NOT be smaller than the preferredHeight. If that happens, it would trigger an infinite loop' );
   }
 
   /**
