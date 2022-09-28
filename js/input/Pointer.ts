@@ -442,9 +442,7 @@ export default abstract class Pointer {
 // Pointer is not a PhetioObject and not instrumented, but this type is used for
 // toStateObject in Input
 Pointer.PointerIO = new IOType<Pointer>( 'PointerIO', {
-
-  // Cannot use valueType since Pointer is abstract
-  isValidValue: p => p instanceof Pointer,
+  valueType: Pointer,
   toStateObject: ( pointer: Pointer ) => {
     return {
       point: pointer.point.toStateObject(),
