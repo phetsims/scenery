@@ -27,6 +27,7 @@ import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
 import { scenery } from '../imports.js';
 
 // Valid values for the 'style' property of Font
@@ -440,6 +441,16 @@ Font.FontIO = new IOType( 'FontIO', {
 
   fromStateObject( stateObject: FontState ) {
     return new Font( stateObject );
+  },
+
+  stateSchema: {
+    style: StringIO,
+    variant: StringIO,
+    weight: StringIO,
+    stretch: StringIO,
+    size: StringIO,
+    lineHeight: StringIO,
+    family: StringIO
   }
 } );
 
