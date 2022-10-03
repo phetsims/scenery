@@ -144,6 +144,7 @@ export default abstract class Pointer {
   }
 
   public set cursor( value: string | null ) { this.setCursor( value ); }
+
   public get cursor(): string | null { return this.getCursor(); }
 
   /**
@@ -436,6 +437,10 @@ export default abstract class Pointer {
 
     assert && assert( this._attachedListener === null, 'Attached listeners should be cleared before pointer disposal' );
     assert && assert( this._listeners.length === 0, 'Should not have listeners when a pointer is disposed' );
+  }
+
+  public toString(): string {
+    return `Pointer#${this.type}_at_${this.point}`;
   }
 }
 
