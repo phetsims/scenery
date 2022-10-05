@@ -603,8 +603,12 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   /**
    * Interrupts and resets the listener on blur so that listener state is reset and keys are removed from the keyState
    * array. Public because this is called with the scenery listener API. Clients should not call this directly.
+   *
+   * focusout bubbles, which is important so that the work of interrupt happens as focus moves between children of
+   * a parent with a KeyboardDragListener, which can create state for the keystate.
+   * See https://github.com/phetsims/scenery/issues/1461.
    */
-  public blur( event: SceneryEvent ): void {
+  public focusout( event: SceneryEvent ): void {
     this.interrupt();
   }
 
