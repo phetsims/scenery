@@ -1,9 +1,10 @@
 // Copyright 2019-2022, University of Colorado Boulder
 
 /**
- * A general type for keyboard dragging. Objects can be dragged in two dimensions with the arrow keys and with the WASD
- * keys. This can be added to a node through addInputListener for accessibility, which is mixed into Nodes with
- * the ParallelDOM trait.
+ * A general type for keyboard dragging. Objects can be dragged in one or two dimensions with the arrow keys and with
+ * the WASD keys. See the option keyboardDragDirection for a description of how keyboard keys can be mapped to
+ * motion for 1D and 2D motion. This can be added to a node through addInputListener for accessibility, which is mixed
+ * into Nodes with the ParallelDOM trait.
  *
  * JavaScript does not natively handle multiple 'keydown' events at once, so we have a custom implementation that
  * tracks which keys are down and for how long in a step() function. To support keydown timing, AXON/timer is used. In
@@ -58,6 +59,37 @@ type Hotkey = {
   callback: () => void;
 };
 
+// Possible movement types for this KeyboardDragListener. 2D motion ('both') or 1D motion ('leftRight' or 'upDown').
+type KeyboardDragDirection = 'both' | 'leftRight' | 'upDown';
+
+type KeyboardDragDirectionKeys = {
+  left: string[];
+  right: string[];
+  up: string[];
+  down: string[];
+};
+
+const KEYBOARD_DRAG_DIRECTION_KEY_MAP = new Map<KeyboardDragDirection, KeyboardDragDirectionKeys>( [
+  [ 'both', {
+    left: [ KeyboardUtils.KEY_A, KeyboardUtils.KEY_LEFT_ARROW ],
+    right: [ KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_D ],
+    up: [ KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_W ],
+    down: [ KeyboardUtils.KEY_DOWN_ARROW, KeyboardUtils.KEY_S ]
+  } ],
+  [ 'leftRight', {
+    left: [ KeyboardUtils.KEY_A, KeyboardUtils.KEY_LEFT_ARROW, KeyboardUtils.KEY_DOWN_ARROW, KeyboardUtils.KEY_S ],
+    right: [ KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_D, KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_W ],
+    up: [],
+    down: []
+  } ],
+  [ 'upDown', {
+    left: [],
+    right: [],
+    up: [ KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_D, KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_W ],
+    down: [ KeyboardUtils.KEY_A, KeyboardUtils.KEY_LEFT_ARROW, KeyboardUtils.KEY_DOWN_ARROW, KeyboardUtils.KEY_S ]
+  } ]
+] );
+
 type SelfOptions = {
 
   // How much the position Property will change in view coordinates every moveOnHoldInterval. Object will
@@ -84,6 +116,11 @@ type SelfOptions = {
   // produces smoother motion for the object. dragVelocity and dragDelta options are mutually exclusive. See dragDelta
   // for more information.
   shiftDragVelocity?: number;
+
+  // Specifies the direction of motion for the KeyboardDragListener. By default, the position Vector2 can change in
+  // both directions by pressing the arrow keys. But you can constrain dragging to 1D left-right or up-down motion
+  // with this value.
+  keyboardDragDirection?: KeyboardDragDirection;
 
   // If provided, it will be synchronized with the drag position in the model frame, applying provided transforms as
   // needed. Most useful when used with transform option
@@ -137,6 +174,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   private _end: ( ( event: SceneryEvent ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _transform: Transform3 | null;
+  private _keyboardDragDirection: KeyboardDragDirection;
   private _positionProperty: TProperty<Vector2> | null;
   private _dragVelocity: number;
   private _shiftDragVelocity: number;
@@ -205,6 +243,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       shiftDragDelta: 5,
       dragVelocity: 0,
       shiftDragVelocity: 0,
+      keyboardDragDirection: 'both',
       positionProperty: null,
       transform: null,
       dragBoundsProperty: null,
@@ -240,6 +279,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
     this._moveOnHoldDelay = options.moveOnHoldDelay;
     this._moveOnHoldInterval = options.moveOnHoldInterval;
     this._hotkeyHoldInterval = options.hotkeyHoldInterval;
+    this._keyboardDragDirection = options.keyboardDragDirection;
 
     this.keyState = [];
     this._hotkeys = [];
@@ -814,31 +854,40 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   }
 
   /**
+   * Get the keyboard keys for the KeyboardDragDirection of this KeyboardDragListener.
+   */
+  private getKeyboardDragDirectionKeys(): KeyboardDragDirectionKeys {
+    const directionKeys = KEYBOARD_DRAG_DIRECTION_KEY_MAP.get( this._keyboardDragDirection )!;
+    assert && assert( directionKeys, `No direction keys found in map for KeyboardDragDirection ${this._keyboardDragDirection}` );
+    return directionKeys;
+  }
+
+  /**
    * Returns true if the keystate indicates that a key is down that should move the object to the left.
    */
   public leftMovementKeysDown(): boolean {
-    return this.keyInListDown( [ KeyboardUtils.KEY_A, KeyboardUtils.KEY_LEFT_ARROW ] );
+    return this.keyInListDown( this.getKeyboardDragDirectionKeys().left );
   }
 
   /**
    * Returns true if the keystate indicates that a key is down that should move the object to the right.
    */
   public rightMovementKeysDown(): boolean {
-    return this.keyInListDown( [ KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_D ] );
+    return this.keyInListDown( this.getKeyboardDragDirectionKeys().right );
   }
 
   /**
    * Returns true if the keystate indicates that a key is down that should move the object up.
    */
   public upMovementKeysDown(): boolean {
-    return this.keyInListDown( [ KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_W ] );
+    return this.keyInListDown( this.getKeyboardDragDirectionKeys().up );
   }
 
   /**
    * Returns true if the keystate indicates that a key is down that should move the upject down.
    */
   public downMovementKeysDown(): boolean {
-    return this.keyInListDown( [ KeyboardUtils.KEY_DOWN_ARROW, KeyboardUtils.KEY_S ] );
+    return this.keyInListDown( this.getKeyboardDragDirectionKeys().down );
   }
 
   /**
