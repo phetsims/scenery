@@ -766,13 +766,14 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       if ( this.leftMovementKeysDown() ) {
         deltaX = -delta;
       }
-      if ( this.rightMovementKeysDown() ) {
+      else if ( this.rightMovementKeysDown() ) {
         deltaX = delta;
       }
+
       if ( this.upMovementKeysDown() ) {
         deltaY = -delta;
       }
-      if ( this.downMovementKeysDown() ) {
+      else if ( this.downMovementKeysDown() ) {
         deltaY = delta;
       }
 
