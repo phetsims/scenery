@@ -339,7 +339,9 @@
 
     <h3 id="FlowBox-grow" class="index">grow</h3>
 
-    <p>Nodes with preferred sizes can be added, and the grow in layoutOptions will attempt to put extra space into that cell</p>
+    <p>Nodes with preferred sizes can be added, and the grow in layoutOptions will attempt to put extra space into that
+      cell. If all nodes have the same grow, then all nodes will receive the same share of the extra space.
+      Otherwise, extra space is distributed proportionally as defined by each node's grow value.</p>
 
     <div id="resizable-example"></div>
     <script type="text/javascript">
