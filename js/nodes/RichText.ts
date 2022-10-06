@@ -100,7 +100,7 @@ const RICH_TEXT_OPTION_KEYS = [
   'align',
   'leading',
   'lineWrap',
-  'stringProperty',
+  Text.STRING_PROPERTY_NAME,
   'text'
 ];
 
@@ -1479,7 +1479,7 @@ export default class RichText extends Node {
   }
 
   public override mutate( options?: RichTextOptions ): this {
-    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) && options.stringProperty ) {
+    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) && options.stringProperty ) { // eslint-disable-line bad-sim-text
       assert && assert( options.stringProperty.value === options.text, 'If both text and stringProperty are provided, then values should match' );
     }
 

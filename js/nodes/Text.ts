@@ -24,10 +24,12 @@ import { PropertyOptions } from '../../../axon/js/Property.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
+const STRING_PROPERTY_NAME = 'stringProperty'; // eslint-disable-line bad-sim-text
+
 // constants
 const TEXT_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined for text, see setBoundsMethod() for more documentation
-  'stringProperty', // {Property.<string>|null} - Sets forwarding of the stringProperty, see setStringProperty() for more documentation
+  STRING_PROPERTY_NAME, // {Property.<string>|null} - Sets forwarding of the stringProperty, see setStringProperty() for more documentation
   'text', // {string|number} - Sets the text to be displayed, see setText() for more documentation
   'font', // {Font|string} - Sets the font used for the text, see setFont() for more documentation
   'fontWeight', // {string|number} - Sets the weight of the current font, see setFont() for more documentation
@@ -81,7 +83,8 @@ export default class Text extends Paintable( Node ) {
   // (phet-io) - property name avoids namespace of the Node setter
   private textTandem: Tandem;
 
-  public static readonly STRING_PROPERTY_TANDEM_NAME = 'stringProperty';
+  public static readonly STRING_PROPERTY_NAME = STRING_PROPERTY_NAME;
+  public static readonly STRING_PROPERTY_TANDEM_NAME = STRING_PROPERTY_NAME;
 
   /**
    * @param text - See setText() for more documentation
@@ -126,10 +129,10 @@ export default class Text extends Paintable( Node ) {
   }
 
   public override mutate( options?: TextOptions ): this {
-    // @ts-ignore
-    if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) ) {
-      // @ts-ignore
-      assert && assert( options.stringProperty.value === options.text, 'If both text and stringProperty are provided, then values should match' );
+
+    // eslint-disable-next-line bad-sim-text
+    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) ) {
+      assert && assert( options.stringProperty!.value === options.text, 'If both text and stringProperty are provided, then values should match' );
     }
     return super.mutate( options );
   }
