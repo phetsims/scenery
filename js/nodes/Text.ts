@@ -129,9 +129,7 @@ export default class Text extends Paintable( Node ) {
   }
 
   public override mutate( options?: TextOptions ): this {
-
-    // eslint-disable-next-line bad-sim-text
-    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) ) {
+    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( STRING_PROPERTY_NAME ) ) {
       assert && assert( options.stringProperty!.value === options.text, 'If both text and stringProperty are provided, then values should match' );
     }
     return super.mutate( options );

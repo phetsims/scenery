@@ -1479,7 +1479,7 @@ export default class RichText extends Node {
   }
 
   public override mutate( options?: RichTextOptions ): this {
-    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'stringProperty' ) && options.stringProperty ) { // eslint-disable-line bad-sim-text
+    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( Text.STRING_PROPERTY_NAME ) && options.stringProperty ) {
       assert && assert( options.stringProperty.value === options.text, 'If both text and stringProperty are provided, then values should match' );
     }
 
