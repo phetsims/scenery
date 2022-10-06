@@ -213,8 +213,6 @@ const DEFAULT_FONT = new Font( {
   size: 20
 } );
 
-const STRING_PROPERTY_TANDEM_NAME = 'stringProperty';
-
 // Tags that should be included in accessible innerContent, see https://github.com/phetsims/joist/issues/430
 const ACCESSIBLE_TAGS = [
   'b', 'strong', 'i', 'em', 'sub', 'sup', 'u', 's'
@@ -329,6 +327,9 @@ export default class RichText extends Node {
   // Normal layout container of lines (separate, so we can clear it easily)
   private lineContainer: Node;
 
+  // Text and RichText currently use the same tandem name for their stringProperty.
+  public static readonly STRING_PROPERTY_TANDEM_NAME = Text.STRING_PROPERTY_TANDEM_NAME;
+
   public constructor( text: string | number | TReadOnlyProperty<string>, providedOptions?: RichTextOptions ) {
 
     // We only fill in some defaults, since the other defaults are defined below (and mutate is relied on)
@@ -398,7 +399,7 @@ export default class RichText extends Node {
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
   public setStringProperty( newTarget: TProperty<string> | null ): this {
-    return this._stringProperty.setTargetProperty( this, STRING_PROPERTY_TANDEM_NAME, newTarget );
+    return this._stringProperty.setTargetProperty( this, RichText.STRING_PROPERTY_TANDEM_NAME, newTarget );
   }
 
   public set stringProperty( property: TProperty<string> | null ) { this.setStringProperty( property ); }
@@ -427,12 +428,12 @@ export default class RichText extends Node {
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      this._stringProperty.initializePhetio( this, STRING_PROPERTY_TANDEM_NAME, () => {
+      this._stringProperty.initializePhetio( this, RichText.STRING_PROPERTY_TANDEM_NAME, () => {
         return new StringProperty( this.text, combineOptions<RichTextOptions>( {
 
           // by default, texts should be readonly. Editable texts most likely pass in editable Properties from i18n model Properties, see https://github.com/phetsims/scenery/issues/1443
           phetioReadOnly: true,
-          tandem: this.tandem.createTandem( STRING_PROPERTY_TANDEM_NAME ),
+          tandem: this.tandem.createTandem( RichText.STRING_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
         }, options.stringPropertyOptions ) );
       } );
