@@ -37,7 +37,7 @@ const TEXT_OPTION_KEYS = [
   'fontSize' // {string|number} - Sets the size of the current font, see setFont() for more documentation
 ];
 
-const TEXT_PROPERTY_TANDEM_NAME = 'stringProperty';
+const STRING_PROPERTY_TANDEM_NAME = 'stringProperty';
 
 // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
 // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
@@ -202,7 +202,7 @@ export default class Text extends Paintable( Node ) {
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
   public setStringProperty( newTarget: TProperty<string> | null ): this {
-    return this._stringProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
+    return this._stringProperty.setTargetProperty( this, STRING_PROPERTY_TANDEM_NAME, newTarget );
   }
 
   public set stringProperty( property: TProperty<string> | null ) { this.setStringProperty( property ); }
@@ -228,12 +228,12 @@ export default class Text extends Paintable( Node ) {
     super.initializePhetioObject( baseOptions, config );
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
-      this._stringProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => {
+      this._stringProperty.initializePhetio( this, STRING_PROPERTY_TANDEM_NAME, () => {
           return new StringProperty( this.text, combineOptions<StringPropertyOptions>( {
 
             // by default, texts should be readonly. Editable texts most likely pass in editable Properties from i18n model Properties, see https://github.com/phetsims/scenery/issues/1443
             phetioReadOnly: true,
-            tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
+            tandem: this.tandem.createTandem( STRING_PROPERTY_TANDEM_NAME ),
             phetioDocumentation: 'Property for the displayed text'
 
           }, config.stringPropertyOptions ) );
