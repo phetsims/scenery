@@ -1187,7 +1187,8 @@
 
     <h3 id="GridBox-grow" class="index">grow</h3>
 
-    <p>Grids by default don't auto-expand all rows/columns in size to the preferred size, but they can with a similar style to FlowBox:</p>
+    <p>Grids by default don't auto-expand all rows/columns in size to the preferred size, but they can with a similar
+      style to FlowBox, where <code>grow</code> applies to both the x and y dimensions:</p>
 
     <div id="grow-grid-example"></div>
     <script type="text/javascript">
@@ -1221,7 +1222,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <p>This space can be grown in specified rows/columns only (and independently):</p>
+    <p>This space can be grown in specified rows/columns only (and independently) with <code>xGrow</code> or <code>yGrow</code>:</p>
 
     <div id="grow-2-grid-example"></div>
     <script type="text/javascript">
@@ -1383,7 +1384,7 @@
 
     <h3 id="GridBox-layoutOptions-size" class="index">width/height</h3>
 
-    <p>Cells can take up more than one row/column with the width/height layout options:</p>
+    <p>Cells can take up more than one row/column with the <code>width</code> / <code>height</code> layout options:</p>
 
     <div id="span-grid-example"></div>
     <script type="text/javascript">
@@ -1626,10 +1627,10 @@
     </p>
 
     <p>
-      Sizable nodes will either mix in <code>WidthSizable</code>, <code>HeightSizable</code>, or <code>Sizable</code> (indicating that both width and height
-      can be adjusted). This provides preferred and minimum sizes in BOTH local and parent coordinate frames (e.g.
-      <code>preferredWidth</code> / <code>localPreferredWidth</code>). These separate coordinate frame versions will be kept in sync (and are
-      backed by Properties).
+      Sizable nodes will either mix in <code>WidthSizable</code>, <code>HeightSizable</code>, or <code>Sizable</code>
+      (indicating that both width and height can be adjusted). This provides preferred and minimum sizes in BOTH local
+      and parent coordinate frames (e.g. <code>preferredWidth</code> / <code>localPreferredWidth</code>).
+      These separate coordinate frame versions will be kept in sync (and are backed by Properties).
     </p>
 
     <p>
