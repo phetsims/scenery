@@ -157,7 +157,7 @@
     <h3 id="FlowBox-orientation" class="index">orientation</h3>
 
     <p class="index" data-index="HBox">
-      For horizontal line-based layout, use HBox:
+      For horizontal line-based layout, use <code>HBox</code>:
     </p>
 
     <div id="HBox-example"></div>
@@ -177,7 +177,7 @@
     </script>
 
     <p class="index" data-index="VBox">
-      For vertical line-based layout, use HBox:
+      For vertical line-based layout, use <code>VBox</code>:
     </p>
 
     <div id="VBox-example"></div>
@@ -200,7 +200,7 @@
       NOTE: For FlowBox, the orientation provided is typically called the <em>primary</em> orientation. This is the
       orientation along which each Node in a line is positioned. The <em>secondary</em> orientation is the opposite one,
       along which each Node is aligned. e.g. for an HBox, its primary orientation is horizontal, and its secondary
-      orientation is vertical (so its elements will be positioned with increasing x values, and its align will control
+      orientation is vertical (so its elements will be positioned with increasing x values, and its <code>align</code> will control
       the y values).
     </p>
 
@@ -269,7 +269,7 @@
       }
     </script>
 
-    <p id="FlowBox-resize" class="index" data-index="resize">Resizing/layout can be disabled with resize:false:</p>
+    <p id="FlowBox-resize" class="index" data-index="resize">Resizing/layout can be disabled with <code>resize: false</code>:</p>
 
     <div id="locked-sizing-example"></div>
     <script type="text/javascript">
@@ -339,9 +339,9 @@
 
     <h3 id="FlowBox-grow" class="index">grow</h3>
 
-    <p>Nodes with preferred sizes can be added, and the grow in layoutOptions will attempt to put extra space into that
-      cell. If all nodes have the same grow, then all nodes will receive the same share of the extra space.
-      Otherwise, extra space is distributed proportionally as defined by each node's grow value.</p>
+    <p>Nodes with preferred sizes can be added, and the <code>grow</code> in <code>layoutOptions</code> will attempt to put extra space into that
+      cell. If all nodes have the same <code>grow</code>, then all nodes will receive the same share of the extra space.
+      Otherwise, extra space is distributed proportionally as defined by each node's <code>grow</code> value.</p>
 
     <div id="resizable-example"></div>
     <script type="text/javascript">
@@ -366,7 +366,7 @@
       }, { resize: 'horizontal' } );
     </script>
 
-    <p>Extra space can be allocated proportionally (a node with 4 times the grow value will grow 4 times as fast):</p>
+    <p>Extra space can be allocated proportionally (a node with 4 times the <code>grow</code> value will grow 4 times as fast):</p>
 
     <div id="grow-example"></div>
     <script type="text/javascript">
@@ -482,7 +482,7 @@
 
     <h3 id="FlowBox-justify" class="index">justify</h3>
 
-    <p>Justification controls how extra space is allocated around cells (after any possible growing has been done):</p>
+    <p><code>justify</code> controls how extra space is allocated around cells (after any possible growing has been done):</p>
 
     <div id="justification-example"></div>
     <script type="text/javascript">
@@ -536,7 +536,7 @@
 
     <h3 id="FlowBox-wrap" class="index">wrap</h3>
 
-    <p>Wrapping will shift content that doesn't fit the preferred size into new rows/columns (try resizing it to be less wide):</p>
+    <p><code>wrap</code> will shift content that doesn't fit the preferred size into new rows/columns (try resizing it to be less wide):</p>
 
     <div id="wrap-example"></div>
     <script type="text/javascript">
@@ -559,7 +559,7 @@
 
     <h3 id="FlowBox-align" class="index">align</h3>
 
-    <p>Alignment controls how cells are positioned in the secondary orientation:</p>
+    <p><code>align</code> controls how cells are positioned in the secondary orientation:</p>
 
     <div id="align-example"></div>
     <script type="text/javascript">
@@ -594,14 +594,14 @@
     </script>
 
     <p>
-      For horizontal boxes, the values are: 'left', 'right', 'center', 'origin'. For vertical boxes, the values are:
-      'top', 'bottom', 'center', 'origin'. See
+      For horizontal boxes, the values are: <code>'left', 'right', 'center', 'origin'</code>. For vertical boxes, the values are:
+      <code>'top', 'bottom', 'center', 'origin'</code>. See
       <a href="https://github.com/phetsims/scenery/blob/master/js/layout/LayoutAlign.ts">LayoutAlign</a> for more details
     </p>
 
     <h3 id="FlowBox-justifyLines" class="index">justifyLines</h3>
 
-    <p>justifyLines controls how lines are positioned in the secondary orientation (null will default to a stretch):</p>
+    <p><code>justifyLines</code> controls how lines are positioned in the secondary orientation (null will default to a stretch):</p>
 
     <div id="justifyLines-example"></div>
     <script type="text/javascript">
@@ -658,7 +658,7 @@
 
     <h3 id="FlowBox-spacing" class="index">spacing</h3>
 
-    <p>Spacing can be added, that is applied between cells:</p>
+    <p><code>spacing</code> controls extra space that can be added between cells:</p>
 
     <div id="spacing-example"></div>
     <script type="text/javascript">
@@ -679,7 +679,7 @@
 
     <h3 id="FlowBox-lineSpacing" class="index">lineSpacing</h3>
 
-    <p>Spacing between lines (rows/columns) can also be added, which applies when wrapped:</p>
+    <p><code>lineSpacing</code> adds space between rows/columns, which applies when wrapped:</p>
 
     <div id="lineSpacing-example"></div>
     <script type="text/javascript">
@@ -701,7 +701,7 @@
 
     <h3 id="FlowBox-margins" class="index">Margins</h3>
 
-    <p>Margins can also be added to every cell (margin affects all 4 sides, xMargin affects left/right, yMargin affects top/bottom):</p>
+    <p>Margins can also be added to every cell (<code>margin</code> affects all 4 sides, <code>xMargin</code> affects left/right, <code>yMargin</code> affects top/bottom):</p>
 
     <div id="margin-example"></div>
     <script type="text/javascript">
@@ -802,7 +802,7 @@
 
     <h3 id="FlowBox-stretch" class="index">stretch</h3>
 
-    <p>Stretch will have a resizable element take up the entire row/column size:</p>
+    <p><code>stretch</code> will have a resizable element take up the entire row/column size:</p>
 
     <div id="stretch-example"></div>
     <script type="text/javascript">
@@ -840,8 +840,8 @@
 
     <h3 class="index">Separators</h3>
 
-    <p>Separators are also available for easy of use (separators at the visible start/end and duplicates will be marked as
-      invisible, while all other separators will be marked as visible):</p>
+    <p>Separators are also available for easy of use (separators at the visible start/end, and duplicates will be marked as
+      <code>visible: false</code>, while all other separators will be marked as <code>visible: true</code>):</p>
 
     <div id="separators-example"></div>
     <script type="text/javascript">
@@ -938,7 +938,7 @@
 
     <h3 id="GridBox-rows" class="index">rows</h3>
 
-    <p>Grids can be constructed by specifying all the children in rows (null for gaps):</p>
+    <p>Grids can be constructed by specifying all the children in rows (<code>null</code> for gaps):</p>
 
     <div id="rows-example"></div>
     <script type="text/javascript">
@@ -974,7 +974,7 @@
 
     <h3 id="GridBox-columns" class="index">columns</h3>
 
-    <p>or with colums:</p>
+    <p>or with columns:</p>
 
     <div id="columns-example"></div>
     <script type="text/javascript">
@@ -1011,7 +1011,7 @@
     <h3 id="GridBox-autoLines" class="index" data-index="auto">autoRows/autoColumn</h3>
 
     <p>
-      Additionally, if a certain number of rows/columns are desired, autoRows/autoColumns can be used to wrap and
+      Additionally, if a certain number of rows/columns are desired, <code>autoRows</code> / <code>autoColumns</code> can be used to wrap and
       position the children based on this (auto-filling all spaces)
     </p>
 
@@ -1046,7 +1046,7 @@
     <h3 id="GridBox-addLine" class="index" data-index="adding">addRow/addColumn</h3>
 
     <p>
-      Rows and columns can also be dynamically added in a similar way (rows will be below all current content, columns
+      Rows and columns can also be added dynamically in a similar way (rows will be below all current content, columns
       will be to the right of all current content):
     </p>
 
@@ -1258,7 +1258,7 @@
 
     <h3 id="GridBox-stretch" class="index">stretch</h3>
 
-    <p>Use stretch (or xStretch/yStretch) to grow a cell dynamically with the preferred dimensions to match the row/column:</p>
+    <p>Use <code>stretch</code> (or <code>xStretch</code> / <code>yStretch</code>) to grow a cell dynamically with the preferred dimensions to match the row/column:</p>
 
     <div id="preferred-grid-example"></div>
     <script type="text/javascript">
@@ -1300,7 +1300,8 @@
 
     <h3 id="GridBox-sizable" class="index">sizable</h3>
 
-    <p>Additionally, widthSizable/heightSizable can be used to turn off resizing in a component (particularly useful if you want to set a preferredWidth/preferredHeight on it that won't change):</p>
+    <p>Additionally, <code>widthSizable</code> / <code>heightSizable</code> can be used to turn off resizing in a
+      component (particularly useful if you want to set a preferredWidth/preferredHeight on it that won't change):</p>
 
     <div id="gridResizable-example"></div>
     <script type="text/javascript">
@@ -1618,40 +1619,40 @@
     <h2 id="Sizable" class="index">Sizables</h2>
 
     <p>
-      Certain Node subtypes are "sizable": they can be adjusted to different <em>preferred</em> sizes/bounds, which are
+      Certain Node subtypes are <code>sizable:</code> they can be adjusted to different <em>preferred</em> sizes/bounds, which are
       equal to or larger than their <em>minimum</em> sizes. When the preferred size is set, the Node should adjust its
       own layout so that it takes up that size. This includes FlowBox (VBox/HBox), GridBox, Panel, and a growing list of
       Nodes.
     </p>
 
     <p>
-      Sizable nodes will either mix in WidthSizable, HeightSizable, or Sizable (indicating that both width and height
+      Sizable nodes will either mix in <code>WidthSizable</code>, <code>HeightSizable</code>, or <code>Sizable</code> (indicating that both width and height
       can be adjusted). This provides preferred and minimum sizes in BOTH local and parent coordinate frames (e.g.
-      `preferredWidth` / `localPreferredWidth`). These separate coordinate frame versions will be kept in sync (and are
+      <code>preferredWidth</code> / <code>localPreferredWidth</code>). These separate coordinate frame versions will be kept in sync (and are
       backed by Properties).
     </p>
 
     <p>
-      Typically Nodes will compute their own minimum width/height. The local version of this (e.g. `localMinimumWidth`)
+      Typically Nodes will compute their own minimum width/height. The local version of this (e.g. <code>localMinimumWidth</code>)
       is considered the "primary" one, since Nodes usually do layout in their local coordinate frame. This means that
-      when a Node's transform changes, its minimum sizes will be adjusted to match the equivalent localMinimum sizes.
+      when a Node's transform changes, its minimum sizes will be adjusted to match the equivalent <code>localMinimum</code> sizes.
     </p>
 
     <p>
-      Typically layout containers (but also clients, manually) will set the preferred sizes on a Node. Thus the
-      parent version will be primary (e.g. when a sizable Node is transformed, its localPreferredWidth will be adjusted
-      to match the preferredWidth after the transformation).
+      Typically layout containers (but also clients, manually) will set the preferred sizes on a Node, thus the
+      parent version will be primary (e.g. when a sizable Node is transformed, its <code>localPreferredWidth</code> will be adjusted
+      to match the <code>preferredWidth</code> after the transformation).
     </p>
 
     <p>
       Some Nodes by default have this "sizability" turned off, and clients can do this manually with
-      widthSizable/heightSizable/sizable:false. Layout containers should not attempt to set preferred sizes when the
+      <code>widthSizable/heightSizable/sizable:false</code>. Layout containers should not attempt to set preferred sizes when the
       Node is not considered "sizable".
     </p>
 
     <p>
-      For instance, Rectangles mix in Sizable, but are marked as sizable:false by default, so it won't take up space
-      even when a container has a larger preferred size. They can be made resizable with sizable: true:
+      For instance, Rectangles mix in Sizable, but are marked as <code>sizable: false</code> by default, so it won't take up space
+      even when a container has a larger preferred size. They can be made resizable with <code>sizable: true</code>:
     </p>
 
     <div id="rectUnsizable-example"></div>
@@ -1697,9 +1698,9 @@
 
     <p>
       Layout options can be set on individual child Nodes of a layout container. These will override the container's
-      default for any options included. These can be mutated after (by setting the entire thing with `node.layoutOptions =`
-      or with mutateLayoutOptions). mutateLayoutOptions is recommended, since it will keep some layout options that may
-      be set by rows/columns/autoRows/autoColumns in GridBox.
+      default for any options included. These can be mutated after (by setting the entire thing with <code>node.layoutOptions =</code>
+      or with <code>mutateLayoutOptions</code>). <code>mutateLayoutOptions</code> is recommended, since it will keep some layout options that may
+      be set by <code>rows/columns/autoRows/autoColumns</code> in GridBox.
     </p>
 
     <div id="layoutOptionsMutate-example"></div>
@@ -1750,7 +1751,7 @@
       }, { resize: 'none' } );
     </script>
 
-    <p>When using align:origin, the origin of the entire FlowBox will be at the origin of the first line:</p>
+    <p>When using <code>align: origin</code>, the origin of the entire FlowBox will be at the origin of the first line:</p>
 
     <div id="flowOrigin-example"></div>
     <script type="text/javascript">
@@ -1796,7 +1797,7 @@
       }, { resize: 'none' } );
     </script>
 
-    <p>When using align:origin, the origin of the entire GridBox will be at the origin of the first cell:</p>
+    <p>When using <code>align: origin</code>, the origin of the entire GridBox will be at the origin of the first cell:</p>
 
     <div id="gridOrigin-example"></div>
     <script type="text/javascript">
@@ -1823,7 +1824,7 @@
       }, { resize: 'none' } );
     </script>
 
-    <p>The position of this origin can be shifted by using `layoutOrigin`</p>
+    <p>The position of this origin can be shifted by using <code>layoutOrigin</code></p>
 
     <div id="layoutOrigin-example"></div>
     <script type="text/javascript">
@@ -1849,7 +1850,7 @@
     <h2 id="ManualConstraint" class="index">ManualConstraint</h2>
 
     <p>
-      ManualConstraint is for hooking up imperative-style layout code (e.g. `someNode.left = otherNode.right`) so that
+      ManualConstraint is for hooking up imperative-style layout code (e.g. <code>someNode.left = otherNode.right</code>) so that
       it correctly auto-updates whenever one of those values may have changed. It also works across different Node
       parents and coordinate frames.
     </p>
@@ -1860,7 +1861,7 @@
     </p>
 
     <p>
-      Children are dynamically added/removed in this demo, and "Child 1" is constantly translated.
+      Children are dynamically added/removed in this demo, and <code>child1</code> is constantly translated.
     </p>
 
     <div id="manualConstraint-example"></div>
@@ -2070,7 +2071,7 @@
 
     <h3 class="index">alignBounds</h3>
 
-    <p>AlignBox on its own will position content within a specific bounding box (its <em>alignBounds</em>):</p>
+    <p>AlignBox on its own will position content within a specific bounding box (its <code>alignBounds</code>):</p>
 
     <div id="simpleAlignBox-example"></div>
     <script type="text/javascript">
@@ -2134,7 +2135,7 @@
       } )();
     </script>
 
-    <p>Margins can also be used on their own (without alignBounds/alignment) to just create a Node with larger bounds:</p>
+    <p>Margins can also be used on their own (without <code>alignBounds</code> / <code>align</code>) to just create a Node with larger bounds:</p>
 
     <div id="alignBoxOnlyMargins-example"></div>
     <script type="text/javascript">
@@ -2153,7 +2154,7 @@
       } )();
     </script>
 
-    <p>AlignBox can also be used with preferred dimensions instead of an explicit alignBounds:</p>
+    <p>AlignBox can also be used with preferred dimensions instead of an explicit <code>alignBounds</code>:</p>
 
     <div id="alignBoxPreferred-example"></div>
     <script type="text/javascript">
