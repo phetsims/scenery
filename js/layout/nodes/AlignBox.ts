@@ -100,6 +100,7 @@ export default class AlignBox extends SuperType {
   private readonly constraint: AlignBoxConstraint;
 
   // Callback for when bounds change (takes no arguments)
+  // (scenery-internal)
   public _contentBoundsListener = _.noop;
 
   /**

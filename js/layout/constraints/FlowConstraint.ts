@@ -465,6 +465,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     this.updateLayoutAutomatically();
   }
 
+  // (scenery-internal)
   public getPreferredProperty( orientation: Orientation ): TProperty<number | null> {
     return orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty : this.preferredHeightProperty;
   }
