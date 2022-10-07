@@ -184,7 +184,7 @@ export default class LayoutConstraint {
         this._layoutAttemptDuringLock = false;
         this.layout();
       }
-      // If we got any layout attempts during the lock, we'll want to rerun the layout
+        // If we got any layout attempts during the lock, we'll want to rerun the layout
       while ( this._layoutAttemptDuringLock );
 
       this.unlock();
