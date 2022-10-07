@@ -34,6 +34,9 @@ export default abstract class Paint {
    *
    * NOTE: This should only be used before the pattern/gradient is ever displayed.
    * TODO: Catch if this is violated?
+   *
+   * NOTE: The scale should be symmetric if it will be used as a stroke. It is difficult to set a different x and y scale
+   * for canvas at the same time.
    */
   public setTransformMatrix( transformMatrix: Matrix3 ): this {
     if ( this.transformMatrix !== transformMatrix ) {

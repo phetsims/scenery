@@ -16,6 +16,7 @@ import memoize from '../../../phet-core/js/memoize.js';
 import { CanvasContextWrapper, Color, Gradient, TPaint, TPaintableDrawable, LinearGradient, Node, Paint, PaintDef, Path, Pattern, RadialGradient, Renderer, scenery, Text } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 
 const isSafari5 = platform.safari5;
 
@@ -179,6 +180,10 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       if ( this._stroke !== stroke ) {
         this._stroke = stroke;
 
+        if ( assert && stroke instanceof Paint && stroke.transformMatrix ) {
+          const scaleVector = stroke.transformMatrix.getScaleVector();
+          assert( Math.abs( scaleVector.x - scaleVector.y ) < 1e-7, 'You cannot specify a pattern or gradient to a stroke that does not have a symmetric scale.' );
+        }
         this.invalidateStroke();
       }
       return this;
@@ -599,18 +604,31 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
       // TODO: is there a better way of not calling so many things on each stroke?
       wrapper.setStrokeStyle( this._stroke );
-      wrapper.setLineWidth( this.getLineWidth() );
       wrapper.setLineCap( this.getLineCap() );
       wrapper.setLineJoin( this.getLineJoin() );
-      wrapper.setMiterLimit( this.getMiterLimit() );
-      wrapper.setLineDash( this.getLineDash() );
-      wrapper.setLineDashOffset( this.getLineDashOffset() );
 
       // @ts-ignore - for performance
       if ( strokeValue.transformMatrix ) {
+
+        // @ts-ignore
+        const scaleVector: Vector2 = strokeValue.transformMatrix.getScaleVector();
+        assert && assert( Math.abs( scaleVector.x - scaleVector.y ) < 1e-7, 'You cannot specify a pattern or gradient to a stroke that does not have a symmetric scale.' );
+        const matrixMultiplier = 1 / scaleVector.x;
+
         wrapper.context.save();
         // @ts-ignore
         strokeValue.transformMatrix.canvasAppendTransform( wrapper.context );
+
+        wrapper.setLineWidth( this.getLineWidth() * matrixMultiplier );
+        wrapper.setMiterLimit( this.getMiterLimit() * matrixMultiplier );
+        wrapper.setLineDash( this.getLineDash().map( dash => dash * matrixMultiplier ) );
+        wrapper.setLineDashOffset( this.getLineDashOffset() * matrixMultiplier );
+      }
+      else {
+        wrapper.setLineWidth( this.getLineWidth() );
+        wrapper.setMiterLimit( this.getMiterLimit() );
+        wrapper.setLineDash( this.getLineDash() );
+        wrapper.setLineDashOffset( this.getLineDashOffset() );
       }
     }
 
