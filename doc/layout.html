@@ -144,11 +144,17 @@
   </div>
   <div class="span8">
 
-    <p>
+    <p id="localOnly">
       If you have the main PhET libraries checked out (sun, etc.), there are a
       <a href="../../sun/sun_en.html?brand=phet&ea&debugger&screens=4">number of examples</a> that show layout in action with
       common components.
     </p>
+
+    <script>
+      if ( window.location.hostname === 'phetsims.github.io' ) {
+        document.getElementById( 'localOnly' ).style.display = 'none';
+      }
+    </script>
 
     <p>NOTE: Many examples can be resized from the lower-right corner. This adjusts the preferred size of the container.</p>
 
