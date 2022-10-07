@@ -45,6 +45,11 @@ const GRID_CONFIGURABLE_OPTION_KEYS = [
 export type GridConfigurableOptions = {
   // Alignments control how the content of a cell is positioned within that cell's available area (thus it only applies
   // if there is ADDITIONAL space, e.g. in a row/column with a larger item, or there is a preferred size on the GridBox.
+  //
+  // For 'origin', the x=0 or y=0 points of each item content will be aligned (vertically or horizontally). This is
+  // particularly useful for Text, where the origin (y=0) is the baseline of the text, so that differently-sized texts
+  // can have their baselines aligned, or other content can be aligned (e.g. a circle whose origin is at its center).
+  //
   // NOTE: 'origin' aligns will only apply to cells that are 1 grid line in that orientation (width/height)
   xAlign?: HorizontalLayoutAlign | null;
   yAlign?: VerticalLayoutAlign | null;
