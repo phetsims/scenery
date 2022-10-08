@@ -37,9 +37,7 @@ export default abstract class LayoutNode<Constraint extends NodeLayoutConstraint
   public readonly layoutOriginProperty: TProperty<Vector2> = new Vector2Property( Vector2.ZERO );
 
   protected constructor( providedOptions?: LayoutNodeOptions ) {
-    super();
-
-    this.mutate( providedOptions );
+    super( providedOptions );
   }
 
   protected linkLayoutBounds(): void {
