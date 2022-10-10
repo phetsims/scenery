@@ -737,10 +737,10 @@ export default class GridBox extends LayoutNode<GridConstraint> {
       str += `row: ${cell.position.vertical}\n`;
       str += `column: ${cell.position.horizontal}\n`;
       if ( cell.size.horizontal > 1 ) {
-        str += `width: ${cell.size.horizontal}\n`;
+        str += `horizontalSpan: ${cell.size.horizontal}\n`;
       }
       if ( cell.size.vertical > 1 ) {
-        str += `height: ${cell.size.vertical}\n`;
+        str += `verticalSpan: ${cell.size.vertical}\n`;
       }
       str += `xAlign: ${LayoutAlign.internalToAlign( Orientation.HORIZONTAL, cell.effectiveXAlign )}\n`;
       str += `yAlign: ${LayoutAlign.internalToAlign( Orientation.VERTICAL, cell.effectiveYAlign )}\n`;
