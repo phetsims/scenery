@@ -18,12 +18,14 @@ import TEmitter from '../../../../axon/js/TEmitter.js';
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
 const INTERACTIVE_HIGHLIGHTING_OPTIONS = [
   'interactiveHighlight',
-  'interactiveHighlightLayerable'
+  'interactiveHighlightLayerable',
+  'interactiveHighlightEnabled'
 ];
 
 type SelfOptions = {
   interactiveHighlight?: Highlight;
   interactiveHighlightLayerable?: boolean;
+  interactiveHighlightEnabled?: boolean;
 };
 
 export type InteractiveHighlightingOptions = SelfOptions;
@@ -63,6 +65,10 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // this.interactiveHighlightActivated is true.
     private _interactiveHighlightLayerable: boolean;
 
+    // If true, the highlight will be displayed on activation input. If false, it will not and we can remove listeners
+    // that would do this work.
+    private _interactiveHighlightEnabled: boolean;
+
     // Emits an event when the interactive highlight changes for this Node
     public interactiveHighlightChangedEmitter: TEmitter;
 
@@ -92,6 +98,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       this.displays = {};
       this._interactiveHighlight = null;
       this._interactiveHighlightLayerable = false;
+      this._interactiveHighlightEnabled = true;
       this.interactiveHighlightChangedEmitter = new TinyEmitter();
 
       this._changedInstanceListener = this.onChangedInstance.bind( this );
@@ -179,6 +186,34 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     public getInteractiveHighlightLayerable(): boolean {
       return this._interactiveHighlightLayerable;
     }
+
+    /**
+     * Set the enabled state of Interactive Highlights on this Node. When false, highlights will not activate
+     * on this Node with mouse and touch input. You can also disable Interactive Highlights by making the node
+     * pickable: false. Use this when you want to disable Interactive Highlights without modifying pickability.
+     */
+    public setInteractiveHighlightEnabled( enabled: boolean ): void {
+      this._interactiveHighlightEnabled = enabled;
+
+      // Each display has its own focusManager.pointerHighlightsVisibleProperty, so we need to go through all of them
+      // and update after this enabled change
+      const trailIds = Object.keys( this.displays );
+      for ( let i = 0; i < trailIds.length; i++ ) {
+        const display = this.displays[ trailIds[ i ] ];
+        this._interactiveHighlightingEnabledListener( display.focusManager.pointerHighlightsVisibleProperty.value );
+      }
+    }
+
+    /**
+     * Are Interactive Highlights enabled for this Node? When false, no highlights activate from mouse and touch.
+     */
+    public getInteractiveHighlightEnabled(): boolean {
+      return this._interactiveHighlightEnabled;
+    }
+
+    public set interactiveHighlightEnabled( enabled: boolean ) { this.setInteractiveHighlightEnabled( enabled ); }
+
+    public get interactiveHighlightEnabled(): boolean { return this.getInteractiveHighlightEnabled(); }
 
     /**
      * Returns true if this Node is "activated" by a pointer, indicating that a Pointer is over it
@@ -335,10 +370,13 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     /**
      * Add or remove listeners related to activating interactive highlighting when the feature becomes enabled.
-     * This way we prevent doing work related to interactive highlighting unless the feature is enabled.
+     * Work related to interactive highlighting is avoided unless the feature is enabled.
      */
-    private _onInteractiveHighlightingEnabledChange( enabled: boolean ): void {
+    private _onInteractiveHighlightingEnabledChange( featureEnabled: boolean ): void {
       const thisNode = this as unknown as Node;
+
+      // Only listen to the activation listener if the feature is enabled and highlighting is enabled for this Node.
+      const enabled = featureEnabled && this._interactiveHighlightEnabled;
 
       const hasActivationListener = thisNode.hasInputListener( this._activationListener );
       if ( enabled && !hasActivationListener ) {
