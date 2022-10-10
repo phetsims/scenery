@@ -40,8 +40,8 @@
  * layoutOptions-only options (can only be set within the child nodes' layoutOptions, NOT available on GridBox):
  *   - x (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-location)
  *   - y (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-location)
- *   - width (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-size)
- *   - height (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-size)
+ *   - horizontalSpan (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-size)
+ *   - verticalSpan (see https://phetsims.github.io/scenery/doc/layout#GridBox-layoutOptions-size)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -426,15 +426,15 @@ export default class GridBox extends LayoutNode<GridConstraint> {
         if ( !child.layoutOptions ||
              child.layoutOptions[ orientation.line ] !== primary ||
              child.layoutOptions[ orientation.opposite.line ] !== secondary ||
-             child.layoutOptions.width !== width ||
-             child.layoutOptions.height !== height
+             child.layoutOptions.horizontalSpan !== width ||
+             child.layoutOptions.verticalSpan !== height
         ) {
           updatedCount++;
           child.mutateLayoutOptions( {
             [ orientation.line ]: index % value,
             [ orientation.opposite.line ]: Math.floor( index / value ),
-            width: 1,
-            height: 1
+            horizontalSpan: 1,
+            verticalSpan: 1
           } );
         }
 

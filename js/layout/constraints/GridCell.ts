@@ -20,10 +20,10 @@ type SelfOptions = {
   column?: number;
 
   // How many columns this one cell spans.
-  width?: number;
+  horizontalSpan?: number;
 
   // How many rows this one cell spans
-  height?: number;
+  verticalSpan?: number;
 };
 
 export type GridCellOptions = SelfOptions & ExternalGridConfigurableOptions;
@@ -130,25 +130,25 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     const options = optionize<GridCellOptions, SelfOptions, ExternalGridConfigurableOptions>()( {
       column: 0,
       row: 0,
-      width: 1,
-      height: 1
+      horizontalSpan: 1,
+      verticalSpan: 1
     }, providedOptions );
 
     assert && assert( typeof options.column === 'number' && Number.isInteger( options.column ) && isFinite( options.column ) && options.column >= 0 );
     assert && assert( typeof options.row === 'number' && Number.isInteger( options.row ) && isFinite( options.row ) && options.row >= 0 );
-    assert && assert( typeof options.width === 'number' && Number.isInteger( options.width ) && isFinite( options.width ) && options.width >= 1 );
-    assert && assert( typeof options.height === 'number' && Number.isInteger( options.height ) && isFinite( options.height ) && options.height >= 1 );
+    assert && assert( typeof options.horizontalSpan === 'number' && Number.isInteger( options.horizontalSpan ) && isFinite( options.horizontalSpan ) && options.horizontalSpan >= 1 );
+    assert && assert( typeof options.verticalSpan === 'number' && Number.isInteger( options.verticalSpan ) && isFinite( options.verticalSpan ) && options.verticalSpan >= 1 );
 
     this.setConfigToInherit();
 
     this.position = new OrientationPair( options.column, options.row );
-    this.size = new OrientationPair( options.width, options.height );
+    this.size = new OrientationPair( options.horizontalSpan, options.verticalSpan );
 
     this.mutateConfigurable( options );
   }
 
   /**
-   * Whether this cell contains the given row/column (based on the orientation). Due to width/height of the cell,
+   * Whether this cell contains the given row/column (based on the orientation). Due to horizontalSpan/verticalSpan of the cell,
    * this could be true for multiple indices.
    * (scenery-internal)
    */

@@ -1399,9 +1399,9 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3 id="GridBox-layoutOptions-size" class="index">width/height</h3>
+    <h3 id="GridBox-layoutOptions-size" class="index">horizontalSpan/verticalSpan</h3>
 
-    <p>Cells can take up more than one row/column with the <code>width</code> / <code>height</code> layout options:</p>
+    <p>Cells can take up more than one row/column with the <code>horizontalSpan</code> / <code>verticalSpan</code> layout options:</p>
 
     <div id="span-grid-example"></div>
     <script type="text/javascript">
@@ -1418,14 +1418,14 @@
               sizable: true,
               localMinimumWidth: 100,
               localMinimumHeight: 50,
-              layoutOptions: { column: 1, row: 0, width: 2, stretch: true, grow: 1 }
+              layoutOptions: { column: 1, row: 0, horizontalSpan: 2, stretch: true, grow: 1 }
             } ),
             new scenery.Rectangle( 0, 0, 100, 100, {
               fill: colors[ 4 ],
               sizable: true,
               localMinimumWidth: 100,
               localMinimumHeight: 100,
-              layoutOptions: { column: 0, row: 1, width: 2, height: 2, stretch: true }
+              layoutOptions: { column: 0, row: 1, horizontalSpan: 2, verticalSpan: 2, stretch: true }
             } ),
             new scenery.Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
