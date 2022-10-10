@@ -126,7 +126,7 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
   private setOptions( providedOptions?: ExternalGridConfigurableOptions ): void {
 
-    // We'll have defaults for cells (the width/height are especially relevant)
+    // We'll have defaults for cells (the horizontalSpan/verticalSpan are especially relevant)
     const options = optionize<GridCellOptions, SelfOptions, ExternalGridConfigurableOptions>()( {
       column: 0,
       row: 0,
