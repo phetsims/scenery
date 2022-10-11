@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scenery Playground</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../chipper/js/sim-tests/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
+  <script src="../../sherpa/lib/himalaya-1.1.0.js"></script>
+  <script src="../../sherpa/lib/linebreak-1.1.0.js"></script>
+  <script src="../../sherpa/lib/flatqueue-1.2.1.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
+  <script src="../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
+  <script src="../../sherpa/lib/base64-js-1.2.0.js"></script>
+  <script src="../../sherpa/lib/seedrandom-2.4.2.js"></script>
+  <script src="../../sherpa/lib/FileSaver-b8054a2.js"></script>
+  <script src="../../query-string-machine/js/QueryStringMachine.js"></script>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css">
+  </link>
+
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js">
+  </script>
+
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/javascript/javascript.min.js">
+  </script>
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/theme/monokai.min.css">
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
+  </script>
+
+
+  <style>
+    html, body {
+      background-color: #eee;
+      margin: 0;
+      border: 0;
+      padding: 0;
+    }
+
+    .CodeMirror {
+      height: auto;
+    }
+  </style>
+
+</head>
+<body>
+
+<div id="main"></div>
+<div id="code"></div>
+<button id="run" onclick="run();">Run</button>
+
+<script>
+  window.phet = window.phet || {};
+  window.phet.chipper = window.phet.chipper || {};
+  window.phet.chipper.packageObject =
+    {
+      "name": "sandbox",
+      "version": "1.0.0-dev.0",
+      "phet": {
+        "buildStandalone": true
+      }
+    };
+  window.phet.chipper.stringRepos = [
+    {
+      "repo": "joist",
+      "requirejsNamespace": "JOIST"
+    },
+    {
+      "repo": "scenery-phet",
+      "requirejsNamespace": "SCENERY_PHET"
+    },
+    {
+      "repo": "sun",
+      "requirejsNamespace": "SUN"
+    },
+    {
+      "repo": "tambo",
+      "requirejsNamespace": "TAMBO"
+    }
+  ];
+
+  phet.chipper.locale = 'en';
+  phet.chipper.strings = {
+    'en': {
+      'SCENERY_PHET/symbol.ohms': 'HI',
+      'SCENERY_PHET/symbol.resistivity': 'HI'
+    }
+  };
+
+</script>
+<script src="../../chipper/js/initialize-globals.js"></script>
+
+<script type="module">
+  import scenery from '../../chipper/dist/js/scenery/js/main.js'; // eslint-disable-line bad-sim-text
+  import phetCore from '../../chipper/dist/js/phet-core/js/main.js';
+  import axon from '../../chipper/dist/js/axon/js/main.js';
+  import dot from '../../chipper/dist/js/dot/js/main.js';
+  import kite from '../../chipper/dist/js/kite/js/main.js';
+  import utteranceQueue from '../../chipper/dist/js/utterance-queue/js/main.js';
+
+  const options = QueryStringMachine.getAll( {
+    script: {
+      type: 'string',
+      defaultValue: ''
+    }
+  } );
+
+  const codeMirror = CodeMirror( document.querySelector( '#code' ), {
+    lineNumbers: true,
+    tabSize: 2,
+    value: options.script,
+    mode: 'javascript',
+    theme: 'monokai',
+    lineWrapping: true
+  } );
+
+  _.extend( window, utteranceQueue );
+  _.extend( window, phetCore );
+  _.extend( window, axon );
+  _.extend( window, dot );
+  _.extend( window, kite );
+  _.extend( window, scenery );
+
+  window.scenery = scenery;
+  window.kite = kite;
+  window.dot = dot;
+  window.phetCore = phetCore;
+  window.axon = axon;
+  window.utteranceQueue = utteranceQueue;
+
+  console.log( 'loaded' );
+
+  window.container = new scenery.Node();
+  window.scene = new scenery.Node();
+  container.addChild( scene );
+
+  const display = window.display = new scenery.Display( container, {
+    width: 512,
+    height: 512,
+    accessibility: true,
+    listenToOnlyElement: true,
+    allowCSSHacks: false
+  } );
+
+  const isDescendant = function (parent, child) {
+    let node = child;
+    while (node) {
+      if (node === parent) {
+        return true;
+      }
+
+      // Traverse up to the parent
+      node = node.parentNode;
+    }
+
+    // Go up until the root but couldn't find the `parent`
+    return false;
+  };
+
+  window.addEventListener( 'keydown', event => {
+    // if shift-enter is pressed
+    if ( event.keyCode === 13 && event.shiftKey && isDescendant( document.getElementById( 'code' ), document.activeElement ) ) {
+      run();
+
+      event.preventDefault();
+    }
+  } );
+
+  display.updateOnRequestAnimationFrame( dt => {
+    const padding = 2;
+    if ( scene.bounds.isValid() ) {
+      scene.left = padding;
+      scene.top = padding;
+      display.width = Math.ceil( scene.right ) + padding;
+      display.height = Math.ceil( scene.bottom ) + padding;
+    }
+    else {
+      display.width = 1;
+      display.height = 1;
+    }
+    document.getElementById( 'main' ).style.height = `${Math.ceil( display.height )}px`;
+  } );
+  display.initializeEvents();
+
+  display._domElement.id = 'display';
+  document.getElementById( 'main' ).appendChild( display._domElement );
+
+  window.run = async () => {
+    scene.removeAllChildren();
+
+    const js = codeMirror.getValue();
+
+    for ( const line of js.split( /\r?\n/ ).filter( line => line.startsWith( '// import ' ) ) ) {
+      const importItem = line.replace( '// import ', '' );
+
+      const bits = importItem.split( '/' );
+      const name = bits[ bits.length - 1 ];
+
+      window[ name ] = ( await import( `../../chipper/dist/js/${importItem}.js` ) ).default;
+    }
+
+    const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};${js}`;
+
+    await import( dataURI );
+  };
+
+  run();
+
+</script>
+</body>
+</html>
