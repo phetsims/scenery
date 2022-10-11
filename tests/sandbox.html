@@ -49,7 +49,7 @@
 
   <style>
     html, body {
-      background-color: #eee;
+      background-color: transparent;
       margin: 0;
       border: 0;
       padding: 0;
@@ -57,15 +57,25 @@
 
     .CodeMirror {
       height: auto;
+      border-radius: 5px;
     }
+
+    button {
+      float: right;
+    }
+
+    #errors {
+      border: 1px solid red;
+    }
+
+    #main {
+      margin-bottom: 10px;
+    }
+
   </style>
 
 </head>
 <body>
-
-<div id="main"></div>
-<div id="code"></div>
-<button id="run" onclick="run();">Run</button>
 
 <script>
   window.phet = window.phet || {};
@@ -119,9 +129,42 @@
   const options = QueryStringMachine.getAll( {
     script: {
       type: 'string',
+      defaultValue: 'scene.addChild( new Rectangle( 0, 0, 100, 100, { fill: \'red\' } ) );'
+    },
+    autoRun: {
+      type: 'boolean',
+      defaultValue: true
+    },
+    codeBefore: {
+      type: 'string',
+      defaultValue: ''
+    },
+    codeAfter: {
+      type: 'string',
       defaultValue: ''
     }
   } );
+
+  const displayContainerElement = document.createElement( 'div' );
+  displayContainerElement.id = 'main';
+
+  document.body.appendChild( displayContainerElement );
+
+  const codeContainerElement = document.createElement( 'div' );
+  codeContainerElement.id = 'code';
+
+  document.body.appendChild( codeContainerElement );
+
+  const errorsContainerElement = document.createElement( 'div' );
+  errorsContainerElement.id = 'errors';
+
+  document.body.appendChild( errorsContainerElement );
+
+  const runButton = document.createElement( 'button' );
+  runButton.id = 'run';
+  runButton.addEventListener( 'click', () => run() );
+  runButton.textContent = 'Run (shift-enter)';
+  document.body.appendChild( runButton );
 
   const codeMirror = CodeMirror( document.querySelector( '#code' ), {
     lineNumbers: true,
@@ -131,6 +174,10 @@
     theme: 'monokai',
     lineWrapping: true
   } );
+
+  if ( options.autoRun ) {
+    document.getElementById( 'run' ).style.display = 'none';
+  }
 
   _.extend( window, utteranceQueue );
   _.extend( window, phetCore );
@@ -153,8 +200,8 @@
   container.addChild( scene );
 
   const display = window.display = new scenery.Display( container, {
-    width: 512,
-    height: 512,
+    width: 1,
+    height: 1,
     accessibility: true,
     listenToOnlyElement: true,
     allowCSSHacks: false
@@ -187,40 +234,60 @@
   display.updateOnRequestAnimationFrame( dt => {
     const padding = 2;
     if ( scene.bounds.isValid() ) {
-      scene.left = padding;
+      scene.centerX = window.innerWidth / 2;
       scene.top = padding;
-      display.width = Math.ceil( scene.right ) + padding;
+      display.width = window.innerWidth;
       display.height = Math.ceil( scene.bottom ) + padding;
     }
-    else {
-      display.width = 1;
-      display.height = 1;
-    }
-    document.getElementById( 'main' ).style.height = `${Math.ceil( display.height )}px`;
+    displayContainerElement.style.height = `${Math.ceil( display.height )}px`;
   } );
   display.initializeEvents();
 
   display._domElement.id = 'display';
-  document.getElementById( 'main' ).appendChild( display._domElement );
+  displayContainerElement.appendChild( display._domElement );
 
   window.run = async () => {
+    const oldChildren = scene.children;
     scene.removeAllChildren();
+    displayContainerElement.style.backgroundColor = 'transparent';
+    scene.opacity = 1;
+    errorsContainerElement.style.display = 'none';
 
     const js = codeMirror.getValue();
 
-    for ( const line of js.split( /\r?\n/ ).filter( line => line.startsWith( '// import ' ) ) ) {
-      const importItem = line.replace( '// import ', '' );
+    try {
+      for ( const line of js.split( /\r?\n/ ).filter( line => line.startsWith( '// import ' ) ) ) {
+        const importItem = line.replace( '// import ', '' );
 
-      const bits = importItem.split( '/' );
-      const name = bits[ bits.length - 1 ];
+        const bits = importItem.split( '/' );
+        const name = bits[ bits.length - 1 ];
 
-      window[ name ] = ( await import( `../../chipper/dist/js/${importItem}.js` ) ).default;
+        window[ name ] = ( await import( `../../chipper/dist/js/${importItem}.js` ) ).default;
+      }
+
+      const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};${options.codeBefore}(()=>{${codeMirror.getValue()}})()${options.codeAfter}`;
+
+      await import( dataURI );
+
+      // On success
+      window.history.pushState( '', '', `?script=${encodeURIComponent( js )}` );
     }
+    catch ( e ) {
+      console.error( e );
+      scene.children = oldChildren;
+      displayContainerElement.style.backgroundColor = 'rgba(255,0,0,0.2)';
+      scene.opacity = 0.5;
 
-    const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};${js}`;
-
-    await import( dataURI );
+      errorsContainerElement.style.display = 'block';
+      errorsContainerElement.innerHTML = `<pre>${e}</pre>`;
+    }
   };
+
+  codeMirror.on( 'change', editor => {
+    if ( options.autoRun && run ) {
+      run();
+    }
+  } );
 
   run();
 
