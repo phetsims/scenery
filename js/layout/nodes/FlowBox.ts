@@ -130,7 +130,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   /**
    * Called when a child is inserted.
    */
-  private onFlowBoxChildInserted( node: Node, index: number ): void {
+  protected onFlowBoxChildInserted( node: Node, index: number ): void {
     const cell = new FlowCell( this._constraint, node, this._constraint.createLayoutProxy( node ) );
     this._cellMap.set( node, cell );
 
