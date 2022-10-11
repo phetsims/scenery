@@ -82,7 +82,7 @@
   window.phet.chipper = window.phet.chipper || {};
   window.phet.chipper.packageObject =
     {
-      "name": "sandbox",
+      "name": "scenery-phet",
       "version": "1.0.0-dev.0",
       "phet": {
         "buildStandalone": true
@@ -107,16 +107,15 @@
     }
   ];
 
+  window.phet.chipper.stringPath = '../';
+
   phet.chipper.locale = 'en';
-  phet.chipper.strings = {
-    'en': {
-      'SCENERY_PHET/symbol.ohms': 'HI',
-      'SCENERY_PHET/symbol.resistivity': 'HI'
-    }
-  };
+
+  phet.chipper.loadModules = () => {};
 
 </script>
 <script src="../../chipper/js/initialize-globals.js"></script>
+<script src="../../chipper/js/load-unbuilt-strings.js"></script>
 
 <script type="module">
   import scenery from '../../chipper/dist/js/scenery/js/main.js'; // eslint-disable-line bad-sim-text
