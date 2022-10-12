@@ -24,9 +24,8 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import memoize from '../../../../phet-core/js/memoize.js';
 import mutate from '../../../../phet-core/js/mutate.js';
-import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, scenery, VerticalLayoutAlign } from '../../imports.js';
+import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, scenery, VerticalLayoutAlign } from '../../imports.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
-import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
@@ -35,21 +34,10 @@ const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
   'align',
   'stretch',
-  'grow',
-  'margin',
-  'xMargin',
-  'yMargin',
-  'leftMargin',
-  'rightMargin',
-  'topMargin',
-  'bottomMargin',
-  'minContentWidth',
-  'minContentHeight',
-  'maxContentWidth',
-  'maxContentHeight'
-];
+  'grow'
+].concat( MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS );
 
-export type FlowConfigurableOptions = {
+type SelfOptions = {
   // The main orientation of the layout that takes place. Items will be spaced out in this orientation (e.g. if it's
   // 'vertical', the y-values of the components will be adjusted to space them out); this is known as the "primary"
   // dimension. Items will be aligned/stretched in the opposite orientation (e.g. if it's 'vertical', the x-values of
@@ -71,51 +59,24 @@ export type FlowConfigurableOptions = {
   // based on the total grow sum (and will not expand at all if the grow is zero).
   // See https://phetsims.github.io/scenery/doc/layout#FlowBox-grow
   grow?: number | null;
-
-  // Adds extra space for each cell in the layout (margin controls all 4 sides, xMargin controls left/right, yMargin
-  // controls top/bottom).
-  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-margins
-  margin?: number | null;
-  xMargin?: number | null;
-  yMargin?: number | null;
-  leftMargin?: number | null;
-  rightMargin?: number | null;
-  topMargin?: number | null;
-  bottomMargin?: number | null;
-
-  // Forces size minimums and maximums on the cells (which does not include the margins).
-  // NOTE: For these, the nullable portion is actually part of the possible "value"
-  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-minContent and
-  // https://phetsims.github.io/scenery/doc/layout#FlowBox-maxContent
-  minContentWidth?: number | null;
-  minContentHeight?: number | null;
-  maxContentWidth?: number | null;
-  maxContentHeight?: number | null;
 };
+
+export type FlowConfigurableOptions = SelfOptions & MarginLayoutConfigurableOptions;
 
 // We remove the null values for the values that won't actually take null
 export type ExternalFlowConfigurableOptions = WithoutNull<FlowConfigurableOptions, Exclude<keyof FlowConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
 
 // (scenery-internal)
 const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  return class FlowConfirableMixin extends type {
+  return class FlowConfigurableMixin extends MarginLayoutConfigurable( type ) {
 
     protected _orientation: Orientation = Orientation.HORIZONTAL;
 
     // (scenery-internal)
     public _align: LayoutAlign | null = null;
     public _stretch: boolean | null = null;
-    public _leftMargin: number | null = null;
-    public _rightMargin: number | null = null;
-    public _topMargin: number | null = null;
-    public _bottomMargin: number | null = null;
     public _grow: number | null = null;
-    public _minContentWidth: number | null = null;
-    public _minContentHeight: number | null = null;
-    public _maxContentWidth: number | null = null;
-    public _maxContentHeight: number | null = null;
 
-    public readonly changedEmitter: TEmitter = new TinyEmitter();
     public readonly orientationChangedEmitter: TEmitter = new TinyEmitter();
 
     /**
@@ -128,10 +89,8 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     /**
      * (scenery-internal)
      */
-    public mutateConfigurable( options?: FlowConfigurableOptions ): void {
-      assertMutuallyExclusiveOptions( options, [ 'margin' ], [ 'xMargin', 'yMargin' ] );
-      assertMutuallyExclusiveOptions( options, [ 'xMargin' ], [ 'leftMargin', 'rightMargin' ] );
-      assertMutuallyExclusiveOptions( options, [ 'yMargin' ], [ 'topMargin', 'bottomMargin' ] );
+    public override mutateConfigurable( options?: FlowConfigurableOptions ): void {
+      super.mutateConfigurable( options );
 
       mutate( this, FLOW_CONFIGURABLE_OPTION_KEYS, options );
     }
@@ -140,40 +99,24 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
      * Resets values to the "base" state
      * (scenery-internal)
      */
-    public setConfigToBaseDefault(): void {
+    public override setConfigToBaseDefault(): void {
       this._align = LayoutAlign.CENTER;
       this._stretch = false;
-      this._leftMargin = 0;
-      this._rightMargin = 0;
-      this._topMargin = 0;
-      this._bottomMargin = 0;
       this._grow = 0;
-      this._minContentWidth = null;
-      this._minContentHeight = null;
-      this._maxContentWidth = null;
-      this._maxContentHeight = null;
 
-      this.changedEmitter.emit();
+      super.setConfigToBaseDefault();
     }
 
     /**
      * Resets values to their original state
      * (scenery-internal)
      */
-    public setConfigToInherit(): void {
+    public override setConfigToInherit(): void {
       this._align = null;
       this._stretch = null;
-      this._leftMargin = null;
-      this._rightMargin = null;
-      this._topMargin = null;
-      this._bottomMargin = null;
       this._grow = null;
-      this._minContentWidth = null;
-      this._minContentHeight = null;
-      this._maxContentWidth = null;
-      this._maxContentHeight = null;
 
-      this.changedEmitter.emit();
+      super.setConfigToInherit();
     }
 
     /**
@@ -250,86 +193,6 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     /**
      * (scenery-internal)
      */
-    public get leftMargin(): number | null {
-      return this._leftMargin;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set leftMargin( value: number | null ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      if ( this._leftMargin !== value ) {
-        this._leftMargin = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get rightMargin(): number | null {
-      return this._rightMargin;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set rightMargin( value: number | null ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      if ( this._rightMargin !== value ) {
-        this._rightMargin = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get topMargin(): number | null {
-      return this._topMargin;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set topMargin( value: number | null ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      if ( this._topMargin !== value ) {
-        this._topMargin = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get bottomMargin(): number | null {
-      return this._bottomMargin;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set bottomMargin( value: number | null ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      if ( this._bottomMargin !== value ) {
-        this._bottomMargin = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
     public get grow(): number | null {
       return this._grow;
     }
@@ -342,153 +205,6 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
       if ( this._grow !== value ) {
         this._grow = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get xMargin(): number | null {
-      assert && assert( this._leftMargin === this._rightMargin );
-
-      return this._leftMargin;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set xMargin( value: number | null ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      if ( this._leftMargin !== value || this._rightMargin !== value ) {
-        this._leftMargin = value;
-        this._rightMargin = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get yMargin(): number | null {
-      assert && assert( this._topMargin === this._bottomMargin );
-
-      return this._topMargin;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set yMargin( value: number | null ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      if ( this._topMargin !== value || this._bottomMargin !== value ) {
-        this._topMargin = value;
-        this._bottomMargin = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get margin(): number | null {
-      assert && assert(
-      this._leftMargin === this._rightMargin &&
-      this._leftMargin === this._topMargin &&
-      this._leftMargin === this._bottomMargin
-      );
-
-      return this._topMargin;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set margin( value: number | null ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      if ( this._leftMargin !== value || this._rightMargin !== value || this._topMargin !== value || this._bottomMargin !== value ) {
-        this._leftMargin = value;
-        this._rightMargin = value;
-        this._topMargin = value;
-        this._bottomMargin = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get minContentWidth(): number | null {
-      return this._minContentWidth;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set minContentWidth( value: number | null ) {
-      if ( this._minContentWidth !== value ) {
-        this._minContentWidth = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get minContentHeight(): number | null {
-      return this._minContentHeight;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set minContentHeight( value: number | null ) {
-      if ( this._minContentHeight !== value ) {
-        this._minContentHeight = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get maxContentWidth(): number | null {
-      return this._maxContentWidth;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set maxContentWidth( value: number | null ) {
-      if ( this._maxContentWidth !== value ) {
-        this._maxContentWidth = value;
-
-        this.changedEmitter.emit();
-      }
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public get maxContentHeight(): number | null {
-      return this._maxContentHeight;
-    }
-
-    /**
-     * (scenery-internal)
-     */
-    public set maxContentHeight( value: number | null ) {
-      if ( this._maxContentHeight !== value ) {
-        this._maxContentHeight = value;
 
         this.changedEmitter.emit();
       }

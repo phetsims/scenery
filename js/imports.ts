@@ -255,6 +255,8 @@ export type { LayoutNodeOptions } from './layout/nodes/LayoutNode.js';
 export { default as LayoutLine } from './layout/constraints/LayoutLine.js';
 export { default as NodeLayoutConstraint } from './layout/constraints/NodeLayoutConstraint.js';
 export type { NodeLayoutConstraintOptions, NodeLayoutAvailableConstraintOptions } from './layout/constraints/NodeLayoutConstraint.js';
+export { default as MarginLayoutConfigurable, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS } from './layout/constraints/MarginLayoutConfigurable.js';
+export type { MarginLayoutConfigurableOptions, ExternalMarginLayoutConfigurableOptions } from './layout/constraints/MarginLayoutConfigurable.js';
 export { default as FlowConfigurable, FLOW_CONFIGURABLE_OPTION_KEYS } from './layout/constraints/FlowConfigurable.js';
 export type { FlowConfigurableOptions, ExternalFlowConfigurableOptions } from './layout/constraints/FlowConfigurable.js';
 export { default as FlowCell } from './layout/constraints/FlowCell.js';
