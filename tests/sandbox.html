@@ -26,20 +26,12 @@
   <script src="../../sherpa/lib/FileSaver-b8054a2.js"></script>
   <script src="../../query-string-machine/js/QueryStringMachine.js"></script>
 
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.css">
-  </link>
+  <link rel="stylesheet" href="../../sherpa/lib/codemirror-5.52.2.min.css">
+  <link rel="stylesheet" href="../../sherpa/lib/codemirror-5.52.2.monokai.min.css">
 
-  <script type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/codemirror.min.js">
-  </script>
+  <script src="../../sherpa/lib/codemirror-5.52.2.min.js"></script>
+  <script src="../../sherpa/lib/codemirror-5.52.2.javascript.min.js"></script>
 
-  <script type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/mode/javascript/javascript.min.js">
-  </script>
-
-  <link rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.2/theme/monokai.min.css">
 
   <script type="text/javascript">
     window.assertions.enableAssert();
@@ -264,7 +256,7 @@
         window[ name ] = ( await import( `../../chipper/dist/js/${importItem}.js` ) ).default;
       }
 
-      const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};${options.codeBefore}(()=>{${codeMirror.getValue()}})()${options.codeAfter}`;
+      const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};${options.codeBefore}${codeMirror.getValue()}${options.codeAfter}`;
 
       await import( dataURI );
 
