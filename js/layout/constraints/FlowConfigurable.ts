@@ -7,7 +7,15 @@
  * This is done primarily for performance and that style of internal enumeration pattern. If string comparisons are
  * faster, that could be used instead.
  *
- * NOTE: Internal non-string representations are also orientation-agnostic
+ * NOTE: Internal non-string representations are also orientation-agnostic - thus "left" and "top" map to the same
+ * "start" internally, and thus the external value will appear to "switch" depending on the orientation.
+ *
+ * NOTE: This is mixed into both the constraint AND the cell, since we have two layers of options. The `null` meaning
+ * "inherit from the default" is mainly used for the cells, so that if it's not specified in the cell, it will be
+ * specified in the constraint (as non-null).
+ *
+ * NOTE: This is a mixin meant to be used internally only by Scenery (for the constraint and cell), and should not be
+ * used by outside code.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -88,6 +96,7 @@ export type FlowConfigurableOptions = {
 // We remove the null values for the values that won't actually take null
 export type ExternalFlowConfigurableOptions = WithoutNull<FlowConfigurableOptions, Exclude<keyof FlowConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
 
+// (scenery-internal)
 const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class FlowConfirableMixin extends type {
 
