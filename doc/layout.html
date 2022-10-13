@@ -849,7 +849,7 @@
       }, { resize: 'both', useMinHeight: true } );
     </script>
 
-    <h3 class="index">Separators</h3>
+    <h3 id="separators" class="index">Separators</h3>
 
     <p>Separators are also available for easy of use (separators at the visible start/end, and duplicates will be marked as
       <code>visible: false</code>, while all other separators will be marked as <code>visible: true</code>):</p>
@@ -875,6 +875,11 @@
         /*END*/
       }, { resize: 'horizontal' } );
     </script>
+
+    <p>
+      Additionally, arbitrary nodes can be made to act like separators by passing <code>isSeparator: true</code> in its
+      <code>layoutOptions</code>
+    </p>
 
     <h2 id="GridBox" class="index">GridBox</h2>
 
