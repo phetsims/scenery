@@ -16,7 +16,8 @@ export default class Separator extends Line {
   public constructor( providedOptions?: LineOptions ) {
     super( optionize<LineOptions, EmptySelfOptions, LineOptions>()( {
       layoutOptions: {
-        stretch: true
+        stretch: true,
+        isSeparator: true
       },
 
       // Matches HSeparatorDeprecated/VSeparatorDeprecated as a default

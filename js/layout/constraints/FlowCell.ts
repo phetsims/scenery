@@ -8,13 +8,23 @@
 
 import { ExternalFlowConfigurableOptions, FlowConfigurable, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import optionize from '../../../../phet-core/js/optionize.js';
 
-export type FlowCellOptions = StrictOmit<ExternalFlowConfigurableOptions, 'orientation'>;
+type SelfOptions = {
+  // Allows marking a cell as a "separator", such that multiple adjacent separators (and those at the start/end) get
+  // collapsed (all but the first are not included in layout AND made invisible)
+  isSeparator?: boolean;
+};
+
+export type FlowCellOptions = SelfOptions & StrictOmit<ExternalFlowConfigurableOptions, 'orientation'>;
 
 export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
   // (scenery-internal) Set during FlowConstraint layout
   public size = 0;
+
+  // (scenery-internal)
+  public _isSeparator = false;
 
   private readonly flowConstraint: FlowConstraint;
 
@@ -50,7 +60,14 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
     super.onLayoutOptionsChange();
   }
 
-  private setOptions( options?: ExternalFlowConfigurableOptions ): void {
+  private setOptions( providedOptions?: ExternalFlowConfigurableOptions ): void {
+
+    const options = optionize<FlowCellOptions, SelfOptions, ExternalFlowConfigurableOptions>()( {
+      isSeparator: false
+    }, providedOptions );
+
+    this._isSeparator = options.isSeparator;
+
     this.setConfigToInherit();
     this.mutateConfigurable( options );
   }
