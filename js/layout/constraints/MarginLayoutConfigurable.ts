@@ -101,7 +101,17 @@ const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( type:
     }
 
     /**
-     * Resets values to the "base" state
+     * Resets values to the "base" state.
+     *
+     * This is the fallback state for a constraint where every value is defined and valid. If a cell does not have a
+     * specific "overridden" value, or a constraint doesn't have an "overridden" value, then it will take the value
+     * defined here.
+     *
+     * These should be the default values for constraints.
+     *
+     * NOTE: min/max content width/height are null here (since null is a valid default, and doesn't indicate an
+     * "inherit" value like the other types).
+     *
      * (scenery-internal)
      */
     public setConfigToBaseDefault(): void {
@@ -118,7 +128,11 @@ const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( type:
     }
 
     /**
-     * Resets values to their original state
+     * Resets values to the "don't override anything, only inherit from the constraint" state
+     *
+     * These should be the default values for cells (e.g. "take all the behavior from the constraint, nothing is
+     * overridden").
+     *
      * (scenery-internal)
      */
     public setConfigToInherit(): void {
