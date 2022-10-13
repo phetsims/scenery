@@ -82,11 +82,14 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   }
 
   private updateSeparatorVisibility(): void {
-    // Determine the first index of a visible non-divider (we need to NOT temporarily change visibility of dividers
-    // back and forth, since this would trigger recursive layouts). We'll hide dividers until this.
-    let firstVisibleNonDividerIndex = 0;
-    for ( ; firstVisibleNonDividerIndex < this.cells.length; firstVisibleNonDividerIndex++ ) {
-      const cell = this.cells[ firstVisibleNonDividerIndex ];
+    // Find the index of the first visible non-separator cell. Then hide all separators until this index.
+    // This is needed, so that we do NOT temporarily change the visibility of separators back-and-forth during the
+    // layout. If we did that, it would trigger a layout inside every layout, leading to an infinite loop.
+    // This is effectively done so that we have NO visible separators in front of the first visible non-separator cell
+    // (thus satisfying our separator constraints).
+    let firstVisibleNonSeparatorIndex = 0;
+    for ( ; firstVisibleNonSeparatorIndex < this.cells.length; firstVisibleNonSeparatorIndex++ ) {
+      const cell = this.cells[ firstVisibleNonSeparatorIndex ];
       if ( cell._isSeparator ) {
         cell.node.visible = false;
       }
@@ -95,17 +98,17 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
       }
     }
 
-    // Scan for dividers, toggling visibility as desired. Leave the "last" divider visible, as if they are marking
+    // Scan for separators, toggling visibility as desired. Leave the "last" separator visible, as if they are marking
     // sections "after" themselves.
-    let hasVisibleNonDivider = false;
-    for ( let i = this.cells.length - 1; i > firstVisibleNonDividerIndex; i-- ) {
+    let hasVisibleNonSeparator = false;
+    for ( let i = this.cells.length - 1; i > firstVisibleNonSeparatorIndex; i-- ) {
       const cell = this.cells[ i ];
       if ( cell._isSeparator ) {
-        cell.node.visible = hasVisibleNonDivider;
-        hasVisibleNonDivider = false;
+        cell.node.visible = hasVisibleNonSeparator;
+        hasVisibleNonSeparator = false;
       }
       else if ( cell.node.visible ) {
-        hasVisibleNonDivider = true;
+        hasVisibleNonSeparator = true;
       }
     }
   }
