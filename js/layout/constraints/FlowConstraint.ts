@@ -81,17 +81,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     } ) );
   }
 
-  protected override layout(): void {
-    super.layout();
-
-    // The orientation along the laid-out lines - also known as the "primary" orientation
-    const orientation = this._orientation;
-
-    // The perpendicular orientation, where alignment is handled - also known as the "secondary" orientation
-    const oppositeOrientation = this._orientation.opposite;
-
-    assert && assert( _.every( this.cells, cell => !cell.node.isDisposed ) );
-
+  private updateSeparatorVisibility(): void {
     // Determine the first index of a visible non-divider (we need to NOT temporarily change visibility of dividers
     // back and forth, since this would trigger recursive layouts). We'll hide dividers until this.
     let firstVisibleNonDividerIndex = 0;
@@ -118,11 +108,21 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         hasVisibleNonDivider = true;
       }
     }
+  }
+
+  protected override layout(): void {
+    super.layout();
+
+    // The orientation along the laid-out lines - also known as the "primary" orientation
+    const orientation = this._orientation;
+
+    // The perpendicular orientation, where alignment is handled - also known as the "secondary" orientation
+    const oppositeOrientation = this._orientation.opposite;
+
+    this.updateSeparatorVisibility();
 
     // Filter to only cells used in the layout
-    const cells: FlowCell[] = this.cells.filter( cell => {
-      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
-    } );
+    const cells = this.filterLayoutCells( this.cells );
 
     this.displayedCells = cells;
 

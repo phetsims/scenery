@@ -77,12 +77,8 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
   protected override layout(): void {
     super.layout();
 
-    assert && assert( _.every( [ ...this.cells ], cell => !cell.node.isDisposed ) );
-
     // Only grab the cells that will participate in layout
-    const cells = [ ...this.cells ].filter( cell => {
-      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
-    } );
+    const cells = this.filterLayoutCells( [ ...this.cells ] );
     this.displayedCells = cells;
 
     if ( !cells.length ) {

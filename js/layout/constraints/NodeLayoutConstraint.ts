@@ -11,7 +11,7 @@ import Property from '../../../../axon/js/Property.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { LayoutConstraint, LayoutProxy, Node, scenery } from '../../imports.js';
+import { LayoutConstraint, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
 import TProperty from '../../../../axon/js/TProperty.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
@@ -88,6 +88,18 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
     this.layoutOriginProperty.lazyLink( this._updateLayoutListener );
+  }
+
+  /**
+   * Filters out cells to only those that will be involved in layout
+   */
+  protected filterLayoutCells<Cell extends MarginLayoutCell>( cells: Cell[] ): Cell[] {
+    // We'll check to make sure cells are disposed in a common place, so it's not duplicated
+    assert && assert( _.every( cells, cell => !cell.node.isDisposed ), 'A cell\'s node should not be disposed when layout happens' );
+
+    return cells.filter( cell => {
+      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this.excludeInvisible || cell.node.visible );
+    } );
   }
 
   public get excludeInvisible(): boolean {
