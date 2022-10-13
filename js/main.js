@@ -137,7 +137,6 @@ import './layout/nodes/LayoutNode.js';
 import './layout/nodes/VBox.js';
 import './layout/nodes/HSeparator.js';
 import './layout/Sizable.js';
-import './layout/TrackingLayoutProxyProperty.js';
 import './layout/WidthSizable.js';
 import './listeners/DragListener.js';
 import './listeners/FireListener.js';

@@ -7,7 +7,7 @@
  */
 
 import Orientation from '../../../../phet-core/js/Orientation.js';
-import { LayoutConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProperty } from '../../imports.js';
+import { LayoutConstraint, LayoutProxy, LayoutProxyProperty, Node, scenery } from '../../imports.js';
 
 // NOTE: This would be an abstract class, but that is incompatible with how mixin constraints work in TypeScript
 export default class LayoutCell {
@@ -25,7 +25,7 @@ export default class LayoutCell {
   private readonly layoutOptionsListener: () => void;
 
   // If we're not provided a (static) LayoutProxy in our constructor, we'll track and generate LayoutProxies with this.
-  private readonly layoutProxyProperty: TrackingLayoutProxyProperty | null;
+  private readonly layoutProxyProperty: LayoutProxyProperty | null;
 
   /**
    * NOTE: Consider this scenery-internal AND protected. It's effectively a protected constructor for an abstract type,
@@ -53,7 +53,9 @@ export default class LayoutCell {
       // If a LayoutProxy is not provided, we'll listen to (a) all the trails between our ancestor and this node,
       // (b) construct layout proxies for it (and assign here), and (c) listen to ancestor transforms to refresh
       // the layout when needed.
-      this.layoutProxyProperty = new TrackingLayoutProxyProperty( constraint.ancestorNode, node, () => constraint.updateLayoutAutomatically() );
+      this.layoutProxyProperty = new LayoutProxyProperty( constraint.ancestorNode, node, {
+        onTransformChange: () => constraint.updateLayoutAutomatically()
+      } );
       this.layoutProxyProperty.link( proxy => {
         this._proxy = proxy;
 

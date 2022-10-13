@@ -245,7 +245,7 @@ export { default as HSeparator } from './layout/nodes/HSeparator.js';
 export type { HSeparatorOptions } from './layout/nodes/HSeparator.js';
 export { default as LayoutProxy } from './layout/LayoutProxy.js';
 export { default as LayoutProxyProperty } from './layout/LayoutProxyProperty.js';
-export { default as TrackingLayoutProxyProperty } from './layout/TrackingLayoutProxyProperty.js';
+export type { LayoutProxyPropertyOptions } from './layout/LayoutProxyProperty.js';
 export { default as LayoutConstraint } from './layout/constraints/LayoutConstraint.js';
 export { default as LayoutCell } from './layout/constraints/LayoutCell.js';
 export { default as MarginLayoutCell } from './layout/constraints/MarginLayoutCell.js';

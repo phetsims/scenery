@@ -18,7 +18,14 @@
  */
 
 import { DerivedProperty1 } from '../../../axon/js/DerivedProperty.js';
-import { LayoutProxy, Node, scenery, Trail, TrailsBetweenProperty } from '../imports.js';
+import { LayoutProxy, Node, scenery, Trail, TrailsBetweenProperty, TransformTracker } from '../imports.js';
+
+type SelfOptions = {
+  // If provided, this will be called when the transform of the proxy changes
+  onTransformChange?: () => void;
+};
+
+export type LayoutProxyPropertyOptions = SelfOptions;
 
 export default class LayoutProxyProperty extends DerivedProperty1<LayoutProxy | null, Trail[]> {
 
@@ -26,11 +33,15 @@ export default class LayoutProxyProperty extends DerivedProperty1<LayoutProxy | 
   // this Property's value, and is thus created as a DerivedProperty.
   private readonly trailsBetweenProperty: TrailsBetweenProperty;
 
+  // Should be set if we provide an onTransformChange callback
+  private transformTracker: TransformTracker | null = null;
+
   /**
    * @param rootNode - The root whose local coordinate frame we'll want the proxy to be in
    * @param leafNode - The leaf that we'll create the proxy for
+   * @param providedOptions
    */
-  public constructor( rootNode: Node, leafNode: Node ) {
+  public constructor( rootNode: Node, leafNode: Node, providedOptions?: LayoutProxyPropertyOptions ) {
 
     const trailsBetweenProperty = new TrailsBetweenProperty( rootNode, leafNode );
 
@@ -42,10 +53,25 @@ export default class LayoutProxyProperty extends DerivedProperty1<LayoutProxy | 
     this.lazyLink( ( value, oldValue ) => {
       oldValue && oldValue.dispose();
     } );
+
+    const onTransformChange = providedOptions?.onTransformChange;
+    if ( onTransformChange ) {
+      this.link( proxy => {
+        if ( this.transformTracker ) {
+          this.transformTracker.dispose();
+          this.transformTracker = null;
+        }
+        if ( proxy ) {
+          this.transformTracker = new TransformTracker( proxy.trail!.copy().addAncestor( rootNode ) );
+          this.transformTracker.addListener( onTransformChange );
+        }
+      } );
+    }
   }
 
   public override dispose(): void {
     this.trailsBetweenProperty.dispose();
+    this.transformTracker && this.transformTracker.dispose();
 
     super.dispose();
   }
