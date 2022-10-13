@@ -14,7 +14,6 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { LayoutConstraint, LayoutProxy, Node, scenery } from '../../imports.js';
 import TProperty from '../../../../axon/js/TProperty.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import Tandem from '../../../../tandem/js/Tandem.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 
@@ -77,8 +76,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     super( ancestorNode );
 
     this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
-      useDeepEquality: true,
-      tandem: Tandem.OPT_OUT
+      useDeepEquality: true
     } );
 
     this.preferredWidthProperty = options.preferredWidthProperty;

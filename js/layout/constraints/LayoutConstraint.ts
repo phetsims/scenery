@@ -4,6 +4,15 @@
  * Abstract supertype for layout constraints. Provides a lot of assistance to layout handling, including adding/removing
  * listeners, and reentrancy detection/loop prevention.
  *
+ * We'll also handle reentrancy somewhat specially. If code tries to enter a layout reentrantly (while a layout is
+ * already executing), we'll instead IGNORE this second one (and set a flag). Once our first layout is done, we'll
+ * attempt to run the layout again. In case the subtype needs to lock multiple times (if a layout is FORCED), we have
+ * an integer count of how many "layout" calls we're in (_layoutLockCount). Once this reaches zero, we're effectively
+ * unlocked and not inside any layout calls.
+ *
+ * NOTE: This can still trigger infinite loops nominally (if every layout call triggers another layout call), but we
+ * have a practical assertion limit that will stop this and flag it as an error.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -11,12 +20,13 @@ import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import { HeightSizableNode, LayoutProxy, mixesHeightSizable, mixesWidthSizable, Node, scenery, SizableNode, WidthSizableNode } from '../../imports.js';
 
-export default class LayoutConstraint {
+export default abstract class LayoutConstraint {
 
   // The Node in whose local coordinate frame our layout computations are done.
   public readonly ancestorNode: Node;
 
   // Prevents layout() from running while greater than zero. Generally will be unlocked and laid out.
+  // See the documentation at the top of the file for more on reentrancy.
   private _layoutLockCount = 0;
 
   // Whether there was a layout attempt during the lock
@@ -36,7 +46,7 @@ export default class LayoutConstraint {
   /**
    * (scenery-internal)
    */
-  public constructor( ancestorNode: Node ) {
+  protected constructor( ancestorNode: Node ) {
     this.ancestorNode = ancestorNode;
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
   }
@@ -45,6 +55,12 @@ export default class LayoutConstraint {
    * Adds listeners to a Node, so that our layout updates will happen if this Node's Properties
    * (bounds/visibility/minimum size) change. Will be cleared on disposal of this type.
    * (scenery-internal)
+   *
+   * @param node
+   * @param addLock - If true, we'll mark the node as having this layout constraint as responsible for its layout.
+   * It will be an assertion failure if another layout container tries to lock the same node (so that we don't run into
+   * infinite loops where multiple constraints try to move a node back-and-forth).
+   * See Node's _activeParentLayoutConstraint for more information.
    */
   public addNode( node: Node, addLock = true ): void {
     assert && assert( !this._listenedNodes.has( node ) );
