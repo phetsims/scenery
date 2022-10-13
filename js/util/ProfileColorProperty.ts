@@ -120,10 +120,10 @@ window.addEventListener( 'message', event => {
 
   if ( data && data.type === 'setColor' ) {
     for ( let i = 0; i < instances.length; i++ ) {
-      const instance = instances[ i ];
-      if ( instance.name === data.name ) {
-        instance.colorProfileMap[ colorProfileProperty.value ] = new Color( data.value ).withAlpha( data.alpha );
-        instance.value = Color.toColor( instance.colorProfileMap[ colorProfileProperty.value ] );
+      const instanceProperty = instances[ i ];
+      if ( instanceProperty.name === data.name ) {
+        instanceProperty.colorProfileMap[ colorProfileProperty.value ] = new Color( data.value ).withAlpha( data.alpha );
+        instanceProperty.value = Color.toColor( instanceProperty.colorProfileMap[ colorProfileProperty.value ] );
       }
     }
   }
