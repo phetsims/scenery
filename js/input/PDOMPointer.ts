@@ -22,7 +22,8 @@ export default class PDOMPointer extends Pointer {
 
   // target of a user event, if focus changes in response to keydown listeners, listeners
   // on keyup are prevented because the key press was not intended for the newly focused node.
-  // TODO: Can we do this for more than keydown/keyup? See https://github.com/phetsims/scenery/issues/942
+  // We only do this for keyup/keydown because focus can change between them, but it is not necessary
+  // for other single events like 'click', 'input' or 'change. See https://github.com/phetsims/scenery/issues/942
   private keydownTargetNode: Node | null;
 
   public constructor( display: Display ) {
