@@ -941,7 +941,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
       this.isPressedProperty.value = true;
 
       // fire the optional callback
-      // @ts-ignore TODO: This seems like a bug, we shouldn't be calling through this if the event is null
+      // @ts-ignore
       this._pressListener( event, this );
 
       callback && callback();
