@@ -816,13 +816,13 @@
   * Layout
   *----------------------------------------------------------------------------*/
 
-  var mainDivider = new Divider( mainBoundsProperty, 'horizontal', window.innerWidth - rightWidth, true );
+  var mainDivider = new Separator( mainBoundsProperty, 'horizontal', window.innerWidth - rightWidth, true );
   mainDivider.minBoundsProperty.link( function( leftBounds ) {
     displayNode.setScaleMagnitude( Math.min( leftBounds.width / snapshotBounds.width, leftBounds.height / snapshotBounds.height ) );
     displayNode.center = leftBounds.center;
   } );
 
-  var rightDivider = new Divider( mainDivider.maxBoundsProperty, 'vertical', window.innerHeight - bottomHeight, true );
+  var rightDivider = new Separator( mainDivider.maxBoundsProperty, 'vertical', window.innerHeight - bottomHeight, true );
   rightDivider.minBoundsProperty.link( function( topBounds ) {
     pathBackground.rectBounds = new dot.Bounds2( topBounds.minX, topBounds.minY, topBounds.maxX, topBounds.minY + pathHeight );
     pathContainer.maxWidth = pathBackground.width - 10;
@@ -836,7 +836,7 @@
     constrainTree();
   } );
 
-  var infoDivider = new Divider( rightDivider.maxBoundsProperty, 'horizontal', window.innerWidth - 200, true );
+  var infoDivider = new Separator( rightDivider.maxBoundsProperty, 'horizontal', window.innerWidth - 200, true );
   infoDivider.minBoundsProperty.link( function( leftBounds ) {
     infoBackground.rectBounds = leftBounds;
     updateInfo();
