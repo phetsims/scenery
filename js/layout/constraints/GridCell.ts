@@ -8,8 +8,16 @@
 
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
-import { ExternalGridConfigurableOptions, GridConfigurable, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
+import { ExternalGridConfigurableOptions, GridConfigurable, GridConstraint, GRID_CONFIGURABLE_OPTION_KEYS, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
+
+const GRID_CELL_KEYS = [
+  ...GRID_CONFIGURABLE_OPTION_KEYS,
+  'row',
+  'column',
+  'horizontalSpan',
+  'verticalSpan'
+];
 
 type SelfOptions = {
 
@@ -133,6 +141,10 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
       horizontalSpan: 1,
       verticalSpan: 1
     }, providedOptions );
+
+    assert && Object.keys( options ).forEach( key => {
+      assert && assert( GRID_CELL_KEYS.includes( key ), `Cannot provide key ${key} to a GridCell's layoutOptions. Perhaps this is a Flow-style layout option?` );
+    } );
 
     assert && assert( typeof options.column === 'number' && Number.isInteger( options.column ) && isFinite( options.column ) && options.column >= 0 );
     assert && assert( typeof options.row === 'number' && Number.isInteger( options.row ) && isFinite( options.row ) && options.row >= 0 );

@@ -6,9 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ExternalFlowConfigurableOptions, FlowConfigurable, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
+import { ExternalFlowConfigurableOptions, FlowConfigurable, FlowConstraint, FLOW_CONFIGURABLE_OPTION_KEYS, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import optionize from '../../../../phet-core/js/optionize.js';
+
+const FLOW_CELL_KEYS = [
+  ...FLOW_CONFIGURABLE_OPTION_KEYS,
+  'isSeparator'
+];
 
 type SelfOptions = {
   // Allows marking a cell as a "separator", such that multiple adjacent separators (and those at the start/end) get
@@ -65,6 +70,10 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
     const options = optionize<FlowCellOptions, SelfOptions, ExternalFlowConfigurableOptions>()( {
       isSeparator: false
     }, providedOptions );
+
+    assert && Object.keys( options ).forEach( key => {
+      assert && assert( FLOW_CELL_KEYS.includes( key ), `Cannot provide key ${key} to a FlowCell's layoutOptions. Perhaps this is a Grid-style layout option?` );
+    } );
 
     this._isSeparator = options.isSeparator;
 
