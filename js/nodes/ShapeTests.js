@@ -56,7 +56,7 @@ function sceneEquals( assert, constructionA, constructionB, message, threshold )
 }
 
 // TODO: factor out
-function strokeEqualsFill( assert, shapeToStroke, shapeToFill, strokeNodeSetup, message ) { // eslint-disable-line no-unused-vars
+function strokeEqualsFill( assert, shapeToStroke, shapeToFill, strokeNodeSetup, message ) {
 
   sceneEquals( assert, scene => {
     const node = new Path( null );
@@ -79,8 +79,7 @@ function strokeEqualsFill( assert, shapeToStroke, shapeToFill, strokeNodeSetup, 
 }
 
 function p( x, y ) { return new Vector2( x, y ); }
-
-/* eslint-disable no-undef */
+ 
 
 QUnit.test( 'Verifying Line/Rect', assert => {
   const lineWidth = 50;

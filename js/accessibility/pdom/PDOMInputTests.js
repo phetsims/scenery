@@ -76,7 +76,7 @@ const triggerDOMEvent = ( event, element, key, options ) => {
 QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   beforeTest( display );
 
   const a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
@@ -172,7 +172,7 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 
 QUnit.test( 'tab focusin/focusout', assert => {
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   beforeTest( display );
 
   const buttonA = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
@@ -257,7 +257,7 @@ QUnit.test( 'tab focusin/focusout', assert => {
 QUnit.test( 'click', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   beforeTest( display );
 
   const a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
@@ -430,7 +430,7 @@ QUnit.test( 'click extra', assert => {
     tagName: 'button'
   } );
   const root = new Node( { tagName: 'div' } );
-  const display = new Display( root ); // eslint-disable-line
+  const display = new Display( root );
   beforeTest( display );
 
   root.addChild( a1 );
@@ -478,7 +478,7 @@ QUnit.test( 'click extra', assert => {
 QUnit.test( 'input', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   beforeTest( display );
 
   const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
@@ -514,7 +514,7 @@ QUnit.test( 'input', assert => {
 QUnit.test( 'change', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   beforeTest( display );
 
   const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'range' } );
@@ -549,7 +549,7 @@ QUnit.test( 'change', assert => {
 QUnit.test( 'keydown/keyup', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   beforeTest( display );
 
   const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
@@ -591,7 +591,7 @@ QUnit.test( 'keydown/keyup', assert => {
 QUnit.test( 'Global KeyStateTracker tests', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   beforeTest( display );
 
   const a = new Node( { tagName: 'button' } );

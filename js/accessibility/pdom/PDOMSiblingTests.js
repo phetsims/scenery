@@ -51,7 +51,7 @@ const siblingBoundsCorrect = node => {
 QUnit.test( 'sibling positioning', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   document.body.appendChild( display.domElement );
 
   // test bounds are set for basic input elements
@@ -103,7 +103,7 @@ QUnit.test( 'sibling positioning', assert => {
 
 QUnit.test( 'PDOM transform source Node', assert => {
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   document.body.appendChild( display.domElement );
 
   const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button', positionInPDOM: true } );
@@ -151,7 +151,7 @@ QUnit.test( 'PDOM transform source Node', assert => {
 
 QUnit.test( 'setPositionElements test', assert => {
   const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   document.body.appendChild( display.domElement );
 
   const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button', positionInPDOM: true } );

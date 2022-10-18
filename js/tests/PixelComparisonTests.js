@@ -28,7 +28,7 @@ QUnit.module( 'PixelComparison' );
 
 const DEFAULT_THRESHOLD = 1.5;
 
-function snapshotFromImage( image ) { // eslint-disable-line no-unused-vars
+function snapshotFromImage( image ) {
 
   const canvas = document.createElement( 'canvas' );
   canvas.width = image.width;
@@ -57,7 +57,7 @@ const colors = [
 // known clipping issues to fix
 const nonDomWebGLTestedRenderers = testedRenderers.filter( renderer => renderer !== 'dom' && renderer !== 'webgl' );
 
-/* eslint-disable no-undef */
+ 
 // We can only guarantee comparisons for Firefox and Chrome
 if ( !platform.firefox && !platform.chromium ) {
   window.console && window.console.log && window.console.log( 'Not running pixel-comparison tests' );

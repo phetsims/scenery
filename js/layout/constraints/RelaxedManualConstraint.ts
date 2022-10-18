@@ -11,7 +11,7 @@ import { LayoutCell, LayoutConstraint, LayoutProxy, Node, scenery } from '../../
 
 // Turns a tuple of things into a tuple of LayoutProxies/null
 type LayoutProxyMap<T> = {
-  [Property in keyof T]: LayoutProxy | null // eslint-disable-line
+  [Property in keyof T]: LayoutProxy | null
 };
 type LayoutCallback<T extends IntentionalAny[]> = ( ...args: LayoutProxyMap<T> ) => void;
 

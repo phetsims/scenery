@@ -323,7 +323,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
         utterance: this.voicingUtterance
       }, providedOptions );
 
-      let response: TAlertable = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
+      let response: TAlertable = responseCollector.collectResponses( options );
 
       if ( options.utterance ) {
         options.utterance.alert = response;
@@ -336,7 +336,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
      * Use the provided function to create content to speak in response to input. The content is then added to the
      * back of the voicing UtteranceQueue.
      */
-    protected speakContent( content: TAlertable ): void { // eslint-disable-line no-undef
+    protected speakContent( content: TAlertable ): void {
 
       const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !( this as unknown as Node ).isInsidePhetioArchetype();
 

@@ -16,7 +16,7 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
   }
 
   public addShapes(): void {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
+     
     const self = this; // eslint-disable-line
 
     function processBackbone( backbone: BackboneDrawable, matrix: Matrix3 ): void {

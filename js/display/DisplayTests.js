@@ -411,8 +411,7 @@ QUnit.test( 'Renderer order bitmask', assert => {
   assert.equal( Renderer.bitmaskOrder( mask, 3 ), Renderer.bitmaskSVG );
   // console.log( mask.toString( 16 ) );
 } );
-
-/* eslint-disable no-undef */
+ 
 
 QUnit.test( 'Empty Display usage', assert => {
   const n = new Node();

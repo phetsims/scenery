@@ -484,7 +484,7 @@ QUnit.test( 'ParallelDOM options', assert => {
 } );
 
 // tests for aria-labelledby and aria-describedby should be the same, since both support the same feature set
-function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
+function testAssociationAttribute( assert, attribute ) {
 
   // use a different setter depending on if testing labelledby or describedby
   const addAssociationFunction = attribute === 'aria-labelledby' ? 'addAriaLabelledbyAssociation' :
@@ -733,7 +733,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   display.domElement.parentElement.removeChild( display.domElement );
 }
 
-function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disable-line
+function testAssociationAttributeBySetters( assert, attribute ) {
 
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line

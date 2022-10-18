@@ -236,7 +236,7 @@ const domEventPropertiesSetInConstructor: SerializedPropertiesForDeserialization
 type SerializedDOMEvent = {
   constructorName: string; // used to get the constructor from the window object, see Input.deserializeDOMEvent
 } & {
-  [key in SerializedPropertiesForDeserialization]?: unknown; // eslint-disable-line no-unused-vars
+  [key in SerializedPropertiesForDeserialization]?: unknown;
 };
 
 // A list of keys on events that need to be serialized into HTMLElements
