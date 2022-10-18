@@ -283,8 +283,6 @@ export { default as AlignBox, AlignBoxXAlignValues, AlignBoxYAlignValues } from 
 export type { AlignBoxOptions, AlignBoxXAlign, AlignBoxYAlign } from './layout/nodes/AlignBox.js';
 export { default as AlignGroup } from './layout/constraints/AlignGroup.js';
 export type { AlignGroupOptions } from './layout/constraints/AlignGroup.js';
-export { default as AlignPropertyBox } from './layout/nodes/AlignPropertyBox.js';
-export type { AlignPropertyBoxOptions } from './layout/nodes/AlignPropertyBox.js';
 
 export { default as HBox } from './layout/nodes/HBox.js';
 export type { HBoxOptions } from './layout/nodes/HBox.js';

@@ -126,7 +126,6 @@ import './layout/LayoutOrientation.js';
 import './layout/LayoutProxy.js';
 import './layout/LayoutProxyProperty.js';
 import './layout/nodes/AlignBox.js';
-import './layout/nodes/AlignPropertyBox.js';
 import './layout/nodes/Separator.js';
 import './layout/nodes/FlowBox.js';
 import './layout/nodes/GridBackgroundNode.js';

@@ -31,6 +31,7 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { AlignGroup, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
@@ -54,6 +55,7 @@ export type AlignBoxYAlign = ( typeof AlignBoxYAlignValues )[number];
 
 type SelfOptions = {
   alignBounds?: Bounds2 | null;
+  alignBoundsProperty?: TReadOnlyProperty<Bounds2>; // if passed in will override alignBounds option
   xAlign?: AlignBoxXAlign;
   yAlign?: AlignBoxYAlign;
   margin?: number;
@@ -103,6 +105,10 @@ export default class AlignBox extends SuperType {
   // (scenery-internal)
   public _contentBoundsListener = _.noop;
 
+  // Will sync the alignBounds to the passed in property
+  private readonly _alignBoundsProperty: TReadOnlyProperty<Bounds2> | null;
+  private readonly _alignBoundsPropertyListener: ( b: Bounds2 ) => void;
+
   /**
    * An individual container for an alignment group. Will maintain its size to match that of the group by overriding
    * its localBounds, and will position its content inside its localBounds by respecting its alignment and margins.
@@ -140,6 +146,19 @@ export default class AlignBox extends SuperType {
     this._bottomMargin = 0;
     this._group = null;
     this._contentBoundsListener = this.invalidateAlignment.bind( this );
+    this._alignBoundsProperty = null;
+    this._alignBoundsPropertyListener = _.noop;
+
+    // We will dynamically update alignBounds if an alignBoundsProperty was passed in through options.
+    if ( providedOptions?.alignBoundsProperty ) {
+      this._alignBoundsProperty = providedOptions.alignBoundsProperty;
+
+      // Overrides any possible alignBounds passed in. Should this be an assertion?
+      options.alignBounds = this._alignBoundsProperty.value;
+
+      this._alignBoundsPropertyListener = ( bounds: Bounds2 ) => { this.alignBounds = bounds; };
+      this._alignBoundsProperty.lazyLink( this._alignBoundsPropertyListener );
+    }
 
     this.localBounds = new Bounds2( 0, 0, 0, 0 );
 
@@ -591,6 +610,9 @@ export default class AlignBox extends SuperType {
    * Disposes this box, releasing listeners and any references to an AlignGroup
    */
   public override dispose(): void {
+
+    this._alignBoundsProperty && this._alignBoundsProperty.unlink( this._alignBoundsPropertyListener );
+
     // Remove our listener
     this._content.boundsProperty.unlink( this._contentBoundsListener );
 
