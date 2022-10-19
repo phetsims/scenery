@@ -232,8 +232,6 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   }
 
   public set align( value: HorizontalLayoutAlign | VerticalLayoutAlign ) {
-    assert && assert( typeof value === 'string', 'FlowBox align should be a string' );
-
     this._constraint.align = value;
   }
 

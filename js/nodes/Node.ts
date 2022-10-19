@@ -844,9 +844,6 @@ class Node extends ParallelDOM {
    */
   public insertChild( index: number, node: Node, isComposite?: boolean ): this {
     assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
-    assert && assert( node instanceof Node,
-      `addChild/insertChild requires the child to be a Node. Constructor: ${
-        node.constructor ? node.constructor.name : 'none'}` );
     assert && assert( !_.includes( this._children, node ), 'Parent already contains child' );
     assert && assert( node !== this, 'Cannot add self as a child' );
     assert && assert( node._parents !== null, 'Tried to insert a disposed child node?' );
@@ -1271,8 +1268,6 @@ class Node extends ParallelDOM {
    * the new child is focusable, the new child will receive focus after it is added.
    */
   public replaceChild( oldChild: Node, newChild: Node ): this {
-    assert && assert( oldChild instanceof Node, 'child to replace must be a Node' );
-    assert && assert( newChild instanceof Node, 'new child must be a Node' );
     assert && assert( this.hasChild( oldChild ), 'Attempted to replace a node that was not a child.' );
 
     // information that needs to be restored
@@ -1939,7 +1934,6 @@ class Node extends ParallelDOM {
    * @param transformBounds - Whether accurate transform bounds should be used.
    */
   public setTransformBounds( transformBounds: boolean ): this {
-    assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
 
     if ( this._transformBounds !== transformBounds ) {
       this._transformBounds = transformBounds;
@@ -2064,7 +2058,7 @@ class Node extends ParallelDOM {
    * @returns - Returns null if the point is not contained in the subtree.
    */
   public hitTest( point: Vector2, isMouse?: boolean, isTouch?: boolean ): Trail | null {
-    assert && assert( point instanceof Vector2 && point.isFinite(), 'The point should be a finite Vector2' );
+    assert && assert( point.isFinite(), 'The point should be a finite Vector2' );
     assert && assert( isMouse === undefined || typeof isMouse === 'boolean',
       'If isMouse is provided, it should be a boolean' );
     assert && assert( isTouch === undefined || typeof isTouch === 'boolean',
@@ -2351,7 +2345,7 @@ class Node extends ParallelDOM {
     else {
       // translate( vector, prependInstead )
       const vector = x;
-      assert && assert( vector instanceof Vector2 && vector.isFinite(), 'translation should be a finite Vector2 if not finite numbers' );
+      assert && assert( vector.isFinite(), 'translation should be a finite Vector2 if not finite numbers' );
       if ( !vector.x && !vector.y ) { return; } // bail out if both are zero
       this.translate( vector.x, vector.y, y as boolean ); // forward to full version
     }
@@ -2403,7 +2397,7 @@ class Node extends ParallelDOM {
     else {
       // scale( vector, [prependInstead] )
       const vector = x;
-      assert && assert( vector instanceof Vector2 && vector.isFinite(), 'scale should be a finite Vector2 if not a finite number' );
+      assert && assert( vector.isFinite(), 'scale should be a finite Vector2 if not a finite number' );
       this.scale( vector.x, vector.y, y as boolean ); // forward to full version
     }
   }
@@ -2441,7 +2435,7 @@ class Node extends ParallelDOM {
    * @param angle - In radians
    */
   public rotateAround( point: Vector2, angle: number ): this {
-    assert && assert( point instanceof Vector2 && point.isFinite(), 'point should be a finite Vector2' );
+    assert && assert( point.isFinite(), 'point should be a finite Vector2' );
     assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
 
     let matrix = Matrix3.translation( -point.x, -point.y );
@@ -2546,7 +2540,7 @@ class Node extends ParallelDOM {
     }
     else {
       // setScaleMagnitude( vector ), where we set the x-scale to vector.x and y-scale to vector.y
-      assert && assert( a instanceof Vector2 && a.isFinite(), 'first parameter should be a finite Vector2' );
+      assert && assert( a.isFinite(), 'first parameter should be a finite Vector2' );
 
       this.appendMatrix( Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
     }
@@ -2627,7 +2621,7 @@ class Node extends ParallelDOM {
       dy = b! - ty;
     }
     else {
-      assert && assert( a instanceof Vector2 && a.isFinite(), 'Should be a finite Vector2' );
+      assert && assert( a.isFinite(), 'Should be a finite Vector2' );
       dx = a.x - tx;
       dy = a.y - ty;
     }
@@ -2664,7 +2658,7 @@ class Node extends ParallelDOM {
    * first before the rest of the Node's current transform (i.e. applied in the local coordinate frame).
    */
   public appendMatrix( matrix: Matrix3 ): void {
-    assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
+    assert && assert( matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
     this._transform.append( matrix );
   }
@@ -2674,7 +2668,7 @@ class Node extends ParallelDOM {
    * after the rest of the Node's current transform (i.e. applied in the parent coordinate frame).
    */
   public prependMatrix( matrix: Matrix3 ): void {
-    assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
+    assert && assert( matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
     this._transform.prepend( matrix );
   }
@@ -2696,7 +2690,7 @@ class Node extends ParallelDOM {
    * Changes this Node's transform to match the passed-in transformation matrix.
    */
   public setMatrix( matrix: Matrix3 ): void {
-    assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
+    assert && assert( matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
 
     this._transform.setMatrix( matrix );
@@ -3162,7 +3156,7 @@ class Node extends ParallelDOM {
    * Sets the position of the upper-left corner of this node's bounds to the specified point.
    */
   public setLeftTop( leftTop: Vector2 ): this {
-    assert && assert( leftTop instanceof Vector2 && leftTop.isFinite(), 'leftTop should be a finite Vector2' );
+    assert && assert( leftTop.isFinite(), 'leftTop should be a finite Vector2' );
 
     const currentLeftTop = this.getLeftTop();
     if ( currentLeftTop.isFinite() ) {
@@ -3197,7 +3191,7 @@ class Node extends ParallelDOM {
    * Sets the position of the center-top location of this node's bounds to the specified point.
    */
   public setCenterTop( centerTop: Vector2 ): this {
-    assert && assert( centerTop instanceof Vector2 && centerTop.isFinite(), 'centerTop should be a finite Vector2' );
+    assert && assert( centerTop.isFinite(), 'centerTop should be a finite Vector2' );
 
     const currentCenterTop = this.getCenterTop();
     if ( currentCenterTop.isFinite() ) {
@@ -3232,7 +3226,7 @@ class Node extends ParallelDOM {
    * Sets the position of the upper-right corner of this node's bounds to the specified point.
    */
   public setRightTop( rightTop: Vector2 ): this {
-    assert && assert( rightTop instanceof Vector2 && rightTop.isFinite(), 'rightTop should be a finite Vector2' );
+    assert && assert( rightTop.isFinite(), 'rightTop should be a finite Vector2' );
 
     const currentRightTop = this.getRightTop();
     if ( currentRightTop.isFinite() ) {
@@ -3267,7 +3261,7 @@ class Node extends ParallelDOM {
    * Sets the position of the center-left of this node's bounds to the specified point.
    */
   public setLeftCenter( leftCenter: Vector2 ): this {
-    assert && assert( leftCenter instanceof Vector2 && leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
+    assert && assert( leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
 
     const currentLeftCenter = this.getLeftCenter();
     if ( currentLeftCenter.isFinite() ) {
@@ -3844,10 +3838,7 @@ class Node extends ParallelDOM {
    * visibility changes, add a listener to this.visibleProperty instead.
    */
   public setVisible( visible: boolean ): this {
-    assert && assert( typeof visible === 'boolean', 'Node visibility should be a boolean value' );
-
     this.visibleProperty.set( visible );
-
     return this;
   }
 

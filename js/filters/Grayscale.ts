@@ -17,7 +17,6 @@ export default class Grayscale extends ColorMatrixFilter {
    * @param [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
   public constructor( amount = 1 ) {
-    assert && assert( typeof amount === 'number', 'Grayscale amount should be a number' );
     assert && assert( isFinite( amount ), 'Grayscale amount should be finite' );
     assert && assert( amount >= 0, 'Grayscale amount should be non-negative' );
     assert && assert( amount <= 1, 'Grayscale amount should be no greater than 1' );

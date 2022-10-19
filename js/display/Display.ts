@@ -795,7 +795,6 @@ export default class Display {
    * Sets the width that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
    */
   public setWidth( width: number ): this {
-    assert && assert( typeof width === 'number', 'Display.width should be a number' );
 
     if ( this.getWidth() !== width ) {
       this.setSize( new Dimension2( width, this.getHeight() ) );
@@ -819,7 +818,6 @@ export default class Display {
    * Sets the height that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
    */
   public setHeight( height: number ): this {
-    assert && assert( typeof height === 'number', 'Display.height should be a number' );
 
     if ( this.getHeight() !== height ) {
       this.setSize( new Dimension2( this.getWidth(), height ) );
@@ -987,8 +985,6 @@ export default class Display {
    * (scenery-internal)
    */
   public markInstanceRootForDisposal( instance: Instance ): void {
-    assert && assert( instance instanceof Instance, 'How would an instance not be an instance of an instance?!?!?' );
-
     sceneryLog && sceneryLog.Display && sceneryLog.Display( `markInstanceRootForDisposal: ${instance.toString()}` );
     this._instanceRootsToDispose.push( instance );
   }

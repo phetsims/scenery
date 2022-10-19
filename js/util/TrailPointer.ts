@@ -31,8 +31,6 @@ export default class TrailPointer {
    * @param isBefore - whether this points to before the node (and its children) have been rendered, or after
    */
   public constructor( trail: Trail, isBefore: boolean ) {
-    assert && assert( trail instanceof Trail, 'trail is not a trail' );
-
     this.trail = trail;
     this.setBefore( isBefore );
   }

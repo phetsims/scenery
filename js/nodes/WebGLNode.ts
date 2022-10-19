@@ -69,8 +69,6 @@ export default abstract class WebGLNode extends Node {
   public constructor( painterType: WebGLNodePainterType, options?: WebGLNodeOptions ) {
     super( options );
 
-    assert && assert( typeof painterType === 'function', 'Painter type now required by WebGLNode' );
-
     // Only support rendering in WebGL
     this.setRendererBitmask( Renderer.bitmaskWebGL );
 

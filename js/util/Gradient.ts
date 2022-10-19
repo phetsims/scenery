@@ -58,7 +58,6 @@ export default abstract class Gradient extends Paint {
    * @returns - for chaining
    */
   public addColorStop( ratio: number, color: TColor ): this {
-    assert && assert( typeof ratio === 'number', 'Ratio needs to be a number' );
     assert && assert( ratio >= 0 && ratio <= 1, 'Ratio needs to be between 0,1 inclusively' );
     assert && assert( color === null ||
                       typeof color === 'string' ||

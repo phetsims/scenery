@@ -336,7 +336,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      *                                opacity.
      */
     public setImageOpacity( imageOpacity: number ): void {
-      assert && assert( typeof imageOpacity === 'number', 'imageOpacity was not a number' );
       assert && assert( isFinite( imageOpacity ) && imageOpacity >= 0 && imageOpacity <= 1,
         `imageOpacity out of range: ${imageOpacity}` );
 
@@ -589,7 +588,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * See https://github.com/phetsims/scenery/issues/1049 for more information.
      */
     public setHitTestPixels( hitTestPixels: boolean ): this {
-      assert && assert( typeof hitTestPixels === 'boolean', 'hitTestPixels should be a boolean' );
 
       if ( this._hitTestPixels !== hitTestPixels ) {
         this._hitTestPixels = hitTestPixels;
@@ -992,10 +990,9 @@ Imageable.hitTestDataToShape = ( imageData: ImageData, width: number, height: nu
  * @param height - Non-negative integer for the image's height
  */
 Imageable.createSVGImage = ( url: string, width: number, height: number ): SVGImageElement => {
-  assert && assert( typeof url === 'string', 'Requires the URL as a string' );
-  assert && assert( typeof width === 'number' && isFinite( width ) && width >= 0 && ( width % 1 ) === 0,
+  assert && assert( isFinite( width ) && width >= 0 && ( width % 1 ) === 0,
     'width should be a non-negative finite integer' );
-  assert && assert( typeof height === 'number' && isFinite( height ) && height >= 0 && ( height % 1 ) === 0,
+  assert && assert( isFinite( height ) && height >= 0 && ( height % 1 ) === 0,
     'height should be a non-negative finite integer' );
 
   const element = document.createElementNS( svgns, 'image' );

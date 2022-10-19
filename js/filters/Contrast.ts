@@ -17,7 +17,6 @@ export default class Contrast extends ColorMatrixFilter {
    * @param amount - The amount of the effect, from 0 (gray), 1 (normal), or above for high-contrast
    */
   public constructor( amount: number ) {
-    assert && assert( typeof amount === 'number', 'Contrast amount should be a number' );
     assert && assert( isFinite( amount ), 'Contrast amount should be finite' );
     assert && assert( amount >= 0, 'Contrast amount should be non-negative' );
 

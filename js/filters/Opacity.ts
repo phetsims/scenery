@@ -19,7 +19,6 @@ export default class Opacity extends Filter {
    * @param amount - The amount of opacity, from 0 (invisible) to 1 (fully visible)
    */
   public constructor( amount: number ) {
-    assert && assert( typeof amount === 'number', 'Opacity amount should be a number' );
     assert && assert( isFinite( amount ), 'Opacity amount should be finite' );
     assert && assert( amount >= 0, 'Opacity amount should be non-negative' );
     assert && assert( amount <= 1, 'Opacity amount should be no greater than 1' );

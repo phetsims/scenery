@@ -18,7 +18,6 @@ export default class HueRotate extends ColorMatrixFilter {
    * @param amount - In radians, the amount of hue to color-shift
    */
   public constructor( amount: number ) {
-    assert && assert( typeof amount === 'number', 'HueRotate amount should be a number' );
     assert && assert( isFinite( amount ), 'HueRotate amount should be finite' );
     assert && assert( amount >= 0, 'HueRotate amount should be non-negative' );
 

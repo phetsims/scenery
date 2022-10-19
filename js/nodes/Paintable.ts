@@ -255,7 +255,6 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Sets whether the stroke is marked as pickable.
      */
     public setStrokePickable( pickable: boolean ): this {
-      assert && assert( typeof pickable === 'boolean', `strokePickable should be a boolean, not ${pickable}` );
 
       if ( this._strokePickable !== pickable ) {
         this._strokePickable = pickable;
@@ -281,7 +280,6 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Sets the line width that will be applied to strokes on this Node.
      */
     public setLineWidth( lineWidth: number ): this {
-      assert && assert( typeof lineWidth === 'number', `lineWidth should be a number, not ${lineWidth}` );
       assert && assert( lineWidth >= 0, `lineWidth should be non-negative instead of ${lineWidth}` );
 
       if ( this.getLineWidth() !== lineWidth ) {

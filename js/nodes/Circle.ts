@@ -188,7 +188,6 @@ export default class Circle extends Path {
    * Sets the radius of the circle.
    */
   public setRadius( radius: number ): this {
-    assert && assert( typeof radius === 'number', 'Circle.radius must be a number' );
     assert && assert( radius >= 0, 'A circle needs a non-negative radius' );
     assert && assert( isFinite( radius ), 'A circle needs a finite radius' );
 

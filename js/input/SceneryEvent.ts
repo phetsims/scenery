@@ -56,9 +56,6 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
    * @param domEvent - The original DOM Event that caused this SceneryEvent to fire.
    */
   public constructor( trail: Trail, type: string, pointer: Pointer, domEvent: DOMEvent | null ) {
-    assert && assert( trail instanceof Trail, 'SceneryEvent\'s trail parameter should be a {Trail}' );
-    assert && assert( typeof type === 'string', 'SceneryEvent\'s type should be a {string}' );
-    assert && assert( pointer instanceof Pointer, 'SceneryEvent\'s pointer parameter should be a {Pointer}' );
     // TODO: add domEvent type assertion -- will browsers support this?
 
     this.handled = false;
