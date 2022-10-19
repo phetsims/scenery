@@ -25,7 +25,7 @@
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
+import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, SpeakableResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
@@ -35,7 +35,6 @@ import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 
 // Helps enforce that the utterance is defined.
 function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {
@@ -102,7 +101,7 @@ export type SpeakingOptions = {
   // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
   // match on the properties because they are optional (marked with `?`)
   [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( VoicingResponse | undefined ) ?
-                                                 ResolvedResponse | TReadOnlyProperty<string> :
+                                                 SpeakableResolvedResponse :
                                                  ResponsePacketOptions[PropertyName];
 };
 
