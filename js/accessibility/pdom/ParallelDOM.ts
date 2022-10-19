@@ -2280,7 +2280,11 @@ export default class ParallelDOM extends PhetioObject {
    * @param value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
    * @param [providedOptions]
    */
-  public setPDOMAttribute( attribute: string, value: string | boolean | number, providedOptions?: SetPDOMAttributeOptions ): void {
+  public setPDOMAttribute( attribute: string, value: PDOMValueType | boolean | number, providedOptions?: SetPDOMAttributeOptions ): void {
+    if ( !( typeof value === 'boolean' || typeof value === 'number' ) ) {
+      value = unwrapProperty( value )!;
+    }
+
     assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
     assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
