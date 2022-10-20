@@ -46,6 +46,8 @@
         useMinWidth: true,
         useMinHeight: false,
         adjustDisplay: false,
+        initialWidth: null,
+        initialHeight: null,
         step: null
       }, options );
 
@@ -64,8 +66,8 @@
       display.domElement.style.resize = options.resize;
 
       // Initials
-      display.width = Math.ceil( scene.right );
-      display.height = Math.ceil( scene.bottom );
+      display.width = Math.ceil( options.initialWidth ? options.initialWidth : scene.right );
+      display.height = Math.ceil( options.initialHeight ? options.initialHeight : scene.bottom );
       display.domElement.style.width = display.width + 'px';
       display.domElement.style.height = display.height + 'px';
       if ( options.useMinWidth ) {
@@ -578,7 +580,7 @@
           children: boxes
         } );
         return container;
-      }, { resize: 'horizontal' } );
+      }, { resize: 'horizontal', initialWidth: 400 } );
     </script>
 
     <h3 id="FlowBox-wrap" class="index">wrap</h3>
