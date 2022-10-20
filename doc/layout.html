@@ -408,6 +408,44 @@
       }, { resize: 'horizontal' } );
     </script>
 
+    <h3 id="FlowBox-stretch" class="index">stretch</h3>
+
+    <p><code>stretch</code> will have a resizable element take up the entire row/column size:</p>
+
+    <div id="stretch-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'stretch-example', () => {
+        /*START*/
+        return new scenery.HBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 100, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 4 ],
+              layoutOptions: { align: 'top' }
+            } ),
+            new scenery.Rectangle( {
+              sizable: true,
+              localMinimumWidth: 50,
+              localMinimumHeight: 50,
+              fill: 'gray',
+              layoutOptions: { stretch: true }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 6 ],
+              layoutOptions: { align: 'bottom' }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { align: 'center' }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
     <h3>Constraining dimensions</h3>
 
     <p id="FlowBox-maxContent" class="index" data-index="maxContent">Maximums can be applied to constrain this growing (it won't grow past the max content dimension):</p>
@@ -807,44 +845,6 @@
         } );
         /*END*/
       }, { resize: 'horizontal' } );
-    </script>
-
-    <h3 id="FlowBox-stretch" class="index">stretch</h3>
-
-    <p><code>stretch</code> will have a resizable element take up the entire row/column size:</p>
-
-    <div id="stretch-example"></div>
-    <script type="text/javascript">
-      dynamicDemo( 'stretch-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 100, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 4 ],
-              layoutOptions: { align: 'top' }
-            } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: { stretch: true }
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 6 ],
-              layoutOptions: { align: 'bottom' }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { align: 'center' }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
     </script>
 
     <h3 id="separators" class="index">Separators</h3>
