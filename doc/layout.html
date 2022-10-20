@@ -536,11 +536,9 @@
         /*END*/
         const container = new scenery.VBox( {
           justify: 'top',
+          stretch: true,
           children: boxes
         } );
-        container.preferredWidthProperty.link( preferredWidth => boxes.forEach( box => {
-          box.preferredWidth = preferredWidth;
-        } ) );
         return container;
       }, { resize: 'horizontal' } );
     </script>
