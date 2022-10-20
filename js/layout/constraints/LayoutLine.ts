@@ -10,7 +10,7 @@ import { scenery } from '../../imports.js';
 
 export default class LayoutLine {
 
-  // A range of sizes for the secondary orientation that our cells could take up
+  // A range of sizes along the secondary axis that our cells could take up
   // (scenery-internal)
   public min!: number;
   public max!: number;
@@ -21,11 +21,11 @@ export default class LayoutLine {
   public minOrigin!: number;
   public maxOrigin!: number;
 
-  // The line's size (in the secondary orientation)
+  // The line's size (along the secondary axis)
   // (scenery-internal)
   public size!: number;
 
-  // The line's position (in the primary orientation)
+  // The line's position (along the primary axis)
   // (scenery-internal)
   public position!: number;
 

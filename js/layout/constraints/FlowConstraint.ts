@@ -29,16 +29,16 @@ type SelfOptions = {
   // certain elements, per-element margins (even negative) can be set in the layoutOptions of nodes contained.
   spacing?: number;
 
-  // The default spacing in-between lines in the secondary direction.
+  // The default spacing in-between lines long the secondary axis.
   lineSpacing?: number;
 
-  // How extra space in the primary direction is allocated. The default is spaceBetween.
+  // How extra space along the primary axis is allocated. The default is spaceBetween.
   justify?: HorizontalLayoutJustification | VerticalLayoutJustification;
 
-  // How extra space in the secondary direction is allocated. The default is null (which will expand content to fit)
+  // How extra space along the secondary axis is allocated. The default is null (which will expand content to fit)
   justifyLines?: HorizontalLayoutJustification | VerticalLayoutJustification | null;
 
-  // Whether line-wrapping is enabled. If so, the primary preferred dimension will determine where things are wrapped.
+  // Whether line-wrapping is enabled. If so, the primary preferred axis will determine where things are wrapped.
   wrap?: boolean;
 
   // The preferred width/height (ideally from a container's localPreferredWidth/localPreferredHeight.
@@ -116,10 +116,10 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   protected override layout(): void {
     super.layout();
 
-    // The orientation along the laid-out lines - also known as the "primary" orientation
+    // The orientation along the laid-out lines - also known as the "primary" axis
     const orientation = this._orientation;
 
-    // The perpendicular orientation, where alignment is handled - also known as the "secondary" orientation
+    // The perpendicular orientation, where alignment is handled - also known as the "secondary" axis
     const oppositeOrientation = this._orientation.opposite;
 
     this.updateSeparatorVisibility();

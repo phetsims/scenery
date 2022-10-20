@@ -208,11 +208,11 @@
     </script>
 
     <p>
-      NOTE: For FlowBox, the orientation provided is typically called the <em>primary</em> orientation. This is the
-      orientation along which each Node in a line is positioned. The <em>secondary</em> orientation is the opposite one,
-      along which each Node is aligned. e.g. for an HBox, its primary orientation is horizontal, and its secondary
-      orientation is vertical (so its elements will be positioned with increasing x values, and its <code>align</code> will control
-      the y values).
+      NOTE: For FlowBox, the orientation provided is typically called the <em>primary</em> axis. This is the
+      axis along which each Node in a line is positioned. The <em>secondary</em> axis is the opposite one,
+      along which each Node is aligned. e.g. for an HBox, its primary axis is horizontal, and its secondary
+      axis is vertical (so its elements will be positioned with increasing x values, and its <code>align</code> will
+      control the y values).
     </p>
 
     <p>For cases where the orientation needs to be determined programmatically, use FlowBox:</p>
@@ -570,7 +570,7 @@
 
     <h3 id="FlowBox-align" class="index">align</h3>
 
-    <p><code>align</code> controls how cells are positioned in the secondary orientation:</p>
+    <p><code>align</code> controls how cells are positioned along the secondary axis:</p>
 
     <div id="align-example"></div>
     <script type="text/javascript">
@@ -612,7 +612,7 @@
 
     <h3 id="FlowBox-justifyLines" class="index">justifyLines</h3>
 
-    <p><code>justifyLines</code> controls how lines are positioned in the secondary orientation (null will default to a stretch):</p>
+    <p><code>justifyLines</code> controls how lines are positioned along the secondary axis (null will default to a stretch):</p>
 
     <div id="justifyLines-example"></div>
     <script type="text/javascript">

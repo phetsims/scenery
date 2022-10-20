@@ -40,8 +40,8 @@ const FLOW_CONFIGURABLE_OPTION_KEYS = [
 type SelfOptions = {
   // The main orientation of the layout that takes place. Items will be spaced out in this orientation (e.g. if it's
   // 'vertical', the y-values of the components will be adjusted to space them out); this is known as the "primary"
-  // dimension. Items will be aligned/stretched in the opposite orientation (e.g. if it's 'vertical', the x-values of
-  // the components will be adjusted by align and stretch); this is known as the "secondary" or "opposite" dimension.
+  // axis. Items will be aligned/stretched in the opposite orientation (e.g. if it's 'vertical', the x-values of
+  // the components will be adjusted by align and stretch); this is known as the "secondary" or "opposite" axis.
   // See https://phetsims.github.io/scenery/doc/layout#FlowBox-orientation
   orientation?: LayoutOrientation | null;
 
@@ -50,12 +50,12 @@ type SelfOptions = {
   // See https://phetsims.github.io/scenery/doc/layout#FlowBox-align
   align?: HorizontalLayoutAlign | VerticalLayoutAlign | null;
 
-  // Controls whether elements will attempt to expand in the "opposite" dimension to take up the full size of the
+  // Controls whether elements will attempt to expand along the "opposite" axis to take up the full size of the
   // largest layout element.
   // See https://phetsims.github.io/scenery/doc/layout#FlowBox-stretch
   stretch?: boolean;
 
-  // Controls whether elements will attempt to expand in the "primary" dimension. Elements will expand proportionally
+  // Controls whether elements will attempt to expand along the "primary" axis. Elements will expand proportionally
   // based on the total grow sum (and will not expand at all if the grow is zero).
   // See https://phetsims.github.io/scenery/doc/layout#FlowBox-grow
   grow?: number | null;
