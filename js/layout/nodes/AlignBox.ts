@@ -348,7 +348,7 @@ export default class AlignBox extends SuperType {
    * box.
    */
   public setMargin( margin: number ): this {
-    assert && assert( typeof margin === 'number' && isFinite( margin ) && margin >= 0,
+    assert && assert( isFinite( margin ) && margin >= 0,
       'margin should be a finite non-negative number' );
 
     if ( this._leftMargin !== margin ||
@@ -386,7 +386,7 @@ export default class AlignBox extends SuperType {
    * right sides of this box.
    */
   public setXMargin( xMargin: number ): this {
-    assert && assert( typeof xMargin === 'number' && isFinite( xMargin ) && xMargin >= 0,
+    assert && assert( isFinite( xMargin ) && xMargin >= 0,
       'xMargin should be a finite non-negative number' );
 
     if ( this._leftMargin !== xMargin || this._rightMargin !== xMargin ) {
@@ -419,7 +419,7 @@ export default class AlignBox extends SuperType {
    * bottom sides of this box.
    */
   public setYMargin( yMargin: number ): this {
-    assert && assert( typeof yMargin === 'number' && isFinite( yMargin ) && yMargin >= 0,
+    assert && assert( isFinite( yMargin ) && yMargin >= 0,
       'yMargin should be a finite non-negative number' );
 
     if ( this._topMargin !== yMargin || this._bottomMargin !== yMargin ) {
@@ -452,7 +452,7 @@ export default class AlignBox extends SuperType {
    * the box.
    */
   public setLeftMargin( leftMargin: number ): this {
-    assert && assert( typeof leftMargin === 'number' && isFinite( leftMargin ) && leftMargin >= 0,
+    assert && assert( isFinite( leftMargin ) && leftMargin >= 0,
       'leftMargin should be a finite non-negative number' );
 
     if ( this._leftMargin !== leftMargin ) {
@@ -483,7 +483,7 @@ export default class AlignBox extends SuperType {
    * the container.
    */
   public setRightMargin( rightMargin: number ): this {
-    assert && assert( typeof rightMargin === 'number' && isFinite( rightMargin ) && rightMargin >= 0,
+    assert && assert( isFinite( rightMargin ) && rightMargin >= 0,
       'rightMargin should be a finite non-negative number' );
 
     if ( this._rightMargin !== rightMargin ) {
@@ -514,7 +514,7 @@ export default class AlignBox extends SuperType {
    * container.
    */
   public setTopMargin( topMargin: number ): this {
-    assert && assert( typeof topMargin === 'number' && isFinite( topMargin ) && topMargin >= 0,
+    assert && assert( isFinite( topMargin ) && topMargin >= 0,
       'topMargin should be a finite non-negative number' );
 
     if ( this._topMargin !== topMargin ) {
@@ -545,7 +545,7 @@ export default class AlignBox extends SuperType {
    * container.
    */
   public setBottomMargin( bottomMargin: number ): this {
-    assert && assert( typeof bottomMargin === 'number' && isFinite( bottomMargin ) && bottomMargin >= 0,
+    assert && assert( isFinite( bottomMargin ) && bottomMargin >= 0,
       'bottomMargin should be a finite non-negative number' );
 
     if ( this._bottomMargin !== bottomMargin ) {

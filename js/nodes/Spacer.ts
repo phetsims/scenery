@@ -21,8 +21,8 @@ export default class Spacer extends Leaf( Node ) {
    * @param [options] - Passed to Node
    */
   public constructor( width: number, height: number, options?: SpacerOptions ) {
-    assert && assert( typeof width === 'number' && isFinite( width ), 'width should be a finite number' );
-    assert && assert( typeof height === 'number' && isFinite( height ), 'height should be a finite number' );
+    assert && assert( isFinite( width ), 'width should be a finite number' );
+    assert && assert( isFinite( height ), 'height should be a finite number' );
 
     super();
 

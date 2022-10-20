@@ -980,9 +980,8 @@ class Node extends ParallelDOM {
    * @param index - The desired index (into the children array) of the child.
    */
   public moveChildToIndex( node: Node, index: number ): this {
-    assert && assert( node && node instanceof Node, 'Need to call node.moveChildToIndex() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to moveChildToIndex with a node that was not a child.' );
-    assert && assert( typeof index === 'number' && index % 1 === 0 && index >= 0 && index < this._children.length,
+    assert && assert( index % 1 === 0 && index >= 0 && index < this._children.length,
       `Invalid index: ${index}` );
 
     const currentIndex = this.indexOfChild( node );
@@ -2330,9 +2329,10 @@ class Node extends ParallelDOM {
   translate( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) { // eslint-disable-line
     if ( typeof x === 'number' ) {
       // translate( x, y, prependInstead )
-      assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
-      assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
-      assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean', 'If provided, prependInstead should be boolean' );
+      assert && assert( isFinite( x ), 'x should be a finite number' );
+
+      // TODO: I am cleaning up type assertions and I was unsure how to proceed here. JO What is your recommendation? https://github.com/phetsims/chipper/issues/1344
+      assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' ); // eslint-disable-line no-simple-type-checking-assertions
 
       if ( Math.abs( x ) < 1e-12 && Math.abs( y as number ) < 1e-12 ) { return; } // bail out if both are zero
       if ( prependInstead ) {
@@ -2382,7 +2382,7 @@ class Node extends ParallelDOM {
       }
       else {
         // scale( x, y, [prependInstead] )
-        assert && assert( typeof y === 'number' && isFinite( y ), 'scales should be finite numbers' );
+        assert && assert( isFinite( y ), 'scales should be finite numbers' );
         assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean', 'If provided, prependInstead should be boolean' );
 
         if ( x === 1 && y === 1 ) { return; } // bail out if we are scaling by 1 (identity)
@@ -2415,7 +2415,7 @@ class Node extends ParallelDOM {
    * @param [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
   public rotate( angle: number, prependInstead?: boolean ): void {
-    assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
+    assert && assert( isFinite( angle ), 'angle should be a finite number' );
     assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean' );
     if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
     if ( prependInstead ) {
@@ -2436,7 +2436,7 @@ class Node extends ParallelDOM {
    */
   public rotateAround( point: Vector2, angle: number ): this {
     assert && assert( point.isFinite(), 'point should be a finite Vector2' );
-    assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
+    assert && assert( isFinite( angle ), 'angle should be a finite number' );
 
     let matrix = Matrix3.translation( -point.x, -point.y );
     matrix = Matrix3.rotation2( angle ).timesMatrix( matrix );
@@ -2449,7 +2449,7 @@ class Node extends ParallelDOM {
    * Shifts the x coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
    */
   public setX( x: number ): this {
-    assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
+    assert && assert( isFinite( x ), 'x should be a finite number' );
 
     this.translate( x - this.getX(), 0, true );
     return this;
@@ -2480,7 +2480,7 @@ class Node extends ParallelDOM {
    * Shifts the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
    */
   public setY( y: number ): this {
-    assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
+    assert && assert( isFinite( y ), 'y should be a finite number' );
 
     this.translate( 0, y - this.getY(), true );
     return this;
@@ -2533,8 +2533,8 @@ class Node extends ParallelDOM {
         // to map setScaleMagnitude( scale ) => setScaleMagnitude( scale, scale )
         b = a;
       }
-      assert && assert( typeof a === 'number' && isFinite( a ), 'setScaleMagnitude parameters should be finite numbers' );
-      assert && assert( typeof b === 'number' && isFinite( b ), 'setScaleMagnitude parameters should be finite numbers' );
+      assert && assert( isFinite( a ), 'setScaleMagnitude parameters should be finite numbers' );
+      assert && assert( isFinite( b ), 'setScaleMagnitude parameters should be finite numbers' );
       // setScaleMagnitude( x, y )
       this.appendMatrix( Matrix3.scaling( a / currentScale.x, b / currentScale.y ) );
     }
@@ -2564,7 +2564,7 @@ class Node extends ParallelDOM {
    * @param rotation - In radians
    */
   public setRotation( rotation: number ): this {
-    assert && assert( typeof rotation === 'number' && isFinite( rotation ),
+    assert && assert( isFinite( rotation ),
       'rotation should be a finite number' );
 
     this.appendMatrix( scratchMatrix3.setToRotationZ( rotation - this.getRotation() ) );
@@ -2615,8 +2615,8 @@ class Node extends ParallelDOM {
     let dy;
 
     if ( typeof a === 'number' ) {
-      assert && assert( typeof a === 'number' && isFinite( a ), 'Parameters to setTranslation should be finite numbers' );
-      assert && assert( typeof b === 'number' && isFinite( b ), 'Parameters to setTranslation should be finite numbers' );
+      assert && assert( isFinite( a ), 'Parameters to setTranslation should be finite numbers' );
+      assert && assert( b !== undefined && isFinite( b ), 'Parameters to setTranslation should be finite numbers' );
       dx = a - tx;
       dy = b! - ty;
     }
@@ -2678,8 +2678,8 @@ class Node extends ParallelDOM {
    * see https://github.com/phetsims/scenery/issues/119
    */
   public prependTranslation( x: number, y: number ): void {
-    assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
-    assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
+    assert && assert( isFinite( x ), 'x should be a finite number' );
+    assert && assert( isFinite( y ), 'y should be a finite number' );
 
     if ( !x && !y ) { return; } // bail out if both are zero
 
@@ -3296,7 +3296,7 @@ class Node extends ParallelDOM {
    * Sets the center of this node's bounds to the specified point.
    */
   public setCenter( center: Vector2 ): this {
-    assert && assert( center instanceof Vector2 && center.isFinite(), 'center should be a finite Vector2' );
+    assert && assert( center.isFinite(), 'center should be a finite Vector2' );
 
     const currentCenter = this.getCenter();
     if ( currentCenter.isFinite() ) {
@@ -3331,7 +3331,7 @@ class Node extends ParallelDOM {
    * Sets the position of the center-right of this node's bounds to the specified point.
    */
   public setRightCenter( rightCenter: Vector2 ): this {
-    assert && assert( rightCenter instanceof Vector2 && rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
+    assert && assert( rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
 
     const currentRightCenter = this.getRightCenter();
     if ( currentRightCenter.isFinite() ) {
@@ -3366,7 +3366,7 @@ class Node extends ParallelDOM {
    * Sets the position of the lower-left corner of this node's bounds to the specified point.
    */
   public setLeftBottom( leftBottom: Vector2 ): this {
-    assert && assert( leftBottom instanceof Vector2 && leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
+    assert && assert( leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
 
     const currentLeftBottom = this.getLeftBottom();
     if ( currentLeftBottom.isFinite() ) {
@@ -3401,7 +3401,7 @@ class Node extends ParallelDOM {
    * Sets the position of the center-bottom of this node's bounds to the specified point.
    */
   public setCenterBottom( centerBottom: Vector2 ): this {
-    assert && assert( centerBottom instanceof Vector2 && centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
+    assert && assert( centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
 
     const currentCenterBottom = this.getCenterBottom();
     if ( currentCenterBottom.isFinite() ) {
@@ -3436,7 +3436,7 @@ class Node extends ParallelDOM {
    * Sets the position of the lower-right corner of this node's bounds to the specified point.
    */
   public setRightBottom( rightBottom: Vector2 ): this {
-    assert && assert( rightBottom instanceof Vector2 && rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
+    assert && assert( rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
 
     const currentRightBottom = this.getRightBottom();
     if ( currentRightBottom.isFinite() ) {
@@ -3917,7 +3917,7 @@ class Node extends ParallelDOM {
    * @throws Error if opacity out of range
    */
   public setOpacity( opacity: number ): void {
-    assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
+    assert && assert( isFinite( opacity ), 'opacity should be a finite number' );
 
     if ( opacity < 0 || opacity > 1 ) {
       throw new Error( `opacity out of range: ${opacity}` );
@@ -3953,7 +3953,7 @@ class Node extends ParallelDOM {
    * @throws Error if disabledOpacity out of range
    */
   public setDisabledOpacity( disabledOpacity: number ): this {
-    assert && assert( typeof disabledOpacity === 'number' && isFinite( disabledOpacity ), 'disabledOpacity should be a finite number' );
+    assert && assert( isFinite( disabledOpacity ), 'disabledOpacity should be a finite number' );
 
     if ( disabledOpacity < 0 || disabledOpacity > 1 ) {
       throw new Error( `disabledOpacity out of range: ${disabledOpacity}` );
@@ -4467,7 +4467,6 @@ class Node extends ParallelDOM {
    * context-menu cell col-resize row-resize all-scroll url( ... ) --> does it support data URLs?
    */
   public setCursor( cursor: string | null ): void {
-    assert && assert( typeof cursor === 'string' || cursor === null );
 
     // TODO: consider a mapping of types to set reasonable defaults
 
@@ -4641,7 +4640,7 @@ class Node extends ParallelDOM {
    * Sets what self renderers (and other bitmask flags) are supported by this node.
    */
   protected setRendererBitmask( bitmask: number ): void {
-    assert && assert( typeof bitmask === 'number' && isFinite( bitmask ) );
+    assert && assert( isFinite( bitmask ) );
 
     if ( bitmask !== this._rendererBitmask ) {
       this._rendererBitmask = bitmask;

@@ -280,12 +280,10 @@ export default class Rectangle extends SuperType {
     const hasXRadius = cornerXRadius !== undefined;
     const hasYRadius = cornerYRadius !== undefined;
 
-    assert && assert( typeof x === 'number' && isFinite( x ) &&
-    typeof y === 'number' && isFinite( y ) &&
-    typeof width === 'number' && isFinite( width ) &&
-    typeof height === 'number' && isFinite( height ), 'x/y/width/height should be finite numbers' );
-    assert && assert( !hasXRadius || ( typeof cornerXRadius === 'number' && isFinite( cornerXRadius ) ) &&
-                      !hasYRadius || ( typeof cornerYRadius === 'number' && isFinite( cornerYRadius ) ),
+    assert && assert( isFinite( x ) && isFinite( y ) &&
+    isFinite( width ) && isFinite( height ), 'x/y/width/height should be finite numbers' );
+    assert && assert( !hasXRadius || isFinite( cornerXRadius ) &&
+                      ( !hasYRadius || isFinite( cornerYRadius ) ),
       'Corner radii (if provided) should be finite numbers' );
 
     // If this doesn't change the rectangle, don't notify about changes.
@@ -318,7 +316,7 @@ export default class Rectangle extends SuperType {
    * Sets the x coordinate of the left side of this rectangle (in the local coordinate frame).
    */
   public setRectX( x: number ): this {
-    assert && assert( typeof x === 'number' && isFinite( x ), 'rectX should be a finite number' );
+    assert && assert( isFinite( x ), 'rectX should be a finite number' );
 
     if ( this._rectX !== x ) {
       this._rectX = x;
@@ -348,7 +346,7 @@ export default class Rectangle extends SuperType {
    * Sets the y coordinate of the top side of this rectangle (in the local coordinate frame).
    */
   public setRectY( y: number ): this {
-    assert && assert( typeof y === 'number' && isFinite( y ), 'rectY should be a finite number' );
+    assert && assert( isFinite( y ), 'rectY should be a finite number' );
 
     if ( this._rectY !== y ) {
       this._rectY = y;
@@ -378,7 +376,7 @@ export default class Rectangle extends SuperType {
    * Sets the width of the rectangle (in the local coordinate frame).
    */
   public setRectWidth( width: number ): this {
-    assert && assert( typeof width === 'number' && isFinite( width ), 'rectWidth should be a finite number' );
+    assert && assert( isFinite( width ), 'rectWidth should be a finite number' );
 
     if ( this._rectWidth !== width ) {
       this._rectWidth = width;
@@ -408,7 +406,7 @@ export default class Rectangle extends SuperType {
    * Sets the height of the rectangle (in the local coordinate frame).
    */
   public setRectHeight( height: number ): this {
-    assert && assert( typeof height === 'number' && isFinite( height ), 'rectHeight should be a finite number' );
+    assert && assert( isFinite( height ), 'rectHeight should be a finite number' );
 
     if ( this._rectHeight !== height ) {
       this._rectHeight = height;
@@ -444,7 +442,7 @@ export default class Rectangle extends SuperType {
    * radius will be equal to cornerXRadius (or a smaller radius if the rectangle is too small).
    */
   public setCornerXRadius( radius: number ): this {
-    assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerXRadius should be a finite number' );
+    assert && assert( isFinite( radius ), 'cornerXRadius should be a finite number' );
 
     if ( this._cornerXRadius !== radius ) {
       this._cornerXRadius = radius;
@@ -480,7 +478,7 @@ export default class Rectangle extends SuperType {
    * radius will be equal to cornerYRadius (or a smaller radius if the rectangle is too small).
    */
   public setCornerYRadius( radius: number ): this {
-    assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerYRadius should be a finite number' );
+    assert && assert( isFinite( radius ), 'cornerYRadius should be a finite number' );
 
     if ( this._cornerYRadius !== radius ) {
       this._cornerYRadius = radius;

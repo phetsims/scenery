@@ -415,7 +415,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   }
 
   public set spacing( value: number ) {
-    assert && assert( typeof value === 'number' && isFinite( value ) );
+    assert && assert( isFinite( value ) );
 
     if ( this._spacing !== value ) {
       this._spacing = value;
@@ -429,7 +429,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
   }
 
   public set lineSpacing( value: number ) {
-    assert && assert( typeof value === 'number' && isFinite( value ) );
+    assert && assert( isFinite( value ) );
 
     if ( this._lineSpacing !== value ) {
       this._lineSpacing = value;

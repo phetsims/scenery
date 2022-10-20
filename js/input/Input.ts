@@ -1147,7 +1147,8 @@ export default class Input extends PhetioObject {
     if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement as HTMLElement ) ) {
 
       const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
-      assert && assert( relatedTarget instanceof window.Element );
+      // TODO: Sam we were unsure if this code might interact with JS code that may create problems in the future. Thoughts? https://github.com/phetsims/chipper/issues/1344
+      assert && assert( relatedTarget instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
       const trailIndices = relatedTarget.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
       assert && assert( trailIndices, 'should not be null' );
 
@@ -1182,7 +1183,8 @@ export default class Input extends PhetioObject {
     }
     else {
       const target = ( domEvent.target as unknown as Element );
-      assert && assert( target instanceof window.Element );
+      // TODO: Sam we were unsure if this code might interact with JS code that may create problems in the future. Thoughts?
+      assert && assert( target instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
       if ( target && this.isTargetUnderPDOM( target as HTMLElement ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
         assert && assert( trailIndices, 'should not be null' );

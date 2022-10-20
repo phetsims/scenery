@@ -119,7 +119,7 @@ export default class PaintColorProperty extends Property<Color> {
    * the paint.
    */
   public setLuminanceFactor( luminanceFactor: number ): void {
-    assert && assert( typeof luminanceFactor === 'number' && luminanceFactor >= -1 && luminanceFactor <= 1 );
+    assert && assert( luminanceFactor >= -1 && luminanceFactor <= 1 );
 
     if ( this.luminanceFactor !== luminanceFactor ) {
       this._luminanceFactor = luminanceFactor;

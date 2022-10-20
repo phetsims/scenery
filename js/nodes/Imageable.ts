@@ -206,10 +206,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      */
     public setImage( image: ImageableImage ): this {
       assert && assert( image, 'image should be available' );
-      assert && assert( typeof image === 'string' ||
-                        image instanceof HTMLImageElement ||
-                        image instanceof HTMLCanvasElement ||
-                        Array.isArray( image ), 'image is not of the correct type' );
 
       // Generally, if a different value for image is provided, it has changed
       let hasImageChanged = this._image !== image;
@@ -376,7 +372,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * @param width - Expected width of the image's unloaded content
      */
     public setInitialWidth( width: number ): this {
-      assert && assert( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ), 'initialWidth should be a non-negative integer' );
+      assert && assert( width >= 0 && ( width % 1 === 0 ), 'initialWidth should be a non-negative integer' );
 
       if ( width !== this._initialWidth ) {
         this._initialWidth = width;
@@ -419,7 +415,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * @param height - Expected height of the image's unloaded content
      */
     public setInitialHeight( height: number ): this {
-      assert && assert( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ), 'initialHeight should be a non-negative integer' );
+      assert && assert( height >= 0 && ( height % 1 === 0 ), 'initialHeight should be a non-negative integer' );
 
       if ( height !== this._initialHeight ) {
         this._initialHeight = height;
@@ -521,7 +517,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * @param level - A non-negative integer representing the number of mipmap levels to precompute.
      */
     public setMipmapInitialLevel( level: number ): this {
-      assert && assert( typeof level === 'number' && level % 1 === 0 && level >= 0,
+      assert && assert( level % 1 === 0 && level >= 0,
         'mipmapInitialLevel should be a non-negative integer' );
 
       if ( this._mipmapInitialLevel !== level ) {
@@ -556,7 +552,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * @param level - A non-negative integer representing the maximum mipmap level to compute.
      */
     public setMipmapMaxLevel( level: number ): this {
-      assert && assert( typeof level === 'number' && level % 1 === 0 && level >= 0,
+      assert && assert( level % 1 === 0 && level >= 0,
         'mipmapMaxLevel should be a non-negative integer' );
 
       if ( this._mipmapMaxLevel !== level ) {
@@ -700,7 +696,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * Returns the desired mipmap level (0-indexed) that should be used for the particular scale
      */
     public getMipmapLevelFromScale( scale: number, additionalBias = 0 ): number {
-      assert && assert( typeof scale === 'number' && scale > 0, 'scale should be a positive number' );
+      assert && assert( scale > 0, 'scale should be a positive number' );
 
       // If we are shown larger than scale, ALWAYS choose the highest resolution
       if ( scale >= 1 ) {
@@ -742,8 +738,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * @returns - Matching <canvas> for the level of detail
      */
     public getMipmapCanvas( level: number ): HTMLCanvasElement {
-      assert && assert( typeof level === 'number' &&
-      level >= 0 &&
+      assert && assert( level >= 0 &&
       level < this._mipmapCanvases.length &&
       ( level % 1 ) === 0 );
 
@@ -763,8 +758,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      * @returns - Matching data URL for the level of detail
      */
     public getMipmapURL( level: number ): string {
-      assert && assert( typeof level === 'number' &&
-      level >= 0 &&
+      assert && assert( level >= 0 &&
       level < this._mipmapCanvases.length &&
       ( level % 1 ) === 0 );
 

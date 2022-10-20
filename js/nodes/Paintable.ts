@@ -377,7 +377,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * it gets cut off to the 'bevel' behavior.
      */
     public setMiterLimit( miterLimit: number ): this {
-      assert && assert( typeof miterLimit === 'number' && isFinite( miterLimit ), 'miterLimit should be a finite number' );
+      assert && assert( isFinite( miterLimit ), 'miterLimit should be a finite number' );
 
       if ( this._lineDrawingStyles.miterLimit !== miterLimit ) {
         this._lineDrawingStyles.miterLimit = miterLimit;
@@ -444,7 +444,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Sets the offset of the line dash pattern from the start of the stroke. Defaults to 0.
      */
     public setLineDashOffset( lineDashOffset: number ): this {
-      assert && assert( typeof lineDashOffset === 'number' && isFinite( lineDashOffset ),
+      assert && assert( isFinite( lineDashOffset ),
         `lineDashOffset should be a number, not ${lineDashOffset}` );
 
       if ( this._lineDrawingStyles.lineDashOffset !== lineDashOffset ) {

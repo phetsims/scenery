@@ -1580,7 +1580,6 @@ export default class ParallelDOM extends PhetioObject {
    * TODO: Support more than one group focus highlight (multiple ancestors could have groupFocusHighlight), see https://github.com/phetsims/scenery/issues/708
    */
   public setGroupFocusHighlight( groupHighlight: Node | boolean ): void {
-    assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof Node );
     this._groupFocusHighlight = groupHighlight;
   }
 
@@ -2285,7 +2284,6 @@ export default class ParallelDOM extends PhetioObject {
       value = unwrapProperty( value )!;
     }
 
-    assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
     assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
     assert && typeof value === 'string' && validate( value, Validation.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );

@@ -58,29 +58,29 @@ export default class ColorMatrixFilter extends Filter {
                m20: number, m21: number, m22: number, m23: number, m24: number,
                m30: number, m31: number, m32: number, m33: number, m34: number ) {
 
-    assert && assert( typeof m00 === 'number' && isFinite( m00 ), 'm00 should be a finite number' );
-    assert && assert( typeof m01 === 'number' && isFinite( m01 ), 'm01 should be a finite number' );
-    assert && assert( typeof m02 === 'number' && isFinite( m02 ), 'm02 should be a finite number' );
-    assert && assert( typeof m03 === 'number' && isFinite( m03 ), 'm03 should be a finite number' );
-    assert && assert( typeof m04 === 'number' && isFinite( m04 ), 'm04 should be a finite number' );
+    assert && assert( isFinite( m00 ), 'm00 should be a finite number' );
+    assert && assert( isFinite( m01 ), 'm01 should be a finite number' );
+    assert && assert( isFinite( m02 ), 'm02 should be a finite number' );
+    assert && assert( isFinite( m03 ), 'm03 should be a finite number' );
+    assert && assert( isFinite( m04 ), 'm04 should be a finite number' );
 
-    assert && assert( typeof m10 === 'number' && isFinite( m10 ), 'm10 should be a finite number' );
-    assert && assert( typeof m11 === 'number' && isFinite( m11 ), 'm11 should be a finite number' );
-    assert && assert( typeof m12 === 'number' && isFinite( m12 ), 'm12 should be a finite number' );
-    assert && assert( typeof m13 === 'number' && isFinite( m13 ), 'm13 should be a finite number' );
-    assert && assert( typeof m14 === 'number' && isFinite( m14 ), 'm14 should be a finite number' );
+    assert && assert( isFinite( m10 ), 'm10 should be a finite number' );
+    assert && assert( isFinite( m11 ), 'm11 should be a finite number' );
+    assert && assert( isFinite( m12 ), 'm12 should be a finite number' );
+    assert && assert( isFinite( m13 ), 'm13 should be a finite number' );
+    assert && assert( isFinite( m14 ), 'm14 should be a finite number' );
 
-    assert && assert( typeof m20 === 'number' && isFinite( m20 ), 'm20 should be a finite number' );
-    assert && assert( typeof m21 === 'number' && isFinite( m21 ), 'm21 should be a finite number' );
-    assert && assert( typeof m22 === 'number' && isFinite( m22 ), 'm22 should be a finite number' );
-    assert && assert( typeof m23 === 'number' && isFinite( m23 ), 'm23 should be a finite number' );
-    assert && assert( typeof m24 === 'number' && isFinite( m24 ), 'm24 should be a finite number' );
+    assert && assert( isFinite( m20 ), 'm20 should be a finite number' );
+    assert && assert( isFinite( m21 ), 'm21 should be a finite number' );
+    assert && assert( isFinite( m22 ), 'm22 should be a finite number' );
+    assert && assert( isFinite( m23 ), 'm23 should be a finite number' );
+    assert && assert( isFinite( m24 ), 'm24 should be a finite number' );
 
-    assert && assert( typeof m30 === 'number' && isFinite( m30 ), 'm30 should be a finite number' );
-    assert && assert( typeof m31 === 'number' && isFinite( m31 ), 'm31 should be a finite number' );
-    assert && assert( typeof m32 === 'number' && isFinite( m32 ), 'm32 should be a finite number' );
-    assert && assert( typeof m33 === 'number' && isFinite( m33 ), 'm33 should be a finite number' );
-    assert && assert( typeof m34 === 'number' && isFinite( m34 ), 'm34 should be a finite number' );
+    assert && assert( isFinite( m30 ), 'm30 should be a finite number' );
+    assert && assert( isFinite( m31 ), 'm31 should be a finite number' );
+    assert && assert( isFinite( m32 ), 'm32 should be a finite number' );
+    assert && assert( isFinite( m33 ), 'm33 should be a finite number' );
+    assert && assert( isFinite( m34 ), 'm34 should be a finite number' );
 
     super();
 

@@ -906,7 +906,6 @@ export default class RichText extends Node {
    */
   public setText( text: string | number ): this {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
-    assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = `${text}`;
@@ -954,8 +953,6 @@ export default class RichText extends Node {
    * Sets the font of our node.
    */
   public setFont( font: Font | string ): this {
-    assert && assert( font instanceof Font || typeof font === 'string',
-      'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
     if ( this._font !== font ) {
       this._font = font;
@@ -1045,7 +1042,7 @@ export default class RichText extends Node {
    * Sets the scale (relative to 1) of any text under subscript (<sub>) elements.
    */
   public setSubScale( subScale: number ): this {
-    assert && assert( typeof subScale === 'number' && isFinite( subScale ) && subScale > 0 );
+    assert && assert( isFinite( subScale ) && subScale > 0 );
 
     if ( this._subScale !== subScale ) {
       this._subScale = subScale;
@@ -1069,7 +1066,7 @@ export default class RichText extends Node {
    * Sets the horizontal spacing before any subscript (<sub>) elements.
    */
   public setSubXSpacing( subXSpacing: number ): this {
-    assert && assert( typeof subXSpacing === 'number' && isFinite( subXSpacing ) );
+    assert && assert( isFinite( subXSpacing ) );
 
     if ( this._subXSpacing !== subXSpacing ) {
       this._subXSpacing = subXSpacing;
@@ -1093,7 +1090,7 @@ export default class RichText extends Node {
    * Sets the adjustment offset to the vertical placement of any subscript (<sub>) elements.
    */
   public setSubYOffset( subYOffset: number ): this {
-    assert && assert( typeof subYOffset === 'number' && isFinite( subYOffset ) );
+    assert && assert( isFinite( subYOffset ) );
 
     if ( this._subYOffset !== subYOffset ) {
       this._subYOffset = subYOffset;
@@ -1117,7 +1114,7 @@ export default class RichText extends Node {
    * Sets the scale (relative to 1) of any text under superscript (<sup>) elements.
    */
   public setSupScale( supScale: number ): this {
-    assert && assert( typeof supScale === 'number' && isFinite( supScale ) && supScale > 0 );
+    assert && assert( isFinite( supScale ) && supScale > 0 );
 
     if ( this._supScale !== supScale ) {
       this._supScale = supScale;
@@ -1141,7 +1138,7 @@ export default class RichText extends Node {
    * Sets the horizontal spacing before any superscript (<sup>) elements.
    */
   public setSupXSpacing( supXSpacing: number ): this {
-    assert && assert( typeof supXSpacing === 'number' && isFinite( supXSpacing ) );
+    assert && assert( isFinite( supXSpacing ) );
 
     if ( this._supXSpacing !== supXSpacing ) {
       this._supXSpacing = supXSpacing;
@@ -1165,7 +1162,7 @@ export default class RichText extends Node {
    * Sets the adjustment offset to the vertical placement of any superscript (<sup>) elements.
    */
   public setSupYOffset( supYOffset: number ): this {
-    assert && assert( typeof supYOffset === 'number' && isFinite( supYOffset ) );
+    assert && assert( isFinite( supYOffset ) );
 
     if ( this._supYOffset !== supYOffset ) {
       this._supYOffset = supYOffset;
@@ -1190,7 +1187,7 @@ export default class RichText extends Node {
    * baseline to the top of the text bounds.
    */
   public setCapHeightScale( capHeightScale: number ): this {
-    assert && assert( typeof capHeightScale === 'number' && isFinite( capHeightScale ) && capHeightScale > 0 );
+    assert && assert( isFinite( capHeightScale ) && capHeightScale > 0 );
 
     if ( this._capHeightScale !== capHeightScale ) {
       this._capHeightScale = capHeightScale;
@@ -1215,7 +1212,7 @@ export default class RichText extends Node {
    * Sets the lineWidth of underline lines.
    */
   public setUnderlineLineWidth( underlineLineWidth: number ): this {
-    assert && assert( typeof underlineLineWidth === 'number' && isFinite( underlineLineWidth ) && underlineLineWidth > 0 );
+    assert && assert( isFinite( underlineLineWidth ) && underlineLineWidth > 0 );
 
     if ( this._underlineLineWidth !== underlineLineWidth ) {
       this._underlineLineWidth = underlineLineWidth;
@@ -1240,7 +1237,7 @@ export default class RichText extends Node {
    * text bounds.
    */
   public setUnderlineHeightScale( underlineHeightScale: number ): this {
-    assert && assert( typeof underlineHeightScale === 'number' && isFinite( underlineHeightScale ) && underlineHeightScale > 0 );
+    assert && assert( isFinite( underlineHeightScale ) && underlineHeightScale > 0 );
 
     if ( this._underlineHeightScale !== underlineHeightScale ) {
       this._underlineHeightScale = underlineHeightScale;
@@ -1265,7 +1262,7 @@ export default class RichText extends Node {
    * Sets the lineWidth of strikethrough lines.
    */
   public setStrikethroughLineWidth( strikethroughLineWidth: number ): this {
-    assert && assert( typeof strikethroughLineWidth === 'number' && isFinite( strikethroughLineWidth ) && strikethroughLineWidth > 0 );
+    assert && assert( isFinite( strikethroughLineWidth ) && strikethroughLineWidth > 0 );
 
     if ( this._strikethroughLineWidth !== strikethroughLineWidth ) {
       this._strikethroughLineWidth = strikethroughLineWidth;
@@ -1290,7 +1287,7 @@ export default class RichText extends Node {
    * text bounds.
    */
   public setStrikethroughHeightScale( strikethroughHeightScale: number ): this {
-    assert && assert( typeof strikethroughHeightScale === 'number' && isFinite( strikethroughHeightScale ) && strikethroughHeightScale > 0 );
+    assert && assert( isFinite( strikethroughHeightScale ) && strikethroughHeightScale > 0 );
 
     if ( this._strikethroughHeightScale !== strikethroughHeightScale ) {
       this._strikethroughHeightScale = strikethroughHeightScale;
@@ -1431,7 +1428,7 @@ export default class RichText extends Node {
    * Sets the leading (spacing between lines)
    */
   public setLeading( leading: number ): this {
-    assert && assert( typeof leading === 'number' && isFinite( leading ) );
+    assert && assert( isFinite( leading ) );
 
     if ( this._leading !== leading ) {
       this._leading = leading;

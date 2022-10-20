@@ -92,7 +92,7 @@ export default class Line extends Path {
     }
     else {
       // new Line( x1, y1, x2, y2, [options] )
-      assert && assert( typeof x1 === 'number' &&
+      assert && assert( x1 !== undefined &&
       typeof y1 === 'number' &&
       typeof x2 === 'number' &&
       typeof y2 === 'number' );

@@ -142,7 +142,6 @@ export default class Text extends Paintable( Node ) {
    */
   public setText( text: string | number ): this {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
-    assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = `${text}`;
@@ -481,8 +480,6 @@ export default class Text extends Paintable( Node ) {
    * Scenery Font object.
    */
   public setFont( font: Font | string ): this {
-    assert && assert( font instanceof Font || typeof font === 'string',
-      'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
     // We need to detect whether things have updated in a different way depending on whether we are passed a string
     // or a Font object.
