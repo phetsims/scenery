@@ -1132,8 +1132,11 @@
         const box = new scenery.GridBox( {
           rows: _.range( 0, 8 ).map( row => {
             return _.range( 0, 8 ).map( column => {
-              return new scenery.Rectangle( 0, 0, 20, 20, {
-                fill: new scenery.Color( row * 32, column * 32, 1 )
+              return new scenery.Rectangle( 0, 0, 80, 20, {
+                fill: new scenery.Color( row * 32, column * 32, 1 ),
+                children: [
+                  new scenery.Text( `row ${row}, column ${column}`, { fill: 'white', centerX: 40, centerY: 10 } )
+                ]
               } );
             } );
           } )
