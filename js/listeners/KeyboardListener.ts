@@ -45,7 +45,7 @@
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { EnglishStringToCodeMap, KeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { globalKeyStateTracker, EnglishStringToCodeMap, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
@@ -94,8 +94,6 @@ type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
 
 class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputListener {
 
-  private readonly _keyStateTracker: KeyStateTracker;
-
   // The CallbackTimer that will manage firing when this listener supports fireOnHold.
   private readonly _timer?: CallbackTimer;
 
@@ -127,10 +125,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._fireOnKeyUp = options.fireOnKeyUp;
     this._activeKeyGroup = null;
 
-    // TODO: Creating a KeyStateTracker every listener seems unnecessary and inefficient. Can one globalKeyStateTracker
-    //       drive everything but the listener queries it on keyboard events? FOr example, for a+b, hold a -> tab -> b, should work.
-    this._keyStateTracker = new KeyStateTracker();
-
     // convert the provided keys to data that we can respond to with scenery's Input system
     this._keyGroups = this.convertKeysToKeyGroups( options.keys );
 
@@ -151,18 +145,15 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._callback( this._activeKeyGroup!.naturalKeys );
   }
 
-  public keydown( event: SceneryEvent ): void {
-
-    // TODO: Ideally the tracker will soon go through scenery input system
-    // TODO: Ideally we will query a globalKeyStateTracker instead?
-    this._keyStateTracker.keydownUpdate( event.domEvent as KeyboardEvent );
+  public keydown( event: SceneryEvent<KeyboardEvent> ): void {
 
     if ( !this._fireOnKeyUp && !this._activeKeyGroup ) {
 
       // modifier keys can be pressed in any order but the last key in the group must be pressed last
       this._keyGroups.forEach( keyGroup => {
-        if ( this._keyStateTracker.areKeysDown( keyGroup.allKeys ) &&
-             this._keyStateTracker.mostRecentKeyFromList( keyGroup.allKeys ) === keyGroup.key ) {
+        // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
+        if ( globalKeyStateTracker.areKeysDown( keyGroup.allKeys ) &&
+             globalKeyStateTracker.mostRecentKeyFromList( keyGroup.allKeys ) === keyGroup.key ) {
 
           this._activeKeyGroup = keyGroup;
 
@@ -175,14 +166,11 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     }
   }
 
-  public keyup( event: SceneryEvent ): void {
-
-    // TODO: Ideally the tracker will soon go through scenery input system
-    // TODO: Ideally we will query a globalKeyStateTracker instead?
-    this._keyStateTracker.keyupUpdate( event.domEvent as KeyboardEvent );
+  public keyup( event: SceneryEvent<KeyboardEvent> ): void {
 
     if ( this._activeKeyGroup ) {
-      if ( !this._keyStateTracker.areKeysDown( this._activeKeyGroup.allKeys ) ) {
+      // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
+      if ( !globalKeyStateTracker.areKeysDown( this._activeKeyGroup.allKeys ) ) {
         if ( this._timer ) {
           this._timer.stop( false );
         }
@@ -192,7 +180,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     if ( this._fireOnKeyUp ) {
       this._keyGroups.forEach( keyGroup => {
-        if ( this._keyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
+        // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
+        if ( globalKeyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
           this._activeKeyGroup = keyGroup;
           this.fireCallback();
