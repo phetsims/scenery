@@ -168,7 +168,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Features, TInputListener, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, Touch, Trail, WindowTouch } from '../imports.js';
+import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Features, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
@@ -977,10 +977,11 @@ export default class Input extends PhetioObject {
     BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
 
     if ( this.display._accessible ) {
+      const eventTarget = this.attachToWindow ? window : this.display.pdomRootElement!;
 
       // Add a listener to the root accessible DOM element for each event we want to monitor.
       this.pdomEventListenerMap!.forEach( ( listener, eventName ) => {
-        this.display.pdomRootElement!.addEventListener( eventName, listener, this.accessibleEventOptions );
+        eventTarget.addEventListener( eventName, listener, this.accessibleEventOptions );
       } );
     }
   }
