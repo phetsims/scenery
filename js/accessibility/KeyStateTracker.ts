@@ -167,7 +167,7 @@ class KeyStateTracker {
    * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
    * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
    */
-  private keydownUpdate( domEvent: KeyboardEvent ): void {
+  public keydownUpdate( domEvent: KeyboardEvent ): void {
     this.enabled && this.keydownUpdateAction.execute( domEvent );
   }
 
@@ -225,7 +225,7 @@ class KeyStateTracker {
    * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
    * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
    */
-  private keyupUpdate( domEvent: KeyboardEvent ): void {
+  public keyupUpdate( domEvent: KeyboardEvent ): void {
     this.enabled && this.keyupUpdateAction.execute( domEvent );
   }
 
@@ -260,6 +260,14 @@ class KeyStateTracker {
     }
 
     return false;
+  }
+
+  /**
+   * get the most recent key pressed
+   */
+  public mostRecentKeyFromList( keys: string[] ): string {
+    assert && assert( this.areKeysDown( keys ), 'Not all the keys in the list are down.' );
+    return _.minBy( keys, key => this.timeDownForKey( key ) )!;
   }
 
   /**

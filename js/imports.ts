@@ -24,6 +24,7 @@ export { default as xlinkns } from './util/xlinkns.js';
 export { default as Utils } from './util/Utils.js';
 export { default as Focus } from './accessibility/Focus.js';
 export { default as KeyboardUtils } from './accessibility/KeyboardUtils.js';
+export { default as EnglishStringToCodeMap } from './accessibility/EnglishStringToCodeMap.js';
 export { default as EventIO } from './input/EventIO.js';
 export { default as SceneryStyle } from './util/SceneryStyle.js';
 export { default as CanvasContextWrapper } from './util/CanvasContextWrapper.js';
@@ -227,6 +228,7 @@ export { default as animatedPanZoomSingleton } from './listeners/animatedPanZoom
 export { default as HandleDownListener } from './listeners/HandleDownListener.js';
 export { default as KeyboardDragListener } from './listeners/KeyboardDragListener.js';
 export type { KeyboardDragListenerOptions } from './listeners/KeyboardDragListener.js';
+export { default as KeyboardListener } from './listeners/KeyboardListener.js';
 export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';
 
