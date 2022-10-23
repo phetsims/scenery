@@ -32,6 +32,7 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import { AlignGroup, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
@@ -149,11 +150,13 @@ export default class AlignBox extends SuperType {
     this._alignBoundsProperty = null;
     this._alignBoundsPropertyListener = _.noop;
 
+    assertMutuallyExclusiveOptions( options, [ 'alignBounds' ], [ 'alignBoundsProperty' ] );
+
     // We will dynamically update alignBounds if an alignBoundsProperty was passed in through options.
     if ( providedOptions?.alignBoundsProperty ) {
       this._alignBoundsProperty = providedOptions.alignBoundsProperty;
 
-      // Overrides any possible alignBounds passed in. Should this be an assertion?
+      // Overrides any possible alignBounds passed in (should not be provided, assertion above).
       options.alignBounds = this._alignBoundsProperty.value;
 
       this._alignBoundsPropertyListener = ( bounds: Bounds2 ) => { this.alignBounds = bounds; };
