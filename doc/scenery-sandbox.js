@@ -113,8 +113,10 @@
         window[ `scene${id}` ] = scene;
         window[ `stepEmitter${id}` ] = stepEmitter;
 
+        const code = `${Math.random()};(${options.jsBefore}\n${codeMirror.getValue()}\n${options.jsAfter}\n)( window[ 'scene${id}' ], window[ 'stepEmitter${id}' ] )`; // eslint-disable-line bad-sim-text
+
         // Assumes it's in a function, differently from the sandbox
-        const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};(${options.jsBefore}\n${codeMirror.getValue()}\n${options.jsAfter}\n)( window[ 'scene${id}' ], window[ 'stepEmitter${id}' ] )`;  // eslint-disable-line bad-sim-text
+        const dataURI = `data:text/javascript;base64,${btoa( code )}`;
 
         await import( dataURI );
       }

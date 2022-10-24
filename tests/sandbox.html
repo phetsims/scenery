@@ -261,7 +261,9 @@
       await attemptImports( js );
       await attemptImports( options.codeBefore );
 
-      const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};${options.codeBefore}${codeMirror.getValue()}${options.codeAfter}`;
+      const code = `${Math.random()};${options.codeBefore}${codeMirror.getValue()}${options.codeAfter}`;
+
+      const dataURI = `data:text/javascript;base64,${btoa( code )}`;
 
       await import( dataURI );
 
