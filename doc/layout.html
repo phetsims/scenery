@@ -30,6 +30,15 @@
   <script src="./doc.js"></script>
   <link rel="stylesheet" href="./doc.css">
 
+  <link rel="stylesheet" href="../../sherpa/lib/codemirror-5.52.2.min.css">
+  <link rel="stylesheet" href="../../sherpa/lib/codemirror-5.52.2.monokai.min.css">
+
+  <script src="../../sherpa/lib/codemirror-5.52.2.min.js"></script>
+  <script src="../../sherpa/lib/codemirror-5.52.2.javascript.min.js"></script>
+
+  <script src="./scenery-sandbox.js"></script>
+  <link rel="stylesheet" href="./scenery-sandbox.css">
+
   <style>
 
   </style>
@@ -40,8 +49,14 @@
   <script type="text/javascript">
     scenery.Utils.polyfillRequestAnimationFrame();
 
+    _.extend( window, phetCore );
+    _.extend( window, axon );
+    _.extend( window, dot );
+    _.extend( window, kite );
+    _.extend( window, scenery );
+
     function dynamicDemo( id, getBox, options ) {
-      options = phetCore.merge( {
+      options = merge( {
         resize: 'both',
         useMinWidth: true,
         useMinHeight: false,
@@ -52,10 +67,10 @@
       }, options );
 
       const container = document.getElementById( id );
-      const scene = new scenery.Node();
+      const scene = new Node();
       const box = getBox();
       scene.addChild( box );
-      const display = new scenery.Display( scene, {
+      const display = new Display( scene, {
         allowCSSHacks: false,
 
         // so Display input does not interfere with documentation links
@@ -103,17 +118,136 @@
     }
 
     const colors = [
-      new scenery.Color( 62, 171, 3 ),
-      new scenery.Color( 23, 180, 77 ),
-      new scenery.Color( 24, 183, 138 ),
-      new scenery.Color( 23, 178, 194 ),
-      new scenery.Color( 20, 163, 238 ),
-      new scenery.Color( 71, 136, 255 ),
-      new scenery.Color( 171, 101, 255 ),
-      new scenery.Color( 228, 72, 235 ),
-      new scenery.Color( 252, 66, 186 ),
-      new scenery.Color( 252, 82, 127 )
+      new Color( 62, 171, 3 ),
+      new Color( 23, 180, 77 ),
+      new Color( 24, 183, 138 ),
+      new Color( 23, 178, 194 ),
+      new Color( 20, 163, 238 ),
+      new Color( 71, 136, 255 ),
+      new Color( 171, 101, 255 ),
+      new Color( 228, 72, 235 ),
+      new Color( 252, 66, 186 ),
+      new Color( 252, 82, 127 )
     ];
+
+    class ResizableNode extends Node {
+      constructor( content, providedOptions ) {
+        const options = merge( {
+          widthResizable: false,
+          heightResizable: false
+        }, providedOptions );
+
+        if ( options.widthResizable ) {
+          content.preferredWidth = content.minimumWidth;
+        }
+        if ( options.heightResizable ) {
+          content.preferredHeight = content.minimumHeight;
+        }
+
+        const resizeIconColor = new Color( 140, 140, 140 );
+        const resizeBackgroundColor = new Color( 210, 210, 210 );
+        const resizeStrokeColor = new Color( 140, 140, 140 );
+        const resizeStrokeLineWidth = 0.5;
+
+        const resizeHandleSize = 12;
+        const space = 3;
+        const radius = 1.2;
+        const singleResizeShape = new Shape()
+          .circle( 0, 0, radius ).close()
+          .circle( space, space, radius ).close()
+          .circle( 2 * space, 0, radius ).close()
+          .circle( 3 * space, space, radius ).close()
+          .circle( 4 * space, 0, radius ).close()
+          .circle( 5 * space, space, radius ).close()
+          .circle( 6 * space, 0, radius ).close()
+          .circle( 7 * space, space, radius ).close()
+          .circle( 8 * space, 0, radius ).close()
+        const singleResizeIcon = new Path( singleResizeShape, {
+          fill: resizeIconColor
+        } );
+
+        const fullResizePath = new Shape()
+          .moveTo( 1, resizeHandleSize - 1, ).lineTo( resizeHandleSize - 1, 1 )
+          .moveTo( 5, resizeHandleSize - 1, ).lineTo( resizeHandleSize - 1, 5 )
+          .moveTo( 9, resizeHandleSize - 1, ).lineTo( resizeHandleSize - 1, 9 );
+        const fullResizeIcon = new Path( fullResizePath, {
+          stroke: resizeIconColor
+        } );
+
+        const horizontalDragHandle = new Rectangle( 0, 0, resizeHandleSize, resizeHandleSize, {
+          fill: resizeBackgroundColor,
+          stroke: resizeStrokeColor,
+          lineWidth: resizeStrokeLineWidth,
+          cursor: 'pointer',
+          inputListeners: [
+            new DragListener( {
+              drag: ( event, listener ) => {
+                content.preferredWidth = Math.max( content.minimumWidth, 2 * listener.modelPoint.x );
+              }
+            } )
+          ],
+          children: [ new Node( { children: [ singleResizeIcon ], rotation: -Math.PI / 2 } ) ]
+        } );
+        const verticalDragHandle = new Rectangle( 0, 0, resizeHandleSize, resizeHandleSize, {
+          fill: resizeBackgroundColor,
+          stroke: resizeStrokeColor,
+          lineWidth: resizeStrokeLineWidth,
+          cursor: 'pointer',
+          inputListeners: [
+            new DragListener( {
+              drag: ( event, listener ) => {
+                content.preferredHeight = Math.max( content.minimumHeight, listener.modelPoint.y );
+              }
+            } )
+          ],
+          children: [ new Node( { children: [ singleResizeIcon ] } ) ]
+        } );
+        const fullDragHandle = new Rectangle( 0, 0, resizeHandleSize + resizeStrokeLineWidth, resizeHandleSize + resizeStrokeLineWidth, {
+          fill: resizeBackgroundColor,
+          cursor: 'pointer',
+          inputListeners: [
+            new DragListener( {
+              drag: ( event, listener ) => {
+                content.preferredWidth = Math.max( content.minimumWidth, 2 * listener.modelPoint.x );
+                content.preferredHeight = Math.max( content.minimumHeight, listener.modelPoint.y );
+              }
+            } )
+          ],
+          children: [
+            fullResizeIcon
+          ]
+        } );
+
+        options.children = [
+          content,
+          ...( options.widthResizable ? [ horizontalDragHandle ] : [] ),
+          ...( options.heightResizable ? [ verticalDragHandle ] : [] ),
+          ...( options.widthResizable && options.heightResizable ? [ fullDragHandle ] : [] )
+        ];
+
+        content.localBoundsProperty.link( () => {
+          content.top = 0;
+          content.centerX = 0;
+
+          horizontalDragHandle.rectHeight = content.height - resizeStrokeLineWidth;
+          verticalDragHandle.rectWidth = content.width - resizeStrokeLineWidth;
+
+          horizontalDragHandle.children[ 0 ].center = horizontalDragHandle.selfBounds.center;
+          verticalDragHandle.children[ 0 ].center = verticalDragHandle.selfBounds.center;
+
+          horizontalDragHandle.left = content.right;
+          horizontalDragHandle.centerY = content.centerY;
+
+          verticalDragHandle.top = content.bottom;
+          verticalDragHandle.centerX = content.centerX;
+
+          fullDragHandle.left = content.right;
+          fullDragHandle.top = content.bottom;
+        } );
+
+        super( options );
+      }
+    }
   </script>
 </head>
 
@@ -158,7 +292,21 @@
       }
     </script>
 
-    <p>NOTE: Many examples can be resized from the lower-right corner. This adjusts the preferred size of the container.</p>
+    <p>
+      If you're using a built version of Scenery, you'll need to add the relevant namespaces to objects. Almost
+      everything here will need a <code>scenery.</code> prefix, e.g. <code>new scenery.Node()</code> instead of
+      <code>new Node()</code>. The built version of Scenery will include <code>scenery</code>, <code>kite</code>
+      (for Shape), <code>dot</code> (for Vector2), <code>axon</code> (for Properties) and <code>phetCore</code>.
+      The code examples here can use either the prefixed versions or non-prefixed.
+    </p>
+
+    <p>
+      All of the code examples here are editable. You can change the code and see the results immediately.
+    </p>
+
+    <p>
+      Many examples can be resized using drag handles. This adjusts the preferred size of the container.
+    </p>
 
     <h2 id="FlowBox" class="index">FlowBox</h2>
 
@@ -175,18 +323,21 @@
 
     <div id="HBox-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'HBox-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'HBox-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <p class="index" data-index="VBox">
@@ -195,18 +346,21 @@
 
     <div id="VBox-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'VBox-example', () => {
-        /*START*/
-        return new scenery.VBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'vertical', useMinHeight: true } );
+      createSandbox( 'VBox-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new VBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <p>
@@ -221,19 +375,22 @@
 
     <div id="orientation-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'orientation-example', () => {
-        /*START*/
-        return new scenery.FlowBox( {
-          orientation: phetCore.Orientation.horizontal,
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'orientation-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new FlowBox( {
+            orientation: 'horizontal',
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <h3 id="FlowBox-resizing">Resizing</h3>
@@ -242,73 +399,63 @@
 
     <div id="dynamic-example"></div>
     <script type="text/javascript">
-      {
-        let step;
-        dynamicDemo( 'dynamic-example', () => {
+      createSandbox( 'dynamic-example', ( scene, stepEmitter ) => {
+        const box = ( () => {
           /*START*/
-          const circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
+          const circle = new Circle( 25, { fill: colors[ 6 ] } );
           let time = 0;
-          step = dt => {
+          stepEmitter.addListener( dt => {
             time += dt;
             circle.radius = 25 + 10 * Math.sin( 4 * time );
-          };
-          const box = new scenery.HBox( {
+          } );
+          const box = new HBox( {
             children: [
-              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
               circle,
-              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
             ]
           } );
           /*END*/
-          const foreground = new scenery.Rectangle( {
-            stroke: 'black',
-            lineWidth: 2
-          } );
-          box.boundsProperty.link( bounds => {
-            foreground.rectBounds = bounds;
-          } );
-          const visualNode = new scenery.Node( {
-            children: [ box, foreground ]
-          } );
-          const alignBox = new scenery.AlignBox( visualNode, {
+          const alignBox = new AlignBox( box, {
             alignBounds: new dot.Bounds2( 0, 0, 230, 80 ),
             xAlign: 'left',
             yAlign: 'top',
             margin: 5
           } );
           return alignBox;
-        }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
-      }
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <p id="FlowBox-resize" class="index" data-index="resize">Resizing/layout can be disabled with <code>resize: false</code>:</p>
 
     <div id="locked-sizing-example"></div>
     <script type="text/javascript">
-      {
-        let circle;
-        let step;
-        dynamicDemo( 'locked-sizing-example', () => {
+      createSandbox( 'locked-sizing-example', ( scene, stepEmitter ) => {
+        const box = ( () => {
           /*START*/
-          circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
+          const circle = new Circle( 25, { fill: colors[ 6 ] } );
           let time = 0;
-          step = dt => {
+          stepEmitter.addListener( dt => {
             time += dt;
             circle.radius = 25 + 10 * Math.sin( 4 * time );
-          };
-          return new scenery.HBox( {
+          } );
+          const box = new HBox( {
             resize: false,
             children: [
-              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
               circle,
-              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
             ]
           } );
           /*END*/
-        }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
-      }
+          return box;
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <h3>Invisible children</h3>
@@ -317,37 +464,43 @@
 
     <div id="invis-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'invis-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'invis-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <p id="FlowBox-excludeInvisibleChildrenFromBounds">Invisible nodes can be forced into the layout:</p>
 
     <div id="force-vis-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'force-vis-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          excludeInvisibleChildrenFromBounds: false,
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'force-vis-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            excludeInvisibleChildrenFromBounds: false,
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <h3 id="FlowBox-grow" class="index">grow</h3>
@@ -358,56 +511,66 @@
 
     <div id="resizable-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'resizable-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: { grow: 1 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'resizable-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
+                fill: 'gray',
+                layoutOptions: { grow: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <p>Extra space can be allocated proportionally (a node with 4 times the <code>grow</code> value will grow 4 times as fast):</p>
 
     <div id="grow-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'grow-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: { grow: 1 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: { grow: 4 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'grow-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
+                fill: 'gray',
+                layoutOptions: { grow: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
+                fill: 'gray',
+                layoutOptions: { grow: 4 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="FlowBox-stretch" class="index">stretch</h3>
@@ -416,36 +579,42 @@
 
     <div id="stretch-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'stretch-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 100, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 4 ],
-              layoutOptions: { align: 'top' }
-            } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: { stretch: true }
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 6 ],
-              layoutOptions: { align: 'bottom' }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { align: 'center' }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+      createSandbox( 'stretch-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 100, {
+                fill: colors[ 2 ]
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 4 ],
+                layoutOptions: { align: 'top' }
+              } ),
+              new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
+                fill: 'gray',
+                layoutOptions: { stretch: true }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 6 ],
+                layoutOptions: { align: 'bottom' }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { align: 'center' }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h3>Constraining dimensions</h3>
@@ -454,81 +623,97 @@
 
     <div id="maxContentWidth-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'maxContentWidth-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: { grow: 1, maxContentWidth: 150 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'maxContentWidth-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
+                fill: 'gray',
+                layoutOptions: { grow: 1, maxContentWidth: 150 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <p id="FlowBox-minContent" class="index" data-index="minContent">Minimums can also force a certain expansion:</p>
 
     <div id="minContentWidth-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'minContentWidth-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: { grow: 1, minContentWidth: 100 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'minContentWidth-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
+                fill: 'gray',
+                layoutOptions: { grow: 1, minContentWidth: 100 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <p>Minimums and maximums also apply on the secondary axis:</p>
 
     <div id="secondaryAxisContent-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'secondaryAxisContent-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 50,
-              localMinimumHeight: 50,
-              fill: 'gray',
-              layoutOptions: {
-                grow: 1,
-                minContentWidth: 50,
-                minContentHeight: 50,
-                maxContentHeight: 100,
-                stretch: true
-              }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+      createSandbox( 'secondaryAxisContent-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 50,
+                localMinimumHeight: 50,
+                fill: 'gray',
+                layoutOptions: {
+                  grow: 1,
+                  minContentWidth: 50,
+                  minContentHeight: 50,
+                  maxContentHeight: 100,
+                  stretch: true
+                }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="FlowBox-justify" class="index">justify</h3>
@@ -537,50 +722,56 @@
 
     <div id="justification-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'justification-example', () => {
-        const createBoxes = label => [
-          new scenery.Rectangle( 0, 0, 170, 30, { fill: colors[ 2 ], children: [
-            new scenery.Text( label, { fontSize: 16, centerY: 15 } )
-          ] } ),
-          new scenery.Rectangle( 0, 0, 50, 30, { fill: colors[ 4 ] } ),
-          new scenery.Circle( 15, { fill: colors[ 6 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 30, { fill: colors[ 8 ] } )
-        ];
-        /*START*/
-        const boxes = [
-          new scenery.HBox( {
-            justify: 'left',
-            children: createBoxes( 'justify:left' )
-          } ),
-          new scenery.HBox( {
-            justify: 'right',
-            children: createBoxes( 'justify:right' )
-          } ),
-          new scenery.HBox( {
-            justify: 'spaceBetween',
-            children: createBoxes( 'justify:spaceBetween' )
-          } ),
-          new scenery.HBox( {
-            justify: 'spaceAround',
-            children: createBoxes( 'justify:spaceAround' )
-          } ),
-          new scenery.HBox( {
-            justify: 'spaceEvenly',
-            children: createBoxes( 'justify:spaceEvenly' )
-          } ),
-          new scenery.HBox( {
-            justify: 'center',
-            children: createBoxes( 'justify:center' )
-          } )
-        ];
-        /*END*/
-        const container = new scenery.VBox( {
-          justify: 'top',
-          stretch: true,
-          children: boxes
-        } );
-        return container;
-      }, { resize: 'horizontal', initialWidth: 400 } );
+      createSandbox( 'justification-example', scene => {
+        const box = ( () => {
+          const createBoxes = label => [
+            new Rectangle( 0, 0, 170, 30, { fill: colors[ 2 ], children: [
+              new Text( label, { fontSize: 16, centerY: 15 } )
+            ] } ),
+            new Rectangle( 0, 0, 50, 30, { fill: colors[ 4 ] } ),
+            new Circle( 15, { fill: colors[ 6 ] } ),
+            new Rectangle( 0, 0, 50, 30, { fill: colors[ 8 ] } )
+          ];
+          /*START*/
+          const boxes = [
+            new HBox( {
+              justify: 'left',
+              children: createBoxes( 'justify:left' )
+            } ),
+            new HBox( {
+              justify: 'right',
+              children: createBoxes( 'justify:right' )
+            } ),
+            new HBox( {
+              justify: 'spaceBetween',
+              children: createBoxes( 'justify:spaceBetween' )
+            } ),
+            new HBox( {
+              justify: 'spaceAround',
+              children: createBoxes( 'justify:spaceAround' )
+            } ),
+            new HBox( {
+              justify: 'spaceEvenly',
+              children: createBoxes( 'justify:spaceEvenly' )
+            } ),
+            new HBox( {
+              justify: 'center',
+              children: createBoxes( 'justify:center' )
+            } )
+          ];
+          /*END*/
+          const container = new VBox( {
+            justify: 'top',
+            stretch: true,
+            children: boxes
+          } );
+          return container;
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+        box.preferredWidth = 400;
+      } );
     </script>
 
     <h3 id="FlowBox-wrap" class="index">wrap</h3>
@@ -589,21 +780,27 @@
 
     <div id="wrap-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'wrap-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          wrap: true,
-          justify: 'left',
-          justifyLines: 'top',
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinWidth: false } );
+      createSandbox( 'wrap-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            wrap: true,
+            justify: 'left',
+            justifyLines: 'top',
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+        box.preferredWidth = 200;
+      } );
     </script>
 
     <h3 id="FlowBox-align" class="index">align</h3>
@@ -612,34 +809,37 @@
 
     <div id="align-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'align-example', () => {
-        /*START*/
-        const boxes = [
-          'top',
-          'bottom',
-          'center',
-          'origin'
-        ].map( align => {
-          return new scenery.HBox( {
-            children: [
-              new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 9 ] } ),
-              new scenery.Rectangle( 0, 0, 50, 20, { fill: colors[ 6 ] } ),
-              new scenery.Rectangle( 0, 0, 50, 5, { fill: colors[ 4 ] } ),
-              new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 2 ] } ),
-              new scenery.Circle( 7, { fill: colors[ 0 ] } ),
-              new scenery.Text( `Alignment: ${align}` )
-            ],
-            justify: 'left',
-            align: align
+      createSandbox( 'align-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const boxes = [
+            'top',
+            'bottom',
+            'center',
+            'origin'
+          ].map( align => {
+            return new HBox( {
+              children: [
+                new Rectangle( 0, 0, 50, 15, { fill: colors[ 9 ] } ),
+                new Rectangle( 0, 0, 50, 20, { fill: colors[ 6 ] } ),
+                new Rectangle( 0, 0, 50, 5, { fill: colors[ 4 ] } ),
+                new Rectangle( 0, 0, 50, 15, { fill: colors[ 2 ] } ),
+                new Circle( 7, { fill: colors[ 0 ] } ),
+                new Text( `Alignment: ${align}` )
+              ],
+              justify: 'left',
+              align: align
+            } );
           } );
-        } );
-        /*END*/
-        return new scenery.VBox( {
-          children: boxes,
-          spacing: 10,
-          align: 'left'
-        } );
-      }, { resize: 'none', useMinWidth: false } );
+          /*END*/
+          return new VBox( {
+            children: boxes,
+            spacing: 10,
+            align: 'left'
+          } );
+        } )();
+        scene.addChild( box );
+      } );
     </script>
 
     <p>
@@ -654,55 +854,58 @@
 
     <div id="justifyLines-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'justifyLines-example', () => {
-        /*START*/
-        const boxes = [
-          'top',
-          'bottom',
-          'center',
-          'spaceBetween',
-          'spaceAround',
-          'spaceEvenly',
-          null
-        ].map( justifyLines => {
-          const createResizable = () => {
-            const node = new scenery.Rectangle( {
-              sizable: true,
-              localMinimumWidth: 20,
-              localMinimumHeight: 20,
-              fill: 'gray'
+      createSandbox( 'justifyLines-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const boxes = [
+            'top',
+            'bottom',
+            'center',
+            'spaceBetween',
+            'spaceAround',
+            'spaceEvenly',
+            null
+          ].map( justifyLines => {
+            const createResizable = () => {
+              const node = new Rectangle( {
+                sizable: true,
+                localMinimumWidth: 20,
+                localMinimumHeight: 20,
+                fill: 'gray'
+              } );
+              return node;
+            };
+            return new HBox( {
+              preferredWidth: 40,
+              widthSizable: false,
+              wrap: true,
+              stretch: true,
+              children: [
+                new Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
+                createResizable(),
+                new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
+                createResizable(),
+                new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
+                createResizable(),
+                new Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } ),
+                createResizable()
+              ],
+              justifyLines: justifyLines
             } );
-            return node;
-          };
-          return new scenery.HBox( {
-            preferredWidth: 40,
-            widthSizable: false,
-            wrap: true,
-            stretch: true,
-            children: [
-              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 2 ] } ),
-              createResizable(),
-              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } ),
-              createResizable(),
-              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } ),
-              createResizable(),
-              new scenery.Rectangle( 0, 0, 20, 20, { fill: colors[ 8 ] } ),
-              createResizable()
-            ],
-            justifyLines: justifyLines
           } );
-        } );
-        /*END*/
-        const container = new scenery.HBox( {
-          justify: 'left',
-          stretch: true,
-          children: boxes
-        } );
-        // container.preferredHeightProperty.link( preferredHeight => boxes.forEach( box => {
-        //   box.preferredHeight = preferredHeight;
-        // } ) );
-        return container;
-      }, { resize: 'vertical', useMinHeight: true } );
+          /*END*/
+          const container = new HBox( {
+            justify: 'left',
+            stretch: true,
+            children: boxes
+          } );
+          return container;
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          heightResizable: true
+        } ) );
+        box.preferredHeight = 150;
+      } );
     </script>
 
     <h3 id="FlowBox-spacing" class="index">spacing</h3>
@@ -711,19 +914,24 @@
 
     <div id="spacing-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'spacing-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          spacing: 10,
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'spacing-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            spacing: 10,
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="FlowBox-lineSpacing" class="index">lineSpacing</h3>
@@ -732,20 +940,26 @@
 
     <div id="lineSpacing-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'lineSpacing-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          lineSpacing: 10,
-          wrap: true,
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinWidth: false } );
+      createSandbox( 'lineSpacing-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            lineSpacing: 10,
+            wrap: true,
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+        box.preferredWidth = 100;
+      } );
     </script>
 
     <h3 id="FlowBox-margins" class="index">Margins</h3>
@@ -754,20 +968,25 @@
 
     <div id="margin-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'margin-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          leftMargin: 10,
-          yMargin: 10, // controls topMargin and bottomMargin
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'margin-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            leftMargin: 10,
+            yMargin: 10, // controls topMargin and bottomMargin
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <h3>Per-cell layout options</h3>
@@ -776,77 +995,92 @@
 
     <div id="marginCell-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'marginCell-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          align: 'top',
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ],
-              layoutOptions: { topMargin: 10 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { leftMargin: 10 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'marginCell-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            align: 'top',
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { topMargin: 10 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { leftMargin: 10 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <p>Similarly, alignment can also be customized by individual cells:</p>
 
     <div id="alignCell-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'alignCell-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 100, {
-              fill: colors[ 2 ]
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 4 ],
-              layoutOptions: { align: 'top' }
-            } ),
-            new scenery.Circle( 25, {
-              fill: colors[ 6 ],
-              layoutOptions: { align: 'bottom' }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { align: 'center' }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'alignCell-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 100, {
+                fill: colors[ 2 ]
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 4 ],
+                layoutOptions: { align: 'top' }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 6 ],
+                layoutOptions: { align: 'bottom' }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { align: 'center' }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <p>These options use the default on the container, but can be overridden by cells:</p>
 
     <div id="override-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'override-example', () => {
-        /*START*/
-        return new scenery.HBox( {
-          topMargin: 10,
-          align: 'top',
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ],
-              layoutOptions: { topMargin: 0 }
-            } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+      createSandbox( 'override-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            topMargin: 10,
+            align: 'top',
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { topMargin: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="separators" class="index">Separators</h3>
@@ -858,18 +1092,18 @@
     <script type="text/javascript">
       dynamicDemo( 'separators-example', () => {
         /*START*/
-        return new scenery.HBox( {
+        return new HBox( {
           margin: 5,
           children: [
-            new scenery.VSeparator(),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.VSeparator(),
-            new scenery.VSeparator(),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
-            new scenery.VSeparator(),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } ),
-            new scenery.VSeparator()
+            new VSeparator(),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new VSeparator(),
+            new VSeparator(),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new Circle( 25, { fill: colors[ 6 ] } ),
+            new VSeparator(),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } ),
+            new VSeparator()
           ]
         } );
         /*END*/
@@ -897,25 +1131,25 @@
     <script type="text/javascript">
       dynamicDemo( 'absolute-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           children: [
-            new scenery.Rectangle( 0, 0, 75, 50, {
+            new Rectangle( 0, 0, 75, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 75, {
+            new Rectangle( 0, 0, 50, 75, {
               fill: colors[ 2 ],
               layoutOptions: { column: 1, row: 0 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 4 ],
               layoutOptions: { column: 2, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
               layoutOptions: { column: 0, row: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { column: 1, row: 2 }
             } )
@@ -938,17 +1172,17 @@
     <script type="text/javascript">
       dynamicDemo( 'skip-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           children: [
-            new scenery.Rectangle( 0, 0, 75, 50, {
+            new Rectangle( 0, 0, 75, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 75, {
+            new Rectangle( 0, 0, 50, 75, {
               fill: colors[ 2 ],
               layoutOptions: { column: 50, row: 0 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 4 ],
               layoutOptions: { column: 25, row: 102 }
             } )
@@ -966,25 +1200,25 @@
     <script type="text/javascript">
       dynamicDemo( 'rows-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           rows: [
             [
-              new scenery.Rectangle( 0, 0, 75, 50, {
+              new Rectangle( 0, 0, 75, 50, {
                 fill: colors[ 0 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 75, {
+              new Rectangle( 0, 0, 50, 75, {
                 fill: colors[ 2 ]
               } ),
-              new scenery.Circle( 25, {
+              new Circle( 25, {
                 fill: colors[ 4 ]
               } )
             ],
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
               null,
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 8 ]
               } )
             ]
@@ -1002,25 +1236,25 @@
     <script type="text/javascript">
       dynamicDemo( 'columns-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           columns: [
             [
-              new scenery.Rectangle( 0, 0, 75, 50, {
+              new Rectangle( 0, 0, 75, 50, {
                 fill: colors[ 0 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 75, {
+              new Rectangle( 0, 0, 50, 75, {
                 fill: colors[ 2 ]
               } ),
-              new scenery.Circle( 25, {
+              new Circle( 25, {
                 fill: colors[ 4 ]
               } )
             ],
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
               null,
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 8 ]
               } )
             ]
@@ -1041,10 +1275,10 @@
     <script type="text/javascript">
       dynamicDemo( 'autoColumns-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           autoColumns: 3,
           children: colors.map( color => {
-            return new scenery.Rectangle( 0, 0, 50, 50, { fill: color } );
+            return new Rectangle( 0, 0, 50, 50, { fill: color } );
           } )
         } );
         /*END*/
@@ -1055,10 +1289,10 @@
     <script type="text/javascript">
       dynamicDemo( 'autoRows-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           autoRows: 3,
           children: colors.map( color => {
-            return new scenery.Rectangle( 0, 0, 50, 50, { fill: color } );
+            return new Rectangle( 0, 0, 50, 50, { fill: color } );
           } )
         } );
         /*END*/
@@ -1076,15 +1310,15 @@
     <script type="text/javascript">
       dynamicDemo( 'addLines-example', () => {
         /*START*/
-        const box = new scenery.GridBox();
+        const box = new GridBox();
         box.addRow( [
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
         ] );
         box.addColumn( [
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
         ] );
         /*END*/
         return box;
@@ -1101,20 +1335,20 @@
     <script type="text/javascript">
       dynamicDemo( 'insertLines-example', () => {
         /*START*/
-        const box = new scenery.GridBox();
+        const box = new GridBox();
         box.insertRow( 0, [
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
         ] );
         box.insertColumn( 1, [
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
         ] );
         box.insertRow( 2, [
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } )
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
+          new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } )
         ] );
         /*END*/
         return box;
@@ -1131,13 +1365,13 @@
     <script type="text/javascript">
       dynamicDemo( 'deleteLines-example', () => {
         /*START*/
-        const box = new scenery.GridBox( {
+        const box = new GridBox( {
           rows: _.range( 0, 8 ).map( row => {
             return _.range( 0, 8 ).map( column => {
-              return new scenery.Rectangle( 0, 0, 80, 20, {
-                fill: new scenery.Color( row * 32, column * 32, 1 ),
+              return new Rectangle( 0, 0, 80, 20, {
+                fill: new Color( row * 32, column * 32, 1 ),
                 children: [
-                  new scenery.Text( `row ${row}, column ${column}`, { fill: 'white', centerX: 40, centerY: 10 } )
+                  new Text( `row ${row}, column ${column}`, { fill: 'white', centerX: 40, centerY: 10 } )
                 ]
               } );
             } );
@@ -1163,8 +1397,8 @@
     <script type="text/javascript">
       dynamicDemo( 'findCell-example', () => {
         /*START*/
-        const boxes = colors.map( color => new scenery.Rectangle( 0, 0, 50, 50, { fill: color } ) );
-        const box = new scenery.GridBox( {
+        const boxes = colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) );
+        const box = new GridBox( {
           children: boxes,
           autoColumns: 3
         } );
@@ -1172,18 +1406,18 @@
 
         // Find a node and insert a row before it
         box.insertRow( box.getRowOfNode( boxes[ 4 ] ), [
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } )
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } )
         ] );
 
         // Find a node and insert a column before it
         box.insertColumn( box.getColumnOfNode( boxes[ 4 ] ), [
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new scenery.Rectangle( 0, 0, 50, 50, { fill: 'black' } )
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+          new Rectangle( 0, 0, 50, 50, { fill: 'black' } )
         ] );
         /*END*/
         return box;
@@ -1194,11 +1428,11 @@
     <script type="text/javascript">
       dynamicDemo( 'getLines-example', () => {
         /*START*/
-        const box = new scenery.GridBox( {
+        const box = new GridBox( {
           rows: _.range( 0, 8 ).map( row => {
             return _.range( 0, 8 ).map( column => {
-              return new scenery.Rectangle( 0, 0, 20, 20, {
-                fill: new scenery.Color( row * 32, column * 32, 1 )
+              return new Rectangle( 0, 0, 20, 20, {
+                fill: new Color( row * 32, column * 32, 1 )
               } );
             } );
           } )
@@ -1219,25 +1453,25 @@
     <script type="text/javascript">
       dynamicDemo( 'grow-grid-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           grow: 1,
           rows: [
             [
-              new scenery.Rectangle( 0, 0, 75, 50, {
+              new Rectangle( 0, 0, 75, 50, {
                 fill: colors[ 0 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 75, {
+              new Rectangle( 0, 0, 50, 75, {
                 fill: colors[ 2 ]
               } ),
-              new scenery.Circle( 25, {
+              new Circle( 25, {
                 fill: colors[ 4 ]
               } ),
             ],
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 8 ]
               } )
             ]
@@ -1253,25 +1487,25 @@
     <script type="text/javascript">
       dynamicDemo( 'grow-2-grid-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           rows: [
             [
-              new scenery.Rectangle( 0, 0, 75, 50, {
+              new Rectangle( 0, 0, 75, 50, {
                 fill: colors[ 0 ],
                 layoutOptions: { xGrow: 1 }
               } ),
-              new scenery.Rectangle( 0, 0, 50, 75, {
+              new Rectangle( 0, 0, 50, 75, {
                 fill: colors[ 2 ]
               } ),
-              new scenery.Circle( 25, {
+              new Circle( 25, {
                 fill: colors[ 4 ]
               } ),
             ],
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 8 ],
                 layoutOptions: { yGrow: 1 }
               } )
@@ -1290,31 +1524,31 @@
     <script type="text/javascript">
       dynamicDemo( 'preferred-grid-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           rows: [
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 0 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 2 ]
               } ),
-              new scenery.Circle( 25, {
+              new Circle( 25, {
                 fill: colors[ 4 ]
               } )
             ],
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
-              new scenery.Rectangle( {
+              new Rectangle( {
                 sizable: true,
                 localMinimumWidth: 50,
                 localMinimumHeight: 50,
                 fill: 'gray',
                 layoutOptions: { grow: 1, stretch: true }
               } ),
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 8 ]
               } )
             ]
@@ -1333,24 +1567,24 @@
     <script type="text/javascript">
       dynamicDemo( 'gridResizable-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           rows: [
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 0 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 2 ]
               } ),
-              new scenery.Circle( 25, {
+              new Circle( 25, {
                 fill: colors[ 4 ]
               } )
             ],
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
-              new scenery.Rectangle( {
+              new Rectangle( {
                 heightSizable: true,
                 localMinimumHeight: 50,
                 fill: 'gray',
@@ -1358,7 +1592,7 @@
                 widthSizable: false,
                 layoutOptions: { grow: 1, stretch: true }
               } ),
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 8 ]
               } )
             ]
@@ -1376,27 +1610,27 @@
     <script type="text/javascript">
       dynamicDemo( 'align-grid-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           grow: 1,
           rows: [
             [
-              new scenery.Rectangle( 0, 0, 75, 50, {
+              new Rectangle( 0, 0, 75, 50, {
                 fill: colors[ 0 ],
                 layoutOptions: { xAlign: 'left', yAlign: 'top' }
               } ),
-              new scenery.Rectangle( 0, 0, 50, 75, {
+              new Rectangle( 0, 0, 50, 75, {
                 fill: colors[ 2 ]
               } ),
-              new scenery.Circle( 25, {
+              new Circle( 25, {
                 fill: colors[ 4 ],
                 layoutOptions: { yAlign: 'bottom' }
               } ),
             ],
             [
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 6 ]
               } ),
-              new scenery.Rectangle( 0, 0, 50, 50, {
+              new Rectangle( 0, 0, 50, 50, {
                 fill: colors[ 8 ],
                 layoutOptions: { yAlign: 'top' }
               } )
@@ -1415,43 +1649,43 @@
     <script type="text/javascript">
       dynamicDemo( 'span-grid-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 100, 50, {
+            new Rectangle( 0, 0, 100, 50, {
               fill: colors[ 2 ],
               sizable: true,
               localMinimumWidth: 100,
               localMinimumHeight: 50,
               layoutOptions: { column: 1, row: 0, horizontalSpan: 2, stretch: true, grow: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 100, 100, {
+            new Rectangle( 0, 0, 100, 100, {
               fill: colors[ 4 ],
               sizable: true,
               localMinimumWidth: 100,
               localMinimumHeight: 100,
               layoutOptions: { column: 0, row: 1, horizontalSpan: 2, verticalSpan: 2, stretch: true }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
               layoutOptions: { column: 2, row: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { column: 2, row: 2 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 3 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 1 ],
               layoutOptions: { column: 1, row: 3 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 2 ],
               layoutOptions: { column: 2, row: 3 }
             } )
@@ -1469,26 +1703,26 @@
     <script type="text/javascript">
       dynamicDemo( 'grid-spacing-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           spacing: 10,
           children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 2 ],
               layoutOptions: { column: 1, row: 0 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 4 ],
               layoutOptions: { column: 2, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
               layoutOptions: { column: 0, row: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { column: 1, row: 1 }
             } )
@@ -1504,27 +1738,27 @@
     <script type="text/javascript">
       dynamicDemo( 'grid-2-spacing-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           xSpacing: 5,
           ySpacing: 15,
           children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 2 ],
               layoutOptions: { column: 1, row: 0 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 4 ],
               layoutOptions: { column: 2, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
               layoutOptions: { column: 0, row: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { column: 1, row: 1 }
             } )
@@ -1540,27 +1774,27 @@
     <script type="text/javascript">
       dynamicDemo( 'grid-3-spacing-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           xSpacing: [ 10, 0 ],
           ySpacing: [ 5 ],
           children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 2 ],
               layoutOptions: { column: 1, row: 0 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 4 ],
               layoutOptions: { column: 2, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
               layoutOptions: { column: 0, row: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { column: 1, row: 1 }
             } )
@@ -1578,26 +1812,26 @@
     <script type="text/javascript">
       dynamicDemo( 'margin-1-spacing-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           margin: 5,
           children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 2 ],
               layoutOptions: { column: 1, row: 0 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 4 ],
               layoutOptions: { column: 2, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
               layoutOptions: { column: 0, row: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { column: 1, row: 1 }
             } )
@@ -1613,26 +1847,26 @@
     <script type="text/javascript">
       dynamicDemo( 'margin-2-spacing-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           yAlign: 'top',
           children: [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 0 ],
               layoutOptions: { column: 0, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 2 ],
               layoutOptions: { column: 1, row: 0, topMargin: 10 }
             } ),
-            new scenery.Circle( 25, {
+            new Circle( 25, {
               fill: colors[ 4 ],
               layoutOptions: { column: 2, row: 0 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 6 ],
               layoutOptions: { column: 0, row: 1 }
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 8 ],
               layoutOptions: { column: 1, row: 1 }
             } )
@@ -1685,7 +1919,7 @@
     <script type="text/javascript">
       dynamicDemo( 'rectUnsizable-example', () => {
         /*START*/
-        return new scenery.GridBox( {
+        return new GridBox( {
           // Resize everything up evenly
           grow: 1,
           stretch: true,
@@ -1694,21 +1928,21 @@
           minContentWidth: 100,
           minContentHeight: 100,
           rows: [ [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               fill: colors[ 2 ]
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               minimumWidth: 50,
               fill: colors[ 4 ],
               widthSizable: true
             } )
           ], [
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               minimumHeight: 50,
               fill: colors[ 6 ],
               heightSizable: true
             } ),
-            new scenery.Rectangle( 0, 0, 50, 50, {
+            new Rectangle( 0, 0, 50, 50, {
               minimumWidth: 50,
               minimumHeight: 50,
               fill: colors[ 8 ],
@@ -1733,8 +1967,8 @@
     <script type="text/javascript">
       dynamicDemo( 'layoutOptionsMutate-example', () => {
         /*START*/
-        const box = new scenery.HBox( {
-          children: colors.map( color => new scenery.Rectangle( 0, 0, 50, 50, { fill: color } ) )
+        const box = new HBox( {
+          children: colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) )
         } );
         box.children[ 0 ].rectHeight = 100;
         box.children[ 3 ].mutateLayoutOptions( {
@@ -1761,17 +1995,17 @@
     <script type="text/javascript">
       dynamicDemo( 'defaultOrigin-example', () => {
         const originSize = 50;
-        const originNode = new scenery.Path( new kite.Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
+        const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
         } );
         /*START*/
-        const box = new scenery.GridBox( {
+        const box = new GridBox( {
           opacity: 0.5,
-          children: colors.map( color => new scenery.Rectangle( 0, 0, 40, 40, { fill: color } ) ),
+          children: colors.map( color => new Rectangle( 0, 0, 40, 40, { fill: color } ) ),
           autoColumns: 3
         } );
         /*END*/
-        return new scenery.AlignBox( new scenery.Node( {
+        return new AlignBox( new Node( {
           children: [ originNode, box ]
         } ) );
       }, { resize: 'none' } );
@@ -1783,31 +2017,31 @@
     <script type="text/javascript">
       dynamicDemo( 'flowOrigin-example', () => {
         const originSize = 50;
-        const originNode = new scenery.Path( new kite.Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
+        const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
         } );
-        const normalText = ( str, options ) => new scenery.Text( str, phetCore.merge( {
-          font: new scenery.Font( { size: 12 } )
+        const normalText = ( str, options ) => new Text( str, merge( {
+          font: new Font( { size: 12 } )
         }, options ) );
-        const bigText = ( str, options ) => new scenery.Text( str, phetCore.merge( {
-          font: new scenery.Font( { size: 18, weight: 'bold' } )
+        const bigText = ( str, options ) => new Text( str, merge( {
+          font: new Font( { size: 18, weight: 'bold' } )
         }, options ) );
         /*START*/
-        const box = new scenery.HBox( {
+        const box = new HBox( {
           align: 'origin',
           spacing: 5,
           lineSpacing: 5,
           children: [
-            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
             bigText( 'Text' ),
             normalText( 'Text' ),
-            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
             bigText( 'Text' ),
             normalText( 'text' ),
-            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
             bigText( 'Text' ),
             normalText( 'text' ),
-            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
             bigText( 'Text' ),
             normalText( 'text' )
           ],
@@ -1817,7 +2051,7 @@
           justify: 'left'
         } );
         /*END*/
-        return new scenery.AlignBox( new scenery.Node( {
+        return new AlignBox( new Node( {
           children: [ originNode, box ]
         } ) );
       }, { resize: 'none' } );
@@ -1829,22 +2063,22 @@
     <script type="text/javascript">
       dynamicDemo( 'gridOrigin-example', () => {
         const originSize = 50;
-        const originNode = new scenery.Path( new kite.Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
+        const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
         } );
         /*START*/
-        const box = new scenery.GridBox( {
+        const box = new GridBox( {
           xAlign: 'origin',
           yAlign: 'origin',
           children: [
-            new scenery.Circle( 20, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 0 } } ),
-            new scenery.Circle( 10, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 0 } } ),
-            new scenery.Circle( 15, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 1 } } ),
-            new scenery.Circle( 25, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 1 } } )
+            new Circle( 20, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 0 } } ),
+            new Circle( 10, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 0 } } ),
+            new Circle( 15, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 1 } } ),
+            new Circle( 25, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 1 } } )
           ]
         } );
         /*END*/
-        return new scenery.AlignBox( new scenery.Node( {
+        return new AlignBox( new Node( {
           children: [ originNode, box ]
         } ) );
       }, { resize: 'none' } );
@@ -1856,18 +2090,18 @@
     <script type="text/javascript">
       dynamicDemo( 'layoutOrigin-example', () => {
         const originSize = 50;
-        const originNode = new scenery.Path( new kite.Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
+        const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
         } );
         /*START*/
-        const box = new scenery.GridBox( {
-          layoutOrigin: new dot.Vector2( 40, 20 ),
+        const box = new GridBox( {
+          layoutOrigin: new Vector2( 40, 20 ),
           opacity: 0.5,
-          children: colors.map( color => new scenery.Rectangle( 0, 0, 40, 40, { fill: color } ) ),
+          children: colors.map( color => new Rectangle( 0, 0, 40, 40, { fill: color } ) ),
           autoColumns: 3
         } );
         /*END*/
-        return new scenery.AlignBox( new scenery.Node( {
+        return new AlignBox( new Node( {
           children: [ originNode, box ]
         } ) );
       }, { resize: 'none' } );
@@ -1894,11 +2128,11 @@
     <script type="text/javascript">
       ( () => {
         const createLabeledBox = ( label, fill, width, height ) => {
-          return new scenery.Rectangle( 0, 0, width, height, {
+          return new Rectangle( 0, 0, width, height, {
             stroke: 'black',
             fill: fill,
             children: [
-              new scenery.Text( label, { font: new scenery.Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+              new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
             ]
           } );
         };
@@ -1906,7 +2140,7 @@
         let elapsedTime = 0;
         dynamicDemo( 'manualConstraint-example', () => {
           /*START*/
-          const background = new scenery.Rectangle( 0, 0, 400, 200, {
+          const background = new Rectangle( 0, 0, 400, 200, {
             fill: '#ccc'
           } );
 
@@ -1914,20 +2148,20 @@
           const child2 = createLabeledBox( 'Child 2', colors[ 4 ], 50, 50 );
           const child3 = createLabeledBox( 'Child 3', colors[ 5 ], 50, 50 );
 
-          scenery.ManualConstraint.create( background, [ child1, child2 ], ( child1Proxy, child2Proxy ) => {
+          ManualConstraint.create( background, [ child1, child2 ], ( child1Proxy, child2Proxy ) => {
             child2Proxy.leftCenter = child1Proxy.rightCenter;
           } );
-          scenery.ManualConstraint.create( background, [ child2, child3 ], ( child2Proxy, child3Proxy ) => {
+          ManualConstraint.create( background, [ child2, child3 ], ( child2Proxy, child3Proxy ) => {
             child3Proxy.left = child2Proxy.right;
           } );
-          scenery.ManualConstraint.create( background, [ child1, child3 ], ( child1Proxy, child3Proxy ) => {
+          ManualConstraint.create( background, [ child1, child3 ], ( child1Proxy, child3Proxy ) => {
             child3Proxy.centerY = child1Proxy.centerY;
           } );
 
           const nodes = [
-            new scenery.Node( { x: 50, y: 50, children: [ child1 ] } ),
-            new scenery.Node( { scale: 2, y: 20, children: [ child2 ] } ),
-            new scenery.Node( { matrix: dot.Matrix3.rowMajor(
+            new Node( { x: 50, y: 50, children: [ child1 ] } ),
+            new Node( { scale: 2, y: 20, children: [ child2 ] } ),
+            new Node( { matrix: dot.Matrix3.rowMajor(
               0.5, 0, 0,
               0, 1, 0,
               0, 0, 1 ), children: [ child3 ] } )
@@ -1935,7 +2169,7 @@
 
           step = dt => {
             elapsedTime += dt;
-            child1.translation = dot.Vector2.createPolar( 10, 2 * elapsedTime );
+            child1.translation = Vector2.createPolar( 10, 2 * elapsedTime );
 
             background.children = [
               ...( elapsedTime % 3 < 2 ? [ nodes[ 0 ] ] : [] ),
@@ -1961,11 +2195,11 @@
     <script type="text/javascript">
       ( () => {
         const createLabeledBox = ( label, fill, width, height ) => {
-          return new scenery.Rectangle( 0, 0, width, height, {
+          return new Rectangle( 0, 0, width, height, {
             stroke: 'black',
             fill: fill,
             children: [
-              new scenery.Text( label, { font: new scenery.Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+              new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
             ]
           } );
         };
@@ -1975,20 +2209,20 @@
           const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
           const thirdChild = createLabeledBox( 'Third child', '#aaf', 150, 30 );
 
-          const firstParent = new scenery.Node( {
+          const firstParent = new Node( {
             children: [
               firstChild,
               createLabeledBox( 'First parent', null, 400, 200 )
             ]
           } );
-          const secondParent = new scenery.Node( {
+          const secondParent = new Node( {
             children: [
               secondChild,
               createLabeledBox( 'Second parent', null, 400, 200 )
             ],
             scale: 0.75
           } );
-          const thirdParent = new scenery.Node( {
+          const thirdParent = new Node( {
             children: [
               thirdChild,
               createLabeledBox( 'Third parent', null, 400, 200 )
@@ -1996,22 +2230,22 @@
             scale: 0.5
           } );
 
-          const scene = new scenery.Node( {
+          const scene = new Node( {
             children: [ firstParent, secondParent, thirdParent ]
           } );
 
           // Directly create the constraint, specifying a layoutOrigin to position the content
-          const constraint = new scenery.FlowConstraint( scene, {
-            layoutOriginProperty: new axon.Property( new dot.Vector2( 10, 10 ) ),
+          const constraint = new FlowConstraint( scene, {
+            layoutOriginProperty: new Property( new Vector2( 10, 10 ) ),
             align: 'top',
             spacing: 10,
           } );
 
           // For Flow constraints, we need to know the order, so cells are inserted at specific indices. They can be
           // removed later
-          constraint.insertCell( 0, new scenery.FlowCell( constraint, firstChild, null ) );
-          constraint.insertCell( 1, new scenery.FlowCell( constraint, secondChild, null ) );
-          constraint.insertCell( 2, new scenery.FlowCell( constraint, thirdChild, null ) );
+          constraint.insertCell( 0, new FlowCell( constraint, firstChild, null ) );
+          constraint.insertCell( 1, new FlowCell( constraint, secondChild, null ) );
+          constraint.insertCell( 2, new FlowCell( constraint, thirdChild, null ) );
           constraint.updateLayout();
 
           /*END*/
@@ -2031,11 +2265,11 @@
     <script type="text/javascript">
       ( () => {
         const createLabeledBox = ( label, fill, width, height ) => {
-          return new scenery.Rectangle( 0, 0, width, height, {
+          return new Rectangle( 0, 0, width, height, {
             stroke: 'black',
             fill: fill,
             children: [
-              new scenery.Text( label, { font: new scenery.Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+              new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
             ]
           } );
         };
@@ -2048,20 +2282,20 @@
           secondChild.layoutOptions = { x: 1, y: 0 };
           thirdChild.layoutOptions = { x: 0, y: 1 };
 
-          const firstParent = new scenery.Node( {
+          const firstParent = new Node( {
             children: [
               firstChild,
               createLabeledBox( 'First parent', null, 400, 200 )
             ]
           } );
-          const secondParent = new scenery.Node( {
+          const secondParent = new Node( {
             children: [
               secondChild,
               createLabeledBox( 'Second parent', null, 400, 200 )
             ],
             scale: 0.75
           } );
-          const thirdParent = new scenery.Node( {
+          const thirdParent = new Node( {
             children: [
               thirdChild,
               createLabeledBox( 'Third parent', null, 400, 200 )
@@ -2069,22 +2303,22 @@
             scale: 0.5
           } );
 
-          const scene = new scenery.Node( {
+          const scene = new Node( {
             children: [ firstParent, secondParent, thirdParent ]
           } );
 
           // Directly create the constraint, specifying a layoutOrigin to position the content
-          const constraint = new scenery.GridConstraint( scene, {
-            layoutOriginProperty: new axon.Property( new dot.Vector2( 10, 10 ) ),
+          const constraint = new GridConstraint( scene, {
+            layoutOriginProperty: new Property( new Vector2( 10, 10 ) ),
             xAlign: 'left',
             yAlign: 'top',
             spacing: 10
           } );
 
           // For the grid, cells are created and added (they can be removed/disposed later).
-          constraint.addCell( new scenery.GridCell( constraint, firstChild, null ) );
-          constraint.addCell( new scenery.GridCell( constraint, secondChild, null ) );
-          constraint.addCell( new scenery.GridCell( constraint, thirdChild, null ) );
+          constraint.addCell( new GridCell( constraint, firstChild, null ) );
+          constraint.addCell( new GridCell( constraint, secondChild, null ) );
+          constraint.addCell( new GridCell( constraint, thirdChild, null ) );
           constraint.updateLayout();
 
           /*END*/
@@ -2104,10 +2338,10 @@
       ( () => {
         dynamicDemo( 'simpleAlignBox-example', () => {
           /*START*/
-          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+          const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
-          return new scenery.AlignBox( rect, {
+          return new AlignBox( rect, {
             alignBounds: new dot.Bounds2( 0, 0, 100, 100 )
           } );
           /*END*/
@@ -2124,10 +2358,10 @@
       ( () => {
         dynamicDemo( 'alignBoxAlign-example', () => {
           /*START*/
-          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+          const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
-          return new scenery.AlignBox( rect, {
+          return new AlignBox( rect, {
             alignBounds: new dot.Bounds2( 0, 0, 100, 100 ),
             xAlign: 'left',
             yAlign: 'bottom'
@@ -2146,10 +2380,10 @@
       ( () => {
         dynamicDemo( 'alignBoxMargins-example', () => {
           /*START*/
-          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+          const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
-          return new scenery.AlignBox( rect, {
+          return new AlignBox( rect, {
             alignBounds: new dot.Bounds2( 0, 0, 100, 100 ),
             xAlign: 'left',
             yAlign: 'bottom',
@@ -2168,10 +2402,10 @@
       ( () => {
         dynamicDemo( 'alignBoxOnlyMargins-example', () => {
           /*START*/
-          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+          const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
-          return new scenery.AlignBox( rect, {
+          return new AlignBox( rect, {
             topMargin: 30,
             xMargin: 10
           } );
@@ -2187,10 +2421,10 @@
       ( () => {
         dynamicDemo( 'alignBoxPreferred-example', () => {
           /*START*/
-          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+          const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
-          return new scenery.AlignBox( rect, {
+          return new AlignBox( rect, {
             preferredWidth: 100,
             preferredHeight: 100,
             xAlign: 'left',
@@ -2208,10 +2442,10 @@
       ( () => {
         dynamicDemo( 'alignBoxSizable-example', () => {
           /*START*/
-          const rect = new scenery.Rectangle( 0, 0, 50, 50, {
+          const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
-          return new scenery.AlignBox( rect, {
+          return new AlignBox( rect, {
             xAlign: 'left',
             yAlign: 'bottom',
             sizable: true,
