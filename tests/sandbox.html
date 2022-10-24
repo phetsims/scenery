@@ -223,6 +223,7 @@
   } );
 
   display.updateOnRequestAnimationFrame( dt => {
+    window.step && window.step( dt );
     const padding = 2;
     if ( scene.bounds.isValid() ) {
       scene.centerX = window.innerWidth / 2;
@@ -247,14 +248,18 @@
     const js = codeMirror.getValue();
 
     try {
-      for ( const line of js.split( /\r?\n/ ).filter( line => line.startsWith( '// import ' ) ) ) {
-        const importItem = line.replace( '// import ', '' );
+      const attemptImports = async jsString => {
+        for ( const line of jsString.split( /\r?\n/ ).map( line => line.trim() ).filter( line => line.startsWith( '// import ' ) ) ) {
+          const importItem = line.replace( '// import ', '' );
 
-        const bits = importItem.split( '/' );
-        const name = bits[ bits.length - 1 ];
+          const bits = importItem.split( '/' );
+          const name = bits[ bits.length - 1 ];
 
-        window[ name ] = ( await import( `../../chipper/dist/js/${importItem}.js` ) ).default;
-      }
+          window[ name ] = ( await import( `../../chipper/dist/js/${importItem}.js` ) ).default;
+        }
+      };
+      await attemptImports( js );
+      await attemptImports( options.codeBefore );
 
       const dataURI = `data:text/javascript;charset=utf-8,${Math.random()};${options.codeBefore}${codeMirror.getValue()}${options.codeAfter}`;
 
