@@ -131,6 +131,16 @@
       new Color( 252, 82, 127 )
     ];
 
+    const createLabeledBox = ( label, fill, width, height ) => {
+      return new Rectangle( 0, 0, width, height, {
+        stroke: 'black',
+        fill: fill,
+        children: [
+          new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+        ]
+      } );
+    };
+
     class ResizableNode extends Node {
       constructor( content, providedOptions ) {
         const options = merge( {
@@ -419,7 +429,7 @@
           } );
           /*END*/
           const alignBox = new AlignBox( box, {
-            alignBounds: new dot.Bounds2( 0, 0, 230, 80 ),
+            alignBounds: new Bounds2( 0, 0, 230, 80 ),
             xAlign: 'left',
             yAlign: 'top',
             margin: 5
@@ -2241,16 +2251,6 @@
 
     <div id="manualConstraint-example"></div>
     <script type="text/javascript">
-      const createLabeledBox = ( label, fill, width, height ) => {
-        return new Rectangle( 0, 0, width, height, {
-          stroke: 'black',
-          fill: fill,
-          children: [
-            new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
-          ]
-        } );
-      };
-
       createSandbox( 'manualConstraint-example', ( scene, stepEmitter ) => {
 
         const box = ( () => {
@@ -2311,18 +2311,8 @@
 
     <div id="flowConstraint-example"></div>
     <script type="text/javascript">
-      ( () => {
-        const createLabeledBox = ( label, fill, width, height ) => {
-          return new Rectangle( 0, 0, width, height, {
-            stroke: 'black',
-            fill: fill,
-            children: [
-              new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
-            ]
-          } );
-        };
-
-      dynamicDemo( 'flowConstraint-example', () => {
+      createSandbox( 'flowConstraint-example', scene => {
+        const box = ( () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
           const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
@@ -2366,11 +2356,11 @@
           constraint.insertCell( 1, new FlowCell( constraint, secondChild, null ) );
           constraint.insertCell( 2, new FlowCell( constraint, thirdChild, null ) );
           constraint.updateLayout();
-
           /*END*/
           return scene;
-        }, { resize: 'none' } );
-      } )();
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h2 id="GridConstraint" class="index">GridConstraint</h2>
@@ -2382,18 +2372,8 @@
 
     <div id="gridConstraint-example"></div>
     <script type="text/javascript">
-      ( () => {
-        const createLabeledBox = ( label, fill, width, height ) => {
-          return new Rectangle( 0, 0, width, height, {
-            stroke: 'black',
-            fill: fill,
-            children: [
-              new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
-            ]
-          } );
-        };
-
-      dynamicDemo( 'gridConstraint-example', () => {
+      createSandbox( 'gridConstraint-example', scene => {
+        const box = ( () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
           const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
@@ -2440,11 +2420,11 @@
           constraint.addCell( new GridCell( constraint, secondChild, null ) );
           constraint.addCell( new GridCell( constraint, thirdChild, null ) );
           constraint.updateLayout();
-
           /*END*/
           return scene;
-        }, { resize: 'none' } );
-      } )();
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h2 id="AlignBox" class="index">AlignBox</h2>
@@ -2455,19 +2435,27 @@
 
     <div id="simpleAlignBox-example"></div>
     <script type="text/javascript">
-      ( () => {
-
-      dynamicDemo( 'simpleAlignBox-example', () => {
+      createSandbox( 'simpleAlignBox-example', scene => {
+        const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
           return new AlignBox( rect, {
-            alignBounds: new dot.Bounds2( 0, 0, 100, 100 )
+            alignBounds: new Bounds2( 0, 0, 100, 100 )
           } );
           /*END*/
-        }, { resize: 'none' } );
-      } )();
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
     </script>
 
     <h3 class="index">Alignment</h3>
@@ -2476,21 +2464,29 @@
 
     <div id="alignBoxAlign-example"></div>
     <script type="text/javascript">
-      ( () => {
-
-      dynamicDemo( 'alignBoxAlign-example', () => {
+      createSandbox( 'alignBoxAlign-example', scene => {
+        const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
           return new AlignBox( rect, {
-            alignBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+            alignBounds: new Bounds2( 0, 0, 100, 100 ),
             xAlign: 'left',
             yAlign: 'bottom'
           } );
           /*END*/
-        }, { resize: 'none' } );
-      } )();
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
     </script>
 
     <h3 class="index">Margins</h3>
@@ -2499,32 +2495,39 @@
 
     <div id="alignBoxMargins-example"></div>
     <script type="text/javascript">
-      ( () => {
-
-      dynamicDemo( 'alignBoxMargins-example', () => {
+      createSandbox( 'alignBoxMargins-example', scene => {
+        const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
           } );
           return new AlignBox( rect, {
-            alignBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+            alignBounds: new Bounds2( 0, 0, 100, 100 ),
             xAlign: 'left',
             yAlign: 'bottom',
             leftMargin: 5,
             bottomMargin: 10
           } );
           /*END*/
-        }, { resize: 'none' } );
-      } )();
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
     </script>
 
     <p>Margins can also be used on their own (without <code>alignBounds</code> / <code>align</code>) to just create a Node with larger bounds:</p>
 
     <div id="alignBoxOnlyMargins-example"></div>
     <script type="text/javascript">
-      ( () => {
-
-      dynamicDemo( 'alignBoxOnlyMargins-example', () => {
+      createSandbox( 'alignBoxOnlyMargins-example', scene => {
+        const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2534,17 +2537,25 @@
             xMargin: 10
           } );
           /*END*/
-        }, { resize: 'none' } );
-      } )();
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
     </script>
 
     <p>AlignBox can also be used with preferred dimensions instead of an explicit <code>alignBounds</code>:</p>
 
     <div id="alignBoxPreferred-example"></div>
     <script type="text/javascript">
-      ( () => {
-
-      dynamicDemo( 'alignBoxPreferred-example', () => {
+      createSandbox( 'alignBoxPreferred-example', scene => {
+        const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2556,17 +2567,25 @@
             yAlign: 'bottom'
           } );
           /*END*/
-        }, { resize: 'none' } );
-      } )();
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
     </script>
 
     <p>and can be dynamically resizable (off by default because it's usually not used for that purpose in legacy code):</p>
 
     <div id="alignBoxSizable-example"></div>
     <script type="text/javascript">
-      ( () => {
-
-      dynamicDemo( 'alignBoxSizable-example', () => {
+      createSandbox( 'alignBoxSizable-example', scene => {
+        const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2578,8 +2597,12 @@
             margin: 10
           } );
           /*END*/
-        }, { resize: 'both', useMinWidth: true, useMinHeight: true } );
-      } )();
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
   </div>
