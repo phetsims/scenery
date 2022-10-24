@@ -1091,24 +1091,30 @@
 
     <div id="separators-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'separators-example', () => {
-        /*START*/
-        return new HBox( {
-          margin: 5,
-          children: [
-            new VSeparator(),
-            new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new VSeparator(),
-            new VSeparator(),
-            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            new Circle( 25, { fill: colors[ 6 ] } ),
-            new VSeparator(),
-            new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } ),
-            new VSeparator()
-          ]
-        } );
-        /*END*/
-      }, { resize: 'horizontal' } );
+
+      createSandbox( 'separators-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            margin: 5,
+            children: [
+              new VSeparator(),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new VSeparator(),
+              new VSeparator(),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              new Circle( 25, { fill: colors[ 6 ] } ),
+              new VSeparator(),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } ),
+              new VSeparator()
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true
+        } ) );
+      } );
     </script>
 
     <p>
@@ -1130,34 +1136,37 @@
 
     <div id="absolute-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'absolute-example', () => {
-        /*START*/
-        return new GridBox( {
-          children: [
-            new Rectangle( 0, 0, 75, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 75, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 1, row: 0 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { column: 2, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ],
-              layoutOptions: { column: 0, row: 1 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { column: 1, row: 2 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'absolute-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            children: [
+              new Rectangle( 0, 0, 75, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 75, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 1, row: 0 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { column: 2, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ],
+                layoutOptions: { column: 0, row: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { column: 1, row: 2 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <p>
@@ -1171,26 +1180,29 @@
 
     <div id="skip-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'skip-example', () => {
-        /*START*/
-        return new GridBox( {
-          children: [
-            new Rectangle( 0, 0, 75, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 75, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 50, row: 0 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { column: 25, row: 102 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'skip-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            children: [
+              new Rectangle( 0, 0, 75, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 75, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 50, row: 0 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { column: 25, row: 102 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-rows" class="index">rows</h3>
@@ -1199,34 +1211,38 @@
 
     <div id="rows-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'rows-example', () => {
-        /*START*/
-        return new GridBox( {
-          rows: [
-            [
-              new Rectangle( 0, 0, 75, 50, {
-                fill: colors[ 0 ]
-              } ),
-              new Rectangle( 0, 0, 50, 75, {
-                fill: colors[ 2 ]
-              } ),
-              new Circle( 25, {
-                fill: colors[ 4 ]
-              } )
-            ],
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 6 ]
-              } ),
-              null,
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 8 ]
-              } )
+      createSandbox( 'rows-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            rows: [
+              [
+                new Rectangle( 0, 0, 75, 50, {
+                  fill: colors[ 0 ]
+                } ),
+                new Rectangle( 0, 0, 50, 75, {
+                  fill: colors[ 2 ]
+                } ),
+                new Circle( 25, {
+                  fill: colors[ 4 ]
+                } )
+              ],
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 6 ]
+                } ),
+                null,
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 8 ]
+                } )
+              ]
             ]
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+          } );
+
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-columns" class="index">columns</h3>
@@ -1235,34 +1251,37 @@
 
     <div id="columns-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'columns-example', () => {
-        /*START*/
-        return new GridBox( {
-          columns: [
-            [
-              new Rectangle( 0, 0, 75, 50, {
-                fill: colors[ 0 ]
-              } ),
-              new Rectangle( 0, 0, 50, 75, {
-                fill: colors[ 2 ]
-              } ),
-              new Circle( 25, {
-                fill: colors[ 4 ]
-              } )
-            ],
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 6 ]
-              } ),
-              null,
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 8 ]
-              } )
+      createSandbox( 'columns-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            columns: [
+              [
+                new Rectangle( 0, 0, 75, 50, {
+                  fill: colors[ 0 ]
+                } ),
+                new Rectangle( 0, 0, 50, 75, {
+                  fill: colors[ 2 ]
+                } ),
+                new Circle( 25, {
+                  fill: colors[ 4 ]
+                } )
+              ],
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 6 ]
+                } ),
+                null,
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 8 ]
+                } )
+              ]
             ]
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-autoLines" class="index" data-index="auto">autoRows/autoColumn</h3>
@@ -1274,30 +1293,36 @@
 
     <div id="autoColumns-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'autoColumns-example', () => {
-        /*START*/
-        return new GridBox( {
-          autoColumns: 3,
-          children: colors.map( color => {
-            return new Rectangle( 0, 0, 50, 50, { fill: color } );
-          } )
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'autoColumns-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            autoColumns: 3,
+            children: colors.map( color => {
+              return new Rectangle( 0, 0, 50, 50, { fill: color } );
+            } )
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <div id="autoRows-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'autoRows-example', () => {
-        /*START*/
-        return new GridBox( {
-          autoRows: 3,
-          children: colors.map( color => {
-            return new Rectangle( 0, 0, 50, 50, { fill: color } );
-          } )
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'autoRows-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            autoRows: 3,
+            children: colors.map( color => {
+              return new Rectangle( 0, 0, 50, 50, { fill: color } );
+            } )
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-addLine" class="index" data-index="adding">addRow/addColumn</h3>
@@ -1309,21 +1334,24 @@
 
     <div id="addLines-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'addLines-example', () => {
-        /*START*/
-        const box = new GridBox();
-        box.addRow( [
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
-        ] );
-        box.addColumn( [
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
-        ] );
-        /*END*/
-        return box;
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'addLines-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const box = new GridBox();
+          box.addRow( [
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
+          ] );
+          box.addColumn( [
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
+          ] );
+          return box
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-insertLine">insertRow/insertColumn</h3>
@@ -1334,26 +1362,29 @@
 
     <div id="insertLines-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'insertLines-example', () => {
-        /*START*/
-        const box = new GridBox();
-        box.insertRow( 0, [
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
-        ] );
-        box.insertColumn( 1, [
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
-        ] );
-        box.insertRow( 2, [
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
-          new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } )
-        ] );
-        /*END*/
-        return box;
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'insertLines-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const box = new GridBox( { grow: 1 } );
+          box.insertRow( 0, [
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } )
+          ] );
+          box.insertColumn( 1, [
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } )
+          ] );
+          box.insertRow( 2, [
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
+            new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } )
+          ] );
+          return box
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-removeLine" class="index" data-index="removing">removeRow/removeColumn</h3>
@@ -1364,27 +1395,31 @@
 
     <div id="deleteLines-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'deleteLines-example', () => {
-        /*START*/
-        const box = new GridBox( {
-          rows: _.range( 0, 8 ).map( row => {
-            return _.range( 0, 8 ).map( column => {
-              return new Rectangle( 0, 0, 80, 20, {
-                fill: new Color( row * 32, column * 32, 1 ),
-                children: [
-                  new Text( `row ${row}, column ${column}`, { fill: 'white', centerX: 40, centerY: 10 } )
-                ]
+      createSandbox( 'deleteLines-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const box = new GridBox( {
+            rows: _.range( 0, 8 ).map( row => {
+              return _.range( 0, 8 ).map( column => {
+                return new Rectangle( 0, 0, 80, 20, {
+                  fill: new Color( row * 32, column * 32, 1 ),
+                  children: [
+                    new Text( `row ${row}, column ${column}`, { fill: 'white', centerX: 40, centerY: 10 } )
+                  ]
+                } );
               } );
-            } );
-          } )
-        } );
-        box.removeRow( 2 );
-        box.removeRow( 2 );
-        box.removeColumn( 5 );
-        box.removeColumn( 5 );
-        /*END*/
-        return box;
-      }, { resize: 'none', useMinHeight: true } );
+            } )
+          } );
+          box.removeRow( 2 );
+          box.removeRow( 2 );
+          box.removeColumn( 5 );
+          box.removeColumn( 5 );
+
+          return box
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-getters" class="index" data-index="getters">line/cell getters</h3>
@@ -1396,53 +1431,61 @@
 
     <div id="findCell-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'findCell-example', () => {
-        /*START*/
-        const boxes = colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) );
-        const box = new GridBox( {
-          children: boxes,
-          autoColumns: 3
-        } );
-        box.autoColumns = null;
+      createSandbox( 'findCell-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const boxes = colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) );
+          const box = new GridBox( {
+            children: boxes,
+            autoColumns: 3,
+            grow: 1
+          } );
+          box.autoColumns = null;
 
-        // Find a node and insert a row before it
-        box.insertRow( box.getRowOfNode( boxes[ 4 ] ), [
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } )
-        ] );
+          // Find a node and insert a row before it
+          box.insertRow( box.getRowOfNode( boxes[ 4 ] ), [
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } )
+          ] );
 
-        // Find a node and insert a column before it
-        box.insertColumn( box.getColumnOfNode( boxes[ 4 ] ), [
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
-          new Rectangle( 0, 0, 50, 50, { fill: 'black' } )
-        ] );
-        /*END*/
-        return box;
-      }, { resize: 'none', useMinHeight: true } );
+          // Find a node and insert a column before it
+          box.insertColumn( box.getColumnOfNode( boxes[ 4 ] ), [
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } ),
+            new Rectangle( 0, 0, 50, 50, { fill: 'black' } )
+          ] );
+
+          return box
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <div id="getLines-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'getLines-example', () => {
-        /*START*/
-        const box = new GridBox( {
-          rows: _.range( 0, 8 ).map( row => {
-            return _.range( 0, 8 ).map( column => {
-              return new Rectangle( 0, 0, 20, 20, {
-                fill: new Color( row * 32, column * 32, 1 )
+      createSandbox( 'getLines-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const box = new GridBox( {
+            rows: _.range( 0, 8 ).map( row => {
+              return _.range( 0, 8 ).map( column => {
+                return new Rectangle( 0, 0, 20, 20, {
+                  fill: new Color( row * 32, column * 32, 1 )
+                } );
               } );
-            } );
-          } )
-        } );
-        box.getNodesInRow( 3 ).forEach( node => { node.opacity = 0.5; } );
-        box.getNodesInColumn( 3 ).forEach( node => { node.opacity = 0.5; } );
-        /*END*/
-        return box;
-      }, { resize: 'none', useMinHeight: true } );
+            } )
+          } );
+          box.getNodesInRow( 3 ).forEach( node => { node.opacity = 0.5; } );
+          box.getNodesInColumn( 3 ).forEach( node => { node.opacity = 0.5; } );
+          return box
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-grow" class="index">grow</h3>
@@ -1452,69 +1495,81 @@
 
     <div id="grow-grid-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'grow-grid-example', () => {
-        /*START*/
-        return new GridBox( {
-          grow: 1,
-          rows: [
-            [
-              new Rectangle( 0, 0, 75, 50, {
-                fill: colors[ 0 ]
-              } ),
-              new Rectangle( 0, 0, 50, 75, {
-                fill: colors[ 2 ]
-              } ),
-              new Circle( 25, {
-                fill: colors[ 4 ]
-              } ),
-            ],
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 6 ]
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 8 ]
-              } )
+      createSandbox( 'grow-grid-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            grow: 1,
+            rows: [
+              [
+                new Rectangle( 0, 0, 75, 50, {
+                  fill: colors[ 0 ]
+                } ),
+                new Rectangle( 0, 0, 50, 75, {
+                  fill: colors[ 2 ]
+                } ),
+                new Circle( 25, {
+                  fill: colors[ 4 ]
+                } ),
+              ],
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 6 ]
+                } ),
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 8 ]
+                } )
+              ]
             ]
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <p>This space can be grown in specified rows/columns only (and independently) with <code>xGrow</code> or <code>yGrow</code>:</p>
 
     <div id="grow-2-grid-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'grow-2-grid-example', () => {
-        /*START*/
-        return new GridBox( {
-          rows: [
-            [
-              new Rectangle( 0, 0, 75, 50, {
-                fill: colors[ 0 ],
-                layoutOptions: { xGrow: 1 }
-              } ),
-              new Rectangle( 0, 0, 50, 75, {
-                fill: colors[ 2 ]
-              } ),
-              new Circle( 25, {
-                fill: colors[ 4 ]
-              } ),
-            ],
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 6 ]
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 8 ],
-                layoutOptions: { yGrow: 1 }
-              } )
+      createSandbox( 'grow-2-grid-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            rows: [
+              [
+                new Rectangle( 0, 0, 75, 50, {
+                  fill: colors[ 0 ],
+                  layoutOptions: { xGrow: 1 }
+                } ),
+                new Rectangle( 0, 0, 50, 75, {
+                  fill: colors[ 2 ]
+                } ),
+                new Circle( 25, {
+                  fill: colors[ 4 ]
+                } ),
+              ],
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 6 ]
+                } ),
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 8 ],
+                  layoutOptions: { yGrow: 1 }
+                } )
+              ]
             ]
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="GridBox-stretch" class="index">stretch</h3>
@@ -1523,40 +1578,47 @@
 
     <div id="preferred-grid-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'preferred-grid-example', () => {
-        /*START*/
-        return new GridBox( {
-          rows: [
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 0 ]
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 2 ]
-              } ),
-              new Circle( 25, {
-                fill: colors[ 4 ]
-              } )
-            ],
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 6 ]
-              } ),
-              new Rectangle( {
-                sizable: true,
-                localMinimumWidth: 50,
-                localMinimumHeight: 50,
-                fill: 'gray',
-                layoutOptions: { grow: 1, stretch: true }
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 8 ]
-              } )
+      createSandbox( 'preferred-grid-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            rows: [
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 0 ]
+                } ),
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 2 ]
+                } ),
+                new Circle( 25, {
+                  fill: colors[ 4 ]
+                } )
+              ],
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 6 ]
+                } ),
+                new Rectangle( {
+                  sizable: true,
+                  localMinimumWidth: 50,
+                  localMinimumHeight: 50,
+                  fill: 'gray',
+                  layoutOptions: { grow: 1, stretch: true }
+                } ),
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 8 ]
+                } )
+              ]
             ]
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+          } );
+
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="GridBox-sizable" class="index">sizable</h3>
@@ -1566,41 +1628,46 @@
 
     <div id="gridResizable-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'gridResizable-example', () => {
-        /*START*/
-        return new GridBox( {
-          rows: [
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 0 ]
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 2 ]
-              } ),
-              new Circle( 25, {
-                fill: colors[ 4 ]
-              } )
-            ],
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 6 ]
-              } ),
-              new Rectangle( {
-                heightSizable: true,
-                localMinimumHeight: 50,
-                fill: 'gray',
-                preferredWidth: 50,
-                widthSizable: false,
-                layoutOptions: { grow: 1, stretch: true }
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 8 ]
-              } )
+      createSandbox( 'gridResizable-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            rows: [
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 0 ]
+                } ),
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 2 ]
+                } ),
+                new Circle( 25, {
+                  fill: colors[ 4 ]
+                } )
+              ],
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 6 ]
+                } ),
+                new Rectangle( {
+                  sizable: true,
+                  localMinimumWidth: 50,
+                  localMinimumHeight: 50,
+                  fill: 'gray',
+                  layoutOptions: { grow: 1, stretch: true }
+                } ),
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 8 ]
+                } )
+              ]
             ]
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="GridBox-align" class="index">align</h3>
@@ -1609,37 +1676,43 @@
 
     <div id="align-grid-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'align-grid-example', () => {
-        /*START*/
-        return new GridBox( {
-          grow: 1,
-          rows: [
-            [
-              new Rectangle( 0, 0, 75, 50, {
-                fill: colors[ 0 ],
-                layoutOptions: { xAlign: 'left', yAlign: 'top' }
-              } ),
-              new Rectangle( 0, 0, 50, 75, {
-                fill: colors[ 2 ]
-              } ),
-              new Circle( 25, {
-                fill: colors[ 4 ],
-                layoutOptions: { yAlign: 'bottom' }
-              } ),
-            ],
-            [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 6 ]
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 8 ],
-                layoutOptions: { yAlign: 'top' }
-              } )
+      createSandbox( 'align-grid-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            grow: 1,
+            rows: [
+              [
+                new Rectangle( 0, 0, 75, 50, {
+                  fill: colors[ 0 ],
+                  layoutOptions: { xAlign: 'left', yAlign: 'top' }
+                } ),
+                new Rectangle( 0, 0, 50, 75, {
+                  fill: colors[ 2 ]
+                } ),
+                new Circle( 25, {
+                  fill: colors[ 4 ],
+                  layoutOptions: { yAlign: 'bottom' }
+                } ),
+              ],
+              [
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 6 ]
+                } ),
+                new Rectangle( 0, 0, 50, 50, {
+                  fill: colors[ 8 ],
+                  layoutOptions: { yAlign: 'top' }
+                } )
+              ]
             ]
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="GridBox-layoutOptions-size" class="index">horizontalSpan/verticalSpan</h3>
@@ -1648,52 +1721,58 @@
 
     <div id="span-grid-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'span-grid-example', () => {
-        /*START*/
-        return new GridBox( {
-          children: [
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 100, 50, {
-              fill: colors[ 2 ],
-              sizable: true,
-              localMinimumWidth: 100,
-              localMinimumHeight: 50,
-              layoutOptions: { column: 1, row: 0, horizontalSpan: 2, stretch: true, grow: 1 }
-            } ),
-            new Rectangle( 0, 0, 100, 100, {
-              fill: colors[ 4 ],
-              sizable: true,
-              localMinimumWidth: 100,
-              localMinimumHeight: 100,
-              layoutOptions: { column: 0, row: 1, horizontalSpan: 2, verticalSpan: 2, stretch: true }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ],
-              layoutOptions: { column: 2, row: 1 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { column: 2, row: 2 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 3 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 1 ],
-              layoutOptions: { column: 1, row: 3 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 2, row: 3 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinHeight: true } );
+      createSandbox( 'span-grid-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 100, 50, {
+                fill: colors[ 2 ],
+                sizable: true,
+                localMinimumWidth: 100,
+                localMinimumHeight: 50,
+                layoutOptions: { column: 1, row: 0, horizontalSpan: 2, stretch: true, grow: 1 }
+              } ),
+              new Rectangle( 0, 0, 100, 100, {
+                fill: colors[ 4 ],
+                sizable: true,
+                localMinimumWidth: 100,
+                localMinimumHeight: 100,
+                layoutOptions: { column: 0, row: 1, horizontalSpan: 2, verticalSpan: 2, stretch: true }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ],
+                layoutOptions: { column: 2, row: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { column: 2, row: 2 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 3 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 1 ],
+                layoutOptions: { column: 1, row: 3 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 2, row: 3 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h3 id="GridBox-spacing" class="index">spacing</h3>
@@ -1702,107 +1781,116 @@
 
     <div id="grid-spacing-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'grid-spacing-example', () => {
-        /*START*/
-        return new GridBox( {
-          spacing: 10,
-          children: [
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 1, row: 0 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { column: 2, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ],
-              layoutOptions: { column: 0, row: 1 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { column: 1, row: 1 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'grid-spacing-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            spacing: 10,
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 1, row: 0 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { column: 2, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ],
+                layoutOptions: { column: 0, row: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { column: 1, row: 1 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <p>Grids can have different spacing on each dimension:</p>
 
     <div id="grid-2-spacing-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'grid-2-spacing-example', () => {
-        /*START*/
-        return new GridBox( {
-          xSpacing: 5,
-          ySpacing: 15,
-          children: [
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 1, row: 0 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { column: 2, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ],
-              layoutOptions: { column: 0, row: 1 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { column: 1, row: 1 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'grid-2-spacing-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            xSpacing: 5,
+            ySpacing: 15,
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 1, row: 0 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { column: 2, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ],
+                layoutOptions: { column: 0, row: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { column: 1, row: 1 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <p>Grids can have custom arrays adjusting the spacing between every single row/column:</p>
 
     <div id="grid-3-spacing-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'grid-3-spacing-example', () => {
-        /*START*/
-        return new GridBox( {
-          xSpacing: [ 10, 0 ],
-          ySpacing: [ 5 ],
-          children: [
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 1, row: 0 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { column: 2, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ],
-              layoutOptions: { column: 0, row: 1 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { column: 1, row: 1 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'grid-3-spacing-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            xSpacing: [ 10, 0 ],
+            ySpacing: [ 5 ],
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 1, row: 0 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { column: 2, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ],
+                layoutOptions: { column: 0, row: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { column: 1, row: 1 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h3 id="GridBox-margins" class="index">Margins</h3>
@@ -1811,70 +1899,76 @@
 
     <div id="margin-1-spacing-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'margin-1-spacing-example', () => {
-        /*START*/
-        return new GridBox( {
-          margin: 5,
-          children: [
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 1, row: 0 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { column: 2, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ],
-              layoutOptions: { column: 0, row: 1 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { column: 1, row: 1 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'margin-1-spacing-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            margin: 5,
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 1, row: 0 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { column: 2, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ],
+                layoutOptions: { column: 0, row: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { column: 1, row: 1 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <p>Or can have margins specified on individual elements:</p>
 
     <div id="margin-2-spacing-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'margin-2-spacing-example', () => {
-        /*START*/
-        return new GridBox( {
-          yAlign: 'top',
-          children: [
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 0 ],
-              layoutOptions: { column: 0, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ],
-              layoutOptions: { column: 1, row: 0, topMargin: 10 }
-            } ),
-            new Circle( 25, {
-              fill: colors[ 4 ],
-              layoutOptions: { column: 2, row: 0 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 6 ],
-              layoutOptions: { column: 0, row: 1 }
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 8 ],
-              layoutOptions: { column: 1, row: 1 }
-            } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinHeight: true } );
+      createSandbox( 'margin-2-spacing-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            yAlign: 'top',
+            children: [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 0 ],
+                layoutOptions: { column: 0, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { column: 1, row: 0, topMargin: 10 }
+              } ),
+              new Circle( 25, {
+                fill: colors[ 4 ],
+                layoutOptions: { column: 2, row: 0 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ],
+                layoutOptions: { column: 0, row: 1 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 8 ],
+                layoutOptions: { column: 1, row: 1 }
+              } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h2 id="Sizable" class="index">Sizables</h2>
@@ -1918,41 +2012,47 @@
 
     <div id="rectUnsizable-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'rectUnsizable-example', () => {
-        /*START*/
-        return new GridBox( {
-          // Resize everything up evenly
-          grow: 1,
-          stretch: true,
+      createSandbox( 'rectUnsizable-example', scene => {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            // Resize everything up evenly
+            grow: 1,
+            stretch: true,
 
-          // Show the effect without having to drag to make it larger
-          minContentWidth: 100,
-          minContentHeight: 100,
-          rows: [ [
-            new Rectangle( 0, 0, 50, 50, {
-              fill: colors[ 2 ]
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              minimumWidth: 50,
-              fill: colors[ 4 ],
-              widthSizable: true
-            } )
-          ], [
-            new Rectangle( 0, 0, 50, 50, {
-              minimumHeight: 50,
-              fill: colors[ 6 ],
-              heightSizable: true
-            } ),
-            new Rectangle( 0, 0, 50, 50, {
-              minimumWidth: 50,
-              minimumHeight: 50,
-              fill: colors[ 8 ],
-              sizable: true
-            } )
-          ] ]
-        } );
-        /*END*/
-      }, { resize: 'both', useMinWidth: true, useMinHeight: true } );
+            // Show the effect without having to drag to make it larger
+            minContentWidth: 100,
+            minContentHeight: 100,
+            rows: [ [
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ]
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                minimumWidth: 50,
+                fill: colors[ 4 ],
+                widthSizable: true
+              } )
+            ], [
+              new Rectangle( 0, 0, 50, 50, {
+                minimumHeight: 50,
+                fill: colors[ 6 ],
+                heightSizable: true
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                minimumWidth: 50,
+                minimumHeight: 50,
+                fill: colors[ 8 ],
+                sizable: true
+              } )
+            ] ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h2 id="layoutOptions" class="index">layoutOptions</h2>
@@ -1966,21 +2066,27 @@
 
     <div id="layoutOptionsMutate-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'layoutOptionsMutate-example', () => {
-        /*START*/
-        const box = new HBox( {
-          children: colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) )
-        } );
-        box.children[ 0 ].rectHeight = 100;
-        box.children[ 3 ].mutateLayoutOptions( {
-          leftMargin: 10
-        } );
-        box.children[ 5 ].mutateLayoutOptions( {
-          align: 'top'
-        } );
-        /*END*/
-        return box;
-      }, { resize: 'both', useMinWidth: true, useMinHeight: true } );
+      createSandbox( 'layoutOptionsMutate-example', scene => {
+        const box = ( () => {
+          /*START*/
+          const box = new HBox( {
+            children: colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) )
+          } );
+          box.children[ 0 ].rectHeight = 100;
+          box.children[ 3 ].mutateLayoutOptions( {
+            leftMargin: 10
+          } );
+          box.children[ 5 ].mutateLayoutOptions( {
+            align: 'top'
+          } );
+          return box;
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
     </script>
 
     <h2 id="layoutOrigin" class="index">layoutOrigin</h2>
@@ -1994,29 +2100,31 @@
 
     <div id="defaultOrigin-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'defaultOrigin-example', () => {
+      createSandbox( 'defaultOrigin-example', scene => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
         } );
-        /*START*/
-        const box = new GridBox( {
-          opacity: 0.5,
-          children: colors.map( color => new Rectangle( 0, 0, 40, 40, { fill: color } ) ),
-          autoColumns: 3
-        } );
-        /*END*/
-        return new AlignBox( new Node( {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            opacity: 0.5,
+            children: colors.map( color => new Rectangle( 0, 0, 40, 40, { fill: color } ) ),
+            autoColumns: 3
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new AlignBox( new Node( {
           children: [ originNode, box ]
-        } ) );
-      }, { resize: 'none' } );
+        } ) ) );
+      } );
     </script>
 
     <p>When using <code>align: origin</code>, the origin of the entire FlowBox will be at the origin of the first line:</p>
 
     <div id="flowOrigin-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'flowOrigin-example', () => {
+      createSandbox( 'flowOrigin-example', scene => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2027,85 +2135,91 @@
         const bigText = ( str, options ) => new Text( str, merge( {
           font: new Font( { size: 18, weight: 'bold' } )
         }, options ) );
-        /*START*/
-        const box = new HBox( {
-          align: 'origin',
-          spacing: 5,
-          lineSpacing: 5,
-          children: [
-            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
-            bigText( 'Text' ),
-            normalText( 'Text' ),
-            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
-            bigText( 'Text' ),
-            normalText( 'text' ),
-            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
-            bigText( 'Text' ),
-            normalText( 'text' ),
-            new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
-            bigText( 'Text' ),
-            normalText( 'text' )
-          ],
-          wrap: true,
-          preferredWidth: 170,
-          widthSizable: false,
-          justify: 'left'
-        } );
-        /*END*/
-        return new AlignBox( new Node( {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            align: 'origin',
+            spacing: 5,
+            lineSpacing: 5,
+            children: [
+              new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+              bigText( 'Text' ),
+              normalText( 'Text' ),
+              new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+              bigText( 'Text' ),
+              normalText( 'text' ),
+              new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+              bigText( 'Text' ),
+              normalText( 'text' ),
+              new Circle( 20, { fill: 'rgba(255,0,0,0.3)' } ),
+              bigText( 'Text' ),
+              normalText( 'text' )
+            ],
+            wrap: true,
+            preferredWidth: 170,
+            widthSizable: false,
+            justify: 'left'
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new AlignBox( new Node( {
           children: [ originNode, box ]
-        } ) );
-      }, { resize: 'none' } );
+        } ) ) );
+      } );
     </script>
 
     <p>When using <code>align: origin</code>, the origin of the entire GridBox will be at the origin of the first cell:</p>
 
     <div id="gridOrigin-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'gridOrigin-example', () => {
+      createSandbox( 'gridOrigin-example', scene => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
         } );
-        /*START*/
-        const box = new GridBox( {
-          xAlign: 'origin',
-          yAlign: 'origin',
-          children: [
-            new Circle( 20, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 0 } } ),
-            new Circle( 10, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 0 } } ),
-            new Circle( 15, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 1 } } ),
-            new Circle( 25, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 1 } } )
-          ]
-        } );
-        /*END*/
-        return new AlignBox( new Node( {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            xAlign: 'origin',
+            yAlign: 'origin',
+            children: [
+              new Circle( 20, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 0 } } ),
+              new Circle( 10, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 0 } } ),
+              new Circle( 15, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 0, row: 1 } } ),
+              new Circle( 25, { fill: 'rgba(255,0,0,0.3)', layoutOptions: { column: 1, row: 1 } } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new AlignBox( new Node( {
           children: [ originNode, box ]
-        } ) );
-      }, { resize: 'none' } );
+        } ) ) );
+      } );
     </script>
 
     <p>The position of this origin can be shifted by using <code>layoutOrigin</code></p>
 
     <div id="layoutOrigin-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'layoutOrigin-example', () => {
+      createSandbox( 'layoutOrigin-example', scene => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
         } );
-        /*START*/
-        const box = new GridBox( {
-          layoutOrigin: new Vector2( 40, 20 ),
-          opacity: 0.5,
-          children: colors.map( color => new Rectangle( 0, 0, 40, 40, { fill: color } ) ),
-          autoColumns: 3
-        } );
-        /*END*/
-        return new AlignBox( new Node( {
+        const box = ( () => {
+          /*START*/
+          return new GridBox( {
+            layoutOrigin: new Vector2( 40, 20 ),
+            opacity: 0.5,
+            children: colors.map( color => new Rectangle( 0, 0, 40, 40, { fill: color } ) ),
+            autoColumns: 3
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new AlignBox( new Node( {
           children: [ originNode, box ]
-        } ) );
-      }, { resize: 'none' } );
+        } ) ) );
+      } );
     </script>
 
     <h2 id="ManualConstraint" class="index">ManualConstraint</h2>
@@ -2127,62 +2241,64 @@
 
     <div id="manualConstraint-example"></div>
     <script type="text/javascript">
-      ( () => {
-        const createLabeledBox = ( label, fill, width, height ) => {
-          return new Rectangle( 0, 0, width, height, {
-            stroke: 'black',
-            fill: fill,
-            children: [
-              new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
-            ]
-          } );
-        };
-        let step;
-        let elapsedTime = 0;
-        dynamicDemo( 'manualConstraint-example', () => {
+      createSandbox( 'manualConstraint-example', ( scene ) => {
+        // const createLabeledBox = ( label, fill, width, height ) => {
+        //   return new Rectangle( 0, 0, width, height, {
+        //     stroke: 'black',
+        //     fill: fill,
+        //     children: [
+        //       new Text( label, { font: new Font( { size: 8 } ), left: 3, bottom: height - 3 } )
+        //     ]
+        //   } );
+        // };
+
+        const box = ( () => {
           /*START*/
-          const background = new Rectangle( 0, 0, 400, 200, {
-            fill: '#ccc'
-          } );
-
-          const child1 = createLabeledBox( 'Child 1', colors[ 2 ], 50, 50 );
-          const child2 = createLabeledBox( 'Child 2', colors[ 4 ], 50, 50 );
-          const child3 = createLabeledBox( 'Child 3', colors[ 5 ], 50, 50 );
-
-          ManualConstraint.create( background, [ child1, child2 ], ( child1Proxy, child2Proxy ) => {
-            child2Proxy.leftCenter = child1Proxy.rightCenter;
-          } );
-          ManualConstraint.create( background, [ child2, child3 ], ( child2Proxy, child3Proxy ) => {
-            child3Proxy.left = child2Proxy.right;
-          } );
-          ManualConstraint.create( background, [ child1, child3 ], ( child1Proxy, child3Proxy ) => {
-            child3Proxy.centerY = child1Proxy.centerY;
-          } );
-
-          const nodes = [
-            new Node( { x: 50, y: 50, children: [ child1 ] } ),
-            new Node( { scale: 2, y: 20, children: [ child2 ] } ),
-            new Node( { matrix: dot.Matrix3.rowMajor(
-              0.5, 0, 0,
-              0, 1, 0,
-              0, 0, 1 ), children: [ child3 ] } )
-          ]
-
-          step = dt => {
-            elapsedTime += dt;
-            child1.translation = Vector2.createPolar( 10, 2 * elapsedTime );
-
-            background.children = [
-              ...( elapsedTime % 3 < 2 ? [ nodes[ 0 ] ] : [] ),
-              ...( elapsedTime % 5 < 4 ? [ nodes[ 1 ] ] : [] ),
-              ...( elapsedTime % 7 < 5 ? [ nodes[ 2 ] ] : [] )
-            ];
-          };
-
+          // const background = new Rectangle( 0, 0, 400, 200, {
+          //   fill: '#ccc'
+          // } );
+          //
+          // const child1 = createLabeledBox( 'Child 1', colors[ 2 ], 50, 50 );
+          // const child2 = createLabeledBox( 'Child 2', colors[ 4 ], 50, 50 );
+          // const child3 = createLabeledBox( 'Child 3', colors[ 5 ], 50, 50 );
+          //
+          // ManualConstraint.create( background, [ child1, child2 ], ( child1Proxy, child2Proxy ) => {
+          //   child2Proxy.leftCenter = child1Proxy.rightCenter;
+          // } );
+          // ManualConstraint.create( background, [ child2, child3 ], ( child2Proxy, child3Proxy ) => {
+          //   child3Proxy.left = child2Proxy.right;
+          // } );
+          // ManualConstraint.create( background, [ child1, child3 ], ( child1Proxy, child3Proxy ) => {
+          //   child3Proxy.centerY = child1Proxy.centerY;
+          // } );
+          //
+          // const nodes = [
+          //   new Node( { x: 50, y: 50, children: [ child1 ] } ),
+          //   new Node( { scale: 2, y: 20, children: [ child2 ] } ),
+          //   new Node( { matrix: dot.Matrix3.rowMajor(
+          //       0.5, 0, 0,
+          //       0, 1, 0,
+          //       0, 0, 1 ), children: [ child3 ] } )
+          // ]
+          //
+          // let elapsedTime = 0;
+          //
+          // stepEmitter.addListener( dt => {
+          //   elapsedTime += dt;
+          //   child1.translation = Vector2.createPolar( 10, 2 * elapsedTime );
+          //
+          //   background.children = [
+          //     ...( elapsedTime % 3 < 2 ? [ nodes[ 0 ] ] : [] ),
+          //     ...( elapsedTime % 5 < 4 ? [ nodes[ 1 ] ] : [] ),
+          //     ...( elapsedTime % 7 < 5 ? [ nodes[ 2 ] ] : [] )
+          //   ];
+          // } );
+          //
+          // return background;
           /*END*/
-          return background;
-        }, { resize: 'none', useMinHeight: true, useMinWidth: true, step: dt => step( dt ) } );
-      } )();
+        } )();
+        scene.addChild( new ResizableNode( box, {} ) );
+      } );
     </script>
 
     <h2 id="FlowConstraint" class="index">FlowConstraint</h2>
@@ -2204,7 +2320,8 @@
             ]
           } );
         };
-        dynamicDemo( 'flowConstraint-example', () => {
+
+      dynamicDemo( 'flowConstraint-example', () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
           const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
@@ -2274,7 +2391,8 @@
             ]
           } );
         };
-        dynamicDemo( 'gridConstraint-example', () => {
+
+      dynamicDemo( 'gridConstraint-example', () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
           const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
@@ -2337,7 +2455,8 @@
     <div id="simpleAlignBox-example"></div>
     <script type="text/javascript">
       ( () => {
-        dynamicDemo( 'simpleAlignBox-example', () => {
+
+      dynamicDemo( 'simpleAlignBox-example', () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2357,7 +2476,8 @@
     <div id="alignBoxAlign-example"></div>
     <script type="text/javascript">
       ( () => {
-        dynamicDemo( 'alignBoxAlign-example', () => {
+
+      dynamicDemo( 'alignBoxAlign-example', () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2379,7 +2499,8 @@
     <div id="alignBoxMargins-example"></div>
     <script type="text/javascript">
       ( () => {
-        dynamicDemo( 'alignBoxMargins-example', () => {
+
+      dynamicDemo( 'alignBoxMargins-example', () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2401,7 +2522,8 @@
     <div id="alignBoxOnlyMargins-example"></div>
     <script type="text/javascript">
       ( () => {
-        dynamicDemo( 'alignBoxOnlyMargins-example', () => {
+
+      dynamicDemo( 'alignBoxOnlyMargins-example', () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2420,7 +2542,8 @@
     <div id="alignBoxPreferred-example"></div>
     <script type="text/javascript">
       ( () => {
-        dynamicDemo( 'alignBoxPreferred-example', () => {
+
+      dynamicDemo( 'alignBoxPreferred-example', () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
@@ -2441,7 +2564,8 @@
     <div id="alignBoxSizable-example"></div>
     <script type="text/javascript">
       ( () => {
-        dynamicDemo( 'alignBoxSizable-example', () => {
+
+      dynamicDemo( 'alignBoxSizable-example', () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
             fill: 'red'
