@@ -1,13 +1,18 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * A listener keyboard input. Specify the keys that you want to listen to with the `keys` option in a format that looks
- * like this:
- *      'shift+t|alt+shift+r'
+ * A listener for general keyboard input. Specify the keys with a `keys` option in a readable format that looks like
+ * this: 'shift+t|alt+shift+r'
  *
- * A group of keys are assembled with
+ * - '|' separates different groups of keys
+ * - '+' separates each key in a single group
+ * - The keys leading up to the last key in the group are considered "modifier" keys. The last key in the group needs
+ *   to be pressed while the modifier keys are down.
+ * - The order modifier keys are pressed does not matter for firing the callback.
  *
- * A typical usage would like this:
+ * In the above example "shift+t" OR "alt+shift + r" will fire the callback when pressed.
+ *
+ * An example usage would like this:
  *
  *     this.addInputListener( new KeyboardListener( {
  *       keys: [ 'a+b', 'a+c', 'shift+arrowLeft', 'alt+g+t', 'ctrl+3', 'alt+ctrl+t' ] as const,
@@ -16,29 +21,23 @@
  *         if ( keys === 'a+b' ) {
  *           console.log( 'you just pressed a+b!' );
  *         }
- *
  *         else if ( keys === 'a+c' ) {
  *           console.log( 'you just pressed a+c!' );
  *         }
- *
  *         else if ( keys === 'alt+g+t' ) {
  *           console.log( 'you just pressed alt+g+t' );
  *         }
- *
  *         else if ( keys === 'ctrl+3' ) {
  *           console.log( 'you just pressed ctrl+3' );
  *         }
- *
  *         else if ( keys === 'shift+arrowLeft' ) {
  *           console.log( 'you just pressed shift+arrowLeft' );
  *         }
  *       }
  *     } ) );
  *
- * By default the callback will fire when the last key is pressed down.
- *
- * Modifier keys are all keys prior to the last provided key. NOTE that modifier keys are not ordered. for example:
- * ctrl+shift+f, will fire the same as shift+ctrl+f.
+ * By default the callback will fire when the last key is pressed down. See additional options for firing on key
+ * up or other press and hold behavior.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -56,6 +55,8 @@ type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | '
   'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
 type AllowedKeys = keyof typeof EnglishStringToCodeMap;
 
+// TODO: The typing for this limits the number of keys that can exist in a group. If that limitation is not acceptable
+//       remove this typing. OR maybe TypeScript will someday support regex patterns for a type.
 type OneKeyStroke = `${AllowedKeys}` |
   `${ModifierKey}+${AllowedKeys}` |
   `${ModifierKey}+${ModifierKey}+${AllowedKeys}`;
