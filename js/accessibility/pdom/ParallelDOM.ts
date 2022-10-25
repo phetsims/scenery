@@ -179,109 +179,109 @@ const ACCESSIBILITY_OPTION_KEYS = [
 
   // Order matters. Having focus before tagName covers the case where you change the tagName and focusability of a
   // currently focused node. We want the focusability to update correctly.
-  'focusable', // {boolean|null} - Sets whether or not the node can receive keyboard focus
-  'tagName', // {string|null} - Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
+  'focusable',
+  'tagName',
 
   /*
    * Higher Level API Functions
    */
-  'accessibleName', // {string|null} - Sets the name of this node, read when this node receives focus and inserted appropriately based on accessibleNameBehavior
-  'accessibleNameBehavior', // {PDOMBehaviorFunctionDef} - Sets the way in which accessibleName will be set for the Node, see DEFAULT_ACCESSIBLE_NAME_BEHAVIOR for example
-  'helpText', // {string|null} - Sets the descriptive content for this node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
-  'helpTextBehavior', // {PDOMBehaviorFunctionDef} - Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
-  'pdomHeading', // {string|null} - Sets content for the heading whose level will be automatically generated if specified
-  'pdomHeadingBehavior', // {PDOMBehaviorFunctionDef} - Set to modify default behavior for inserting pdomHeading string
+  'accessibleName',
+  'accessibleNameBehavior',
+  'helpText',
+  'helpTextBehavior',
+  'pdomHeading',
+  'pdomHeadingBehavior',
 
   /*
    * Lower Level API Functions
    */
-  'containerTagName', // {string|null} - Sets the tag name for an [optional] element that contains this Node's siblings
-  'containerAriaRole', // {string|null} - Sets the ARIA role for the container parent DOM element
+  'containerTagName',
+  'containerAriaRole',
 
-  'innerContent', // {string|null} - Sets the inner text or HTML for a node's primary sibling element
-  'inputType', // {string|null} - Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
-  'inputValue', // {string|null|number} - Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
-  'pdomChecked', // {boolean} - Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
-  'pdomNamespace', // {string|null} - Sets the namespace for the primary element
-  'ariaLabel', // {string|null} - Sets the value of the 'aria-label' attribute on the primary sibling of this Node
-  'ariaRole', // {string|null} - Sets the ARIA role for the primary sibling of this Node
-  'ariaValueText', // {string|null} - sets the aria-valuetext attribute of the primary sibling
+  'innerContent',
+  'inputType',
+  'inputValue',
+  'pdomChecked',
+  'pdomNamespace',
+  'ariaLabel',
+  'ariaRole',
+  'ariaValueText',
 
-  'labelTagName', // {string|null} - Sets the tag name for the DOM element sibling labeling this node
-  'labelContent', // {string|null} - Sets the label content for the node
-  'appendLabel', // {boolean} - Sets the label sibling to come after the primary sibling in the PDOM
+  'labelTagName',
+  'labelContent',
+  'appendLabel',
 
-  'descriptionTagName', // {string|null} - Sets the tag name for the DOM element sibling describing this node
-  'descriptionContent', // {string|null} - Sets the description content for the node
-  'appendDescription', // {string|null} - Sets the description sibling to come after the primary sibling in the PDOM
+  'descriptionTagName',
+  'descriptionContent',
+  'appendDescription',
 
-  'focusHighlight', // {Node|Shape|null} - Sets the focus highlight for the node
-  'focusHighlightLayerable', // {boolean} Flag to determine if the focus highlight node can be layered in the scene graph
-  'groupFocusHighlight', // {boolean|Node} - Sets the outer focus highlight for this node when a descendant has focus
-  'pdomVisible', // {boolean} - Sets whether or not the node's DOM element is visible in the parallel DOM
-  'pdomOrder', // {Array.<Node|null>|null} - Modifies the order of accessible navigation
+  'focusHighlight',
+  'focusHighlightLayerable',
+  'groupFocusHighlight',
+  'pdomVisible',
+  'pdomOrder',
 
-  'ariaLabelledbyAssociations', // {Array.<Object>} - sets the list of aria-labelledby associations between from this node to others (including itself)
-  'ariaDescribedbyAssociations', // {Array.<Object>} - sets the list of aria-describedby associations between from this node to others (including itself)
-  'activeDescendantAssociations', // {Array.<Object>} - sets the list of aria-activedescendant associations between from this node to others (including itself)
+  'ariaLabelledbyAssociations',
+  'ariaDescribedbyAssociations',
+  'activeDescendantAssociations',
 
-  'positionInPDOM', // {boolean} - Sets whether or not the node's DOM elements are positioned in the viewport
+  'positionInPDOM',
 
-  'pdomTransformSourceNode' // {Node|null} - sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
+  'pdomTransformSourceNode'
 ];
 
 // Most options use null for their default behavior, see the setters for each option for a description of how null
 // behaves as a default.
 export type ParallelDOMOptions = {
-  focusable?: boolean | null;
-  tagName?: string | null;
+  focusable?: boolean | null; // Sets whether the node can receive keyboard focus
+  tagName?: string | null; // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
 
   /*
    * Higher Level API Functions
    */
-  accessibleName?: PDOMValueType | null;
-  accessibleNameBehavior?: PDOMBehaviorFunction;
-  helpText?: PDOMValueType | null;
-  helpTextBehavior?: PDOMBehaviorFunction;
-  pdomHeading?: PDOMValueType | null;
-  pdomHeadingBehavior?: PDOMBehaviorFunction;
+  accessibleName?: PDOMValueType | null; // Sets the name of this node, read when this node receives focus and inserted appropriately based on accessibleNameBehavior
+  accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the way in which accessibleName will be set for the Node, see DEFAULT_ACCESSIBLE_NAME_BEHAVIOR for example
+  helpText?: PDOMValueType | null; // Sets the descriptive content for this node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
+  helpTextBehavior?: PDOMBehaviorFunction; // Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
+  pdomHeading?: PDOMValueType | null; // Sets content for the heading whose level will be automatically generated if specified
+  pdomHeadingBehavior?: PDOMBehaviorFunction; // Set to modify default behavior for inserting pdomHeading string
 
   /*
    * Lower Level API Functions
    */
-  containerTagName?: string | null;
-  containerAriaRole?: string | null;
+  containerTagName?: string | null; // Sets the tag name for an [optional] element that contains this Node's siblings
+  containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
 
-  innerContent?: PDOMValueType | null;
-  inputType?: string | null;
-  inputValue?: PDOMValueType | null | number;
-  pdomChecked?: boolean;
-  pdomNamespace?: string | null;
-  ariaLabel?: PDOMValueType | null;
-  ariaRole?: string | null;
-  ariaValueText?: PDOMValueType | null;
+  innerContent?: PDOMValueType | null; // Sets the inner text or HTML for a node's primary sibling element
+  inputType?: string | null; // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
+  inputValue?: PDOMValueType | null | number; // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
+  pdomChecked?: boolean; // Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
+  pdomNamespace?: string | null; // Sets the namespace for the primary element
+  ariaLabel?: PDOMValueType | null; // Sets the value of the 'aria-label' attribute on the primary sibling of this Node
+  ariaRole?: string | null; // Sets the ARIA role for the primary sibling of this Node
+  ariaValueText?: PDOMValueType | null; // sets the aria-valuetext attribute of the primary sibling
 
-  labelTagName?: string | null;
-  labelContent?: PDOMValueType | null;
-  appendLabel?: boolean;
+  labelTagName?: string | null; // Sets the tag name for the DOM element sibling labeling this node
+  labelContent?: PDOMValueType | null; // Sets the label content for the node
+  appendLabel?: boolean; // Sets the label sibling to come after the primary sibling in the PDOM
 
-  descriptionTagName?: string | null;
-  descriptionContent?: PDOMValueType | null;
-  appendDescription?: boolean;
+  descriptionTagName?: string | null; // Sets the tag name for the DOM element sibling describing this node
+  descriptionContent?: PDOMValueType | null; // Sets the description content for the node
+  appendDescription?: boolean; // Sets the description sibling to come after the primary sibling in the PDOM
 
-  focusHighlight?: Highlight;
-  focusHighlightLayerable?: boolean;
-  groupFocusHighlight?: Node | boolean;
-  pdomVisible?: boolean;
-  pdomOrder?: ( Node | null )[] | null;
+  focusHighlight?: Highlight; // Sets the focus highlight for the node
+  focusHighlightLayerable?: boolean; //lag to determine if the focus highlight node can be layered in the scene graph
+  groupFocusHighlight?: Node | boolean; // Sets the outer focus highlight for this node when a descendant has focus
+  pdomVisible?: boolean; // Sets whether or not the node's DOM element is visible in the parallel DOM
+  pdomOrder?: ( Node | null )[] | null; // Modifies the order of accessible navigation
 
-  ariaLabelledbyAssociations?: Association[];
-  ariaDescribedbyAssociations?: Association[];
-  activeDescendantAssociations?: Association[];
+  ariaLabelledbyAssociations?: Association[]; // sets the list of aria-labelledby associations between from this node to others (including itself)
+  ariaDescribedbyAssociations?: Association[]; // sets the list of aria-describedby associations between from this node to others (including itself)
+  activeDescendantAssociations?: Association[]; // sets the list of aria-activedescendant associations between from this node to others (including itself)
 
-  positionInPDOM?: boolean;
+  positionInPDOM?: boolean; // Sets whether the node's DOM elements are positioned in the viewport
 
-  pdomTransformSourceNode?: Node | null;
+  pdomTransformSourceNode?: Node | null; // { sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
 } & PhetioObjectOptions;
 
 type PDOMAttribute = {
