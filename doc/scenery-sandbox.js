@@ -55,7 +55,8 @@
       height: 1,
       accessibility: true,
       listenToOnlyElement: true,
-      allowCSSHacks: false
+      allowCSSHacks: false,
+      passiveEvents: true
     } );
     display.domElement.style.position = 'relative';
 
