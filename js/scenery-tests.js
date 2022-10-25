@@ -20,6 +20,7 @@ import './layout/nodes/AlignBoxTests.js';
 import './listeners/DragListenerTests.js';
 import './listeners/FireListenerTests.js';
 import './listeners/PressListenerTests.js';
+import './listeners/KeyboardListenerTests.js';
 import './nodes/NodeTests.js';
 import './nodes/RichTextTests.js';
 import './nodes/ShapeTests.js';
