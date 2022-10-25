@@ -142,7 +142,7 @@
     };
 
     class ResizableNode extends Node {
-      constructor( content, providedOptions ) {
+      constructor( display, content, providedOptions ) {
         const options = merge( {
           widthResizable: false,
           heightResizable: false
@@ -193,7 +193,7 @@
           inputListeners: [
             new DragListener( {
               drag: ( event, listener ) => {
-                content.preferredWidth = Math.max( content.minimumWidth, 2 * listener.modelPoint.x );
+                content.preferredWidth = Math.min( display.width - resizeHandleSize, Math.max( content.minimumWidth, 2 * listener.modelPoint.x ) );
               }
             } )
           ],
@@ -219,7 +219,7 @@
           inputListeners: [
             new DragListener( {
               drag: ( event, listener ) => {
-                content.preferredWidth = Math.max( content.minimumWidth, 2 * listener.modelPoint.x );
+                content.preferredWidth = Math.min( display.width - resizeHandleSize, Math.max( content.minimumWidth, 2 * listener.modelPoint.x ) );
                 content.preferredHeight = Math.max( content.minimumHeight, listener.modelPoint.y );
               }
             } )
@@ -334,7 +334,7 @@
 
     <div id="HBox-example"></div>
     <script type="text/javascript">
-      createSandbox( 'HBox-example', scene => {
+      createSandbox( 'HBox-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -357,7 +357,7 @@
 
     <div id="VBox-example"></div>
     <script type="text/javascript">
-      createSandbox( 'VBox-example', scene => {
+      createSandbox( 'VBox-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new VBox( {
@@ -386,7 +386,7 @@
 
     <div id="orientation-example"></div>
     <script type="text/javascript">
-      createSandbox( 'orientation-example', scene => {
+      createSandbox( 'orientation-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new FlowBox( {
@@ -410,7 +410,7 @@
 
     <div id="dynamic-example"></div>
     <script type="text/javascript">
-      createSandbox( 'dynamic-example', ( scene, stepEmitter ) => {
+      createSandbox( 'dynamic-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const circle = new Circle( 25, { fill: colors[ 6 ] } );
@@ -444,7 +444,7 @@
 
     <div id="locked-sizing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'locked-sizing-example', ( scene, stepEmitter ) => {
+      createSandbox( 'locked-sizing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const circle = new Circle( 25, { fill: colors[ 6 ] } );
@@ -475,7 +475,7 @@
 
     <div id="invis-example"></div>
     <script type="text/javascript">
-      createSandbox( 'invis-example', scene => {
+      createSandbox( 'invis-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -496,7 +496,7 @@
 
     <div id="force-vis-example"></div>
     <script type="text/javascript">
-      createSandbox( 'force-vis-example', scene => {
+      createSandbox( 'force-vis-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -522,7 +522,7 @@
 
     <div id="resizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'resizable-example', scene => {
+      createSandbox( 'resizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -542,7 +542,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -552,7 +552,7 @@
 
     <div id="grow-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grow-example', scene => {
+      createSandbox( 'grow-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -578,7 +578,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -590,7 +590,7 @@
 
     <div id="stretch-example"></div>
     <script type="text/javascript">
-      createSandbox( 'stretch-example', scene => {
+      createSandbox( 'stretch-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -621,7 +621,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -634,7 +634,7 @@
 
     <div id="maxContentWidth-example"></div>
     <script type="text/javascript">
-      createSandbox( 'maxContentWidth-example', scene => {
+      createSandbox( 'maxContentWidth-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -654,7 +654,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -664,7 +664,7 @@
 
     <div id="minContentWidth-example"></div>
     <script type="text/javascript">
-      createSandbox( 'minContentWidth-example', scene => {
+      createSandbox( 'minContentWidth-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -684,7 +684,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -694,7 +694,7 @@
 
     <div id="secondaryAxisContent-example"></div>
     <script type="text/javascript">
-      createSandbox( 'secondaryAxisContent-example', scene => {
+      createSandbox( 'secondaryAxisContent-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -720,7 +720,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -733,7 +733,7 @@
 
     <div id="justification-example"></div>
     <script type="text/javascript">
-      createSandbox( 'justification-example', scene => {
+      createSandbox( 'justification-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           const createBoxes = label => [
             new Rectangle( 0, 0, 170, 30, { fill: colors[ 2 ], children: [
@@ -778,7 +778,7 @@
           } );
           return container;
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
         box.preferredWidth = 400;
@@ -791,7 +791,7 @@
 
     <div id="wrap-example"></div>
     <script type="text/javascript">
-      createSandbox( 'wrap-example', scene => {
+      createSandbox( 'wrap-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -807,7 +807,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
         box.preferredWidth = 200;
@@ -820,7 +820,7 @@
 
     <div id="align-example"></div>
     <script type="text/javascript">
-      createSandbox( 'align-example', scene => {
+      createSandbox( 'align-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const boxes = [
@@ -865,7 +865,7 @@
 
     <div id="justifyLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'justifyLines-example', scene => {
+      createSandbox( 'justifyLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const boxes = [
@@ -912,7 +912,7 @@
           } );
           return container;
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           heightResizable: true
         } ) );
         box.preferredHeight = 150;
@@ -925,7 +925,7 @@
 
     <div id="spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'spacing-example', scene => {
+      createSandbox( 'spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -939,7 +939,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -951,7 +951,7 @@
 
     <div id="lineSpacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'lineSpacing-example', scene => {
+      createSandbox( 'lineSpacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -966,7 +966,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
         box.preferredWidth = 100;
@@ -979,7 +979,7 @@
 
     <div id="margin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'margin-example', scene => {
+      createSandbox( 'margin-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -994,7 +994,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -1006,7 +1006,7 @@
 
     <div id="marginCell-example"></div>
     <script type="text/javascript">
-      createSandbox( 'marginCell-example', scene => {
+      createSandbox( 'marginCell-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1026,7 +1026,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -1036,7 +1036,7 @@
 
     <div id="alignCell-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignCell-example', scene => {
+      createSandbox( 'alignCell-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1060,7 +1060,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -1070,7 +1070,7 @@
 
     <div id="override-example"></div>
     <script type="text/javascript">
-      createSandbox( 'override-example', scene => {
+      createSandbox( 'override-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1088,7 +1088,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -1102,7 +1102,7 @@
     <div id="separators-example"></div>
     <script type="text/javascript">
 
-      createSandbox( 'separators-example', scene => {
+      createSandbox( 'separators-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1121,7 +1121,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true
         } ) );
       } );
@@ -1146,7 +1146,7 @@
 
     <div id="absolute-example"></div>
     <script type="text/javascript">
-      createSandbox( 'absolute-example', scene => {
+      createSandbox( 'absolute-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1175,7 +1175,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1190,7 +1190,7 @@
 
     <div id="skip-example"></div>
     <script type="text/javascript">
-      createSandbox( 'skip-example', scene => {
+      createSandbox( 'skip-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1211,7 +1211,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1221,7 +1221,7 @@
 
     <div id="rows-example"></div>
     <script type="text/javascript">
-      createSandbox( 'rows-example', scene => {
+      createSandbox( 'rows-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1251,7 +1251,7 @@
 
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1261,7 +1261,7 @@
 
     <div id="columns-example"></div>
     <script type="text/javascript">
-      createSandbox( 'columns-example', scene => {
+      createSandbox( 'columns-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1290,7 +1290,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1303,7 +1303,7 @@
 
     <div id="autoColumns-example"></div>
     <script type="text/javascript">
-      createSandbox( 'autoColumns-example', scene => {
+      createSandbox( 'autoColumns-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1314,13 +1314,13 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
     <div id="autoRows-example"></div>
     <script type="text/javascript">
-      createSandbox( 'autoRows-example', scene => {
+      createSandbox( 'autoRows-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1331,7 +1331,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1344,7 +1344,7 @@
 
     <div id="addLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'addLines-example', scene => {
+      createSandbox( 'addLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox();
@@ -1360,7 +1360,7 @@
           return box
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1372,7 +1372,7 @@
 
     <div id="insertLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'insertLines-example', scene => {
+      createSandbox( 'insertLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox( { grow: 1 } );
@@ -1393,7 +1393,7 @@
           return box
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1405,7 +1405,7 @@
 
     <div id="deleteLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'deleteLines-example', scene => {
+      createSandbox( 'deleteLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox( {
@@ -1428,7 +1428,7 @@
           return box
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1441,7 +1441,7 @@
 
     <div id="findCell-example"></div>
     <script type="text/javascript">
-      createSandbox( 'findCell-example', scene => {
+      createSandbox( 'findCell-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const boxes = colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) );
@@ -1471,13 +1471,13 @@
           return box
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
     <div id="getLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'getLines-example', scene => {
+      createSandbox( 'getLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox( {
@@ -1494,7 +1494,7 @@
           return box
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1505,7 +1505,7 @@
 
     <div id="grow-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grow-grid-example', scene => {
+      createSandbox( 'grow-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1534,7 +1534,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -1545,7 +1545,7 @@
 
     <div id="grow-2-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grow-2-grid-example', scene => {
+      createSandbox( 'grow-2-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1575,7 +1575,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -1588,7 +1588,7 @@
 
     <div id="preferred-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'preferred-grid-example', scene => {
+      createSandbox( 'preferred-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1624,7 +1624,7 @@
 
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -1638,7 +1638,7 @@
 
     <div id="gridResizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'gridResizable-example', scene => {
+      createSandbox( 'gridResizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1673,7 +1673,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -1686,7 +1686,7 @@
 
     <div id="align-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'align-grid-example', scene => {
+      createSandbox( 'align-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1718,7 +1718,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -1731,7 +1731,7 @@
 
     <div id="span-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'span-grid-example', scene => {
+      createSandbox( 'span-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1778,7 +1778,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -1791,7 +1791,7 @@
 
     <div id="grid-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grid-spacing-example', scene => {
+      createSandbox( 'grid-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1821,7 +1821,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1829,7 +1829,7 @@
 
     <div id="grid-2-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grid-2-spacing-example', scene => {
+      createSandbox( 'grid-2-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1860,7 +1860,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1868,7 +1868,7 @@
 
     <div id="grid-3-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grid-3-spacing-example', scene => {
+      createSandbox( 'grid-3-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1899,7 +1899,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1909,7 +1909,7 @@
 
     <div id="margin-1-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'margin-1-spacing-example', scene => {
+      createSandbox( 'margin-1-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1939,7 +1939,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -1947,7 +1947,7 @@
 
     <div id="margin-2-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'margin-2-spacing-example', scene => {
+      createSandbox( 'margin-2-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1977,7 +1977,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -2022,7 +2022,7 @@
 
     <div id="rectUnsizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'rectUnsizable-example', scene => {
+      createSandbox( 'rectUnsizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -2058,7 +2058,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -2076,7 +2076,7 @@
 
     <div id="layoutOptionsMutate-example"></div>
     <script type="text/javascript">
-      createSandbox( 'layoutOptionsMutate-example', scene => {
+      createSandbox( 'layoutOptionsMutate-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new HBox( {
@@ -2092,7 +2092,7 @@
           return box;
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
@@ -2110,7 +2110,7 @@
 
     <div id="defaultOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'defaultOrigin-example', scene => {
+      createSandbox( 'defaultOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2134,7 +2134,7 @@
 
     <div id="flowOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'flowOrigin-example', scene => {
+      createSandbox( 'flowOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2182,7 +2182,7 @@
 
     <div id="gridOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'gridOrigin-example', scene => {
+      createSandbox( 'gridOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2211,7 +2211,7 @@
 
     <div id="layoutOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'layoutOrigin-example', scene => {
+      createSandbox( 'layoutOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2251,7 +2251,7 @@
 
     <div id="manualConstraint-example"></div>
     <script type="text/javascript">
-      createSandbox( 'manualConstraint-example', ( scene, stepEmitter ) => {
+      createSandbox( 'manualConstraint-example', ( scene, stepEmitter, display ) => {
 
         const box = ( () => {
           /*START*/
@@ -2298,7 +2298,7 @@
           /*END*/
           return background;
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -2311,7 +2311,7 @@
 
     <div id="flowConstraint-example"></div>
     <script type="text/javascript">
-      createSandbox( 'flowConstraint-example', scene => {
+      createSandbox( 'flowConstraint-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
@@ -2359,7 +2359,7 @@
           /*END*/
           return scene;
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -2372,7 +2372,7 @@
 
     <div id="gridConstraint-example"></div>
     <script type="text/javascript">
-      createSandbox( 'gridConstraint-example', scene => {
+      createSandbox( 'gridConstraint-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
@@ -2423,7 +2423,7 @@
           /*END*/
           return scene;
         } )();
-        scene.addChild( new ResizableNode( box, {} ) );
+        scene.addChild( new ResizableNode( display, box, {} ) );
       } );
     </script>
 
@@ -2435,7 +2435,7 @@
 
     <div id="simpleAlignBox-example"></div>
     <script type="text/javascript">
-      createSandbox( 'simpleAlignBox-example', scene => {
+      createSandbox( 'simpleAlignBox-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2464,7 +2464,7 @@
 
     <div id="alignBoxAlign-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxAlign-example', scene => {
+      createSandbox( 'alignBoxAlign-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2495,7 +2495,7 @@
 
     <div id="alignBoxMargins-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxMargins-example', scene => {
+      createSandbox( 'alignBoxMargins-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2526,7 +2526,7 @@
 
     <div id="alignBoxOnlyMargins-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxOnlyMargins-example', scene => {
+      createSandbox( 'alignBoxOnlyMargins-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2554,7 +2554,7 @@
 
     <div id="alignBoxPreferred-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxPreferred-example', scene => {
+      createSandbox( 'alignBoxPreferred-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2584,7 +2584,7 @@
 
     <div id="alignBoxSizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxSizable-example', scene => {
+      createSandbox( 'alignBoxSizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2598,7 +2598,7 @@
           } );
           /*END*/
         } )();
-        scene.addChild( new ResizableNode( box, {
+        scene.addChild( new ResizableNode( display, box, {
           widthResizable: true,
           heightResizable: true
         } ) );
