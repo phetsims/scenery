@@ -83,7 +83,7 @@
       }
     } );
 
-    const stepEmitter = new axon.Emitter(); // eslint-disable-line no-undef
+    const stepEmitter = new axon.TinyEmitter(); // eslint-disable-line no-undef
 
     display.updateOnRequestAnimationFrame( dt => {
       stepEmitter.emit( dt );
