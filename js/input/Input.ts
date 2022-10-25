@@ -993,10 +993,11 @@ export default class Input extends PhetioObject {
     BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
 
     if ( this.display._accessible ) {
+      const eventTarget = this.attachToWindow ? window : this.display.pdomRootElement!;
 
       // Remove listeners from the root accessible DOM element for each event we want to monitor.
       this.pdomEventListenerMap!.forEach( ( listener, eventName ) => {
-        this.display.pdomRootElement!.removeEventListener( eventName, listener, this.accessibleEventOptions );
+        eventTarget.removeEventListener( eventName, listener, this.accessibleEventOptions );
       } );
     }
   }
