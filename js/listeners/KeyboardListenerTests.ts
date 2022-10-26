@@ -14,6 +14,13 @@ QUnit.module( 'KeyboardListener' );
 
 QUnit.test( 'KeyboardListener Tests', assert => {
 
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+
+  //////////////////////////////////////////////////
+
   let callbackFired = false;
   const listener = new KeyboardListener( {
     keys: [ 'enter' ],
@@ -23,10 +30,6 @@ QUnit.test( 'KeyboardListener Tests', assert => {
     }
   } );
 
-  const rootNode = new Node( { tagName: 'div' } );
-  const display = new Display( rootNode );
-  display.initializeEvents();
-  document.body.appendChild( display.domElement );
   const a = new Node( { tagName: 'div' } );
   rootNode.addChild( a );
   a.addInputListener( listener );
@@ -219,3 +222,26 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   document.body.removeChild( display.domElement );
   display.dispose();
 } );
+
+//
+// QUnit.test( 'KeyboardListener Callback timing', assert => {
+//   const rootNode = new Node( { tagName: 'div' } );
+//   const display = new Display( rootNode );
+//   display.initializeEvents();
+//   document.body.appendChild( display.domElement );
+//
+//
+//   //
+//   // a -> callback timer
+//   //
+//   // wait
+//   // b -> callback timer
+//   //
+//   // release before b
+//   //
+//   // ensure a fires
+//
+//
+//   document.body.removeChild( display.domElement );
+//   display.dispose();
+// });
