@@ -16,7 +16,7 @@
  *
  *     this.addInputListener( new KeyboardListener( {
  *       keys: [ 'a+b', 'a+c', 'shift+arrowLeft', 'alt+g+t', 'ctrl+3', 'alt+ctrl+t' ] as const,
- *       callback: keys => {
+ *       callback: ( event, keys ) => {
  *
  *         if ( keys === 'a+b' ) {
  *           console.log( 'you just pressed a+b!' );
@@ -76,7 +76,7 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // '1|2|3' // any of these keys are pressed
   // 'j+1|j+2' // any of these are pressed
   keys: Keys;
-  callback?: ( keysPressed: Keys[number] ) => void;
+  callback?: ( event: SceneryEvent<KeyboardEvent> | null, keysPressed: Keys[number] ) => void;
   fireOnKeyUp?: boolean;
 
   fireOnHold?: boolean;
@@ -96,13 +96,15 @@ type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
 
 class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputListener {
 
-  // The function called when a KeyGroup is pressed (or just released).
-  // TODO: callback should take a SCeneryEvent. https://github.com/phetsims/scenery/issues/1445
-  private readonly _callback: ( keysPressed: Keys[number] ) => void;
+  // The function called when a KeyGroup is pressed (or just released). Provides the SceneryEvent that fired the input
+  // listeners and this the keys that were pressed from the active key group. The event may be null when using
+  // fireOnHold or in cases of cancel or interrupt.
+  private readonly _callback: ( event: SceneryEvent<KeyboardEvent> | null, keysPressed: Keys[number] ) => void;
 
   // Will it the callback fire on keys up or down?
   private readonly _fireOnKeyUp: boolean;
 
+  // Does the listener fire the callback continuously when keys are held down?
   private readonly _fireOnHold: boolean;
 
   // All of the KeyGroups of this listener from the keys provided in natural language.
@@ -111,6 +113,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // All of the key groups that are currently firing
   private readonly _activeKeyGroups: KeyGroup<Keys>[];
 
+  // Timing variables for the CallbackTimers.
   private readonly _fireOnHoldDelay: number;
   private readonly _fireOnHoldInterval: number;
 
@@ -141,8 +144,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   /**
    * Mostly required to fire with CallbackTimer since the callback cannot take arguments.
    */
-  public fireCallback( naturalKeys: Keys[number] ): void {
-    this._callback( naturalKeys );
+  public fireCallback( event: SceneryEvent<KeyboardEvent> | null, naturalKeys: Keys[number] ): void {
+    this._callback( event, naturalKeys );
   }
 
   /**
@@ -166,7 +169,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
             if ( keyGroup.timer ) {
               keyGroup.timer.start();
             }
-            this.fireCallback( keyGroup.naturalKeys );
+            this.fireCallback( event, keyGroup.naturalKeys );
           }
         }
       } );
@@ -198,7 +201,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
         // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
         if ( globalKeyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
-          this.fireCallback( keyGroup.naturalKeys );
+          this.fireCallback( event, keyGroup.naturalKeys );
         }
       } );
     }
@@ -271,7 +274,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
       // Set up the timer for triggering callbacks if this listener supports press and hold behavior
       const timer = this._fireOnHold ? new CallbackTimer( {
-        callback: () => { this.fireCallback( naturalKeys ); },
+        callback: () => { this.fireCallback( null, naturalKeys ); },
         delay: this._fireOnHoldDelay,
         interval: this._fireOnHoldInterval
       } ) : null;

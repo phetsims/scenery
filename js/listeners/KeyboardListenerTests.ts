@@ -56,7 +56,7 @@ QUnit.test( 'Basics', assert => {
   a.addInputListener( new KeyboardListener( {
     keys: [ 'p', 'ctrl+p' ],
 
-    callback: keysPressed => {
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFired = true;
       }
