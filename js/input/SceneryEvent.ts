@@ -19,7 +19,8 @@ import StringIO from '../../../tandem/js/types/StringIO.js';
 import { Mouse, Node, PDOMPointer, Pointer, scenery, Trail } from '../imports.js';
 import EventIO from './EventIO.js';
 
-export default class SceneryEvent<DOMEvent extends Event = Event> {
+// "out" here ensures that SceneryListenerFunctions don't specify a wider type arguments for the event, see  https://github.com/phetsims/scenery/issues/1483
+export default class SceneryEvent<out DOMEvent extends Event = Event> {
 
   // Whether this SceneryEvent has been 'handled'. If so, it will not bubble further.
   public handled: boolean;

@@ -930,7 +930,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
    * @param [callback] optionally called immediately after press, but only on successful click
    * @returns success - Returns whether the press was actually started
    */
-  public click( event: PressListenerEvent | null, callback?: () => void ): boolean {
+  public click( event: SceneryEvent<MouseEvent> | null, callback?: () => void ): boolean {
     if ( this.canClick() ) {
       this.interrupted = false; // clears the flag (don't set to false before here)
 

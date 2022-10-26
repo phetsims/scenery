@@ -415,7 +415,7 @@ export default class DragListener extends PressListener implements TInputListene
    * components that have drag functionality but can still be activated with a single click event.
    * (scenery-internal) (part of the scenery listener API)
    */
-  public override click( event: PressListenerEvent, callback?: () => void ): boolean {
+  public override click( event: SceneryEvent<MouseEvent>, callback?: () => void ): boolean {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener click' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

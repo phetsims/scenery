@@ -167,7 +167,7 @@ export default class FireListener extends PressListener implements TInputListene
    * @param [event]
    * @param [callback] - called at the end of the click
    */
-  public override click( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null, callback?: () => void ): boolean {
+  public override click( event: SceneryEvent<MouseEvent> | null, callback?: () => void ): boolean {
     return super.click( event, () => {
 
       // don't click if listener was interrupted before this callback
