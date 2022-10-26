@@ -1191,7 +1191,6 @@ export default class Input extends PhetioObject {
     if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement as HTMLElement ) ) {
 
       const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
-      // TODO: Sam we were unsure if this code might interact with JS code that may create problems in the future. Thoughts? https://github.com/phetsims/chipper/issues/1344
       assert && assert( relatedTarget instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
       const trailIndices = relatedTarget.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
       assert && assert( trailIndices, 'should not be null' );

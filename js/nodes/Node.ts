@@ -2331,7 +2331,6 @@ class Node extends ParallelDOM {
       // translate( x, y, prependInstead )
       assert && assert( isFinite( x ), 'x should be a finite number' );
 
-      // TODO: I am cleaning up type assertions and I was unsure how to proceed here. JO What is your recommendation? https://github.com/phetsims/chipper/issues/1344
       assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' ); // eslint-disable-line no-simple-type-checking-assertions
 
       if ( Math.abs( x ) < 1e-12 && Math.abs( y as number ) < 1e-12 ) { return; } // bail out if both are zero
