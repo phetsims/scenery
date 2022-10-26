@@ -668,7 +668,8 @@ export default class Input extends PhetioObject {
     } );
 
     this.focusinAction = new PhetioAction( ( event: FocusEvent ) => {
-      if ( !this.getPDOMEventTrail( event, 'focusin' ) ) {
+      const trail = this.getPDOMEventTrail( event, 'focusin' );
+      if ( !trail ) {
         return;
       }
 
@@ -680,7 +681,6 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusin(${Input.debugText( null, event )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      const trail = this.updateTrailForPDOMDispatch( event );
       this.dispatchPDOMEvent<FocusEvent>( trail, 'focus', event, false );
       this.dispatchPDOMEvent<FocusEvent>( trail, 'focusin', event, true );
 
@@ -696,7 +696,8 @@ export default class Input extends PhetioObject {
     } );
 
     this.focusoutAction = new PhetioAction( ( event: FocusEvent ) => {
-      if ( !this.getPDOMEventTrail( event, 'focusout' ) ) {
+      const trail = this.getPDOMEventTrail( event, 'focusout' );
+      if ( !trail ) {
         return;
       }
 
@@ -708,7 +709,6 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusOut(${Input.debugText( null, event )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      const trail = this.updateTrailForPDOMDispatch( event );
       this.dispatchPDOMEvent<FocusEvent>( trail, 'blur', event, false );
       this.dispatchPDOMEvent<FocusEvent>( trail, 'focusout', event, true );
 
@@ -726,14 +726,14 @@ export default class Input extends PhetioObject {
     // https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event notes that the click action should result
     // in a MouseEvent
     this.clickAction = new PhetioAction( ( event: MouseEvent ) => {
-      if ( !this.getPDOMEventTrail( event, 'click' ) ) {
+      const trail = this.getPDOMEventTrail( event, 'click' );
+      if ( !trail ) {
         return;
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `click(${Input.debugText( null, event )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      const trail = this.updateTrailForPDOMDispatch( event );
       this.dispatchPDOMEvent<MouseEvent>( trail, 'click', event, true );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -748,14 +748,14 @@ export default class Input extends PhetioObject {
     } );
 
     this.inputAction = new PhetioAction( ( event: Event | InputEvent ) => {
-      if ( !this.getPDOMEventTrail( event, 'input' ) ) {
+      const trail = this.getPDOMEventTrail( event, 'input' );
+      if ( !trail ) {
         return;
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `input(${Input.debugText( null, event )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      const trail = this.updateTrailForPDOMDispatch( event );
       this.dispatchPDOMEvent<Event | InputEvent>( trail, 'input', event, true );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -770,14 +770,14 @@ export default class Input extends PhetioObject {
     } );
 
     this.changeAction = new PhetioAction( ( event: Event ) => {
-      if ( !this.getPDOMEventTrail( event, 'change' ) ) {
+      const trail = this.getPDOMEventTrail( event, 'change' );
+      if ( !trail ) {
         return;
       }
 
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `change(${Input.debugText( null, event )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      const trail = this.updateTrailForPDOMDispatch( event );
       this.dispatchPDOMEvent<Event>( trail, 'change', event, true );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -797,10 +797,8 @@ export default class Input extends PhetioObject {
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', event, true );
 
-      if ( this.getPDOMEventTrail( event, 'keydown' ) ) {
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keydown', event, true );
-      }
+      const trail = this.getPDOMEventTrail( event, 'keydown' );
+      trail && this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keydown', event, true );
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', event, false );
 
@@ -821,10 +819,8 @@ export default class Input extends PhetioObject {
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', event, true );
 
-      if ( this.getPDOMEventTrail( event, 'keydown' ) ) {
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keyup', event, true );
-      }
+      const trail = this.getPDOMEventTrail( event, 'keydown' );
+      trail && this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keyup', event, true );
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', event, false );
 
@@ -1106,6 +1102,8 @@ export default class Input extends PhetioObject {
    */
   private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: string, domEvent: DOMEvent, bubbles: boolean ): void {
 
+    this.ensurePDOMPointer().updateTrail( trail );
+
     // exclude focus and blur events because they can happen with scripting without user input
     if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) ) {
       Display.userGestureEmitter.emit();
@@ -1172,17 +1170,6 @@ export default class Input extends PhetioObject {
       return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
     }
     return null;
-  }
-
-  /**
-   * Update the PDOMPointer with a new trail from a DOMEvent and return it. For multiple dispatches from a single
-   * DOMEvent, this ensures that all will dispatch to the same Trail.
-   */
-  private updateTrailForPDOMDispatch( domEvent: Event ): Trail {
-
-    const trail = this.getTrailFromPDOMEvent( domEvent );
-    assert && assert( trail, 'trail should not be null because domEvent is from the PDOM' );
-    return this.ensurePDOMPointer().updateTrail( trail! );
   }
 
   /**
