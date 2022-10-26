@@ -8,7 +8,7 @@
  * @author Agustín Vallejo (PhET Interactive Simulations)
  */
 
-import { KeyboardListener, Node, Display, KeyboardUtils } from '../imports.js';
+import { Display, KeyboardListener, KeyboardUtils, Node } from '../imports.js';
 
 QUnit.module( 'KeyboardListener' );
 
@@ -46,6 +46,37 @@ QUnit.test( 'Basics', assert => {
     bubbles: true
   } ) );
   assert.ok( callbackFired, 'should fire on enter' );
+
+  //////////////////////////////////////////////////////
+
+  a.removeInputListener( listener );
+
+  let pFired = false;
+  let ctrlPFired = false;
+  a.addInputListener( new KeyboardListener( {
+    keys: [ 'p', 'ctrl+p' ],
+
+    callback: keysPressed => {
+      if ( keysPressed === 'p' ) {
+        pFired = true;
+      }
+      else if ( keysPressed === 'ctrl+p' ) {
+        ctrlPFired = true;
+      }
+      else {
+        assert.ok( false, 'never again' );
+      }
+    }
+  } ) );
+  domElement.dispatchEvent( new KeyboardEvent( 'keydown', {
+    code: KeyboardUtils.KEY_P,
+    ctrlKey: true,
+    bubbles: true
+  } ) );
+  assert.ok( pFired, 'p should have fired' );
+  assert.ok( ctrlPFired, 'ctrl P should have fired' );
+
+  //////////////////////////////////////////////////////
 
   document.body.removeChild( display.domElement );
   display.dispose();

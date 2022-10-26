@@ -45,6 +45,9 @@ class KeyStateTracker {
   // with events so we have to update this object ourselves.
   private keyState: KeyState = {};
 
+  // The KeyboardEvent.code of the last key that was pressed down when updating the key state.
+  private _lastKeyDown: string | null = null;
+
   // Whether this KeyStateTracker is attached to the document and listening for events.
   private attachedToDocument = false;
 
@@ -107,6 +110,8 @@ class KeyStateTracker {
             timeDown: 0 // in ms
           };
         }
+
+        this._lastKeyDown = key;
 
         // keydown update received, notify listeners
         this.keydownEmitter.emit( domEvent );
@@ -234,6 +239,13 @@ class KeyStateTracker {
    */
   public get movementKeysDown(): boolean {
     return this.isAnyKeyInListDown( KeyboardUtils.MOVEMENT_KEYS );
+  }
+
+  /**
+   * Returns the KeyboardEvent.code from the last key down that updated the keystate.
+   */
+  public getLastKeyDown(): string | null {
+    return this._lastKeyDown;
   }
 
   /**

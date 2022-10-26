@@ -44,7 +44,7 @@
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { globalKeyStateTracker, EnglishStringToCodeMap, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { EnglishStringToCodeMap, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
@@ -91,15 +91,10 @@ type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
   key: string;
   allKeys: string[];
   naturalKeys: Keys[number];
+  timer: CallbackTimer | null;
 };
 
 class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputListener {
-
-  // The CallbackTimer that will manage firing when this listener supports fireOnHold.
-  private readonly _timer?: CallbackTimer;
-
-  // The KeyGroup that is currently "active", firing the callback because keys are pressed or just released.
-  private _activeKeyGroup: KeyGroup<Keys> | null;
 
   // The function called when a KeyGroup is pressed (or just released).
   // TODO: callback should take a SCeneryEvent. https://github.com/phetsims/scenery/issues/1445
@@ -108,8 +103,16 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // Will it the callback fire on keys up or down?
   private readonly _fireOnKeyUp: boolean;
 
+  private readonly _fireOnHold: boolean;
+
   // All of the KeyGroups of this listener from the keys provided in natural language.
   private readonly _keyGroups: KeyGroup<Keys>[];
+
+  // All of the key groups that are currently firing
+  private readonly _activeKeyGroups: KeyGroup<Keys>[];
+
+  private readonly _fireOnHoldDelay: number;
+  private readonly _fireOnHoldInterval: number;
 
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
     assert && assertMutuallyExclusiveOptions( providedOptions, [ 'fireOnKeyUp' ], [ 'fireOnHold', 'fireOnHoldInterval', 'fireOnHoldDelay' ] );
@@ -124,59 +127,70 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     this._callback = options.callback;
     this._fireOnKeyUp = options.fireOnKeyUp;
-    this._activeKeyGroup = null;
 
     // convert the provided keys to data that we can respond to with scenery's Input system
     this._keyGroups = this.convertKeysToKeyGroups( options.keys );
 
-    if ( options.fireOnHold ) {
-      this._timer = new CallbackTimer( {
-        callback: this.fireCallback.bind( this ),
-        delay: options.fireOnHoldDelay,
-        interval: options.fireOnHoldInterval
-      } );
-    }
+    this._fireOnHold = options.fireOnHold;
+    this._fireOnHoldDelay = options.fireOnHoldDelay;
+    this._fireOnHoldInterval = options.fireOnHoldInterval;
+
+    this._activeKeyGroups = [];
   }
 
   /**
    * Mostly required to fire with CallbackTimer since the callback cannot take arguments.
    */
-  public fireCallback(): void {
-    assert && assert( this._activeKeyGroup, 'Need an active keyGroup down to fire' );
-    this._callback( this._activeKeyGroup!.naturalKeys );
+  public fireCallback( naturalKeys: Keys[number] ): void {
+    this._callback( naturalKeys );
   }
 
+  /**
+   * Part of the scenery listener API. Responding to a keydown event, update active keygroups and potentially
+   * start firing callbacks or timers.
+   */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
 
-    if ( !this._fireOnKeyUp && !this._activeKeyGroup ) {
+    if ( !this._fireOnKeyUp ) {
 
       // modifier keys can be pressed in any order but the last key in the group must be pressed last
       this._keyGroups.forEach( keyGroup => {
-        // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
-        if ( globalKeyStateTracker.areKeysDown( keyGroup.allKeys ) &&
-             globalKeyStateTracker.mostRecentKeyFromList( keyGroup.allKeys ) === keyGroup.key ) {
 
-          this._activeKeyGroup = keyGroup;
+        if ( !this._activeKeyGroups.includes( keyGroup ) ) {
+          // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
+          if ( globalKeyStateTracker.areKeysDown( keyGroup.allKeys ) &&
+               globalKeyStateTracker.getLastKeyDown() === keyGroup.key ) {
 
-          if ( this._timer ) {
-            this._timer.start();
+            this._activeKeyGroups.push( keyGroup );
+
+            if ( keyGroup.timer ) {
+              keyGroup.timer.start();
+            }
+            this.fireCallback( keyGroup.naturalKeys );
           }
-          this.fireCallback();
         }
       } );
     }
   }
 
+  /**
+   * Part of the scenery listener API. If there are any active key groups firing stop and remove if keygroup keys
+   * are no longer down. Also potentially fires a keygroup if the key that was released has all other modifier keys
+   * down.
+   */
   public keyup( event: SceneryEvent<KeyboardEvent> ): void {
 
-    if ( this._activeKeyGroup ) {
+    if ( this._activeKeyGroups.length > 0 ) {
       // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
-      if ( !globalKeyStateTracker.areKeysDown( this._activeKeyGroup.allKeys ) ) {
-        if ( this._timer ) {
-          this._timer.stop( false );
+
+      this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
+        if ( !globalKeyStateTracker.areKeysDown( activeKeyGroup.allKeys ) ) {
+          if ( activeKeyGroup.timer ) {
+            activeKeyGroup.timer.stop( false );
+          }
+          this._activeKeyGroups.splice( index, 1 );
         }
-        this._activeKeyGroup = null;
-      }
+      } );
     }
 
     if ( this._fireOnKeyUp ) {
@@ -184,26 +198,45 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
         // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
         if ( globalKeyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
-          this._activeKeyGroup = keyGroup;
-          this.fireCallback();
-          this._activeKeyGroup = null;
+          this.fireCallback( keyGroup.naturalKeys );
         }
       } );
     }
   }
 
+  /**
+   * Part of the scenery listener API. On cancel, clear active key groups and stop their behavior.
+   */
   public cancel(): void {
-    // TODO
+    this.clearActiveKeyGroups();
   }
 
+  /**
+   * Part of the scenery listener API. Clear active key groups and stop their callbacks.
+   */
   public interrupt(): void {
-    // TODO
+    this.clearActiveKeyGroups();
   }
 
+  /**
+   * Dispose of this listener by disposing of any Callback timers. Then clear all key groups.
+   */
   public dispose(): void {
-    if ( this._timer ) {
-      this._timer.dispose();
-    }
+    this._keyGroups.forEach( activeKeyGroup => {
+      activeKeyGroup.timer && activeKeyGroup.timer.dispose();
+    } );
+    this._keyGroups.length = 0;
+  }
+
+  /**
+   * Clear the active key groups on this listener. Stopping any active groups if they use a CallbackTimer.
+   */
+  private clearActiveKeyGroups(): void {
+    this._activeKeyGroups.forEach( activeKeyGroup => {
+      activeKeyGroup.timer && activeKeyGroup.timer.stop( false );
+    } );
+
+    this._activeKeyGroups.length = 0;
   }
 
   /**
@@ -235,11 +268,20 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
           return modifierKey;
         } );
       }
+
+      // Set up the timer for triggering callbacks if this listener supports press and hold behavior
+      const timer = this._fireOnHold ? new CallbackTimer( {
+        callback: () => { this.fireCallback( naturalKeys ); },
+        delay: this._fireOnHoldDelay,
+        interval: this._fireOnHoldInterval
+      } ) : null;
+
       return {
         key: key,
         modifierKeys: modifierKeys,
         naturalKeys: naturalKeys,
-        allKeys: modifierKeys.concat( key )
+        allKeys: modifierKeys.concat( key ),
+        timer: timer
       };
     } );
 
