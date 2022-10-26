@@ -14,6 +14,7 @@ export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryE
 type TInputListener = {
   interrupt?: () => void;
   cursor?: string | null;
+  capture?: boolean; // NOTE: only applies to globalkeydown / globalkeyup
 
   focus?: SceneryListenerFunction<FocusEvent>;
   blur?: SceneryListenerFunction<FocusEvent>;
@@ -22,6 +23,9 @@ type TInputListener = {
 
   keydown?: SceneryListenerFunction<KeyboardEvent>;
   keyup?: SceneryListenerFunction<KeyboardEvent>;
+
+  globalkeydown?: SceneryListenerFunction<KeyboardEvent>;
+  globalkeyup?: SceneryListenerFunction<KeyboardEvent>;
 
   click?: SceneryListenerFunction<MouseEvent>;
   input?: SceneryListenerFunction<Event | InputEvent>;
