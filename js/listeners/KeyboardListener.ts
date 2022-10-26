@@ -10,7 +10,7 @@
  *   to be pressed while the modifier keys are down.
  * - The order modifier keys are pressed does not matter for firing the callback.
  *
- * In the above example "shift+t" OR "alt+shift + r" will fire the callback when pressed.
+ * In the above example "shift+t" OR "alt+shift+r" will fire the callback when pressed.
  *
  * An example usage would like this:
  *
@@ -70,17 +70,23 @@ type OneKeyStroke = `${AllowedKeys}` |
 // TODO: Automated testing, https://github.com/phetsims/scenery/issues/1445
 type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
-  // Keys that trigger functionality for this listener.
-  // 'j+o+1' // all three keys need to be held down in order
-  // 'j+o' // these two keys need to be pressed down
-  // '1|2|3' // any of these keys are pressed
-  // 'j+1|j+2' // any of these are pressed
+  // The keys that need to be pressed to fire the callback. In a form like `[ 'shift+t', 'alt+shift+r' ]`. See top
+  // level documentation for more information and an example of providing keys.
   keys: Keys;
+
+  // Called when the listener detects that the set of keys are pressed.
   callback?: ( event: SceneryEvent<KeyboardEvent> | null, keysPressed: Keys[number] ) => void;
+
+  // Does the listener fire when the last key in the group is pressed down or released?
   fireOnKeyUp?: boolean;
 
+  // Does the listener fire continuously as you hold down keys?
   fireOnHold?: boolean;
+
+  // If fireOnHold true, this is the delay in (in milliseconds) before the callback is fired continuously.
   fireOnHoldDelay?: number;
+
+  // If fireOnHold true, this is the interval (in milliseconds) that the callback fires after the fireOnHoldDelay.
   fireOnHoldInterval?: number;
 };
 
@@ -97,7 +103,7 @@ type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
 class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputListener {
 
   // The function called when a KeyGroup is pressed (or just released). Provides the SceneryEvent that fired the input
-  // listeners and this the keys that were pressed from the active key group. The event may be null when using
+  // listeners and this the keys that were pressed from the active KeyGroup. The event may be null when using
   // fireOnHold or in cases of cancel or interrupt.
   private readonly _callback: ( event: SceneryEvent<KeyboardEvent> | null, keysPressed: Keys[number] ) => void;
 
@@ -110,7 +116,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // All of the KeyGroups of this listener from the keys provided in natural language.
   private readonly _keyGroups: KeyGroup<Keys>[];
 
-  // All of the key groups that are currently firing
+  // All of the KeyGroups that are currently firing
   private readonly _activeKeyGroups: KeyGroup<Keys>[];
 
   // Timing variables for the CallbackTimers.
@@ -149,8 +155,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Part of the scenery listener API. Responding to a keydown event, update active keygroups and potentially
-   * start firing callbacks or timers.
+   * Part of the scenery listener API. Responding to a keydown event, update active KeyGroups and potentially
+   * fire callbacks and start CallbackTimers.
    */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
 
@@ -177,8 +183,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Part of the scenery listener API. If there are any active key groups firing stop and remove if keygroup keys
-   * are no longer down. Also potentially fires a keygroup if the key that was released has all other modifier keys
+   * Part of the scenery listener API. If there are any active KeyGroup firing stop and remove if KeyGroup keys
+   * are no longer down. Also potentially fires a KeyGroup if the key that was released has all other modifier keys
    * down.
    */
   public keyup( event: SceneryEvent<KeyboardEvent> ): void {
@@ -208,21 +214,21 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Part of the scenery listener API. On cancel, clear active key groups and stop their behavior.
+   * Part of the scenery listener API. On cancel, clear active KeyGroups and stop their behavior.
    */
   public cancel(): void {
     this.clearActiveKeyGroups();
   }
 
   /**
-   * Part of the scenery listener API. Clear active key groups and stop their callbacks.
+   * Part of the scenery listener API. Clear active KeyGroups and stop their callbacks.
    */
   public interrupt(): void {
     this.clearActiveKeyGroups();
   }
 
   /**
-   * Dispose of this listener by disposing of any Callback timers. Then clear all key groups.
+   * Dispose of this listener by disposing of any Callback timers. Then clear all KeyGroups.
    */
   public dispose(): void {
     this._keyGroups.forEach( activeKeyGroup => {
@@ -232,7 +238,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Clear the active key groups on this listener. Stopping any active groups if they use a CallbackTimer.
+   * Clear the active KeyGroups on this listener. Stopping any active groups if they use a CallbackTimer.
    */
   private clearActiveKeyGroups(): void {
     this._activeKeyGroups.forEach( activeKeyGroup => {
