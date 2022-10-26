@@ -88,11 +88,11 @@ export { default as Picker } from './util/Picker.js';
 export { default as RendererSummary } from './util/RendererSummary.js';
 export { default as NodeProperty } from './util/NodeProperty.js';
 export { default as PDOMDisplaysInfo } from './accessibility/pdom/PDOMDisplaysInfo.js';
-export { default as WidthSizable, isWidthSizable, mixesWidthSizable, WIDTH_SIZABLE_OPTION_KEYS } from './layout/WidthSizable.js';
+export { default as WidthSizable, isWidthSizable, extendsWidthSizable, WIDTH_SIZABLE_OPTION_KEYS } from './layout/WidthSizable.js';
 export type { WidthSizableNode, WidthSizableOptions } from './layout/WidthSizable.js';
-export { default as HeightSizable, isHeightSizable, mixesHeightSizable, HEIGHT_SIZABLE_OPTION_KEYS } from './layout/HeightSizable.js';
+export { default as HeightSizable, isHeightSizable, extendsHeightSizable, HEIGHT_SIZABLE_OPTION_KEYS } from './layout/HeightSizable.js';
 export type { HeightSizableNode, HeightSizableOptions } from './layout/HeightSizable.js';
-export { default as Sizable, isSizable, mixesSizable, SIZABLE_SELF_OPTION_KEYS, SIZABLE_OPTION_KEYS } from './layout/Sizable.js';
+export { default as Sizable, isSizable, extendsSizable, SIZABLE_SELF_OPTION_KEYS, SIZABLE_OPTION_KEYS } from './layout/Sizable.js';
 export type { SizableNode, SizableOptions } from './layout/Sizable.js';
 
 export { default as Trail } from './util/Trail.js';

@@ -1,6 +1,5 @@
 // Copyright 2022, University of Colorado Boulder
 
-//TODO https://github.com/phetsims/scenery/issues/1488 adjust doc and naming to indicate that this is a trait, not a mixin
 /**
  * Provides a minimum and preferred width/height (both WidthSizable and HeightSizable, but with added features that
  * allow convenience of working with both dimensions at once).
@@ -67,7 +66,7 @@ export type SizableOptions = SelfOptions & ParentOptions;
 
 const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );
-  const SizableMixin = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class SizableMixin extends SuperExtendedType {
+  const SizableTrait = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class SizableTrait extends SuperExtendedType {
 
     public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
@@ -167,7 +166,7 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       this.heightSizable = value;
     }
 
-    public get mixesSizable(): boolean { return true; }
+    public get extendsSizable(): boolean { return true; }
 
     public validateLocalPreferredSize(): void {
       if ( assert ) {
@@ -340,29 +339,29 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
     const existingKeys = SuperExtendedType.prototype._mutatorKeys;
     const newKeys = SIZABLE_SELF_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
-    SizableMixin.prototype._mutatorKeys = [
+    SizableTrait.prototype._mutatorKeys = [
       ...existingKeys.slice( 0, indexOfBoundsBasedOptions ),
       ...newKeys,
       ...existingKeys.slice( indexOfBoundsBasedOptions )
     ];
   }
 
-  return SizableMixin;
+  return SizableTrait;
 } );
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as Sizable
 // We need to define an unused function with a concrete type, so that we can extract the return type of the function
-// and provide a type for a Node that mixes this type.
+// and provide a type for a Node that extends this type.
 const wrapper = () => Sizable( Node );
 export type SizableNode = InstanceType<ReturnType<typeof wrapper>>;
 
 const isSizable = ( node: Node ): node is SizableNode => {
   return node.widthSizable && node.heightSizable;
 };
-const mixesSizable = ( node: Node ): node is SizableNode => {
-  return node.mixesSizable;
+const extendsSizable = ( node: Node ): node is SizableNode => {
+  return node.extendsSizable;
 };
 
 scenery.register( 'Sizable', Sizable );
 export default Sizable;
-export { isSizable, mixesSizable };
+export { isSizable, extendsSizable };

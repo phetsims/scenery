@@ -1,6 +1,5 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
-//TODO https://github.com/phetsims/scenery/issues/1488 adjust doc and naming to indicate that this is a trait, not a mixin
 /**
  * Provides a minimum and preferred width. The minimum width is set by the component, so that layout containers could
  * know how "small" the component can be made. The preferred width is set by the layout container, and the component
@@ -56,13 +55,13 @@ export type WidthSizableOptions = {
   widthSizable?: boolean;
 };
 
-// IMPORTANT: If you're mixing this in, typically don't pass options that WidthSizable would take through the
+// IMPORTANT: If you're combining this in, typically don't pass options that WidthSizable would take through the
 // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
 // values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
 const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  const WidthSizableMixin = DelayedMutate( 'WidthSizable', WIDTH_SIZABLE_OPTION_KEYS, class WidthSizableMixin extends type {
+  const WidthSizableTrait = DelayedMutate( 'WidthSizable', WIDTH_SIZABLE_OPTION_KEYS, class WidthSizableTrait extends type {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
     public readonly preferredWidthProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
@@ -84,7 +83,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     protected _updateMinimumWidthListener: () => void;
     protected _updateLocalMinimumWidthListener: () => void;
 
-    // IMPORTANT: If you're mixing this in, typically don't pass options that WidthSizable would take through the
+    // IMPORTANT: If you're combining this in, typically don't pass options that WidthSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
     // values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
     // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
@@ -180,7 +179,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       this.isWidthResizableProperty.value = value;
     }
 
-    public get mixesWidthSizable(): boolean { return true; }
+    public get extendsWidthSizable(): boolean { return true; }
 
     public validateLocalPreferredWidth(): void {
       if ( assert ) {
@@ -193,7 +192,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalPreferredWidth(): number | null {
       const node = this as unknown as Node;
 
@@ -219,7 +218,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculatePreferredWidth(): number | null {
       const node = this as unknown as Node;
 
@@ -243,7 +242,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalMinimumWidth(): number | null {
       const node = this as unknown as Node;
 
@@ -267,7 +266,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateMinimumWidth(): number | null {
       const node = this as unknown as Node;
 
@@ -297,29 +296,29 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     const existingKeys = type.prototype._mutatorKeys;
     const newKeys = WIDTH_SIZABLE_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
-    WidthSizableMixin.prototype._mutatorKeys = [
+    WidthSizableTrait.prototype._mutatorKeys = [
       ...existingKeys.slice( 0, indexOfBoundsBasedOptions ),
       ...newKeys,
       ...existingKeys.slice( indexOfBoundsBasedOptions )
     ];
   }
 
-  return WidthSizableMixin;
+  return WidthSizableTrait;
 } );
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as widthSizable
 // We need to define an unused function with a concrete type, so that we can extract the return type of the function
-// and provide a type for a Node that mixes this type.
+// and provide a type for a Node that extends this type.
 const wrapper = () => WidthSizable( Node );
 export type WidthSizableNode = InstanceType<ReturnType<typeof wrapper>>;
 
 const isWidthSizable = ( node: Node ): node is WidthSizableNode => {
   return node.widthSizable;
 };
-const mixesWidthSizable = ( node: Node ): node is WidthSizableNode => {
-  return node.mixesWidthSizable;
+const extendsWidthSizable = ( node: Node ): node is WidthSizableNode => {
+  return node.extendsWidthSizable;
 };
 
 scenery.register( 'WidthSizable', WidthSizable );
 export default WidthSizable;
-export { isWidthSizable, mixesWidthSizable };
+export { isWidthSizable, extendsWidthSizable };

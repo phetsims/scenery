@@ -4948,11 +4948,11 @@ class Node extends ParallelDOM {
 
   public get heightSizable(): boolean { return false; }
 
-  public get mixesWidthSizable(): boolean { return false; }
+  public get extendsWidthSizable(): boolean { return false; }
 
-  public get mixesHeightSizable(): boolean { return false; }
+  public get extendsHeightSizable(): boolean { return false; }
 
-  public get mixesSizable(): boolean { return false; }
+  public get extendsSizable(): boolean { return false; }
 
   /**
    * Sets the preventFit performance flag.

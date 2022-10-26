@@ -1,6 +1,5 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
-//TODO https://github.com/phetsims/scenery/issues/1488 adjust doc and naming to indicate that this is a trait, not a mixin
 /**
  * Provides a minimum and preferred height. The minimum height is set by the component, so that layout containers could
  * know how "small" the component can be made. The preferred height is set by the layout container, and the component
@@ -56,13 +55,13 @@ export type HeightSizableOptions = {
   heightSizable?: boolean;
 };
 
-// IMPORTANT: If you're mixing this in, typically don't pass options that HeightSizable would take through the
+// IMPORTANT: If you're combining this in, typically don't pass options that HeightSizable would take through the
 // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
 // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
 const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  const HeightSizableMixin = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS, class HeightSizableMixin extends type {
+  const HeightSizableTrait = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS, class HeightSizableTrait extends type {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
     public readonly preferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
@@ -84,7 +83,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     protected _updateMinimumHeightListener: () => void;
     protected _updateLocalMinimumHeightListener: () => void;
 
-    // IMPORTANT: If you're mixing this in, typically don't pass options that HeightSizable would take through the
+    // IMPORTANT: If you're combining this in, typically don't pass options that HeightSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
     // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
     // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
@@ -179,7 +178,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.isHeightResizableProperty.value = value;
     }
 
-    public get mixesHeightSizable(): boolean { return true; }
+    public get extendsHeightSizable(): boolean { return true; }
 
     public validateLocalPreferredHeight(): void {
       if ( assert ) {
@@ -192,7 +191,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalPreferredHeight(): number | null {
       const node = this as unknown as Node;
 
@@ -218,7 +217,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculatePreferredHeight(): number | null {
       const node = this as unknown as Node;
 
@@ -242,7 +241,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalMinimumHeight(): number | null {
       const node = this as unknown as Node;
 
@@ -266,7 +265,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       }
     }
 
-    // This is provided to hook into the Sizable mixin, so that we can update the opposite dimension
+    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateMinimumHeight(): number | null {
       const node = this as unknown as Node;
 
@@ -296,29 +295,29 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     const existingKeys = type.prototype._mutatorKeys;
     const newKeys = HEIGHT_SIZABLE_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
-    HeightSizableMixin.prototype._mutatorKeys = [
+    HeightSizableTrait.prototype._mutatorKeys = [
       ...existingKeys.slice( 0, indexOfBoundsBasedOptions ),
       ...newKeys,
       ...existingKeys.slice( indexOfBoundsBasedOptions )
     ];
   }
 
-  return HeightSizableMixin;
+  return HeightSizableTrait;
 } );
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable.
 // We need to define an unused function with a concrete type, so that we can extract the return type of the function
-// and provide a type for a Node that mixes this type.
+// and provide a type for a Node that extends this type.
 const wrapper = () => HeightSizable( Node );
 export type HeightSizableNode = InstanceType<ReturnType<typeof wrapper>>;
 
 const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
   return node.heightSizable;
 };
-const mixesHeightSizable = ( node: Node ): node is HeightSizableNode => {
-  return node.mixesHeightSizable;
+const extendsHeightSizable = ( node: Node ): node is HeightSizableNode => {
+  return node.extendsHeightSizable;
 };
 
 scenery.register( 'HeightSizable', HeightSizable );
 export default HeightSizable;
-export { isHeightSizable, mixesHeightSizable };
+export { isHeightSizable, extendsHeightSizable };
