@@ -173,7 +173,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Features, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
+import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
@@ -263,8 +263,6 @@ type SelfOptions = EmptySelfOptions;
 
 export type InputOptions = SelfOptions & PickOptional<PhetioObjectOptions, 'tandem'>;
 
-type EventListenerOptions = { capture?: boolean; passive?: boolean; once?: boolean } | boolean;
-
 export default class Input extends PhetioObject {
 
   public readonly display: Display;
@@ -320,22 +318,14 @@ export default class Input extends PhetioObject {
   private readonly lostPointerCaptureAction: PhetioAction<[ number, Event ]>;
 
   // If accessible
-  private readonly focusinAction?: PhetioAction<[ FocusEvent ]>;
-  private readonly focusoutAction?: PhetioAction<[ FocusEvent ]>;
-  private readonly clickAction?: PhetioAction<[ MouseEvent ]>;
-  private readonly inputAction?: PhetioAction<[ Event | InputEvent ]>;
-  private readonly changeAction?: PhetioAction<[ Event ]>;
-  private readonly keydownAction?: PhetioAction<[ KeyboardEvent ]>;
-  private readonly keyupAction?: PhetioAction<[ KeyboardEvent ]>;
+  private readonly focusinAction: PhetioAction<[ FocusEvent ]>;
+  private readonly focusoutAction: PhetioAction<[ FocusEvent ]>;
+  private readonly clickAction: PhetioAction<[ MouseEvent ]>;
+  private readonly inputAction: PhetioAction<[ Event | InputEvent ]>;
+  private readonly changeAction: PhetioAction<[ Event ]>;
+  private readonly keydownAction: PhetioAction<[ KeyboardEvent ]>;
+  private readonly keyupAction: PhetioAction<[ KeyboardEvent ]>;
 
-  // Same event options for all DOM listeners, used when we connect listeners
-  private accessibleEventOptions?: EventListenerOptions;
-
-  // Maps events that are added to the root PDOM element to the listener that will
-  // fire one of the above Actions and finally dispatch a corresponding SceneryEvent to scenery targets.
-  // Event listeners are not added until initializeEvents, and are stored in this Map so they can be removed
-  // again in detachEvents.
-  private readonly pdomEventListenerMap?: Map<string, ( event: Event ) => void>;
   public static InputIO: IOType<Input>;
 
   /**
@@ -677,198 +667,177 @@ export default class Input extends PhetioObject {
       phetioHighFrequency: true
     } );
 
-    // wire up accessibility listeners on the display's root accessible DOM element.
-    if ( this.display._accessible ) {
-      this.focusinAction = new PhetioAction( ( event: FocusEvent ) => {
+    this.focusinAction = new PhetioAction( ( event: FocusEvent ) => {
+      if ( !this.getPDOMEventTrail( event, 'focusin' ) ) {
+        return;
+      }
 
-        // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
-        if ( this.display.blockFocusCallbacks ) {
-          return;
-        }
+      // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
+      if ( this.display.blockFocusCallbacks ) {
+        return;
+      }
 
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusin(${Input.debugText( null, event )});` );
-        sceneryLog && sceneryLog.Input && sceneryLog.push();
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusin(${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent<FocusEvent>( trail, 'focus', event, false );
-        this.dispatchPDOMEvent<FocusEvent>( trail, 'focusin', event, true );
+      const trail = this.updateTrailForPDOMDispatch( event );
+      this.dispatchPDOMEvent<FocusEvent>( trail, 'focus', event, false );
+      this.dispatchPDOMEvent<FocusEvent>( trail, 'focusin', event, true );
 
-        sceneryLog && sceneryLog.Input && sceneryLog.pop();
-      }, {
-        phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'focusinAction' ),
-        parameters: [
-          { name: 'event', phetioType: EventIO }
-        ],
-        phetioEventType: EventType.USER,
-        phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
-      } );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'focusinAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
+    } );
 
-      this.focusoutAction = new PhetioAction( ( event: FocusEvent ) => {
+    this.focusoutAction = new PhetioAction( ( event: FocusEvent ) => {
+      if ( !this.getPDOMEventTrail( event, 'focusout' ) ) {
+        return;
+      }
 
-        // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
-        if ( this.display.blockFocusCallbacks ) {
-          return;
-        }
+      // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
+      if ( this.display.blockFocusCallbacks ) {
+        return;
+      }
 
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusOut(${Input.debugText( null, event )});` );
-        sceneryLog && sceneryLog.Input && sceneryLog.push();
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusOut(${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent<FocusEvent>( trail, 'blur', event, false );
-        this.dispatchPDOMEvent<FocusEvent>( trail, 'focusout', event, true );
+      const trail = this.updateTrailForPDOMDispatch( event );
+      this.dispatchPDOMEvent<FocusEvent>( trail, 'blur', event, false );
+      this.dispatchPDOMEvent<FocusEvent>( trail, 'focusout', event, true );
 
-        sceneryLog && sceneryLog.Input && sceneryLog.pop();
-      }, {
-        phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'focusoutAction' ),
-        parameters: [
-          { name: 'event', phetioType: EventIO }
-        ],
-        phetioEventType: EventType.USER,
-        phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.'
-      } );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'focusoutAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.'
+    } );
 
-      // https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event notes that the click action should result
-      // in a MouseEvent
-      this.clickAction = new PhetioAction( ( event: MouseEvent ) => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( `click(${Input.debugText( null, event )});` );
-        sceneryLog && sceneryLog.Input && sceneryLog.push();
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event notes that the click action should result
+    // in a MouseEvent
+    this.clickAction = new PhetioAction( ( event: MouseEvent ) => {
+      if ( !this.getPDOMEventTrail( event, 'click' ) ) {
+        return;
+      }
 
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent<MouseEvent>( trail, 'click', event, true );
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `click(${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        sceneryLog && sceneryLog.Input && sceneryLog.pop();
-      }, {
-        phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'clickAction' ),
-        parameters: [
-          { name: 'event', phetioType: EventIO }
-        ],
-        phetioEventType: EventType.USER,
-        phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
-      } );
+      const trail = this.updateTrailForPDOMDispatch( event );
+      this.dispatchPDOMEvent<MouseEvent>( trail, 'click', event, true );
 
-      this.inputAction = new PhetioAction( ( event: Event | InputEvent ) => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( `input(${Input.debugText( null, event )});` );
-        sceneryLog && sceneryLog.Input && sceneryLog.push();
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'clickAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
+    } );
 
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent<Event | InputEvent>( trail, 'input', event, true );
+    this.inputAction = new PhetioAction( ( event: Event | InputEvent ) => {
+      if ( !this.getPDOMEventTrail( event, 'input' ) ) {
+        return;
+      }
 
-        sceneryLog && sceneryLog.Input && sceneryLog.pop();
-      }, {
-        phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'inputAction' ),
-        parameters: [
-          { name: 'event', phetioType: EventIO }
-        ],
-        phetioEventType: EventType.USER,
-        phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
-      } );
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `input(${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      this.changeAction = new PhetioAction( ( event: Event ) => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( `change(${Input.debugText( null, event )});` );
-        sceneryLog && sceneryLog.Input && sceneryLog.push();
+      const trail = this.updateTrailForPDOMDispatch( event );
+      this.dispatchPDOMEvent<Event | InputEvent>( trail, 'input', event, true );
 
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent<Event>( trail, 'change', event, true );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'inputAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
+    } );
 
-        sceneryLog && sceneryLog.Input && sceneryLog.pop();
-      }, {
-        phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'changeAction' ),
-        parameters: [
-          { name: 'event', phetioType: EventIO }
-        ],
-        phetioEventType: EventType.USER,
-        phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
-      } );
+    this.changeAction = new PhetioAction( ( event: Event ) => {
+      if ( !this.getPDOMEventTrail( event, 'change' ) ) {
+        return;
+      }
 
-      this.keydownAction = new PhetioAction( ( event: KeyboardEvent ) => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, event )});` );
-        sceneryLog && sceneryLog.Input && sceneryLog.push();
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `change(${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
 
+      const trail = this.updateTrailForPDOMDispatch( event );
+      this.dispatchPDOMEvent<Event>( trail, 'change', event, true );
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'changeAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
+    } );
+
+    this.keydownAction = new PhetioAction( ( event: KeyboardEvent ) => {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', event, true );
+
+      if ( this.getPDOMEventTrail( event, 'keydown' ) ) {
         const trail = this.updateTrailForPDOMDispatch( event );
         this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keydown', event, true );
+      }
 
-        sceneryLog && sceneryLog.Input && sceneryLog.pop();
-      }, {
-        phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'keydownAction' ),
-        parameters: [
-          { name: 'event', phetioType: EventIO }
-        ],
-        phetioEventType: EventType.USER,
-        phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
-      } );
+      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', event, false );
 
-      this.keyupAction = new PhetioAction( ( event: KeyboardEvent ) => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyup(${Input.debugText( null, event )});` );
-        sceneryLog && sceneryLog.Input && sceneryLog.push();
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'keydownAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
+    } );
 
+    this.keyupAction = new PhetioAction( ( event: KeyboardEvent ) => {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyup(${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', event, true );
+
+      if ( this.getPDOMEventTrail( event, 'keydown' ) ) {
         const trail = this.updateTrailForPDOMDispatch( event );
         this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keyup', event, true );
+      }
 
-        sceneryLog && sceneryLog.Input && sceneryLog.pop();
-      }, {
-        phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'keyupAction' ),
-        parameters: [
-          { name: 'event', phetioType: EventIO }
-        ],
-        phetioEventType: EventType.USER,
-        phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
-      } );
+      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', event, false );
 
-      this.accessibleEventOptions = Features.passive ? { capture: false, passive: false } : false;
-      this.pdomEventListenerMap = new Map();
-
-      PDOMUtils.DOM_EVENTS.forEach( eventName => {
-
-        const actionName = `${eventName}Action`;
-        assert && assert( this[ actionName as keyof Input ], `action not defined on Input: ${actionName}` );
-
-        this.pdomEventListenerMap!.set( eventName, event => {
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
-
-          if ( this.display.interactive ) {
-
-            const trail = this.getTrailFromPDOMEvent( event );
-
-            // Only dispatch the event if the click did not happen rapidly after an up event. It is
-            // likely that the screen reader dispatched both pointer AND click events in this case, and
-            // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
-            // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
-            // stream.
-            const notBlockingSubsequentClicksOccurringTooQuickly = trail && !( eventName === 'click' &&
-                                                                   _.some( trail.nodes, node => node.positionInPDOM ) &&
-                                                                   event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY );
-            if ( eventName === 'keydown' ) {
-              this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', event as KeyboardEvent, true );
-            }
-            if ( eventName === 'keyup' ) {
-              this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', event as KeyboardEvent, true );
-            }
-
-            if ( trail && notBlockingSubsequentClicksOccurringTooQuickly ) {
-              ( this[ actionName as keyof Input ] as unknown as PhetioAction<[ Event ]> ).execute( event );
-            }
-
-            if ( eventName === 'keydown' ) {
-              this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', event as KeyboardEvent, false );
-            }
-            if ( eventName === 'keyup' ) {
-              this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', event as KeyboardEvent, false );
-            }
-          }
-
-          sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        } );
-      } );
-    }
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'keyupAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
+    } );
   }
 
   /**
@@ -907,7 +876,10 @@ export default class Input extends PhetioObject {
     // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
     // Additionally, IE had some issues with skipping prevent default, see
     // https://github.com/phetsims/scenery/issues/464 for mouse handling.
-    if ( !( this.passiveEvents === true ) && ( callback !== this.mouseDown || platform.edge ) ) {
+    // WE WILL NOT preventDefault() on keyboard or alternative input events here
+    if ( !( this.passiveEvents === true ) &&
+         ( callback !== this.mouseDown || platform.edge ) &&
+         batchType !== BatchedDOMEventType.ALT_TYPE ) {
       // We cannot prevent a passive event, so don't try
       domEvent.preventDefault();
     }
@@ -992,15 +964,6 @@ export default class Input extends PhetioObject {
    */
   public connectListeners(): void {
     BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
-
-    if ( this.display._accessible ) {
-      const eventTarget = this.attachToWindow ? window : this.display.pdomRootElement!;
-
-      // Add a listener to the root accessible DOM element for each event we want to monitor.
-      this.pdomEventListenerMap!.forEach( ( listener, eventName ) => {
-        eventTarget.addEventListener( eventName, listener, this.accessibleEventOptions );
-      } );
-    }
   }
 
   /**
@@ -1008,15 +971,6 @@ export default class Input extends PhetioObject {
    */
   public disconnectListeners(): void {
     BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
-
-    if ( this.display._accessible ) {
-      const eventTarget = this.attachToWindow ? window : this.display.pdomRootElement!;
-
-      // Remove listeners from the root accessible DOM element for each event we want to monitor.
-      this.pdomEventListenerMap!.forEach( ( listener, eventName ) => {
-        eventTarget.removeEventListener( eventName, listener, this.accessibleEventOptions );
-      } );
-    }
   }
 
   /**
@@ -1083,6 +1037,25 @@ export default class Input extends PhetioObject {
       }
     }
     return null;
+  }
+
+  private getPDOMEventTrail( domEvent: TargetSubstitudeAugmentedEvent, eventName: string ): Trail | null {
+    if ( !this.display.interactive ) {
+      return null;
+    }
+
+    const trail = this.getTrailFromPDOMEvent( domEvent );
+
+    // Only dispatch the event if the click did not happen rapidly after an up event. It is
+    // likely that the screen reader dispatched both pointer AND click events in this case, and
+    // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
+    // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
+    // stream.
+    const notBlockingSubsequentClicksOccurringTooQuickly = trail && !( eventName === 'click' &&
+                                                           _.some( trail.nodes, node => node.positionInPDOM ) &&
+                                                           domEvent.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY );
+
+    return notBlockingSubsequentClicksOccurringTooQuickly ? trail : null;
   }
 
   /**
@@ -1217,8 +1190,11 @@ export default class Input extends PhetioObject {
    * This is a bit of a misnomer, because the domEvent doesn't have to be under the PDOM. Returns null if not in the PDOM.
    */
   private getTrailFromPDOMEvent( domEvent: TargetSubstitudeAugmentedEvent ): Trail | null {
-    assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from PDOMPeers' );
     assert && assert( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
+
+    if ( !this.display._accessible ) {
+      return null;
+    }
 
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
     if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
@@ -1569,6 +1545,90 @@ export default class Input extends PhetioObject {
   public pointerLeave( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
+  }
+
+  /**
+   * Handles a focusin event, forwarding it to the proper logical event. (scenery-internal)
+   */
+  public focusIn( event: FocusEvent ): void {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusIn('${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+    this.focusinAction.execute( event );
+
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Handles a focusout event, forwarding it to the proper logical event. (scenery-internal)
+   */
+  public focusOut( event: FocusEvent ): void {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusOut('${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+    this.focusoutAction.execute( event );
+
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Handles a input event, forwarding it to the proper logical event. (scenery-internal)
+   */
+  public input( event: Event | InputEvent ): void {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `input('${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+    this.inputAction.execute( event );
+
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Handles a change event, forwarding it to the proper logical event. (scenery-internal)
+   */
+  public change( event: Event ): void {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `change('${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+    this.changeAction.execute( event );
+
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Handles a click event, forwarding it to the proper logical event. (scenery-internal)
+   */
+  public click( event: MouseEvent ): void {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `click('${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+    this.clickAction.execute( event );
+
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Handles a keydown event, forwarding it to the proper logical event. (scenery-internal)
+   */
+  public keyDown( event: KeyboardEvent ): void {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyDown('${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+    this.keydownAction.execute( event );
+
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Handles a keyup event, forwarding it to the proper logical event. (scenery-internal)
+   */
+  public keyUp( event: KeyboardEvent ): void {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyUp('${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+    this.keyupAction.execute( event );
+
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
 
   /**
