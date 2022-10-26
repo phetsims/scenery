@@ -275,14 +275,6 @@ class KeyStateTracker {
   }
 
   /**
-   * get the most recent key pressed
-   */
-  public mostRecentKeyFromList( keys: string[] ): string {
-    assert && assert( this.areKeysDown( keys ), 'Not all the keys in the list are down.' );
-    return _.minBy( keys, key => this.timeDownForKey( key ) )!;
-  }
-
-  /**
    * Returns true if ALL of the keys in the list are currently down. Values of the keyList array are the
    * KeyboardEvent.code for the keys you are interested in.
    */

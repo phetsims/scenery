@@ -2,10 +2,10 @@
 
 /**
  * A listener for general keyboard input. Specify the keys with a `keys` option in a readable format that looks like
- * this: 'shift+t|alt+shift+r'
+ * this: [ 'shift+t', 'alt+shift+r' ]
  *
- * - '|' separates different groups of keys
- * - '+' separates each key in a single group
+ * - Each entry in the array represents a "group" of keys.
+ * - '+' separates each key in a single group.
  * - The keys leading up to the last key in the group are considered "modifier" keys. The last key in the group needs
  *   to be pressed while the modifier keys are down.
  * - The order modifier keys are pressed does not matter for firing the callback.
