@@ -1,5 +1,6 @@
 // Copyright 2022, University of Colorado Boulder
 
+//TODO https://github.com/phetsims/scenery/issues/1488 adjust doc and naming to indicate that this is a trait, not a mixin
 /**
  * Provides a minimum and preferred width/height (both WidthSizable and HeightSizable, but with added features that
  * allow convenience of working with both dimensions at once).

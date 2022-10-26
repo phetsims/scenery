@@ -1,5 +1,6 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
+//TODO https://github.com/phetsims/scenery/issues/1488 adjust doc and naming to indicate that this is a trait, not a mixin
 /**
  * Provides a minimum and preferred height. The minimum height is set by the component, so that layout containers could
  * know how "small" the component can be made. The preferred height is set by the layout container, and the component
