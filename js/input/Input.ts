@@ -1203,7 +1203,6 @@ export default class Input extends PhetioObject {
     }
     else {
       const target = ( domEvent.target as unknown as Element );
-      // TODO: Sam we were unsure if this code might interact with JS code that may create problems in the future. Thoughts?
       assert && assert( target instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
       if ( target && this.isTargetUnderPDOM( target as HTMLElement ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
