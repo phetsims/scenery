@@ -14,27 +14,28 @@
  *
  * An example usage would like this:
  *
- *     this.addInputListener( new KeyboardListener( {
- *       keys: [ 'a+b', 'a+c', 'shift+arrowLeft', 'alt+g+t', 'ctrl+3', 'alt+ctrl+t' ] as const,
- *       callback: ( event, keys ) => {
+ * this.addInputListener( new KeyboardListener( {
+ *   keys: [ 'a+b', 'a+c', 'shift+arrowLeft', 'alt+g+t', 'ctrl+3', 'alt+ctrl+t' ],
+ *   callback: ( event, listener ) => {
+ *     const keysPressed = listener.keysPressed;
  *
- *         if ( keys === 'a+b' ) {
- *           console.log( 'you just pressed a+b!' );
- *         }
- *         else if ( keys === 'a+c' ) {
- *           console.log( 'you just pressed a+c!' );
- *         }
- *         else if ( keys === 'alt+g+t' ) {
- *           console.log( 'you just pressed alt+g+t' );
- *         }
- *         else if ( keys === 'ctrl+3' ) {
- *           console.log( 'you just pressed ctrl+3' );
- *         }
- *         else if ( keys === 'shift+arrowLeft' ) {
- *           console.log( 'you just pressed shift+arrowLeft' );
- *         }
- *       }
- *     } ) );
+ *     if ( keysPressed === 'a+b' ) {
+ *       console.log( 'you just pressed a+b!' );
+ *     }
+ *     else if ( keysPressed === 'a+c' ) {
+ *       console.log( 'you just pressed a+c!' );
+ *     }
+ *     else if ( keysPressed === 'alt+g+t' ) {
+ *       console.log( 'you just pressed alt+g+t' );
+ *     }
+ *     else if ( keysPressed === 'ctrl+3' ) {
+ *       console.log( 'you just pressed ctrl+3' );
+ *     }
+ *     else if ( keysPressed === 'shift+arrowLeft' ) {
+ *       console.log( 'you just pressed shift+arrowLeft' );
+ *     }
+ *   }
+ * } ) );
  *
  * By default the callback will fire when the last key is pressed down. See additional options for firing on key
  * up or other press and hold behavior.
@@ -73,7 +74,7 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   keys: Keys;
 
   // Called when the listener detects that the set of keys are pressed.
-  callback?: ( event: SceneryEvent<KeyboardEvent> | null, keysPressed: Keys[number] ) => void;
+  callback?: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
   // Does the listener fire when the last key in the group is pressed down or released?
   fireOnKeyUp?: boolean;
@@ -103,7 +104,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // The function called when a KeyGroup is pressed (or just released). Provides the SceneryEvent that fired the input
   // listeners and this the keys that were pressed from the active KeyGroup. The event may be null when using
   // fireOnHold or in cases of cancel or interrupt.
-  private readonly _callback: ( event: SceneryEvent<KeyboardEvent> | null, keysPressed: Keys[number] ) => void;
+  private readonly _callback: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
   // Will it the callback fire on keys up or down?
   private readonly _fireOnKeyUp: boolean;
@@ -111,11 +112,14 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // Does the listener fire the callback continuously when keys are held down?
   private readonly _fireOnHold: boolean;
 
-  // All of the KeyGroups of this listener from the keys provided in natural language.
+  // All the KeyGroups of this listener from the keys provided in natural language.
   private readonly _keyGroups: KeyGroup<Keys>[];
 
-  // All of the KeyGroups that are currently firing
+  // All the KeyGroups that are currently firing
   private readonly _activeKeyGroups: KeyGroup<Keys>[];
+
+  // Current keys pressed that are having their listeners fired now.
+  public keysPressed: Keys[number] | null = null;
 
   // Timing variables for the CallbackTimers.
   private readonly _fireOnHoldDelay: number;
@@ -149,7 +153,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * Mostly required to fire with CallbackTimer since the callback cannot take arguments.
    */
   public fireCallback( event: SceneryEvent<KeyboardEvent> | null, naturalKeys: Keys[number] ): void {
-    this._callback( event, naturalKeys );
+    this.keysPressed = naturalKeys;
+    this._callback( event, this );
+    this.keysPressed = null;
   }
 
   /**
@@ -278,7 +284,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
       // Set up the timer for triggering callbacks if this listener supports press and hold behavior
       const timer = this._fireOnHold ? new CallbackTimer( {
-        callback: () => { this.fireCallback( null, naturalKeys ); },
+        callback: () => this.fireCallback( null, naturalKeys ),
         delay: this._fireOnHoldDelay,
         interval: this._fireOnHoldInterval
       } ) : null;
