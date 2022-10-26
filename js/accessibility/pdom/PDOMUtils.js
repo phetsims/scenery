@@ -62,6 +62,7 @@ const ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
 // valid DOM events that the display adds listeners to. For a list of scenery events that support pdom features
 // see Input.PDOM_EVENT_TYPES
+// NOTE: Update BrowserEvents if this is added to
 const DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
 // DOM events that must have been triggered from user input of some kind, and will trigger the

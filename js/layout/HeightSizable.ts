@@ -1,9 +1,9 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * Provides a minimum and preferred height. The minimum height is set by the component, so that layout containers could
- * know how "small" the component can be made. The preferred height is set by the layout container, and the component
- * should adjust its size so that it takes up that height.
+ * HeightSizable is a trait that provides a minimum and preferred height. The minimum height is set by the component,
+ * so that layout containers could know how "small" the component can be made. The preferred height is set by the
+ * layout container, and the component should adjust its size so that it takes up that height.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

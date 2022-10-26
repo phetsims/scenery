@@ -1,8 +1,8 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * Provides a minimum and preferred width/height (both WidthSizable and HeightSizable, but with added features that
- * allow convenience of working with both dimensions at once).
+ * Sizable is a trait that provides a minimum and preferred width/height (both WidthSizable and HeightSizable,
+ * but with added features that allow convenience of working with both dimensions at once).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

@@ -1,9 +1,9 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * Provides a minimum and preferred width. The minimum width is set by the component, so that layout containers could
- * know how "small" the component can be made. The preferred width is set by the layout container, and the component
- * should adjust its size so that it takes up that width.
+ * WidthSizable is a trait that provides a minimum and preferred width. The minimum width is set by the component,
+ * so that layout containers could know how "small" the component can be made. The preferred width is set by the
+ * layout container, and the component should adjust its size so that it takes up that width.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

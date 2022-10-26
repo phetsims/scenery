@@ -8,7 +8,7 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import platform from '../../../phet-core/js/platform.js';
-import { BatchedDOMEventType, Display, Features, scenery } from '../imports.js';
+import { BatchedDOMEventType, Display, Features, PDOMUtils, scenery } from '../imports.js';
 
 // Sometimes we need to add a listener that does absolutely nothing
 const noop = () => {};
@@ -192,6 +192,12 @@ const BrowserEvents = {
   ],
 
   /**
+   * {Array.<string>} - Alternative input types
+   * @private
+   */
+  altListenerTypes: PDOMUtils.DOM_EVENTS,
+
+  /**
    * Returns all event types that will be listened to on this specific platform.
    * @private
    *
@@ -217,10 +223,9 @@ const BrowserEvents = {
       eventTypes = this.touchListenerTypes.concat( this.mouseListenerTypes );
     }
 
-    // eventTypes = eventTypes.concat( this.wheelListenerTypes );
+    eventTypes = eventTypes.concat( this.altListenerTypes );
 
-    assert && assert( !_.includes( eventTypes, 'keydown' ),
-      'Make sure not to preventDefault key events in the future.' );
+    // eventTypes = eventTypes.concat( this.wheelListenerTypes );
 
     return eventTypes;
   },
@@ -713,6 +718,76 @@ const BrowserEvents = {
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
     BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.WHEEL_TYPE, 'wheel', false );
+
+    sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+  },
+
+  onfocusin: function onfocusin( domEvent ) {
+    sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'focusin' );
+    sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+    // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'focusIn', true );
+
+    sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+  },
+
+  onfocusout: function onfocusout( domEvent ) {
+    sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'focusout' );
+    sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+    // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'focusOut', true );
+
+    sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+  },
+
+  oninput: function oninput( domEvent ) {
+    sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'input' );
+    sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+    // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'input', true );
+
+    sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+  },
+
+  onchange: function onchange( domEvent ) {
+    sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'change' );
+    sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+    // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'change', true );
+
+    sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+  },
+
+  onclick: function onclick( domEvent ) {
+    sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'click' );
+    sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+    // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'click', true );
+
+    sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+  },
+
+  onkeydown: function onkeydown( domEvent ) {
+    sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'keydown' );
+    sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+    // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'keyDown', true );
+
+    sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+  },
+
+  onkeyup: function onkeyup( domEvent ) {
+    sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'keyup' );
+    sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+    // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'keyUp', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   }

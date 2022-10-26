@@ -21,6 +21,7 @@ export class BatchedDOMEventType extends EnumerationValue {
   public static readonly TOUCH_TYPE = new BatchedDOMEventType();
   public static readonly MOUSE_TYPE = new BatchedDOMEventType();
   public static readonly WHEEL_TYPE = new BatchedDOMEventType();
+  public static readonly ALT_TYPE = new BatchedDOMEventType();
 
   public static readonly enumeration = new Enumeration( BatchedDOMEventType, {
     phetioDocumentation: 'The type of batched event'
@@ -83,7 +84,7 @@ export default class BatchedDOMEvent implements TPoolable {
         callback.call( input, input.pointFromEvent( mouseEvent ), mouseEvent );
       }
     }
-    else if ( this.type === BatchedDOMEventType.WHEEL_TYPE ) {
+    else if ( this.type === BatchedDOMEventType.WHEEL_TYPE || this.type === BatchedDOMEventType.ALT_TYPE ) {
       callback.call( input, domEvent );
     }
     else {
