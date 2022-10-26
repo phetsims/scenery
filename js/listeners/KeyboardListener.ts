@@ -163,8 +163,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * fire callbacks and start CallbackTimers.
    */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
-    // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself
-    //  instead of a global, https://github.com/phetsims/scenery/issues/1445
 
     if ( !this._fireOnKeyUp ) {
 
@@ -193,7 +191,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * down.
    */
   public keyup( event: SceneryEvent<KeyboardEvent> ): void {
-    // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
 
     if ( this._activeKeyGroups.length > 0 ) {
 
