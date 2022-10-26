@@ -49,25 +49,23 @@ import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
 
-// TODO: If we run out of union space for template strings, then remove some of these. https://github.com/phetsims/scenery/issues/1445
+// TODO: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
+//       entries in a union type. If that limitation is not acceptable remove this typing. OR maybe TypeScript will
+//       someday support regex patterns for a type. See https://github.com/microsoft/TypeScript/issues/41160
+// If we run out of union space for template strings, consider the above comment or remove some from the type.
 type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | 'a' | 's' | 'd' |
   'f' | 'g' | 'h' | 'j' | 'k' | 'l' | 'z' | 'x' | 'c' |
   'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
 type AllowedKeys = keyof typeof EnglishStringToCodeMap;
 
-// TODO: The typing for this limits the number of keys that can exist in a group. If that limitation is not acceptable
-//       remove this typing. OR maybe TypeScript will someday support regex patterns for a type.
 type OneKeyStroke = `${AllowedKeys}` |
   `${ModifierKey}+${AllowedKeys}` |
   `${ModifierKey}+${ModifierKey}+${AllowedKeys}`;
-
-// TODO: adding this extra one has Typescript all hot and bothered: "TS2590: Expression produces a union type that is too complex to represent."
+// These combinations are not supported by TypeScript: "TS2590: Expression produces a union type that is too complex to
+// represent." See above note and https://github.com/microsoft/TypeScript/issues/41160#issuecomment-1287271132.
 // `${AllowedKeys}+${AllowedKeys}+${AllowedKeys}+${AllowedKeys}`;
-// TODO: combining these has Typescript all hot and bothered: "TS2590: Expression produces a union type that is too complex to represent."
 // type KeyCombinations = `${OneKeyStroke}` | `${OneKeyStroke},${OneKeyStroke}`;
-//
 
-// TODO: Automated testing, https://github.com/phetsims/scenery/issues/1445
 type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
   // The keys that need to be pressed to fire the callback. In a form like `[ 'shift+t', 'alt+shift+r' ]`. See top
@@ -159,6 +157,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * fire callbacks and start CallbackTimers.
    */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
+    // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself
+    //  instead of a global, https://github.com/phetsims/scenery/issues/1445
 
     if ( !this._fireOnKeyUp ) {
 
@@ -166,7 +166,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       this._keyGroups.forEach( keyGroup => {
 
         if ( !this._activeKeyGroups.includes( keyGroup ) ) {
-          // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
           if ( globalKeyStateTracker.areKeysDown( keyGroup.allKeys ) &&
                globalKeyStateTracker.getLastKeyDown() === keyGroup.key ) {
 
@@ -188,9 +187,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * down.
    */
   public keyup( event: SceneryEvent<KeyboardEvent> ): void {
+    // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
 
     if ( this._activeKeyGroups.length > 0 ) {
-      // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
 
       this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
         if ( !globalKeyStateTracker.areKeysDown( activeKeyGroup.allKeys ) ) {
@@ -204,7 +203,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     if ( this._fireOnKeyUp ) {
       this._keyGroups.forEach( keyGroup => {
-        // TODO: Guarantee that globalKeyStateTracker is updated first, likely by embedding that data in the event itself instead of a global, https://github.com/phetsims/scenery/issues/1445
         if ( globalKeyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
           this.fireCallback( event, keyGroup.naturalKeys );
