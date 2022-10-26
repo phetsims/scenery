@@ -382,8 +382,8 @@ class KeyStateTracker {
     const addListenersToDocument = () => {
 
       // attach with useCapture so that the keyStateTracker is updated before the events dispatch within Scenery
-      window.addEventListener( 'keyup', this.documentKeyupListener!, true );
-      window.addEventListener( 'keydown', this.documentKeydownListener!, true );
+      window.addEventListener( 'keyup', this.documentKeyupListener!, { capture: true } );
+      window.addEventListener( 'keydown', this.documentKeydownListener!, { capture: true } );
       this.attachedToDocument = true;
     };
 

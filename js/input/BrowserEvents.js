@@ -8,10 +8,13 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import platform from '../../../phet-core/js/platform.js';
-import { BatchedDOMEventType, Display, Features, PDOMUtils, scenery } from '../imports.js';
+import { BatchedDOMEventType, Display, Features, globalKeyStateTracker, PDOMUtils, scenery } from '../imports.js';
 
 // Sometimes we need to add a listener that does absolutely nothing
 const noop = () => {};
+
+// Ensure we only attach global window listeners (display independent) once
+let isGloballyAttached = false;
 
 const BrowserEvents = {
   /**
@@ -28,6 +31,14 @@ const BrowserEvents = {
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( !_.includes( this.attachedDisplays, display ),
       'A display cannot be concurrently attached to events more than one time' );
+
+    // Always first please
+    if ( !isGloballyAttached ) {
+      isGloballyAttached = true;
+
+      // never unattach because we don't know if there are other Displays listening to this.
+      globalKeyStateTracker.attachToWindow();
+    }
 
     this.attachedDisplays.push( display );
 

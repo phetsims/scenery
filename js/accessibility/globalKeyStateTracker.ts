@@ -15,7 +15,6 @@ import { KeyStateTrackerOptions } from './KeyStateTracker.js';
 class GlobalKeyStateTracker extends KeyStateTracker {
   public constructor( options?: KeyStateTrackerOptions ) {
     super( options );
-    this.attachToWindow();
   }
 }
 
