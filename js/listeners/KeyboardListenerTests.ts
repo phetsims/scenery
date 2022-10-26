@@ -1,4 +1,4 @@
-// Copyright 2018-2021, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * KeyboardListener tests.
@@ -56,7 +56,7 @@ QUnit.test( 'Basics', assert => {
   a.addInputListener( new KeyboardListener( {
     keys: [ 'p', 'ctrl+p' ],
 
-    callback: keysPressed => {
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFired = true;
       }
