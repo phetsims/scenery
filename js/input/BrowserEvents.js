@@ -87,16 +87,15 @@ const BrowserEvents = {
     if ( !passDirectPassiveFlag ) {
       return false;
     }
-    if ( isMain ) {
-      return {
-        capture: false,
-        passive: passiveEvents
-      };
-    }
     else {
-      return {
-        passive: passiveEvents
-      };
+      const eventOptions = { passive: passiveEvents };
+      if ( isMain ) {
+        eventOptions.capture = false;
+      }
+
+      assert && assert( !eventOptions.capture, 'Do not use capture without consulting globalKeyStateTracker, ' +
+                                               'which expects have listeners called FIRST in keyboard-related cases.' );
+      return eventOptions;
     }
   },
 
