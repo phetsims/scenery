@@ -1,4 +1,4 @@
-// Copyright 2021, University of Colorado Boulder
+// Copyright 2021-2022, University of Colorado Boulder
 
 /**
  * Singleton Property<string> which chooses between the available color profiles of a simulation, such as 'default',
