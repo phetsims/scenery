@@ -833,7 +833,8 @@ export default class DragListener extends PressListener implements TInputListene
    *
    * See https://github.com/phetsims/scenery/issues/639
    */
-  public static createForwardingListener( down: ( event: PressListenerEvent ) => void, providedOptions?: CreateForwardingListenerOptions ): TInputListener {
+  public static createForwardingListener( down: ( event: PressListenerEvent ) => void,
+                                          providedOptions?: CreateForwardingListenerOptions ): TInputListener {
 
     const options = optionize<CreateForwardingListenerOptions, CreateForwardingListenerOptions>()( {
       allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999
