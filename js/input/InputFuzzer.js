@@ -74,6 +74,8 @@ class InputFuzzer {
   fuzzEvents( averageEventCount, allowMouse, allowTouch, maximumPointerCount ) {
     assert && assert( averageEventCount > 0, `averageEventCount must be positive: ${averageEventCount}` );
 
+    this.display._input.currentlyFiringEvents = true;
+
     // run a variable number of events, with a certain chance of bailing out (so no events are possible)
     // models a geometric distribution of events
     // See https://github.com/phetsims/joist/issues/343 for notes on the distribution.
@@ -104,6 +106,8 @@ class InputFuzzer {
       const action = this.random.sample( potentialActions );
       action();
     }
+
+    this.display._input.currentlyFiringEvents = false;
   }
 
   /**
