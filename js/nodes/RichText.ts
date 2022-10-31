@@ -101,7 +101,7 @@ const RICH_TEXT_OPTION_KEYS = [
   'leading',
   'lineWrap',
   Text.STRING_PROPERTY_NAME,
-  'text'
+  'string'
 ];
 
 export type RichTextAlign = 'left' | 'center' | 'right';
@@ -182,7 +182,7 @@ type SelfOptions = {
   stringPropertyOptions?: PropertyOptions<string>;
 
   // Sets the text to be displayed by this Node
-  text?: string | number;
+  string?: string | number;
 };
 
 export type RichTextOptions = SelfOptions & NodeOptions;
@@ -330,7 +330,11 @@ export default class RichText extends Node {
   // Text and RichText currently use the same tandem name for their stringProperty.
   public static readonly STRING_PROPERTY_TANDEM_NAME = Text.STRING_PROPERTY_TANDEM_NAME;
 
-  public constructor( text: string | number | TReadOnlyProperty<string>, providedOptions?: RichTextOptions ) {
+  public constructor( string: string | number | TReadOnlyProperty<string>, providedOptions?: RichTextOptions ) {
+
+    if ( assert && providedOptions ) {
+      assert && assert( !providedOptions.hasOwnProperty( 'text' ), 'Text option should be string.' );
+    }
 
     // We only fill in some defaults, since the other defaults are defined below (and mutate is relied on)
     const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill'>, NodeOptions>()( {
@@ -343,11 +347,11 @@ export default class RichText extends Node {
       phetioVisiblePropertyInstrumented: false
     }, providedOptions );
 
-    if ( typeof text === 'string' || typeof text === 'number' ) {
-      options.text = text;
+    if ( typeof string === 'string' || typeof string === 'number' ) {
+      options.string = string;
     }
     else {
-      options.stringProperty = text;
+      options.stringProperty = string;
     }
 
     super();
@@ -429,7 +433,7 @@ export default class RichText extends Node {
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
 
       this._stringProperty.initializePhetio( this, RichText.STRING_PROPERTY_TANDEM_NAME, () => {
-        return new StringProperty( this.text, combineOptions<RichTextOptions>( {
+        return new StringProperty( this.string, combineOptions<RichTextOptions>( {
 
           // by default, texts should be readonly. Editable texts most likely pass in editable Properties from i18n model Properties, see https://github.com/phetsims/scenery/issues/1443
           phetioReadOnly: true,
@@ -447,7 +451,7 @@ export default class RichText extends Node {
     this.freeChildrenToPool();
 
     // Bail early, particularly if we are being constructed.
-    if ( this.text === '' ) {
+    if ( this.string === '' ) {
       this.appendEmptyLeaf();
       return;
     }
@@ -456,7 +460,7 @@ export default class RichText extends Node {
     sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
     // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
-    const mappedText = this.text.replace( /\u202a/g, '<span dir="ltr">' )
+    const mappedText = this.string.replace( /\u202a/g, '<span dir="ltr">' )
       .replace( /\u202b/g, '<span dir="rtl">' )
       .replace( /\u202c/g, '</span>' );
 
@@ -905,6 +909,7 @@ export default class RichText extends Node {
    * @param text - The text to display. If it's a number, it will be cast to a string
    */
   public setText( text: string | number ): this {
+    assert && assert( false, 'Should not be calling setText' );
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
 
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
@@ -915,14 +920,50 @@ export default class RichText extends Node {
     return this;
   }
 
-  public set text( value: string | number ) { this.setText( value ); }
+  /**
+   * Sets the text displayed by our node.
+   *
+   * NOTE: Encoding HTML entities is required, and malformed HTML is not accepted.
+   *
+   * @param string - The string to display. If it's a number, it will be cast to a string
+   */
+  public setString( string: string | number ): this {
+    assert && assert( string !== null && string !== undefined, 'String should be defined and non-null. Use the empty string if needed.' );
 
-  public get text(): string { return this.getText(); }
+    // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed string)
+    string = `${string}`;
+
+    this._stringProperty.set( string );
+
+    return this;
+  }
+
+  public set text( value: string | number ) {
+    assert && assert( false, 'Should not be calling setText' );
+  }
+
+  public get text(): string {
+    assert && assert( false, 'Should not be calling getText' );
+    return this.getText();
+  }
+
+  public set string( value: string | number ) { this.setString( value ); }
+
+  public get string(): string { return this.getString(); }
+
 
   /**
    * Returns the text displayed by our node.
    */
   public getText(): string {
+    assert && assert( false, 'Should not be calling getText' );
+    return this._stringProperty.value;
+  }
+
+  /**
+   * Returns the text displayed by our node.
+   */
+  public getString(): string {
     return this._stringProperty.value;
   }
 
@@ -1476,8 +1517,8 @@ export default class RichText extends Node {
   }
 
   public override mutate( options?: RichTextOptions ): this {
-    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( Text.STRING_PROPERTY_NAME ) && options.stringProperty ) {
-      assert && assert( options.stringProperty.value === options.text, 'If both text and stringProperty are provided, then values should match' );
+    if ( assert && options && options.hasOwnProperty( 'string' ) && options.hasOwnProperty( Text.STRING_PROPERTY_NAME ) && options.stringProperty ) {
+      assert && assert( options.stringProperty.value === options.string, 'If both text and stringProperty are provided, then values should match' );
     }
 
     return super.mutate( options );
