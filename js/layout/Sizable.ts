@@ -261,6 +261,30 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       return null;
     }
 
+    // We'll need to cross-link because we might need to update either the width or height when the other changes
+    protected override _onReentrantLocalMinimumWidth(): void {
+      this._updateMinimumWidthListener();
+      this._updateMinimumHeightListener();
+    }
+
+    // We'll need to cross-link because we might need to update either the width or height when the other changes
+    protected override _onReentrantLocalMinimumHeight(): void {
+      this._updateMinimumWidthListener();
+      this._updateMinimumHeightListener();
+    }
+
+    // We'll need to cross-link because we might need to update either the width or height when the other changes
+    protected override _onReentrantPreferredWidth(): void {
+      this._updateLocalPreferredWidthListener();
+      this._updateLocalPreferredHeightListener();
+    }
+
+    // We'll need to cross-link because we might need to update either the width or height when the other changes
+    protected override _onReentrantPreferredHeight(): void {
+      this._updateLocalPreferredWidthListener();
+      this._updateLocalPreferredHeightListener();
+    }
+
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculateLocalMinimumWidth(): number | null {
       const node = this as unknown as Node;

@@ -77,6 +77,16 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     protected _preferredSizeChanging = false;
     protected _minimumSizeChanging = false;
 
+    // We'll need to detect reentrancy when setting the dual of the preferred/minimum properties (e.g. local vs parent).
+    // If we get a reentrant case, we'll need to detect it and clear things up at the end (updating the minimum size
+    // in the parent coordinate frame, and the preferred size in the local coordinate frame).
+    // An example is if the minimum size is set, and that triggers a listener that UPDATES something that changes the
+    // minimum size, we'll need to make sure that the local minimum size is updated AFTER everything has happened.
+    // These locks are used to detect these cases, and then run the appropriate updates afterward to make sure that the
+    // local and parent values are in sync (based on the transform used).
+    protected _preferredSizeChangeAttemptDuringLock = false;
+    protected _minimumSizeChangeAttemptDuringLock = false;
+
     // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
     protected _updatePreferredHeightListener: () => void;
     protected _updateLocalPreferredHeightListener: () => void;
@@ -200,20 +210,38 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
              : null;
     }
 
+    // Provides a hook to Sizable, since we'll need to cross-link this to also try updating the opposite dimension
+    protected _onReentrantPreferredHeight(): void {
+      this._updateLocalPreferredHeightListener();
+    }
+
     private _updateLocalPreferredHeight(): void {
       assert && ( this as unknown as Node ).auditMaxDimensions();
 
       if ( !this._preferredSizeChanging ) {
         this._preferredSizeChanging = true;
 
-        const localPreferredHeight = this._calculateLocalPreferredHeight();
+        // Since the local "preferred" size is the one that we'll want to continue to update if we experience
+        // reentrancy (since we treat the non-local version as the ground truth), we'll loop here until we didn't get
+        // an attempt to change it. This will ensure that after changes, we'll have a consistent preferred and
+        // localPreferred size.
+        do {
+          this._preferredSizeChangeAttemptDuringLock = false;
 
-        if ( this.localPreferredHeightProperty.value === null ||
-             localPreferredHeight === null ||
-             Math.abs( this.localPreferredHeightProperty.value - localPreferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
-          this.localPreferredHeightProperty.value = localPreferredHeight;
+          const localPreferredHeight = this._calculateLocalPreferredHeight();
+
+          if ( this.localPreferredHeightProperty.value === null ||
+               localPreferredHeight === null ||
+               Math.abs( this.localPreferredHeightProperty.value - localPreferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
+            this.localPreferredHeightProperty.value = localPreferredHeight;
+          }
         }
+        while ( this._preferredSizeChangeAttemptDuringLock );
+
         this._preferredSizeChanging = false;
+      }
+      else {
+        this._preferredSizeChangeAttemptDuringLock = true;
       }
     }
 
@@ -230,6 +258,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       if ( !this._preferredSizeChanging ) {
         this._preferredSizeChanging = true;
 
+        this._preferredSizeChangeAttemptDuringLock = false;
+
         const preferredHeight = this._calculatePreferredHeight();
 
         if ( this.preferredHeightProperty.value === null ||
@@ -238,6 +268,15 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
           this.preferredHeightProperty.value = preferredHeight;
         }
         this._preferredSizeChanging = false;
+
+        // Here, in the case of reentrance, we'll actually want to switch to updating the local preferred size, since
+        // given any other changes it should be the primary one to change.
+        if ( this._preferredSizeChangeAttemptDuringLock ) {
+          this._onReentrantPreferredHeight();
+        }
+      }
+      else {
+        this._preferredSizeChangeAttemptDuringLock = true;
       }
     }
 
@@ -250,9 +289,15 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
              : null;
     }
 
+    protected _onReentrantLocalMinimumHeight(): void {
+      this._updateMinimumHeight();
+    }
+
     private _updateLocalMinimumHeight(): void {
       if ( !this._minimumSizeChanging ) {
         this._minimumSizeChanging = true;
+
+        this._minimumSizeChangeAttemptDuringLock = false;
 
         const localMinimumHeight = this._calculateLocalMinimumHeight();
 
@@ -262,6 +307,15 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
           this.localMinimumHeightProperty.value = localMinimumHeight;
         }
         this._minimumSizeChanging = false;
+
+        // Here, in the case of reentrance, we'll actually want to switch to updating the non-local minimum size, since
+        // given any other changes it should be the primary one to change.
+        if ( this._minimumSizeChangeAttemptDuringLock ) {
+          this._onReentrantLocalMinimumHeight();
+        }
+      }
+      else {
+        this._minimumSizeChangeAttemptDuringLock = true;
       }
     }
 
@@ -278,13 +332,23 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       if ( !this._minimumSizeChanging ) {
         this._minimumSizeChanging = true;
 
-        const minimumHeight = this._calculateMinimumHeight();
+        // Since the non-local "minimum" size is the one that we'll want to continue to update if we experience
+        // reentrancy (since we treat the local version as the ground truth), we'll loop here until we didn't get
+        // an attempt to change it. This will ensure that after changes, we'll have a consistent minimum and
+        // localMinimum size.
+        do {
+          this._minimumSizeChangeAttemptDuringLock = false;
 
-        if ( this.minimumHeightProperty.value === null ||
-             minimumHeight === null ||
-             Math.abs( this.minimumHeightProperty.value - minimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
-          this.minimumHeightProperty.value = minimumHeight;
+          const minimumHeight = this._calculateMinimumHeight();
+
+          if ( this.minimumHeightProperty.value === null ||
+               minimumHeight === null ||
+               Math.abs( this.minimumHeightProperty.value - minimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
+            this.minimumHeightProperty.value = minimumHeight;
+          }
         }
+        while ( this._minimumSizeChangeAttemptDuringLock );
+
         this._minimumSizeChanging = false;
       }
     }

@@ -77,6 +77,16 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     protected _preferredSizeChanging = false;
     protected _minimumSizeChanging = false;
 
+    // We'll need to detect reentrancy when setting the dual of the preferred/minimum properties (e.g. local vs parent).
+    // If we get a reentrant case, we'll need to detect it and clear things up at the end (updating the minimum size
+    // in the parent coordinate frame, and the preferred size in the local coordinate frame).
+    // An example is if the minimum size is set, and that triggers a listener that UPDATES something that changes the
+    // minimum size, we'll need to make sure that the local minimum size is updated AFTER everything has happened.
+    // These locks are used to detect these cases, and then run the appropriate updates afterward to make sure that the
+    // local and parent values are in sync (based on the transform used).
+    protected _preferredSizeChangeAttemptDuringLock = false;
+    protected _minimumSizeChangeAttemptDuringLock = false;
+
     // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
     protected _updatePreferredWidthListener: () => void;
     protected _updateLocalPreferredWidthListener: () => void;
@@ -201,20 +211,38 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
              : null;
     }
 
+    // Provides a hook to Sizable, since we'll need to cross-link this to also try updating the opposite dimension
+    protected _onReentrantPreferredWidth(): void {
+      this._updateLocalPreferredWidthListener();
+    }
+
     private _updateLocalPreferredWidth(): void {
       assert && ( this as unknown as Node ).auditMaxDimensions();
 
       if ( !this._preferredSizeChanging ) {
         this._preferredSizeChanging = true;
 
-        const localPreferredWidth = this._calculateLocalPreferredWidth();
+        // Since the local "preferred" size is the one that we'll want to continue to update if we experience
+        // reentrancy (since we treat the non-local version as the ground truth), we'll loop here until we didn't get
+        // an attempt to change it. This will ensure that after changes, we'll have a consistent preferred and
+        // localPreferred size.
+        do {
+          this._preferredSizeChangeAttemptDuringLock = false;
 
-        if ( this.localPreferredWidthProperty.value === null ||
-             localPreferredWidth === null ||
-             Math.abs( this.localPreferredWidthProperty.value - localPreferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
-          this.localPreferredWidthProperty.value = localPreferredWidth;
+          const localPreferredWidth = this._calculateLocalPreferredWidth();
+
+          if ( this.localPreferredWidthProperty.value === null ||
+               localPreferredWidth === null ||
+               Math.abs( this.localPreferredWidthProperty.value - localPreferredWidth ) > CHANGE_POSITION_THRESHOLD ) {
+            this.localPreferredWidthProperty.value = localPreferredWidth;
+          }
         }
+        while ( this._preferredSizeChangeAttemptDuringLock );
+
         this._preferredSizeChanging = false;
+      }
+      else {
+        this._preferredSizeChangeAttemptDuringLock = true;
       }
     }
 
@@ -231,6 +259,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       if ( !this._preferredSizeChanging ) {
         this._preferredSizeChanging = true;
 
+        this._preferredSizeChangeAttemptDuringLock = false;
+
         const preferredWidth = this._calculatePreferredWidth();
 
         if ( this.preferredWidthProperty.value === null ||
@@ -239,6 +269,15 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
           this.preferredWidthProperty.value = preferredWidth;
         }
         this._preferredSizeChanging = false;
+
+        // Here, in the case of reentrance, we'll actually want to switch to updating the local preferred size, since
+        // given any other changes it should be the primary one to change.
+        if ( this._preferredSizeChangeAttemptDuringLock ) {
+          this._onReentrantPreferredWidth();
+        }
+      }
+      else {
+        this._preferredSizeChangeAttemptDuringLock = true;
       }
     }
 
@@ -251,11 +290,17 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
              : null;
     }
 
+    protected _onReentrantLocalMinimumWidth(): void {
+      this._updateMinimumWidthListener();
+    }
+
     private _updateLocalMinimumWidth(): void {
       if ( !this._minimumSizeChanging ) {
         this._minimumSizeChanging = true;
 
         const localMinimumWidth = this._calculateLocalMinimumWidth();
+
+        this._minimumSizeChangeAttemptDuringLock = false;
 
         if ( this.localMinimumWidthProperty.value === null ||
              localMinimumWidth === null ||
@@ -263,6 +308,15 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
           this.localMinimumWidthProperty.value = localMinimumWidth;
         }
         this._minimumSizeChanging = false;
+
+        // Here, in the case of reentrance, we'll actually want to switch to updating the non-local minimum size, since
+        // given any other changes it should be the primary one to change.
+        if ( this._minimumSizeChangeAttemptDuringLock ) {
+          this._onReentrantLocalMinimumWidth();
+        }
+      }
+      else {
+        this._minimumSizeChangeAttemptDuringLock = true;
       }
     }
 
@@ -279,14 +333,27 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       if ( !this._minimumSizeChanging ) {
         this._minimumSizeChanging = true;
 
-        const minimumWidth = this._calculateMinimumWidth();
+        // Since the non-local "minimum" size is the one that we'll want to continue to update if we experience
+        // reentrancy (since we treat the local version as the ground truth), we'll loop here until we didn't get
+        // an attempt to change it. This will ensure that after changes, we'll have a consistent minimum and
+        // localMinimum size.
+        do {
+          this._minimumSizeChangeAttemptDuringLock = false;
 
-        if ( this.minimumWidthProperty.value === null ||
-             minimumWidth === null ||
-             Math.abs( this.minimumWidthProperty.value - minimumWidth ) > CHANGE_POSITION_THRESHOLD ) {
-          this.minimumWidthProperty.value = minimumWidth;
+          const minimumWidth = this._calculateMinimumWidth();
+
+          if ( this.minimumWidthProperty.value === null ||
+               minimumWidth === null ||
+               Math.abs( this.minimumWidthProperty.value - minimumWidth ) > CHANGE_POSITION_THRESHOLD ) {
+            this.minimumWidthProperty.value = minimumWidth;
+          }
         }
+        while ( this._minimumSizeChangeAttemptDuringLock );
+
         this._minimumSizeChanging = false;
+      }
+      else {
+        this._minimumSizeChangeAttemptDuringLock = true;
       }
     }
   } );
