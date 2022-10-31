@@ -332,6 +332,7 @@ export default class RichText extends Node {
 
   public constructor( string: string | number | TReadOnlyProperty<string>, providedOptions?: RichTextOptions ) {
 
+    // TODO: https://github.com/phetsims/scenery/issues/1472
     if ( assert && providedOptions ) {
       assert && assert( !providedOptions.hasOwnProperty( 'text' ), 'Text option should be string.' );
     }
@@ -909,6 +910,7 @@ export default class RichText extends Node {
    * @param text - The text to display. If it's a number, it will be cast to a string
    */
   public setText( text: string | number ): this {
+    // TODO: https://github.com/phetsims/scenery/issues/1472
     assert && assert( false, 'Should not be calling setText' );
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
 
@@ -939,10 +941,14 @@ export default class RichText extends Node {
   }
 
   public set text( value: string | number ) {
+
+    // TODO: https://github.com/phetsims/scenery/issues/1472
     assert && assert( false, 'Should not be calling setText' );
   }
 
   public get text(): string {
+
+    // TODO: https://github.com/phetsims/scenery/issues/1472
     assert && assert( false, 'Should not be calling getText' );
     return this.getText();
   }
@@ -956,6 +962,8 @@ export default class RichText extends Node {
    * Returns the text displayed by our node.
    */
   public getText(): string {
+
+    // TODO: https://github.com/phetsims/scenery/issues/1472
     assert && assert( false, 'Should not be calling getText' );
     return this._stringProperty.value;
   }
