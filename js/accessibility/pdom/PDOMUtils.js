@@ -219,6 +219,21 @@ function tagNameSupportsContent( tagName ) {
 const PDOMUtils = {
 
   /**
+   * Given a Property or string, return the Propergy value if it is a property. Otherwise just return the string.
+   * Useful for forwarding the string to DOM content, but allowing the API to take a StringProperty. Eventually
+   * PDOM may support dynamic strings.
+   * @param valueOrProperty
+   * @returns {string|Property}
+   */
+  unwrapStringProperty( valueOrProperty ) {
+    const result = valueOrProperty === null ? null : ( typeof valueOrProperty === 'string' ? valueOrProperty : valueOrProperty.value );
+
+    assert && assert( result === null || typeof result === 'string' );
+
+    return result;
+  },
+
+  /**
    * Get the next focusable element relative to the currently focused element and under the parentElement.
    * Can be useful if you want to emulate the 'Tab' key behavior or just transition focus to the next element
    * in the document. If no next focusable can be found, it will return the currently focused element.
