@@ -295,8 +295,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     }
 
     /**
-     * When a pointer exits this Node, signal to the Displays that pointer focus has changed to deactivate
-     * the HighlightOverlay.
+     * When a pointer exits this Node or its children, signal to the Displays that pointer focus has changed to
+     * deactivate the HighlightOverlay. This can also fire when visibility/pickability of the Node changes.
      */
     private _onPointerExited( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
@@ -304,6 +304,14 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
         display.focusManager.pointerFocusProperty.set( null );
+
+        // An exit event may come from a Node along the trail becoming invisible or unpickable. In that case unlock
+        // focus and remove pointer listeners so that highlights can continue to update from new input.
+        if ( !event.trail.isPickable() ) {
+
+          // unlock and remove pointer listeners
+          this._onPointerRelease( event );
+        }
       }
     }
 
