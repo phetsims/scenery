@@ -108,6 +108,11 @@ class InputFuzzer {
     }
 
     this.display._input.currentlyFiringEvents = false;
+
+    // Since we do a lock-out to stop reentrant events above, we'll need to fire any batched events that have accumulated
+    // see https://github.com/phetsims/scenery/issues/1497. We'll likely get some focus events that need to fire
+    // for correctness, before we continue on.
+    this.display._input.fireBatchedEvents();
   }
 
   /**

@@ -83,10 +83,13 @@ class KeyboardFuzzer {
     } );
   }
 
-  private triggerClickEvent( element: Element ): void {
+  private triggerClickEvent(): void {
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'triggering click' );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
+    // We'll only ever want to send events to the activeElement (so that it's not stale), see
+    // https://github.com/phetsims/scenery/issues/1497
+    const element = document.activeElement;
     element instanceof HTMLElement && element.click();
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
@@ -95,18 +98,18 @@ class KeyboardFuzzer {
   /**
    * Trigger a keydown/keyup pair. The keyup is triggered with a timeout.
    */
-  private triggerKeyDownUpEvents( element: Element, code: string ): void {
+  private triggerKeyDownUpEvents( code: string ): void {
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger keydown/up: ${code}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
     // TODO: screen readers normally take our keydown events, but may not here, is the discrepancy ok?
-    this.triggerDOMEvent( KEY_DOWN, element, code );
+    this.triggerDOMEvent( KEY_DOWN, code );
 
     const randomTimeForKeypress = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
 
     const keyupListener: KeyupListener = () => {
-      this.triggerDOMEvent( KEY_UP, element, code );
+      this.triggerDOMEvent( KEY_UP, code );
       if ( this.keyupListeners.includes( keyupListener ) ) {
         this.keyupListeners.splice( this.keyupListeners.indexOf( keyupListener ), 1 );
       }
@@ -128,7 +131,7 @@ class KeyboardFuzzer {
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger random keydown/up: ${randomCode}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
-    this.triggerKeyDownUpEvents( element, randomCode );
+    this.triggerKeyDownUpEvents( randomCode );
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
   }
@@ -169,10 +172,10 @@ class KeyboardFuzzer {
           if ( randomNumber < DO_KNOWN_KEYS_THRESHOLD ) {
             const codeValues = keyboardTestingSchema[ elementWithFocus.tagName ];
             const code = this.random.sample( codeValues );
-            this.triggerKeyDownUpEvents( elementWithFocus, code );
+            this.triggerKeyDownUpEvents( code );
           }
           else if ( randomNumber < CLICK_EVENT_THRESHOLD ) {
-            this.triggerClickEvent( elementWithFocus );
+            this.triggerClickEvent();
           }
           else {
             this.triggerRandomKeyDownUpEvents( elementWithFocus );
@@ -192,16 +195,20 @@ class KeyboardFuzzer {
   /**
    * Taken from example in http://output.jsbin.com/awenaq/3,
    */
-  private triggerDOMEvent( event: string, element: Element, code: string ): void {
-    const eventObj = new KeyboardEvent( event, {
-      bubbles: true,
-      code: code,
-      shiftKey: globalKeyStateTracker.shiftKeyDown,
-      altKey: globalKeyStateTracker.altKeyDown,
-      ctrlKey: globalKeyStateTracker.ctrlKeyDown
-    } );
+  private triggerDOMEvent( event: string, code: string ): void {
+    // We'll only ever want to send events to the activeElement (so that it's not stale), see
+    // https://github.com/phetsims/scenery/issues/1497
+    if ( document.activeElement ) {
+      const eventObj = new KeyboardEvent( event, {
+        bubbles: true,
+        code: code,
+        shiftKey: globalKeyStateTracker.shiftKeyDown,
+        altKey: globalKeyStateTracker.altKeyDown,
+        ctrlKey: globalKeyStateTracker.ctrlKeyDown
+      } );
 
-    element.dispatchEvent( eventObj );
+      document.activeElement.dispatchEvent( eventObj );
+    }
   }
 }
 
