@@ -3799,14 +3799,14 @@ class Node extends ParallelDOM {
    * If you need to "delay" setting an instrumented visibleProperty to this node, pass phetioVisiblePropertyInstrumented
    * to instrumentation call to this Node (where Tandem is provided).
    */
-  public setVisibleProperty( newTarget: TProperty<boolean> | null ): this {
-    return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget );
+  public setVisibleProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
+    return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget as TProperty<boolean> );
   }
 
   /**
    * See setVisibleProperty() for more information
    */
-  public set visibleProperty( property: TProperty<boolean> | null ) {
+  public set visibleProperty( property: TReadOnlyProperty<boolean> | null ) {
     this.setVisibleProperty( property );
   }
 
@@ -4077,14 +4077,14 @@ class Node extends ParallelDOM {
    *
    * PhET-iO Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
    */
-  public setPickableProperty( newTarget: TProperty<boolean | null> | null ): this {
-    return this._pickableProperty.setTargetProperty( this, null, newTarget );
+  public setPickableProperty( newTarget: TReadOnlyProperty<boolean | null> | null ): this {
+    return this._pickableProperty.setTargetProperty( this, null, newTarget as TProperty<boolean | null> );
   }
 
   /**
    * See setPickableProperty() for more information
    */
-  public set pickableProperty( property: TProperty<boolean | null> | null ) {
+  public set pickableProperty( property: TReadOnlyProperty<boolean | null> | null ) {
     this.setPickableProperty( property );
   }
 
@@ -4207,14 +4207,14 @@ class Node extends ParallelDOM {
    * If you need to "delay" setting an instrumented enabledProperty to this node, pass phetioEnabledPropertyInstrumented
    * to instrumentation call to this Node (where Tandem is provided).
    */
-  public setEnabledProperty( newTarget: TProperty<boolean> | null ): this {
-    return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget );
+  public setEnabledProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
+    return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget as TProperty<boolean> );
   }
 
   /**
    * See setEnabledProperty() for more information
    */
-  public set enabledProperty( property: TProperty<boolean> | null ) {
+  public set enabledProperty( property: TReadOnlyProperty<boolean> | null ) {
     this.setEnabledProperty( property );
   }
 
@@ -4321,14 +4321,14 @@ class Node extends ParallelDOM {
    * If you need to "delay" setting an instrumented inputEnabledProperty to this node, pass phetioInputEnabledPropertyInstrumented
    * to instrumentation call to this Node (where Tandem is provided).
    */
-  public setInputEnabledProperty( newTarget: TProperty<boolean> | null ): this {
-    return this._inputEnabledProperty.setTargetProperty( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, newTarget );
+  public setInputEnabledProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
+    return this._inputEnabledProperty.setTargetProperty( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, newTarget as TProperty<boolean> );
   }
 
   /**
    * See setInputEnabledProperty() for more information
    */
-  public set inputEnabledProperty( property: TProperty<boolean> | null ) {
+  public set inputEnabledProperty( property: TReadOnlyProperty<boolean> | null ) {
     this.setInputEnabledProperty( property );
   }
 
