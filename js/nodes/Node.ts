@@ -171,7 +171,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, TInputListener, TLayoutOptions, Image, ImageOptions, Instance, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable, isWidthSizable, isHeightSizable } from '../imports.js';
+import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, Image, ImageOptions, Instance, isHeightSizable, isWidthSizable, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, TInputListener, TLayoutOptions, Trail, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -253,7 +253,8 @@ const NODE_OPTION_KEYS = [
   'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
   'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
   'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
-  ...REQUIRES_BOUNDS_OPTION_KEYS
+  ...REQUIRES_BOUNDS_OPTION_KEYS,
+  'disposer' // To support mutation from Disposable.ts
 ];
 
 const DEFAULT_OPTIONS = {
