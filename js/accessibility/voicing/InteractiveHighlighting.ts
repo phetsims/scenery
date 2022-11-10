@@ -351,12 +351,10 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
           const focus = display.focusManager.pointerFocusProperty.value;
-          const locked = !!display.focusManager.lockedPointerFocusProperty.value;
 
-          // Focus should generally be defined when pointer enters the Node, but it may be null in cases of
-          // cancel or interrupt. Don't attempt to lock if the FocusManager already has a locked highlight (especially
-          // important for gracefully handling multitouch)
-          if ( focus && !locked ) {
+          // focus should generally be defined when pointer enters the Node, but it may be null in cases of
+          // cancel or interrupt
+          if ( focus ) {
             lockPointer = this.attemptHighlightLock( focus, display.focusManager, event.pointer );
           }
         }
