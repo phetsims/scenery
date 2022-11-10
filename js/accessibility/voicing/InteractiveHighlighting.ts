@@ -10,7 +10,7 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import { DelayedMutate, Display, Focus, FocusManager, Instance, Node, Pointer, PressListener, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
+import { DelayedMutate, Display, Focus, Instance, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 
@@ -260,37 +260,21 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a Pointer enters this Node, signal to the Displays that the pointer is over this Node so that the
      * HighlightOverlay can be activated.
-     *
-     * This is most likely how most pointerFocusProperty is set. First we get an `enter` event then we may get
-     * a down event or move event which could do further updates on the event Pointer or FocusManager.
      */
     private _onPointerEntered( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
-      let lockPointer = false;
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
-        if ( display.focusManager.pointerFocusProperty.value === null || !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
-          const newFocus = new Focus( display, event.trail );
-          display.focusManager.pointerFocusProperty.set( newFocus );
-          if ( display.focusManager.lockedPointerFocusProperty.value === null && event.pointer.attachedListener ) {
-            lockPointer = this.attemptHighlightLock( newFocus, display.focusManager, event.pointer );
-          }
-        }
-      }
 
-      if ( lockPointer ) {
-        this.savePointer( event.pointer );
+        if ( display.focusManager.pointerFocusProperty.value === null || !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
+
+          display.focusManager.pointerFocusProperty.set( new Focus( display, event.trail ) );
+        }
       }
     }
 
-    /**
-     * Update highlights when the Pointer moves over this Node. In general, highlights will activate on 'enter'. But
-     * in cases where multiple Nodes in a Trail support InteractiveHighlighting this listener can move focus
-     * to the most reasonable target (the closest ancestor or descendent that is composed with InteractiveHighlighting).
-     */
     private _onPointerMove( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
-      let lockPointer = false;
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -299,21 +283,14 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         // the SceneryEvent might have gone through a descendant of this Node
         const rootToSelf = event.trail.subtrailTo( this as unknown as Node );
 
-        // only do more work on move if the event indicates that pointer focus might have changed.
+        // only do more work on move if the event indicates that pointer focus might have changed
         if ( display.focusManager.pointerFocusProperty.value === null || !rootToSelf.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
-          if ( !this.getDescendantsUseHighlighting( event.trail ) ) {
-            const newFocus = new Focus( display, rootToSelf );
-            display.focusManager.pointerFocusProperty.set( newFocus );
 
-            if ( display.focusManager.lockedPointerFocusProperty.value === null && event.pointer.attachedListener ) {
-              lockPointer = this.attemptHighlightLock( newFocus, display.focusManager, event.pointer );
-            }
+          if ( !this.getDescendantsUseHighlighting( event.trail ) ) {
+
+            display.focusManager.pointerFocusProperty.set( new Focus( display, rootToSelf ) );
           }
         }
-      }
-
-      if ( lockPointer ) {
-        this.savePointer( event.pointer );
       }
     }
 
@@ -339,14 +316,11 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     }
 
     /**
-     * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked. On the down
-     * event, the pointerFocusProperty will have been set first from the `enter` event.
+     * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked
      */
     private _onPointerDown( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       if ( this._pointer === null ) {
-        let lockPointer = false;
-
         const displays = Object.values( this.displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
@@ -355,13 +329,15 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
           // focus should generally be defined when pointer enters the Node, but it may be null in cases of
           // cancel or interrupt
           if ( focus ) {
-            lockPointer = this.attemptHighlightLock( focus, display.focusManager, event.pointer );
+
+            // Set the lockedPointerFocusProperty with a copy of the Focus (as deep as possible) because we want
+            // to keep a reference to the old Trail while pointerFocusProperty changes.
+            display.focusManager.lockedPointerFocusProperty.set( new Focus( focus.display, focus.trail.copy() ) );
           }
         }
 
-        if ( lockPointer ) {
-          this.savePointer( event.pointer );
-        }
+        this._pointer = event.pointer;
+        this._pointer.addInputListener( this._pointerListener );
       }
     }
 
@@ -398,41 +374,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
       // unlock and remove pointer listeners
       this._onPointerRelease( event );
-    }
-
-    /**
-     * Save the Pointer and add a listener to it to remove highlights when a pointer is released/cancelled.
-     */
-    private savePointer( eventPointer: Pointer ): void {
-      assert && assert( this._pointer === null,
-        'It should be impossible to already have a Pointer before locking from touchSnag' );
-
-      this._pointer = eventPointer;
-      this._pointer.addInputListener( this._pointerListener );
-    }
-
-    /**
-     * May set the lockedPointerFocusProperty for a FocusManager if the provided Pointer indicates that this should
-     * be done. The "locking" makes sure that the highlight remains active on the Node that is receiving interaction
-     * even when the pointer has move away from the Node (but presumably is still down somewhere else on the screen).
-     * Returns true when the lockedPointerFocusProperty is set to a new Focus so that use cases can do more work
-     * in this case.
-     */
-    private attemptHighlightLock( newFocus: Focus, focusManager: FocusManager, eventPointer: Pointer ): boolean {
-      let pointerLock = false;
-
-      // If the event Pointer is attached to a PressListener there is some activation input happening, so
-      // we should "lock" the highlight to this target until the pointer is released.
-      if ( eventPointer.attachedListener && eventPointer.attachedListener.listener instanceof PressListener ) {
-        assert && assert( this._pointer === null,
-          'It should be impossible to already have a Pointer before locking from touchSnag' );
-
-        // A COPY of the focus is saved to the Property because we need the value of the Trail at this event.
-        focusManager.lockedPointerFocusProperty.set( new Focus( newFocus.display, newFocus.trail.copy() ) );
-        pointerLock = true;
-      }
-
-      return pointerLock;
     }
 
     /**
