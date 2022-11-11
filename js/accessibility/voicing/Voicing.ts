@@ -105,7 +105,7 @@ export type SpeakingOptions = {
                                                  ResponsePacketOptions[PropertyName];
 };
 
-const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
@@ -173,14 +173,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
       this._voicingCanSpeakCount = 0;
 
       this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
-      ( this as unknown as Node ).changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
+      this.changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
 
       this._speakContentOnFocusListener = {
         focus: event => {
           this._voicingFocusListener && this._voicingFocusListener( event );
         }
       };
-      ( this as unknown as Node ).addInputListener( this._speakContentOnFocusListener );
+      this.addInputListener( this._speakContentOnFocusListener );
 
       return this;
     }
@@ -337,7 +337,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
      */
     protected speakContent( content: TAlertable ): void {
 
-      const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !( this as unknown as Node ).isInsidePhetioArchetype();
+      const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !this.isInsidePhetioArchetype();
 
       // don't send to utteranceQueue if response is empty
       // don't send to utteranceQueue for PhET-iO dynamic element archetypes, https://github.com/phetsims/joist/issues/817
@@ -474,14 +474,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
     public setVoicingUtterance( utterance: Utterance ): void {
       if ( this._voicingUtterance !== utterance ) {
 
-        // `this` is not recognized as a VoicingNode, but it is because this trait can only be used with Node subtypes
-        const thisVoicingNode = this as unknown as VoicingNode;
-
         if ( this._voicingUtterance ) {
           this.cleanVoicingUtterance();
         }
 
-        Voicing.registerUtteranceToVoicingNode( utterance, thisVoicingNode );
+        Voicing.registerUtteranceToVoicingNode( utterance, this );
         this._voicingUtterance = utterance;
       }
     }
@@ -546,9 +543,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
      * Detaches references that ensure this components of this Trait are eligible for garbage collection.
      */
     public override dispose(): void {
-      const thisVoicingNode = ( this as unknown as VoicingNode );
-      thisVoicingNode.removeInputListener( this._speakContentOnFocusListener );
-      thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+      this.removeInputListener( this._speakContentOnFocusListener );
+      this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
       if ( this._voicingUtterance ) {
         this.cleanVoicingUtterance();
@@ -559,9 +555,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
     }
 
     public clean(): void {
-      const thisVoicingNode = ( this as unknown as VoicingNode );
-      thisVoicingNode.removeInputListener( this._speakContentOnFocusListener );
-      thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+      this.removeInputListener( this._speakContentOnFocusListener );
+      this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
       if ( this._voicingUtterance ) {
         this.cleanVoicingUtterance();
@@ -591,7 +586,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
       }
 
       assert && assert( this._voicingCanSpeakCount >= 0, 'the voicingCanSpeakCount should not go below zero' );
-      assert && assert( this._voicingCanSpeakCount <= ( this as unknown as Node ).instances.length,
+      assert && assert( this._voicingCanSpeakCount <= this.instances.length,
         'The voicingCanSpeakCount cannot be greater than the number of Instances.' );
 
       this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
@@ -644,7 +639,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => { // eslin
         this._voicingUtterance.dispose();
       }
       else {
-        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance!, this as unknown as VoicingNode );
+        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance!, this );
       }
     }
   } );

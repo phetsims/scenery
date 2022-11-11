@@ -22,7 +22,6 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
-import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import { DelayedMutate, Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
@@ -78,9 +77,7 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
 } );
 
-const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
-
-  assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
+const ReadingBlock = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
   const ReadingBlockClass = DelayedMutate( 'ReadingBlock', READING_BLOCK_OPTION_KEYS, class ReadingBlockClass extends Voicing( Type ) {
 
@@ -122,7 +119,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
       this.readingBlockResponsePatternCollection = DEFAULT_CONTENT_HINT_PATTERN;
 
       this._localBoundsChangedListener = this._onLocalBoundsChanged.bind( this );
-      ( this as unknown as Node ).localBoundsProperty.link( this._localBoundsChangedListener );
+      this.localBoundsProperty.link( this._localBoundsChangedListener );
 
       this._readingBlockInputListener = {
         focus: event => this._speakReadingBlockContentListener( event ),
@@ -135,7 +132,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
 
       // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
       // a different behavior.
-      ( this as unknown as Node ).focusHighlight = new ReadingBlockHighlight( this as unknown as Node );
+      this.focusHighlight = new ReadingBlockHighlight( this );
 
       // All ReadingBlocks use a ReadingBlockUtterance with Focus and Trail data to this Node so that it can be
       // highlighted in the FocusOverlay when this Utterance is being announced.
@@ -301,7 +298,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
       for ( let i = 0; i < trailIds.length; i++ ) {
 
         const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
-        if ( pointerFocus && pointerFocus.trail.lastNode() === this as unknown as Node ) {
+        if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
           activated = true;
           break;
         }
@@ -318,23 +315,20 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
      * @param focusable - whether ReadingBlocks should be focusable
      */
     private _onReadingBlockFocusableChanged( focusable: boolean ): void {
-
-      const thisNode = this as unknown as Node;
-
-      thisNode.focusable = focusable;
+      this.focusable = focusable;
 
       if ( focusable ) {
-        thisNode.tagName = this._readingBlockTagName;
+        this.tagName = this._readingBlockTagName;
 
         // don't add the input listener if we are already active, we may just be updating the tagName in this case
-        if ( !thisNode.hasInputListener( this._readingBlockInputListener ) ) {
-          thisNode.addInputListener( this._readingBlockInputListener );
+        if ( !this.hasInputListener( this._readingBlockInputListener ) ) {
+          this.addInputListener( this._readingBlockInputListener );
         }
       }
       else {
-        thisNode.tagName = this._readingBlockDisabledTagName;
-        if ( thisNode.hasInputListener( this._readingBlockInputListener ) ) {
-          thisNode.removeInputListener( this._readingBlockInputListener );
+        this.tagName = this._readingBlockDisabledTagName;
+        if ( this.hasInputListener( this._readingBlockInputListener ) ) {
+          this.removeInputListener( this._readingBlockInputListener );
         }
       }
     }
@@ -343,9 +337,8 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
      * Update the hit areas for this Node whenever the bounds change.
      */
     private _onLocalBoundsChanged( localBounds: Bounds2 ): void {
-      const thisNode = this as unknown as Node;
-      thisNode.mouseArea = localBounds;
-      thisNode.touchArea = localBounds;
+      this.mouseArea = localBounds;
+      this.touchArea = localBounds;
     }
 
     /**
@@ -355,7 +348,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
      */
     private _speakReadingBlockContentListener( event: SceneryEvent ): void {
 
-      const displays = ( this as unknown as Node ).getConnectedDisplays();
+      const displays = this.getConnectedDisplays();
 
       const readingBlockUtterance = this.voicingUtterance;
 
@@ -372,7 +365,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
           if ( !this.getDescendantsUseHighlighting( event.trail ) ) {
 
             // the SceneryEvent might have gone through a descendant of this Node
-            const rootToSelf = event.trail.subtrailTo( ( this as unknown as Node ) );
+            const rootToSelf = event.trail.subtrailTo( this );
 
             // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
             // this finds the actual visual trail to use
@@ -399,14 +392,13 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => { // 
     }
 
     public override dispose(): void {
-      const thisNode = ( this as unknown as Node );
       voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this._readingBlockFocusableChangeListener );
-      thisNode.localBoundsProperty.unlink( this._localBoundsChangedListener );
+      this.localBoundsProperty.unlink( this._localBoundsChangedListener );
 
       // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while
       // the ReadingBlock is enabled
-      if ( thisNode.hasInputListener( this._readingBlockInputListener ) ) {
-        thisNode.removeInputListener( this._readingBlockInputListener );
+      if ( this.hasInputListener( this._readingBlockInputListener ) ) {
+        this.removeInputListener( this._readingBlockInputListener );
       }
 
       super.dispose();

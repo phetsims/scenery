@@ -9,7 +9,6 @@
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import inheritance from '../../../../phet-core/js/inheritance.js';
 import { DelayedMutate, Display, Focus, Instance, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
@@ -30,8 +29,7 @@ type SelfOptions = {
 
 export type InteractiveHighlightingOptions = SelfOptions;
 
-const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
-  assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
+const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
   // @ts-ignore
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
@@ -102,7 +100,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       this.interactiveHighlightChangedEmitter = new TinyEmitter();
 
       this._changedInstanceListener = this.onChangedInstance.bind( this );
-      ( this as unknown as Node ).changedInstanceEmitter.addListener( this._changedInstanceListener );
+      this.changedInstanceEmitter.addListener( this._changedInstanceListener );
 
       this._interactiveHighlightingEnabledListener = this._onInteractiveHighlightingEnabledChange.bind( this );
 
@@ -225,7 +223,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
         const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.pointerFocusProperty.value;
-        if ( pointerFocus && pointerFocus.trail.lastNode() === this as unknown as Node ) {
+        if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
           activated = true;
           break;
         }
@@ -235,13 +233,12 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     public get interactiveHighlightActivated(): boolean { return this.isInteractiveHighlightActivated(); }
 
-    public dispose(): void {
-      const thisNode = this as unknown as Node;
-      thisNode.changedInstanceEmitter.removeListener( this._changedInstanceListener );
+    public override dispose(): void {
+      this.changedInstanceEmitter.removeListener( this._changedInstanceListener );
 
       // remove the activation listener if it is currently attached
-      if ( thisNode.hasInputListener( this._activationListener ) ) {
-        thisNode.removeInputListener( this._activationListener );
+      if ( this.hasInputListener( this._activationListener ) ) {
+        this.removeInputListener( this._activationListener );
       }
 
       // remove listeners on displays and remove Displays from the map
@@ -253,7 +250,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         delete this.displays[ trailIds[ i ] ];
       }
 
-      // @ts-ignore
       super.dispose && super.dispose();
     }
 
@@ -281,7 +277,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         const display = displays[ i ];
 
         // the SceneryEvent might have gone through a descendant of this Node
-        const rootToSelf = event.trail.subtrailTo( this as unknown as Node );
+        const rootToSelf = event.trail.subtrailTo( this );
 
         // only do more work on move if the event indicates that pointer focus might have changed
         if ( display.focusManager.pointerFocusProperty.value === null || !rootToSelf.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
@@ -381,17 +377,15 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Work related to interactive highlighting is avoided unless the feature is enabled.
      */
     private _onInteractiveHighlightingEnabledChange( featureEnabled: boolean ): void {
-      const thisNode = this as unknown as Node;
-
       // Only listen to the activation listener if the feature is enabled and highlighting is enabled for this Node.
       const enabled = featureEnabled && this._interactiveHighlightEnabled;
 
-      const hasActivationListener = thisNode.hasInputListener( this._activationListener );
+      const hasActivationListener = this.hasInputListener( this._activationListener );
       if ( enabled && !hasActivationListener ) {
-        thisNode.addInputListener( this._activationListener );
+        this.addInputListener( this._activationListener );
       }
       else if ( !enabled && hasActivationListener ) {
-        thisNode.removeInputListener( this._activationListener );
+        this.removeInputListener( this._activationListener );
       }
     }
 
@@ -432,7 +426,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * should be activated instead.
      */
     protected getDescendantsUseHighlighting( trail: Trail ): boolean {
-      const indexOfSelf = trail.nodes.indexOf( this as unknown as Node );
+      const indexOfSelf = trail.nodes.indexOf( this );
 
       // all the way to length, end not included in slice - and if start value is greater than index range
       // an empty array is returned
