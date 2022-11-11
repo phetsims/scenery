@@ -67,7 +67,7 @@ export type PaintableNode = Path | Text;
 
 const PAINTABLE_DRAWABLE_MARK_FLAGS = [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ];
 
-const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
+const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
 
   return class PaintableMixin extends type {
@@ -286,9 +286,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
         this._lineDrawingStyles.lineWidth = lineWidth;
         this.invalidateStroke();
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineWidth();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineWidth();
         }
       }
       return this;
@@ -319,9 +319,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
         this._lineDrawingStyles.lineCap = lineCap;
         this.invalidateStroke();
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
         }
       }
       return this;
@@ -353,9 +353,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
         this._lineDrawingStyles.lineJoin = lineJoin;
         this.invalidateStroke();
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
         }
       }
       return this;
@@ -383,9 +383,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
         this._lineDrawingStyles.miterLimit = miterLimit;
         this.invalidateStroke();
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
         }
       }
       return this;
@@ -414,9 +414,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
         this._lineDrawingStyles.lineDash = lineDash || [];
         this.invalidateStroke();
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
         }
       }
       return this;
@@ -451,9 +451,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
         this._lineDrawingStyles.lineDashOffset = lineDashOffset;
         this.invalidateStroke();
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyLineOptions();
         }
       }
       return this;
@@ -503,9 +503,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     public setCachedPaints( paints: TPaint[] ): this {
       this._cachedPaints = paints.filter( ( paint: TPaint ): paint is Paint => paint instanceof Paint );
 
-      const stateLen = ( this as unknown as Node )._drawables.length;
+      const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyCachedPaints();
+        ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyCachedPaints();
       }
 
       return this;
@@ -536,9 +536,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
       if ( paint instanceof Paint ) {
         this._cachedPaints.push( paint );
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyCachedPaints();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyCachedPaints();
         }
       }
     }
@@ -558,9 +558,9 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
 
         arrayRemove( this._cachedPaints, paint );
 
-        const stateLen = ( this as unknown as Node )._drawables.length;
+        const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
-          ( ( this as unknown as Node )._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyCachedPaints();
+          ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyCachedPaints();
         }
       }
     }
@@ -801,13 +801,11 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Invalidates our current fill, triggering recomputation of anything that depended on the old fill's value
      */
     public invalidateFill(): void {
-      const thisNode = this as unknown as Node;
+      this.invalidateSupportedRenderers();
 
-      thisNode.invalidateSupportedRenderers();
-
-      const stateLen = thisNode._drawables.length;
+      const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( thisNode._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyFill();
+        ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyFill();
       }
     }
 
@@ -815,13 +813,11 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * Invalidates our current stroke, triggering recomputation of anything that depended on the old stroke's value
      */
     public invalidateStroke(): void {
-      const thisNode = this as unknown as Node;
+      this.invalidateSupportedRenderers();
 
-      thisNode.invalidateSupportedRenderers();
-
-      const stateLen = thisNode._drawables.length;
+      const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        ( thisNode._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyStroke();
+        ( this._drawables[ i ] as unknown as TPaintableDrawable ).markDirtyStroke();
       }
     }
   };
