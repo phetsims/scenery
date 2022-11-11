@@ -6,25 +6,23 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inheritance from '../../../phet-core/js/inheritance.js';
 import { Node, scenery } from '../imports.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 
-const Leaf = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Leaf' );
+const Leaf = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
 
   return class LeafMixin extends type {
     public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
     }
 
-    public insertChild( index: number, node: Node ): void {
+    public override insertChild( index: number, node: Node ): this {
       throw new Error( 'Attempt to insert child into Leaf' );
     }
 
-    public removeChildWithIndex( node: Node, indexOfChild: number ): void {
+    public override removeChildWithIndex( node: Node, indexOfChild: number ): void {
       throw new Error( 'Attempt to remove child from Leaf' );
     }
   };

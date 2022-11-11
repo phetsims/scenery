@@ -38,7 +38,7 @@ import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
  * @param keys - An array of the mutate option names that should be delayed
  * @param type - The class we're mixing into
  */
-const DelayedMutate = <SuperType extends Constructor>( name: string, keys: string[], type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+const DelayedMutate = <SuperType extends Constructor<Node>>( name: string, keys: string[], type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
   // We typecast these to strings to satisfy the type-checker without large amounts of grief. It doesn't seem to be
   // able to parse that we're using the same keys for each call of this.
   const pendingOptionsKey = `_${name}PendingOptions` as '_fakePendingOptionsType';
@@ -57,14 +57,14 @@ const DelayedMutate = <SuperType extends Constructor>( name: string, keys: strin
       this[ isConstructedKey ] = true;
 
       // Apply any options that we delayed
-      ( this as unknown as Node ).mutate( this[ pendingOptionsKey ] );
+      this.mutate( this[ pendingOptionsKey ] );
 
       // Prevent memory leaks by tossing the options data that we've now used
       this[ pendingOptionsKey ] = undefined;
     }
 
     // Typescript doesn't want an override here, but we're overriding it
-    public mutate( options?: NodeOptions ): this {
+    public override mutate( options?: NodeOptions ): this {
 
       // If we're not constructed, we need to save the options for later
       // NOTE: If we haven't SET the constructed field yet, then it will be undefined (and falsy), so we do a check
@@ -78,7 +78,6 @@ const DelayedMutate = <SuperType extends Constructor>( name: string, keys: strin
         options = _.omit( options, keys );
       }
 
-      // @ts-ignore --- we can't get this to type-check correctly, since otherwise the mixin wouldn't work
       return super.mutate( options );
     }
   };

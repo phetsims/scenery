@@ -60,7 +60,7 @@ export type HeightSizableOptions = {
 // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
-const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
+const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
   const HeightSizableTrait = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS, class HeightSizableTrait extends type {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
@@ -113,9 +113,9 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.localMinimumHeightProperty.lazyLink( this._updateMinimumHeightListener );
 
       // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
-      ( this as unknown as Node ).transformEmitter.addListener( this._updateLocalPreferredHeightListener );
+      this.transformEmitter.addListener( this._updateLocalPreferredHeightListener );
       // On a transform change this should update the minimum
-      ( this as unknown as Node ).transformEmitter.addListener( this._updateMinimumHeightListener );
+      this.transformEmitter.addListener( this._updateMinimumHeightListener );
     }
 
     public get preferredHeight(): number | null {
@@ -176,23 +176,23 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
       this.localMinimumHeightProperty.value = value;
     }
 
-    public get heightSizable(): boolean {
+    public override get heightSizable(): boolean {
       assert && assert( this.isHeightResizableProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.isHeightResizableProperty.value;
     }
 
-    public set heightSizable( value: boolean ) {
+    public override set heightSizable( value: boolean ) {
       assert && assert( this.isHeightResizableProperty,
         'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
       this.isHeightResizableProperty.value = value;
     }
 
-    public get extendsHeightSizable(): boolean { return true; }
+    public override get extendsHeightSizable(): boolean { return true; }
 
     public validateLocalPreferredHeight(): void {
       if ( assert ) {
-        const currentHeight = ( this as unknown as Node ).localHeight;
+        const currentHeight = this.localHeight;
         const effectiveMinimumHeight = this.localMinimumHeight === null ? currentHeight : this.localMinimumHeight;
         const idealHeight = this.localPreferredHeight === null ? effectiveMinimumHeight : this.localPreferredHeight;
 
@@ -203,10 +203,9 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalPreferredHeight(): number | null {
-      const node = this as unknown as Node;
 
-      return ( node.matrix.isAligned() && this.preferredHeight !== null )
-             ? Math.abs( node.transform.inverseDeltaY( this.preferredHeight ) )
+      return ( this.matrix.isAligned() && this.preferredHeight !== null )
+             ? Math.abs( this.transform.inverseDeltaY( this.preferredHeight ) )
              : null;
     }
 
@@ -216,7 +215,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     }
 
     private _updateLocalPreferredHeight(): void {
-      assert && ( this as unknown as Node ).auditMaxDimensions();
+      assert && this.auditMaxDimensions();
 
       if ( !this._preferredSizeChanging ) {
         this._preferredSizeChanging = true;
@@ -247,10 +246,9 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculatePreferredHeight(): number | null {
-      const node = this as unknown as Node;
 
-      return ( node.matrix.isAligned() && this.localPreferredHeight !== null )
-             ? Math.abs( node.transform.transformDeltaY( this.localPreferredHeight ) )
+      return ( this.matrix.isAligned() && this.localPreferredHeight !== null )
+             ? Math.abs( this.transform.transformDeltaY( this.localPreferredHeight ) )
              : null;
     }
 
@@ -282,10 +280,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalMinimumHeight(): number | null {
-      const node = this as unknown as Node;
-
-      return ( node.matrix.isAligned() && this.minimumHeight !== null )
-             ? Math.abs( node.transform.inverseDeltaY( this.minimumHeight ) )
+      return ( this.matrix.isAligned() && this.minimumHeight !== null )
+             ? Math.abs( this.transform.inverseDeltaY( this.minimumHeight ) )
              : null;
     }
 
@@ -321,10 +317,8 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateMinimumHeight(): number | null {
-      const node = this as unknown as Node;
-
-      return ( node.matrix.isAligned() && this.localMinimumHeight !== null )
-             ? Math.abs( node.transform.transformDeltaY( this.localMinimumHeight ) )
+      return ( this.matrix.isAligned() && this.localMinimumHeight !== null )
+             ? Math.abs( this.transform.transformDeltaY( this.localMinimumHeight ) )
              : null;
     }
 

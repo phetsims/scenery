@@ -64,7 +64,7 @@ type SelfOptions = {
 type ParentOptions = WidthSizableOptions & HeightSizableOptions;
 export type SizableOptions = SelfOptions & ParentOptions;
 
-const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
+const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
   const SuperExtendedType = WidthSizable( HeightSizable( type ) );
   const SizableTrait = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class SizableTrait extends SuperExtendedType {
 
@@ -166,7 +166,7 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       this.heightSizable = value;
     }
 
-    public get extendsSizable(): boolean { return true; }
+    public override get extendsSizable(): boolean { return true; }
 
     public validateLocalPreferredSize(): void {
       if ( assert ) {
@@ -189,17 +189,15 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculateLocalPreferredWidth(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.preferredWidth !== null ) {
-            return Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) );
+            return Math.abs( this.transform.inverseDeltaX( this.preferredWidth ) );
           }
         }
         // If we're height-sizable and we have an orientation swap, set the correct preferred width!
         else if ( this.preferredHeight !== null ) {
-          return Math.abs( node.transform.getInverse().m01() * this.preferredHeight );
+          return Math.abs( this.transform.getInverse().m01() * this.preferredHeight );
         }
       }
 
@@ -208,17 +206,15 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculateLocalPreferredHeight(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.preferredHeight !== null ) {
-            return Math.abs( node.transform.inverseDeltaY( this.preferredHeight ) );
+            return Math.abs( this.transform.inverseDeltaY( this.preferredHeight ) );
           }
         }
         // If we're width-sizable and we have an orientation swap, set the correct preferred height!
         else if ( this.preferredWidth !== null ) {
-          return Math.abs( node.transform.getInverse().m10() * this.preferredWidth );
+          return Math.abs( this.transform.getInverse().m10() * this.preferredWidth );
         }
       }
 
@@ -227,16 +223,14 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculatePreferredWidth(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.localPreferredWidth !== null ) {
-            return Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) );
+            return Math.abs( this.transform.transformDeltaX( this.localPreferredWidth ) );
           }
         }
         else if ( this.localPreferredHeight !== null ) {
-          return Math.abs( node.transform.matrix.m01() * this.localPreferredHeight );
+          return Math.abs( this.transform.matrix.m01() * this.localPreferredHeight );
         }
       }
 
@@ -245,16 +239,14 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculatePreferredHeight(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.localPreferredHeight !== null ) {
-            return Math.abs( node.transform.transformDeltaY( this.localPreferredHeight ) );
+            return Math.abs( this.transform.transformDeltaY( this.localPreferredHeight ) );
           }
         }
         else if ( this.localPreferredWidth !== null ) {
-          return Math.abs( node.transform.matrix.m10() * this.localPreferredWidth );
+          return Math.abs( this.transform.matrix.m10() * this.localPreferredWidth );
         }
       }
 
@@ -287,16 +279,14 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculateLocalMinimumWidth(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.minimumWidth !== null ) {
-            return Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) );
+            return Math.abs( this.transform.inverseDeltaX( this.minimumWidth ) );
           }
         }
         else if ( this.minimumHeight !== null ) {
-          return Math.abs( node.transform.getInverse().m01() * this.minimumHeight );
+          return Math.abs( this.transform.getInverse().m01() * this.minimumHeight );
         }
       }
 
@@ -305,16 +295,14 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculateLocalMinimumHeight(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.minimumHeight !== null ) {
-            return Math.abs( node.transform.inverseDeltaY( this.minimumHeight ) );
+            return Math.abs( this.transform.inverseDeltaY( this.minimumHeight ) );
           }
         }
         else if ( this.minimumWidth !== null ) {
-          return Math.abs( node.transform.getInverse().m10() * this.minimumWidth );
+          return Math.abs( this.transform.getInverse().m10() * this.minimumWidth );
         }
       }
 
@@ -323,16 +311,14 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculateMinimumWidth(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.localMinimumWidth !== null ) {
-            return Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) );
+            return Math.abs( this.transform.transformDeltaX( this.localMinimumWidth ) );
           }
         }
         else if ( this.localMinimumHeight !== null ) {
-          return Math.abs( node.transform.matrix.m01() * this.localMinimumHeight );
+          return Math.abs( this.transform.matrix.m01() * this.localMinimumHeight );
         }
       }
 
@@ -341,16 +327,14 @@ const Sizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
     protected override _calculateMinimumHeight(): number | null {
-      const node = this as unknown as Node;
-
-      if ( node.matrix.isAxisAligned() ) {
-        if ( node.matrix.isAligned() ) {
+      if ( this.matrix.isAxisAligned() ) {
+        if ( this.matrix.isAligned() ) {
           if ( this.localMinimumHeight !== null ) {
-            return Math.abs( node.transform.transformDeltaY( this.localMinimumHeight ) );
+            return Math.abs( this.transform.transformDeltaY( this.localMinimumHeight ) );
           }
         }
         else if ( this.localMinimumWidth !== null ) {
-          return Math.abs( node.transform.matrix.m10() * this.localMinimumWidth );
+          return Math.abs( this.transform.matrix.m10() * this.localMinimumWidth );
         }
       }
 

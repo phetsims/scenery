@@ -60,7 +60,7 @@ export type WidthSizableOptions = {
 // values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
-const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
+const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
   const WidthSizableTrait = DelayedMutate( 'WidthSizable', WIDTH_SIZABLE_OPTION_KEYS, class WidthSizableTrait extends type {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
@@ -113,9 +113,9 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       this.localMinimumWidthProperty.lazyLink( this._updateMinimumWidthListener );
 
       // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
-      ( this as unknown as Node ).transformEmitter.addListener( this._updateLocalPreferredWidthListener );
+      this.transformEmitter.addListener( this._updateLocalPreferredWidthListener );
       // On a transform change this should update the minimum
-      ( this as unknown as Node ).transformEmitter.addListener( this._updateMinimumWidthListener );
+      this.transformEmitter.addListener( this._updateMinimumWidthListener );
     }
 
     public get preferredWidth(): number | null {
@@ -177,23 +177,23 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
       this.localMinimumWidthProperty.value = value;
     }
 
-    public get widthSizable(): boolean {
+    public override get widthSizable(): boolean {
       assert && assert( this.isWidthResizableProperty,
         'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       return this.isWidthResizableProperty.value;
     }
 
-    public set widthSizable( value: boolean ) {
+    public override set widthSizable( value: boolean ) {
       assert && assert( this.isWidthResizableProperty,
         'WidthSizable options should be set from a later mutate() call instead of the super constructor' );
       this.isWidthResizableProperty.value = value;
     }
 
-    public get extendsWidthSizable(): boolean { return true; }
+    public override get extendsWidthSizable(): boolean { return true; }
 
     public validateLocalPreferredWidth(): void {
       if ( assert ) {
-        const currentWidth = ( this as unknown as Node ).localWidth;
+        const currentWidth = this.localWidth;
         const effectiveMinimumWidth = this.localMinimumWidth === null ? currentWidth : this.localMinimumWidth;
         const idealWidth = this.localPreferredWidth === null ? effectiveMinimumWidth : this.localPreferredWidth;
 
@@ -204,10 +204,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalPreferredWidth(): number | null {
-      const node = this as unknown as Node;
-
-      return ( node.matrix.isAligned() && this.preferredWidth !== null )
-             ? Math.abs( node.transform.inverseDeltaX( this.preferredWidth ) )
+      return ( this.matrix.isAligned() && this.preferredWidth !== null )
+             ? Math.abs( this.transform.inverseDeltaX( this.preferredWidth ) )
              : null;
     }
 
@@ -217,7 +215,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     private _updateLocalPreferredWidth(): void {
-      assert && ( this as unknown as Node ).auditMaxDimensions();
+      assert && this.auditMaxDimensions();
 
       if ( !this._preferredSizeChanging ) {
         this._preferredSizeChanging = true;
@@ -248,10 +246,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculatePreferredWidth(): number | null {
-      const node = this as unknown as Node;
-
-      return ( node.matrix.isAligned() && this.localPreferredWidth !== null )
-             ? Math.abs( node.transform.transformDeltaX( this.localPreferredWidth ) )
+      return ( this.matrix.isAligned() && this.localPreferredWidth !== null )
+             ? Math.abs( this.transform.transformDeltaX( this.localPreferredWidth ) )
              : null;
     }
 
@@ -283,10 +279,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateLocalMinimumWidth(): number | null {
-      const node = this as unknown as Node;
-
-      return ( node.matrix.isAligned() && this.minimumWidth !== null )
-             ? Math.abs( node.transform.inverseDeltaX( this.minimumWidth ) )
+      return ( this.matrix.isAligned() && this.minimumWidth !== null )
+             ? Math.abs( this.transform.inverseDeltaX( this.minimumWidth ) )
              : null;
     }
 
@@ -322,10 +316,8 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
     protected _calculateMinimumWidth(): number | null {
-      const node = this as unknown as Node;
-
-      return ( node.matrix.isAligned() && this.localMinimumWidth !== null )
-             ? Math.abs( node.transform.transformDeltaX( this.localMinimumWidth ) )
+      return ( this.matrix.isAligned() && this.localMinimumWidth !== null )
+             ? Math.abs( this.transform.transformDeltaX( this.localMinimumWidth ) )
              : null;
     }
 
