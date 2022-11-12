@@ -68,6 +68,7 @@ import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js'
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
+import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
 
 export type DisplayOptions = {
   // Initial (or override) display width
@@ -78,6 +79,10 @@ export type DisplayOptions = {
 
   // Applies CSS styles to the root DOM element that make it amenable to interactive content
   allowCSSHacks?: boolean;
+
+  // Whether we allow the display to put a rectangle in front of everything that subtly shifts every frame, in order to
+  // force repaints for https://github.com/phetsims/geometric-optics-basics/issues/31.
+  allowSafariRedrawWorkaround?: boolean;
 
   // Usually anything displayed outside our dom element is hidden with CSS overflow.
   allowSceneOverflow?: boolean;
@@ -320,6 +325,8 @@ export default class Display {
       // {boolean} - Applies CSS styles to the root DOM element that make it amenable to interactive content
       allowCSSHacks: true,
 
+      allowSafariRedrawWorkaround: true,
+
       // {boolean} - Usually anything displayed outside of our dom element is hidden with CSS overflow
       allowSceneOverflow: false,
 
@@ -457,6 +464,10 @@ export default class Display {
       initialize: this._accessible,
       featureSpecificAnnouncingControlPropertyName: 'descriptionCanAnnounceProperty'
     } );
+
+    if ( platform.safari && options.allowSafariRedrawWorkaround ) {
+      this.addOverlay( new SafariWorkaroundOverlay( this ) );
+    }
 
     this.focusManager = new FocusManager();
 
