@@ -51,8 +51,8 @@ type SelfOptions = {
   // Stretch will control whether a resizable component (mixes in WidthSizable/HeightSizable) will expand to fill the
   // available space within a cell's available area. Similarly to align, this only applies if there is additional space.
   stretch?: boolean; // shortcut for xStretch/yStretch
-  xStretch?: number | null;
-  yStretch?: number | null;
+  xStretch?: boolean | null;
+  yStretch?: boolean | null;
 
   // Grow will control how additional empty space (above the minimum sizes that the grid could take) will be
   // proportioned out to the rows and columns. Unlike stretch, this affects the size of the columns, and does not affect
