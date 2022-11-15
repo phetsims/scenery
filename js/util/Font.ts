@@ -108,11 +108,11 @@ export default class Font extends PhetioObject {
   // Shorthand font property
   private readonly _font: string;
 
-  public constructor( options?: FontOptions ) {
-    assert && assert( options === undefined || ( typeof options === 'object' && Object.getPrototypeOf( options ) === Object.prototype ),
+  public constructor( providedOptions?: FontOptions ) {
+    assert && assert( providedOptions === undefined || ( typeof providedOptions === 'object' && Object.getPrototypeOf( providedOptions ) === Object.prototype ),
       'options, if provided, should be a raw object' );
 
-    const definedOptions = optionize<FontOptions, SelfOptions, PhetioObjectOptions>()( {
+    const options = optionize<FontOptions, SelfOptions, PhetioObjectOptions>()( {
       // {string} - 'normal', 'italic' or 'oblique'
       style: 'normal',
 
@@ -141,20 +141,20 @@ export default class Font extends PhetioObject {
 
       phetioType: Font.FontIO,
       tandem: Tandem.OPTIONAL
-    }, options );
+    }, providedOptions );
 
-    assert && assert( typeof definedOptions.weight === 'string' || typeof definedOptions.weight === 'number', 'Font weight should be specified as a string or number' );
-    assert && assert( typeof definedOptions.size === 'string' || typeof definedOptions.size === 'number', 'Font size should be specified as a string or number' );
+    assert && assert( typeof options.weight === 'string' || typeof options.weight === 'number', 'Font weight should be specified as a string or number' );
+    assert && assert( typeof options.size === 'string' || typeof options.size === 'number', 'Font size should be specified as a string or number' );
 
-    super( definedOptions );
+    super( options );
 
-    this._style = definedOptions.style;
-    this._variant = definedOptions.variant;
-    this._weight = `${definedOptions.weight}` as FontWeight; // cast to string, we'll double check it later
-    this._stretch = definedOptions.stretch;
-    this._size = Font.castSize( definedOptions.size );
-    this._lineHeight = definedOptions.lineHeight;
-    this._family = definedOptions.family;
+    this._style = options.style;
+    this._variant = options.variant;
+    this._weight = `${options.weight}` as FontWeight; // cast to string, we'll double check it later
+    this._stretch = options.stretch;
+    this._size = Font.castSize( options.size );
+    this._lineHeight = options.lineHeight;
+    this._family = options.family;
 
     // sanity checks to prevent errors in interpretation or in the font shorthand usage
     assert && assert( typeof this._style === 'string' && _.includes( VALID_STYLES, this._style ),
