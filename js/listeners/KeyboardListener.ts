@@ -93,9 +93,17 @@ type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
 
   // All must be pressed fully before the key is pressed to activate the command.
   modifierKeys: string[];
+
+  // the final key that is pressed (after modifier keys) to trigger the listener
   key: string;
+
+  // all keys in this KeyGroup as a KeyboardEvent.code
   allKeys: string[];
+
+  // All keys in this KeyGroup using the readable form
   naturalKeys: Keys[number];
+
+  // A callback timer for this KeyGroup to support press and hold timing and callbacks
   timer: CallbackTimer | null;
 };
 
@@ -187,7 +195,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   /**
    * Part of the scenery listener API. If there are any active KeyGroup firing stop and remove if KeyGroup keys
-   * are no longer down. Also potentially fires a KeyGroup if the key that was released has all other modifier keys
+   * are no longer down. Also, potentially fires a KeyGroup if the key that was released has all other modifier keys
    * down.
    */
   public keyup( event: SceneryEvent<KeyboardEvent> ): void {
