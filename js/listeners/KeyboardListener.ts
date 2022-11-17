@@ -73,6 +73,12 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // level documentation for more information and an example of providing keys.
   keys: Keys;
 
+  // If true, the listener will fire for keys regardless of where focus is in the document. Use this when you want
+  // to add some key press behavior that will always fire no matter what the event target is. If this listener
+  // is added to a Node, it will only fire if the Node (and all of its ancestors) are visible with inputEnabled: true.
+  // More specifically, this uses `globalKeyUp` and `globalKeyDown`. See definitions in Input.ts for more information.
+  global?: boolean;
+
   // Called when the listener detects that the set of keys are pressed.
   callback?: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
@@ -138,6 +144,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
+      global: false,
       fireOnKeyUp: false,
       fireOnHold: false,
       fireOnHoldDelay: 400,
@@ -155,6 +162,27 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._fireOnHoldInterval = options.fireOnHoldInterval;
 
     this._activeKeyGroups = [];
+
+    // Implement listeners depending on desired scope for this KeyboardListener. These are part of the scenery
+    // Input API (implementing TInputListener).
+    const boundHandleKeyDown = this.handleKeyDown.bind( this );
+    const boundHandleKeyUp = this.handleKeyUp.bind( this );
+    if ( options.global ) {
+
+      // @ts-ignore
+      this.globalkeydown = boundHandleKeyDown;
+
+      // @ts-ignore
+      this.globalkeyup = boundHandleKeyUp;
+    }
+    else {
+
+      // @ts-ignore
+      this.keydown = boundHandleKeyDown;
+
+      // @ts-ignore
+      this.keyup = boundHandleKeyUp;
+    }
   }
 
   /**
@@ -170,8 +198,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * Part of the scenery listener API. Responding to a keydown event, update active KeyGroups and potentially
    * fire callbacks and start CallbackTimers.
    */
-  public keydown( event: SceneryEvent<KeyboardEvent> ): void {
-
+  private handleKeyDown( event: SceneryEvent<KeyboardEvent> ): void {
     if ( !this._fireOnKeyUp ) {
 
       // modifier keys can be pressed in any order but the last key in the group must be pressed last
@@ -194,11 +221,11 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Part of the scenery listener API. If there are any active KeyGroup firing stop and remove if KeyGroup keys
-   * are no longer down. Also, potentially fires a KeyGroup if the key that was released has all other modifier keys
+   * If there are any active KeyGroup firing stop and remove if KeyGroup keys are no longer down. Also, potentially
+   * fires a KeyGroup if the key that was released has all other modifier keys
    * down.
    */
-  public keyup( event: SceneryEvent<KeyboardEvent> ): void {
+  private handleKeyUp( event: SceneryEvent<KeyboardEvent> ): void {
 
     if ( this._activeKeyGroups.length > 0 ) {
 
