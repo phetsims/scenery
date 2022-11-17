@@ -34,7 +34,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   rootNode.addChild( a );
   a.addInputListener( listener );
 
-  const domElementA = a.pdomInstances[ 0 ].peer.primarySibling;
+  const domElementA = a.pdomInstances[ 0 ].peer!.primarySibling!;
   assert.ok( domElementA, 'pdom element needed' );
 
   domElementA.dispatchEvent( new KeyboardEvent( 'keydown', {
@@ -90,7 +90,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   const b = new Node( { tagName: 'div' } );
   a.addChild( b );
 
-  const domElementB = b.pdomInstances[ 0 ].peer.primarySibling;
+  const domElementB = b.pdomInstances[ 0 ].peer!.primarySibling!;
 
   // test handled - event should no longer bubble, b listener should handle and a listener should not fire
   let pFiredFromA = false;

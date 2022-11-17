@@ -98,7 +98,7 @@ class PDOMPeer {
     // the label and description content.
     this._containerParent = null;
 
-    // @public {Array.<HTMLElement>} Rather than guarantee that a peer is a tree with a root DOMElement,
+    // @public {HTMLElement[]} Rather than guarantee that a peer is a tree with a root DOMElement,
     // allow multiple window.Elements at the top level of the peer. This is used for sorting the instance.
     // See this.orderElements for more info.
     this.topLevelElements = [];
@@ -895,7 +895,7 @@ class PDOMPeer {
    * pdomInstance's trail.
    * @public
    *
-   * @param {Node|null} node
+   * @param {../nodes/Node|null} node
    */
   setPDOMTransformSourceNode( node ) {
 

@@ -485,14 +485,15 @@ export default class Display {
     if ( this._accessible ) {
       this.blockFocusCallbacks = false;
 
-      // @ts-ignore TODO: PDOMInstance
+      // @ts-ignore TODO: Poolable is not well supported for TypeScript
       this._rootPDOMInstance = PDOMInstance.createFromPool( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
         `Display root instance: ${this._rootPDOMInstance!.toString()}` );
       PDOMTree.rebuildInstanceTree( this._rootPDOMInstance! );
 
       // add the accessible DOM as a child of this DOM element
-      this._domElement.appendChild( this._rootPDOMInstance!.peer.primarySibling );
+      assert && assert( this._rootPDOMInstance!.peer, 'Peer should be created from createFromPool' );
+      this._domElement.appendChild( this._rootPDOMInstance!.peer!.primarySibling! );
 
       const ariaLiveContainer = ariaLiveAnnouncer.ariaLiveContainer;
 
@@ -550,7 +551,7 @@ export default class Display {
     if ( this._accessible ) {
 
       // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
-      this._rootPDOMInstance!.peer.updateSubtreePositioning();
+      this._rootPDOMInstance!.peer!.updateSubtreePositioning();
     }
 
     // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
@@ -860,7 +861,7 @@ export default class Display {
 
   public set interactive( value: boolean ) {
     if ( this._accessible && value !== this._interactive ) {
-      this._rootPDOMInstance!.peer.recursiveDisable( !value );
+      this._rootPDOMInstance!.peer!.recursiveDisable( !value );
     }
 
     this._interactive = value;
@@ -899,7 +900,7 @@ export default class Display {
    * technology. If this Display is not accessible, returns null.
    */
   public getPDOMRootElement(): HTMLElement | null {
-    return this._accessible ? this._rootPDOMInstance!.peer.primarySibling : null;
+    return this._accessible ? this._rootPDOMInstance!.peer!.primarySibling : null;
   }
 
   public get pdomRootElement(): HTMLElement | null { return this.getPDOMRootElement(); }
@@ -1835,14 +1836,14 @@ export default class Display {
 
     result += `<br><div style="${headerStyle}">Parallel DOM</div><br>`;
 
-    let parallelDOM = this._rootPDOMInstance!.peer.primarySibling.outerHTML;
+    let parallelDOM = this._rootPDOMInstance!.peer!.primarySibling!.outerHTML;
     parallelDOM = parallelDOM.replace( /></g, '>\n<' );
     const lines = parallelDOM.split( '\n' );
 
     let indentation = '';
     for ( let i = 0; i < lines.length; i++ ) {
       const line = lines[ i ];
-      const isEndTag = line.slice( 0, 2 ) === '</';
+      const isEndTag = line.startsWith( '</' );
 
       if ( isEndTag ) {
         indentation = indentation.slice( indent.length );

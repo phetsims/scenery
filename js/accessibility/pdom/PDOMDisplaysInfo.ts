@@ -24,7 +24,7 @@ export default class PDOMDisplaysInfo {
   //   at this node).
   // This value is synchronously updated, and supports pdomInstances by letting them know when certain
   // nodes are visible on the display.
-  private readonly pdomDisplays: Display[];
+  public readonly pdomDisplays: Display[];
 
   /**
    * Tracks pdom display information for our given node.

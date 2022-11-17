@@ -649,7 +649,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   public isFocused(): boolean {
     for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      const peer = this._pdomInstances[ i ].peer;
+      const peer = this._pdomInstances[ i ].peer!;
       if ( peer.isFocused() ) {
         return true;
       }
@@ -677,7 +677,7 @@ export default class ParallelDOM extends PhetioObject {
       assert && assert( this._pdomVisible, 'trying to set focus on a node with invisible pdom content' );
       assert && assert( this._pdomInstances.length === 1, 'focus() unsupported for Nodes using DAG, pdom content is not unique' );
 
-      const peer = this._pdomInstances[ 0 ].peer;
+      const peer = this._pdomInstances[ 0 ].peer!;
       assert && assert( peer, 'must have a peer to focus' );
       peer.focus();
     }
@@ -690,7 +690,7 @@ export default class ParallelDOM extends PhetioObject {
   public blur(): void {
     if ( this._pdomInstances.length > 0 ) {
       assert && assert( this._pdomInstances.length === 1, 'blur() unsupported for Nodes using DAG, pdom content is not unique' );
-      const peer = this._pdomInstances[ 0 ].peer;
+      const peer = this._pdomInstances[ 0 ].peer!;
       assert && assert( peer, 'must have a peer to blur' );
       peer.blur();
     }
@@ -1094,7 +1094,7 @@ export default class ParallelDOM extends PhetioObject {
 
       this._inputType = inputType;
       for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-        const peer = this._pdomInstances[ i ].peer;
+        const peer = this._pdomInstances[ i ].peer!;
 
         // remove the attribute if cleared by setting to 'null'
         if ( inputType === null ) {
@@ -1238,7 +1238,7 @@ export default class ParallelDOM extends PhetioObject {
       }
 
       for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-        const peer = this._pdomInstances[ i ].peer;
+        const peer = this._pdomInstances[ i ].peer!;
         peer.setLabelSiblingContent( this._labelContent );
       }
     }
@@ -1268,7 +1268,7 @@ export default class ParallelDOM extends PhetioObject {
       this._innerContent = content;
 
       for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-        const peer = this._pdomInstances[ i ].peer;
+        const peer = this._pdomInstances[ i ].peer!;
         peer.setPrimarySiblingContent( this._innerContent );
       }
     }
@@ -1303,7 +1303,7 @@ export default class ParallelDOM extends PhetioObject {
       }
 
       for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-        const peer = this._pdomInstances[ i ].peer;
+        const peer = this._pdomInstances[ i ].peer!;
         peer.setDescriptionSiblingContent( this._descriptionContent );
       }
     }
@@ -1697,7 +1697,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   public updateAriaLabelledbyAssociationsInPeers(): void {
     for ( let i = 0; i < this.pdomInstances.length; i++ ) {
-      const peer = this.pdomInstances[ i ].peer;
+      const peer = this.pdomInstances[ i ].peer!;
       peer.onAriaLabelledbyAssociationChange();
     }
   }
@@ -1829,7 +1829,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   public updateAriaDescribedbyAssociationsInPeers(): void {
     for ( let i = 0; i < this.pdomInstances.length; i++ ) {
-      const peer = this.pdomInstances[ i ].peer;
+      const peer = this.pdomInstances[ i ].peer!;
       peer.onAriaDescribedbyAssociationChange();
     }
   }
@@ -1954,7 +1954,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   private updateActiveDescendantAssociationsInPeers(): void {
     for ( let i = 0; i < this.pdomInstances.length; i++ ) {
-      const peer = this.pdomInstances[ i ].peer;
+      const peer = this.pdomInstances[ i ].peer!;
       peer.onActiveDescendantAssociationChange();
     }
   }
@@ -2211,7 +2211,7 @@ export default class ParallelDOM extends PhetioObject {
       this._inputValue = value;
 
       for ( let i = 0; i < this.pdomInstances.length; i++ ) {
-        const peer = this.pdomInstances[ i ].peer;
+        const peer = this.pdomInstances[ i ].peer!;
         peer.onInputValueChange();
       }
     }
@@ -2328,7 +2328,7 @@ export default class ParallelDOM extends PhetioObject {
     } as PDOMAttribute );
 
     for ( let j = 0; j < this._pdomInstances.length; j++ ) {
-      const peer = this._pdomInstances[ j ].peer;
+      const peer = this._pdomInstances[ j ].peer!;
       peer.setAttributeToElement( attribute, value, options );
     }
   }
@@ -2367,7 +2367,7 @@ export default class ParallelDOM extends PhetioObject {
     assert && assert( attributeRemoved, `Node does not have pdom attribute ${attribute}` );
 
     for ( let j = 0; j < this._pdomInstances.length; j++ ) {
-      const peer = this._pdomInstances[ j ].peer;
+      const peer = this._pdomInstances[ j ].peer!;
       peer.removeAttributeFromElement( attribute, options );
     }
   }
@@ -2438,7 +2438,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomClasses.push( { className: className, options: options } );
 
     for ( let j = 0; j < this._pdomInstances.length; j++ ) {
-      const peer = this._pdomInstances[ j ].peer;
+      const peer = this._pdomInstances[ j ].peer!;
       peer.setClassToElement( className, options );
     }
   }
@@ -2463,7 +2463,7 @@ export default class ParallelDOM extends PhetioObject {
     assert && assert( classRemoved, `Node does not have pdom attribute ${className}` );
 
     for ( let j = 0; j < this._pdomClasses.length; j++ ) {
-      const peer = this.pdomInstances[ j ].peer;
+      const peer = this.pdomInstances[ j ].peer!;
       peer.removeClassFromElement( className, options );
     }
   }
@@ -2495,20 +2495,22 @@ export default class ParallelDOM extends PhetioObject {
 
         // after the override is set, update the focusability of the peer based on this node's value for focusable
         // which may be true or false (but not null)
-        this._pdomInstances[ i ].peer.setFocusable( this.focusable );
+        // assert && assert( typeof this.focusable === 'boolean' );
+        assert && assert( this._pdomInstances[ i ].peer, 'Peer required to set focusable.' );
+        this._pdomInstances[ i ].peer!.setFocusable( this.focusable );
       }
     }
   }
 
   public set focusable( isFocusable: boolean | null ) { this.setFocusable( isFocusable ); }
 
-  public get focusable(): boolean | null { return this.isFocusable(); }
+  public get focusable(): boolean { return this.isFocusable(); }
 
   /**
    * Get whether or not the node is focusable. Use the focusOverride, and then default to browser defined
    * focusable elements.
    */
-  public isFocusable(): boolean | null {
+  public isFocusable(): boolean {
     if ( this._focusableOverride !== null ) {
       return this._focusableOverride;
     }
@@ -2537,7 +2539,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomTransformSourceNode = node;
 
     for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      this._pdomInstances[ i ].peer.setPDOMTransformSourceNode( this._pdomTransformSourceNode );
+      this._pdomInstances[ i ].peer!.setPDOMTransformSourceNode( this._pdomTransformSourceNode );
     }
   }
 
@@ -2567,7 +2569,7 @@ export default class ParallelDOM extends PhetioObject {
     this._positionInPDOM = positionInPDOM;
 
     for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      this._pdomInstances[ i ].peer.setPositionInPDOM( positionInPDOM );
+      this._pdomInstances[ i ].peer!.setPositionInPDOM( positionInPDOM );
     }
   }
 

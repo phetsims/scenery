@@ -32,15 +32,21 @@ import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import Enumeration from '../../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../../phet-core/js/EnumerationValue.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
+import { Display, FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
 
 // PDOMInstances support two different styles of unique IDs, each with their own tradeoffs, https://github.com/phetsims/phet-io/issues/1851
 class PDOMUniqueIdStrategy extends EnumerationValue {
-  static INDICES = new PDOMUniqueIdStrategy();
-  static TRAIL_ID = new PDOMUniqueIdStrategy();
+  public static INDICES = new PDOMUniqueIdStrategy();
+  public static TRAIL_ID = new PDOMUniqueIdStrategy();
 
-  static enumeration = new Enumeration( PDOMUniqueIdStrategy );
+  public static enumeration = new Enumeration( PDOMUniqueIdStrategy );
 }
+
+// A type representing a fake instance, for some aggressive auditing (under ?assertslow)
+type FakeInstance = {
+  node: Node | null;
+  children: FakeInstance[];
+};
 
 // This constant is set up to allow us to change our unique id strategy. Both strategies have trade-offs that are
 // described in https://github.com/phetsims/phet-io/issues/1847#issuecomment-1068377336. TRAIL_ID is our path forward
@@ -51,29 +57,64 @@ const UNIQUE_ID_STRATEGY = PDOMUniqueIdStrategy.TRAIL_ID;
 let globalId = 1;
 
 class PDOMInstance {
+
+  // unique ID
+  private id!: number;
+
+  public parent!: PDOMInstance | null;
+
+  // {Display}
+  private display!: Display | null;
+
+  public trail!: Trail | null;
+  public isRootInstance!: boolean;
+  public node!: Node | null;
+  public children!: PDOMInstance[];
+  public peer!: PDOMPeer | null;
+
+  // {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
+  // display in their pdomDisplays. For non-root instances, this is initialized later in the constructor.
+  private invisibleCount!: number;
+
+  // {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
+  private relativeNodes: Node[] | null = [];
+
+  // {Array.<boolean>} - Whether our display is in the respective relativeNodes' pdomDisplays
+  private relativeVisibilities: boolean[] = [];
+
+  // {function} - The listeners added to the respective relativeNodes
+  private relativeListeners: ( () => void )[] = [];
+
+  // (scenery-internal) {TransformTracker|null} - Used to quickly compute the global matrix of this
+  // instance's transform source Node and observe when the transform changes. Used by PDOMPeer to update
+  // positioning of sibling elements. By default, watches this PDOMInstance's visual trail.
+  public transformTracker: TransformTracker | null = null;
+
+  // {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
+  // re-initialized
+  private isDisposed!: boolean;
+
   /**
    * Constructor for PDOMInstance, uses an initialize method for pooling.
    * @mixes Poolable
    *
-   * @param {PDOMInstance|null} parent - parent of this instance, null if root of PDOMInstance tree
-   * @param {Display} display
-   * @param {Trail} trail - trail to the node for this PDOMInstance
+   * @param parent - parent of this instance, null if root of PDOMInstance tree
+   * @param display
+   * @param trail - trail to the node for this PDOMInstance
    */
-  constructor( parent, display, trail ) {
+  public constructor( parent: PDOMInstance | null, display: Display, trail: Trail ) {
     this.initializePDOMInstance( parent, display, trail );
   }
 
-
   /**
    * Initializes an PDOMInstance, implements construction for pooling.
-   * @private
    *
-   * @param {PDOMInstance|null} parent - null if this PDOMInstance is root of PDOMInstance tree
-   * @param {Display} display
-   * @param {Trail} trail - trail to node for this PDOMInstance
-   * @returns {PDOMInstance} - Returns 'this' reference, for chaining
+   * @param parent - null if this PDOMInstance is root of PDOMInstance tree
+   * @param display
+   * @param trail - trail to node for this PDOMInstance
+   * @returns - Returns 'this' reference, for chaining
    */
-  initializePDOMInstance( parent, display, trail ) {
+  public initializePDOMInstance( parent: PDOMInstance | null, display: Display, trail: Trail ): PDOMInstance {
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
     // unique ID
@@ -81,19 +122,19 @@ class PDOMInstance {
 
     this.parent = parent;
 
-    // @public {Display}
+    // {Display}
     this.display = display;
 
-    // @public {Trail}
+    // {Trail}
     this.trail = trail;
 
-    // @public {boolean}
+    // {boolean}
     this.isRootInstance = parent === null;
 
-    // @public {Node|null}
+    // {Node|null}
     this.node = this.isRootInstance ? null : trail.lastNode();
 
-    // @public {Array.<PDOMInstance>}
+    // {Array.<PDOMInstance>}
     this.children = cleanArray( this.children );
 
     // If we are the root accessible instance, we won't actually have a reference to a node.
@@ -101,50 +142,50 @@ class PDOMInstance {
       this.node.addPDOMInstance( this );
     }
 
-    // @public {PDOMPeer}
-    this.peer = null; // Filled in below
-
-    // @private {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
+    // {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
     // display in their pdomDisplays. For non-root instances, this is initialized later in the constructor.
     this.invisibleCount = 0;
 
-    // @private {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
+    // {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
     this.relativeNodes = [];
 
-    // @private {Array.<boolean>} - Whether our display is in the respective relativeNodes' pdomDisplays
+    // {Array.<boolean>} - Whether our display is in the respective relativeNodes' pdomDisplays
     this.relativeVisibilities = [];
 
-    // @private {function} - The listeners added to the respective relativeNodes
+    // {function} - The listeners added to the respective relativeNodes
     this.relativeListeners = [];
 
-    // @public (scenery-internal) {TransformTracker|null} - Used to quickly compute the global matrix of this
+    // (scenery-internal) {TransformTracker|null} - Used to quickly compute the global matrix of this
     // instance's transform source Node and observe when the transform changes. Used by PDOMPeer to update
     // positioning of sibling elements. By default, watches this PDOMInstance's visual trail.
     this.transformTracker = null;
     this.updateTransformTracker( this.node ? this.node.pdomTransformSourceNode : null );
 
-    // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
+    // {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
     // re-initialized
     this.isDisposed = false;
 
     if ( this.isRootInstance ) {
       const accessibilityContainer = document.createElement( 'div' );
+
+      // @ts-ignore - Poolable is a mixin and TypeScript doesn't have good mixin support
       this.peer = PDOMPeer.createFromPool( this, {
         primarySibling: accessibilityContainer
       } );
     }
     else {
+
+      // @ts-ignore - Poolable a mixin and TypeScript doesn't have good mixin support
       this.peer = PDOMPeer.createFromPool( this );
 
       // The peer is not fully constructed until this update function is called, see https://github.com/phetsims/scenery/issues/832
       // Trail Ids will never change, so update them eagerly, a single time during construction.
-      this.peer.update( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
-
-      assert && assert( this.peer.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
+      this.peer!.update( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
+      assert && assert( this.peer!.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
 
       // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for pdomDisplays
       // so we can initialize our invisibleCount and add listeners.
-      const parentTrail = this.parent.trail;
+      const parentTrail = this.parent!.trail!;
       for ( let i = parentTrail.length; i < trail.length; i++ ) {
         const relativeNode = trail.nodes[ i ];
         this.relativeNodes.push( relativeNode );
@@ -172,11 +213,8 @@ class PDOMInstance {
 
   /**
    * Adds a series of (sorted) accessible instances as children.
-   * @public
-   *
-   * @param {Array.<PDOMInstance>} pdomInstances
    */
-  addConsecutiveInstances( pdomInstances ) {
+  public addConsecutiveInstances( pdomInstances: PDOMInstance[] ): void {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       `addConsecutiveInstances on ${this.toString()} with: ${pdomInstances.map( inst => inst.toString() ).join( ',' )}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
@@ -188,7 +226,10 @@ class PDOMInstance {
     for ( let i = 0; i < pdomInstances.length; i++ ) {
       // Append the container parent to the end (so that, when provided in order, we don't have to resort below
       // when initializing).
-      PDOMUtils.insertElements( this.peer.primarySibling, pdomInstances[ i ].peer.topLevelElements );
+      assert && assert( !!this.peer!.primarySibling, 'Primary sibling must be defined to insert elements.' );
+
+      // @ts-ignore - when PDOMPeer is converted to TS this ts-ignore can probably be removed
+      PDOMUtils.insertElements( this.peer.primarySibling!, pdomInstances[ i ].peer.topLevelElements );
     }
 
     if ( hadChildren ) {
@@ -215,11 +256,8 @@ class PDOMInstance {
 
   /**
    * Removes any child instances that are based on the provided trail.
-   * @public
-   *
-   * @param {Trail} trail
    */
-  removeInstancesForTrail( trail ) {
+  public removeInstancesForTrail( trail: Trail ): void {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       `removeInstancesForTrail on ${this.toString()} with trail ${trail.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
@@ -229,10 +267,10 @@ class PDOMInstance {
       const childTrail = childInstance.trail;
 
       // Not worth it to inspect before our trail ends, since it should be (!) guaranteed to be equal
-      let differs = childTrail.length < trail.length;
+      let differs = childTrail!.length < trail.length;
       if ( !differs ) {
-        for ( let j = this.trail.length; j < trail.length; j++ ) {
-          if ( trail.nodes[ j ] !== childTrail.nodes[ j ] ) {
+        for ( let j = this.trail!.length; j < trail.length; j++ ) {
+          if ( trail.nodes[ j ] !== childTrail!.nodes[ j ] ) {
             differs = true;
             break;
           }
@@ -251,14 +289,13 @@ class PDOMInstance {
 
   /**
    * Removes all of the children.
-   * @public
    */
-  removeAllChildren() {
+  public removeAllChildren(): void {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance( `removeAllChildren on ${this.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     while ( this.children.length ) {
-      this.children.pop().dispose();
+      this.children.pop()!.dispose();
     }
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
@@ -266,15 +303,11 @@ class PDOMInstance {
 
   /**
    * Returns an PDOMInstance child (if one exists with the given Trail), or null otherwise.
-   * @public
-   *
-   * @param {Trail} trail
-   * @returns {PDOMInstance|null}
    */
-  findChildWithTrail( trail ) {
+  public findChildWithTrail( trail: Trail ): PDOMInstance | null {
     for ( let i = 0; i < this.children.length; i++ ) {
       const child = this.children[ i ];
-      if ( child.trail.equals( trail ) ) {
+      if ( child.trail!.equals( trail ) ) {
         return child;
       }
     }
@@ -284,18 +317,18 @@ class PDOMInstance {
   /**
    * Remove a subtree of PDOMInstances from this PDOMInstance
    *
-   * @param {Trail} trail - children of this PDOMInstance will be removed if the child trails are extensions
+   * @param trail - children of this PDOMInstance will be removed if the child trails are extensions
    *                        of the trail.
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  removeSubtree( trail ) {
+  public removeSubtree( trail: Trail ): void {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       `removeSubtree on ${this.toString()} with trail ${trail.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     for ( let i = this.children.length - 1; i >= 0; i-- ) {
       const childInstance = this.children[ i ];
-      if ( childInstance.trail.isExtensionOf( trail, true ) ) {
+      if ( childInstance.trail!.isExtensionOf( trail, true ) ) {
         sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
           `Remove parent: ${this.toString()}, child: ${childInstance.toString()}` );
         this.children.splice( i, 1 ); // remove it from the children array
@@ -310,12 +343,11 @@ class PDOMInstance {
 
   /**
    * Checks to see whether our visibility needs an update based on an pdomDisplays change.
-   * @private
    *
-   * @param {number} index - Index into the relativeNodes array (which node had the notification)
+   * @param index - Index into the relativeNodes array (which node had the notification)
    */
-  checkAccessibleDisplayVisibility( index ) {
-    const isNodeVisible = _.includes( this.relativeNodes[ index ]._pdomDisplaysInfo.pdomDisplays, this.display );
+  private checkAccessibleDisplayVisibility( index: number ): void {
+    const isNodeVisible = _.includes( this.relativeNodes![ index ]._pdomDisplaysInfo.pdomDisplays, this.display );
     const wasNodeVisible = this.relativeVisibilities[ index ];
 
     if ( isNodeVisible !== wasNodeVisible ) {
@@ -324,7 +356,7 @@ class PDOMInstance {
       const wasVisible = this.invisibleCount === 0;
 
       this.invisibleCount += ( isNodeVisible ? -1 : 1 );
-      assert && assert( this.invisibleCount >= 0 && this.invisibleCount <= this.relativeNodes.length );
+      assert && assert( this.invisibleCount >= 0 && this.invisibleCount <= this.relativeNodes!.length );
 
       const isVisible = this.invisibleCount === 0;
 
@@ -338,18 +370,18 @@ class PDOMInstance {
    * Update visibility of this peer's accessible DOM content. The hidden attribute will hide all of the descendant
    * DOM content, so it is not necessary to update the subtree of PDOMInstances since the browser
    * will do this for us.
-   * @private
    */
-  updateVisibility() {
-    this.peer.setVisible( this.invisibleCount <= 0 );
+  private updateVisibility(): void {
+    assert && assert( !!this.peer, 'Peer needs to be available on update visibility.' );
+    this.peer!.setVisible( this.invisibleCount <= 0 );
 
     // if we hid a parent element, blur focus if active element was an ancestor
-    if ( !this.peer.isVisible() && FocusManager.pdomFocusedNode ) {
+    if ( !this.peer!.isVisible() && FocusManager.pdomFocusedNode ) {
       assert && assert( FocusManager.pdomFocusedNode.pdomInstances.length === 1,
         'focusable Nodes do not support DAG, and should be connected with an instance if focused.' );
 
       // NOTE: We don't seem to be able to import normally here
-      if ( FocusManager.pdomFocusedNode.pdomInstances[ 0 ].trail.containsNode( this.node ) ) {
+      if ( FocusManager.pdomFocusedNode.pdomInstances[ 0 ].trail!.containsNode( this.node! ) ) {
         FocusManager.pdomFocus = null;
       }
     }
@@ -357,15 +389,13 @@ class PDOMInstance {
 
   /**
    * Returns whether the parallel DOM for this instance and its ancestors are not hidden.
-   * @public
-   *
-   * @returns {boolean}
    */
-  isGloballyVisible() {
+  public isGloballyVisible(): boolean {
+    assert && assert( !!this.peer, 'PDOMPeer needs to be available, has this PDOMInstance been disposed?' );
 
     // If this peer is hidden, then return because that attribute will bubble down to children,
     // otherwise recurse to parent.
-    if ( !this.peer.isVisible() ) {
+    if ( !this.peer!.isVisible() ) {
       return false;
     }
     else if ( this.parent ) {
@@ -378,17 +408,15 @@ class PDOMInstance {
 
   /**
    * Returns what our list of children (after sorting) should be.
-   * @private
    *
-   * @param {Trail} trail - A partial trail, where the root of the trail is either this.node or the display's root
+   * @param trail - A partial trail, where the root of the trail is either this.node or the display's root
    *                        node (if we are the root PDOMInstance)
-   * @returns {Array.<PDOMInstance>}
    */
-  getChildOrdering( trail ) {
+  private getChildOrdering( trail: Trail ): PDOMInstance[] {
     const node = trail.lastNode();
     const effectiveChildren = node.getEffectiveChildren();
     let i;
-    const instances = [];
+    const instances: PDOMInstance[] = [];
 
     // base case, node has accessible content, but don't match the "root" node of this accessible instance
     if ( node.hasPDOMContent && node !== this.node ) {
@@ -402,7 +430,7 @@ class PDOMInstance {
           }
 
           for ( let j = 0; j < trail.length; j++ ) {
-            if ( trail.nodes[ j ] !== potentialInstance.trail.nodes[ j + potentialInstance.trail.length - trail.length ] ) {
+            if ( trail.nodes[ j ] !== potentialInstance.trail!.nodes[ j + potentialInstance.trail!.length - trail.length ] ) {
               continue instanceLoop; // eslint-disable-line no-labels
             }
           }
@@ -429,12 +457,24 @@ class PDOMInstance {
    * of the children, looking for specified accessible orders that would determine the ordering for the two
    * PDOMInstances.
    *
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  sortChildren() {
+  public sortChildren(): void {
     // It's simpler/faster to just grab our order directly with one recursion, rather than specifying a sorting
     // function (since a lot gets re-evaluated in that case).
-    const targetChildren = this.getChildOrdering( new Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
+
+    assert && assert( this.peer !== null, 'peer required for sort' );
+    let nodeForTrail: Node;
+    if ( this.isRootInstance ) {
+
+      assert && assert( this.display !== null, 'Display should be available for the root' );
+      nodeForTrail = this.display!.rootNode;
+    }
+    else {
+      assert && assert( this.node !== null, 'Node should be defined, were we disposed?' );
+      nodeForTrail = this.node!;
+    }
+    const targetChildren = this.getChildOrdering( new Trail( nodeForTrail ) );
 
     assert && assert( targetChildren.length === this.children.length, 'sorting should not change number of children' );
 
@@ -442,7 +482,7 @@ class PDOMInstance {
     this.children = targetChildren;
 
     // the DOMElement to add the child DOMElements to.
-    const primarySibling = this.peer.primarySibling;
+    const primarySibling = this.peer!.primarySibling!;
 
     // "i" will keep track of the "collapsed" index when all DOMElements for all PDOMInstance children are
     // added to a single parent DOMElement (this PDOMInstance's PDOMPeer's primarySibling)
@@ -450,11 +490,11 @@ class PDOMInstance {
 
     // Iterate through all PDOMInstance children
     for ( let peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
-      const peer = this.children[ peerIndex ].peer;
+      const peer = this.children[ peerIndex ].peer!;
 
       // Iterate through all top level elements of an PDOMInstance's peer
-      for ( let elementIndex = peer.topLevelElements.length - 1; elementIndex >= 0; elementIndex-- ) {
-        const element = peer.topLevelElements[ elementIndex ];
+      for ( let elementIndex = peer.topLevelElements!.length - 1; elementIndex >= 0; elementIndex-- ) {
+        const element = peer.topLevelElements![ elementIndex ];
 
         // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
         // No need to reinsert if `element` is already in the right order
@@ -478,11 +518,8 @@ class PDOMInstance {
    * Create a new TransformTracker that will observe transforms along the trail of this PDOMInstance OR
    * the provided pdomTransformSourceNode. See ParallelDOM.setPDOMTransformSourceNode(). The The source Node
    * must not use DAG so that its trail is unique.
-   * @public
-   *
-   * @param {null|Node} pdomTransformSourceNode
    */
-  updateTransformTracker( pdomTransformSourceNode ) {
+  public updateTransformTracker( pdomTransformSourceNode: Node | null ): void {
     this.transformTracker && this.transformTracker.dispose();
 
     let trackedTrail = null;
@@ -490,7 +527,7 @@ class PDOMInstance {
       trackedTrail = pdomTransformSourceNode.getUniqueTrail();
     }
     else {
-      trackedTrail = PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
+      trackedTrail = PDOMInstance.guessVisualTrail( this.trail!, this.display!.rootNode );
     }
 
     this.transformTracker = new TransformTracker( trackedTrail );
@@ -498,16 +535,14 @@ class PDOMInstance {
 
   /**
    * Depending on what the unique ID strategy is, formulate the correct id for this PDOM instance.
-   * @public
-   * @returns {string}
    */
-  getPDOMInstanceUniqueId() {
+  public getPDOMInstanceUniqueId(): string {
 
     if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
 
       const indicesString = [];
 
-      let pdomInstance = this; // eslint-disable-line consistent-this
+      let pdomInstance: PDOMInstance = this; // eslint-disable-line
 
       while ( pdomInstance.parent ) {
         const indexOf = pdomInstance.parent.children.indexOf( pdomInstance );
@@ -522,33 +557,30 @@ class PDOMInstance {
     else {
       assert && assert( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
 
-      return this.trail.getUniqueId();
+      return this.trail!.getUniqueId();
     }
   }
 
   /**
    * Using indices requires updating whenever the PDOMInstance tree changes, so recursively update all descendant
    * ids from such a change. Update peer ids for provided instances and all descendants of provided instances.
-   * @param {PDOMInstance[]} pdomInstances
-   * @private
    */
-  updateDescendantPeerIds( pdomInstances ) {
+  private updateDescendantPeerIds( pdomInstances: PDOMInstance[] ): void {
     assert && assert( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES, 'method should not be used with uniqueId comes from TRAIL_ID' );
-    const toUpdate = [].concat( pdomInstances );
+    const toUpdate = Array.from( pdomInstances );
     while ( toUpdate.length > 0 ) {
-      const pdomInstance = toUpdate.shift();
-      pdomInstance.peer.updateIndicesStringAndElementIds();
+      const pdomInstance = toUpdate.shift()!;
+      pdomInstance.peer!.updateIndicesStringAndElementIds();
       toUpdate.push( ...pdomInstance.children );
     }
   }
 
   /**
-   * @public
    * @param display
    * @param uniqueId - value returned from PDOMInstance.getPDOMInstanceUniqueId()
-   * @returns {Trail|null} - null if there is no path to the unique id provided.
+   * @returns null if there is no path to the unique id provided.
    */
-  static uniqueIdToTrail( display, uniqueId ) {
+  public static uniqueIdToTrail( display: Display, uniqueId: string ): Trail | null {
     if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
       return display.getTrailFromPDOMIndicesString( uniqueId );
     }
@@ -561,35 +593,38 @@ class PDOMInstance {
   /**
    * Recursive disposal, to make eligible for garbage collection.
    *
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  dispose() {
+  public dispose(): void {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       `Disposing ${this.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
+
+    assert && assert( !!this.peer, 'PDOMPeer required, were we already disposed?' );
+    const thisPeer = this.peer!;
 
     // Disconnect DOM and remove listeners
     if ( !this.isRootInstance ) {
 
       // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
       // primary sibling (or its child container)
-      PDOMUtils.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
+      PDOMUtils.removeElements( this.parent!.peer!.primarySibling!, thisPeer.topLevelElements! );
 
-      for ( let i = 0; i < this.relativeNodes.length; i++ ) {
-        this.relativeNodes[ i ].pdomDisplaysEmitter.removeListener( this.relativeListeners[ i ] );
+      for ( let i = 0; i < this.relativeNodes!.length; i++ ) {
+        this.relativeNodes![ i ].pdomDisplaysEmitter.removeListener( this.relativeListeners[ i ] );
       }
     }
 
     while ( this.children.length ) {
-      this.children.pop().dispose();
+      this.children.pop()!.dispose();
     }
 
     // NOTE: We dispose OUR peer after disposing children, so our peer can be available for our children during
     // disposal.
-    this.peer.dispose();
+    thisPeer.dispose();
 
     // dispose after the peer so the peer can remove any listeners from it
-    this.transformTracker.dispose();
+    this.transformTracker!.dispose();
     this.transformTracker = null;
 
     // If we are the root accessible instance, we won't actually have a reference to a node.
@@ -601,9 +636,11 @@ class PDOMInstance {
     this.display = null;
     this.trail = null;
     this.node = null;
+
     this.peer = null;
     this.isDisposed = true;
 
+    // @ts-ignore - Mixes poolable, but TypeScript doesn't have good mixin support
     this.freeToPool();
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
@@ -611,12 +648,9 @@ class PDOMInstance {
 
   /**
    * For debugging purposes.
-   * @public
-   *
-   * @returns {string}
    */
-  toString() {
-    return `${this.id}#{${this.trail.toString()}}`;
+  public toString(): string {
+    return `${this.id}#{${this.trail!.toString()}}`;
   }
 
   /**
@@ -624,21 +658,21 @@ class PDOMInstance {
    *
    * Only ever called from the _rootPDOMInstance of the display.
    *
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  auditRoot() {
+  public auditRoot(): void {
     if ( !assert ) { return; }
 
-    const rootNode = this.display.rootNode;
+    const rootNode = this.display!.rootNode;
 
-    assert( this.trail.length === 0,
+    assert( this.trail!.length === 0,
       'Should only call auditRoot() on the root PDOMInstance for a display' );
 
-    function audit( fakeInstance, pdomInstance ) {
-      assert( fakeInstance.children.length === pdomInstance.children.length,
+    function audit( fakeInstance: FakeInstance, pdomInstance: PDOMInstance ): void {
+      assert && assert( fakeInstance.children.length === pdomInstance.children.length,
         'Different number of children in accessible instance' );
 
-      assert( fakeInstance.node === pdomInstance.node, 'Node mismatch for PDOMInstance' );
+      assert && assert( fakeInstance.node === pdomInstance.node, 'Node mismatch for PDOMInstance' );
 
       for ( let i = 0; i < pdomInstance.children.length; i++ ) {
         audit( fakeInstance.children[ i ], pdomInstance.children[ i ] );
@@ -647,8 +681,8 @@ class PDOMInstance {
       const isVisible = pdomInstance.isGloballyVisible();
 
       let shouldBeVisible = true;
-      for ( let i = 0; i < pdomInstance.trail.length; i++ ) {
-        const node = pdomInstance.trail.nodes[ i ];
+      for ( let i = 0; i < pdomInstance.trail!.length; i++ ) {
+        const node = pdomInstance.trail!.nodes[ i ];
         const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isPDOMVisible() );
         if ( trails.length === 0 ) {
           shouldBeVisible = false;
@@ -656,23 +690,20 @@ class PDOMInstance {
         }
       }
 
-      assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
+      assert && assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
     }
 
     audit( PDOMInstance.createFakePDOMTree( rootNode ), this );
   }
 
-
   /**
    * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to pdomOrder), this finds the best
    * actual visual Trail to use, from the trail of an PDOMInstance to the root of a Display.
-   * @public
    *
-   * @param {Trail} trail - trail of the PDOMInstance, which can containe "gaps"
-   * @param {Node} rootNode - root of a Display
-   * @returns {Trail}
+   * @param trail - trail of the PDOMInstance, which can containe "gaps"
+   * @param rootNode - root of a Display
    */
-  static guessVisualTrail( trail, rootNode ) {
+  public static guessVisualTrail( trail: Trail, rootNode: Node ): Trail {
     trail.reindex();
 
     // Search for places in the trail where adjacent nodes do NOT have a parent-child relationship, i.e.
@@ -711,14 +742,12 @@ class PDOMInstance {
   /**
    * Creates a fake PDOMInstance-like tree structure (with the equivalent nodes and children structure).
    * For debugging.
-   * @private
    *
-   * @param {Node} rootNode
-   * @returns {Object} - Type FakePDOMInstance: { node: {Node}, children: {Array.<FakePDOMInstance>} }
+   * @returns Type FakePDOMInstance: { node: {Node}, children: {Array.<FakePDOMInstance>} }
    */
-  static createFakePDOMTree( rootNode ) {
-    function createFakeTree( node ) {
-      let fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
+  private static createFakePDOMTree( rootNode: Node ): FakeInstance {
+    function createFakeTree( node: Node ): object {
+      let fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) ) as FakeInstance[];
       if ( node.hasPDOMContent ) {
         fakeInstances = [ {
           node: node,
@@ -730,6 +759,8 @@ class PDOMInstance {
 
     return {
       node: null,
+
+      // @ts-ignore
       children: createFakeTree( rootNode )
     };
   }
