@@ -139,6 +139,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _fireOnHoldDelay: number;
   private readonly _fireOnHoldInterval: number;
 
+  // Will the listener respond to 'global' events or just to events targeted to where this listener was added?
+  private readonly _global: boolean;
+
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
     assert && assertMutuallyExclusiveOptions( providedOptions, [ 'fireOnKeyUp' ], [ 'fireOnHold', 'fireOnHoldInterval', 'fireOnHoldDelay' ] );
 
@@ -163,26 +166,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     this._activeKeyGroups = [];
 
-    // Implement listeners depending on desired scope for this KeyboardListener. These are part of the scenery
-    // Input API (implementing TInputListener).
-    const boundHandleKeyDown = this.handleKeyDown.bind( this );
-    const boundHandleKeyUp = this.handleKeyUp.bind( this );
-    if ( options.global ) {
-
-      // @ts-ignore
-      this.globalkeydown = boundHandleKeyDown;
-
-      // @ts-ignore
-      this.globalkeyup = boundHandleKeyUp;
-    }
-    else {
-
-      // @ts-ignore
-      this.keydown = boundHandleKeyDown;
-
-      // @ts-ignore
-      this.keyup = boundHandleKeyUp;
-    }
+    this._global = options.global;
   }
 
   /**
@@ -222,8 +206,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   /**
    * If there are any active KeyGroup firing stop and remove if KeyGroup keys are no longer down. Also, potentially
-   * fires a KeyGroup if the key that was released has all other modifier keys
-   * down.
+   * fires a KeyGroup if the key that was released has all other modifier keys down.
    */
   private handleKeyUp( event: SceneryEvent<KeyboardEvent> ): void {
 
@@ -246,6 +229,46 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
           this.fireCallback( event, keyGroup.naturalKeys );
         }
       } );
+    }
+  }
+
+  /**
+   * This is part of the scenery Input API (implementing TInputListener). Handle the keydown event when not
+   * added to the global key events. Target will be the Node, Display, or Pointer this listener was added to.
+   */
+  public keydown( event: SceneryEvent<KeyboardEvent> ): void {
+    if ( !this._global ) {
+      this.handleKeyDown( event );
+    }
+  }
+
+  /**
+   * This is part of the scenery Input API (implementing TInputListener). Handle the keyup event when not
+   * added to the global key events. Target will be the Node, Display, or Pointer this listener was added to.
+   */
+  public keyup( event: SceneryEvent<KeyboardEvent> ): void {
+    if ( !this._global ) {
+      this.handleKeyUp( event );
+    }
+  }
+
+  /**
+   * This is part of the scenery Input API (implementing TInputListener). Handle the global keydown event.
+   * Event has no target.
+   */
+  public globalkeydown( event: SceneryEvent<KeyboardEvent> ): void {
+    if ( this._global ) {
+      this.handleKeyDown( event );
+    }
+  }
+
+  /**
+   * This is part of the scenery Input API (implementing TInputListener). Handle the global keyup event.
+   * Event has no target.
+   */
+  public globalkeyup( event: SceneryEvent<KeyboardEvent> ): void {
+    if ( this._global ) {
+      this.handleKeyUp( event );
     }
   }
 
