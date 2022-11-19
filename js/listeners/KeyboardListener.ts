@@ -93,6 +93,9 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
   // If fireOnHold true, this is the interval (in milliseconds) that the callback fires after the fireOnHoldDelay.
   fireOnHoldInterval?: number;
+
+  // TODO: Potential option to allow overlap between the keys of this KeyboardListener and another.
+  allowKeyOverlap?: boolean;
 };
 
 type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
@@ -126,8 +129,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // Does the listener fire the callback continuously when keys are held down?
   private readonly _fireOnHold: boolean;
 
-  // All the KeyGroups of this listener from the keys provided in natural language.
-  private readonly _keyGroups: KeyGroup<Keys>[];
+  // (scenery-internal) All the KeyGroups of this listener from the keys provided in natural language.
+  public readonly _keyGroups: KeyGroup<Keys>[];
 
   // All the KeyGroups that are currently firing
   private readonly _activeKeyGroups: KeyGroup<Keys>[];
@@ -142,6 +145,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // Will the listener respond to 'global' events or just to events targeted to where this listener was added?
   private readonly _global: boolean;
 
+  // TODO: Potentially a flag that could allow overlaps between keys of other KeyboardListeners.
+  private readonly _allowKeyOverlap: boolean;
+
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
     assert && assertMutuallyExclusiveOptions( providedOptions, [ 'fireOnKeyUp' ], [ 'fireOnHold', 'fireOnHoldInterval', 'fireOnHoldDelay' ] );
 
@@ -151,7 +157,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       fireOnKeyUp: false,
       fireOnHold: false,
       fireOnHoldDelay: 400,
-      fireOnHoldInterval: 100
+      fireOnHoldInterval: 100,
+      allowKeyOverlap: false
     }, providedOptions );
 
     this._callback = options.callback;
@@ -166,14 +173,24 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     this._activeKeyGroups = [];
 
+    this._allowKeyOverlap = options.allowKeyOverlap;
+
     this._global = options.global;
+
+    ( this as unknown as TInputListener ).listener = this;
   }
 
   /**
    * Mostly required to fire with CallbackTimer since the callback cannot take arguments.
    */
-  public fireCallback( event: SceneryEvent<KeyboardEvent> | null, naturalKeys: Keys[number] ): void {
-    this.keysPressed = naturalKeys;
+  public fireCallback( event: SceneryEvent<KeyboardEvent> | null, keyGroup: KeyGroup<Keys> ): void {
+
+    // TODO: Some initial work to check for overlap between other listeners that are responding to the same keys.
+    // if ( assert && event && !this._allowKeyOverlap ) {
+    //   this.checkForTrailKeyCollisions( event, keyGroup );
+    // }
+
+    this.keysPressed = keyGroup.naturalKeys;
     this._callback( event, this );
     this.keysPressed = null;
   }
@@ -197,7 +214,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
             if ( keyGroup.timer ) {
               keyGroup.timer.start();
             }
-            this.fireCallback( event, keyGroup.naturalKeys );
+            this.fireCallback( event, keyGroup );
           }
         }
       } );
@@ -226,7 +243,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       this._keyGroups.forEach( keyGroup => {
         if ( globalKeyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
-          this.fireCallback( event, keyGroup.naturalKeys );
+          this.fireCallback( event, keyGroup );
         }
       } );
     }
@@ -287,6 +304,46 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
+   * Throws an assertion if any Node along the trail has a KeyboardListener that is listening for key presses that
+   * overlap with this KeyboardListener, so both would fire. A lot of loops required to find this information,
+   * only run when assertions are enabled. Or consider optimizing.
+   *
+   * TODO: Still working on this function. This method works decently but has not been tested well and may not
+   *       cover all cases. Still need to look for collisions against active global listeners as well. For that
+   *       we will probably need a registry object.
+   */
+  private checkForTrailKeyCollisions( event: SceneryEvent<KeyboardEvent>, myKeyGroup: KeyGroup<Keys> ): void {
+    const trails = event.target.getTrails();
+
+    for ( let i = 0; i < trails.length; i++ ) {
+      const trail = trails[ i ];
+      for ( let j = 0; j < trail.nodes.length; j++ ) {
+        const node = trail.nodes[ j ];
+        for ( let k = 0; k < node.inputListeners.length; k++ ) {
+          const inputListener = node.inputListeners[ k ];
+          if ( inputListener.listener instanceof KeyboardListener &&
+               !inputListener.listener._allowKeyOverlap &&
+               inputListener.listener !== this ) {
+            const ancestorKeyGroups = inputListener.listener._keyGroups;
+
+            for ( let l = 0; l < ancestorKeyGroups.length; l++ ) {
+              const ancestorNaturalKeys = ancestorKeyGroups[ l ].naturalKeys;
+
+              // There is an ovelrap if the last keys are the same, or if all keys of the ancestor are pressed while
+              // pressing the modifier keys of the descendant keys
+              const modifierOverlap = ancestorNaturalKeys.startsWith( myKeyGroup.naturalKeys );
+              const finalKeysEqual = ancestorKeyGroups[ l ].key === myKeyGroup.key;
+
+              assert && assert( !modifierOverlap && !finalKeysEqual,
+                `Keys collision with another KeyboardListener along this trail. My keys: ${myKeyGroup.naturalKeys}, other keys: '${ancestorNaturalKeys}, '` );
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Dispose of this listener by disposing of any Callback timers. Then clear all KeyGroups.
    */
   public dispose(): void {
@@ -339,18 +396,19 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
       // Set up the timer for triggering callbacks if this listener supports press and hold behavior
       const timer = this._fireOnHold ? new CallbackTimer( {
-        callback: () => this.fireCallback( null, naturalKeys ),
+        callback: () => this.fireCallback( null, keyGroup ),
         delay: this._fireOnHoldDelay,
         interval: this._fireOnHoldInterval
       } ) : null;
 
-      return {
+      const keyGroup: KeyGroup<Keys> = {
         key: key,
         modifierKeys: modifierKeys,
         naturalKeys: naturalKeys,
         allKeys: modifierKeys.concat( key ),
         timer: timer
       };
+      return keyGroup;
     } );
 
     return keyGroups;
