@@ -164,9 +164,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._callback = options.callback;
     this._fireOnKeyUp = options.fireOnKeyUp;
 
-    // convert the provided keys to data that we can respond to with scenery's Input system
-    this._keyGroups = this.convertKeysToKeyGroups( options.keys );
-
     this._fireOnHold = options.fireOnHold;
     this._fireOnHoldDelay = options.fireOnHoldDelay;
     this._fireOnHoldInterval = options.fireOnHoldInterval;
@@ -176,6 +173,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._allowKeyOverlap = options.allowKeyOverlap;
 
     this._global = options.global;
+
+    // convert the provided keys to data that we can respond to with scenery's Input system
+    this._keyGroups = this.convertKeysToKeyGroups( options.keys );
 
     ( this as unknown as TInputListener ).listener = this;
   }
