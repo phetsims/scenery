@@ -180,6 +180,8 @@ import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 
+const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
+
 // This is the list of keys that get serialized AND deserialized. NOTE: Do not add or change this without
 // consulting the PhET-iO IOType schema for this in EventIO
 const domEventPropertiesToSerialize = [
@@ -326,7 +328,18 @@ export default class Input extends PhetioObject {
   private readonly keydownAction: PhetioAction<[ KeyboardEvent ]>;
   private readonly keyupAction: PhetioAction<[ KeyboardEvent ]>;
 
-  public static InputIO: IOType<Input>;
+  public static readonly InputIO = new IOType<Input>( 'InputIO', {
+    valueType: Input,
+    applyState: _.noop,
+    toStateObject: ( input: Input ) => {
+      return {
+        pointers: ArrayIOPointerIO.toStateObject( input.pointers )
+      };
+    },
+    stateSchema: {
+      pointers: ArrayIOPointerIO
+    }
+  } );
 
   /**
    * @param display
@@ -2080,20 +2093,5 @@ export default class Input extends PhetioObject {
     }
   }
 }
-
-const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
-
-Input.InputIO = new IOType<Input>( 'InputIO', {
-  valueType: Input,
-  applyState: _.noop,
-  toStateObject: ( input: Input ) => {
-    return {
-      pointers: ArrayIOPointerIO.toStateObject( input.pointers )
-    };
-  },
-  stateSchema: {
-    pointers: ArrayIOPointerIO
-  }
-} );
 
 scenery.register( 'Input', Input );

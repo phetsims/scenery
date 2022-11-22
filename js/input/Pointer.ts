@@ -101,7 +101,23 @@ export default abstract class Pointer {
   // so they can be removed on disposal
   private _listenerForDragReserve: TInputListener | null;
   private _listenerForKeyboardDragReserve: TInputListener | null;
-  public static PointerIO: IOType<Pointer>;
+
+
+  // Pointer is not a PhetioObject and not instrumented, but this type is used for
+  // toStateObject in Input
+  public static readonly PointerIO = new IOType<Pointer>( 'PointerIO', {
+    valueType: Pointer,
+    toStateObject: ( pointer: Pointer ) => {
+      return {
+        point: pointer.point.toStateObject(),
+        type: pointer.type
+      };
+    },
+    stateSchema: {
+      point: Vector2.Vector2IO,
+      type: StringIO
+    }
+  } );
 
   /**
    * @param initialPoint
@@ -443,21 +459,5 @@ export default abstract class Pointer {
     return `Pointer#${this.type}_at_${this.point}`;
   }
 }
-
-// Pointer is not a PhetioObject and not instrumented, but this type is used for
-// toStateObject in Input
-Pointer.PointerIO = new IOType<Pointer>( 'PointerIO', {
-  valueType: Pointer,
-  toStateObject: ( pointer: Pointer ) => {
-    return {
-      point: pointer.point.toStateObject(),
-      type: pointer.type
-    };
-  },
-  stateSchema: {
-    point: Vector2.Vector2IO,
-    type: StringIO
-  }
-} );
 
 scenery.register( 'Pointer', Pointer );

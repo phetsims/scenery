@@ -44,9 +44,7 @@ export default class Sepia extends ColorMatrixFilter {
     return true;
   }
 
-  public static FULL: Sepia;
+  public static readonly FULL = new Sepia( 1 );
 }
-
-Sepia.FULL = new Sepia( 1 );
 
 scenery.register( 'Sepia', Sepia );

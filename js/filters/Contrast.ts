@@ -44,9 +44,7 @@ export default class Contrast extends ColorMatrixFilter {
   }
 
   // Turns the content gray
-  public static GRAY: Contrast;
+  public static readonly GRAY = new Contrast( 0 );
 }
-
-Contrast.GRAY = new Contrast( 0 );
 
 scenery.register( 'Contrast', Contrast );

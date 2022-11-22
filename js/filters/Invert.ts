@@ -39,7 +39,7 @@ export default class Invert extends Filter {
     return true;
   }
 
-  public static FULL: Invert;
+  public static readonly FULL = new Invert( 1 );
 
   public applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
     throw new Error( 'unimplemented' );
@@ -49,7 +49,5 @@ export default class Invert extends Filter {
     throw new Error( 'unimplemented' );
   }
 }
-
-Invert.FULL = new Invert( 1 );
 
 scenery.register( 'Invert', Invert );

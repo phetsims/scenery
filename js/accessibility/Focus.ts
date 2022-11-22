@@ -21,37 +21,35 @@ class Focus {
   // The Display containing the Trail to the focused Node.
   public readonly display: Display;
 
-  public static FocusIO: IOType;
+  public static readonly FocusIO = new IOType( 'FocusIO', {
+    valueType: Focus,
+    documentation: 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
+                   'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
+                   'from parent-most to child-most corresponding to the PhET-iO element that was instrumented.',
+    toStateObject: ( focus: Focus ) => {
+      const phetioIDs: string[] = [];
+      focus.trail.nodes.forEach( ( node, i ) => {
+
+        // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
+        if ( node.isPhetioInstrumented() ) {
+          phetioIDs.push( node.tandem.phetioID );
+        }
+      } );
+
+      return {
+        focusedPhetioElement: phetioIDs
+      };
+    },
+    stateSchema: {
+      focusedPhetioElement: ArrayIO( StringIO )
+    }
+  } );
 
   public constructor( display: Display, trail: Trail ) {
     this.display = display;
     this.trail = trail;
   }
 }
-
-Focus.FocusIO = new IOType( 'FocusIO', {
-  valueType: Focus,
-  documentation: 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
-                 'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
-                 'from parent-most to child-most corresponding to the PhET-iO element that was instrumented.',
-  toStateObject: ( focus: Focus ) => {
-    const phetioIDs: string[] = [];
-    focus.trail.nodes.forEach( ( node, i ) => {
-
-      // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
-      if ( node.isPhetioInstrumented() ) {
-        phetioIDs.push( node.tandem.phetioID );
-      }
-    } );
-
-    return {
-      focusedPhetioElement: phetioIDs
-    };
-  },
-  stateSchema: {
-    focusedPhetioElement: ArrayIO( StringIO )
-  }
-} );
 
 scenery.register( 'Focus', Focus );
 export default Focus;

@@ -44,9 +44,7 @@ export default class Brightness extends ColorMatrixFilter {
   }
 
   // Fully darkens the content
-  public static BLACKEN: Brightness;
+  public static readonly BLACKEN = new Brightness( 0 );
 }
-
-Brightness.BLACKEN = new Brightness( 0 );
 
 scenery.register( 'Brightness', Brightness );

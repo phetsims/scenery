@@ -124,26 +124,26 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
     return !this.pointer.isAttached() && ( !( this.pointer instanceof Mouse ) || ( this.domEvent as unknown as MouseEvent ).button === 0 );
   }
 
-  public static SceneryEventIO: IOType;
+  public static readonly SceneryEventIO = new IOType( 'SceneryEventIO', {
+    valueType: SceneryEvent,
+    documentation: 'An event, with a "point" field',
+    toStateObject: ( event: SceneryEvent ) => {
+
+      // Note: If changing the contents of this object, please document it in the public documentation string.
+      return {
+        type: event.type,
+        domEventType: NullableIO( EventIO ).toStateObject( event.domEvent ),
+        point: ( event.pointer && event.pointer.point ) ? Vector2.Vector2IO.toStateObject( event.pointer.point ) : null
+      };
+    },
+    stateSchema: {
+      type: StringIO,
+      domEventType: NullableIO( EventIO ),
+      point: NullableIO( Vector2.Vector2IO )
+    }
+  } );
+
 }
 
-SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
-  valueType: SceneryEvent,
-  documentation: 'An event, with a "point" field',
-  toStateObject: ( event: SceneryEvent ) => {
-
-    // Note: If changing the contents of this object, please document it in the public documentation string.
-    return {
-      type: event.type,
-      domEventType: NullableIO( EventIO ).toStateObject( event.domEvent ),
-      point: ( event.pointer && event.pointer.point ) ? Vector2.Vector2IO.toStateObject( event.pointer.point ) : null
-    };
-  },
-  stateSchema: {
-    type: StringIO,
-    domEventType: NullableIO( EventIO ),
-    point: NullableIO( Vector2.Vector2IO )
-  }
-} );
 
 scenery.register( 'SceneryEvent', SceneryEvent );

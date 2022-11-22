@@ -52,9 +52,7 @@ export default class Grayscale extends ColorMatrixFilter {
   }
 
   // Turns things fully gray-scale (instead of partially)
-  public static FULL: Grayscale;
+  public static readonly FULL = new Grayscale( 1 );
 }
-
-Grayscale.FULL = new Grayscale( 1 );
 
 scenery.register( 'Grayscale', Grayscale );
