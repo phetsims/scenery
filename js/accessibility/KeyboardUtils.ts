@@ -112,6 +112,7 @@ const KeyboardUtils = {
   KEY_EQUALS: 'Equal',
   KEY_PLUS: 'Equal',
   KEY_MINUS: 'Minus',
+  KEY_PERIOD: 'Period',
 
   ARROW_KEYS: ARROW_KEYS,
   WASD_KEYS: WASD_KEYS,
