@@ -55,6 +55,7 @@ const EnglishStringToCodeMap = {
   equals: KeyboardUtils.KEY_EQUALS,
   plus: KeyboardUtils.KEY_PLUS,
   minus: KeyboardUtils.KEY_MINUS,
+  period: KeyboardUtils.KEY_PERIOD,
   escape: KeyboardUtils.KEY_ESCAPE,
   delete: KeyboardUtils.KEY_DELETE,
   backspace: KeyboardUtils.KEY_BACKSPACE,

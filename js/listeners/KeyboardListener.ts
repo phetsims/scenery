@@ -59,7 +59,7 @@ type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | '
   'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
 type AllowedKeys = keyof typeof EnglishStringToCodeMap;
 
-type OneKeyStroke = `${AllowedKeys}` |
+export type OneKeyStroke = `${AllowedKeys}` |
   `${ModifierKey}+${AllowedKeys}` |
   `${ModifierKey}+${ModifierKey}+${AllowedKeys}`;
 // These combinations are not supported by TypeScript: "TS2590: Expression produces a union type that is too complex to

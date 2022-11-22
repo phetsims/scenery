@@ -229,6 +229,7 @@ export { default as HandleDownListener } from './listeners/HandleDownListener.js
 export { default as KeyboardDragListener } from './listeners/KeyboardDragListener.js';
 export type { KeyboardDragListenerOptions } from './listeners/KeyboardDragListener.js';
 export { default as KeyboardListener } from './listeners/KeyboardListener.js';
+export type { OneKeyStroke } from './listeners/KeyboardListener.js';
 export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';
 
