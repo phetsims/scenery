@@ -309,7 +309,7 @@ export default class SpriteSheet {
   public static Sprite: typeof Sprite;
 
   // the size of a sprite sheet
-  public static MAX_DIMENSION: typeof MAX_DIMENSION;
+  public static readonly MAX_DIMENSION = MAX_DIMENSION;
 }
 
 scenery.register( 'SpriteSheet', SpriteSheet );
@@ -346,4 +346,3 @@ class Sprite {
 }
 
 SpriteSheet.Sprite = Sprite;
-SpriteSheet.MAX_DIMENSION = MAX_DIMENSION;
