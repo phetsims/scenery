@@ -10,6 +10,7 @@ define( function( require ) {
   'use strict';
 
   var inherit = require( 'PHET_CORE/inherit' );
+  var platform = require( 'PHET_CORE/platform' );
   var Shape = require( 'KITE/Shape' );
   var Bounds2 = require( 'DOT/Bounds2' );
 
@@ -387,7 +388,11 @@ define( function( require ) {
         if ( !svgPath ) { svgPath = 'M0 0'; }
 
         // only set the SVG path if it's not the empty string
-        path.setAttribute( 'd', svgPath );
+
+        // We'll conditionally add another M0 0 to the end of the path if we're on Safari, we're running into a bug in
+        // https://github.com/phetsims/gravity-and-orbits/issues/472 (debugged in
+        // https://github.com/phetsims/geometric-optics-basics/issues/31) where we're getting artifacts.
+        path.setAttribute( 'd', `${svgPath}${platform.safari ? ' M0 0' : ''}` );
       }
 
       this.updateFillStrokeStyle( path );
