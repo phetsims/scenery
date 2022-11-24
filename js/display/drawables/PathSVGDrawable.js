@@ -62,7 +62,7 @@ define( function( require ) {
         // We'll conditionally add another M0 0 to the end of the path if we're on Safari, we're running into a bug in
         // https://github.com/phetsims/gravity-and-orbits/issues/472 (debugged in
         // https://github.com/phetsims/geometric-optics-basics/issues/31) where we're getting artifacts.
-        path.setAttribute( 'd', `${svgPath}${platform.safari ? ' M0 0' : ''}` );
+        path.setAttribute( 'd', svgPath + ( platform.safari ? ' M0 0' : '' ) );
       }
 
       // Apply any fill/stroke changes to our element.
