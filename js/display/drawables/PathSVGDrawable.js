@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { PathStatefulDrawable, scenery, svgns, SVGSelfDrawable } from '../../imports.js';
 
@@ -47,7 +48,11 @@ class PathSVGDrawable extends PathStatefulDrawable( SVGSelfDrawable ) {
       if ( !svgPath ) { svgPath = 'M0 0'; }
 
       // only set the SVG path if it's not the empty string
-      path.setAttribute( 'd', svgPath );
+
+      // We'll conditionally add another M0 0 to the end of the path if we're on Safari, we're running into a bug in
+      // https://github.com/phetsims/gravity-and-orbits/issues/472 (debugged in
+      // https://github.com/phetsims/geometric-optics-basics/issues/31) where we're getting artifacts.
+      path.setAttribute( 'd', `${svgPath}${platform.safari ? ' M0 0' : ''}` );
     }
 
     // Apply any fill/stroke changes to our element.
