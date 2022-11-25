@@ -350,8 +350,10 @@ define( function( require ) {
             rootNode.addInputListener( new ButtonListener( {
               fire: function( event ) {
                 self._linkEventsHandled && event.handle();
-                var newWindow = window.open( href, '_blank' ); // open in a new window/tab
-                newWindow.focus();
+                if ( !window.phet || !phet.chipper || !phet.chipper.queryParameters || phet.chipper.queryParameters.allowLinks ) {
+                  var newWindow = window.open( href, '_blank' ); // open in a new window/tab
+                  newWindow.focus();
+                }
               }
             } ) );
             rootNode.setAccessibleAttribute( 'href', href );
