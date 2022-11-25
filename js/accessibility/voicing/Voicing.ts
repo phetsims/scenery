@@ -628,6 +628,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
      */
     protected cleanVoicingUtterance(): void {
       assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
+      this._voicingResponsePacket.clean();
       if ( this._voicingUtterance instanceof OwnedVoicingUtterance ) {
         this._voicingUtterance.dispose();
       }
