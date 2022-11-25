@@ -25,7 +25,7 @@
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, SpeakableResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
+import ResponsePacket, { ResolvedResponse, SpeakableResolvedOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
@@ -96,14 +96,7 @@ export type VoicingOptions = SelfOptions & InteractiveHighlightingOptions;
 
 export type SpeakingOptions = {
   utterance?: SelfOptions['voicingUtterance'];
-} & {
-
-  // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
-  // match on the properties because they are optional (marked with `?`)
-  [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( VoicingResponse | undefined ) ?
-                                                 SpeakableResolvedResponse :
-                                                 ResponsePacketOptions[PropertyName];
-};
+} & SpeakableResolvedOptions;
 
 const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
