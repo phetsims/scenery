@@ -26,10 +26,11 @@ import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 import { AlignBox, Node, scenery } from '../../imports.js';
 import { AlignBoxOptions } from '../nodes/AlignBox.js';
+import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';
 
 let globalId = 1;
 
-export type AlignGroupOptions = {
+type SelfOptions = {
   // Whether the boxes should have all matching widths (otherwise it fits to size)
   matchHorizontal?: boolean;
 
@@ -37,12 +38,14 @@ export type AlignGroupOptions = {
   matchVertical?: boolean;
 };
 
+export type AlignGroupOptions = SelfOptions & DisposableOptions;
+
 const DEFAULT_OPTIONS = {
   matchHorizontal: true,
   matchVertical: true
 };
 
-export default class AlignGroup {
+export default class AlignGroup extends Disposable {
 
   private readonly _alignBoxes: AlignBox[];
   private _matchHorizontal: boolean;
@@ -67,10 +70,12 @@ export default class AlignGroup {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on options object is a code smell' );
 
-    const options = optionize3<AlignGroupOptions, AlignGroupOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+    const options = optionize3<AlignGroupOptions, SelfOptions, DisposableOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     assert && assert( typeof options.matchHorizontal === 'boolean' );
     assert && assert( typeof options.matchVertical === 'boolean' );
+
+    super( options );
 
     this._alignBoxes = [];
 
@@ -131,7 +136,8 @@ export default class AlignGroup {
 
     // Setting the group should call our addAlignBox()
     return new AlignBox( content, combineOptions<AlignBoxOptions>( {
-      group: this
+      group: this,
+      disposer: this
     }, options ) );
   }
 
@@ -187,15 +193,6 @@ export default class AlignGroup {
    */
   public getMatchVertical(): boolean {
     return this._matchVertical;
-  }
-
-  /**
-   * Dispose all the boxes.
-   */
-  public dispose(): void {
-    for ( let i = this._alignBoxes.length - 1; i >= 0; i-- ) {
-      this._alignBoxes[ i ].dispose();
-    }
   }
 
   /**
