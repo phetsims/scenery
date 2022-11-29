@@ -635,6 +635,8 @@ export default class ParallelDOM extends PhetioObject {
     this.setAriaLabelledbyAssociations( [] );
     this.setAriaDescribedbyAssociations( [] );
     this.setActiveDescendantAssociations( [] );
+
+    this._innerContentProperty.dispose();
   }
 
   private pdomInputEnabledListener( enabled: boolean ): void {
