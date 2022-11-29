@@ -1,7 +1,8 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * A superclass for Node, adding accessibility by defining content for the Parallel DOM.
+ * A superclass for Node, adding accessibility by defining content for the Parallel DOM. Please note that Node and
+ * ParallelDOM are closely intertwined, though they are separated into separate files in the type hierarchy.
  *
  * The Parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
  * accessible, assistive technologies require HTML markup, which is something that pure graphical content does not
@@ -138,6 +139,8 @@ import TEmitter from '../../../../axon/js/TEmitter.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
+import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -399,7 +402,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // The inner label content for this node's primary sibling. Set as inner HTML
   // or text content of the actual DOM element. If this is used, the node should not have children.
-  private _innerContent: string | null;
+  private _innerContentProperty: TinyForwardingProperty<string | null>;
 
   // The description content for this node's DOM element.
   private _descriptionContent: string | null;
@@ -565,7 +568,10 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomAttributes = [];
     this._pdomClasses = [];
     this._labelContent = null;
-    this._innerContent = null;
+
+    this._innerContentProperty = new TinyForwardingProperty<string | null>( null, false );
+    this._innerContentProperty.lazyLink( this.onInnerContentPropertyChange.bind( this ) );
+
     this._descriptionContent = null;
     this._pdomNamespace = null;
     this._ariaLabel = null;
@@ -716,7 +722,7 @@ export default class ParallelDOM extends PhetioObject {
       // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
       // but this will catch most cases since often things that get added to the focus order have the application
       // role for custom input. Note that accessibleName will not be checked that it specifically changes innerContent, it is up to the dev to do this.
-      this.ariaRole === 'application' && assert( this._innerContent || this._accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
+      this.ariaRole === 'application' && assert( this._innerContentProperty.value || this._accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
     }
 
     for ( let i = 0; i < ( this as unknown as Node ).children.length; i++ ) {
@@ -1261,17 +1267,7 @@ export default class ParallelDOM extends PhetioObject {
    * have accessible descendants because this content will override the HTML of descendants of this node.
    */
   public setInnerContent( providedContent: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const content = unwrapProperty( providedContent );
-
-    if ( this._innerContent !== content ) {
-      this._innerContent = content;
-
-      for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-        const peer = this._pdomInstances[ i ].peer!;
-        peer.setPrimarySiblingContent( this._innerContent );
-      }
-    }
+    this._innerContentProperty.setValueOrTargetProperty( this, null, providedContent );
   }
 
   public set innerContent( content: PDOMValueType | null ) { this.setInnerContent( content ); }
@@ -1282,7 +1278,14 @@ export default class ParallelDOM extends PhetioObject {
    * Get the inner content, the string that is the innerHTML or innerText for the Node's primary sibling.
    */
   public getInnerContent(): string | null {
-    return this._innerContent;
+    return this._innerContentProperty.value;
+  }
+
+  private onInnerContentPropertyChange( value: string | null ): void {
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.setPrimarySiblingContent( value );
+    }
   }
 
   /**
@@ -2862,6 +2865,24 @@ export default class ParallelDOM extends PhetioObject {
     PDOMTree.childrenOrderChange( this as unknown as Node );
 
     sceneryLog && sceneryLog.ParallelDOM && sceneryLog.pop();
+  }
+
+  /**
+   * Handles linking and checking child PhET-iO Properties such as Node.visibleProperty and Node.enabledProperty.
+   */
+  public updateLinkedElementForProperty<T>( tandemName: string, oldProperty?: TProperty<T> | null, newProperty?: TProperty<T> | null ): void {
+    assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
+
+    // Only update linked elements if this Node is instrumented for PhET-iO
+    if ( this.isPhetioInstrumented() ) {
+
+      oldProperty && oldProperty instanceof ReadOnlyProperty && oldProperty.isPhetioInstrumented() && oldProperty instanceof PhetioObject && this.removeLinkedElements( oldProperty );
+
+      const tandem = this.tandem.createTandem( tandemName );
+      if ( newProperty && newProperty instanceof ReadOnlyProperty && newProperty.isPhetioInstrumented() && newProperty instanceof PhetioObject && tandem !== newProperty.tandem ) {
+        this.addLinkedElement( newProperty, { tandem: tandem } );
+      }
+    }
   }
 
   /*---------------------------------------------------------------------------*/

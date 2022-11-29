@@ -154,7 +154,6 @@
 import BooleanProperty, { BooleanPropertyOptions } from '../../../axon/js/BooleanProperty.js';
 import EnabledProperty, { EnabledPropertyOptions } from '../../../axon/js/EnabledProperty.js';
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -4175,24 +4174,6 @@ class Node extends ParallelDOM {
     this._picker.onPickableChange( oldPickable, pickable );
     if ( assertSlow ) { this._picker.audit(); }
     // TODO: invalidate the cursor somehow? #150
-  }
-
-  /**
-   * Handles linking and checking child PhET-iO Properties such as visibleProperty and enabledProperty.
-   */
-  public updateLinkedElementForProperty<T>( tandemName: string, oldProperty?: TProperty<T> | null, newProperty?: TProperty<T> | null ): void {
-    assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
-
-    // Only update linked elements if this Node is instrumented for PhET-iO
-    if ( this.isPhetioInstrumented() ) {
-
-      oldProperty && oldProperty instanceof ReadOnlyProperty && oldProperty.isPhetioInstrumented() && oldProperty instanceof PhetioObject && this.removeLinkedElements( oldProperty );
-
-      const tandem = this.tandem.createTandem( tandemName );
-      if ( newProperty && newProperty instanceof ReadOnlyProperty && newProperty.isPhetioInstrumented() && newProperty instanceof PhetioObject && tandem !== newProperty.tandem ) {
-        this.addLinkedElement( newProperty, { tandem: tandem } );
-      }
-    }
   }
 
   /**
