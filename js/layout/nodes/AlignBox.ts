@@ -618,6 +618,7 @@ export default class AlignBox extends SuperType {
 
     // Remove our listener
     this._content.boundsProperty.unlink( this._contentBoundsListener );
+    this._content = new Node(); // clear the reference for GC
 
     if ( this.disposer && this.group && ( this.disposer === this.group || this.disposer === this.group.disposeEmitter ) ) {
       this.disposer = null;
