@@ -306,6 +306,10 @@ export default class AlignGroup extends Disposable {
   public removeAlignBox( alignBox: AlignBox ): void {
     arrayRemove( this._alignBoxes, alignBox );
 
+    if ( alignBox.disposer === this ) {
+      alignBox.disposer = null;
+    }
+
     // Trigger an update when a alignBox is removed
     this.updateLayout();
   }
