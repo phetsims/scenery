@@ -619,6 +619,10 @@ export default class AlignBox extends SuperType {
     // Remove our listener
     this._content.boundsProperty.unlink( this._contentBoundsListener );
 
+    if ( this.disposer && this.group && ( this.disposer === this.group || this.disposer === this.group.disposeEmitter ) ) {
+      this.disposer = null;
+    }
+
     // Disconnects from the group
     this.group = null;
 
