@@ -12,11 +12,11 @@ import { allowLinksProperty } from '../imports.js';
 /**
  * Opens the URL in a new window or tab.
  */
-function openPopup( url: string ): void {
+function openPopup( url: string, allowPopup?: boolean ): void {
 
   // Don't allow openPopup IF we have query parameters AND allowLinks is false,
   // see https://github.com/phetsims/joist/issues/830
-  if ( allowLinksProperty.value ) {
+  if ( allowLinksProperty.value || allowPopup ) {
     const popupWindow = window.open( url, '_blank' ); // open in a new window/tab
 
     // We can't guarantee the presence of a window object, since if it isn't opened then it will return null.
