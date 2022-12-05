@@ -176,6 +176,7 @@ import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
+import { DISPOSABLE_OPTION_KEYS } from '../../../axon/js/Disposable.js';
 
 let globalIdCounter = 1;
 
@@ -253,7 +254,7 @@ const NODE_OPTION_KEYS = [
   'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
   'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
   ...REQUIRES_BOUNDS_OPTION_KEYS,
-  'disposer' // To support mutation from Disposable.ts
+  ...DISPOSABLE_OPTION_KEYS // From Disposable.ts
 ];
 
 const DEFAULT_OPTIONS = {
