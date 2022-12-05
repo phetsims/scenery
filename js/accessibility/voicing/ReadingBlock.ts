@@ -383,12 +383,10 @@ const ReadingBlock = <SuperType extends Constructor<Node>>( Type: SuperType ) =>
      * If we created and own the voicingUtterance we can fully dispose of it.
      */
     protected override cleanVoicingUtterance(): void {
-      if ( this._voicingUtterance instanceof ReadingBlockUtterance ) {
+      if ( this._voicingUtterance instanceof OwnedReadingBlockUtterance ) {
         this._voicingUtterance.dispose();
       }
-      else {
-        super.cleanVoicingUtterance();
-      }
+      super.cleanVoicingUtterance();
     }
 
     public override dispose(): void {
