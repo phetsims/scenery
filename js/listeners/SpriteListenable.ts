@@ -1,4 +1,4 @@
-// Copyright 2020-2022, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * A trait to be mixed into PressListeners for identifying which SpriteInstance of a given Sprites node was interacted
