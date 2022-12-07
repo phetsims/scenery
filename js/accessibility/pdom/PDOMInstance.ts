@@ -542,7 +542,7 @@ class PDOMInstance {
 
       const indicesString = [];
 
-      let pdomInstance: PDOMInstance = this; // eslint-disable-line
+      let pdomInstance: PDOMInstance = this; // eslint-disable-line consistent-this, @typescript-eslint/no-this-alias
 
       while ( pdomInstance.parent ) {
         const indexOf = pdomInstance.parent.children.indexOf( pdomInstance );

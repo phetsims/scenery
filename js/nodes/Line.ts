@@ -145,8 +145,8 @@ export default class Line extends Path {
    * Set the line's first point's x and y values
    */
   public setPoint1( p1: Vector2 ): this;
-  setPoint1( x1: number, y1: number ): this; // eslint-disable-line
-  setPoint1( x1: number | Vector2, y1?: number ): this {  // eslint-disable-line
+  setPoint1( x1: number, y1: number ): this; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  setPoint1( x1: number | Vector2, y1?: number ): this {  // eslint-disable-line @typescript-eslint/explicit-member-accessibility
     if ( typeof x1 === 'number' ) {
 
       // setPoint1( x1, y1 );
@@ -178,8 +178,8 @@ export default class Line extends Path {
    * Set the line's second point's x and y values
    */
   public setPoint2( p1: Vector2 ): this;
-  setPoint2( x2: number, y2: number ): this; // eslint-disable-line
-  setPoint2( x2: number | Vector2, y2?: number ): this {  // eslint-disable-line
+  setPoint2( x2: number, y2: number ): this; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  setPoint2( x2: number | Vector2, y2?: number ): this {  // eslint-disable-line @typescript-eslint/explicit-member-accessibility
     if ( typeof x2 === 'number' ) {
       // setPoint2( x2, y2 );
       assert && assert( x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );

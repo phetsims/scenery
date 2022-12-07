@@ -2326,8 +2326,8 @@ class Node extends ParallelDOM {
    * @param [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
   public translate( v: Vector2, prependInstead?: boolean ): void;
-  translate( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line
-  translate( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) { // eslint-disable-line
+  translate( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  translate( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ): void { // eslint-disable-line @typescript-eslint/explicit-member-accessibility
     if ( typeof x === 'number' ) {
       // translate( x, y, prependInstead )
       assert && assert( isFinite( x ), 'x should be a finite number' );
@@ -2371,9 +2371,9 @@ class Node extends ParallelDOM {
    * @param [prependInstead] - (x,y invocation) Whether the transform should be prepended (defaults to false)
    */
   public scale( s: number, prependInstead?: boolean ): void;
-  scale( s: Vector2, prependInstead?: boolean ): void; // eslint-disable-line
-  scale( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line
-  scale( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) { // eslint-disable-line
+  scale( s: Vector2, prependInstead?: boolean ): void; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  scale( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  scale( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ): void { // eslint-disable-line @typescript-eslint/explicit-member-accessibility
     if ( typeof x === 'number' ) {
       assert && assert( isFinite( x ), 'scales should be finite' );
       if ( y === undefined || typeof y === 'boolean' ) {
@@ -2523,9 +2523,9 @@ class Node extends ParallelDOM {
    * @param [b] - Scale for the Y axis (only for the 2-parameter call)
    */
   public setScaleMagnitude( s: number ): this;
-  setScaleMagnitude( v: Vector2 ): this; // eslint-disable-line
-  setScaleMagnitude( sx: number, sy: number ): this; // eslint-disable-line
-  setScaleMagnitude( a: number | Vector2, b?: number ): this { // eslint-disable-line
+  setScaleMagnitude( v: Vector2 ): this; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  setScaleMagnitude( sx: number, sy: number ): this; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  setScaleMagnitude( a: number | Vector2, b?: number ): this { // eslint-disable-line @typescript-eslint/explicit-member-accessibility
     const currentScale = this.getScaleVector();
 
     if ( typeof a === 'number' ) {
@@ -2605,8 +2605,8 @@ class Node extends ParallelDOM {
    * @param [b] - Y translation
    */
   public setTranslation( x: number, y: number ): this;
-  setTranslation( v: Vector2 ): this; // eslint-disable-line
-  setTranslation( a: number | Vector2, b?: number ): this { // eslint-disable-line
+  setTranslation( v: Vector2 ): this; // eslint-disable-line @typescript-eslint/explicit-member-accessibility
+  setTranslation( a: number | Vector2, b?: number ): this { // eslint-disable-line @typescript-eslint/explicit-member-accessibility
     const m = this._transform.getMatrix();
     const tx = m.m02();
     const ty = m.m12();
@@ -5521,7 +5521,7 @@ class Node extends ParallelDOM {
       'If provided, height should be a non-negative integer' );
 
     this.toImage( ( image, x, y ) => {
-      callback( new Node( { // eslint-disable-line
+      callback( new Node( { // eslint-disable-line no-html-constructors
         children: [
           new Image( image, { x: -x, y: -y } )
         ]

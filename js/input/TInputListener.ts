@@ -84,4 +84,4 @@ type TInputListener = {
   // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
   createPanTargetBounds?: ( () => Bounds2 ) | null;
 };
-export default TInputListener // eslint-disable-line
+export default TInputListener;

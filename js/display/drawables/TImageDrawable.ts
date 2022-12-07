@@ -12,4 +12,4 @@ type TImageDrawable = {
   markDirtyImageOpacity(): void;
   markDirtyMipmap(): void;
 };
-export default TImageDrawable // eslint-disable-line
+export default TImageDrawable;

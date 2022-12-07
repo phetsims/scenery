@@ -11,4 +11,4 @@ import { TPathDrawable } from '../../imports.js';
 type TCircleDrawable = {
   markDirtyRadius(): void;
 } & TPathDrawable;
-export default TCircleDrawable // eslint-disable-line
+export default TCircleDrawable;

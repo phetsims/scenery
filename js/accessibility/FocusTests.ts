@@ -262,7 +262,7 @@ QUnit.test( 'pdomOrder DAG test', assert => {
 QUnit.test( 'setting pdomOrder', assert => {
 
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   const a = new Node( { tagName: 'div' } );
@@ -292,7 +292,7 @@ QUnit.test( 'setting pdomOrder', assert => {
 
 QUnit.test( 'setting pdomOrder before setting accessible content', assert => {
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   const a = new Node();
@@ -326,7 +326,7 @@ QUnit.test( 'setting pdomOrder before setting accessible content', assert => {
 
 QUnit.test( 'setting accessible order on nodes with no accessible content', assert => {
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // root
@@ -362,7 +362,7 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
 
 QUnit.test( 'setting accessible order on nodes with no accessible content', assert => {
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  const display = new Display( rootNode );
   document.body.appendChild( display.domElement );
 
   const a = new Node( { tagName: 'div' } );

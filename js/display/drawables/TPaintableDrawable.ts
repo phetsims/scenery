@@ -13,4 +13,4 @@ type TPaintableDrawable = {
   markDirtyLineOptions(): void;
   markDirtyCachedPaints(): void;
 };
-export default TPaintableDrawable // eslint-disable-line
+export default TPaintableDrawable;

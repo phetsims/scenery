@@ -10,4 +10,4 @@ type TOverlay = {
   get domElement(): HTMLElement | SVGElement;
   update: () => void;
 };
-export default TOverlay // eslint-disable-line
+export default TOverlay;

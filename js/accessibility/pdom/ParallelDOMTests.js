@@ -95,7 +95,7 @@ QUnit.test( 'tagName/innerContent options', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // create some nodes for testing
@@ -155,7 +155,7 @@ QUnit.test( 'containerTagName option', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // create some nodes for testing
@@ -184,7 +184,7 @@ QUnit.test( 'labelTagName/labelContent option', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // create some nodes for testing
@@ -249,7 +249,7 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // test containerTag is not needed
@@ -347,7 +347,7 @@ QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // create some nodes for testing
@@ -391,7 +391,7 @@ QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
 QUnit.test( 'ParallelDOM options', assert => {
 
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // test setting of accessible content through options
@@ -497,7 +497,7 @@ function testAssociationAttribute( assert, attribute ) {
   }
 
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // two new nodes that will be related with the aria-labelledby and aria-describedby associations
@@ -736,7 +736,7 @@ function testAssociationAttribute( assert, attribute ) {
 function testAssociationAttributeBySetters( assert, attribute ) {
 
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // use a different setter depending on if testing labelledby or describedby
@@ -841,7 +841,7 @@ QUnit.test( 'ParallelDOM invalidation', assert => {
   a1.tagName = 'button';
 
   // accessible instances are not sorted until added to a display
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   rootNode.addChild( a1 );
@@ -903,7 +903,7 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
   const a1 = new Node( {
     tagName: 'div'
   } );
-  var display = new Display( a1 ); // eslint-disable-line
+  var display = new Display( a1 ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // set/get attributes
@@ -965,7 +965,7 @@ QUnit.test( 'Next/Previous focusable', assert => {
   const util = PDOMUtils;
 
   const rootNode = new Node( { tagName: 'div', focusable: true } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
@@ -1034,7 +1034,7 @@ QUnit.test( 'Next/Previous focusable', assert => {
 
 QUnit.test( 'Remove accessibility subtree', assert => {
   const rootNode = new Node( { tagName: 'div', focusable: true } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   const a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
@@ -1066,7 +1066,7 @@ QUnit.test( 'accessible-dag', assert => {
 
   // test accessibility for multiple instances of a node
   const rootNode = new Node( { tagName: 'div', focusable: true } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   const a = new Node( { tagName: 'div' } );
@@ -1109,7 +1109,7 @@ QUnit.test( 'replaceChild', assert => {
 
   // test the behavior of replaceChild function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   display.initializeEvents();
@@ -1430,7 +1430,7 @@ QUnit.test( 'swapVisibility', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   display.initializeEvents();
@@ -1498,7 +1498,7 @@ QUnit.test( 'Aria Label Setter', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // create some nodes for testing
@@ -1530,7 +1530,7 @@ QUnit.test( 'focusable option', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   display.initializeEvents();
@@ -1731,7 +1731,7 @@ QUnit.test( 'accessibleName option', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   const a = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
@@ -1814,7 +1814,7 @@ QUnit.test( 'pdomHeading option', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   const a = new Node( { tagName: 'div', pdomHeading: TEST_LABEL, containerTagName: 'div' } );
@@ -1836,7 +1836,7 @@ QUnit.test( 'helpText option', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   // label tag needed for default sibling indices to work
@@ -1925,7 +1925,7 @@ QUnit.test( 'move to front/move to back', assert => {
 QUnit.test( 'Node.enabledProperty with PDOM', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
 
   const pdomNode = new Node( {
@@ -1950,7 +1950,7 @@ QUnit.test( 'Node.enabledProperty with PDOM', assert => {
 QUnit.test( 'Display.interactive toggling in the PDOM', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   display.initializeEvents();
   document.body.appendChild( display.domElement );
 

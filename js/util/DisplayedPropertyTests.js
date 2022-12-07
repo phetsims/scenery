@@ -15,7 +15,7 @@ QUnit.module( 'DisplayedProperty' );
 QUnit.test( 'basics', assert => {
 
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   display.initializeEvents();
   document.body.appendChild( display.domElement );
 
@@ -52,7 +52,7 @@ QUnit.test( 'basics', assert => {
 QUnit.test( 'pdom visibility', assert => {
 
   const rootNode = new Node();
-  var display = new Display( rootNode ); // eslint-disable-line
+  var display = new Display( rootNode ); // eslint-disable-line no-var
   display.initializeEvents();
   document.body.appendChild( display.domElement );
 

@@ -17,4 +17,4 @@ type TRectangleDrawable = {
   markDirtyCornerXRadius(): void;
   markDirtyCornerYRadius(): void;
 } & TPathDrawable;
-export default TRectangleDrawable // eslint-disable-line
+export default TRectangleDrawable;

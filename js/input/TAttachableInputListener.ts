@@ -12,5 +12,5 @@ type TAttachableInputListener = {
   // Has to be interruptable
   interrupt: () => void;
 } & TInputListener;
-export default TAttachableInputListener // eslint-disable-line
+export default TAttachableInputListener;
 

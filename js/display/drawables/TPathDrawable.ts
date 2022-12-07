@@ -10,4 +10,4 @@ type TPathDrawable = {
   markPaintDirty(): void;
   markDirtyShape(): void;
 };
-export default TPathDrawable // eslint-disable-line
+export default TPathDrawable;

@@ -12,4 +12,4 @@ type TTextDrawable = {
   markDirtyFont(): void;
   markDirtyBounds(): void;
 };
-export default TTextDrawable // eslint-disable-line
+export default TTextDrawable;

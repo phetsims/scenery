@@ -514,7 +514,7 @@ export default class Input extends PhetioObject {
     this.touchEndAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
-        assert && assert( touch instanceof Touch ); // eslint-disable-line
+        assert && assert( touch instanceof Touch ); // eslint-disable-line no-simple-type-checking-assertions, bad-sim-text
         const pointChanged = touch.end( point, event );
         this.upEvent<TouchEvent | PointerEvent>( touch, event, pointChanged );
         this.removePointer( touch );
@@ -534,7 +534,7 @@ export default class Input extends PhetioObject {
     this.touchMoveAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
-        assert && assert( touch instanceof Touch ); // eslint-disable-line
+        assert && assert( touch instanceof Touch ); // eslint-disable-line no-simple-type-checking-assertions, bad-sim-text
         touch.move( point, event );
         this.moveEvent<TouchEvent | PointerEvent>( touch, event );
       }
@@ -554,7 +554,7 @@ export default class Input extends PhetioObject {
     this.touchCancelAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
-        assert && assert( touch instanceof Touch ); // eslint-disable-line
+        assert && assert( touch instanceof Touch ); // eslint-disable-line no-simple-type-checking-assertions, bad-sim-text
         const pointChanged = touch.cancel( point, event );
         this.cancelEvent<TouchEvent | PointerEvent>( touch, event, pointChanged );
         this.removePointer( touch );

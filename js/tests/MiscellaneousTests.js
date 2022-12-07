@@ -48,7 +48,7 @@ if ( includeBleedingEdgeCanvasTests ) {
   } );
 
   QUnit.test( 'Path object support', assert => {
-    new Path( null ); // eslint-disable-line
+    new Path( null ); // eslint-disable-line no-new, no-undef
   } );
 
   QUnit.test( 'Text width measurement in canvas', assert => {
