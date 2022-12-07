@@ -121,7 +121,7 @@ export default abstract class CanvasNode extends Node {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return CanvasNodeDrawable.createFromPool( renderer, instance );
   }
 }

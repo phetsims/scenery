@@ -39,7 +39,7 @@ const KeyboardZoomUtils = {
     const zoomKey = zoomIn ? KeyboardUtils.KEY_EQUALS : KeyboardUtils.KEY_MINUS;
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
 
-    // @ts-ignore
+    // @ts-expect-error
     return event[ metaKey ] && KeyboardUtils.isKeyEvent( event, zoomKey );
   },
 
@@ -49,7 +49,7 @@ const KeyboardZoomUtils = {
   isZoomResetCommand: ( event: Event ): boolean => {
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
 
-    // @ts-ignore
+    // @ts-expect-error
     return event[ metaKey ] && KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_0 );
   }
 };

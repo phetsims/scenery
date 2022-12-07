@@ -152,7 +152,7 @@ export default class DOM extends Node {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
-    // @ts-ignore Poolable
+    // @ts-expect-error Poolable
     return DOMDrawable.createFromPool( renderer, instance );
   }
 

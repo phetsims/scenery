@@ -33,7 +33,7 @@ export default class PointerOverlay implements TOverlay {
     this.pointerSVGContainer.style.position = 'absolute';
     this.pointerSVGContainer.style.top = '0';
     this.pointerSVGContainer.style.left = '0';
-    // @ts-ignore
+    // @ts-expect-error
     this.pointerSVGContainer.style[ 'pointer-events' ] = 'none';
 
     const innerRadius = 10;
@@ -57,7 +57,7 @@ export default class PointerOverlay implements TOverlay {
       svg.style.position = 'absolute';
       svg.style.top = '0';
       svg.style.left = '0';
-      // @ts-ignore
+      // @ts-expect-error
       svg.style[ 'pointer-events' ] = 'none';
 
       Utils.prepareForTransform( svg );

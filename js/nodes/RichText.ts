@@ -466,7 +466,7 @@ export default class RichText extends Node {
       .replace( /\u202c/g, '</span>' );
 
     // Start appending all top-level elements
-    // @ts-ignore
+    // @ts-expect-error
     const rootElements: HimalayaNode[] = himalaya.parse( mappedText );
 
     // Clear out link items, as we'll need to reconstruct them later
@@ -763,7 +763,7 @@ export default class RichText extends Node {
         for ( let i = 0; i < FONT_STYLE_KEYS.length; i++ ) {
           const styleKey = FONT_STYLE_KEYS[ i ];
           if ( css[ styleKey ] ) {
-            // @ts-ignore
+            // @ts-expect-error
             fontOptions[ FONT_STYLE_MAP[ styleKey ] ] = css[ styleKey ];
           }
         }
@@ -777,7 +777,7 @@ export default class RichText extends Node {
         // Try extracting the href from the links object
         if ( href !== null && this._links !== true ) {
           if ( href.startsWith( '{{' ) && href.indexOf( '}}' ) === href.length - 2 ) {
-            // @ts-ignore TODO
+            // @ts-expect-error TODO
             href = this._links[ href.slice( 2, -2 ) ];
           }
           else {
@@ -1609,7 +1609,7 @@ export default class RichText extends Node {
    * See https://github.com/phetsims/scenery-phet/issues/315
    */
   public static contentToString( content: string, isLTR: boolean ): string {
-    // @ts-ignore - we should get a string from this
+    // @ts-expect-error - we should get a string from this
     const unescapedContent: string = he.decode( content );
     return isLTR ? ( `\u202a${unescapedContent}\u202c` ) : ( `\u202b${unescapedContent}\u202c` );
   }
@@ -1913,7 +1913,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
             // prevent default from pdom activation so we don't also open a new tab from native DOM input on a link
             event.domEvent!.preventDefault();
           }
-          // @ts-ignore TODO TODO TODO this is a bug! How do we handle this?
+          // @ts-expect-error TODO TODO TODO this is a bug! How do we handle this?
           self._linkEventsHandled && event.handle();
           openPopup( href ); // open in a new window/tab
         },

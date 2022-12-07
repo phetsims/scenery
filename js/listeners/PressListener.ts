@@ -339,7 +339,6 @@ export default class PressListener extends EnabledComponent implements TInputLis
                            'used to convey info about the SceneryEvent.',
       phetioReadOnly: true,
       phetioFeatured: options.phetioFeatured,
-      // @ts-ignore
       phetioEventType: EventType.USER,
       parameters: [ {
         name: 'event',
@@ -368,7 +367,6 @@ export default class PressListener extends EnabledComponent implements TInputLis
       phetioDocumentation: 'Executes whenever a release occurs.',
       phetioReadOnly: true,
       phetioFeatured: options.phetioFeatured,
-      // @ts-ignore
       phetioEventType: EventType.USER
     } );
 
@@ -435,7 +433,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
            !this.isPressed &&
            this._canStartPress( event, this ) &&
            // Only let presses be started with the correct mouse button.
-           // @ts-ignore Typed SceneryEvent
+           // @ts-expect-error Typed SceneryEvent
            ( !( event.pointer instanceof Mouse ) || event.domEvent.button === this._mouseButton ) &&
            // We can't attach to a pointer that is already attached.
            ( !this._attach || !event.pointer.isAttached() );
@@ -559,9 +557,9 @@ export default class PressListener extends EnabledComponent implements TInputLis
       }
 
       // clear the clicking timer, specific to pdom input
-      // @ts-ignore TODO: This looks buggy, will need to ignore for now
+      // @ts-expect-error TODO: This looks buggy, will need to ignore for now
       if ( stepTimer.hasListener( this._pdomClickingTimeoutListener ) ) {
-        // @ts-ignore TODO: This looks buggy, will need to ignore for now
+        // @ts-expect-error TODO: This looks buggy, will need to ignore for now
         stepTimer.clearTimeout( this._pdomClickingTimeoutListener );
 
         // interrupt may be called after the PressListener has been disposed (for instance, internally by scenery
@@ -941,7 +939,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
       this.isPressedProperty.value = true;
 
       // fire the optional callback
-      // @ts-ignore
+      // @ts-expect-error
       this._pressListener( event, this );
 
       callback && callback();
@@ -954,12 +952,12 @@ export default class PressListener extends EnabledComponent implements TInputLis
 
       // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
       // listener is no longer attached
-      // @ts-ignore TODO: This looks buggy, will need to ignore for now
+      // @ts-expect-error TODO: This looks buggy, will need to ignore for now
       stepTimer.clearTimeout( this._pdomClickingTimeoutListener );
 
       // Now add the timeout back to start over, saving so that it can be removed later. Even when this listener was
       // interrupted from above logic, we still delay setting this to false to support visual "pressing" redraw.
-      // @ts-ignore TODO: This looks buggy, will need to ignore for now
+      // @ts-expect-error TODO: This looks buggy, will need to ignore for now
       this._pdomClickingTimeoutListener = stepTimer.setTimeout( () => {
 
         // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and

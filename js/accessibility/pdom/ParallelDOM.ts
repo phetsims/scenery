@@ -2141,7 +2141,7 @@ export default class ParallelDOM extends PhetioObject {
         // for efficiency
         nonOrderedChildren.unshift( placeholderIndex, 1 );
 
-        // @ts-ignore - TODO: best way to type?
+        // @ts-expect-error - TODO: best way to type?
         Array.prototype.splice.apply( effectiveChildren, nonOrderedChildren );
       }
       // Otherwise, just add the normal things at the end
@@ -2689,7 +2689,7 @@ export default class ParallelDOM extends PhetioObject {
     for ( let i = 0; i < ACCESSIBILITY_OPTION_KEYS.length; i++ ) {
       const optionName = ACCESSIBILITY_OPTION_KEYS[ i ];
 
-      // @ts-ignore - Not sure of a great way to do this
+      // @ts-expect-error - Not sure of a great way to do this
       currentOptions[ optionName ] = this[ optionName ];
     }
 
@@ -2748,7 +2748,7 @@ export default class ParallelDOM extends PhetioObject {
       pruneStack = pruneStack.concat( arrayPDOMOrder as Node[] );
 
       // Visiting trails to ordered nodes.
-      // @ts-ignore
+      // @ts-expect-error
       _.each( arrayPDOMOrder, ( descendant: Node ) => {
         // Find all descendant references to the node.
         // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for

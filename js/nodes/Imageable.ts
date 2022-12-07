@@ -881,7 +881,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
         this._detachImageLoadListener();
       }
 
-      // @ts-ignore
+      // @ts-expect-error
       super.dispose && super.dispose();
     }
   };

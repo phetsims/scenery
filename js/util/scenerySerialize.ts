@@ -143,9 +143,9 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
       'webglScale',
       'preventFit'
     ].forEach( simpleKey => {
-      // @ts-ignore
+      // @ts-expect-error
       if ( node[ simpleKey ] !== Node.DEFAULT_NODE_OPTIONS[ simpleKey ] ) {
-        // @ts-ignore
+        // @ts-expect-error
         options[ simpleKey ] = node[ simpleKey ];
       }
     } );
@@ -160,9 +160,9 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
     ].forEach( simpleKey => {
 
       // All default to null
-      // @ts-ignore
+      // @ts-expect-error
       if ( node[ simpleKey ] !== null ) {
-        // @ts-ignore
+        // @ts-expect-error
         options[ simpleKey ] = node[ simpleKey ];
       }
     } );
@@ -174,9 +174,9 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
       'mouseArea',
       'touchArea'
     ].forEach( serializedKey => {
-      // @ts-ignore
+      // @ts-expect-error
       if ( node[ serializedKey ] !== Node.DEFAULT_NODE_OPTIONS[ serializedKey ] ) {
-        // @ts-ignore
+        // @ts-expect-error
         setup[ serializedKey ] = scenerySerialize( node[ serializedKey ] );
       }
     } );
@@ -253,9 +253,9 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
         'mipmapInitialLevel',
         'mipmapMaxLevel'
       ].forEach( simpleKey => {
-        // @ts-ignore
+        // @ts-expect-error
         if ( node[ simpleKey ] !== Image.DEFAULT_IMAGE_OPTIONS[ simpleKey ] ) {
-          // @ts-ignore
+          // @ts-expect-error
           options[ simpleKey ] = node[ simpleKey ];
         }
       } );
@@ -337,9 +337,9 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
         'lineDashOffset',
         'miterLimit'
       ].forEach( simpleKey => {
-        // @ts-ignore
+        // @ts-expect-error
         if ( node[ simpleKey ] !== PAINTABLE_DEFAULT_OPTIONS[ simpleKey ] ) {
-          // @ts-ignore
+          // @ts-expect-error
           options[ simpleKey ] = node[ simpleKey ];
         }
       } );

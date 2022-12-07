@@ -31,7 +31,7 @@ export type InteractiveHighlightingOptions = SelfOptions;
 
 const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
-  // @ts-ignore
+  // @ts-expect-error
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
 
   const InteractiveHighlightingClass = DelayedMutate( 'InteractiveHighlightingClass', INTERACTIVE_HIGHLIGHTING_OPTIONS, class InteractiveHighlightingClass extends Type {

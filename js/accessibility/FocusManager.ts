@@ -114,7 +114,7 @@ export default class FocusManager {
       this.readingBlockFocusProperty.value = utterance instanceof ReadingBlockUtterance ? utterance.readingBlockFocus : null;
     };
 
-    // @ts-ignore
+    // @ts-expect-error
     voicingManager.startSpeakingEmitter.addListener( this.startSpeakingListener );
 
     this.endSpeakingListener = ( text, utterance ) => {
@@ -131,7 +131,7 @@ export default class FocusManager {
       }
     };
 
-    // @ts-ignore
+    // @ts-expect-error
     voicingManager.endSpeakingEmitter.addListener( this.endSpeakingListener );
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -154,10 +154,10 @@ export default class FocusManager {
     this.pointerFocusDisplayedController.dispose();
     this.pointerHighlightsVisibleProperty.dispose();
 
-    // @ts-ignore
+    // @ts-expect-error
     voicingManager.startSpeakingEmitter.removeListener( this.startSpeakingListener );
 
-    // @ts-ignore
+    // @ts-expect-error
     voicingManager.endSpeakingEmitter.removeListener( this.endSpeakingListener );
 
     voicingManager.voicingFullyEnabledProperty.unlink( this.voicingFullyEnabledListener );

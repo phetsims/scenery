@@ -574,10 +574,10 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
       const fillValue = this.getFillValue()!;
 
       wrapper.setFillStyle( fillValue );
-      // @ts-ignore - For performance, we could check this by ruling out string and 'transformMatrix' in fillValue
+      // @ts-expect-error - For performance, we could check this by ruling out string and 'transformMatrix' in fillValue
       if ( fillValue.transformMatrix ) {
         wrapper.context.save();
-        // @ts-ignore
+        // @ts-expect-error
         fillValue.transformMatrix.canvasAppendTransform( wrapper.context );
       }
     }
@@ -588,7 +588,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
     public afterCanvasFill( wrapper: CanvasContextWrapper ): void {
       const fillValue = this.getFillValue();
 
-      // @ts-ignore
+      // @ts-expect-error
       if ( fillValue.transformMatrix ) {
         wrapper.context.restore();
       }
@@ -605,16 +605,16 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
       wrapper.setLineCap( this.getLineCap() );
       wrapper.setLineJoin( this.getLineJoin() );
 
-      // @ts-ignore - for performance
+      // @ts-expect-error - for performance
       if ( strokeValue.transformMatrix ) {
 
-        // @ts-ignore
+        // @ts-expect-error
         const scaleVector: Vector2 = strokeValue.transformMatrix.getScaleVector();
         assert && assert( Math.abs( scaleVector.x - scaleVector.y ) < 1e-7, 'You cannot specify a pattern or gradient to a stroke that does not have a symmetric scale.' );
         const matrixMultiplier = 1 / scaleVector.x;
 
         wrapper.context.save();
-        // @ts-ignore
+        // @ts-expect-error
         strokeValue.transformMatrix.canvasAppendTransform( wrapper.context );
 
         wrapper.setLineWidth( this.getLineWidth() * matrixMultiplier );
@@ -636,7 +636,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
     public afterCanvasStroke( wrapper: CanvasContextWrapper ): void {
       const strokeValue = this.getStrokeValue();
 
-      // @ts-ignore - for performance
+      // @ts-expect-error - for performance
       if ( strokeValue.transformMatrix ) {
         wrapper.context.restore();
       }
@@ -649,7 +649,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
       const fillValue = this.getFillValue();
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
-      // @ts-ignore - toCSS checks for color, left for performance
+      // @ts-expect-error - toCSS checks for color, left for performance
       return fillValue ? ( fillValue.toCSS ? fillValue.toCSS() : fillValue ) : 'transparent';
     }
 
@@ -660,7 +660,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
       const strokeValue = this.getStrokeValue();
       // if it's a Color object, get the corresponding CSS
       // 'transparent' will make us invisible if the fill is null
-      // @ts-ignore - toCSS checks for color, left for performance
+      // @ts-expect-error - toCSS checks for color, left for performance
       return strokeValue ? ( strokeValue.toCSS ? strokeValue.toCSS() : strokeValue ) : 'transparent';
     }
 
@@ -716,9 +716,9 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
         }
 
         _.each( [ 'lineWidth', 'lineCap', 'miterLimit', 'lineJoin', 'lineDashOffset' ], prop => {
-          // @ts-ignore
+          // @ts-expect-error
           if ( this[ prop ] !== defaultStyles[ prop ] ) {
-            // @ts-ignore
+            // @ts-expect-error
             addProp( prop, this[ prop ] );
           }
         } );
@@ -825,7 +825,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
 
 scenery.register( 'Paintable', Paintable );
 
-// @ts-ignore
+// @ts-expect-error
 Paintable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 export {

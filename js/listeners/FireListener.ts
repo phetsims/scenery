@@ -60,14 +60,13 @@ export default class FireListener extends PressListener implements TInputListene
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
     assert && assert( typeof options.fireOnDown === 'boolean', 'fireOnDown should be a boolean' );
 
-    // @ts-ignore TODO see https://github.com/phetsims/chipper/issues/1128
+    // @ts-expect-error TODO see https://github.com/phetsims/chipper/issues/1128
     super( options );
 
     this._fireOnDown = options.fireOnDown;
 
     this.firedEmitter = new Emitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ]>( {
       tandem: options.tandem.createTandem( 'firedEmitter' ),
-      // @ts-ignore TODO EventType
       phetioEventType: EventType.USER,
       phetioReadOnly: options.phetioReadOnly,
       phetioDocumentation: 'Emits at the time that the listener fires',
@@ -76,7 +75,7 @@ export default class FireListener extends PressListener implements TInputListene
         phetioType: NullableIO( SceneryEvent.SceneryEventIO )
       } ]
     } );
-    // @ts-ignore TODO Emitter
+    // @ts-expect-error TODO Emitter
     this.firedEmitter.addListener( options.fire );
 
     // Create a timer to handle the optional fire-on-hold feature.

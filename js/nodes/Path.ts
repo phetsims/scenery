@@ -417,7 +417,7 @@ export default class Path extends Paintable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return PathSVGDrawable.createFromPool( renderer, instance );
   }
 
@@ -428,7 +428,7 @@ export default class Path extends Paintable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return PathCanvasDrawable.createFromPool( renderer, instance );
   }
 

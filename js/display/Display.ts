@@ -485,7 +485,7 @@ export default class Display {
     if ( this._accessible ) {
       this.blockFocusCallbacks = false;
 
-      // @ts-ignore TODO: Poolable is not well supported for TypeScript
+      // @ts-expect-error TODO: Poolable is not well supported for TypeScript
       this._rootPDOMInstance = PDOMInstance.createFromPool( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
         `Display root instance: ${this._rootPDOMInstance!.toString()}` );
@@ -522,7 +522,7 @@ export default class Display {
    * Updates the display's DOM element with the current visual state of the attached root node and its descendants
    */
   public updateDisplay(): void {
-    // @ts-ignore scenery namespace
+    // @ts-expect-error scenery namespace
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       this.perfSyncTreeCount = 0;
       this.perfStitchCount = 0;
@@ -562,11 +562,11 @@ export default class Display {
 
     if ( assertSlow ) { this._rootNode._picker.audit(); }
 
-    // @ts-ignore TODO Instance
+    // @ts-expect-error TODO Instance
     this._baseInstance = this._baseInstance || Instance.createFromPool( this, new Trail( this._rootNode ), true, false );
     this._baseInstance!.baseSyncTree();
     if ( firstRun ) {
-      // @ts-ignore TODO instance
+      // @ts-expect-error TODO instance
       this.markTransformRootDirty( this._baseInstance!, this._baseInstance!.isTransformed ); // marks the transform root as dirty (since it is)
     }
 
@@ -591,7 +591,7 @@ export default class Display {
     sceneryLog && sceneryLog.Display && sceneryLog.push();
     while ( this._drawablesToChangeBlock.length ) {
       const changed = this._drawablesToChangeBlock.pop()!.updateBlock();
-      // @ts-ignore scenery namespace
+      // @ts-expect-error scenery namespace
       if ( sceneryLog && scenery.isLoggingPerformance() && changed ) {
         this.perfDrawableBlockChangeCount!++;
       }
@@ -672,7 +672,7 @@ export default class Display {
 
     this._frameId++;
 
-    // @ts-ignore TODO scenery namespace
+    // @ts-expect-error TODO scenery namespace
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       const syncTreeMessage = `syncTree count: ${this.perfSyncTreeCount}`;
       if ( this.perfSyncTreeCount! > 500 ) {
@@ -1113,7 +1113,7 @@ export default class Display {
     }
 
     // forward all pointer events
-    // @ts-ignore legacy
+    // @ts-expect-error legacy
     this._domElement.style.msTouchAction = 'none';
 
     // don't allow browser to switch between font smoothing methods for text (see https://github.com/phetsims/scenery/issues/431)
@@ -1125,7 +1125,7 @@ export default class Display {
 
       // prevent any default zooming behavior from a trackpad on IE11 and Edge, all should be handled by scenery - must
       // be on the body, doesn't prevent behavior if on the display div
-      // @ts-ignore legacy
+      // @ts-expect-error legacy
       document.body.style.msContentZooming = 'none';
 
       // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js).
@@ -1277,7 +1277,7 @@ export default class Display {
 
     const self = this; // eslint-disable-line @typescript-eslint/no-this-alias
     ( function step() {
-      // @ts-ignore LEGACY --- it would know to update just the DOM element's location if it's the second argument
+      // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
 
       // calculate how much time has elapsed since we rendered the last frame
@@ -1482,7 +1482,7 @@ export default class Display {
       return count;
     }
 
-    // @ts-ignore TODO BackboneDrawable
+    // @ts-expect-error TODO BackboneDrawable
     result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone )}<br/>` ) : '';
 
     const drawableCountMap: Record<string, number> = {}; // {string} drawable constructor name => {number} count of seen
@@ -1508,7 +1508,7 @@ export default class Display {
         count++;
       }
       if ( instance.sharedCacheDrawable ) {
-        // @ts-ignore TODO Instance
+        // @ts-expect-error TODO Instance
         countRetainedDrawable( instance.sharedCacheDrawable );
         count++;
       }
@@ -1529,7 +1529,7 @@ export default class Display {
         return '';
       }
 
-      // @ts-ignore TODO display stuff
+      // @ts-expect-error TODO display stuff
       const hasBackbone = block.domDrawable && block.domDrawable.blocks;
 
       let div = `<div style="margin-left: ${depth * 20}px">`;
@@ -1543,9 +1543,9 @@ export default class Display {
 
       depth += 1;
       if ( hasBackbone ) {
-        // @ts-ignore TODO display stuff
+        // @ts-expect-error TODO display stuff
         for ( let k = 0; k < block.domDrawable.blocks.length; k++ ) {
-          // @ts-ignore TODO display stuff
+          // @ts-expect-error TODO display stuff
           div += blockSummary( block.domDrawable.blocks[ k ] );
         }
       }
@@ -1690,7 +1690,7 @@ export default class Display {
 
       instance.selfDrawable && addDrawable( 'self', instance.selfDrawable );
       instance.groupDrawable && addDrawable( 'group', instance.groupDrawable );
-      // @ts-ignore TODO Instance
+      // @ts-expect-error TODO Instance
       instance.sharedCacheDrawable && addDrawable( 'sharedCache', instance.sharedCacheDrawable );
 
       div += '</div>';
@@ -1750,7 +1750,7 @@ export default class Display {
 
     if ( this._rootBackbone ) {
       result += '<div style="font-weight: bold;">Root Drawable Tree</div>';
-      // @ts-ignore TODO BackboneDrawable
+      // @ts-expect-error TODO BackboneDrawable
       printDrawableSubtree( this._rootBackbone );
     }
 
@@ -1908,7 +1908,7 @@ export default class Display {
       }
     }
 
-    // @ts-ignore TODO BackboneDrawable
+    // @ts-expect-error TODO BackboneDrawable
     scanForCanvases( this._rootBackbone! );
 
     // Create a new document, so that we can (1) serialize it to XHTML, and (2) manipulate it independently.
@@ -2118,9 +2118,9 @@ export default class Display {
 
     // We can't btoa() arbitrary unicode, so we need another solution,
     // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
-    // @ts-ignore - Exterior lib
+    // @ts-expect-error - Exterior lib
     const uint8array = new window.TextEncoderLite( 'utf-8' ).encode( data );
-    // @ts-ignore - Exterior lib
+    // @ts-expect-error - Exterior lib
     const base64 = window.fromByteArray( uint8array );
 
     // turn it to base64 and wrap it in the data URL format

@@ -379,7 +379,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
       const naturalKey = groupKeys.slice( -1 )[ 0 ];
 
-      // @ts-ignore - because a string shouldn't be used for lookup like this in the object type
+      // @ts-expect-error - because a string shouldn't be used for lookup like this in the object type
       const key = EnglishStringToCodeMap[ naturalKey ];
       assert && assert( key, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalKey}` );
 
@@ -387,7 +387,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       if ( groupKeys.length > 1 ) {
         modifierKeys = groupKeys.slice( 0, groupKeys.length - 1 ).map( naturalModifierKey => {
 
-          // @ts-ignore - because a string shouldn't be used for lookup like this in the object type
+          // @ts-expect-error - because a string shouldn't be used for lookup like this in the object type
           const modifierKey = EnglishStringToCodeMap[ naturalModifierKey ];
           assert && assert( modifierKey, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalModifierKey}` );
           return modifierKey;

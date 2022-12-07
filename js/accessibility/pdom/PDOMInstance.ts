@@ -168,14 +168,14 @@ class PDOMInstance {
     if ( this.isRootInstance ) {
       const accessibilityContainer = document.createElement( 'div' );
 
-      // @ts-ignore - Poolable is a mixin and TypeScript doesn't have good mixin support
+      // @ts-expect-error - Poolable is a mixin and TypeScript doesn't have good mixin support
       this.peer = PDOMPeer.createFromPool( this, {
         primarySibling: accessibilityContainer
       } );
     }
     else {
 
-      // @ts-ignore - Poolable a mixin and TypeScript doesn't have good mixin support
+      // @ts-expect-error - Poolable a mixin and TypeScript doesn't have good mixin support
       this.peer = PDOMPeer.createFromPool( this );
 
       // The peer is not fully constructed until this update function is called, see https://github.com/phetsims/scenery/issues/832
@@ -228,7 +228,7 @@ class PDOMInstance {
       // when initializing).
       assert && assert( !!this.peer!.primarySibling, 'Primary sibling must be defined to insert elements.' );
 
-      // @ts-ignore - when PDOMPeer is converted to TS this ts-ignore can probably be removed
+      // @ts-expect-error - when PDOMPeer is converted to TS this ts-expect-error can probably be removed
       PDOMUtils.insertElements( this.peer.primarySibling!, pdomInstances[ i ].peer.topLevelElements );
     }
 
@@ -640,7 +640,7 @@ class PDOMInstance {
     this.peer = null;
     this.isDisposed = true;
 
-    // @ts-ignore - Mixes poolable, but TypeScript doesn't have good mixin support
+    // @ts-expect-error - Mixes poolable, but TypeScript doesn't have good mixin support
     this.freeToPool();
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
@@ -760,7 +760,7 @@ class PDOMInstance {
     return {
       node: null,
 
-      // @ts-ignore
+      // @ts-expect-error
       children: createFakeTree( rootNode )
     };
   }

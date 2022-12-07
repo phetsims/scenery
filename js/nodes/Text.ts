@@ -414,7 +414,7 @@ export default class Text extends Paintable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return TextDOMDrawable.createFromPool( renderer, instance );
   }
 
@@ -425,7 +425,7 @@ export default class Text extends Paintable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return TextSVGDrawable.createFromPool( renderer, instance );
   }
 
@@ -436,7 +436,7 @@ export default class Text extends Paintable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return TextCanvasDrawable.createFromPool( renderer, instance );
   }
 

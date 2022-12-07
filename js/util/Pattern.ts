@@ -25,7 +25,7 @@ export default class Pattern extends Paint {
     this.image = image;
 
     // Use the global scratch canvas instead of creating a new Canvas
-    // @ts-ignore TODO: scenery namespace
+    // @ts-expect-error TODO: scenery namespace
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
   }
 

@@ -39,7 +39,7 @@ export default class LinearGradient extends Gradient {
    */
   public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
-    // @ts-ignore TODO scenery namespace
+    // @ts-expect-error TODO scenery namespace
     return scenery.scratchContext.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
   }
 

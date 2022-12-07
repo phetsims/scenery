@@ -25,7 +25,7 @@ export default abstract class ShapeBasedOverlay implements TOverlay {
     svg.setAttribute( 'class', name );
     svg.style.top = '0';
     svg.style.left = '0';
-    // @ts-ignore
+    // @ts-expect-error
     svg.style[ 'pointer-events' ] = 'none';
     this.svg = svg;
 

@@ -9,7 +9,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  *
- * TODO: When converting to TypeScript, please see ts-ignore in SimDisplay
+ * TODO: When converting to TypeScript, please see ts-expect-error in SimDisplay
  */
 
 import extend from '../../phet-core/js/extend.js';

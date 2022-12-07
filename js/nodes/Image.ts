@@ -189,7 +189,7 @@ export default class Image extends Imageable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
-    // @ts-ignore - Poolable
+    // @ts-expect-error - Poolable
     return ImageDOMDrawable.createFromPool( renderer, instance );
   }
 
@@ -200,7 +200,7 @@ export default class Image extends Imageable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
-    // @ts-ignore - Poolable
+    // @ts-expect-error - Poolable
     return ImageSVGDrawable.createFromPool( renderer, instance );
   }
 
@@ -211,7 +211,7 @@ export default class Image extends Imageable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore - Poolable
+    // @ts-expect-error - Poolable
     return ImageCanvasDrawable.createFromPool( renderer, instance );
   }
 
@@ -222,7 +222,7 @@ export default class Image extends Imageable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
-    // @ts-ignore - Poolable
+    // @ts-expect-error - Poolable
     return ImageWebGLDrawable.createFromPool( renderer, instance );
   }
 
@@ -307,7 +307,7 @@ Image.ImageIO = new IOType( 'ImageIO', {
       implementation: function( base64Text: string ) {
         const im = new window.Image();
         im.src = base64Text;
-        // @ts-ignore TODO: how would this even work?
+        // @ts-expect-error TODO: how would this even work?
         this.image = im;
       },
       documentation: 'Set the image from a base64 string',

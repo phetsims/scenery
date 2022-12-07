@@ -105,7 +105,7 @@ export default class Sprites extends Node {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore Pooling
+    // @ts-expect-error Pooling
     return SpritesCanvasDrawable.createFromPool( renderer, instance );
   }
 
@@ -116,7 +116,7 @@ export default class Sprites extends Node {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
-    // @ts-ignore Pooling
+    // @ts-expect-error Pooling
     return SpritesWebGLDrawable.createFromPool( renderer, instance );
   }
 

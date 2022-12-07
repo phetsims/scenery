@@ -5487,7 +5487,7 @@ class Node extends ParallelDOM {
       img.onload = () => {
         callback( img, x, y );
         try {
-          // @ts-ignore - I believe we need to delete this
+          // @ts-expect-error - I believe we need to delete this
           delete img.onload;
         }
         catch( e ) {
@@ -6251,11 +6251,11 @@ class Node extends ParallelDOM {
     assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
-    // @ts-ignore
+    // @ts-expect-error
     assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], key => options[ key ] !== undefined ).length <= 1,
       `More than one mutation on this Node set the x component, check ${Object.keys( options ).join( ',' )}` );
 
-    // @ts-ignore
+    // @ts-expect-error
     assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], key => options[ key ] !== undefined ).length <= 1,
       `More than one mutation on this Node set the y component, check ${Object.keys( options ).join( ',' )}` );
 
@@ -6275,20 +6275,20 @@ class Node extends ParallelDOM {
     _.each( this._mutatorKeys, key => {
 
       // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
-      // @ts-ignore
+      // @ts-expect-error
       assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined, `Undefined not allowed for Node key: ${key}` );
 
-      // @ts-ignore - Hmm, better way to check this?
+      // @ts-expect-error - Hmm, better way to check this?
       if ( options[ key ] !== undefined ) {
         const descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
 
         // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
         if ( descriptor && typeof descriptor.value === 'function' ) {
-          // @ts-ignore
+          // @ts-expect-error
           this[ key ]( options[ key ] );
         }
         else {
-          // @ts-ignore
+          // @ts-expect-error
           this[ key ] = options[ key ];
         }
       }

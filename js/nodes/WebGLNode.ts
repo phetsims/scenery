@@ -182,7 +182,6 @@ export default abstract class WebGLNode extends Node {
     painter.paint( matrix, projectionMatrix );
     painter.dispose();
 
-    // @ts-ignore TODO: pooling
     projectionMatrix.freeToPool();
 
     gl.flush();
@@ -199,7 +198,7 @@ export default abstract class WebGLNode extends Node {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
-    // @ts-ignore TODO: pooling
+    // @ts-expect-error TODO: pooling
     return WebGLNodeDrawable.createFromPool( renderer, instance );
   }
 

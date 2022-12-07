@@ -88,7 +88,7 @@ export default class RadialGradient extends Gradient {
    */
   public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
-    // @ts-ignore TODO scenery namespace
+    // @ts-expect-error TODO scenery namespace
     return scenery.scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
   }
 

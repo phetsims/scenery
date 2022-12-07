@@ -153,7 +153,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
     // otherwise
     public initialize( ...args: IntentionalAny[] ): this {
 
-      // @ts-ignore
+      // @ts-expect-error
       super.initialize && super.initialize( args );
 
       this._voicingCanSpeakProperty = new TinyProperty<boolean>( true );
@@ -556,7 +556,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
         this._voicingUtterance = null;
       }
 
-      // @ts-ignore
+      // @ts-expect-error
       super.clean && super.clean();
     }
 
@@ -611,11 +611,11 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
       assert && assert( instance.canVoiceEmitter, 'Instance must be initialized.' );
 
       if ( added ) {
-        // @ts-ignore - Emitters in Instance need typing
+        // @ts-expect-error - Emitters in Instance need typing
         instance.canVoiceEmitter!.addListener( this._boundInstanceCanVoiceChangeListener );
       }
       else {
-        // @ts-ignore - Emitters in Instance need typing
+        // @ts-expect-error - Emitters in Instance need typing
         instance.canVoiceEmitter!.removeListener( this._boundInstanceCanVoiceChangeListener );
       }
 

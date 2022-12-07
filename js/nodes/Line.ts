@@ -432,7 +432,7 @@ export default class Line extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return LineSVGDrawable.createFromPool( renderer, instance );
   }
 
@@ -443,7 +443,7 @@ export default class Line extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return LineCanvasDrawable.createFromPool( renderer, instance );
   }
 

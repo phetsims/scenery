@@ -266,7 +266,7 @@ export default class DragListener extends PressListener implements TInputListene
       'Only one of mapPosition and dragBoundsProperty can be provided, as they handle mapping of the drag point'
     );
 
-    // @ts-ignore TODO: See https://github.com/phetsims/chipper/issues/1128
+    // @ts-expect-error TODO: See https://github.com/phetsims/chipper/issues/1128
     super( options );
 
     this._allowTouchSnag = options.allowTouchSnag;

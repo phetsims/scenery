@@ -74,7 +74,7 @@ export default class Circle extends Path {
    */
   public override getStrokeRendererBitmask(): number {
     let bitmask = super.getStrokeRendererBitmask();
-    // @ts-ignore TODO isGradient/isPattern better handling
+    // @ts-expect-error TODO isGradient/isPattern better handling
     if ( this.hasStroke() && !this.getStroke()!.isGradient && !this.getStroke()!.isPattern && this.getLineWidth() <= this.getRadius() ) {
       bitmask |= Renderer.bitmaskDOM;
     }
@@ -158,7 +158,7 @@ export default class Circle extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
-    // @ts-ignore TODO: pooling
+    // @ts-expect-error TODO: pooling
     return CircleDOMDrawable.createFromPool( renderer, instance );
   }
 
@@ -169,7 +169,7 @@ export default class Circle extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
-    // @ts-ignore TODO: pooling
+    // @ts-expect-error TODO: pooling
     return CircleSVGDrawable.createFromPool( renderer, instance );
   }
 
@@ -180,7 +180,7 @@ export default class Circle extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore TODO: pooling
+    // @ts-expect-error TODO: pooling
     return CircleCanvasDrawable.createFromPool( renderer, instance );
   }
 

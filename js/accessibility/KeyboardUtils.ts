@@ -232,10 +232,10 @@ const KeyboardUtils = {
 
 for ( const keyKey in KeyboardUtils ) {
 
-  // @ts-ignore No functions or key-groups allowed
+  // @ts-expect-error No functions or key-groups allowed
   if ( KeyboardUtils.hasOwnProperty( keyKey ) && typeof KeyboardUtils[ keyKey ] === 'string' ) {
 
-    // @ts-ignore
+    // @ts-expect-error
     ALL_KEYS.push( KeyboardUtils[ keyKey ] as string );
   }
 }

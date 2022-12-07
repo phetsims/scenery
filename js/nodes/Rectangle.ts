@@ -739,7 +739,7 @@ export default class Rectangle extends SuperType {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return RectangleDOMDrawable.createFromPool( renderer, instance );
   }
 
@@ -750,7 +750,7 @@ export default class Rectangle extends SuperType {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return RectangleSVGDrawable.createFromPool( renderer, instance );
   }
 
@@ -761,7 +761,7 @@ export default class Rectangle extends SuperType {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return RectangleCanvasDrawable.createFromPool( renderer, instance );
   }
 
@@ -772,7 +772,7 @@ export default class Rectangle extends SuperType {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
-    // @ts-ignore
+    // @ts-expect-error
     return RectangleWebGLDrawable.createFromPool( renderer, instance );
   }
 

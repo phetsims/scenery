@@ -26,7 +26,7 @@ export default class SafariWorkaroundOverlay implements TOverlay {
     svg.setAttribute( 'class', 'safari-workaround' );
     svg.style.top = '0';
     svg.style.left = '0';
-    // @ts-ignore
+    // @ts-expect-error
     svg.style[ 'pointer-events' ] = 'none';
 
     // Make sure it covers our full size

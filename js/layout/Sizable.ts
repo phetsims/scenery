@@ -183,7 +183,6 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
       assertMutuallyExclusiveOptions( options, [ 'localMinimumSize' ], [ 'localMinimumWidth', 'localMinimumHeight' ] );
       assertMutuallyExclusiveOptions( options, [ 'sizable' ], [ 'widthSizable', 'heightSizable' ] );
 
-      // @ts-ignore
       return super.mutate( options );
     }
 

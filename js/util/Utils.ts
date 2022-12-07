@@ -89,9 +89,9 @@ const Utils = {
       }
       // Fill in the non-prefixed names with the prefixed versions
       else {
-        // @ts-ignore
+        // @ts-expect-error
         window.requestAnimationFrame = window[ Features.requestAnimationFrame ];
-        // @ts-ignore
+        // @ts-expect-error
         window.cancelAnimationFrame = window[ Features.cancelAnimationFrame ];
       }
     }
@@ -104,15 +104,15 @@ const Utils = {
    * @returns The backing store pixel ratio.
    */
   backingStorePixelRatio( context: CanvasRenderingContext2D | WebGLRenderingContext ): number {
-    // @ts-ignore
+    // @ts-expect-error
     return context.webkitBackingStorePixelRatio ||
-           // @ts-ignore
+           // @ts-expect-error
            context.mozBackingStorePixelRatio ||
-           // @ts-ignore
+           // @ts-expect-error
            context.msBackingStorePixelRatio ||
-           // @ts-ignore
+           // @ts-expect-error
            context.oBackingStorePixelRatio ||
-           // @ts-ignore
+           // @ts-expect-error
            context.backingStorePixelRatio || 1;
   },
 
@@ -142,7 +142,7 @@ const Utils = {
    * store pixel ratio that is non-1, we'll be blurring out things during that operation, which would be unacceptable.
    */
   supportsImageDataCanvasFilter(): boolean {
-    // @ts-ignore TODO: scenery and typing
+    // @ts-expect-error TODO: scenery and typing
     return Utils.backingStorePixelRatio( scenery.scratchContext ) === 1;
   },
 
@@ -377,7 +377,7 @@ const Utils = {
       console.log( `maxBounds: ${maxBounds}` );
     }
 
-    // @ts-ignore
+    // @ts-expect-error
     const result: Bounds2 & { minBounds: Bounds2; maxBounds: Bounds2; isConsistent: boolean; precision: number } = new Bounds2(
       // Do finite checks so we don't return NaN
       ( isFinite( minBounds.minX ) && isFinite( maxBounds.minX ) ) ? ( minBounds.minX + maxBounds.minX ) / 2 : Number.POSITIVE_INFINITY,
@@ -477,7 +477,7 @@ const Utils = {
 
     const args = { failIfMajorPerformanceCaveat: true };
     try {
-      // @ts-ignore
+      // @ts-expect-error
       const gl: WebGLRenderingContext | null = !!window.WebGLRenderingContext &&
                                                ( canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ) );
 
@@ -507,7 +507,7 @@ const Utils = {
     const canvas = document.createElement( 'canvas' );
 
     try {
-      // @ts-ignore
+      // @ts-expect-error
       const gl: WebGLRenderingContext | null = !!window.WebGLRenderingContext &&
                                                ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) );
 

@@ -2015,13 +2015,13 @@ export default class Input extends PhetioObject {
     // serialize the relatedTarget back into an event Object, so that it can be passed to the init config in the Event
     // constructor
     if ( configForConstructor.relatedTarget ) {
-      // @ts-ignore
+      // @ts-expect-error
       const htmlElement = document.getElementById( configForConstructor.relatedTarget.id );
       assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
       configForConstructor.relatedTarget = htmlElement;
     }
 
-    // @ts-ignore
+    // @ts-expect-error
     const domEvent: Event = new window[ constructorName ]( constructorName, configForConstructor );
 
     for ( const key in eventObject ) {
@@ -2039,18 +2039,18 @@ export default class Input extends PhetioObject {
             }
           }
 
-          // @ts-ignore
+          // @ts-expect-error
           domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};
 
           // This may not be needed since https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailFromPDOMEvent() too
-          // @ts-ignore
+          // @ts-expect-error
           domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute = function( key ) {
             return this[ key ];
           };
         }
         else {
 
-          // @ts-ignore
+          // @ts-expect-error
           domEvent[ key ] = eventObject[ key ];
         }
       }
@@ -2076,15 +2076,15 @@ export default class Input extends PhetioObject {
    * Maps the current MS pointer types onto the pointer spec. (scenery-internal)
    */
   public static msPointerType( event: PointerEvent ): string {
-    // @ts-ignore -- legacy API
+    // @ts-expect-error -- legacy API
     if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
       return 'touch';
     }
-    // @ts-ignore -- legacy API
+    // @ts-expect-error -- legacy API
     else if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
       return 'pen';
     }
-    // @ts-ignore -- legacy API
+    // @ts-expect-error -- legacy API
     else if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
       return 'mouse';
     }
