@@ -20,9 +20,9 @@ import { scenery } from '../imports.js';
 class DisplayedProperty extends BooleanProperty {
   /**
    * @public
-   * @extends {BooleanProperty}
+   * @extends {Property<boolean>}
    *
-   * @param {Node} node
+   * @param {scenery.Node} node
    * @param {Object} [options] - Passed through to the BooleanProperty
    */
   constructor( node, options ) {
