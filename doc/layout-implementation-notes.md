@@ -19,15 +19,15 @@
 flowchart TD
     layoutCell --- MarginLayoutCell
     MarginLayoutCell --- FlowCell
+    FlowCell -.cells.-> FlowConstraint
     
+    MarginLayoutConfigurable --- FlowConfigurable
     FlowConfigurable -.- FlowCell & FlowConstraint
     
     LayoutConstraint --- NodeLayoutConstraint
     NodeLayoutConstraint --- FlowConstraint
-    FlowCell -.cellMap.-> FlowBox
-    FlowConstraint -.constraint.-> FlowCell & FlowBox
-    
-    
+    FlowConstraint -.constraint.->FlowBox
+
     Node --- LayoutNode
     LayoutNode --- FlowBox
     FlowBox --- VBox & HBox
@@ -39,12 +39,14 @@ flowchart TD
 flowchart TD
     layoutCell --- MarginLayoutCell
     MarginLayoutCell --- GridCell
+    GridCell -.cells.-> GridConstraint
+    
+    MarginLayoutConfigurable --- GridConfigurable
     GridConfigurable -.- GridCell & GridConstraint
     
     LayoutConstraint --- NodeLayoutConstraint
     NodeLayoutConstraint --- GridConstraint
-    GridCell -.cellMap.-> GridBox
-    GridConstraint -.constraint.-> GridCell & GridBox
+    GridConstraint -.constraint.-> GridBox
     
     Node --- LayoutNode
     LayoutNode --- GridBox
