@@ -75,17 +75,17 @@ class FocusHighlightPath extends Path {
   // outer path to give the focus highlight a 'fade-out' appearance
   protected readonly innerHighlightPath: Path;
 
-  public static OUTER_FOCUS_COLOR = OUTER_FOCUS_COLOR;
-  public static INNER_FOCUS_COLOR = INNER_FOCUS_COLOR;
+  public static readonly OUTER_FOCUS_COLOR = OUTER_FOCUS_COLOR;
+  public static readonly INNER_FOCUS_COLOR = INNER_FOCUS_COLOR;
 
-  public static INNER_LIGHT_GROUP_FOCUS_COLOR = INNER_LIGHT_GROUP_FOCUS_COLOR;
-  public static OUTER_LIGHT_GROUP_FOCUS_COLOR = OUTER_LIGHT_GROUP_FOCUS_COLOR;
+  public static readonly INNER_LIGHT_GROUP_FOCUS_COLOR = INNER_LIGHT_GROUP_FOCUS_COLOR;
+  public static readonly OUTER_LIGHT_GROUP_FOCUS_COLOR = OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
-  public static INNER_DARK_GROUP_FOCUS_COLOR = INNER_DARK_GROUP_FOCUS_COLOR;
-  public static OUTER_DARK_GROUP_FOCUS_COLOR = OUTER_DARK_GROUP_FOCUS_COLOR;
+  public static readonly INNER_DARK_GROUP_FOCUS_COLOR = INNER_DARK_GROUP_FOCUS_COLOR;
+  public static readonly OUTER_DARK_GROUP_FOCUS_COLOR = OUTER_DARK_GROUP_FOCUS_COLOR;
 
-  public static GROUP_OUTER_LINE_WIDTH = GROUP_OUTER_LINE_WIDTH;
-  public static GROUP_INNER_LINE_WIDTH = GROUP_INNER_LINE_WIDTH;
+  public static readonly GROUP_OUTER_LINE_WIDTH = GROUP_OUTER_LINE_WIDTH;
+  public static readonly GROUP_INNER_LINE_WIDTH = GROUP_INNER_LINE_WIDTH;
 
   /**
    * @param [shape] - the shape for the focus highlight

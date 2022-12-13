@@ -36,10 +36,10 @@ import { Display, FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, Trans
 
 // PDOMInstances support two different styles of unique IDs, each with their own tradeoffs, https://github.com/phetsims/phet-io/issues/1851
 class PDOMUniqueIdStrategy extends EnumerationValue {
-  public static INDICES = new PDOMUniqueIdStrategy();
-  public static TRAIL_ID = new PDOMUniqueIdStrategy();
+  public static readonly INDICES = new PDOMUniqueIdStrategy();
+  public static readonly TRAIL_ID = new PDOMUniqueIdStrategy();
 
-  public static enumeration = new Enumeration( PDOMUniqueIdStrategy );
+  public static readonly enumeration = new Enumeration( PDOMUniqueIdStrategy );
 }
 
 // A type representing a fake instance, for some aggressive auditing (under ?assertslow)

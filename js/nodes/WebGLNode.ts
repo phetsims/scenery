@@ -203,10 +203,10 @@ export default abstract class WebGLNode extends Node {
   }
 
   // Return code from painter.paint() when nothing was painted to the WebGL context.
-  public static PAINTED_NOTHING: 0;
+  public static readonly PAINTED_NOTHING = 0 as const;
 
   // Return code from painter.paint() when something was painted to the WebGL context.
-  public static PAINTED_SOMETHING: 1;
+  public static readonly PAINTED_SOMETHING = 1 as const;
 }
 
 /**
@@ -217,8 +217,5 @@ export default abstract class WebGLNode extends Node {
  *       cases that may apply.
  */
 WebGLNode.prototype._mutatorKeys = WEBGL_NODE_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
-
-WebGLNode.PAINTED_NOTHING = 0;
-WebGLNode.PAINTED_SOMETHING = 1;
 
 scenery.register( 'WebGLNode', WebGLNode );

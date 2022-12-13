@@ -274,7 +274,7 @@ export default class Image extends Imageable( Node ) {
   public static ImageIO: IOType;
 
   // Initial values for most Node mutator options
-  public static DEFAULT_IMAGE_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_NODE_OPTIONS, Imageable.DEFAULT_OPTIONS );
+  public static readonly DEFAULT_IMAGE_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_NODE_OPTIONS, Imageable.DEFAULT_OPTIONS );
 }
 
 /**

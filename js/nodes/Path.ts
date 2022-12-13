@@ -515,7 +515,7 @@ export default class Path extends Paintable( Node ) {
   }
 
   // Initial values for most Node mutator options
-  public static DEFAULT_PATH_OPTIONS = combineOptions<PathOptions>( {}, Node.DEFAULT_NODE_OPTIONS, DEFAULT_OPTIONS );
+  public static readonly DEFAULT_PATH_OPTIONS = combineOptions<PathOptions>( {}, Node.DEFAULT_NODE_OPTIONS, DEFAULT_OPTIONS );
 }
 
 /**

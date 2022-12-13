@@ -407,7 +407,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     return marginsNode;
   }
 
-  public static DEFAULT_FLOW_BOX_OPTIONS = DEFAULT_OPTIONS;
+  public static readonly DEFAULT_FLOW_BOX_OPTIONS = DEFAULT_OPTIONS;
 }
 
 /**

@@ -992,20 +992,20 @@ export default class Color {
     yellowgreen: '9acd32'
   };
 
-  public static BLACK: Color;
-  public static BLUE: Color;
-  public static CYAN: Color;
-  public static DARK_GRAY: Color;
-  public static GRAY: Color;
-  public static GREEN: Color;
-  public static LIGHT_GRAY: Color;
-  public static MAGENTA: Color;
-  public static ORANGE: Color;
-  public static PINK: Color;
-  public static RED: Color;
-  public static WHITE: Color;
-  public static YELLOW: Color;
-  public static TRANSPARENT: Color;
+  public static BLACK: Color;  // eslint-disable-line statics-should-be-readonly
+  public static BLUE: Color;  // eslint-disable-line statics-should-be-readonly
+  public static CYAN: Color;  // eslint-disable-line statics-should-be-readonly
+  public static DARK_GRAY: Color;  // eslint-disable-line statics-should-be-readonly
+  public static GRAY: Color;  // eslint-disable-line statics-should-be-readonly
+  public static GREEN: Color;  // eslint-disable-line statics-should-be-readonly
+  public static LIGHT_GRAY: Color;  // eslint-disable-line statics-should-be-readonly
+  public static MAGENTA: Color;  // eslint-disable-line statics-should-be-readonly
+  public static ORANGE: Color;  // eslint-disable-line statics-should-be-readonly
+  public static PINK: Color;  // eslint-disable-line statics-should-be-readonly
+  public static RED: Color;  // eslint-disable-line statics-should-be-readonly
+  public static WHITE: Color;  // eslint-disable-line statics-should-be-readonly
+  public static YELLOW: Color;  // eslint-disable-line statics-should-be-readonly
+  public static TRANSPARENT: Color;  // eslint-disable-line statics-should-be-readonly
 
   public static black: Color;
   public static blue: Color;

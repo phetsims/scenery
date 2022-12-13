@@ -410,7 +410,9 @@ export default class Font extends PhetioObject {
   }
 
   public static FontIO: IOType<Font, FontState>;
-  public static DEFAULT: Font;
+
+  // {Font} - Default Font object (since they are immutable).
+  public static readonly DEFAULT = new Font();
 }
 
 type FontState = Required<SelfOptions>;
@@ -453,6 +455,3 @@ Font.FontIO = new IOType( 'FontIO', {
     family: StringIO
   }
 } );
-
-// {Font} - Default Font object (since they are immutable).
-Font.DEFAULT = new Font();
