@@ -325,7 +325,7 @@ export default class Display {
       // {boolean} - Applies CSS styles to the root DOM element that make it amenable to interactive content
       allowCSSHacks: true,
 
-      allowSafariRedrawWorkaround: true,
+      allowSafariRedrawWorkaround: false,
 
       // {boolean} - Usually anything displayed outside of our dom element is hidden with CSS overflow
       allowSceneOverflow: false,
