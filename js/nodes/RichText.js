@@ -254,8 +254,19 @@ define( function( require ) {
         .replace( /\u202b/g, '<span dir="rtl">' )
         .replace( /\u202c/g, '</span>' );
 
+      var rootElements;
+
       // Start appending all top-level elements
-      var rootElements = himalaya.parse( mappedText );
+      try {
+        rootElements = himalaya.parse( mappedText );
+      }
+      catch( e ) {
+        // If we error out, don't kill the sim. Instead, replace the string with something that looks obviously like an
+        // error. See https://github.com/phetsims/chipper/issues/1361 (we don't want translations to error out our
+        // build process).
+
+        rootElements = himalaya.parse( 'INVALID TRANSLATION' );
+      }
 
       // Clear out link items, as we'll need to reconstruct them later
       this._linkItems.length = 0;
