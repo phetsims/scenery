@@ -82,10 +82,13 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // Called when the listener detects that the set of keys are pressed.
   callback?: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
-  // Does the listener fire when the last key in the group is pressed down or released?
+  // When true, the listener will fire when the keys are released.
   fireOnKeyUp?: boolean;
 
-  // Does the listener fire continuously as you hold down keys?
+  // When true, the listener will fire when the keys are first pressed down.
+  fireOnKeyDown?: boolean;
+
+  // When true, the listener will fire continuously while keys are held down, at the following intervals.
   fireOnHold?: boolean;
 
   // If fireOnHold true, this is the delay in (in milliseconds) before the callback is fired continuously.
@@ -125,6 +128,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   // Will it the callback fire on keys up or down?
   private readonly _fireOnKeyUp: boolean;
+  private readonly _fireOnKeyDown: boolean;
 
   // Does the listener fire the callback continuously when keys are held down?
   private readonly _fireOnHold: boolean;
@@ -137,6 +141,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   // Current keys pressed that are having their listeners fired now.
   public keysPressed: Keys[number] | null = null;
+
+  // True when keys are pressed down. If fireOnKeyUp and fireOnKeyDown are both true, you can look at this in your
+  // callback to determine if keys are pressed or released.
+  public keysDown: boolean;
 
   // Timing variables for the CallbackTimers.
   private readonly _fireOnHoldDelay: number;
@@ -154,6 +162,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
       global: false,
+      fireOnKeyDown: true,
       fireOnKeyUp: false,
       fireOnHold: false,
       fireOnHoldDelay: 400,
@@ -163,6 +172,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     this._callback = options.callback;
     this._fireOnKeyUp = options.fireOnKeyUp;
+    this._fireOnKeyDown = options.fireOnKeyDown;
 
     this._fireOnHold = options.fireOnHold;
     this._fireOnHoldDelay = options.fireOnHoldDelay;
@@ -171,6 +181,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._activeKeyGroups = [];
 
     this._allowKeyOverlap = options.allowKeyOverlap;
+
+    this.keysDown = false;
 
     this._global = options.global;
 
@@ -200,7 +212,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * fire callbacks and start CallbackTimers.
    */
   private handleKeyDown( event: SceneryEvent<KeyboardEvent> ): void {
-    if ( !this._fireOnKeyUp ) {
+    if ( this._fireOnKeyDown ) {
 
       // modifier keys can be pressed in any order but the last key in the group must be pressed last
       this._keyGroups.forEach( keyGroup => {
@@ -211,9 +223,12 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
             this._activeKeyGroups.push( keyGroup );
 
+            this.keysDown = true;
+
             if ( keyGroup.timer ) {
               keyGroup.timer.start();
             }
+
             this.fireCallback( event, keyGroup );
           }
         }
@@ -243,6 +258,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       this._keyGroups.forEach( keyGroup => {
         if ( globalKeyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
+
+          this.keysDown = false;
           this.fireCallback( event, keyGroup );
         }
       } );
