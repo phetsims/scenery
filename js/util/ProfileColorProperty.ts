@@ -29,13 +29,17 @@ export default class ProfileColorProperty extends ColorProperty {
   // Treat as private
   public readonly name: string;
 
+  // Typically use this suffix, but see TANDEM_NAME_SUFFIXES for other possibilities.
   public static override readonly TANDEM_NAME_SUFFIX = 'ColorProperty';
+
+  // See https://github.com/phetsims/scenery/issues/1512
+  public static readonly TANDEM_NAME_SUFFIXES = [ ProfileColorProperty.TANDEM_NAME_SUFFIX, 'FillProperty', 'StrokeProperty' ];
 
   /**
    * @param namespace - namespace that this color belongs to
    * @param colorName - name of the color, unique within namespace
    * @param colorProfileMap - object literal that maps keys (profile names) to ColorDef (that should be immutable)
-   * @param [options]
+   * @param [providedOptions]
    */
   public constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, providedOptions?: PropertyOptions<Color> ) {
 
@@ -62,10 +66,11 @@ export default class ProfileColorProperty extends ColorProperty {
     // Fallback to default if a color was not supplied.
     super( Color.toColor( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ] ), options );
 
+    // See https://github.com/phetsims/scenery/issues/1512
     assert && assert( !this.isPhetioInstrumented() ||
-                      tandem.name.endsWith( ProfileColorProperty.TANDEM_NAME_SUFFIX ) ||
-                      tandem.name === 'colorProperty',
-      `Property tandem.name must end with ${ProfileColorProperty.TANDEM_NAME_SUFFIX}: ${tandem.phetioID}` );
+                      _.find( ProfileColorProperty.TANDEM_NAME_SUFFIXES, suffix => tandem.name.endsWith( suffix ) ) ||
+                      tandem.name === 'colorProperty' || tandem.name === 'fillProperty' || tandem.name === 'strokeProperty',
+      `invalid tandem.name: ${tandem.phetioID}` );
 
     this.colorProfileMap = colorProfileMap;
 
