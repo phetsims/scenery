@@ -190,6 +190,9 @@ const INPUT_ENABLED_PROPERTY_TANDEM_NAME = 'inputEnabledProperty';
 
 const PHET_IO_STATE_DEFAULT = false;
 
+// Store the number of parents from the single Node instance that has the most parents in the whole runtime.
+let maxParentCount = 0;
+
 export const REQUIRES_BOUNDS_OPTION_KEYS = [
   'leftTop', // {Vector2} - The upper-left corner of this Node's bounds, see setLeftTop() for more documentation
   'centerTop', // {Vector2} - The top-center of this Node's bounds, see setCenterTop() for more documentation
@@ -857,6 +860,15 @@ class Node extends ParallelDOM {
     this._rendererSummary.summaryChange( RendererSummary.bitmaskAll, node._rendererSummary.bitmask );
 
     node._parents.push( this );
+    if ( assert && window.phet?.chipper?.queryParameters && isFinite( phet.chipper.queryParameters.parentLimit ) ) {
+      const parentCount = node._parents.length;
+      if ( maxParentCount < parentCount ) {
+        maxParentCount = parentCount;
+        console.log( `Max Node parents: ${maxParentCount}` );
+        assert( maxParentCount <= phet.chipper.queryParameters.parentLimit,
+          `parent count of ${maxParentCount} above ?parentLimit=${phet.chipper.queryParameters.parentLimit}` );
+      }
+    }
     this._children.splice( index, 0, node );
 
     // If this added subtree contains PDOM content, we need to notify any relevant displays
