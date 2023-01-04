@@ -223,7 +223,18 @@ const KeyboardUtils = {
    * @returns - null if there is no `code` property on the provided Event.
    */
   getEventCode( domEvent: Event | null ): string | null {
-    return domEvent instanceof KeyboardEvent && domEvent.code ? domEvent.code : null;
+    let eventCode = null;
+    if ( domEvent instanceof KeyboardEvent && domEvent.code ) {
+      eventCode = domEvent.code;
+
+      // If the Event is from the Numpad, the Event.key matches the desired Event.code when Num Lock is off. This
+      // supports using the Num Pad for arrow keys and home/end/page up/page down.
+      if ( eventCode.startsWith( 'Numpad' ) ) {
+        eventCode = domEvent.key;
+      }
+    }
+
+    return eventCode;
   },
 
   ALL_KEYS: ALL_KEYS
