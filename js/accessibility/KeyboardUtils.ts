@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * Collection of utility constants and functions for managing keyboard input. Constants are values of Event.code, as
