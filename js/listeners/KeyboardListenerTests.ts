@@ -8,9 +8,31 @@
  * @author Agustín Vallejo (PhET Interactive Simulations)
  */
 
-import { Display, KeyboardListener, KeyboardUtils, Node, SceneryEvent } from '../imports.js';
+import { Display, globalKeyStateTracker, KeyboardListener, KeyboardUtils, Node, SceneryEvent } from '../imports.js';
 
-QUnit.module( 'KeyboardListener' );
+QUnit.module( 'KeyboardListener', {
+  before() {
+
+    // clear in case other tests didn't finish with a keyup event
+    globalKeyStateTracker.clearState();
+  }
+} );
+
+const triggerKeydownEvent = ( target: HTMLElement, code: string, ctrlKey = false ) => {
+  target.dispatchEvent( new KeyboardEvent( 'keydown', {
+    code: code,
+    bubbles: true,
+    ctrlKey: ctrlKey
+  } ) );
+};
+
+const triggerKeyupEvent = ( target: HTMLElement, code: string, ctrlKey = false ) => {
+  target.dispatchEvent( new KeyboardEvent( 'keyup', {
+    code: code,
+    bubbles: true,
+    ctrlKey: ctrlKey
+  } ) );
+};
 
 QUnit.test( 'KeyboardListener Tests', assert => {
 
@@ -37,23 +59,17 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   const domElementA = a.pdomInstances[ 0 ].peer!.primarySibling!;
   assert.ok( domElementA, 'pdom element needed' );
 
-  domElementA.dispatchEvent( new KeyboardEvent( 'keydown', {
-    code: KeyboardUtils.KEY_TAB,
-    bubbles: true
-  } ) );
-
+  triggerKeydownEvent( domElementA, KeyboardUtils.KEY_TAB );
   assert.ok( !callbackFired, 'should not fire on tab' );
+  triggerKeyupEvent( domElementA, KeyboardUtils.KEY_TAB );
 
-  domElementA.dispatchEvent( new KeyboardEvent( 'keydown', {
-    code: KeyboardUtils.KEY_ENTER,
-    bubbles: true
-  } ) );
+  triggerKeydownEvent( domElementA, KeyboardUtils.KEY_ENTER );
   assert.ok( callbackFired, 'should fire on enter' );
+  triggerKeyupEvent( domElementA, KeyboardUtils.KEY_ENTER );
 
   //////////////////////////////////////////////////////
-  // Test an overlap of keys in two keygroups. The callback should fire for BOTH gey groups
-  // in response to a single input event.
-
+  // Test an overlap of keys in two keygroups. The callback should fire for only the keygroup where every key
+  // is down and only every key is down.
   a.removeInputListener( listener );
 
   let pFired = false;
@@ -75,12 +91,8 @@ QUnit.test( 'KeyboardListener Tests', assert => {
     }
   } );
   a.addInputListener( listenerWithOverlappingKeys );
-  domElementA.dispatchEvent( new KeyboardEvent( 'keydown', {
-    code: KeyboardUtils.KEY_P,
-    ctrlKey: true,
-    bubbles: true
-  } ) );
-  assert.ok( pFired, 'p should have fired' );
+  triggerKeydownEvent( domElementA, KeyboardUtils.KEY_P, true );
+  assert.ok( !pFired, 'p should not fire because control key is down' );
   assert.ok( ctrlPFired, 'ctrl P should have fired' );
 
   //////////////////////////////////////////////////////
@@ -120,14 +132,10 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   } );
   b.addInputListener( handlingListener );
 
-  domElementB.dispatchEvent( new KeyboardEvent( 'keydown', {
-    code: KeyboardUtils.KEY_P,
-    ctrlKey: true,
-    bubbles: true
-  } ) );
-
+  triggerKeydownEvent( domElementB, KeyboardUtils.KEY_P );
   assert.ok( !pFiredFromA, 'A should not have received the event because of event handling' );
   assert.ok( pFiredFromB, 'B received the event and handled it (stopping bubbling)' );
+  triggerKeyupEvent( domElementB, KeyboardUtils.KEY_P );
 
   a.removeInputListener( listenerPreventedByHandle );
   b.removeInputListener( handlingListener );
@@ -168,15 +176,11 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   };
   b.addInputListener( otherListenerPreventedByAbort );
 
-  domElementB.dispatchEvent( new KeyboardEvent( 'keydown', {
-    code: KeyboardUtils.KEY_P,
-    ctrlKey: true,
-    bubbles: true
-  } ) );
-
+  triggerKeydownEvent( domElementB, KeyboardUtils.KEY_P );
   assert.ok( !pFiredFromA, 'A should not have received the event because of abort' );
   assert.ok( pFiredFromB, 'B received the event and handled it (stopping bubbling)' );
   assert.ok( !pFiredFromExtraListener, 'Other listener on B did not fire because of abort (stopping all listeners)' );
+  triggerKeyupEvent( domElementB, KeyboardUtils.KEY_P );
 
   a.removeInputListener( listenerPreventedByAbort );
   b.removeInputListener( abortingListener );

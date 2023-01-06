@@ -290,6 +290,14 @@ class KeyStateTracker {
   }
 
   /**
+   * Returns true if ALL keys in the list are down and ONLY the keys in the list are down. Values of keyList array
+   * are the KeyboardEvent.code for keys you are interested in.
+   */
+  public areKeysExclusivelyDown( keyList: string [] ): boolean {
+    return Object.keys( this.keyState ).length === keyList.length && this.areKeysDown( keyList );
+  }
+
+  /**
    * Returns true if any keys are down according to teh keyState.
    */
   public keysAreDown(): boolean {

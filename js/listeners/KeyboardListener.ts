@@ -8,6 +8,7 @@
  * - '+' separates each key in a single group.
  * - The keys leading up to the last key in the group are considered "modifier" keys. The last key in the group needs
  *   to be pressed while the modifier keys are down.
+ * - ONLY the keys in the group can be pressed down. If any other keys are pressed the callback will not fire.
  * - The order modifier keys are pressed does not matter for firing the callback.
  *
  * In the above example "shift+t" OR "alt+shift+r" will fire the callback when pressed.
@@ -218,7 +219,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       this._keyGroups.forEach( keyGroup => {
 
         if ( !this._activeKeyGroups.includes( keyGroup ) ) {
-          if ( globalKeyStateTracker.areKeysDown( keyGroup.allKeys ) &&
+          if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.allKeys ) &&
                globalKeyStateTracker.getLastKeyDown() === keyGroup.key ) {
 
             this._activeKeyGroups.push( keyGroup );
@@ -245,7 +246,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     if ( this._activeKeyGroups.length > 0 ) {
 
       this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
-        if ( !globalKeyStateTracker.areKeysDown( activeKeyGroup.allKeys ) ) {
+        if ( !globalKeyStateTracker.areKeysExclusivelyDown( activeKeyGroup.allKeys ) ) {
           if ( activeKeyGroup.timer ) {
             activeKeyGroup.timer.stop( false );
           }
@@ -256,7 +257,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     if ( this._fireOnKeyUp ) {
       this._keyGroups.forEach( keyGroup => {
-        if ( globalKeyStateTracker.areKeysDown( keyGroup.modifierKeys ) &&
+        if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
 
           this.keysDown = false;
