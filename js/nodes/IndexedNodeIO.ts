@@ -20,7 +20,7 @@ import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import { Node, scenery } from '../imports.js';
 
 // In order to support unlinking from listening to the index property, keep an indexed map to callback functions
-const map = {};
+const map: Record<number, () => void> = {};
 
 // The next index at which a callback will appear in the map. This always increments and we do reuse old indices
 let index = 0;
@@ -30,13 +30,10 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
   documentation: 'Node that can be moved forward/back by index, which specifies z-order and/or layout order',
   supertype: Node.NodeIO,
   toStateObject: node => {
-    const stateObject = {};
+    const stateObject: { index: number | null } = { index: null };
     if ( node.parents[ 0 ] ) {
       assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
       stateObject.index = node.parents[ 0 ].indexOfChild( node );
-    }
-    else {
-      stateObject.index = null;
     }
     return stateObject;
   },
@@ -67,7 +64,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       documentation: 'Following the PropertyIO.link pattern, subscribe for notifications when the index in the parent ' +
                      'changes, and receive a callback with the current value.  The return value is a numeric ID for use ' +
                      'with clearLinkIndex.',
-      implementation: function( listener ) {
+      implementation: function( this: Node, listener ) {
 
         // The callback which signifies the current index
         const callback = () => {
@@ -90,7 +87,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       documentation: 'Unlink a listener that has been added using linkIndex, by its numerical ID (like setTimeout/clearTimeout)',
-      implementation: function( index ) {
+      implementation: function( this: Node, index ) {
         const method = map[ index ];
         assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
         this.parents[ 0 ].childrenChangedEmitter.removeListener( method );
@@ -100,7 +97,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
     moveForward: {
       returnType: VoidIO,
       parameterTypes: [],
-      implementation: function() {
+      implementation: function( this: Node ) {
         return this.moveForward();
       },
       documentation: 'Move this node one index forward in each of its parents.  If the node is already at the front, this is a no-op.'
@@ -109,7 +106,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
     moveBackward: {
       returnType: VoidIO,
       parameterTypes: [],
-      implementation: function() {
+      implementation: function( this: Node ) {
         return this.moveBackward();
       },
       documentation: 'Move this node one index backward in each of its parents.  If the node is already at the back, this is a no-op.'
