@@ -18,7 +18,7 @@ type FocusDisplayedControllerOptions = {
 
   // Extra work to do after the focusProperty is set to null because the focused Node is no longer displayed (it has
   // become invisible or has been removed from the scene graph).
-  onRemoveFocus: () => void;
+  onRemoveFocus?: () => void;
 };
 
 class FocusDisplayedController {
