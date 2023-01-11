@@ -9,6 +9,10 @@
  * to ensure that by the end of state setting, all Nodes are in the correct order.
  * see https://github.com/phetsims/scenery/issues/1252#issuecomment-888014859 for more information.
  *
+ * Invisible nodes are skipped in order to ensure that "move forward" moves past the next visible item and "move backward"
+ * moves before the prior visible item. If we did not skip invisible nodes, then a user could press "move forward" and
+ * be confused that the visible order does not change (even though the index changes).
+ *
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
@@ -24,6 +28,34 @@ const map: Record<number, () => void> = {};
 
 // The next index at which a callback will appear in the map. This always increments and we do reuse old indices
 let index = 0;
+
+// Move this node one index forward in each of its parents, jumping over invisible nodes. If the Node is already at the front, this is a no-op.
+function moveForward( node: Node ): void {
+  node._parents.forEach( parent => moveChild( parent, node, +1 ) );
+}
+
+// Move this node one index backward in each of its parents, jumping over invisible nodes.  If the Node is already at the back, this is a no-op.
+function moveBackward( node: Node ): void {
+  node._parents.forEach( parent => moveChild( parent, node, -1 ) );
+}
+
+/**
+ * Moves the specified child by +1/-1 indices, without going past the beginning or end.
+ */
+function moveChild( parent: Node, child: Node, delta: number ): void {
+  const index = parent.indexOfChild( child );
+
+  let targetIndex = index + delta;
+
+  // skip invisible children
+  while ( targetIndex > 0 && targetIndex < parent.children.length && !parent.children[ targetIndex ].visible ) {
+    targetIndex += delta;
+  }
+
+  if ( targetIndex >= 0 && targetIndex < parent.children.length ) {
+    parent.moveChildToIndex( child, targetIndex );
+  }
+}
 
 const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
   valueType: Node,
@@ -98,18 +130,18 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       returnType: VoidIO,
       parameterTypes: [],
       implementation: function( this: Node ) {
-        return this.moveForward();
+        return moveForward( this );
       },
-      documentation: 'Move this node one index forward in each of its parents.  If the node is already at the front, this is a no-op.'
+      documentation: 'Move this Node one index forward in each of its parents, skipping invisible Nodes. If the Node is already at the front, this is a no-op.'
     },
 
     moveBackward: {
       returnType: VoidIO,
       parameterTypes: [],
       implementation: function( this: Node ) {
-        return this.moveBackward();
+        return moveBackward( this );
       },
-      documentation: 'Move this node one index backward in each of its parents.  If the node is already at the back, this is a no-op.'
+      documentation: 'Move this Node one index backward in each of its parents, skipping invisible Nodes. If the Node is already at the back, this is a no-op.'
     }
   }
 } );
