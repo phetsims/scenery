@@ -83,6 +83,11 @@ export default class FocusManager {
 
   private readonly voicingFullyEnabledListener: ( enabled: boolean ) => void;
 
+  // References to the window listeners that update when the window has focus. So they can be removed if needed.
+  private static attachedWindowFocusListener: null | ( () => void ) = null;
+  private static attachedWindowBlurListener: null | ( () => void ) = null;
+  private static globallyAttached = false;
+
   public constructor() {
     this.pointerFocusProperty = new Property( null );
     this.readingBlockFocusProperty = new Property( null );
@@ -220,6 +225,43 @@ export default class FocusManager {
     phetioFeatured: true,
     phetioReadOnly: true
   } );
+
+  public static windowHasFocusProperty = new BooleanProperty( false, {
+    // TODO: PhET-iO?
+  } );
+
+  /**
+   * Updates the windowHasFocusProperty when the window receives/loses focus. When the window has focus
+   * it is in the foreground of the user. When in the background, the window will not receive keyboard input.
+   * https://developer.mozilla.org/en-US/docs/Web/API/Window/focus_event.
+   *
+   * This will be called by scenery for you when you use Display.initializeEvents().
+   */
+  public static attachToWindow(): void {
+    assert && assert( !FocusManager.globallyAttached, 'Can only be attached statically once.' );
+    FocusManager.attachedWindowFocusListener = () => {
+      FocusManager.windowHasFocusProperty.value = true;
+    };
+
+    FocusManager.attachedWindowBlurListener = () => {
+      FocusManager.windowHasFocusProperty.value = false;
+    };
+
+    window.addEventListener( 'focus', FocusManager.attachedWindowFocusListener );
+    window.addEventListener( 'blur', FocusManager.attachedWindowBlurListener );
+
+    FocusManager.globallyAttached = true;
+  }
+
+  /**
+   * Detach all window focus/blur listeners from FocusManager watching for when the window loses focus.
+   */
+  public static detachFromWindow(): void {
+    window.removeEventListener( 'focus', FocusManager.attachedWindowFocusListener! );
+    window.removeEventListener( 'blur', FocusManager.attachedWindowBlurListener! );
+
+    FocusManager.globallyAttached = false;
+  }
 }
 
 scenery.register( 'FocusManager', FocusManager );
