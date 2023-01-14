@@ -226,7 +226,12 @@ export default class FocusManager {
     phetioReadOnly: true
   } );
 
-  public static windowHasFocusProperty = new BooleanProperty( false, {
+
+  /**
+   * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.
+   * When in the background, the window does not receive keyboard input (important for global keyboard events).
+   */
+  public static windowHasFocusProperty = new BooleanProperty( true, {
     // TODO: PhET-iO?
   } );
 
@@ -249,6 +254,10 @@ export default class FocusManager {
 
     window.addEventListener( 'focus', FocusManager.attachedWindowFocusListener );
     window.addEventListener( 'blur', FocusManager.attachedWindowBlurListener );
+
+    // value will be updated with window, but we need a proper initial value (this function may be called while
+    // the window is not in the foreground).
+    FocusManager.windowHasFocusProperty.value = document.hasFocus();
 
     FocusManager.globallyAttached = true;
   }
