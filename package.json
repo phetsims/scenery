@@ -38,7 +38,8 @@
   "eslintConfig": {
     "extends": "../chipper/eslint/sim_eslintrc.js",
     "rules": {
-      "no-bitwise": "off"
+      "no-bitwise": "off",
+      "todo-should-have-issue": "off"
     },
     "globals": {
       "himalaya": "readonly",
