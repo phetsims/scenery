@@ -51,7 +51,7 @@ import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
 
-// TODO: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
+// NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
 //       entries in a union type. If that limitation is not acceptable remove this typing. OR maybe TypeScript will
 //       someday support regex patterns for a type. See https://github.com/microsoft/TypeScript/issues/41160
 // If we run out of union space for template strings, consider the above comment or remove some from the type.
