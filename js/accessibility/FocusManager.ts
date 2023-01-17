@@ -231,10 +231,11 @@ export default class FocusManager {
    * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.
    * When in the background, the window does not receive keyboard input (important for global keyboard events).
    */
-  public static windowHasFocusProperty = new BooleanProperty( true );
+  private static _windowHasFocusProperty = new BooleanProperty( true );
+  public static windowHasFocusProperty: TReadOnlyProperty<boolean> = FocusManager._windowHasFocusProperty;
 
   /**
-   * Updates the windowHasFocusProperty when the window receives/loses focus. When the window has focus
+   * Updates the _windowHasFocusProperty when the window receives/loses focus. When the window has focus
    * it is in the foreground of the user. When in the background, the window will not receive keyboard input.
    * https://developer.mozilla.org/en-US/docs/Web/API/Window/focus_event.
    *
@@ -243,11 +244,11 @@ export default class FocusManager {
   public static attachToWindow(): void {
     assert && assert( !FocusManager.globallyAttached, 'Can only be attached statically once.' );
     FocusManager.attachedWindowFocusListener = () => {
-      FocusManager.windowHasFocusProperty.value = true;
+      FocusManager._windowHasFocusProperty.value = true;
     };
 
     FocusManager.attachedWindowBlurListener = () => {
-      FocusManager.windowHasFocusProperty.value = false;
+      FocusManager._windowHasFocusProperty.value = false;
     };
 
     window.addEventListener( 'focus', FocusManager.attachedWindowFocusListener );
@@ -255,7 +256,7 @@ export default class FocusManager {
 
     // value will be updated with window, but we need a proper initial value (this function may be called while
     // the window is not in the foreground).
-    FocusManager.windowHasFocusProperty.value = document.hasFocus();
+    FocusManager._windowHasFocusProperty.value = document.hasFocus();
 
     FocusManager.globallyAttached = true;
   }
