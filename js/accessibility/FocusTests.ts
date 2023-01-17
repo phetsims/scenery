@@ -6,7 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import { Display, Node, Trail } from '../imports.js';
+import { Display, FocusManager, Node, Trail } from '../imports.js';
 
 QUnit.module( 'Focus' );
 
@@ -387,4 +387,37 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   assert.ok( divA.children[ 1 ] === divC, 'div C should be second child of div B' );
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'Testing FocusManager.windowHasFocusProperty', assert => {
+  const rootNode = new Node();
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  const focusableNode = new Node( { tagName: 'button' } );
+  rootNode.addChild( focusableNode );
+
+  assert.ok( !FocusManager.windowHasFocusProperty.value, 'should not have focus at start' );
+
+  // First, test detachFromWindow, once focus is in the window it is impossible to remove it from
+  // the window with JavaScript.
+  FocusManager.attachToWindow();
+  FocusManager.detachFromWindow();
+
+  assert.ok( !FocusManager.windowHasFocusProperty.value, 'should not have focus after detaching' );
+  focusableNode.focus();
+  assert.ok( !FocusManager.windowHasFocusProperty.value, 'Should not be watching window focus changes after detaching' );
+
+  // now test changes to windowHasFocusProperty - window focus listeners will only work if tests are being run
+  // in the foreground (dev cannot be using dev tools, running in puppeteer, minimized, etc...)
+  if ( document.hasFocus() ) {
+    FocusManager.attachToWindow();
+    assert.ok( FocusManager.windowHasFocusProperty.value, 'Focus was moved into window from previous tests, this attach should reflect window already has focus.' );
+    focusableNode.focus();
+    assert.ok( FocusManager.windowHasFocusProperty.value, 'Window has focus, is now in the foreground' );
+    focusableNode.blur();
+    assert.ok( FocusManager.windowHasFocusProperty.value, 'window still has focus after a blur (focus on body)' );
+  }
+
+  FocusManager.detachFromWindow();
 } );

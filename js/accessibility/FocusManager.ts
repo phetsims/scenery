@@ -231,7 +231,7 @@ export default class FocusManager {
    * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.
    * When in the background, the window does not receive keyboard input (important for global keyboard events).
    */
-  private static _windowHasFocusProperty = new BooleanProperty( true );
+  private static _windowHasFocusProperty = new BooleanProperty( false );
   public static windowHasFocusProperty: TReadOnlyProperty<boolean> = FocusManager._windowHasFocusProperty;
 
   /**
@@ -267,6 +267,9 @@ export default class FocusManager {
   public static detachFromWindow(): void {
     window.removeEventListener( 'focus', FocusManager.attachedWindowFocusListener! );
     window.removeEventListener( 'blur', FocusManager.attachedWindowBlurListener! );
+
+    // For cleanup, this Property becomes false again when detaching because we will no longer be watching for changes.
+    FocusManager._windowHasFocusProperty.value = false;
 
     FocusManager.globallyAttached = false;
   }
