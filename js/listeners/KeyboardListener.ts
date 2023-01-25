@@ -48,10 +48,8 @@ import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { EnglishStringToCodeMap, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
-import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
-
-// TODO: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
+// NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
 //       entries in a union type. If that limitation is not acceptable remove this typing. OR maybe TypeScript will
 //       someday support regex patterns for a type. See https://github.com/microsoft/TypeScript/issues/41160
 // If we run out of union space for template strings, consider the above comment or remove some from the type.
@@ -68,6 +66,12 @@ export type OneKeyStroke = `${AllowedKeys}` |
 // `${AllowedKeys}+${AllowedKeys}+${AllowedKeys}+${AllowedKeys}`;
 // type KeyCombinations = `${OneKeyStroke}` | `${OneKeyStroke},${OneKeyStroke}`;
 
+// Possible input types that decide when the callbacks of this listener should fire.
+// - 'up': Callbacks fire on release of keys.
+// - 'down': Callbacks fire on press of keys.
+// - 'both': Callbacks fire on both press and release of keys.
+type ListenerFireTrigger = 'up' | 'down' | 'both';
+
 type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
   // The keys that need to be pressed to fire the callback. In a form like `[ 'shift+t', 'alt+shift+r' ]`. See top
@@ -83,12 +87,6 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // Called when the listener detects that the set of keys are pressed.
   callback?: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
-  // When true, the listener will fire when the keys are released.
-  fireOnKeyUp?: boolean;
-
-  // When true, the listener will fire when the keys are first pressed down.
-  fireOnKeyDown?: boolean;
-
   // When true, the listener will fire continuously while keys are held down, at the following intervals.
   fireOnHold?: boolean;
 
@@ -100,6 +98,10 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
   // TODO: Potential option to allow overlap between the keys of this KeyboardListener and another.
   allowKeyOverlap?: boolean;
+
+  // Possible input types that decide when callbacks of the listener fire in response to input. See
+  // ListenerFireTrigger type documentation.
+  listenerFireTrigger?: ListenerFireTrigger;
 };
 
 type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
@@ -127,9 +129,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // fireOnHold or in cases of cancel or interrupt.
   private readonly _callback: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
-  // Will it the callback fire on keys up or down?
-  private readonly _fireOnKeyUp: boolean;
-  private readonly _fireOnKeyDown: boolean;
+  // When callbacks are fired in response to input. Could be on keys pressed down, up, or both.
+  private readonly _listenerFireTrigger: ListenerFireTrigger;
 
   // Does the listener fire the callback continuously when keys are held down?
   private readonly _fireOnHold: boolean;
@@ -143,8 +144,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // Current keys pressed that are having their listeners fired now.
   public keysPressed: Keys[number] | null = null;
 
-  // True when keys are pressed down. If fireOnKeyUp and fireOnKeyDown are both true, you can look at this in your
-  // callback to determine if keys are pressed or released.
+  // True when keys are pressed down. If listenerFireTrigger is 'both', you can look at this in your callback to
+  // determine if keys are pressed or released.
   public keysDown: boolean;
 
   // Timing variables for the CallbackTimers.
@@ -158,13 +159,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _allowKeyOverlap: boolean;
 
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
-    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'fireOnKeyUp' ], [ 'fireOnHold', 'fireOnHoldInterval', 'fireOnHoldDelay' ] );
-
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
       global: false,
-      fireOnKeyDown: true,
-      fireOnKeyUp: false,
+      listenerFireTrigger: 'down',
       fireOnHold: false,
       fireOnHoldDelay: 400,
       fireOnHoldInterval: 100,
@@ -172,9 +170,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     }, providedOptions );
 
     this._callback = options.callback;
-    this._fireOnKeyUp = options.fireOnKeyUp;
-    this._fireOnKeyDown = options.fireOnKeyDown;
 
+    this._listenerFireTrigger = options.listenerFireTrigger;
     this._fireOnHold = options.fireOnHold;
     this._fireOnHoldDelay = options.fireOnHoldDelay;
     this._fireOnHoldInterval = options.fireOnHoldInterval;
@@ -213,7 +210,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * fire callbacks and start CallbackTimers.
    */
   private handleKeyDown( event: SceneryEvent<KeyboardEvent> ): void {
-    if ( this._fireOnKeyDown ) {
+    if ( this._listenerFireTrigger === 'down' || this._listenerFireTrigger === 'both' ) {
 
       // modifier keys can be pressed in any order but the last key in the group must be pressed last
       this._keyGroups.forEach( keyGroup => {
@@ -255,7 +252,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       } );
     }
 
-    if ( this._fireOnKeyUp ) {
+    if ( this._listenerFireTrigger === 'up' || this._listenerFireTrigger === 'both' ) {
       this._keyGroups.forEach( keyGroup => {
         if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.modifierKeys ) &&
              KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {

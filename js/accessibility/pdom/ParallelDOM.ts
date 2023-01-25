@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * A superclass for Node, adding accessibility by defining content for the Parallel DOM. Please note that Node and
@@ -2620,7 +2620,9 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * Alert on all interactive description utteranceQueues located on each connected Display (see Node.getConnectedDisplays)
+   * Alert on all interactive description utteranceQueues located on each connected Display. See
+   * Node.getConnectedDisplays. Note that if your Node is not connected to a Display, this function will have
+   * no effect.
    */
   public alertDescriptionUtterance( utterance: TAlertable ): void {
 
@@ -2636,12 +2638,6 @@ export default class ParallelDOM extends PhetioObject {
     }
 
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
-
-    // If you run into this assertion, talk to @jessegreenberg and @zepumph, because it is quite possible we would
-    // remove this assertion for your case.
-    assert && assert( connectedDisplays.length > 0,
-      'must be connected to a display to use UtteranceQueue features' );
-
     for ( let i = 0; i < connectedDisplays.length; i++ ) {
       const display = connectedDisplays[ i ];
       if ( display.isAccessible() ) {

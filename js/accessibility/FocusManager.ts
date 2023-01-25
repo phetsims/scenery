@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * Manages the Properties which signify and control where various forms of focus are. A Focus
@@ -82,6 +82,11 @@ export default class FocusManager {
   private readonly pointerFocusDisplayedController: FocusDisplayedController;
 
   private readonly voicingFullyEnabledListener: ( enabled: boolean ) => void;
+
+  // References to the window listeners that update when the window has focus. So they can be removed if needed.
+  private static attachedWindowFocusListener: null | ( () => void ) = null;
+  private static attachedWindowBlurListener: null | ( () => void ) = null;
+  private static globallyAttached = false;
 
   public constructor() {
     this.pointerFocusProperty = new Property( null );
@@ -220,6 +225,54 @@ export default class FocusManager {
     phetioFeatured: true,
     phetioReadOnly: true
   } );
+
+
+  /**
+   * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.
+   * When in the background, the window does not receive keyboard input (important for global keyboard events).
+   */
+  private static _windowHasFocusProperty = new BooleanProperty( false );
+  public static windowHasFocusProperty: TReadOnlyProperty<boolean> = FocusManager._windowHasFocusProperty;
+
+  /**
+   * Updates the _windowHasFocusProperty when the window receives/loses focus. When the window has focus
+   * it is in the foreground of the user. When in the background, the window will not receive keyboard input.
+   * https://developer.mozilla.org/en-US/docs/Web/API/Window/focus_event.
+   *
+   * This will be called by scenery for you when you use Display.initializeEvents().
+   */
+  public static attachToWindow(): void {
+    assert && assert( !FocusManager.globallyAttached, 'Can only be attached statically once.' );
+    FocusManager.attachedWindowFocusListener = () => {
+      FocusManager._windowHasFocusProperty.value = true;
+    };
+
+    FocusManager.attachedWindowBlurListener = () => {
+      FocusManager._windowHasFocusProperty.value = false;
+    };
+
+    window.addEventListener( 'focus', FocusManager.attachedWindowFocusListener );
+    window.addEventListener( 'blur', FocusManager.attachedWindowBlurListener );
+
+    // value will be updated with window, but we need a proper initial value (this function may be called while
+    // the window is not in the foreground).
+    FocusManager._windowHasFocusProperty.value = document.hasFocus();
+
+    FocusManager.globallyAttached = true;
+  }
+
+  /**
+   * Detach all window focus/blur listeners from FocusManager watching for when the window loses focus.
+   */
+  public static detachFromWindow(): void {
+    window.removeEventListener( 'focus', FocusManager.attachedWindowFocusListener! );
+    window.removeEventListener( 'blur', FocusManager.attachedWindowBlurListener! );
+
+    // For cleanup, this Property becomes false again when detaching because we will no longer be watching for changes.
+    FocusManager._windowHasFocusProperty.value = false;
+
+    FocusManager.globallyAttached = false;
+  }
 }
 
 scenery.register( 'FocusManager', FocusManager );

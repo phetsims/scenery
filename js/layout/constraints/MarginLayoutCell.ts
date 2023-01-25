@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * A LayoutCell that has margins, and can be positioned and sized relative to those. Used for Flow/Grid layouts
@@ -12,6 +12,7 @@ import Utils from '../../../../dot/js/Utils.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
 import { Font, TColor, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, Text } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
@@ -371,7 +372,9 @@ export default class MarginLayoutCell extends LayoutCell {
     cells.forEach( cell => {
       const bounds = cell.getCellBounds();
 
-      const hoverListener = new PressListener();
+      const hoverListener = new PressListener( {
+        tandem: Tandem.OPT_OUT
+      } );
       container.addChild( Rectangle.bounds( bounds, {
         inputListeners: [ hoverListener ]
       } ) );

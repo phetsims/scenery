@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * Handles attaching/detaching and forwarding browser input events to displays.
@@ -8,7 +8,7 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import platform from '../../../phet-core/js/platform.js';
-import { BatchedDOMEventType, Display, Features, globalKeyStateTracker, PDOMUtils, scenery } from '../imports.js';
+import { BatchedDOMEventType, Display, Features, FocusManager, globalKeyStateTracker, PDOMUtils, scenery } from '../imports.js';
 
 // Sometimes we need to add a listener that does absolutely nothing
 const noop = () => {};
@@ -38,6 +38,7 @@ const BrowserEvents = {
 
       // never unattach because we don't know if there are other Displays listening to this.
       globalKeyStateTracker.attachToWindow();
+      FocusManager.attachToWindow();
     }
 
     this.attachedDisplays.push( display );
