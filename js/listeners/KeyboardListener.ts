@@ -84,6 +84,18 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // More specifically, this uses `globalKeyUp` and `globalKeyDown`. See definitions in Input.ts for more information.
   global?: boolean;
 
+  // If true, this listener is fired during the 'capture' phase, meaning BEFORE other listeners get fired during
+  // typical event dispatch. Only relevant for `global` key events.
+  capture?: boolean;
+
+  // If true, all SceneryEvents that trigger this listener (keydown and keyup) will be `handled` (no more
+  // event bubbling). See `manageEvent` for more information.
+  handle?: boolean;
+
+  // If true, all SceneryEvents that trigger this listener (keydown and keyup) will be `aborted` (no more
+  // event bubbling, no more listeners fire). See `manageEvent` for more information.
+  abort?: boolean;
+
   // Called when the listener detects that the set of keys are pressed.
   callback?: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
@@ -152,8 +164,11 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _fireOnHoldDelay: number;
   private readonly _fireOnHoldInterval: number;
 
-  // Will the listener respond to 'global' events or just to events targeted to where this listener was added?
+  // see options documentation
   private readonly _global: boolean;
+  private readonly _capture: boolean;
+  private readonly _handle: boolean;
+  private readonly _abort: boolean;
 
   // TODO: Potentially a flag that could allow overlaps between keys of other KeyboardListeners.
   private readonly _allowKeyOverlap: boolean;
@@ -162,6 +177,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
       global: false,
+      capture: false,
+      handle: false,
+      abort: false,
       listenerFireTrigger: 'down',
       fireOnHold: false,
       fireOnHoldDelay: 400,
@@ -183,6 +201,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this.keysDown = false;
 
     this._global = options.global;
+    this._capture = options.capture;
+    this._handle = options.handle;
+    this._abort = options.abort;
 
     // convert the provided keys to data that we can respond to with scenery's Input system
     this._keyGroups = this.convertKeysToKeyGroups( options.keys );
@@ -232,6 +253,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
         }
       } );
     }
+
+    this.manageEvent( event );
   }
 
   /**
@@ -262,6 +285,19 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
         }
       } );
     }
+
+    this.manageEvent( event );
+  }
+
+  /**
+   * In response to every SceneryEvent, handle and/or abort depending on listener options. This cannot be done in
+   * the callbacks because press-and-hold behavior triggers many keydown events. We need to handle/abort each, not
+   * just the event that triggered the callback. Also, callbacks can be called without a SceneryEvent from the
+   * CallbackTimer.
+   */
+  private manageEvent( event: SceneryEvent<KeyboardEvent> ): void {
+    this._handle && event.handle();
+    this._abort && event.abort();
   }
 
   /**

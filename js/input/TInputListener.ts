@@ -14,7 +14,11 @@ export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryE
 type TInputListener = {
   interrupt?: () => void;
   cursor?: string | null;
-  capture?: boolean; // NOTE: only applies to globalkeydown / globalkeyup
+
+  // Only applies to globalkeydown/globalkeyup. When true, this listener is fired during the 'capture'
+  // phase. Listeners are fired BEFORE the dispatch through the scene graph. (very similar to DOM addEventListener's
+  // useCapture).
+  capture?: boolean;
 
   focus?: SceneryListenerFunction<FocusEvent>;
   blur?: SceneryListenerFunction<FocusEvent>;
