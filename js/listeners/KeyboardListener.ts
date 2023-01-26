@@ -46,7 +46,7 @@
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { EnglishStringToCodeMap, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { EnglishStringToCodeMap, FocusManager, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 
 // NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
@@ -99,6 +99,9 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // Called when the listener detects that the set of keys are pressed.
   callback?: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
+  // Called when the listener is cancelled/interrupted.
+  cancel?: ( listener: KeyboardListener<Keys> ) => void;
+
   // When true, the listener will fire continuously while keys are held down, at the following intervals.
   fireOnHold?: boolean;
 
@@ -141,6 +144,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // fireOnHold or in cases of cancel or interrupt.
   private readonly _callback: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
+  // The optional function called when this listener is cancelled.
+  private readonly _cancel: ( listener: KeyboardListener<Keys> ) => void;
+
   // When callbacks are fired in response to input. Could be on keys pressed down, up, or both.
   private readonly _listenerFireTrigger: ListenerFireTrigger;
 
@@ -172,9 +178,12 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // TODO: Potentially a flag that could allow overlaps between keys of other KeyboardListeners.
   private readonly _allowKeyOverlap: boolean;
 
+  private readonly _windowFocusListener: ( windowHasFocus: boolean ) => void;
+
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
+      cancel: _.noop,
       global: false,
       capture: false,
       handle: false,
@@ -187,6 +196,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     }, providedOptions );
 
     this._callback = options.callback;
+    this._cancel = options.cancel;
 
     this._listenerFireTrigger = options.listenerFireTrigger;
     this._fireOnHold = options.fireOnHold;
@@ -208,6 +218,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     ( this as unknown as TInputListener ).listener = this;
     ( this as unknown as TInputListener ).capture = options.capture;
+
+    this._windowFocusListener = this.handleWindowFocusChange.bind( this );
+    FocusManager.windowHasFocusProperty.link( this._windowFocusListener );
   }
 
   /**
@@ -340,17 +353,34 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
+   * Work to be done on both cancel and interrupt.
+   */
+  private handleCancel(): void {
+    this.clearActiveKeyGroups();
+    this._cancel( this );
+  }
+
+  /**
+   * When the window loses focus, cancel.
+   */
+  private handleWindowFocusChange( windowHasFocus: boolean ): void {
+    if ( !windowHasFocus ) {
+      this.handleCancel();
+    }
+  }
+
+  /**
    * Part of the scenery listener API. On cancel, clear active KeyGroups and stop their behavior.
    */
   public cancel(): void {
-    this.clearActiveKeyGroups();
+    this.handleCancel();
   }
 
   /**
    * Part of the scenery listener API. Clear active KeyGroups and stop their callbacks.
    */
   public interrupt(): void {
-    this.clearActiveKeyGroups();
+    this.handleCancel();
   }
 
   /**
@@ -401,6 +431,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       activeKeyGroup.timer && activeKeyGroup.timer.dispose();
     } );
     this._keyGroups.length = 0;
+
+    FocusManager.windowHasFocusProperty.unlink( this._windowFocusListener );
   }
 
   /**
