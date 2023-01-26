@@ -166,7 +166,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   // see options documentation
   private readonly _global: boolean;
-  private readonly _capture: boolean;
   private readonly _handle: boolean;
   private readonly _abort: boolean;
 
@@ -201,7 +200,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this.keysDown = false;
 
     this._global = options.global;
-    this._capture = options.capture;
     this._handle = options.handle;
     this._abort = options.abort;
 
@@ -209,6 +207,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._keyGroups = this.convertKeysToKeyGroups( options.keys );
 
     ( this as unknown as TInputListener ).listener = this;
+    ( this as unknown as TInputListener ).capture = options.capture;
   }
 
   /**
