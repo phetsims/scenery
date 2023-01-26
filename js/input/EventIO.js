@@ -1,4 +1,4 @@
-// Copyright 2018-2022, University of Colorado Boulder
+// Copyright 2018-2023, University of Colorado Boulder
 
 /**
  * IOType for a window.Event. Since this needs to support any data from any subtype of window.Event, we supply NullableIO
