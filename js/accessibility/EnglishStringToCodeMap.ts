@@ -45,10 +45,15 @@ const EnglishStringToCodeMap = {
   8: KeyboardUtils.KEY_8,
   9: KeyboardUtils.KEY_9,
 
-  // TODO: what about right vs left?
-  ctrl: KeyboardUtils.KEY_CONTROL_LEFT,
-  alt: KeyboardUtils.KEY_ALT_LEFT,
-  shift: KeyboardUtils.KEY_SHIFT_LEFT,
+  ctrl: KeyboardUtils.KEY_CONTROL,
+  alt: KeyboardUtils.KEY_ALT,
+  shift: KeyboardUtils.KEY_SHIFT,
+  ctrlLeft: KeyboardUtils.KEY_CONTROL_LEFT,
+  ctrlRight: KeyboardUtils.KEY_CONTROL_RIGHT,
+  shiftLeft: KeyboardUtils.KEY_SHIFT_LEFT,
+  shiftRight: KeyboardUtils.KEY_SHIFT_RIGHT,
+  altLeft: KeyboardUtils.KEY_ALT_LEFT,
+  altRight: KeyboardUtils.KEY_ALT_RIGHT,
 
   enter: KeyboardUtils.KEY_ENTER,
   tab: KeyboardUtils.KEY_TAB,

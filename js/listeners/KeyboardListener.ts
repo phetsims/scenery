@@ -217,7 +217,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
         if ( !this._activeKeyGroups.includes( keyGroup ) ) {
           if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.allKeys ) &&
-               globalKeyStateTracker.getLastKeyDown() === keyGroup.key ) {
+               KeyboardUtils.areKeysEquivalent( keyGroup.key, globalKeyStateTracker.getLastKeyDown()! ) ) {
 
             this._activeKeyGroups.push( keyGroup );
 
@@ -241,7 +241,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private handleKeyUp( event: SceneryEvent<KeyboardEvent> ): void {
 
     if ( this._activeKeyGroups.length > 0 ) {
-
       this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
         if ( !globalKeyStateTracker.areKeysExclusivelyDown( activeKeyGroup.allKeys ) ) {
           if ( activeKeyGroup.timer ) {
@@ -254,9 +253,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     if ( this._listenerFireTrigger === 'up' || this._listenerFireTrigger === 'both' ) {
       this._keyGroups.forEach( keyGroup => {
+        const eventCode = KeyboardUtils.getEventCode( event.domEvent )!;
+        assert && assert( eventCode, 'No event code found for KeyboardEvent' );
         if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.modifierKeys ) &&
-             KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
-
+             KeyboardUtils.areKeysEquivalent( keyGroup.key, eventCode ) ) {
           this.keysDown = false;
           this.fireCallback( event, keyGroup );
         }

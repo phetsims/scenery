@@ -185,21 +185,21 @@ class KeyStateTracker {
     assert && assert( key, 'key not found from domEvent' );
 
     // add modifier keys if they aren't down
-    if ( domEvent.shiftKey && !this.shiftKeyDown ) {
+    if ( domEvent.shiftKey && !KeyboardUtils.isShiftKey( domEvent ) && !this.shiftKeyDown ) {
       this.keyState[ KeyboardUtils.KEY_SHIFT_LEFT ] = {
         keyDown: true,
         key: key,
         timeDown: 0 // in ms
       };
     }
-    if ( domEvent.altKey && !this.altKeyDown ) {
+    if ( domEvent.altKey && !KeyboardUtils.isAltKey( domEvent ) && !this.altKeyDown ) {
       this.keyState[ KeyboardUtils.KEY_ALT_LEFT ] = {
         keyDown: true,
         key: key,
         timeDown: 0 // in ms
       };
     }
-    if ( domEvent.ctrlKey && !this.ctrlKeyDown ) {
+    if ( domEvent.ctrlKey && !KeyboardUtils.isControlKey( domEvent ) && !this.ctrlKeyDown ) {
       this.keyState[ KeyboardUtils.KEY_CONTROL_LEFT ] = {
         keyDown: true,
         key: key,
@@ -291,10 +291,37 @@ class KeyStateTracker {
 
   /**
    * Returns true if ALL keys in the list are down and ONLY the keys in the list are down. Values of keyList array
-   * are the KeyboardEvent.code for keys you are interested in.
+   * are the KeyboardEvent.code for keys you are interested in OR the KeyboardEvent.key in the special case of
+   * modifier keys.
+   *
+   * (scenery-internal)
    */
   public areKeysExclusivelyDown( keyList: string [] ): boolean {
-    return Object.keys( this.keyState ).length === keyList.length && this.areKeysDown( keyList );
+    const keyStateKeys = Object.keys( this.keyState );
+
+    // quick sanity check for equality first
+    if ( keyStateKeys.length !== keyList.length ) {
+      return false;
+    }
+
+    // Now make sure that every key in the list is in the keyState
+    let onlyKeyListDown = true;
+    for ( let i = 0; i < keyList.length; i++ ) {
+      const initialKey = keyList[ i ];
+      let keysToCheck = [ initialKey ];
+
+      // If a modifier key, need to look for the equivalent pair of left/right KeyboardEvent.codes in the list
+      // because KeyStateTracker works exclusively with codes.
+      if ( KeyboardUtils.isModifierKey( initialKey ) ) {
+        keysToCheck = KeyboardUtils.MODIFIER_KEY_TO_CODE_MAP.get( initialKey )!;
+      }
+
+      if ( _.intersection( keyStateKeys, keysToCheck ).length === 0 ) {
+        onlyKeyListDown = false;
+      }
+    }
+
+    return onlyKeyListDown;
   }
 
   /**
