@@ -395,7 +395,7 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     const marginsNode = MarginLayoutCell.createHelperNode( this.constraint.displayedCells, this.constraint.layoutBoundsProperty.value, cell => {
       let str = '';
 
-      const internalOrientation = cell.orientation === 'horizontal' ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+      const internalOrientation = Orientation.fromLayoutOrientation( cell.orientation );
 
       str += `align: ${LayoutAlign.internalToAlign( internalOrientation, cell.effectiveAlign )}\n`;
       str += `stretch: ${cell.effectiveStretch}\n`;
