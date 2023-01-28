@@ -27,6 +27,7 @@ import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.j
 import { AlignBox, Node, scenery } from '../../imports.js';
 import { AlignBoxOptions } from '../nodes/AlignBox.js';
 import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
 
 let globalId = 1;
 
@@ -128,6 +129,10 @@ export default class AlignGroup extends Disposable {
   }
 
   public get maxHeightProperty(): TProperty<number> { return this.getMaxHeightProperty(); }
+
+  public getMaxSizeProperty( orientation: Orientation ): TProperty<number> {
+    return orientation === Orientation.HORIZONTAL ? this._maxWidthProperty : this._maxHeightProperty;
+  }
 
   /**
    * Creates an alignment box with the given content and options.

@@ -572,6 +572,14 @@ export default class AlignBox extends SuperType {
     return this._bottomMargin;
   }
 
+  public getContent(): Node {
+    return this._content;
+  }
+
+  public get content(): Node {
+    return this.getContent();
+  }
+
   /**
    * Returns the bounding box of this box's content. This will include any margins.
    */
