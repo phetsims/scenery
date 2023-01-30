@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * Main handler for user-input events in Scenery.
@@ -1880,6 +1880,8 @@ export default class Input extends PhetioObject {
    * @param listeners - Should be a defensive array copy already.
    * @param type
    * @param inputEvent
+   * @param capture - If true, this dispatch is in the capture sequence (like DOM's addEventListener useCapture).
+   *                  Listeners will only be called if the listener also indicates it is for the capture sequence.
    */
   private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: TInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent>, capture: boolean | null = null ): void {
 

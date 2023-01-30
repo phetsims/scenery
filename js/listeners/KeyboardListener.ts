@@ -46,7 +46,7 @@
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { EnglishStringToCodeMap, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { EnglishStringToCodeMap, FocusManager, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 
 // NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
@@ -84,8 +84,23 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // More specifically, this uses `globalKeyUp` and `globalKeyDown`. See definitions in Input.ts for more information.
   global?: boolean;
 
+  // If true, this listener is fired during the 'capture' phase, meaning BEFORE other listeners get fired during
+  // typical event dispatch. Only relevant for `global` key events.
+  capture?: boolean;
+
+  // If true, all SceneryEvents that trigger this listener (keydown and keyup) will be `handled` (no more
+  // event bubbling). See `manageEvent` for more information.
+  handle?: boolean;
+
+  // If true, all SceneryEvents that trigger this listener (keydown and keyup) will be `aborted` (no more
+  // event bubbling, no more listeners fire). See `manageEvent` for more information.
+  abort?: boolean;
+
   // Called when the listener detects that the set of keys are pressed.
   callback?: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
+
+  // Called when the listener is cancelled/interrupted.
+  cancel?: ( listener: KeyboardListener<Keys> ) => void;
 
   // When true, the listener will fire continuously while keys are held down, at the following intervals.
   fireOnHold?: boolean;
@@ -129,6 +144,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // fireOnHold or in cases of cancel or interrupt.
   private readonly _callback: ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardListener<Keys> ) => void;
 
+  // The optional function called when this listener is cancelled.
+  private readonly _cancel: ( listener: KeyboardListener<Keys> ) => void;
+
   // When callbacks are fired in response to input. Could be on keys pressed down, up, or both.
   private readonly _listenerFireTrigger: ListenerFireTrigger;
 
@@ -152,16 +170,24 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _fireOnHoldDelay: number;
   private readonly _fireOnHoldInterval: number;
 
-  // Will the listener respond to 'global' events or just to events targeted to where this listener was added?
+  // see options documentation
   private readonly _global: boolean;
+  private readonly _handle: boolean;
+  private readonly _abort: boolean;
 
   // TODO: Potentially a flag that could allow overlaps between keys of other KeyboardListeners.
   private readonly _allowKeyOverlap: boolean;
 
+  private readonly _windowFocusListener: ( windowHasFocus: boolean ) => void;
+
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
+      cancel: _.noop,
       global: false,
+      capture: false,
+      handle: false,
+      abort: false,
       listenerFireTrigger: 'down',
       fireOnHold: false,
       fireOnHoldDelay: 400,
@@ -170,6 +196,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     }, providedOptions );
 
     this._callback = options.callback;
+    this._cancel = options.cancel;
 
     this._listenerFireTrigger = options.listenerFireTrigger;
     this._fireOnHold = options.fireOnHold;
@@ -183,11 +210,17 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this.keysDown = false;
 
     this._global = options.global;
+    this._handle = options.handle;
+    this._abort = options.abort;
 
     // convert the provided keys to data that we can respond to with scenery's Input system
     this._keyGroups = this.convertKeysToKeyGroups( options.keys );
 
     ( this as unknown as TInputListener ).listener = this;
+    ( this as unknown as TInputListener ).capture = options.capture;
+
+    this._windowFocusListener = this.handleWindowFocusChange.bind( this );
+    FocusManager.windowHasFocusProperty.link( this._windowFocusListener );
   }
 
   /**
@@ -217,7 +250,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
         if ( !this._activeKeyGroups.includes( keyGroup ) ) {
           if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.allKeys ) &&
-               globalKeyStateTracker.getLastKeyDown() === keyGroup.key ) {
+               KeyboardUtils.areKeysEquivalent( keyGroup.key, globalKeyStateTracker.getLastKeyDown()! ) ) {
 
             this._activeKeyGroups.push( keyGroup );
 
@@ -232,6 +265,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
         }
       } );
     }
+
+    this.manageEvent( event );
   }
 
   /**
@@ -241,7 +276,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private handleKeyUp( event: SceneryEvent<KeyboardEvent> ): void {
 
     if ( this._activeKeyGroups.length > 0 ) {
-
       this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
         if ( !globalKeyStateTracker.areKeysExclusivelyDown( activeKeyGroup.allKeys ) ) {
           if ( activeKeyGroup.timer ) {
@@ -254,14 +288,28 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     if ( this._listenerFireTrigger === 'up' || this._listenerFireTrigger === 'both' ) {
       this._keyGroups.forEach( keyGroup => {
+        const eventCode = KeyboardUtils.getEventCode( event.domEvent )!;
+        assert && assert( eventCode, 'No event code found for KeyboardEvent' );
         if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.modifierKeys ) &&
-             KeyboardUtils.getEventCode( event.domEvent ) === keyGroup.key ) {
-
+             KeyboardUtils.areKeysEquivalent( keyGroup.key, eventCode ) ) {
           this.keysDown = false;
           this.fireCallback( event, keyGroup );
         }
       } );
     }
+
+    this.manageEvent( event );
+  }
+
+  /**
+   * In response to every SceneryEvent, handle and/or abort depending on listener options. This cannot be done in
+   * the callbacks because press-and-hold behavior triggers many keydown events. We need to handle/abort each, not
+   * just the event that triggered the callback. Also, callbacks can be called without a SceneryEvent from the
+   * CallbackTimer.
+   */
+  private manageEvent( event: SceneryEvent<KeyboardEvent> ): void {
+    this._handle && event.handle();
+    this._abort && event.abort();
   }
 
   /**
@@ -305,17 +353,34 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
+   * Work to be done on both cancel and interrupt.
+   */
+  private handleCancel(): void {
+    this.clearActiveKeyGroups();
+    this._cancel( this );
+  }
+
+  /**
+   * When the window loses focus, cancel.
+   */
+  private handleWindowFocusChange( windowHasFocus: boolean ): void {
+    if ( !windowHasFocus ) {
+      this.handleCancel();
+    }
+  }
+
+  /**
    * Part of the scenery listener API. On cancel, clear active KeyGroups and stop their behavior.
    */
   public cancel(): void {
-    this.clearActiveKeyGroups();
+    this.handleCancel();
   }
 
   /**
    * Part of the scenery listener API. Clear active KeyGroups and stop their callbacks.
    */
   public interrupt(): void {
-    this.clearActiveKeyGroups();
+    this.handleCancel();
   }
 
   /**
@@ -366,6 +431,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       activeKeyGroup.timer && activeKeyGroup.timer.dispose();
     } );
     this._keyGroups.length = 0;
+
+    FocusManager.windowHasFocusProperty.unlink( this._windowFocusListener );
   }
 
   /**

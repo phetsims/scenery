@@ -1,4 +1,4 @@
-// Copyright 2018-2022, University of Colorado Boulder
+// Copyright 2018-2023, University of Colorado Boulder
 
 /**
  * IOType for a window.Event. Since this needs to support any data from any subtype of window.Event, we supply NullableIO
@@ -26,29 +26,31 @@ const EventIO = new IOType( 'EventIO', {
   // This should remain the same as Input.domEventPropertiesToSerialize (local var). Each key can be null depending on
   // what Event interface is being serialized (which depends on what DOM Event the instance is).
   stateSchema: () => ( {
-    pointerId: NullableIO( NumberIO ),
-    pointerType: NullableIO( StringIO ),
+    constructorName: StringIO,
+    altKey: NullableIO( BooleanIO ),
+    button: NullableIO( NumberIO ),
+    charCode: NullableIO( NumberIO ),
     clientX: NullableIO( NumberIO ),
     clientY: NullableIO( NumberIO ),
+    code: NullableIO( StringIO ),
     ctrlKey: NullableIO( BooleanIO ),
-    shiftKey: NullableIO( BooleanIO ),
-    altKey: NullableIO( BooleanIO ),
-    metaKey: NullableIO( BooleanIO ),
-    button: NullableIO( NumberIO ),
-    relatedTarget: NullableIO( ObjectLiteralIO ),
-    pageX: NullableIO( NumberIO ),
-    pageY: NullableIO( NumberIO ),
-    which: NullableIO( NumberIO ),
-    type: NullableIO( StringIO ),
-    target: NullableIO( ObjectLiteralIO ),
-    keyCode: NullableIO( NumberIO ),
-    key: NullableIO( StringIO ),
+    deltaMode: NullableIO( NumberIO ),
     deltaX: NullableIO( NumberIO ),
     deltaY: NullableIO( NumberIO ),
     deltaZ: NullableIO( NumberIO ),
-    deltaMode: NullableIO( NumberIO ),
-    charCode: NullableIO( NumberIO ),
-    scale: NullableIO( NumberIO )
+    key: NullableIO( StringIO ),
+    keyCode: NullableIO( NumberIO ),
+    metaKey: NullableIO( BooleanIO ),
+    pageX: NullableIO( NumberIO ),
+    pageY: NullableIO( NumberIO ),
+    pointerId: NullableIO( NumberIO ),
+    pointerType: NullableIO( StringIO ),
+    scale: NullableIO( NumberIO ),
+    shiftKey: NullableIO( BooleanIO ),
+    target: NullableIO( ObjectLiteralIO ),
+    type: NullableIO( StringIO ),
+    relatedTarget: NullableIO( ObjectLiteralIO ),
+    which: NullableIO( NumberIO )
   } )
 } );
 

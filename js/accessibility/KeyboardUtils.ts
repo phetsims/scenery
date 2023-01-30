@@ -36,12 +36,21 @@ const KEY_7 = 'Digit7';
 const KEY_8 = 'Digit8';
 const KEY_9 = 'Digit9';
 
+// These are `KeyboardEvent.key` values! The difference is necessary because KeyboardEvent.code distinguishes between
+// left and right, but we often need to watch for both at the same time.
+const KEY_ALT = 'Alt';
+const KEY_SHIFT = 'Shift';
+const KEY_CONTROL = 'Control';
+
 const ARROW_KEYS = [ KEY_RIGHT_ARROW, KEY_LEFT_ARROW, KEY_UP_ARROW, KEY_DOWN_ARROW ];
 const WASD_KEYS = [ KEY_W, KEY_S, KEY_A, KEY_D ];
 const NUMBER_KEYS = [ KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9 ];
 const SHIFT_KEYS = [ KEY_SHIFT_LEFT, KEY_SHIFT_RIGHT ];
 const CONTROL_KEYS = [ KEY_CONTROL_LEFT, KEY_CONTROL_RIGHT ];
 const ALT_KEYS = [ KEY_ALT_LEFT, KEY_ALT_RIGHT ];
+
+// These are KeyboardEvent.key values, excluding left/right KeyboardEvent.codes
+const MODIFIER_KEYS = [ KEY_ALT, KEY_CONTROL, KEY_SHIFT ];
 
 const DOM_EVENT_VALIDATOR = { valueType: Event };
 const ALL_KEYS: string[] = [];
@@ -64,6 +73,9 @@ const KeyboardUtils = {
   KEY_ALT_RIGHT: KEY_ALT_RIGHT,
   KEY_CONTROL_LEFT: KEY_CONTROL_LEFT,
   KEY_CONTROL_RIGHT: KEY_CONTROL_RIGHT,
+  KEY_SHIFT: KEY_SHIFT,
+  KEY_ALT: KEY_ALT,
+  KEY_CONTROL: KEY_CONTROL,
   KEY_ESCAPE: 'Escape',
   KEY_DELETE: 'Delete',
   KEY_BACKSPACE: 'Backspace',
@@ -120,6 +132,14 @@ const KeyboardUtils = {
   SHIFT_KEYS: SHIFT_KEYS,
   CONTROL_KEYS: CONTROL_KEYS,
   ALT_KEYS: ALT_KEYS,
+
+  // Maps a KeyboardEvent.key to the left/right pair of KeyboardEvent.code for modifier keys
+  MODIFIER_KEY_TO_CODE_MAP: new Map( [
+    [ KEY_ALT, ALT_KEYS ],
+    [ KEY_SHIFT, SHIFT_KEYS ],
+    [ KEY_CONTROL, CONTROL_KEYS ]
+  ] ),
+
 
   /**
    * Returns whether the key corresponds to pressing an arrow key
@@ -236,6 +256,39 @@ const KeyboardUtils = {
     }
 
     return eventCode;
+  },
+
+  /**
+   * Returns true when if the provided string is a KeyboardEvent.key for a modifier key. Note that is KeyboardEvent.key
+   * **NOT** KeyboardEvent.code. KeyboardEvent.code does not distinguish between left and right modifier keys so we
+   * have some special behavior when we detect a modifier key (left or right) is pressed.
+   * @param key
+   */
+  isModifierKey( key: string ): boolean {
+    return MODIFIER_KEYS.includes( key );
+  },
+
+  /**
+   * Returns true if the provided KeyboardEvent.code/KeyboardEvent.key is equivalent to the provided KeyboardEvent.code.
+   * Specifically comparing modifier keys. If both are `code`, returns true when they are equal. If first value is
+   * a `key` for alt/control/shift modifier key, then it returns true when the code is one of the matching
+   * left/right `codes` for that `key`. For example
+   *
+   * `keyOrCode` = 'Shift', `code` = 'ShiftLeft -> true
+   * `keyOrCode = 'Alt', `code` = 'AltRight' -> true
+   * `keyOrCode = 'Control`, `code` = 'KeyR' -> false
+   *
+   * @param keyOrCode - KeyboardEvent.key OR KeyboardEvent.code
+   * @param code - KeyboardEvent.code
+   */
+  areKeysEquivalent( keyOrCode: string, code: string ): boolean {
+    const equivalentModifierKeys = KeyboardUtils.MODIFIER_KEY_TO_CODE_MAP.get( keyOrCode );
+    if ( equivalentModifierKeys ) {
+      return equivalentModifierKeys.includes( code );
+    }
+    else {
+      return keyOrCode === code;
+    }
   },
 
   ALL_KEYS: ALL_KEYS
