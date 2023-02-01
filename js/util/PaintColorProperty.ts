@@ -66,7 +66,7 @@ export default class PaintColorProperty extends Property<Color> {
       luminanceFactor: 0,
 
       // Property options
-      useDeepEquality: true // We don't need to renotify for equivalent colors
+      valueComparisonStrategy: 'equalsFunction' // We don't need to renotify for equivalent colors
     }, providedOptions );
 
     super( initialColor, options );

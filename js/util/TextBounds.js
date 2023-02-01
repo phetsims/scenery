@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * Different methods of detection of text bounds.
@@ -87,6 +87,28 @@ const TextBounds = {
    * Returns a new Bounds2 that is the approximate bounds of the specified Text node.
    * @public
    *
+   * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
+   *
+   * @param {scenery.Text} text - The Text node
+   * @returns {Bounds2}
+   */
+  accurateCanvasBounds( text ) {
+    const context = scenery.scratchContext;
+    context.font = text._font.toCSS();
+    context.direction = 'ltr';
+    const metrics = context.measureText( text.renderedText );
+    return new Bounds2(
+      -metrics.actualBoundingBoxLeft,
+      -metrics.actualBoundingBoxAscent,
+      metrics.actualBoundingBoxRight,
+      metrics.actualBoundingBoxDescent
+    );
+  },
+
+  /**
+   * Returns a new Bounds2 that is the approximate bounds of the specified Text node.
+   * @public
+   *
    * This method repeatedly renders the text into a Canvas and checks for what pixels are filled. Iteratively doing this for each bound
    * (top/left/bottom/right) until a tolerance results in very accurate bounds of what is displayed.
    *
@@ -95,7 +117,7 @@ const TextBounds = {
    * @param {scenery.Text} text - The Text node
    * @returns {Bounds2}
    */
-  accurateCanvasBounds( text ) {
+  accurateCanvasBoundsFallback( text ) {
     // this seems to be slower than expected, mostly due to Font getters
     const svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText );
 

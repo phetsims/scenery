@@ -522,7 +522,7 @@ QUnit.test( 'Consistent and precise bounds range on Text', assert => {
 
 QUnit.test( 'Consistent and precise bounds range on Text', assert => {
   const text = new Text( '0\u0489' );
-  const textBounds = TextBounds.accurateCanvasBounds( text );
+  const textBounds = TextBounds.accurateCanvasBoundsFallback( text );
   assert.ok( textBounds.isConsistent, textBounds.toString() );
 
   // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)

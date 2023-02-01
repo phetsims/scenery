@@ -146,7 +146,8 @@ type SelfOptions = {
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
   moveOnHoldDelay?: number;
 
-  // Time interval at which the object will change position while the arrow key is held down, in ms
+  // Time interval at which the object will change position while the arrow key is held down, in ms. This must be larger
+  // than 0 to prevent dragging that is based on how often animation-frame steps occur.
   moveOnHoldInterval?: number;
 
   // Time interval at which holding down a hotkey group will trigger an associated listener, in ms
@@ -181,7 +182,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   private _dragDelta: number;
   private _shiftDragDelta: number;
   private _moveOnHoldDelay: number;
-  private _moveOnHoldInterval: number;
+  private _moveOnHoldInterval!: number;
   private _hotkeyHoldInterval: number;
 
   // Tracks the state of the keyboard. JavaScript doesn't handle multiple key presses, so we track which keys are
@@ -251,7 +252,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       drag: null,
       end: null,
       moveOnHoldDelay: 0,
-      moveOnHoldInterval: 0,
+      moveOnHoldInterval: 1000 / 60, // an average dt value at 60 frames a second
       hotkeyHoldInterval: 800,
       phetioEnabledPropertyInstrumented: false,
       tandem: Tandem.REQUIRED,
@@ -277,7 +278,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
     this._dragDelta = options.dragDelta;
     this._shiftDragDelta = options.shiftDragDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
-    this._moveOnHoldInterval = options.moveOnHoldInterval;
+    this.moveOnHoldInterval = options.moveOnHoldInterval;
     this._hotkeyHoldInterval = options.hotkeyHoldInterval;
     this._keyboardDragDirection = options.keyboardDragDirection;
 
@@ -330,6 +331,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         // move object on first down before a delay
         const positionDelta = this.shiftKeyDown() ? this._shiftDragDelta : this._dragDelta;
         this.updatePosition( positionDelta );
+        this.moveOnHoldIntervalCounter = 0;
       }
     }, {
       parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
@@ -472,7 +474,11 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   /**
    * Setter for the moveOnHoldInterval property, see options.moveOnHoldInterval for more info.
    */
-  public set moveOnHoldInterval( moveOnHoldInterval: number ) { this._moveOnHoldInterval = moveOnHoldInterval; }
+  public set moveOnHoldInterval( moveOnHoldInterval: number ) {
+    assert && assert( moveOnHoldInterval > 0, 'if the moveOnHoldInterval is 0, then the dragging will be ' +
+                                              'dependent on how often the dragListener is stepped' );
+    this._moveOnHoldInterval = moveOnHoldInterval;
+  }
 
   /**
    * Getter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
@@ -668,6 +674,14 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         // Initial delay is complete, now we will move every moveOnHoldInterval
         if ( this.delayComplete && this.moveOnHoldIntervalCounter >= this._moveOnHoldInterval ) {
           movable = true;
+
+          // If updating as a result of the moveOnHoldIntervalCounter, don't automatically throw away any "remainder"
+          // time by setting back to 0. We want to accumulate them so that, no matter the clock speed of the
+          // runtime, the long-term effect of the drag is consistent.
+          const overflowTime = this.moveOnHoldIntervalCounter - this._moveOnHoldInterval; // ms
+
+          // This doesn't take into account if 2 updatePosition calls should occur based on the current timing.
+          this.moveOnHoldIntervalCounter = overflowTime;
         }
 
         positionDelta = movable ? ( this.shiftKeyDown() ? this._shiftDragDelta : this._dragDelta ) : 0;
@@ -811,7 +825,6 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         this.dragEmitter.emit();
       }
     }
-    this.moveOnHoldIntervalCounter = 0;
   }
 
   /**
