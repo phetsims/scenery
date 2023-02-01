@@ -71,7 +71,6 @@
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -80,7 +79,7 @@ import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { TInputListener, Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerNullableCallback, PressListenerOptions, scenery, SceneryEvent, TransformTracker } from '../imports.js';
+import { Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerNullableCallback, PressListenerOptions, scenery, SceneryEvent, TInputListener, TransformTracker } from '../imports.js';
 import Property from '../../../axon/js/Property.js';
 
 // Scratch vectors used to prevent allocations
@@ -107,7 +106,7 @@ type SelfOptions<Listener extends DragListener> = {
 
   // If provided, this will be the conversion between the parent (view) and model coordinate
   // frames. Usually most useful when paired with the positionProperty.
-  transform?: Transform3 | null;
+  transform?: Transform3 | TReadOnlyProperty<Transform3> | null;
 
   // If provided, the model position will be constrained to be inside these bounds.
   dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
@@ -246,19 +245,7 @@ export default class DragListener extends PressListener implements TInputListene
       phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
     }, providedOptions );
 
-    assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
-    assert && assert( typeof options.applyOffset === 'boolean', 'applyOffset should be a boolean' );
-    assert && assert( typeof options.trackAncestors === 'boolean', 'trackAncestors should be a boolean' );
-    assert && assert( typeof options.translateNode === 'boolean', 'translateNode should be a boolean' );
-    assert && assert( options.transform === null || options.transform instanceof Transform3, 'transform, if provided, should be a Transform3' );
-    assert && assert( options.positionProperty === null || options.positionProperty instanceof ReadOnlyProperty, 'positionProperty, if provided, should be a Property' );
     assert && assert( !( options as unknown as { dragBounds: Bounds2 } ).dragBounds, 'options.dragBounds was removed in favor of options.dragBoundsProperty' );
-    assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof ReadOnlyProperty, 'dragBoundsProperty, if provided, should be a Property' );
-    assert && assert( options.mapPosition === null || typeof options.mapPosition === 'function', 'mapPosition, if provided, should be a function' );
-    assert && assert( options.offsetPosition === null || typeof options.offsetPosition === 'function', 'offsetPosition, if provided, should be a function' );
-    assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );
-    assert && assert( options.end === null || typeof options.end === 'function', 'end, if provided, should be a function' );
-    assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
     assert && assert( !options.useParentOffset || options.positionProperty, 'If useParentOffset is set, a positionProperty is required' );
 
     assert && assert(
@@ -593,7 +580,9 @@ export default class DragListener extends PressListener implements TInputListene
    */
   protected parentToModelPoint( parentPoint: Vector2 ): Vector2 {
     if ( this._transform ) {
-      this._transform.getInverse().multiplyVector2( parentPoint );
+      const transform = this._transform instanceof Transform3 ? this._transform : this._transform.value;
+
+      transform.getInverse().multiplyVector2( parentPoint );
     }
     return parentPoint;
   }
@@ -608,7 +597,9 @@ export default class DragListener extends PressListener implements TInputListene
    */
   protected modelToParentPoint( modelPoint: Vector2 ): Vector2 {
     if ( this._transform ) {
-      this._transform.getMatrix().multiplyVector2( modelPoint );
+      const transform = this._transform instanceof Transform3 ? this._transform : this._transform.value;
+
+      transform.getMatrix().multiplyVector2( modelPoint );
     }
     return modelPoint;
   }
@@ -767,20 +758,18 @@ export default class DragListener extends PressListener implements TInputListene
   /**
    * Sets the drag transform of the listener.
    */
-  public setTransform( transform: Transform3 | null ): void {
-    assert && assert( transform === null || transform instanceof Transform3 );
-
+  public setTransform( transform: Transform3 | TReadOnlyProperty<Transform3> | null ): void {
     this._transform = transform;
   }
 
-  public set transform( transform: Transform3 | null ) { this.setTransform( transform ); }
+  public set transform( transform: Transform3 | TReadOnlyProperty<Transform3> | null ) { this.setTransform( transform ); }
 
-  public get transform(): Transform3 | null { return this.getTransform(); }
+  public get transform(): Transform3 | TReadOnlyProperty<Transform3> | null { return this.getTransform(); }
 
   /**
    * Returns the transform of the listener.
    */
-  public getTransform(): Transform3 | null {
+  public getTransform(): Transform3 | TReadOnlyProperty<Transform3> | null {
     return this._transform;
   }
 
