@@ -669,6 +669,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         if ( this.moveOnHoldDelayCounter >= this._moveOnHoldDelay && !this.delayComplete ) {
           movable = true;
           this.delayComplete = true;
+          this.moveOnHoldIntervalCounter = 0;
         }
 
         // Initial delay is complete, now we will move every moveOnHoldInterval
