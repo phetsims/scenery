@@ -76,7 +76,7 @@ export default class NodeLayoutConstraint extends LayoutConstraint {
     super( ancestorNode );
 
     this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
-      useDeepEquality: true
+      valueComparisonStrategy: 'equalsFunction'
     } );
 
     this.preferredWidthProperty = options.preferredWidthProperty;

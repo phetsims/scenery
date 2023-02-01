@@ -48,7 +48,7 @@ export default class ProfileColorProperty extends ColorProperty {
 
       // So that notifications won't occur when we change from different objects representing the same color.
       // We should never be mutating the Color objects used for ProfileColorProperty.
-      useDeepEquality: true
+      valueComparisonStrategy: 'equalsFunction'
     }, providedOptions );
 
     const tandem = options.tandem;
