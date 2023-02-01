@@ -331,6 +331,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         // move object on first down before a delay
         const positionDelta = this.shiftKeyDown() ? this._shiftDragDelta : this._dragDelta;
         this.updatePosition( positionDelta );
+        this.moveOnHoldIntervalCounter = 0;
       }
     }, {
       parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
@@ -673,6 +674,14 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         // Initial delay is complete, now we will move every moveOnHoldInterval
         if ( this.delayComplete && this.moveOnHoldIntervalCounter >= this._moveOnHoldInterval ) {
           movable = true;
+
+          // If updating as a result of the moveOnHoldIntervalCounter, don't automatically throw away any "remainder"
+          // time by setting back to 0. We want to accumulate them so that, no matter the clock speed of the
+          // runtime, the long-term effect of the drag is consistent.
+          const overflowTime = this.moveOnHoldIntervalCounter - this._moveOnHoldInterval; // ms
+
+          // This doesn't take into account if 2 updatePosition calls should occur based on the current timing.
+          this.moveOnHoldIntervalCounter = overflowTime;
         }
 
         positionDelta = movable ? ( this.shiftKeyDown() ? this._shiftDragDelta : this._dragDelta ) : 0;
@@ -816,7 +825,6 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         this.dragEmitter.emit();
       }
     }
-    this.moveOnHoldIntervalCounter = 0;
   }
 
   /**
