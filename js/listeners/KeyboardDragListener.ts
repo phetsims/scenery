@@ -1,4 +1,4 @@
-// Copyright 2019-2022, University of Colorado Boulder
+// Copyright 2019-2023, University of Colorado Boulder
 
 /**
  * A general type for keyboard dragging. Objects can be dragged in one or two dimensions with the arrow keys and with
