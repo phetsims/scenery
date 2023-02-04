@@ -1,4 +1,4 @@
-// Copyright 2019-2022, University of Colorado Boulder
+// Copyright 2019-2023, University of Colorado Boulder
 
 /**
  * A general type for keyboard dragging. Objects can be dragged in one or two dimensions with the arrow keys and with
@@ -669,6 +669,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         if ( this.moveOnHoldDelayCounter >= this._moveOnHoldDelay && !this.delayComplete ) {
           movable = true;
           this.delayComplete = true;
+          this.moveOnHoldIntervalCounter = 0;
         }
 
         // Initial delay is complete, now we will move every moveOnHoldInterval
