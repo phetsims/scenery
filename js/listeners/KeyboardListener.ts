@@ -287,15 +287,19 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     }
 
     if ( this._listenerFireTrigger === 'up' || this._listenerFireTrigger === 'both' ) {
-      this._keyGroups.forEach( keyGroup => {
-        const eventCode = KeyboardUtils.getEventCode( event.domEvent )!;
-        assert && assert( eventCode, 'No event code found for KeyboardEvent' );
-        if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.modifierKeys ) &&
-             KeyboardUtils.areKeysEquivalent( keyGroup.key, eventCode ) ) {
-          this.keysDown = false;
-          this.fireCallback( event, keyGroup );
-        }
-      } );
+      const eventCode = KeyboardUtils.getEventCode( event.domEvent )!;
+
+      // Screen readers may send key events with no code for unknown reasons, we need to be graceful when that
+      // happens, see https://github.com/phetsims/scenery/issues/1534.
+      if ( eventCode ) {
+        this._keyGroups.forEach( keyGroup => {
+          if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.modifierKeys ) &&
+               KeyboardUtils.areKeysEquivalent( keyGroup.key, eventCode ) ) {
+            this.keysDown = false;
+            this.fireCallback( event, keyGroup );
+          }
+        } );
+      }
     }
 
     this.manageEvent( event );
