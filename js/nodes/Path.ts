@@ -23,11 +23,11 @@ const DEFAULT_OPTIONS = {
   boundsMethod: 'accurate' as const
 };
 
-export type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
+export type PathBoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
 
 type SelfOptions = {
   shape?: Shape | string | null;
-  boundsMethod?: BoundsMethod;
+  boundsMethod?: PathBoundsMethod;
 };
 type ParentOptions = PaintableOptions & NodeOptions;
 export type PathOptions = SelfOptions & ParentOptions;
@@ -47,7 +47,7 @@ export default class Path extends Paintable( Node ) {
   private _strokedShape: Shape | null;
 
   // (scenery-internal)
-  public _boundsMethod: BoundsMethod;
+  public _boundsMethod: PathBoundsMethod;
 
   // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
   // immutable, and if the Shape becomes immutable, then the listeners are removed.
@@ -276,7 +276,7 @@ export default class Path extends Paintable( Node ) {
    * - 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
    * - 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
    */
-  public setBoundsMethod( boundsMethod: BoundsMethod ): this {
+  public setBoundsMethod( boundsMethod: PathBoundsMethod ): this {
     assert && assert( boundsMethod === 'accurate' ||
                       boundsMethod === 'unstroked' ||
                       boundsMethod === 'tightPadding' ||
@@ -291,14 +291,14 @@ export default class Path extends Paintable( Node ) {
     return this;
   }
 
-  public set boundsMethod( value: BoundsMethod ) { this.setBoundsMethod( value ); }
+  public set boundsMethod( value: PathBoundsMethod ) { this.setBoundsMethod( value ); }
 
-  public get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
+  public get boundsMethod(): PathBoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Returns the current bounds method. See setBoundsMethod for details.
    */
-  public getBoundsMethod(): BoundsMethod {
+  public getBoundsMethod(): PathBoundsMethod {
     return this._boundsMethod;
   }
 
