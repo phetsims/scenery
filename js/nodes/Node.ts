@@ -4130,7 +4130,7 @@ class Node extends ParallelDOM {
    * Pickable can take one of three values:
    * - null: (default) pass-through behavior. Hit-testing will prune this subtree if there are no
    *         ancestors/descendants with either pickable: true set or with any input listeners.
-   * - false: Hit-testing is pruned, nothing under a pickable: false will respond to events or be picked.
+   * - false: Hit-testing is pruned, nothing in this node or its subtree will respond to events or be picked.
    * - true: Hit-testing will not be pruned in this subtree, except for pickable: false cases.
    *
    * Hit testing is accomplished mainly with node.trailUnderPointer() and node.trailUnderPoint(), following the
