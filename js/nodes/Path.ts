@@ -23,7 +23,7 @@ const DEFAULT_OPTIONS = {
   boundsMethod: 'accurate' as const
 };
 
-type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
+export type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
 
 type SelfOptions = {
   shape?: Shape | string | null;
