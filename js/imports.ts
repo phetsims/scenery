@@ -86,7 +86,6 @@ export { default as Node, REQUIRES_BOUNDS_OPTION_KEYS } from './nodes/Node.js';
 export type { NodeOptions, NodeBoundsBasedTranslationOptions, NodeTranslationOptions, NodeTransformOptions, RendererType } from './nodes/Node.js';
 export { default as Picker } from './util/Picker.js';
 export { default as RendererSummary } from './util/RendererSummary.js';
-export { default as NodeProperty } from './util/NodeProperty.js';
 export { default as PDOMDisplaysInfo } from './accessibility/pdom/PDOMDisplaysInfo.js';
 export { default as WidthSizable, isWidthSizable, extendsWidthSizable, WIDTH_SIZABLE_OPTION_KEYS } from './layout/WidthSizable.js';
 export type { WidthSizableNode, WidthSizableOptions } from './layout/WidthSizable.js';
