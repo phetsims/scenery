@@ -7,7 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import ReadOnlyProperty, { PropertyIO } from '../../../axon/js/ReadOnlyProperty.js';
+import Property from '../../../axon/js/Property.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
@@ -52,7 +53,7 @@ const ColorDef = {
 
 ColorDef.ColorDefIO = new IOType( 'ColorDefIO', {
   isValidValue: ColorDef.isColorDef,
-  supertype: NullableIO( OrIO( [ StringIO, Color.ColorIO, ReferenceIO( PropertyIO( NullableIO( OrIO( [ StringIO, Color.ColorIO ] ) ) ) ) ] ) )
+  supertype: NullableIO( OrIO( [ StringIO, Color.ColorIO, ReferenceIO( Property.PropertyIO( NullableIO( OrIO( [ StringIO, Color.ColorIO ] ) ) ) ) ] ) )
 } );
 
 scenery.register( 'ColorDef', ColorDef );
