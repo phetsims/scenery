@@ -157,7 +157,7 @@ type SelfOptions<Listener extends DragListener> = {
   // Generally DragListener should not respond to click events, but there are some exceptions where drag
   // functionality is nice but a click should still activate the component. See
   // https://github.com/phetsims/sun/issues/696
-  allowClick?: boolean;
+  canClick?: boolean;
 };
 export type DragListenerOptions<Listener extends DragListener> = SelfOptions<Listener> & PressListenerOptions<Listener>;
 type CreateForwardingListenerOptions = {
@@ -184,7 +184,7 @@ export default class DragListener extends PressListener implements TInputListene
   private _dragBoundsProperty: NonNullable<RequiredOption<SelfOptions<DragListener>, 'dragBoundsProperty'>>;
   private _start: RequiredOption<SelfOptions<PressedDragListener>, 'start'>;
   private _end: RequiredOption<SelfOptions<PressedDragListener>, 'end'>;
-  private _allowClick: RequiredOption<SelfOptions<DragListener>, 'allowClick'>;
+  private _canClick: RequiredOption<SelfOptions<DragListener>, 'canClick'>;
 
   // The point of the drag in the target's global coordinate frame. Updated with mutation.
   private _globalPoint: Vector2;
@@ -235,7 +235,7 @@ export default class DragListener extends PressListener implements TInputListene
       translateNode: false,
       mapPosition: null,
       offsetPosition: null,
-      allowClick: false,
+      canClick: false,
 
       tandem: Tandem.REQUIRED,
 
@@ -268,7 +268,7 @@ export default class DragListener extends PressListener implements TInputListene
     this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
     this._start = options.start;
     this._end = options.end;
-    this._allowClick = options.allowClick;
+    this._canClick = options.canClick;
     this.isUserControlledProperty = this.isPressedProperty;
     this._globalPoint = new Vector2( 0, 0 );
     this._localPoint = new Vector2( 0, 0 );
@@ -389,10 +389,10 @@ export default class DragListener extends PressListener implements TInputListene
   /**
    * Components using DragListener should generally not be activated with a click. A single click from alternative
    * input would pick up the component then immediately release it. But occasionally that is desirable and can be
-   * controlled with the allowClick option.
+   * controlled with the canClick option.
    */
   public override canClick(): boolean {
-    return super.canClick() && this._allowClick;
+    return super.canClick() && this._canClick;
   }
 
   /**
