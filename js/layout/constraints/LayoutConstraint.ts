@@ -252,6 +252,8 @@ export default abstract class LayoutConstraint {
     for ( let i = 0; i < listenedNodes.length; i++ ) {
       this.removeNode( listenedNodes[ i ] );
     }
+
+    this.finishedLayoutEmitter.dispose();
   }
 }
 
