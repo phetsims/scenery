@@ -13,11 +13,12 @@
 - Inheritance: _______
 - Mixin: _ _ _ _ _
 - Composition: _ _ {{VARIABLE}} _ >
+- Optional Composition: --{{VARIABLE}}*_>
 
 ## FlowBox Hierarchy and Composition
 ```mermaid
 flowchart TD
-    layoutCell --- MarginLayoutCell
+    LayoutCell --- MarginLayoutCell
     MarginLayoutCell --- FlowCell
     FlowCell -.cells.-> FlowConstraint
     
@@ -37,7 +38,7 @@ flowchart TD
 ## GridBox Hierarchy & Composition
 ```mermaid
 flowchart TD
-    layoutCell --- MarginLayoutCell
+    LayoutCell --- MarginLayoutCell
     MarginLayoutCell --- GridCell
     GridCell -.cells.-> GridConstraint
     
@@ -71,8 +72,8 @@ flowchart TD
 ```mermaid
 flowchart TD
     Node --- WidthSizable & HeightSizable --- Sizeable --- AlignBox
-    AlignGroup -.group.-> AlignBox
-    AlignBox -.alignBoxes.->AlignGroup
+    AlignGroup -.group*.-> AlignBox
+    AlignBox -.alignBoxes*.->AlignGroup
 ```
 
 ## LayoutLine Hierarchy
