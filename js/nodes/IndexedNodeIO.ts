@@ -23,6 +23,11 @@ import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import { Node, scenery } from '../imports.js';
 
+export type IndexedNodeIOParent = {
+  onIndexedNodeIOChildMoved: ( node: Node ) => void;
+};
+type IndexedNodeIOObserver = Partial<IndexedNodeIOParent> & Node;
+
 // In order to support unlinking from listening to the index property, keep an indexed map to callback functions
 const map: Record<number, () => void> = {};
 
@@ -31,18 +36,18 @@ let index = 0;
 
 // Move this node one index forward in each of its parents, jumping over invisible nodes. If the Node is already at the front, this is a no-op.
 function moveForward( node: Node ): void {
-  node._parents.forEach( parent => moveChild( parent, node, +1 ) );
+  node._parents.forEach( parent => moveChild( parent as IndexedNodeIOObserver, node, +1 ) );
 }
 
 // Move this node one index backward in each of its parents, jumping over invisible nodes.  If the Node is already at the back, this is a no-op.
 function moveBackward( node: Node ): void {
-  node._parents.forEach( parent => moveChild( parent, node, -1 ) );
+  node._parents.forEach( parent => moveChild( parent as IndexedNodeIOObserver, node, -1 ) );
 }
 
 /**
  * Moves the specified child by +1/-1 indices, without going past the beginning or end.
  */
-function moveChild( parent: Node, child: Node, delta: number ): void {
+function moveChild( parent: IndexedNodeIOObserver, child: Node, delta: number ): void {
   const index = parent.indexOfChild( child );
 
   let targetIndex = index + delta;
@@ -55,6 +60,8 @@ function moveChild( parent: Node, child: Node, delta: number ): void {
   if ( targetIndex >= 0 && targetIndex < parent.children.length ) {
     parent.moveChildToIndex( child, targetIndex );
   }
+
+  parent.onIndexedNodeIOChildMoved && parent.onIndexedNodeIOChildMoved( child );
 }
 
 const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
