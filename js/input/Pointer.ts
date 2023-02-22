@@ -30,7 +30,7 @@ import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import TAttachableInputListener from './TAttachableInputListener.js';
-import { TInputListener, scenery, SceneryEvent, Trail } from '../imports.js';
+import { scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
@@ -121,10 +121,9 @@ export default abstract class Pointer {
 
   /**
    * @param initialPoint
-   * @param initialDownState
    * @param type - the type of the pointer; can different for each subtype
    */
-  protected constructor( initialPoint: Vector2, initialDownState: boolean, type: PointerType ) {
+  protected constructor( initialPoint: Vector2, type: PointerType ) {
     assert && assert( initialPoint === null || initialPoint instanceof Vector2 );
     assert && assert( Object.getPrototypeOf( this ) !== Pointer.prototype, 'Pointer is an abstract class' );
 
@@ -132,7 +131,7 @@ export default abstract class Pointer {
     this.type = type;
     this.trail = null;
     this.inputEnabledTrail = null;
-    this.isDownProperty = new BooleanProperty( initialDownState );
+    this.isDownProperty = new BooleanProperty( false );
     this.attachedProperty = new BooleanProperty( false );
     this._listeners = [];
     this._attachedListener = null;
@@ -302,6 +301,49 @@ export default abstract class Pointer {
 
     this.attachedProperty.value = true;
     this._attachedListener = listener;
+  }
+
+  /**
+   * @returns - Whether the point changed
+   */
+  public updatePoint( point: Vector2, eventName = 'event' ): boolean {
+    const pointChanged = this.hasPointChanged( point );
+    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `pointer ${eventName} at ${point.toString()}` );
+
+    this.point = point;
+    return pointChanged;
+  }
+
+  /**
+   * Sets information in this Pointer for a given pointer down. (scenery-internal)
+   *
+   @returns - Whether the point changed
+   */
+  public down( event: Event ): void {
+    this.isDown = true;
+  }
+
+  /**
+   * Sets information in this Pointer for a given pointer up. (scenery-internal)
+   *
+   * @returns - Whether the point changed
+   */
+  public up( point: Vector2, event: Event ): boolean {
+
+    this.isDown = false;
+    return this.updatePoint( point, 'up' );
+  }
+
+  /**
+   * Sets information in this Pointer for a given pointer cancel. (scenery-internal)
+   *
+   * @returns - Whether the point changed
+   */
+  public cancel( point: Vector2 ): boolean {
+
+    this.isDown = false;
+
+    return this.updatePoint( point, 'cancel' );
   }
 
   /**

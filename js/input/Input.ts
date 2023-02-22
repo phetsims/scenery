@@ -397,9 +397,8 @@ export default class Input extends PhetioObject {
 
     this.mouseUpAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
-      const pointChanged = mouse.up( point, event );
       mouse.id = null;
-      this.upEvent<MouseEvent>( mouse, event, pointChanged );
+      this.upEvent<MouseEvent>( mouse, event, point );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseUpAction' ),
@@ -414,8 +413,7 @@ export default class Input extends PhetioObject {
     this.mouseDownAction = new PhetioAction( ( id: number, point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
       mouse.id = id;
-      const pointChanged = mouse.down( point, event );
-      this.downEvent<MouseEvent>( mouse, event, pointChanged );
+      this.downEvent<MouseEvent>( mouse, event, point );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseDownAction' ),
@@ -430,7 +428,7 @@ export default class Input extends PhetioObject {
 
     this.mouseMoveAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
-      mouse.move( point, event );
+      mouse.move( point );
       this.moveEvent<MouseEvent>( mouse, event );
     }, {
       phetioPlayback: true,
@@ -446,7 +444,7 @@ export default class Input extends PhetioObject {
 
     this.mouseOverAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
-      mouse.over( point, event );
+      mouse.over( point );
       // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
     }, {
       phetioPlayback: true,
@@ -461,7 +459,7 @@ export default class Input extends PhetioObject {
 
     this.mouseOutAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
-      mouse.out( point, event );
+      mouse.out( point );
       // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
     }, {
       phetioPlayback: true,
@@ -498,7 +496,7 @@ export default class Input extends PhetioObject {
     this.touchStartAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = new Touch( id, point, event );
       this.addPointer( touch );
-      this.downEvent<TouchEvent | PointerEvent>( touch, event, false );
+      this.downEvent<TouchEvent | PointerEvent>( touch, event, point );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'touchStartAction' ),
@@ -515,8 +513,7 @@ export default class Input extends PhetioObject {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
         assert && assert( touch instanceof Touch ); // eslint-disable-line no-simple-type-checking-assertions, bad-sim-text
-        const pointChanged = touch.end( point, event );
-        this.upEvent<TouchEvent | PointerEvent>( touch, event, pointChanged );
+        this.upEvent<TouchEvent | PointerEvent>( touch, event, point );
         this.removePointer( touch );
       }
     }, {
@@ -535,7 +532,7 @@ export default class Input extends PhetioObject {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
         assert && assert( touch instanceof Touch ); // eslint-disable-line no-simple-type-checking-assertions, bad-sim-text
-        touch.move( point, event );
+        touch.move( point );
         this.moveEvent<TouchEvent | PointerEvent>( touch, event );
       }
     }, {
@@ -555,8 +552,7 @@ export default class Input extends PhetioObject {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
         assert && assert( touch instanceof Touch ); // eslint-disable-line no-simple-type-checking-assertions, bad-sim-text
-        const pointChanged = touch.cancel( point, event );
-        this.cancelEvent<TouchEvent | PointerEvent>( touch, event, pointChanged );
+        this.cancelEvent<TouchEvent | PointerEvent>( touch, event, point );
         this.removePointer( touch );
       }
     }, {
@@ -574,7 +570,7 @@ export default class Input extends PhetioObject {
     this.penStartAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = new Pen( id, point, event );
       this.addPointer( pen );
-      this.downEvent<PointerEvent>( pen, event, false );
+      this.downEvent<PointerEvent>( pen, event, point );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'penStartAction' ),
@@ -590,8 +586,7 @@ export default class Input extends PhetioObject {
     this.penEndAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
-        const pointChanged = pen.end( point, event );
-        this.upEvent<PointerEvent>( pen, event, pointChanged );
+        this.upEvent<PointerEvent>( pen, event, point );
         this.removePointer( pen );
       }
     }, {
@@ -609,7 +604,7 @@ export default class Input extends PhetioObject {
     this.penMoveAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
-        pen.move( point, event );
+        pen.move( point );
         this.moveEvent<PointerEvent>( pen, event );
       }
     }, {
@@ -628,8 +623,7 @@ export default class Input extends PhetioObject {
     this.penCancelAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
-        const pointChanged = pen.cancel( point, event );
-        this.cancelEvent<PointerEvent>( pen, event, pointChanged );
+        this.cancelEvent<PointerEvent>( pen, event, point );
         this.removePointer( pen );
       }
     }, {
@@ -1652,7 +1646,7 @@ export default class Input extends PhetioObject {
   /**
    * Called for each logical "up" event, for any pointer type.
    */
-  private upEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ): void {
+  private upEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, point: Vector2 ): void {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
@@ -1660,6 +1654,8 @@ export default class Input extends PhetioObject {
     if ( this.isTargetUnderPDOM( event.target as HTMLElement ) ) {
       return;
     }
+
+    const pointChanged = pointer.up( point, event );
 
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `upEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
@@ -1680,7 +1676,7 @@ export default class Input extends PhetioObject {
   /**
    * Called for each logical "down" event, for any pointer type.
    */
-  private downEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ): void {
+  private downEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, point: Vector2 ): void {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
@@ -1689,11 +1685,15 @@ export default class Input extends PhetioObject {
       return;
     }
 
+    const pointChanged = pointer.updatePoint( point );
+
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `downEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents<DOMEvent>( pointer, event, pointChanged );
+
+    pointer.down( event );
 
     this.dispatchEvent<DOMEvent>( eventTrail, 'down', pointer, event, true );
 
@@ -1716,7 +1716,10 @@ export default class Input extends PhetioObject {
   /**
    * Called for each logical "cancel" event, for any pointer type.
    */
-  private cancelEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ): void {
+  private cancelEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, point: Vector2 ): void {
+
+    const pointChanged = pointer.cancel( point );
+
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `cancelEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 

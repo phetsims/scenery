@@ -17,49 +17,23 @@ export default class Touch extends Pointer {
   public id: number;
 
   public constructor( id: number, point: Vector2, event: Event ) {
-    super( point, true, 'touch' ); // true: touches always start in the down state
+    super( point, 'touch' ); // true: touches always start in the down state
 
     this.id = id;
 
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
   }
 
-
   /**
    * Sets information in this Touch for a given touch move. (scenery-internal)
    *
    * @returns - Whether the point changed
    */
-  public move( point: Vector2, event: Event ): boolean {
+  public move( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
-    return pointChanged;
-  }
 
-  /**
-   * Sets information in this Touch for a given touch end. (scenery-internal)
-   *
-   * @returns - Whether the point changed
-   */
-  public end( point: Vector2, event: Event ): boolean {
-    const pointChanged = this.hasPointChanged( point );
-
-    this.point = point;
-    this.isDown = false;
-    return pointChanged;
-  }
-
-  /**
-   * Sets information in this Touch for a given touch cancel. (scenery-internal)
-   *
-   * @returns - Whether the point changed
-   */
-  public cancel( point: Vector2, event: Event ): boolean {
-    const pointChanged = this.hasPointChanged( point );
-
-    this.point = point;
-    this.isDown = false;
     return pointChanged;
   }
 

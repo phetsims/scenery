@@ -15,7 +15,7 @@ export default class Pen extends Pointer {
   public id: number;
 
   public constructor( id: number, point: Vector2, event: Event ) {
-    super( point, true, 'pen' ); // true: pen pointers always start in the down state
+    super( point, 'pen' ); // true: pen pointers always start in the down state
 
     this.id = id;
 
@@ -27,36 +27,11 @@ export default class Pen extends Pointer {
    *
    * @returns Whether the point changed
    */
-  public move( point: Vector2, event: Event ): boolean {
+  public move( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
-    return pointChanged;
-  }
 
-  /**
-   * Sets information in this Pen for a given end. (scenery-internal)
-   *
-   * @returns Whether the point changed
-   */
-  public end( point: Vector2, event: Event ): boolean {
-    const pointChanged = this.hasPointChanged( point );
-
-    this.point = point;
-    this.isDown = false;
-    return pointChanged;
-  }
-
-  /**
-   * Sets information in this Pen for a given cancel. (scenery-internal)
-   *
-   * @returns Whether the point changed
-   */
-  public cancel( point: Vector2, event: Event ): boolean {
-    const pointChanged = this.hasPointChanged( point );
-
-    this.point = point;
-    this.isDown = false;
     return pointChanged;
   }
 

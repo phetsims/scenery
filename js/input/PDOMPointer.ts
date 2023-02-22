@@ -28,7 +28,7 @@ export default class PDOMPointer extends Pointer {
 
   public constructor( display: Display ) {
     // We'll start with a defined Vector2, so that pointers always have points
-    super( Vector2.ZERO, false, 'pdom' );
+    super( Vector2.ZERO, 'pdom' );
 
     this.display = display;
 

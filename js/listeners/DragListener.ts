@@ -696,7 +696,9 @@ export default class DragListener extends PressListener implements TInputListene
    * NOTE: Do not call directly. See the press method instead.
    */
   public touchenter( event: PressListenerEvent ): void {
-    this.tryTouchSnag( event );
+    if ( event.pointer.isDownProperty.value ) {
+      this.tryTouchSnag( event );
+    }
   }
 
   /**

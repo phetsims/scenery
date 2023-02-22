@@ -28,7 +28,7 @@ export default class Mouse extends Pointer {
   public wheelDeltaMode: number;
 
   public constructor( point: Vector2 ) {
-    super( point, false, 'mouse' );
+    super( point, 'mouse' );
 
     this.id = null;
     this.leftDown = false;
@@ -45,15 +45,10 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  public down( point: Vector2, event: Event ): boolean {
+  public override down( event: Event ): void {
     assert && assert( event instanceof MouseEvent ); // eslint-disable-line no-simple-type-checking-assertions
     const mouseEvent = event as MouseEvent;
 
-    const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse down at ${point.toString()}` );
-
-    this.point = point;
-    this.isDown = true;
     switch( mouseEvent.button ) {
       case 0:
         this.leftDown = true;
@@ -67,7 +62,7 @@ export default class Mouse extends Pointer {
       default:
       // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
     }
-    return pointChanged;
+    return super.down( event );
   }
 
   /**
@@ -75,15 +70,10 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  public up( point: Vector2, event: Event ): boolean {
+  public override up( point: Vector2, event: Event ): boolean {
     assert && assert( event instanceof MouseEvent ); // eslint-disable-line no-simple-type-checking-assertions
     const mouseEvent = event as MouseEvent;
 
-    const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse up at ${point.toString()}` );
-
-    this.point = point;
-    this.isDown = false;
     switch( mouseEvent.button ) {
       case 0:
         this.leftDown = false;
@@ -97,7 +87,8 @@ export default class Mouse extends Pointer {
       default:
       // no-op until we refactor things, see https://github.com/phetsims/scenery/issues/813
     }
-    return pointChanged;
+
+    return super.up( point, event );
   }
 
   /**
@@ -105,11 +96,12 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  public move( point: Vector2, event: Event ): boolean {
+  public move( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse move at ${point.toString()}` );
 
     this.point = point;
+
     return pointChanged;
   }
 
@@ -118,11 +110,12 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  public over( point: Vector2, event: Event ): boolean {
+  public over( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse over at ${point.toString()}` );
 
     this.point = point;
+
     return pointChanged;
   }
 
@@ -131,7 +124,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  public out( point: Vector2, event: Event ): boolean {
+  public out( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
 
