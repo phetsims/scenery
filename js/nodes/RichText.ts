@@ -2067,7 +2067,10 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
   public override clean(): void {
     super.clean();
 
-    this.fireListener && this.removeInputListener( this.fireListener );
+    if ( this.fireListener ) {
+      this.removeInputListener( this.fireListener );
+      this.fireListener.dispose();
+    }
     this.fireListener = null;
     if ( this.accessibleInputListener ) {
       this.removeInputListener( this.accessibleInputListener );
