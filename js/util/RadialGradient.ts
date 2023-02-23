@@ -109,7 +109,7 @@ export default class RadialGradient extends Gradient {
     const maxRadius = this.maxRadius;
     const minRadius = this.minRadius;
 
-    //TODO: replace with dot.Utils.linear
+    //TODO: replace with phet.dot.Utils.linear
     // maps x linearly from [a0,b0] => [a1,b1]
     function linearMap( a0: number, b0: number, a1: number, b1: number, x: number ): number {
       return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );

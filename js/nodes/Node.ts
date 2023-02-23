@@ -2047,10 +2047,10 @@ class Node extends ParallelDOM {
    * returned value.
    *
    * For example, hit-testing a simple shape (with no pickability) will return null:
-   * > new phet.scenery.Circle( 20 ).hitTest( dot.v2( 0, 0 ) ); // null
+   * > new phet.scenery.Circle( 20 ).hitTest( phet.dot.v2( 0, 0 ) ); // null
    *
    * If the same shape is made to be pickable, it will return a trail:
-   * > new phet.scenery.Circle( 20, { pickable: true } ).hitTest( dot.v2( 0, 0 ) );
+   * > new phet.scenery.Circle( 20, { pickable: true } ).hitTest( phet.dot.v2( 0, 0 ) );
    * > // returns a Trail with the circle as the only node.
    *
    * It will return the result that is visually stacked on top, so e.g.:
@@ -2060,7 +2060,7 @@ class Node extends ParallelDOM {
    * >     new phet.scenery.Circle( 20 ),
    * >     new phet.scenery.Circle( 15 )
    * >   ]
-   * > } ).hitTest( dot.v2( 0, 0 ) ); // returns the "top-most" circle (the one with radius:15).
+   * > } ).hitTest( phet.dot.v2( 0, 0 ) ); // returns the "top-most" circle (the one with radius:15).
    *
    * This is used by Scenery's internal input system by calling hitTest on a Display's rootNode with the
    * global-coordinate point.
@@ -4515,7 +4515,7 @@ class Node extends ParallelDOM {
    * default behavior.
    */
   public setMouseArea( area: Shape | Bounds2 | null ): this {
-    assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
+    assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a phet.kite.Shape, phet.dot.Bounds2, or null' );
 
     if ( this._mouseArea !== area ) {
       this._mouseArea = area; // TODO: could change what is under the mouse, invalidate!
@@ -4553,7 +4553,7 @@ class Node extends ParallelDOM {
    * default behavior.
    */
   public setTouchArea( area: Shape | Bounds2 | null ): this {
-    assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
+    assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a phet.kite.Shape, phet.dot.Bounds2, or null' );
 
     if ( this._touchArea !== area ) {
       this._touchArea = area; // TODO: could change what is under the touch, invalidate!
@@ -4591,7 +4591,7 @@ class Node extends ParallelDOM {
    * (anything outside is fully transparent).
    */
   public setClipArea( shape: Shape | null ): void {
-    assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
+    assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a phet.kite.Shape, or null' );
 
     if ( this.clipArea !== shape ) {
       this.clipAreaProperty.value = shape;

@@ -72,7 +72,7 @@ function strokeEqualsFill( assert, shapeToStroke, shapeToFill, strokeNodeSetup, 
     scene.addChild( node );
     // node.validateBounds();
     // scene.addChild( new Path( {
-    //   shape: kite.Shape.bounds( node.getSelfBounds() ),
+    //   shape: phet.kite.Shape.bounds( node.getSelfBounds() ),
     //   fill: 'rgba(0,0,255,0.5)'
     // } ) );
   }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
