@@ -36,8 +36,8 @@
   window.axon = axon;
   window.phetCore = phetCore;
 
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     width: 2048,
     height: 1024,
     backgroundColor: '#eee',
@@ -47,7 +47,7 @@
   document.body.appendChild( display.domElement );
   display.domElement.style.position = 'relative';
 
-  var image = new scenery.Image( '../assets/sharpness-test-pattern.png', {
+  var image = new phet.scenery.Image( '../assets/sharpness-test-pattern.png', {
     mipmap: true,
     initialLevel: 7,
     maxLevel: 7,
@@ -55,14 +55,14 @@
   } );
 
   const images = [
-    new scenery.Image( '../assets/sharpness-test-pattern.png', {
+    new phet.scenery.Image( '../assets/sharpness-test-pattern.png', {
       mipmap: true,
       initialLevel: 7,
       maxLevel: 7,
       mipmapBias: 0,
       renderer: 'svg'
     } ),
-    new scenery.Image( '../assets/sharpness-test-pattern.png', {
+    new phet.scenery.Image( '../assets/sharpness-test-pattern.png', {
       mipmap: true,
       initialLevel: 7,
       maxLevel: 7,
@@ -71,7 +71,7 @@
     } )
   ];
 
-  var imageContainer = new scenery.HBox( {
+  var imageContainer = new phet.scenery.HBox( {
     children: images
   } );
   scene.addChild( imageContainer );

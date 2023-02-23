@@ -180,7 +180,7 @@ export default class Display {
   // controlling which forms of focus should be displayed in the HighlightOverlay.
   public focusManager: FocusManager;
 
-  // (phet-io,scenery) - Will be filled in with a scenery.Input if event handling is enabled
+  // (phet-io,scenery) - Will be filled in with a phet.scenery.Input if event handling is enabled
   public _input: Input | null;
 
   // (scenery-internal) Whether accessibility is enabled for this particular display.

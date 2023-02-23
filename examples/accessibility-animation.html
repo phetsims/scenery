@@ -107,8 +107,8 @@
     // specify the dom element to which the display will be appended
     var $container = $( '#' + id );
     // create the scene and display
-    var scene = new scenery.Node();
-    var display = new scenery.Display( scene, {
+    var scene = new phet.scenery.Node();
+    var display = new phet.scenery.Display( scene, {
       width: $container.width(),
       height: $container.height()
     } );
@@ -145,7 +145,7 @@
   docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
 
-    class Hexagon extends scenery.Node {
+    class Hexagon extends phet.scenery.Node {
 
       constructor( fill = 'yellow' ) {
         const options = {
@@ -159,7 +159,7 @@
         super( options );
 
         this.fill = fill;
-        this.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+        this.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 22 ), {
           fill: this.fill,
           stroke: '#000',
           x: 50,

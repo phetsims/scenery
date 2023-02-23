@@ -127,9 +127,9 @@
   window.addEventListener( 'keydown', keyboardEvent.bind( this, 'keydown' ) );
   window.addEventListener( 'keypress', keyboardEvent.bind( this, 'keypress' ) );
 
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
 
-  // var scene = new scenery.Scene( $div );
+  // var scene = new phet.scenery.Scene( $div );
 
   // scene.resizeOnWindowResize();
   // scene.initializeWindowEvents( { batchDOMEvents: true } );
@@ -143,7 +143,7 @@
   })();
 
   // var container = document.createElement( 'div' );
-  // scene.addChild( new scenery.DOM( container ) );
+  // scene.addChild( new phet.scenery.DOM( container ) );
 
   // function logEvent( name, event ) {
   //   console.log( 'boo' );

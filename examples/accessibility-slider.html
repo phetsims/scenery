@@ -107,8 +107,8 @@
   function docExample( id, draw ) {
     'use strict';
     const $container = $( '#' + id );
-    scene = new scenery.Node();
-    const display = new scenery.Display( scene, {
+    scene = new phet.scenery.Node();
+    const display = new phet.scenery.Display( scene, {
       width: $container.width(),
       height: $container.height(),
       backgroundColor: '#eee'
@@ -129,7 +129,7 @@
    *
    */
 
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
   docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
 
@@ -140,7 +140,7 @@
     const increment = ( display.width ) / ( ( numberOfTicks + 2 ) );
 
     // add a red hexagon to the screen at the beginning (since slider will start on the red side)
-    const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+    const hexagon = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 22 ), {
       fill: 'rgb(255, 0, 0)',
       stroke: '#000',
       x: display.width / 2,
@@ -149,7 +149,7 @@
       accessibleName: 'a hexagon of color ' // accessibility description
     } );
 
-    let trackFill = new scenery.LinearGradient( increment / 2, 215, display.width - increment, 10 );
+    let trackFill = new phet.scenery.LinearGradient( increment / 2, 215, display.width - increment, 10 );
     trackFill
       .addColorStop( 0, 'pink' )
       .addColorStop( 0.1, 'red' )
@@ -165,7 +165,7 @@
     const sliderStops = trackFill.getSVGStops();
 
     // slider thumb
-    const thumb = new scenery.Path( kite.Shape.rectangle( increment, 200, 15, 40 ), {
+    const thumb = new phet.scenery.Path( phet.kite.Shape.rectangle( increment, 200, 15, 40 ), {
       fill: 'white',
       stroke: 'black',
       tagName: 'button',
@@ -174,7 +174,7 @@
     thumb.index = 0;
 
     // slider track
-    const track = new scenery.Path( kite.Shape.rectangle( increment / 2, 215, display.width - increment, 10 ), {
+    const track = new phet.scenery.Path( phet.kite.Shape.rectangle( increment / 2, 215, display.width - increment, 10 ), {
       fill: trackFill
     } );
 
@@ -188,13 +188,13 @@
     for ( i = 0; i < numberOfTicks + 1; i++ ) {
 
       //labels
-      scene.addChild( new scenery.Text( `${i}`, {
+      scene.addChild( new phet.scenery.Text( `${i}`, {
         font: '0.8em sans-serif',
-        center: new dot.Vector2( ( i + 1 ) * increment + thumb.width / 2, 250 )
+        center: new phet.dot.Vector2( ( i + 1 ) * increment + thumb.width / 2, 250 )
       } ) );
 
       // tick marks
-      scene.addChild( new scenery.Path( kite.Shape.rectangle( ( i + 1 ) * increment + thumb.width / 2, 205, 3, 30 ), {
+      scene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( ( i + 1 ) * increment + thumb.width / 2, 205, 3, 30 ), {
         fill: 'black'
       } ) );
     }

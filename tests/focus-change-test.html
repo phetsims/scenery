@@ -39,12 +39,12 @@
 <div id="main" style="width: 800px; height: 512px;" class="scene"></div>
 <script>
 
-  var scene = new scenery.Scene( $( '#main' ) );
+  var scene = new phet.scenery.Scene( $( '#main' ) );
 
   scene.initializeEvents();
   scene.updateOnRequestAnimationFrame();
 
-  var redRect = new scenery.Rectangle( 50, 50, 200, 100, { fill: 'red' } );
+  var redRect = new phet.scenery.Rectangle( 50, 50, 200, 100, { fill: 'red' } );
   redRect.addInputListener( {
     enter: function( evt ) { console.log( 'red enter' ); },
     exit: function( evt ) { console.log( 'red exit' ); },
@@ -56,7 +56,7 @@
   } );
   scene.addChild( redRect );
 
-  var blueRect = new scenery.Rectangle( 50, 50, 200, 100, { fill: 'blue' } );
+  var blueRect = new phet.scenery.Rectangle( 50, 50, 200, 100, { fill: 'blue' } );
   blueRect.addInputListener( {
     enter: function( evt ) { console.log( 'blue enter' ); },
     exit: function( evt ) { console.log( 'blue exit' ); },

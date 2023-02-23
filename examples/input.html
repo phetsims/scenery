@@ -54,11 +54,11 @@
   *----------------------------------------------------------------------------*/
 
   window.assertions.enableAssert();
-  // scenery.enableLogging( [ 'Input', 'InputListener' ] );
+  // phet.scenery.enableLogging( [ 'Input', 'InputListener' ] );
 
   // Set up the display
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
   display.initializeEvents();
@@ -71,20 +71,20 @@
 
   // creates a minimally stylized button
   function createButton( labelString, callback, options ) {
-    var label = new scenery.Text( labelString, {
+    var label = new phet.scenery.Text( labelString, {
       fontSize: 12,
-      center: new dot.Vector2( 0, 0 )
+      center: new phet.dot.Vector2( 0, 0 )
     } );
-    var buttonListener = new scenery.FireListener( {
+    var buttonListener = new phet.scenery.FireListener( {
       fire: callback
     } );
-    var background = scenery.Rectangle.bounds( label.bounds.dilatedXY( 5, 5 ), {
+    var background = phet.scenery.Rectangle.bounds( label.bounds.dilatedXY( 5, 5 ), {
       stroke: strokeColor,
-      fill: ( options.color && options.color( buttonListener ) ) || new axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
+      fill: ( options.color && options.color( buttonListener ) ) || new phet.axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
         return isPressed ? armedColor : ( isHighlighted ? activeColor : inactiveColor );
       } )
     } );
-    return new scenery.Node( _.extend( {
+    return new phet.scenery.Node( _.extend( {
       children: [ background, label ],
       cursor: 'pointer',
       inputListeners: [ buttonListener ]
@@ -92,7 +92,7 @@
   }
 
   // Handle tabs (each 'tab' is a Node)
-  var tabProperty = new axon.Property( null );
+  var tabProperty = new phet.axon.Property( null );
   var tabs = [];
   tabProperty.lazyLink( function( selectedTab ) {
     tabs.forEach( function( tab ) {
@@ -103,12 +103,12 @@
       }
     } );
   } );
-  var tabContent = new scenery.Node( {
+  var tabContent = new phet.scenery.Node( {
     x: 10,
     y: 120
   } );
   scene.addChild( tabContent );
-  var tabBox = new scenery.HBox( {
+  var tabBox = new phet.scenery.HBox( {
     spacing: -1,
     x: 10,
     y: 30
@@ -123,7 +123,7 @@
     }, {
       color: function( buttonListener ) {
         // handle highlighting of the active tab (on top of what the button above does)
-        return new axon.DerivedProperty( [ tabProperty, buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( tabValue, isHighlighted, isPressed ) {
+        return new phet.axon.DerivedProperty( [ tabProperty, buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( tabValue, isHighlighted, isPressed ) {
           return isPressed ? armedColor : ( ( isHighlighted || tabValue === value ) ? activeColor : inactiveColor );
         } );
       }
@@ -145,19 +145,19 @@
   * Uses new DragListener( { translateNode: true } )
   *----------------------------------------------------------------------------*/
 
-  var simpleDragContainer = new scenery.Node();
+  var simpleDragContainer = new phet.scenery.Node();
   createTab( 'Drag', simpleDragContainer );
-  simpleDragContainer.addChild( new scenery.Circle( 30, {
+  simpleDragContainer.addChild( new phet.scenery.Circle( 30, {
     fill: 'red',
     stroke: strokeColor,
     cursor: 'pointer',
     centerX: 70,
     centerY: 70,
-    inputListeners: [ new scenery.DragListener( { translateNode: true } ) ]
+    inputListeners: [ new phet.scenery.DragListener( { translateNode: true } ) ]
   } ) );
-  var blueListener = new scenery.DragListener( { translateNode: true } );
-  simpleDragContainer.addChild( new scenery.Rectangle( 0, 0, 45, 45, {
-    fill: new axon.DerivedProperty( [ blueListener.isHighlightedProperty ], function( highlighted ) {
+  var blueListener = new phet.scenery.DragListener( { translateNode: true } );
+  simpleDragContainer.addChild( new phet.scenery.Rectangle( 0, 0, 45, 45, {
+    fill: new phet.axon.DerivedProperty( [ blueListener.isHighlightedProperty ], function( highlighted ) {
       return highlighted ? '#6CF' : '#08F'
     } ),
     stroke: strokeColor,
@@ -173,17 +173,17 @@
   * Uses FireListener (naming?)
   *----------------------------------------------------------------------------*/
 
-  var buttonExample = new scenery.Node();
+  var buttonExample = new phet.scenery.Node();
   createTab( 'Button', buttonExample );
-  var buttonText = new scenery.Text( 'outside released', {
+  var buttonText = new phet.scenery.Text( 'outside released', {
     fontSize: 14,
     centerX: 0,
     centerY: 0
   } );
-  var buttonBackground = scenery.Rectangle.bounds( buttonText.bounds.dilatedXY( 20, 10 ), {
+  var buttonBackground = phet.scenery.Rectangle.bounds( buttonText.bounds.dilatedXY( 20, 10 ), {
     stroke: strokeColor
   } );
-  var buttonNode = new scenery.Node( {
+  var buttonNode = new phet.scenery.Node( {
     children: [ buttonBackground, buttonText ],
     cursor: 'pointer',
     left: 40,
@@ -191,7 +191,7 @@
   } );
   buttonExample.addChild( buttonNode );
 
-  var fireNode = new scenery.Rectangle( 0, 0, buttonNode.height, buttonNode.height, {
+  var fireNode = new phet.scenery.Rectangle( 0, 0, buttonNode.height, buttonNode.height, {
     opacity: 0,
     fill: 'red',
     left: buttonNode.right + 10,
@@ -199,7 +199,7 @@
   } );
   buttonExample.addChild( fireNode );
 
-  var buttonListener = new scenery.FireListener( {
+  var buttonListener = new phet.scenery.FireListener( {
     press: function() { console.log( 'press' ); },
     release: function() { console.log( 'release' ); },
     drag: function() { console.log( 'drag' ); },
@@ -207,11 +207,11 @@
   } );
   buttonNode.addInputListener( buttonListener );
 
-  axon.Multilink.multilink( [ buttonListener.isHoveringProperty, buttonListener.isPressedProperty ], function( isHovering, isPressed ) {
+  phet.axon.Multilink.multilink( [ buttonListener.isHoveringProperty, buttonListener.isPressedProperty ], function( isHovering, isPressed ) {
     var isActive = isHovering || isPressed;
     buttonBackground.fill = isActive ? activeColor : inactiveColor;
     buttonText.text = ( isHovering ? 'hovering' : 'no-hover' ) + ' ' + ( isPressed ? 'pressed' : 'released' );
-    buttonText.center = new dot.Vector2( 0, 0 );
+    buttonText.center = new phet.dot.Vector2( 0, 0 );
   } );
 
   /*---------------------------------------------------------------------------*
@@ -219,7 +219,7 @@
   * DragListener with dragBounds, with a parent that is rotated and scaled.
   *----------------------------------------------------------------------------*/
 
-  var transformContainer = new scenery.Node( {
+  var transformContainer = new phet.scenery.Node( {
     scale: 1.5,
     rotation: Math.PI / 4,
     x: 100,
@@ -227,21 +227,21 @@
   } );
   createTab( 'Bound+Transform', transformContainer );
 
-  var constrainBounds = new dot.Bounds2( 50, 0, 150, 75 );
-  transformContainer.addChild( scenery.Rectangle.bounds( constrainBounds, {
+  var constrainBounds = new phet.dot.Bounds2( 50, 0, 150, 75 );
+  transformContainer.addChild( phet.scenery.Rectangle.bounds( constrainBounds, {
     stroke: strokeColor,
     lineDash: [ 5, 5 ]
   } ) );
-  var constrainedNode = new scenery.Circle( 20, {
+  var constrainedNode = new phet.scenery.Circle( 20, {
     fill: '#2f2',
     cursor: 'pointer',
     stroke: strokeColor,
     center: constrainBounds.center
   } );
   transformContainer.addChild( constrainedNode );
-  constrainedNode.addInputListener( new scenery.DragListener( {
+  constrainedNode.addInputListener( new phet.scenery.DragListener( {
     translateNode: true,
-    dragBoundsProperty: new axon.Property( constrainBounds.eroded( constrainedNode.radius ) )
+    dragBoundsProperty: new phet.axon.Property( constrainBounds.eroded( constrainedNode.radius ) )
   } ) );
 
   /*---------------------------------------------------------------------------*
@@ -250,21 +250,21 @@
   * hook-ups for dragging things from a panel (removing when dragged back).
   *----------------------------------------------------------------------------*/
 
-  var modelContainer = new scenery.Node();
+  var modelContainer = new phet.scenery.Node();
   createTab( 'Panel+Model', modelContainer );
-  var objectGraphic = new scenery.Path( kite.Shape.regularPolygon( 6, 20 ), {
+  var objectGraphic = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 20 ), {
     fill: '#f3f',
     stroke: strokeColor
   } );
 
-  var objectTransform = new dot.Transform3( dot.Matrix3.scaling( 2 ).timesMatrix( dot.Matrix3.translation( 100, 50 ) ) );
-  var objects = axon.createObservableArray(); // {ObservableArrayDef.<Property.<Vector2>>}
+  var objectTransform = new phet.dot.Transform3( phet.dot.Matrix3.scaling( 2 ).timesMatrix( phet.dot.Matrix3.translation( 100, 50 ) ) );
+  var objects = phet.axon.createObservableArray(); // {ObservableArrayDef.<Property.<Vector2>>}
   var objectNodes = []; // Node with { model: {Property.<Vector2>}, dragListener: {DragListener} }
   function getObjectNode( object ) {
     return objectNodes.filter( function( objectNode ) { return objectNode.model === object; } )[ 0 ];
   }
   objects.addItemAddedListener( function( newObject ) {
-    var objectNode = new scenery.Node( {
+    var objectNode = new phet.scenery.Node( {
       children: [ objectGraphic ],
       cursor: 'pointer',
       scale: 1.3
@@ -276,7 +276,7 @@
     objectNodes.push( objectNode );
     modelContainer.addChild( objectNode );
 
-    var dragListener = new scenery.DragListener( {
+    var dragListener = new phet.scenery.DragListener( {
       transform: objectTransform,
       locationProperty: newObject,
       targetNode: objectNode,
@@ -293,10 +293,10 @@
     var objectNode = getObjectNode( removedObject );
     modelContainer.removeChild( objectNode );
     objectNode.interruptSubtreeInput(); // Removing it, so we interrupt any drags that it is involved in
-    phetCore.arrayRemove( objectNodes, objectNode );
+    phet.phetCore.arrayRemove( objectNodes, objectNode );
   } );
 
-  var objectButton = scenery.Rectangle.roundedBounds( objectGraphic.bounds.dilated( 10 ), 10, 10, {
+  var objectButton = phet.scenery.Rectangle.roundedBounds( objectGraphic.bounds.dilated( 10 ), 10, 10, {
     children: [ objectGraphic ],
     left: fireNode.left,
     top: fireNode.bottom + 10,
@@ -313,7 +313,7 @@
 
       // Put the initial model location right where the pointer is
       var modelPosition = objectTransform.inversePosition2( modelContainer.getUniqueTrail().globalToLocalPoint( event.pointer.point ) );
-      var newObject = new axon.Property( modelPosition );
+      var newObject = new phet.axon.Property( modelPosition );
       objects.push( newObject );
 
       // pass it off to the drag listener
@@ -328,33 +328,33 @@
   var innerRadius = 40;
   var outerRadius = 80;
   var halfAngle = Math.PI / 8;
-  var rotationShape = new kite.Shape().arc( 0, 0, innerRadius, -halfAngle, halfAngle, false )
+  var rotationShape = new phet.kite.Shape().arc( 0, 0, innerRadius, -halfAngle, halfAngle, false )
                                       .arc( 0, 0, outerRadius, halfAngle, -halfAngle, true )
                                       .close();
   var touchAmount = 10;
   var touchCenterOffset = touchAmount * Math.sqrt( 2 ) * 1.5;
-  var rotationTouchShape = new kite.Shape().arc( -touchCenterOffset, 0, touchCenterOffset + innerRadius - touchAmount, -halfAngle, halfAngle, false )
+  var rotationTouchShape = new phet.kite.Shape().arc( -touchCenterOffset, 0, touchCenterOffset + innerRadius - touchAmount, -halfAngle, halfAngle, false )
                                            .arc( -touchCenterOffset, 0, touchCenterOffset + outerRadius + touchAmount, halfAngle, -halfAngle, true )
                                            .close();
-  var rotationNode = new scenery.Path( rotationShape, {
+  var rotationNode = new phet.scenery.Path( rotationShape, {
     fill: '#f80',
     stroke: strokeColor,
     cursor: 'pointer',
     touchArea: rotationTouchShape
   } );
-  var rotationProperty = new axon.Property( 0 );
+  var rotationProperty = new phet.axon.Property( 0 );
   rotationProperty.linkAttribute( rotationNode, 'rotation' );
-  rotationNode.addInputListener( new scenery.DragListener( {
+  rotationNode.addInputListener( new phet.scenery.DragListener( {
     applyOffset: false, // Tracking the initial rotation needs to be done, have our model point ignore local location.
     drag: function( event ) {
       rotationProperty.value = this.modelPoint.angle - this.localPoint.angle;
     }
   } ) );
 
-  var rotationContainer = new scenery.Node( {
+  var rotationContainer = new phet.scenery.Node( {
     children: [
-      new scenery.Circle( 3, { fill: 'black' } ),
-      new scenery.Circle( 0.5 * ( innerRadius + outerRadius ), { stroke: strokeColor, lineWidth: 0.25 } ),
+      new phet.scenery.Circle( 3, { fill: 'black' } ),
+      new phet.scenery.Circle( 0.5 * ( innerRadius + outerRadius ), { stroke: strokeColor, lineWidth: 0.25 } ),
       rotationNode
     ],
     x: 210,
@@ -367,18 +367,18 @@
   * Handle tracking ancestors so that a drag pins the node on the screen (ignores ancestor transform)
   *----------------------------------------------------------------------------*/
 
-  var trackerNode = new scenery.Path( kite.Shape.regularPolygon( 5, 40 ), {
+  var trackerNode = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 5, 40 ), {
     fill: '#08F',
     stroke: strokeColor,
     rotation: -Math.PI / 2,
     cursor: 'pointer'
   } );
-  trackerNode.addInputListener( new scenery.DragListener( {
+  trackerNode.addInputListener( new phet.scenery.DragListener( {
     trackAncestors: true,
     translateNode: true
   } ) );
 
-  var trackerContainer = new scenery.Circle( 60, {
+  var trackerContainer = new phet.scenery.Circle( 60, {
     children: [ trackerNode ],
     stroke: strokeColor,
     lineWidth: 0.25,
@@ -395,14 +395,14 @@
   *----------------------------------------------------------------------------*/
 
   function addMulti( allowScale, allowRotation, label ) {
-    var multiNode = new scenery.Path( kite.Shape.regularPolygon( 3, 100 ), {
+    var multiNode = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 3, 100 ), {
       fill: '#F08',
       stroke: strokeColor,
       cursor: 'pointer',
       x: 130,
       y: 130
     } );
-    multiNode.addInputListener( new scenery.MultiListener( multiNode, {
+    multiNode.addInputListener( new phet.scenery.MultiListener( multiNode, {
       allowScale: allowScale,
       allowRotation: allowRotation
     } ) );
@@ -418,8 +418,8 @@
   * Pan + zoom prototype
   *----------------------------------------------------------------------------*/
 
-  var panBounds = new dot.Bounds2( 0, 0, 400, 200 );
-  var panGridShape = new kite.Shape();
+  var panBounds = new phet.dot.Bounds2( 0, 0, 400, 200 );
+  var panGridShape = new phet.kite.Shape();
   for ( var x = panBounds.left + 20; x <= panBounds.right - 10; x += 20 ) {
     panGridShape.moveTo( x, panBounds.top + 1 )
                 .lineTo( x, panBounds.bottom - 1 )
@@ -428,28 +428,28 @@
     panGridShape.moveTo( panBounds.left + 1, y )
                 .lineTo( panBounds.right - 1, y )
   }
-  var panContent = new scenery.Node( {
+  var panContent = new phet.scenery.Node( {
     children: [
-      scenery.Rectangle.bounds( panBounds ),
-      new scenery.Path( panGridShape, { stroke: strokeColor, lineWidth: 0.25 } ),
-      new scenery.Text( 'pan and zoom?', { fill: '#606', fontSize: 50, center: panBounds.center } ),
+      phet.scenery.Rectangle.bounds( panBounds ),
+      new phet.scenery.Path( panGridShape, { stroke: strokeColor, lineWidth: 0.25 } ),
+      new phet.scenery.Text( 'pan and zoom?', { fill: '#606', fontSize: 50, center: panBounds.center } ),
       createButton( 'button can stick!', function(){}, { centerX: panBounds.centerX, centerY: panBounds.height * 4 / 5 } ),
-      new scenery.Rectangle( 0, 0, 20, 20, { fill: 'red' } ),
-      new scenery.Rectangle( 380, 0, 20, 20, { fill: 'red' } ),
-      new scenery.Rectangle( 0, 180, 20, 20, { fill: 'red' } ),
-      new scenery.Rectangle( 380, 180, 20, 20, { fill: 'red' } )
+      new phet.scenery.Rectangle( 0, 0, 20, 20, { fill: 'red' } ),
+      new phet.scenery.Rectangle( 380, 0, 20, 20, { fill: 'red' } ),
+      new phet.scenery.Rectangle( 0, 180, 20, 20, { fill: 'red' } ),
+      new phet.scenery.Rectangle( 380, 180, 20, 20, { fill: 'red' } )
     ]
   } );
-  panContent.addInputListener( new scenery.PanZoomListener( panContent, {
+  panContent.addInputListener( new phet.scenery.PanZoomListener( panContent, {
     allowMultitouchInterruption: true,
     panBounds: panBounds
   } ) );
-  var panContainer = new scenery.Node( {
+  var panContainer = new phet.scenery.Node( {
     children: [
       panContent,
-      scenery.Rectangle.bounds( panBounds, { stroke: strokeColor } )
+      phet.scenery.Rectangle.bounds( panBounds, { stroke: strokeColor } )
     ],
-    clipArea: kite.Shape.bounds( panBounds.dilated( 0.5 ) )
+    clipArea: phet.kite.Shape.bounds( panBounds.dilated( 0.5 ) )
   } );
   createTab( 'Pan', panContainer );
 
@@ -463,7 +463,7 @@
     elapsedTime += dt;
 
     fireNode.opacity *= Math.pow( 0.2, dt );
-    trackerContainer.translation = dot.Vector2.createPolar( 20, elapsedTime ).plusXY( 150, 75 );
+    trackerContainer.translation = phet.dot.Vector2.createPolar( 20, elapsedTime ).plusXY( 150, 75 );
   } );
 
 </script>

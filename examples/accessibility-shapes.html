@@ -56,8 +56,8 @@
 <script type="text/javascript">
   function docExample( id, draw ) {
     var $container = $( '#' + id );
-    var scene = new scenery.Node();
-    var display = new scenery.Display( scene, {
+    var scene = new phet.scenery.Node();
+    var display = new phet.scenery.Display( scene, {
       width: $container.width(),
       height: $container.height()
     } );
@@ -76,13 +76,13 @@
 <script type="text/javascript">
 
 
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
 
 
   docExample( 'accessibility-scene', ( scene, display ) => {
 
     // Add our text
-    scene.addChild( new scenery.Path( kite.Shape.arc( 20, 20, 50, 0, 3 ),
+    scene.addChild( new phet.scenery.Path( phet.kite.Shape.arc( 20, 20, 50, 0, 3 ),
       {
         centerX: 200, // the center of our text's bounds is at x = 200
         centerY: 50, // the center of our text's bounds is at y = 50
@@ -95,7 +95,7 @@
       } ) );
 
     // regular polygon
-    scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), { // sides, radius
+    scene.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 22 ), { // sides, radius
       fill: '#ff0',
       stroke: '#000',
 

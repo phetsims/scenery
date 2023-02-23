@@ -48,8 +48,8 @@
 <script>
 
   // initialize our scene
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' ),
     backgroundColor: '#eee'
   } );
@@ -62,11 +62,11 @@
 
   // our transformed container, to ensure we properly map coordinate frames.
   // includes translation, off-axis rotation and asymmetric scaling
-  var container = new scenery.Node( { x: 140, y: 200, scale: dot.v2( 4, 2 ), rotation: Math.PI / 4 } );
+  var container = new phet.scenery.Node( { x: 140, y: 200, scale: phet.dot.v2( 4, 2 ), rotation: Math.PI / 4 } );
   scene.addChild( container );
 
   // our line (makes things simpler to assume we rotate around the line's origin, but doesn't need to be a requirement)
-  var line = new scenery.Line( 0, 0, 100, 0, {
+  var line = new phet.scenery.Line( 0, 0, 100, 0, {
     stroke: 'red'
   } );
   container.addChild( line );

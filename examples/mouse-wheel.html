@@ -52,15 +52,15 @@
 <script>
 
   // initialize our scene
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
   display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
   // explanatory text
-  scene.addChild( new scenery.Text( 'Use the mouse wheel (up and down) over the rectangles', {
+  scene.addChild( new phet.scenery.Text( 'Use the mouse wheel (up and down) over the rectangles', {
     x: 20,
     y: 30,
     fill: '#000000',
@@ -68,10 +68,10 @@
   } ) );
 
   function createRectangle( x, y ) {
-    var rect = new scenery.Rectangle( x, y, 50, 50 );
+    var rect = new phet.scenery.Rectangle( x, y, 50, 50 );
 
     // store a 3-dimensional offset on each rectangle
-    rect.wheelOffset = new dot.Vector3( 0, 0, 0 );
+    rect.wheelOffset = new phet.dot.Vector3( 0, 0, 0 );
 
     function updateFill() {
       // pay attention only to the vertical scroll offset

@@ -48,7 +48,7 @@
   <script src="../dist/scenery.min.js"></script>
 
   <script type="text/javascript">
-    scenery.Utils.polyfillRequestAnimationFrame();
+    phet.scenery.Utils.polyfillRequestAnimationFrame();
 
     _.extend( window, phetCore );
     _.extend( window, axon );
@@ -305,7 +305,7 @@
 
     <p>
       If you're using a built version of Scenery, you'll need to add the relevant namespaces to objects. Almost
-      everything here will need a <code>scenery.</code> prefix, e.g. <code>new scenery.Node()</code> instead of
+      everything here will need a <code>scenery.</code> prefix, e.g. <code>new phet.scenery.Node()</code> instead of
       <code>new Node()</code>. The built version of Scenery will include <code>scenery</code>, <code>kite</code>
       (for Shape), <code>dot</code> (for Vector2), <code>axon</code> (for Properties) and <code>phetCore</code>.
       The code examples here can use either the prefixed versions or non-prefixed.
@@ -2276,7 +2276,7 @@
           const nodes = [
             new Node( { x: 50, y: 50, children: [ child1 ] } ),
             new Node( { scale: 2, y: 20, children: [ child2 ] } ),
-            new Node( { matrix: dot.Matrix3.rowMajor(
+            new Node( { matrix: phet.dot.Matrix3.rowMajor(
                 0.5, 0, 0,
                 0, 1, 0,
                 0, 0, 1 ), children: [ child3 ] } )

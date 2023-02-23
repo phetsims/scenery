@@ -52,8 +52,8 @@
 <script>
 
   // initialize our scene
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
   display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
@@ -77,7 +77,7 @@
   ];
 
   // explanatory text
-  scene.addChild( new scenery.Text( 'Some cursors may not be supported by your browser', {
+  scene.addChild( new phet.scenery.Text( 'Some cursors may not be supported by your browser', {
     x: 20,
     y: 30,
     fill: '#000000',
@@ -100,7 +100,7 @@
     var y = baseY + ( padding + rowHeight ) * Math.floor( i / columns );
 
     // we'll create a node that will contain text and a background
-    var group = new scenery.Node( {
+    var group = new phet.scenery.Node( {
       // if the mouse is over this node, its cursor will be set to this,
       // unless there is a descendant node that the mouse is over with a cursor specified
       cursor: cursor,
@@ -108,14 +108,14 @@
     } );
 
     // a label for the cursor
-    var text = new scenery.Text( cursor.slice( 0, 3 ) === 'url' ? 'url( ' + cursor.slice( 15, 18 ) + ' )' : cursor, {
+    var text = new phet.scenery.Text( cursor.slice( 0, 3 ) === 'url' ? 'url( ' + cursor.slice( 15, 18 ) + ' )' : cursor, {
       font: '16px sans-serif',
       centerX: x,
       centerY: y
     } );
 
     // add background and text to our group
-    group.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, columnWidth, rowHeight ), {
+    group.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, columnWidth, rowHeight ), {
       centerX: x,
       centerY: y,
       stroke: '#000000',

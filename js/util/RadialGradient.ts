@@ -145,7 +145,7 @@ export default class RadialGradient extends Gradient {
    * Returns a string form of this object
    */
   public override toString(): string {
-    let result = `new scenery.RadialGradient( ${this.start.x}, ${this.start.y}, ${this.startRadius}, ${this.end.x}, ${this.end.y}, ${this.endRadius} )`;
+    let result = `new phet.scenery.RadialGradient( ${this.start.x}, ${this.start.y}, ${this.startRadius}, ${this.end.x}, ${this.end.y}, ${this.endRadius} )`;
 
     _.each( this.stops, stop => {
       result += `.addColorStop( ${stop.ratio}, ${ColorDef.scenerySerialize( stop.color )} )`;

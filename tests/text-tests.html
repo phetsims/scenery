@@ -96,11 +96,11 @@
 
   var svgText = document.getElementById( 'gA' );
   var svgBox = svgText.getBBox();
-  var svgBoundsA = new dot.Bounds2( svgBox.x, svgBox.y, svgBox.x + svgBox.width, svgBox.y + svgBox.height );
+  var svgBoundsA = new phet.dot.Bounds2( svgBox.x, svgBox.y, svgBox.x + svgBox.width, svgBox.y + svgBox.height );
   console.log( 'svg A: ' + svgBoundsA.toString() + ' (' + svgBoundsA.width + ',' + svgBoundsA.height + ')' );
   svgText = document.getElementById( 'gB' );
   svgBox = svgText.getBBox();
-  var svgBoundsB = new dot.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
+  var svgBoundsB = new phet.dot.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
   console.log( 'svg B: ' + svgBoundsB.toString() + ' (' + svgBoundsB.width + ',' + svgBoundsB.height + ')' );
 
   var main = $( '#main' );
@@ -110,11 +110,11 @@
    *----------------------------------------------------------------------------*/
 
   // initialize our scene
-  var scene = new scenery.Scene( main, {
-    // preferredSceneLayerType: scenery.SVGDefaultLayerType
+  var scene = new phet.scenery.Scene( main, {
+    // preferredSceneLayerType: phet.scenery.SVGDefaultLayerType
   } );
 
-  var textA = new scenery.Text( str, {
+  var textA = new phet.scenery.Text( str, {
     x: 50,
     y: 50,
     fill: 'rgba(255,0,0,0.5)',
@@ -148,7 +148,7 @@
 
   var span = document.getElementById( 'textSpan' );
   var spanRect = span.getBoundingClientRect();
-  var spanBounds = new dot.Bounds2( spanRect.left, spanRect.top, spanRect.right, spanRect.bottom );
+  var spanBounds = new phet.dot.Bounds2( spanRect.left, spanRect.top, spanRect.right, spanRect.bottom );
   console.log( 'DOM span A: ' + spanBounds.toString() + ' (' + spanBounds.width + ',' + spanBounds.height + ')' );
   console.log( 'span.clientWidth: ' + span.clientWidth );
   console.log( 'span.clientHeight: ' + span.clientHeight );
@@ -157,7 +157,7 @@
 
   var baselineSpan = document.getElementById( 'baselineSpan' );
   var baselineSpanRect = baselineSpan.getBoundingClientRect();
-  var baselineSpanBounds = new dot.Bounds2( baselineSpanRect.left, baselineSpanRect.top, baselineSpanRect.right, baselineSpanRect.bottom );
+  var baselineSpanBounds = new phet.dot.Bounds2( baselineSpanRect.left, baselineSpanRect.top, baselineSpanRect.right, baselineSpanRect.bottom );
   console.log( 'DOM baseline A: ' + baselineSpanBounds.toString() + ' (' + baselineSpanBounds.width + ',' + baselineSpanBounds.height + ')' );
   console.log( 'baselineSpan.clientWidth: ' + baselineSpan.clientWidth );
   console.log( 'baselineSpan.clientHeight: ' + baselineSpan.clientHeight );
@@ -169,22 +169,22 @@
    * Displays of bounds for accuracy
    *----------------------------------------------------------------------------*/
 
-  var boundsScene = new scenery.Scene( $( '#bounds' ) );
-  boundsScene.addChild( new scenery.Path( kite.Shape.bounds( svgBoundsA ), {
+  var boundsScene = new phet.scenery.Scene( $( '#bounds' ) );
+  boundsScene.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( svgBoundsA ), {
     fill: 'rgba(255,0,0,0.1)'
   } ) );
-  boundsScene.addChild( new scenery.Path( kite.Shape.bounds( baselineSpanBounds ), {
+  boundsScene.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( baselineSpanBounds ), {
     fill: 'rgba(0,0,255,0.1)'
   } ) );
-  boundsScene.addChild( new scenery.Path( kite.Shape.bounds( boundsA ), {
+  boundsScene.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( boundsA ), {
     fill: 'rgba(0,255,0,0.1)'
   } ) );
   boundsScene.updateScene();
 
-  var textNode = new scenery.Text( 'QuipTaQiy' );
+  var textNode = new phet.scenery.Text( 'QuipTaQiy' );
 
   function canvasAccurate( textNode ) {
-    return scenery.TextBounds.accurateCanvasBounds( textNode );
+    return phet.scenery.TextBounds.accurateCanvasBounds( textNode );
   }
 
   function svgApproximate( textNode ) {
@@ -228,7 +228,7 @@
 
     document.body.appendChild( svg );
     var rect = textElement.getBBox();
-    var result = new dot.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+    var result = new phet.dot.Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
     document.body.removeChild( svg );
 
     return result;
@@ -273,7 +273,7 @@
 
     document.body.appendChild( div );
     var rect = span.getBoundingClientRect();
-    var result = new dot.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
+    var result = new phet.dot.Bounds2( rect.left, rect.top - maxHeight, rect.right, rect.bottom - maxHeight );
     document.body.removeChild( div );
 
     var width = rect.right - rect.left;
@@ -301,9 +301,9 @@
   console.log( svgApproximate( textNode ) );
   console.log( domApproximate( textNode ) );
 
-  console.log( scenery.TextBounds.accurateCanvasBounds( textNode ) );
-  console.log( scenery.TextBounds.approximateSVGBounds( textNode._font, textNode.renderedText ) );
-  console.log( scenery.TextBounds.approximateDOMBounds( textNode._font, textNode.getDOMTextNode() ) );
+  console.log( phet.scenery.TextBounds.accurateCanvasBounds( textNode ) );
+  console.log( phet.scenery.TextBounds.approximateSVGBounds( textNode._font, textNode.renderedText ) );
+  console.log( phet.scenery.TextBounds.approximateDOMBounds( textNode._font, textNode.getDOMTextNode() ) );
 
 
 </script>

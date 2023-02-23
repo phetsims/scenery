@@ -83,15 +83,15 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
   var paintables = window.paintables = {};
   var paints = window.paints = {};
 
-  fuzzLog.push( 'var scene = new scenery.Node();' );
-  nodes.scene = new scenery.Node();
+  fuzzLog.push( 'var scene = new phet.scenery.Node();' );
+  nodes.scene = new phet.scenery.Node();
 
-  fuzzLog.push( 'var display = new scenery.Display( scene, { ' +
+  fuzzLog.push( 'var display = new phet.scenery.Display( scene, { ' +
                 'width: ' + INITIAL_WIDTH + ', ' +
                 'height: ' + INITIAL_HEIGHT + ', ' +
                 'backgroundColor: \'' + INITIAL_BACKGROUND_COLOR + '\'' +
                 ' } );' );
-  var display = window.display = new scenery.Display( nodes.scene, {
+  var display = window.display = new phet.scenery.Display( nodes.scene, {
     width: INITIAL_WIDTH,
     height: INITIAL_HEIGHT,
     backgroundColor: INITIAL_BACKGROUND_COLOR
@@ -105,26 +105,26 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
 
   var i;
   for ( i = 0; i < Math.ceil( 2 * NODE_COUNT_MULTIPLIER ); i++ ) {
-    fuzzLog.push( 'var node' + i + ' = new scenery.Node();' );
-    nodes[ 'node' + i ] = new scenery.Node();
+    fuzzLog.push( 'var node' + i + ' = new phet.scenery.Node();' );
+    nodes[ 'node' + i ] = new phet.scenery.Node();
   }
   for ( i = 0; i < Math.ceil( 6 * NODE_COUNT_MULTIPLIER ); i++ ) {
-    fuzzLog.push( 'var path' + i + ' = new scenery.Path( null );' );
-    paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path( null );
+    fuzzLog.push( 'var path' + i + ' = new phet.scenery.Path( null );' );
+    paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new phet.scenery.Path( null );
   }
   for ( i = 0; i < Math.ceil( 4 * NODE_COUNT_MULTIPLIER ); i++ ) {
-    fuzzLog.push( 'var text' + i + ' = new scenery.Text( \'' + i + '!\' );' );
-    texts[ 'text' + i ] = paintables[ 'text' + i ] = nodes[ 'text' + i ] = new scenery.Text( i + '!' );
+    fuzzLog.push( 'var text' + i + ' = new phet.scenery.Text( \'' + i + '!\' );' );
+    texts[ 'text' + i ] = paintables[ 'text' + i ] = nodes[ 'text' + i ] = new phet.scenery.Text( i + '!' );
   }
 
   fuzzLog.push( 'var shape0 = null;' );
   shapes.shape0 = null;
-  fuzzLog.push( 'var shape1 = kite.Shape.regularPolygon( 6, 50 );' );
-  shapes.shape1 = kite.Shape.regularPolygon( 6, 50 );
-  fuzzLog.push( 'var shape2 = kite.Shape.circle( 40 );' );
-  shapes.shape2 = kite.Shape.circle( 40 );
-  fuzzLog.push( 'var shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );' );
-  shapes.shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );
+  fuzzLog.push( 'var shape1 = phet.kite.Shape.regularPolygon( 6, 50 );' );
+  shapes.shape1 = phet.kite.Shape.regularPolygon( 6, 50 );
+  fuzzLog.push( 'var shape2 = phet.kite.Shape.circle( 40 );' );
+  shapes.shape2 = phet.kite.Shape.circle( 40 );
+  fuzzLog.push( 'var shape3 = phet.kite.Shape.lineSegment( 0, 0, 50, 100 );' );
+  shapes.shape3 = phet.kite.Shape.lineSegment( 0, 0, 50, 100 );
 
   fuzzLog.push( 'var paint0 = null;' );
   paints.paint0 = null;
@@ -132,12 +132,12 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
   paints.paint1 = 'red';
   fuzzLog.push( 'var paint2 = \'#aa00ee\';' );
   paints.paint2 = '#aa00ee';
-  fuzzLog.push( 'var paint3 = new scenery.Color( 0, 0, 255, 0.8 );' );
-  paints.paint3 = new scenery.Color( 0, 0, 255, 0.8 );
-  fuzzLog.push( 'var paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, \'white\' ).addColorStop( 1, \'black\' );' );
-  paints.paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, 'white' ).addColorStop( 1, 'black' );
-  fuzzLog.push( 'var paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, \'red\' ).addColorStop( 1, \'black\' );' );
-  paints.paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, 'red' ).addColorStop( 1, 'black' );
+  fuzzLog.push( 'var paint3 = new phet.scenery.Color( 0, 0, 255, 0.8 );' );
+  paints.paint3 = new phet.scenery.Color( 0, 0, 255, 0.8 );
+  fuzzLog.push( 'var paint4 = new phet.scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, \'white\' ).addColorStop( 1, \'black\' );' );
+  paints.paint4 = new phet.scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, 'white' ).addColorStop( 1, 'black' );
+  fuzzLog.push( 'var paint5 = new phet.scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, \'red\' ).addColorStop( 1, \'black\' );' );
+  paints.paint5 = new phet.scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, 'red' ).addColorStop( 1, 'black' );
 
   function randomName( names ) {
     return names[ _.random( 0, names.length - 1 ) ];
@@ -304,19 +304,19 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
     if ( a < 0.4 ) {
       var x = Math.random() * 200 - 100;
       var y = Math.random() * 200 - 100;
-      matrix = dot.Matrix3.translation( x, y );
+      matrix = phet.dot.Matrix3.translation( x, y );
       matrixString = 'dot.Matrix3.translation( ' + x + ', ' + y + ' )';
     }
     else if ( a < 0.8 ) {
       // slightly scales up, but random => 0 undoes random => 1
       var phi = 1.61803398875;
       var scale = Math.random() + phi - 1;
-      matrix = dot.Matrix3.scaling( scale );
+      matrix = phet.dot.Matrix3.scaling( scale );
       matrixString = 'dot.Matrix3.scaling( ' + scale + ' )';
     }
     else {
       var rotation = Math.random() * Math.PI * 2;
-      matrix = dot.Matrix3.rotation2( rotation );
+      matrix = phet.dot.Matrix3.rotation2( rotation );
       matrixString = 'dot.Matrix3.rotation2( ' + rotation + ' )';
     }
 
@@ -379,7 +379,7 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
     fuzzing = false;
   };
 
-  phetCore.extend( window, {
+  phet.phetCore.extend( window, {
     get fuzzLog() {
       return this._fuzzLog.join( '\n' );
     }
@@ -396,19 +396,19 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
   //   fuzzStep = true;
 
   //   // disable the layer logging, or we'll spam ourselves to death
-  //   scenery.disableLayerLogging();
-  //   scenery.disableEventLogging();
+  //   phet.scenery.disableLayerLogging();
+  //   phet.scenery.disableEventLogging();
 
   //   var lines = [];
   //   window.lines = lines;
 
   //   var nodes = [];
-  //   var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 320 } );
+  //   var scene = new phet.scenery.Scene( $( '<div>' ), { width: 640, height: 320 } );
   //   nodes.push( scene );
 
-  //   _.times( 5, function() { nodes.push( new scenery.Node() ); } );
-  //   _.times( 10, function() { nodes.push( new scenery.Path() ); } );
-  //   // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
+  //   _.times( 5, function() { nodes.push( new phet.scenery.Node() ); } );
+  //   _.times( 10, function() { nodes.push( new phet.scenery.Path() ); } );
+  //   // _.times( 5, function() { nodes.push( new phet.scenery.DOM( document.createElement( 'div' ) ) ); } );
 
   //   function name( node ) {
   //     return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;

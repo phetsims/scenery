@@ -57,17 +57,17 @@
 <script>
 
   // initialize our scene
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
   display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
-  var container = new scenery.Node();
+  var container = new phet.scenery.Node();
   scene.addChild( container );
 
-  container.addChild( new scenery.Text( 'Try dragging the hexagons. On a touch-screen, dragging will pick up the first hexagon.', {
+  container.addChild( new phet.scenery.Text( 'Try dragging the hexagons. On a touch-screen, dragging will pick up the first hexagon.', {
     x: 20,
     y: 50,
     fill: '#000000',
@@ -78,7 +78,7 @@
   for ( var i = 0; i < 100; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
     (function() {
-      var node = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+      var node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 22 ), {
         fill: '#ff0000',
         stroke: '#000000',
         x: Math.random() * 500,
@@ -88,7 +88,7 @@
       container.addChild( node );
 
       // add a drag handler to each node
-      node.addInputListener( new scenery.SimpleDragHandler( {
+      node.addInputListener( new phet.scenery.SimpleDragHandler( {
         // allow moving a pointer (touch) across a node to pick it up
         allowTouchSnag: true,
 

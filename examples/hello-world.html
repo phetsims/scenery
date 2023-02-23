@@ -28,15 +28,15 @@
 <div id="hello-world-scene" style="width: 400px; height: 100px;"></div>
 <script type="text/javascript">
   // Create a Node as the root of our tree (it can contain children)
-  var scene = new scenery.Node();
+  var scene = new phet.scenery.Node();
 
   // Create a display using this root node, using our existing div
-  var display = new scenery.Display( scene, {
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'hello-world-scene' )
   } );
 
   // Add our text
-  scene.addChild( new scenery.Text( 'Hello World', {
+  scene.addChild( new phet.scenery.Text( 'Hello World', {
     centerX: 200, // the center of our text's bounds is at x = 200
     centerY: 50, // the center of our text's bounds is at y = 50
     font: '25px sans-serif' // any CSS 'font' declaration will work

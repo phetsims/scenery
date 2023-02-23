@@ -6,9 +6,9 @@
  *
  * This is valuable, since:
  * ```
- *   const color = new scenery.Color( 'red' );
- *   const fill = new axon.Property( color );
- *   const paintColorProperty = new scenery.PaintColorProperty( fill );
+ *   const color = new phet.scenery.Color( 'red' );
+ *   const fill = new phet.axon.Property( color );
+ *   const paintColorProperty = new phet.scenery.PaintColorProperty( fill );
  *
  *   // value is converted to a {Color}
  *   paintColorProperty.value; // r: 255, g: 0, b: 0, a: 1

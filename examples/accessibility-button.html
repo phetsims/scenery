@@ -58,8 +58,8 @@
 <script type="text/javascript">
   function docExample( id, draw ) {
     var $container = $( '#' + id );
-    var scene = new scenery.Node();
-    var display = new scenery.Display( scene, {
+    var scene = new phet.scenery.Node();
+    var display = new phet.scenery.Display( scene, {
       width: $container.width(),
       height: $container.height()
     } );
@@ -79,13 +79,13 @@
 <script type="text/javascript">
 
 
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
 
 
   docExample( 'accessibility-scene', ( scene, display ) => {
 
     // Add our text
-    const rectangle = new scenery.Path( kite.Shape.roundedRectangleWithRadii( 5, 5, 500, 100, {
+    const rectangle = new phet.scenery.Path( phet.kite.Shape.roundedRectangleWithRadii( 5, 5, 500, 100, {
       topLeft: 10,
       topRight: 10,
       bottomLeft: 10,
@@ -100,7 +100,7 @@
     } );
 
     scene.addChild( rectangle );
-    rectangle.addChild( new scenery.Text( 'Go Sports.', {
+    rectangle.addChild( new phet.scenery.Text( 'Go Sports.', {
       font: '36px sans-serif',
       center: rectangle.center
     } ) );

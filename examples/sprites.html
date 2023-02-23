@@ -69,19 +69,19 @@
     var spriteCount = 200;
 
     window.onload = function() {
-      var scene = new scenery.Node( { renderer: 'webgl' } );
-      var display = new scenery.Display( scene, {
+      var scene = new phet.scenery.Node( { renderer: 'webgl' } );
+      var display = new phet.scenery.Display( scene, {
         container: document.getElementById( 'main' ),
         backgroundColor: '#eee'
       } );
       display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
       display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
-      var image1 = new scenery.Image( document.getElementById( 'example-image-1' ) );
-      var image2 = new scenery.Image( document.getElementById( 'example-image-2' ) );
+      var image1 = new phet.scenery.Image( document.getElementById( 'example-image-1' ) );
+      var image2 = new phet.scenery.Image( document.getElementById( 'example-image-2' ) );
 
       for ( var i = 0; i < spriteCount; i++ ) {
-        var node = new scenery.Node( {
+        var node = new phet.scenery.Node( {
           children: [ Math.random() > 0.5 ? image1 : image2 ],
           x: Math.random() * 512,
           y: Math.random() * 512,

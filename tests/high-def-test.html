@@ -39,19 +39,19 @@
 <div id="main" style="width: 800px; height: 512px;" class="scene"></div>
 <script>
 
-  var mainScene = new scenery.Scene( $( '#main' ) );
+  var mainScene = new phet.scenery.Scene( $( '#main' ) );
 
   var y = 10;
   var padding = 7;
   function addText( str ) {
-    var text = new scenery.Text( str, { fontSize: 14, top: y } )
+    var text = new phet.scenery.Text( str, { fontSize: 14, top: y } )
     mainScene.addChild( text );
     y += padding + 10;
   }
 
   addText( 'Test for high-definition displays' );
   addText( 'devicePixelRatio: ' + window.devicePixelRatio );
-  addText( 'scenery.Utils.backingScale: ' + scenery.Utils.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) );
+  addText( 'scenery.Utils.backingScale: ' + phet.scenery.Utils.backingScale( document.createElement( 'canvas' ).getContext( '2d' ) ) );
 
   mainScene.updateScene();
 

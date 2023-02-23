@@ -50,50 +50,50 @@
 
   function boundsSnapshot( textNode ) {
 
-    var canvasBounds = scenery.TextBounds.accurateCanvasBounds( textNode );
-    var svgBounds = scenery.TextBounds.approximateSVGBounds( textNode._font, textNode.renderedText );
-    var domBounds = scenery.TextBounds.approximateDOMBounds( textNode._font, textNode.getDOMTextNode() );
-    var domImprovedBounds = scenery.TextBounds.approximateImprovedDOMBounds(  textNode._font, textNode.getDOMTextNode() );
-    var width = scenery.TextBounds.approximateCanvasWidth( textNode._font, textNode.renderedText );
+    var canvasBounds = phet.scenery.TextBounds.accurateCanvasBounds( textNode );
+    var svgBounds = phet.scenery.TextBounds.approximateSVGBounds( textNode._font, textNode.renderedText );
+    var domBounds = phet.scenery.TextBounds.approximateDOMBounds( textNode._font, textNode.getDOMTextNode() );
+    var domImprovedBounds = phet.scenery.TextBounds.approximateImprovedDOMBounds(  textNode._font, textNode.getDOMTextNode() );
+    var width = phet.scenery.TextBounds.approximateCanvasWidth( textNode._font, textNode.renderedText );
 
     var unionBounds = canvasBounds.union( svgBounds ).union( domBounds ).union( domImprovedBounds );
 
     // align the container so that our upper-left corner of the union bounds is at 0,0
-    var container = new scenery.Node( {
+    var container = new phet.scenery.Node( {
       x: -unionBounds.minX,
       y: -unionBounds.minY
     } );
 
-    container.addChild( new scenery.Path( kite.Shape.bounds( canvasBounds ), {
+    container.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( canvasBounds ), {
       fill: '#aaaaaa'
     } ) );
-    container.addChild( new scenery.Path( kite.Shape.bounds( svgBounds ), {
+    container.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( svgBounds ), {
       fill: 'rgba(255,0,0,0.4)'
     } ) );
-    container.addChild( new scenery.Path( kite.Shape.bounds( domBounds ), {
+    container.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( domBounds ), {
       fill: 'rgba(0,0,255,0.3)'
     } ) );
-    container.addChild( new scenery.Path( kite.Shape.bounds( domImprovedBounds ), {
+    container.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( domImprovedBounds ), {
       fill: 'rgba(0,255,0,0.2)'
     } ) );
-    container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( domBounds.minX + width, domBounds.minY ), new dot.Vector2( domBounds.minX + width, domBounds.maxY ) ), {
+    container.addChild( new phet.scenery.Path( phet.kite.Shape.lineSegment( new phet.dot.Vector2( domBounds.minX + width, domBounds.minY ), new phet.dot.Vector2( domBounds.minX + width, domBounds.maxY ) ), {
       stroke: '#00ff00'
     } ) );
 
     // TODO: improve how layer strategies are used
-    var svgNode = new scenery.Node( { renderer: 'svg' } );
+    var svgNode = new phet.scenery.Node( { renderer: 'svg' } );
     svgNode.addChild( textNode );
-    var canvasNode = new scenery.Node( { renderer: 'canvas' } );
+    var canvasNode = new phet.scenery.Node( { renderer: 'canvas' } );
     canvasNode.addChild( textNode );
 
     container.addChild( svgNode );
     container.addChild( canvasNode );
     textNode.fill = 'rgba(255,255,255,0.6)';
 
-    container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( 5, 0.5 ), new dot.Vector2( -5, 0.5 ) ), {
+    container.addChild( new phet.scenery.Path( phet.kite.Shape.lineSegment( new phet.dot.Vector2( 5, 0.5 ), new phet.dot.Vector2( -5, 0.5 ) ), {
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
-    container.addChild( new scenery.Path( kite.Shape.lineSegment( new dot.Vector2( 0.5, 5 ), new dot.Vector2( 0.5, -5 ) ), {
+    container.addChild( new phet.scenery.Path( phet.kite.Shape.lineSegment( new phet.dot.Vector2( 0.5, 5 ), new phet.dot.Vector2( 0.5, -5 ) ), {
       stroke: 'rgba(0,0,0,0.5)'
     } ) );
 
@@ -107,8 +107,8 @@
     $main.width( width );
     $main.height( height );
 
-    var scene = new scenery.Node();
-    var display = new scenery.Display( scene, { container: $main[ 0 ], width: width, height: height } );
+    var scene = new phet.scenery.Node();
+    var display = new phet.scenery.Display( scene, { container: $main[ 0 ], width: width, height: height } );
     scene.addChild( node );
     node.x += padding;
     node.y += padding;
@@ -132,7 +132,7 @@
         }
         else {
           var ob = queue.shift();
-          document.body.appendChild( wrapScene( boundsSnapshot( new scenery.Text( ob.string, ob.options ) ) ) );
+          document.body.appendChild( wrapScene( boundsSnapshot( new phet.scenery.Text( ob.string, ob.options ) ) ) );
         }
       }, 4 );
     }

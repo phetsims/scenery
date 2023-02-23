@@ -46,10 +46,10 @@
 <script>
   window.assertions.enableAssert();
 
-  var selectedTreeNodeProperty = new axon.Property( null );
-  var activeTreeNodeProperty = new axon.Property( null );
+  var selectedTreeNodeProperty = new phet.axon.Property( null );
+  var activeTreeNodeProperty = new phet.axon.Property( null );
 
-  var previewTreeNodeProperty = new axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
+  var previewTreeNodeProperty = new phet.axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
     return selected ? selected : active;
   } );
 
@@ -60,7 +60,7 @@
     }
   } );
 
-  class Separator extends scenery.Rectangle {
+  class Separator extends phet.scenery.Rectangle {
     constructor( preferredBoundsProperty, orientation, initialSeparatorLocation, pushFromMax ) {
 
       super( {
@@ -68,8 +68,8 @@
         cursor: orientation === 'horizontal' ? 'w-resize' : 'n-resize'
       } );
 
-      this.minBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
-      this.maxBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
+      this.minBoundsProperty = new phet.axon.Property( new phet.dot.Bounds2( 0, 0, 0, 0 ) );
+      this.maxBoundsProperty = new phet.axon.Property( new phet.dot.Bounds2( 0, 0, 0, 0 ) );
 
       this.preferredBoundsProperty = preferredBoundsProperty;
       this.orientation = orientation;
@@ -88,7 +88,7 @@
 
       this[ this.primaryRectName ] = 2;
 
-      var dragListener = new scenery.DragListener( {
+      var dragListener = new phet.scenery.DragListener( {
         drag: event => {
           this.separatorLocation = dragListener.parentPoint[ this.primaryCoordinate ];
           this.layout();
@@ -152,7 +152,7 @@
     }
   }
 
-  class TreeNode extends scenery.Node {
+  class TreeNode extends phet.scenery.Node {
     constructor( displayNode, trail ) {
       super();
 
@@ -182,60 +182,60 @@
         }
       } );
 
-      this.expandedProperty = new axon.Property( true );
+      this.expandedProperty = new phet.axon.Property( true );
 
       var serialization = displayNode._serialization;
       var isVisible = _.every( trail.nodes, function( node ) {
         return node._serialization.options.visible !== false;
       } );
 
-      var selfNode = new scenery.HBox( {
+      var selfNode = new phet.scenery.HBox( {
         spacing: 5
       } );
 
       var buttonSize = 12;
-      var expandButton = new scenery.Rectangle( -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize, {
+      var expandButton = new phet.scenery.Rectangle( -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize, {
         children: [
-          new scenery.Path( kite.Shape.regularPolygon( 3, buttonSize / 2.5 ), {
+          new phet.scenery.Path( phet.kite.Shape.regularPolygon( 3, buttonSize / 2.5 ), {
             fill: '#444'
           } )
         ],
         visible: false,
         cursor: 'pointer'
       } );
-      expandButton.addInputListener( new scenery.FireListener( {
+      expandButton.addInputListener( new phet.scenery.FireListener( {
         fire: function() {
           self.expandedProperty.value = !self.expandedProperty.value;
         }
       } ) );
       selfNode.addChild( expandButton );
 
-      var TREE_FONT = new scenery.Font( { size: 12 } );
+      var TREE_FONT = new phet.scenery.Font( { size: 12 } );
 
-      selfNode.addChild( new scenery.Text( serialization.name, {
+      selfNode.addChild( new phet.scenery.Text( serialization.name, {
         font: TREE_FONT,
         pickable: false,
         fill: isVisible ? '#000' : '#60a'
       } ) );
       if ( serialization.name !== serialization.type && serialization.type !== 'Node' ) {
-        selfNode.addChild( new scenery.Text( '(' + serialization.type + ')', {
+        selfNode.addChild( new phet.scenery.Text( '(' + serialization.type + ')', {
           font: TREE_FONT,
           pickable: false,
           fill: '#666'
         } ) );
       }
       if ( serialization.type === 'Text' ) {
-        selfNode.addChild( new scenery.Text( '"' + displayNode.text + '"', {
+        selfNode.addChild( new phet.scenery.Text( '"' + displayNode.text + '"', {
           font: TREE_FONT,
           pickable: false,
           fill: '#666'
         } ) );
       }
 
-      var selfBackground = this.selfBackground = scenery.Rectangle.bounds( selfNode.bounds, {
+      var selfBackground = this.selfBackground = phet.scenery.Rectangle.bounds( selfNode.bounds, {
         children: [ selfNode ],
         cursor: 'pointer',
-        fill: new axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
+        fill: new phet.axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
           if ( self === selected ) {
             return 'rgba(0,128,255,0.4)';
           }
@@ -255,7 +255,7 @@
           activeTreeNodeProperty.value = null;
         }
       } );
-      selfBackground.addInputListener( new scenery.FireListener( {
+      selfBackground.addInputListener( new phet.scenery.FireListener( {
         fire: function() {
           selectedTreeNodeProperty.value = self;
         }
@@ -268,19 +268,19 @@
         return new TreeNode( child, trail.copy().addDescendant( child, index ) );
       } );
 
-      var childrenNode = new scenery.VBox( {
+      var childrenNode = new phet.scenery.VBox( {
         spacing: 0,
         align: 'left',
         children: this.childTreeNodes
       } );
 
-      var column = new scenery.Rectangle( {
+      var column = new phet.scenery.Rectangle( {
         rectWidth: 2,
         rectHeight: 5,
         fill: 'rgba(0,0,0,0.1)'
       } );
 
-      var expandedNode = new scenery.Node( {
+      var expandedNode = new phet.scenery.Node( {
         children: [
           childrenNode,
           // column
@@ -332,8 +332,8 @@
   var pathHeight = 20;
 
   // initialize our scene
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
   display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
@@ -342,29 +342,29 @@
   var isDisplay = snapshot.type === 'Display';
 
   var subtree = isDisplay ? snapshot.tree : snapshot;
-  var displayTree = scenery.sceneryDeserialize( subtree );
-  var backgroundColor = isDisplay ? scenery.sceneryDeserialize( snapshot.backgroundColor ) : '#fff';
-  var snapshotBounds = isDisplay ? new dot.Bounds2( 0, 0, snapshot.width, snapshot.height ) : displayTree.bounds.dilatedXY( displayTree.width * 0.05, displayTree.height * 0.05 );
+  var displayTree = phet.scenery.sceneryDeserialize( subtree );
+  var backgroundColor = isDisplay ? phet.scenery.sceneryDeserialize( snapshot.backgroundColor ) : '#fff';
+  var snapshotBounds = isDisplay ? new phet.dot.Bounds2( 0, 0, snapshot.width, snapshot.height ) : displayTree.bounds.dilatedXY( displayTree.width * 0.05, displayTree.height * 0.05 );
 
-  var overlayNode = new scenery.Node();
-  var displayNode = new scenery.Node( {
+  var overlayNode = new phet.scenery.Node();
+  var displayNode = new phet.scenery.Node( {
     children: [
-      scenery.Rectangle.bounds( snapshotBounds, {
+      phet.scenery.Rectangle.bounds( snapshotBounds, {
         fill: backgroundColor
       } ),
       displayTree,
       overlayNode
     ],
-    clipArea: kite.Shape.bounds( snapshotBounds )
+    clipArea: phet.kite.Shape.bounds( snapshotBounds )
   } );
   scene.addChild( displayNode );
 
-  var infoBox = new scenery.VBox( {
+  var infoBox = new phet.scenery.VBox( {
     align: 'left',
     x: 1000,
     y: 1000
   } );
-  var infoBackground = new scenery.Rectangle( {
+  var infoBackground = new phet.scenery.Rectangle( {
     children: [ infoBox ]
   } );
   scene.addChild( infoBackground );
@@ -393,15 +393,15 @@
       var serialization = treeNode.displayNode._serialization;
       var types = serialization.types.join( ' : ' );
       if ( types ) {
-        infoBox.addChild( new scenery.Text( types, { fontSize: 14, fontWeight: 'bold' } ) );
+        infoBox.addChild( new phet.scenery.Text( types, { fontSize: 14, fontWeight: 'bold' } ) );
       }
 
       function addRaw( key, valueNode ) {
-        infoBox.addChild( new scenery.HBox( {
+        infoBox.addChild( new phet.scenery.HBox( {
           spacing: 0,
           align: 'top',
           children: [
-            new scenery.Text( key + ': ', { fontSize: 12 } ),
+            new phet.scenery.Text( key + ': ', { fontSize: 12 } ),
             valueNode
           ]
         } ) );
@@ -411,24 +411,24 @@
         if ( value !== undefined ) {
           var valueNode;
 
-          valueNode = new scenery.Text( '' + value, { fontSize: 12 } );
+          valueNode = new phet.scenery.Text( '' + value, { fontSize: 12 } );
 
           addRaw( key, valueNode );
         }
       }
 
       function colorSwatch( serial ) {
-        var color = new scenery.Color( serial.red, serial.green, serial.blue, serial.alpha );
+        var color = new phet.scenery.Color( serial.red, serial.green, serial.blue, serial.alpha );
         var hex = color.toNumber().toString( 16 );
         while ( hex.length < 6 ) {
           hex = '0' + hex;
         }
-        return new scenery.HBox( {
+        return new phet.scenery.HBox( {
           spacing: 4,
           children: [
-            new scenery.Rectangle( 0, 0, 10, 10, { fill: color, stroke: 'black', lineWidth: 0.5 } ),
-            new scenery.Text( '#' + hex, { fontSize: 12 } ),
-            new scenery.Text( color.toCSS(), { fontSize: 12 } )
+            new phet.scenery.Rectangle( 0, 0, 10, 10, { fill: color, stroke: 'black', lineWidth: 0.5 } ),
+            new phet.scenery.Text( '#' + hex, { fontSize: 12 } ),
+            new phet.scenery.Text( color.toCSS(), { fontSize: 12 } )
           ]
         } );
       }
@@ -440,7 +440,7 @@
               addSimple( key, null );
             }
             else {
-              addRaw( key, colorSwatch( scenery.scenerySerialize( new scenery.Color( serialization.value ) ) ) );
+              addRaw( key, colorSwatch( phet.scenery.scenerySerialize( new phet.scenery.Color( serialization.value ) ) ) );
             }
           }
           else if ( serialization.type === 'Color' ) {
@@ -450,14 +450,14 @@
             addRaw( key, colorSwatch( serialization.value ) );
           }
           else if ( serialization.type === 'Property' && serialization.value.type === 'value' ) {
-            addRaw( key, colorSwatch( scenery.scenerySerialize( new scenery.Color( serialization.value.value ) ) ) );
+            addRaw( key, colorSwatch( phet.scenery.scenerySerialize( new phet.scenery.Color( serialization.value.value ) ) ) );
           }
         }
       }
 
       function addSerial( key, serialization ) {
         if ( serialization ) {
-          var value = scenery.sceneryDeserialize( serialization );
+          var value = phet.scenery.sceneryDeserialize( serialization );
           if ( serialization.type === 'value' ) {
             addSimple( key, value );
           }
@@ -465,31 +465,31 @@
             addSimple( key, 'Vector2(' + serialization.x + ',' + serialization.y + ')' );
           }
           else if ( serialization.type === 'Matrix3' ) {
-            var matrixGroup = new scenery.AlignGroup();
-            addRaw( key, new scenery.VBox( {
+            var matrixGroup = new phet.scenery.AlignGroup();
+            addRaw( key, new phet.scenery.VBox( {
               children: [
-                new scenery.HBox( {
+                new phet.scenery.HBox( {
                   spacing: 6,
                   children: [
-                    new scenery.AlignBox( new scenery.Text( serialization.m00 ), { group: matrixGroup } ),
-                    new scenery.AlignBox( new scenery.Text( serialization.m01 ), { group: matrixGroup } ),
-                    new scenery.AlignBox( new scenery.Text( serialization.m02 ), { group: matrixGroup } )
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m00 ), { group: matrixGroup } ),
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m01 ), { group: matrixGroup } ),
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m02 ), { group: matrixGroup } )
                   ]
                 } ),
-                new scenery.HBox( {
+                new phet.scenery.HBox( {
                   spacing: 6,
                   children: [
-                    new scenery.AlignBox( new scenery.Text( serialization.m10 ), { group: matrixGroup } ),
-                    new scenery.AlignBox( new scenery.Text( serialization.m11 ), { group: matrixGroup } ),
-                    new scenery.AlignBox( new scenery.Text( serialization.m12 ), { group: matrixGroup } )
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m10 ), { group: matrixGroup } ),
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m11 ), { group: matrixGroup } ),
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m12 ), { group: matrixGroup } )
                   ]
                 } ),
-                new scenery.HBox( {
+                new phet.scenery.HBox( {
                   spacing: 6,
                   children: [
-                    new scenery.AlignBox( new scenery.Text( serialization.m20 ), { group: matrixGroup } ),
-                    new scenery.AlignBox( new scenery.Text( serialization.m21 ), { group: matrixGroup } ),
-                    new scenery.AlignBox( new scenery.Text( serialization.m22 ), { group: matrixGroup } )
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m20 ), { group: matrixGroup } ),
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m21 ), { group: matrixGroup } ),
+                    new phet.scenery.AlignBox( new phet.scenery.Text( serialization.m22 ), { group: matrixGroup } )
                   ]
                 } )
               ]
@@ -540,8 +540,8 @@
       addSimple( 'height', serialization.setup.height );
       addSimple( 'imageType', serialization.setup.imageType );
 
-      infoBox.addChild( new scenery.Spacer( 5, 5 ) );
-      infoBox.addChild( new scenery.Text( 'Bounds', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+      infoBox.addChild( new phet.scenery.Spacer( 5, 5 ) );
+      infoBox.addChild( new phet.scenery.Text( 'Bounds', { font: new phet.scenery.Font( { size: 14, weight: 'bold' } ) } ) );
 
       function boxString( bounds ) {
         return bounds.minX + ', ' + bounds.minY + ', ' + bounds.maxX + ', ' + bounds.maxY + ' (' + bounds.width + ' x ' + bounds.height + ')';
@@ -550,8 +550,8 @@
       addSimple( 'local', boxString( treeNode.displayNode.localBounds ) );
       addSimple( 'parent', boxString( treeNode.displayNode.bounds ) );
 
-      infoBox.addChild( new scenery.Spacer( 5, 5 ) );
-      infoBox.addChild( new scenery.Text( 'Trail', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+      infoBox.addChild( new phet.scenery.Spacer( 5, 5 ) );
+      infoBox.addChild( new phet.scenery.Text( 'Trail', { font: new phet.scenery.Font( { size: 14, weight: 'bold' } ) } ) );
 
       // Visibility check
       if ( _.some( treeNode.trail.nodes, function( treeNode ) {
@@ -576,30 +576,30 @@
         return treeNode._serialization.setup.hasInputListeners || treeNode._serialization.options.pickable === true;
       } );
       if ( !hasPickableFalseEquivalent && hasPickableTrueEquivalent ) {
-        infoBox.addChild( new scenery.Text( 'Hit Tested', { fontSize: 12, fill: '#f00' } ) );
+        infoBox.addChild( new phet.scenery.Text( 'Hit Tested', { fontSize: 12, fill: '#f00' } ) );
       }
-      addSerial( 'matrix', scenery.scenerySerialize( treeNode.trail.getMatrix() ) );
+      addSerial( 'matrix', phet.scenery.scenerySerialize( treeNode.trail.getMatrix() ) );
 
       /*---------------------------------------------------------------------------*
       * Buttons
       *----------------------------------------------------------------------------*/
 
       function badButton( label, action ) {
-        var text = new scenery.Text( label, { fontSize: 12 } );
-        var rect = scenery.Rectangle.bounds( text.bounds.dilatedXY( 5, 3 ), {
+        var text = new phet.scenery.Text( label, { fontSize: 12 } );
+        var rect = phet.scenery.Rectangle.bounds( text.bounds.dilatedXY( 5, 3 ), {
           children: [ text ],
           stroke: 'black',
           cursor: 'pointer'
         } );
-        rect.addInputListener( new scenery.FireListener( {
+        rect.addInputListener( new phet.scenery.FireListener( {
           fire: action
         } ) );
         return rect;
       }
 
-      infoBox.addChild( new scenery.Spacer( 10, 10 ) );
+      infoBox.addChild( new phet.scenery.Spacer( 10, 10 ) );
 
-      infoBox.addChild( new scenery.HBox( {
+      infoBox.addChild( new phet.scenery.HBox( {
         spacing: 5,
         children: [
           badButton( 'toggle visibility', function() {
@@ -624,30 +624,30 @@
 
   var treeMarginX = 8;
   var treeMarginY = 5;
-  var rootTreeNode = new TreeNode( displayTree, new scenery.Trail( displayTree ) );
+  var rootTreeNode = new TreeNode( displayTree, new phet.scenery.Trail( displayTree ) );
   rootTreeNode.x = treeMarginX;
   rootTreeNode.y = treeMarginY + pathHeight;
-  var treeBackground = new scenery.Rectangle( {
+  var treeBackground = new phet.scenery.Rectangle( {
     fill: '#fcfcfc'
   } );
-  var treeControls = new scenery.HBox( {
+  var treeControls = new phet.scenery.HBox( {
     spacing: 5,
     children: [
-      new scenery.Text( 'expand', {
-        font: new scenery.Font( { size: 12 } ),
+      new phet.scenery.Text( 'expand', {
+        font: new phet.scenery.Font( { size: 12 } ),
         fill: '#888',
         pointer: 'cursor',
-        inputListeners: [ new scenery.FireListener( {
+        inputListeners: [ new phet.scenery.FireListener( {
           fire: function() {
             rootTreeNode.expandRecusively();
           }
         } ) ]
       } ),
-      new scenery.Text( 'collapse', {
-        font: new scenery.Font( { size: 12 } ),
+      new phet.scenery.Text( 'collapse', {
+        font: new phet.scenery.Font( { size: 12 } ),
         fill: '#888',
         pointer: 'cursor',
-        inputListeners: [ new scenery.FireListener( {
+        inputListeners: [ new phet.scenery.FireListener( {
           fire: function() {
             rootTreeNode.collapseRecursively();
           }
@@ -656,7 +656,7 @@
     ],
     y: rootTreeNode.y
   } );
-  var treeContainer = new scenery.Node( {
+  var treeContainer = new phet.scenery.Node( {
     children: [
       treeBackground,
       rootTreeNode,
@@ -708,7 +708,7 @@
     focusTreeNode( selectedTreeNodeProperty.value );
   }
 
-  var localBoundsHighlight = new scenery.Path( null, {
+  var localBoundsHighlight = new phet.scenery.Path( null, {
     fill: 'rgba(0,128,255,0.4)',
     stroke: 'rgb(0,64,128)',
     lineWidth: 0.5
@@ -724,7 +724,7 @@
 
       if ( localBounds.isValid() ) {
         localBoundsHighlight.visible = true;
-        localBoundsHighlight.shape = kite.Shape.polygon( [
+        localBoundsHighlight.shape = phet.kite.Shape.polygon( [
           localBounds.leftTop,
           localBounds.leftBottom,
           localBounds.rightBottom,
@@ -742,8 +742,8 @@
     }
   } );
 
-  var previewContainer = new scenery.Node();
-  var previewBackground = new scenery.Rectangle( {
+  var previewContainer = new phet.scenery.Node();
+  var previewBackground = new phet.scenery.Rectangle( {
     rectWidth: bottomHeight,
     rectHeight: bottomHeight,
     children: [ previewContainer ],
@@ -775,10 +775,10 @@
     updatePreview();
   } );
 
-  var pathBackground = new scenery.Rectangle( {
+  var pathBackground = new phet.scenery.Rectangle( {
     fill: '#333'
   } );
-  var pathContainer = new scenery.HBox( {
+  var pathContainer = new phet.scenery.HBox( {
     spacing: 5
   } );
   scene.addChild( pathBackground );
@@ -791,16 +791,16 @@
     }
   }
 
-  var PATH_FONT = new scenery.Font( { size: 12, weight: 'bold' } );
+  var PATH_FONT = new phet.scenery.Font( { size: 12, weight: 'bold' } );
   previewTreeNodeProperty.link( function( treeNode ) {
     if ( treeNode ) {
       pathContainer.children = treeNode.trail.nodes.map( function( node ) {
         var name = node._serialization.name;
         if ( name === 'Node' ) {
-          return new scenery.Text( '|', { font: PATH_FONT, fill: '#bbb' } );
+          return new phet.scenery.Text( '|', { font: PATH_FONT, fill: '#bbb' } );
         }
         else {
-          return new scenery.Text( name, { font: PATH_FONT, fill: '#fff' } );
+          return new phet.scenery.Text( name, { font: PATH_FONT, fill: '#fff' } );
         }
       } );
     }
@@ -810,7 +810,7 @@
     layoutPathContainer();
   } );
 
-  var mainBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, window.innerWidth, window.innerHeight ) );
+  var mainBoundsProperty = new phet.axon.Property( new phet.dot.Bounds2( 0, 0, window.innerWidth, window.innerHeight ) );
 
   /*---------------------------------------------------------------------------*
   * Layout
@@ -824,13 +824,13 @@
 
   var rightDivider = new Separator( mainDivider.maxBoundsProperty, 'vertical', window.innerHeight - bottomHeight, true );
   rightDivider.minBoundsProperty.link( function( topBounds ) {
-    pathBackground.rectBounds = new dot.Bounds2( topBounds.minX, topBounds.minY, topBounds.maxX, topBounds.minY + pathHeight );
+    pathBackground.rectBounds = new phet.dot.Bounds2( topBounds.minX, topBounds.minY, topBounds.maxX, topBounds.minY + pathHeight );
     pathContainer.maxWidth = pathBackground.width - 10;
     layoutPathContainer();
 
-    var treeLocalBounds = new dot.Bounds2( 0, pathHeight, topBounds.width, topBounds.height );
+    var treeLocalBounds = new phet.dot.Bounds2( 0, pathHeight, topBounds.width, topBounds.height );
     treeContainer.x = topBounds.left;
-    treeContainer.clipArea = kite.Shape.bounds( treeLocalBounds );
+    treeContainer.clipArea = phet.kite.Shape.bounds( treeLocalBounds );
     treeBackground.rectBounds = treeLocalBounds;
     treeControls.right = treeLocalBounds.right - 5;
     constrainTree();
@@ -854,7 +854,7 @@
     var width = window.innerWidth;
     var height = window.innerHeight;
     display.setWidthHeight( width, height );
-    mainBoundsProperty.value = new dot.Bounds2( 0, 0, width, height );
+    mainBoundsProperty.value = new phet.dot.Bounds2( 0, 0, width, height );
   }
 
   window.addEventListener( 'resize', onResize );

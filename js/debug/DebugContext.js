@@ -8,7 +8,7 @@
  * Wrapping of the CanvasRenderingContext2D interface as of January 27th, 2013 (but not other interfaces like TextMetrics and Path)
  *
  * Shortcut to create:
- *    var context = new scenery.DebugContext( document.createElement( 'canvas' ).getContext( '2d' ) );
+ *    var context = new phet.scenery.DebugContext( document.createElement( 'canvas' ).getContext( '2d' ) );
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

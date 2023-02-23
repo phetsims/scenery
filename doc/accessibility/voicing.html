@@ -35,13 +35,13 @@
 
 
   <script type="text/javascript">
-    scenery.Utils.polyfillRequestAnimationFrame();
+    phet.scenery.Utils.polyfillRequestAnimationFrame();
 
     function docExample( id, draw ) {
 
       var $container = $( '#' + id );
-      var scene = new scenery.Node();
-      var display = new scenery.Display( scene, {
+      var scene = new phet.scenery.Node();
+      var display = new phet.scenery.Display( scene, {
         width: $container.width(),
         height: $container.height(),
 
@@ -350,7 +350,7 @@
         /*START*/
 
         // create a class that is compsed with Voicing
-        class VoicingRectangle extends Voicing( scenery.Rectangle ) {
+        class VoicingRectangle extends Voicing( phet.scenery.Rectangle ) {
           constructor() {
 
             // super constructor for a blue rectangle
@@ -361,7 +361,7 @@
             this.voicingObjectResponse = 'blue';
 
             // add a listener that updates the color of the rectangle and requests speech on release
-            this.addInputListener( new scenery.PressListener( {
+            this.addInputListener( new phet.scenery.PressListener( {
               release: () => {
 
                 // change the Rectangle fill color
@@ -384,8 +384,8 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        scenery.voicingManager.initialize( scenery.Display.userGestureEmitter );
-        scenery.voicingManager.enabledProperty.value = true;
+        phet.scenery.voicingManager.initialize( phet.scenery.Display.userGestureEmitter );
+        phet.scenery.voicingManager.enabledProperty.value = true;
         /*END*/
       } );
     </script>
@@ -411,7 +411,7 @@
         /*START*/
 
         // create a class that is compsed with Voicing
-        class VoicingRectangle extends Voicing( scenery.Rectangle ) {
+        class VoicingRectangle extends Voicing( phet.scenery.Rectangle ) {
           constructor() {
 
             // super constructor for a blue rectangle
@@ -421,9 +421,9 @@
             this.voicingNameResponse = 'Rectangle';
 
             // add a listener that updates the color of the rectangle and requests speech on release
-            this.addInputListener( new scenery.DragListener( {
+            this.addInputListener( new phet.scenery.DragListener( {
               translateNode: true,
-              dragBoundsProperty: new axon.Property( new dot.Bounds2( 0, 0, 128 - 32, 128 - 32 ) ),
+              dragBoundsProperty: new phet.axon.Property( new phet.dot.Bounds2( 0, 0, 128 - 32, 128 - 32 ) ),
               press: () => {
 
                 // on press, speak the voicingNameResponse
@@ -447,12 +447,12 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        scenery.voicingManager.initialize( scenery.Display.userGestureEmitter );
-        scenery.voicingManager.enabledProperty.value = true;
+        phet.scenery.voicingManager.initialize( phet.scenery.Display.userGestureEmitter );
+        phet.scenery.voicingManager.enabledProperty.value = true;
 
         // globally enable/disable object responses
         document.getElementById( 'object-responses' ).addEventListener( 'change', () => {
-          scenery.voicingManager.objectResponsesEnabledProperty.toggle();
+          phet.scenery.voicingManager.objectResponsesEnabledProperty.toggle();
         } );
         /*END*/
       } );

@@ -1,7 +1,7 @@
 // Copyright 2020-2022, University of Colorado Boulder
 
 /**
- * SVG namespace, used for document.createElementNS( scenery.svgns, name );
+ * SVG namespace, used for document.createElementNS( svgns, name );
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

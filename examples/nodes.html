@@ -60,20 +60,20 @@
 <script>
 
   // initialize our scene
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
   display.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
-  var container = new scenery.Node();
+  var container = new phet.scenery.Node();
   scene.addChild( container );
 
   /*---------------------------------------------------------------------------*
    * Text
    *----------------------------------------------------------------------------*/
 
-  container.addChild( new scenery.Text( 'This is a Text node', {
+  container.addChild( new phet.scenery.Text( 'This is a Text node', {
     x: 20,
     y: 50,
     fill: '#000000',
@@ -84,7 +84,7 @@
    * Rectangle
    *----------------------------------------------------------------------------*/
 
-  container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
+  container.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 44, 44 ), {
     x: 20.5,
     y: 100.5,
     fill: '#ff0000',
@@ -95,14 +95,14 @@
    * Custom Shape
    *----------------------------------------------------------------------------*/
 
-  var customShape = new kite.Shape();
+  var customShape = new phet.kite.Shape();
   customShape.moveTo( 0, 0 );
   customShape.quadraticCurveTo( 200, 0, 100, 50 );
   customShape.lineTo( 100, 25 );
   customShape.lineTo( 0, 25 );
   customShape.close();
 
-  container.addChild( new scenery.Path( customShape, {
+  container.addChild( new phet.scenery.Path( customShape, {
     x: 120.5,
     y: 100.5,
     fill: '#ff0000',
@@ -116,7 +116,7 @@
 
   var imageSource = document.createElement( 'img' );
   imageSource.onload = function( e ) {
-    container.insertChild( 0, new scenery.Image( imageSource, {
+    container.insertChild( 0, new phet.scenery.Image( imageSource, {
       x: 20,
       y: 200
     } ) );
@@ -146,9 +146,9 @@
   }
   addButton( 'Scale down', function( event ) { container.scaleBy( Math.pow( 0.5, 0.25 ) ); } );
   addButton( 'Scale up', function( event ) { container.scaleBy( Math.pow( 2, 0.25 ) ); } );
-  addButton( 'Rotate', function( event ) { container.rotateAround( new dot.Vector2( 200, 200 ), Math.PI / 16 ); } );
+  addButton( 'Rotate', function( event ) { container.rotateAround( new phet.dot.Vector2( 200, 200 ), Math.PI / 16 ); } );
 
-  container.addChild( new scenery.DOM( element, {
+  container.addChild( new phet.scenery.DOM( element, {
     x: 20,
     y: 350
   } ) );

@@ -40,12 +40,12 @@
   <script src="../dist/scenery.min.js"></script>
 
   <script type="text/javascript">
-    scenery.Utils.polyfillRequestAnimationFrame();
+    phet.scenery.Utils.polyfillRequestAnimationFrame();
 
     function docExample( id, draw ) {
       var $container = $( '#' + id );
-      var scene = new scenery.Node();
-      var display = new scenery.Display( scene, {
+      var scene = new phet.scenery.Node();
+      var display = new phet.scenery.Display( scene, {
         width: $container.width(),
         height: $container.height(),
         accessibility: false,
@@ -379,8 +379,8 @@ window.assertions.disableAssertSlow();
     <h3 id="node" class="section">Node</h3>
 
     <p>
-      A default node can be created with <code>new scenery.Node()</code>, but usually a parameter object is
-      given, for example <code>new scenery.Node( { x: 20, y: 100 } )</code>. Below are all of the available
+      A default node can be created with <code>new phet.scenery.Node()</code>, but usually a parameter object is
+      given, for example <code>new phet.scenery.Node( { x: 20, y: 100 } )</code>. Below are all of the available
       parameter object options:
     </p>
 
@@ -484,18 +484,18 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-children', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Node( {
+        scene.addChild( new phet.scenery.Node( {
           // an array of children can be specified, so no
           // reference to the container node is needed
           children: [
             // gray rectangle on the left
-            new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
+            new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 64, 64 ), {
               fill: '#aaa'
             } ),
 
             // later nodes in the array will show up on top
             // of previous nodes
-            new scenery.Text( 'Children', {
+            new phet.scenery.Text( 'Children', {
               font: '20px sans-serif',
               centerX: 64,
               centerY: 32
@@ -580,7 +580,7 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-cursor', function( scene, display ) {
         /*START*/
-        scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 25 ), {
+        scene.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 25 ), {
           x: 64, y: 32,
           fill: '#88f',
           cursor: 'pointer', // classic hand
@@ -656,12 +656,12 @@ window.assertions.disableAssertSlow();
       docExample( 'example-clipArea', function( scene ) {
         scene.renderer = 'svg';
         /*START*/
-        scene.addChild( new scenery.Circle( 28, {
+        scene.addChild( new phet.scenery.Circle( 28, {
           fill: 'black',
           stroke: 'red',
           lineWidth: 5,
           x: 38, y: 38,
-          clipArea: kite.Shape.roundRect( -32, -32, 50, 50, 10, 10 )
+          clipArea: phet.kite.Shape.roundRect( -32, -32, 50, 50, 10, 10 )
         } ) );
         /*END*/
       } );
@@ -727,13 +727,13 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-opacity', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
-        var circle = kite.Shape.circle( 0, 0, 30 );
-        scene.addChild( new scenery.Node( {
+        scene.addChild( new phet.scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
+        var circle = phet.kite.Shape.circle( 0, 0, 30 );
+        scene.addChild( new phet.scenery.Node( {
           opacity: 0.5,
           children: [
-            new scenery.Path( circle, { x: 12, y: 22, fill: '#f00' } ),
-            new scenery.Path( circle, { x: 52, y: 22, fill: '#00f' } )
+            new phet.scenery.Path( circle, { x: 12, y: 22, fill: '#f00' } ),
+            new phet.scenery.Path( circle, { x: 52, y: 22, fill: '#00f' } )
           ]
         } ) );
         /*END*/
@@ -957,7 +957,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       The Display is responsible for visually displaying a specific root Node and all of its descendants. It is
-      created with <code>new scenery.Display( node, [options] )</code>, where <code>node</code> is the
+      created with <code>new phet.scenery.Display( node, [options] )</code>, where <code>node</code> is the
       <a href="#node">Node</a> to display, and the options available are documented below. Unlike earlier versions,
       the Display is NOT a sub-type of Node, and the root node may be referred to as the 'scene'.
     </p>
@@ -1124,36 +1124,36 @@ window.assertions.disableAssertSlow();
     <div id="example-lineCap" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-lineCap', function( scene ) {
-        scene.addChild( new scenery.Text( 'butt', {
+        scene.addChild( new phet.scenery.Text( 'butt', {
           fontSize: 14,
           centerX: 256 / 6,
           y: 20
         } ) );
-        scene.addChild( new scenery.Text( 'square', {
+        scene.addChild( new phet.scenery.Text( 'square', {
           fontSize: 14,
           centerX: 256 * 3 / 6,
           y: 20
         } ) );
-        scene.addChild( new scenery.Text( 'round', {
+        scene.addChild( new phet.scenery.Text( 'round', {
           fontSize: 14,
           centerX: 256 * 5 / 6,
           y: 20
         } ) );
         /*START*/
-        var shape = kite.Shape.lineSegment( 0, 50, 0, 70 );
-        scene.addChild( new scenery.Path( shape, {
+        var shape = phet.kite.Shape.lineSegment( 0, 50, 0, 70 );
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 / 6,
           stroke: '#000',
           lineWidth: 30,
           lineCap: 'butt'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 3 / 6,
           stroke: '#000',
           lineWidth: 30,
           lineCap: 'square'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 5 / 6,
           stroke: '#000',
           lineWidth: 30,
@@ -1161,15 +1161,15 @@ window.assertions.disableAssertSlow();
         } ) );
         /*END*/
 // add a red highlight
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 / 6,
           stroke: '#f00'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 3 / 6,
           stroke: '#f00'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 5 / 6,
           stroke: '#f00'
         } ) );
@@ -1189,36 +1189,36 @@ window.assertions.disableAssertSlow();
     <div id="example-lineJoin" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-lineJoin', function( scene ) {
-        scene.addChild( new scenery.Text( 'miter', {
+        scene.addChild( new phet.scenery.Text( 'miter', {
           fontSize: 14,
           centerX: 256 / 6,
           y: 20
         } ) );
-        scene.addChild( new scenery.Text( 'bevel', {
+        scene.addChild( new phet.scenery.Text( 'bevel', {
           fontSize: 14,
           centerX: 256 * 3 / 6,
           y: 20
         } ) );
-        scene.addChild( new scenery.Text( 'round', {
+        scene.addChild( new phet.scenery.Text( 'round', {
           fontSize: 14,
           centerX: 256 * 5 / 6,
           y: 20
         } ) );
         /*START*/
-        var shape = new kite.Shape().moveTo( -30, 80 ).lineTo( 0, 50 ).lineTo( 30, 80 );
-        scene.addChild( new scenery.Path( shape, {
+        var shape = new phet.kite.Shape().moveTo( -30, 80 ).lineTo( 0, 50 ).lineTo( 30, 80 );
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 / 6,
           stroke: '#000',
           lineWidth: 25,
           lineJoin: 'miter'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 3 / 6,
           stroke: '#000',
           lineWidth: 25,
           lineJoin: 'bevel'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 5 / 6,
           stroke: '#000',
           lineWidth: 25,
@@ -1226,15 +1226,15 @@ window.assertions.disableAssertSlow();
         } ) );
         /*END*/
 // add a red highlight
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 / 6,
           stroke: '#f00'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 3 / 6,
           stroke: '#f00'
         } ) );
-        scene.addChild( new scenery.Path( shape, {
+        scene.addChild( new phet.scenery.Path( shape, {
           x: 256 * 5 / 6,
           stroke: '#f00'
         } ) );
@@ -1255,7 +1255,7 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-lineDash', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 25 ), {
+        scene.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 25 ), {
           x: 32, y: 32,
           stroke: '#000',
           lineWidth: 3,
@@ -1277,7 +1277,7 @@ window.assertions.disableAssertSlow();
     <div id="example-lineDashOffset" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-lineDashOffset', function( scene ) {
-        scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 16.5 )
+        scene.addChild( new phet.scenery.Path( new phet.kite.Shape().moveTo( 0, 16.5 )
             .lineTo( 128, 16.5 )
             .moveTo( 0, 32.5 )
             .lineTo( 128, 32.5 )
@@ -1286,21 +1286,21 @@ window.assertions.disableAssertSlow();
           stroke: '#f00'
         } ) );
         /*START*/
-        var shape = kite.Shape.lineSegment( 0, 0, 128, 0 );
+        var shape = phet.kite.Shape.lineSegment( 0, 0, 128, 0 );
         var args = {
           stroke: '#000',
           lineWidth: 8,
           lineDash: [ 20, 5 ]
         };
-        scene.addChild( new scenery.Path( shape, _.extend( {
+        scene.addChild( new phet.scenery.Path( shape, _.extend( {
           y: 16.5,
           lineDashOffset: 0
         }, args ) ) );
-        scene.addChild( new scenery.Path( shape, _.extend( {
+        scene.addChild( new phet.scenery.Path( shape, _.extend( {
           y: 32.5,
           lineDashOffset: 5
         }, args ) ) );
-        scene.addChild( new scenery.Path( shape, _.extend( {
+        scene.addChild( new phet.scenery.Path( shape, _.extend( {
           y: 48.5,
           lineDashOffset: 10
         }, args ) ) );
@@ -1334,7 +1334,7 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      A path is constructed with <code>new scenery.Path( options )</code>, where <code>options</code>
+      A path is constructed with <code>new phet.scenery.Path( options )</code>, where <code>options</code>
       is the standard <a href="#node">Node</a> parameter object, where the <a href="#path-shape">shape</a>
       should be specified.
     </p>
@@ -1353,7 +1353,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       Image is a <a href="#node">Node</a> subtype that displays a single image in either Canvas,
-      SVG or DOM. An image node is constructed with <code>new scenery.Image( image, [options] )</code>,
+      SVG or DOM. An image node is constructed with <code>new phet.scenery.Image( image, [options] )</code>,
       where <code>image</code> is as described in <a href="#image-image">image</a>, and
       <code>options</code> is the normal <a href="#node-options">options parameter object</a>.
     </p>
@@ -1363,7 +1363,7 @@ window.assertions.disableAssertSlow();
       docExample( 'example-image', function( scene, display ) {
         var url = 'https://phet.colorado.edu/sims/my-solar-system/my-solar-system-thumbnail.png';
         /*START*/
-        scene.addChild( new scenery.Image( url ) );
+        scene.addChild( new phet.scenery.Image( url ) );
         /*END*/
         display.updateOnRequestAnimationFrame();
       } );
@@ -1403,7 +1403,7 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      Text nodes are constructed with <code>new scenery.Text( text, [options] )</code>, where
+      Text nodes are constructed with <code>new phet.scenery.Text( text, [options] )</code>, where
       <code>text</code> is described by <a href="#text-text">text</a>, and <code>options</code>
       is the standard <a href="#node">Node</a> parameter object.
     </p>
@@ -1412,7 +1412,7 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-text', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Text( 'Some text', {
+        scene.addChild( new phet.scenery.Text( 'Some text', {
           font: '20px sans-serif',
           centerX: 128, centerY: 32
         } ) );
@@ -1563,7 +1563,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       DOM nodes should be constructed by passing in the DOM element, along with a parameter object if desired:
-      <code>new scenery.DOM( element, [options] )</code>
+      <code>new phet.scenery.DOM( element, [options] )</code>
     </p>
 
     <div id="example-dom" class="exampleScene" style="width: 256px; height: 128px;"></div>
@@ -1572,7 +1572,7 @@ window.assertions.disableAssertSlow();
         /*START*/
         var element = document.createElement( 'span' );
         element.innerHTML = '<label style="display: inline;">Type in me: </label><input type="text">';
-        scene.addChild( new scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
+        scene.addChild( new phet.scenery.DOM( element, { x: 30, rotation: Math.PI / 6 } ) );
         /*END*/
       } );
     </script>
@@ -1605,7 +1605,7 @@ window.assertions.disableAssertSlow();
       LinearGradient is constructed and used very similarly to Canvas's
       <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-createlineargradient">context.createLinearGradient</a>,
       with
-      <code>new scenery.LinearGradient( x0, y0, x1, y1 )</code> where the gradient goes from (x0,y0) to
+      <code>new phet.scenery.LinearGradient( x0, y0, x1, y1 )</code> where the gradient goes from (x0,y0) to
       (x1,y1), and then <a href="#linearGradient-addColorStop">color stops</a> can be added.
     </p>
 
@@ -1613,20 +1613,20 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-linearGradient', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 128, 128 ), {
+        scene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 128, 128 ), {
 
           // upper-left to lower-right
-          fill: new scenery.LinearGradient( 0, 0, 128, 128 )
+          fill: new phet.scenery.LinearGradient( 0, 0, 128, 128 )
               .addColorStop( 0, '#888' )
               .addColorStop( 0.4, '#000' )
               .addColorStop( 1, '#555' )
         } ) );
-        scene.addChild( new scenery.Text( 'A', {
+        scene.addChild( new phet.scenery.Text( 'A', {
           fontSize: 80,
           centerX: 64, centerY: 64,
 
           // left to right
-          fill: new scenery.LinearGradient( 0, 0, 55, 0 )
+          fill: new phet.scenery.LinearGradient( 0, 0, 55, 0 )
               .addColorStop( 0, '#f00' )
               .addColorStop( 1, '#ff0' )
         } ) );
@@ -1660,7 +1660,7 @@ window.assertions.disableAssertSlow();
       RadialGradient is constructed and used very similarly to Canvas's
       <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-createradialgradient">context.createRadialGradient</a>,
       with
-      <code>new scenery.RadialGradient( x0, y0, r0, x1, y1, r1 )</code> where the gradient handled between
+      <code>new phet.scenery.RadialGradient( x0, y0, r0, x1, y1, r1 )</code> where the gradient handled between
       two circles, one centered at (x0,y0) with a radius r0, and the other at (x1,y1) with a radius r1.
       Due to SVG compatibility, this is slightly constricted, as the smaller circle needs to be completely
       within the larger circle. Then <a href="#radialGradient-addColorStop">color stops</a> can be added.
@@ -1675,10 +1675,10 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-radialGradient', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 128, 128 ), {
+        scene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 128, 128 ), {
 
           // starts at a 10-px radius circle and expands out nonuniformly
-          fill: new scenery.RadialGradient( 32, 32, 10, 64, 64, 90 )
+          fill: new phet.scenery.RadialGradient( 32, 32, 10, 64, 64, 90 )
               .addColorStop( 0, '#05f' )
               .addColorStop( 0.5, '#306' )
               .addColorStop( 1, '#000' )
@@ -1686,12 +1686,12 @@ window.assertions.disableAssertSlow();
 
         var transparent = 'rgba(255,255,255,0)';
         var letter = '#fff';
-        scene.addChild( new scenery.Text( 'A', {
+        scene.addChild( new phet.scenery.Text( 'A', {
           fontSize: 80,
           centerX: 64, centerY: 64,
 
           // concentric circles
-          fill: new scenery.RadialGradient( 25, -30, 0, 25, -30, 50 )
+          fill: new phet.scenery.RadialGradient( 25, -30, 0, 25, -30, 50 )
               .addColorStop( 0, transparent )
               .addColorStop( 0.1, letter )
               .addColorStop( 0.2, transparent )
@@ -1731,7 +1731,7 @@ window.assertions.disableAssertSlow();
       Pattern is constructed and used very similarly to Canvas's
       <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#dom-context-2d-createpattern">context.createPattern</a>,
       with
-      <code>new scenery.Pattern( image )</code> where <code>image</code> is an HTMLImageElement.
+      <code>new phet.scenery.Pattern( image )</code> where <code>image</code> is an HTMLImageElement.
     </p>
 
     <div id="example-pattern" class="exampleScene" style="width: 256px; height: 256px;"></div>
@@ -1740,12 +1740,12 @@ window.assertions.disableAssertSlow();
         var loadedImg = document.createElement( 'img' );
         loadedImg.addEventListener( 'load', function() {
           /*START*/
-          scene.addChild( new scenery.Path( kite.Shape.roundRectangle( 10, 10, 236, 236, 64, 64 ), {
+          scene.addChild( new phet.scenery.Path( phet.kite.Shape.roundRectangle( 10, 10, 236, 236, 64, 64 ), {
 
             // tile the image, and rotate it 30 degrees, and scale it down
-            fill: new scenery.Pattern( loadedImg ).setTransformMatrix(
-                dot.Matrix3.rotation2( Math.PI / 6 )
-                    .timesMatrix( dot.Matrix3.scale( 0.5 ) ) ),
+            fill: new phet.scenery.Pattern( loadedImg ).setTransformMatrix(
+                phet.dot.Matrix3.rotation2( Math.PI / 6 )
+                    .timesMatrix( phet.dot.Matrix3.scale( 0.5 ) ) ),
             stroke: '#000'
           } ) );
           /*END*/
@@ -1774,10 +1774,10 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      A Rectangle is normally created with <code>new scenery.Rectangle( x, y, width, height, [options] )</code>,
-      but rounded corners can be specified with <code>new scenery.Rectangle( x, y, width, height, arcWidth, arcHeight, [options] )</code>,
+      A Rectangle is normally created with <code>new phet.scenery.Rectangle( x, y, width, height, [options] )</code>,
+      but rounded corners can be specified with <code>new phet.scenery.Rectangle( x, y, width, height, arcWidth, arcHeight, [options] )</code>,
       or all of the parameters can be specified in the options with
-      <code>new scenery.Rectangle( { rectX: _, rectY: _, rectWidth: _, rectHeight: _, ... } )</code>
+      <code>new phet.scenery.Rectangle( { rectX: _, rectY: _, rectWidth: _, rectHeight: _, ... } )</code>
     </p>
 
     <div id="example-rectangle" class="exampleScene" style="width: 128px; height: 64px;"></div>
@@ -1785,20 +1785,20 @@ window.assertions.disableAssertSlow();
       docExample( 'example-rectangle', function( scene ) {
         /*START*/
 // red rectangle
-        scene.addChild( new scenery.Rectangle( 10, 10, 44, 44, {
+        scene.addChild( new phet.scenery.Rectangle( 10, 10, 44, 44, {
           fill: '#f00',
         } ) );
 
 // green rotated rectangle
         var s = 44 / Math.sqrt( 2 );
-        scene.addChild( new scenery.Rectangle( -s / 2, -s / 2, s, s, {
+        scene.addChild( new phet.scenery.Rectangle( -s / 2, -s / 2, s, s, {
           fill: '#0f0',
           x: 32, y: 32,
           rotation: Math.PI / 4
         } ) );
 
 // blue rectangle with 10px rounded corners
-        scene.addChild( new scenery.Rectangle( 74, 10, 44, 44, 10, 10, {
+        scene.addChild( new phet.scenery.Rectangle( 74, 10, 44, 44, 10, 10, {
           fill: '#00f',
         } ) );
         /*END*/
@@ -1865,17 +1865,17 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      A Circle is created with <code>new scenery.Circle( radius, [options] )</code> with the specified radius.
+      A Circle is created with <code>new phet.scenery.Circle( radius, [options] )</code> with the specified radius.
     </p>
 
     <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
       docExample( 'example-circle', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Circle( 22, {
+        scene.addChild( new phet.scenery.Circle( 22, {
           x: 32, y: 32, fill: '#f00'
         } ) );
-        scene.addChild( new scenery.Circle( 11, {
+        scene.addChild( new phet.scenery.Circle( 11, {
           x: 43, y: 32, fill: '#0f0'
         } ) );
         /*END*/
@@ -1897,9 +1897,9 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      A Line is created with <code>new scenery.Line( x1, y1, x2, y2, [options] )</code> as a line from (x1,y1) to (x2,y2). Additionally,
-      the constructors <code>new scenery.Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), [options] )</code> and
-      <code>new scenery.Line( { x1: x1, y1: y1, x2: x2, y2: y2, [other options] } )</code>
+      A Line is created with <code>new phet.scenery.Line( x1, y1, x2, y2, [options] )</code> as a line from (x1,y1) to (x2,y2). Additionally,
+      the constructors <code>new phet.scenery.Line( new Vector2( x1, y1 ), new Vector2( x2, y2 ), [options] )</code> and
+      <code>new phet.scenery.Line( { x1: x1, y1: y1, x2: x2, y2: y2, [other options] } )</code>
       are supported.
     </p>
 
@@ -1907,10 +1907,10 @@ window.assertions.disableAssertSlow();
     <script type="text/javascript">
       docExample( 'example-line', function( scene ) {
         /*START*/
-        scene.addChild( new scenery.Line( 8, 8, 56, 56, {
+        scene.addChild( new phet.scenery.Line( 8, 8, 56, 56, {
           stroke: 'red', lineWidth: 5, lineCap: 'round'
         } ) );
-        scene.addChild( new scenery.Line( 8, 56, 56, 8, {
+        scene.addChild( new phet.scenery.Line( 8, 56, 56, 8, {
           stroke: 'blue', lineWidth: 5, lineCap: 'round'
         } ) );
         /*END*/
@@ -1961,24 +1961,24 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      It can be constructed with <code>new scenery.Font()</code> initialized with the default font '10px sans-serif',
+      It can be constructed with <code>new phet.scenery.Font()</code> initialized with the default font '10px sans-serif',
       <code>scenery.Font.fromCSS( cssFontString )</code> initialized with the specified <a href="http://www.w3.org/TR/css3-fonts/">CSS Font</a>,
-      or with a property object <code>new scenery.Font( { ... } )</code>, where any of the Font's properties
+      or with a property object <code>new phet.scenery.Font( { ... } )</code>, where any of the Font's properties
       (<a href="#font-font">font</a>, <a href="#font-family">family</a>, <a href="#font-weight">weight</a>, <a href="#font-stretch">stretch</a>, <a
         href="#font-style">style</a>, <a href="#font-size">size</a>, and <a href="#font-lineHeight">lineHeight</a>)
       can be present.
     </p>
 
     <p>
-      For example, <code>new scenery.Font( { size: 16, style: 'italic' } )</code> and <code>scenery.Font.fromCSS( 'italic 16px sans-serif' )</code>
+      For example, <code>new phet.scenery.Font( { size: 16, style: 'italic' } )</code> and <code>scenery.Font.fromCSS( 'italic 16px sans-serif' )</code>
       are equivalent ways of creating that specific Font instance. In addition:
     </p>
       <pre class="brush: js">
-new scenery.Font().font                      // "10px sans-serif" (the default)
-new scenery.Font( { family: 'serif' } ).font // "10px serif"
-new scenery.Font( { weight: 'bold' } ).font  // "bold 10px sans-serif"
-new scenery.Font( { size: 16 } ).font        // "16px sans-serif"
-var font = new scenery.Font( {
+new phet.scenery.Font().font                      // "10px sans-serif" (the default)
+new phet.scenery.Font( { family: 'serif' } ).font // "10px serif"
+new phet.scenery.Font( { weight: 'bold' } ).font  // "bold 10px sans-serif"
+new phet.scenery.Font( { size: 16 } ).font        // "16px sans-serif"
+var font = new phet.scenery.Font( {
   family: '"Times New Roman", serif',
   style: 'italic',
   lineHeight: 10
@@ -2042,8 +2042,8 @@ font.weight;                                 // 400 (the default)
     <h3 id="color" class="section">Color</h3>
 
     <p>
-      A Color can be constructed either with any valid CSS color (<code>new scenery.Color( cssColorString )</code>), or with components directly
-      (<code>new scenery.Color( red, green blue [, alpha] )</code>) where red/green/blue are 0-255, and alpha is 0-1.
+      A Color can be constructed either with any valid CSS color (<code>new phet.scenery.Color( cssColorString )</code>), or with components directly
+      (<code>new phet.scenery.Color( red, green blue [, alpha] )</code>) where red/green/blue are 0-255, and alpha is 0-1.
     </p>
 
     <p>Color operations will assume that the color is not pre-multiplied.</p>

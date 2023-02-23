@@ -35,12 +35,12 @@
 
 
   <script type="text/javascript">
-    scenery.Utils.polyfillRequestAnimationFrame();
+    phet.scenery.Utils.polyfillRequestAnimationFrame();
 
     function docExample( id, draw ) {
       var $container = $( '#' + id );
-      var scene = new scenery.Node();
-      var display = new scenery.Display( scene, {
+      var scene = new phet.scenery.Node();
+      var display = new phet.scenery.Display( scene, {
         width: $container.width(),
         height: $container.height()
       } );
@@ -298,7 +298,7 @@
     <script type="text/javascript">
       docExample( 'example-accessibleTag', function( scene, display ) {
         /*START*/
-        var pdomNode = new scenery.Rectangle( 0, 0, 64, 64, {
+        var pdomNode = new phet.scenery.Rectangle( 0, 0, 64, 64, {
           fill: 'blue',
 
           // pdom
@@ -353,7 +353,7 @@
     <script type="text/javascript">
       docExample( 'example-all-siblings', function( scene, display ) {
         /*START*/
-        var pdomNode = new scenery.Node( {
+        var pdomNode = new phet.scenery.Node( {
 
           // pdom
           tagName: 'button',
@@ -366,12 +366,12 @@
         } );
 
         // the visual representation of the magnet
-        var southPole = new scenery.Rectangle( 0, 0, 48, 64, { fill: 'grey' } );
-        var northPole = new scenery.Rectangle( 48, 0, 48, 64, { fill: 'red' } );
+        var southPole = new phet.scenery.Rectangle( 0, 0, 48, 64, { fill: 'grey' } );
+        var northPole = new phet.scenery.Rectangle( 48, 0, 48, 64, { fill: 'red' } );
         pdomNode.children = [ southPole, northPole ];
 
         scene.addChild( pdomNode );
-        pdomNode.addChild( new scenery.Text( 'North South Magnet', { stroke: 'black', center: pdomNode.center } ) );
+        pdomNode.addChild( new phet.scenery.Text( 'North South Magnet', { stroke: 'black', center: pdomNode.center } ) );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
@@ -423,7 +423,7 @@
         var dimension = 64;
 
         // add a parent rectangle, represented as an unordered list
-        var rectangle = new scenery.Rectangle( 0, 0, dimension, dimension, {
+        var rectangle = new phet.scenery.Rectangle( 0, 0, dimension, dimension, {
           fill: 'lightblue',
 
           // pdom
@@ -436,9 +436,9 @@
           const x = Math.floor( Math.random() * dimension );
           const y = Math.floor( Math.random() * dimension );
 
-          rectangle.addChild( new scenery.Circle( 3, {
+          rectangle.addChild( new phet.scenery.Circle( 3, {
             fill: 'red',
-            center: new dot.Vector2( x, y ),
+            center: new phet.dot.Vector2( x, y ),
 
             // pdom
             tagName: 'li',
@@ -469,7 +469,7 @@
     <script type="text/javascript">
       docExample( 'example-lots-of-text', function( scene, display ) {
         /*START*/
-        var pdomNode = new scenery.Node( {
+        var pdomNode = new phet.scenery.Node( {
 
           // pdom
           tagName: 'p',
@@ -513,7 +513,7 @@
     <script type="text/javascript">
       docExample( 'example-input-type', function( scene, display ) {
         /*START*/
-        var pdomNode = new scenery.Rectangle( 0, 0, 64, 64, {
+        var pdomNode = new phet.scenery.Rectangle( 0, 0, 64, 64, {
           fill: 'blue',
 
           // pdom

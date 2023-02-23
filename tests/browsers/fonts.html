@@ -55,7 +55,7 @@
 <script type="text/javascript">
 
   window.onload = function() {
-    var scene = new scenery.Scene( $( '#main' ) );
+    var scene = new phet.scenery.Scene( $( '#main' ) );
 
     // representative strings
     var languages = [
@@ -116,21 +116,21 @@
 
     var currentFontFamily = ( location.search && location.search.length ) ? decodeURIComponent( location.search.slice( 1 ) ) : 'sans-serif';
 
-    var font = new scenery.Font( { size: 20, family: currentFontFamily + ', monospace' } );
+    var font = new phet.scenery.Font( { size: 20, family: currentFontFamily + ', monospace' } );
 
     var offset = 30;
 
     scene.interactive = true;
 
     for ( var i = 0; i < languages.length; i++ ) {
-      scene.addChild( new scenery.Text( languages[ i ].lang, { font: font, top: i * 30 + offset, interactive: true } ) );
-      scene.addChild( new scenery.Text( languages[ i ].string, { font: font, top: i * 30 + offset, left: 50, interactive: true } ) );
+      scene.addChild( new phet.scenery.Text( languages[ i ].lang, { font: font, top: i * 30 + offset, interactive: true } ) );
+      scene.addChild( new phet.scenery.Text( languages[ i ].string, { font: font, top: i * 30 + offset, left: 50, interactive: true } ) );
     }
 
     var textField = $( '<input type="text">' )[ 0 ];
     textField.value = currentFontFamily;
 
-    var canvasButton = new scenery.Text( 'Canvas', { fontSize: 20, top: 0, left: 200, cursor: 'pointer' } );
+    var canvasButton = new phet.scenery.Text( 'Canvas', { fontSize: 20, top: 0, left: 200, cursor: 'pointer' } );
     canvasButton.addInputListener( {
       down: function() {
         scene.renderer = 'canvas';
@@ -138,7 +138,7 @@
     } );
     scene.addChild( canvasButton );
 
-    var svgButton = new scenery.Text( 'SVG', { fontSize: 20, top: 0, left: 300, cursor: 'pointer' } );
+    var svgButton = new phet.scenery.Text( 'SVG', { fontSize: 20, top: 0, left: 300, cursor: 'pointer' } );
     svgButton.addInputListener( {
       down: function() {
         scene.renderer = 'svg';
@@ -146,7 +146,7 @@
     } );
     scene.addChild( svgButton );
 
-    var domButton = new scenery.Text( 'DOM', { fontSize: 20, top: 0, left: 400, cursor: 'pointer' } );
+    var domButton = new phet.scenery.Text( 'DOM', { fontSize: 20, top: 0, left: 400, cursor: 'pointer' } );
     domButton.addInputListener( {
       down: function() {
         scene.renderer = 'dom';
@@ -154,7 +154,7 @@
     } );
     scene.addChild( domButton );
 
-    scene.addChild( new scenery.DOM( textField, { interactive: true } ) );
+    scene.addChild( new phet.scenery.DOM( textField, { interactive: true } ) );
 
     scene.resize( window.innerWidth, 1200 );
     scene.initializeEvents();

@@ -63,8 +63,8 @@
 <script>
 
   // initialize our scene
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene );
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene );
   document.getElementById( 'main' ).appendChild( display.domElement );
   display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   display.resizeOnWindowResize(); // the scene gets resized to the full screen size
@@ -106,35 +106,35 @@
     var s3 = ry * Math.sin( angle3 );
 
     var groundShape = {
-      0: new kite.Shape().moveTo( -50, 0 )
+      0: new phet.kite.Shape().moveTo( -50, 0 )
           .quadraticCurveTo( -25, -20, 0, 5 )
           .smoothQuadraticCurveTo( c, s )
           .ellipticalArc( 0, 0, 50, 40, 0, angle, Math.PI, false )
           .close(),
-      1: new kite.Shape().moveTo( -50, 0 )
+      1: new phet.kite.Shape().moveTo( -50, 0 )
           .quadraticCurveTo( -25, -23, 0, 4 )
           .smoothQuadraticCurveTo( c, s )
           .ellipticalArc( 0, 0, 50, 40, 0, angle, Math.PI, false )
           .close(),
-      2: new kite.Shape().moveTo( -50, 0 )
+      2: new phet.kite.Shape().moveTo( -50, 0 )
           .quadraticCurveTo( -25, -26, 0, 3 )
           .smoothQuadraticCurveTo( c2, s2 )
           .ellipticalArc( 0, 0, 50, 40, 0, angle2, Math.PI, false )
           .close()
     }[ shapeType ];
 
-    var skyShape = new kite.Shape().ellipticalArc( 0, -10, 45, 45, 0, 0, 2 * Math.PI, false )
+    var skyShape = new phet.kite.Shape().ellipticalArc( 0, -10, 45, 45, 0, 0, 2 * Math.PI, false )
         .close();
 
     var mountainShape = {
-      0: new kite.Shape().moveTo( -70, 70 )
+      0: new phet.kite.Shape().moveTo( -70, 70 )
           .lineTo( 0, 0 )
           .lineTo( 70, 70 )
           .close()
     }[ { 0: 0, 1: 0, 2: 0 }[ mountainType ] ];
 
     var snowShape = {
-      0: new kite.Shape().moveTo( 0, 0 ) // tip
+      0: new phet.kite.Shape().moveTo( 0, 0 ) // tip
           .lineTo( 10, 10 )
           .lineTo( 3, 7 )
           .lineTo( 0, 10 )
@@ -143,7 +143,7 @@
           .close()
     }[ { 0: 0, 1: 0, 2: 0 }[ mountainType ] ];
 
-    var sunburstShape = new kite.Shape().moveTo( 0, 0 );
+    var sunburstShape = new phet.kite.Shape().moveTo( 0, 0 );
     var sunburstN = 16;
     for ( var i = 0; i < sunburstN; i++ ) {
       var sunburstAngleUp = 2 * Math.PI * i / sunburstN;
@@ -154,60 +154,60 @@
     }
     sunburstShape.close();
 
-    var graphic = new scenery.Node();
-    var background = new scenery.Node( { clipArea: skyShape } );
+    var graphic = new phet.scenery.Node();
+    var background = new phet.scenery.Node( { clipArea: skyShape } );
 
     var sunsetGradients = {
       // something
-      3: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, sunsetSun )
+      3: new phet.scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, sunsetSun )
           .addColorStop( 0.6, sunsetMedium )
           .addColorStop( 1, sunsetFar )
     };
 
     var sunburstGradients = {
       // something
-      3: new scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, sunburstStart )
+      3: new phet.scenery.RadialGradient( 0, 0, 0, 0, 0, 55 ).addColorStop( 0.2, sunburstStart )
           .addColorStop( 1, sunburstEnd )
     };
 
     var groundGradients = {
       // first green
-      0: new scenery.RadialGradient( 0, -10, 0, 0, -10, 55 ).addColorStop( 0, ground1 )
+      0: new phet.scenery.RadialGradient( 0, -10, 0, 0, -10, 55 ).addColorStop( 0, ground1 )
           .addColorStop( 0.5, ground2 )
           .addColorStop( 0.8, ground3 )
           .addColorStop( 1, ground4 )
     };
 
-    var ground = new scenery.Path( groundShape, {
+    var ground = new phet.scenery.Path( groundShape, {
       fill: groundGradients[ 0 ],
       stroke: groundStroke
     } );
 
-    var sunset = new scenery.Path( skyShape, {
+    var sunset = new phet.scenery.Path( skyShape, {
       fill: sunsetGradients[ sunsetType ]
 
     } );
 
     function createMountain( darkColor, lightColor, x, y, scale ) {
-      var mountain = new scenery.Path( mountainShape, {
-        fill: new scenery.RadialGradient( -x, -y, 0, -x, -y, 55 ).addColorStop( 0, lightColor )
+      var mountain = new phet.scenery.Path( mountainShape, {
+        fill: new phet.scenery.RadialGradient( -x, -y, 0, -x, -y, 55 ).addColorStop( 0, lightColor )
             .addColorStop( 1, darkColor ),
         x: x,
         y: y,
         scale: scale
       } );
 
-      var snow = new scenery.Path( snowShape, {
+      var snow = new phet.scenery.Path( snowShape, {
         fill: snowColor,
         x: x,
         y: y,
         scale: scale
       } );
 
-      return new scenery.Node( { children: [ mountain, snow ] } );
+      return new phet.scenery.Node( { children: [ mountain, snow ] } );
     }
 
-    var sunburst = new scenery.Path( sunburstShape, {
+    var sunburst = new phet.scenery.Path( sunburstShape, {
       fill: sunburstGradients[ sunsetType ]
     } );
 
@@ -228,7 +228,7 @@
     graphic.addChild( background );
     graphic.addChild( ground );
 
-    var text = new scenery.Text( shapeType === 2 ? 'SCENERY' : 'Scenery', {
+    var text = new phet.scenery.Text( shapeType === 2 ? 'SCENERY' : 'Scenery', {
       fill: isDark ? textLight : textDark,
       font: {
         0: '70px "Muli", sans-serif',
@@ -241,10 +241,10 @@
 
     shapeType === 2 && ( text.scale( 1, 0.9 ), text.centerY = graphic.centerY - 2 );
 
-    return new scenery.Node( _.extend( { children: [ graphic, text ] }, options ) );
+    return new phet.scenery.Node( _.extend( { children: [ graphic, text ] }, options ) );
   }
 
-  scene.addChild( new scenery.Rectangle( 0, 325, 1720, 1720, 0, 0, {
+  scene.addChild( new phet.scenery.Rectangle( 0, 325, 1720, 1720, 0, 0, {
     fill: '#000'
   } ) );
 

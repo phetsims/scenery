@@ -70,7 +70,7 @@
   var context = canvas.getContext( '2d' );
 
   $( '#devicePixelRatio' ).text( window.devicePixelRatio );
-  $( '#backingStorePixelRatio' ).text( scenery.Utils.backingStorePixelRatio( context ) );
+  $( '#backingStorePixelRatio' ).text( phet.scenery.Utils.backingStorePixelRatio( context ) );
 
   function updateOrientation( event ) {
     $( '#innerWidth' ).text( window.innerWidth );

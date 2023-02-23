@@ -37,8 +37,8 @@
 
 <script>
 
-  var scene1 = new scenery.Node();
-  var display1 = new scenery.Display( scene1, {
+  var scene1 = new phet.scenery.Node();
+  var display1 = new phet.scenery.Display( scene1, {
     container: document.getElementById( 'display1' ),
     width: 200,
     height: 400,
@@ -47,8 +47,8 @@
   display1.initializeEvents();
   display1.updateOnRequestAnimationFrame();
 
-  var scene2 = new scenery.Node();
-  var display2 = new scenery.Display( scene2, {
+  var scene2 = new phet.scenery.Node();
+  var display2 = new phet.scenery.Display( scene2, {
     container: document.getElementById( 'display2' ),
     width: 200,
     height: 400,
@@ -64,20 +64,20 @@
 
   // creates a minimally stylized button
   function createButton( label, callback, options ) {
-    var label = new scenery.Text( label, {
+    var label = new phet.scenery.Text( label, {
       fontSize: 12,
-      center: new dot.Vector2( 0, 0 )
+      center: new phet.dot.Vector2( 0, 0 )
     } );
-    var buttonListener = new scenery.FireListener( {
+    var buttonListener = new phet.scenery.FireListener( {
       fire: callback
     } );
-    var background = scenery.Rectangle.bounds( label.bounds.dilatedXY( 5, 5 ), {
+    var background = phet.scenery.Rectangle.bounds( label.bounds.dilatedXY( 5, 5 ), {
       stroke: strokeColor,
-      fill: ( options.color && options.color( buttonListener ) ) || new axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
+      fill: ( options.color && options.color( buttonListener ) ) || new phet.axon.DerivedProperty( [ buttonListener.isHighlightedProperty, buttonListener.isPressedProperty ], function( isHighlighted, isPressed ) {
         return isPressed ? armedColor : ( isHighlighted ? activeColor : inactiveColor );
       } )
     } );
-    return new scenery.Node( _.extend( {
+    return new phet.scenery.Node( _.extend( {
       children: [ background, label ],
       cursor: 'pointer',
       inputListeners: [ buttonListener ]

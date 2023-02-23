@@ -29,10 +29,10 @@
 <div id="hello-world-scene" style="width: 400px; height: 400px;"></div>
 <script type="text/javascript">
   // Create a Node as the root of our tree (it can contain children)
-  var scene = new scenery.Node();
+  var scene = new phet.scenery.Node();
 
   // Create a display using this root node, using our existing div
-  var display = new scenery.Display( scene, {
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'hello-world-scene' ),
     backgroundColor: '#eee'
   } );
@@ -81,7 +81,7 @@
         '}'
       ].join( '\n' );
 
-      this.shaderProgram = new scenery.ShaderProgram( gl, vertexShaderSource, fragmentShaderSource, {
+      this.shaderProgram = new phet.scenery.ShaderProgram( gl, vertexShaderSource, fragmentShaderSource, {
         attributes: [ 'aPosition', 'aColor' ],
         uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
       } );
@@ -131,7 +131,7 @@
 
       this.shaderProgram.unuse();
 
-      return scenery.WebGLNode.PAINTED_SOMETHING;
+      return phet.scenery.WebGLNode.PAINTED_SOMETHING;
     }
 
     /**
@@ -147,14 +147,14 @@
     }
   }
 
-  class TriangleNode extends scenery.WebGLNode {
+  class TriangleNode extends phet.scenery.WebGLNode {
     /**
      * @public
      *
      * @param {Object} [options]
      */
     constructor( options ) {
-      const shape = kite.Shape.regularPolygon( 3, 100 * Math.sqrt( 2 ) );
+      const shape = phet.kite.Shape.regularPolygon( 3, 100 * Math.sqrt( 2 ) );
 
       super( TrianglePainter, _.extend( {
         canvasBounds: shape.bounds

@@ -19,7 +19,7 @@
 
     const { js, jsBefore, jsAfter } = window.extractFunctionJS( func );
 
-    const options = phetCore.merge( { // eslint-disable-line no-undef
+    const options = phet.phetCore.merge( {
       jsBefore: jsBefore,
       jsAfter: jsAfter
     }, providedOptions );
@@ -45,12 +45,12 @@
       lineWrapping: true
     } );
 
-    const container = new scenery.Node(); // eslint-disable-line no-undef
-    const scene = new scenery.Node(); // eslint-disable-line no-undef
+    const container = new phet.scenery.Node();
+    const scene = new phet.scenery.Node();
 
     container.addChild( scene );
 
-    const display = new scenery.Display( container, { // eslint-disable-line no-undef
+    const display = new phet.scenery.Display( container, {
       width: 1,
       height: 1,
       accessibility: true,
@@ -84,7 +84,7 @@
       }
     } );
 
-    const stepEmitter = new axon.TinyEmitter(); // eslint-disable-line no-undef
+    const stepEmitter = new phet.axon.TinyEmitter();
 
     display.updateOnRequestAnimationFrame( dt => {
       stepEmitter.emit( dt );

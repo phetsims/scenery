@@ -30,8 +30,8 @@
 <div id="example-scene"></div>
 <script type="text/javascript">
   // Create a scene graph over the block-level element. Everything inside is replaced
-  var scene = new scenery.Node();
-  var display = new scenery.Display( scene, {
+  var scene = new phet.scenery.Node();
+  var display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'example-scene' )
   } );
 
@@ -40,13 +40,13 @@
    *----------------------------------------------------------------------------*/
 
   // circle
-  scene.addChild( new scenery.Path( kite.Shape.circle( 50, 50, 40 ), {// center X, center Y, radius
+  scene.addChild( new phet.scenery.Path( phet.kite.Shape.circle( 50, 50, 40 ), {// center X, center Y, radius
     fill: '#0ff',
     stroke: '#000'
   } ) );
 
   // regular polygon
-  scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), { // sides, radius
+  scene.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 22 ), { // sides, radius
     fill: '#ff0',
     stroke: '#000',
 

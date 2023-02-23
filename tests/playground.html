@@ -11,6 +11,10 @@ an UI and Display made for visual testing and debugging.
 
   <title>Scenery Playground</title>
 
+  <script>
+    window.phet = window.phet || {};
+  </script>
+
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/sim-tests/pageload-connector.js"></script>
 
@@ -93,25 +97,18 @@ an UI and Display made for visual testing and debugging.
 </div>
 
 <script type="module">
-  import scenery from '../../chipper/dist/js/scenery/js/main.js'; // eslint-disable-line bad-sim-text
-  import phetCore from '../../chipper/dist/js/phet-core/js/main.js';
-  import axon from '../../chipper/dist/js/axon/js/main.js';
-  import dot from '../../chipper/dist/js/dot/js/main.js';
-  import kite from '../../chipper/dist/js/kite/js/main.js';
-  import utteranceQueue from '../../chipper/dist/js/utterance-queue/js/main.js';
-
-  window.scenery = scenery;
-  window.kite = kite;
-  window.dot = dot;
-  window.phetCore = phetCore;
-  window.axon = axon;
-  window.utteranceQueue = utteranceQueue;
+  import '../../chipper/dist/js/scenery/js/main.js'; // eslint-disable-line bad-sim-text
+  import '../../chipper/dist/js/phet-core/js/main.js';
+  import '../../chipper/dist/js/axon/js/main.js';
+  import '../../chipper/dist/js/dot/js/main.js';
+  import '../../chipper/dist/js/kite/js/main.js';
+  import '../../chipper/dist/js/utterance-queue/js/main.js';
 
   console.log( 'loaded' );
 
-  window.scene = new scenery.Node();
+  window.scene = new phet.scenery.Node();
 
-  var display = window.display = new scenery.Display( scene, {
+  var display = window.display = new phet.scenery.Display( scene, {
     width: 640,
     height: 320,
     preserveDrawingBuffer: true,
@@ -123,7 +120,7 @@ an UI and Display made for visual testing and debugging.
   display._domElement.id = 'display';
   document.body.insertBefore( display._domElement, document.body.firstChild );
 
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
 
   // convenience function for IE stack trackes
   window.twrap = function( f ) {
@@ -141,7 +138,7 @@ an UI and Display made for visual testing and debugging.
       display.initializeEvents();
       document.body.appendChild( display.domElement );
 
-      const a = new scenery.Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+      const a = new phet.scenery.Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
       let aGotFocus = false;
       let aLostFocus = false;
@@ -183,7 +180,7 @@ an UI and Display made for visual testing and debugging.
     context.fillRect( 3, 0, 1, 4 );
     context.fillStyle = 'rgba(0,0,0,0)'
     context.fillRect( 2, 0, 2, 4 );
-    var im = new scenery.Image( canvas );
+    var im = new phet.scenery.Image( canvas );
     scene.addChild( im );
     im.setScaleMagnitude( 100 );
     im.renderer = 'webgl';
@@ -231,36 +228,36 @@ an UI and Display made for visual testing and debugging.
     context2.fillStyle = gradient;
     context2.fillRect( 0, 0, 168, 256 );
 
-    var im = new scenery.Image( canvas );
+    var im = new phet.scenery.Image( canvas );
     im.setScaleMagnitude( 16, 64 );
     im.x = 80;
-    var im2 = new scenery.Image( canvas2 );
+    var im2 = new phet.scenery.Image( canvas2 );
     im2.x = 176;
-    var im3 = new scenery.Image( canvas2.toDataURL() );
+    var im3 = new phet.scenery.Image( canvas2.toDataURL() );
     im3.x = 176 + 168;
 
-    const bars = new scenery.Node( {
+    const bars = new phet.scenery.Node( {
       children: [
-        new scenery.Rectangle( 0, 0, 16, 256, {
+        new phet.scenery.Rectangle( 0, 0, 16, 256, {
           fill: 'rgba(0,255,0,1)'
         } ),
-        new scenery.Rectangle( 16, 0, 16, 256, {
+        new phet.scenery.Rectangle( 16, 0, 16, 256, {
           fill: 'rgba(0,0,0,0)'
         } ),
-        new scenery.Rectangle( 32, 0, 16, 256, {
+        new phet.scenery.Rectangle( 32, 0, 16, 256, {
           fill: 'rgba(255,255,255,0)'
         } ),
-        new scenery.Rectangle( 48, 0, 16, 256, {
+        new phet.scenery.Rectangle( 48, 0, 16, 256, {
           fill: 'rgba(0,0,0,0.5)'
         } ),
-        new scenery.Rectangle( 64, 0, 16, 256, {
+        new phet.scenery.Rectangle( 64, 0, 16, 256, {
           fill: 'rgba(255,255,255,0.5)'
         } ),
         im,
-        new scenery.Rectangle( 144, 0, 16, 256, {
+        new phet.scenery.Rectangle( 144, 0, 16, 256, {
           fill: 'rgba(128,128,128,1)'
         } ),
-        new scenery.Rectangle( 160, 0, 16, 256, {
+        new phet.scenery.Rectangle( 160, 0, 16, 256, {
           fill: 'rgba(128,128,128,0.5)'
         } ),
         im2,
@@ -268,10 +265,10 @@ an UI and Display made for visual testing and debugging.
       ]
     } );
 
-    const section = new scenery.Node( {
+    const section = new phet.scenery.Node( {
       children: [
-        new scenery.Rectangle( 0, 0, 512, 256, {
-          fill: new scenery.LinearGradient( 0, 0, 0, 256 )
+        new phet.scenery.Rectangle( 0, 0, 512, 256, {
+          fill: new phet.scenery.LinearGradient( 0, 0, 0, 256 )
               .addColorStop( 0, 'rgba(255,0,0,1)' )
               .addColorStop( 0.3, 'rgba(255,0,0,0)' )
               .addColorStop( 0.4, 'rgba(255,255,255,0)' )
@@ -283,12 +280,12 @@ an UI and Display made for visual testing and debugging.
       ]
     } );
 
-    scene.addChild( new scenery.Node( {
+    scene.addChild( new phet.scenery.Node( {
       children: [ section ],
       renderer: 'svg'
     } ) );
 
-    const webglNode = new scenery.Node( {
+    const webglNode = new phet.scenery.Node( {
       y: 512,
       children: [ section ],
       renderer: 'webgl'
@@ -304,7 +301,7 @@ an UI and Display made for visual testing and debugging.
       toggleUpdates();
       display.initializeEvents();
 
-      var button = new scenery.Rectangle( 10, 10, 100, 60, {
+      var button = new phet.scenery.Rectangle( 10, 10, 100, 60, {
         fill: 'gray',
         tagName: 'div',
         focusable: true
@@ -314,10 +311,10 @@ an UI and Display made for visual testing and debugging.
           console.log( param1, param2 );
         }
       } );
-      scene.addChild( new scenery.Node( {
+      scene.addChild( new phet.scenery.Node( {
         children: [ button ]
       } ) );
-      scene.addChild( new scenery.Node( {
+      scene.addChild( new phet.scenery.Node( {
         children: [ button ],
         y: 100
       } ) );
@@ -417,16 +414,16 @@ an UI and Display made for visual testing and debugging.
 
   window.displayErr = function() {
     setTimeout( function() {
-      var node0 = new scenery.Node();
-      var node4 = new scenery.Node();
-      var path1 = new scenery.Path();
-      var path3 = new scenery.Path();
+      var node0 = new phet.scenery.Node();
+      var node4 = new phet.scenery.Node();
+      var path1 = new phet.scenery.Path();
+      var path3 = new phet.scenery.Path();
 
       path1.insertChild( 0, node4 );
       node4.insertChild( 0, path3 );
       scene.insertChild( 0, node0 );
       node0.insertChild( 0, path1 );
-      scene.transform.append( dot.Matrix3.scaling( 1.5586118499044517 ) );
+      scene.transform.append( phet.dot.Matrix3.scaling( 1.5586118499044517 ) );
       node0.renderer = "canvas";
       display.updateDisplay();
     } );
@@ -436,18 +433,18 @@ an UI and Display made for visual testing and debugging.
     display.initializeEvents();
     toggleUpdates();
 
-    var circle = new scenery.Circle( 30, { fill: 'red', cursor: 'pointer' } );
+    var circle = new phet.scenery.Circle( 30, { fill: 'red', cursor: 'pointer' } );
     scene.addChild( circle );
-    circle.addInputListener( new scenery.DragListener( {
+    circle.addInputListener( new phet.scenery.DragListener( {
       translateNode: true,
       press: function() { console.log( 'press' ); },
       release: function() { console.log( 'release' ); },
       drag: function() { console.log( 'drag' ); }
     } ) );
 
-    var square = new scenery.Rectangle( 0, 0, 60, 60, { fill: 'blue', cursor: 'pointer', x: -30, y: 90 } );
+    var square = new phet.scenery.Rectangle( 0, 0, 60, 60, { fill: 'blue', cursor: 'pointer', x: -30, y: 90 } );
     scene.addChild( square );
-    square.addInputListener( new scenery.SimpleDragHandler( {
+    square.addInputListener( new phet.scenery.SimpleDragHandler( {
       start: function() { console.log( 'start' ); },
       end: function() { console.log( 'end' ); },
       drag: function() { console.log( 'drag' ); }
@@ -457,15 +454,15 @@ an UI and Display made for visual testing and debugging.
   window.cssTest = function() {
     window.assertSlow = window.assert;
     setTimeout( function() {
-      window.back = new scenery.Rectangle( 0, 0, 100, 100, 0, 0, {
+      window.back = new phet.scenery.Rectangle( 0, 0, 100, 100, 0, 0, {
         fill: '#000'
       } );
-      window.rect = new scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
+      window.rect = new phet.scenery.Rectangle( 0, 0, 100, 50, 0, 0, {
         y: 50,
-        fill: new scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
+        fill: new phet.scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' )
       } );
-      window.a = new scenery.Node( {} );
-      window.b = new scenery.Node( { y: 100 } );
+      window.a = new phet.scenery.Node( {} );
+      window.b = new phet.scenery.Node( { y: 100 } );
       b._hints.cssTransform = true;
       a.addChild( back );
       a.addChild( rect );
@@ -483,17 +480,17 @@ an UI and Display made for visual testing and debugging.
   };
 
   window.transformTest = function() {
-    window.n = new scenery.Node();
-    n.addChild( new scenery.Rectangle( 0, 50, 100, 50, { fill: '#aaa' } ) );
-    n.addChild( new scenery.Rectangle( 50, 0, 50, 50, { fill: '#aaf' } ) );
+    window.n = new phet.scenery.Node();
+    n.addChild( new phet.scenery.Rectangle( 0, 50, 100, 50, { fill: '#aaa' } ) );
+    n.addChild( new phet.scenery.Rectangle( 50, 0, 50, 50, { fill: '#aaf' } ) );
     scene.addChild( n );
     n.x = 50;
     n.y = 50;
     n.rotation = Math.PI / 4;
     n.left = 50;
-    scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'red' } ) );
+    scene.addChild( phet.scenery.Rectangle.bounds( n.bounds, { stroke: 'red' } ) );
     n.transformBounds = true;
-    scene.addChild( scenery.Rectangle.bounds( n.bounds, { stroke: 'blue' } ) );
+    scene.addChild( phet.scenery.Rectangle.bounds( n.bounds, { stroke: 'blue' } ) );
 
     display.updateDisplay();
   };
@@ -554,7 +551,7 @@ an UI and Display made for visual testing and debugging.
   window.toggleA11yDebug = function( withSceneryLog ) {
     if ( a11yDebugging ) {
       if ( window.location.search.indexOf( 'a11yLog' ) >= 0 || withSceneryLog ) {
-        scenery.disableLogging();
+        phet.scenery.disableLogging();
       }
 
       window.cancelAnimationFrame( a11yDebuggingRequestID );
@@ -562,7 +559,7 @@ an UI and Display made for visual testing and debugging.
     }
     else {
       if ( window.location.search.indexOf( 'a11yLog' ) >= 0 || withSceneryLog ) {
-        scenery.enableLogging( [ 'a11y' ] );
+        phet.scenery.enableLogging( [ 'a11y' ] );
       }
 
       a11yDebugStep();
@@ -596,10 +593,10 @@ an UI and Display made for visual testing and debugging.
 
   window.toggleLogging = function() {
     if ( logging ) {
-      scenery.disableLogging();
+      phet.scenery.disableLogging();
     }
     else {
-      scenery.enableLogging( [
+      phet.scenery.enableLogging( [
         'ParallelDOM'
       ] );
     }

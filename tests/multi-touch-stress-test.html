@@ -62,14 +62,14 @@
   var main = $( '#main' );
 
   // initialize our scene
-  var scene = new scenery.Scene( main );
+  var scene = new phet.scenery.Scene( main );
   scene.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
   scene.resizeOnWindowResize(); // the scene gets resized to the full screen size
 
-  var container = new scenery.Node();
+  var container = new phet.scenery.Node();
   scene.addChild( container );
 
-  container.addChild( new scenery.Text( 'Try dragging the hexagons. On a touch-screen, dragging will pick up the first hexagon.', {
+  container.addChild( new phet.scenery.Text( 'Try dragging the hexagons. On a touch-screen, dragging will pick up the first hexagon.', {
     x: 20,
     y: 50,
     fill: '#000000',
@@ -85,7 +85,7 @@
   for ( var i = 0; i < count; i++ ) {
     // anonymous function so the closure variables aren't shared between iterations
     (function() {
-      var node = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+      var node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 22 ), {
         fill: normalColor,
         stroke: '#000000',
         x: Math.random() * 500,
@@ -93,7 +93,7 @@
       } );
       container.addChild( node );
 
-      node.addInputListener( new scenery.SimpleDragHandler( {
+      node.addInputListener( new phet.scenery.SimpleDragHandler( {
         allowTouchSnag: true,
 
         start: function( event ) {

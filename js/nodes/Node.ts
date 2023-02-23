@@ -668,10 +668,10 @@ class Node extends ParallelDOM {
   // This is an array of property (setter) names for Node.mutate(), which are also used when creating
   // Nodes with parameter objects.
   //
-  // E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
+  // E.g. new phet.scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
   // (node.x = 5; node.rotation = 20)
   //
-  // Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
+  // Some special cases exist (for function names). new phet.scenery.Node( { scale: 2 } ) will actually call
   // node.scale( 2 ).
   //
   // The order below is important! Don't change this without knowing the implications.
@@ -2047,18 +2047,18 @@ class Node extends ParallelDOM {
    * returned value.
    *
    * For example, hit-testing a simple shape (with no pickability) will return null:
-   * > new scenery.Circle( 20 ).hitTest( dot.v2( 0, 0 ) ); // null
+   * > new phet.scenery.Circle( 20 ).hitTest( dot.v2( 0, 0 ) ); // null
    *
    * If the same shape is made to be pickable, it will return a trail:
-   * > new scenery.Circle( 20, { pickable: true } ).hitTest( dot.v2( 0, 0 ) );
+   * > new phet.scenery.Circle( 20, { pickable: true } ).hitTest( dot.v2( 0, 0 ) );
    * > // returns a Trail with the circle as the only node.
    *
    * It will return the result that is visually stacked on top, so e.g.:
-   * > new scenery.Node( {
+   * > new phet.scenery.Node( {
    * >   pickable: true,
    * >   children: [
-   * >     new scenery.Circle( 20 ),
-   * >     new scenery.Circle( 15 )
+   * >     new phet.scenery.Circle( 20 ),
+   * >     new phet.scenery.Circle( 15 )
    * >   ]
    * > } ).hitTest( dot.v2( 0, 0 ) ); // returns the "top-most" circle (the one with radius:15).
    *

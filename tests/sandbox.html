@@ -186,11 +186,11 @@
 
   console.log( 'loaded' );
 
-  window.container = new scenery.Node();
-  window.scene = new scenery.Node();
+  window.container = new phet.scenery.Node();
+  window.scene = new phet.scenery.Node();
   container.addChild( scene );
 
-  const display = window.display = new scenery.Display( container, {
+  const display = window.display = new phet.scenery.Display( container, {
     width: 1,
     height: 1,
     accessibility: true,

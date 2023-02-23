@@ -4,11 +4,11 @@
  * Immutable font object.
  *
  * Examples:
- * new scenery.Font().font                      // "10px sans-serif" (the default)
- * new scenery.Font( { family: 'serif' } ).font // "10px serif"
- * new scenery.Font( { weight: 'bold' } ).font  // "bold 10px sans-serif"
- * new scenery.Font( { size: 16 } ).font        // "16px sans-serif"
- * var font = new scenery.Font( {
+ * new phet.scenery.Font().font                      // "10px sans-serif" (the default)
+ * new phet.scenery.Font( { family: 'serif' } ).font // "10px serif"
+ * new phet.scenery.Font( { weight: 'bold' } ).font  // "bold 10px sans-serif"
+ * new phet.scenery.Font( { size: 16 } ).font        // "16px sans-serif"
+ * var font = new phet.scenery.Font( {
  *   family: '"Times New Roman", serif',
  *   style: 'italic',
  *   lineHeight: 10

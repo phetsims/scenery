@@ -38,16 +38,16 @@ Test for https://github.com/phetsims/scenery/issues/644
   window.phetCore = phetCore;
   window.axon = axon;
 
-  window.scene = new scenery.Node();
+  window.scene = new phet.scenery.Node();
 
 
-  var display = window.display = new scenery.Display( scene, {
+  var display = window.display = new phet.scenery.Display( scene, {
     width: 640,
     height: 320
   } );
   document.body.insertBefore( display.domElement, document.body.firstChild );
 
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
   display.initializeEvents();
 
   var cellSize = 10;
@@ -56,7 +56,7 @@ Test for https://github.com/phetsims/scenery/issues/644
 
   var cells = _.flatten( _.range( 0, numRows ).map( function( row ) {
     return _.range( 0, numColumns ).map( function( column ) {
-      return new scenery.Rectangle( 0, 0, cellSize, cellSize, {
+      return new phet.scenery.Rectangle( 0, 0, cellSize, cellSize, {
         x: column * cellSize,
         y: row * cellSize
       } );

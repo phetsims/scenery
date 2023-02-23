@@ -107,8 +107,8 @@
 
   function docExample( id, draw ) {
     let $container = $( '#' + id );
-    scene = new scenery.Node();
-    let display = new scenery.Display( scene, {
+    scene = new phet.scenery.Node();
+    let display = new phet.scenery.Display( scene, {
       width: $container.width(),
       height: $container.height(),
       backgroundColor: '#eee'
@@ -121,7 +121,7 @@
 </script>
 
 <script type="text/javascript">
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
 
   // This example is designed to demonstrate the way the PDOM updates as properties of the sim change, as well as the
   // usage of Press Listener. PressListener is a PhET type that is designed to gracefully handle a variety of input events,
@@ -137,7 +137,7 @@
     let colorsToGenerate = [ ...initialColors ];
 
     // creates the initial hexagon
-    const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+    const hexagon = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 22 ), {
       fill: 'yellow',
       stroke: '#000',
       x: display.width / 2,
@@ -147,24 +147,24 @@
     } );
 
     // creates the scenery node to which both hexagon and buttons will be added.
-    const container = new scenery.Node();
-    const buttonsContainer = new scenery.Node();
+    const container = new phet.scenery.Node();
+    const buttonsContainer = new phet.scenery.Node();
 
     // creates the button to add another color
-    const addButton = new scenery.Path( kite.Shape.roundRect( 20, 20, 70, 30, 7, 7 ), {
+    const addButton = new phet.scenery.Path( phet.kite.Shape.roundRect( 20, 20, 70, 30, 7, 7 ), {
       stroke: 'grey',
       fill: 'yellow',
       cursor: 'pointer',
       tagName: 'button', // tag name for PDOM element
       accessibleName: 'add a color button' // accessibility description
     } );
-    addButton.addChild( new scenery.Text( 'Add color', {
+    addButton.addChild( new phet.scenery.Text( 'Add color', {
       font: '1em sans-serif',
       center: addButton.center
     } ) );
 
     // listener to make the add button respond to user clicks/touches/a11y clicks
-    const addButtonListener = new scenery.PressListener( {
+    const addButtonListener = new phet.scenery.PressListener( {
       press: () => {
 
         // remove old scene
@@ -184,7 +184,7 @@
     } );
 
     // reset button resets the scene to only the first three color buttons
-    const resetButton = new scenery.Path( kite.Shape.roundRect( 20, 70, 70, 30, 7, 7 ), {
+    const resetButton = new phet.scenery.Path( phet.kite.Shape.roundRect( 20, 70, 70, 30, 7, 7 ), {
       stroke: 'grey',
       fill: 'yellow',
       cursor: 'pointer',
@@ -192,7 +192,7 @@
       accessibleName: 'reset button'
     } );
 
-    const resetButtonListener = new scenery.PressListener( {
+    const resetButtonListener = new phet.scenery.PressListener( {
       press: () => {
 
         // remove old scene and redraw the scene
@@ -205,7 +205,7 @@
       }
     } );
 
-    resetButton.addChild( new scenery.Text( 'Reset', {
+    resetButton.addChild( new phet.scenery.Text( 'Reset', {
       font: '1em sans-serif',
       center: resetButton.center
     } ) );
@@ -214,7 +214,7 @@
     resetButton.addInputListener( resetButtonListener );
 
     // control panel holds the "Add Button" button and the "Reset" button
-    const controlPanel = new scenery.Path( kite.Shape.roundRect( 10, 10, 90, 100, 7, 7 ), {
+    const controlPanel = new phet.scenery.Path( phet.kite.Shape.roundRect( 10, 10, 90, 100, 7, 7 ), {
       stroke: 'orange',
       lineWidth: 3,
       fill: 'white'
@@ -224,7 +224,7 @@
     function generateButton( color, x, y ) {
 
       // creates the button as a scenery element
-      const rectangle = new scenery.Path( kite.Shape.roundedRectangleWithRadii( x, y, display.width / ( colorsToGenerate.length ) - 10, 40, {
+      const rectangle = new phet.scenery.Path( phet.kite.Shape.roundedRectangleWithRadii( x, y, display.width / ( colorsToGenerate.length ) - 10, 40, {
         topLeft: 10,
         topRight: 10,
         bottomLeft: 10,
@@ -238,13 +238,13 @@
       } );
 
       // Adds text to the button with the name of the color
-      rectangle.addChild( new scenery.Text( color, {
+      rectangle.addChild( new phet.scenery.Text( color, {
         font: '0.8em sans-serif',
         center: rectangle.center
       } ) );
 
       // Input listener makes the hexagon change colors when buttons are clicked
-      const rectangleListener = new scenery.PressListener( {
+      const rectangleListener = new phet.scenery.PressListener( {
         press: () => {
           hexagon.fill = color; // change hexagon color
           hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text

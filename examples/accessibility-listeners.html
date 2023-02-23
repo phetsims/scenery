@@ -105,8 +105,8 @@
   function docExample( id, draw ) {
     'use strict';
     const $container = $( '#' + id );
-    scene = new scenery.Node();
-    const display = new scenery.Display( scene, {
+    scene = new phet.scenery.Node();
+    const display = new phet.scenery.Display( scene, {
       width: $container.width(),
       height: $container.height(),
       backgroundColor: '#eee'
@@ -119,7 +119,7 @@
 </script>
 
 <script type="text/javascript">
-  scenery.Utils.polyfillRequestAnimationFrame();
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
 
   docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
@@ -127,13 +127,13 @@
     const squareDimension = 3 * display.height / 4;
     const squareCenterX = display.width / 2 - squareDimension / 2;
     const squareCenterY = display.height / 2 - squareDimension / 2;
-    const square = new scenery.Path( kite.Shape.rectangle( squareCenterX, squareCenterY, squareDimension, squareDimension ), {
+    const square = new phet.scenery.Path( phet.kite.Shape.rectangle( squareCenterX, squareCenterY, squareDimension, squareDimension ), {
       fill: 'black',
       tagName: 'button',
       accessibleName: 'a black square'
     } );
 
-    const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, display.height / 3 ), {
+    const hexagon = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, display.height / 3 ), {
       fill: 'yellow',
       stroke: '#000',
       center: square.center,
@@ -141,7 +141,7 @@
       accessibleName: 'a yellow hexagon', // accessibility description
     } );
 
-    const circle = new scenery.Path( kite.Shape.circle( 0, 0, squareDimension / 3 ), {
+    const circle = new phet.scenery.Path( phet.kite.Shape.circle( 0, 0, squareDimension / 3 ), {
       fill: 'gold',
       stroke: 'black',
       center: square.center,
