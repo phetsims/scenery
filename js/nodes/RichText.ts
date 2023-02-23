@@ -20,6 +20,7 @@
  * - <s> for strikethrough text
  * - <span> tags with a dir="ltr" / dir="rtl" attribute
  * - <br> for explicit line breaks
+ * - <node id="id"> for embedding a Node into the text (pass in { nodes: { id: NODE } }), with optional align attribute
  * - Unicode bidirectional marks (present in PhET strings) for full RTL support
  * - CSS style="..." attributes, with color and font settings, see https://github.com/phetsims/scenery/issues/807
  *
@@ -97,6 +98,7 @@ const RICH_TEXT_OPTION_KEYS = [
   'linkFill',
   'linkEventsHandled',
   'links',
+  'nodes',
   'align',
   'leading',
   'lineWrap',
@@ -107,7 +109,7 @@ const RICH_TEXT_OPTION_KEYS = [
 export type RichTextAlign = 'left' | 'center' | 'right';
 export type RichTextHref = ( () => void ) | string;
 type RichTextLinksObject = Record<string, string>;
-export type RichTextLinks = RichTextLinksObject | boolean;
+export type RichTextLinks = RichTextLinksObject | true;
 
 type SelfOptions = {
   // Sets how bounds are determined for text
@@ -166,6 +168,9 @@ type SelfOptions = {
 
   // Sets the map of href placeholder => actual href/callback used for links
   links?: RichTextLinks;
+
+  // A map of string => Node that will be used to replace `<node id="string"/>` with the Node
+  nodes?: Record<string, Node>;
 
   // Sets text alignment if there are multiple lines
   align?: RichTextAlign;
@@ -275,7 +280,7 @@ const FONT_STYLE_MAP = {
   'line-height': 'lineHeight'
 } as const;
 
-const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
+const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP ) as ( keyof typeof FONT_STYLE_MAP )[];
 const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
 export default class RichText extends Node {
@@ -283,46 +288,48 @@ export default class RichText extends Node {
   // The text to display. We'll initialize this by mutating.
   private readonly _stringProperty: TinyForwardingProperty<string>;
 
-  private _font: Font | string;
-  private _boundsMethod: TextBoundsMethod;
-  private _fill: TPaint;
-  private _stroke: TPaint;
-  private _lineWidth: number;
+  private _font: Font | string = DEFAULT_FONT;
+  private _boundsMethod: TextBoundsMethod = 'hybrid';
+  private _fill: TPaint = '#000000';
+  private _stroke: TPaint = null;
+  private _lineWidth = 1;
 
-  private _subScale: number;
-  private _subXSpacing: number;
-  private _subYOffset: number;
+  private _subScale = 0.75;
+  private _subXSpacing = 0;
+  private _subYOffset = 0;
 
-  private _supScale: number;
-  private _supXSpacing: number;
-  private _supYOffset: number;
+  private _supScale = 0.75;
+  private _supXSpacing = 0;
+  private _supYOffset = 0;
 
-  private _capHeightScale: number;
+  private _capHeightScale = 0.75;
 
-  private _underlineLineWidth: number;
-  private _underlineHeightScale: number;
+  private _underlineLineWidth = 1;
+  private _underlineHeightScale = 0.15;
 
-  private _strikethroughLineWidth: number;
-  private _strikethroughHeightScale: number;
+  private _strikethroughLineWidth = 1;
+  private _strikethroughHeightScale = 0.3;
 
-  private _linkFill: TPaint;
+  private _linkFill: TPaint = 'rgb(27,0,241)';
 
-  private _linkEventsHandled: boolean;
+  private _linkEventsHandled = false;
 
   // If an object, values are either {string} or {function}
-  private _links: Record<string, string> | boolean;
+  private _links: RichTextLinks = {};
 
-  private _align: RichTextAlign;
-  private _leading: number;
-  private _lineWrap: number | null;
+  private _nodes: Record<string, Node> = {};
+
+  private _align: RichTextAlign = 'left';
+  private _leading = 0;
+  private _lineWrap: number | null = null;
 
   // We need to consolidate links (that could be split across multiple lines) under one "link" node, so we track created
   // link fragments here so they can get pieced together later.
-  private _linkItems: { element: HimalayaNode; node: Node; href: string }[];
+  private _linkItems: { element: HimalayaNode; node: Node; href: string }[] = [];
 
   // Whether something has been added to this line yet. We don't want to infinite-loop out if something is longer than
   // our lineWrap, so we'll place one item on its own on an otherwise empty line.
-  private _hasAddedLeafToLine: boolean;
+  private _hasAddedLeafToLine = false;
 
   // Normal layout container of lines (separate, so we can clear it easily)
   private lineContainer: Node;
@@ -358,30 +365,6 @@ export default class RichText extends Node {
     super();
 
     this._stringProperty = new TinyForwardingProperty( '', true, this.onStringPropertyChange.bind( this ) );
-    this._font = DEFAULT_FONT;
-    this._boundsMethod = 'hybrid';
-    this._fill = '#000000';
-    this._stroke = null;
-    this._lineWidth = 1;
-    this._subScale = 0.75;
-    this._subXSpacing = 0;
-    this._subYOffset = 0;
-    this._supScale = 0.75;
-    this._supXSpacing = 0;
-    this._supYOffset = 0;
-    this._capHeightScale = 0.75;
-    this._underlineLineWidth = 1;
-    this._underlineHeightScale = 0.15;
-    this._strikethroughLineWidth = 1;
-    this._strikethroughHeightScale = 0.3;
-    this._linkFill = 'rgb(27,0,241)';
-    this._linkEventsHandled = false;
-    this._links = {};
-    this._align = 'left';
-    this._leading = 0;
-    this._lineWrap = null;
-    this._linkItems = [];
-    this._hasAddedLeafToLine = false;
 
     this.lineContainer = new Node( {} );
     this.addChild( this.lineContainer );
@@ -469,7 +452,7 @@ export default class RichText extends Node {
 
     // Start appending all top-level elements
     try {
-      // @ts-expect-error
+      // @ts-expect-error - Since himalaya isn't in tsconfig
       rootElements = himalaya.parse( mappedText );
     }
     catch( e ) {
@@ -477,7 +460,7 @@ export default class RichText extends Node {
       // error. See https://github.com/phetsims/chipper/issues/1361 (we don't want translations to error out our
       // build process).
 
-      // @ts-expect-error
+      // @ts-expect-error - Since himalaya isn't in tsconfig
       rootElements = himalaya.parse( 'INVALID TRANSLATION' );
     }
 
@@ -661,8 +644,14 @@ export default class RichText extends Node {
   private appendElement( containerNode: RichTextElement, element: HimalayaNode, font: Font | string, fill: TPaint, isLTR: boolean, widthAvailable: number ): string {
     let lineBreakState = LineBreakState.NONE;
 
-    // {Node|Text} - The main Node for the element that we are adding
-    let node!: Node | Text;
+    // The main Node for the element that we are adding
+    let node!: RichTextLeaf | RichTextNode | RichTextElement;
+
+    // If this content gets added, it will need to be pushed over by this amount
+    const containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
+
+    // Container spacing cuts into our effective available width
+    const widthAvailableWithSpacing = widthAvailable - containerSpacing;
 
     // If we're a leaf
     if ( isTextNode( element ) ) {
@@ -671,11 +660,8 @@ export default class RichText extends Node {
 
       node = RichTextLeaf.pool.create( element.content, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
-      // If this content gets added, it will need to be pushed over by this amount
-      const containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
-
       // Handle wrapping if required. Container spacing cuts into our available width
-      if ( !( node as RichTextLeaf ).fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) ) {
+      if ( !node.fitsIn( widthAvailableWithSpacing, this._hasAddedLeafToLine, isLTR ) ) {
         // Didn't fit, lets break into words to see what we can fit. We'll create ranges for all the individual
         // elements we could split the lines into. If we split into different lines, we can ignore the characters
         // in-between, however if not, we need to include them.
@@ -703,10 +689,11 @@ export default class RichText extends Node {
 
           // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
           while ( ranges.length ) {
+            node.clean(); // We're tossing the old one, so we'll free up memory for the new one
             node = RichTextLeaf.pool.create( rangesToString( ranges ), isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
-            // If we haven't added anything to the line and we are down to the first word, we need to just add it.
-            if ( !( node as RichTextLeaf ).fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
+            // If we haven't added anything to the line AND we are down to the first word, we need to just add it.
+            if ( !node.fitsIn( widthAvailableWithSpacing, this._hasAddedLeafToLine, isLTR ) &&
                  ( this._hasAddedLeafToLine || ranges.length > 1 ) ) {
               sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Skipping word ${rangesToString( [ ranges[ ranges.length - 1 ] ] )}` );
               skippedRanges.unshift( ranges.pop()! );
@@ -725,6 +712,9 @@ export default class RichText extends Node {
             sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Remaining content: ${element.content}` );
           }
           else {
+            // We won't use this one, so we'll free it back to the pool
+            node.clean();
+
             return LineBreakState.INCOMPLETE;
           }
         }
@@ -741,8 +731,9 @@ export default class RichText extends Node {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'manual line break' );
         return LineBreakState.COMPLETE;
       }
+
       // Span (dir attribute) -- we need the LTR/RTL knowledge before most other operations
-      else if ( element.tagName === 'span' ) {
+      if ( element.tagName === 'span' ) {
         const dirAttributeString = himalayaGetAttribute( 'dir', element );
 
         if ( dirAttributeString ) {
@@ -752,7 +743,44 @@ export default class RichText extends Node {
         }
       }
 
-      node = RichTextElement.pool.create( isLTR );
+      // Handle <node> tags, which should not have content
+      if ( element.tagName === 'node' ) {
+        const referencedId = himalayaGetAttribute( 'id', element );
+        const referencedNode = referencedId ? ( this._nodes[ referencedId ] || null ) : null;
+        if ( referencedNode ) {
+          node = RichTextNode.pool.create( referencedNode );
+
+          if ( this._hasAddedLeafToLine && !node.fitsIn( widthAvailableWithSpacing ) ) {
+            // If we don't fit, we'll toss this node to the pool and create it on the next line
+            node.clean();
+            return LineBreakState.INCOMPLETE;
+          }
+
+          const nodeAlign = himalayaGetAttribute( 'align', element );
+          if ( nodeAlign === 'center' || nodeAlign === 'top' || nodeAlign === 'bottom' ) {
+            const textBounds = scratchText.setText( 'Test' ).setFont( font ).bounds;
+            if ( nodeAlign === 'center' ) {
+              node.centerY = textBounds.centerY;
+            }
+            else if ( nodeAlign === 'top' ) {
+              node.top = textBounds.top;
+            }
+            else if ( nodeAlign === 'bottom' ) {
+              node.bottom = textBounds.bottom;
+            }
+          }
+        }
+        else {
+          // If there is no node in our map, we'll just skip it
+          return lineBreakState;
+        }
+
+        this._hasAddedLeafToLine = true;
+      }
+      // If not a <node> tag
+      else {
+        node = RichTextElement.pool.create( isLTR );
+      }
 
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
@@ -775,7 +803,6 @@ export default class RichText extends Node {
         for ( let i = 0; i < FONT_STYLE_KEYS.length; i++ ) {
           const styleKey = FONT_STYLE_KEYS[ i ];
           if ( css[ styleKey ] ) {
-            // @ts-expect-error
             fontOptions[ FONT_STYLE_MAP[ styleKey ] ] = css[ styleKey ];
           }
         }
@@ -789,7 +816,6 @@ export default class RichText extends Node {
         // Try extracting the href from the links object
         if ( href !== null && this._links !== true ) {
           if ( href.startsWith( '{{' ) && href.indexOf( '}}' ) === href.length - 2 ) {
-            // @ts-expect-error TODO
             href = this._links[ href.slice( 2, -2 ) ];
           }
           else {
@@ -844,25 +870,27 @@ export default class RichText extends Node {
       const scale = node.getScaleVector().x;
 
       // Process children
-      while ( lineBreakState === LineBreakState.NONE && element.children.length ) {
-        const widthBefore = node.bounds.isValid() ? node.width : 0;
+      if ( element.tagName !== 'node' ) {
+        while ( lineBreakState === LineBreakState.NONE && element.children.length ) {
+          const widthBefore = node.bounds.isValid() ? node.width : 0;
 
-        const childElement = element.children[ 0 ];
-        lineBreakState = this.appendElement( node as RichTextElement, childElement, font, fill, isLTR, widthAvailable / scale );
+          const childElement = element.children[ 0 ];
+          lineBreakState = this.appendElement( node as RichTextElement, childElement, font, fill, isLTR, widthAvailable / scale );
 
-        // for COMPLETE or NONE, we'll want to remove the childElement from the tree (we fully processed it)
-        if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
-          element.children.splice( 0, 1 );
+          // for COMPLETE or NONE, we'll want to remove the childElement from the tree (we fully processed it)
+          if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
+            element.children.splice( 0, 1 );
+          }
+
+          const widthAfter = node.bounds.isValid() ? node.width : 0;
+
+          // Remove the amount of width taken up by the child
+          widthAvailable += widthBefore - widthAfter;
         }
-
-        const widthAfter = node.bounds.isValid() ? node.width : 0;
-
-        // Remove the amount of width taken up by the child
-        widthAvailable += widthBefore - widthAfter;
-      }
-      // If there is a line break and there are still more things to process, we are incomplete
-      if ( lineBreakState === LineBreakState.COMPLETE && element.children.length ) {
-        lineBreakState = LineBreakState.INCOMPLETE;
+        // If there is a line break and there are still more things to process, we are incomplete
+        if ( lineBreakState === LineBreakState.COMPLETE && element.children.length ) {
+          lineBreakState = LineBreakState.INCOMPLETE;
+        }
       }
 
       // Subscript positioning
@@ -901,13 +929,13 @@ export default class RichText extends Node {
     }
 
     if ( node ) {
-      const wasAdded = containerNode.addElement( node as RichTextElement | RichTextLeaf );
+      const wasAdded = containerNode.addElement( node );
       if ( !wasAdded ) {
         // Remove it from the linkItems if we didn't actually add it.
         this._linkItems = this._linkItems.filter( item => item.node !== node );
 
         // And since we won't dispose it (since it's not a child), clean it here
-        ( node as RichTextCleanableNode ).clean();
+        node.clean();
       }
     }
 
@@ -1441,7 +1469,7 @@ export default class RichText extends Node {
    * See https://github.com/phetsims/scenery-phet/issues/316 for more information.
    */
   public setLinks( links: RichTextLinks ): this {
-    assert && assert( links !== false || Object.getPrototypeOf( links ) === Object.prototype );
+    assert && assert( links === true || Object.getPrototypeOf( links ) === Object.prototype );
 
     if ( this._links !== links ) {
       this._links = links;
@@ -1450,16 +1478,59 @@ export default class RichText extends Node {
     return this;
   }
 
-  public set links( value: RichTextLinks ) { this.setLinks( value ); }
-
-  public get links(): RichTextLinks { return this.getLinks(); }
-
   /**
    * Returns whether link events will be handled.
    */
   public getLinks(): RichTextLinks {
     return this._links;
   }
+
+  public set links( value: RichTextLinks ) { this.setLinks( value ); }
+
+  public get links(): RichTextLinks { return this.getLinks(); }
+
+  /**
+   * Sets the map of string => Node, where {{string}} will get replaced by the given Node (DAG supported)
+   *
+   * For example:
+   *
+   * new RichText( 'This is a <node id="test"/>', {
+   *   nodes: {
+   *     test: new Text( 'Node' )
+   *   }
+   * }
+   *
+   * Alignment is also supported, with the align attribute (center/top/bottom/origin).
+   * This alignment is in relation to the current text/font size in the HTML where the <node> tag is placed.
+   * An example:
+   *
+   * new RichText( 'This is a <node id="test" align="top"/>', {
+   *   nodes: {
+   *     test: new Text( 'Node' )
+   *   }
+   * }
+   * NOTE: When alignment isn't supplied, origin is used as a default. Origin means "y=0 is placed at the baseline of
+   * the text".
+   *
+   */
+  public setNodes( nodes: Record<string, Node> ): this {
+    assert && assert( Object.getPrototypeOf( nodes ) === Object.prototype );
+
+    if ( this._nodes !== nodes ) {
+      this._nodes = nodes;
+      this.rebuildRichText();
+    }
+
+    return this;
+  }
+
+  public getNodes(): Record<string, Node> {
+    return this._nodes;
+  }
+
+  public set nodes( value: Record<string, Node> ) { this.setNodes( value ); }
+
+  public get nodes(): Record<string, Node> { return this.getNodes(); }
 
   /**
    * Sets the alignment of text (only relevant if there are multiple lines).
@@ -1516,7 +1587,7 @@ export default class RichText extends Node {
    * @param lineWrap - If it's a number, it should be greater than 0.
    */
   public setLineWrap( lineWrap: number | null ): this {
-    assert && assert( lineWrap === null || ( typeof lineWrap === 'number' && isFinite( lineWrap ) && lineWrap > 0 ) );
+    assert && assert( lineWrap === null || ( isFinite( lineWrap ) && lineWrap > 0 ) );
 
     if ( this._lineWrap !== lineWrap ) {
       this._lineWrap = lineWrap;
@@ -1630,7 +1701,7 @@ export default class RichText extends Node {
 }
 
 /**
- * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+ * {Array.<string>} - String keys for all the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
@@ -1708,7 +1779,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
    *
    * @returns- Whether the item was actually added.
    */
-  public addElement( element: RichTextElement | RichTextLeaf ): boolean {
+  public addElement( element: RichTextElement | RichTextLeaf | RichTextNode ): boolean {
 
     const hadChild = this.children.length > 0;
     const hasElement = element.width > 0;
@@ -1718,7 +1789,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
     const leftElementSpacing = element.leftSpacing * elementScale;
     const rightElementSpacing = element.rightSpacing * elementScale;
 
-    // If there is nothing, than no spacing should be handled
+    // If there is nothing, then no spacing should be handled
     if ( !hadChild && !hasElement ) {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'No child or element, ignoring' );
       return false;
@@ -1857,6 +1928,52 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   }
 
   public static readonly pool = new Pool( RichTextLeaf );
+}
+
+class RichTextNode extends RichTextCleanable( Node ) {
+
+  public readonly leftSpacing = 0;
+  public readonly rightSpacing = 0;
+
+  /**
+   * A leaf (Node) node.
+   */
+  public constructor( content: Node ) {
+    super();
+
+    this.initialize( content );
+  }
+
+  /**
+   * Set up this text's state
+   */
+  public initialize( content: Node ): this {
+    this.addChild( content );
+
+    return this;
+  }
+
+  /**
+   * Cleans references that could cause memory leaks (as those things may contain other references).
+   */
+  public override clean(): void {
+    super.clean();
+
+    this.removeAllChildren();
+  }
+
+  /**
+   * Whether this leaf will fit in the specified amount of space
+   */
+  public fitsIn( widthAvailable: number ): boolean {
+    return this.width <= widthAvailable;
+  }
+
+  public freeToPool(): void {
+    RichTextNode.pool.freeToPool( this );
+  }
+
+  public static readonly pool = new Pool( RichTextNode );
 }
 
 class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
