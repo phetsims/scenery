@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * A debugging version of the CanvasRenderingContext2D that will output all commands issued,
