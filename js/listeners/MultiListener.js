@@ -6,9 +6,9 @@
  * panning. Multi-touch gestures will initiate scaling, translation, and potentially rotation depending on
  * the gesture.
  *
- * Multilistener will keep track of all "background" presses on the screen. When certain conditions are met, the
- * "background" presses become active and attached listeners may be interrupted so that the Multilistener
- * gestures take precedence. Multilistener uses the Intent feature of Pointer, so that the default behavior of this
+ * MultiListener will keep track of all "background" presses on the screen. When certain conditions are met, the
+ * "background" presses become active and attached listeners may be interrupted so that the MultiListener
+ * gestures take precedence. MultiListener uses the Intent feature of Pointer, so that the default behavior of this
  * listener can be prevented if necessary. Generally, you would use Pointer.reserveForDrag() to indicate
  * that your Node is intended for other input that should not be interrupted by this listener.
  *
@@ -65,7 +65,7 @@ class MultiListener {
       // {boolean} - If true, the listener will rotate the targetNode from input
       allowRotation: true,
 
-      // {boolean} - if true, multitouch will interrupt any active pointer listeners and and initiate translation
+      // {boolean} - if true, multitouch will interrupt any active pointer listeners and initiate translation
       // and scale from multitouch gestures
       allowMultitouchInterruption: false,
 
@@ -183,26 +183,28 @@ class MultiListener {
 
       move: event => {
 
-        // A pointer with "drag" intent is signifying that it should not be interrupted for other things like
-        // this listener, do not interrupt if background Presses have a pointer with drag intent
-        if ( this.canMoveFromPointer( event.pointer ) && !this.anyBackgroundPressesWithDragIntent() && this._allowMoveInterruption ) {
+        // Any background press needs to meet certain conditions to be promoted to an actual press that pans/zooms
+        const candidateBackgroundPresses = this._backgroundPresses.filter( press => {
 
-          const backgroundPress = this.findBackgroundPress( event.pointer );
-          const difference = backgroundPress.initialPoint.minus( event.pointer.point );
+          // Dragged pointers and pointers that haven't moved a certain distance are not candidates, and should not be
+          // interrupted. We don't want to interrupt taps that might move a little bit
+          return !press.pointer.hasIntent( Intent.Drag ) && press.initialPoint.distance( press.pointer.point ) > MOVE_INTERRUPT_MAGNITUDE;
+        } );
 
-          // it is nice to allow down pointers to move around freely without interruption when there isn't any zoom,
-          // but we still allow interruption if the number of background presses indicate the user is trying to
-          // zoom in
-          const zoomedOutPan = this._backgroundPresses.length <= 1 && this.getCurrentScale() === 1;
-          if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE && !zoomedOutPan ) {
+        // If we are already zoomed in, we should promote any number of background presses to actual presses.
+        // Otherwise, we'll need at least two presses to zoom
+        // It is nice to allow down pointers to move around freely without interruption when there isn't any zoom,
+        // but we still allow interruption if the number of background presses indicate the user is trying to
+        // zoom in
+        if ( this.getCurrentScale() !== 1 || candidateBackgroundPresses.length >= 2 ) {
+          sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
 
-            // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little or
-            // when there is no scale to translate
-            sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
-            this.interruptOtherListeners( event.pointer );
-            this.convertBackgroundPresses();
-            this.movePress( this.findPress( event.pointer ) );
-          }
+          // Convert all candidate background presses to actual presses
+          candidateBackgroundPresses.forEach( press => {
+            this.removeBackgroundPress( press );
+            this.interruptOtherListeners( press.pointer );
+            this.addPress( press );
+          } );
         }
       },
 
@@ -276,18 +278,6 @@ class MultiListener {
   }
 
   /**
-   * Returns true if any background presses are assigned a "Drag" intent.
-   * @private
-   *
-   * @returns {boolean}
-   */
-  anyBackgroundPressesWithDragIntent() {
-    return _.some( this._backgroundPresses, press => {
-      return !this.canMoveFromPointer( press.pointer );
-    } );
-  }
-
-  /**
    * Interrupt all listeners on the pointer, except for background listeners that
    * were added by this MultiListener. Useful when it is time for this listener to
    * "take over" and interrupt any other listeners on the pointer.
@@ -303,17 +293,6 @@ class MultiListener {
         listener.interrupt && listener.interrupt();
       }
     }
-  }
-
-  /**
-   * Movement is disallowed for pointers with Intent that indicate that dragging is expected.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @returns {boolean}
-   */
-  canMoveFromPointer( pointer ) {
-    return !pointer.hasIntent( Intent.DRAG );
   }
 
   /**
@@ -355,12 +334,11 @@ class MultiListener {
       if ( !event.pointer.isAttached() ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener unattached, using press' );
         this.addPress( press );
-        this.convertBackgroundPresses();
       }
     }
     else {
 
-      // we allow some form of interruption, add as background presses and we will decide if they
+      // we allow some form of interruption, add as background presses, and we will decide if they
       // should be converted to presses and interrupt other listeners on move event
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, adding background press' );
       this.addBackgroundPress( press );
@@ -438,7 +416,7 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    // its possible that the press pointer already has the listener - for instance in Chrome we fail to get
+    // It's possible that the press pointer already has the listener - for instance in Chrome we fail to get
     // "up" events once the context menu is open (like after a right click), so only add to the Pointer
     // if it isn't already added
     if ( !this.hasPress( press ) ) {
@@ -462,26 +440,6 @@ class MultiListener {
     press.pointer.removeInputListener( this._backgroundListener );
 
     arrayRemove( this._backgroundPresses, press );
-
-    sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  }
-
-  /**
-   * Convert background Presses to Presses. Done when an attached Pointer is interrupted and we are ready to begin
-   * a pan or zoom operation with the available Presses.\
-   * @private
-   */
-  convertBackgroundPresses() {
-    sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener convertBackgroundPresses' );
-    sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-    const presses = this._backgroundPresses.slice();
-    for ( let i = 0; i < presses.length; i++ ) {
-      const press = presses[ i ];
-      this.removeBackgroundPress( press );
-      press.pointer.interruptAttached();
-      this.addPress( press );
-    }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
