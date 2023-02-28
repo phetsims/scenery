@@ -1,42 +1,64 @@
 scenery
 =======
 
-Scenery is an HTML5 scene graph.
+Scenery is a library for building interactive visual experiences in HTML5, which can be displayed in a
+combination of ways (WebGL, SVG, Canvas, etc.)
 
 By PhET Interactive Simulations
 https://phet.colorado.edu/
 
 ### Documentation
 
-This is under active prototyping, so please expect any sort of API to change. Comments at this stage are very welcome.
-A [tentative website](http://phetsims.github.io/scenery/) is up for browsing documentation and examples in a more user-friendly way.
+The majority of the documentation exists within the code itself, but our
+[main documentation](http://phetsims.github.io/scenery/doc/)
+and [a tour of features](http://phetsims.github.io/scenery/doc/a-tour-of-scenery.html)
+is available online, along with other resources under [the dedicated website](http://phetsims.github.io/scenery/)
 
-[Grunt](http://gruntjs.com/) is used to build the source ("npm update -g grunt-cli", "npm update" and "grunt" at the top level
-should build into build/). [Node.js](http://nodejs.org/) is required for this process.
+Currently, you can grab the unminified [scenery.debug.js](http://phetsims.github.io/scenery/dist/scenery.debug.js)
+or
+minified version [scenery.min.js](http://phetsims.github.io/scenery/dist/scenery.min.js).
 
-Currently, you can also grab the unminified [scenery.js](http://phetsims.github.io/scenery/dist/scenery.min.js) or
-minified version [scenery-min.js](http://phetsims.github.io/scenery/build/standalone/scenery.min.js).
-They are currently not versioned due to the accelerated development speed, but will be more stable soon. A development version
-will be available soon that has assertions enabled.
+We have a [list of examples](https://phetsims.github.io/scenery/examples/) to get started from
 
-Documentation of Scenery is available at:
-* [Main Documentation](http://phetsims.github.io/scenery/doc/) (up-to-date version is checked in at scenery/doc/index.html)
-* [A Tour of Scenery](http://phetsims.github.io/scenery/doc/a-tour-of-scenery.html) (up-to-date version is checked in at scenery/doc/index.html)
+The [PhET Development Overview](https://github.com/phetsims/phet-info/blob/master/doc/phet-development-overview.md) is
+the most complete guide to PhET Simulation Development. This guide includes how
+to obtain simulation code and its dependencies, notes about architecture & design, how to test and build the sims, as
+well as other important information.
 
-Examples:
-* [Hello world](http://phetsims.github.io/scenery/examples/hello-world.html)
-* [Node types](http://phetsims.github.io/scenery/examples/nodes.html)
-* [Multi-touch and Drag-by-touchover](http://phetsims.github.io/scenery/examples/multi-touch.html)
-* [Cursors](http://phetsims.github.io/scenery/examples/cursors.html)
-* [Devious Dragging (handling of corner cases)](http://phetsims.github.io/scenery/examples/devious-drag.html)
+### To check out and build the code
 
-For testing purposes, the following are currently being worked on:
-* [Unit Tests / Linter](http://phetsims.github.io/scenery/scenery-tests.html)
-* [Renderer Comparison](http://phetsims.github.io/scenery/tests/renderer-comparison.html)
-* [Canvas Browser Differences](http://jonathan-olson.com/canvas-diff/canvas-diff.html)
+Our processes depend on [Node.js](http://nodejs.org/) and [Grunt](http://gruntjs.com/). It's highly recommended to install
+Node.js and then grunt with `npm install -g grunt-cli`.
 
-The [PhET Development Overview](https://github.com/phetsims/phet-info/blob/master/doc/phet-development-overview.md) is the most complete guide to PhET Simulation Development. This guide includes how
-to obtain simulation code and its dependencies, notes about architecture & design, how to test and build the sims, as well as other important information.
+(1) Clone the simulation and its dependencies:
+```
+git clone https://github.com/phetsims/assert.git
+git clone https://github.com/phetsims/axon.git
+git clone https://github.com/phetsims/chipper.git
+git clone https://github.com/phetsims/dot.git
+git clone https://github.com/phetsims/kite.git
+git clone https://github.com/phetsims/perennial.git perennial-alias
+git clone https://github.com/phetsims/phet-core.git
+git clone https://github.com/phetsims/scenery.git
+git clone https://github.com/phetsims/sherpa.git
+git clone https://github.com/phetsims/tandem.git
+git clone https://github.com/phetsims/utterance-queue.git
+```
+
+(2) Install dev dependencies:
+```
+cd chipper
+npm install
+cd ../perennial-alias
+npm install
+cd ../scenery
+npm install
+```
+
+(3) Build scenery
+
+Ensure you're in the kite directory and run `grunt --lint=false --report-media=false`. This will output files under the `build/` directory
 
 ### License
-See the [license](LICENSE)
+
+MIT license, see [LICENSE](LICENSE)
