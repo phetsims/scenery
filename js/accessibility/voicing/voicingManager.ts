@@ -52,7 +52,7 @@ class VoicingManager extends SpeechSynthesisAnnouncer {
 }
 
 const voicingManager = new VoicingManager( {
-  tandem: Tandem.GENERAL_VIEW.createTandem( 'voicing' ).createTandem( 'voicingManager' ),
+  tandem: Tandem.GENERAL_VIEW_AUDIO.createTandem( 'voicing' ).createTandem( 'voicingManager' ),
   phetioDocumentation: 'The Announcer responsible for announcing` to WebSpeech for the "voicing" feature.'
 } );
 
