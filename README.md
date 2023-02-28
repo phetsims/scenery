@@ -39,6 +39,7 @@ git clone https://github.com/phetsims/dot.git
 git clone https://github.com/phetsims/kite.git
 git clone https://github.com/phetsims/perennial.git perennial-alias
 git clone https://github.com/phetsims/phet-core.git
+git clone https://github.com/phetsims/phetcommon.git
 git clone https://github.com/phetsims/scenery.git
 git clone https://github.com/phetsims/sherpa.git
 git clone https://github.com/phetsims/tandem.git
