@@ -14,7 +14,7 @@ A [tentative website](http://phetsims.github.io/scenery/) is up for browsing doc
 [Grunt](http://gruntjs.com/) is used to build the source ("npm update -g grunt-cli", "npm update" and "grunt" at the top level
 should build into build/). [Node.js](http://nodejs.org/) is required for this process.
 
-Currently, you can also grab the unminified [scenery.js](http://phetsims.github.io/scenery/build/scenery.min.js) or
+Currently, you can also grab the unminified [scenery.js](http://phetsims.github.io/scenery/dist/scenery.min.js) or
 minified version [scenery-min.js](http://phetsims.github.io/scenery/build/standalone/scenery.min.js).
 They are currently not versioned due to the accelerated development speed, but will be more stable soon. A development version
 will be available soon that has assertions enabled.

@@ -50,6 +50,9 @@
         height: $container.height(),
         accessibility: false,
 
+        // We want to allow text selection, and currently this is needed to allow it
+        allowCSSHacks: false,
+
         // so Display input does not interfere with documentation links
         listenToOnlyElement: true
       } );

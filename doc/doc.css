@@ -18,3 +18,10 @@ h3 {
 .sublink {
   padding-left: 1em;
 }
+
+.exampleScene {
+  position: relative;
+  left: 0;
+  top: 0;
+  margin: 10px auto;
+}

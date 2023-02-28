@@ -170,12 +170,12 @@
     document.getElementById( 'run' ).style.display = 'none';
   }
 
-  _.extend( window, utteranceQueue );
-  _.extend( window, phetCore );
-  _.extend( window, axon );
-  _.extend( window, dot );
-  _.extend( window, kite );
-  _.extend( window, scenery );
+  _.extend( window, phet.utteranceQueue );
+  _.extend( window, phet.phetCore );
+  _.extend( window, phet.axon );
+  _.extend( window, phet.dot );
+  _.extend( window, phet.kite );
+  _.extend( window, phet.scenery );
 
   window.scenery = scenery;
   window.kite = kite;
