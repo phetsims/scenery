@@ -335,7 +335,7 @@ export type NodeOptions = {
   enabledProperty?: TReadOnlyProperty<boolean> | null;
   enabled?: boolean;
   phetioInputEnabledPropertyInstrumented?: boolean;
-  inputEnabledProperty?: TProperty<boolean> | null;
+  inputEnabledProperty?: TReadOnlyProperty<boolean> | null;
   inputEnabled?: boolean;
   inputListeners?: TInputListener[];
   opacity?: number;
