@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * MultiListener is responsible for monitoring the mouse, touch, and other presses on the screen and determines the
