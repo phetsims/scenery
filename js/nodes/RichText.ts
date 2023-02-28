@@ -809,7 +809,7 @@ export default class RichText extends Node {
         font = ( typeof font === 'string' ? Font.fromCSS( font ) : font ).copy( fontOptions );
       }
 
-      // Achor (link)
+      // Anchor (link)
       if ( element.tagName === 'a' ) {
         let href = himalayaGetAttribute( 'href', element );
 
