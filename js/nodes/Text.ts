@@ -80,9 +80,6 @@ export default class Text extends Paintable( Node ) {
   // When this is null, its value needs to be recomputed
   private _cachedRenderedText: string | null;
 
-  // (phet-io) - property name avoids namespace of the Node setter
-  private textTandem: Tandem;
-
   public static readonly STRING_PROPERTY_NAME = STRING_PROPERTY_NAME;
   public static readonly STRING_PROPERTY_TANDEM_NAME = STRING_PROPERTY_NAME;
 
@@ -120,8 +117,6 @@ export default class Text extends Paintable( Node ) {
     else {
       definedOptions.stringProperty = text;
     }
-
-    this.textTandem = definedOptions.tandem;
 
     this.mutate( definedOptions );
 
