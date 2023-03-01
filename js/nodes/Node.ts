@@ -5380,7 +5380,7 @@ class Node extends ParallelDOM {
    * @deprecated
    * Render this Node to the Canvas (clearing it first)
    */
-  public renderToCanvas( canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, callback: () => void, backgroundColor: string ): void {
+  public renderToCanvas( canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, callback?: () => void, backgroundColor?: string ): void {
 
     assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use Node.rasterized() instead' );
 

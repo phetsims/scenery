@@ -19,7 +19,7 @@ const canvasWidth = 320;
 const canvasHeight = 240;
 
 // takes a snapshot of a scene and stores the pixel data, so that we can compare them
-function snapshot( scene, width, height ) {
+function snapshot( scene: Node, width?: number, height?: number ): ImageData {
 
   width = width || canvasWidth;
   height = height || canvasHeight;
@@ -27,14 +27,15 @@ function snapshot( scene, width, height ) {
   const canvas = document.createElement( 'canvas' );
   canvas.width = width;
   canvas.height = height;
-  const context = canvas.getContext( '2d' );
+  const context = canvas.getContext( '2d' )!;
   scene.renderToCanvas( canvas, context );
   const data = context.getImageData( 0, 0, canvasWidth, canvasHeight );
   return data;
 }
 
 // TODO: factor out
-function sceneEquals( assert, constructionA, constructionB, message, threshold ) {
+function sceneEquals( assert: Assert, constructionA: ( node: Node ) => void, constructionB: ( node: Node ) => void,
+                      message?: string, threshold?: number ): boolean {
 
   if ( threshold === undefined ) {
     threshold = 0;
@@ -56,7 +57,8 @@ function sceneEquals( assert, constructionA, constructionB, message, threshold )
 }
 
 // TODO: factor out
-function strokeEqualsFill( assert, shapeToStroke, shapeToFill, strokeNodeSetup, message ) {
+function strokeEqualsFill( assert: Assert, shapeToStroke: Shape, shapeToFill: Shape,
+                           strokeNodeSetup?: ( node: Path ) => void, message?: string ): void {
 
   sceneEquals( assert, scene => {
     const node = new Path( null );
@@ -78,8 +80,7 @@ function strokeEqualsFill( assert, shapeToStroke, shapeToFill, strokeNodeSetup, 
   }, message, 128 ); // threshold of 128 due to antialiasing differences between fill and stroke... :(
 }
 
-function p( x, y ) { return new Vector2( x, y ); }
- 
+function p( x: number, y: number ): Vector2 { return new Vector2( x, y ); }
 
 QUnit.test( 'Verifying Line/Rect', assert => {
   const lineWidth = 50;

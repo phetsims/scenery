@@ -18,6 +18,8 @@ QUnit.test( 'Mutually exclusive options', assert => {
   const stringProperty = new StringProperty( 'oh boy, here we go.' );
   window.assert && assert.throws( () => {
     return new Text( {
+
+      // @ts-expect-error for testing
       text: 'hi',
       stringProperty: stringProperty
     } );

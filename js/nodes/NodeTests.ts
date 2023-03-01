@@ -7,9 +7,11 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import Touch from '../input/Touch.js';
 import Node from './Node.js';
@@ -17,8 +19,8 @@ import Rectangle from './Rectangle.js';
 
 QUnit.module( 'Node' );
 
-function fakeTouchPointer( vector ) {
-  return new Touch( 0, vector, {} );
+function fakeTouchPointer( vector: Vector2 ): Touch {
+  return new Touch( 0, vector, {} as Event );
 }
 
 QUnit.test( 'Mouse and Touch areas', assert => {
@@ -211,16 +213,16 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
   /**
    * Factor out a way to test added Properties to Node and their PhET-iO instrumentation
-   * @param {Object} assert - from qunit test
-   * @param {string} nodeField - name of getter/setter, like `visible`
-   * @param {string} nodeProperty - name of public property, like `visibleProperty`
-   * @param {string} nodePropertySetter - name of setter function, like `setVisibleProperty`
-   * @param {boolean} ownedPropertyInstrumented - default value of phetioNodePropertyInstrumentedKeyName option in Node.
-   * @param {string} phetioNodePropertyInstrumentedKeyName - key name for setting opt-in PhET-iO instrumentation
+   * @param assert - from qunit test
+   * @param nodeField - name of getter/setter, like `visible`
+   * @param nodeProperty - name of public property, like `visibleProperty`
+   * @param nodePropertySetter - name of setter function, like `setVisibleProperty`
+   * @param ownedPropertyInstrumented - default value of phetioNodePropertyInstrumentedKeyName option in Node.
+   * @param phetioNodePropertyInstrumentedKeyName - key name for setting opt-in PhET-iO instrumentation
    */
-  const testInstrumentedNodeProperty = ( assert, nodeField,
-                                         nodeProperty, nodePropertySetter,
-                                         ownedPropertyInstrumented, phetioNodePropertyInstrumentedKeyName ) => {
+  const testInstrumentedNodeProperty = ( assert: Assert, nodeField: keyof Node,
+                                         nodeProperty: string, nodePropertySetter: string,
+                                         ownedPropertyInstrumented: boolean, phetioNodePropertyInstrumentedKeyName: string ): void => {
 
     const apiValidation = phet.tandem.phetioAPIValidation;
     const previousAPIValidationEnabled = apiValidation.enabled;
@@ -228,14 +230,16 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     apiValidation.simHasStarted = false;
 
-    const testNodeAndProperty = ( node, property ) => {
+    const testNodeAndProperty = ( node: Node, property: TProperty<IntentionalAny> ) => {
       const initialValue = node[ nodeField ];
       assert.ok( property.value === node[ nodeField ], 'initial values should be the same' );
+      // @ts-expect-error - no sure now to do this well in typescript
       node[ nodeField ] = !initialValue;
       assert.ok( property.value === !initialValue, 'property should reflect node change' );
       property.value = initialValue;
       assert.ok( node[ nodeField ] === initialValue, 'node should reflect property change' );
 
+      // @ts-expect-error - no sure now to do this well in typescript
       node[ nodeField ] = initialValue;
     };
 
@@ -250,11 +254,14 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
       // uninstrumentedNode => no property (before startup)
     let uninstrumented = new Node();
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === undefined );
+    // @ts-expect-error - no sure now to do this well in typescript
     testNodeAndProperty( uninstrumented, uninstrumented[ nodeProperty ] );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { [ nodeProperty ]: uninstrumentedProperty } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === uninstrumentedProperty );
     testNodeAndProperty( uninstrumented, uninstrumentedProperty );
 
@@ -263,6 +270,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       [ nodeProperty ]: instrumentedProperty
     } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
 
@@ -272,6 +280,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ nodeProperty ]: instrumentedProperty
     } );
     uninstrumented.mutate( { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ) } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
     uninstrumented.dispose();
@@ -281,11 +290,14 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // uninstrumentedNode => no property (before startup)
     uninstrumented = new Node();
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === undefined );
+    // @ts-expect-error - no sure now to do this well in typescript
     testNodeAndProperty( uninstrumented, uninstrumented[ nodeProperty ] );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { [ nodeProperty ]: uninstrumentedProperty } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === uninstrumentedProperty );
     testNodeAndProperty( uninstrumented, uninstrumentedProperty );
 
@@ -294,6 +306,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       [ nodeProperty ]: instrumentedProperty
     } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
 
@@ -304,6 +317,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     } );
 
     uninstrumented.mutate( { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ) } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( uninstrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
     uninstrumented.dispose();
@@ -319,8 +333,11 @@ if ( Tandem.PHET_IO_ENABLED ) {
         tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
         [ phetioNodePropertyInstrumentedKeyName ]: true
       } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ nodeProperty ][ 'targetProperty' ] === instrumented[ nodeProperty ].ownedPhetioProperty );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ 'linkedElements' ].length === 0, `no linked elements for default ${nodeProperty}` );
+    // @ts-expect-error - no sure now to do this well in typescript
     testNodeAndProperty( instrumented, instrumented[ nodeProperty ] );
     instrumented.dispose();
 
@@ -329,6 +346,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
+    // @ts-expect-error - no sure now to do this well in typescript
     instrumented.hasOwnProperty( 'phetioNodePropertyInstrumentedKeyName' ) && assert.ok( instrumented[ phetioNodePropertyInstrumentedKeyName ] === true, 'getter should work' );
     window.assert && assert.throws( () => {
       instrumented.mutate( { [ nodeProperty ]: uninstrumentedProperty } );
@@ -341,8 +359,11 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     instrumented.mutate( { [ nodeProperty ]: instrumentedProperty } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ 'linkedElements' ].length === 1, 'added linked element' );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ 'linkedElements' ][ 0 ].element === instrumentedProperty,
       `added linked element should be for ${nodeProperty}` );
     testNodeAndProperty( instrumented, instrumentedProperty );
@@ -352,8 +373,11 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ nodeProperty ]: instrumentedProperty
     } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ nodeProperty ][ 'targetProperty' ] === instrumentedProperty );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ 'linkedElements' ].length === 1, 'added linked element' );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented[ 'linkedElements' ][ 0 ].element === instrumentedProperty,
       `added linked element should be for ${nodeProperty}` );
     testNodeAndProperty( instrumented, instrumentedProperty );
@@ -384,8 +408,11 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated1` ),
       [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented1[ nodeProperty ][ 'targetProperty' ] === instrumented1[ nodeProperty ].ownedPhetioProperty );
+    // @ts-expect-error - no sure now to do this well in typescript
     assert.ok( instrumented1[ 'linkedElements' ].length === 0, `no linked elements for default ${nodeProperty}` );
+    // @ts-expect-error - no sure now to do this well in typescript
     testNodeAndProperty( instrumented1, instrumented1[ nodeProperty ] );
 
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (after startup)
@@ -394,6 +421,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     window.assert && assert.throws( () => {
+      // @ts-expect-error - no sure now to do this well in typescript
       instrumented2[ nodePropertySetter ]( uninstrumentedProperty );
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
 
@@ -433,6 +461,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ phetioNodePropertyInstrumentedKeyName ]: false // required when passing in an instrumented one later
     } );
 
+    // @ts-expect-error - no sure now to do this well in typescript
     instrumented6[ nodeProperty ] = new BooleanProperty( false, {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyBooleanProperty` )
     } );
@@ -454,6 +483,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     window.assert && assert.throws( () => {
+      // @ts-expect-error - no sure now to do this well in typescript
       instrumented[ nodePropertySetter ]( null );
     }, `cannot clear out an instrumented ${nodeProperty}` );
     instrumented.dispose();
@@ -466,6 +496,8 @@ if ( Tandem.PHET_IO_ENABLED ) {
         tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` )
       } );
       window.assert && assert.throws( () => {
+
+        // @ts-expect-error - no sure now to do this well in typescript
         instrumented[ phetioNodePropertyInstrumentedKeyName ] = true;
       }, `cannot set ${phetioNodePropertyInstrumentedKeyName} after instrumentation` );
       instrumented.dispose();
