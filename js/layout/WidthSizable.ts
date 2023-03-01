@@ -348,6 +348,10 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
         this._minimumSizeChangeAttemptDuringLock = true;
       }
     }
+
+    public override mutate( options?: WidthSizableOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+      return super.mutate( options );
+    }
   } );
 
   // If we're extending into a Node type, include option keys

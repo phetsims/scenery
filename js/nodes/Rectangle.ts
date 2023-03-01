@@ -841,6 +841,10 @@ export default class Rectangle extends SuperType {
     return this._cornerXRadius;
   }
 
+  public override mutate( options?: RectangleOptions ): this {
+    return super.mutate( options );
+  }
+
   /**
    * Returns whether a point is within a rounded rectangle.
    *

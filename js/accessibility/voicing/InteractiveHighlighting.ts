@@ -444,6 +444,10 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
 
       return descendantsUseVoicing;
     }
+
+    public override mutate( options?: SelfOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+      return super.mutate( options );
+    }
   } );
 
   /**

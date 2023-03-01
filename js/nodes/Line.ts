@@ -484,6 +484,10 @@ export default class Line extends Path {
     return true;
   }
 
+  public override mutate( options?: LineOptions ): this {
+    return super.mutate( options );
+  }
+
   /**
    * Returns available fill renderers. (scenery-internal)
    *

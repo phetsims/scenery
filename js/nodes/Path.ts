@@ -94,7 +94,6 @@ export default class Path extends Paintable( Node ) {
     this.mutate( options );
   }
 
-
   /**
    * This sets the shape of the Path, which determines the shape of its appearance. It should generally not be called
    * on Path subtypes like Line, Rectangle, etc.
@@ -512,6 +511,10 @@ export default class Path extends Paintable( Node ) {
     }
 
     super.dispose();
+  }
+
+  public override mutate( options?: PathOptions ): this {
+    return super.mutate( options );
   }
 
   // Initial values for most Node mutator options

@@ -221,6 +221,10 @@ export default class DOM extends Node {
   public isTransformPrevented(): boolean {
     return this._preventTransform;
   }
+
+  public override mutate( options?: DOMOptions ): this {
+    return super.mutate( options );
+  }
 }
 
 /**

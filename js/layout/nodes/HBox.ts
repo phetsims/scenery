@@ -26,6 +26,10 @@ export default class HBox extends FlowBox {
 
     super.onFlowBoxChildInserted( node, index );
   }
+
+  public override mutate( options?: HBoxOptions ): this {
+    return super.mutate( options );
+  }
 }
 
 scenery.register( 'HBox', HBox );

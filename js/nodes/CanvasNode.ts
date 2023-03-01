@@ -124,6 +124,10 @@ export default abstract class CanvasNode extends Node {
     // @ts-expect-error
     return CanvasNodeDrawable.createFromPool( renderer, instance );
   }
+
+  public override mutate( options?: CanvasNodeOptions ): this {
+    return super.mutate( options );
+  }
 }
 
 /**

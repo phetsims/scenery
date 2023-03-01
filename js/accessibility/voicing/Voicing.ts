@@ -635,6 +635,10 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
         Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, this );
       }
     }
+
+    public override mutate( options?: SelfOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+      return super.mutate( options );
+    }
   } );
 
   /**

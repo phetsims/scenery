@@ -635,6 +635,10 @@ export default class AlignBox extends SuperType {
 
     super.dispose();
   }
+
+  public override mutate( options?: AlignBoxOptions ): this {
+    return super.mutate( options );
+  }
 }
 
 // Layout logic for AlignBox

@@ -271,6 +271,10 @@ export default class Image extends Imageable( Node ) {
     }
   }
 
+  public override mutate( options?: ImageOptions ): this {
+    return super.mutate( options );
+  }
+
   public static ImageIO: IOType;
 
   // Initial values for most Node mutator options

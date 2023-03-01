@@ -26,6 +26,10 @@ export default class VBox extends FlowBox {
 
     super.onFlowBoxChildInserted( node, index );
   }
+
+  public override mutate( options?: VBoxOptions ): this {
+    return super.mutate( options );
+  }
 }
 
 scenery.register( 'VBox', VBox );

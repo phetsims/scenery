@@ -401,6 +401,10 @@ const ReadingBlock = <SuperType extends Constructor<Node>>( Type: SuperType ) =>
 
       super.dispose();
     }
+
+    public override mutate( options?: SelfOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+      return super.mutate( options );
+    }
   } );
 
   /**

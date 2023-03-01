@@ -202,6 +202,10 @@ export default abstract class WebGLNode extends Node {
     return WebGLNodeDrawable.createFromPool( renderer, instance );
   }
 
+  public override mutate( options?: WebGLNodeOptions ): this {
+    return super.mutate( options );
+  }
+
   // Return code from painter.paint() when nothing was painted to the WebGL context.
   public static readonly PAINTED_NOTHING = 0 as const;
 

@@ -183,6 +183,10 @@ export default class Sprites extends Node {
       this._drawables[ i ].markDirty();
     }
   }
+
+  public override mutate( options?: SpritesOptions ): this {
+    return super.mutate( options );
+  }
 }
 
 /**

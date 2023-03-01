@@ -346,6 +346,10 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
         this._minimumSizeChanging = false;
       }
     }
+
+    public override mutate( options?: HeightSizableOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+      return super.mutate( options );
+    }
   } );
 
   // If we're extending into a Node type, include option keys

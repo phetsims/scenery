@@ -299,6 +299,11 @@ export default class Circle extends Path {
     // Always true for this Path subtype
     return true;
   }
+
+  public override mutate( options?: CircleOptions ): this {
+    return super.mutate( options );
+  }
+
 }
 
 /**
