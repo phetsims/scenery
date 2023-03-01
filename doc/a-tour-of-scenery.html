@@ -610,7 +610,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
         // update our label and color
         function updatePointers() {
           node.fill = colors[ Math.min( count, maxColor ) ];
-          label.setText( labelPrefix + count );
+          label.setString( labelPrefix + count );
         }
 
         // listener fired whenever the event occurs over the node
@@ -695,7 +695,7 @@ scene.addChild( node );
 // update our label and color
 function updatePointers() {
   node.fill = colors[ Math.min( count, maxColor ) ];
-  label.setText( labelPrefix + count );
+  label.setString( labelPrefix + count );
 }
 
 // listener fired whenever the event occurs over the node

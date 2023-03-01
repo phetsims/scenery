@@ -103,7 +103,8 @@ const RICH_TEXT_OPTION_KEYS = [
   'leading',
   'lineWrap',
   Text.STRING_PROPERTY_NAME,
-  'string'
+  'string',
+  'text'// @deprecated, TODO: remove as part of https://github.com/phetsims/scenery/issues/1472
 ];
 
 export type RichTextAlign = 'left' | 'center' | 'right';
@@ -186,7 +187,7 @@ type SelfOptions = {
 
   stringPropertyOptions?: PropertyOptions<string>;
 
-  // Sets the text to be displayed by this Node
+  // Sets the string to be displayed by this Node
   string?: string | number;
 };
 
@@ -285,7 +286,7 @@ const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
 export default class RichText extends Node {
 
-  // The text to display. We'll initialize this by mutating.
+  // The string to display. We'll initialize this by mutating.
   private readonly _stringProperty: TinyForwardingProperty<string>;
 
   private _font: Font | string = DEFAULT_FONT;
@@ -377,7 +378,7 @@ export default class RichText extends Node {
   }
 
   /**
-   * Called when our text Property changes values.
+   * Called when our stringProperty changes values.
    */
   private onStringPropertyChange(): void {
     this.rebuildRichText();
@@ -493,7 +494,7 @@ export default class RichText extends Node {
         }
         // Otherwise if it's a blank line, add in a strut (<br><br> should result in a blank line)
         else {
-          this.appendLine( RichTextVerticalSpacer.pool.create( scratchText.setText( 'X' ).setFont( this._font ).height ) );
+          this.appendLine( RichTextVerticalSpacer.pool.create( scratchText.setString( 'X' ).setFont( this._font ).height ) );
         }
 
         // Set up a new line
@@ -637,7 +638,7 @@ export default class RichText extends Node {
    *                      (https://github.com/andrejewski/himalaya/blob/master/text/ast-spec-v0.md)
    * @param font - The font to apply at this level
    * @param fill - Fill to apply
-   * @param isLTR - True if LTR, false if RTL (handles RTL text properly)
+   * @param isLTR - True if LTR, false if RTL (handles RTL strings properly)
    * @param widthAvailable - How much width we have available before forcing a line break (for lineWrap)
    * @returns - Whether a line break was reached
    */
@@ -758,7 +759,7 @@ export default class RichText extends Node {
 
           const nodeAlign = himalayaGetAttribute( 'align', element );
           if ( nodeAlign === 'center' || nodeAlign === 'top' || nodeAlign === 'bottom' ) {
-            const textBounds = scratchText.setText( 'Test' ).setFont( font ).bounds;
+            const textBounds = scratchText.setString( 'Test' ).setFont( font ).bounds;
             if ( nodeAlign === 'center' ) {
               node.centerY = textBounds.centerY;
             }
@@ -902,7 +903,7 @@ export default class RichText extends Node {
       // Superscript positioning
       else if ( element.tagName === 'sup' ) {
         if ( isFinite( node.height ) ) {
-          node.centerY = scratchText.setText( 'X' ).setFont( font ).top * this._capHeightScale;
+          node.centerY = scratchText.setString( 'X' ).setFont( font ).top * this._capHeightScale;
         }
       }
       // Underline
@@ -943,27 +944,7 @@ export default class RichText extends Node {
   }
 
   /**
-   * Sets the text displayed by our node.
-   *
-   * NOTE: Encoding HTML entities is required, and malformed HTML is not accepted.
-   *
-   * @param text - The text to display. If it's a number, it will be cast to a string
-   */
-  public setText( text: string | number ): this {
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling setText' );
-    assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
-
-    // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
-    text = `${text}`;
-
-    this._stringProperty.set( text );
-
-    return this;
-  }
-
-  /**
-   * Sets the text displayed by our node.
+   * Sets the string displayed by our node.
    *
    * NOTE: Encoding HTML entities is required, and malformed HTML is not accepted.
    *
@@ -983,33 +964,23 @@ export default class RichText extends Node {
   public set text( value: string | number ) {
 
     // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling setText' );
+    assert && assert( false, 'Should not be calling setString' );
+    this.setString( value );
   }
 
   public get text(): string {
 
     // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling getText' );
-    return this.getText();
+    assert && assert( false, 'Should not be calling getString' );
+    return this.getString();
   }
 
   public set string( value: string | number ) { this.setString( value ); }
 
   public get string(): string { return this.getString(); }
 
-
   /**
-   * Returns the text displayed by our node.
-   */
-  public getText(): string {
-
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling getText' );
-    return this._stringProperty.value;
-  }
-
-  /**
-   * Returns the text displayed by our node.
+   * Returns the string displayed by our text Node.
    */
   public getString(): string {
     return this._stringProperty.value;
@@ -1128,7 +1099,7 @@ export default class RichText extends Node {
   }
 
   /**
-   * Sets the scale (relative to 1) of any text under subscript (<sub>) elements.
+   * Sets the scale (relative to 1) of any string under subscript (<sub>) elements.
    */
   public setSubScale( subScale: number ): this {
     assert && assert( isFinite( subScale ) && subScale > 0 );
@@ -1145,7 +1116,7 @@ export default class RichText extends Node {
   public get subScale(): number { return this.getSubScale(); }
 
   /**
-   * Returns the scale (relative to 1) of any text under subscript (<sub>) elements.
+   * Returns the scale (relative to 1) of any string under subscript (<sub>) elements.
    */
   public getSubScale(): number {
     return this._subScale;
@@ -1200,7 +1171,7 @@ export default class RichText extends Node {
   }
 
   /**
-   * Sets the scale (relative to 1) of any text under superscript (<sup>) elements.
+   * Sets the scale (relative to 1) of any string under superscript (<sup>) elements.
    */
   public setSupScale( supScale: number ): this {
     assert && assert( isFinite( supScale ) && supScale > 0 );
@@ -1217,7 +1188,7 @@ export default class RichText extends Node {
   public get supScale(): number { return this.getSupScale(); }
 
   /**
-   * Returns the scale (relative to 1) of any text under superscript (<sup>) elements.
+   * Returns the scale (relative to 1) of any string under superscript (<sup>) elements.
    */
   public getSupScale(): number {
     return this._supScale;
@@ -1608,8 +1579,14 @@ export default class RichText extends Node {
   }
 
   public override mutate( options?: RichTextOptions ): this {
+
+    // TODO: https://github.com/phetsims/scenery/issues/1472
+    if ( assert && options ) {
+      assert && assert( !options.hasOwnProperty( 'text' ), 'Text option should be "string".' );
+    }
+
     if ( assert && options && options.hasOwnProperty( 'string' ) && options.hasOwnProperty( Text.STRING_PROPERTY_NAME ) && options.stringProperty ) {
-      assert && assert( options.stringProperty.value === options.string, 'If both text and stringProperty are provided, then values should match' );
+      assert && assert( options.stringProperty.value === options.string, 'If both string and stringProperty are provided, then values should match' );
     }
 
     return super.mutate( options );
@@ -1888,15 +1865,15 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
       content = content.slice( 0, content.length - 1 );
     }
 
-    this.text = RichText.contentToString( content, isLTR );
+    this.string = RichText.contentToString( content, isLTR );
     this.boundsMethod = boundsMethod;
     this.font = font;
     this.fill = fill;
     this.stroke = stroke;
     this.lineWidth = lineWidth;
 
-    const spacingBefore = whitespaceBefore.length ? scratchText.setText( whitespaceBefore ).setFont( font ).width : 0;
-    const spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
+    const spacingBefore = whitespaceBefore.length ? scratchText.setString( whitespaceBefore ).setFont( font ).width : 0;
+    const spacingAfter = whitespaceAfter.length ? scratchText.setString( whitespaceAfter ).setFont( font ).width : 0;
 
     // Turn logical spacing into directional
     this.leftSpacing = isLTR ? spacingBefore : spacingAfter;

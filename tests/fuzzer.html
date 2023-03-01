@@ -278,8 +278,8 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
     var text = randomText();
     var string = randomString();
 
-    fuzzLog.push( nameOf( text ) + '.text = ' + JSON.stringify( string ) + ';' );
-    text.text = string;
+    fuzzLog.push( nameOf( text ) + '.string = ' + JSON.stringify( string ) + ';' );
+    text.string = string;
   }
 
   function opacityChange() {

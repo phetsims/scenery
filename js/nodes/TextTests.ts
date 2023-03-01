@@ -21,7 +21,7 @@ QUnit.test( 'Mutually exclusive options', assert => {
     return new Text( {
 
       // @ts-expect-error for testing
-      text: 'hi',
+      string: 'hi',
       stringProperty: stringProperty
     } );
   }, 'text and stringProperty values do not match' );
@@ -42,10 +42,10 @@ QUnit.test( 'DerivedProperty stringProperty', assert => {
 
   assert.ok( text.stringProperty.value === string + extra );
   stringProperty.value = string + extra;
-  assert.ok( text.text === string + extra + extra );
+  assert.ok( text.string === string + extra + extra );
 
   window.assert && assert.throws( () => {
-    text.text = 'hi';
+    text.string = 'hi';
   }, 'cannot set a derivedProperty' );
 } );
 

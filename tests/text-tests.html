@@ -196,7 +196,7 @@
     svg.setAttribute( 'style', 'display: hidden;' ); // so we don't flash it in a visible way to the user
 
     var textElement = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-    textElement.appendChild( document.createTextNode( textNode.text ) );
+    textElement.appendChild( document.createTextNode( textNode.string ) );
     switch( textNode.textAlign ) {
       case 'start':
       case 'end':
@@ -255,7 +255,7 @@
 
     var span = document.createElement( 'span' );
     $( span ).css( 'font', textNode.font );
-    span.appendChild( document.createTextNode( textNode.text ) );
+    span.appendChild( document.createTextNode( textNode.string ) );
     span.setAttribute( 'direction', textNode.direction );
 
     var fakeImage = document.createElement( 'div' );

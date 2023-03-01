@@ -242,7 +242,7 @@ QUnit.test( 'Drawables (Text)', assert => {
   r1ds.updateSVG();
   r1dc.paintCanvas( wrapper, r1 );
 
-  r1.text = 'b';
+  r1.string = 'b';
 
   r1dd.updateDOM();
   r1ds.updateSVG();

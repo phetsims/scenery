@@ -239,7 +239,7 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
       if ( node.boundsMethod !== 'hybrid' ) {
         options.boundsMethod = node.boundsMethod;
       }
-      options.text = node.text;
+      options.string = node.string;
       options.font = node.font;
     }
 

@@ -21,7 +21,7 @@ QUnit.test( 'Mutually exclusive options', assert => {
     return new RichText( {
 
       // @ts-expect-error for testing
-      text: 'hi',
+      string: 'hi',
       stringProperty: stringProperty
     } );
   }, 'text and stringProperty values do not match' );
