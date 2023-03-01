@@ -6,6 +6,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import RichText from './RichText.js';
 
@@ -27,3 +28,23 @@ QUnit.test( 'Mutually exclusive options', assert => {
 
 } );
 
+QUnit.test( 'DerivedProperty stringProperty', assert => {
+
+  assert.ok( true, 'always true, even when assertions are not on.' );
+
+  const string = 'oh boy, here we go';
+  const stringProperty = new StringProperty( string );
+
+  const extra = '!!';
+  const aBitExtraForAStringProperty = new DerivedProperty( [ stringProperty ], value => value + extra );
+
+  const text = new RichText( aBitExtraForAStringProperty );
+
+  assert.ok( text.stringProperty.value === string + extra );
+  stringProperty.value = string + extra;
+  assert.ok( text.string === string + extra + extra );
+
+  window.assert && assert.throws( () => {
+    text.string = 'hi';
+  }, 'cannot set a derivedProperty' );
+} );
