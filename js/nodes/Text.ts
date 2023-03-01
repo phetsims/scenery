@@ -111,6 +111,9 @@ export default class Text extends Paintable( Node ) {
       phetioVisiblePropertyInstrumented: false
     }, options );
 
+    assert && assert( !definedOptions.hasOwnProperty( 'text' ) && !definedOptions.hasOwnProperty( Text.STRING_PROPERTY_TANDEM_NAME ),
+      'provide text and stringProperty through constructor arg please' );
+
     if ( typeof text === 'string' || typeof text === 'number' ) {
       definedOptions.text = text;
     }
