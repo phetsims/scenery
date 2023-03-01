@@ -214,7 +214,7 @@ export default class FocusManager {
   // Display has an axon `Property to indicate which component is focused (or null if no
   // scenery Node has focus). By passing the tandem and phetioTye, PhET-iO is able to interoperate (save, restore,
   // control, observe what is currently focused). See FocusManager.pdomFocus for setting the focus. Don't set the value
-  // of this Property dir`ectly.
+  // of this Property directly.
   public static readonly pdomFocusProperty = new Property<Focus | null>( null, {
     tandem: Tandem.GENERAL_MODEL.createTandem( 'pdomFocusProperty' ),
     phetioDocumentation: 'Stores the current focus in the Parallel DOM, null if nothing has focus. This is not updated ' +
