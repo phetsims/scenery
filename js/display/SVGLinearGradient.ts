@@ -12,7 +12,12 @@ import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import { LinearGradient, scenery, SVGBlock, SVGGradient, svgns } from '../imports.js';
 
 export default class SVGLinearGradient extends SVGGradient implements TPoolable {
-  public override initialize( svgBlock: SVGBlock, gradient: LinearGradient ): void {
+
+  public constructor( svgBlock: SVGBlock, gradient: LinearGradient ) {
+    super( svgBlock, gradient );
+  }
+
+  public override initialize( svgBlock: SVGBlock, gradient: LinearGradient ): this {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGLinearGradient] initialize ${gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -37,6 +42,8 @@ export default class SVGLinearGradient extends SVGGradient implements TPoolable 
     this.definition.setAttribute( 'y2', '' + linearGradient.end.y );
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
+
+    return this;
   }
 
   /**

@@ -28,12 +28,14 @@ export default class FlowLine extends LayoutLine {
   /**
    * (scenery-internal)
    */
-  public initialize( orientation: Orientation, cells: FlowCell[] ): void {
+  public initialize( orientation: Orientation, cells: FlowCell[] ): this {
 
     this.orientation = orientation;
     this.cells = cells;
 
     this.initializeLayoutLine();
+
+    return this;
   }
 
   /**
@@ -53,7 +55,7 @@ export default class FlowLine extends LayoutLine {
   /**
    * (scenery-internal)
    */
-  public static readonly pool = new Pool<typeof FlowLine, [Orientation, FlowCell[]]>( FlowLine, {
+  public static readonly pool = new Pool( FlowLine, {
     defaultArguments: [ Orientation.HORIZONTAL, [] ]
   } );
 }

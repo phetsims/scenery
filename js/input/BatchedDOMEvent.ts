@@ -38,13 +38,15 @@ export default class BatchedDOMEvent implements TPoolable {
     this.initialize( domEvent, type, callback );
   }
 
-  public initialize( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ): void {
+  public initialize( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ): this {
     // called multiple times due to pooling, this should be re-entrant
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
 
     this.domEvent = domEvent;
     this.type = type;
     this.callback = callback;
+
+    return this;
   }
 
   public run( input: Input ): void {

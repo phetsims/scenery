@@ -45,8 +45,10 @@ export default class LayoutProxy {
    *
    * DO not call it twice without in-between disposals (follow the above pattern).
    */
-  public initialize( trail: Trail ): void {
+  public initialize( trail: Trail ): this {
     this.trail = trail;
+
+    return this;
   }
 
   private checkPreconditions(): void {

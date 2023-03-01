@@ -28,7 +28,7 @@ export default class GridLine extends LayoutLine {
   /**
    * (scenery-internal)
    */
-  public initialize( index: number, cells: GridCell[], grow: number ): void {
+  public initialize( index: number, cells: GridCell[], grow: number ): this {
     this.index = index;
 
     this.cells = cells;
@@ -36,6 +36,8 @@ export default class GridLine extends LayoutLine {
     this.grow = grow;
 
     this.initializeLayoutLine();
+
+    return this;
   }
 
   /**
@@ -48,7 +50,7 @@ export default class GridLine extends LayoutLine {
   /**
    * (scenery-internal)
    */
-  public static readonly pool = new Pool<typeof GridLine, [number, GridCell[], number]>( GridLine, {
+  public static readonly pool = new Pool( GridLine, {
     defaultArguments: [ 0, [], 0 ]
   } );
 }
