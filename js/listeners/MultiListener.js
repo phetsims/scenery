@@ -188,7 +188,7 @@ class MultiListener {
 
           // Dragged pointers and pointers that haven't moved a certain distance are not candidates, and should not be
           // interrupted. We don't want to interrupt taps that might move a little bit
-          return !press.pointer.hasIntent( Intent.Drag ) && press.initialPoint.distance( press.pointer.point ) > MOVE_INTERRUPT_MAGNITUDE;
+          return !press.pointer.hasIntent( Intent.DRAG ) && press.initialPoint.distance( press.pointer.point ) > MOVE_INTERRUPT_MAGNITUDE;
         } );
 
         // If we are already zoomed in, we should promote any number of background presses to actual presses.
