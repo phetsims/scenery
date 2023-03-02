@@ -167,10 +167,54 @@ type SelfOptions = {
   // Sets whether link clicks will call event.handle()
   linkEventsHandled?: boolean;
 
-  // Sets the map of href placeholder => actual href/callback used for links
+  // Sets the map of href placeholder => actual href/callback used for links. However, if set to true ({boolean}) as a
+  // full object, links in the string will not be mapped, but will be directly added.
+  //
+  // For instance, the default is to map hrefs for security purposes:
+  //
+  // new RichText( '<a href="{{alink}}">content</a>', {
+  //   links: {
+  //     alink: 'https://phet.colorado.edu'
+  //   }
+  // } );
+  //
+  // But links with an href not matching will be ignored. This can be avoided by passing links: true to directly
+  // embed links:
+  //
+  // new RichText( '<a href="https://phet.colorado.edu">content</a>', { links: true } );
+  //
+  // Callbacks (instead of a URL) are also supported, e.g.:
+  //
+  // new RichText( '<a href="{{acallback}}">content</a>', {
+  //   links: {
+  //     acallback: function() { console.log( 'clicked' ) }
+  //   }
+  // } );
+  //
+  // See https://github.com/phetsims/scenery-phet/issues/316 for more information.
   links?: RichTextLinks;
 
-  // A map of string => Node that will be used to replace `<node id="string"/>` with the Node
+  // A map of string => Node, where `<node id="string"/>` will get replaced by the given Node (DAG supported)
+  //
+  // For example:
+  //
+  // new RichText( 'This is a <node id="test"/>', {
+  //   nodes: {
+  //     test: new Text( 'Node' )
+  //   }
+  // }
+  //
+  // Alignment is also supported, with the align attribute (center/top/bottom/origin).
+  // This alignment is in relation to the current text/font size in the HTML where the <node> tag is placed.
+  // An example:
+  //
+  // new RichText( 'This is a <node id="test" align="top"/>', {
+  //   nodes: {
+  //     test: new Text( 'Node' )
+  //   }
+  // }
+  // NOTE: When alignment isn't supplied, origin is used as a default. Origin means "y=0 is placed at the baseline of
+  // the text".
   nodes?: Record<string, Node>;
 
   // Sets text alignment if there are multiple lines
@@ -1412,33 +1456,6 @@ export default class RichText extends Node {
     return this._linkEventsHandled;
   }
 
-  /**
-   * Sets the map of href placeholder => actual href/callback used for links. However if set to true ({boolean}) as a
-   * full object, links in the string will not be mapped, but will be directly added.
-   *
-   * For instance, the default is to map hrefs for security purposes:
-   *
-   * new RichText( '<a href="{{alink}}">content</a>', {
-   *   links: {
-   *     alink: 'https://phet.colorado.edu'
-   *   }
-   * } );
-   *
-   * But links with an href not matching will be ignored. This can be avoided by passing links: true to directly
-   * embed links:
-   *
-   * new RichText( '<a href="https://phet.colorado.edu">content</a>', { links: true } );
-   *
-   * Callbacks (instead of a URL) are also supported, e.g.:
-   *
-   * new RichText( '<a href="{{acallback}}">content</a>', {
-   *   links: {
-   *     acallback: function() { console.log( 'clicked' ) }
-   *   }
-   * } );
-   *
-   * See https://github.com/phetsims/scenery-phet/issues/316 for more information.
-   */
   public setLinks( links: RichTextLinks ): this {
     assert && assert( links === true || Object.getPrototypeOf( links ) === Object.prototype );
 
@@ -1460,30 +1477,6 @@ export default class RichText extends Node {
 
   public get links(): RichTextLinks { return this.getLinks(); }
 
-  /**
-   * Sets the map of string => Node, where {{string}} will get replaced by the given Node (DAG supported)
-   *
-   * For example:
-   *
-   * new RichText( 'This is a <node id="test"/>', {
-   *   nodes: {
-   *     test: new Text( 'Node' )
-   *   }
-   * }
-   *
-   * Alignment is also supported, with the align attribute (center/top/bottom/origin).
-   * This alignment is in relation to the current text/font size in the HTML where the <node> tag is placed.
-   * An example:
-   *
-   * new RichText( 'This is a <node id="test" align="top"/>', {
-   *   nodes: {
-   *     test: new Text( 'Node' )
-   *   }
-   * }
-   * NOTE: When alignment isn't supplied, origin is used as a default. Origin means "y=0 is placed at the baseline of
-   * the text".
-   *
-   */
   public setNodes( nodes: Record<string, Node> ): this {
     assert && assert( Object.getPrototypeOf( nodes ) === Object.prototype );
 
