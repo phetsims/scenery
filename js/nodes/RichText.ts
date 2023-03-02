@@ -75,6 +75,7 @@ import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import cleanArray from '../../../phet-core/js/cleanArray.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -281,6 +282,11 @@ const LineBreakState = {
   NONE: 'NONE'
 };
 
+// We'll store an array here that will record which links/nodes were used in the last rebuild (so we can assert out if
+// there were some that were not used).
+const usedLinks: string[] = [];
+const usedNodes: string[] = [];
+
 /**
  * Get the attribute value from an element. Return null if that attribute isn't on the element.
  */
@@ -477,6 +483,9 @@ export default class RichText extends Node {
    * When called, will rebuild the node structure for this RichText
    */
   private rebuildRichText(): void {
+    assert && cleanArray( usedLinks );
+    assert && cleanArray( usedNodes );
+
     this.freeChildrenToPool();
 
     // Bail early, particularly if we are being constructed.
@@ -604,6 +613,19 @@ export default class RichText extends Node {
 
     // Clear them out afterwards, for memory purposes
     this._linkItems.length = 0;
+
+    if ( assert ) {
+      if ( this._links && this._links !== true ) {
+        Object.keys( this._links ).forEach( link => {
+          assert && assert( usedLinks.includes( link ), `Unused RichText link: ${link}` );
+        } );
+      }
+      if ( this._nodes ) {
+        Object.keys( this._nodes ).forEach( node => {
+          assert && assert( usedNodes.includes( node ), `Unused RichText node: ${node}` );
+        } );
+      }
+    }
 
     sceneryLog && sceneryLog.RichText && sceneryLog.pop();
   }
@@ -792,7 +814,13 @@ export default class RichText extends Node {
       if ( element.tagName === 'node' ) {
         const referencedId = himalayaGetAttribute( 'id', element );
         const referencedNode = referencedId ? ( this._nodes[ referencedId ] || null ) : null;
+
+        assert && assert( referencedNode,
+          referencedId
+          ? `Could not find a matching item in RichText's nodes for ${referencedId}. It should be provided in the nodes option`
+          : 'No id attribute provided for a given <node> element' );
         if ( referencedNode ) {
+          assert && usedNodes.push( referencedId! );
           node = RichTextNode.pool.create( referencedNode );
 
           if ( this._hasAddedLeafToLine && !node.fitsIn( widthAvailableWithSpacing ) ) {
@@ -857,11 +885,14 @@ export default class RichText extends Node {
       // Anchor (link)
       if ( element.tagName === 'a' ) {
         let href = himalayaGetAttribute( 'href', element );
+        const originalHref = href;
 
         // Try extracting the href from the links object
         if ( href !== null && this._links !== true ) {
           if ( href.startsWith( '{{' ) && href.indexOf( '}}' ) === href.length - 2 ) {
-            href = this._links[ href.slice( 2, -2 ) ];
+            const linkName = href.slice( 2, -2 );
+            href = this._links[ linkName ];
+            assert && usedLinks.push( linkName );
           }
           else {
             href = null;
@@ -869,6 +900,8 @@ export default class RichText extends Node {
         }
 
         // Ignore things if there is no matching href
+        assert && assert( href,
+          `Could not find a matching item in RichText's links for ${originalHref}. It should be provided in the links option, or links should be turned to true (to allow the string to create its own urls` );
         if ( href ) {
           if ( this._linkFill !== null ) {
             fill = this._linkFill; // Link color
