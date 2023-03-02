@@ -111,7 +111,7 @@ export default class SpriteInstance {
     SpriteInstance.pool.freeToPool( this );
   }
 
-  public static pool = new Pool( SpriteInstance, {
+  public static readonly pool = new Pool( SpriteInstance, {
     maxSize: 1000
   } );
 }
