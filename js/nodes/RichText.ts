@@ -1986,7 +1986,8 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
   private allowLinksListener: ( ( allowLinks: boolean ) => void ) | null = null;
 
   /**
-   * A link node
+   * A link node - NOTE: This is NOT embedded for layout. Instead, link content will be added as children to this node,
+   * and this will exist solely for the link functionality.
    */
   public constructor( innerContent: string, href: RichTextHref ) {
     super();
