@@ -63,18 +63,12 @@ import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Range from '../../../dot/js/Range.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import Constructor from '../../../phet-core/js/types/Constructor.js';
-import inheritance from '../../../phet-core/js/inheritance.js';
-import memoize from '../../../phet-core/js/memoize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { allowLinksProperty, Color, FireListener, Font, getLineBreakRanges, Line, Node, NodeOptions, openPopup, scenery, Text, TextBoundsMethod, TInputListener, TPaint, Voicing } from '../imports.js';
-import Pool from '../../../phet-core/js/Pool.js';
+import { Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
@@ -238,28 +232,6 @@ type SelfOptions = {
 
 export type RichTextOptions = SelfOptions & NodeOptions;
 
-type HimalayaAttribute = {
-  key: string;
-  value?: string;
-};
-type HimalayaNode = {
-  type: 'element' | 'comment' | 'text';
-  innerContent: string;
-};
-type HimalayaElementNode = {
-  type: 'element';
-  tagName: string;
-  children: HimalayaNode[];
-  attributes: HimalayaAttribute[];
-  innerContent?: string; // Is this in the generated stuff? Do we just override this? Unclear
-} & HimalayaNode;
-const isElementNode = ( node: HimalayaNode ): node is HimalayaElementNode => node.type.toLowerCase() === 'element';
-type HimalayaTextNode = {
-  type: 'text';
-  content: string;
-} & HimalayaNode;
-const isTextNode = ( node: HimalayaNode ): node is HimalayaTextNode => node.type.toLowerCase() === 'text';
-
 const DEFAULT_FONT = new Font( {
   size: 20
 } );
@@ -286,39 +258,6 @@ const LineBreakState = {
 // there were some that were not used).
 const usedLinks: string[] = [];
 const usedNodes: string[] = [];
-
-/**
- * Get the attribute value from an element. Return null if that attribute isn't on the element.
- */
-const himalayaGetAttribute = ( attribute: string, element: HimalayaElementNode | null ): string | null => {
-  if ( !element ) {
-    return null;
-  }
-  const attributeObject = _.find( element.attributes, x => x.key === attribute );
-  if ( !attributeObject ) {
-    return null;
-  }
-  return attributeObject.value || null;
-};
-
-/**
- * Turn a string of style like "font-sie:6; font-weight:6; favorite-number:6" into a may of style key/values (trimmed of whitespace)
- */
-const himalayaStyleStringToMap = ( styleString: string ): Record<string, string> => {
-  const styleElements = styleString.split( ';' );
-  const styleMap: Record<string, string> = {};
-  styleElements.forEach( styleKeyValue => {
-    if ( styleKeyValue.length > 0 ) {
-      const keyValueTuple = styleKeyValue.split( ':' );
-      assert && assert( keyValueTuple.length === 2, 'too many colons' );
-      styleMap[ keyValueTuple[ 0 ].trim() ] = keyValueTuple[ 1 ].trim();
-    }
-  } );
-  return styleMap;
-};
-
-// We need to do some font-size tests, so we have a Text for that.
-const scratchText = new Text( '' );
 
 // himalaya converts dash separated CSS to camel case - use CSS compatible style with dashes, see above for examples
 const FONT_STYLE_MAP = {
@@ -547,7 +486,7 @@ export default class RichText extends Node {
         }
         // Otherwise if it's a blank line, add in a strut (<br><br> should result in a blank line)
         else {
-          this.appendLine( RichTextVerticalSpacer.pool.create( scratchText.setString( 'X' ).setFont( this._font ).height ) );
+          this.appendLine( RichTextVerticalSpacer.pool.create( RichTextUtils.scratchText.setString( 'X' ).setFont( this._font ).height ) );
         }
 
         // Set up a new line
@@ -721,7 +660,7 @@ export default class RichText extends Node {
     const widthAvailableWithSpacing = widthAvailable - containerSpacing;
 
     // If we're a leaf
-    if ( isTextNode( element ) ) {
+    if ( isHimalayaTextNode( element ) ) {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `appending leaf: ${element.content}` );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
@@ -792,7 +731,7 @@ export default class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.pop();
     }
     // Otherwise presumably an element with content
-    else if ( isElementNode( element ) ) {
+    else if ( isHimalayaElementNode( element ) ) {
       // Bail out quickly for a line break
       if ( element.tagName === 'br' ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'manual line break' );
@@ -801,7 +740,7 @@ export default class RichText extends Node {
 
       // Span (dir attribute) -- we need the LTR/RTL knowledge before most other operations
       if ( element.tagName === 'span' ) {
-        const dirAttributeString = himalayaGetAttribute( 'dir', element );
+        const dirAttributeString = RichTextUtils.himalayaGetAttribute( 'dir', element );
 
         if ( dirAttributeString ) {
           assert && assert( dirAttributeString === 'ltr' || dirAttributeString === 'rtl',
@@ -812,7 +751,7 @@ export default class RichText extends Node {
 
       // Handle <node> tags, which should not have content
       if ( element.tagName === 'node' ) {
-        const referencedId = himalayaGetAttribute( 'id', element );
+        const referencedId = RichTextUtils.himalayaGetAttribute( 'id', element );
         const referencedNode = referencedId ? ( this._nodes[ referencedId ] || null ) : null;
 
         assert && assert( referencedNode,
@@ -829,9 +768,9 @@ export default class RichText extends Node {
             return LineBreakState.INCOMPLETE;
           }
 
-          const nodeAlign = himalayaGetAttribute( 'align', element );
+          const nodeAlign = RichTextUtils.himalayaGetAttribute( 'align', element );
           if ( nodeAlign === 'center' || nodeAlign === 'top' || nodeAlign === 'bottom' ) {
-            const textBounds = scratchText.setString( 'Test' ).setFont( font ).bounds;
+            const textBounds = RichTextUtils.scratchText.setString( 'Test' ).setFont( font ).bounds;
             if ( nodeAlign === 'center' ) {
               node.centerY = textBounds.centerY;
             }
@@ -858,10 +797,10 @@ export default class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
-      const styleAttributeString = himalayaGetAttribute( 'style', element );
+      const styleAttributeString = RichTextUtils.himalayaGetAttribute( 'style', element );
 
       if ( styleAttributeString ) {
-        const css = himalayaStyleStringToMap( styleAttributeString );
+        const css = RichTextUtils.himalayaStyleStringToMap( styleAttributeString );
         assert && Object.keys( css ).forEach( key => {
           assert!( _.includes( STYLE_KEYS, key ), 'See supported style CSS keys' );
         } );
@@ -884,7 +823,7 @@ export default class RichText extends Node {
 
       // Anchor (link)
       if ( element.tagName === 'a' ) {
-        let href = himalayaGetAttribute( 'href', element );
+        let href = RichTextUtils.himalayaGetAttribute( 'href', element );
         const originalHref = href;
 
         // Try extracting the href from the links object
@@ -980,7 +919,7 @@ export default class RichText extends Node {
       // Superscript positioning
       else if ( element.tagName === 'sup' ) {
         if ( isFinite( node.height ) ) {
-          node.centerY = scratchText.setString( 'X' ).setFont( font ).top * this._capHeightScale;
+          node.centerY = RichTextUtils.scratchText.setString( 'X' ).setFont( font ).top * this._capHeightScale;
         }
       }
       // Underline
@@ -1641,11 +1580,11 @@ export default class RichText extends Node {
    * Stringifies an HTML subtree defined by the given element.
    */
   public static himalayaElementToString( element: HimalayaNode, isLTR: boolean ): string {
-    if ( isTextNode( element ) ) {
+    if ( isHimalayaTextNode( element ) ) {
       return RichText.contentToString( element.content, isLTR );
     }
-    else if ( isElementNode( element ) ) {
-      const dirAttributeString = himalayaGetAttribute( 'dir', element );
+    else if ( isHimalayaElementNode( element ) ) {
+      const dirAttributeString = RichTextUtils.himalayaGetAttribute( 'dir', element );
 
       if ( element.tagName === 'span' && dirAttributeString ) {
         isLTR = dirAttributeString === 'ltr';
@@ -1664,11 +1603,11 @@ export default class RichText extends Node {
    * accessibility (like <a>, <span>, etc.), and adding in tags we do want (see ACCESSIBLE_TAGS).
    */
   public static himalayaElementToAccessibleString( element: HimalayaNode, isLTR: boolean ): string {
-    if ( isTextNode( element ) ) {
+    if ( isHimalayaTextNode( element ) ) {
       return RichText.contentToString( element.content, isLTR );
     }
-    else if ( isElementNode( element ) ) {
-      const dirAttribute = himalayaGetAttribute( 'dir', element );
+    else if ( isHimalayaElementNode( element ) ) {
+      const dirAttribute = RichTextUtils.himalayaGetAttribute( 'dir', element );
 
       if ( element.tagName === 'span' && dirAttribute ) {
         isLTR = dirAttribute === 'ltr';
@@ -1713,409 +1652,6 @@ export default class RichText extends Node {
 RichText.prototype._mutatorKeys = RICH_TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
 
 scenery.register( 'RichText', RichText );
-
-const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
-
-  return class RichTextCleanableMixin extends type {
-    public get isCleanable(): boolean {
-      return true;
-    }
-
-    /**
-     * Releases references
-     */
-    public clean(): void {
-      const thisNode = this as unknown as RichTextCleanableNode;
-
-      // Remove all children (and recursively clean)
-      for ( let i = thisNode._children.length - 1; i >= 0; i-- ) {
-        const child = thisNode._children[ i ] as RichTextCleanableNode;
-
-        if ( child.isCleanable ) {
-          thisNode.removeChild( child );
-          child.clean();
-        }
-      }
-
-      thisNode.matrix = Matrix3.IDENTITY;
-
-      thisNode.freeToPool();
-    }
-  };
-} );
-type RichTextCleanableNode = Node & { clean: () => void; isCleanable: boolean; freeToPool: () => void };
-
-class RichTextElement extends RichTextCleanable( Node ) {
-
-  private isLTR!: boolean;
-
-  // The amount of local-coordinate spacing to apply on each side
-  public leftSpacing!: number;
-  public rightSpacing!: number;
-
-  /**
-   * A container of other RichText elements and leaves.
-   *
-   * @param isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be
-   *                          right-to-left).
-   */
-  public constructor( isLTR: boolean ) {
-    super();
-
-    this.initialize( isLTR );
-  }
-
-  /**
-   * Sets up state
-   */
-  public initialize( isLTR: boolean ): this {
-    this.isLTR = isLTR;
-    this.leftSpacing = 0;
-    this.rightSpacing = 0;
-
-    return this;
-  }
-
-  /**
-   * Adds a child element.
-   *
-   * @returns- Whether the item was actually added.
-   */
-  public addElement( element: RichTextElement | RichTextLeaf | RichTextNode ): boolean {
-
-    const hadChild = this.children.length > 0;
-    const hasElement = element.width > 0;
-
-    // May be at a different scale, which we need to handle
-    const elementScale = element.getScaleVector().x;
-    const leftElementSpacing = element.leftSpacing * elementScale;
-    const rightElementSpacing = element.rightSpacing * elementScale;
-
-    // If there is nothing, then no spacing should be handled
-    if ( !hadChild && !hasElement ) {
-      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'No child or element, ignoring' );
-      return false;
-    }
-    else if ( !hadChild ) {
-      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `First child, ltr:${this.isLTR}, spacing: ${this.isLTR ? rightElementSpacing : leftElementSpacing}` );
-      if ( this.isLTR ) {
-        element.left = 0;
-        this.leftSpacing = leftElementSpacing;
-        this.rightSpacing = rightElementSpacing;
-      }
-      else {
-        element.right = 0;
-        this.leftSpacing = leftElementSpacing;
-        this.rightSpacing = rightElementSpacing;
-      }
-      this.addChild( element );
-      return true;
-    }
-    else if ( !hasElement ) {
-      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `No element, adding spacing, ltr:${this.isLTR}, spacing: ${leftElementSpacing + rightElementSpacing}` );
-      if ( this.isLTR ) {
-        this.rightSpacing += leftElementSpacing + rightElementSpacing;
-      }
-      else {
-        this.leftSpacing += leftElementSpacing + rightElementSpacing;
-      }
-    }
-    else {
-      if ( this.isLTR ) {
-        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `LTR add ${this.rightSpacing} + ${leftElementSpacing}` );
-        element.left = this.localRight + this.rightSpacing + leftElementSpacing;
-        this.rightSpacing = rightElementSpacing;
-      }
-      else {
-        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `RTL add ${this.leftSpacing} + ${rightElementSpacing}` );
-        element.right = this.localLeft - this.leftSpacing - rightElementSpacing;
-        this.leftSpacing = leftElementSpacing;
-      }
-      this.addChild( element );
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Adds an amount of spacing to the "before" side.
-   */
-  public addExtraBeforeSpacing( amount: number ): void {
-    if ( this.isLTR ) {
-      this.leftSpacing += amount;
-    }
-    else {
-      this.rightSpacing += amount;
-    }
-  }
-
-  public freeToPool(): void {
-    RichTextElement.pool.freeToPool( this );
-  }
-
-  public static readonly pool = new Pool( RichTextElement );
-
-}
-
-class RichTextLeaf extends RichTextCleanable( Text ) {
-
-  public leftSpacing!: number;
-  public rightSpacing!: number;
-
-  /**
-   * A leaf (text) node.
-   */
-  public constructor( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: TPaint, stroke: TPaint, lineWidth: number ) {
-    super( '' );
-
-    this.initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth );
-  }
-
-  /**
-   * Set up this text's state
-   */
-  public initialize( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: TPaint, stroke: TPaint, lineWidth: number ): this {
-
-    // Grab all spaces at the (logical) start
-    let whitespaceBefore = '';
-    while ( content.startsWith( ' ' ) ) {
-      whitespaceBefore += ' ';
-      content = content.slice( 1 );
-    }
-
-    // Grab all spaces at the (logical) end
-    let whitespaceAfter = '';
-    while ( content.endsWith( ' ' ) ) {
-      whitespaceAfter = ' ';
-      content = content.slice( 0, content.length - 1 );
-    }
-
-    this.string = RichText.contentToString( content, isLTR );
-    this.boundsMethod = boundsMethod;
-    this.font = font;
-    this.fill = fill;
-    this.stroke = stroke;
-    this.lineWidth = lineWidth;
-
-    const spacingBefore = whitespaceBefore.length ? scratchText.setString( whitespaceBefore ).setFont( font ).width : 0;
-    const spacingAfter = whitespaceAfter.length ? scratchText.setString( whitespaceAfter ).setFont( font ).width : 0;
-
-    // Turn logical spacing into directional
-    this.leftSpacing = isLTR ? spacingBefore : spacingAfter;
-    this.rightSpacing = isLTR ? spacingAfter : spacingBefore;
-
-    return this;
-  }
-
-  /**
-   * Cleans references that could cause memory leaks (as those things may contain other references).
-   */
-  public override clean(): void {
-    super.clean();
-
-    this.fill = null;
-    this.stroke = null;
-  }
-
-  /**
-   * Whether this leaf will fit in the specified amount of space (including, if required, the amount of spacing on
-   * the side).
-   */
-  public fitsIn( widthAvailable: number, hasAddedLeafToLine: boolean, isContainerLTR: boolean ): boolean {
-    return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
-  }
-
-  public freeToPool(): void {
-    RichTextLeaf.pool.freeToPool( this );
-  }
-
-  public static readonly pool = new Pool( RichTextLeaf );
-}
-
-class RichTextNode extends RichTextCleanable( Node ) {
-
-  public readonly leftSpacing = 0;
-  public readonly rightSpacing = 0;
-
-  /**
-   * A leaf (Node) node.
-   */
-  public constructor( content: Node ) {
-    super();
-
-    this.initialize( content );
-  }
-
-  /**
-   * Set up this text's state
-   */
-  public initialize( content: Node ): this {
-    this.addChild( content );
-
-    return this;
-  }
-
-  /**
-   * Cleans references that could cause memory leaks (as those things may contain other references).
-   */
-  public override clean(): void {
-    super.clean();
-
-    this.removeAllChildren();
-  }
-
-  /**
-   * Whether this leaf will fit in the specified amount of space
-   */
-  public fitsIn( widthAvailable: number ): boolean {
-    return this.width <= widthAvailable;
-  }
-
-  public freeToPool(): void {
-    RichTextNode.pool.freeToPool( this );
-  }
-
-  public static readonly pool = new Pool( RichTextNode );
-}
-
-class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
-
-  private fireListener: FireListener | null = null;
-  private accessibleInputListener: TInputListener | null = null;
-  private allowLinksListener: ( ( allowLinks: boolean ) => void ) | null = null;
-
-  /**
-   * A link node - NOTE: This is NOT embedded for layout. Instead, link content will be added as children to this node,
-   * and this will exist solely for the link functionality.
-   */
-  public constructor( innerContent: string, href: RichTextHref ) {
-    super();
-
-    // Voicing was already initialized in the super call, we do not want to initialize super again. But we do want to
-    // initialize the RichText portion of the implementation.
-    this.initialize( innerContent, href, false );
-
-    // Mutate to make sure initialize doesn't clear this away
-    this.mutate( {
-      cursor: 'pointer',
-      tagName: 'a'
-    } );
-  }
-
-  /**
-   * Set up this state. First construction does not need to use super.initialize() because the constructor has done
-   * that for us. But repeated initialization with Poolable will need to initialize super again.
-   */
-  public override initialize( innerContent: string, href: RichTextHref, initializeSuper = true ): this {
-
-    if ( initializeSuper ) {
-      super.initialize();
-    }
-
-    // pdom - open the link in the new tab when activated with a keyboard.
-    // also see https://github.com/phetsims/joist/issues/430
-    this.innerContent = innerContent;
-
-    this.voicingNameResponse = innerContent;
-
-    // If our href is a function, it should be called when the user clicks on the link
-    if ( typeof href === 'function' ) {
-      this.fireListener = new FireListener( {
-        fire: href,
-        tandem: Tandem.OPT_OUT
-      } );
-      this.addInputListener( this.fireListener );
-      this.setPDOMAttribute( 'href', '#' ); // Required so that the click listener will get called.
-      this.setPDOMAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
-      this.accessibleInputListener = {
-        click: event => {
-          event.domEvent && event.domEvent.preventDefault();
-
-          href();
-        }
-      };
-      this.addInputListener( this.accessibleInputListener );
-    }
-    // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
-    else {
-      this.fireListener = new FireListener( {
-        fire: event => {
-          if ( event.isFromPDOM() ) {
-
-            // prevent default from pdom activation so we don't also open a new tab from native DOM input on a link
-            event.domEvent!.preventDefault();
-          }
-          // @ts-expect-error TODO TODO TODO this is a bug! How do we handle this?
-          self._linkEventsHandled && event.handle();
-          openPopup( href ); // open in a new window/tab
-        },
-        tandem: Tandem.OPT_OUT
-      } );
-      this.addInputListener( this.fireListener );
-      this.setPDOMAttribute( 'href', href );
-      this.setPDOMAttribute( 'target', '_blank' );
-
-      this.allowLinksListener = ( allowLinks: boolean ) => {
-        this.visible = allowLinks;
-      };
-      allowLinksProperty.link( this.allowLinksListener );
-    }
-
-    return this;
-  }
-
-  /**
-   * Cleans references that could cause memory leaks (as those things may contain other references).
-   */
-  public override clean(): void {
-    super.clean();
-
-    if ( this.fireListener ) {
-      this.removeInputListener( this.fireListener );
-      this.fireListener.dispose();
-    }
-    this.fireListener = null;
-    if ( this.accessibleInputListener ) {
-      this.removeInputListener( this.accessibleInputListener );
-      this.accessibleInputListener = null;
-    }
-    if ( this.allowLinksListener ) {
-      allowLinksProperty.unlink( this.allowLinksListener );
-      this.allowLinksListener = null;
-    }
-  }
-
-  public freeToPool(): void {
-    RichTextLink.pool.freeToPool( this );
-  }
-
-  public static readonly pool = new Pool( RichTextLink );
-}
-
-class RichTextVerticalSpacer extends RichTextCleanable( Node ) {
-  public constructor( height: number ) {
-    super();
-
-    this.initialize( height );
-  }
-
-  /**
-   * Set up this text's state
-   */
-  public initialize( height: number ): this {
-
-    this.localBounds = new Bounds2( 0, 0, 0, height );
-
-    return this;
-  }
-
-  public freeToPool(): void {
-    RichTextVerticalSpacer.pool.freeToPool( this );
-  }
-
-  public static readonly pool = new Pool( RichTextVerticalSpacer );
-}
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {
   valueType: RichText,

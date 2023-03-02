@@ -291,6 +291,15 @@ export type { HBoxOptions } from './layout/nodes/HBox.js';
 export { default as VBox } from './layout/nodes/VBox.js';
 export type { VBoxOptions } from './layout/nodes/VBox.js';
 
+export { default as RichTextUtils, isHimalayaElementNode, isHimalayaTextNode } from './util/rich-text/RichTextUtils.js';
+export type { HimalayaAttribute, HimalayaNode, HimalayaElementNode, HimalayaTextNode } from './util/rich-text/RichTextUtils.js';
+export { default as RichTextCleanable } from './util/rich-text/RichTextCleanable.js';
+export type { RichTextCleanableNode } from './util/rich-text/RichTextCleanable.js';
+export { default as RichTextVerticalSpacer } from './util/rich-text/RichTextVerticalSpacer.js';
+export { default as RichTextElement } from './util/rich-text/RichTextElement.js';
+export { default as RichTextLeaf } from './util/rich-text/RichTextLeaf.js';
+export { default as RichTextNode } from './util/rich-text/RichTextNode.js';
+export { default as RichTextLink } from './util/rich-text/RichTextLink.js';
 export { default as RichText } from './nodes/RichText.js';
 export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks } from './nodes/RichText.js';
 
