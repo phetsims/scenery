@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * A node that displays a single image either from an actual HTMLImageElement, a URL, a Canvas element, or a mipmap

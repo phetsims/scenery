@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * A trait for Node that supports the Voicing feature, under accessibility. Allows you to define responses for the Node

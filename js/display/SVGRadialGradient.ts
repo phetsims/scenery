@@ -1,4 +1,4 @@
-// Copyright 2022, University of Colorado Boulder
+// Copyright 2022-2023, University of Colorado Boulder
 
 /**
  * Controller that creates and keeps an SVG radial gradient up-to-date with a Scenery RadialGradient
