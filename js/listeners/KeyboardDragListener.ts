@@ -179,7 +179,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
   // See options for documentation
   private _start: ( ( event: SceneryEvent ) => void ) | null;
-  private _drag: ( ( viewDelta: Vector2 ) => void ) | null;
+  private _drag: ( ( viewDelta: Vector2, listener: KeyboardDragListener ) => void ) | null;
   private _end: ( ( event: SceneryEvent ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _mapPosition: MapPosition | null;
@@ -827,7 +827,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
         // call our drag function
         if ( this._drag ) {
-          this._drag( vectorDelta );
+          this._drag( vectorDelta, this );
         }
 
         this.dragEmitter.emit();
