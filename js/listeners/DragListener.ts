@@ -605,10 +605,10 @@ export default class DragListener extends PressListener implements TInputListene
   }
 
   /**
-   * Apply a mapping from from the drag target's model position to an allowed model position.
+   * Apply a mapping from the drag target's model position to an allowed model position.
    *
    * A common example is using dragBounds, where the position of the drag target is constrained to within a bounding
-   * box. This is done by mapping points outside of the bounding box to the closest position inside the box. More
+   * box. This is done by mapping points outside the bounding box to the closest position inside the box. More
    * general mappings can be used.
    *
    * Should be overridden (or use mapPosition) if a custom transformation is needed.

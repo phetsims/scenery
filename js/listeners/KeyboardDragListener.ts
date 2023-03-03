@@ -90,6 +90,8 @@ const KEYBOARD_DRAG_DIRECTION_KEY_MAP = new Map<KeyboardDragDirection, KeyboardD
   } ]
 ] );
 
+type MapPosition = ( point: Vector2 ) => Vector2;
+
 type SelfOptions = {
 
   // How much the position Property will change in view coordinates every moveOnHoldInterval. Object will
@@ -133,6 +135,12 @@ type SelfOptions = {
   // If provided, the model position will be constrained to be inside these bounds, in model coordinates
   dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
 
+  // If provided, it will allow custom mapping
+  // from the desired position (i.e. where the pointer is) to the actual possible position (i.e. where the dragged
+  // object ends up). For example, using dragBoundsProperty is equivalent to passing:
+  //   mapPosition: function( point ) { return dragBoundsProperty.value.closestPointTo( point ); }
+  mapPosition?: MapPosition | null;
+
   // Called when keyboard drag is started (on initial press).
   start?: ( ( event: SceneryEvent ) => void ) | null;
 
@@ -174,6 +182,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   private _drag: ( ( viewDelta: Vector2 ) => void ) | null;
   private _end: ( ( event: SceneryEvent ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
+  private _mapPosition: MapPosition | null;
   private _transform: Transform3 | null;
   private _keyboardDragDirection: KeyboardDragDirection;
   private _positionProperty: TProperty<Vector2> | null;
@@ -236,6 +245,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
     // Use either dragVelocity or dragDelta, cannot use both at the same time.
     assert && assertMutuallyExclusiveOptions( providedOptions, [ 'dragVelocity', 'shiftDragVelocity' ], [ 'dragDelta', 'shiftDragDelta' ] );
+    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'mapPosition' ], [ 'dragBoundsProperty' ] );
 
     const options = optionize<KeyboardDragListenerOptions, SelfOptions, EnabledComponentOptions>()( {
 
@@ -248,6 +258,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       positionProperty: null,
       transform: null,
       dragBoundsProperty: null,
+      mapPosition: null,
       start: null,
       drag: null,
       end: null,
@@ -271,6 +282,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
     this._drag = options.drag;
     this._end = options.end;
     this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
+    this._mapPosition = options.mapPosition;
     this._transform = options.transform;
     this._positionProperty = options.positionProperty;
     this._dragVelocity = options.dragVelocity;
@@ -805,12 +817,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         if ( this._positionProperty ) {
           let newPosition = this._positionProperty.get().plus( vectorDelta );
 
-          const dragBounds = this._dragBoundsProperty.value;
-
-          // constrain to bounds in model coordinates
-          if ( dragBounds ) {
-            newPosition = dragBounds.closestPointTo( newPosition );
-          }
+          newPosition = this.mapModelPoint( newPosition );
 
           // update the position if it is different
           if ( !newPosition.equals( this._positionProperty.get() ) ) {
@@ -825,6 +832,29 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
         this.dragEmitter.emit();
       }
+    }
+  }
+
+  /**
+   * Apply a mapping from the drag target's model position to an allowed model position.
+   *
+   * A common example is using dragBounds, where the position of the drag target is constrained to within a bounding
+   * box. This is done by mapping points outside the bounding box to the closest position inside the box. More
+   * general mappings can be used.
+   *
+   * Should be overridden (or use mapPosition) if a custom transformation is needed.
+   *
+   * @returns - A point in the model coordinate frame
+   */
+  protected mapModelPoint( modelPoint: Vector2 ): Vector2 {
+    if ( this._mapPosition ) {
+      return this._mapPosition( modelPoint );
+    }
+    else if ( this._dragBoundsProperty.value ) {
+      return this._dragBoundsProperty.value.closestPointTo( modelPoint );
+    }
+    else {
+      return modelPoint;
     }
   }
 
