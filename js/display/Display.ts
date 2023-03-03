@@ -456,10 +456,7 @@ export default class Display {
 
     this.setBackgroundColor( options.backgroundColor );
 
-    const ariaLiveAnnouncer = new AriaLiveAnnouncer( {
-      tandem: options.tandem.createTandem( 'ariaLiveAnnouncer' ),
-      phetioDocumentation: 'The Announcer responsible for announcing to aria-live for this Display.'
-    } );
+    const ariaLiveAnnouncer = new AriaLiveAnnouncer();
     this.descriptionUtteranceQueue = new UtteranceQueue( ariaLiveAnnouncer, {
       initialize: this._accessible,
       featureSpecificAnnouncingControlPropertyName: 'descriptionCanAnnounceProperty'
