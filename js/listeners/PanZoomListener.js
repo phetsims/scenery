@@ -71,6 +71,7 @@ class PanZoomListener extends MultiListener {
     // so that the initial state part of the API doesn't depend on the window size.
     this.sourceFramePanBoundsProperty = new Property( Tandem.API_GENERATION ? new Bounds2( 0, 0, 0, 0 ) : this._panBounds, {
       tandem: options.tandem.createTandem( 'sourceFramePanBoundsProperty' ),
+      phetioReadOnly: true,
       phetioValueType: Bounds2.Bounds2IO
     } );
 

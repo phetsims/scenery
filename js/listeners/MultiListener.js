@@ -112,7 +112,8 @@ class MultiListener {
     // input for the MultiListener
     this.matrixProperty = new Property( targetNode.matrix.copy(), {
       phetioValueType: Matrix3.Matrix3IO,
-      tandem: options.tandem.createTandem( 'matrixProperty' )
+      tandem: options.tandem.createTandem( 'matrixProperty' ),
+      phetioReadOnly: true
     } );
 
     // assign the matrix to the targetNode whenever it changes
