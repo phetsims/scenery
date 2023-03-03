@@ -6,11 +6,11 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import Pool from '../../../../phet-core/js/Pool.js';
+import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { allowLinksProperty, FireListener, Node, openPopup, RichTextCleanable, RichTextHref, scenery, TInputListener, Voicing } from '../../imports.js';
 
-export default class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
+export default class RichTextLink extends Voicing( RichTextCleanable( Node ) ) implements TPoolable {
 
   private fireListener: FireListener | null = null;
   private accessibleInputListener: TInputListener | null = null;

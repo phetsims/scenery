@@ -5,10 +5,10 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import Pool from '../../../../phet-core/js/Pool.js';
+import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import { Node, RichTextCleanable, scenery } from '../../imports.js';
 
-export default class RichTextNode extends RichTextCleanable( Node ) {
+export default class RichTextNode extends RichTextCleanable( Node ) implements TPoolable {
 
   public readonly leftSpacing = 0;
   public readonly rightSpacing = 0;

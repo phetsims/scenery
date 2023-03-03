@@ -6,10 +6,10 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import Pool from '../../../../phet-core/js/Pool.js';
+import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import { Node, RichTextCleanable, RichTextLeaf, RichTextNode, scenery } from '../../imports.js';
 
-export default class RichTextElement extends RichTextCleanable( Node ) {
+export default class RichTextElement extends RichTextCleanable( Node ) implements TPoolable {
 
   private isLTR!: boolean;
 

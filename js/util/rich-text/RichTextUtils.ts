@@ -12,10 +12,12 @@ export type HimalayaAttribute = {
   key: string;
   value?: string;
 };
+
 export type HimalayaNode = {
   type: 'element' | 'comment' | 'text';
   innerContent: string;
 };
+
 export type HimalayaElementNode = {
   type: 'element';
   tagName: string;
@@ -23,11 +25,14 @@ export type HimalayaElementNode = {
   attributes: HimalayaAttribute[];
   innerContent?: string; // Is this in the generated stuff? Do we just override this? Unclear
 } & HimalayaNode;
+
 export const isHimalayaElementNode = ( node: HimalayaNode ): node is HimalayaElementNode => node.type.toLowerCase() === 'element';
+
 export type HimalayaTextNode = {
   type: 'text';
   content: string;
 } & HimalayaNode;
+
 export const isHimalayaTextNode = ( node: HimalayaNode ): node is HimalayaTextNode => node.type.toLowerCase() === 'text';
 
 const RichTextUtils = {
