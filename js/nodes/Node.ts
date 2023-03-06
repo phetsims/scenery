@@ -1392,7 +1392,12 @@ class Node extends ParallelDOM {
       // have each child validate their own bounds
       i = this._children.length;
       while ( i-- ) {
-        this._children[ i ].validateBounds();
+        const child = this._children[ i ];
+
+        // Reentrancy might cause the child to be removed
+        if ( child ) {
+          child.validateBounds();
+        }
       }
 
       // and recompute our childBounds
@@ -1402,7 +1407,9 @@ class Node extends ParallelDOM {
       i = this._children.length;
       while ( i-- ) {
         const child = this._children[ i ];
-        if ( !this._excludeInvisibleChildrenFromBounds || child.isVisible() ) {
+
+        // Reentrancy might cause the child to be removed
+        if ( child && !this._excludeInvisibleChildrenFromBounds || child.isVisible() ) {
           ourChildBounds.includeBounds( child.bounds );
         }
       }
