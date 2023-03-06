@@ -65,7 +65,7 @@ import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Range from '../../../dot/js/Range.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint } from '../imports.js';
+import { allowLinksProperty, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -550,12 +550,12 @@ export default class RichText extends Node {
     if ( assert ) {
       if ( this._links && this._links !== true ) {
         Object.keys( this._links ).forEach( link => {
-          assert && assert( usedLinks.includes( link ), `Unused RichText link: ${link}` );
+          assert && allowLinksProperty.value && assert( usedLinks.includes( link ), `Unused RichText link: ${link}` );
         } );
       }
       if ( this._nodes ) {
         Object.keys( this._nodes ).forEach( node => {
-          assert && assert( usedNodes.includes( node ), `Unused RichText node: ${node}` );
+          assert && allowLinksProperty.value && assert( usedNodes.includes( node ), `Unused RichText node: ${node}` );
         } );
       }
     }
