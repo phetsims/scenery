@@ -103,7 +103,7 @@ const RICH_TEXT_OPTION_KEYS = [
 
 export type RichTextAlign = 'left' | 'center' | 'right';
 export type RichTextHref = ( () => void ) | string;
-type RichTextLinksObject = Record<string, string>;
+type RichTextLinksObject = Record<string, RichTextHref>;
 export type RichTextLinks = RichTextLinksObject | true;
 
 type SelfOptions = {
@@ -314,7 +314,7 @@ export default class RichText extends Node {
 
   // We need to consolidate links (that could be split across multiple lines) under one "link" node, so we track created
   // link fragments here so they can get pieced together later.
-  private _linkItems: { element: HimalayaNode; node: Node; href: string }[] = [];
+  private _linkItems: { element: HimalayaNode; node: Node; href: RichTextHref }[] = [];
 
   // Whether something has been added to this line yet. We don't want to infinite-loop out if something is longer than
   // our lineWrap, so we'll place one item on its own on an otherwise empty line.
@@ -817,7 +817,7 @@ export default class RichText extends Node {
 
       // Anchor (link)
       if ( element.tagName === 'a' ) {
-        let href = RichTextUtils.himalayaGetAttribute( 'href', element );
+        let href: RichTextHref | null = RichTextUtils.himalayaGetAttribute( 'href', element );
         const originalHref = href;
 
         // Try extracting the href from the links object
