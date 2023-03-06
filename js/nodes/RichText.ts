@@ -98,8 +98,7 @@ const RICH_TEXT_OPTION_KEYS = [
   'leading',
   'lineWrap',
   Text.STRING_PROPERTY_NAME,
-  'string',
-  'text'// @deprecated, TODO: remove as part of https://github.com/phetsims/scenery/issues/1472
+  'string'
 ];
 
 export type RichTextAlign = 'left' | 'center' | 'right';
@@ -328,11 +327,6 @@ export default class RichText extends Node {
   public static readonly STRING_PROPERTY_TANDEM_NAME = Text.STRING_PROPERTY_TANDEM_NAME;
 
   public constructor( string: string | number | TReadOnlyProperty<string>, providedOptions?: RichTextOptions ) {
-
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    if ( assert && providedOptions ) {
-      assert && assert( !providedOptions.hasOwnProperty( 'text' ), 'Text option should be string.' );
-    }
 
     // We only fill in some defaults, since the other defaults are defined below (and mutate is relied on)
     const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill'>, NodeOptions>()( {
@@ -977,20 +971,6 @@ export default class RichText extends Node {
     return this;
   }
 
-  public set text( value: string | number ) {
-
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling setString' );
-    this.setString( value );
-  }
-
-  public get text(): string {
-
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling getString' );
-    return this.getString();
-  }
-
   public set string( value: string | number ) { this.setString( value ); }
 
   public get string(): string { return this.getString(); }
@@ -1544,11 +1524,6 @@ export default class RichText extends Node {
   }
 
   public override mutate( options?: RichTextOptions ): this {
-
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    if ( assert && options ) {
-      assert && assert( !options.hasOwnProperty( 'text' ), 'Text option should be "string".' );
-    }
 
     if ( assert && options && options.hasOwnProperty( 'string' ) && options.hasOwnProperty( Text.STRING_PROPERTY_NAME ) && options.stringProperty ) {
       assert && assert( options.stringProperty.value === options.string, 'If both string and stringProperty are provided, then values should match' );

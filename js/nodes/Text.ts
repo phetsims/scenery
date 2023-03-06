@@ -31,9 +31,6 @@ const TEXT_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined for text, see setBoundsMethod() for more documentation
   STRING_PROPERTY_NAME, // {Property.<string>|null} - Sets forwarding of the stringProperty, see setStringProperty() for more documentation
   'string', // {string|number} - Sets the string to be displayed by this Text, see setString() for more documentation
-
-  // @deprecated TODO: Remove as part of https://github.com/phetsims/scenery/issues/1472
-  'text', // {string|number} - Sets the string to be displayed by this Text, see setString() for more documentation
   'font', // {Font|string} - Sets the font used for the text, see setFont() for more documentation
   'fontWeight', // {string|number} - Sets the weight of the current font, see setFont() for more documentation
   'fontFamily', // {string} - Sets the family of the current font, see setFont() for more documentation
@@ -104,11 +101,6 @@ export default class Text extends Paintable( Node ) {
     this._isHTML = false; // TODO: clean this up
     this._cachedRenderedText = null;
 
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    if ( assert && options ) {
-      assert && assert( !options.hasOwnProperty( 'text' ), 'Text option should be string.' );
-    }
-
     const definedOptions = extendDefined( {
       fill: '#000000', // Default to black filled string
 
@@ -119,7 +111,7 @@ export default class Text extends Paintable( Node ) {
       phetioVisiblePropertyInstrumented: false
     }, options );
 
-    assert && assert( !definedOptions.hasOwnProperty( 'text' ) && !definedOptions.hasOwnProperty( Text.STRING_PROPERTY_TANDEM_NAME ),
+    assert && assert( !definedOptions.hasOwnProperty( 'string' ) && !definedOptions.hasOwnProperty( Text.STRING_PROPERTY_TANDEM_NAME ),
       'provide string and stringProperty through constructor arg please' );
 
     if ( typeof string === 'string' || typeof string === 'number' ) {
@@ -136,11 +128,6 @@ export default class Text extends Paintable( Node ) {
 
   public override mutate( options?: TextOptions ): this {
 
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    if ( assert && options ) {
-      assert && assert( !options.hasOwnProperty( 'text' ), 'Text option should be "string".' );
-    }
-
     if ( assert && options && options.hasOwnProperty( 'string' ) && options.hasOwnProperty( STRING_PROPERTY_NAME ) ) {
       assert && assert( options.stringProperty!.value === options.string, 'If both string and stringProperty are provided, then values should match' );
     }
@@ -153,7 +140,7 @@ export default class Text extends Paintable( Node ) {
    * @param string - The string to display. If it's a number, it will be cast to a string
    */
   public setString( string: string | number ): this {
-    assert && assert( string !== null && string !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
+    assert && assert( string !== null && string !== undefined, 'String should be defined and non-null. Use the empty string if needed.' );
 
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed string)
     string = `${string}`;
@@ -161,20 +148,6 @@ export default class Text extends Paintable( Node ) {
     this._stringProperty.set( string );
 
     return this;
-  }
-
-  public set text( value: string | number ) {
-
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling text setter' );
-    this.setString( value );
-  }
-
-  public get text(): string {
-
-    // TODO: https://github.com/phetsims/scenery/issues/1472
-    assert && assert( false, 'Should not be calling text getter' );
-    return this.getString();
   }
 
   public set string( value: string | number ) { this.setString( value ); }
