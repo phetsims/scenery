@@ -107,7 +107,7 @@ export default class HighlightOverlay implements TOverlay {
   // Trail to the ReadingBlock Node with an active highlight around it while the voicingManager is speaking its content.
   private readingBlockTrail: null | Trail = null;
 
-  // Whether or not the transform applied to the readinBlockHighlightNode is out of date.
+  // Whether the transform applied to the readinBlockHighlightNode is out of date.
   private readingBlockTransformDirty = true;
 
   // The TransformTracker used to observe changes to the transform of the Node with Reading Block focus, so that

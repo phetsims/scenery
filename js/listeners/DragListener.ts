@@ -153,7 +153,7 @@ type SelfOptions<Listener extends DragListener> = {
   offsetPosition?: OffsetPosition<Listener> | null;
 
   // pdom
-  // Whether or not to allow `click` events to trigger behavior in the supertype PressListener.
+  // Whether to allow `click` events to trigger behavior in the supertype PressListener.
   // Generally DragListener should not respond to click events, but there are some exceptions where drag
   // functionality is nice but a click should still activate the component. See
   // https://github.com/phetsims/sun/issues/696

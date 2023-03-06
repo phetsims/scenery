@@ -526,7 +526,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
     }
 
     /**
-     * Whether or not a Node composes Voicing.
+     * Whether a Node composes Voicing.
      */
     public get isVoicing(): boolean {
       return true;

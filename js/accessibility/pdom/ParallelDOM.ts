@@ -370,7 +370,7 @@ export default class ParallelDOM extends PhetioObject {
   // string because the `value` attribute is a DOMString. null value indicates no value.
   private _inputValue: string | number | null;
 
-  // Whether or not the pdom input is considered 'checked', only useful for inputs of
+  // Whether the pdom input is considered 'checked', only useful for inputs of
   // type 'radio' and 'checkbox'
   private _pdomChecked: boolean;
 
@@ -457,7 +457,7 @@ export default class ParallelDOM extends PhetioObject {
   // nodes to update their aria-activedescendant associations when this Node rebuilds its pdom content.
   private _nodesThatAreActiveDescendantToThisNode: Node[];
 
-  // Whether or not this Node's primary sibling has been explicitly set to receive focus from
+  // Whether this Node's primary sibling has been explicitly set to receive focus from
   // tab navigation. Sets the tabIndex attribute on the Node's primary sibling. Setting to false will not remove the
   // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
   // HTMLElements (such as HTML form elements) can be focusable by default, without setting this property. The
@@ -479,7 +479,7 @@ export default class ParallelDOM extends PhetioObject {
   // highlight will go around local bounds of this node. Otherwise the custom node will be used as the highlight/
   private _groupFocusHighlight: Node | boolean;
 
-  // Whether or not the pdom content will be visible from the browser and assistive
+  // Whether the pdom content will be visible from the browser and assistive
   // technologies.  When pdomVisible is false, the Node's primary sibling will not be focusable, and it cannot
   // be found by the assistive technology virtual cursor. For more information on how assistive technologies
   // read with the virtual cursor see

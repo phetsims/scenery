@@ -196,7 +196,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
   // isHighlightedProperty updates (not a DerivedProperty because we need to hook to passed-in properties)
   private _isHighlightedListener: () => void;
 
-  // (read-only) - Whether or not a press is being processed from a pdom click input event from the PDOM.
+  // (read-only) - Whether a press is being processed from a pdom click input event from the PDOM.
   public readonly pdomClickingProperty: TProperty<boolean>;
 
   // (read-only) - This Property was added to support input from the PDOM. It tracks whether

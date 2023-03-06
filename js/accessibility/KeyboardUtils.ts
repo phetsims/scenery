@@ -226,7 +226,7 @@ const KeyboardUtils = {
   },
 
   /**
-   * Whether or not the event was of the provided KeyboardUtils string.
+   * Whether the event was of the provided KeyboardUtils string.
    */
   isKeyEvent( domEvent: Event | null, keyboardUtilsKey: string ): boolean {
     return KeyboardUtils.getEventCode( domEvent ) === keyboardUtilsKey;

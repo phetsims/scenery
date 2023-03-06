@@ -121,7 +121,7 @@ class MultiListener {
       this._targetNode.matrix = matrix;
     } );
 
-    // @private {boolean} - Whether or not the listener was interrupted, in which case we may need to prevent certain
+    // @private {boolean} - Whether the listener was interrupted, in which case we may need to prevent certain
     // behavior. If the listener was interrupted, pointer listeners might still be called since input is dispatched to
     // a defensive copy of the Pointer's listeners. But presses will have been cleared in this case so we won't try
     // to do any work on them.
