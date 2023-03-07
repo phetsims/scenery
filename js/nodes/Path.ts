@@ -14,8 +14,8 @@ import { CanvasContextWrapper, CanvasSelfDrawable, Instance, TPathDrawable, Node
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 
 const PATH_OPTION_KEYS = [
-  'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.
-  'shape' // {Shape|string|null} - Sets the shape of the Path, see  setShape() for more documentation.
+  'boundsMethod',
+  'shape'
 ];
 
 const DEFAULT_OPTIONS = {
@@ -26,7 +26,42 @@ const DEFAULT_OPTIONS = {
 export type PathBoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
 
 type SelfOptions = {
+  /**
+   * This sets the shape of the Path, which determines the shape of its appearance. It should generally not be called
+   * on Path subtypes like Line, Rectangle, etc.
+   *
+   * NOTE: When you create a Path with a shape in the constructor, this function will be called.
+   *
+   * The valid parameter types are:
+   * - Shape: (from Kite), normally used.
+   * - string: Uses the SVG Path format, see https://www.w3.org/TR/SVG/paths.html (the PATH part of <path d="PATH"/>).
+   *           This will immediately be converted to a Shape object, and getShape() or equivalents will return the new
+   *           Shape object instead of the original string.
+   * - null: Indicates that there is no Shape, and nothing is drawn. Usually used as a placeholder.
+   *
+   * NOTE: Be aware of the potential for memory leaks. If a Shape is not marked as immutable (with makeImmutable()),
+   *       Path will add a listener so that it is updated when the Shape itself changes. If there is a listener
+   *       added, keeping a reference to the Shape will also keep a reference to the Path object (and thus whatever
+   *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
+   *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
+   */
   shape?: Shape | string | null;
+
+  /**
+   * Sets the bounds method for the Path. This determines how our (self) bounds are computed, and can particularly
+   * determine how expensive to compute our bounds are if we have a stroke.
+   *
+   * There are the following options:
+   * - 'accurate' - Always uses the most accurate way of getting bounds. Computes the exact stroked bounds.
+   * - 'unstroked' - Ignores any stroke, just gives the filled bounds.
+   *                 If there is a stroke, the bounds will be marked as inaccurate
+   * - 'tightPadding' - Pads the filled bounds by enough to cover everything except mitered joints.
+   *                     If there is a stroke, the bounds wil be marked as inaccurate.
+   * - 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
+   * - 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
+   *            NOTE: It's important to provide a localBounds override if you use this option, so its bounds cover the
+   *            Path's shape. (path.localBounds = ...)
+   */
   boundsMethod?: PathBoundsMethod;
 };
 type ParentOptions = PaintableOptions & NodeOptions;
@@ -94,25 +129,6 @@ export default class Path extends Paintable( Node ) {
     this.mutate( options );
   }
 
-  /**
-   * This sets the shape of the Path, which determines the shape of its appearance. It should generally not be called
-   * on Path subtypes like Line, Rectangle, etc.
-   *
-   * NOTE: When you create a Path with a shape in the constructor, this function will be called.
-   *
-   * The valid parameter types are:
-   * - Shape: (from Kite), normally used.
-   * - string: Uses the SVG Path format, see https://www.w3.org/TR/SVG/paths.html (the PATH part of <path d="PATH"/>).
-   *           This will immediately be converted to a Shape object, and getShape() or equivalents will return the new
-   *           Shape object instead of the original string.
-   * - null: Indicates that there is no Shape, and nothing is drawn. Usually used as a placeholder.
-   *
-   * NOTE: Be aware of the potential for memory leaks. If a Shape is not marked as immutable (with makeImmutable()),
-   *       Path will add a listener so that it is updated when the Shape itself changes. If there is a listener
-   *       added, keeping a reference to the Shape will also keep a reference to the Path object (and thus whatever
-   *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
-   *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
-   */
   public setShape( shape: Shape | string | null ): this {
     assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
       'A path\'s shape should either be null, a string, or a Shape' );
@@ -262,19 +278,6 @@ export default class Path extends Paintable( Node ) {
     return changed;
   }
 
-  /**
-   * Sets the bounds method for the Path. This determines how our (self) bounds are computed, and can particularly
-   * determine how expensive to compute our bounds are if we have a stroke.
-   *
-   * There are the following options:
-   * - 'accurate' - Always uses the most accurate way of getting bounds. Computes the exact stroked bounds.
-   * - 'unstroked' - Ignores any stroke, just gives the filled bounds.
-   *                 If there is a stroke, the bounds will be marked as inaccurate
-   * - 'tightPadding' - Pads the filled bounds by enough to cover everything except mitered joints.
-   *                     If there is a stroke, the bounds wil be marked as inaccurate.
-   * - 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
-   * - 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
-   */
   public setBoundsMethod( boundsMethod: PathBoundsMethod ): this {
     assert && assert( boundsMethod === 'accurate' ||
                       boundsMethod === 'unstroked' ||
