@@ -193,57 +193,64 @@ export default class Trail {
   }
 
   /**
-   * From local to global
+   * Returns the matrix multiplication of our selected nodes transformation matrices.
+   *
+   * @param startingIndex - Include nodes matrices starting from this index (inclusive)
+   * @param endingIndex - Include nodes matrices up to this index (exclusive)
    */
-  public getMatrix(): Matrix3 {
+  public getMatrixConcatenation( startingIndex: number, endingIndex: number ): Matrix3 {
     // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
     // this matrix will be modified in place, so always start fresh
     const matrix = Matrix3.identity();
 
     // from the root up
     const nodes = this.nodes;
-    const length = nodes.length;
-    for ( let i = 0; i < length; i++ ) {
+    for ( let i = startingIndex; i < endingIndex; i++ ) {
       matrix.multiplyMatrix( nodes[ i ].getMatrix() );
     }
     return matrix;
+  }
+
+  /**
+   * From local to global
+   *
+   * e.g. local coordinate frame of the leaf node to the parent coordinate frame of the root node
+   */
+  public getMatrix(): Matrix3 {
+    return this.getMatrixConcatenation( 0, this.nodes.length );
   }
 
   /**
    * From local to next-to-global (ignores root node matrix)
+   *
+   * e.g. local coordinate frame of the leaf node to the local coordinate frame of the root node
    */
   public getAncestorMatrix(): Matrix3 {
-    // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
-    // this matrix will be modified in place, so always start fresh
-    const matrix = Matrix3.identity();
-
-    // from the root up
-    const nodes = this.nodes;
-    const length = nodes.length;
-    for ( let i = 1; i < length; i++ ) {
-      matrix.multiplyMatrix( nodes[ i ].getMatrix() );
-    }
-    return matrix;
+    return this.getMatrixConcatenation( 1, this.nodes.length );
   }
 
   /**
    * From parent to global
+   *
+   * e.g. parent coordinate frame of the leaf node to the parent coordinate frame of the root node
    */
   public getParentMatrix(): Matrix3 {
-    // this matrix will be modified in place, so always start fresh
-    const matrix = Matrix3.identity();
+    return this.getMatrixConcatenation( 0, this.nodes.length - 1 );
+  }
 
-    // from the root up
-    const nodes = this.nodes;
-    const length = nodes.length;
-    for ( let i = 0; i < length - 1; i++ ) {
-      matrix.multiplyMatrix( nodes[ i ].getMatrix() );
-    }
-    return matrix;
+  /**
+   * From parent to next-to-global (ignores root node matrix)
+   *
+   * e.g. parent coordinate frame of the leaf node to the local coordinate frame of the root node
+   */
+  public getAncestorParentMatrix(): Matrix3 {
+    return this.getMatrixConcatenation( 1, this.nodes.length - 1 );
   }
 
   /**
    * From local to global
+   *
+   * e.g. local coordinate frame of the leaf node to the parent coordinate frame of the root node
    */
   public getTransform(): Transform3 {
     return new Transform3( this.getMatrix() );
@@ -251,6 +258,8 @@ export default class Trail {
 
   /**
    * From parent to global
+   *
+   * e.g. parent coordinate frame of the leaf node to the parent coordinate frame of the root node
    */
   public getParentTransform(): Transform3 {
     return new Transform3( this.getParentMatrix() );
