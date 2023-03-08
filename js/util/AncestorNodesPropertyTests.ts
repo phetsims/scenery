@@ -1,9 +1,9 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * QUnit tests for Disposable
+ * QUnit tests for AncestorNodesPropertyTests
  *
- * @author Michael Kauzmann (PhET Interactive Simulations)
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 import { AncestorNodesProperty, Node } from '../imports.js';

@@ -32,6 +32,7 @@ import './util/AncestorNodesPropertyTests.js';
 import './util/ColorTests.js';
 import './util/DisplayedPropertyTests.js';
 import './util/FontTests.js';
+import './util/MatrixBetweenPropertyTests.js';
 import './util/TrailTests.js';
 
 // add elements to the QUnit fixture for our Scenery-specific tests
