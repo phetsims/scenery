@@ -464,16 +464,12 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       assert && assert( groupKeys.length > 0, 'no keys provided?' );
 
       const naturalKey = groupKeys.slice( -1 )[ 0 ];
-
-      // @ts-expect-error - because a string shouldn't be used for lookup like this in the object type
       const key = EnglishStringToCodeMap[ naturalKey ];
       assert && assert( key, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalKey}` );
 
       let modifierKeys: string[] = [];
       if ( groupKeys.length > 1 ) {
         modifierKeys = groupKeys.slice( 0, groupKeys.length - 1 ).map( naturalModifierKey => {
-
-          // @ts-expect-error - because a string shouldn't be used for lookup like this in the object type
           const modifierKey = EnglishStringToCodeMap[ naturalModifierKey ];
           assert && assert( modifierKey, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalModifierKey}` );
           return modifierKey;
