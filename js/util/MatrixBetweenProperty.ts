@@ -15,10 +15,12 @@ import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { AncestorNodesProperty, Node, scenery, Trail } from '../imports.js';
 
+type CoordinateFrame = 'parent' | 'local';
+
 export type MatrixBetweenPropertyOptions = {
   // Which coordinate frames we want to be converting from/to, for each node
-  fromCoordinateFrame?: 'parent' | 'local';
-  toCoordinateFrame?: 'parent' | 'local';
+  fromCoordinateFrame?: CoordinateFrame;
+  toCoordinateFrame?: CoordinateFrame;
 };
 
 export default class MatrixBetweenProperty extends TinyProperty<Matrix3 | null> {
@@ -34,8 +36,8 @@ export default class MatrixBetweenProperty extends TinyProperty<Matrix3 | null> 
   private fromTrail: Trail | null = null;
   private toTrail: Trail | null = null;
 
-  private readonly fromCoordinateFrame: 'parent' | 'local';
-  private readonly toCoordinateFrame: 'parent' | 'local';
+  private readonly fromCoordinateFrame: CoordinateFrame;
+  private readonly toCoordinateFrame: CoordinateFrame;
 
   // A set of nodes where we are listening to whether their transforms change
   private readonly listenedNodeSet: Set<Node> = new Set<Node>();
@@ -72,6 +74,7 @@ export default class MatrixBetweenProperty extends TinyProperty<Matrix3 | null> 
 
   private update(): void {
     // Track nodes (not just ancestors) here, in case one is an ancestor of the other
+    // REVIEW: would it be more performant for below opperations if these were Sets?
     const fromNodes = [ ...this.fromAncestorsProperty.value, this.from ];
     const toNodes = [ ...this.toAncestorsProperty.value, this.to ];
 
@@ -99,6 +102,7 @@ export default class MatrixBetweenProperty extends TinyProperty<Matrix3 | null> 
         hasDAG = true;
       }
 
+      // REVIEW: Can you factor these two expressions out to variables for clarity?
       return ( fromOnly.length > 0 || this.from === node ) && ( toOnly.length > 0 || this.to === node );
     } );
 

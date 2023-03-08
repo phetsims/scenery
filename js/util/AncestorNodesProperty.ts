@@ -13,7 +13,7 @@ import { Node, scenery } from '../imports.js';
 export default class AncestorNodesProperty extends TinyProperty<Set<Node>> {
 
   // A set of nodes where we are listening to whether their parents change
-  private readonly listenedNodeSet: Set<Node> = new Set<Node>();
+  private readonly listenedNodeSet = new Set<Node>();
 
   private readonly _nodeUpdateListener: () => void;
 
