@@ -94,6 +94,7 @@ const RICH_TEXT_OPTION_KEYS = [
   'linkEventsHandled',
   'links',
   'nodes',
+  'replaceNewlines',
   'align',
   'leading',
   'lineWrap',
@@ -211,6 +212,9 @@ type SelfOptions = {
   // the text".
   nodes?: Record<string, Node>;
 
+  // Will replace newlines (`\n`) with <br>, similar to the old MultiLineText (defaults to false)
+  replaceNewlines?: boolean;
+
   // Sets text alignment if there are multiple lines
   align?: RichTextAlign;
 
@@ -308,6 +312,7 @@ export default class RichText extends Node {
 
   private _nodes: Record<string, Node> = {};
 
+  private _replaceNewlines = false;
   private _align: RichTextAlign = 'left';
   private _leading = 0;
   private _lineWrap: number | null = null;
@@ -431,9 +436,14 @@ export default class RichText extends Node {
     sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
     // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
-    const mappedText = this.string.replace( /\u202a/g, '<span dir="ltr">' )
+    let mappedText = this.string.replace( /\u202a/g, '<span dir="ltr">' )
       .replace( /\u202b/g, '<span dir="rtl">' )
       .replace( /\u202c/g, '</span>' );
+
+    // Optional replacement of newlines, see https://github.com/phetsims/scenery/issues/1542
+    if ( this._replaceNewlines ) {
+      mappedText = mappedText.replace( /\n/g, '<br>' );
+    }
 
     let rootElements: HimalayaNode[];
 
@@ -1447,6 +1457,25 @@ export default class RichText extends Node {
   public set nodes( value: Record<string, Node> ) { this.setNodes( value ); }
 
   public get nodes(): Record<string, Node> { return this.getNodes(); }
+
+  /**
+   * Sets whether newlines are replaced with <br>
+   */
+  public setReplaceNewlines( replaceNewlines: boolean ): this {
+    if ( this._replaceNewlines !== replaceNewlines ) {
+      this._replaceNewlines = replaceNewlines;
+      this.rebuildRichText();
+    }
+    return this;
+  }
+
+  public set replaceNewlines( value: boolean ) { this.setReplaceNewlines( value ); }
+
+  public get replaceNewlines(): boolean { return this.getReplaceNewlines(); }
+
+  public getReplaceNewlines(): boolean {
+    return this._replaceNewlines;
+  }
 
   /**
    * Sets the alignment of text (only relevant if there are multiple lines).
