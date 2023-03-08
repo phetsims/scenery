@@ -730,7 +730,8 @@
 
     <p>Content width/height can be set for the entire flowbox as well, by using <code>layoutOptions: { minContentWidth: {{NUMBER}}, minContentHeight: {{NUMBER}} }</code>
         in the parent. This will set the width/height for the flowbox even if the children are smaller, however it still allows the flowBox to
-        dynamically resize if the children grow.</p>
+        dynamically resize if the children grow. A common mistake is to use <code>preferredWidth</code> / <code>preferredHeight</code> to size a FlowBox. However, these options will get
+      overwritten on <code>resizable: true</code>, which is the default option value for all FlowBoxes. </p>
 
     <div id="dimension-example"></div>
     <script type="text/javascript">
@@ -2286,12 +2287,25 @@
       } );
     </script>
 
-    <h2 id="ManualConstraint" class="index">ManualConstraint</h2>
+    <h2 id="Constraint" class="index">Constraint</h2>
+
+    <p>The next sections requires a basic understanding of what a constraint is in scenery layout, how it's used, and how it can be leveraged.</p>
+
+    <p>
+      Constraints are the foundational layer that handles layout logic for scenery elements. If you search through the PhET codebase you can find
+      constraints such as: <code>ButtonConstraint</code>,<code>CarouselConstraint</code>, <code>SliderConstraint</code>, and many more.
+      All of these constraints extend <code>LayoutConstraint</code>, and importantly, override the method <code>layout</code>. Its
+      important to understand that the motor of the layout logic is housed in a constraint, not only for debugging, but also to empower developers
+      to use existing constraints or create their own constraint as is desirable.
+    </p>
+
+    <h3 id="ManualConstraint" class="index">ManualConstraint</h3>
 
     <p>
       ManualConstraint is for hooking up imperative-style layout code (e.g. <code>someNode.left = otherNode.right</code>) so that
       it correctly auto-updates whenever one of those values may have changed. It also works across different Node
-      parents and coordinate frames.
+      parents and coordinate frames. A good indication that ManualConstraint may be useful is when a developer is linking to multiple
+      <code>BoundsProperty</code>, or connecting view positions for elements in different coordinate frames.
     </p>
 
     <p>
@@ -2356,7 +2370,7 @@
       } );
     </script>
 
-    <h2 id="FlowConstraint" class="index">FlowConstraint</h2>
+    <h3 id="FlowConstraint" class="index">FlowConstraint</h3>
 
     <p>
       FlowBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
@@ -2417,7 +2431,7 @@
       } );
     </script>
 
-    <h2 id="GridConstraint" class="index">GridConstraint</h2>
+    <h3 id="GridConstraint" class="index">GridConstraint</h3>
 
     <p>
       GridBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
