@@ -49,6 +49,26 @@ const SHIFT_KEYS = [ KEY_SHIFT_LEFT, KEY_SHIFT_RIGHT ];
 const CONTROL_KEYS = [ KEY_CONTROL_LEFT, KEY_CONTROL_RIGHT ];
 const ALT_KEYS = [ KEY_ALT_LEFT, KEY_ALT_RIGHT ];
 
+/// List of event.keys to use the code for when we get a code that starts with "Numpad", see KeyboardUtils.getEventCode().
+// Basically this is the list of KeyboardEvent.key values in which when we would see a KeyboardEvent.code starting with
+// "Numpad", we won't use the `key`, and instead will keep with the key. This list is essentially to bypass needing to
+// keep track of the number lock key value.
+const USE_CODE_ON_NUMPAD_LIST = [
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  '.',
+  '+',
+  '-'
+];
+
 // These are KeyboardEvent.key values, excluding left/right KeyboardEvent.codes
 const MODIFIER_KEYS = [ KEY_ALT, KEY_CONTROL, KEY_SHIFT ];
 
@@ -93,6 +113,19 @@ const KeyboardUtils = {
   KEY_7: KEY_7,
   KEY_8: KEY_8,
   KEY_9: KEY_9,
+  KEY_NUMPAD_0: 'Numpad0',
+  KEY_NUMPAD_1: 'Numpad1',
+  KEY_NUMPAD_2: 'Numpad2',
+  KEY_NUMPAD_3: 'Numpad3',
+  KEY_NUMPAD_4: 'Numpad4',
+  KEY_NUMPAD_5: 'Numpad5',
+  KEY_NUMPAD_6: 'Numpad6',
+  KEY_NUMPAD_7: 'Numpad7',
+  KEY_NUMPAD_8: 'Numpad8',
+  KEY_NUMPAD_9: 'Numpad9',
+  KEY_NUMPAD_DECIMAL: 'NumpadDecimal',
+  KEY_NUMPAD_PLUS: 'NumpadAdd',
+  KEY_NUMPAD_MINUS: 'NumpadSubtract',
   KEY_A: 'KeyA',
   KEY_B: 'KeyB',
   KEY_C: 'KeyC',
@@ -250,7 +283,7 @@ const KeyboardUtils = {
 
       // If the Event is from the Numpad, the Event.key matches the desired Event.code when Num Lock is off. This
       // supports using the Num Pad for arrow keys and home/end/page up/page down.
-      if ( eventCode.startsWith( 'Numpad' ) ) {
+      if ( eventCode.startsWith( 'Numpad' ) && !USE_CODE_ON_NUMPAD_LIST.includes( domEvent.key ) ) {
         eventCode = domEvent.key;
       }
     }
