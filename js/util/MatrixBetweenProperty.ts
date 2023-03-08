@@ -102,8 +102,10 @@ export default class MatrixBetweenProperty extends TinyProperty<Matrix3 | null> 
         hasDAG = true;
       }
 
-      // REVIEW: Can you factor these two expressions out to variables for clarity?
-      return ( fromOnly.length > 0 || this.from === node ) && ( toOnly.length > 0 || this.to === node );
+      const hasFromExclusive = fromOnly.length > 0 || this.from === node;
+      const hasToExclusive = toOnly.length > 0 || this.to === node;
+
+      return hasFromExclusive && hasToExclusive;
     } );
 
     if ( !hasDAG && rootNodes.length === 1 ) {
