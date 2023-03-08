@@ -28,6 +28,7 @@ import './nodes/TextTests.js';
 import scenery from './scenery.js';
 import './tests/MiscellaneousTests.js';
 import './tests/PixelComparisonTests.js';
+import './util/AncestorNodesPropertyTests.js';
 import './util/ColorTests.js';
 import './util/DisplayedPropertyTests.js';
 import './util/FontTests.js';
