@@ -31,7 +31,7 @@ import dotRandom from '../../../../dot/js/dotRandom.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import Enumeration from '../../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../../phet-core/js/EnumerationValue.js';
-import Poolable from '../../../../phet-core/js/Poolable.js';
+import Pool from '../../../../phet-core/js/Pool.js';
 import { Display, FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
 
 // PDOMInstances support two different styles of unique IDs, each with their own tradeoffs, https://github.com/phetsims/phet-io/issues/1851
@@ -639,7 +639,6 @@ class PDOMInstance {
     this.peer = null;
     this.isDisposed = true;
 
-    // @ts-expect-error - Mixes poolable, but TypeScript doesn't have good mixin support
     this.freeToPool();
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
@@ -763,12 +762,17 @@ class PDOMInstance {
       children: createFakeTree( rootNode )
     };
   }
+
+  public freeToPool(): void {
+    PDOMInstance.pool.freeToPool( this );
+  }
+
+  public static readonly pool = new Pool( PDOMInstance, {
+    initialize: PDOMInstance.prototype.initializePDOMInstance
+  } );
 }
 
 scenery.register( 'PDOMInstance', PDOMInstance );
 
-Poolable.mixInto( PDOMInstance, {
-  initialize: PDOMInstance.prototype.initializePDOMInstance
-} );
 
 export default PDOMInstance;

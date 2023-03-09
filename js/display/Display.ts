@@ -482,15 +482,14 @@ export default class Display {
     if ( this._accessible ) {
       this.blockFocusCallbacks = false;
 
-      // @ts-expect-error TODO: Poolable is not well supported for TypeScript
-      this._rootPDOMInstance = PDOMInstance.createFromPool( null, this, new Trail() );
+      this._rootPDOMInstance = PDOMInstance.pool.create( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-        `Display root instance: ${this._rootPDOMInstance!.toString()}` );
-      PDOMTree.rebuildInstanceTree( this._rootPDOMInstance! );
+        `Display root instance: ${this._rootPDOMInstance.toString()}` );
+      PDOMTree.rebuildInstanceTree( this._rootPDOMInstance );
 
       // add the accessible DOM as a child of this DOM element
-      assert && assert( this._rootPDOMInstance!.peer, 'Peer should be created from createFromPool' );
-      this._domElement.appendChild( this._rootPDOMInstance!.peer!.primarySibling! );
+      assert && assert( this._rootPDOMInstance.peer, 'Peer should be created from createFromPool' );
+      this._domElement.appendChild( this._rootPDOMInstance.peer!.primarySibling! );
 
       const ariaLiveContainer = ariaLiveAnnouncer.ariaLiveContainer;
 

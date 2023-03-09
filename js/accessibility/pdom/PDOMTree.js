@@ -356,7 +356,7 @@ const PDOMTree = {
         existed = true;
       }
       else {
-        instance = PDOMInstance.createFromPool( parentInstance, display, trail.copy() );
+        instance = PDOMInstance.pool.create( parentInstance, display, trail.copy() );
       }
 
       // If there was an instance, then it should be the parent to effective children, otherwise, it isn't part of the
