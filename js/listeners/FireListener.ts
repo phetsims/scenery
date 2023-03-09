@@ -60,7 +60,7 @@ export default class FireListener extends PressListener implements TInputListene
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
     assert && assert( typeof options.fireOnDown === 'boolean', 'fireOnDown should be a boolean' );
 
-    // @ts-expect-error TODO see https://github.com/phetsims/chipper/issues/1128
+    // @ts-expect-error TODO see https://github.com/phetsims/phet-core/issues/128
     super( options );
 
     this._fireOnDown = options.fireOnDown;
