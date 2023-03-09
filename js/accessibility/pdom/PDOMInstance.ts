@@ -96,7 +96,6 @@ class PDOMInstance {
 
   /**
    * Constructor for PDOMInstance, uses an initialize method for pooling.
-   * @mixes Poolable
    *
    * @param parent - parent of this instance, null if root of PDOMInstance tree
    * @param display
