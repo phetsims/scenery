@@ -518,10 +518,12 @@
 
     <h3 id="FlowBox-grow" class="index">grow</h3>
 
-    <p>Nodes with preferred sizes can be added, and the <code>grow</code> in <code>layoutOptions</code> will attempt to
-      put extra space into that
-      cell. If all nodes have the same <code>grow</code>, then all nodes will receive the same share of the extra space.
-      Otherwise, extra space is distributed proportionally as defined by each node's <code>grow</code> value.</p>
+    <p>
+      Nodes with preferred sizes can be added, and the <code>grow</code> in <code>layoutOptions</code> will attempt to
+      put extra space into that cell. If all nodes have the same <code>grow</code>, then all nodes will receive the same
+      share of the extra space. Otherwise, extra space is distributed proportionally as defined by each node's <code>grow</code>
+      value.
+    </p>
 
     <div id="resizable-example"></div>
     <script type="text/javascript">
@@ -732,13 +734,14 @@
       } );
     </script>
 
-    <p>Content width/height can be set for the entire flowbox as well, by using <code>layoutOptions: { minContentWidth:
-      {{NUMBER}}, minContentHeight: {{NUMBER}} }</code>
-      in the parent. This will set the width/height for the flowbox even if the children are smaller, however it still
-      allows the flowBox to
-      dynamically resize if the children grow. A common mistake is to use <code>preferredWidth</code> / <code>preferredHeight</code>
-      to size a FlowBox. However, these options will get
-      overwritten on <code>resizable: true</code>, which is the default option value for all FlowBoxes. </p>
+    <p>
+      Content width/height can be set for the entire FlowBox as well, by using <code>layoutOptions: { minContentWidth:
+      {{NUMBER}}, minContentHeight: {{NUMBER}} }</code>in the parent. This will set the width/height for the FlowBox
+      even if the children are smaller, however it still allows the FlowBox to dynamically resize if the children grow.
+      A common mistake is to use <code>preferredWidth</code> / <code>preferredHeight</code>to size a FlowBox. However,
+      these options will get overwritten on <code>resizable: true</code>, which is the default option value for all
+      FlowBoxes.
+    </p>
 
     <div id="dimension-example"></div>
     <script type="text/javascript">
@@ -1166,9 +1169,10 @@
 
     <h3 id="separators" class="index">Separators</h3>
 
-    <p>Separators are also available for easy of use (separators at the visible start/end, and duplicates will be marked
-      as
-      <code>visible: false</code>, while all other separators will be marked as <code>visible: true</code>):</p>
+    <p>
+      Separators are also available for easy of use (separators at the visible start/end, and duplicates will be marked
+      as <code>visible: false</code>, while all other separators will be marked as <code>visible: true</code>):
+    </p>
 
     <div id="separators-example"></div>
     <script type="text/javascript">
@@ -1369,8 +1373,7 @@
 
     <p>
       Additionally, if a certain number of rows/columns are desired, <code>autoRows</code> / <code>autoColumns</code>
-      can be used to wrap and
-      position the children based on this (auto-filling all spaces)
+      can be used to wrap and position the children based on this (auto-filling all spaces)
     </p>
 
     <div id="autoColumns-example"></div>
@@ -1572,8 +1575,10 @@
 
     <h3 id="GridBox-grow" class="index">grow</h3>
 
-    <p>Grids by default don't auto-expand all rows/columns in size to the preferred size, but they can with a similar
-      style to FlowBox, where <code>grow</code> applies to both the x and y dimensions:</p>
+    <p>
+      Grids by default don't auto-expand all rows/columns in size to the preferred size, but they can with a similar
+      style to FlowBox, where <code>grow</code> applies to both the x and y dimensions:
+    </p>
 
     <div id="grow-grid-example"></div>
     <script type="text/javascript">
@@ -1613,8 +1618,10 @@
       } );
     </script>
 
-    <p>This space can be grown in specified rows/columns only (and independently) with <code>xGrow</code> or
-      <code>yGrow</code>:</p>
+    <p>
+      This space can be grown in specified rows/columns only (and independently) with <code>xGrow</code> or
+      <code>yGrow</code>:
+    </p>
 
     <div id="grow-2-grid-example"></div>
     <script type="text/javascript">
@@ -1657,9 +1664,11 @@
 
     <h3 id="GridBox-stretch" class="index">stretch</h3>
 
-    <p>Use <code>stretch</code> (or <code>xStretch</code> / <code>yStretch</code>) to grow a cell dynamically with the
-      preferred dimensions to match the row/column.
-      <code>stretch</code> must be paired with a <code>grow</code> value to be activated. </p>
+    <p>
+      Use <code>stretch</code> (or <code>xStretch</code> / <code>yStretch</code>) to grow a cell dynamically with the
+      preferred dimensions to match the row/column. <code>stretch</code> must be paired with a <code>grow</code> value
+      to be activated.
+    </p>
 
     <div id="preferred-grid-example"></div>
     <script type="text/javascript">
@@ -1708,8 +1717,10 @@
 
     <h3 id="GridBox-sizable" class="index">sizable</h3>
 
-    <p>Additionally, <code>widthSizable</code> / <code>heightSizable</code> can be used to turn off resizing in a
-      component (particularly useful if you want to set a preferredWidth/preferredHeight on it that won't change):</p>
+    <p>
+      Additionally, <code>widthSizable</code> / <code>heightSizable</code> can be used to turn off resizing in a
+      component (particularly useful if you want to set a preferredWidth/preferredHeight on it that won't change):
+    </p>
 
     <div id="gridResizable-example"></div>
     <script type="text/javascript">
@@ -1757,7 +1768,9 @@
 
     <h3 id="GridBox-align" class="index">align</h3>
 
-    <p>Cells can be aligned in a similar way to FlowBox, but in both dimensions:</p>
+    <p>
+      Cells can be aligned in a similar way to FlowBox, but in both dimensions:
+    </p>
 
     <div id="align-grid-example"></div>
     <script type="text/javascript">
@@ -1802,8 +1815,10 @@
 
     <h3 id="GridBox-layoutOptions-size" class="index">horizontalSpan/verticalSpan</h3>
 
-    <p>Cells can take up more than one row/column with the <code>horizontalSpan</code> / <code>verticalSpan</code>
-      layout options:</p>
+    <p>
+      Cells can take up more than one row/column with the <code>horizontalSpan</code> / <code>verticalSpan</code>
+      layout options:
+    </p>
 
     <div id="span-grid-example"></div>
     <script type="text/javascript">
@@ -2061,10 +2076,9 @@
 
     <p>
       Certain Node subtypes are <code>sizable:</code> they can be adjusted to different <em>preferred</em> sizes/bounds,
-      which are
-      equal to or larger than their <em>minimum</em> sizes. When the preferred size is set, the Node should adjust its
-      own layout so that it takes up that size. This includes FlowBox (VBox/HBox), GridBox, Panel, and a growing list of
-      Nodes.
+      which are equal to or larger than their <em>minimum</em> sizes. When the preferred size is set, the Node should
+      adjust its own layout so that it takes up that size. This includes FlowBox (VBox/HBox), GridBox, Panel, and a
+      growing list of Nodes.
     </p>
 
     <p>
@@ -2084,21 +2098,19 @@
     <p>
       Typically layout containers (but also clients, manually) will set the preferred sizes on a Node, thus the
       parent version will be primary (e.g. when a sizable Node is transformed, its <code>localPreferredWidth</code> will
-      be adjusted
-      to match the <code>preferredWidth</code> after the transformation).
+      be adjusted to match the <code>preferredWidth</code> after the transformation).
     </p>
 
     <p>
       Some Nodes by default have this "sizability" turned off, and clients can do this manually with
       <code>widthSizable/heightSizable/sizable:false</code>. Layout containers should not attempt to set preferred sizes
-      when the
-      Node is not considered "sizable".
+      when the Node is not considered "sizable".
     </p>
 
     <p>
       For instance, Rectangles mix in Sizable, but are marked as <code>sizable: false</code> by default, so it won't
-      take up space
-      even when a container has a larger preferred size. They can be made resizable with <code>sizable: true</code>:
+      take up space even when a container has a larger preferred size. They can be made resizable with <code>sizable:
+      true</code>:
     </p>
 
     <div id="rectUnsizable-example"></div>
@@ -2151,10 +2163,8 @@
     <p>
       Layout options can be set on individual child Nodes of a layout container. These will override the container's
       default for any options included. These can be mutated after (by setting the entire thing with <code>node.layoutOptions
-      =</code>
-      or with <code>mutateLayoutOptions</code>). <code>mutateLayoutOptions</code> is recommended, since it will keep
-      some layout options that may
-      be set by <code>rows/columns/autoRows/autoColumns</code> in GridBox.
+      =</code>or with <code>mutateLayoutOptions</code>). <code>mutateLayoutOptions</code> is recommended, since it will
+      keep some layout options that may be set by <code>rows/columns/autoRows/autoColumns</code> in GridBox.
     </p>
 
     <div id="layoutOptionsMutate-example"></div>
@@ -2213,7 +2223,8 @@
       } );
     </script>
 
-    <p>When using <code>align: origin</code>, the origin of the entire FlowBox will be at the origin of the first line:
+    <p>
+      When using <code>align: origin</code>, the origin of the entire FlowBox will be at the origin of the first line:
     </p>
 
     <div id="flowOrigin-example"></div>
@@ -2262,7 +2273,8 @@
       } );
     </script>
 
-    <p>When using <code>align: origin</code>, the origin of the entire GridBox will be at the origin of the first cell:
+    <p>
+      When using <code>align: origin</code>, the origin of the entire GridBox will be at the origin of the first cell:
     </p>
 
     <div id="gridOrigin-example"></div>
@@ -2319,8 +2331,10 @@
 
     <h2 id="Constraint" class="index">Constraint</h2>
 
-    <p>The next sections requires a basic understanding of what a constraint is in scenery layout, how it's used, and
-      how it can be leveraged.</p>
+    <p>
+      The next sections requires a basic understanding of what a constraint is in scenery layout, how it's used, and
+      how it can be leveraged.
+    </p>
 
     <p>
       Constraints are the foundational layer that handles layout logic for scenery elements. If you search through the
@@ -2627,8 +2641,10 @@
       } );
     </script>
 
-    <p>Margins can also be used on their own (without <code>alignBounds</code> / <code>align</code>) to just create a
-      Node with larger bounds:</p>
+    <p>
+      Margins can also be used on their own (without <code>alignBounds</code> / <code>align</code>) to just create a
+      Node with larger bounds:
+    </p>
 
     <div id="alignBoxOnlyMargins-example"></div>
     <script type="text/javascript">
@@ -2686,8 +2702,10 @@
       } );
     </script>
 
-    <p>and can be dynamically resizable (off by default because it's usually not used for that purpose in legacy
-      code):</p>
+    <p>
+      and can be dynamically resizable (off by default because it's usually not used for that purpose in legacy
+      code):
+    </p>
 
     <div id="alignBoxSizable-example"></div>
     <script type="text/javascript">
