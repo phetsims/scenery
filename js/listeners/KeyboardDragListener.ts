@@ -130,7 +130,7 @@ type SelfOptions = {
 
   // If provided, this will be the conversion between the view and model coordinate frames. Usually most useful when
   // paired with the positionProperty.
-  transform?: Transform3 | null;
+  transform?: Transform3 | TReadOnlyProperty<Transform3> | null;
 
   // If provided, the model position will be constrained to be inside these bounds, in model coordinates
   dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
@@ -183,7 +183,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   private _end: ( ( event: SceneryEvent ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _mapPosition: MapPosition | null;
-  private _transform: Transform3 | null;
+  private _transform: Transform3 | TReadOnlyProperty<Transform3> | null;
   private _keyboardDragDirection: KeyboardDragDirection;
   private _positionProperty: TProperty<Vector2> | null;
   private _dragVelocity: number;
@@ -413,18 +413,18 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   /**
    * Sets the drag transform of the listener.
    */
-  public setTransform( transform: Transform3 | null ): void {
+  public setTransform( transform: Transform3 | TReadOnlyProperty<Transform3> | null ): void {
     this._transform = transform;
   }
 
-  public set transform( transform: Transform3 | null ) { this.setTransform( transform ); }
+  public set transform( transform: Transform3 | TReadOnlyProperty<Transform3> | null ) { this.setTransform( transform ); }
 
-  public get transform(): Transform3 | null { return this.getTransform(); }
+  public get transform(): Transform3 | TReadOnlyProperty<Transform3> | null { return this.getTransform(); }
 
   /**
    * Returns the transform of the listener.
    */
-  public getTransform(): Transform3 | null {
+  public getTransform(): Transform3 | TReadOnlyProperty<Transform3> | null {
     return this._transform;
   }
 
@@ -810,7 +810,9 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
         // to model coordinates
         if ( this._transform ) {
-          vectorDelta = this._transform.inverseDelta2( vectorDelta );
+          const transform = this._transform instanceof Transform3 ? this._transform : this._transform.value;
+
+          vectorDelta = transform.inverseDelta2( vectorDelta );
         }
 
         // synchronize with model position
