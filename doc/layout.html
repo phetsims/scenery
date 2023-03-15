@@ -735,12 +735,19 @@
     </script>
 
     <p>
-      Content width/height can be set for the entire FlowBox as well, by using <code>layoutOptions: { minContentWidth:
-      {{NUMBER}}, minContentHeight: {{NUMBER}} }</code>in the parent. This will set the width/height for the FlowBox
-      even if the children are smaller, however it still allows the FlowBox to dynamically resize if the children grow.
-      A common mistake is to use <code>preferredWidth</code> / <code>preferredHeight</code>to size a FlowBox. However,
-      these options will get overwritten on <code>resizable: true</code>, which is the default option value for all
-      FlowBoxes.
+      Content minimums and maximums can be applied to all layout cells in the FlowBox by using <code>layoutOptions: {
+      minContentWidth: {{NUMBER}}, minContentHeight: {{NUMBER}} }</code>. For example, setting
+      <code>minContentWidth</code> in a FlowBox's <code>layoutOption</code> constrains all of its layout cells to
+      a certain width ( with margin and spacing added to calculate the total width). This occurs even if the children
+      are smaller and do not occupy the full width. However, this method still allows the FlowBox to dynamically resize
+      if the children grow. A common mistake is to use <code>preferredWidth</code> / <code>preferredHeight</code>to size
+      any content that will end up inside a layout container. These options will get overwritten by a parent with <code>resizable:
+      true</code>, which is the default option value for all FlowBoxes.
+    </p>
+
+    <p>
+      A good thing to note is that the content width/height can multiply the width/height of the parent container when
+      wrapping occurs.
     </p>
 
     <div id="dimension-example"></div>
