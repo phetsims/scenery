@@ -111,9 +111,6 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // If fireOnHold true, this is the interval (in milliseconds) that the callback fires after the fireOnHoldDelay.
   fireOnHoldInterval?: number;
 
-  // TODO: Potential option to allow overlap between the keys of this KeyboardListener and another.
-  allowKeyOverlap?: boolean;
-
   // Possible input types that decide when callbacks of the listener fire in response to input. See
   // ListenerFireTrigger type documentation.
   listenerFireTrigger?: ListenerFireTrigger;
@@ -175,9 +172,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _handle: boolean;
   private readonly _abort: boolean;
 
-  // TODO: Potentially a flag that could allow overlaps between keys of other KeyboardListeners.
-  private readonly _allowKeyOverlap: boolean;
-
   private readonly _windowFocusListener: ( windowHasFocus: boolean ) => void;
 
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
@@ -191,8 +185,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       listenerFireTrigger: 'down',
       fireOnHold: false,
       fireOnHoldDelay: 400,
-      fireOnHoldInterval: 100,
-      allowKeyOverlap: false
+      fireOnHoldInterval: 100
     }, providedOptions );
 
     this._callback = options.callback;
@@ -204,8 +197,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._fireOnHoldInterval = options.fireOnHoldInterval;
 
     this._activeKeyGroups = [];
-
-    this._allowKeyOverlap = options.allowKeyOverlap;
 
     this.keysDown = false;
 
@@ -227,12 +218,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * Mostly required to fire with CallbackTimer since the callback cannot take arguments.
    */
   public fireCallback( event: SceneryEvent<KeyboardEvent> | null, keyGroup: KeyGroup<Keys> ): void {
-
-    // TODO: Some initial work to check for overlap between other listeners that are responding to the same keys.
-    // if ( assert && event && !this._allowKeyOverlap ) {
-    //   this.checkForTrailKeyCollisions( event, keyGroup );
-    // }
-
     this.keysPressed = keyGroup.naturalKeys;
     this._callback( event, this );
     this.keysPressed = null;
@@ -385,46 +370,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    */
   public interrupt(): void {
     this.handleCancel();
-  }
-
-  /**
-   * Throws an assertion if any Node along the trail has a KeyboardListener that is listening for key presses that
-   * overlap with this KeyboardListener, so both would fire. A lot of loops required to find this information,
-   * only run when assertions are enabled. Or consider optimizing.
-   *
-   * TODO: Still working on this function. This method works decently but has not been tested well and may not
-   *       cover all cases. Still need to look for collisions against active global listeners as well. For that
-   *       we will probably need a registry object.
-   */
-  private checkForTrailKeyCollisions( event: SceneryEvent<KeyboardEvent>, myKeyGroup: KeyGroup<Keys> ): void {
-    const trails = event.target.getTrails();
-
-    for ( let i = 0; i < trails.length; i++ ) {
-      const trail = trails[ i ];
-      for ( let j = 0; j < trail.nodes.length; j++ ) {
-        const node = trail.nodes[ j ];
-        for ( let k = 0; k < node.inputListeners.length; k++ ) {
-          const inputListener = node.inputListeners[ k ];
-          if ( inputListener.listener instanceof KeyboardListener &&
-               !inputListener.listener._allowKeyOverlap &&
-               inputListener.listener !== this ) {
-            const ancestorKeyGroups = inputListener.listener._keyGroups;
-
-            for ( let l = 0; l < ancestorKeyGroups.length; l++ ) {
-              const ancestorNaturalKeys = ancestorKeyGroups[ l ].naturalKeys;
-
-              // There is an ovelrap if the last keys are the same, or if all keys of the ancestor are pressed while
-              // pressing the modifier keys of the descendant keys
-              const modifierOverlap = ancestorNaturalKeys.startsWith( myKeyGroup.naturalKeys );
-              const finalKeysEqual = ancestorKeyGroups[ l ].key === myKeyGroup.key;
-
-              assert && assert( !modifierOverlap && !finalKeysEqual,
-                `Keys collision with another KeyboardListener along this trail. My keys: ${myKeyGroup.naturalKeys}, other keys: '${ancestorNaturalKeys}, '` );
-            }
-          }
-        }
-      }
-    }
   }
 
   /**
