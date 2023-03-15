@@ -8,7 +8,6 @@
  * - '+' separates each key in a single group.
  * - The keys leading up to the last key in the group are considered "modifier" keys. The last key in the group needs
  *   to be pressed while the modifier keys are down.
- * - ONLY the keys in the group can be pressed down. If any other keys are pressed the callback will not fire.
  * - The order modifier keys are pressed does not matter for firing the callback.
  *
  * In the above example "shift+t" OR "alt+shift+r" will fire the callback when pressed.
@@ -77,6 +76,11 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // The keys that need to be pressed to fire the callback. In a form like `[ 'shift+t', 'alt+shift+r' ]`. See top
   // level documentation for more information and an example of providing keys.
   keys: Keys;
+
+  // If true, the listener will fire callbacks if keys other than keys in the key group happen to be down at the same
+  // time. If false, callbacks will fire only when the keys of a group are exclusively down. Setting this to true is
+  // also useful if you want multiple key groups from your provided keys to fire callbacks at the same time.
+  allowOtherKeys?: boolean;
 
   // If true, the listener will fire for keys regardless of where focus is in the document. Use this when you want
   // to add some key press behavior that will always fire no matter what the event target is. If this listener
@@ -171,6 +175,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _global: boolean;
   private readonly _handle: boolean;
   private readonly _abort: boolean;
+  private readonly _allowOtherKeys: boolean;
 
   private readonly _windowFocusListener: ( windowHasFocus: boolean ) => void;
 
@@ -185,7 +190,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       listenerFireTrigger: 'down',
       fireOnHold: false,
       fireOnHoldDelay: 400,
-      fireOnHoldInterval: 100
+      fireOnHoldInterval: 100,
+      allowOtherKeys: false
     }, providedOptions );
 
     this._callback = options.callback;
@@ -195,6 +201,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._fireOnHold = options.fireOnHold;
     this._fireOnHoldDelay = options.fireOnHoldDelay;
     this._fireOnHoldInterval = options.fireOnHoldInterval;
+    this._allowOtherKeys = options.allowOtherKeys;
 
     this._activeKeyGroups = [];
 
@@ -234,7 +241,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       this._keyGroups.forEach( keyGroup => {
 
         if ( !this._activeKeyGroups.includes( keyGroup ) ) {
-          if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.allKeys ) &&
+          if ( this.areKeysDownForListener( keyGroup.allKeys ) &&
                KeyboardUtils.areKeysEquivalent( keyGroup.key, globalKeyStateTracker.getLastKeyDown()! ) ) {
 
             this._activeKeyGroups.push( keyGroup );
@@ -262,7 +269,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     if ( this._activeKeyGroups.length > 0 ) {
       this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
-        if ( !globalKeyStateTracker.areKeysExclusivelyDown( activeKeyGroup.allKeys ) ) {
+        if ( !this.areKeysDownForListener( activeKeyGroup.allKeys ) ) {
           if ( activeKeyGroup.timer ) {
             activeKeyGroup.timer.stop( false );
           }
@@ -278,7 +285,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       // happens, see https://github.com/phetsims/scenery/issues/1534.
       if ( eventCode ) {
         this._keyGroups.forEach( keyGroup => {
-          if ( globalKeyStateTracker.areKeysExclusivelyDown( keyGroup.modifierKeys ) &&
+          if ( this.areKeysDownForListener( keyGroup.modifierKeys ) &&
                KeyboardUtils.areKeysEquivalent( keyGroup.key, eventCode ) ) {
             this.keysDown = false;
             this.fireCallback( event, keyGroup );
@@ -288,6 +295,15 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     }
 
     this.manageEvent( event );
+  }
+
+  /**
+   * Are the provided keys currently pressed in a way that should start or stop firing callbacks? If this listener
+   * allows other keys to be pressed, returns true if the keys are down. If not, it returns true if ONLY the
+   * provided keys are down.
+   */
+  private areKeysDownForListener( keys: string[] ): boolean {
+    return this._allowOtherKeys ? globalKeyStateTracker.areKeysDown( keys ) : globalKeyStateTracker.areKeysExclusivelyDown( keys );
   }
 
   /**
