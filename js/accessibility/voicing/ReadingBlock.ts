@@ -29,6 +29,7 @@ import TInputListener from '../../input/TInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
+import memoize from '../../../../phet-core/js/memoize.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -77,7 +78,7 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
 } );
 
-const ReadingBlock = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ) => {
 
   const ReadingBlockClass = DelayedMutate( 'ReadingBlock', READING_BLOCK_OPTION_KEYS, class ReadingBlockClass extends Voicing( Type ) {
 
@@ -419,7 +420,7 @@ const ReadingBlock = <SuperType extends Constructor<Node>>( Type: SuperType ) =>
     'x mutator keys in ReadingBlock' );
 
   return ReadingBlockClass;
-};
+} );
 
 // Export a type that lets you check if your Node is composed with ReadingBlock
 const wrapper = () => ReadingBlock( Node );

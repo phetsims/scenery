@@ -12,6 +12,7 @@ import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import { DelayedMutate, Display, Focus, Instance, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
+import memoize from '../../../../phet-core/js/memoize.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -29,7 +30,7 @@ type SelfOptions = {
 
 export type InteractiveHighlightingOptions = SelfOptions;
 
-const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ) => {
 
   // @ts-expect-error
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
@@ -463,7 +464,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
     'duplicate mutator keys in InteractiveHighlighting' );
 
   return InteractiveHighlightingClass;
-};
+} );
 
 // Provides a way to determine if a Node is composed with InteractiveHighlighting by type
 const wrapper = () => InteractiveHighlighting( Node );
