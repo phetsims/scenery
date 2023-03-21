@@ -14,13 +14,15 @@ import { Line, LineOptions, scenery } from '../../imports.js';
 // Separators are automatically shown/hidden and hence should not be instrumented for PhET-iO control.
 export type SeparatorOptions = StrictOmit<LineOptions, 'tandem'>;
 
+export const DEFAULT_SEPARATOR_LAYOUT_OPTIONS = {
+  stretch: true,
+  isSeparator: true
+};
+
 export default class Separator extends Line {
   public constructor( providedOptions?: LineOptions ) {
     super( optionize<LineOptions, EmptySelfOptions, LineOptions>()( {
-      layoutOptions: {
-        stretch: true,
-        isSeparator: true
-      },
+        layoutOptions: DEFAULT_SEPARATOR_LAYOUT_OPTIONS,
 
       // Matches HSeparatorDeprecated/VSeparatorDeprecated as a default
       stroke: 'rgb(100,100,100)'

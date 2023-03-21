@@ -244,6 +244,7 @@ export type { HorizontalLayoutJustification, VerticalLayoutJustification } from 
 export type { default as TLayoutOptions } from './layout/TLayoutOptions.js';
 export { default as Separator } from './layout/nodes/Separator.js';
 export type { SeparatorOptions } from './layout/nodes/Separator.js';
+export { DEFAULT_SEPARATOR_LAYOUT_OPTIONS } from './layout/nodes/Separator.js';
 export { default as VSeparator } from './layout/nodes/VSeparator.js';
 export type { VSeparatorOptions } from './layout/nodes/VSeparator.js';
 export { default as HSeparator } from './layout/nodes/HSeparator.js';
