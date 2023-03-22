@@ -149,7 +149,7 @@ type SelfOptions = {
   drag?: ( ( viewDelta: Vector2 ) => void ) | null;
 
   // Called when keyboard dragging ends.
-  end?: ( ( event: SceneryEvent ) => void ) | null;
+  end?: ( ( event?: SceneryEvent ) => void ) | null;
 
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
   moveOnHoldDelay?: number;
@@ -180,7 +180,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   // See options for documentation
   private _start: ( ( event: SceneryEvent ) => void ) | null;
   private _drag: ( ( viewDelta: Vector2, listener: KeyboardDragListener ) => void ) | null;
-  private _end: ( ( event: SceneryEvent ) => void ) | null;
+  private _end: ( ( event?: SceneryEvent ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _mapPosition: MapPosition | null;
   private _transform: Transform3 | TReadOnlyProperty<Transform3> | null;
@@ -1035,6 +1035,8 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         'A reference to the Pointer means it should have the pointerListener' );
       this._pointer.removeInputListener( this._pointerListener );
       this._pointer = null;
+
+      this._end && this._end();
     }
   }
 
