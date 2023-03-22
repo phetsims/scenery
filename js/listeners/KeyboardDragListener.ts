@@ -791,17 +791,17 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       let deltaY = 0;
 
       if ( this.leftMovementKeysDown() ) {
-        deltaX = -delta;
+        deltaX -= delta;
       }
-      else if ( this.rightMovementKeysDown() ) {
-        deltaX = delta;
+      if ( this.rightMovementKeysDown() ) {
+        deltaX += delta;
       }
 
       if ( this.upMovementKeysDown() ) {
-        deltaY = -delta;
+        deltaY -= delta;
       }
-      else if ( this.downMovementKeysDown() ) {
-        deltaY = delta;
+      if ( this.downMovementKeysDown() ) {
+        deltaY += delta;
       }
 
       // only initiate move if there was some attempted keyboard drag
