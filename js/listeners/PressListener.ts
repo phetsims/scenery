@@ -33,7 +33,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { Display, TInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
+import { Display, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -299,7 +299,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
 
     this.overPointers = createObservableArray();
 
-    this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
+    this.isPressedProperty = new BooleanProperty( false, { reentrant: true, hasListenerOrderDependencies: true } ); // TODO: listener order dependency in https://github.com/phetsims/expression-exchange/issues/161
     this.isOverProperty = new BooleanProperty( false );
     this.looksOverProperty = new BooleanProperty( false );
     this.isHoveringProperty = new BooleanProperty( false );
