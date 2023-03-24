@@ -173,7 +173,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
+import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, SupportedEventTypes, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
@@ -1107,7 +1107,7 @@ export default class Input extends PhetioObject {
    * Steps to dispatch a pdom-related event. Before dispatch, the PDOMPointer is initialized if it
    * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
    */
-  private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: string, domEvent: DOMEvent, bubbles: boolean ): void {
+  private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: SupportedEventTypes, domEvent: DOMEvent, bubbles: boolean ): void {
 
     this.ensurePDOMPointer().updateTrail( trail );
 
@@ -1131,7 +1131,7 @@ export default class Input extends PhetioObject {
     }
   }
 
-  private dispatchGlobalEvent<DOMEvent extends Event>( eventType: string, domEvent: DOMEvent, capture: boolean ): void {
+  private dispatchGlobalEvent<DOMEvent extends Event>( eventType: SupportedEventTypes, domEvent: DOMEvent, capture: boolean ): void {
 
     this.ensurePDOMPointer();
     assert && assert( this.pdomPointer );
@@ -1846,7 +1846,7 @@ export default class Input extends PhetioObject {
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
    */
-  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, event: DOMEvent | null, bubbles: boolean, fireOnInputDisabled = false ): void {
+  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: SupportedEventTypes, pointer: Pointer, event: DOMEvent | null, bubbles: boolean, fireOnInputDisabled = false ): void {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
       `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point ? pointer.point.toString() : 'null'}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1886,32 +1886,32 @@ export default class Input extends PhetioObject {
    * @param capture - If true, this dispatch is in the capture sequence (like DOM's addEventListener useCapture).
    *                  Listeners will only be called if the listener also indicates it is for the capture sequence.
    */
-  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: TInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent>, capture: boolean | null = null ): void {
+  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: TInputListener[], type: SupportedEventTypes, inputEvent: SceneryEvent<DOMEvent>, capture: boolean | null = null ): void {
 
     if ( inputEvent.handled ) {
       return;
     }
 
-    const specificType = pointer.type + type; // e.g. mouseup, touchup
+    const specificType = pointer.type + type as SupportedEventTypes; // e.g. mouseup, touchup
 
     for ( let i = 0; i < listeners.length; i++ ) {
       const listener = listeners[ i ];
 
       if ( capture === null || capture === !!listener.capture ) {
-        if ( !inputEvent.aborted && listener[ specificType as keyof TInputListener ] ) {
+        if ( !inputEvent.aborted && listener[ specificType ] ) {
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( specificType );
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-          ( listener[ specificType as keyof TInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
+          ( listener[ specificType ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
         }
 
-        if ( !inputEvent.aborted && listener[ type as keyof TInputListener ] ) {
+        if ( !inputEvent.aborted && listener[ type ] ) {
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( type );
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-          ( listener[ type as keyof TInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
+          ( listener[ type ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
           sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
         }
@@ -1929,7 +1929,9 @@ export default class Input extends PhetioObject {
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param [fireOnInputDisabled]
    */
-  private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean, fireOnInputDisabled = false ): void {
+  private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: SupportedEventTypes, pointer: Pointer,
+                                                     inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean,
+                                                     fireOnInputDisabled = false ): void {
 
     if ( inputEvent.aborted || inputEvent.handled ) {
       return;

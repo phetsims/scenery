@@ -7,6 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { SceneryEvent } from '../imports.js';
 
 export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
@@ -19,6 +20,18 @@ type TInputListener = {
   // phase. Listeners are fired BEFORE the dispatch through the scene graph. (very similar to DOM addEventListener's
   // useCapture).
   capture?: boolean;
+
+  listener?: unknown;
+
+  // Function that returns the Bounds2 for AnimatedPanZoomListener to keep in view during drag input.
+  // Bounds are in the global coordinate frame.
+  // While dragging, the AnimatedPanZoomListener will try to keep these bounds in view. Intended to be
+  // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
+  createPanTargetBounds?: ( () => Bounds2 ) | null;
+
+  ////////////////////////////////////////////////
+  //////////////////////////////////////////////
+  // Only actual events below here
 
   focus?: SceneryListenerFunction<FocusEvent>;
   blur?: SceneryListenerFunction<FocusEvent>;
@@ -79,13 +92,9 @@ type TInputListener = {
   mouseout?: SceneryListenerFunction<MouseEvent | PointerEvent>;
   touchout?: SceneryListenerFunction<TouchEvent | PointerEvent>;
   penout?: SceneryListenerFunction<PointerEvent>;
-
-  listener?: unknown;
-
-  // Function that returns the Bounds2 for AnimatedPanZoomListener to keep in view during drag input.
-  // Bounds are in the global coordinate frame.
-  // While dragging, the AnimatedPanZoomListener will try to keep these bounds in view. Intended to be
-  // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
-  createPanTargetBounds?: ( () => Bounds2 ) | null;
 };
+
+// Exclude all but the actual browser events
+export type SupportedEventTypes = keyof StrictOmit<TInputListener, 'interrupt' | 'cursor' | 'capture' | 'listener' | 'createPanTargetBounds'>;
+
 export default TInputListener;
