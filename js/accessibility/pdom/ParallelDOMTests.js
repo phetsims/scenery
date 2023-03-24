@@ -1181,7 +1181,7 @@ QUnit.test( 'replaceChild', assert => {
   b.replaceChild( d, testNode );
   assert.ok( b.hasChild( testNode ), 'testNode should be a child of node b after replacing with replaceChild' );
   assert.ok( !b.hasChild( d ), 'd should not be a child of b after it was replaced with replaceChild' );
-  assert.ok( !d.focused, 'do does not have focus after being replaced by testNode' );
+  assert.ok( !d.focused, 'd does not have focus after being replaced by testNode' );
   assert.ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
 
   display.dispose();
