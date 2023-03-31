@@ -1046,6 +1046,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   public override dispose(): void {
     this.interrupt();
     this._disposeKeyboardDragListener();
+    super.dispose();
   }
 
   /**
