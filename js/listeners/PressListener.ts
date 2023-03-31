@@ -299,7 +299,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
 
     this.overPointers = createObservableArray();
 
-    this.isPressedProperty = new BooleanProperty( false, { reentrant: true, hasListenerOrderDependencies: true } ); // TODO: listener order dependency in https://github.com/phetsims/expression-exchange/issues/161
+    this.isPressedProperty = new BooleanProperty( false, { reentrant: true, hasListenerOrderDependencies: true } ); // TODO: listener order dependency in https://github.com/phetsims/axon/issues/432
     this.isOverProperty = new BooleanProperty( false );
     this.looksOverProperty = new BooleanProperty( false );
     this.isHoveringProperty = new BooleanProperty( false );
