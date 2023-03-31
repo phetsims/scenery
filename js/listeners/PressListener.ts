@@ -1028,16 +1028,19 @@ export default class PressListener extends EnabledComponent implements TInputLis
     }
     !this.isHoveringProperty.isDisposed && this.isHoveringProperty.unlink( this._isHighlightedListener );
 
-    this.overPointers.dispose();
-    this.isPressedProperty.dispose();
-    this.isOverProperty.dispose();
-    this.isHoveringProperty.dispose();
-    this.isHighlightedProperty.dispose();
-    this.isFocusedProperty.dispose();
-    this.pdomClickingProperty.dispose();
-    this.looksPressedProperty.dispose();
     this._pressAction.dispose();
     this._releaseAction.dispose();
+
+    this.looksPressedProperty.dispose();
+    this.pdomClickingProperty.dispose();
+    this.cursorProperty.dispose();
+    this.isFocusedProperty.dispose();
+    this.isHighlightedProperty.dispose();
+    this.isHoveringProperty.dispose();
+    this.looksOverProperty.dispose();
+    this.isOverProperty.dispose();
+    this.isPressedProperty.dispose();
+    this.overPointers.dispose();
 
     // Remove references to the stored display, if we have any.
     if ( this.display ) {
