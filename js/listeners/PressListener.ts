@@ -706,6 +706,8 @@ export default class PressListener extends EnabledComponent implements TInputLis
    * @param [callback] - to be run at the end of the function, but only on success
    */
   private onPress( event: PressListenerEvent, targetNode: Node | null, callback: ( () => void ) | null ): void {
+    assert && assert( !this.isDisposed, 'Should not press on a disposed listener' );
+
     const givenTargetNode = targetNode || this._targetNode;
 
     // Set this properties before the property change, so they are visible to listeners.
