@@ -52,6 +52,11 @@ export default class FlowLine extends LayoutLine {
     FlowLine.pool.freeToPool( this );
   }
 
+  public clean(): void {
+    this.cells.length = 0;
+    this.freeToPool();
+  }
+
   /**
    * (scenery-internal)
    */

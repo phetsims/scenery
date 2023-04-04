@@ -103,7 +103,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
       const lineMap: Map<number, GridLine> = this.displayedLines.get( orientation );
 
       // Clear out the lineMap
-      lineMap.forEach( line => line.freeToPool() );
+      lineMap.forEach( line => line.clean() );
       lineMap.clear();
 
       // What are all the line indices used by displayed cells? There could be gaps. We pretend like those gaps

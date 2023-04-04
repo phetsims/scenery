@@ -344,7 +344,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
 
     this.finishedLayoutEmitter.emit();
 
-    lines.forEach( line => line.freeToPool() );
+    lines.forEach( line => line.clean() );
   }
 
   public get justify(): HorizontalLayoutJustification | VerticalLayoutJustification {
