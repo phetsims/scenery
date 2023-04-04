@@ -26,7 +26,7 @@ import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 import { AlignBox, Node, scenery } from '../../imports.js';
 import { AlignBoxOptions } from '../nodes/AlignBox.js';
-import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';
+import Disposable from '../../../../axon/js/Disposable.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 
 let globalId = 1;
@@ -39,7 +39,7 @@ type SelfOptions = {
   matchVertical?: boolean;
 };
 
-export type AlignGroupOptions = SelfOptions & DisposableOptions;
+export type AlignGroupOptions = SelfOptions;
 
 const DEFAULT_OPTIONS = {
   matchHorizontal: true,
@@ -71,12 +71,12 @@ export default class AlignGroup extends Disposable {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on options object is a code smell' );
 
-    const options = optionize3<AlignGroupOptions, SelfOptions, DisposableOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+    const options = optionize3<AlignGroupOptions, SelfOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     assert && assert( typeof options.matchHorizontal === 'boolean' );
     assert && assert( typeof options.matchVertical === 'boolean' );
 
-    super( options );
+    super();
 
     this._alignBoxes = [];
 
@@ -141,8 +141,7 @@ export default class AlignGroup extends Disposable {
 
     // Setting the group should call our addAlignBox()
     return new AlignBox( content, combineOptions<AlignBoxOptions>( {
-      group: this,
-      disposer: this
+      group: this
     }, options ) );
   }
 
@@ -311,12 +310,18 @@ export default class AlignGroup extends Disposable {
   public removeAlignBox( alignBox: AlignBox ): void {
     arrayRemove( this._alignBoxes, alignBox );
 
-    if ( alignBox.disposer === this ) {
-      alignBox.disposer = null;
-    }
-
     // Trigger an update when a alignBox is removed
     this.updateLayout();
+  }
+
+  /**
+   * Dispose all the boxes.
+   */
+  public override dispose(): void {
+    for ( let i = this._alignBoxes.length - 1; i >= 0; i-- ) {
+      this._alignBoxes[ i ].dispose();
+    }
+    super.dispose();
   }
 }
 
