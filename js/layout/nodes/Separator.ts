@@ -22,9 +22,9 @@ export const DEFAULT_SEPARATOR_LAYOUT_OPTIONS = {
 export default class Separator extends Line {
   public constructor( providedOptions?: LineOptions ) {
     super( optionize<LineOptions, EmptySelfOptions, LineOptions>()( {
-        layoutOptions: DEFAULT_SEPARATOR_LAYOUT_OPTIONS,
+      layoutOptions: DEFAULT_SEPARATOR_LAYOUT_OPTIONS,
 
-      // Matches HSeparatorDeprecated/VSeparatorDeprecated as a default
+      // dark gray
       stroke: 'rgb(100,100,100)'
     }, providedOptions ) );
   }
