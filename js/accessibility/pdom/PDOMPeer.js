@@ -349,6 +349,17 @@ class PDOMPeer {
   get containerParent() { return this.getContainerParent(); }
 
   /**
+   * Returns the top-level element that contains the primary sibling. If there is no container parent, then the primary
+   * sibling is returned.
+   * @public
+   *
+   * @returns {HTMLElement|null}
+   */
+  getTopLevelElementContainingPrimarySibling() {
+    return this._containerParent || this._primarySibling;
+  }
+
+  /**
    * Recompute the aria-labelledby attributes for all of the peer's elements
    * @public
    */

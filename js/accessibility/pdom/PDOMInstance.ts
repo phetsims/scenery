@@ -483,27 +483,65 @@ class PDOMInstance {
     // the DOMElement to add the child DOMElements to.
     const primarySibling = this.peer!.primarySibling!;
 
+    // Ignore DAG for focused trail. We need to know if there is a focused child instance so that we can avoid
+    // temporarily detaching the focused element from the DOM. See https://github.com/phetsims/my-solar-system/issues/142
+    const focusedTrail = FocusManager.pdomFocusedNode?.pdomInstances[ 0 ]?.trail || null;
+
     // "i" will keep track of the "collapsed" index when all DOMElements for all PDOMInstance children are
     // added to a single parent DOMElement (this PDOMInstance's PDOMPeer's primarySibling)
     let i = primarySibling.childNodes.length - 1;
 
-    // Iterate through all PDOMInstance children
-    for ( let peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
-      const peer = this.children[ peerIndex ].peer!;
+    const focusedChildInstance = focusedTrail && _.find( this.children, child => focusedTrail.containsNode( child.peer!.node! ) );
+    if ( focusedChildInstance ) {
+      // If there's a focused child instance, we need to make sure that its primarySibling is not detached from the DOM
+      // (this has caused focus issues, see https://github.com/phetsims/my-solar-system/issues/142).
+      // Since this doesn't happen often, we can just recompute the full order, and move every other element.
 
-      // Iterate through all top level elements of an PDOMInstance's peer
-      for ( let elementIndex = peer.topLevelElements!.length - 1; elementIndex >= 0; elementIndex-- ) {
-        const element = peer.topLevelElements![ elementIndex ];
+      const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements! ) );
+      const needsOrderChange = !_.every( desiredOrder, ( desiredElement, index ) => primarySibling.children[ index ] === desiredElement );
 
-        // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
-        // No need to reinsert if `element` is already in the right order
-        if ( primarySibling.childNodes[ i ] !== element ) {
-          primarySibling.insertBefore( element, primarySibling.childNodes[ i + 1 ] );
+      if ( needsOrderChange ) {
+        const pivotElement = focusedChildInstance.peer!.getTopLevelElementContainingPrimarySibling();
+        const pivotIndex = desiredOrder.indexOf( pivotElement );
+        assert && assert( pivotIndex >= 0 );
+
+        // Insert all elements before the pivot element
+        for ( let j = 0; j < pivotIndex; j++ ) {
+          primarySibling.insertBefore( desiredOrder[ j ], pivotElement );
         }
 
-        // Decrement so that it is easier to place elements using the browser's Node.insertBefore API
-        i--;
+        // Insert all elements after the pivot element
+        for ( let j = pivotIndex + 1; j < desiredOrder.length; j++ ) {
+          primarySibling.appendChild( desiredOrder[ j ] );
+        }
       }
+    }
+    else {
+      // Iterate through all PDOMInstance children
+      for ( let peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
+        const peer = this.children[ peerIndex ].peer!;
+
+        // Iterate through all top level elements of an PDOMInstance's peer
+        for ( let elementIndex = peer.topLevelElements!.length - 1; elementIndex >= 0; elementIndex-- ) {
+          const element = peer.topLevelElements![ elementIndex ];
+
+          // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
+          // No need to reinsert if `element` is already in the right order
+          if ( primarySibling.childNodes[ i ] !== element ) {
+            primarySibling.insertBefore( element, primarySibling.childNodes[ i + 1 ] );
+          }
+
+          // Decrement so that it is easier to place elements using the browser's Node.insertBefore API
+          i--;
+        }
+      }
+    }
+
+    if ( assert ) {
+      const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements! ) );
+
+      // Verify the order
+      assert( _.every( desiredOrder, ( desiredElement, index ) => primarySibling.children[ index ] === desiredElement ) );
     }
 
     if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
