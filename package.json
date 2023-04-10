@@ -28,7 +28,7 @@
     "supportsOutputJS": true
   },
   "eslintConfig": {
-    "extends": "../chipper/eslint/sim_eslintrc.js",
+    "extends": "../chipper/eslint/phet-library_eslintrc.js",
     "rules": {
       "no-bitwise": "off",
       "todo-should-have-issue": "off"

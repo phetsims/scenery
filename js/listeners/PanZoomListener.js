@@ -76,7 +76,9 @@ class PanZoomListener extends MultiListener {
     } );
 
     this.sourceFramePanBoundsProperty.lazyLink( () => {
-      if ( ( _.hasIn( window, 'phet.joist.sim' ) && phet.joist.sim.isSettingPhetioStateProperty.value ) ) {
+      const simGlobal = _.get( window, 'phet.joist.sim', null ); // returns null if global isn't found
+
+      if ( ( simGlobal && simGlobal.isSettingPhetioStateProperty.value ) ) {
 
         // The matrixProperty has transformations relative to the global view coordinates of the source simulation,
         // so it will not be correct if source and destination frames are different sizes. This will map transforamtions

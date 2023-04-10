@@ -177,7 +177,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // set source and destination positions and scales after setting from state
     // to initialize values for animation with AnimatedPanZoomListener
     this.sourceFramePanBoundsProperty.lazyLink( () => {
-      if ( ( _.hasIn( window, 'phet.joist.sim' ) && phet.joist.sim.isSettingPhetioStateProperty.value ) ) {
+      const simGlobal = _.get( window, 'phet.joist.sim', null ); // returns null if global isn't found
+
+      if ( ( simGlobal && simGlobal.isSettingPhetioStateProperty.value ) ) {
         this.initializePositions();
         this.sourceScale = this.getCurrentScale();
         this.setDestinationScale( this.sourceScale );
@@ -463,8 +465,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // on any keyboard reposition interrupt the middle press panning
     this.cancelMiddlePress();
 
-    const displayAccessible = phet.joist.display._accessible;
-    if ( !displayAccessible || !phet.joist.display.pdomRootElement.contains( domEvent.target ) ) {
+    const simGlobal = _.get( window, 'phet.joist.sim', null ); // returns null if global isn't found
+
+    if ( !simGlobal || !simGlobal.display._accessible ||
+         !simGlobal.display.pdomRootElement.contains( domEvent.target ) ) {
       this.handleZoomCommands( domEvent );
 
       // handle translation without worry of the pointer being attached because there is no pointer at this level
