@@ -1,4 +1,4 @@
-// Copyright 2019-2022, University of Colorado Boulder
+// Copyright 2019-2023, University of Colorado Boulder
 
 /**
  * A PanZoomListener that supports additional forms of input for pan and zoom, including trackpad gestures, mouse
