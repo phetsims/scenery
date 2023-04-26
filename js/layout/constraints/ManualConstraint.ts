@@ -9,7 +9,7 @@
  *
  * For example:
  *
- * new ManualConstraint( [ firstNode, secondNode ], ( firstProxy, secondProxy ) => {
+ * new ManualConstraint( ancestorNode, [ firstNode, secondNode ], ( firstProxy, secondProxy ) => {
  *   firstProxy.left = secondProxy.right + 5;
  *   secondProxy.centerY = firstProxy.centerY;
  * } );
