@@ -8,7 +8,7 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import platform from '../../../phet-core/js/platform.js';
-import { BatchedDOMEventType, Display, Features, FocusManager, globalKeyStateTracker, PDOMUtils, scenery } from '../imports.js';
+import { BatchedDOMEventType, Display, EventContext, Features, FocusManager, globalKeyStateTracker, PDOMUtils, scenery } from '../imports.js';
 
 // Sometimes we need to add a listener that does absolutely nothing
 const noop = () => {};
@@ -17,6 +17,12 @@ const noop = () => {};
 let isGloballyAttached = false;
 
 const BrowserEvents = {
+
+  // Prevents focus related event callbacks from being dispatched - scenery internal operations might change
+  // focus temporarily, we don't want event listeners to be called in this case because they are transient and not
+  // caused by user interaction.
+  blockFocusCallbacks: false,
+
   /**
    * Adds a Display to the list of displays that will be notified of input events.
    * @public
@@ -318,7 +324,7 @@ const BrowserEvents = {
    * Sets an event from the window to be batched on all of the displays.
    * @private
    *
-   * @param {Event} domEvent
+   * @param {EventContext} eventContext
    * @param {BatchedDOMEventType} batchType - TODO: turn to full enumeration?
    * @param {string} inputCallbackName - e.g. 'mouseDown', will trigger Input.mouseDown
    * @param {boolean} triggerImmediate - Whether this will be force-executed now, causing all batched events to fire.
@@ -326,14 +332,17 @@ const BrowserEvents = {
    *                                     necessary for certain security-sensitive actions (like triggering
    *                                     full-screen).
    */
-  batchWindowEvent( domEvent, batchType, inputCallbackName, triggerImmediate ) {
+  batchWindowEvent( eventContext, batchType, inputCallbackName, triggerImmediate ) {
     // NOTE: For now, we don't check whether the event is actually within the display's boundingClientRect. Most
     // displays will want to receive events outside of their bounds (especially for checking drags and mouse-ups
     // outside of their bounds).
     for ( let i = 0; i < this.attachedDisplays.length; i++ ) {
       const display = this.attachedDisplays[ i ];
       const input = display._input;
-      input.batchEvent( domEvent, batchType, input[ inputCallbackName ], triggerImmediate );
+
+      if ( !BrowserEvents.blockFocusCallbacks || ( inputCallbackName !== 'focusIn' && inputCallbackName !== 'focusOut' ) ) {
+        input.batchEvent( eventContext, batchType, input[ inputCallbackName ], triggerImmediate );
+      }
     }
   },
 
@@ -347,12 +356,15 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerdown' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+    // Get the active element BEFORE any actions are taken
+    const eventContext = new EventContext( domEvent );
+
     if ( domEvent.pointerType === 'mouse' ) {
       Display.userGestureEmitter.emit();
     }
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'pointerDown', false );
+    BrowserEvents.batchWindowEvent( eventContext, BatchedDOMEventType.POINTER_TYPE, 'pointerDown', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -367,10 +379,13 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerup' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+    // Get the active element BEFORE any actions are taken
+    const eventContext = new EventContext( domEvent );
+
     Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'pointerUp', true );
+    BrowserEvents.batchWindowEvent( eventContext, BatchedDOMEventType.POINTER_TYPE, 'pointerUp', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -386,7 +401,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'pointerMove', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.POINTER_TYPE, 'pointerMove', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -402,7 +417,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'pointerOver', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.POINTER_TYPE, 'pointerOver', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -418,7 +433,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'pointerOut', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.POINTER_TYPE, 'pointerOut', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -434,7 +449,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'pointerCancel', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.POINTER_TYPE, 'pointerCancel', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -450,7 +465,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'gotPointerCapture', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.POINTER_TYPE, 'gotPointerCapture', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -466,7 +481,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.POINTER_TYPE, 'lostPointerCapture', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.POINTER_TYPE, 'lostPointerCapture', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -482,7 +497,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MS_POINTER_TYPE, 'pointerDown', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MS_POINTER_TYPE, 'pointerDown', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -498,7 +513,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MS_POINTER_TYPE, 'pointerUp', true );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MS_POINTER_TYPE, 'pointerUp', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -514,7 +529,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MS_POINTER_TYPE, 'pointerMove', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MS_POINTER_TYPE, 'pointerMove', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -530,7 +545,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MS_POINTER_TYPE, 'pointerOver', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MS_POINTER_TYPE, 'pointerOver', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -546,7 +561,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MS_POINTER_TYPE, 'pointerOut', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MS_POINTER_TYPE, 'pointerOut', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -562,7 +577,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MS_POINTER_TYPE, 'pointerCancel', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MS_POINTER_TYPE, 'pointerCancel', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -578,7 +593,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.TOUCH_TYPE, 'touchStart', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.TOUCH_TYPE, 'touchStart', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -593,10 +608,13 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'touchend' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+    // Get the active element BEFORE any actions are taken
+    const eventContext = new EventContext( domEvent );
+
     Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.TOUCH_TYPE, 'touchEnd', true );
+    BrowserEvents.batchWindowEvent( eventContext, BatchedDOMEventType.TOUCH_TYPE, 'touchEnd', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -612,7 +630,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.TOUCH_TYPE, 'touchMove', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.TOUCH_TYPE, 'touchMove', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -628,7 +646,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.TOUCH_TYPE, 'touchCancel', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.TOUCH_TYPE, 'touchCancel', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -643,10 +661,13 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mousedown' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+    // Get the active element BEFORE any actions are taken
+    const eventContext = new EventContext( domEvent );
+
     Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MOUSE_TYPE, 'mouseDown', false );
+    BrowserEvents.batchWindowEvent( eventContext, BatchedDOMEventType.MOUSE_TYPE, 'mouseDown', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -661,10 +682,13 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mouseup' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
+    // Get the active element BEFORE any actions are taken
+    const eventContext = new EventContext( domEvent );
+
     Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MOUSE_TYPE, 'mouseUp', true );
+    BrowserEvents.batchWindowEvent( eventContext, BatchedDOMEventType.MOUSE_TYPE, 'mouseUp', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -680,7 +704,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MOUSE_TYPE, 'mouseMove', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MOUSE_TYPE, 'mouseMove', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -696,7 +720,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MOUSE_TYPE, 'mouseOver', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MOUSE_TYPE, 'mouseOver', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -712,7 +736,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.MOUSE_TYPE, 'mouseOut', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.MOUSE_TYPE, 'mouseOut', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -728,7 +752,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.WHEEL_TYPE, 'wheel', false );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.WHEEL_TYPE, 'wheel', false );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -738,7 +762,12 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'focusIn', true );
+
+    // if ( domEvent.target.id === 'display1-primary-30-44-2795-2802-2797-2806-3012-3011-2992' ) {
+    //   debugger;
+    // }
+
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusIn', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -748,7 +777,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'focusOut', true );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusOut', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -758,7 +787,8 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'input', true );
+
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'input', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -768,7 +798,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'change', true );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'change', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -778,7 +808,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'click', true );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'click', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -788,7 +818,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'keyDown', true );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'keyDown', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -798,7 +828,7 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
-    BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEventType.ALT_TYPE, 'keyUp', true );
+    BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'keyUp', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   }

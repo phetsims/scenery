@@ -8,6 +8,7 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import Display from '../display/Display.js';
+import { EventContext } from '../imports.js';
 import Node from '../nodes/Node.js';
 import Rectangle from '../nodes/Rectangle.js';
 
@@ -32,7 +33,7 @@ const ListenerTestUtils = {
       null );
 
     display._input.validatePointers();
-    display._input.mouseDown( null, new Vector2( x, y ), domEvent );
+    display._input.mouseDown( null, new Vector2( x, y ), new EventContext( domEvent ) );
   },
 
   /**
@@ -54,7 +55,7 @@ const ListenerTestUtils = {
       null );
 
     display._input.validatePointers();
-    display._input.mouseUp( new Vector2( x, y ), domEvent );
+    display._input.mouseUp( new Vector2( x, y ), new EventContext( domEvent ) );
   },
 
   /**
@@ -77,7 +78,7 @@ const ListenerTestUtils = {
 
 
     display._input.validatePointers();
-    display._input.mouseMove( new Vector2( x, y ), domEvent );
+    display._input.mouseMove( new Vector2( x, y ), new EventContext( domEvent ) );
   },
 
   /**

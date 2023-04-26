@@ -16,7 +16,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { Mouse, Node, PDOMPointer, Pointer, scenery, Trail } from '../imports.js';
+import { EventContext, Mouse, Node, PDOMPointer, Pointer, scenery, Trail } from '../imports.js';
 import EventIO from './EventIO.js';
 
 // "out" here ensures that SceneryListenerFunctions don't specify a wider type arguments for the event, see  https://github.com/phetsims/scenery/issues/1483
@@ -40,6 +40,12 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
   // Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
   public readonly domEvent: DOMEvent | null;
 
+  // Assorted environment information when the event was fired
+  public readonly context: EventContext;
+
+  // The document.activeElement when the event was fired
+  public readonly activeElement: Element | null;
+
   // Whatever node you attached the listener to, or null when firing events on a Pointer
   public currentTarget: Node | null;
 
@@ -54,9 +60,9 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
    * @param trail - The trail to the node picked/hit by this input event.
    * @param type - Type of the event, e.g. 'string'
    * @param pointer - The pointer that triggered this event
-   * @param domEvent - The original DOM Event that caused this SceneryEvent to fire.
+   * @param context - The original DOM EventContext that caused this SceneryEvent to fire.
    */
-  public constructor( trail: Trail, type: string, pointer: Pointer, domEvent: DOMEvent | null ) {
+  public constructor( trail: Trail, type: string, pointer: Pointer, context: EventContext<DOMEvent> ) {
     // TODO: add domEvent type assertion -- will browsers support this?
 
     this.handled = false;
@@ -64,17 +70,17 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
     this.trail = trail;
     this.type = type;
     this.pointer = pointer;
-    this.domEvent = domEvent;
+    this.context = context;
+    this.domEvent = context.domEvent;
+    this.activeElement = context.activeElement;
     this.currentTarget = null;
     this.target = trail.lastNode();
 
     // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?)
-    this.isPrimary = !( pointer instanceof Mouse ) || !domEvent || ( domEvent as unknown as MouseEvent ).button === 0;
+    this.isPrimary = !( pointer instanceof Mouse ) || !this.domEvent || ( this.domEvent as unknown as MouseEvent ).button === 0;
 
     // Store the last-used non-null DOM event for future use if required.
-    if ( domEvent ) {
-      pointer.lastDOMEvent = domEvent;
-    }
+    pointer.lastEventContext = context;
   }
 
   /**

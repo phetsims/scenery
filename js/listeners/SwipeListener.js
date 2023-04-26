@@ -91,7 +91,7 @@ class SwipeListener {
       }
     } );
 
-    // @private - listener added to the pointer with atachment to call swipe functions
+    // @private - listener added to the pointer with attachment to call swipe functions
     // on a particular node with focus
     this._attachedPointerListener = {
       up: event => {
@@ -162,8 +162,8 @@ class SwipeListener {
               // send a click event to the active element
               const pdomRoot = document.getElementsByClassName( 'a11y-pdom-root' )[ 0 ];
 
-              if ( pdomRoot && pdomRoot.contains( document.activeElement ) ) {
-                document.activeElement.click();
+              if ( pdomRoot && pdomRoot.contains( event.activeElement ) ) {
+                event.activeElement.click();
               }
             }
           }

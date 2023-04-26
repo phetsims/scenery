@@ -285,11 +285,6 @@ export default class Display {
   private _focusRootNode?: Node;
   private _focusOverlay?: HighlightOverlay;
 
-  // (if accessible) During DOM operations where HTML elements are removed from and
-  // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
-  // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
-  public blockFocusCallbacks?: boolean;
-
   // (scenery-internal, if accessible)
   public _rootPDOMInstance?: PDOMInstance;
 
@@ -480,8 +475,6 @@ export default class Display {
     }
 
     if ( this._accessible ) {
-      this.blockFocusCallbacks = false;
-
       this._rootPDOMInstance = PDOMInstance.pool.create( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
         `Display root instance: ${this._rootPDOMInstance.toString()}` );

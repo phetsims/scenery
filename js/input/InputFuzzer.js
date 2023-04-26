@@ -8,7 +8,7 @@
 
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery } from '../imports.js';
+import { EventContext, scenery } from '../imports.js';
 
 class InputFuzzer {
   /**
@@ -211,7 +211,7 @@ class InputFuzzer {
     const event = this.createTouchEvent( 'touchstart', [ touch ] );
 
     this.display._input.validatePointers();
-    this.display._input.touchStart( touch.id, touch.position, event );
+    this.display._input.touchStart( touch.id, touch.position, new EventContext( event ) );
   }
 
   /**
@@ -226,7 +226,7 @@ class InputFuzzer {
     const event = this.createTouchEvent( 'touchmove', [ touch ] );
 
     this.display._input.validatePointers();
-    this.display._input.touchMove( touch.id, touch.position, event );
+    this.display._input.touchMove( touch.id, touch.position, new EventContext( event ) );
   }
 
   /**
@@ -239,7 +239,7 @@ class InputFuzzer {
     const event = this.createTouchEvent( 'touchend', [ touch ] );
 
     this.display._input.validatePointers();
-    this.display._input.touchEnd( touch.id, touch.position, event );
+    this.display._input.touchEnd( touch.id, touch.position, new EventContext( event ) );
   }
 
   /**
@@ -252,7 +252,7 @@ class InputFuzzer {
     const event = this.createTouchEvent( 'touchcancel', [ touch ] );
 
     this.display._input.validatePointers();
-    this.display._input.touchCancel( touch.id, touch.position, event );
+    this.display._input.touchCancel( touch.id, touch.position, new EventContext( event ) );
   }
 
   /**
@@ -272,11 +272,11 @@ class InputFuzzer {
     this.display._input.validatePointers();
 
     if ( this.isMouseDown ) {
-      this.display._input.mouseUp( this.mousePosition, domEvent );
+      this.display._input.mouseUp( this.mousePosition, new EventContext( domEvent ) );
       this.isMouseDown = false;
     }
     else {
-      this.display._input.mouseDown( null, this.mousePosition, domEvent );
+      this.display._input.mouseDown( null, this.mousePosition, new EventContext( domEvent ) );
       this.isMouseDown = true;
     }
   }
@@ -299,7 +299,7 @@ class InputFuzzer {
       null );
 
     this.display._input.validatePointers();
-    this.display._input.mouseMove( this.mousePosition, domEvent );
+    this.display._input.mouseMove( this.mousePosition, new EventContext( domEvent ) );
   }
 }
 

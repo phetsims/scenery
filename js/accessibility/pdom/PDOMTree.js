@@ -7,10 +7,10 @@
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import { FocusManager, Node, PartialPDOMTrail, PDOMInstance, scenery, Trail } from '../../imports.js';
+import { BrowserEvents, Node, PartialPDOMTrail, PDOMInstance, scenery, Trail } from '../../imports.js';
 
-// globals (for restoring focus)
-let focusedNode = null;
+// Reference to the focused DOM element, so we can restore focus between big tree operations.
+let activeElementId = null;
 
 const PDOMTree = {
   /**
@@ -28,13 +28,13 @@ const PDOMTree = {
     assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.hasNoPDOM() );
 
-    const blockedDisplays = PDOMTree.beforeOp( child );
+    PDOMTree.beforeOp();
 
     if ( !child._pdomParent ) {
       PDOMTree.addTree( parent, child );
     }
 
-    PDOMTree.afterOp( blockedDisplays );
+    PDOMTree.afterOp();
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -54,13 +54,13 @@ const PDOMTree = {
     assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.hasNoPDOM() );
 
-    const blockedDisplays = PDOMTree.beforeOp( child );
+    PDOMTree.beforeOp();
 
     if ( !child._pdomParent ) {
       PDOMTree.removeTree( parent, child );
     }
 
-    PDOMTree.afterOp( blockedDisplays );
+    PDOMTree.afterOp();
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -78,11 +78,11 @@ const PDOMTree = {
     assert && assert( node instanceof Node );
     assert && assert( !node._rendererSummary.hasNoPDOM() );
 
-    const blockedDisplays = PDOMTree.beforeOp( node );
+    PDOMTree.beforeOp();
 
     PDOMTree.reorder( node );
 
-    PDOMTree.afterOp( blockedDisplays );
+    PDOMTree.afterOp();
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -101,7 +101,7 @@ const PDOMTree = {
 
     assert && assert( node instanceof Node );
 
-    const blockedDisplays = PDOMTree.beforeOp( node );
+    PDOMTree.beforeOp();
 
     const removedItems = []; // {Array.<Node|null>} - May contain the placeholder null
     const addedItems = []; // {Array.<Node|null>} - May contain the placeholder null
@@ -173,7 +173,7 @@ const PDOMTree = {
 
     PDOMTree.reorder( node, pdomTrails );
 
-    PDOMTree.afterOp( blockedDisplays );
+    PDOMTree.afterOp();
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -190,7 +190,7 @@ const PDOMTree = {
 
     assert && assert( node instanceof Node );
 
-    const blockedDisplays = PDOMTree.beforeOp( node );
+    PDOMTree.beforeOp();
 
     let i;
     const parents = node._pdomParent ? [ node._pdomParent ] : node._parents;
@@ -220,7 +220,7 @@ const PDOMTree = {
       }
     }
 
-    PDOMTree.afterOp( blockedDisplays );
+    PDOMTree.afterOp();
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -387,40 +387,23 @@ const PDOMTree = {
   },
 
   /**
-   * Prepares for an pdom-tree-changing operation (saving some state). During DOM operations we don't want Display
+   * Prepares for a pdom-tree-changing operation (saving some state). During DOM operations we don't want Display
    * input to dispatch events as focus changes.
    * @private
-   *
-   * @param {Node} node - root of Node subtree whose PDOMInstance tree is being rearranged.
    */
-  beforeOp( node ) {
-    focusedNode = FocusManager.pdomFocusedNode;
-
-    // list of displays to stop blocking focus callbacks in afterOp
-    const displays = [];
-
-    const pdomTrails = this.findPDOMTrails( node );
-    for ( let i = 0; i < pdomTrails.length; i++ ) {
-      const display = pdomTrails[ i ].pdomInstance.display;
-      display.blockFocusCallbacks = true;
-      displays.push( display );
-    }
-
-    return displays;
+  beforeOp() {
+    activeElementId = document.activeElement.id;
+    BrowserEvents.blockFocusCallbacks = true;
   },
 
   /**
-   * Finalizes an pdom-tree-changing operation (restoring some state).
+   * Finalizes a pdom-tree-changing operation (restoring some state).
    * @private
-   *
-   * @param {Array.<Display>} blockedDisplays
    */
-  afterOp( blockedDisplays ) {
-    focusedNode && focusedNode.focus();
-
-    for ( let i = 0; i < blockedDisplays.length; i++ ) {
-      blockedDisplays[ i ].blockFocusCallbacks = false;
-    }
+  afterOp() {
+    const activeElement = document.getElementById( activeElementId );
+    activeElement && activeElement.focus();
+    BrowserEvents.blockFocusCallbacks = false;
   },
 
   /**

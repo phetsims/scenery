@@ -30,7 +30,7 @@ import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import TAttachableInputListener from './TAttachableInputListener.js';
-import { scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
+import { EventContext, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
@@ -88,7 +88,7 @@ export default abstract class Pointer {
 
   // (scenery-internal) - Recorded and exposed so that it can be provided to events when there
   // is no "immediate" DOM event (e.g. when a node moves UNDER a pointer and triggers a touch-snag).
-  public lastDOMEvent: Event | null;
+  public lastEventContext: EventContext | null;
 
   // A Pointer can be assigned an intent when a listener is attached to initiate or prevent
   // certain behavior for the life of the listener. Other listeners can observe the Intents on the Pointer and
@@ -136,7 +136,7 @@ export default abstract class Pointer {
     this._listeners = [];
     this._attachedListener = null;
     this._cursor = null;
-    this.lastDOMEvent = null;
+    this.lastEventContext = null;
     this._intents = [];
     this._pointerCaptured = false;
     this._listenerForDragReserve = null;

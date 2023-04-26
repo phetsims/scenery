@@ -9,7 +9,7 @@
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
-import { Mouse, scenery, SceneryEvent, Trail } from '../imports.js';
+import { EventContext, Mouse, scenery, SceneryEvent, Trail } from '../imports.js';
 
 /**
  * @deprecated - use PressListener instead
@@ -193,9 +193,11 @@ class DownUpListener extends PhetioObject {
 
       this.interrupted = true;
 
+      const context = EventContext.createSynthetic();
+
       // We create a synthetic event here, as there is no available event here.
       // Empty trail, so that it for-sure isn't under our downTrail (guaranteeing that isInside will be false).
-      const syntheticEvent = new SceneryEvent( new Trail(), 'synthetic', this.pointer, null );
+      const syntheticEvent = new SceneryEvent( new Trail(), 'synthetic', this.pointer, context );
       syntheticEvent.currentTarget = this.downCurrentTarget;
       this.buttonUp( syntheticEvent );
 

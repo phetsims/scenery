@@ -11,7 +11,7 @@ import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { Input, scenery } from '../imports.js';
+import { EventContext, Input, scenery } from '../imports.js';
 
 export type BatchedDOMEventCallback = ( ...args: IntentionalAny[] ) => void;
 
@@ -30,19 +30,19 @@ export class BatchedDOMEventType extends EnumerationValue {
 
 export default class BatchedDOMEvent implements TPoolable {
 
-  private domEvent!: Event | null;
+  private eventContext!: EventContext | null;
   private type!: BatchedDOMEventType | null;
   private callback!: BatchedDOMEventCallback | null;
 
-  public constructor( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ) {
-    this.initialize( domEvent, type, callback );
+  public constructor( eventContext: EventContext, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ) {
+    this.initialize( eventContext, type, callback );
   }
 
-  public initialize( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ): this {
+  public initialize( eventContext: EventContext, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ): this {
     // called multiple times due to pooling, this should be re-entrant
-    assert && assert( domEvent, 'for some reason, there is no DOM event?' );
+    assert && assert( eventContext.domEvent, 'for some reason, there is no DOM event?' );
 
-    this.domEvent = domEvent;
+    this.eventContext = eventContext;
     this.type = type;
     this.callback = callback;
 
@@ -53,7 +53,6 @@ export default class BatchedDOMEvent implements TPoolable {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Running batched event' );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
-    const domEvent = this.domEvent!;
     const callback = this.callback!;
 
     // process whether anything under the pointers changed before running additional input events
@@ -61,33 +60,37 @@ export default class BatchedDOMEvent implements TPoolable {
 
     //OHTWO TODO: switch?
     if ( this.type === BatchedDOMEventType.POINTER_TYPE ) {
-      const pointerEvent = domEvent as PointerEvent;
-      callback.call( input, pointerEvent.pointerId, pointerEvent.pointerType, input.pointFromEvent( pointerEvent ), pointerEvent );
+      const context = this.eventContext as EventContext<PointerEvent>;
+      const pointerEvent = context.domEvent;
+      callback.call( input, pointerEvent.pointerId, pointerEvent.pointerType, input.pointFromEvent( pointerEvent ), context );
     }
     else if ( this.type === BatchedDOMEventType.MS_POINTER_TYPE ) {
-      const pointerEvent = domEvent as PointerEvent;
-      callback.call( input, pointerEvent.pointerId, Input.msPointerType( pointerEvent ), input.pointFromEvent( pointerEvent ), pointerEvent );
+      const context = this.eventContext as EventContext<PointerEvent>;
+      const pointerEvent = context.domEvent;
+      callback.call( input, pointerEvent.pointerId, Input.msPointerType( pointerEvent ), input.pointFromEvent( pointerEvent ), context );
     }
     else if ( this.type === BatchedDOMEventType.TOUCH_TYPE ) {
-      const touchEvent = domEvent as TouchEvent;
+      const context = this.eventContext as EventContext<TouchEvent>;
+      const touchEvent = context.domEvent;
       for ( let i = 0; i < touchEvent.changedTouches.length; i++ ) {
         // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
         const touch = touchEvent.changedTouches.item( i )!;
 
-        callback.call( input, touch.identifier, input.pointFromEvent( touch ), touchEvent );
+        callback.call( input, touch.identifier, input.pointFromEvent( touch ), context );
       }
     }
     else if ( this.type === BatchedDOMEventType.MOUSE_TYPE ) {
-      const mouseEvent = domEvent as MouseEvent;
+      const context = this.eventContext as EventContext<MouseEvent>;
+      const point = input.pointFromEvent( context.domEvent );
       if ( callback === input.mouseDown ) {
-        callback.call( input, null, input.pointFromEvent( mouseEvent ), mouseEvent );
+        callback.call( input, null, point, context );
       }
       else {
-        callback.call( input, input.pointFromEvent( mouseEvent ), mouseEvent );
+        callback.call( input, point, context );
       }
     }
     else if ( this.type === BatchedDOMEventType.WHEEL_TYPE || this.type === BatchedDOMEventType.ALT_TYPE ) {
-      callback.call( input, domEvent );
+      callback.call( input, this.eventContext );
     }
     else {
       throw new Error( `bad type value: ${this.type}` );
@@ -101,7 +104,7 @@ export default class BatchedDOMEvent implements TPoolable {
    */
   public dispose(): void {
     // clear our references
-    this.domEvent = null;
+    this.eventContext = null;
     this.callback = null;
     this.freeToPool();
   }

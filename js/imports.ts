@@ -203,6 +203,7 @@ export { default as Touch } from './input/Touch.js';
 export { default as Pen } from './input/Pen.js';
 export { default as PDOMPointer } from './input/PDOMPointer.js';
 
+export { default as EventContext, EventContextIO } from './input/EventContext.js';
 export { default as SceneryEvent } from './input/SceneryEvent.js';
 
 export { default as Input } from './input/Input.js';
