@@ -18,7 +18,10 @@ import { allowLinksProperty } from '../imports.js';
  */
 function openPopup( url: string, allowPopups = allowLinksProperty.value ): void {
 
-  if ( allowPopups ) {
+  // If available, don't openPopups for fuzzing
+  const fuzzOptOut = phet && phet.chipper && phet.chipper.isFuzzEnabled();
+
+  if ( allowPopups && !fuzzOptOut ) {
     const popupWindow = window.open( url, '_blank' ); // open in a new window/tab
 
     // We can't guarantee the presence of a window object, since if it isn't opened then it will return null.
