@@ -401,8 +401,10 @@ const PDOMTree = {
    * @private
    */
   afterOp() {
-    const activeElement = document.getElementById( activeElementId );
-    activeElement && activeElement.focus();
+    if ( activeElementId ) {
+      const activeElement = document.getElementById( activeElementId );
+      activeElement && activeElement.focus();
+    }
     BrowserEvents.blockFocusCallbacks = false;
   },
 
