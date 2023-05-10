@@ -142,7 +142,7 @@ class KeyStateTracker {
           delete this.keyState[ key ];
         }
 
-        // On Safari, we will not get key keyup events while a meta key is pressed. So the keystate will be inaccurate
+        // On MacOS, we will not get key keyup events while a meta key is pressed. So the keystate will be inaccurate
         // until the meta keys are released. If both meta keys are pressed, We just We will not get a keyup event until
         // BOTH keys are released, so this should be safe in that case.
         // See https://github.com/phetsims/scenery/issues/1555
