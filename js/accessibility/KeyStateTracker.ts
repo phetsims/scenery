@@ -20,6 +20,7 @@ import optionize from '../../../phet-core/js/optionize.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
+import platform from '../../../phet-core/js/platform.js';
 
 // Type describing the state of a single key in the KeyState.
 type KeyStateInfo = {
@@ -139,6 +140,13 @@ class KeyStateTracker {
         // an assertion for this is too strict. See https://github.com/phetsims/scenery/issues/918
         if ( this.isKeyDown( key ) ) {
           delete this.keyState[ key ];
+        }
+
+        // On Safari, we will not get key keyup events while a meta key is pressed. So the keystate will be inaccurate
+        // until the meta keys are released. Since we don't get keyup events, we just We will not get a keyup event
+        // until both keys are released. See https://github.com/phetsims/scenery/issues/1555
+        if ( platform.safari && KeyboardUtils.isMetaKey( domEvent ) ) {
+          this.clearState();
         }
 
         // keyup event received, notify listeners
