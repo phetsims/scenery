@@ -146,7 +146,7 @@ class KeyStateTracker {
         // until the meta keys are released. If both meta keys are pressed, We just We will not get a keyup event until
         // BOTH keys are released, so this should be safe in that case.
         // See https://github.com/phetsims/scenery/issues/1555
-        if ( platform.safari && KeyboardUtils.isMetaKey( domEvent ) ) {
+        if ( platform.mac && KeyboardUtils.isMetaKey( domEvent ) ) {
           this.clearState();
         }
 
