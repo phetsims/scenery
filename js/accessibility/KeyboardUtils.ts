@@ -23,6 +23,8 @@ const KEY_ALT_LEFT = 'AltLeft';
 const KEY_ALT_RIGHT = 'AltRight';
 const KEY_META_LEFT = 'MetaLeft';
 const KEY_META_RIGHT = 'MetaRight';
+const KEY_META_LEFT_FIREFOX = 'OSLeft'; // FF specific codes for meta keys
+const KEY_META_RIGHT_FIREFOX = 'OSRight';
 const KEY_W = 'KeyW';
 const KEY_A = 'KeyA';
 const KEY_S = 'KeyS';
@@ -50,7 +52,7 @@ const NUMBER_KEYS = [ KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KE
 const SHIFT_KEYS = [ KEY_SHIFT_LEFT, KEY_SHIFT_RIGHT ];
 const CONTROL_KEYS = [ KEY_CONTROL_LEFT, KEY_CONTROL_RIGHT ];
 const ALT_KEYS = [ KEY_ALT_LEFT, KEY_ALT_RIGHT ];
-const META_KEYS = [ KEY_META_LEFT, KEY_META_RIGHT ];
+const META_KEYS = [ KEY_META_LEFT, KEY_META_RIGHT, KEY_META_LEFT_FIREFOX, KEY_META_RIGHT_FIREFOX ];
 
 // These are KeyboardEvent.key values, excluding left/right KeyboardEvent.codes
 const MODIFIER_KEYS = [ KEY_ALT, KEY_CONTROL, KEY_SHIFT ];
@@ -78,6 +80,8 @@ const KeyboardUtils = {
   KEY_CONTROL_RIGHT: KEY_CONTROL_RIGHT,
   KEY_META_LEFT: KEY_META_LEFT,
   KEY_META_RIGHT: KEY_META_RIGHT,
+  KEY_META_LEFT_FIREFOX: KEY_META_LEFT_FIREFOX,
+  KEY_META_RIGHT_FIREFOX: KEY_META_RIGHT_FIREFOX,
   KEY_SHIFT: KEY_SHIFT,
   KEY_ALT: KEY_ALT,
   KEY_CONTROL: KEY_CONTROL,
