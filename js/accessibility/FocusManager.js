@@ -198,5 +198,51 @@ FocusManager.pdomFocusProperty = new Property( null, {
   phetioReadOnly: true
 } );
 
+  /**
+   * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.
+   * When in the background, the window does not receive keyboard input (important for global keyboard events).
+   */
+  FocusManager.windowHasFocusProperty = new BooleanProperty( false );
+
+  /**
+   * Updates the windowHasFocusProperty when the window receives/loses focus. When the window has focus
+   * it is in the foreground of the user. When in the background, the window will not receive keyboard input.
+   * https://developer.mozilla.org/en-US/docs/Web/API/Window/focus_event.
+   *
+   * This will be called by scenery for you when you use Display.initializeEvents().
+   */
+  FocusManager.attachToWindow = () => {
+    assert && assert( !FocusManager.globallyAttached, 'Can only be attached statically once.' );
+    FocusManager.attachedWindowFocusListener = () => {
+      FocusManager.windowHasFocusProperty.value = true;
+    };
+
+    FocusManager.attachedWindowBlurListener = () => {
+      FocusManager.windowHasFocusProperty.value = false;
+    };
+
+    window.addEventListener( 'focus', FocusManager.attachedWindowFocusListener );
+    window.addEventListener( 'blur', FocusManager.attachedWindowBlurListener );
+
+    // value will be updated with window, but we need a proper initial value (this function may be called while
+    // the window is not in the foreground).
+    FocusManager.windowHasFocusProperty.value = document.hasFocus();
+
+    FocusManager.globallyAttached = true;
+  };
+
+  /**
+   * Detach all window focus/blur listeners from FocusManager watching for when the window loses focus.
+   */
+  FocusManager.detachFromWindow = () => {
+    window.removeEventListener( 'focus', FocusManager.attachedWindowFocusListener );
+    window.removeEventListener( 'blur', FocusManager.attachedWindowBlurListener );
+
+    // For cleanup, this Property becomes false again when detaching because we will no longer be watching for changes.
+    FocusManager.windowHasFocusProperty.value = false;
+
+    FocusManager.globallyAttached = false;
+  };
+
 scenery.register( 'FocusManager', FocusManager );
 export default FocusManager;
