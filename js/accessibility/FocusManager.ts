@@ -226,7 +226,6 @@ export default class FocusManager {
     phetioReadOnly: true
   } );
 
-
   /**
    * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.
    * When in the background, the window does not receive keyboard input (important for global keyboard events).
