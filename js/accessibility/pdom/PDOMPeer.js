@@ -782,7 +782,12 @@ class PDOMPeer {
    */
   focus() {
     assert && assert( this._primarySibling, 'must have a primary sibling to focus' );
-    this._primarySibling.focus();
+
+    // We do not want to steal focus from any parent application. For example, if this element is in an iframe.
+    // See https://github.com/phetsims/joist/issues/897.
+    if ( scenery.FocusManager.windowHasFocusProperty.value ) {
+      this._primarySibling.focus();
+    }
   }
 
   /**

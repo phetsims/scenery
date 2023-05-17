@@ -13,6 +13,7 @@ import Rectangle from '../../nodes/Rectangle.js';
 import PDOMFuzzer from './PDOMFuzzer.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMUtils from './PDOMUtils.js';
+import FocusManager from '../../accessibility/FocusManager.js';
 
 // constants
 const TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';
@@ -962,6 +963,8 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
 QUnit.test( 'Next/Previous focusable', assert => {
   const util = PDOMUtils;
 
+  FocusManager.attachToWindow();
+
   const rootNode = new Node( { tagName: 'div', focusable: true } );
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
@@ -1028,6 +1031,7 @@ QUnit.test( 'Next/Previous focusable', assert => {
   display.dispose();
   display.domElement.parentElement.removeChild( display.domElement );
 
+  FocusManager.detachFromWindow();
 } );
 
 QUnit.test( 'Remove accessibility subtree', assert => {
