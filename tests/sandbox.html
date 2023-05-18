@@ -255,6 +255,7 @@
           const bits = importItem.split( '/' );
           const name = bits[ bits.length - 1 ];
 
+          phetCore.asyncLoader?.reset();
           window[ name ] = ( await import( `../../chipper/dist/js/${importItem}.js` ) ).default;
         }
       };
