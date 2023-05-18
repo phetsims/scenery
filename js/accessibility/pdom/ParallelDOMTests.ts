@@ -963,76 +963,84 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
 } );
 
 QUnit.test( 'Next/Previous focusable', assert => {
-  const util = PDOMUtils;
 
-  FocusManager.attachToWindow();
+  // Especially important for puppeteer which doesn't support focus/blur events
+  // see https://github.com/phetsims/aqua/issues/134
+  if ( !document.hasFocus() ) {
+    assert.ok( true, 'Unable to run focus tests if document does not have focus.' );
+  }
+  else {
+    const util = PDOMUtils;
 
-  const rootNode = new Node( { tagName: 'div', focusable: true } );
-  var display = new Display( rootNode ); // eslint-disable-line no-var
-  document.body.appendChild( display.domElement );
+    FocusManager.attachToWindow();
 
-  // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
-  const a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-  const b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-  const c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-  const d = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-  const e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-  rootNode.children = [ a, b, c, d ];
+    const rootNode = new Node( { tagName: 'div', focusable: true } );
+    var display = new Display( rootNode ); // eslint-disable-line no-var
+    document.body.appendChild( display.domElement );
 
-  assert.ok( a.focusable, 'should be focusable' );
+    // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
+    const a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const d = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    rootNode.children = [ a, b, c, d ];
 
-  // get dom elements from the body
-  const rootElement = getPrimarySiblingElementByNode( rootNode );
-  const aElement = getPrimarySiblingElementByNode( a );
-  const bElement = getPrimarySiblingElementByNode( b );
-  const cElement = getPrimarySiblingElementByNode( c );
-  const dElement = getPrimarySiblingElementByNode( d );
+    assert.ok( a.focusable, 'should be focusable' );
 
-  a.focus();
-  assert.ok( document.activeElement!.id === aElement.id, 'a in focus (next)' );
+    // get dom elements from the body
+    const rootElement = getPrimarySiblingElementByNode( rootNode );
+    const aElement = getPrimarySiblingElementByNode( a );
+    const bElement = getPrimarySiblingElementByNode( b );
+    const cElement = getPrimarySiblingElementByNode( c );
+    const dElement = getPrimarySiblingElementByNode( d );
 
-  util.getNextFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === bElement.id, 'b in focus (next)' );
+    a.focus();
+    assert.ok( document.activeElement!.id === aElement.id, 'a in focus (next)' );
 
-  util.getNextFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === cElement.id, 'c in focus (next)' );
+    util.getNextFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === bElement.id, 'b in focus (next)' );
 
-  util.getNextFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === dElement.id, 'd in focus (next)' );
+    util.getNextFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === cElement.id, 'c in focus (next)' );
 
-  util.getNextFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === dElement.id, 'd still in focus (next)' );
+    util.getNextFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === dElement.id, 'd in focus (next)' );
 
-  util.getPreviousFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === cElement.id, 'c in focus (previous)' );
+    util.getNextFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === dElement.id, 'd still in focus (next)' );
 
-  util.getPreviousFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === bElement.id, 'b in focus (previous)' );
+    util.getPreviousFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === cElement.id, 'c in focus (previous)' );
 
-  util.getPreviousFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === aElement.id, 'a in focus (previous)' );
+    util.getPreviousFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === bElement.id, 'b in focus (previous)' );
 
-  util.getPreviousFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === aElement.id, 'a still in focus (previous)' );
+    util.getPreviousFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === aElement.id, 'a in focus (previous)' );
 
-  rootNode.removeAllChildren();
-  rootNode.addChild( a );
-  a.children = [ b, c ];
-  c.addChild( d );
-  d.addChild( e );
+    util.getPreviousFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === aElement.id, 'a still in focus (previous)' );
 
-  // this should hide everything except a
-  b.focusable = false;
-  c.pdomVisible = false;
+    rootNode.removeAllChildren();
+    rootNode.addChild( a );
+    a.children = [ b, c ];
+    c.addChild( d );
+    d.addChild( e );
 
-  a.focus();
-  util.getNextFocusable( rootElement ).focus();
-  assert.ok( document.activeElement!.id === aElement.id, 'a only element focusable' );
+    // this should hide everything except a
+    b.focusable = false;
+    c.pdomVisible = false;
 
-  pdomAuditRootNode( rootNode );
-  display.dispose();
-  display.domElement.parentElement!.removeChild( display.domElement );
-  FocusManager.detachFromWindow();
+    a.focus();
+    util.getNextFocusable( rootElement ).focus();
+    assert.ok( document.activeElement!.id === aElement.id, 'a only element focusable' );
+
+    pdomAuditRootNode( rootNode );
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+    FocusManager.detachFromWindow();
+  }
 } );
 
 QUnit.test( 'Remove accessibility subtree', assert => {
