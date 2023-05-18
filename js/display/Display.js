@@ -62,6 +62,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Property = require( 'AXON/Property' );
+  var BooleanProperty = require( 'AXON/BooleanProperty' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var Tandem = require( 'TANDEM/Tandem' );
 
@@ -996,6 +997,7 @@ define( function( require ) {
       var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, options );
       this._input = input;
 
+      Display.attachToWindow();
       input.connectListeners();
     },
 
@@ -1806,6 +1808,51 @@ define( function( require ) {
       }
     }
   };
+
+  /**
+   * Property is updated when the window receives/loses focus (requires attachToWindow, which is called through
+   * display.initializeEvents()).
+   */
+  Display.windowHasFocusProperty = new BooleanProperty( false );
+
+  /**
+   * Updates the windowHasFocusProperty when the window gains/loses focus.
+   */
+  Display.attachToWindow = () => {
+
+    if ( !Display.globallyAttached ) {
+      Display.attachedWindowFocusListener = () => {
+        Display.windowHasFocusProperty.value = true;
+      };
+      Display.attachedWindowBlurListener = () => {
+        Display.windowHasFocusProperty.value = false;
+      };
+
+      window.addEventListener( 'focus', Display.attachedWindowFocusListener );
+      window.addEventListener( 'blur', Display.attachedWindowBlurListener );
+
+      // initial value from whether the document currently has focus (it is active for the user)
+      Display.windowHasFocusProperty.value = document.hasFocus();
+
+      Display.globallyAttached = true;
+    }
+  };
+
+  /**
+   * Detach focus/blur listeners from the window that were watcing for focus changes.
+   */
+  Display.detachFromWindow = () => {
+    window.removeEventListener( 'focus', Display.attachedWindowFocusListener );
+    window.removeEventListener( 'blur', Display.attachedWindowBlurListener );
+
+    // For cleanup, this Property is false again with detaching beacuse we will no longer be watching for changes.
+    Display.windowHasFocusProperty.value = document.hasFocus();
+
+    Display.globallyAttached = false;
+  
+  };
+
+  Display.globallyAttached = false;
 
   return Display;
 } );
