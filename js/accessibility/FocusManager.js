@@ -244,5 +244,7 @@ FocusManager.pdomFocusProperty = new Property( null, {
     FocusManager.globallyAttached = false;
   };
 
+  FocusManager.attachToWindow();
+
 scenery.register( 'FocusManager', FocusManager );
 export default FocusManager;
