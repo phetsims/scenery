@@ -2199,13 +2199,6 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Overrideable so that subclasses can return a different PhetioObject than their own Node.
-   */
-  public getPhetioMouseHitTarget(): PhetioObject | null {
-    return this;
-  }
-
-  /**
    * Whether this Node itself is painted (displays something itself). Meant to be overridden.
    */
   public isPainted(): boolean {

@@ -400,7 +400,7 @@ export default class RichText extends Node {
 
       // Even if this isn't PhET-iO instrumented, it still qualifies as this RichText's hit
       if ( targetStringProperty instanceof PhetioObject ) {
-        return targetStringProperty;
+        return targetStringProperty.getPhetioMouseHitTarget();
       }
       else {
         return null;

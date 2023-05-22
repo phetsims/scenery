@@ -250,7 +250,7 @@ export default class Text extends Paintable( Node ) {
 
       // Even if this isn't PhET-iO instrumented, it still qualifies as this Text's hit
       if ( targetStringProperty instanceof PhetioObject ) {
-        return targetStringProperty;
+        return targetStringProperty.getPhetioMouseHitTarget();
       }
       else {
         return null;
