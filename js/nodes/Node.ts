@@ -2132,15 +2132,10 @@ class Node extends ParallelDOM {
       return false;
     }
 
-    // unpickable things cannot be autoselected
-    if ( this.pickable === false ) {
-      return false;
-    }
-
     // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
     const localPoint = this._transform.getInverse().timesVector2( point );
 
-    // If our point is outside of the local-coordinate clipping area, there should be no hit.
+    // If our point is outside the local-coordinate clipping area, there should be no hit.
     if ( this.clipArea !== null && !this.clipArea.containsPoint( localPoint ) ) {
       return false;
     }
@@ -2159,34 +2154,55 @@ class Node extends ParallelDOM {
     // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
     const localPoint = this._transform.getInverse().timesVector2( point );
 
+    let anyChildWasPhetioMouseHit = false;
+
     // Check children before our "self", since the children are rendered on top.
     // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
     for ( let i = this._children.length - 1; i >= 0; i-- ) {
       const child = this._children[ i ];
-      const childHit = child.getPhetioMouseHit( localPoint );
 
-      // If there was a hit, immediately add our node to the start of the Trail (will recursively build the Trail).
-      if ( childHit ) {
-        return childHit.isPhetioInstrumented() ? childHit : this;
+      // Not necessarily a child of this Node (see getPhetioMouseHitTarget())
+      const childTargetHit = child.getPhetioMouseHit( localPoint );
+
+      if ( childTargetHit ) {
+        anyChildWasPhetioMouseHit = true;
+
+        // If there was a hit from a child, only care about it if it is PhET-iO instrumented, this way, uninstrumented
+        // nodes "on top" of instrumented Nodes don't "soak up" the hit, making it unusable and unhelpful.
+        if ( childTargetHit.isPhetioInstrumented() ) {
+          return childTargetHit;
+        }
       }
     }
 
-    // Tests for mouse and touch hit areas before testing containsPointSelf
+    // If a child was phet-io mouse hit, but no target was chosen for return, then we return this parent.
+    if ( anyChildWasPhetioMouseHit ) {
+      return this.getPhetioMouseHitTarget();
+    }
+
+    // Tests for mouse hit areas before testing containsPointSelf. If there is a mouseArea, then don't ever check selfBounds.
     if ( this._mouseArea ) {
       // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
-      return this._mouseArea.containsPoint( localPoint ) ? this : null;
+      return this._mouseArea.containsPoint( localPoint ) ? this.getPhetioMouseHitTarget() : null;
     }
 
     // Didn't hit our children, so check ourself as a last resort. Check our selfBounds first, so we can potentially
     // avoid hit-testing the actual object (which may be more expensive).
     if ( this.selfBounds.containsPoint( localPoint ) ) {
       if ( this.containsPointSelf( localPoint ) ) {
-        return this;
+        return this.getPhetioMouseHitTarget();
       }
     }
 
     // No hit
     return null;
+  }
+
+  /**
+   * Overrideable so that subclasses can return a different PhetioObject than their own Node.
+   */
+  public getPhetioMouseHitTarget(): PhetioObject | null {
+    return this;
   }
 
   /**

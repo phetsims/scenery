@@ -15,7 +15,7 @@ import extendDefined from '../../../phet-core/js/extendDefined.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -238,6 +238,23 @@ export default class Text extends Paintable( Node ) {
           }, config.stringPropertyOptions ) );
         }
       );
+    }
+  }
+
+  public override getPhetioMouseHitTarget(): PhetioObject | null {
+    if ( this.isPhetioInstrumented() ) {
+      return super.getPhetioMouseHitTarget();
+    }
+    else {
+      const targetStringProperty = this._stringProperty.getTargetProperty();
+
+      // Even if this isn't PhET-iO instrumented, it still qualifies as this Text's hit
+      if ( targetStringProperty instanceof PhetioObject ) {
+        return targetStringProperty;
+      }
+      else {
+        return null;
+      }
     }
   }
 

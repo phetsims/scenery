@@ -67,7 +67,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { allowLinksProperty, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 
@@ -389,6 +389,23 @@ export default class RichText extends Node {
    */
   public getStringProperty(): TProperty<string> {
     return this._stringProperty;
+  }
+
+  public override getPhetioMouseHitTarget(): PhetioObject | null {
+    if ( this.isPhetioInstrumented() ) {
+      return super.getPhetioMouseHitTarget();
+    }
+    else {
+      const targetStringProperty = this._stringProperty.getTargetProperty();
+
+      // Even if this isn't PhET-iO instrumented, it still qualifies as this RichText's hit
+      if ( targetStringProperty instanceof PhetioObject ) {
+        return targetStringProperty;
+      }
+      else {
+        return null;
+      }
+    }
   }
 
   /**
