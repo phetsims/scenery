@@ -2142,10 +2142,13 @@ class Node extends ParallelDOM {
     return true;
   }
 
-  // Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
-  // Adapted from Picker.recursiveHitTest
-  // TODO: What about supporting autoselect where given a point, find that closest instrumented ancestor? https://github.com/phetsims/studio/issues/304
-  // @returns - may not be a Node.  For instance, ThreeIsometricNode hits Mass instances
+  /**
+   * Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
+   * Adapted from Picker.recursiveHitTest
+   * TODO: What about supporting autoselect where given a point, find that closest instrumented ancestor? https://github.com/phetsims/studio/issues/304
+   * @returns - may not be a Node.  For instance, ThreeIsometricNode hits Mass instances.  RichText or Text may return
+   *          - the associated stringProperty.  May return null if no PhetioObject is found (this means to continue the search)
+   */
   public getPhetioMouseHit( point: Vector2 ): PhetioObject | null {
 
     if ( !this.isPhetioMouseHittable( point ) ) {
@@ -2158,10 +2161,9 @@ class Node extends ParallelDOM {
     // Check children before our "self", since the children are rendered on top.
     // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
     for ( let i = this._children.length - 1; i >= 0; i-- ) {
-      const child = this._children[ i ];
 
       // Not necessarily a child of this Node (see getPhetioMouseHitTarget())
-      const childTargetHit = child.getPhetioMouseHit( localPoint );
+      const childTargetHit = this._children[ i ].getPhetioMouseHit( localPoint );
 
       if ( childTargetHit ) {
         return childTargetHit;
@@ -2170,7 +2172,6 @@ class Node extends ParallelDOM {
 
     // Tests for mouse hit areas before testing containsPointSelf. If there is a mouseArea, then don't ever check selfBounds.
     if ( this._mouseArea ) {
-      // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
       return this._mouseArea.containsPoint( localPoint ) ? this.getPhetioMouseHitTarget() : null;
     }
 
