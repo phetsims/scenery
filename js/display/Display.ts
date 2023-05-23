@@ -702,7 +702,12 @@ export default class Display {
   // Used for Studio Autoselect to determine the leafiest PhET-iO Element under the mouse
   public getPhetioElementAt( point: Vector2 ): PhetioObject | null {
     const node = this._rootNode.getPhetioMouseHit( point );
-    return node && node.isPhetioInstrumented() ? node : null;
+    if ( assert && node ) {
+      assert && assert( node.isPhetioInstrumented(), 'a PhetioMouseHit should be instrumented' );
+      assert && phet.tandem.phetioElementsDisplayProperty.value === 'featured' && assert( node.phetioFeatured,
+        `featured display mode should only yield featured PhET-iO Elements: ${node.tandem.phetioID}` );
+    }
+    return node;
   }
 
   private updateSize(): void {

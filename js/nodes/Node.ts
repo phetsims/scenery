@@ -2144,6 +2144,7 @@ class Node extends ParallelDOM {
 
   // Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
   // Adapted from Picker.recursiveHitTest
+  // TODO: What about supporting autoselect where given a point, find that closest instrumented ancestor? https://github.com/phetsims/studio/issues/304
   // @returns - may not be a Node.  For instance, ThreeIsometricNode hits Mass instances
   public getPhetioMouseHit( point: Vector2 ): PhetioObject | null {
 
@@ -2154,8 +2155,6 @@ class Node extends ParallelDOM {
     // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
     const localPoint = this._transform.getInverse().timesVector2( point );
 
-    let anyChildWasPhetioMouseHit = false;
-
     // Check children before our "self", since the children are rendered on top.
     // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
     for ( let i = this._children.length - 1; i >= 0; i-- ) {
@@ -2165,19 +2164,8 @@ class Node extends ParallelDOM {
       const childTargetHit = child.getPhetioMouseHit( localPoint );
 
       if ( childTargetHit ) {
-        anyChildWasPhetioMouseHit = true;
-
-        // If there was a hit from a child, only care about it if it is PhET-iO instrumented, this way, uninstrumented
-        // nodes "on top" of instrumented Nodes don't "soak up" the hit, making it unusable and unhelpful.
-        if ( childTargetHit.isPhetioInstrumented() ) {
-          return childTargetHit;
-        }
+        return childTargetHit;
       }
-    }
-
-    // If a child was phet-io mouse hit, but no target was chosen for return, then we return this parent.
-    if ( anyChildWasPhetioMouseHit ) {
-      return this.getPhetioMouseHitTarget();
     }
 
     // Tests for mouse hit areas before testing containsPointSelf. If there is a mouseArea, then don't ever check selfBounds.
@@ -2186,7 +2174,7 @@ class Node extends ParallelDOM {
       return this._mouseArea.containsPoint( localPoint ) ? this.getPhetioMouseHitTarget() : null;
     }
 
-    // Didn't hit our children, so check ourself as a last resort. Check our selfBounds first, so we can potentially
+    // Didn't hit our children, so check ourselves as a last resort. Check our selfBounds first, so we can potentially
     // avoid hit-testing the actual object (which may be more expensive).
     if ( this.selfBounds.containsPoint( localPoint ) ) {
       if ( this.containsPointSelf( localPoint ) ) {
