@@ -2176,10 +2176,8 @@ class Node extends ParallelDOM {
 
     // Didn't hit our children, so check ourselves as a last resort. Check our selfBounds first, so we can potentially
     // avoid hit-testing the actual object (which may be more expensive).
-    if ( this.selfBounds.containsPoint( localPoint ) ) {
-      if ( this.containsPointSelf( localPoint ) ) {
-        return this.getPhetioMouseHitTarget();
-      }
+    if ( this.selfBounds.containsPoint( localPoint ) && this.containsPointSelf( localPoint ) ) {
+      return this.getPhetioMouseHitTarget();
     }
 
     // No hit
