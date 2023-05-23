@@ -253,12 +253,7 @@ export default class Text extends Paintable( Node ) {
     const targetStringProperty = this._stringProperty.getTargetProperty();
 
     // Even if this isn't PhET-iO instrumented, it still qualifies as this Text's hit
-    if ( targetStringProperty instanceof PhetioObject ) {
-      return targetStringProperty.getPhetioMouseHitTarget();
-    }
-    else {
-      return null;
-    }
+    return targetStringProperty instanceof PhetioObject ? targetStringProperty.getPhetioMouseHitTarget() : null;
   }
 
   /**
