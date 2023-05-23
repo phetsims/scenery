@@ -2125,21 +2125,16 @@ class Node extends ParallelDOM {
     return this.selfBounds.intersectsBounds( bounds );
   }
 
+  /**
+   * Determine if the Node is a candidate for phet-io autoselect.
+   * 1. Invisible things cannot be autoselected
+   * 2. Transform the point in the local coordinate frame, so we can test it with the clipArea/children
+   * 3. If our point is outside the local-coordinate clipping area, there should be no hit.
+   * 4. Note that non-pickable nodes can still be autoselected
+   */
   public isPhetioMouseHittable( point: Vector2 ): boolean {
-
-    // invisible things cannot be autoselected
-    if ( !this.visible ) {
-      return false;
-    }
-
-    // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
-    const localPoint = this._transform.getInverse().timesVector2( point );
-
-    // If our point is outside the local-coordinate clipping area, there should be no hit.
-    if ( this.clipArea !== null && !this.clipArea.containsPoint( localPoint ) ) {
-      return false;
-    }
-    return true;
+    return this.visible &&
+           ( this.clipArea === null || this.clipArea.containsPoint( this._transform.getInverse().timesVector2( point ) ) );
   }
 
   /**
