@@ -196,6 +196,8 @@ export default class Rectangle extends SuperType {
 
     this.localPreferredWidthProperty.lazyLink( this.updatePreferredSizes.bind( this ) );
     this.localPreferredHeightProperty.lazyLink( this.updatePreferredSizes.bind( this ) );
+    this.localMinimumWidthProperty.lazyLink( this.updatePreferredSizes.bind( this ) );
+    this.localMinimumHeightProperty.lazyLink( this.updatePreferredSizes.bind( this ) );
 
     this.mutate( options );
   }
@@ -641,8 +643,16 @@ export default class Rectangle extends SuperType {
   }
 
   private updatePreferredSizes(): void {
-    const width = this.localPreferredWidth;
-    const height = this.localPreferredHeight;
+    let width = this.localPreferredWidth;
+    let height = this.localPreferredHeight;
+
+    if ( width !== null ) {
+      width = Math.max( width, this.localMinimumWidth || 0 );
+    }
+
+    if ( height !== null ) {
+      height = Math.max( height, this.localMinimumHeight || 0 );
+    }
 
     if ( width !== null ) {
       this.rectWidth = this.hasStroke() ? width - this.lineWidth : width;
