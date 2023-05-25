@@ -1121,7 +1121,6 @@ QUnit.test( 'replaceChild', assert => {
   // this suite involves focus tests which do not work on headless puppeteer
   if ( !document.hasFocus() ) {
     assert.ok( true, 'Unable to run focus tests if document does not have focus.' );
-    return;
   }
   else {
 
