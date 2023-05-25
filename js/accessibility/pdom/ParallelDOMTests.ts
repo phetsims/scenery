@@ -1118,86 +1118,94 @@ QUnit.test( 'accessible-dag', assert => {
 
 QUnit.test( 'replaceChild', assert => {
 
-  // test the behavior of replaceChild function
-  const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line no-var
-  document.body.appendChild( display.domElement );
+  // this suite involves focus tests which do not work on headless puppeteer
+  if ( !document.hasFocus() ) {
+    assert.ok( true, 'Unable to run focus tests if document does not have focus.' );
+    return;
+  }
+  else {
 
-  display.initializeEvents();
 
-  // create some nodes for testing
-  const a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-  const b = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-  const c = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-  const d = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-  const e = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-  const f = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    // test the behavior of replaceChild function
+    const rootNode = new Node( { tagName: 'div' } );
+    var display = new Display( rootNode ); // eslint-disable-line no-var
+    document.body.appendChild( display.domElement );
 
-  // a child that will be added through replaceChild()
-  const testNode = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    display.initializeEvents();
 
-  // make sure replaceChild puts the child in the right spot
-  a.children = [ b, c, d, e, f ];
-  const initIndex = a.indexOfChild( e );
-  a.replaceChild( e, testNode );
-  const afterIndex = a.indexOfChild( testNode );
+    // create some nodes for testing
+    const a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const b = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const c = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const d = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const e = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const f = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
 
-  assert.ok( a.hasChild( testNode ), 'a should have child testNode after it replaced node e' );
-  assert.ok( !a.hasChild( e ), 'a should no longer have child node e after it was replaced by testNode' );
-  assert.ok( initIndex === afterIndex, 'testNode should be at the same place as e was after replaceChild' );
+    // a child that will be added through replaceChild()
+    const testNode = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
 
-  // create a scene graph to test how scenery manages focus
-  //    a
-  //   / \
-  //  f   b
-  //     / \
-  //    c   d
-  //     \ /
-  //      e
-  a.removeAllChildren();
-  rootNode.addChild( a );
-  a.children = [ f, b ];
-  b.children = [ c, d ];
-  c.addChild( e );
-  d.addChild( e );
+    // make sure replaceChild puts the child in the right spot
+    a.children = [ b, c, d, e, f ];
+    const initIndex = a.indexOfChild( e );
+    a.replaceChild( e, testNode );
+    const afterIndex = a.indexOfChild( testNode );
 
-  f.focus();
-  assert.ok( f.focused, 'f has focus before being replaced' );
+    assert.ok( a.hasChild( testNode ), 'a should have child testNode after it replaced node e' );
+    assert.ok( !a.hasChild( e ), 'a should no longer have child node e after it was replaced by testNode' );
+    assert.ok( initIndex === afterIndex, 'testNode should be at the same place as e was after replaceChild' );
 
-  // replace f with testNode, ensure that testNode receives focus after replacing
-  a.replaceChild( f, testNode );
-  assert.ok( !a.hasChild( f ), 'a should no longer have child f' );
-  assert.ok( a.hasChild( testNode ), 'a should now have child testNode' );
-  assert.ok( !f.focused, 'f no longer has focus after being replaced' );
-  assert.ok( testNode.focused, 'testNode has focus after replacing focused node f' );
-  assert.ok( testNode.pdomInstances[ 0 ].peer!.primarySibling === document.activeElement, 'browser is focusing testNode' );
+    // create a scene graph to test how scenery manages focus
+    //    a
+    //   / \
+    //  f   b
+    //     / \
+    //    c   d
+    //     \ /
+    //      e
+    a.removeAllChildren();
+    rootNode.addChild( a );
+    a.children = [ f, b ];
+    b.children = [ c, d ];
+    c.addChild( e );
+    d.addChild( e );
 
-  testNode.blur();
-  assert.ok( !!testNode, 'testNode blurred before being replaced' );
+    f.focus();
+    assert.ok( f.focused, 'f has focus before being replaced' );
 
-  // replace testNode with f after bluring testNode, neither should have focus after the replacement
-  a.replaceChild( testNode, f );
-  assert.ok( a.hasChild( f ), 'node f should replace node testNode' );
-  assert.ok( !a.hasChild( testNode ), 'testNode should no longer be a child of node a' );
-  assert.ok( !testNode.focused, 'testNode should not have focus after being replaced' );
-  assert.ok( !f.focused, 'f should not have focus after replacing testNode, testNode did not have focus' );
-  assert.ok( f.pdomInstances[ 0 ].peer!.primarySibling !== document.activeElement, 'browser should not be focusing node f' );
+    // replace f with testNode, ensure that testNode receives focus after replacing
+    a.replaceChild( f, testNode );
+    assert.ok( !a.hasChild( f ), 'a should no longer have child f' );
+    assert.ok( a.hasChild( testNode ), 'a should now have child testNode' );
+    assert.ok( !f.focused, 'f no longer has focus after being replaced' );
+    assert.ok( testNode.focused, 'testNode has focus after replacing focused node f' );
+    assert.ok( testNode.pdomInstances[ 0 ].peer!.primarySibling === document.activeElement, 'browser is focusing testNode' );
 
-  // focus node d and replace with non-focusable testNode, neither should have focus since testNode is not focusable
-  d.focus();
-  testNode.focusable = false;
-  assert.ok( d.focused, 'd has focus before being replaced' );
-  assert.ok( !testNode.focusable, 'testNode is not focusable before replacing node d' );
+    testNode.blur();
+    assert.ok( !!testNode, 'testNode blurred before being replaced' );
 
-  b.replaceChild( d, testNode );
-  assert.ok( b.hasChild( testNode ), 'testNode should be a child of node b after replacing with replaceChild' );
-  assert.ok( !b.hasChild( d ), 'd should not be a child of b after it was replaced with replaceChild' );
-  assert.ok( !d.focused, 'd does not have focus after being replaced by testNode' );
-  assert.ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
+    // replace testNode with f after bluring testNode, neither should have focus after the replacement
+    a.replaceChild( testNode, f );
+    assert.ok( a.hasChild( f ), 'node f should replace node testNode' );
+    assert.ok( !a.hasChild( testNode ), 'testNode should no longer be a child of node a' );
+    assert.ok( !testNode.focused, 'testNode should not have focus after being replaced' );
+    assert.ok( !f.focused, 'f should not have focus after replacing testNode, testNode did not have focus' );
+    assert.ok( f.pdomInstances[ 0 ].peer!.primarySibling !== document.activeElement, 'browser should not be focusing node f' );
 
-  display.dispose();
-  display.domElement.parentElement!.removeChild( display.domElement );
+    // focus node d and replace with non-focusable testNode, neither should have focus since testNode is not focusable
+    d.focus();
+    testNode.focusable = false;
+    assert.ok( d.focused, 'd has focus before being replaced' );
+    assert.ok( !testNode.focusable, 'testNode is not focusable before replacing node d' );
 
+    b.replaceChild( d, testNode );
+    assert.ok( b.hasChild( testNode ), 'testNode should be a child of node b after replacing with replaceChild' );
+    assert.ok( !b.hasChild( d ), 'd should not be a child of b after it was replaced with replaceChild' );
+    assert.ok( !d.focused, 'd does not have focus after being replaced by testNode' );
+    assert.ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
 } );
 
 QUnit.test( 'pdomVisible', assert => {
