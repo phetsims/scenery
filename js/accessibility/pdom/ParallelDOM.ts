@@ -466,7 +466,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // The focus highlight that will surround this node when it
   // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
-  // bounds.
+  // bounds. When providing a custom highlight, draw around the Node's local coordinate frame.
   private _focusHighlight: Shape | Node | 'invisible' | null;
 
   // A flag that allows prevents focus highlight from being displayed in the HighlightOverlay.
@@ -1512,6 +1512,8 @@ export default class ParallelDOM extends PhetioObject {
    * Set the focus highlight for this node. By default, the focus highlight will be a pink rectangle that
    * surrounds the node's local bounds.  If focus highlight is set to 'invisible', the node will not have
    * any highlighting when it receives focus.
+   *
+   * Use the local coordinate frame when drawing a custom highlight for this Node.
    */
   public setFocusHighlight( focusHighlight: Highlight ): void {
     if ( this._focusHighlight !== focusHighlight ) {
