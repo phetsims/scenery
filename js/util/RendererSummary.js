@@ -34,6 +34,12 @@ const summaryBits = [
   Renderer.bitmaskLacksDOM,
   Renderer.bitmaskLacksWebGL
 ];
+
+const summaryBitIndices = {};
+summaryBits.forEach( ( bit, index ) => {
+  summaryBitIndices[ bit ] = index;
+} );
+
 const numSummaryBits = summaryBits.length;
 
 // A bitmask with all of the bits set that we record
@@ -56,12 +62,9 @@ class RendererSummary {
     // @private {Node}
     this.node = node;
 
-    // @private {Object} Maps stringified bitmask bit (e.g. "1" for Canvas, since Renderer.bitmaskCanvas is 0x01) to
+    // @private Int16Array, maps bitmask indices (see summaryBitIndices, the index of the bitmask in summaryBits) to
     // a count of how many children (or self) have that property (e.g. can't renderer all of their contents with Canvas)
-    this._counts = {};
-    for ( let i = 0; i < numSummaryBits; i++ ) {
-      this._counts[ summaryBits[ i ] ] = 0; // set everything to 0 at first
-    }
+    this._counts = new Int16Array( numSummaryBits );
 
     // @public {number} (scenery-internal)
     this.bitmask = bitmaskAll;
@@ -94,21 +97,22 @@ class RendererSummary {
     let ancestorNewMask = 0;
     for ( let i = 0; i < numSummaryBits; i++ ) {
       const bit = summaryBits[ i ];
+      const bitIndex = summaryBitIndices[ bit ];
 
       // If the bit for the renderer has changed
       if ( bit & changeBitmask ) {
 
         // If it is now set (wasn't before), gained support for the renderer
         if ( bit & newBitmask ) {
-          this._counts[ bit ]--; // reduce count, since we count the number of 0s (unsupported)
-          if ( this._counts[ bit ] === 0 ) {
+          this._counts[ bitIndex ]--; // reduce count, since we count the number of 0s (unsupported)
+          if ( this._counts[ bitIndex ] === 0 ) {
             ancestorNewMask |= bit; // add our bit to the "new" mask we will send to ancestors
           }
         }
         // It was set before (now isn't), lost support for the renderer
         else {
-          this._counts[ bit ]++; // increment the count, since we count the number of 0s (unsupported)
-          if ( this._counts[ bit ] === 1 ) {
+          this._counts[ bitIndex ]++; // increment the count, since we count the number of 0s (unsupported)
+          if ( this._counts[ bitIndex ] === 1 ) {
             ancestorOldMask |= bit; // add our bit to the "old" mask we will send to ancestors
           }
         }
@@ -169,7 +173,7 @@ class RendererSummary {
   computeBitmask() {
     let bitmask = 0;
     for ( let i = 0; i < numSummaryBits; i++ ) {
-      if ( this._counts[ summaryBits[ i ] ] === 0 ) {
+      if ( this._counts[ i ] === 0 ) {
         bitmask |= summaryBits[ i ];
       }
     }
@@ -322,7 +326,7 @@ class RendererSummary {
     if ( assert ) {
       for ( let i = 0; i < numSummaryBits; i++ ) {
         const bit = summaryBits[ i ];
-        const countIsZero = this._counts[ bit ] === 0;
+        const countIsZero = this._counts[ i ] === 0;
         const bitmaskContainsBit = !!( this.bitmask & bit );
         assert( countIsZero === bitmaskContainsBit, 'Bits should be set if count is zero' );
       }
@@ -339,7 +343,7 @@ class RendererSummary {
     let result = RendererSummary.bitmaskToString( this.bitmask );
     for ( let i = 0; i < numSummaryBits; i++ ) {
       const bit = summaryBits[ i ];
-      const countForBit = this._counts[ bit ];
+      const countForBit = this._counts[ i ];
       if ( countForBit !== 0 ) {
         result += ` ${RendererSummary.bitToString( bit )}:${countForBit}`;
       }
