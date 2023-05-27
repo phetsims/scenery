@@ -352,9 +352,9 @@ class WebGLBlock extends FittedBlock {
     if ( this.firstDrawable &&
          this.firstDrawable === this.lastDrawable &&
          this.firstDrawable.node &&
-         this.firstDrawable.node._hints.webglScale !== null &&
-         this.backingScale !== this.originalBackingScale * this.firstDrawable.node._hints.webglScale ) {
-      this.backingScale = this.originalBackingScale * this.firstDrawable.node._hints.webglScale;
+         this.firstDrawable.node._webglScale !== null &&
+         this.backingScale !== this.originalBackingScale * this.firstDrawable.node._webglScale ) {
+      this.backingScale = this.originalBackingScale * this.firstDrawable.node._webglScale;
       this.dirtyFit = true;
     }
 

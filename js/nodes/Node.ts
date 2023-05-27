@@ -284,6 +284,8 @@ const DEFAULT_OPTIONS = {
   preventFit: false
 };
 
+const DEFAULT_INTERNAL_RENDERER = DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer );
+
 export type RendererType = 'svg' | 'canvas' | 'webgl' | 'dom' | null;
 
 // Isolated so that we can delay options that are based on bounds of the Node to after construction.
@@ -542,39 +544,33 @@ class Node extends ParallelDOM {
   private _originalSelfBounds?: Bounds2; // If assertions are enabled
   private _originalChildBounds?: Bounds2; // If assertions are enabled
 
-  // Where rendering-specific settings are stored. They are generally modified internally, so there is no ES5 setter
-  // for hints.
-  // (scenery-internal)
-  public _hints: {
-    // What type of renderer should be forced for this Node. Uses the internal bitmask structure declared in
-    // scenery.js and Renderer.js.
-    renderer: number;
+  // (scenery-internal) Performance hint: What type of renderer should be forced for this Node. Uses the internal
+  // bitmask structure declared in Renderer.
+  public _renderer: number;
 
-    // Whether it is anticipated that opacity will be switched on. If so, having this set to true will make switching
-    // back-and-forth between opacity:1 and other opacities much faster.
-    usesOpacity: boolean;
+  // (scenery-internal) Performance hint: Whether it is anticipated that opacity will be switched on. If so, having this
+  // set to true will make switching back-and-forth between opacity:1 and other opacities much faster.
+  public _usesOpacity: boolean;
 
-    // Whether layers should be split before and after this Node.
-    layerSplit: boolean;
+  // (scenery-internal) Performance hint: Whether layers should be split before and after this Node.
+  public _layerSplit: boolean;
 
-    // Whether this Node and its subtree should handle transforms by using a CSS transform of a div.
-    cssTransform: boolean;
+  // (scenery-internal) Performance hint: Whether this Node and its subtree should handle transforms by using a CSS
+  // transform of a div.
+  public _cssTransform: boolean;
 
-    // When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
-    // TODO: ensure that this is working? 0.2 may have caused a regression.
-    fullResolution: boolean;
+  // (scenery-internal) Performance hint: Whether SVG (or other) content should be excluded from the DOM tree when
+  // invisible (instead of just being hidden)
+  public _excludeInvisible: boolean;
 
-    // Whether SVG (or other) content should be excluded from the DOM tree when invisible (instead of just being hidden)
-    excludeInvisible: boolean;
+  // (scenery-internal) Performance hint: If non-null, a multiplier to the detected pixel-to-pixel scaling of the
+  // WebGL Canvas
+  public _webglScale: number | null;
 
-    // If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
-    webglScale: number | null;
-
-    // If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this Node's subtree.
-    // This will typically prevent Scenery from triggering bounds computation for this sub-tree, and movement of this
-    // Node or its descendants will never trigger the refitting of a block.
-    preventFit: boolean;
-  };
+  // (scenery-internal) Performance hint: If true, Scenery will not fit any blocks that contain drawables attached to
+  // Nodes underneath this Node's subtree. This will typically prevent Scenery from triggering bounds computation for
+  // this sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
+  public _preventFit: boolean;
 
   // This is fired only once for any single operation that may change the children of a Node.
   // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
@@ -755,6 +751,13 @@ class Node extends ParallelDOM {
     this._maxHeight = DEFAULT_OPTIONS.maxHeight;
     this._appliedScaleFactor = 1;
     this._inputListeners = [];
+    this._renderer = DEFAULT_INTERNAL_RENDERER;
+    this._usesOpacity = DEFAULT_OPTIONS.usesOpacity;
+    this._layerSplit = DEFAULT_OPTIONS.layerSplit;
+    this._cssTransform = DEFAULT_OPTIONS.cssTransform;
+    this._excludeInvisible = DEFAULT_OPTIONS.excludeInvisible;
+    this._webglScale = DEFAULT_OPTIONS.webglScale;
+    this._preventFit = DEFAULT_OPTIONS.preventFit;
 
     this.inputEnabledProperty.lazyLink( this.pdomBoundInputEnabledListener );
 
@@ -793,17 +796,6 @@ class Node extends ParallelDOM {
     }
 
     this._filters = [];
-
-    this._hints = {
-      renderer: DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer ),
-      usesOpacity: DEFAULT_OPTIONS.usesOpacity,
-      layerSplit: DEFAULT_OPTIONS.layerSplit,
-      cssTransform: DEFAULT_OPTIONS.cssTransform,
-      fullResolution: false,
-      excludeInvisible: DEFAULT_OPTIONS.excludeInvisible,
-      webglScale: DEFAULT_OPTIONS.webglScale,
-      preventFit: DEFAULT_OPTIONS.preventFit
-    };
 
     this.childrenChangedEmitter = new TinyEmitter();
     this.childInsertedEmitter = new TinyEmitter();
@@ -4691,8 +4683,8 @@ class Node extends ParallelDOM {
     assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
       'We should only end up with no actual renderer if renderer is null' );
 
-    if ( this._hints.renderer !== newRenderer ) {
-      this._hints.renderer = newRenderer;
+    if ( this._renderer !== newRenderer ) {
+      this._renderer = newRenderer;
 
       this.invalidateHint();
     }
@@ -4716,19 +4708,19 @@ class Node extends ParallelDOM {
    * Returns the preferred renderer (if any) of this node, as a string.
    */
   public getRenderer(): RendererType {
-    if ( this._hints.renderer === 0 ) {
+    if ( this._renderer === 0 ) {
       return null;
     }
-    else if ( this._hints.renderer === Renderer.bitmaskCanvas ) {
+    else if ( this._renderer === Renderer.bitmaskCanvas ) {
       return 'canvas';
     }
-    else if ( this._hints.renderer === Renderer.bitmaskSVG ) {
+    else if ( this._renderer === Renderer.bitmaskSVG ) {
       return 'svg';
     }
-    else if ( this._hints.renderer === Renderer.bitmaskDOM ) {
+    else if ( this._renderer === Renderer.bitmaskDOM ) {
       return 'dom';
     }
-    else if ( this._hints.renderer === Renderer.bitmaskWebGL ) {
+    else if ( this._renderer === Renderer.bitmaskWebGL ) {
       return 'webgl';
     }
     assert && assert( false, 'Seems to be an invalid renderer?' );
@@ -4740,8 +4732,8 @@ class Node extends ParallelDOM {
    * layer, different from other siblings or other nodes. Can be used for performance purposes.
    */
   public setLayerSplit( split: boolean ): void {
-    if ( split !== this._hints.layerSplit ) {
-      this._hints.layerSplit = split;
+    if ( split !== this._layerSplit ) {
+      this._layerSplit = split;
 
       this.invalidateHint();
     }
@@ -4765,7 +4757,7 @@ class Node extends ParallelDOM {
    * Returns whether the layerSplit performance flag is set.
    */
   public isLayerSplit(): boolean {
-    return this._hints.layerSplit;
+    return this._layerSplit;
   }
 
   /**
@@ -4773,8 +4765,8 @@ class Node extends ParallelDOM {
    * gains if there need to be multiple layers for this node's descendants.
    */
   public setUsesOpacity( usesOpacity: boolean ): void {
-    if ( usesOpacity !== this._hints.usesOpacity ) {
-      this._hints.usesOpacity = usesOpacity;
+    if ( usesOpacity !== this._usesOpacity ) {
+      this._usesOpacity = usesOpacity;
 
       this.invalidateHint();
     }
@@ -4798,7 +4790,7 @@ class Node extends ParallelDOM {
    * Returns whether the usesOpacity performance flag is set.
    */
   public getUsesOpacity(): boolean {
-    return this._hints.usesOpacity;
+    return this._usesOpacity;
   }
 
   /**
@@ -4807,8 +4799,8 @@ class Node extends ParallelDOM {
    * have to re-rasterize contents when it is animated.
    */
   public setCSSTransform( cssTransform: boolean ): void {
-    if ( cssTransform !== this._hints.cssTransform ) {
-      this._hints.cssTransform = cssTransform;
+    if ( cssTransform !== this._cssTransform ) {
+      this._cssTransform = cssTransform;
 
       this.invalidateHint();
     }
@@ -4832,7 +4824,7 @@ class Node extends ParallelDOM {
    * Returns whether the cssTransform performance flag is set.
    */
   public isCSSTransformed(): boolean {
-    return this._hints.cssTransform;
+    return this._cssTransform;
   }
 
   /**
@@ -4840,8 +4832,8 @@ class Node extends ParallelDOM {
    * invisible. The default is false, and invisible content is in the DOM, but hidden.
    */
   public setExcludeInvisible( excludeInvisible: boolean ): void {
-    if ( excludeInvisible !== this._hints.excludeInvisible ) {
-      this._hints.excludeInvisible = excludeInvisible;
+    if ( excludeInvisible !== this._excludeInvisible ) {
+      this._excludeInvisible = excludeInvisible;
 
       this.invalidateHint();
     }
@@ -4865,7 +4857,7 @@ class Node extends ParallelDOM {
    * Returns whether the excludeInvisible performance flag is set.
    */
   public isExcludeInvisible(): boolean {
-    return this._hints.excludeInvisible;
+    return this._excludeInvisible;
   }
 
   /**
@@ -4949,8 +4941,8 @@ class Node extends ParallelDOM {
    * Sets the preventFit performance flag.
    */
   public setPreventFit( preventFit: boolean ): void {
-    if ( preventFit !== this._hints.preventFit ) {
-      this._hints.preventFit = preventFit;
+    if ( preventFit !== this._preventFit ) {
+      this._preventFit = preventFit;
 
       this.invalidateHint();
     }
@@ -4974,7 +4966,7 @@ class Node extends ParallelDOM {
    * Returns whether the preventFit performance flag is set.
    */
   public isPreventFit(): boolean {
-    return this._hints.preventFit;
+    return this._preventFit;
   }
 
   /**
@@ -4983,8 +4975,8 @@ class Node extends ParallelDOM {
   public setWebGLScale( webglScale: number | null ): void {
     assert && assert( webglScale === null || ( typeof webglScale === 'number' && isFinite( webglScale ) ) );
 
-    if ( webglScale !== this._hints.webglScale ) {
-      this._hints.webglScale = webglScale;
+    if ( webglScale !== this._webglScale ) {
+      this._webglScale = webglScale;
 
       this.invalidateHint();
     }
@@ -5008,7 +5000,7 @@ class Node extends ParallelDOM {
    * Returns the value of the webglScale performance flag.
    */
   public getWebGLScale(): number | null {
-    return this._hints.webglScale;
+    return this._webglScale;
   }
 
   /*---------------------------------------------------------------------------*

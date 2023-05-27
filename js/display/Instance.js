@@ -369,7 +369,7 @@ class Instance {
     this.groupRenderer = 0;
     this.sharedCacheRenderer = 0;
 
-    const hints = this.node._hints;
+    const node = this.node;
 
     this.isUnderCanvasCache = this.isSharedCanvasCacheRoot ||
                               ( this.parent ? ( this.parent.isUnderCanvasCache || this.parent.isInstanceCanvasCache || this.parent.isSharedCanvasCacheSelf ) : false );
@@ -377,12 +377,12 @@ class Instance {
     // set up our preferred renderer list (generally based on the parent)
     this.preferredRenderers = this.parent ? this.parent.preferredRenderers : defaultPreferredRenderers;
     // allow the node to modify its preferred renderers (and those of its descendants)
-    if ( hints.renderer ) {
-      this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
+    if ( node._renderer ) {
+      this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, node._renderer );
     }
 
     const hasClip = this.node.hasClipArea();
-    const hasFilters = this.node.effectiveOpacity !== 1 || hints.usesOpacity || this.node._filters.length > 0;
+    const hasFilters = this.node.effectiveOpacity !== 1 || node._usesOpacity || this.node._filters.length > 0;
     // let hasNonDOMFilter = false;
     let hasNonSVGFilter = false;
     let hasNonCanvasFilter = false;
@@ -407,7 +407,7 @@ class Instance {
         // }
       }
     }
-    const requiresSplit = hints.cssTransform || hints.layerSplit;
+    const requiresSplit = node._cssTransform || node._layerSplit;
     const backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
 
     // Support either "all Canvas" or "all SVG" opacity/clip
@@ -425,17 +425,19 @@ class Instance {
     if ( useBackbone ) {
       this.isBackbone = true;
       this.isVisibilityApplied = true;
-      this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
+      this.isTransformed = this.isDisplayRoot || !!node._cssTransform; // for now, only trigger CSS transform if we have the specific hint
       //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
       this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
     }
-    else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || hints.canvasCache ) ) {
+    // TODO: node._canvasCache hint not defined, always undefined
+    else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || node._canvasCache ) ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
-        `hints.canvasCache provided, but not all node contents can be rendered with Canvas under ${
+        `Node canvasCache provided, but not all node contents can be rendered with Canvas under ${
           this.node.constructor.name}` );
 
-      if ( hints.singleCache ) {
+      // TODO: node._singleCache hint not defined, always undefined
+      if ( node._singleCache ) {
         // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
         if ( this.isSharedCanvasCacheRoot ) {
           this.isSharedCanvasCacheSelf = true;
@@ -446,7 +448,7 @@ class Instance {
           // everything underneath needs to guarantee that its bounds are valid
           //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
           assert && assert( this.node._rendererSummary.areBoundsValid(),
-            `hints.singleCache provided, but not all node contents have valid bounds under ${
+            `Node singleCache provided, but not all node contents have valid bounds under ${
               this.node.constructor.name}` );
 
           this.isSharedCanvasCachePlaceholder = true;
