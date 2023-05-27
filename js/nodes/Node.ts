@@ -1122,7 +1122,6 @@ class Node extends ParallelDOM {
    * Making changes to the returned result will not affect this node's children.
    */
   public getChildren(): Node[] {
-    // TODO: ensure we are not triggering this in Scenery code when not necessary!
     return this._children.slice( 0 ); // create a defensive copy
   }
 
