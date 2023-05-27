@@ -1195,7 +1195,7 @@ class Node extends ParallelDOM {
    * Moves this Node to the front (end) of all of its parents children array.
    */
   public moveToFront(): this {
-    _.each( this._parents.slice(), parent => parent.moveChildToFront( this ) );
+    _.each( this.parents, parent => parent.moveChildToFront( this ) );
 
     return this; // allow chaining
   }
@@ -1213,7 +1213,7 @@ class Node extends ParallelDOM {
    * Move this node one index forward in each of its parents.  If the Node is already at the front, this is a no-op.
    */
   public moveForward(): this {
-    this._parents.forEach( parent => parent.moveChildForward( this ) ); // TODO: Do we need slice like moveToFront has?
+    this.parents.forEach( parent => parent.moveChildForward( this ) );
     return this; // chaining
   }
 
@@ -1232,7 +1232,7 @@ class Node extends ParallelDOM {
    * Move this node one index backward in each of its parents.  If the Node is already at the back, this is a no-op.
    */
   public moveBackward(): this {
-    this._parents.forEach( parent => parent.moveChildBackward( this ) ); // TODO: Do we need slice like moveToFront has?
+    this.parents.forEach( parent => parent.moveChildBackward( this ) );
     return this; // chaining
   }
 
@@ -1251,7 +1251,7 @@ class Node extends ParallelDOM {
    * Moves this Node to the back (front) of all of its parents children array.
    */
   public moveToBack(): this {
-    _.each( this._parents.slice(), parent => parent.moveChildToBack( this ) );
+    _.each( this.parents, parent => parent.moveChildToBack( this ) );
 
     return this; // allow chaining
   }
