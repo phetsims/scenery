@@ -6281,7 +6281,9 @@ class Node extends ParallelDOM {
       assert && assert( options.pickableProperty!.value === options.pickable, 'If both pickable and pickableProperty are provided, then values should match' );
     }
 
-    _.each( this._mutatorKeys, key => {
+    const mutatorKeys = this._mutatorKeys;
+    for ( let i = 0; i < mutatorKeys.length; i++ ) {
+      const key = mutatorKeys[ i ];
 
       // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
       // @ts-expect-error
@@ -6301,9 +6303,9 @@ class Node extends ParallelDOM {
           this[ key ] = options[ key ];
         }
       }
-    } );
+    }
 
-    this.initializePhetioObject( { phetioType: Node.NodeIO, phetioState: PHET_IO_STATE_DEFAULT }, options );
+    this.initializePhetioObject( DEFAULT_PHET_IO_OBJECT_BASE_OPTIONS, options );
 
     return this; // allow chaining
   }
@@ -6524,6 +6526,8 @@ Node.NodeIO = new IOType( 'NodeIO', {
     phetioState: PHET_IO_STATE_DEFAULT
   }
 } );
+
+const DEFAULT_PHET_IO_OBJECT_BASE_OPTIONS = { phetioType: Node.NodeIO, phetioState: PHET_IO_STATE_DEFAULT };
 
 // We use interface extension, so we can't export Node at its declaration location
 export default Node;
