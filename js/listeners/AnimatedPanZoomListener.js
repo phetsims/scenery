@@ -15,6 +15,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
+import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, Node, PanZoomListener, PDOMPointer, PDOMUtils, PressListener, scenery } from '../imports.js';
@@ -177,9 +178,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // set source and destination positions and scales after setting from state
     // to initialize values for animation with AnimatedPanZoomListener
     this.sourceFramePanBoundsProperty.lazyLink( () => {
-      const simGlobal = _.get( window, 'phet.joist.sim', null ); // returns null if global isn't found
 
-      if ( ( simGlobal && simGlobal.isSettingPhetioStateProperty.value ) ) {
+      if ( isSettingPhetioStateProperty.value ) {
         this.initializePositions();
         this.sourceScale = this.getCurrentScale();
         this.setDestinationScale( this.sourceScale );

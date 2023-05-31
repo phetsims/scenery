@@ -141,6 +141,7 @@ import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
+import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -2629,8 +2630,7 @@ export default class ParallelDOM extends PhetioObject {
   public alertDescriptionUtterance( utterance: TAlertable ): void {
 
     // No description should be alerted if setting PhET-iO state, see https://github.com/phetsims/scenery/issues/1397
-    if ( _.hasIn( window, 'phet.phetio.phetioEngine.phetioStateEngine' ) &&
-         phet.phetio.phetioEngine.phetioStateEngine.isSettingStateProperty.value ) {
+    if ( isSettingPhetioStateProperty.value ) {
       return;
     }
 

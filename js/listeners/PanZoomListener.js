@@ -13,6 +13,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import merge from '../../../phet-core/js/merge.js';
 import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
+import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { MultiListener, scenery } from '../imports.js';
 
@@ -76,9 +77,7 @@ class PanZoomListener extends MultiListener {
     } );
 
     this.sourceFramePanBoundsProperty.lazyLink( () => {
-      const simGlobal = _.get( window, 'phet.joist.sim', null ); // returns null if global isn't found
-
-      if ( ( simGlobal && simGlobal.isSettingPhetioStateProperty.value ) ) {
+      if ( isSettingPhetioStateProperty.value ) {
 
         // The matrixProperty has transformations relative to the global view coordinates of the source simulation,
         // so it will not be correct if source and destination frames are different sizes. This will map transforamtions
