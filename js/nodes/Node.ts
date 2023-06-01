@@ -2125,9 +2125,11 @@ class Node extends ParallelDOM {
    */
   public isPhetioMouseHittable( point: Vector2 ): boolean {
 
-    // unpickable things cannot be autoselected unless they are PhET-iO instrumented
-    if ( this.pickable === false ) {
-      return this.isPhetioInstrumented();
+    // unpickable things cannot be autoselected unless there are descendants that could be potential mouse hits.
+    // It is important to opt out of these subtrees to make sure that they don't falsely "suck up" a mouse hit that
+    // would otherwise go to a target behind the unpickable Node.
+    if ( this.pickable === false && !this.isAnyDescendantAPhetioMouseHitTarget() ) {
+      return false;
     }
 
     return this.visible &&
@@ -2135,10 +2137,34 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
-   * Adapted from Picker.recursiveHitTest
-   * @returns - may not be a Node.  For instance, ThreeIsometricNode hits Mass instances.  RichText or Text may return
-   *          - the associated stringProperty.  May return null if no PhetioObject is found (this means to continue the search)
+   * If you need to know if any Node in a subtree could possibly be a phetio mouse hit target.
+   * SR and MK ran performance on this function in CCK:DC and CAV in 6/2023 and there was no noticeable problem.
+   */
+  public isAnyDescendantAPhetioMouseHitTarget(): boolean {
+    return this.getPhetioMouseHitTarget() !== 'phetioNotSelectable' ||
+           _.some( this.children, child => child.isAnyDescendantAPhetioMouseHitTarget() );
+  }
+
+  /**
+   * Used in Studio Autoselect.  Returns a PhET-iO Element (a PhetioObject) if possible, or null if no hit.
+   * "phetioNotSelectable" is an intermediate state used to note when a "hit" has occurred, but the hit was on a Node
+   * that didn't have a fit target (see PhetioObject.getPhetioMouseHitTarget())
+   * A few notes on the implementation:
+   * 1. Prefer the leaf most Node that is at the highest z-index in rendering order
+   * 2. Pickable:false Nodes don't prune out subtrees if descendents could still be mouse hit targets
+   *    (see PhetioObject.getPhetioMouseHitTarget()).
+   * 3. First the algorithm finds a Node that is a "hit", and then it tries to find the most fit "target" for that hit.
+   *    a. Itself, see  PhetioObject.getPhetioMouseHitTarget()
+   *    b. A class defined substitute, Text.getPhetioMouseHitTarget()
+   *    c. A sibling that is rendered behind the hit
+   *    d. The most recent descendant that is a usable target.
+   *
+   * Adapted originally from Picker.recursiveHitTest, with specific tweaks needed for PhET-iO instrumentation, display
+   * and filtering.
+   * @returns - null if no hit occurred
+   *          - A PhetioObject if a hit occurred on a Node with a selectable target
+   *          - 'phetioNotSelectable' if a hit occurred, but no suitable target was found from that hit (see
+   *             PhetioObject.getPhetioMouseHitTarget())
    */
   public getPhetioMouseHit( point: Vector2 ): PhetioObject | null | 'phetioNotSelectable' {
 
@@ -2149,8 +2175,12 @@ class Node extends ParallelDOM {
     // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
     const localPoint = this._transform.getInverse().timesVector2( point );
 
+    // If any child was hit but returned 'phetioNotSelectable', then that will trigger the "find the best target" portion
+    // of the algorithm, moving on from the "find the hit Node" part.
+    let childHitWithoutTarget = null;
+
     // Check children before our "self", since the children are rendered on top.
-    // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
+    // Manual iteration here so we can return directly, and so we can iterate backwards (last node is rendered in front).
     for ( let i = this._children.length - 1; i >= 0; i-- ) {
 
       // Not necessarily a child of this Node (see getPhetioMouseHitTarget())
@@ -2160,9 +2190,13 @@ class Node extends ParallelDOM {
         return childTargetHit;
       }
       else if ( childTargetHit === 'phetioNotSelectable' ) {
-        return this.getPhetioMouseHitTarget();
+        childHitWithoutTarget = true;
       }
       // No hit, so keep iterating to next child
+    }
+
+    if ( childHitWithoutTarget ) {
+      return this.getPhetioMouseHitTarget();
     }
 
     // Tests for mouse hit areas before testing containsPointSelf. If there is a mouseArea, then don't ever check selfBounds.
