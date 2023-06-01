@@ -144,9 +144,10 @@ type SelfOptions = {
   // Called when keyboard drag is started (on initial press).
   start?: ( ( event: SceneryEvent ) => void ) | null;
 
-  // Called during drag. Note that this does not provide the SceneryEvent. Dragging happens during animation
-  // (as long as keys are down), so there is no event associated with the drag.
-  drag?: ( ( viewDelta: Vector2 ) => void ) | null;
+  // Called during drag. If providedOptions.transform is provided, vectorDelta will be in model coordinates.
+  // Otherwise, it will be in view coordinates. Note that this does not provide the SceneryEvent. Dragging
+  // happens during animation (as long as keys are down), so there is no event associated with the drag.
+  drag?: ( ( vectorDelta: Vector2 ) => void ) | null;
 
   // Called when keyboard dragging ends.
   end?: ( ( event?: SceneryEvent ) => void ) | null;
@@ -179,7 +180,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
   // See options for documentation
   private _start: ( ( event: SceneryEvent ) => void ) | null;
-  private _drag: ( ( viewDelta: Vector2, listener: KeyboardDragListener ) => void ) | null;
+  private _drag: ( ( vectorDelta: Vector2, listener: KeyboardDragListener ) => void ) | null;
   private _end: ( ( event?: SceneryEvent ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _mapPosition: MapPosition | null;
