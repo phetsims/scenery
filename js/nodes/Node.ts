@@ -2124,6 +2124,12 @@ class Node extends ParallelDOM {
    * 4. Note that non-pickable nodes can still be autoselected
    */
   public isPhetioMouseHittable( point: Vector2 ): boolean {
+
+    // unpickable things cannot be autoselected unless they are PhET-iO instrumented
+    if ( this.pickable === false ) {
+      return this.isPhetioInstrumented();
+    }
+
     return this.visible &&
            ( this.clipArea === null || this.clipArea.containsPoint( this._transform.getInverse().timesVector2( point ) ) );
   }
