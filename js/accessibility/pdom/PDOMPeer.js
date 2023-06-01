@@ -249,6 +249,13 @@ class PDOMPeer {
       this.setAttributeToElement( 'type', options.inputType );
     }
 
+    // if the label element happens to be a 'label', associate with 'for' attribute (must be done after updating IDs)
+    if ( options.labelTagName && options.labelTagName.toUpperCase() === LABEL_TAG ) {
+      this.setAttributeToElement( 'for', this._primarySibling.id, {
+        elementName: PDOMPeer.LABEL_SIBLING
+      } );
+    }
+
     this.setFocusable( this.node.focusable );
 
     // set the positionInPDOM field to our updated instance
@@ -863,13 +870,6 @@ class PDOMPeer {
     }
 
     PDOMUtils.setTextContent( this._labelSibling, content );
-
-    // if the label element happens to be a 'label', associate with 'for' attribute
-    if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
-      this.setAttributeToElement( 'for', this._primarySibling.id, {
-        elementName: PDOMPeer.LABEL_SIBLING
-      } );
-    }
   }
 
   /**
