@@ -2131,11 +2131,10 @@ class Node extends ParallelDOM {
   /**
    * Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
    * Adapted from Picker.recursiveHitTest
-   * TODO: What about supporting autoselect where given a point, find that closest instrumented ancestor? https://github.com/phetsims/studio/issues/304
    * @returns - may not be a Node.  For instance, ThreeIsometricNode hits Mass instances.  RichText or Text may return
    *          - the associated stringProperty.  May return null if no PhetioObject is found (this means to continue the search)
    */
-  public getPhetioMouseHit( point: Vector2 ): PhetioObject | null {
+  public getPhetioMouseHit( point: Vector2 ): PhetioObject | null | 'phetioNotSelectable' {
 
     if ( !this.isPhetioMouseHittable( point ) ) {
       return null;
@@ -2151,9 +2150,13 @@ class Node extends ParallelDOM {
       // Not necessarily a child of this Node (see getPhetioMouseHitTarget())
       const childTargetHit = this._children[ i ].getPhetioMouseHit( localPoint );
 
-      if ( childTargetHit ) {
+      if ( childTargetHit instanceof PhetioObject ) {
         return childTargetHit;
       }
+      else if ( childTargetHit === 'phetioNotSelectable' ) {
+        return this.getPhetioMouseHitTarget();
+      }
+      // No hit, so keep iterating to next child
     }
 
     // Tests for mouse hit areas before testing containsPointSelf. If there is a mouseArea, then don't ever check selfBounds.

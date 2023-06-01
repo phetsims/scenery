@@ -395,15 +395,16 @@ export default class RichText extends Node {
    * RichText will use the default implementation of the PhET-iO mouse hit target, but if unavailable (likely because this
    * RichText is PhET-iO uninstrumented), then it will target its stringProperty target.
    */
-  public override getPhetioMouseHitTarget(): PhetioObject | null {
-    return super.getPhetioMouseHitTarget() || this.getStringPropertyPhetioMouseHitTarget();
+  public override getPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {
+    const superHit = super.getPhetioMouseHitTarget();
+    return superHit === 'phetioNotSelectable' ? this.getStringPropertyPhetioMouseHitTarget() : superHit;
   }
 
-  private getStringPropertyPhetioMouseHitTarget(): PhetioObject | null {
+  private getStringPropertyPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {
     const targetStringProperty = this._stringProperty.getTargetProperty();
 
     // Even if this isn't PhET-iO instrumented, it still qualifies as this RichText's hit
-    return targetStringProperty instanceof PhetioObject ? targetStringProperty.getPhetioMouseHitTarget() : null;
+    return targetStringProperty instanceof PhetioObject ? targetStringProperty.getPhetioMouseHitTarget() : 'phetioNotSelectable';
   }
 
   /**
