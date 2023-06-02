@@ -44,7 +44,20 @@ const TEST_HIGHLIGHT = new Circle( 5 );
 // a custom focus highlight (since dummy node's have no bounds)
 const focusHighlight = new Rectangle( 0, 0, 10, 10 );
 
-QUnit.module( 'ParallelDOMTests' );
+let canRunTests = true;
+
+QUnit.module( 'ParallelDOMTests', {
+  beforeEach: () => {
+
+    // A test can only be run when the document has focus because tests require focus/blur events. Browsers
+    // do not emit these events when the window is not active (especially true for pupetteer
+    canRunTests = document.hasFocus();
+
+    if ( !canRunTests ) {
+      console.warn( 'Unable to run focus tests because the document does not have focus' );
+    }
+  }
+} );
 
 /**
  * Get a unique PDOMPeer from a node with accessible content. Will error if the node has multiple instances
@@ -963,6 +976,10 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
 } );
 
 QUnit.test( 'Next/Previous focusable', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   // Especially important for puppeteer which doesn't support focus/blur events
   // see https://github.com/phetsims/aqua/issues/134
@@ -1447,6 +1464,10 @@ QUnit.test( 'pdomChecked', assert => {
 } );
 
 QUnit.test( 'swapVisibility', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1547,6 +1568,10 @@ QUnit.test( 'Aria Label Setter', assert => {
 } );
 
 QUnit.test( 'focusable option', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1914,6 +1939,10 @@ QUnit.test( 'helpText option', assert => {
 } );
 
 QUnit.test( 'move to front/move to back', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   // make sure state is restored after moving children to front and back
   const rootNode = new Node( { tagName: 'div' } );

@@ -18,7 +18,20 @@ import KeyboardUtils from '../KeyboardUtils.js';
 const TEST_LABEL = 'Test Label';
 const TEST_LABEL_2 = 'Test Label 2';
 
-QUnit.module( 'PDOMInput' );
+let canRunTests = true;
+
+QUnit.module( 'PDOMInput', {
+  beforeEach: () => {
+
+    // A test can only be run when the document has focus because tests require focus/blur events. Browsers
+    // do not emit these events when the window is not active (especially true for pupetteer
+    canRunTests = document.hasFocus();
+
+    if ( !canRunTests ) {
+      console.warn( 'Unable to run focus tests because the document does not have focus' );
+    }
+  }
+} );
 
 /**
  * Set up a test for accessible input by attaching a root node to a display and initializing events.
@@ -74,6 +87,10 @@ const triggerDOMEvent = ( event, element, key, options ) => {
 };
 
 QUnit.test( 'focusin/focusout (focus/blur)', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
@@ -171,6 +188,10 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 } );
 
 QUnit.test( 'tab focusin/focusout', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
   beforeTest( display );
@@ -255,6 +276,10 @@ QUnit.test( 'tab focusin/focusout', assert => {
 } );
 
 QUnit.test( 'click', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
@@ -476,6 +501,10 @@ QUnit.test( 'click extra', assert => {
 } );
 
 QUnit.test( 'input', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
@@ -512,6 +541,10 @@ QUnit.test( 'input', assert => {
 
 
 QUnit.test( 'change', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
@@ -547,6 +580,10 @@ QUnit.test( 'change', assert => {
 } );
 
 QUnit.test( 'keydown/keyup', assert => {
+  if ( !canRunTests ) {
+    assert.ok( true, 'Skipping test because document does not have focus' );
+    return;
+  }
 
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode );
