@@ -400,19 +400,28 @@ QUnit.test( 'setting accessible order on a Node with focus', assert => {
   display.initializeEvents();
   document.body.appendChild( display.domElement );
 
-  const a = new Node( { tagName: 'div' } );
-  const b = new Node( { tagName: 'div', focusable: true } );
-  const c = new Node( { tagName: 'div', focusable: true } );
-  const d = new Node( { tagName: 'div', focusable: true } );
+  const a1 = new Node( { tagName: 'div' } );
+  const b1 = new Node( { tagName: 'div', focusable: true } );
+  const c1 = new Node( { tagName: 'div', focusable: true } );
+  const d1 = new Node( { tagName: 'div', focusable: true } );
+  const d2 = new Node( { tagName: 'div', focusable: true } );
+  const d3 = new Node( { tagName: 'div', focusable: true } );
+  const d4 = new Node( { tagName: 'div', focusable: true } );
 
-  rootNode.addChild( a );
-  a.children = [ b, c, d ];
+  // a scene graph where d nodes are children of b, but will be moved under c in the pdomOrder
+  rootNode.addChild( a1 );
+  a1.children = [ b1, c1 ];
+  b1.children = [ d1, d2, d3, d4 ];
 
-  c.focus();
-  assert.ok( c.focused, 'c should be focused' );
+  d1.focus();
+  assert.ok( d1.focused, 'd1 should be focused' );
 
-  a.pdomOrder = [ c, b, d ];
-  assert.ok( c.focused, 'c should still have focus after order change' );
+  b1.pdomOrder = [ d3, d4 ];
+  assert.ok( d1.focused, 'd1 should still have focus after order change' );
+
+  b1.pdomOrder = null;
+  c1.pdomOrder = [ d4, d3, d2, d1 ];
+  assert.ok( d1.focused, 'd1 should still have focus after order change' );
 
   display.detachEvents();
 } );
