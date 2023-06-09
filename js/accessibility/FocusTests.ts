@@ -389,6 +389,34 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
 
+QUnit.test( 'setting accessible order on a Node with focus', assert => {
+  if ( !document.hasFocus() ) {
+    assert.ok( true, 'Opting out of test because document does not have focus' );
+    return;
+  }
+
+  const rootNode = new Node();
+  const display = new Display( rootNode );
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+
+  const a = new Node( { tagName: 'div' } );
+  const b = new Node( { tagName: 'div', focusable: true } );
+  const c = new Node( { tagName: 'div', focusable: true } );
+  const d = new Node( { tagName: 'div', focusable: true } );
+
+  rootNode.addChild( a );
+  a.children = [ b, c, d ];
+
+  c.focus();
+  assert.ok( c.focused, 'c should be focused' );
+
+  a.pdomOrder = [ c, b, d ];
+  assert.ok( c.focused, 'c should still have focus after order change' );
+
+  display.detachEvents();
+} );
+
 QUnit.test( 'Testing FocusManager.windowHasFocusProperty', assert => {
   const rootNode = new Node();
   const display = new Display( rootNode );
