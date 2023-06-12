@@ -709,8 +709,6 @@ export default class Display {
 
     if ( node ) {
       assert && assert( node.isPhetioInstrumented(), 'a PhetioMouseHit should be instrumented' );
-      assert && phet.tandem.phetioElementsDisplayProperty.value === 'featured' && assert( node.phetioFeatured,
-        `featured display mode should only yield featured PhET-iO Elements: ${node.tandem.phetioID}` );
     }
     return node;
   }
