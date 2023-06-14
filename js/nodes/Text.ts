@@ -23,6 +23,7 @@ import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontSt
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 
 const STRING_PROPERTY_NAME = 'stringProperty'; // eslint-disable-line bad-sim-text
 
@@ -246,8 +247,7 @@ export default class Text extends Paintable( Node ) {
    * Text is PhET-iO uninstrumented), then it will target its stringProperty target.
    */
   public override getPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {
-    const superHit = super.getPhetioMouseHitTarget();
-    return superHit === 'phetioNotSelectable' ? this.getStringPropertyPhetioMouseHitTarget() : superHit;
+    return phetioElementSelectionProperty.value === 'string' ? this.getStringPropertyPhetioMouseHitTarget() : super.getPhetioMouseHitTarget();
   }
 
   private getStringPropertyPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {

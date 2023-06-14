@@ -70,6 +70,7 @@ import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
+import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -396,8 +397,7 @@ export default class RichText extends Node {
    * RichText is PhET-iO uninstrumented), then it will target its stringProperty target.
    */
   public override getPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {
-    const superHit = super.getPhetioMouseHitTarget();
-    return superHit === 'phetioNotSelectable' ? this.getStringPropertyPhetioMouseHitTarget() : superHit;
+    return phetioElementSelectionProperty.value === 'string' ? this.getStringPropertyPhetioMouseHitTarget() : super.getPhetioMouseHitTarget();
   }
 
   private getStringPropertyPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {
