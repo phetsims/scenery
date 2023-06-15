@@ -8,6 +8,8 @@
 
 import { Display, FocusManager, Node, Trail } from '../imports.js';
 
+QUnit.module( 'Focus' );
+
 type EqualityItem = {
   trail?: Trail;
   children: Node[];
