@@ -14,7 +14,6 @@ import PDOMFuzzer from './PDOMFuzzer.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMUtils from './PDOMUtils.js';
 import { ParallelDOMOptions, PDOMBehaviorFunction } from './ParallelDOM.js';
-import { FocusManager } from '../../imports.js';
 
 // constants
 const TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';
@@ -989,10 +988,9 @@ QUnit.test( 'Next/Previous focusable', assert => {
   else {
     const util = PDOMUtils;
 
-    FocusManager.attachToWindow();
-
     const rootNode = new Node( { tagName: 'div', focusable: true } );
     var display = new Display( rootNode ); // eslint-disable-line no-var
+    display.initializeEvents();
     document.body.appendChild( display.domElement );
 
     // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
@@ -1056,7 +1054,8 @@ QUnit.test( 'Next/Previous focusable', assert => {
     pdomAuditRootNode( rootNode );
     display.dispose();
     display.domElement.parentElement!.removeChild( display.domElement );
-    FocusManager.detachFromWindow();
+
+    // NOTE: The FocusManager should not be detached here, it is used globally and is needed for other tests.
   }
 } );
 
@@ -1532,7 +1531,6 @@ QUnit.test( 'swapVisibility', assert => {
 
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
-
 } );
 
 QUnit.test( 'Aria Label Setter', assert => {

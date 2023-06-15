@@ -7,10 +7,10 @@
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import { BrowserEvents, Node, PartialPDOMTrail, PDOMInstance, scenery, Trail } from '../../imports.js';
+import { BrowserEvents, FocusManager, Node, PartialPDOMTrail, PDOMInstance, scenery, Trail } from '../../imports.js';
 
-// Reference to the focused DOM element, so we can restore focus between big tree operations.
-let activeElementId = null;
+// Reference to the focused Node, so we can restore focus between big tree operations.
+let focusedNode = null;
 
 const PDOMTree = {
   /**
@@ -392,7 +392,7 @@ const PDOMTree = {
    * @private
    */
   beforeOp() {
-    activeElementId = document.activeElement.id;
+    focusedNode = FocusManager.pdomFocusedNode;
     BrowserEvents.blockFocusCallbacks = true;
   },
 
@@ -401,9 +401,8 @@ const PDOMTree = {
    * @private
    */
   afterOp() {
-    if ( activeElementId ) {
-      const activeElement = document.getElementById( activeElementId );
-      activeElement && activeElement.focus();
+    if ( focusedNode && focusedNode.focusable ) {
+      focusedNode.focus();
     }
     BrowserEvents.blockFocusCallbacks = false;
   },

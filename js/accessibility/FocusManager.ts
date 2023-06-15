@@ -33,7 +33,7 @@ import Property from '../../../axon/js/Property.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Utterance from '../../../utterance-queue/js/Utterance.js';
-import { Focus, FocusDisplayedController, Node, ReadingBlockUtterance, scenery, voicingManager } from '../imports.js';
+import { Display, Focus, FocusDisplayedController, Node, PDOMInstance, PDOMUtils, ReadingBlockUtterance, scenery, voicingManager } from '../imports.js';
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 
@@ -169,6 +169,74 @@ export default class FocusManager {
   }
 
   /**
+   * Update the pdomFocus from a focusin/focusout event. Scenery events are batched so that they cannot be
+   * reentrant. However, that means that scenery state that needs to be updated synchronously with the
+   * changing DOM cannot happen in listeners that fire from scenery input. This method
+   * is meant to be called from focusin/focusout listeners on the window so that The pdomFocus matches
+   * browser state.
+   *
+   * @param displays - List of any displays that are attached to BrowserEvents.
+   * @param event - The focusin/focusout event that triggered this update.
+   * @param focus - True for focusin event, false for focusout event.
+   */
+  public static updatePDOMFocusFromEvent( displays: Display[], event: FocusEvent, focus: boolean ): void {
+    assert && assert( document.activeElement, 'Must be called from focusin, therefore active elemetn expected' );
+
+    if ( focus ) {
+      const uniqueId = document.activeElement!.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID )!;
+      assert && assert( uniqueId, 'Event target must have a unique ID on its data' );
+
+      // Look for the scenery target under the PDOM
+      for ( let i = 0; i < displays.length; i++ ) {
+        const display = displays[ i ];
+
+        // null if target is not under the PDOM
+        const trail = PDOMInstance.uniqueIdToTrail( display, uniqueId );
+        if ( trail ) {
+          const visualTrail = PDOMInstance.guessVisualTrail( trail, display.rootNode );
+          if ( visualTrail.lastNode().focusable ) {
+            FocusManager.pdomFocus = new Focus( display, visualTrail );
+          }
+          else {
+
+            // It is possible that `blur` or `focusout` listeners have removed the element from the traversal order
+            // before we receive the `focus` event. In that case, the browser will still try to put focus on the element
+            // even though the PDOM element and Node are not in the traversal order. It is more consistent to remove
+            // focus in this case.
+            ( event.target as HTMLElement ).blur();
+
+            // do not allow any more focus listeners to dispatch, this target should never have been focused in the
+            // first place, but the browser did it anyway
+            event.stopImmediatePropagation();
+          }
+
+          // no need to keep searching
+          break;
+        }
+      }
+    }
+    else {
+      for ( let i = 0; i < displays.length; i++ ) {
+
+        const display = displays[ i ];
+
+        // will be null if it is not in the PDOM or if it is undefined
+        const relatedTargetTrail = display._input!.getRelatedTargetTrail( event );
+
+        if ( relatedTargetTrail && relatedTargetTrail.lastNode().focusable ) {
+          FocusManager.pdomFocus = new Focus( display, PDOMInstance.guessVisualTrail( relatedTargetTrail, display.rootNode ) );
+        }
+        else {
+
+          // Don't set this before the related target case because we want to support Node.blur listeners overwriting
+          // the relatedTarget behavior.
+          FocusManager.pdomFocus = null;
+        }
+      }
+    }
+  }
+
+  /**
    * Set the DOM focus. A DOM limitation is that there can only be one element with focus at a time so this must
    * be a static for the FocusManager.
    */
@@ -225,7 +293,6 @@ export default class FocusManager {
     phetioFeatured: true,
     phetioReadOnly: true
   } );
-
 
   /**
    * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.

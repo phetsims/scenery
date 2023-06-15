@@ -9,7 +9,7 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Display, Focus, FocusManager, Node, PDOMInstance, Pointer, scenery, Trail } from '../imports.js';
+import { Display, Node, PDOMInstance, Pointer, scenery, Trail } from '../imports.js';
 
 export default class PDOMPointer extends Pointer {
 
@@ -56,8 +56,6 @@ export default class PDOMPointer extends Pointer {
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( lastNode.focusable ) {
           const visualTrail = PDOMInstance.guessVisualTrail( this.trail!, this.display.rootNode );
-
-          FocusManager.pdomFocus = new Focus( this.display, visualTrail );
           this.point = visualTrail.parentToGlobalPoint( lastNode.center );
 
           // TODO: it would be better if we could use this assertion instead, but guessVisualTrail seems to not be working here, https://github.com/phetsims/phet-io/issues/1847
@@ -66,37 +64,9 @@ export default class PDOMPointer extends Pointer {
             // assert && assert( !isNaN( this.point.x ), 'Guess visual trail should be able to get the right point' );
           }
         }
-        else {
-
-          // It is possible that `blur` or `focusout` listeners have removed the element from the traversal order
-          // before we receive the `focus` event. In that case, the browser will still try to put focus on the element
-          // even though the PDOM element and Node are not in the traversal order. It is more consistent to remove
-          // focus in this case.
-          event.target.blur();
-
-          // do not allow any more focus listeners to dispatch, this Node should never have been focused in the
-          // first place, but the browser did it anyway
-          event.abort();
-        }
       },
       blur: event => {
-        assert && assert( event.domEvent );
-
-        // Null if it is not in the PDOM, or if it is undefined
-        const relatedTargetTrail = this.display._input!.getRelatedTargetTrail( event.domEvent! );
-
         this.trail = null;
-
-        if ( relatedTargetTrail && relatedTargetTrail.lastNode().focusable ) {
-          FocusManager.pdomFocus = new Focus( this.display, PDOMInstance.guessVisualTrail( relatedTargetTrail, this.display.rootNode ) );
-        }
-        else {
-
-          // Don't set this before the related target case because we want to support Node.blur listeners overwriting
-          // the relatedTarget behavior.
-          FocusManager.pdomFocus = null;
-        }
-
         this.keydownTargetNode = null;
       },
       keydown: event => {

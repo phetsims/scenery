@@ -763,9 +763,9 @@ const BrowserEvents = {
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
 
-    // if ( domEvent.target.id === 'display1-primary-30-44-2795-2802-2797-2806-3012-3011-2992' ) {
-    //   debugger;
-    // }
+    // Update state related to focus immediately and allowing for reentrancy for focus state
+    // that must match the browser's focus state.
+    FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent, true );
 
     BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusIn', true );
 
@@ -777,6 +777,11 @@ const BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+
+    // Update state related to focus immediately and allowing for reentrancy for focus state
+    // that must match the browser's focus state.
+    FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent, false );
+
     BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusOut', true );
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();

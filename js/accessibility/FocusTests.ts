@@ -8,8 +8,6 @@
 
 import { Display, FocusManager, Node, Trail } from '../imports.js';
 
-QUnit.module( 'Focus' );
-
 type EqualityItem = {
   trail?: Trail;
   children: Node[];
@@ -418,15 +416,74 @@ QUnit.test( 'setting accessible order on a Node with focus', assert => {
 
   b1.pdomOrder = [ d3, d4 ];
   assert.ok( d1.focused, 'd1 should still have focus after order change' );
-
   b1.pdomOrder = null;
+
   c1.pdomOrder = [ d4, d3, d2, d1 ];
+  assert.ok( d1.focused, 'd1 should still have focus after order change' );
+  c1.pdomOrder = null;
+
+  a1.pdomOrder = [ d1, d2, d3 ];
   assert.ok( d1.focused, 'd1 should still have focus after order change' );
 
   display.detachEvents();
 } );
 
+QUnit.test( 'pdomOrder with reentrant events', assert => {
+  if ( !document.hasFocus() ) {
+    assert.ok( true, 'Opting out of test because document does not have focus' );
+    return;
+  }
+
+  const rootNode = new Node();
+  const display = new Display( rootNode );
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+
+  const a1 = new Node( { tagName: 'div' } );
+  const b1 = new Node( { tagName: 'button', focusable: true } );
+  const c1 = new Node( { tagName: 'div', focusable: true } );
+  const d1 = new Node( { tagName: 'div', focusable: true } );
+  const d2 = new Node( { tagName: 'div', focusable: true } );
+
+  const getDOMElement = ( node: Node ) => node.pdomInstances[ 0 ].peer!.primarySibling!;
+
+  rootNode.addChild( a1 );
+  a1.children = [ b1, c1 ];
+  b1.children = [ d1 ];
+
+  b1.addInputListener( {
+    click: event => {
+
+      // focus another thing, inside of the click listener - generates reentrant events
+      d1.focus();
+
+      assert.ok( d1.focused, 'd1 should have focus even though focus was set in a reentrant event' );
+      assert.ok( FocusManager.pdomFocusedNode === d1, 'pdomFocusedNode should be correct during reentrant events' );
+      assert.ok( document.activeElement === getDOMElement( d1 ), 'activeElement should be correct during reentrant events' );
+
+      // change the trail to the Node
+      a1.pdomOrder = [ d1, d2, null ];
+
+      // verify that focus is still correct after PDOM rearrangement
+      assert.ok( d1.focused, 'd1 should still trail change operations in reentrant events' );
+    }
+  } );
+
+  // Focus the button and trigger a click
+  b1.focus();
+  getDOMElement( b1 ).click();
+  assert.ok( true, 'dummy test that should run after click events' );
+
+  b1.blur();
+
+  display.detachEvents();
+} );
+
 QUnit.test( 'Testing FocusManager.windowHasFocusProperty', assert => {
+
+  // detach the FocusManager first just in case it was attached by a previous test
+  FocusManager.detachFromWindow();
+
   const rootNode = new Node();
   const display = new Display( rootNode );
   document.body.appendChild( display.domElement );
@@ -454,7 +511,8 @@ QUnit.test( 'Testing FocusManager.windowHasFocusProperty', assert => {
     assert.ok( FocusManager.windowHasFocusProperty.value, 'Window has focus, is now in the foreground' );
     focusableNode.blur();
     assert.ok( FocusManager.windowHasFocusProperty.value, 'window still has focus after a blur (focus on body)' );
-  }
 
-  FocusManager.detachFromWindow();
+    // NOTE - don't detach the FocusManager here, it is globally attached and it needs to beused
+    // for other tests
+  }
 } );

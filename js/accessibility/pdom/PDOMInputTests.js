@@ -196,9 +196,10 @@ QUnit.test( 'tab focusin/focusout', assert => {
   const display = new Display( rootNode );
   beforeTest( display );
 
-  const buttonA = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
-  const buttonB = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
-  const buttonC = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
+  // inner content for improved readability during debugging
+  const buttonA = new Rectangle( 0, 0, 5, 5, { tagName: 'button', innerContent: 'BUTTON A' } );
+  const buttonB = new Rectangle( 0, 0, 5, 5, { tagName: 'button', innerContent: 'BUTTON B' } );
+  const buttonC = new Rectangle( 0, 0, 5, 5, { tagName: 'button', innerContent: 'BUTTON C' } );
   rootNode.children = [ buttonA, buttonB, buttonC ];
 
   const aPrimarySibling = buttonA.pdomInstances[ 0 ].peer.primarySibling;
