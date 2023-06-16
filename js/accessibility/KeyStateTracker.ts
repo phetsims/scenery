@@ -17,7 +17,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { EventIO, KeyboardUtils, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import PhetioObject from '../../../tandem/js/PhetioObject.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import platform from '../../../phet-core/js/platform.js';
@@ -38,7 +38,7 @@ type KeyStateInfo = {
 // The type for the keyState Object, keys are the KeyboardEvent.code for the pressed key.
 type KeyState = Record<string, KeyStateInfo>;
 
-export type KeyStateTrackerOptions = PickOptional<PhetioObject, 'tandem'>;
+export type KeyStateTrackerOptions = PickOptional<PhetioObjectOptions, 'tandem'>;
 
 class KeyStateTracker {
 
