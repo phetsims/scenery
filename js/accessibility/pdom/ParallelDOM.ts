@@ -2880,7 +2880,6 @@ export default class ParallelDOM extends PhetioObject {
 
       const tandem = this.tandem.createTandem( tandemName );
 
-      // TODO: https://github.com/phetsims/tandem/issues/291 this tandem comparison could be dubious if new Tandem() is ever used.
       if ( newProperty && newProperty instanceof ReadOnlyProperty && newProperty.isPhetioInstrumented() && newProperty instanceof PhetioObject && tandem !== newProperty.tandem ) {
         this.addLinkedElement( newProperty, { tandemName: tandemName } );
       }
