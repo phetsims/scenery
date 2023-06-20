@@ -11,8 +11,10 @@ import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { Line, LineOptions, scenery } from '../../imports.js';
 
+type SelfOptions = EmptySelfOptions;
+
 // Separators are automatically shown/hidden and hence should not be instrumented for PhET-iO control.
-export type SeparatorOptions = StrictOmit<LineOptions, 'tandem'>;
+export type SeparatorOptions = SelfOptions & StrictOmit<LineOptions, 'tandem'>;
 
 export const DEFAULT_SEPARATOR_LAYOUT_OPTIONS = {
   stretch: true,
@@ -20,8 +22,8 @@ export const DEFAULT_SEPARATOR_LAYOUT_OPTIONS = {
 };
 
 export default class Separator extends Line {
-  public constructor( providedOptions?: LineOptions ) {
-    super( optionize<LineOptions, EmptySelfOptions, LineOptions>()( {
+  public constructor( providedOptions?: SeparatorOptions ) {
+    super( optionize<SeparatorOptions, SelfOptions, LineOptions>()( {
       layoutOptions: DEFAULT_SEPARATOR_LAYOUT_OPTIONS,
 
       // dark gray
