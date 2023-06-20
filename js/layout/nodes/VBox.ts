@@ -10,13 +10,14 @@ import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { FlowBox, FlowBoxOptions, scenery, Node, VSeparator } from '../../imports.js';
 
+type SelfOptions = EmptySelfOptions;
 export type VBoxOptions = StrictOmit<FlowBoxOptions, 'orientation'>;
 
 export default class VBox extends FlowBox {
   public constructor( providedOptions?: VBoxOptions ) {
     assert && assert( !providedOptions || !( providedOptions as FlowBoxOptions ).orientation, 'VBox sets orientation' );
 
-    super( optionize<VBoxOptions, EmptySelfOptions, FlowBoxOptions>()( {
+    super( optionize<VBoxOptions, SelfOptions, FlowBoxOptions>()( {
       orientation: 'vertical'
     }, providedOptions ) );
   }
