@@ -243,18 +243,22 @@ export default class Text extends Paintable( Node ) {
   }
 
   /**
-   * Text will use the default implementation of the PhET-iO mouse hit target, but if unavailable (likely because this
-   * Text is PhET-iO uninstrumented), then it will target its stringProperty target.
+   * Text supports a "string" selection mode, in which it will map to its stringProperty (if applicable), otherwise is
+   * uses the default mouse-hit target from the supertype.
    */
-  public override getPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {
-    return phetioElementSelectionProperty.value === 'string' ? this.getStringPropertyPhetioMouseHitTarget() : super.getPhetioMouseHitTarget();
+  public override getPhetioMouseHitTarget( fromLinking = false ): PhetioObject | 'phetioNotSelectable' {
+    return phetioElementSelectionProperty.value === 'string' ?
+           this.getStringPropertyPhetioMouseHitTarget( fromLinking ) :
+           super.getPhetioMouseHitTarget( fromLinking );
   }
 
-  private getStringPropertyPhetioMouseHitTarget(): PhetioObject | 'phetioNotSelectable' {
+  private getStringPropertyPhetioMouseHitTarget( fromLinking = false ): PhetioObject | 'phetioNotSelectable' {
     const targetStringProperty = this._stringProperty.getTargetProperty();
 
-    // Even if this isn't PhET-iO instrumented, it still qualifies as this Text's hit
-    return targetStringProperty instanceof PhetioObject ? targetStringProperty.getPhetioMouseHitTarget() : 'phetioNotSelectable';
+    // Even if this isn't PhET-iO instrumented, it still qualifies as this RichText's hit
+    return targetStringProperty instanceof PhetioObject ?
+           targetStringProperty.getPhetioMouseHitTarget( fromLinking ) :
+           'phetioNotSelectable';
   }
 
   /**
