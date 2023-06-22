@@ -26,7 +26,7 @@ import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 import { AlignBox, Node, scenery } from '../../imports.js';
 import { AlignBoxOptions } from '../nodes/AlignBox.js';
-import Disposable from '../../../../axon/js/Disposable.js';
+import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 
 let globalId = 1;
@@ -39,7 +39,7 @@ type SelfOptions = {
   matchVertical?: boolean;
 };
 
-export type AlignGroupOptions = SelfOptions;
+export type AlignGroupOptions = SelfOptions & DisposableOptions;
 
 const DEFAULT_OPTIONS = {
   matchHorizontal: true,
@@ -71,12 +71,12 @@ export default class AlignGroup extends Disposable {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on options object is a code smell' );
 
-    const options = optionize3<AlignGroupOptions, SelfOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+    const options = optionize3<AlignGroupOptions, SelfOptions, DisposableOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     assert && assert( typeof options.matchHorizontal === 'boolean' );
     assert && assert( typeof options.matchVertical === 'boolean' );
 
-    super();
+    super( options );
 
     this._alignBoxes = [];
 
