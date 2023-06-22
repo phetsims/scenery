@@ -255,7 +255,9 @@ const NODE_OPTION_KEYS = [
   'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
   'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
   'transformBounds', // Flag that makes bounds tighter, see setTransformBounds() for more documentation
-  ...REQUIRES_BOUNDS_OPTION_KEYS
+  ...REQUIRES_BOUNDS_OPTION_KEYS,
+
+  'isDisposable' // From Disposable, see Disposable.isDisposable
 ];
 
 const DEFAULT_OPTIONS = {
@@ -367,6 +369,8 @@ export type NodeOptions = {
   visiblePropertyOptions?: PropertyOptions<boolean>;
   enabledPropertyOptions?: PropertyOptions<boolean>;
   inputEnabledPropertyOptions?: PropertyOptions<boolean>;
+
+  isDisposable?: boolean; // See Disposable.isDisposable
 } & ParallelDOMOptions & NodeTransformOptions;
 
 type RasterizedOptions = {
