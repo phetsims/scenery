@@ -99,6 +99,7 @@
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import { CanvasBlock, DOMBlock, Drawable, Renderer, scenery, SVGBlock, WebGLBlock } from '../imports.js';
+import VelloBlock from './VelloBlock.js';
 
 class Stitcher {
   /**
@@ -440,6 +441,9 @@ class Stitcher {
     }
     else if ( Renderer.isWebGL( renderer ) ) {
       block = WebGLBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
+    }
+    else if ( Renderer.isVello( renderer ) ) {
+      block = VelloBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
     }
     else {
       throw new Error( `unsupported renderer for createBlock: ${renderer}` );

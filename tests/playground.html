@@ -357,57 +357,130 @@ an UI and Display made for visual testing and debugging.
     setTimeout( async function() {
       const sceneryImports = await import( '../../chipper/dist/js/scenery/js/imports.js' );
 
-      const GridBox = sceneryImports.GridBox;
-      const Rectangle = sceneryImports.Rectangle;
-      const Color = sceneryImports.Color;
+      const canvas = document.createElement( 'canvas' );
+      const fullWidth = 512;
+      const fullHeight = 512;
+      canvas.width = Math.ceil( fullWidth * window.devicePixelRatio );
+      canvas.height = Math.ceil( fullHeight * window.devicePixelRatio );
+      canvas.style.width = `${fullWidth}px`;
+      canvas.style.height = `${fullHeight}px`;
 
-      const colors = [
-        new Color( 62, 171, 3 ),
-        new Color( 23, 180, 77 ),
-        new Color( 24, 183, 138 ),
-        new Color( 23, 178, 194 ),
-        new Color( 20, 163, 238 ),
-        new Color( 71, 136, 255 ),
-        new Color( 171, 101, 255 ),
-        new Color( 228, 72, 235 ),
-        new Color( 252, 66, 186 ),
-        new Color( 252, 82, 127 )
-      ];
+      document.body.appendChild( canvas );
 
-      const box = new GridBox( {
-        x: 10,
-        y: 10,
-        preferredWidth: 100,
-        preferredHeight: 100,
+      const PhetEncoding = phet.scenery.PhetEncoding;
+      const DeviceContext = phet.scenery.DeviceContext;
+
+      const deviceContext = await DeviceContext.create();
+      const canvasContext = deviceContext.getCanvasContext( canvas );
+
+      // const sceneEncoding = exampleScene( window.devicePixelRatio );
+      const sceneEncoding = new phet.scenery.PhetEncoding();
+      sceneEncoding.reset( false );
+
+      const encoding = new phet.scenery.PhetEncoding();
+
+      const node = new phet.scenery.Node( {
         children: [
-          new Rectangle( 0, 0, 30, 15, {
-            fill: colors[ 2 ],
-            sizable: true,
-            localMinimumWidth: 30,
-            localMinimumHeight: 15,
-            layoutOptions: { column: 1, row: 0, stretch: true, grow: 1 }
-          } ),
-          new Rectangle( 0, 0, 30, 30, {
-            fill: colors[ 4 ],
-            sizable: true,
-            localMinimumWidth: 30,
-            localMinimumHeight: 100,
-            layoutOptions: { column: 0, row: 1, horizontalSpan: 2, verticalSpan: 2, stretch: true }
-          } ),
-          new Rectangle( 0, 0, 15, 15, {
-            fill: colors[ 0 ],
-            layoutOptions: { column: 0, row: 3 }
+          new phet.scenery.Rectangle( 0, 0, 100, 50, { fill: 'red' } ),
+          new phet.scenery.Rectangle( 0, 50, 100, 50, { fill: new phet.scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' ) } ),
+          new phet.scenery.Rectangle( 0, 100, 100, 50, { fill: new phet.scenery.LinearGradient( 0, 0, 100, 0 ).addColorStop( 0.3, 'red' ).addColorStop( 0.7, 'orange' ) } ),
+          new phet.scenery.Rectangle( 0, 150, 100, 100, { fill: new phet.scenery.RadialGradient( 0, 150, 0, 0, 150, 100 ).addColorStop( 0.3, 'red' ).addColorStop( 0.7, 'orange' ) } ),
+          new phet.scenery.Text( 'Hello World', {
+            font: new phet.scenery.Font( { size: 20 } ),
+            top: 10,
+            left: 10,
+            fill: 'black'
           } )
-        ]
+        ],
+        clipArea: phet.kite.Shape.rect( 0, 20, 512, 512 )
       } );
 
-      console.log( box.height );
+      encoding.encode_node( node );
 
-      scene.addChild( box );
 
-      display.width = 120;
-      display.height = 120;
-      display.updateDisplay();
+      // const angle = Date.now() / 1000;
+      // let c = Math.cos( angle );
+      // let s = Math.sin( angle );
+      //
+      // encoding.encode_transform( new phet.scenery.Affine( c, -s, s, c, 200, 100 ) );
+      // encoding.encode_linewidth( -1 );
+      // encoding.encode_path( true );
+      // encoding.move_to( -100, -100 );
+      // encoding.quad_to( 0, 0, 100, -100 );
+      // encoding.line_to( 100, 100 );
+      // encoding.cubic_to( 0, 200, 0, 0, -100, 100 );
+      // encoding.line_to( -100, -100 );
+      // encoding.close();
+      // encoding.finish( true );
+      // encoding.encode_linear_gradient( -100, 0, 100, 0, [
+      //   new phet.scenery.VelloColorStop( 0, 0xff0000ff ),
+      //   new phet.scenery.VelloColorStop( 1, 0x0000ffff )
+      // ], phet.scenery.Extend.Pad );
+
+
+
+
+      sceneEncoding.append( encoding, new phet.scenery.Affine( window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0 ) );
+
+      sceneEncoding.finalize_scene();
+
+      const outTexture = canvasContext.getCurrentTexture();
+      const renderInfo = sceneEncoding.resolve( deviceContext );
+      renderInfo.prepareRender( outTexture.width, outTexture.height, 0xf4fcfeff );
+
+      phet.scenery.render( renderInfo, deviceContext, outTexture );
+
+      // const GridBox = sceneryImports.GridBox;
+      // const Rectangle = sceneryImports.Rectangle;
+      // const Color = sceneryImports.Color;
+      //
+      // const colors = [
+      //   new Color( 62, 171, 3 ),
+      //   new Color( 23, 180, 77 ),
+      //   new Color( 24, 183, 138 ),
+      //   new Color( 23, 178, 194 ),
+      //   new Color( 20, 163, 238 ),
+      //   new Color( 71, 136, 255 ),
+      //   new Color( 171, 101, 255 ),
+      //   new Color( 228, 72, 235 ),
+      //   new Color( 252, 66, 186 ),
+      //   new Color( 252, 82, 127 )
+      // ];
+      //
+      // const box = new GridBox( {
+      //   x: 10,
+      //   y: 10,
+      //   preferredWidth: 100,
+      //   preferredHeight: 100,
+      //   children: [
+      //     new Rectangle( 0, 0, 30, 15, {
+      //       fill: colors[ 2 ],
+      //       sizable: true,
+      //       localMinimumWidth: 30,
+      //       localMinimumHeight: 15,
+      //       layoutOptions: { column: 1, row: 0, stretch: true, grow: 1 }
+      //     } ),
+      //     new Rectangle( 0, 0, 30, 30, {
+      //       fill: colors[ 4 ],
+      //       sizable: true,
+      //       localMinimumWidth: 30,
+      //       localMinimumHeight: 100,
+      //       layoutOptions: { column: 0, row: 1, horizontalSpan: 2, verticalSpan: 2, stretch: true }
+      //     } ),
+      //     new Rectangle( 0, 0, 15, 15, {
+      //       fill: colors[ 0 ],
+      //       layoutOptions: { column: 0, row: 3 }
+      //     } )
+      //   ]
+      // } );
+      //
+      // console.log( box.height );
+      //
+      // scene.addChild( box );
+      //
+      // display.width = 120;
+      // display.height = 120;
+      // display.updateDisplay();
 
     }, 400 );
   };

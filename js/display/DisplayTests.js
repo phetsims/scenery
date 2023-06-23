@@ -333,11 +333,12 @@ QUnit.test( 'Drawables (DOM)', assert => {
 QUnit.test( 'Renderer order bitmask', assert => {
 
   // init test
-  let mask = Renderer.createOrderBitmask( Renderer.bitmaskCanvas, Renderer.bitmaskSVG, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
+  let mask = Renderer.createOrderBitmask( Renderer.bitmaskCanvas, Renderer.bitmaskSVG, Renderer.bitmaskDOM, Renderer.bitmaskWebGL, Renderer.bitmaskVello );
   assert.equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskCanvas );
   assert.equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskSVG );
   assert.equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskDOM );
   assert.equal( Renderer.bitmaskOrder( mask, 3 ), Renderer.bitmaskWebGL );
+  assert.equal( Renderer.bitmaskOrder( mask, 4 ), Renderer.bitmaskVello );
 
   // empty test
   mask = Renderer.createOrderBitmask();

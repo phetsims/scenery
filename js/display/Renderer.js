@@ -22,10 +22,10 @@ scenery.register( 'Renderer', Renderer );
  * Renderer bitmask flags
  *---------------------------------------------------------------------------*/
 
-Renderer.numActiveRenderers = 4;
+Renderer.numActiveRenderers = 5;
 Renderer.bitsPerRenderer = 5;
 Renderer.bitmaskRendererArea = 0x00000FF;
-Renderer.bitmaskCurrentRendererArea = 0x000000F;
+Renderer.bitmaskCurrentRendererArea = 0x000001F;
 Renderer.bitmaskLacksOffset = 0x10000;
 Renderer.bitmaskLacksShift = 16; // number of bits between the main renderer bitmask and the "lacks" variety
 Renderer.bitmaskNodeDefault = Renderer.bitmaskRendererArea;
@@ -34,7 +34,8 @@ Renderer.bitmaskCanvas = 0x0000001;
 Renderer.bitmaskSVG = 0x0000002;
 Renderer.bitmaskDOM = 0x0000004;
 Renderer.bitmaskWebGL = 0x0000008;
-// 10, 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea/numActiveRenderers if they are added/removed
+Renderer.bitmaskVello = 0x0000010;
+// 20, 40, 80 reserved for future renderers NOTE: update bitmaskCurrentRendererArea/numActiveRenderers if they are added/removed
 
 // summary bits (for RendererSummary):
 Renderer.bitmaskSingleCanvas = 0x100;
@@ -62,12 +63,16 @@ Renderer.isDOM = function( bitmask ) {
 Renderer.isWebGL = function( bitmask ) {
   return ( bitmask & Renderer.bitmaskWebGL ) !== 0;
 };
+Renderer.isVello = function( bitmask ) {
+  return ( bitmask & Renderer.bitmaskVello ) !== 0;
+};
 
 const rendererMap = {
   canvas: Renderer.bitmaskCanvas,
   svg: Renderer.bitmaskSVG,
   dom: Renderer.bitmaskDOM,
-  webgl: Renderer.bitmaskWebGL
+  webgl: Renderer.bitmaskWebGL,
+  vello: Renderer.bitmaskVello
 };
 Renderer.fromName = function( name ) {
   return rendererMap[ name ];
@@ -79,17 +84,20 @@ Renderer.stripBitmask = function( bitmask ) {
   return bitmask & Renderer.bitmaskRendererArea;
 };
 
-Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer ) {
+// TODO: presumably we can find a better way of handling this?
+Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer, fifthRenderer ) {
   firstRenderer = firstRenderer || 0;
   secondRenderer = secondRenderer || 0;
   thirdRenderer = thirdRenderer || 0;
   fourthRenderer = fourthRenderer || 0;
+  fifthRenderer = fifthRenderer || 0;
 
-  // uses 20 bits now with 4 renderers
+  // uses 25(?) bits now with 4 renderers
   return firstRenderer |
          ( secondRenderer << 5 ) |
          ( thirdRenderer << 10 ) |
-         ( fourthRenderer << 15 );
+         ( fourthRenderer << 15 ) |
+         ( fifthRenderer << 20 );
 };
 // bitmaskOrderN with n=0 is bitmaskOrderFirst, n=1 is bitmaskOrderSecond, etc.
 Renderer.bitmaskOrder = function( bitmask, n ) {
@@ -112,6 +120,9 @@ Renderer.bitmaskOrderThird = function( bitmask ) {
 };
 Renderer.bitmaskOrderFourth = function( bitmask ) {
   return ( bitmask >> 15 ) & Renderer.bitmaskCurrentRendererArea;
+};
+Renderer.bitmaskOrderFifth = function( bitmask ) {
+  return ( bitmask >> 20 ) & Renderer.bitmaskCurrentRendererArea;
 };
 Renderer.pushOrderBitmask = function( bitmask, renderer ) {
   assert && assert( typeof bitmask === 'number' );
@@ -161,6 +172,9 @@ Renderer.createSelfDrawable = function( instance, node, selfRenderer, fittable )
   }
   else if ( Renderer.isWebGL( selfRenderer ) ) {
     drawable = node.createWebGLDrawable( selfRenderer, instance );
+  }
+  else if ( Renderer.isVello( selfRenderer ) ) {
+    drawable = node.createVelloDrawable( selfRenderer, instance );
   }
   else {
     throw new Error( `Unrecognized renderer: ${selfRenderer}` );
