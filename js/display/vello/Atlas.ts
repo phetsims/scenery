@@ -102,8 +102,8 @@ export default class Atlas {
     this.texture = this.device.createTexture( {
       label: 'atlas texture',
       size: {
-        width: this.width,
-        height: this.height,
+        width: this.width || 1,
+        height: this.height || 1,
         depthOrArrayLayers: 1
       },
       format: 'rgba8unorm',

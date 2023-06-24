@@ -8,17 +8,15 @@
  * @author Sharfudeen Ashraf (For Ghent University)
  */
 
-import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { FittedBlock, Renderer, scenery, SpriteSheet, Utils } from '../imports.js';
-
-// TODO: don't hack this!
+import { FittedBlock, scenery, Utils } from '../imports.js';
+import { Affine } from './vello/Affine.js';
+import DeviceContext from './vello/DeviceContext.js';
 import PhetEncoding from './vello/PhetEncoding.js';
-import DeviceContext from './vello/DeviceContext.js'; // eslint-disable-line no-unused-vars
-import render from './vello/render.js'; // eslint-disable-line no-unused-vars
+import render from './vello/render.js';
 
+// TODO: don't let this hackiness in
 PhetEncoding.load();
 
 class VelloBlock extends FittedBlock {
@@ -50,58 +48,43 @@ class VelloBlock extends FittedBlock {
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.push();
 
     // VelloBlocks are hard-coded to take the full display size (as opposed to svg and canvas)
-    // Since we saw some jitter on iPad, see #318 and generally expect WebGL layers to span the entire display
+    // Since we saw some jitter on iPad, see #318 and generally expect WebGPU layers to span the entire display
     // In the future, it would be good to understand what was causing the problem and make webgl consistent
     // with svg and canvas again.
+    // TODO: Don't have it be a "Fitted" block then
     super.initialize( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
 
     // TODO: Uhh, is this not used?
     this.filterRootInstance = filterRootInstance;
 
-    // {boolean} - Whether we pass this flag to the WebGL Context. It will store the contents displayed on the screen,
-    // so that canvas.toDataURL() will work. It also requires clearing the context manually ever frame. Both incur
-    // performance costs, so it should be false by default.
-    // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately?
-    this.preserveDrawingBuffer = display._preserveDrawingBuffer;
+    // // {boolean} - Whether we pass this flag to the WebGL Context. It will store the contents displayed on the screen,
+    // // so that canvas.toDataURL() will work. It also requires clearing the context manually ever frame. Both incur
+    // // performance costs, so it should be false by default.
+    // // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately?
+    // this.preserveDrawingBuffer = display._preserveDrawingBuffer;
 
     // list of {Drawable}s that need to be updated before we update
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
-    // {Array.<SpriteSheet>}, permanent list of spritesheets for this block
-    this.spriteSheets = this.spriteSheets || [];
-
-    // Projection {Matrix3} that maps from Scenery's global coordinate frame to normalized device coordinates,
-    // where x,y are both in the range [-1,1] from one side of the Canvas to the other.
-    this.projectionMatrix = this.projectionMatrix || new Matrix3();
-
-    // @private {Float32Array} - Column-major 3x3 array specifying our projection matrix for 2D points
-    // (homogenized to (x,y,1))
-    this.projectionMatrixArray = new Float32Array( 9 );
-
-    // @public {Emitter} - Called when the WebGL context changes to a new context.
-    this.glChangedEmitter = new TinyEmitter();
-
-    // @private {boolean}
-    this.isContextLost = false;
-
-    // @private {function}
-    this.contextLostListener = this.onContextLoss.bind( this );
-    this.contextRestoreListener = this.onContextRestoration.bind( this );
-
     if ( !this.domElement ) {
       // @public (scenery-internal) {HTMLCanvasElement} - Div wrapper used so we can switch out Canvases if necessary.
-      this.domElement = document.createElement( 'div' );
-      this.domElement.className = 'webgl-container';
-      this.domElement.style.position = 'absolute';
-      this.domElement.style.left = '0';
-      this.domElement.style.top = '0';
+      this.canvas = document.createElement( 'canvas' );
+      this.canvas.style.position = 'absolute';
+      this.canvas.style.left = '0';
+      this.canvas.style.top = '0';
+      this.canvas.style.pointerEvents = 'none';
 
-      this.rebuildCanvas();
+      // @private {number} - unique ID so that we can support rasterization with Display.foreignObjectRasterization
+      this.canvasId = this.canvas.id = `scenery-vello${this.id}`;
+
+      this.domElement = this.canvas;
+
+      // TODO: handle context restoration/loss
+      this.deviceContext = DeviceContext.getSync();
+      this.canvasContext = this.deviceContext.getCanvasContext( this.canvas );
     }
 
-    // clear buffers when we are reinitialized
-    this.gl.clear( this.gl.COLOR_BUFFER_BIT );
-
+    // TODO: perhaps these might reduce performance? kill them?
     // reset any fit transforms that were applied
     Utils.prepareForTransform( this.canvas ); // Apply CSS needed for future CSS transforms to work properly.
     Utils.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
@@ -112,194 +95,13 @@ class VelloBlock extends FittedBlock {
   }
 
   /**
-   * Forces a rebuild of the Canvas and its context (as long as a context can be obtained).
-   * @private
-   *
-   * This can be necessary when the browser won't restore our context that was lost (and we need to create another
-   * canvas to get a valid context).
-   */
-  rebuildCanvas() {
-    sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `rebuildCanvas #${this.id}` );
-    sceneryLog && sceneryLog.VelloBlock && sceneryLog.push();
-
-    const canvas = document.createElement( 'canvas' );
-    const gl = this.getContextFromCanvas( canvas );
-
-    // Don't assert-failure out if this is not our first attempt (we're testing to see if we can recreate)
-    assert && assert( gl || this.canvas, 'We should have a WebGL context by now' );
-
-    // If we're aggressively trying to rebuild, we need to ignore context creation failure.
-    if ( gl ) {
-      if ( this.canvas ) {
-        this.domElement.removeChild( this.canvas );
-        this.canvas.removeEventListener( 'webglcontextlost', this.contextLostListener, false );
-        this.canvas.removeEventListener( 'webglcontextrestored', this.contextRestoreListener, false );
-      }
-
-      // @private {HTMLCanvasElement}
-      this.canvas = canvas;
-      this.canvas.style.pointerEvents = 'none';
-
-      // @private {number} - unique ID so that we can support rasterization with Display.foreignObjectRasterization
-      this.canvasId = this.canvas.id = `scenery-webgl${this.id}`;
-
-      this.canvas.addEventListener( 'webglcontextlost', this.contextLostListener, false );
-      this.canvas.addEventListener( 'webglcontextrestored', this.contextRestoreListener, false );
-
-      this.domElement.appendChild( this.canvas );
-
-      this.setupContext( gl );
-    }
-
-    sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
-  }
-
-  /**
-   * Takes a fresh WebGL context switches the WebGL block over to use it.
-   * @private
-   *
-   * @param {WebGLRenderingContext} gl
-   */
-  setupContext( gl ) {
-    sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `setupContext #${this.id}` );
-    sceneryLog && sceneryLog.VelloBlock && sceneryLog.push();
-
-    assert && assert( gl, 'Should have an actual context if this is called' );
-
-    this.isContextLost = false;
-
-    // @private {WebGLRenderingContext}
-    this.gl = gl;
-
-    // @private {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our
-    // Canvas maps one of its pixels to a physical pixel (for Retina devices, etc.).
-    this.backingScale = Utils.backingScale( this.gl );
-
-    // Double the backing scale size if we detect no built-in antialiasing.
-    // See https://github.com/phetsims/circuit-construction-kit-dc/issues/139 and
-    // https://github.com/phetsims/scenery/issues/859.
-    if ( this.display._allowBackingScaleAntialiasing && gl.getParameter( gl.SAMPLES ) === 0 ) {
-      this.backingScale *= 2;
-    }
-
-    // @private {number}
-    this.originalBackingScale = this.backingScale;
-
-    Utils.applyWebGLContextDefaults( this.gl ); // blending defaults, etc.
-
-    // When the context changes, we need to force certain refreshes
-    this.markDirty();
-    this.dirtyFit = true; // Force re-fitting
-
-    // Update the context references on the processors
-    this.customProcessor.initializeContext( this.gl );
-    this.vertexColorPolygonsProcessor.initializeContext( this.gl );
-    this.texturedTrianglesProcessor.initializeContext( this.gl );
-
-    // Notify spritesheets of the new context
-    for ( let i = 0; i < this.spriteSheets.length; i++ ) {
-      this.spriteSheets[ i ].initializeContext( this.gl );
-    }
-
-    // Notify (e.g. WebGLNode painters need to be recreated)
-    this.glChangedEmitter.emit();
-
-    sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
-  }
-
-  /**
-   * Attempts to force a Canvas rebuild to get a new Canvas/context pair.
-   * @private
-   */
-  delayedRebuildCanvas() {
-    sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Delaying rebuilding of Canvas #${this.id}` );
-    const self = this;
-
-    // TODO: Can we move this to before the update() step? Could happen same-frame in that case.
-    // NOTE: We don't want to rely on a common timer, so we're using the built-in form on purpose.
-    window.setTimeout( function() { // eslint-disable-line bad-sim-text
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Executing delayed rebuilding #${this.id}` );
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.push();
-      self.rebuildCanvas();
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
-    } );
-  }
-
-  /**
-   * Callback for whenever our WebGL context is lost.
-   * @private
-   *
-   * @param {WebGLContextEvent} domEvent
-   */
-  onContextLoss( domEvent ) {
-    if ( !this.isContextLost ) {
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Context lost #${this.id}` );
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.push();
-
-      this.isContextLost = true;
-
-      // Preventing default is super-important, otherwise it never attempts to restore the context
-      domEvent.preventDefault();
-
-      this.canvas.style.display = 'none';
-
-      this.markDirty();
-
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
-    }
-  }
-
-  /**
-   * Callback for whenever our WebGL context is restored.
-   * @private
-   *
-   * @param {WebGLContextEvent} domEvent
-   */
-  onContextRestoration( domEvent ) {
-    if ( this.isContextLost ) {
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Context restored #${this.id}` );
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.push();
-
-      const gl = this.getContextFromCanvas( this.canvas );
-      assert && assert( gl, 'We were told the context was restored, so this should work' );
-
-      this.setupContext( gl );
-
-      this.canvas.style.display = '';
-
-      sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
-    }
-  }
-
-  /**
-   * Attempts to get a WebGL context from a Canvas.
-   * @private
-   *
-   * @param {HTMLCanvasElement}
-   * @returns {WebGLRenderingContext|*} - If falsy, it did not succeed.
-   */
-  getContextFromCanvas( canvas ) {
-    const contextOptions = {
-      antialias: true,
-      preserveDrawingBuffer: this.preserveDrawingBuffer
-      // NOTE: we use premultiplied alpha since it should have better performance AND it appears to be the only one
-      // truly compatible with texture filtering/interpolation.
-      // See https://github.com/phetsims/energy-skate-park/issues/39, https://github.com/phetsims/scenery/issues/397
-      // and https://stackoverflow.com/questions/39341564/webgl-how-to-correctly-blend-alpha-channel-png
-    };
-
-    // we've already committed to using a VelloBlock, so no use in a try-catch around our context attempt
-    return canvas.getContext( 'webgl', contextOptions ) || canvas.getContext( 'experimental-webgl', contextOptions );
-  }
-
-  /**
    * @public
    * @override
    */
   setSizeFullDisplay() {
     const size = this.display.getSize();
-    this.canvas.width = Math.ceil( size.width * this.backingScale );
-    this.canvas.height = Math.ceil( size.height * this.backingScale );
+    this.canvas.width = Math.ceil( size.width * window.devicePixelRatio );
+    this.canvas.height = Math.ceil( size.height * window.devicePixelRatio );
     this.canvas.style.width = `${size.width}px`;
     this.canvas.style.height = `${size.height}px`;
   }
@@ -329,108 +131,42 @@ class VelloBlock extends FittedBlock {
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `update #${this.id}` );
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.push();
 
-    const gl = this.gl;
-
-    if ( this.isContextLost && this.display._aggressiveContextRecreation ) {
-      this.delayedRebuildCanvas();
-    }
-
     // update drawables, so that they have vertex arrays up to date, etc.
     while ( this.dirtyDrawables.length ) {
       this.dirtyDrawables.pop().update();
     }
 
-    // ensure sprite sheet textures are up-to-date
-    const numSpriteSheets = this.spriteSheets.length;
-    for ( let i = 0; i < numSpriteSheets; i++ ) {
-      this.spriteSheets[ i ].updateTexture();
-    }
-
-    // temporary hack for supporting webglScale
-    if ( this.firstDrawable &&
-         this.firstDrawable === this.lastDrawable &&
-         this.firstDrawable.node &&
-         this.firstDrawable.node._webglScale !== null &&
-         this.backingScale !== this.originalBackingScale * this.firstDrawable.node._webglScale ) {
-      this.backingScale = this.originalBackingScale * this.firstDrawable.node._webglScale;
-      this.dirtyFit = true;
-    }
-
-    // udpate the fit BEFORE drawing, since it may change our offset
+    // update the fit BEFORE drawing, since it may change our offset
+    // TODO: make not fittable
     this.updateFit();
 
-    // finalX = 2 * x / display.width - 1
-    // finalY = 1 - 2 * y / display.height
-    // result = matrix * ( x, y, 1 )
-    this.projectionMatrix.rowMajor(
-      2 / this.display.width, 0, -1,
-      0, -2 / this.display.height, 1,
-      0, 0, 1 );
-    this.projectionMatrix.copyToArray( this.projectionMatrixArray );
+    const sceneEncoding = new phet.scenery.PhetEncoding();
+    sceneEncoding.reset( false );
 
-    // if we created the context with preserveDrawingBuffer, we need to clear before rendering
-    if ( this.preserveDrawingBuffer ) {
-      gl.clear( gl.COLOR_BUFFER_BIT );
-    }
+    const encoding = new phet.scenery.PhetEncoding();
 
-    gl.viewport( 0.0, 0.0, this.canvas.width, this.canvas.height );
-
-    // We switch between processors for drawables based on each drawable's webglRenderer property. Each processor
-    // will be activated, will process a certain number of adjacent drawables with that processor's webglRenderer,
-    // and then will be deactivated. This allows us to switch back-and-forth between different shader programs,
-    // and allows us to trigger draw calls for each grouping of drawables in an efficient way.
-    let currentProcessor = null;
-    // How many draw calls have been executed. If no draw calls are executed while updating, it means nothing should
-    // be drawn, and we'll have to manually clear the Canvas if we are not preserving the drawing buffer.
-    let cumulativeDrawCount = 0;
     // Iterate through all of our drawables (linked list)
     //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
     for ( let drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
       // ignore invisible drawables
       if ( drawable.visible ) {
-        // select our desired processor
-        let desiredProcessor = null;
-        if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
-          desiredProcessor = this.texturedTrianglesProcessor;
-        }
-        else if ( drawable.webglRenderer === Renderer.webglCustom ) {
-          desiredProcessor = this.customProcessor;
-        }
-        else if ( drawable.webglRenderer === Renderer.webglVertexColorPolygons ) {
-          desiredProcessor = this.vertexColorPolygonsProcessor;
-        }
-        assert && assert( desiredProcessor );
-
-        // swap processors if necessary
-        if ( desiredProcessor !== currentProcessor ) {
-          // deactivate any old processors
-          if ( currentProcessor ) {
-            cumulativeDrawCount += currentProcessor.deactivate();
-          }
-          // activate the new processor
-          currentProcessor = desiredProcessor;
-          currentProcessor.activate();
-        }
-
-        // process our current drawable with the current processor
-        currentProcessor.processDrawable( drawable );
+        encoding.append( drawable.encoding );
       }
 
       // exit loop end case
       if ( drawable === this.lastDrawable ) { break; }
     }
-    // deactivate any processor that still has drawables that need to be handled
-    if ( currentProcessor ) {
-      cumulativeDrawCount += currentProcessor.deactivate();
-    }
 
-    // If we executed no draw calls AND we aren't preserving the drawing buffer, we'll need to manually clear the
-    // drawing buffer ourself.
-    if ( cumulativeDrawCount === 0 && !this.preserveDrawingBuffer ) {
-      gl.clear( gl.COLOR_BUFFER_BIT );
-    }
+    // TODO: really get rid of Affine!!!
+    sceneEncoding.append( encoding, new Affine( window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0 ) );
+    sceneEncoding.finalize_scene();
 
-    gl.flush();
+    const outTexture = this.canvasContext.getCurrentTexture();
+    console.log( outTexture.width );
+    const renderInfo = sceneEncoding.resolve( this.deviceContext );
+    renderInfo.prepareRender( outTexture.width, outTexture.height, 0 );
+
+    render( renderInfo, this.deviceContext, outTexture );
 
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
 
@@ -478,9 +214,6 @@ class VelloBlock extends FittedBlock {
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `#${this.id}.addDrawable ${drawable.toString()}` );
 
     super.addDrawable( drawable );
-
-    // will trigger changes to the spritesheets for images, or initialization for others
-    drawable.onAddToBlock( this );
   }
 
   /**
@@ -499,56 +232,7 @@ class VelloBlock extends FittedBlock {
       this.dirtyDrawables.splice( index, 1 );
     }
 
-    // wil trigger removal from spritesheets
-    drawable.onRemoveFromBlock( this );
-
     super.removeDrawable( drawable );
-  }
-
-  /**
-   * Ensures we have an allocated part of a SpriteSheet for this image. If a SpriteSheet already contains this image,
-   * we'll just increase the reference count. Otherwise, we'll attempt to add it into one of our SpriteSheets. If
-   * it doesn't fit, we'll add a new SpriteSheet and add the image to it.
-   * @public
-   *
-   * @param {HTMLImageElement | HTMLCanvasElement} image
-   * @param {number} width
-   * @param {number} height
-   *
-   * @returns {Sprite} - Throws an error if we can't accommodate the image
-   */
-  addSpriteSheetImage( image, width, height ) {
-    let sprite = null;
-    const numSpriteSheets = this.spriteSheets.length;
-    // TODO: check for SpriteSheet containment first?
-    for ( let i = 0; i < numSpriteSheets; i++ ) {
-      const spriteSheet = this.spriteSheets[ i ];
-      sprite = spriteSheet.addImage( image, width, height );
-      if ( sprite ) {
-        break;
-      }
-    }
-    if ( !sprite ) {
-      const newSpriteSheet = new SpriteSheet( true ); // use mipmaps for now?
-      sprite = newSpriteSheet.addImage( image, width, height );
-      newSpriteSheet.initializeContext( this.gl );
-      this.spriteSheets.push( newSpriteSheet );
-      if ( !sprite ) {
-        // TODO: renderer flags should change for very large images
-        throw new Error( 'Attempt to load image that is too large for sprite sheets' );
-      }
-    }
-    return sprite;
-  }
-
-  /**
-   * Removes the reference to the sprite in our spritesheets.
-   * @public
-   *
-   * @param {Sprite} sprite
-   */
-  removeSpriteSheetImage( sprite ) {
-    sprite.spriteSheet.removeImage( sprite.image );
   }
 
   /**

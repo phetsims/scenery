@@ -327,6 +327,7 @@ export { default as CanvasSelfDrawable } from './display/CanvasSelfDrawable.js';
 export { default as DOMSelfDrawable } from './display/DOMSelfDrawable.js';
 export { default as SVGSelfDrawable } from './display/SVGSelfDrawable.js';
 export { default as WebGLSelfDrawable } from './display/WebGLSelfDrawable.js';
+export { default as VelloSelfDrawable } from './display/VelloSelfDrawable.js';
 
 export { default as CircleStatefulDrawable } from './display/drawables/CircleStatefulDrawable.js';
 export { default as ImageStatefulDrawable } from './display/drawables/ImageStatefulDrawable.js';
@@ -359,6 +360,7 @@ export { default as LineCanvasDrawable } from './display/drawables/LineCanvasDra
 export { default as LineSVGDrawable } from './display/drawables/LineSVGDrawable.js';
 export { default as PathCanvasDrawable } from './display/drawables/PathCanvasDrawable.js';
 export { default as PathSVGDrawable } from './display/drawables/PathSVGDrawable.js';
+export { default as PathVelloDrawable } from './display/drawables/PathVelloDrawable.js';
 export { default as RectangleCanvasDrawable } from './display/drawables/RectangleCanvasDrawable.js';
 export { default as RectangleDOMDrawable } from './display/drawables/RectangleDOMDrawable.js';
 export { default as RectangleSVGDrawable } from './display/drawables/RectangleSVGDrawable.js';

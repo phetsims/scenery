@@ -89,8 +89,8 @@ export default class Ramps {
     this.texture = this.device.createTexture( {
       label: 'ramps texture',
       size: {
-        width: this.width,
-        height: this.height,
+        width: this.width || 1,
+        height: this.height || 1,
         depthOrArrayLayers: 1
       },
       format: 'rgba8unorm',

@@ -247,7 +247,7 @@ export default class Rectangle extends SuperType {
    * @returns - Renderer bitmask, see Renderer for details
    */
   public override getPathRendererBitmask(): number {
-    let bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
+    let bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskVello;
 
     const maximumArcSize = this.getMaximumArcSize();
 

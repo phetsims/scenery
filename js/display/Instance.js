@@ -25,6 +25,7 @@ import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import { BackboneDrawable, CanvasBlock, ChangeInterval, Drawable, Fittability, InlineCanvasCacheDrawable, RelativeTransform, Renderer, scenery, SharedCanvasCacheDrawable, Trail, Utils } from '../imports.js';
+import DeviceContext from './vello/DeviceContext.js';
 
 let globalIdCounter = 1;
 
@@ -76,6 +77,10 @@ class Instance {
 
     // @public {boolean}
     this.isWebGLSupported = display.isWebGLAllowed() && Utils.isWebGLSupported;
+
+    // TODO: add display.isVelloAllowed()?
+    // NOTE: We rely on DeviceContext's checks to be finished before calling here
+    this.isVelloSupported = DeviceContext.isVelloSupportedSync();
 
     // @public {RelativeTransform} - provides high-performance access to 'relative' transforms (from our nearest
     // transform root), and allows for listening to when our relative transform changes (called during a phase of
@@ -467,8 +472,10 @@ class Instance {
       }
       else {
         let supportedNodeBitmask = this.node._rendererBitmask;
-        if ( !this.isWebGLSupported ) {
-          const invalidBitmasks = Renderer.bitmaskWebGL;
+        if ( !this.isWebGLSupported || !this.isVelloSupported ) {
+          const invalidBitmasks =
+            ( this.isWebGLSupported ? 0 : Renderer.bitmaskWebGL ) |
+            ( this.isVelloSupported ? 0 : Renderer.bitmaskVello );
           supportedNodeBitmask = supportedNodeBitmask ^ ( supportedNodeBitmask & invalidBitmasks );
         }
 

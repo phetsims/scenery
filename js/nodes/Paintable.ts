@@ -751,6 +751,9 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
       // we always have Canvas support?
       bitmask |= Renderer.bitmaskCanvas;
 
+      // we always have Vello support?
+      bitmask |= Renderer.bitmaskVello;
+
       if ( !this.hasFill() ) {
         // if there is no fill, it is supported by DOM and WebGL
         bitmask |= Renderer.bitmaskDOM;
@@ -787,6 +790,9 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
 
       // always have SVG support (for now?)
       bitmask |= Renderer.bitmaskSVG;
+
+      // we always have Vello support?
+      bitmask |= Renderer.bitmaskVello;
 
       if ( !this.hasStroke() ) {
         // allow DOM support if there is no stroke (since the fill will determine what is available)

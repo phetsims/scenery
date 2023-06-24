@@ -86,7 +86,7 @@ export default class Circle extends Path {
    */
   public override getPathRendererBitmask(): number {
     // If we can use CSS borderRadius, we can support the DOM renderer.
-    return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
+    return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskVello | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
   }
 
   /**

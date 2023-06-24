@@ -10,7 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, TPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, PathVelloDrawable, Renderer, scenery, SVGSelfDrawable, TPathDrawable, VelloSelfDrawable } from '../imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 
 const PATH_OPTION_KEYS = [
@@ -196,8 +196,8 @@ export default class Path extends Paintable( Node ) {
    * @returns - A bitmask that includes supported renderers, see Renderer for details.
    */
   protected getPathRendererBitmask(): number {
-    // By default, Canvas and SVG are accepted.
-    return Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
+    // By default, Canvas, SVG, and Vello are accepted.
+    return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskVello;
   }
 
   /**
@@ -432,6 +432,17 @@ export default class Path extends Paintable( Node ) {
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-expect-error
     return PathCanvasDrawable.createFromPool( renderer, instance );
+  }
+
+  /**
+   * Creates a Vello drawable for this Path. (scenery-internal)
+   *
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
+   */
+  public override createVelloDrawable( renderer: number, instance: Instance ): VelloSelfDrawable {
+    // @ts-expect-error
+    return PathVelloDrawable.createFromPool( renderer, instance );
   }
 
   /**

@@ -358,7 +358,7 @@ class WebGLBlock extends FittedBlock {
       this.dirtyFit = true;
     }
 
-    // udpate the fit BEFORE drawing, since it may change our offset
+    // update the fit BEFORE drawing, since it may change our offset
     this.updateFit();
 
     // finalX = 2 * x / display.width - 1

@@ -170,7 +170,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, Image, ImageOptions, Instance, isHeightSizable, isWidthSizable, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, TInputListener, TLayoutOptions, Trail, WebGLSelfDrawable } from '../imports.js';
+import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, Image, ImageOptions, Instance, isHeightSizable, isWidthSizable, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, TInputListener, TLayoutOptions, Trail, VelloSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -286,7 +286,7 @@ const DEFAULT_OPTIONS = {
 
 const DEFAULT_INTERNAL_RENDERER = DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer );
 
-export type RendererType = 'svg' | 'canvas' | 'webgl' | 'dom' | null;
+export type RendererType = 'svg' | 'canvas' | 'webgl' | 'dom' | 'vello' | null;
 
 // Isolated so that we can delay options that are based on bounds of the Node to after construction.
 // See https://github.com/phetsims/scenery/issues/1332
@@ -4706,7 +4706,7 @@ class Node extends ParallelDOM {
    * - 'webgl'
    */
   public setRenderer( renderer: RendererType ): void {
-    assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
+    assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl' || renderer === 'vello',
       'Renderer input should be null, or one of: "canvas", "svg", "dom" or "webgl".' );
 
     let newRenderer = 0;
@@ -4721,6 +4721,9 @@ class Node extends ParallelDOM {
     }
     else if ( renderer === 'webgl' ) {
       newRenderer = Renderer.bitmaskWebGL;
+    }
+    else if ( renderer === 'vello' ) {
+      newRenderer = Renderer.bitmaskVello;
     }
     assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
       'We should only end up with no actual renderer if renderer is null' );
@@ -4764,6 +4767,9 @@ class Node extends ParallelDOM {
     }
     else if ( this._renderer === Renderer.bitmaskWebGL ) {
       return 'webgl';
+    }
+    else if ( this._renderer === Renderer.bitmaskVello ) {
+      return 'vello';
     }
     assert && assert( false, 'Seems to be an invalid renderer?' );
     return null;
@@ -5845,6 +5851,19 @@ class Node extends ParallelDOM {
    */
   public createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     throw new Error( 'createWebGLDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
+  }
+
+  /**
+   * Creates a Vello drawable for this Node's self representation. (scenery-internal)
+   *
+   * Implemented by subtypes that support Vello self drawables. There is no need to implement this for subtypes that
+   * do not allow the Vello renderer (not set in its rendererBitmask).
+   *
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
+   */
+  public createVelloDrawable( renderer: number, instance: Instance ): VelloSelfDrawable {
+    throw new Error( 'createVelloDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
   }
 
   /*---------------------------------------------------------------------------*
