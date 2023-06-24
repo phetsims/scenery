@@ -68,6 +68,14 @@ export default class BufferPool {
       }
     }
   }
+
+  public dispose(): void {
+    for ( let i = 0; i < this.freeBuffers.length; i++ ) {
+      const entry = this.freeBuffers[ i ];
+      entry.buffer.destroy();
+    }
+    this.freeBuffers = [];
+  }
 }
 
 scenery.register( 'BufferPool', BufferPool );

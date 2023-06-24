@@ -12,7 +12,7 @@ import { scenery } from '../../imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { VelloImagePatch } from './Encoding.js';
 
-const ATLAS_INITIAL_SIZE = 2048; // TODO: revert to 1024, with sizing up (implement that!!)
+const ATLAS_INITIAL_SIZE = 1024;
 const ATLAS_MAX_SIZE = 8192;
 
 // Amount of space along the edge of each image that is filled with the closest adjacent pixel value. This helps
@@ -30,12 +30,11 @@ export default class Atlas {
   public height: number;
   public texture: GPUTexture | null = null;
   public textureView: GPUTextureView | null = null;
-  private binPacker: BinPacker;
+  private binPacker!: BinPacker;
 
   private dirtyAtlasSubImages: AtlasSubImage[] = [];
   private used: AtlasSubImage[] = [];
   private unused: AtlasSubImage[] = [];
-  private generation = 0;
 
   // TODO: better image atlas, something nice like https://github.com/nical/guillotiere?
   public constructor( public device: GPUDevice ) {
@@ -44,56 +43,103 @@ export default class Atlas {
     // TODO: atlas size (1) when no images?
     this.width = ATLAS_INITIAL_SIZE;
     this.height = ATLAS_INITIAL_SIZE;
-    this.binPacker = this.getBinPacker();
 
     this.replaceTexture();
   }
 
   public updatePatches( patches: VelloImagePatch[] ): void {
-    const generation = this.generation++;
+
+    // TODO: actually could we accomplish this with a generation?
+    this.unused.push( ...this.used );
+    this.used.length = 0;
 
     // TODO: sort heuristic for bin packing, so we can find the largest ones first?
 
-    patches.forEach( patch => {
-      // TODO: reduce GC, no closures like this!!
-      let atlasSubImage = _.find( this.used, atlasSubImage => atlasSubImage.image === patch.image );
+    for ( let i = 0; i < patches.length; i++ ) {
+      const patch = patches[ i ];
+      patch.atlasSubImage = this.getAtlasSubImage( patch.image );
+    }
+  }
 
-      if ( !atlasSubImage ) {
-        atlasSubImage = _.find( this.unused, atlasSubImage => atlasSubImage.image === patch.image );
-        if ( atlasSubImage ) {
-          this.used.push( atlasSubImage );
-          this.unused.splice( this.unused.indexOf( atlasSubImage ), 1 );
+  // TODO: Add some "unique" identifier on BufferImage so we can check if it's actually representing the same image
+  // TODO: would it kill performance to hash the image data? If we're changing the image every frame, that would
+  // TODO: be very excessive.
+  private getAtlasSubImage( image: BufferImage, existingAtlasSubImage?: AtlasSubImage ): AtlasSubImage | null {
+    assert && assert( !existingAtlasSubImage || existingAtlasSubImage.image === image );
+
+    for ( let i = 0; i < this.used.length; i++ ) {
+      if ( this.used[ i ].image === image ) {
+        assert && assert( !existingAtlasSubImage );
+        return this.used[ i ];
+      }
+    }
+    for ( let i = 0; i < this.unused.length; i++ ) {
+      if ( this.unused[ i ].image === image ) {
+        let atlasSubImage = this.unused[ i ];
+        this.unused.splice( this.unused.indexOf( atlasSubImage ), 1 );
+
+        // If we're switching it to used, we can swap instances (since outside things shouldn't have a reference)
+        if ( existingAtlasSubImage ) {
+          existingAtlasSubImage.bin = atlasSubImage.bin;
+          existingAtlasSubImage.x = atlasSubImage.x;
+          existingAtlasSubImage.y = atlasSubImage.y;
+          atlasSubImage = existingAtlasSubImage;
         }
-        else {
-          let bin: Bin | null = null;
 
-          while ( !( bin = this.binPacker.allocate( patch.image.width + GUTTER_SIZE * 2 + PADDING, patch.image.height + GUTTER_SIZE * 2 + PADDING ) ) && this.unused.length ) {
-            this.binPacker.deallocate( this.unused.pop()!.bin );
-          }
+        this.used.push( atlasSubImage );
+        return atlasSubImage;
+      }
+    }
+    let bin: Bin | null = null;
 
-          if ( !bin ) {
-            if ( this.width === ATLAS_MAX_SIZE || this.height === ATLAS_MAX_SIZE ) {
-              throw new Error( 'maximum size atlas reached' );
-            }
-            this.width *= 2;
-            this.height *= 2;
-            this.replaceTexture();
+    while ( !( bin = this.binPacker.allocate( image.width + GUTTER_SIZE * 2 + PADDING, image.height + GUTTER_SIZE * 2 + PADDING ) ) && this.unused.length ) {
+      this.binPacker.deallocate( this.unused.pop()!.bin );
+    }
 
-            bin = this.binPacker.allocate( patch.image.width + GUTTER_SIZE * 2 + PADDING, patch.image.height + GUTTER_SIZE * 2 + PADDING );
-          }
+    if ( bin ) {
+      let atlasSubImage;
+      const x = bin.bounds.minX + GUTTER_SIZE;
+      const y = bin.bounds.minY + GUTTER_SIZE;
+      if ( existingAtlasSubImage ) {
+        existingAtlasSubImage.bin = bin;
+        existingAtlasSubImage.x = x;
+        existingAtlasSubImage.y = y;
+        atlasSubImage = existingAtlasSubImage;
+      }
+      else {
+        atlasSubImage = new AtlasSubImage( image, x, y, bin );
+      }
+      this.dirtyAtlasSubImages.push( atlasSubImage );
+      this.used.push( atlasSubImage );
+      return atlasSubImage;
+    }
+    else {
+      // TODO: could try to repack it too
+      if ( this.width === ATLAS_MAX_SIZE || this.height === ATLAS_MAX_SIZE ) {
+        return null;
+      }
+      this.width *= 2;
+      this.height *= 2;
 
-          atlasSubImage = new AtlasSubImage( patch.image, bin!.bounds.minX + GUTTER_SIZE, bin!.bounds.minY + GUTTER_SIZE, bin!, generation );
-          this.dirtyAtlasSubImages.push( atlasSubImage );
-          this.used.push( atlasSubImage );
-        }
+      // Copy out the used images, so we can repack them
+      const used = this.used.slice();
+      this.used = [];
+      this.unused.length = 0;
+      this.dirtyAtlasSubImages.length = 0;
+
+      this.replaceTexture();
+
+      for ( let i = 0; i < used.length; i++ ) {
+        const newSubImage = this.getAtlasSubImage( used[ i ].image, used[ i ] );
+
+        assert && assert( newSubImage, 'We had these packed in the original, they should exist now' );
       }
 
-      patch.atlasSubImage = atlasSubImage;
+      const atlasSubImage = this.getAtlasSubImage( image );
+      assert && assert( atlasSubImage, 'Could not fit the new image in the texture atlas' );
 
-      if ( atlasSubImage.generation < generation ) {
-        atlasSubImage.generation = generation;
-      }
-    } );
+      return atlasSubImage;
+    }
   }
 
   private replaceTexture(): void {
@@ -115,10 +161,6 @@ export default class Atlas {
       dimension: '2d'
     } );
 
-    // TODO: REPACK everything!!!
-    if ( this.binPacker && this.width > ATLAS_INITIAL_SIZE ) {
-      throw new Error( 'resizing up unimplemented' );
-    }
     this.binPacker = new BinPacker( new Bounds2( 0, 0, this.width, this.height ) );
 
     // We'll need to redraw everything!
@@ -153,10 +195,6 @@ export default class Atlas {
     }
   }
 
-  private getBinPacker(): BinPacker {
-    return new BinPacker( new Bounds2( 0, 0, this.width, this.height ) );
-  }
-
   public dispose(): void {
     this.texture && this.texture.destroy();
   }
@@ -164,12 +202,12 @@ export default class Atlas {
 
 scenery.register( 'Atlas', Atlas );
 
+// TODO: pool these?
 export class AtlasSubImage {
   public constructor(
     public image: BufferImage,
     public x: number,
     public y: number,
-    public bin: Bin,
-    public generation: number
+    public bin: Bin
   ) {}
 }

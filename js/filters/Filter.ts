@@ -85,6 +85,11 @@ export default abstract class Filter {
     return false;
   }
 
+  public isVelloCompatible(): boolean {
+    // TODO: how to handle?
+    return false;
+  }
+
   /**
    * Returns a string form of this object
    */

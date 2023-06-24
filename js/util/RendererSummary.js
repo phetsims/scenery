@@ -226,6 +226,15 @@ class RendererSummary {
    *
    * @returns {boolean}
    */
+  isSingleVelloSupported() {
+    return !!( Renderer.bitmaskSingleSVG & this.bitmask );
+  }
+
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
   isNotPainted() {
     return !!( Renderer.bitmaskNotPainted & this.bitmask );
   }
@@ -305,6 +314,42 @@ class RendererSummary {
 
       // If it's Canvas, congrats! Everything will render in Canvas (since Canvas is supported, as noted above)
       if ( Renderer.bitmaskCanvas & renderer ) {
+        return true;
+      }
+
+      // Since it's not Canvas, if there's a single painted node that supports this renderer (which is preferred over Canvas),
+      // then it will be rendered with this renderer, NOT Canvas.
+      if ( this.isSubtreeContainingCompatible( renderer ) ) {
+        return false;
+      }
+    }
+
+    return false; // sanity check
+  }
+
+  // TODO: reduce code duplication
+  /**
+   * Given a bitmask representing a list of ordered preferred renderers, we check to see if all of our nodes can be
+   * displayed in a single Vello block, AND that given the preferred renderers, that it will actually happen in our
+   * rendering process.
+   * @public
+   *
+   * @param {number} preferredRenderers
+   * @returns {boolean}
+   */
+  isSubtreeRenderedExclusivelyVello( preferredRenderers ) {
+    // Check if we have anything that would PREVENT us from having a single Canvas block
+    if ( !this.isSingleVelloSupported() ) {
+      return false;
+    }
+
+    // Check for any renderer preferences that would CAUSE us to choose not to display with a single Canvas block
+    for ( let i = 0; i < Renderer.numActiveRenderers; i++ ) {
+      // Grab the next-most preferred renderer
+      const renderer = Renderer.bitmaskOrder( preferredRenderers, i );
+
+      // If it's Canvas, congrats! Everything will render in Canvas (since Canvas is supported, as noted above)
+      if ( Renderer.bitmaskVello & renderer ) {
         return true;
       }
 

@@ -391,6 +391,7 @@ class Instance {
     // let hasNonDOMFilter = false;
     let hasNonSVGFilter = false;
     let hasNonCanvasFilter = false;
+    let hasNonVelloFilter = false;
     // let hasNonWebGLFilter = false;
     if ( hasFilters ) {
       // NOTE: opacity is OK with all of those (currently)
@@ -407,6 +408,10 @@ class Instance {
         if ( !filter.isCanvasCompatible() ) {
           hasNonCanvasFilter = true;
         }
+        if ( !filter.isVelloCompatible() ) {
+          // TODO: Vello filters?
+          hasNonVelloFilter = true;
+        }
         // if ( !filter.isWebGLCompatible() ) {
         //   hasNonWebGLFilter = true;
         // }
@@ -419,6 +424,7 @@ class Instance {
     const applyTransparencyWithBlock = !backboneRequired &&
                                        ( hasFilters || hasClip ) &&
                                        ( ( !hasNonSVGFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ) ||
+                                         ( !hasNonVelloFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyVello( this.preferredRenderers ) ) ||
                                          ( !hasNonCanvasFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) ) );
     const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasFilters || hasClip );
 
