@@ -496,7 +496,7 @@ export default class Line extends Path {
    * See Renderer for more information on the bitmasks
    */
   public override getFillRendererBitmask(): number {
-    return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskWebGL;
+    return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskWebGL | Renderer.bitmaskVello;
   }
 }
 
