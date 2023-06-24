@@ -19,6 +19,16 @@ let loaded = false;
 
 // TODO: use scenery imports for things to avoid circular reference issues
 
+const matrixToAffine = ( matrix: Matrix3 ) => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
+
+const convert_color = ( color: Color ) => {
+  return ( ( color.r << 24 ) + ( color.g << 16 ) + ( color.b << 8 ) + ( Math.floor( color.a * 255 ) & 0xff ) ) >>> 0;
+};
+
+const convert_color_stop = ( color_stop: GradientStop ) => {
+  return new VelloColorStop( color_stop.ratio, convert_color( PaintDef.toColor( color_stop.color ) ) );
+};
+
 export default class PhetEncoding extends Encoding {
 
   public static async load(): Promise<void> {
@@ -35,39 +45,29 @@ export default class PhetEncoding extends Encoding {
     }
   }
 
-  public encode_node( topNode: Node ): void {
-    const matrixStack = [ Matrix3.IDENTITY ];
-
-    const matrixToAffine = ( matrix: Matrix3 ) => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
-
-    const convert_color = ( color: Color ) => {
-      return ( ( color.r << 24 ) + ( color.g << 16 ) + ( color.b << 8 ) + ( Math.floor( color.a * 255 ) & 0xff ) ) >>> 0;
-    };
-
-    const convert_color_stop = ( color_stop: GradientStop ) => {
-      return new VelloColorStop( color_stop.ratio, convert_color( PaintDef.toColor( color_stop.color ) ) );
-    };
-
-    const encode_paint = ( paint: TPaint ) => {
-      if ( paint instanceof Paint ) {
-        if ( paint instanceof LinearGradient ) {
-          this.encode_linear_gradient( paint.start.x, paint.start.y, paint.end.x, paint.end.y, paint.stops.map( convert_color_stop ), 1, Extend.Pad );
-        }
-        else if ( paint instanceof RadialGradient ) {
-          this.encode_radial_gradient( paint.start.x, paint.start.y, paint.startRadius, paint.end.x, paint.end.y, paint.endRadius, paint.stops.map( convert_color_stop ), 1, Extend.Pad );
-        }
-        else {
-          // Pattern, no-op for now
-          // TODO: implement pattern, shouldn't be too hard
-          console.log( 'PATTERN UNIMPLEMENTED' );
-          this.encode_color( 0 );
-        }
+  public encode_paint( paint: TPaint ): void {
+    if ( paint instanceof Paint ) {
+      if ( paint instanceof LinearGradient ) {
+        this.encode_linear_gradient( paint.start.x, paint.start.y, paint.end.x, paint.end.y, paint.stops.map( convert_color_stop ), 1, Extend.Pad );
+      }
+      else if ( paint instanceof RadialGradient ) {
+        this.encode_radial_gradient( paint.start.x, paint.start.y, paint.startRadius, paint.end.x, paint.end.y, paint.endRadius, paint.stops.map( convert_color_stop ), 1, Extend.Pad );
       }
       else {
-        const color = PaintDef.toColor( paint );
-        this.encode_color( convert_color( color ) );
+        // Pattern, no-op for now
+        // TODO: implement pattern, shouldn't be too hard
+        console.log( 'PATTERN UNIMPLEMENTED' );
+        this.encode_color( 0 );
       }
-    };
+    }
+    else {
+      const color = PaintDef.toColor( paint );
+      this.encode_color( convert_color( color ) );
+    }
+  }
+
+  public encode_node( topNode: Node ): void {
+    const matrixStack = [ Matrix3.IDENTITY ];
 
     const recurse = ( node: Node ) => {
       if ( !node.visible || !node.bounds.isValid() ) {
@@ -107,7 +107,7 @@ export default class PhetEncoding extends Encoding {
             this.encode_transform( matrixToAffine( matrix ) );
             this.encode_linewidth( -1 );
             this.encode_kite_shape( node.shape, true, true, 1 );
-            encode_paint( node.fill );
+            this.encode_paint( node.fill );
           }
           if ( node.hasStroke() ) {
             this.encode_transform( matrixToAffine( matrix ) );
@@ -117,7 +117,7 @@ export default class PhetEncoding extends Encoding {
             }
             this.encode_linewidth( node.lineWidth );
             this.encode_kite_shape( shape, false, true, 1 );
-            encode_paint( node.stroke );
+            this.encode_paint( node.stroke );
           }
         }
       }
@@ -170,7 +170,7 @@ export default class PhetEncoding extends Encoding {
 
           if ( hasEncodedGlyph ) {
             this.insert_path_marker();
-            encode_paint( node.fill );
+            this.encode_paint( node.fill );
           }
         }
       }
@@ -193,7 +193,7 @@ export default class PhetEncoding extends Encoding {
 
           const shape = Shape.rect( 0, 0, canvas.width, canvas.height );
 
-          this.encode_kite_shape( shape, true, true, 1 );
+          this.encode_kite_shape( shape, true, true, 100 );
 
           this.encode_image( new BufferImage( canvas.width, canvas.height, buffer ) );
         }

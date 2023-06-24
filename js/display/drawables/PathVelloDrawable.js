@@ -7,9 +7,8 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { LinearGradient, Paint, PaintDef, PathStatefulDrawable, RadialGradient, scenery, VelloSelfDrawable } from '../../imports.js';
+import { PathStatefulDrawable, scenery, VelloSelfDrawable } from '../../imports.js';
 import { Affine } from '../vello/Affine.js';
-import { Extend, VelloColorStop } from '../vello/Encoding.js';
 import PhetEncoding from '../vello/PhetEncoding.js';
 
 class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
@@ -26,24 +25,6 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     this.encoding = new PhetEncoding();
 
     this.transformDirty = true;
-  }
-
-  /**
-   * @public
-   *
-   * @param {WebGLBlock} webglBlock
-   */
-  onAddToBlock( webglBlock ) {
-    this.webglBlock = webglBlock; // TODO: do we need this reference?
-    this.markDirty();
-  }
-
-  /**
-   * @public
-   *
-   * @param {WebGLBlock} webglBlock
-   */
-  onRemoveFromBlock( webglBlock ) {
   }
 
   /**
@@ -104,37 +85,6 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     const matrixToAffine = matrix => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
 
-    const convert_color = color => {
-      return ( ( color.r << 24 ) + ( color.g << 16 ) + ( color.b << 8 ) + ( Math.floor( color.a * 255 ) & 0xff ) ) >>> 0;
-    };
-
-    const convert_color_stop = color_stop => {
-      return new VelloColorStop( color_stop.ratio, convert_color( PaintDef.toColor( color_stop.color ) ) );
-    };
-
-    // TODO: validation for these!!!!
-    const encode_paint = paint => {
-      if ( paint instanceof Paint ) {
-        if ( paint instanceof LinearGradient ) {
-          this.encoding.encode_linear_gradient( paint.start.x, paint.start.y, paint.end.x, paint.end.y, paint.stops.map( convert_color_stop ), 1, Extend.Pad );
-        }
-        else if ( paint instanceof RadialGradient ) {
-          this.encoding.encode_radial_gradient( paint.start.x, paint.start.y, paint.startRadius, paint.end.x, paint.end.y, paint.endRadius, paint.stops.map( convert_color_stop ), 1, Extend.Pad );
-        }
-        else {
-          // Pattern, no-op for now
-          // TODO: implement pattern, shouldn't be too hard
-          console.log( 'PATTERN UNIMPLEMENTED' );
-          this.encoding.encode_color( 0 );
-          // throw new Error( 'Pattern unimplemented' );
-        }
-      }
-      else {
-        const color = PaintDef.toColor( paint );
-        this.encoding.encode_color( convert_color( color ) );
-      }
-    };
-
     const node = this.node;
     const matrix = this.instance.relativeTransform.matrix;
 
@@ -143,7 +93,7 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         this.encoding.encode_transform( matrixToAffine( matrix ) );
         this.encoding.encode_linewidth( -1 );
         this.encoding.encode_kite_shape( node.shape, true, true, 1 );
-        encode_paint( node.fill );
+        this.encoding.encode_paint( node.fill );
       }
       if ( node.hasStroke() ) {
         this.encoding.encode_transform( matrixToAffine( matrix ) );
@@ -153,7 +103,7 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         }
         this.encoding.encode_linewidth( node.lineWidth );
         this.encoding.encode_kite_shape( shape, false, true, 1 );
-        encode_paint( node.stroke );
+        this.encoding.encode_paint( node.stroke );
       }
     }
 

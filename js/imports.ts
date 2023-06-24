@@ -370,6 +370,7 @@ export { default as SpritesWebGLDrawable } from './display/drawables/SpritesWebG
 export { default as TextCanvasDrawable } from './display/drawables/TextCanvasDrawable.js';
 export { default as TextDOMDrawable } from './display/drawables/TextDOMDrawable.js';
 export { default as TextSVGDrawable } from './display/drawables/TextSVGDrawable.js';
+export { default as TextVelloDrawable } from './display/drawables/TextVelloDrawable.js';
 export { default as WebGLNodeDrawable } from './display/drawables/WebGLNodeDrawable.js';
 
 export { default as InlineCanvasCacheDrawable } from './display/InlineCanvasCacheDrawable.js';

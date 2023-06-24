@@ -19,7 +19,7 @@ import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObje
 import TProperty from '../../../axon/js/TProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable, TTextDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable, TextVelloDrawable, TTextDrawable, VelloSelfDrawable } from '../imports.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -321,11 +321,15 @@ export default class Text extends Paintable( Node ) {
       bitmask |= Renderer.bitmaskCanvas;
     }
     if ( !this._isHTML ) {
+      // TODO: Do we still do _isHTML at all?!? Let's get rid of that
       bitmask |= Renderer.bitmaskSVG;
     }
 
     // fill and stroke will determine whether we have DOM text support
     bitmask |= Renderer.bitmaskDOM;
+
+    // TODO: make this very conditional
+    bitmask |= Renderer.bitmaskVello;
 
     return bitmask;
   }
@@ -457,6 +461,17 @@ export default class Text extends Paintable( Node ) {
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-expect-error
     return TextCanvasDrawable.createFromPool( renderer, instance );
+  }
+
+  /**
+   * Creates a Vello drawable for this Path. (scenery-internal)
+   *
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
+   */
+  public override createVelloDrawable( renderer: number, instance: Instance ): VelloSelfDrawable {
+    // @ts-expect-error
+    return TextVelloDrawable.createFromPool( renderer, instance );
   }
 
   /**

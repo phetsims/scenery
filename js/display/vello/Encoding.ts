@@ -1091,7 +1091,9 @@ export default class Encoding {
             const maxRadius = segment instanceof Arc ? segment.radius : Math.max( segment.radiusX, segment.radiusY );
             const scaled_err = maxRadius / tolerance;
             const n_err = Math.max( Math.pow( 1.1163 * scaled_err, 1 / 6 ), 3.999999 );
-            const n = Math.ceil( n_err * Math.abs( segment.getAngleDifference() ) * ( 1.0 / ( 2.0 * Math.PI ) ) );
+
+            // TODO: hacked with *4 for now, figure out how to better do this
+            const n = Math.ceil( n_err * Math.abs( segment.getAngleDifference() ) * ( 1.0 / ( 2.0 * Math.PI ) ) ) * 4;
 
             // For now, evenly subdivide
             const segments = n > 1 ? segment.subdivisions( _.range( 1, n ).map( t => t / n ) ) : [ segment ];
