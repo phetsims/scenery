@@ -356,6 +356,7 @@ export { default as ImageCanvasDrawable } from './display/drawables/ImageCanvasD
 export { default as ImageDOMDrawable } from './display/drawables/ImageDOMDrawable.js';
 export { default as ImageSVGDrawable } from './display/drawables/ImageSVGDrawable.js';
 export { default as ImageWebGLDrawable } from './display/drawables/ImageWebGLDrawable.js';
+export { default as ImageVelloDrawable } from './display/drawables/ImageVelloDrawable.js';
 export { default as LineCanvasDrawable } from './display/drawables/LineCanvasDrawable.js';
 export { default as LineSVGDrawable } from './display/drawables/LineSVGDrawable.js';
 export { default as PathCanvasDrawable } from './display/drawables/PathCanvasDrawable.js';

@@ -14,9 +14,8 @@ import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, TImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageVelloDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, TImageDrawable, VelloSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-
 
 // Image-specific options that can be passed in the constructor or mutate() call.
 const IMAGE_OPTION_KEYS = [
@@ -93,8 +92,8 @@ export default class Image extends Imageable( Node ) {
    */
   public override invalidateSupportedRenderers(): void {
 
-    // Canvas is always permitted
-    let r = Renderer.bitmaskCanvas;
+    // Canvas/Vello are always permitted
+    let r = Renderer.bitmaskCanvas | Renderer.bitmaskVello;
 
     // If it fits within the sprite sheet, then WebGL is also permitted
     // If the image hasn't loaded, the getImageWidth/Height will be 0 and this rule would pass.  However, this
@@ -224,6 +223,17 @@ export default class Image extends Imageable( Node ) {
   public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-expect-error - Poolable
     return ImageWebGLDrawable.createFromPool( renderer, instance );
+  }
+
+  /**
+   * Creates a Vello drawable for this Image. (scenery-internal)
+   *
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
+   */
+  public override createVelloDrawable( renderer: number, instance: Instance ): VelloSelfDrawable {
+    // @ts-expect-error
+    return ImageVelloDrawable.createFromPool( renderer, instance );
   }
 
   /**

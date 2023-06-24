@@ -66,6 +66,8 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   markDirtyCornerXRadius() { this.markDirtyShape(); }
   // @public
   markDirtyCornerYRadius() { this.markDirtyShape(); }
+  // @public
+  markDirtyRectangle() { this.markDirtyShape(); }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
