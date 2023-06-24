@@ -7,8 +7,9 @@
  */
 
 import { default as Encoding, Extend, Mix, Compose, VelloColorStop, base64ToU8 } from './Encoding.js';
-// @ts-expect-error yeah, this doesn't exist for most people
-import { default as wasmInit, load_font_data, shape_text, get_glyph } from '../../../../../../../vello-tests/swash-tests/pkg/swash_tests.js';
+import { default as wasmInit, load_font_data, shape_text, get_glyph } from './swash.js';
+import Arial from './Arial.js';
+import swash_wasm from './swash_wasm.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import { LinearGradient, Paint, PaintDef, RadialGradient, scenery, Node, Text, Image, Color, GradientStop, TPaint, Path } from '../../imports.js';
@@ -33,10 +34,7 @@ export default class PhetEncoding extends Encoding {
 
   public static async load(): Promise<void> {
     if ( !loaded ) {
-      // @ts-expect-error yeah, this doesn't exist for most people
-      const Arial = ( await import( '../../../../../../../vello-tests/fonts/Arial.js' ) ).default;
-
-      await wasmInit();
+      await wasmInit( base64ToU8( swash_wasm ) );
 
       load_font_data( base64ToU8( Arial ) );
 

@@ -7,7 +7,7 @@
  */
 
 // @ts-expect-error yeah, this doesn't exist for most people
-import { get_glyph, shape_text } from '../../../../../../../vello-tests/swash-tests/pkg/swash_tests.js';
+import { get_glyph, shape_text } from '../vello/swash.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
