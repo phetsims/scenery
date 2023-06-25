@@ -26,6 +26,7 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import { BackboneDrawable, CanvasBlock, ChangeInterval, Drawable, Fittability, InlineCanvasCacheDrawable, RelativeTransform, Renderer, scenery, SharedCanvasCacheDrawable, Trail, Utils } from '../imports.js';
 import DeviceContext from './vello/DeviceContext.js';
+import VelloBlock from './VelloBlock.js';
 
 let globalIdCounter = 1;
 
@@ -424,7 +425,7 @@ class Instance {
     const applyTransparencyWithBlock = !backboneRequired &&
                                        ( hasFilters || hasClip ) &&
                                        ( ( !hasNonSVGFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ) ||
-                                         ( !hasNonVelloFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyVello( this.preferredRenderers ) ) ||
+                                         ( !hasNonVelloFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyVello( this.preferredRenderers ) && VelloBlock.VELLO_BLOCK_APPLIES_OPACITY_FILTERS ) ||
                                          ( !hasNonCanvasFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) ) );
     const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasFilters || hasClip );
 

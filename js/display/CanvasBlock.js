@@ -169,7 +169,7 @@ class CanvasBlock extends FittedBlock {
       this.dirtyDrawables.pop().update();
     }
 
-    // udpate the fit BEFORE drawing, since it may change our offset
+    // update the fit BEFORE drawing, since it may change our offset
     this.updateFit();
 
     // for now, clear everything!

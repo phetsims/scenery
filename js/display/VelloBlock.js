@@ -13,6 +13,7 @@ import Poolable from '../../../phet-core/js/Poolable.js';
 import { FittedBlock, scenery, Utils } from '../imports.js';
 import { Affine } from './vello/Affine.js';
 import DeviceContext from './vello/DeviceContext.js';
+import { Compose, Mix } from './vello/Encoding.js';
 import PhetEncoding from './vello/PhetEncoding.js';
 import render from './vello/render.js';
 
@@ -54,7 +55,6 @@ class VelloBlock extends FittedBlock {
     // TODO: Don't have it be a "Fitted" block then
     super.initialize( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
 
-    // TODO: Uhh, is this not used?
     this.filterRootInstance = filterRootInstance;
 
     // // {boolean} - Whether we pass this flag to the WebGL Context. It will store the contents displayed on the screen,
@@ -65,6 +65,9 @@ class VelloBlock extends FittedBlock {
 
     // list of {Drawable}s that need to be updated before we update
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
+
+    // @private {Drawable|null} -- The drawable for which the current clip/filter setup has been applied (during the walk)
+    this.currentDrawable = null;
 
     if ( !this.domElement ) {
       // @public (scenery-internal) {HTMLCanvasElement} - Div wrapper used so we can switch out Canvases if necessary.
@@ -93,6 +96,8 @@ class VelloBlock extends FittedBlock {
 
     return this;
   }
+
+  static VELLO_BLOCK_APPLIES_OPACITY_FILTERS = true;
 
   /**
    * @public
@@ -140,6 +145,7 @@ class VelloBlock extends FittedBlock {
     // TODO: make not fittable
     this.updateFit();
 
+    // TODO: imports and don't namespace things like this
     const sceneEncoding = new phet.scenery.PhetEncoding();
     sceneEncoding.reset( false );
 
@@ -147,14 +153,27 @@ class VelloBlock extends FittedBlock {
 
     // Iterate through all of our drawables (linked list)
     //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
+    this.currentDrawable = null; // we haven't rendered a drawable this frame yet
     for ( let drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
       // ignore invisible drawables
       if ( drawable.visible ) {
+        // For opacity/clip, walk up/down as necessary (Can only walk down if we are not the first drawable)
+        const branchIndex = this.currentDrawable ? drawable.instance.getBranchIndexTo( this.currentDrawable.instance ) : 0;
+        if ( this.currentDrawable ) {
+          this.walkDown( encoding, this.currentDrawable.instance.trail, branchIndex );
+        }
+        this.walkUp( encoding, drawable.instance.trail, branchIndex );
+
         encoding.append( drawable.encoding );
+
+        this.currentDrawable = drawable;
       }
 
       // exit loop end case
       if ( drawable === this.lastDrawable ) { break; }
+    }
+    if ( this.currentDrawable ) {
+      this.walkDown( encoding, this.currentDrawable.instance.trail, 0 );
     }
 
     // TODO: really get rid of Affine!!!
@@ -170,6 +189,152 @@ class VelloBlock extends FittedBlock {
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
 
     return true;
+  }
+
+  /**
+   * TODO: code share with Canvas?
+   * Walk down towards the root, popping any clip/opacity effects that were needed.
+   * @private
+   *
+   * @param {PhetEncoding} encoding
+   * @param {Trail} trail
+   * @param {number} branchIndex - The first index where our before and after trails have diverged.
+   */
+  walkDown( encoding, trail, branchIndex ) {
+    if ( !VelloBlock.VELLO_BLOCK_APPLIES_OPACITY_FILTERS ) {
+      return;
+    }
+
+    const filterRootIndex = this.filterRootInstance.trail.length - 1;
+
+    for ( let i = trail.length - 1; i >= branchIndex; i-- ) {
+      const node = trail.nodes[ i ];
+
+      let needsEncodeEndClip = false;
+
+      if ( node.hasClipArea() ) {
+        sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Pop clip ${trail.subtrailTo( node ).toDebugString()}` );
+
+        needsEncodeEndClip = true;
+      }
+
+      // We should not apply opacity or other filters at or below the filter root
+      if ( i > filterRootIndex ) {
+        if ( node._filters.length ) {
+          sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Pop filters ${trail.subtrailTo( node ).toDebugString()}` );
+
+          // TODO: grayscale can be done with mix/compose!
+          for ( let i = 0; i < node._filters.length; i++ ) {
+            const filter = node._filters[ i ];
+            if ( filter.isVelloCompatible() ) {
+              needsEncodeEndClip = true;
+            }
+          }
+        }
+
+        if ( node.getEffectiveOpacity() !== 1 ) {
+          sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Pop opacity ${trail.subtrailTo( node ).toDebugString()}` );
+
+          needsEncodeEndClip = true;
+        }
+      }
+
+      if ( needsEncodeEndClip ) {
+        encoding.encode_end_clip();
+      }
+    }
+  }
+
+  /**
+   * Walk up towards the next leaf, pushing any clip/opacity effects that are needed.
+   * TODO: code share with Canvas?
+   * @private
+   *
+   * @param {PhetEncoding} encoding
+   * @param {Trail} trail
+   * @param {number} branchIndex - The first index where our before and after trails have diverged.
+   */
+  walkUp( encoding, trail, branchIndex ) {
+    if ( !VelloBlock.VELLO_BLOCK_APPLIES_OPACITY_FILTERS ) {
+      return;
+    }
+
+    const filterRootIndex = this.filterRootInstance.trail.length - 1;
+
+    for ( let i = branchIndex; i < trail.length; i++ ) {
+      const node = trail.nodes[ i ];
+
+      let needsEncodeBeginClip = false;
+      let alpha = 1;
+      let clipArea = null;
+
+      // We should not apply opacity at or below the filter root
+      if ( i > filterRootIndex ) {
+        alpha = node.getEffectiveOpacity();
+        if ( alpha !== 1 ) {
+          sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Push opacity ${trail.subtrailTo( node ).toDebugString()}` );
+
+          needsEncodeBeginClip = true;
+        }
+
+        if ( node._filters.length ) {
+          sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Push filters ${trail.subtrailTo( node ).toDebugString()}` );
+
+          // TODO: grayscale can be done with mix/compose!
+          for ( let i = 0; i < node._filters.length; i++ ) {
+            const filter = node._filters[ i ];
+            if ( filter.isVelloCompatible() ) {
+              needsEncodeBeginClip = true;
+            }
+          }
+        }
+      }
+
+      if ( node.hasClipArea() && node.getClipArea().getNonoverlappingArea() > 0 ) {
+        sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Push clip ${trail.subtrailTo( node ).toDebugString()}` );
+
+        needsEncodeBeginClip = true;
+        clipArea = node.getClipArea();
+      }
+
+      if ( needsEncodeBeginClip ) {
+        // For a layer push: matrix, linewidth(-1), shape, begin_clip
+
+        if ( clipArea ) {
+          // TODO: ZOMG just put this in PhetEncoding. encode_matrix omg
+          const matrixToAffine = matrix => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
+
+          // +1 ideally to avoid including the filter root (ignore its parent coordinate frame, stay in its local)
+          // TODO: is the filter root... actually we need the transform root?
+          encoding.encode_transform( matrixToAffine( trail.slice( this.transformRootInstance.trail.length ).getMatrix() ) );
+        }
+        else {
+          encoding.encode_transform( new Affine( 1, 0, 0, 1, 0, 0 ) );
+        }
+
+        encoding.encode_linewidth( -1 );
+
+        if ( clipArea ) {
+          // TODO: consolidate tolerance somewhere. Adaptively set this up? ACTUALLY we should really avoid
+          // TODO: re-encoding the clips like this every frame, right?
+          encoding.encode_kite_shape( clipArea, true, true, 0.01 );
+        }
+        else {
+          // TODO: Can we... verify this? Perhaps store this encoding whenever size changes?
+          encoding.encode_path( true );
+          encoding.move_to( 0, 0 );
+          encoding.line_to( this.canvas.width, 0 );
+          encoding.line_to( this.canvas.width, this.canvas.height );
+          encoding.line_to( 0, this.canvas.height );
+          encoding.close();
+          encoding.finish( true );
+        }
+
+        // TODO: filters we can do with this
+        // TODO: ensure NOT Mix.Clip when alpha < 1 (but we can gain performance if alpha is 1?)
+        encoding.encode_begin_clip( Mix.Normal, Compose.SrcOver, alpha );
+      }
+    }
   }
 
   /**
