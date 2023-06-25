@@ -196,6 +196,7 @@ export default class Atlas {
         } );
       }
       else {
+        // TODO: Since ImageBitmaps are async, can we create an option somewhere to await them so we don't use stale data?
         this.device.queue.copyExternalImageToTexture( {
           source: image.source
         }, {

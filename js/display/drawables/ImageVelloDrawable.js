@@ -10,7 +10,6 @@ import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { imageBitmapMap, ImageStatefulDrawable, scenery, VelloSelfDrawable } from '../../imports.js';
 import { Affine } from '../vello/Affine.js';
-import { BufferImage } from '../vello/BufferImage.js';
 import PhetEncoding from '../vello/PhetEncoding.js';
 import { SourceImage } from '../vello/SourceImage.js';
 
