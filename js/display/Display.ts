@@ -66,7 +66,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PaintDef, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js'; // TODO: fix import
 
@@ -1851,44 +1851,6 @@ export default class Display {
       }
     }
     return result;
-  }
-
-  public async velloDebug(): Promise<void> {
-    await phet.scenery.PhetEncoding.load();
-
-    const canvas = document.createElement( 'canvas' );
-    const fullWidth = this.width;
-    const fullHeight = this.height;
-    canvas.width = Math.ceil( fullWidth * window.devicePixelRatio );
-    canvas.height = Math.ceil( fullHeight * window.devicePixelRatio );
-    canvas.style.width = `${fullWidth}px`;
-    canvas.style.height = `${fullHeight}px`;
-    canvas.style.zIndex = '10000';
-    canvas.style.position = 'absolute';
-    canvas.style.left = '0';
-    canvas.style.top = '0';
-
-    document.body.appendChild( canvas );
-
-    const deviceContext = await phet.scenery.DeviceContext.create();
-    const canvasContext = deviceContext.getCanvasContext( canvas );
-
-    // const sceneEncoding = exampleScene( window.devicePixelRatio );
-    const sceneEncoding = new phet.scenery.PhetEncoding();
-    sceneEncoding.reset( false );
-
-    const encoding = new phet.scenery.PhetEncoding();
-
-    encoding.encode_node( this.rootNode );
-
-    sceneEncoding.append( encoding, new phet.scenery.Affine( window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0 ) );
-    sceneEncoding.finalize_scene();
-
-    const outTexture = canvasContext.getCurrentTexture();
-    const renderInfo = sceneEncoding.resolve( deviceContext );
-    renderInfo.prepareRender( outTexture.width, outTexture.height, ( ( PaintDef.toColor( this.backgroundColor ).toNumber() << 8 ) | 0xff ) >>> 0 );
-
-    phet.scenery.render( renderInfo, deviceContext, outTexture );
   }
 
   /**
