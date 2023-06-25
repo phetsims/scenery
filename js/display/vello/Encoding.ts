@@ -111,102 +111,102 @@ export class VelloColorStop {
 }
 scenery.register( 'VelloColorStop', VelloColorStop );
 
-// TODO: proper enum
-export class Extend {
+export enum Extend {
   // Extends the image by repeating the edge color of the brush.
-  public static readonly Pad = 0;
+  Pad = 0,
   // Extends the image by repeating the brush.
-  public static readonly Repeat = 1;
+  Repeat = 1,
   // Extends the image by reflecting the brush.
-  public static readonly Reflect = 2;
+  Reflect = 2
 }
+
 scenery.register( 'Extend', Extend );
 
-// TODO: proper enum
-export class Mix {
+export enum Mix {
   // Default attribute which specifies no blending. The blending formula simply selects the source color.
-  public static readonly Normal = 0;
+  Normal = 0,
   // Source color is multiplied by the destination color and replaces the destination.
-  public static readonly Multiply = 1;
+  Multiply = 1,
   // Multiplies the complements of the backdrop and source color values, then complements the result.
-  public static readonly Screen = 2;
+  Screen = 2,
   // Multiplies or screens the colors, depending on the backdrop color value.
-  public static readonly Overlay = 3;
+  Overlay = 3,
   // Selects the darker of the backdrop and source colors.
-  public static readonly Darken = 4;
+  Darken = 4,
   // Selects the lighter of the backdrop and source colors.
-  public static readonly Lighten = 5;
+  Lighten = 5,
   // Brightens the backdrop color to reflect the source color. Painting with black produces no
   // change.
-  public static readonly ColorDodge = 6;
+  ColorDodge = 6,
   // Darkens the backdrop color to reflect the source color. Painting with white produces no
   // change.
-  public static readonly ColorBurn = 7;
+  ColorBurn = 7,
   // Multiplies or screens the colors, depending on the source color value. The effect is
   // similar to shining a harsh spotlight on the backdrop.
-  public static readonly HardLight = 8;
+  HardLight = 8,
   // Darkens or lightens the colors, depending on the source color value. The effect is similar
   // to shining a diffused spotlight on the backdrop.
-  public static readonly SoftLight = 9;
+  SoftLight = 9,
   // Subtracts the darker of the two constituent colors from the lighter color.
-  public static readonly Difference = 10;
+  Difference = 10,
   // Produces an effect similar to that of the Difference mode but lower in contrast. Painting
   // with white inverts the backdrop color; painting with black produces no change.
-  public static readonly Exclusion = 11;
+  Exclusion = 11,
   // Creates a color with the hue of the source color and the saturation and luminosity of the
   // backdrop color.
-  public static readonly Hue = 12;
+  Hue = 12,
   // Creates a color with the saturation of the source color and the hue and luminosity of the
   // backdrop color. Painting with this mode in an area of the backdrop that is a pure gray
   // (no saturation) produces no change.
-  public static readonly Saturation = 13;
+  Saturation = 13,
   // Creates a color with the hue and saturation of the source color and the luminosity of the
   // backdrop color. This preserves the gray levels of the backdrop and is useful for coloring
   // monochrome images or tinting color images.
-  public static readonly Color = 14;
+  Color = 14,
   // Creates a color with the luminosity of the source color and the hue and saturation of the
   // backdrop color. This produces an inverse effect to that of the Color mode.
-  public static readonly Luminosity = 15;
+  Luminosity = 15,
   // Clip is the same as normal, but the latter always creates an isolated blend group and the
   // former can optimize that out.
-  public static readonly Clip = 128;
+  Clip = 128
 }
+
 scenery.register( 'Mix', Mix );
 
-// Defines the layer composition function for a blend operation.
-export class Compose {
+export enum Compose {
   // No regions are enabled.
-  public static readonly Clear = 0;
+  Clear = 0,
   // Only the source will be present.
-  public static readonly Copy = 1;
+  Copy = 1,
   // Only the destination will be present.
-  public static readonly Dest = 2;
+  Dest = 2,
   // The source is placed over the destination.
-  public static readonly SrcOver = 3;
+  SrcOver = 3,
   // The destination is placed over the source.
-  public static readonly DestOver = 4;
+  DestOver = 4,
   // The parts of the source that overlap with the destination are placed.
-  public static readonly SrcIn = 5;
+  SrcIn = 5,
   // The parts of the destination that overlap with the source are placed.
-  public static readonly DestIn = 6;
+  DestIn = 6,
   // The parts of the source that fall outside of the destination are placed.
-  public static readonly SrcOut = 7;
+  SrcOut = 7,
   // The parts of the destination that fall outside of the source are placed.
-  public static readonly DestOut = 8;
+  DestOut = 8,
   // The parts of the source which overlap the destination replace the destination. The
   // destination is placed everywhere else.
-  public static readonly SrcAtop = 9;
+  SrcAtop = 9,
   // The parts of the destination which overlaps the source replace the source. The source is
   // placed everywhere else.
-  public static readonly DestAtop = 10;
+  DestAtop = 10,
   // The non-overlapping regions of source and destination are combined.
-  public static readonly Xor = 11;
+  Xor = 11,
   // The sum of the source image and destination image is displayed.
-  public static readonly Plus = 12;
+  Plus = 12,
   // Allows two elements to cross fade by changing their opacities from 0 to 1 on one
   // element and 1 to 0 on the other element.
-  public static readonly PlusLighter = 13;
+  PlusLighter = 13
 }
+
 scenery.register( 'Compose', Compose );
 
 // u32
@@ -690,7 +690,7 @@ export class VelloRampPatch extends VelloPatch {
   // Filled in by Ramps
   public id = -1;
 
-  public constructor( draw_data_offset: number, public stops: VelloColorStop[], public extend: number ) {
+  public constructor( draw_data_offset: number, public stops: VelloColorStop[], public extend: Extend ) {
     super( draw_data_offset );
   }
 
@@ -1038,7 +1038,7 @@ export default class Encoding {
   }
 
   // zero: => false, one => color, many => true (icky)
-  private add_ramp( color_stops: VelloColorStop[], alpha: number, extend: number ): null | true | ColorRGBA32 {
+  private add_ramp( color_stops: VelloColorStop[], alpha: number, extend: Extend ): null | true | ColorRGBA32 {
     const offset = this.drawDataBuf.byteLength;
     const stops_start = this.color_stops.length;
     if ( alpha !== 1 ) {
@@ -1066,7 +1066,7 @@ export default class Encoding {
   }
 
   // Encodes a linear gradient brush.
-  public encode_linear_gradient( x0: number, y0: number, x1: number, y1: number, color_stops: VelloColorStop[], alpha: number, extend: number ): void {
+  public encode_linear_gradient( x0: number, y0: number, x1: number, y1: number, color_stops: VelloColorStop[], alpha: number, extend: Extend ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linear_gradient(DrawLinearGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], p1: [${rustF32( x1 )}, ${rustF32( y1 )}]}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${extend});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
@@ -1091,7 +1091,7 @@ export default class Encoding {
 
   // TODO: note the parameter order?
   // Encodes a radial gradient brush.
-  public encode_radial_gradient( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number, color_stops: VelloColorStop[], alpha: number, extend: number ): void {
+  public encode_radial_gradient( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number, color_stops: VelloColorStop[], alpha: number, extend: Extend ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_radial_gradient(DrawRadialGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], r0: ${rustF32( r0 )}, p1: [${rustF32( x1 )}, ${rustF32( y1 )}], r1: ${rustF32( r1 )}}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${extend});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
@@ -1138,7 +1138,7 @@ export default class Encoding {
   }
 
   // Encodes a begin clip command.
-  public encode_begin_clip( mix: number, compose: number, alpha: number ): void {
+  public encode_begin_clip( mix: Mix, compose: Compose, alpha: number ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(${mix}, ${compose}, ${rustF32( alpha )});\n` );
     this.drawTagsBuf.pushU32( DrawTag.BEGIN_CLIP );
 
