@@ -10,7 +10,7 @@ import { BufferImage } from './BufferImage.js';
 import BinPacker, { Bin } from '../../../../dot/js/BinPacker.js';
 import { scenery } from '../../imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { VelloImagePatch } from './Encoding.js';
+import { EncodableImage, VelloImagePatch } from './Encoding.js';
 
 const ATLAS_INITIAL_SIZE = 1024;
 const ATLAS_MAX_SIZE = 8192;
@@ -64,7 +64,7 @@ export default class Atlas {
   // TODO: Add some "unique" identifier on BufferImage so we can check if it's actually representing the same image
   // TODO: would it kill performance to hash the image data? If we're changing the image every frame, that would
   // TODO: be very excessive.
-  private getAtlasSubImage( image: BufferImage, existingAtlasSubImage?: AtlasSubImage ): AtlasSubImage | null {
+  private getAtlasSubImage( image: EncodableImage, existingAtlasSubImage?: AtlasSubImage ): AtlasSubImage | null {
     assert && assert( !existingAtlasSubImage || existingAtlasSubImage.image === image );
 
     for ( let i = 0; i < this.used.length; i++ ) {
@@ -153,7 +153,7 @@ export default class Atlas {
         depthOrArrayLayers: 1
       },
       format: 'rgba8unorm',
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST
+      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
     } );
     this.textureView = this.texture.createView( {
       label: 'atlas texture view',
@@ -175,23 +175,44 @@ export default class Atlas {
       const atlasSubImage = this.dirtyAtlasSubImages.pop()!;
       const image = atlasSubImage.image;
 
-      // TODO: we have the ability to do this in a single call, would that be better ever for performance? Maybe a single
-      // TODO: call if we have to update a bunch of sections at once?
-      this.device.queue.writeTexture( {
-        texture: this.texture!,
-        origin: {
-          x: atlasSubImage.x,
-          y: atlasSubImage.y,
-          z: 0
-        }
-      }, image.buffer, {
-        offset: 0,
-        bytesPerRow: image.width * 4
-      }, {
-        width: image.width,
-        height: image.height,
-        depthOrArrayLayers: 1
-      } );
+      // TODO: note premultiplied. Why we don't want to use BufferImages from canvas data
+      if ( image instanceof BufferImage ) {
+        // TODO: we have the ability to do this in a single call, would that be better ever for performance? Maybe a single
+        // TODO: call if we have to update a bunch of sections at once?
+        this.device.queue.writeTexture( {
+          texture: this.texture!,
+          origin: {
+            x: atlasSubImage.x,
+            y: atlasSubImage.y,
+            z: 0
+          }
+        }, image.buffer, {
+          offset: 0,
+          bytesPerRow: image.width * 4
+        }, {
+          width: image.width,
+          height: image.height,
+          depthOrArrayLayers: 1
+        } );
+      }
+      else {
+        this.device.queue.copyExternalImageToTexture( {
+          source: image.source
+        }, {
+          texture: this.texture!,
+          origin: {
+            x: atlasSubImage.x,
+            y: atlasSubImage.y,
+            z: 0
+          },
+          premultipliedAlpha: true
+        }, {
+          width: image.width,
+          height: image.height,
+          depthOrArrayLayers: 1
+        } );
+      }
+
     }
   }
 
@@ -205,7 +226,7 @@ scenery.register( 'Atlas', Atlas );
 // TODO: pool these?
 export class AtlasSubImage {
   public constructor(
-    public image: BufferImage,
+    public image: EncodableImage,
     public x: number,
     public y: number,
     public bin: Bin

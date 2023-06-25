@@ -256,8 +256,13 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
         this._image = image;
 
         // If our image is an HTML image that hasn't loaded yet, attach a load listener.
-        if ( this._image instanceof HTMLImageElement && ( !this._image.width || !this._image.height ) ) {
-          this._attachImageLoadListener();
+        if ( this._image instanceof HTMLImageElement ) {
+          if ( !this._image.width || !this._image.height ) {
+            this._attachImageLoadListener();
+          }
+          else {
+            this._createImageBitmap();
+          }
         }
 
         // Try recomputing bounds (may give a 0x0 if we aren't yet loaded)
@@ -869,8 +874,27 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
     private _onImageLoad(): void {
       assert && assert( this._imageLoadListenerAttached, 'If _onImageLoad is firing, it should be attached' );
 
+      this._createImageBitmap();
       this.invalidateImage();
       this._detachImageLoadListener();
+    }
+
+    /**
+     * Creates an ImageBitmap for the image, if it is an HTMLImageElement and we haven't already created one.
+     * We'll store it in the global cache for later use
+     */
+    private _createImageBitmap(): void {
+      // Closure, so if we set ANOTHER image in the meantime, we won't store the wrong thing
+      const image = this._image;
+      if ( image instanceof HTMLImageElement && !imageBitmapMap.has( image ) ) {
+        createImageBitmap( image, {
+          premultiplyAlpha: 'premultiply'
+        } ).then( ( bitmap: ImageBitmap ) => {
+          imageBitmapMap.set( image, bitmap );
+        } ).catch( ( error: Error ) => {
+          throw error;
+        } );
+      }
     }
 
     /**
@@ -1063,3 +1087,8 @@ Imageable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'Imageable', Imageable );
 export default Imageable;
+
+// Global map of image elements to their corresponding ImageBitmaps, so we can have high-performance output for
+// Canvas/Vello/WebGL/etc.
+export const imageBitmapMap = new WeakMap<HTMLImageElement, ImageBitmap>();
+scenery.register( 'imageBitmapMap', imageBitmapMap );

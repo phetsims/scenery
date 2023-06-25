@@ -17,6 +17,7 @@ import DeviceContext from './DeviceContext.js';
 import { scenery } from '../../imports.js';
 import { AtlasSubImage } from './Atlas.js';
 import { Arc, Cubic, EllipticalArc, Line, Quadratic, Shape } from '../../../../kite/js/imports.js';
+import { SourceImage } from './SourceImage.js';
 
 const TILE_WIDTH = 16; // u32
 const TILE_HEIGHT = 16; // u32
@@ -48,6 +49,11 @@ export type ColorRGBA32 = number;
 export type F32 = number;
 export type U32 = number;
 export type U8 = number;
+
+// If you're looking here, prefer SourceImage. It can go directly from image sources, and you won't have to manually
+// premultiply data (which is required for BufferImage). For HTMLImageElements, use createImageBitmap() with the
+// premultiplyAlpha: 'premultiply' option
+export type EncodableImage = SourceImage | BufferImage;
 
 const size_to_words = ( byte_size: number ): number => byte_size / 4;
 
@@ -665,7 +671,7 @@ export class VelloImagePatch extends VelloPatch {
   // Filled in by Atlas
   public atlasSubImage: AtlasSubImage | null = null;
 
-  public constructor( draw_data_offset: number, public image: BufferImage ) {
+  public constructor( draw_data_offset: number, public image: EncodableImage ) {
     super( draw_data_offset );
   }
 
@@ -1021,7 +1027,7 @@ export default class Encoding {
   }
 
   // Encodes an image brush.
-  public encode_image( image: BufferImage ): void {
+  public encode_image( image: EncodableImage ): void {
     this.patches.push( new VelloImagePatch( this.drawDataBuf.byteLength, image ) );
     this.drawTagsBuf.pushU32( DrawTag.IMAGE );
 

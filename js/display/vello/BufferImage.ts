@@ -10,6 +10,8 @@ import { scenery } from '../../imports.js';
 
 export class BufferImage {
   // TODO: perhaps reorder parameters
+  // NOTE: IMPORTANT! If using this, make sure the buffer has premultiplied values. Canvas.getImageData() is NOT
+  // premultiplied. Use SourceImage with Canvases
   public constructor(
     public readonly width: number,
     public readonly height: number,

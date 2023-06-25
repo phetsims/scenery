@@ -8,10 +8,11 @@
 
 import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { ImageStatefulDrawable, scenery, VelloSelfDrawable } from '../../imports.js';
+import { imageBitmapMap, ImageStatefulDrawable, scenery, VelloSelfDrawable } from '../../imports.js';
 import { Affine } from '../vello/Affine.js';
 import { BufferImage } from '../vello/BufferImage.js';
 import PhetEncoding from '../vello/PhetEncoding.js';
+import { SourceImage } from '../vello/SourceImage.js';
 
 class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
   /**
@@ -57,31 +58,40 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
 
     this.encoding.reset( true );
 
-    const matrixToAffine = matrix => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
-
     const node = this.node;
     const matrix = this.instance.relativeTransform.matrix;
 
-    const canvas = document.createElement( 'canvas' );
-    canvas.width = node.getImageWidth();
-    canvas.height = node.getImageHeight();
+    // GPUImageCopyExternalImageSource
+    let source;
+
+    if ( node._image instanceof HTMLImageElement ) {
+      const imageBitmap = imageBitmapMap.get( node._image );
+      if ( imageBitmap && imageBitmap.width && imageBitmap.height ) {
+        source = imageBitmap;
+      }
+      else {
+        console.log( 'ImageVelloDrawable: image not loaded yet' );
+      }
+    }
+    else if ( node._image instanceof HTMLCanvasElement ) {
+      if ( node._image.width && node._image.height ) {
+        source = node._image;
+      }
+    }
+
+    // TODO: get rid of Affine?
+    const matrixToAffine = matrix => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
 
     // if we are not loaded yet, just ignore
-    if ( canvas.width && canvas.height ) {
-      const context = canvas.getContext( '2d' );
-      context.drawImage( node._image, 0, 0 );
-
-      const imageData = context.getImageData( 0, 0, canvas.width, canvas.height );
-      const buffer = new Uint8Array( imageData.data.buffer ).buffer; // copy in case the length isn't correct
-
+    if ( source ) {
       this.encoding.encode_transform( matrixToAffine( matrix ) );
       this.encoding.encode_linewidth( -1 );
 
-      const shape = Shape.rect( 0, 0, canvas.width, canvas.height );
+      const shape = Shape.rect( 0, 0, source.width, source.height );
 
       this.encoding.encode_kite_shape( shape, true, true, 100 );
 
-      this.encoding.encode_image( new BufferImage( canvas.width, canvas.height, buffer ) );
+      this.encoding.encode_image( new SourceImage( source.width, source.height, source ) );
     }
 
     this.setToCleanState();

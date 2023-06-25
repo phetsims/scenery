@@ -103,7 +103,7 @@ export type { MatrixBetweenPropertyOptions } from './util/MatrixBetweenProperty.
 
 export { default as Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_DEFAULT_OPTIONS } from './nodes/Paintable.js';
 export type { PaintableOptions, PaintableNode } from './nodes/Paintable.js';
-export { default as Imageable } from './nodes/Imageable.js';
+export { default as Imageable, imageBitmapMap } from './nodes/Imageable.js';
 export type { ImageableOptions, Mipmap, ImageableImage } from './nodes/Imageable.js';
 export { default as DelayedMutate } from './util/DelayedMutate.js';
 
