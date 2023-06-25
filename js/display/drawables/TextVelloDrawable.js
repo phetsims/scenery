@@ -68,6 +68,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     const node = this.node;
     const matrix = this.instance.relativeTransform.matrix;
 
+    // TODO: stroking also!!!
     if ( node.hasFill() ) {
       const shapedText = JSON.parse( shape_text( node.renderedText, true ) );
 
@@ -96,10 +97,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( shearMatrix );
         x += glyph.adv;
 
-        this.encoding.encode_transform( new Affine(
-          glyphMatrix.m00(), glyphMatrix.m10(), glyphMatrix.m01(), glyphMatrix.m11(),
-          glyphMatrix.m02(), glyphMatrix.m12()
-        ) );
+        this.encoding.encode_matrix( glyphMatrix );
         this.encoding.encode_linewidth( -1 );
         const encodedCount = this.encoding.encode_kite_shape( shape, true, false, 1 );
         if ( encodedCount ) {

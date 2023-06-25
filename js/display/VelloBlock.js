@@ -8,6 +8,7 @@
  * @author Sharfudeen Ashraf (For Ghent University)
  */
 
+import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import { FittedBlock, scenery, Utils } from '../imports.js';
@@ -301,15 +302,12 @@ class VelloBlock extends FittedBlock {
         // For a layer push: matrix, linewidth(-1), shape, begin_clip
 
         if ( clipArea ) {
-          // TODO: ZOMG just put this in PhetEncoding. encode_matrix omg
-          const matrixToAffine = matrix => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
-
           // +1 ideally to avoid including the filter root (ignore its parent coordinate frame, stay in its local)
           // TODO: is the filter root... actually we need the transform root?
-          encoding.encode_transform( matrixToAffine( trail.slice( this.transformRootInstance.trail.length ).getMatrix() ) );
+          encoding.encode_matrix( trail.slice( this.transformRootInstance.trail.length ).getMatrix() );
         }
         else {
-          encoding.encode_transform( new Affine( 1, 0, 0, 1, 0, 0 ) );
+          encoding.encode_matrix( Matrix3.IDENTITY );
         }
 
         encoding.encode_linewidth( -1 );

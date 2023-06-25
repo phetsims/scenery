@@ -85,20 +85,18 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     this.encoding.reset( true );
 
-    const matrixToAffine = matrix => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
-
     const node = this.node;
     const matrix = this.instance.relativeTransform.matrix;
 
     if ( node.shape ) {
       if ( node.hasFill() ) {
-        this.encoding.encode_transform( matrixToAffine( matrix ) );
+        this.encoding.encode_matrix( matrix );
         this.encoding.encode_linewidth( -1 );
         this.encoding.encode_kite_shape( node.shape, true, true, 1 );
         this.encoding.encode_paint( node.fill );
       }
       if ( node.hasStroke() ) {
-        this.encoding.encode_transform( matrixToAffine( matrix ) );
+        this.encoding.encode_matrix( matrix );
         let shape = node.shape;
         if ( node.lineDash.length ) {
           shape = node.shape.getDashedShape( node.lineDash, node.lineDashOffset );

@@ -79,11 +79,9 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
     }
 
     // TODO: get rid of Affine?
-    const matrixToAffine = matrix => new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() );
-
     // if we are not loaded yet, just ignore
     if ( source ) {
-      this.encoding.encode_transform( matrixToAffine( matrix ) );
+      this.encoding.encode_matrix( matrix );
       this.encoding.encode_linewidth( -1 );
 
       const shape = Shape.rect( 0, 0, source.width, source.height );
