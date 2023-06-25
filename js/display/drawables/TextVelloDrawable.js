@@ -6,14 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// @ts-expect-error yeah, this doesn't exist for most people
-import { get_glyph, shape_text } from '../vello/swash.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { PathStatefulDrawable, scenery, VelloSelfDrawable } from '../../imports.js';
-import { Affine } from '../vello/Affine.js';
 import PhetEncoding from '../vello/PhetEncoding.js';
+// @ts-expect-error yeah, this doesn't exist for most people
+import { get_glyph, shape_text } from '../vello/swash.js';
 
 class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**

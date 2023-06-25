@@ -181,6 +181,8 @@ class VelloBlock extends FittedBlock {
     sceneEncoding.append( encoding, new Affine( window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0 ) );
     sceneEncoding.finalize_scene();
 
+    sceneryLog && sceneryLog.Encoding && console.log( sceneEncoding.rustEncoding );
+
     const outTexture = this.canvasContext.getCurrentTexture();
     const renderInfo = sceneEncoding.resolve( this.deviceContext );
     renderInfo.prepareRender( outTexture.width, outTexture.height, 0 );

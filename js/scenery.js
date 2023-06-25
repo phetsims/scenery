@@ -82,6 +82,9 @@ const logProperties = {
 
   Sim: { name: 'Sim', style: '' },
 
+  // For Vello encoding
+  Encoding: { name: 'Encoding', style: '' },
+
   // Accessibility-related
   ParallelDOM: { name: 'ParallelDOM', style: '' },
   PDOMInstance: { name: 'PDOMInstance', style: '' },

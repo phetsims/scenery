@@ -103,6 +103,9 @@ export const lerp_rgba8 = ( c1: ColorRGBA32, c2: ColorRGBA32, t: number ): Color
   return ( ( r << 24 ) | ( g << 16 ) | ( b << 8 ) | a ) >>> 0;
 };
 
+let globalEncodingID = 0;
+let globalPathID = 0;
+
 export class VelloColorStop {
   public constructor( public offset: number, public color: number ) {}
 }
@@ -696,7 +699,28 @@ export class VelloRampPatch extends VelloPatch {
   }
 }
 
+const rustF32 = ( f: number ): string => {
+  let str = '' + f;
+  if ( !str.includes( '.' ) ) {
+    str += '.0';
+  }
+  return str;
+};
+const rustTransform = ( t: Affine ): string => {
+  return `Transform { matrix: [${rustF32( t.a00 )}, ${rustF32( t.a10 )}, ${rustF32( t.a01 )}, ${rustF32( t.a11 )}], translation: [${rustF32( t.a02 )}, ${rustF32( t.a12 )}] }`;
+};
+const rustDrawColor = ( color: ColorRGBA32 ): string => {
+  return `DrawColor {rgba: 0x${( ( color & 0xffffffff ) >>> 0 ).toString( 16 )}}`;
+};
+const rustColorStops = ( stops: VelloColorStop[] ): string => {
+  return `[${stops.map( stop => {
+    return `ColorStop {offset: ${rustF32( stop.offset )}, color: peniko::Color {r: ${( ( stop.color >>> 24 ) & 0xff ).toString( 16 )}, g: ${( ( stop.color >>> 16 ) & 0xff ).toString( 16 )}, b: ${( ( stop.color >>> 8 ) & 0xff ).toString( 16 )}, a: ${( ( stop.color >>> 0 ) & 0xff ).toString( 16 )}}}`;
+  } ).join( ', ' )}]`;
+};
+
 export default class Encoding {
+
+  public id: number; // For things like output of drawing commands for validation
 
   public pathTagsBuf = new ByteBuffer(); // path_tags
   public pathDataBuf = new ByteBuffer(); // path_data
@@ -722,12 +746,26 @@ export default class Encoding {
   public static readonly PATH_MOVE_TO = 0x2;
   public static readonly PATH_NONEMPTY_SUBPATH = 0x3;
 
+  // For debugging, so we can dump rust commands out to execute
+  public rustEncoding!: string;
+  public rustLock!: number;
+
+  public constructor() {
+    this.id = globalEncodingID++;
+    if ( sceneryLog && sceneryLog.Encoding ) {
+      this.rustEncoding = '';
+      this.rustLock = 0;
+    }
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `let mut encoding${this.id}: Encoding = Encoding::new();\n` );
+  }
+
   public is_empty(): boolean {
     return this.pathTagsBuf.byteLength === 0;
   }
 
   // Clears the encoding.
   public reset( is_fragment: boolean ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.reset(${is_fragment});\n` );
     this.transforms.length = 0;
     this.pathTagsBuf.clear();
     this.pathDataBuf.clear();
@@ -767,11 +805,19 @@ export default class Encoding {
     this.linewidths.push( ...other.linewidths );
     this.color_stops.push( ...other.color_stops );
     this.patches.push( ...other.patches.map( patch => patch.withOffset( patch.draw_data_offset + initial_draw_data_length ) ) );
+
+    if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
+      if ( !this.rustEncoding?.includes( `let mut encoding${other.id} ` ) ) {
+        this.rustEncoding = other.rustEncoding + this.rustEncoding;
+      }
+      this.rustEncoding += `encoding${this.id}.append(&mut encoding${other.id}, ${transform ? `&Some(${rustTransform( transform )})` : '&None'});\n`;
+    }
   }
 
   // Encodes a linewidth.
   public encode_linewidth( linewidth: number ): void {
     if ( this.linewidths[ this.linewidths.length - 1 ] !== linewidth ) {
+      sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linewidth(${rustF32( linewidth )});\n` );
       this.pathTagsBuf.pushU8( PathTag.LINEWIDTH );
       this.linewidths.push( linewidth );
     }
@@ -784,6 +830,7 @@ export default class Encoding {
   public encode_transform( transform: Affine ): boolean {
     const last = this.transforms[ this.transforms.length - 1 ];
     if ( !last || !last.equals( transform ) ) {
+      sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_transform(${rustTransform( transform )});\n` );
       this.pathTagsBuf.pushU8( PathTag.TRANSFORM );
       this.transforms.push( transform );
       return true;
@@ -801,11 +848,20 @@ export default class Encoding {
     this.state = Encoding.PATH_START;
     this.n_encoded_segments = 0;
     this.is_fill = is_fill;
+
+    if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
+      globalPathID++;
+
+      this.rustEncoding += `let mut path_encoder${globalPathID} = encoding${this.id}.encode_path(${is_fill});\n`;
+    }
   }
 
 
   // Encodes a move, starting a new subpath.
   public move_to( x: number, y: number ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.move_to(${rustF32( x )}, ${rustF32( y )});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock++;
+
     if ( this.is_fill ) {
       this.close();
     }
@@ -820,15 +876,21 @@ export default class Encoding {
     this.pathDataBuf.pushF32( x );
     this.pathDataBuf.pushF32( y );
     this.state = Encoding.PATH_MOVE_TO;
+
+    sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
   // Encodes a line.
   public line_to( x: number, y: number ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.line_to(${rustF32( x )}, ${rustF32( y )});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock++;
+
     if ( this.state === Encoding.PATH_START ) {
       if ( this.n_encoded_segments === 0 ) {
         // This copies the behavior of kurbo which treats an initial line, quad
         // or curve as a move.
         this.move_to( x, y );
+        sceneryLog && sceneryLog.Encoding && this.rustLock--;
         return;
       }
       this.move_to( this.first_point.x, this.first_point.y );
@@ -838,13 +900,19 @@ export default class Encoding {
     this.pathTagsBuf.pushU8( PathTag.LINE_TO_F32 );
     this.state = Encoding.PATH_NONEMPTY_SUBPATH;
     this.n_encoded_segments += 1;
+
+    sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
   // Encodes a quadratic bezier.
   public quad_to( x1: number, y1: number, x2: number, y2: number ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.quad_to(${rustF32( x1 )}, ${rustF32( y1 )}, ${rustF32( x2 )}, ${rustF32( y2 )});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock++;
+
     if ( this.state === Encoding.PATH_START ) {
       if ( this.n_encoded_segments === 0 ) {
         this.move_to( x2, y2 );
+        sceneryLog && sceneryLog.Encoding && this.rustLock--;
         return;
       }
       this.move_to( this.first_point.x, this.first_point.y );
@@ -856,13 +924,19 @@ export default class Encoding {
     this.pathTagsBuf.pushU8( PathTag.QUAD_TO_F32 );
     this.state = Encoding.PATH_NONEMPTY_SUBPATH;
     this.n_encoded_segments += 1;
+
+    sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
   // Encodes a cubic bezier.
   public cubic_to( x1: number, y1: number, x2: number, y2: number, x3: number, y3: number ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.cubic_to(${rustF32( x1 )}, ${rustF32( y1 )}, ${rustF32( x2 )}, ${rustF32( y2 )}, ${rustF32( x3 )}, ${rustF32( y3 )});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock++;
+
     if ( this.state === Encoding.PATH_START ) {
       if ( this.n_encoded_segments === 0 ) {
         this.move_to( x3, y3 );
+        sceneryLog && sceneryLog.Encoding && this.rustLock--;
         return;
       }
       this.move_to( this.first_point.x, this.first_point.y );
@@ -876,10 +950,14 @@ export default class Encoding {
     this.pathTagsBuf.pushU8( PathTag.CUBIC_TO_F32 );
     this.state = Encoding.PATH_NONEMPTY_SUBPATH;
     this.n_encoded_segments += 1;
+
+    sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
   // Closes the current subpath.
   public close(): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.close();\n` );
+
     if ( this.state === Encoding.PATH_START ) {
       return;
     }
@@ -913,6 +991,9 @@ export default class Encoding {
   // the end of a complete path object. Setting this to false allows encoding
   // multiple paths with differing transforms for a single draw object.
   public finish( insert_path_marker: boolean ): number {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.finish(${insert_path_marker});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock++;
+
     if ( this.is_fill ) {
       this.close();
     }
@@ -926,6 +1007,9 @@ export default class Encoding {
         this.insert_path_marker();
       }
     }
+
+    sceneryLog && sceneryLog.Encoding && this.rustLock--;
+
     return this.n_encoded_segments;
   }
 
@@ -940,12 +1024,15 @@ export default class Encoding {
 
   // Exposed for glyph handling
   public insert_path_marker(): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.path_tags.push(PathTag::PATH);\n*encoding${this.id}.n_paths += 1;\n` );
     this.pathTagsBuf.pushU8( PathTag.PATH );
     this.n_paths += 1;
   }
 
   // Encodes a solid color brush.
   public encode_color( color: ColorRGBA32 ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_color(${rustDrawColor( color )});\n` );
+
     this.drawTagsBuf.pushU32( DrawTag.COLOR );
     this.drawDataBuf.pushU32( to_premul_u32( color ) );
   }
@@ -980,6 +1067,9 @@ export default class Encoding {
 
   // Encodes a linear gradient brush.
   public encode_linear_gradient( x0: number, y0: number, x1: number, y1: number, color_stops: VelloColorStop[], alpha: number, extend: number ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linear_gradient(DrawLinearGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], p1: [${rustF32( x1 )}, ${rustF32( y1 )}]}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${extend});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock++;
+
     const result = this.add_ramp( color_stops, alpha, extend );
     if ( result === null ) {
       this.encode_color( 0 );
@@ -995,11 +1085,16 @@ export default class Encoding {
     else {
       this.encode_color( result );
     }
+
+    sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
   // TODO: note the parameter order?
   // Encodes a radial gradient brush.
   public encode_radial_gradient( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number, color_stops: VelloColorStop[], alpha: number, extend: number ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_radial_gradient(DrawRadialGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], r0: ${rustF32( r0 )}, p1: [${rustF32( x1 )}, ${rustF32( y1 )}], r1: ${rustF32( r1 )}}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${extend});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock++;
+
     // Match Skia's epsilon for radii comparison
     const SKIA_EPSILON = 1 / ( ( 1 << 12 ) >>> 0 );
     if ( x0 === x1 && y0 === y1 && Math.abs( r0 - r1 ) < SKIA_EPSILON ) {
@@ -1024,10 +1119,14 @@ export default class Encoding {
         this.encode_color( result );
       }
     }
+
+    sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
   // Encodes an image brush.
   public encode_image( image: EncodableImage ): void {
+    // TODO: sceneryLog.Encoding support!! (easy from BufferImage, hard from SourceImage)
+    // TODO: see if it's premultiplied and we don't have to do that!
     this.patches.push( new VelloImagePatch( this.drawDataBuf.byteLength, image ) );
     this.drawTagsBuf.pushU32( DrawTag.IMAGE );
 
@@ -1040,6 +1139,7 @@ export default class Encoding {
 
   // Encodes a begin clip command.
   public encode_begin_clip( mix: number, compose: number, alpha: number ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(${mix}, ${compose}, ${rustF32( alpha )});\n` );
     this.drawTagsBuf.pushU32( DrawTag.BEGIN_CLIP );
 
     // u32 combination of mix and compose
@@ -1052,6 +1152,7 @@ export default class Encoding {
 
   // Encodes an end clip command.
   public encode_end_clip(): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_end_clip();\n` );
     if ( this.n_open_clips > 0 ) {
       this.drawTagsBuf.pushU32( DrawTag.END_CLIP );
       // This is a dummy path, and will go away with the new clip impl.
