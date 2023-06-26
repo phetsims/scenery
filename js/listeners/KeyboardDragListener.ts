@@ -37,6 +37,7 @@ import optionize from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 
 type PressedKeyTiming = {
 
@@ -166,13 +167,9 @@ type SelfOptions = {
   // By default, do not instrument the enabledProperty; opt in with this option. See EnabledComponent
   phetioEnabledPropertyInstrumented?: boolean;
 
-  // phet-io
-  tandem?: Tandem;
-
   // Though DragListener is not instrumented, declare these here to support properly passing this to children, see
   // https://github.com/phetsims/tandem/issues/60.
-  phetioReadOnly?: boolean;
-};
+} & Pick<PhetioObjectOptions, 'tandem' | 'phetioReadOnly'>;
 
 export type KeyboardDragListenerOptions = SelfOptions & EnabledComponentOptions;
 
