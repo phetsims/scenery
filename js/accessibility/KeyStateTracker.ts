@@ -14,9 +14,7 @@ import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import EventType from '../../../tandem/js/EventType.js';
-import Tandem from '../../../tandem/js/Tandem.js';
 import { EventIO, KeyboardUtils, scenery } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
@@ -74,11 +72,7 @@ class KeyStateTracker {
 
   private readonly disposeKeyStateTracker: () => void;
 
-  public constructor( providedOptions?: KeyStateTrackerOptions ) {
-
-    const options = optionize<KeyStateTrackerOptions>()( {
-      tandem: Tandem.OPTIONAL
-    }, providedOptions );
+  public constructor( options?: KeyStateTrackerOptions ) {
 
     this.keydownUpdateAction = new PhetioAction( domEvent => {
 
@@ -120,7 +114,7 @@ class KeyStateTracker {
 
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'keydownUpdateAction' ),
+      tandem: options?.tandem?.createTandem( 'keydownUpdateAction' ),
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioEventType: EventType.USER,
       phetioDocumentation: 'Action that executes whenever a keydown occurs from the input listeners this keyStateTracker adds (most likely to the document).'
@@ -155,7 +149,7 @@ class KeyStateTracker {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'keyupUpdateAction' ),
+      tandem: options?.tandem?.createTandem( 'keyupUpdateAction' ),
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioEventType: EventType.USER,
       phetioDocumentation: 'Action that executes whenever a keyup occurs from the input listeners this keyStateTracker adds (most likely to the document).'

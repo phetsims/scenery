@@ -10,14 +10,12 @@
  */
 
 import SpeechSynthesisAnnouncer, { SpeechSynthesisAnnouncerOptions, SpeechSynthesisInitializeOptions } from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
-import Tandem from '../../../../tandem/js/Tandem.js';
 import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 
 type SelfOptions = EmptySelfOptions;
 type VoicingManagerOptions = SelfOptions & SpeechSynthesisAnnouncerOptions;
-
 
 class VoicingManager extends SpeechSynthesisAnnouncer {
   public constructor( providedOptions?: VoicingManagerOptions ) {
@@ -28,7 +26,6 @@ class VoicingManager extends SpeechSynthesisAnnouncer {
       respectResponseCollectorProperties: true,
 
       // phet-io
-      tandem: Tandem.OPTIONAL,
       phetioDocumentation: 'Announcer that manages the voicing feature, providing audio responses via WebAudio.'
     }, providedOptions );
 

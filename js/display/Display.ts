@@ -62,15 +62,14 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
-import PhetioObject from '../../../tandem/js/PhetioObject.js';
-import Tandem from '../../../tandem/js/Tandem.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
 
-export type DisplayOptions = {
+type SelfOptions = {
   // Initial (or override) display width
   width?: number;
 
@@ -153,10 +152,10 @@ export type DisplayOptions = {
 
   // An HTMLElement used to contain the contents of the Display
   container?: HTMLElement;
-
-  // phet-io
-  tandem?: Tandem;
 };
+
+type ParentOptions = Pick<PhetioObjectOptions, 'tandem'>;
+export type DisplayOptions = SelfOptions & ParentOptions;
 
 const CUSTOM_CURSORS = {
   'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
@@ -310,7 +309,7 @@ export default class Display {
 
     //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
-    const options = optionize<DisplayOptions, StrictOmit<DisplayOptions, 'container'>>()( {
+    const options = optionize<DisplayOptions, StrictOmit<SelfOptions, 'container'>, ParentOptions>()( {
       // {number} - Initial display width
       width: ( providedOptions && providedOptions.container && providedOptions.container.clientWidth ) || 640,
 
@@ -384,10 +383,7 @@ export default class Display {
 
       // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
       //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
-      allowBackingScaleAntialiasing: true,
-
-      // phet-io
-      tandem: Tandem.OPTIONAL
+      allowBackingScaleAntialiasing: true
     }, providedOptions );
 
     this.id = globalIdCounter++;

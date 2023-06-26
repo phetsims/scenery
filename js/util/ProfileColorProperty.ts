@@ -7,7 +7,6 @@
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import Namespace from '../../../phet-core/js/Namespace.js';
-import Tandem from '../../../tandem/js/Tandem.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import { Color, colorProfileProperty, ColorProperty, scenery, SceneryConstants } from '../imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
@@ -44,7 +43,6 @@ export default class ProfileColorProperty extends ColorProperty {
   public constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, providedOptions?: PropertyOptions<Color> ) {
 
     const options = optionize<PropertyOptions<Color>, EmptySelfOptions, PropertyOptions<Color>>()( {
-      tandem: Tandem.OPTIONAL,
 
       // So that notifications won't occur when we change from different objects representing the same color.
       // We should never be mutating the Color objects used for ProfileColorProperty.
@@ -70,7 +68,7 @@ export default class ProfileColorProperty extends ColorProperty {
     assert && assert( !this.isPhetioInstrumented() ||
                       _.find( ProfileColorProperty.TANDEM_NAME_SUFFIXES, suffix => tandem.name.endsWith( suffix ) ) ||
                       tandem.name === 'colorProperty' || tandem.name === 'fillProperty' || tandem.name === 'strokeProperty',
-      `invalid tandem.name: ${tandem.phetioID}` );
+      `invalid tandem.name: ${tandem?.phetioID}` );
 
     this.colorProfileMap = colorProfileMap;
 

@@ -106,7 +106,6 @@ export default class Text extends Paintable( Node ) {
       fill: '#000000', // Default to black filled string
 
       // phet-io
-      tandem: Tandem.OPTIONAL,
       tandemNameSuffix: 'Text',
       phetioType: Text.TextIO,
       phetioVisiblePropertyInstrumented: false
