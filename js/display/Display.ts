@@ -66,9 +66,10 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PaintDef, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
-import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js'; // TODO: fix import
+import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
+import VelloBlock from './VelloBlock.js'; // TODO: fix import
 
 export type DisplayOptions = {
   // Initial (or override) display width
@@ -1850,6 +1851,31 @@ export default class Display {
         indentation += indent;
       }
     }
+    return result;
+  }
+
+  public getVelloEncoding( index = -1 ): string {
+    let result = '';
+
+    let currentIndex = 0;
+    const processBackbone = ( backbone: BackboneDrawable ): void => {
+      backbone.blocks.forEach( ( block: Block ) => {
+        if ( block instanceof VelloBlock ) {
+          if ( index < 0 || currentIndex === index ) {
+            result += block.lastEncodingString;
+          }
+          currentIndex++;
+        }
+        else if ( block instanceof DOMBlock ) {
+          processBackbone( block.domDrawable );
+        }
+      } );
+    };
+    processBackbone( this._rootBackbone! );
+
+    const bg = PaintDef.toColor( this.backgroundColor );
+    result += `params.base_color = Some(Color::rgb8(${bg.red}, ${bg.green}, ${bg.blue}));\n`;
+
     return result;
   }
 

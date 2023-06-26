@@ -179,9 +179,14 @@ class VelloBlock extends FittedBlock {
 
     // TODO: really get rid of Affine!!!
     sceneEncoding.append( encoding, new Affine( window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0 ) );
-    sceneEncoding.finalize_scene();
 
-    sceneryLog && sceneryLog.Encoding && console.log( sceneEncoding.rustEncoding );
+    if ( sceneryLog && sceneryLog.Encoding ) {
+
+      this.lastEncodingString = sceneEncoding.rustEncoding +
+                                `sb.append(&SceneFragment { data: encoding${sceneEncoding.id} }, None);\n`;
+    }
+
+    sceneEncoding.finalize_scene();
 
     const outTexture = this.canvasContext.getCurrentTexture();
     const renderInfo = sceneEncoding.resolve( this.deviceContext );

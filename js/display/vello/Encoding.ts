@@ -120,6 +120,12 @@ export enum Extend {
   Reflect = 2
 }
 
+const ExtendMap = {
+  [ Extend.Pad ]: 'Extend::Pad',
+  [ Extend.Repeat ]: 'Extend::Repeat',
+  [ Extend.Reflect ]: 'Extend::Reflect'
+};
+
 scenery.register( 'Extend', Extend );
 
 export enum Mix {
@@ -171,6 +177,26 @@ export enum Mix {
   Clip = 128
 }
 
+const MixMap = {
+  [ Mix.Normal ]: 'Mix::Normal',
+  [ Mix.Multiply ]: 'Mix::Multiply',
+  [ Mix.Screen ]: 'Mix::Screen',
+  [ Mix.Overlay ]: 'Mix::Overlay',
+  [ Mix.Darken ]: 'Mix::Darken',
+  [ Mix.Lighten ]: 'Mix::Lighten',
+  [ Mix.ColorDodge ]: 'Mix::ColorDodge',
+  [ Mix.ColorBurn ]: 'Mix::ColorBurn',
+  [ Mix.HardLight ]: 'Mix::HardLight',
+  [ Mix.SoftLight ]: 'Mix::SoftLight',
+  [ Mix.Difference ]: 'Mix::Difference',
+  [ Mix.Exclusion ]: 'Mix::Exclusion',
+  [ Mix.Hue ]: 'Mix::Hue',
+  [ Mix.Saturation ]: 'Mix::Saturation',
+  [ Mix.Color ]: 'Mix::Color',
+  [ Mix.Luminosity ]: 'Mix::Luminosity',
+  [ Mix.Clip ]: 'Mix::Clip'
+};
+
 scenery.register( 'Mix', Mix );
 
 export enum Compose {
@@ -206,6 +232,23 @@ export enum Compose {
   // element and 1 to 0 on the other element.
   PlusLighter = 13
 }
+
+const ComposeMap = {
+  [ Compose.Clear ]: 'Compose::Clear',
+  [ Compose.Copy ]: 'Compose::Copy',
+  [ Compose.Dest ]: 'Compose::Dest',
+  [ Compose.SrcOver ]: 'Compose::SrcOver',
+  [ Compose.DestOver ]: 'Compose::DestOver',
+  [ Compose.SrcIn ]: 'Compose::SrcIn',
+  [ Compose.DestIn ]: 'Compose::DestIn',
+  [ Compose.SrcOut ]: 'Compose::SrcOut',
+  [ Compose.DestOut ]: 'Compose::DestOut',
+  [ Compose.SrcAtop ]: 'Compose::SrcAtop',
+  [ Compose.DestAtop ]: 'Compose::DestAtop',
+  [ Compose.Xor ]: 'Compose::Xor',
+  [ Compose.Plus ]: 'Compose::Plus',
+  [ Compose.PlusLighter ]: 'Compose::PlusLighter'
+};
 
 scenery.register( 'Compose', Compose );
 
@@ -714,8 +757,8 @@ const rustDrawColor = ( color: ColorRGBA32 ): string => {
 };
 const rustColorStops = ( stops: VelloColorStop[] ): string => {
   return `[${stops.map( stop => {
-    return `ColorStop {offset: ${rustF32( stop.offset )}, color: peniko::Color {r: ${( ( stop.color >>> 24 ) & 0xff ).toString( 16 )}, g: ${( ( stop.color >>> 16 ) & 0xff ).toString( 16 )}, b: ${( ( stop.color >>> 8 ) & 0xff ).toString( 16 )}, a: ${( ( stop.color >>> 0 ) & 0xff ).toString( 16 )}}}`;
-  } ).join( ', ' )}]`;
+    return `ColorStop {offset: ${rustF32( stop.offset )}, color: peniko::Color {r: 0x${( ( stop.color >>> 24 ) & 0xff ).toString( 16 )}, g: 0x${( ( stop.color >>> 16 ) & 0xff ).toString( 16 )}, b: 0x${( ( stop.color >>> 8 ) & 0xff ).toString( 16 )}, a: 0x${( ( stop.color >>> 0 ) & 0xff ).toString( 16 )}}}`;
+  } ).join( ', ' )}].into_iter()`;
 };
 
 export default class Encoding {
@@ -765,7 +808,10 @@ export default class Encoding {
 
   // Clears the encoding.
   public reset( is_fragment: boolean ): void {
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.reset(${is_fragment});\n` );
+    // Clears the rustEncoding too, reinitalizing it
+    // TODO: don't requre hardcoding TRUE for is_fragment?
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding = `let mut encoding${this.id}: Encoding = Encoding::new();\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.reset(true);\n` );
     this.transforms.length = 0;
     this.pathTagsBuf.clear();
     this.pathDataBuf.clear();
@@ -786,6 +832,8 @@ export default class Encoding {
 
   // Appends another encoding to this one with an optional transform.
   public append( other: Encoding, transform: Affine | null = null ): void {
+    assert && assert( !this.rustLock );
+
     const initial_draw_data_length = this.drawDataBuf.byteLength;
 
     this.pathTagsBuf.pushByteBuffer( other.pathTagsBuf );
@@ -1024,7 +1072,7 @@ export default class Encoding {
 
   // Exposed for glyph handling
   public insert_path_marker(): void {
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.path_tags.push(PathTag::PATH);\n*encoding${this.id}.n_paths += 1;\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.path_tags.push(PathTag::PATH);\nencoding${this.id}.n_paths += 1;\n` );
     this.pathTagsBuf.pushU8( PathTag.PATH );
     this.n_paths += 1;
   }
@@ -1067,7 +1115,8 @@ export default class Encoding {
 
   // Encodes a linear gradient brush.
   public encode_linear_gradient( x0: number, y0: number, x1: number, y1: number, color_stops: VelloColorStop[], alpha: number, extend: Extend ): void {
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linear_gradient(DrawLinearGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], p1: [${rustF32( x1 )}, ${rustF32( y1 )}]}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${extend});\n` );
+    // TODO: not just pad
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linear_gradient(DrawLinearGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], p1: [${rustF32( x1 )}, ${rustF32( y1 )}]}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${ExtendMap[ extend ]});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
     const result = this.add_ramp( color_stops, alpha, extend );
@@ -1092,7 +1141,8 @@ export default class Encoding {
   // TODO: note the parameter order?
   // Encodes a radial gradient brush.
   public encode_radial_gradient( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number, color_stops: VelloColorStop[], alpha: number, extend: Extend ): void {
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_radial_gradient(DrawRadialGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], r0: ${rustF32( r0 )}, p1: [${rustF32( x1 )}, ${rustF32( y1 )}], r1: ${rustF32( r1 )}}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${extend});\n` );
+    // TODO: not just pad
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_radial_gradient(DrawRadialGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], r0: ${rustF32( r0 )}, p1: [${rustF32( x1 )}, ${rustF32( y1 )}], r1: ${rustF32( r1 )}}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${ExtendMap[ extend ]});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
     // Match Skia's epsilon for radii comparison
@@ -1125,8 +1175,26 @@ export default class Encoding {
 
   // Encodes an image brush.
   public encode_image( image: EncodableImage ): void {
-    // TODO: sceneryLog.Encoding support!! (easy from BufferImage, hard from SourceImage)
-    // TODO: see if it's premultiplied and we don't have to do that!
+    if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
+      let u8array;
+      if ( image instanceof BufferImage ) {
+        u8array = new Uint8Array( image.buffer );
+      }
+      else {
+        const canvas = document.createElement( 'canvas' );
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const context = canvas.getContext( '2d' )!;
+        context.drawImage( image.source, 0, 0 );
+
+        // TODO: see if this gets the premultiplication right - ImageBitmap was encoded as premultiplied?
+        // TODO: This probably does NOT get premultiplication right
+        u8array = new Uint8Array( context.getImageData( 0, 0, image.width, image.height ).data.buffer );
+      }
+      const dataString = [ ...u8array ].join( ', ' );
+      sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_image(&peniko::Image::new(peniko::Blob::new(std::sync::Arc::new([${dataString}].to_vec())), peniko::Format::Rgba8, ${image.width}, ${image.height}), 1.0);\n` );
+    }
+
     this.patches.push( new VelloImagePatch( this.drawDataBuf.byteLength, image ) );
     this.drawTagsBuf.pushU32( DrawTag.IMAGE );
 
@@ -1139,7 +1207,7 @@ export default class Encoding {
 
   // Encodes a begin clip command.
   public encode_begin_clip( mix: Mix, compose: Compose, alpha: number ): void {
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(${mix}, ${compose}, ${rustF32( alpha )});\n` );
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(BlendMode {mix: ${MixMap[ mix ]}, compose: ${ComposeMap[ compose ]}}, ${rustF32( alpha )});\n` );
     this.drawTagsBuf.pushU32( DrawTag.BEGIN_CLIP );
 
     // u32 combination of mix and compose
