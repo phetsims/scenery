@@ -49,6 +49,14 @@ class VoicingManager extends SpeechSynthesisAnnouncer {
       }
     } );
   }
+
+  /**
+   * Returns true if voicing is supported for the provided locale. Currently, only English is supported.
+   * @param locale - the locale string
+   */
+  public voicingSupportedForLocale( locale: string ): boolean {
+    return locale.startsWith( 'en' );
+  }
 }
 
 const voicingManager = new VoicingManager();
