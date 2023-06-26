@@ -14,6 +14,8 @@ import PhetEncoding from '../vello/PhetEncoding.js';
 // @ts-expect-error yeah, this doesn't exist for most people
 import { get_glyph, shape_text } from '../vello/swash.js';
 
+const glyphCache = new Map(); // `${id}-${embolden}` => Shape (TODO: variations for italics?)
+
 class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**
    * @public
@@ -90,7 +92,12 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
       let x = 0;
       shapedText.forEach( glyph => {
-        const shape = new Shape( get_glyph( glyph.id, embolden, embolden ) ); // TODO: bold! (italic with oblique transform!!)
+        const cacheId = `${glyph.id}-${embolden}`;
+        if ( !glyphCache.has( cacheId ) ) {
+          // TODO: bold! (italic with oblique transform!!)
+          glyphCache.set( cacheId, new Shape( get_glyph( glyph.id, embolden, embolden ) ) );
+        }
+        const shape = glyphCache.get( cacheId );
 
         // TODO: check whether the glyph y needs to be reversed! And italics/oblique
         const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( shearMatrix );

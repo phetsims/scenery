@@ -98,6 +98,8 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         this.encoding.encode_matrix( matrix );
         let shape = node.shape;
         if ( node.lineDash.length ) {
+          // TODO: cache dashed shapes? OR AT LEAST DO NOT UPDATE THE IMAGE ENCODNG IF IT IS THE SAME
+          // TODO: See SVG example
           shape = node.shape.getDashedShape( node.lineDash, node.lineDashOffset );
         }
         this.encoding.encode_linewidth( node.lineWidth );
