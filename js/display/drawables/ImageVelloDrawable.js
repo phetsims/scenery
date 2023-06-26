@@ -83,8 +83,8 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
       this.encoding.encode_matrix( matrix );
       this.encoding.encode_linewidth( -1 );
 
+      // TODO: faster "rect"
       const shape = Shape.rect( 0, 0, source.width, source.height );
-
       this.encoding.encode_kite_shape( shape, true, true, 100 );
 
       this.encoding.encode_image( new SourceImage( source.width, source.height, source ) );
