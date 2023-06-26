@@ -15,8 +15,6 @@ import { SourceImage } from '../vello/SourceImage.js';
 // @ts-expect-error yeah, this doesn't exist for most people
 import { get_glyph, shape_text } from '../vello/swash.js';
 
-const USE_CANVAS = true;
-
 const glyphCache = new Map(); // `${id}-${embolden}` => Shape (TODO: variations for italics?)
 
 class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
@@ -72,7 +70,10 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     const node = this.node;
     const matrix = this.instance.relativeTransform.matrix;
 
-    if ( USE_CANVAS ) {
+    // TODO: use glyph detection to see if we have everything for the text
+    const useSwash = window.phet?.chipper?.queryParameters?.swashText;
+
+    if ( !useSwash ) {
       // TODO: pooling, but figure out if we need to wait for the device.queue.onSubmittedWorkDone()
       const canvas = document.createElement( 'canvas' );
 
