@@ -6,13 +6,13 @@ import config from './shared/config.js';
 export default `${config}
 ${bbox}
 ${clip}
-@group(0) @binding(0)
-var<uniform>config:Config;@group(0) @binding(1)
-var<storage>clip_inp:array<ClipInp>;@group(0) @binding(2)
-var<storage>path_bboxes:array<PathBbox>;@group(0) @binding(3)
-var<storage,read_write>reduced:array<Bic>;@group(0) @binding(4)
-var<storage,read_write>clip_out:array<ClipEl>;const WG_SIZE=256u;var<workgroup>sh_bic:array<Bic,WG_SIZE>;var<workgroup>sh_parent:array<u32,WG_SIZE>;var<workgroup>sh_path_ix:array<u32,WG_SIZE>;@compute @workgroup_size(256)
+@group(0)@binding(0)
+var<uniform>_l:_aL;@group(0)@binding(1)
+var<storage>_cA:array<_ek>;@group(0)@binding(2)
+var<storage>_bw:array<_bY>;@group(0)@binding(3)
+var<storage,read_write>_ao:array<_aS>;@group(0)@binding(4)
+var<storage,read_write>_hN:array<_fi>;const _i=256u;var<workgroup>_aD:array<_aS,_i>;var<workgroup>_be:array<u32,_i>;var<workgroup>_fW:array<u32,_i>;@compute @workgroup_size(256)
 fn main(
-@builtin(global_invocation_id) global_id:vec3<u32>,@builtin(local_invocation_id) local_id:vec3<u32>,@builtin(workgroup_id) wg_id:vec3<u32>,){let inp=clip_inp[global_id.x].path_ix;let is_push=inp>=0;var bic=Bic(1u-u32(is_push),u32(is_push));
-sh_bic[local_id.x]=bic;for (var i=0u; i<firstTrailingBit(WG_SIZE); i+=1u){workgroupBarrier();if local_id.x+(1u<<i)<WG_SIZE{let other=sh_bic[local_id.x+(1u<<i)];bic=bic_combine(bic,other);}workgroupBarrier();sh_bic[local_id.x]=bic;}if local_id.x==0u{reduced[wg_id.x]=bic;}workgroupBarrier();let size=sh_bic[0].b;bic=Bic();if is_push&&bic.a==0u{let local_ix=size-bic.b-1u;sh_parent[local_ix]=local_id.x;sh_path_ix[local_ix]=u32(inp);}workgroupBarrier();
-if local_id.x<size{let path_ix=sh_path_ix[local_id.x];let path_bbox=path_bboxes[path_ix];let parent_ix=sh_parent[local_id.x]+wg_id.x*WG_SIZE;let bbox=vec4(f32(path_bbox.x0),f32(path_bbox.y0),f32(path_bbox.x1),f32(path_bbox.y1));clip_out[global_id.x]=ClipEl(parent_ix,bbox);}}`
+@builtin(global_invocation_id)_E:vec3<u32>,@builtin(local_invocation_id)_e:vec3<u32>,@builtin(workgroup_id)_ah:vec3<u32>,){let _aH=_cA[_E.x]._N;let _bV=_aH>=0;var _n=_aS(1u-u32(_bV),u32(_bV));
+_aD[_e.x]=_n;for(var i=0u;i<firstTrailingBit(_i);i+=1u){workgroupBarrier();if _e.x+(1u<<i)<_i{let _Y=_aD[_e.x+(1u<<i)];_n=_dz(_n,_Y);}workgroupBarrier();_aD[_e.x]=_n;}if _e.x==0u{_ao[_ah.x]=_n;}workgroupBarrier();let _B=_aD[0].b;_n=_aS();if _bV&&_n.a==0u{let _fX=_B-_n.b-1u;_be[_fX]=_e.x;_fW[_fX]=u32(_aH);}workgroupBarrier();
+if _e.x<_B{let _N=_fW[_e.x];let _T=_bw[_N];let _dy=_be[_e.x]+_ah.x*_i;let _b=vec4(f32(_T.x0),f32(_T.y0),f32(_T.x1),f32(_T.y1));_hN[_E.x]=_fi(_dy,_b);}}`

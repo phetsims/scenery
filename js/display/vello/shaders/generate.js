@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 const fs = require( 'fs' );
+const _ = require( 'lodash' );
 
 // go to this directory, then run `node generate.js` to generate the shaders (output is also in this directory)
 
@@ -10,6 +11,90 @@ const stripComments = str => {
     return index >= 0 ? line.substring( 0, index ) : line;
   } ).join( '\n' );
 };
+
+let symbols = [];
+let totalStr = '';
+const scanSymbols = str => {
+  totalStr += str;
+  str = stripComments( str );
+  [ ...str.matchAll( /struct ([\w]+) {/g ) ].forEach( match => {
+    symbols.push( match[ 1 ] );
+  } );
+  [ ...str.matchAll( /fn ([\w]+)\(/g ) ].forEach( match => {
+    symbols.push( match[ 1 ] );
+  } );
+  [ ...str.matchAll( /let ([\w]+) = /g ) ].forEach( match => {
+    symbols.push( match[ 1 ] );
+  } );
+  [ ...str.matchAll( /var ([\w]+) = /g ) ].forEach( match => {
+    symbols.push( match[ 1 ] );
+  } );
+  [ ...str.matchAll( /\s([\w]+):/g ) ].forEach( match => {
+    symbols.push( match[ 1 ] );
+  } );
+};
+
+// TODO: sort inverse by length!
+// TODO: uniqueness!
+// TODO: get rid of "main", or other things that could be builtins!!!
+
+fs.readdirSync( '../wgsl/shared' ).forEach( filename => {
+  if ( filename.endsWith( '.wgsl' ) ) {
+    scanSymbols( fs.readFileSync( `../wgsl/shared/${filename}`, 'utf8' ) );
+  }
+} );
+fs.readdirSync( '../wgsl' ).forEach( filename => {
+  if ( filename.endsWith( '.wgsl' ) ) {
+    scanSymbols( fs.readFileSync( `../wgsl/${filename}`, 'utf8' ) );
+  }
+} );
+
+symbols = _.uniq( symbols ).filter( symbol => {
+  if ( _.some( _.range( 0, 10 ), i => symbol.startsWith( `${i}` ) ) ) {
+    return false;
+  }
+
+  // Don't kill swizzles
+  if ( _.every( symbol.split( '' ), c => c === 'x' || c === 'y' || c === 'z' || c === 'w' ) ) {
+    return false;
+  }
+  if ( _.every( symbol.split( '' ), c => c === 'r' || c === 'g' || c === 'b' || c === 'a' ) ) {
+    return false;
+  }
+
+  // TODO: update to < 2 once we get rid of underscore
+  if ( symbol.length < 3 ) {
+    return false;
+  }
+
+  return ![
+    'main',
+    'default',
+    'group',
+    'binding',
+    'compute',
+    'workgroup_size',
+    'builtin',
+    'local_invocation_id',
+    'global_invocation_id',
+    'workgroup_id',
+    'storage',
+    'uniform',
+    'read_write',
+    'array',
+    'atomic',
+    'f32',
+    'u32',
+    'u8',
+    'workgroup'
+  ].includes( symbol );
+} );
+symbols = _.sortBy( symbols, symbol => {
+  return [ ...totalStr.matchAll( new RegExp( symbol, 'g' ) ) ].length;
+} ).reverse();
+// console.log( JSON.stringify( symbols, null, 2 ) );
+
+// TODO: we have... constants declared that aren't used! Can we just strip them out?
 
 const minify = str => {
   // TODO: could improve minification
@@ -46,7 +131,10 @@ const minify = str => {
   str = str.replaceAll( new RegExp( `${whitespace}*\u007D${whitespace}*`, 'g' ), '}' );
 
   str = str.replaceAll( new RegExp( `: `, 'g' ), ':' );
+  str = str.replaceAll( new RegExp( `; `, 'g' ), ';' );
   str = str.replaceAll( new RegExp( `, `, 'g' ), ',' );
+  str = str.replaceAll( new RegExp( `,}`, 'g' ), '}' );
+  str = str.replaceAll( new RegExp( `,]`, 'g' ), ']' );
 
   str = str.replaceAll( new RegExp( `${whitespace}*\\+${whitespace}*`, 'g' ), '+' );
   str = str.replaceAll( new RegExp( `${whitespace}*-${whitespace}*`, 'g' ), '-' );
@@ -57,6 +145,42 @@ const minify = str => {
   str = str.replaceAll( new RegExp( `${whitespace}*&${whitespace}*`, 'g' ), '&' );
   str = str.replaceAll( new RegExp( `${whitespace}*\\|${whitespace}*`, 'g' ), '|' );
   str = str.replaceAll( new RegExp( `${whitespace}*=${whitespace}*`, 'g' ), '=' );
+  str = str.replaceAll( new RegExp( `${whitespace}*\\(${whitespace}*`, 'g' ), '(' );
+  str = str.replaceAll( new RegExp( `${whitespace}*\\)${whitespace}*`, 'g' ), ')' );
+
+  symbols.forEach( ( name, index ) => {
+    // TODO: OMG why do we need to iterate this? Something is WRONG with this code. See below
+    for ( let i = 0; i < 2; i++ ) {
+      [ ...str.matchAll( new RegExp( `[^\\w](${name})[^\\w]`, 'g' ) ) ].reverse().forEach( match => {
+        const index0 = match.index + 1;
+        const index1 = index0 + match[ 1 ].length;
+        const before = str.substring( 0, index0 );
+        const after = str.substring( index1 );
+
+        // We still have to do import stuff
+        if ( !before.endsWith( '#import ' ) ) {
+          const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+          let variable;
+          if ( index < alphabet.length ) {
+            variable = alphabet[ index ];
+          }
+          else {
+            variable = alphabet[ Math.floor( index / alphabet.length ) - 1 ] + alphabet[ index % alphabet.length ];
+          }
+          // TODO: figure out how we could get rid of this underscore. What are we hitting?
+          variable = `_${variable}`;
+          str = before + variable + after;
+        }
+      } );
+    }
+    // THIS is why the loop above is needed
+    // if ( name === 'linewidth' && str.includes( 'linewidth' ) ) {
+    //   console.log( 'EEEEEK' );
+    //   console.log( [ ...str.matchAll( new RegExp( `.linewidth.`, 'g' ) ) ].map( match => match[ 0 ] ) );
+    //   console.log( [ ...str.matchAll( new RegExp( `[^\\w](${name})[^\\w]`, 'g' ) ) ].map( match => match[ 0 ] ) );
+    // }
+  } );
 
   return str;
 };
@@ -114,6 +238,7 @@ const preprocess = ( str, defines ) => {
   return outputLines.join( '\n' );
 };
 
+let byteSize = 0;
 const convert = ( dir, filename, defines = [ 'full' ], outputName ) => {
   outputName = outputName || filename;
   if ( filename.endsWith( '.wgsl' ) ) {
@@ -131,6 +256,7 @@ const convert = ( dir, filename, defines = [ 'full' ], outputName ) => {
     } );
 
     const outputString = ( '`' + shaderString + '`' ).replaceAll( '`` + ', '' );
+    byteSize += outputString.length;
 
     const importsString = importNames.map( name => `import ${name} from './shared/${name}.js';\n` ).join( '' );
 
@@ -153,7 +279,7 @@ convert( 'shared/', 'ptcl.wgsl' );
 convert( 'shared/', 'segment.wgsl' );
 convert( 'shared/', 'tile.wgsl' );
 convert( 'shared/', 'transform.wgsl' );
-convert( '', 'backdrop.wgsl' );
+// convert( '', 'backdrop.wgsl' ); // NOT USED
 convert( '', 'backdrop_dyn.wgsl' );
 convert( '', 'bbox_clear.wgsl' );
 convert( '', 'binning.wgsl' );
@@ -172,3 +298,5 @@ convert( '', 'pathtag_scan.wgsl', [ 'full' ], 'pathtag_scan_large.wgsl' );
 convert( '', 'pathtag_scan.wgsl', [ 'full', 'small' ], 'pathtag_scan_small.wgsl' );
 convert( '', 'pathtag_scan1.wgsl' );
 convert( '', 'tile_alloc.wgsl' );
+
+console.log( `bytes: ${byteSize}` );

@@ -1,10 +1,10 @@
 /* eslint-disable */
 
-export default `struct Config{width_in_tiles:u32,height_in_tiles:u32,target_width:u32,target_height:u32,
+export default `struct _aL{_aB:u32,_cs:u32,_gI:u32,_gH:u32,
 
 
-base_color:u32,n_drawobj:u32,n_path:u32,n_clip:u32,
+_im:u32,_dx:u32,_il:u32,_dw:u32,
 
-bin_data_start:u32,
-pathtag_base:u32,pathdata_base:u32,drawtag_base:u32,drawdata_base:u32,transform_base:u32,linewidth_base:u32,
-binning_size:u32,tiles_size:u32,segments_size:u32,ptcl_size:u32,}const TILE_WIDTH=16u;const TILE_HEIGHT=16u;const N_TILE_X=16u;const N_TILE_Y=16u;const N_TILE=256u;const BLEND_STACK_SPLIT=4u;const RAD_GRAD_KIND_CIRCULAR=1u;const RAD_GRAD_KIND_STRIP=2u;const RAD_GRAD_KIND_FOCAL_ON_CIRCLE=3u;const RAD_GRAD_KIND_CONE=4u;const RAD_GRAD_SWAPPED=1u;`
+_gG:u32,
+_dv:u32,_bf:u32,_cJ:u32,_fh:u32,_cI:u32,_ik:u32,
+_ij:u32,_ii:u32,_ih:u32,_ig:u32}const _cu=16u;const _bg=16u;const _bb=16u;const _ct=16u;const _F=256u;const _ej=4u;const _gM=1u;const _gL=2u;const _gK=3u;const _in=4u;const _gJ=1u;`

@@ -8,19 +8,19 @@ export default `${config}
 ${drawtag}
 ${bbox}
 ${bump}
-@group(0) @binding(0)
-var<uniform>config:Config;@group(0) @binding(1)
-var<storage>draw_monoids:array<DrawMonoid>;@group(0) @binding(2)
-var<storage>path_bbox_buf:array<PathBbox>;@group(0) @binding(3)
-var<storage>clip_bbox_buf:array<vec4<f32>>;@group(0) @binding(4)
-var<storage,read_write>intersected_bbox:array<vec4<f32>>;@group(0) @binding(5)
-var<storage,read_write>bump:BumpAllocators;@group(0) @binding(6)
-var<storage,read_write>bin_data:array<u32>;struct BinHeader{element_count:u32,chunk_offset:u32,}@group(0) @binding(7)
-var<storage,read_write>bin_header:array<BinHeader>;const SX=0.00390625;const SY=0.00390625;const WG_SIZE=256u;const N_SLICE=8u;const N_SUBSLICE=4u;var<workgroup>sh_bitmaps:array<array<atomic<u32>,N_TILE>,N_SLICE>;var<workgroup>sh_count:array<array<u32,N_TILE>,N_SUBSLICE>;var<workgroup>sh_chunk_offset:array<u32,N_TILE>;@compute @workgroup_size(256)
+@group(0)@binding(0)
+var<uniform>_l:_aL;@group(0)@binding(1)
+var<storage>_bM:array<_aE>;@group(0)@binding(2)
+var<storage>_hV:array<_bY>;@group(0)@binding(3)
+var<storage>_hU:array<vec4<f32>>;@group(0)@binding(4)
+var<storage,read_write>_hT:array<vec4<f32>>;@group(0)@binding(5)
+var<storage,read_write>_af:_em;@group(0)@binding(6)
+var<storage,read_write>_bv:array<u32>;struct _eV{_aA:u32,_bn:u32}@group(0)@binding(7)
+var<storage,read_write>_co:array<_eV>;const SX=0.00390625;const SY=0.00390625;const _i=256u;const _bW=8u;const _gi=4u;var<workgroup>_bm:array<array<atomic<u32>,_F>,_bW>;var<workgroup>_gd:array<array<u32,_F>,_gi>;var<workgroup>_gc:array<u32,_F>;@compute @workgroup_size(256)
 fn main(
-@builtin(global_invocation_id) global_id:vec3<u32>,@builtin(local_invocation_id) local_id:vec3<u32>,@builtin(workgroup_id) wg_id:vec3<u32>,){for (var i=0u; i<N_SLICE; i+=1u){atomicStore(&sh_bitmaps[i][local_id.x],0u);}workgroupBarrier();
-let element_ix=global_id.x;var x0=0;var y0=0;var x1=0;var y1=0;if element_ix<config.n_drawobj{let draw_monoid=draw_monoids[element_ix];var clip_bbox=vec4(-1e9,-1e9,1e9,1e9);if draw_monoid.clip_ix>0u{clip_bbox=clip_bbox_buf[draw_monoid.clip_ix-1u];}let path_bbox=path_bbox_buf[draw_monoid.path_ix];let pb=vec4<f32>(vec4(path_bbox.x0,path_bbox.y0,path_bbox.x1,path_bbox.y1));let bbox_raw=bbox_intersect(clip_bbox,pb);
-let bbox=vec4(bbox_raw.xy,max(bbox_raw.xy,bbox_raw.zw));intersected_bbox[element_ix]=bbox;x0=i32(floor(bbox.x*SX));y0=i32(floor(bbox.y*SY));x1=i32(ceil(bbox.z*SX));y1=i32(ceil(bbox.w*SY));}let width_in_bins=i32((config.width_in_tiles+N_TILE_X-1u)/N_TILE_X);let height_in_bins=i32((config.height_in_tiles+N_TILE_Y-1u)/N_TILE_Y);x0=clamp(x0,0,width_in_bins);y0=clamp(y0,0,height_in_bins);x1=clamp(x1,0,width_in_bins);y1=clamp(y1,0,height_in_bins);if x0==x1{y1=y0;}var x=x0;var y=y0;let my_slice=local_id.x/32u;let my_mask=1u<<(local_id.x&31u);while y<y1{atomicOr(&sh_bitmaps[my_slice][y*width_in_bins+x],my_mask);x+=1;if x==x1{x=x0;y+=1;}}workgroupBarrier();
-var element_count=0u;for (var i=0u; i<N_SUBSLICE; i+=1u){element_count+=countOneBits(atomicLoad(&sh_bitmaps[i*2u][local_id.x]));let element_count_lo=element_count;element_count+=countOneBits(atomicLoad(&sh_bitmaps[i*2u+1u][local_id.x]));let element_count_hi=element_count;let element_count_packed=element_count_lo|(element_count_hi<<16u);sh_count[i][local_id.x]=element_count_packed;}var chunk_offset=atomicAdd(&bump.binning,element_count);if chunk_offset+element_count>config.binning_size{chunk_offset=0u;atomicOr(&bump.failed,STAGE_BINNING);}sh_chunk_offset[local_id.x]=chunk_offset;bin_header[global_id.x].element_count=element_count;bin_header[global_id.x].chunk_offset=chunk_offset;workgroupBarrier();
-x=x0;y=y0;while y<y1{let bin_ix=y*width_in_bins+x;let out_mask=atomicLoad(&sh_bitmaps[my_slice][bin_ix]);
-if (out_mask&my_mask) !=0u{var idx=countOneBits(out_mask&(my_mask-1u));if my_slice>0u{let count_ix=my_slice-1u;let count_packed=sh_count[count_ix/2u][bin_ix];idx+=(count_packed>>(16u*(count_ix&1u)))&0xffffu;}let offset=config.bin_data_start+sh_chunk_offset[bin_ix];bin_data[offset+idx]=element_ix;}x+=1;if x==x1{x=x0;y+=1;}}}`
+@builtin(global_invocation_id)_E:vec3<u32>,@builtin(local_invocation_id)_e:vec3<u32>,@builtin(workgroup_id)_ah:vec3<u32>,){for(var i=0u;i<_bW;i+=1u){atomicStore(&_bm[i][_e.x],0u);}workgroupBarrier();
+let _dX=_E.x;var x0=0;var y0=0;var x1=0;var y1=0;if _dX<_l._dx{let _ai=_bM[_dX];var _cB=vec4(-1e9,-1e9,1e9,1e9);if _ai._cr>0u{_cB=_hU[_ai._cr-1u];}let _T=_hV[_ai._N];let pb=vec4<f32>(vec4(_T.x0,_T.y0,_T.x1,_T.y1));let _eU=_er(_cB,pb);
+let _b=vec4(_eU.xy,max(_eU.xy,_eU.zw));_hT[_dX]=_b;x0=i32(floor(_b.x*SX));y0=i32(floor(_b.y*SY));x1=i32(ceil(_b.z*SX));y1=i32(ceil(_b.w*SY));}let _cC=i32((_l._aB+_bb-1u)/_bb);let _gh=i32((_l._cs+_ct-1u)/_ct);x0=clamp(x0,0,_cC);y0=clamp(y0,0,_gh);x1=clamp(x1,0,_cC);y1=clamp(y1,0,_gh);if x0==x1{y1=y0;}var x=x0;var y=y0;let _dW=_e.x/32u;let _eT=1u<<(_e.x&31u);while y<y1{atomicOr(&_bm[_dW][y*_cC+x],_eT);x+=1;if x==x1{x=x0;y+=1;}}workgroupBarrier();
+var _aA=0u;for(var i=0u;i<_gi;i+=1u){_aA+=countOneBits(atomicLoad(&_bm[i*2u][_e.x]));let _hY=_aA;_aA+=countOneBits(atomicLoad(&_bm[i*2u+1u][_e.x]));let _hX=_aA;let _hW=_hY|(_hX<<16u);_gd[i][_e.x]=_hW;}var _bn=atomicAdd(&_af._dA,_aA);if _bn+_aA>_l._ij{_bn=0u;atomicOr(&_af._ab,_el);}_gc[_e.x]=_bn;_co[_E.x]._aA=_aA;_co[_E.x]._bn=_bn;workgroupBarrier();
+x=x0;y=y0;while y<y1{let _dl=y*_cC+x;let _gg=atomicLoad(&_bm[_dW][_dl]);
+if(_gg&_eT)!=0u{var _ge=countOneBits(_gg&(_eT-1u));if _dW>0u{let _gf=_dW-1u;let _eS=_gd[_gf/2u][_dl];_ge+=(_eS>>(16u*(_gf&1u)))&0xffffu;}let _d=_l._gG+_gc[_dl];_bv[_d+_ge]=_dX;}x+=1;if x==x1{x=x0;y+=1;}}}`
