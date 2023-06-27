@@ -11,6 +11,7 @@ import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { CanvasContextWrapper, PathStatefulDrawable, PhetEncoding, scenery, SourceImage, TextCanvasDrawable, VelloSelfDrawable } from '../../imports.js';
 import ArialFont from '../vello/ArialFont.js';
+import ArialBoldFont from '../vello/ArialBoldFont.js';
 
 class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**
@@ -111,7 +112,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     else {
       // TODO: stroking also!!!
       if ( node.hasFill() ) {
-        const shapedText = ArialFont.shapeText( node.renderedText, true );
+        const shapedText = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont ).shapeText( node.renderedText, true );
 
         let hasEncodedGlyph = false;
 
