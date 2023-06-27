@@ -284,8 +284,8 @@ class VelloBlock extends FittedBlock {
           sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Push filters ${trail.subtrailTo( node ).toDebugString()}` );
 
           // TODO: grayscale can be done with mix/compose!
-          for ( let i = 0; i < node._filters.length; i++ ) {
-            const filter = node._filters[ i ];
+          for ( let j = 0; j < node._filters.length; j++ ) {
+            const filter = node._filters[ j ];
             if ( filter.isVelloCompatible() ) {
               needsEncodeBeginClip = true;
             }
@@ -305,8 +305,8 @@ class VelloBlock extends FittedBlock {
 
         if ( clipArea ) {
           // +1 ideally to avoid including the filter root (ignore its parent coordinate frame, stay in its local)
-          // TODO: is the filter root... actually we need the transform root?
-          encoding.encode_matrix( trail.slice( this.transformRootInstance.trail.length ).getMatrix() );
+          encoding.encode_matrix( trail.slice( this.transformRootInstance.trail.length, i + 1 ).getMatrix() );
+
         }
         else {
           encoding.encode_matrix( Matrix3.IDENTITY );
