@@ -1858,7 +1858,7 @@ export default class Display {
     let currentIndex = 0;
     const processBackbone = ( backbone: BackboneDrawable ): void => {
       backbone.blocks.forEach( ( block: Block ) => {
-        if ( block instanceof VelloBlock ) {
+        if ( block instanceof VelloBlock && block.visible ) {
           if ( index < 0 || currentIndex === index ) {
             result += block.lastEncodingString;
           }
