@@ -170,7 +170,6 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
-import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventContext, EventContextIO, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, SupportedEventTypes, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
@@ -356,7 +355,6 @@ export default class Input extends PhetioObject {
 
     const options = optionize<InputOptions, SelfOptions, PhetioObjectOptions>()( {
       phetioType: Input.InputIO,
-      tandem: Tandem.OPTIONAL,
       phetioDocumentation: 'Central point for user input events, such as mouse, touch'
     }, providedOptions );
 
@@ -391,7 +389,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'validatePointersAction' ),
+      tandem: options.tandem?.createTandem( 'validatePointersAction' ),
       phetioHighFrequency: true
     } );
 
@@ -401,7 +399,7 @@ export default class Input extends PhetioObject {
       this.upEvent<MouseEvent>( mouse, context, point );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseUpAction' ),
+      tandem: options.tandem?.createTandem( 'mouseUpAction' ),
       parameters: [
         { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'context', phetioType: EventContextIO }
@@ -416,7 +414,7 @@ export default class Input extends PhetioObject {
       this.downEvent<MouseEvent>( mouse, context, point );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseDownAction' ),
+      tandem: options.tandem?.createTandem( 'mouseDownAction' ),
       parameters: [
         { name: 'id', phetioType: NullableIO( NumberIO ) },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -432,7 +430,7 @@ export default class Input extends PhetioObject {
       this.moveEvent<MouseEvent>( mouse, context );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseMoveAction' ),
+      tandem: options.tandem?.createTandem( 'mouseMoveAction' ),
       parameters: [
         { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'context', phetioType: EventContextIO }
@@ -448,7 +446,7 @@ export default class Input extends PhetioObject {
       // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseOverAction' ),
+      tandem: options.tandem?.createTandem( 'mouseOverAction' ),
       parameters: [
         { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'context', phetioType: EventContextIO }
@@ -463,7 +461,7 @@ export default class Input extends PhetioObject {
       // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseOutAction' ),
+      tandem: options.tandem?.createTandem( 'mouseOutAction' ),
       parameters: [
         { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'context', phetioType: EventContextIO }
@@ -486,7 +484,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'wheelScrollAction' ),
+      tandem: options.tandem?.createTandem( 'wheelScrollAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
@@ -501,7 +499,7 @@ export default class Input extends PhetioObject {
       this.downEvent<TouchEvent | PointerEvent>( touch, context, point );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchStartAction' ),
+      tandem: options.tandem?.createTandem( 'touchStartAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -520,7 +518,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchEndAction' ),
+      tandem: options.tandem?.createTandem( 'touchEndAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -539,7 +537,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchMoveAction' ),
+      tandem: options.tandem?.createTandem( 'touchMoveAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -559,7 +557,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'touchCancelAction' ),
+      tandem: options.tandem?.createTandem( 'touchCancelAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -575,7 +573,7 @@ export default class Input extends PhetioObject {
       this.downEvent<PointerEvent>( pen, context, point );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penStartAction' ),
+      tandem: options.tandem?.createTandem( 'penStartAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -593,7 +591,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penEndAction' ),
+      tandem: options.tandem?.createTandem( 'penEndAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -611,7 +609,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penMoveAction' ),
+      tandem: options.tandem?.createTandem( 'penMoveAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -630,7 +628,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'penCancelAction' ),
+      tandem: options.tandem?.createTandem( 'penCancelAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'point', phetioType: Vector2.Vector2IO },
@@ -648,7 +646,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'gotPointerCaptureAction' ),
+      tandem: options.tandem?.createTandem( 'gotPointerCaptureAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'context', phetioType: EventContextIO }
@@ -666,7 +664,7 @@ export default class Input extends PhetioObject {
       }
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'lostPointerCaptureAction' ),
+      tandem: options.tandem?.createTandem( 'lostPointerCaptureAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
         { name: 'context', phetioType: EventContextIO }
@@ -691,7 +689,7 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'focusinAction' ),
+      tandem: options.tandem?.createTandem( 'focusinAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
@@ -714,7 +712,7 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'focusoutAction' ),
+      tandem: options.tandem?.createTandem( 'focusoutAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
@@ -738,7 +736,7 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'clickAction' ),
+      tandem: options.tandem?.createTandem( 'clickAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
@@ -760,7 +758,7 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'inputAction' ),
+      tandem: options.tandem?.createTandem( 'inputAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
@@ -782,7 +780,7 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'changeAction' ),
+      tandem: options.tandem?.createTandem( 'changeAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
@@ -804,7 +802,7 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'keydownAction' ),
+      tandem: options.tandem?.createTandem( 'keydownAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
@@ -826,7 +824,7 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'keyupAction' ),
+      tandem: options.tandem?.createTandem( 'keyupAction' ),
       parameters: [
         { name: 'context', phetioType: EventContextIO }
       ],
