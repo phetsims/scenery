@@ -11,12 +11,7 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { FittedBlock, scenery, Utils } from '../imports.js';
-import { Affine } from './vello/Affine.js';
-import DeviceContext from './vello/DeviceContext.js';
-import { Compose, Mix } from './vello/Encoding.js';
-import PhetEncoding from './vello/PhetEncoding.js';
-import render from './vello/render.js';
+import { Affine, Compose, DeviceContext, FittedBlock, Mix, PhetEncoding, render, scenery, Utils } from '../imports.js';
 
 // TODO: don't let this hackiness in
 PhetEncoding.load();

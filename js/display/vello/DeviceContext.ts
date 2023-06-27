@@ -6,10 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Atlas from './Atlas.js';
-import Ramps from './Ramps.js';
-import { scenery } from '../../imports.js';
-import VelloShader from './VelloShader.js';
+import { Atlas, Ramps, scenery, VelloShader } from '../../imports.js';
 import asyncLoader from '../../../../phet-core/js/asyncLoader.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 

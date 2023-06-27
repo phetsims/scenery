@@ -9,9 +9,7 @@
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { CanvasContextWrapper, PathStatefulDrawable, scenery, TextCanvasDrawable, VelloSelfDrawable } from '../../imports.js';
-import PhetEncoding from '../vello/PhetEncoding.js';
-import { SourceImage } from '../vello/SourceImage.js';
+import { CanvasContextWrapper, PathStatefulDrawable, PhetEncoding, scenery, SourceImage, TextCanvasDrawable, VelloSelfDrawable } from '../../imports.js';
 // @ts-expect-error yeah, this doesn't exist for most people
 import { get_glyph, shape_text } from '../vello/swash.js';
 

@@ -24,9 +24,7 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { BackboneDrawable, CanvasBlock, ChangeInterval, Drawable, Fittability, InlineCanvasCacheDrawable, RelativeTransform, Renderer, scenery, SharedCanvasCacheDrawable, Trail, Utils } from '../imports.js';
-import DeviceContext from './vello/DeviceContext.js';
-import VelloBlock from './VelloBlock.js';
+import { BackboneDrawable, CanvasBlock, ChangeInterval, DeviceContext, Drawable, Fittability, InlineCanvasCacheDrawable, RelativeTransform, Renderer, scenery, SharedCanvasCacheDrawable, Trail, Utils, VelloBlock } from '../imports.js';
 
 let globalIdCounter = 1;
 

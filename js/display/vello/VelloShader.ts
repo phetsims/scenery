@@ -37,9 +37,7 @@ DEALINGS IN THE SOFTWARE.
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-
-import scenery from '../../scenery.js';
-import { WorkgroupSize } from './WorkgroupSize.js';
+import { scenery, WorkgroupSize } from '../../imports.js';
 
 // TODO: autogenerate from crates/shaders/build.rs
 // TODO: minify/compress shaders (get rid of comments?)

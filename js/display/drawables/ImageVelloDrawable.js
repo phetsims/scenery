@@ -8,9 +8,7 @@
 
 import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { imageBitmapMap, ImageStatefulDrawable, scenery, VelloSelfDrawable } from '../../imports.js';
-import PhetEncoding from '../vello/PhetEncoding.js';
-import { SourceImage } from '../vello/SourceImage.js';
+import { imageBitmapMap, ImageStatefulDrawable, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
 
 class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
   /**

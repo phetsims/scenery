@@ -317,6 +317,24 @@ export { default as scenerySerialize, serializeConnectedNodes } from './util/sce
 export { default as sceneryDeserialize } from './util/sceneryDeserialize.js';
 export { default as sceneryCopy } from './util/sceneryCopy.js';
 
+export { default as Affine } from './display/vello/Affine.js';
+export { default as BufferImage } from './display/vello/BufferImage.js';
+export { default as BufferPool } from './display/vello/BufferPool.js';
+export { default as ByteBuffer } from './display/vello/ByteBuffer.js';
+export { default as SourceImage } from './display/vello/SourceImage.js';
+export { default as WorkgroupSize } from './display/vello/WorkgroupSize.js';
+
+export { default as VelloShader } from './display/vello/VelloShader.js';
+export type { ShaderMap } from './display/vello/VelloShader.js';
+export { default as DeviceContext } from './display/vello/DeviceContext.js';
+export { default as Atlas, AtlasSubImage } from './display/vello/Atlas.js';
+export { default as Ramps } from './display/vello/Ramps.js';
+export { default as Encoding, f32_to_bytes, u32_to_bytes, with_alpha_factor, to_premul_u32, lerp_rgba8, VelloColorStop, Extend, Mix, Compose, DrawTag, PathTag, Layout, SceneBufferSizes, ConfigUniform, WorkgroupCounts, BufferSize, BufferSizes, RenderConfig, u8ToBase64, base64ToU8, RenderInfo, VelloPatch, VelloImagePatch, VelloRampPatch } from './display/vello/Encoding.js';
+export type { ColorRGBA32, F32, U32, U8, EncodableImage } from './display/vello/Encoding.js';
+export { default as PhetEncoding } from './display/vello/PhetEncoding.js';
+export { default as render } from './display/vello/render.js';
+
+
 export { default as Drawable } from './display/Drawable.js';
 export { default as SelfDrawable } from './display/SelfDrawable.js';
 
@@ -389,6 +407,7 @@ export { default as CanvasBlock } from './display/CanvasBlock.js';
 export { default as DOMBlock } from './display/DOMBlock.js';
 export { default as SVGBlock } from './display/SVGBlock.js';
 export { default as WebGLBlock } from './display/WebGLBlock.js';
+export { default as VelloBlock } from './display/VelloBlock.js';
 
 export { default as Stitcher } from './display/Stitcher.js';
 export { default as GreedyStitcher } from './display/GreedyStitcher.js';
@@ -403,6 +422,7 @@ export type { Highlight, HighlightOverlayOptions } from './overlays/HighlightOve
 export { default as HitAreaOverlay } from './overlays/HitAreaOverlay.js';
 export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js';
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
+export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundOverlay.js';
 
 export { default as Instance } from './display/Instance.js';
 export type { default as TOverlay } from './overlays/TOverlay.js';

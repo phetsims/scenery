@@ -8,7 +8,7 @@
 
 import { scenery } from '../../imports.js';
 
-export class BufferImage {
+export default class BufferImage {
   // TODO: perhaps reorder parameters
   // NOTE: IMPORTANT! If using this, make sure the buffer has premultiplied values. Canvas.getImageData() is NOT
   // premultiplied. Use SourceImage with Canvases

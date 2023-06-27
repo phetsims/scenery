@@ -7,17 +7,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { WorkgroupSize } from './WorkgroupSize.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Utils from '../../../../dot/js/Utils.js';
-import { ByteBuffer } from './ByteBuffer.js';
-import { Affine } from './Affine.js';
-import { BufferImage } from './BufferImage.js';
-import DeviceContext from './DeviceContext.js';
-import { scenery } from '../../imports.js';
-import { AtlasSubImage } from './Atlas.js';
+import { Affine, AtlasSubImage, BufferImage, ByteBuffer, DeviceContext, scenery, SourceImage, WorkgroupSize } from '../../imports.js';
 import { Arc, Cubic, EllipticalArc, Line, Quadratic, Shape } from '../../../../kite/js/imports.js';
-import { SourceImage } from './SourceImage.js';
 
 const TILE_WIDTH = 16; // u32
 const TILE_HEIGHT = 16; // u32
@@ -66,6 +59,7 @@ const next_multiple_of = ( val: number, rhs: number ): number => {
   return r === 0 ? val : val + ( rhs - r );
 };
 
+// TODO: rename methods!
 // Convert u32/f32 to 4 bytes in little endian order
 const scratch_to_bytes = new Uint8Array( 4 );
 export const f32_to_bytes = ( float: number ): U8[] => {

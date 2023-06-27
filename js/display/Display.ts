@@ -51,6 +51,7 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
+import TEmitter from '../../../axon/js/TEmitter.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
@@ -66,10 +67,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PaintDef, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
-import TEmitter from '../../../axon/js/TEmitter.js';
-import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
-import VelloBlock from './VelloBlock.js'; // TODO: fix import
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PaintDef, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, SafariWorkaroundOverlay, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, VelloBlock, WebGLBlock } from '../imports.js';
 
 export type DisplayOptions = {
   // Initial (or override) display width

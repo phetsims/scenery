@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { lerp_rgba8, to_premul_u32, VelloColorStop, VelloRampPatch } from './Encoding.js';
-import { scenery } from '../../imports.js';
+import { lerp_rgba8, scenery, to_premul_u32, VelloColorStop, VelloRampPatch } from '../../imports.js';
 
 const NUM_RAMP_SAMPLES = 512;
 const STARTING_RAMPS = 32;

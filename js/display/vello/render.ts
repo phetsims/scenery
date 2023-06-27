@@ -6,12 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import BufferPool from './BufferPool.js';
-import VelloShader from './VelloShader.js';
-import DeviceContext from './DeviceContext.js';
-import { RenderInfo } from './Encoding.js';
-import { scenery } from '../../imports.js';
+import { BufferPool, DeviceContext, RenderInfo, scenery, VelloShader } from '../../imports.js';
 
+// TODO: name change!
 const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTexture: GPUTexture ): void => {
   const device = deviceContext.device;
 

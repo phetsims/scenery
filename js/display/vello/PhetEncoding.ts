@@ -6,13 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { base64ToU8, default as Encoding, Extend, VelloColorStop } from './Encoding.js';
 import { default as wasmInit, load_font_data } from './swash.js';
 import Arial from './.Arial.js'; // eslint-disable-line default-import-match-filename
 import swash_wasm from './swash_wasm.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import { Color, GradientStop, LinearGradient, Paint, PaintDef, RadialGradient, scenery, TPaint } from '../../imports.js';
-import { Affine } from './Affine.js';
+import { Affine, base64ToU8, Color, Encoding, Extend, GradientStop, LinearGradient, Paint, PaintDef, RadialGradient, scenery, TPaint, VelloColorStop } from '../../imports.js';
 
 let loaded = false;
 

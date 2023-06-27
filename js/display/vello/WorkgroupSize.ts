@@ -8,7 +8,7 @@ import { scenery } from '../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export class WorkgroupSize {
+export default class WorkgroupSize {
   // u32 in rust
   public constructor( public x: number, public y: number, public z: number ) {
   }

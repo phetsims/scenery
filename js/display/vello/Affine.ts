@@ -8,7 +8,7 @@
 
 import { scenery } from '../../imports.js';
 
-export class Affine {
+export default class Affine {
   public constructor(
     public a00: number, public a10: number, public a01: number, public a11: number,
     public a02: number, public a12: number

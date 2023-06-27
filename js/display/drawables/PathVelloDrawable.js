@@ -7,8 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { PathStatefulDrawable, scenery, VelloSelfDrawable } from '../../imports.js';
-import PhetEncoding from '../vello/PhetEncoding.js';
+import { PathStatefulDrawable, PhetEncoding, scenery, VelloSelfDrawable } from '../../imports.js';
 
 class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**

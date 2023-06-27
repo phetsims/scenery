@@ -6,10 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { F32, f32_to_bytes, U32, u32_to_bytes, U8 } from './Encoding.js';
-import { scenery } from '../../imports.js';
+import { F32, f32_to_bytes, scenery, U32, u32_to_bytes, U8 } from '../../imports.js';
 
-export class ByteBuffer {
+export default class ByteBuffer {
 
   private _byteLength: number;
   private _arrayBuffer: ArrayBuffer;

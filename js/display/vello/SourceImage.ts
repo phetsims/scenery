@@ -13,7 +13,7 @@
 
 import { scenery } from '../../imports.js';
 
-export class SourceImage {
+export default class SourceImage {
   // TODO: perhaps reorder parameters
   public constructor(
     public readonly width: number,

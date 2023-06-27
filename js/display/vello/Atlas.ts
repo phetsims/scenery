@@ -6,11 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BufferImage } from './BufferImage.js';
 import BinPacker, { Bin } from '../../../../dot/js/BinPacker.js';
-import { scenery } from '../../imports.js';
+import { BufferImage, EncodableImage, scenery, VelloImagePatch } from '../../imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { EncodableImage, VelloImagePatch } from './Encoding.js';
 
 const ATLAS_INITIAL_SIZE = 1024;
 const ATLAS_MAX_SIZE = 8192;
