@@ -1,5 +1,9 @@
 /* eslint-disable */
 
+// Compiles and minifies the WGSL Vello shaders, turning them into ES6 modules
+// TODO: better minification with 3rd party library (if/when it exists?) - we rely on assumptions like
+// TODO: 'no variables starting with _ appended with one character are used', and don't do a lot of ideal things
+
 const fs = require( 'fs' );
 const _ = require( 'lodash' );
 
@@ -33,10 +37,6 @@ const scanSymbols = str => {
     symbols.push( match[ 1 ] );
   } );
 };
-
-// TODO: sort inverse by length!
-// TODO: uniqueness!
-// TODO: get rid of "main", or other things that could be builtins!!!
 
 fs.readdirSync( '../wgsl/shared' ).forEach( filename => {
   if ( filename.endsWith( '.wgsl' ) ) {
