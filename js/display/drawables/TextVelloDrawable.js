@@ -10,10 +10,7 @@ import Matrix3 from '../../../../dot/js/Matrix3.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { CanvasContextWrapper, PathStatefulDrawable, PhetEncoding, scenery, SourceImage, TextCanvasDrawable, VelloSelfDrawable } from '../../imports.js';
-// @ts-expect-error yeah, this doesn't exist for most people
-import { get_glyph, shape_text } from '../vello/swash.js';
-
-const glyphCache = new Map(); // `${id}-${embolden}` => Shape (TODO: variations for italics?)
+import ArialFont from '../vello/ArialFont.js';
 
 class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**
@@ -68,7 +65,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     const node = this.node;
     const matrix = this.instance.relativeTransform.matrix;
 
-    // TODO: use glyph detection to see if we have everything for the text
+    // TODO: use glyph detection to see if we have everything for the text!! (will need to determine font first)
     const useSwash = window.phet?.chipper?.queryParameters?.swashText;
 
     if ( !useSwash ) {
@@ -114,41 +111,33 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     else {
       // TODO: stroking also!!!
       if ( node.hasFill() ) {
-        const shapedText = JSON.parse( shape_text( node.renderedText, true ) );
+        const shapedText = ArialFont.shapeText( node.renderedText, true );
 
         let hasEncodedGlyph = false;
 
         // TODO: more performance possible easily
-        const scale = node._font.numericSize / 2048; // get UPM
+        const scale = node._font.numericSize / 2048; // get UPM TODO
         const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
-        const shearMatrix = Matrix3.rowMajor(
-          // approx 14 degrees, with always vertical flip
-          1, node._font.style !== 'normal' ? 0.2419 : 0, 0,
+        const flipMatrix = Matrix3.rowMajor(
+          1, 0, 0,
           0, -1, 0, // vertical flip
           0, 0, 1
         );
 
-        let embolden = 0;
-        if ( node._font.weight === 'bold' ) {
-          embolden = 40;
-        }
+        // TODO: support this for text, so we can QUICKLY get the bounds of text
+        // TODO: support these inside Font!!!
 
         let x = 0;
         shapedText.forEach( glyph => {
-          const cacheId = `${glyph.id}-${embolden}`;
-          if ( !glyphCache.has( cacheId ) ) {
-            // TODO: bold! (italic with oblique transform!!)
-            glyphCache.set( cacheId, new Shape( get_glyph( glyph.id, embolden, embolden ) ) );
-          }
-          const shape = glyphCache.get( cacheId );
-
           // TODO: check whether the glyph y needs to be reversed! And italics/oblique
-          const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( shearMatrix );
-          x += glyph.adv;
+          const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( flipMatrix );
+          x += glyph.advance;
 
           this.encoding.encode_matrix( glyphMatrix );
           this.encoding.encode_linewidth( -1 );
-          const encodedCount = this.encoding.encode_kite_shape( shape, true, false, 1 );
+
+          // TODO: OMG we can store encodings for glyphs in a cached form!!!!
+          const encodedCount = this.encoding.encode_kite_shape( glyph.shape, true, false, 1 );
           if ( encodedCount ) {
             hasEncodedGlyph = true;
           }

@@ -6,13 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { default as wasmInit, load_font_data } from './swash.js';
-import Arial from './.Arial.js'; // eslint-disable-line default-import-match-filename
-import swash_wasm from './swash_wasm.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import { Affine, base64ToU8, Color, Encoding, Extend, GradientStop, LinearGradient, Paint, PaintDef, RadialGradient, scenery, TPaint, VelloColorStop } from '../../imports.js';
-
-let loaded = false;
+import { Affine, Color, Encoding, Extend, GradientStop, LinearGradient, Paint, PaintDef, RadialGradient, scenery, TPaint, VelloColorStop } from '../../imports.js';
 
 // TODO: use scenery imports for things to avoid circular reference issues
 
@@ -25,17 +20,6 @@ const convert_color_stop = ( color_stop: GradientStop ) => {
 };
 
 export default class PhetEncoding extends Encoding {
-
-  public static async load(): Promise<void> {
-    if ( !loaded ) {
-      await wasmInit( base64ToU8( swash_wasm ) );
-
-      load_font_data( base64ToU8( Arial ) );
-
-      console.log( 'Fonts loaded' );
-      loaded = true;
-    }
-  }
 
   public encode_paint( paint: TPaint ): void {
     if ( paint instanceof Paint ) {

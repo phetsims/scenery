@@ -11,10 +11,7 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { Affine, Compose, DeviceContext, FittedBlock, Mix, PhetEncoding, render, scenery, Utils } from '../imports.js';
-
-// TODO: don't let this hackiness in
-PhetEncoding.load();
+import { Affine, Compose, DeviceContext, FittedBlock, Mix, render, scenery, Utils } from '../imports.js';
 
 class VelloBlock extends FittedBlock {
   /**
