@@ -6,7 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { imageBitmapMap, ImageStatefulDrawable, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
 
@@ -75,16 +74,11 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
       }
     }
 
-    // TODO: get rid of Affine?
     // if we are not loaded yet, just ignore
     if ( source ) {
       this.encoding.encode_matrix( matrix );
       this.encoding.encode_linewidth( -1 );
-
-      // TODO: faster "rect"
-      const shape = Shape.rect( 0, 0, source.width, source.height );
-      this.encoding.encode_kite_shape( shape, true, true, 100 );
-
+      this.encoding.encode_rect( 0, 0, source.width, source.height );
       this.encoding.encode_image( new SourceImage( source.width, source.height, source ) );
     }
 

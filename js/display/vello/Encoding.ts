@@ -11,6 +11,7 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 import Utils from '../../../../dot/js/Utils.js';
 import { Affine, AtlasSubImage, BufferImage, ByteBuffer, DeviceContext, scenery, SourceImage, WorkgroupSize } from '../../imports.js';
 import { Arc, Cubic, EllipticalArc, Line, Quadratic, Shape } from '../../../../kite/js/imports.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
 
 const TILE_WIDTH = 16; // u32
 const TILE_HEIGHT = 16; // u32
@@ -1232,6 +1233,20 @@ export default class Encoding {
     this.line_to( 1, 0 );
     this.close();
     this.finish( true );
+  }
+
+  public encode_bounds( bounds: Bounds2 ): number {
+    return this.encode_rect( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
+  }
+
+  public encode_rect( x0: number, y0: number, x1: number, y1: number ): number {
+    this.encode_path( true );
+    this.move_to( x0, y0 );
+    this.line_to( x1, y0 );
+    this.line_to( x1, y1 );
+    this.line_to( x0, y1 );
+    this.close();
+    return this.finish( true );
   }
 
   // To encode a kite shape, we'll need to split arcs/elliptical-arcs into bezier curves

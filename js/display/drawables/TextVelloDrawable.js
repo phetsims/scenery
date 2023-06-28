@@ -7,11 +7,10 @@
  */
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import { Shape } from '../../../../kite/js/imports.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { CanvasContextWrapper, PathStatefulDrawable, PhetEncoding, scenery, SourceImage, TextCanvasDrawable, VelloSelfDrawable } from '../../imports.js';
-import ArialFont from '../vello/ArialFont.js';
 import ArialBoldFont from '../vello/ArialBoldFont.js';
+import ArialFont from '../vello/ArialFont.js';
 
 const fillEncodingCache = new Map();
 // const strokeEncodingCache = new Map();
@@ -102,19 +101,14 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         // TODO: also, this isn't the right matrix???
         TextCanvasDrawable.prototype.paintCanvas( wrapper, node, matrix );
 
-        // TODO: faster function, don't create an Affine
+        // TODO: faster function, don't create an object?
         this.encoding.encode_matrix( Matrix3.rowMajor(
           1 / window.devicePixelRatio, 0, bounds.minX,
           0, 1 / window.devicePixelRatio, bounds.minY,
           0, 0, 1
         ) );
-        // this.encoding.encode_matrix( Matrix3.translation( bounds.minX, bounds.minY ) );
         this.encoding.encode_linewidth( -1 );
-
-        // TODO: faster "rect"
-        const shape = Shape.rect( 0, 0, canvas.width, canvas.height );
-        this.encoding.encode_kite_shape( shape, true, true, 100 );
-
+        this.encoding.encode_rect( 0, 0, canvas.width, canvas.height );
         this.encoding.encode_image( new SourceImage( canvas.width, canvas.height, canvas ) );
       }
     }
