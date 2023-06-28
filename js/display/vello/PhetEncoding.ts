@@ -30,6 +30,7 @@ export default class PhetEncoding extends Encoding {
       else {
         // Pattern, no-op for now
         // TODO: implement pattern, shouldn't be too hard
+        // TODO: I said that, didn't I? WE NEED "Extend" to be implemented for images for us to do pattern nicely
         console.log( 'PATTERN UNIMPLEMENTED' );
         this.encodeColor( 0 );
       }

@@ -52,7 +52,8 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
       return false;
     }
 
-    // TODO: only re-encode the image when IT changes, not when the transform changes
+    // TODO: only re-encode the image when IT changes, not when the transform changes!!!
+    // TODO: This is fairly important for performance it seems
 
     this.encoding.reset( true );
 
