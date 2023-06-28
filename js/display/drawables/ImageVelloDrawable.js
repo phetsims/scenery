@@ -55,6 +55,8 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
     // TODO: only re-encode the image when IT changes, not when the transform changes!!!
     // TODO: This is fairly important for performance it seems
 
+    // TODO: implement imageOpacity
+
     this.encoding.reset( true );
 
     const node = this.node;
