@@ -24,6 +24,17 @@ class TextCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable 
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
   paintCanvas( wrapper, node, matrix ) {
+    TextCanvasDrawable.paintTextNodeToCanvas( wrapper, node );
+  }
+
+  /**
+   * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
+   * @public
+   *
+   * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
+   * other required effects (opacity, clipping, etc.) have already been prepared.
+   */
+  static paintTextNodeToCanvas( wrapper, node ) {
     const context = wrapper.context;
 
     // extra parameters we need to set, but should avoid setting if we aren't drawing anything

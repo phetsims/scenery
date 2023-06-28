@@ -95,11 +95,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         context.translate( -bounds.minX, -bounds.minY );
         matrix.canvasAppendTransform( context );
 
-        const wrapper = new CanvasContextWrapper( canvas, context );
-
-        // TODO: This is used in multiple places. Make it an actual static method, so we don't keep hacking it
-        // TODO: also, this isn't the right matrix???
-        TextCanvasDrawable.prototype.paintCanvas( wrapper, node, matrix );
+        TextCanvasDrawable.paintTextNodeToCanvas( new CanvasContextWrapper( canvas, context ), node, matrix );
 
         // TODO: faster function, don't create an object?
         this.encoding.encode_matrix( Matrix3.rowMajor(
