@@ -59,7 +59,7 @@ export default class PathFont {
 
     if ( !this.glyphCache.has( id ) ) {
       // No embolden for now, if we're trying to use fonts directly
-      this.glyphCache.set( id, new Shape( this.swashFont.get_glyph( id, 0, 0 ) ) );
+      this.glyphCache.set( id, new Shape( this.swashFont.get_glyph( id, 0, 0 ) ).makeImmutable() );
     }
     return this.glyphCache.get( id )!;
   }

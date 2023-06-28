@@ -13,6 +13,15 @@ import { CanvasContextWrapper, PathStatefulDrawable, PhetEncoding, scenery, Sour
 import ArialFont from '../vello/ArialFont.js';
 import ArialBoldFont from '../vello/ArialBoldFont.js';
 
+const fillEncodingCache = new Map();
+// const strokeEncodingCache = new Map();
+
+const flipMatrix = Matrix3.rowMajor(
+  1, 0, 0,
+  0, -1, 0, // vertical flip
+  0, 0, 1
+);
+
 class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**
    * @public
@@ -110,43 +119,46 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
       }
     }
     else {
-      // TODO: stroking also!!!
-      if ( node.hasFill() ) {
+      if ( node.hasFill() || node.hasStroke() ) {
         const shapedText = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont ).shapeText( node.renderedText, true );
 
-        let hasEncodedGlyph = false;
+        // TODO: stroking also!!!
+        if ( node.hasFill() ) {
 
-        // TODO: more performance possible easily
-        const scale = node._font.numericSize / 2048; // get UPM TODO
-        const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
-        const flipMatrix = Matrix3.rowMajor(
-          1, 0, 0,
-          0, -1, 0, // vertical flip
-          0, 0, 1
-        );
+          let hasEncodedGlyph = false;
 
-        // TODO: support this for text, so we can QUICKLY get the bounds of text
-        // TODO: support these inside Font!!!
+          // TODO: more performance possible easily
+          const scale = node._font.numericSize / 2048; // get UPM TODO
+          const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
 
-        let x = 0;
-        shapedText.forEach( glyph => {
-          // TODO: check whether the glyph y needs to be reversed! And italics/oblique
-          const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( flipMatrix );
-          x += glyph.advance;
+          // TODO: support this for text, so we can QUICKLY get the bounds of text
+          // TODO: support these inside Font!!!
 
-          this.encoding.encode_matrix( glyphMatrix );
-          this.encoding.encode_linewidth( -1 );
+          let x = 0;
+          shapedText.forEach( glyph => {
+            const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( flipMatrix );
+            x += glyph.advance;
 
-          // TODO: OMG we can store encodings for glyphs in a cached form!!!!
-          const encodedCount = this.encoding.encode_kite_shape( glyph.shape, true, false, 1 );
-          if ( encodedCount ) {
-            hasEncodedGlyph = true;
+            this.encoding.encode_matrix( glyphMatrix );
+            this.encoding.encode_linewidth( -1 );
+
+            let encoding = fillEncodingCache.get( glyph.shape );
+            if ( !encoding ) {
+              encoding = new PhetEncoding();
+              encoding.encode_kite_shape( glyph.shape, true, false, 1 ); // TODO: tolerance
+              fillEncodingCache.set( glyph.shape, encoding );
+            }
+
+            this.encoding.append( encoding );
+            if ( !encoding.is_empty() ) {
+              hasEncodedGlyph = true;
+            }
+          } );
+
+          if ( hasEncodedGlyph ) {
+            this.encoding.insert_path_marker();
+            this.encoding.encode_paint( node.fill );
           }
-        } );
-
-        if ( hasEncodedGlyph ) {
-          this.encoding.insert_path_marker();
-          this.encoding.encode_paint( node.fill );
         }
       }
     }
