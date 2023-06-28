@@ -103,7 +103,7 @@ export default class DeviceContext {
     DeviceContext.supportsBGRATextureStorage = adapter?.features.has( 'bgra8unorm-storage' ) || false;
 
     const device = await adapter?.requestDevice( {
-      requiredFeatures: [ 'bgra8unorm-storage' ]
+      requiredFeatures: DeviceContext.supportsBGRATextureStorage ? [ 'bgra8unorm-storage' ] : []
     } );
 
     DeviceContext.completedDeviceAttempt = true;
