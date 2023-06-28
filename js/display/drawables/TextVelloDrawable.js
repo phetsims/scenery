@@ -13,7 +13,7 @@ import ArialBoldFont from '../vello/ArialBoldFont.js';
 import ArialFont from '../vello/ArialFont.js';
 
 const fillEncodingCache = new Map();
-// const strokeEncodingCache = new Map();
+const strokeEncodingCache = new Map();
 
 const flipMatrix = Matrix3.rowMajor(
   1, 0, 0,
@@ -111,46 +111,16 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     else {
       if ( node.hasFill() || node.hasStroke() ) {
         const font = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont );
+        const scale = node._font.numericSize / font.unitsPerEM;
+        const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
 
         const shapedText = font.shapeText( node.renderedText, true );
 
-        // TODO: stroking also!!!
         if ( node.hasFill() ) {
-
-          let hasEncodedGlyph = false;
-
-          // TODO: more performance possible easily
-          const scale = node._font.numericSize / font.unitsPerEM;
-          const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
-
-          // TODO: support this for text, so we can QUICKLY get the bounds of text
-          // TODO: support these inside Font!!!
-
-          let x = 0;
-          shapedText.forEach( glyph => {
-            const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( flipMatrix );
-
-            let encoding = fillEncodingCache.get( glyph.shape );
-            if ( !encoding ) {
-              encoding = new PhetEncoding();
-              encoding.encode_kite_shape( glyph.shape, true, false, 1 ); // TODO: tolerance
-              fillEncodingCache.set( glyph.shape, encoding );
-            }
-
-            this.encoding.encode_matrix( glyphMatrix );
-            this.encoding.encode_linewidth( -1 );
-            this.encoding.append( encoding );
-            if ( !encoding.is_empty() ) {
-              hasEncodedGlyph = true;
-            }
-
-            x += glyph.advance;
-          } );
-
-          if ( hasEncodedGlyph ) {
-            this.encoding.insert_path_marker();
-            this.encoding.encode_paint( node.fill );
-          }
+          this.encodeGlyphRun( shapedText, sizedMatrix, true );
+        }
+        if ( node.hasStroke() ) {
+          this.encodeGlyphRun( shapedText, sizedMatrix, false );
         }
       }
     }
@@ -159,6 +129,48 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     this.cleanPaintableState();
 
     return true;
+  }
+
+  // @private
+  encodeGlyphRun( shapedText, sizedMatrix, isFill ) {
+    let hasEncodedGlyph = false;
+
+    // TODO: support this for text, so we can QUICKLY get the bounds of text
+    // TODO: support these inside Font!!!
+
+    let x = 0;
+    shapedText.forEach( glyph => {
+      const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( flipMatrix );
+
+      const encoding = TextVelloDrawable.getGlyphEncoding( glyph.shape, isFill );
+
+      if ( !encoding.is_empty() ) {
+        this.encoding.encode_matrix( glyphMatrix );
+        this.encoding.encode_linewidth( -1 );
+        this.encoding.append( encoding );
+        hasEncodedGlyph = true;
+      }
+
+      x += glyph.advance;
+    } );
+
+    if ( hasEncodedGlyph ) {
+      this.encoding.insert_path_marker();
+      this.encoding.encode_paint( isFill ? this.node.fill : this.node.stroke );
+    }
+  }
+
+  // @private
+  static getGlyphEncoding( shape, isFill ) {
+    const cache = isFill ? fillEncodingCache : strokeEncodingCache;
+    let encoding = cache.get( shape );
+    if ( !encoding ) {
+      encoding = new PhetEncoding();
+      encoding.encode_kite_shape( shape, isFill, false, 1 ); // TODO: tolerance
+      cache.set( shape, encoding );
+    }
+
+    return encoding;
   }
 }
 
