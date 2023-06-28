@@ -1914,7 +1914,7 @@ export default class Display {
         }
         scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
 
-        if ( ( drawable instanceof CanvasBlock || drawable instanceof WebGLBlock ) && drawable.canvas && drawable.canvas instanceof window.HTMLCanvasElement ) {
+        if ( ( drawable instanceof CanvasBlock || drawable instanceof WebGLBlock || drawable instanceof VelloBlock ) && drawable.canvas && drawable.canvas instanceof window.HTMLCanvasElement ) {
           addCanvas( drawable.canvas );
         }
       }
