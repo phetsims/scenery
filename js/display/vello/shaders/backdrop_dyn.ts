@@ -2,12 +2,74 @@
 import tile from './shared/tile.js';
 import config from './shared/config.js';
 
-export default `${config}
+export default `
+
+
+
+${config}
 ${tile}
-@group(0)@binding(0)
-var<uniform>_l:_aL;@group(0)@binding(1)
-var<storage>_J:array<_aJ>;@group(0)@binding(2)
-var<storage,read_write>_t:array<_aI>;const _i=256u;var<workgroup>_gj:array<u32,_i>;var<workgroup>_cC:array<u32,_i>;var<workgroup>_gi:array<u32,_i>;@compute @workgroup_size(256)
+
+@group(0) @binding(0)
+var<uniform> config: Config;
+
+@group(0) @binding(1)
+var<storage> paths: array<Path>;
+
+@group(0) @binding(2)
+var<storage, read_write> tiles: array<Tile>;
+
+const WG_SIZE = 256u;
+
+var<workgroup> sh_row_width: array<u32, WG_SIZE>;
+var<workgroup> sh_row_count: array<u32, WG_SIZE>;
+var<workgroup> sh_offset: array<u32, WG_SIZE>;
+
+@compute @workgroup_size(256)
 fn main(
-@builtin(global_invocation_id)_E:vec3<u32>,@builtin(local_invocation_id)_e:vec3<u32>,){let _aa=_E.x;var _bo=0u;if _aa<_l._dw{let _c=_J[_aa];_gj[_e.x]=_c._b.z-_c._b.x;_bo=_c._b.w-_c._b.y;_gi[_e.x]=_c._t;}_cC[_e.x]=_bo;
-for(var i=0u;i<firstTrailingBit(_i);i+=1u){workgroupBarrier();if _e.x>=(1u<<i){_bo+=_cC[_e.x-(1u<<i)];}workgroupBarrier();_cC[_e.x]=_bo;}workgroupBarrier();let _hX=_cC[_i-1u];for(var _ag=_e.x;_ag<_hX;_ag+=_i){var _aj=0u;for(var i=0u;i<firstTrailingBit(_i);i+=1u){let _bp=_aj+((_i/2u)>>i);if _ag>=_cC[_bp-1u]{_aj=_bp;}}let _m=_gj[_aj];if _m>0u{var _dX=_ag-select(0u,_cC[_aj-1u],_aj>0u);var _ap=_gi[_aj]+_dX*_m;var _Z=_t[_ap]._w;for(var x=1u;x<_m;x+=1u){_ap+=1u;_Z+=_t[_ap]._w;_t[_ap]._w=_Z;}}}}`
+    @builtin(global_invocation_id) global_id: vec3<u32>,
+    @builtin(local_invocation_id) local_id: vec3<u32>,
+) {
+    let drawobj_ix = global_id.x;
+    var row_count = 0u;
+    if drawobj_ix < config.n_drawobj {
+        
+        let path = paths[drawobj_ix];
+        sh_row_width[local_id.x] = path.bbox.z - path.bbox.x;
+        row_count = path.bbox.w - path.bbox.y;
+        sh_offset[local_id.x] = path.tiles;
+    }
+    sh_row_count[local_id.x] = row_count;
+
+    
+    for (var i = 0u; i < firstTrailingBit(WG_SIZE); i += 1u) {
+        workgroupBarrier();
+        if local_id.x >= (1u << i) {
+            row_count += sh_row_count[local_id.x - (1u << i)];
+        }
+        workgroupBarrier();
+        sh_row_count[local_id.x] = row_count;
+    }
+    workgroupBarrier();
+    let total_rows = sh_row_count[WG_SIZE - 1u];
+    for (var row = local_id.x; row < total_rows; row += WG_SIZE) {
+        var el_ix = 0u;
+        for (var i = 0u; i < firstTrailingBit(WG_SIZE); i += 1u) {
+            let probe = el_ix + ((WG_SIZE / 2u) >> i);
+            if row >= sh_row_count[probe - 1u] {
+                el_ix = probe;
+            }
+        }
+        let width = sh_row_width[el_ix];
+        if width > 0u {
+            var seq_ix = row - select(0u, sh_row_count[el_ix - 1u], el_ix > 0u);
+            var tile_ix = sh_offset[el_ix] + seq_ix * width;
+            var sum = tiles[tile_ix].backdrop;
+            for (var x = 1u; x < width; x += 1u) {
+                tile_ix += 1u;
+                sum += tiles[tile_ix].backdrop;
+                tiles[tile_ix].backdrop = sum;
+            }
+        }
+    }
+}
+`

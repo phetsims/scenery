@@ -4,22 +4,410 @@ import blend from './shared/blend.js';
 import config from './shared/config.js';
 import segment from './shared/segment.js';
 
-export default `struct _aI{_w:i32,_Q:u32}${segment}
+export default `
+
+
+
+
+
+struct Tile {
+    backdrop: i32,
+    segments: u32,
+}
+
+${segment}
 ${config}
-@group(0)@binding(0)
-var<uniform>_l:_aL;@group(0)@binding(1)
-var<storage>_t:array<_aI>;@group(0)@binding(2)
-var<storage>_Q:array<_dm>;${blend}
+
+@group(0) @binding(0)
+var<uniform> config: Config;
+
+@group(0) @binding(1)
+var<storage> tiles: array<Tile>;
+
+@group(0) @binding(2)
+var<storage> segments: array<Segment>;
+
+
+${blend}
 ${ptcl}
-const _fI=512;@group(0)@binding(3)
-var _bd:texture_storage_2d<rgba8unorm,write>;@group(0)@binding(4)
-var<storage>_y:array<u32>;@group(0)@binding(5)
-var _eC:texture_2d<f32>;@group(0)@binding(6)
-var<storage>_k:array<u32>;@group(0)@binding(7)
-var _dE:texture_2d<f32>;fn _hr(_C:u32)->_fc{let _a=_y[_C+1u];let _w=i32(_y[_C+2u]);return _fc(_a,_w);}fn _hq(_C:u32)->_fb{let _a=_y[_C+1u];let _cF=bitcast<f32>(_y[_C+2u]);return _fb(_a,_cF);}fn _hp(_C:u32)->_eb{let _cE=_y[_C+1u];return _eb(_cE);}fn _ho(_C:u32)->_gx{let _dc=_y[_C+1u];let _ak=_dc>>2u;let _bx=_dc&0x3u;let _K=_y[_C+2u];let _bW=bitcast<f32>(_k[_K]);let _eZ=bitcast<f32>(_k[_K+1u]);let _dn=bitcast<f32>(_k[_K+2u]);return _gx(_ak,_bx,_bW,_eZ,_dn);}fn _hn(_C:u32)->_gw{let _dc=_y[_C+1u];let _ak=_dc>>2u;let _bx=_dc&0x3u;let _K=_y[_C+2u];let m0=bitcast<f32>(_k[_K]);let m1=bitcast<f32>(_k[_K+1u]);let m2=bitcast<f32>(_k[_K+2u]);let m3=bitcast<f32>(_k[_K+3u]);let _z=vec4(m0,m1,m2,m3);let _cp=vec2(bitcast<f32>(_k[_K+4u]),bitcast<f32>(_k[_K+5u]));let _aV=bitcast<f32>(_k[_K+6u]);let _aK=bitcast<f32>(_k[_K+7u]);let _fH=_k[_K+8u];let _ad=_fH>>3u;let _aR=_fH&0x7u;return _gw(_ak,_bx,_z,_cp,_aV,_aK,_aR,_ad);}fn _hm(_C:u32)->_gv{let _K=_y[_C+1u];let m0=bitcast<f32>(_k[_K]);let m1=bitcast<f32>(_k[_K+1u]);let m2=bitcast<f32>(_k[_K+2u]);let m3=bitcast<f32>(_k[_K+3u]);let _z=vec4(m0,m1,m2,m3);let _cp=vec2(bitcast<f32>(_k[_K+4u]),bitcast<f32>(_k[_K+5u]));let xy=_k[_K+6u];let _fG=_k[_K+7u];
-let x=f32(xy>>16u);let y=f32(xy&0xffffu);let _m=f32(_fG>>16u);let _az=f32(_fG&0xffffu);return _gv(_z,_cp,vec2(x,y),vec2(_m,_az));}fn _hl(_C:u32)->_ea{let _H=_y[_C+1u];let _aQ=bitcast<f32>(_y[_C+2u]);return _ea(_H,_aQ);}fn _bx(t:f32,_M:u32)->f32{let _hj=0u;let _hi=1u;let _hh=2u;switch _M{case 0u:{return clamp(t,0.0,1.0);}case 1u:{return fract(t);}default:{return abs(t-2.0*round(0.5*t));}}}const _V=4u;fn _fJ(_a:_aI,xy:vec2<f32>,_cx:bool)->array<f32,_V>{var _ar:array<f32,_V>;let _hg=f32(_a._w);for(var i=0u;i<_V;i+=1u){_ar[i]=_hg;}var _ci=_a._Q;while _ci !=0u{let _s=_Q[_ci];let y=_s._co.y-xy.y;let y0=clamp(y,0.0,1.0);let y1=clamp(y+_s._aq.y,0.0,1.0);let dy=y0-y1;if dy !=0.0{let _fF=1.0/_s._aq.y;let t0=(y0-y)*_fF;let t1=(y1-y)*_fF;let _fE=_s._co.x-xy.x;let x0=_fE+t0*_s._aq.x;let x1=_fE+t1*_s._aq.x;let _hf=min(x0,x1);let _he=max(x0,x1);for(var i=0u;i<_V;i+=1u){let _fD=f32(i);let _bJ=min(_hf-_fD,1.0)-1.0e-6;let _dI=_he-_fD;let b=min(_dI,1.0);let c=max(b,0.0);let d=max(_bJ,0.0);let a=(b+0.5*(d*d-c*c)-_bJ)/(_dI-_bJ);_ar[i]+=a*dy;}}let _aU=sign(_s._aq.x)*clamp(xy.y-_s._aU+1.0,0.0,1.0);for(var i=0u;i<_V;i+=1u){_ar[i]+=_aU;}_ci=_s._aT;}if _cx{for(var i=0u;i<_V;i+=1u){let a=_ar[i];_ar[i]=abs(a-2.0*round(0.5*a));}}else{for(var i=0u;i<_V;i+=1u){_ar[i]=min(abs(_ar[i]),1.0);}}return _ar;}fn _hk(seg:u32,_cF:f32,xy:vec2<f32>)->array<f32,_V>{var df:array<f32,_V>;for(var i=0u;i<_V;i+=1u){df[i]=1e9;}var _ci=seg;while _ci !=0u{let _s=_Q[_ci];let _aq=_s._aq;let _fC=xy+vec2(0.5,0.5)-_s._co;let _G=1.0/dot(_aq,_aq);for(var i=0u;i<_V;i+=1u){let _db=vec2(_fC.x+f32(i),_fC.y);let t=clamp(dot(_db,_aq)*_G,0.0,1.0);
-df[i]=min(df[i],length(_aq*t-_db));}_ci=_s._aT;}for(var i=0u;i<_V;i+=1u){df[i]=clamp(_cF+0.5-df[i],0.0,1.0);}return df;}@compute @workgroup_size(4,16)
+
+const GRADIENT_WIDTH = 512;
+
+@group(0) @binding(3)
+var output: texture_storage_2d<rgba8unorm, write>;
+
+@group(0) @binding(4)
+var<storage> ptcl: array<u32>;
+
+@group(0) @binding(5)
+var gradients: texture_2d<f32>;
+
+@group(0) @binding(6)
+var<storage> info: array<u32>;
+
+@group(0) @binding(7)
+var image_atlas: texture_2d<f32>;
+
+fn read_fill(cmd_ix: u32) -> CmdFill {
+    let tile = ptcl[cmd_ix + 1u];
+    let backdrop = i32(ptcl[cmd_ix + 2u]);
+    return CmdFill(tile, backdrop);
+}
+
+fn read_stroke(cmd_ix: u32) -> CmdStroke {
+    let tile = ptcl[cmd_ix + 1u];
+    let half_width = bitcast<f32>(ptcl[cmd_ix + 2u]);
+    return CmdStroke(tile, half_width);
+}
+
+fn read_color(cmd_ix: u32) -> CmdColor {
+    let rgba_color = ptcl[cmd_ix + 1u];
+    return CmdColor(rgba_color);
+}
+
+fn read_lin_grad(cmd_ix: u32) -> CmdLinGrad {
+    let index_mode = ptcl[cmd_ix + 1u];
+    let index = index_mode >> 2u;
+    let extend_mode = index_mode & 0x3u;
+    let info_offset = ptcl[cmd_ix + 2u];
+    let line_x = bitcast<f32>(info[info_offset]);
+    let line_y = bitcast<f32>(info[info_offset + 1u]);
+    let line_c = bitcast<f32>(info[info_offset + 2u]);
+    return CmdLinGrad(index, extend_mode, line_x, line_y, line_c);
+}
+
+fn read_rad_grad(cmd_ix: u32) -> CmdRadGrad {
+    let index_mode = ptcl[cmd_ix + 1u];
+    let index = index_mode >> 2u;
+    let extend_mode = index_mode & 0x3u;
+    let info_offset = ptcl[cmd_ix + 2u];
+    let m0 = bitcast<f32>(info[info_offset]);
+    let m1 = bitcast<f32>(info[info_offset + 1u]);
+    let m2 = bitcast<f32>(info[info_offset + 2u]);
+    let m3 = bitcast<f32>(info[info_offset + 3u]);
+    let matrx = vec4(m0, m1, m2, m3);
+    let xlat = vec2(bitcast<f32>(info[info_offset + 4u]), bitcast<f32>(info[info_offset + 5u]));
+    let focal_x = bitcast<f32>(info[info_offset + 6u]);
+    let radius = bitcast<f32>(info[info_offset + 7u]);
+    let flags_kind = info[info_offset + 8u];
+    let flags = flags_kind >> 3u;
+    let kind = flags_kind & 0x7u;
+    return CmdRadGrad(index, extend_mode, matrx, xlat, focal_x, radius, kind, flags);
+}
+
+fn read_image(cmd_ix: u32) -> CmdImage {
+    let info_offset = ptcl[cmd_ix + 1u];
+    let m0 = bitcast<f32>(info[info_offset]);
+    let m1 = bitcast<f32>(info[info_offset + 1u]);
+    let m2 = bitcast<f32>(info[info_offset + 2u]);
+    let m3 = bitcast<f32>(info[info_offset + 3u]);
+    let matrx = vec4(m0, m1, m2, m3);
+    let xlat = vec2(bitcast<f32>(info[info_offset + 4u]), bitcast<f32>(info[info_offset + 5u]));
+    let xy = info[info_offset + 6u];
+    let width_height = info[info_offset + 7u];
+    
+    let x = f32(xy >> 16u);
+    let y = f32(xy & 0xffffu);
+    let width = f32(width_height >> 16u);
+    let height = f32(width_height & 0xffffu);
+    return CmdImage(matrx, xlat, vec2(x, y), vec2(width, height));
+}
+
+fn read_end_clip(cmd_ix: u32) -> CmdEndClip {
+    let blend = ptcl[cmd_ix + 1u];
+    let alpha = bitcast<f32>(ptcl[cmd_ix + 2u]);
+    return CmdEndClip(blend, alpha);
+}
+
+fn extend_mode(t: f32, mode: u32) -> f32 {
+    let EXTEND_PAD = 0u;
+    let EXTEND_REPEAT = 1u;
+    let EXTEND_REFLECT = 2u;
+    switch mode {
+        
+        case 0u: {
+            return clamp(t, 0.0, 1.0);
+        }
+        
+        case 1u: {
+            return fract(t);
+        }
+        
+        default: {
+            return abs(t - 2.0 * round(0.5 * t));
+        }
+    }
+}
+
+
+const PIXELS_PER_THREAD = 4u;
+
+fn fill_path(tile: Tile, xy: vec2<f32>, even_odd: bool) -> array<f32, PIXELS_PER_THREAD> {
+    var area: array<f32, PIXELS_PER_THREAD>;
+    let backdrop_f = f32(tile.backdrop);
+    for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+        area[i] = backdrop_f;
+    }
+    var segment_ix = tile.segments;
+    while segment_ix != 0u {
+        let segment = segments[segment_ix];
+        let y = segment.origin.y - xy.y;
+        let y0 = clamp(y, 0.0, 1.0);
+        let y1 = clamp(y + segment.delta.y, 0.0, 1.0);
+        let dy = y0 - y1;
+        if dy != 0.0 {
+            let vec_y_recip = 1.0 / segment.delta.y;
+            let t0 = (y0 - y) * vec_y_recip;
+            let t1 = (y1 - y) * vec_y_recip;
+            let startx = segment.origin.x - xy.x;
+            let x0 = startx + t0 * segment.delta.x;
+            let x1 = startx + t1 * segment.delta.x;
+            let xmin0 = min(x0, x1);
+            let xmax0 = max(x0, x1);
+            for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                let i_f = f32(i);
+                let xmin = min(xmin0 - i_f, 1.0) - 1.0e-6;
+                let xmax = xmax0 - i_f;
+                let b = min(xmax, 1.0);
+                let c = max(b, 0.0);
+                let d = max(xmin, 0.0);
+                let a = (b + 0.5 * (d * d - c * c) - xmin) / (xmax - xmin);
+                area[i] += a * dy;
+            }
+        }
+        let y_edge = sign(segment.delta.x) * clamp(xy.y - segment.y_edge + 1.0, 0.0, 1.0);
+        for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+            area[i] += y_edge;
+        }
+        segment_ix = segment.next;
+    }
+    if even_odd {
+        
+        for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+            let a = area[i];
+            area[i] = abs(a - 2.0 * round(0.5 * a));
+        }
+    } else {
+        
+        for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+            area[i] = min(abs(area[i]), 1.0);
+        }
+    }
+    return area;
+}
+
+fn stroke_path(seg: u32, half_width: f32, xy: vec2<f32>) -> array<f32, PIXELS_PER_THREAD> {
+    var df: array<f32, PIXELS_PER_THREAD>;
+    for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+        df[i] = 1e9;
+    }
+    var segment_ix = seg;
+    while segment_ix != 0u {
+        let segment = segments[segment_ix];
+        let delta = segment.delta;
+        let dpos0 = xy + vec2(0.5, 0.5) - segment.origin;
+        let scale = 1.0 / dot(delta, delta);
+        for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+            let dpos = vec2(dpos0.x + f32(i), dpos0.y);
+            let t = clamp(dot(dpos, delta) * scale, 0.0, 1.0);
+            
+            df[i] = min(df[i], length(delta * t - dpos));
+        }
+        segment_ix = segment.next;
+    }
+    for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+        
+        df[i] = clamp(half_width + 0.5 - df[i], 0.0, 1.0);
+    }
+    return df;
+}
+
+
+@compute @workgroup_size(4, 16)
 fn main(
-@builtin(global_invocation_id)_E:vec3<u32>,@builtin(local_invocation_id)_e:vec3<u32>,@builtin(workgroup_id)_ah:vec3<u32>,){let _ap=_ah.y*_l._aB+_ah.x;let xy=vec2(f32(_E.x*_V),f32(_E.y));var rgba:array<vec4<f32>,_V>;for(var i=0u;i<_V;i+=1u){rgba[i]=unpack4x8unorm(_l._ik).wzyx;}var _fx:array<array<u32,_V>,_ei>;var _aY=0u;var _ar:array<f32,_V>;var _C=_ap*_dZ;let _fT=_y[_C];_C+=1u;
-while true{let _f=_y[_C];if _f==_do{break;}switch _f{case 1u:{let _aZ=_hr(_C);let _Q=_aZ._a>>1u;let _cx=(_aZ._a&1u)!=0u;let _a=_aI(_aZ._w,_Q);_ar=_fJ(_a,xy,_cx);_C+=3u;}case 2u:{let _al=_hq(_C);_ar=_hk(_al._a,_al._cF,xy);_C+=3u;}case 3u:{for(var i=0u;i<_V;i+=1u){_ar[i]=1.0;}_C+=1u;}case 5u:{let _O=_hp(_C);let fg=unpack4x8unorm(_O._cE).wzyx;for(var i=0u;i<_V;i+=1u){let _bl=fg*_ar[i];rgba[i]=rgba[i]*(1.0-_bl.a)+_bl;}_C+=2u;}case 6u:{let _h=_ho(_C);let d=_h._bW*xy.x+_h._eZ*xy.y+_h._dn;for(var i=0u;i<_V;i+=1u){let _hd=d+_h._bW*f32(i);let x=i32(round(_bx(_hd,_h._bx)*f32(_fI-1)));let _da=textureLoad(_eC,vec2(x,i32(_h._ak)),0);let _bl=_da*_ar[i];rgba[i]=rgba[i]*(1.0-_bl.a)+_bl;}_C+=3u;}case 7u:{let _v=_hn(_C);let _aV=_v._aV;let _aK=_v._aK;let _hc=_v._aR==_gK;let _hb=_v._aR==_gL;let _ha=_v._aR==_gJ;let _fB=(_v._ad&_gI)!=0u;let _fA=select(1.0/_aK,0.0,_hb);let _gZ=select(1.0,-1.0,_fB||(1.0-_aV)<0.0);let _gY=sign(1.0-_aV);for(var i=0u;i<_V;i+=1u){let _cZ=vec2(xy.x+f32(i),xy.y);let _fz=_v._z.xy*_cZ.x+_v._z.zw*_cZ.y+_v._cp;let x=_fz.x;let y=_fz.y;let xx=x*x;let yy=y*y;var t=0.0;var _dF=true;if _hc{let a=_aK-yy;t=sqrt(a)+x;_dF=a>=0.0;}else if _ha{t=(xx+yy)/x;_dF=t>=0.0&&x !=0.0;}else if _aK>1.0{t=sqrt(xx+yy)-x*_fA;}else{let a=xx-yy;t=_gZ*sqrt(a)-x*_fA;_dF=a>=0.0&&t>=0.0;}if _dF{t=_bx(_aV+_gY*t,_v._bx);t=select(t,1.0-t,_fB);let x=i32(round(t*f32(_fI-1)));let _da=textureLoad(_eC,vec2(x,i32(_v._ak)),0);let _bl=_da*_ar[i];rgba[i]=rgba[i]*(1.0-_bl.a)+_bl;}}_C+=3u;}case 8u:{let _aC=_hm(_C);let _fy=_aC._eY+_aC._dY;for(var i=0u;i<_V;i+=1u){let _cZ=vec2(xy.x+f32(i),xy.y);let _dH=_aC._z.xy*_cZ.x+_aC._z.zw*_cZ.y+_aC._cp+_aC._eY;
-if all(_dH<_fy)&&_ar[i] !=0.0{let _dG=vec4(max(floor(_dH),_aC._eY),min(ceil(_dH),_fy));let _eE=fract(_dH);let a=_dJ(textureLoad(_dE,vec2<i32>(_dG.xy),0));let b=_dJ(textureLoad(_dE,vec2<i32>(_dG.xw),0));let c=_dJ(textureLoad(_dE,vec2<i32>(_dG.zy),0));let d=_dJ(textureLoad(_dE,vec2<i32>(_dG.zw),0));let _da=mix(mix(a,b,_eE.y),mix(c,d,_eE.y),_eE.x);let _bl=_da*_ar[i];rgba[i]=rgba[i]*(1.0-_bl.a)+_bl;}}_C+=2u;}case 9u:{if _aY<_ei{for(var i=0u;i<_V;i+=1u){_fx[_aY][i]=pack4x8unorm(rgba[i]);rgba[i]=vec4(0.0);}}else{}_aY+=1u;_C+=1u;}case 10u:{let _bI=_hl(_C);_aY-=1u;for(var i=0u;i<_V;i+=1u){var _fw:u32;if _aY<_ei{_fw=_fx[_aY][i];}else{}let bg=unpack4x8unorm(_fw);let fg=rgba[i]*_ar[i]*_bI._aQ;rgba[i]=_iR(bg,fg,_bI._H);}_C+=3u;}case 11u:{_C=_y[_C+1u];}default:{}}}let _eD=vec2<u32>(xy);for(var i=0u;i<_V;i+=1u){let _cj=_eD+vec2(i,0u);if _cj.x<_l._gH&&_cj.y<_l._gG{textureStore(_bd,vec2<i32>(_cj),rgba[i]);}}}fn _dJ(rgba:vec4<f32>)->vec4<f32>{return vec4(rgba.rgb*rgba.a,rgba.a);}`
+    @builtin(global_invocation_id) global_id: vec3<u32>,
+    @builtin(local_invocation_id) local_id: vec3<u32>,
+    @builtin(workgroup_id) wg_id: vec3<u32>,
+) {
+    let tile_ix = wg_id.y * config.width_in_tiles + wg_id.x;
+    let xy = vec2(f32(global_id.x * PIXELS_PER_THREAD), f32(global_id.y));
+    var rgba: array<vec4<f32>, PIXELS_PER_THREAD>;
+    for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+        rgba[i] = unpack4x8unorm(config.base_color).wzyx;
+    }
+    var blend_stack: array<array<u32, PIXELS_PER_THREAD>, BLEND_STACK_SPLIT>;
+    var clip_depth = 0u;
+    var area: array<f32, PIXELS_PER_THREAD>;
+    var cmd_ix = tile_ix * PTCL_INITIAL_ALLOC;
+    let blend_offset = ptcl[cmd_ix];
+    cmd_ix += 1u;
+    
+    while true {
+        let tag = ptcl[cmd_ix];
+        if tag == CMD_END {
+            break;
+        }
+        switch tag {
+            
+            case 1u: {
+                let fill = read_fill(cmd_ix);
+                let segments = fill.tile >> 1u;
+                let even_odd = (fill.tile & 1u) != 0u;
+                let tile = Tile(fill.backdrop, segments);
+                area = fill_path(tile, xy, even_odd);
+                cmd_ix += 3u;
+            }
+            
+            case 2u: {
+                let stroke = read_stroke(cmd_ix);
+                area = stroke_path(stroke.tile, stroke.half_width, xy);
+                cmd_ix += 3u;
+            }
+            
+            case 3u: {
+                for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                    area[i] = 1.0;
+                }
+                cmd_ix += 1u;
+            }
+            
+            case 5u: {
+                let color = read_color(cmd_ix);
+                let fg = unpack4x8unorm(color.rgba_color).wzyx;
+                for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                    let fg_i = fg * area[i];
+                    rgba[i] = rgba[i] * (1.0 - fg_i.a) + fg_i;
+                }
+                cmd_ix += 2u;
+            }
+            
+            case 6u: {
+                let lin = read_lin_grad(cmd_ix);
+                let d = lin.line_x * xy.x + lin.line_y * xy.y + lin.line_c;
+                for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                    let my_d = d + lin.line_x * f32(i);
+                    let x = i32(round(extend_mode(my_d, lin.extend_mode) * f32(GRADIENT_WIDTH - 1)));
+                    let fg_rgba = textureLoad(gradients, vec2(x, i32(lin.index)), 0);
+                    let fg_i = fg_rgba * area[i];
+                    rgba[i] = rgba[i] * (1.0 - fg_i.a) + fg_i;
+                }
+                cmd_ix += 3u;
+            }
+            
+            case 7u: {
+                let rad = read_rad_grad(cmd_ix);
+                let focal_x = rad.focal_x;
+                let radius = rad.radius;
+                let is_strip = rad.kind == RAD_GRAD_KIND_STRIP;
+                let is_circular = rad.kind == RAD_GRAD_KIND_CIRCULAR;
+                let is_focal_on_circle = rad.kind == RAD_GRAD_KIND_FOCAL_ON_CIRCLE;
+                let is_swapped = (rad.flags & RAD_GRAD_SWAPPED) != 0u;
+                let r1_recip = select(1.0 / radius, 0.0, is_circular);
+                let less_scale = select(1.0, -1.0, is_swapped || (1.0 - focal_x) < 0.0);
+                let t_sign = sign(1.0 - focal_x);
+                for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                    let my_xy = vec2(xy.x + f32(i), xy.y);
+                    let local_xy = rad.matrx.xy * my_xy.x + rad.matrx.zw * my_xy.y + rad.xlat;
+                    let x = local_xy.x;
+                    let y = local_xy.y;
+                    let xx = x * x;
+                    let yy = y * y;
+                    var t = 0.0;
+                    var is_valid = true;
+                    if is_strip {
+                        let a = radius - yy;
+                        t = sqrt(a) + x;
+                        is_valid = a >= 0.0;
+                    } else if is_focal_on_circle {
+                        t = (xx + yy) / x;
+                        is_valid = t >= 0.0 && x != 0.0;
+                    } else if radius > 1.0 {
+                        t = sqrt(xx + yy) - x * r1_recip;
+                    } else { 
+                        let a = xx - yy;
+                        t = less_scale * sqrt(a) - x * r1_recip;
+                        is_valid = a >= 0.0 && t >= 0.0;
+                    }
+                    if is_valid {
+                        t = extend_mode(focal_x + t_sign * t, rad.extend_mode);
+                        t = select(t, 1.0 - t, is_swapped);
+                        let x = i32(round(t * f32(GRADIENT_WIDTH - 1)));
+                        let fg_rgba = textureLoad(gradients, vec2(x, i32(rad.index)), 0);
+                        let fg_i = fg_rgba * area[i];
+                        rgba[i] = rgba[i] * (1.0 - fg_i.a) + fg_i;
+                    }
+                }
+                cmd_ix += 3u;
+            }
+            
+            case 8u: {
+                let image = read_image(cmd_ix);
+                let atlas_extents = image.atlas_offset + image.extents;
+                for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                    let my_xy = vec2(xy.x + f32(i), xy.y);
+                    let atlas_uv = image.matrx.xy * my_xy.x + image.matrx.zw * my_xy.y + image.xlat + image.atlas_offset;
+                    
+                    if all(atlas_uv < atlas_extents) && area[i] != 0.0 {
+                        let uv_quad = vec4(max(floor(atlas_uv), image.atlas_offset), min(ceil(atlas_uv), atlas_extents));
+                        let uv_frac = fract(atlas_uv);
+                        let a = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.xy), 0));
+                        let b = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.xw), 0));
+                        let c = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.zy), 0));
+                        let d = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.zw), 0));
+                        let fg_rgba = mix(mix(a, b, uv_frac.y), mix(c, d, uv_frac.y), uv_frac.x);
+                        let fg_i = fg_rgba * area[i];
+                        rgba[i] = rgba[i] * (1.0 - fg_i.a) + fg_i;
+                    }
+                }
+                cmd_ix += 2u;
+            }
+            
+            case 9u: {
+                if clip_depth < BLEND_STACK_SPLIT {
+                    for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                        blend_stack[clip_depth][i] = pack4x8unorm(rgba[i]);
+                        rgba[i] = vec4(0.0);
+                    }
+                } else {
+                    
+                }
+                clip_depth += 1u;
+                cmd_ix += 1u;
+            }
+            
+            case 10u: {
+                let end_clip = read_end_clip(cmd_ix);
+                clip_depth -= 1u;
+                for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+                    var bg_rgba: u32;
+                    if clip_depth < BLEND_STACK_SPLIT {
+                        bg_rgba = blend_stack[clip_depth][i];
+                    } else {
+                        
+                    }
+                    let bg = unpack4x8unorm(bg_rgba);
+                    let fg = rgba[i] * area[i] * end_clip.alpha;
+                    rgba[i] = blend_mix_compose(bg, fg, end_clip.blend);
+                }
+                cmd_ix += 3u;
+            }
+            
+            case 11u: {
+                cmd_ix = ptcl[cmd_ix + 1u];
+            }
+            default: {}
+        }
+    }
+    let xy_uint = vec2<u32>(xy);
+    for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
+        let coords = xy_uint + vec2(i, 0u);
+        if coords.x < config.target_width && coords.y < config.target_height {
+            textureStore(output, vec2<i32>(coords), rgba[i]);
+        }
+    } 
+}
+
+fn premul_alpha(rgba: vec4<f32>) -> vec4<f32> {
+    return vec4(rgba.rgb * rgba.a, rgba.a);
+}
+`

@@ -13,7 +13,7 @@ const fs = require( 'fs' );
 const _ = require( 'lodash' );
 
 // Enable opting out of minification for debugging
-const MINIFY = true;
+const MINIFY = false;
 
 // go to this directory, then run `node generate.js` to generate the shaders (output is also in this directory)
 

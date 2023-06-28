@@ -1,14 +1,340 @@
 /* eslint-disable */
 
-export default `const _iQ=0u;const _iP=1u;const _iO=2u;const _iN=3u;const _iM=4u;const _iL=5u;const _iK=6u;const _iJ=7u;const _iI=8u;const _iH=9u;const _iG=10u;const _iF=11u;const _iE=12u;const _iD=13u;const _dA=14u;const _iC=15u;const _ja=128u;fn _gR(cb:vec3<f32>,cs:vec3<f32>)->vec3<f32>{return cb+cs-(cb*cs);}fn _fn(cb:f32,cs:f32)->f32{if cb==0.0{return 0.0;}else if cs==1.0{return 1.0;}else{return min(1.0,cb/(1.0-cs));}}fn _fm(cb:f32,cs:f32)->f32{if cb==1.0{return 1.0;}else if cs==0.0{return 0.0;}else{return 1.0-min(1.0,(1.0-cb)/cs);}}fn _gQ(cb:vec3<f32>,cs:vec3<f32>)->vec3<f32>{return select(
-_gR(cb,2.0*cs-1.0),cb*2.0*cs,cs<=vec3(0.5)
-);}fn _iU(cb:vec3<f32>,cs:vec3<f32>)->vec3<f32>{let d=select(
-sqrt(cb),((16.0*cb-12.0)*cb+4.0)*cb,cb<=vec3(0.25)
-);return select(
-cb+(2.0*cs-1.0)*(d-cb),cb-(1.0-2.0*cs)*cb*(1.0-cb),cs<=vec3(0.5)
-);}fn _bh(c:vec3<f32>)->f32{return max(c.x,max(c.y,c.z))-min(c.x,min(c.y,c.z));}fn _br(c:vec3<f32>)->f32{let f=vec3(0.3,0.59,0.11);return dot(c,f);}fn _iT(c_in:vec3<f32>)->vec3<f32>{var c=c_in;let l=_br(c);let n=min(c.x,min(c.y,c.z));let x=max(c.x,max(c.y,c.z));if n<0.0{c=l+(((c-l)*l)/(l-n));}if x>1.0{c=l+(((c-l)*(1.0-l))/(x-l));}return c;}fn _ep(c:vec3<f32>,l:f32)->vec3<f32>{return _iT(c+(l-_br(c)));}fn _cK(
-_en:ptr<function,f32>,_fj:ptr<function,f32>,_em:ptr<function,f32>,s:f32
-){if*_em>*_en{*_fj=((*_fj-*_en)*s)/(*_em-*_en);*_em=s;}else{*_fj=0.0;*_em=0.0;}*_en=0.0;}fn _bN(c:vec3<f32>,s:f32)->vec3<f32>{var r=c.r;var g=c.g;var b=c.b;if r<=g{if g<=b{_cK(&r,&g,&b,s);}else{if r<=b{_cK(&r,&b,&g,s);}else{_cK(&b,&r,&g,s);}}}else{if r<=b{_cK(&g,&r,&b,s);}else{if g<=b{_cK(&g,&b,&r,s);}else{_cK(&b,&g,&r,s);}}}return vec3(r,g,b);}fn _fl(cb:vec3<f32>,cs:vec3<f32>,_M:u32)->vec3<f32>{var b=vec3(0.0);switch _M{case 1u:{b=cb*cs;}case 2u:{b=_gR(cb,cs);}case 3u:{b=_gQ(cs,cb);}case 4u:{b=min(cb,cs);}case 5u:{b=max(cb,cs);}case 6u:{b=vec3(_fn(cb.x,cs.x),_fn(cb.y,cs.y),_fn(cb.z,cs.z));}case 7u:{b=vec3(_fm(cb.x,cs.x),_fm(cb.y,cs.y),_fm(cb.z,cs.z));}case 8u:{b=_gQ(cb,cs);}case 9u:{b=_iU(cb,cs);}case 10u:{b=abs(cb-cs);}case 11u:{b=cb+cs-2.0*cb*cs;}case 12u:{b=_ep(_bN(cs,_bh(cb)),_br(cb));}case 13u:{b=_ep(_bN(cb,_bh(cs)),_br(cb));}case 14u:{b=_ep(cs,_br(cb));}case 15u:{b=_ep(cb,_br(cs));}default:{b=cs;}}return b;}const _iZ=0u;const _iB=1u;const _bM=2u;const _fk=3u;const _iA=4u;const _iz=5u;const _iy=6u;const _ix=7u;const _iw=8u;const _iv=9u;const _iu=10u;const _it=11u;const _eo=12u;const _is=13u;fn _iS(
-cb:vec3<f32>,cs:vec3<f32>,ab:f32,_ae:f32,_M:u32
-)->vec4<f32>{var fa=0.0;var fb=0.0;switch _M{case 1u:{fa=1.0;fb=0.0;}case 2u:{fa=0.0;fb=1.0;}case 3u:{fa=1.0;fb=1.0-_ae;}case 4u:{fa=1.0-ab;fb=1.0;}case 5u:{fa=ab;fb=0.0;}case 6u:{fa=0.0;fb=_ae;}case 7u:{fa=1.0-ab;fb=0.0;}case 8u:{fa=0.0;fb=1.0-_ae;}case 9u:{fa=ab;fb=1.0-_ae;}case 10u:{fa=1.0-ab;fb=_ae;}case 11u:{fa=1.0-ab;fb=1.0-_ae;}case 12u:{fa=1.0;fb=1.0;}case 13u:{return min(vec4(1.0),vec4(_ae*cs+ab*cb,_ae+ab));}default:{}}let _gP=_ae*fa;let _gO=ab*fb;let co=_gP*cs+_gO*cb;
-return vec4(co,min(_gP+_gO,1.0));}fn _iR(_w:vec4<f32>,_bc:vec4<f32>,_M:u32)->vec4<f32>{let _ir=((_iQ<<8u)|_fk);let _cJ=1e-15;if(_M&0x7fffu)==_ir{return _w*(1.0-_bc.a)+_bc;}let _iq=1.0/max(_bc.a,_cJ);var cs=_bc.rgb*_iq;let _ip=1.0/max(_w.a,_cJ);let cb=_w.rgb*_ip;let _io=_M>>8u;let _in=_fl(cb,cs,_io);cs=mix(cs,_in,_w.a);let _gN=_M&0xffu;if _gN==_fk{let co=mix(_w.rgb,cs,_bc.a);return vec4(co,_bc.a+_w.a*(1.0-_bc.a));}else{return _iS(cb,cs,_w.a,_bc.a,_gN);}}`
+export default `
+
+
+
+const MIX_NORMAL = 0u;
+const MIX_MULTIPLY = 1u;
+const MIX_SCREEN = 2u;
+const MIX_OVERLAY = 3u;
+const MIX_DARKEN = 4u;
+const MIX_LIGHTEN = 5u;
+const MIX_COLOR_DODGE = 6u;
+const MIX_COLOR_BURN = 7u;
+const MIX_HARD_LIGHT = 8u;
+const MIX_SOFT_LIGHT = 9u;
+const MIX_DIFFERENCE = 10u;
+const MIX_EXCLUSION = 11u;
+const MIX_HUE = 12u;
+const MIX_SATURATION = 13u;
+const MIX_COLOR = 14u;
+const MIX_LUMINOSITY = 15u;
+const MIX_CLIP = 128u;
+
+fn screen(cb: vec3<f32>, cs: vec3<f32>) -> vec3<f32> {
+    return cb + cs - (cb * cs);
+}
+
+fn color_dodge(cb: f32, cs: f32) -> f32 {
+    if cb == 0.0 {
+        return 0.0;
+    } else if cs == 1.0 {
+        return 1.0;
+    } else {
+        return min(1.0, cb / (1.0 - cs));
+    }
+}
+
+fn color_burn(cb: f32, cs: f32) -> f32 {
+    if cb == 1.0 {
+        return 1.0;
+    } else if cs == 0.0 {
+        return 0.0;
+    } else {
+        return 1.0 - min(1.0, (1.0 - cb) / cs);
+    }
+}
+
+fn hard_light(cb: vec3<f32>, cs: vec3<f32>) -> vec3<f32> {
+    return select(
+        screen(cb, 2.0 * cs - 1.0),
+        cb * 2.0 * cs,
+        cs <= vec3(0.5)
+    );
+}
+
+fn soft_light(cb: vec3<f32>, cs: vec3<f32>) -> vec3<f32> {
+    let d = select(
+        sqrt(cb),
+        ((16.0 * cb - 12.0) * cb + 4.0) * cb,
+        cb <= vec3(0.25)
+    );
+    return select(
+        cb + (2.0 * cs - 1.0) * (d - cb),
+        cb - (1.0 - 2.0 * cs) * cb * (1.0 - cb),
+        cs <= vec3(0.5)
+    );
+}
+
+fn sat(c: vec3<f32>) -> f32 {
+    return max(c.x, max(c.y, c.z)) - min(c.x, min(c.y, c.z));
+}
+
+fn lum(c: vec3<f32>) -> f32 {
+    let f = vec3(0.3, 0.59, 0.11);
+    return dot(c, f);
+}
+
+fn clip_color(c_in: vec3<f32>) -> vec3<f32> {
+    var c = c_in;
+    let l = lum(c);
+    let n = min(c.x, min(c.y, c.z));
+    let x = max(c.x, max(c.y, c.z));
+    if n < 0.0 {
+        c = l + (((c - l) * l) / (l - n));
+    }
+    if x > 1.0 {
+        c = l + (((c - l) * (1.0 - l)) / (x - l));
+    }
+    return c;
+}
+
+fn set_lum(c: vec3<f32>, l: f32) -> vec3<f32> {
+    return clip_color(c + (l - lum(c)));
+}
+
+fn set_sat_inner(
+    cmin: ptr<function, f32>,
+    cmid: ptr<function, f32>,
+    cmax: ptr<function, f32>,
+    s: f32
+) {
+    if *cmax > *cmin {
+        *cmid = ((*cmid - *cmin) * s) / (*cmax - *cmin);
+        *cmax = s;
+    } else {
+        *cmid = 0.0;
+        *cmax = 0.0;
+    }
+    *cmin = 0.0;
+}
+
+fn set_sat(c: vec3<f32>, s: f32) -> vec3<f32> {
+    var r = c.r;
+    var g = c.g;
+    var b = c.b;
+    if r <= g {
+        if g <= b {
+            set_sat_inner(&r, &g, &b, s);
+        } else {
+            if r <= b {
+                set_sat_inner(&r, &b, &g, s);
+            } else {
+                set_sat_inner(&b, &r, &g, s);
+            }
+        }
+    } else {
+        if r <= b {
+            set_sat_inner(&g, &r, &b, s);
+        } else {
+            if g <= b {
+                set_sat_inner(&g, &b, &r, s);
+            } else {
+                set_sat_inner(&b, &g, &r, s);
+            }
+        }
+    }
+    return vec3(r, g, b);
+}
+
+
+
+fn blend_mix(cb: vec3<f32>, cs: vec3<f32>, mode: u32) -> vec3<f32> {
+    var b = vec3(0.0);
+    switch mode {
+        
+        case 1u: {
+            b = cb * cs;
+        }
+        
+        case 2u: {
+            b = screen(cb, cs);
+        }
+        
+        case 3u: {
+            b = hard_light(cs, cb);
+        }
+        
+        case 4u: {
+            b = min(cb, cs);
+        }
+        
+        case 5u: {
+            b = max(cb, cs);
+        }
+        
+        case 6u: {
+            b = vec3(color_dodge(cb.x, cs.x), color_dodge(cb.y, cs.y), color_dodge(cb.z, cs.z));
+        }
+        
+        case 7u: {
+            b = vec3(color_burn(cb.x, cs.x), color_burn(cb.y, cs.y), color_burn(cb.z, cs.z));
+        }
+        
+        case 8u: {
+            b = hard_light(cb, cs);
+        }
+        
+        case 9u: {
+            b = soft_light(cb, cs);
+        }
+        
+        case 10u: {
+            b = abs(cb - cs);
+        }
+        
+        case 11u: {
+            b = cb + cs - 2.0 * cb * cs;
+        }
+        
+        case 12u: {
+            b = set_lum(set_sat(cs, sat(cb)), lum(cb));
+        }
+        
+        case 13u: {
+            b = set_lum(set_sat(cb, sat(cs)), lum(cb));
+        }
+        
+        case 14u: {
+            b = set_lum(cs, lum(cb));
+        }
+        
+        case 15u: {
+            b = set_lum(cb, lum(cs));
+        }
+        default: {
+            b = cs;
+        }
+    }
+    return b;
+}
+
+
+
+const COMPOSE_CLEAR = 0u;
+const COMPOSE_COPY = 1u;
+const COMPOSE_DEST = 2u;
+const COMPOSE_SRC_OVER = 3u;
+const COMPOSE_DEST_OVER = 4u;
+const COMPOSE_SRC_IN = 5u;
+const COMPOSE_DEST_IN = 6u;
+const COMPOSE_SRC_OUT = 7u;
+const COMPOSE_DEST_OUT = 8u;
+const COMPOSE_SRC_ATOP = 9u;
+const COMPOSE_DEST_ATOP = 10u;
+const COMPOSE_XOR = 11u;
+const COMPOSE_PLUS = 12u;
+const COMPOSE_PLUS_LIGHTER = 13u;
+
+
+
+fn blend_compose(
+    cb: vec3<f32>,
+    cs: vec3<f32>,
+    ab: f32,
+    as_: f32,
+    mode: u32
+) -> vec4<f32> {
+    var fa = 0.0;
+    var fb = 0.0;
+    switch mode {
+        
+        case 1u: {
+            fa = 1.0;
+            fb = 0.0;
+        }
+        
+        case 2u: {
+            fa = 0.0;
+            fb = 1.0;
+        }
+        
+        case 3u: {
+            fa = 1.0;
+            fb = 1.0 - as_;
+        }
+        
+        case 4u: {
+            fa = 1.0 - ab;
+            fb = 1.0;
+        }
+        
+        case 5u: {
+            fa = ab;
+            fb = 0.0;
+        }
+        
+        case 6u: {
+            fa = 0.0;
+            fb = as_;
+        }
+        
+        case 7u: {
+            fa = 1.0 - ab;
+            fb = 0.0;
+        }
+        
+        case 8u: {
+            fa = 0.0;
+            fb = 1.0 - as_;
+        }
+        
+        case 9u: {
+            fa = ab;
+            fb = 1.0 - as_;
+        }
+        
+        case 10u: {
+            fa = 1.0 - ab;
+            fb = as_;
+        }
+        
+        case 11u: {
+            fa = 1.0 - ab;
+            fb = 1.0 - as_;
+        }
+        
+        case 12u: {
+            fa = 1.0;
+            fb = 1.0;
+        }
+        
+        case 13u: {
+            return min(vec4(1.0), vec4(as_ * cs + ab * cb, as_ + ab));
+        }
+        default: {}
+    }
+    let as_fa = as_ * fa;
+    let ab_fb = ab * fb;
+    let co = as_fa * cs + ab_fb * cb;
+    
+    return vec4(co, min(as_fa + ab_fb, 1.0));
+}
+
+
+
+fn blend_mix_compose(backdrop: vec4<f32>, src: vec4<f32>, mode: u32) -> vec4<f32> {
+    let BLEND_DEFAULT = ((MIX_NORMAL << 8u) | COMPOSE_SRC_OVER);
+    let EPSILON = 1e-15;
+    if (mode & 0x7fffu) == BLEND_DEFAULT {
+        
+        return backdrop * (1.0 - src.a) + src;
+    }
+    
+    let inv_src_a = 1.0 / max(src.a, EPSILON);
+    var cs = src.rgb * inv_src_a;
+    let inv_backdrop_a = 1.0 / max(backdrop.a, EPSILON);
+    let cb = backdrop.rgb * inv_backdrop_a;
+    let mix_mode = mode >> 8u;
+    let mixed = blend_mix(cb, cs, mix_mode);
+    cs = mix(cs, mixed, backdrop.a);
+    let compose_mode = mode & 0xffu;
+    if compose_mode == COMPOSE_SRC_OVER {
+        let co = mix(backdrop.rgb, cs, src.a);
+        return vec4(co, src.a + backdrop.a * (1.0 - src.a));
+    } else {
+        return blend_compose(cb, cs, backdrop.a, src.a, compose_mode);
+    }
+}
+`

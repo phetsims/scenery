@@ -1,3 +1,77 @@
 /* eslint-disable */
 
-export default `const _dZ=64u;const _fa=256u;const _gu=2u;const _do=0u;const _gt=1u;const _gs=2u;const _gr=3u;const _gq=5u;const _gp=6u;const _go=7u;const _gn=8u;const _gm=9u;const _gl=10u;const _gk=11u;struct _fc{_a:u32,_w:i32}struct _fb{_a:u32,_cF:f32}struct _iY{_iX:u32}struct _eb{_cE:u32}struct _gx{_ak:u32,_bx:u32,_bW:f32,_eZ:f32,_dn:f32}struct _gw{_ak:u32,_bx:u32,_z:vec4<f32>,_cp:vec2<f32>,_aV:f32,_aK:f32,_aR:u32,_ad:u32}struct _gv{_z:vec4<f32>,_cp:vec2<f32>,_eY:vec2<f32>,_dY:vec2<f32>}struct _ea{_H:u32,_aQ:f32}`
+export default `
+
+
+
+const PTCL_INITIAL_ALLOC = 64u;
+const PTCL_INCREMENT = 256u;
+
+
+const PTCL_HEADROOM = 2u;
+
+
+const CMD_END = 0u;
+const CMD_FILL = 1u;
+const CMD_STROKE = 2u;
+const CMD_SOLID = 3u;
+const CMD_COLOR = 5u;
+const CMD_LIN_GRAD = 6u;
+const CMD_RAD_GRAD = 7u;
+const CMD_IMAGE = 8u;
+const CMD_BEGIN_CLIP = 9u;
+const CMD_END_CLIP = 10u;
+const CMD_JUMP = 11u;
+
+
+
+
+struct CmdFill {
+    tile: u32,
+    backdrop: i32,
+}
+
+struct CmdStroke {
+    tile: u32,
+    half_width: f32,
+}
+
+struct CmdJump {
+    new_ix: u32,
+}
+
+struct CmdColor {
+    rgba_color: u32,
+}
+
+struct CmdLinGrad {
+    index: u32,
+    extend_mode: u32,
+    line_x: f32,
+    line_y: f32,
+    line_c: f32,
+}
+
+struct CmdRadGrad {
+    index: u32,
+    extend_mode: u32,
+    matrx: vec4<f32>,
+    xlat: vec2<f32>,
+    focal_x: f32,
+    radius: f32,
+    kind: u32,
+    flags: u32,
+}
+
+struct CmdImage {
+    matrx: vec4<f32>,
+    xlat: vec2<f32>,
+    atlas_offset: vec2<f32>,
+    extents: vec2<f32>,
+}
+
+struct CmdEndClip {
+    blend: u32,
+    alpha: f32,
+}
+`

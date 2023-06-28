@@ -1,6 +1,28 @@
 /* eslint-disable */
 
-export default `struct _aS{a:u32,b:u32}fn _dy(x:_aS,y:_aS)->_aS{let m=min(x.b,y.a);return _aS(x.a+y.a-m,x.b+y.b-m);}struct _ej{ix:u32,
+export default `
+ 
+struct Bic {
+    a: u32,
+    b: u32,
+}
 
+fn bic_combine(x: Bic, y: Bic) -> Bic {
+    let m = min(x.b, y.a);
+    return Bic(x.a + y.a - m, x.b + y.b - m);
+}
 
-_N:i32}struct _fh{_dx:u32,_b:vec4<f32>}`
+struct ClipInp {
+    
+    ix: u32,
+    
+    
+    
+    path_ix: i32,
+}
+
+struct ClipEl {
+    parent_ix: u32,
+    bbox: vec4<f32>,
+}
+`

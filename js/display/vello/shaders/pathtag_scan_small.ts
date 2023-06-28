@@ -2,13 +2,71 @@
 import pathtag from './shared/pathtag.js';
 import config from './shared/config.js';
 
-export default `${config}
+export default `
+
+${config}
 ${pathtag}
-@group(0)@binding(0)
-var<uniform>_l:_aL;@group(0)@binding(1)
-var<storage>_q:array<u32>;@group(0)@binding(2)
-var<storage>_ao:array<_ac>;@group(0)@binding(3)
-var<storage,read_write>_bO:array<_ac>;const _bA=8u;const _i=256u;var<workgroup>_be:array<_ac,_i>;var<workgroup>_bz:array<_ac,_i>;@compute @workgroup_size(256)
+
+@group(0) @binding(0)
+var<uniform> config: Config;
+
+@group(0) @binding(1)
+var<storage> scene: array<u32>;
+
+@group(0) @binding(2)
+var<storage> reduced: array<TagMonoid>;
+
+@group(0) @binding(3)
+var<storage, read_write> tag_monoids: array<TagMonoid>;
+
+const LG_WG_SIZE = 8u;
+const WG_SIZE = 256u;
+
+var<workgroup> sh_parent: array<TagMonoid, WG_SIZE>;
+
+var<workgroup> sh_monoid: array<TagMonoid, WG_SIZE>;
+
+@compute @workgroup_size(256)
 fn main(
-@builtin(global_invocation_id)_E:vec3<u32>,@builtin(local_invocation_id)_e:vec3<u32>,@builtin(workgroup_id)_ah:vec3<u32>,){var agg=_gD();if _e.x<_ah.x{agg=_ao[_e.x];}_be[_e.x]=agg;for(var i=0u;i<_bA;i+=1u){workgroupBarrier();if _e.x+(1u<<i)<_i{let _Y=_be[_e.x+(1u<<i)];agg=_by(agg,_Y);}workgroupBarrier();_be[_e.x]=agg;}let ix=_E.x;let _D=_q[_l._du+ix];var _dB=_ec(_D);_bz[_e.x]=_dB;for(var i=0u;i<_bA;i+=1u){workgroupBarrier();if _e.x>=1u<<i{let _Y=_bz[_e.x-(1u<<i)];_dB=_by(_Y,_dB);}workgroupBarrier();_bz[_e.x]=_dB;}workgroupBarrier();
-var tm=_be[0];if _e.x>0u{tm=_by(tm,_bz[_e.x-1u]);}_bO[ix]=tm;}`
+    @builtin(global_invocation_id) global_id: vec3<u32>,
+    @builtin(local_invocation_id) local_id: vec3<u32>,
+    @builtin(workgroup_id) wg_id: vec3<u32>,
+) {
+    var agg = tag_monoid_identity();
+    if local_id.x < wg_id.x {
+        agg = reduced[local_id.x];
+    }
+    sh_parent[local_id.x] = agg;
+    for (var i = 0u; i < LG_WG_SIZE; i += 1u) {
+        workgroupBarrier();
+        if local_id.x + (1u << i) < WG_SIZE {
+            let other = sh_parent[local_id.x + (1u << i)];
+            agg = combine_tag_monoid(agg, other);
+        }
+        workgroupBarrier();
+        sh_parent[local_id.x] = agg;
+    }
+
+    let ix = global_id.x;
+    let tag_word = scene[config.pathtag_base + ix];
+    var agg_part = reduce_tag(tag_word);
+    sh_monoid[local_id.x] = agg_part;
+    for (var i = 0u; i < LG_WG_SIZE; i += 1u) {
+        workgroupBarrier();
+        if local_id.x >= 1u << i {
+            let other = sh_monoid[local_id.x - (1u << i)];
+            agg_part = combine_tag_monoid(other, agg_part);
+        }
+        workgroupBarrier();
+        sh_monoid[local_id.x] = agg_part;
+    }
+    workgroupBarrier();
+    
+    var tm = sh_parent[0];
+    if local_id.x > 0u {
+        tm = combine_tag_monoid(tm, sh_monoid[local_id.x - 1u]);
+    }
+    
+    tag_monoids[ix] = tm;
+}
+`
