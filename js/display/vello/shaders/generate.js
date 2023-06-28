@@ -4,6 +4,11 @@
 // TODO: better minification with 3rd party library (if/when it exists?) - we rely on assumptions like
 // TODO: 'no variables starting with _ appended with one character are used', and don't do a lot of ideal things
 
+/*
+ * List of things I've had to patch for the shaders:
+ * - fine.wgsl: don't premultiply output. For some reason (even though we're requesting premultiplied canvas texture)
+ */
+
 const fs = require( 'fs' );
 const _ = require( 'lodash' );
 
