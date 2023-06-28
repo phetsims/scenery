@@ -25,6 +25,8 @@ loadPromise.then( () => {
 
 export default class PathFont {
 
+  // Glyphs come out in units that are typically 1000 or 2048 per EM, so if we're scaling to a font size of
+  // 16, we need to scale by 16 / unitsPerEM.
   public unitsPerEM = 0;
 
   private swashFont: SwashFont | null = null;
@@ -32,19 +34,22 @@ export default class PathFont {
 
   public constructor( dataString: string ) {
     if ( loaded ) {
-      this.swashFont = new SwashFont( base64ToU8( dataString ) );
-      this.unitsPerEM = this.swashFont.get_units_per_em();
+      this.initialize( dataString );
     }
     else {
       const lock = asyncLoader.createLock( 'font load' );
       loadPromise.then( () => {
 
-        this.swashFont = new SwashFont( base64ToU8( dataString ) );
-        this.unitsPerEM = this.swashFont.get_units_per_em();
+        this.initialize( dataString );
 
         lock();
       } ).catch( ( err: IntentionalAny ) => { throw err; } );
     }
+  }
+
+  public initialize( dataString: string ): void {
+    this.swashFont = new SwashFont( base64ToU8( dataString ) );
+    this.unitsPerEM = this.swashFont.get_units_per_em();
   }
 
   public shapeText( str: string, ltr: boolean ): PathGlyph[] {
@@ -73,5 +78,11 @@ export default class PathFont {
 scenery.register( 'PathFont', PathFont );
 
 export class PathGlyph {
-  public constructor( public id: number, public shape: Shape, public x: number, public y: number, public advance: number ) {}
+  public constructor(
+    public id: number,
+    public shape: Shape,
+    public x: number,
+    public y: number,
+    public advance: number
+  ) {}
 }
