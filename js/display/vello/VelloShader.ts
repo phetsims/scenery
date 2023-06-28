@@ -99,14 +99,19 @@ const shaderDeviceMap = new WeakMap<GPUDevice, ShaderMap>();
 
 export default class VelloShader {
 
-  public wgsl: string;
-  public bindings: Binding[];
+  public readonly wgsl: string;
+  public readonly bindings: Binding[];
 
-  public module: GPUShaderModule;
-  public bindGroupLayout: GPUBindGroupLayout;
-  public pipeline: GPUComputePipeline;
+  public readonly module: GPUShaderModule;
+  public readonly bindGroupLayout: GPUBindGroupLayout;
+  public readonly pipeline: GPUComputePipeline;
 
-  public constructor( public name: string, data: ShaderOptions, public device: GPUDevice, format: VelloShaderFormat = 'rgba8unorm' ) {
+  public constructor(
+    public readonly name: string,
+    data: ShaderOptions,
+    public readonly device: GPUDevice,
+    format: VelloShaderFormat = 'rgba8unorm'
+  ) {
     this.wgsl = data.wgsl;
     this.bindings = data.bindings;
 

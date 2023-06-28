@@ -12,9 +12,9 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 
 export default class DeviceContext {
 
-  public ramps: Ramps;
-  public atlas: Atlas;
-  public preferredCanvasFormat: GPUTextureFormat; // TODO: support other formats?
+  public readonly ramps: Ramps;
+  public readonly atlas: Atlas;
+  public readonly preferredCanvasFormat: GPUTextureFormat; // TODO: support other formats?
 
   public static currentDevice: GPUDevice | null = null;
   public static currentDeviceContext: DeviceContext | null = null;

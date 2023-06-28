@@ -227,7 +227,7 @@ scenery.register( 'Atlas', Atlas );
 // TODO: pool these?
 export class AtlasSubImage {
   public constructor(
-    public image: EncodableImage,
+    public readonly image: EncodableImage,
     public x: number,
     public y: number,
     public bin: Bin

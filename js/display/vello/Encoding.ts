@@ -102,7 +102,7 @@ let globalEncodingID = 0;
 let globalPathID = 0;
 
 export class VelloColorStop {
-  public constructor( public offset: number, public color: number ) {}
+  public constructor( public readonly offset: number, public readonly color: number ) {}
 }
 scenery.register( 'VelloColorStop', VelloColorStop );
 
@@ -510,7 +510,7 @@ export class WorkgroupCounts {
 }
 
 export class BufferSize {
-  public constructor( public length: number, public bytes_per_element: number ) {}
+  public constructor( public readonly length: number, public readonly bytes_per_element: number ) {}
 
   // Creates a new buffer size from size in bytes (u32)
   public static from_size_in_bytes( size: number, bytes_per_element: number ): BufferSize {
@@ -559,32 +559,32 @@ export class BufferSizes {
   // pub segments: BufferSize<PathSegment>,
   // pub ptcl: BufferSize<u32>,
 
-  public path_reduced: BufferSize;
-  public path_reduced2: BufferSize;
-  public path_reduced_scan: BufferSize;
-  public path_monoids: BufferSize;
-  public path_bboxes: BufferSize;
-  public cubics: BufferSize;
-  public draw_reduced: BufferSize;
-  public draw_monoids: BufferSize;
-  public info: BufferSize;
-  public clip_inps: BufferSize;
-  public clip_els: BufferSize;
-  public clip_bics: BufferSize;
-  public clip_bboxes: BufferSize;
-  public draw_bboxes: BufferSize;
-  public bump_alloc: BufferSize;
-  public bin_headers: BufferSize;
-  public paths: BufferSize;
+  public readonly path_reduced: BufferSize;
+  public readonly path_reduced2: BufferSize;
+  public readonly path_reduced_scan: BufferSize;
+  public readonly path_monoids: BufferSize;
+  public readonly path_bboxes: BufferSize;
+  public readonly cubics: BufferSize;
+  public readonly draw_reduced: BufferSize;
+  public readonly draw_monoids: BufferSize;
+  public readonly info: BufferSize;
+  public readonly clip_inps: BufferSize;
+  public readonly clip_els: BufferSize;
+  public readonly clip_bics: BufferSize;
+  public readonly clip_bboxes: BufferSize;
+  public readonly draw_bboxes: BufferSize;
+  public readonly bump_alloc: BufferSize;
+  public readonly bin_headers: BufferSize;
+  public readonly paths: BufferSize;
 
   // The following buffer sizes have been hand picked to accommodate the vello test scenes as
   // well as paris-30k. These should instead get derived from the scene layout using
   // reasonable heuristics.
   // TODO: derive from scene layout
-  public bin_data: BufferSize;
-  public tiles: BufferSize;
-  public segments: BufferSize;
-  public ptcl: BufferSize;
+  public readonly bin_data: BufferSize;
+  public readonly tiles: BufferSize;
+  public readonly segments: BufferSize;
+  public readonly ptcl: BufferSize;
 
   // layout: &Layout, workgroups: &WorkgroupCounts, n_path_tags: u32
   public constructor( layout: Layout, workgroups: WorkgroupCounts, n_path_tags: number ) {
@@ -628,17 +628,22 @@ export class BufferSizes {
 export class RenderConfig {
 
   // Workgroup counts for all compute pipelines.
-  public workgroup_counts: WorkgroupCounts;
+  public readonly workgroup_counts: WorkgroupCounts;
 
   // Sizes of all buffer resources.
-  public buffer_sizes: BufferSizes;
+  public readonly buffer_sizes: BufferSizes;
 
   // TODO: rename
-  public gpu: ConfigUniform;
+  public readonly gpu: ConfigUniform;
 
-  public config_bytes: Uint8Array;
+  public readonly config_bytes: Uint8Array;
 
-  public constructor( layout: Layout, public width: number, public height: number, public base_color: ColorRGBA32 ) {
+  public constructor(
+    layout: Layout,
+    public readonly width: number,
+    public readonly height: number,
+    public readonly base_color: ColorRGBA32
+  ) {
     const configUniform = new ConfigUniform( layout );
 
     const new_width = next_multiple_of( width, TILE_WIDTH );
@@ -694,7 +699,10 @@ export class RenderInfo {
   // generated with prepareRender
   public renderConfig: RenderConfig | null = null;
 
-  public constructor( public packed: Uint8Array, public layout: Layout ) {}
+  public constructor(
+    public readonly packed: Uint8Array,
+    public readonly layout: Layout
+  ) {}
 
   public prepareRender( width: number, height: number, base_color: ColorRGBA32 ): void {
     this.renderConfig = new RenderConfig( this.layout, width, height, base_color );
@@ -702,7 +710,7 @@ export class RenderInfo {
 }
 
 export class VelloPatch {
-  public constructor( public draw_data_offset: number ) {}
+  public constructor( public readonly draw_data_offset: number ) {}
 }
 
 export class VelloImagePatch extends VelloPatch {
@@ -712,7 +720,7 @@ export class VelloImagePatch extends VelloPatch {
   // Filled in by Atlas
   public atlasSubImage: AtlasSubImage | null = null;
 
-  public constructor( draw_data_offset: number, public image: EncodableImage ) {
+  public constructor( draw_data_offset: number, public readonly image: EncodableImage ) {
     super( draw_data_offset );
   }
 
@@ -728,7 +736,11 @@ export class VelloRampPatch extends VelloPatch {
   // Filled in by Ramps
   public id = -1;
 
-  public constructor( draw_data_offset: number, public stops: VelloColorStop[], public extend: Extend ) {
+  public constructor(
+    draw_data_offset: number,
+    public readonly stops: VelloColorStop[],
+    public extend: Extend
+  ) {
     super( draw_data_offset );
   }
 
@@ -758,23 +770,23 @@ const rustColorStops = ( stops: VelloColorStop[] ): string => {
 
 export default class Encoding {
 
-  public id: number; // For things like output of drawing commands for validation
+  public readonly id: number; // For things like output of drawing commands for validation
 
-  public pathTagsBuf = new ByteBuffer(); // path_tags
-  public pathDataBuf = new ByteBuffer(); // path_data
-  public drawTagsBuf = new ByteBuffer(); // draw_tags // NOTE: was u32 array (effectively) in rust
-  public drawDataBuf = new ByteBuffer(); // draw_data
-  public transforms: Affine[] = []; // Vec<Transform> in rust, Affine[] in js
-  public linewidths: number[] = []; // Vec<f32> in rust, number[] in js
+  public readonly pathTagsBuf = new ByteBuffer(); // path_tags
+  public readonly pathDataBuf = new ByteBuffer(); // path_data
+  public readonly drawTagsBuf = new ByteBuffer(); // draw_tags // NOTE: was u32 array (effectively) in rust
+  public readonly drawDataBuf = new ByteBuffer(); // draw_data
+  public readonly transforms: Affine[] = []; // Vec<Transform> in rust, Affine[] in js
+  public readonly linewidths: number[] = []; // Vec<f32> in rust, number[] in js
   public n_paths = 0; // u32
   public n_path_segments = 0; // u32,
   public n_clips = 0; // u32
   public n_open_clips = 0; // u32
-  public patches: ( VelloImagePatch | VelloRampPatch )[] = []; // Vec<Patch> in rust, Patch[] in js
-  public color_stops: VelloColorStop[] = []; // Vec<ColorStop> in rust, VelloColorStop[] in js
+  public readonly patches: ( VelloImagePatch | VelloRampPatch )[] = []; // Vec<Patch> in rust, Patch[] in js
+  public readonly color_stops: VelloColorStop[] = []; // Vec<ColorStop> in rust, VelloColorStop[] in js
 
   // Embedded PathEncoder
-  public first_point: Vector2 = new Vector2( 0, 0 ); // mutated
+  public readonly first_point: Vector2 = new Vector2( 0, 0 ); // mutated
   public state: ( 0x1 | 0x2 | 0x3 ) = Encoding.PATH_START;
   public n_encoded_segments = 0;
   public is_fill = true;

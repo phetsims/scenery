@@ -23,7 +23,7 @@ export default class BufferPool {
   private generation = 0;
 
   // This is definitely unoptimized
-  private freeBuffers: BufferEntry[] = [];
+  private readonly freeBuffers: BufferEntry[] = [];
 
   public constructor( public device: GPUDevice ) {}
 
@@ -74,7 +74,7 @@ export default class BufferPool {
       const entry = this.freeBuffers[ i ];
       entry.buffer.destroy();
     }
-    this.freeBuffers = [];
+    this.freeBuffers.length = 0;
   }
 }
 

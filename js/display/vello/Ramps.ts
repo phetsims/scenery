@@ -25,7 +25,7 @@ export default class Ramps {
   public dirty = false; // initially because it's empty! -- done after replaceTexture() so we don't start dirty
   public generation = 0;
 
-  public constructor( public device: GPUDevice ) {
+  public constructor( public readonly device: GPUDevice ) {
 
     // NOTE: we can increase the size in the future
     // TODO: test the increase in size, and other ramp characteristics

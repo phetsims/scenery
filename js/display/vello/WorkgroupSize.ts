@@ -10,8 +10,11 @@ import { scenery } from '../../imports.js';
 
 export default class WorkgroupSize {
   // u32 in rust
-  public constructor( public x: number, public y: number, public z: number ) {
-  }
+  public constructor(
+    public readonly x: number,
+    public readonly y: number,
+    public readonly z: number
+  ) {}
 
   public toString(): string {
     return `[${this.x} ${this.y} ${this.z}]`;
