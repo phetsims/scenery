@@ -333,7 +333,7 @@ export { default as Encoding, f32_to_bytes, u32_to_bytes, with_alpha_factor, to_
 export type { ColorRGBA32, F32, U32, U8, EncodableImage } from './display/vello/Encoding.js';
 export { default as PhetEncoding } from './display/vello/PhetEncoding.js';
 export { default as render } from './display/vello/render.js';
-export { default as PathFont } from './display/vello/PathFont.js';
+export { default as PathFont } from './display/swash/PathFont.js';
 
 
 export { default as Drawable } from './display/Drawable.js';

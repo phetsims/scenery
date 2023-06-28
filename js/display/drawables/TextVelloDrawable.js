@@ -120,7 +120,9 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     }
     else {
       if ( node.hasFill() || node.hasStroke() ) {
-        const shapedText = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont ).shapeText( node.renderedText, true );
+        const font = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont );
+
+        const shapedText = font.shapeText( node.renderedText, true );
 
         // TODO: stroking also!!!
         if ( node.hasFill() ) {
@@ -128,7 +130,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
           let hasEncodedGlyph = false;
 
           // TODO: more performance possible easily
-          const scale = node._font.numericSize / 2048; // get UPM TODO
+          const scale = node._font.numericSize / font.unitsPerEM;
           const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
 
           // TODO: support this for text, so we can QUICKLY get the bounds of text

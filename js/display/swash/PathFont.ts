@@ -11,6 +11,7 @@ import swash_wasm from './swash_wasm.js';
 import { base64ToU8, scenery } from '../../imports.js';
 import asyncLoader from '../../../../phet-core/js/asyncLoader.js';
 import { Shape } from '../../../../kite/js/imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 const loadPromise = swash( base64ToU8( swash_wasm ) );
 
@@ -18,11 +19,13 @@ const loadPromise = swash( base64ToU8( swash_wasm ) );
 let loaded = false;
 loadPromise.then( () => {
   loaded = true;
-} ).catch( err => {
+} ).catch( ( err: IntentionalAny ) => {
   throw err;
 } );
 
 export default class PathFont {
+
+  public unitsPerEM = 0;
 
   private swashFont: SwashFont | null = null;
   private readonly glyphCache: Map<number, Shape> = new Map<number, Shape>();
@@ -30,15 +33,17 @@ export default class PathFont {
   public constructor( dataString: string ) {
     if ( loaded ) {
       this.swashFont = new SwashFont( base64ToU8( dataString ) );
+      this.unitsPerEM = this.swashFont.get_units_per_em();
     }
     else {
       const lock = asyncLoader.createLock( 'font load' );
       loadPromise.then( () => {
 
         this.swashFont = new SwashFont( base64ToU8( dataString ) );
+        this.unitsPerEM = this.swashFont.get_units_per_em();
 
         lock();
-      } ).catch( err => { throw err; } );
+      } ).catch( ( err: IntentionalAny ) => { throw err; } );
     }
   }
 
