@@ -295,6 +295,7 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   // for now TODO: can we reuse? Likely get some from reusing these
   configBuffer.destroy();
+  fineOutputTexture && fineOutputTexture.destroy();
 
   bufferPool.dispose();
 };
