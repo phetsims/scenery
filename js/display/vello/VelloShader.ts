@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, WorkgroupSize } from '../../imports.js';
+import { DeviceContext, scenery, WorkgroupSize } from '../../imports.js';
 import fine from './shaders/fine.js';
 import backdrop_dyn from './shaders/backdrop_dyn.js';
 import bbox_clear from './shaders/bbox_clear.js';
@@ -99,12 +99,12 @@ const shaderDeviceMap = new WeakMap<GPUDevice, ShaderMap>();
 
 export default class VelloShader {
 
-  public readonly wgsl: string;
-  public readonly bindings: Binding[];
+  public readonly wgsl!: string;
+  public readonly bindings!: Binding[];
 
-  public readonly module: GPUShaderModule;
-  public readonly bindGroupLayout: GPUBindGroupLayout;
-  public readonly pipeline: GPUComputePipeline;
+  public readonly module!: GPUShaderModule;
+  public readonly bindGroupLayout!: GPUBindGroupLayout;
+  public readonly pipeline!: GPUComputePipeline;
 
   public constructor(
     public readonly name: string,
@@ -112,6 +112,12 @@ export default class VelloShader {
     public readonly device: GPUDevice,
     format: VelloShaderFormat = 'rgba8unorm'
   ) {
+
+    if ( data.wgsl.length === 0 ) {
+      // Just bail out, don't try compiling a shader that won't work
+      return;
+    }
+
     this.wgsl = data.wgsl;
     this.bindings = data.bindings;
 
@@ -204,7 +210,14 @@ export default class VelloShader {
   }
 
   private static loadShaders( device: GPUDevice ): ShaderMap {
-    const getFineShaderWGSL = ( format: VelloShaderFormat ) => fine.replace( 'rgba8unorm', format );
+    const getFineShaderWGSL = ( format: VelloShaderFormat ) => {
+      if ( !DeviceContext.supportsBGRATextureStorage && format === 'bgra8unorm' ) {
+        // NO shader! Don't compile it
+        return '';
+      }
+
+      return fine.replace( 'rgba8unorm', format );
+    };
 
     return {
       backdrop_dyn: new VelloShader( 'backdrop_dyn', {

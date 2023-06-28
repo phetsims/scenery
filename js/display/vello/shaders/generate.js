@@ -12,6 +12,9 @@
 const fs = require( 'fs' );
 const _ = require( 'lodash' );
 
+// Enable opting out of minification for debugging
+const MINIFY = true;
+
 // go to this directory, then run `node generate.js` to generate the shaders (output is also in this directory)
 
 const stripComments = str => {
@@ -109,83 +112,85 @@ const minify = str => {
   // // Naga does not yet recognize `const` but web does not allow global `let`.
   str = str.replaceAll( '\nlet ', '\nconst ' );
 
-  // According to WGSL spec:
-  // line breaks: \u000A\u000B\u000C\u000D\u0085\u2028\u2029
-  // white space: \u0020\u0009\u000A\u000B\u000C\u000D\u0085\u200E\u200F\u2028\u2029
+  if ( MINIFY ) {
+    // According to WGSL spec:
+    // line breaks: \u000A\u000B\u000C\u000D\u0085\u2028\u2029
+    // white space: \u0020\u0009\u000A\u000B\u000C\u000D\u0085\u200E\u200F\u2028\u2029
 
-  const linebreak = '[\u000A\u000B\u000C\u000D\u0085\u2028\u2029]';
-  const whitespace = '[\u0020\u0009\u0085\u200E\u200F\u2028\u2029]';
+    const linebreak = '[\u000A\u000B\u000C\u000D\u0085\u2028\u2029]';
+    const whitespace = '[\u0020\u0009\u0085\u200E\u200F\u2028\u2029]';
 
-  // Collapse newlines
-  str = str.replaceAll( new RegExp( `${whitespace}*${linebreak}+${whitespace}*`, 'g' ), '\n' );
-  str = str.trim();
+    // Collapse newlines
+    str = str.replaceAll( new RegExp( `${whitespace}*${linebreak}+${whitespace}*`, 'g' ), '\n' );
+    str = str.trim();
 
-  // Collapse other whitespace
-  str = str.replaceAll( new RegExp( `${whitespace}+`, 'g' ), ' ' );
+    // Collapse other whitespace
+    str = str.replaceAll( new RegExp( `${whitespace}+`, 'g' ), ' ' );
 
-  // Semicolon + newline => semicolon
-  str = str.replaceAll( new RegExp( `;${linebreak}`, 'g' ), ';' );
+    // Semicolon + newline => semicolon
+    str = str.replaceAll( new RegExp( `;${linebreak}`, 'g' ), ';' );
 
-  // Comma + newline => comma
-  str = str.replaceAll( new RegExp( `,${linebreak}`, 'g' ), ',' );
+    // Comma + newline => comma
+    str = str.replaceAll( new RegExp( `,${linebreak}`, 'g' ), ',' );
 
-  // newlines around {}
-  str = str.replaceAll( new RegExp( `${linebreak}*\u007B${linebreak}*`, 'g' ), '{' );
-  str = str.replaceAll( new RegExp( `${linebreak}*\u007D${linebreak}*`, 'g' ), '}' );
-  str = str.replaceAll( new RegExp( `${whitespace}*\u007B${whitespace}*`, 'g' ), '{' );
-  str = str.replaceAll( new RegExp( `${whitespace}*\u007D${whitespace}*`, 'g' ), '}' );
+    // newlines around {}
+    str = str.replaceAll( new RegExp( `${linebreak}*\u007B${linebreak}*`, 'g' ), '{' );
+    str = str.replaceAll( new RegExp( `${linebreak}*\u007D${linebreak}*`, 'g' ), '}' );
+    str = str.replaceAll( new RegExp( `${whitespace}*\u007B${whitespace}*`, 'g' ), '{' );
+    str = str.replaceAll( new RegExp( `${whitespace}*\u007D${whitespace}*`, 'g' ), '}' );
 
-  str = str.replaceAll( new RegExp( `: `, 'g' ), ':' );
-  str = str.replaceAll( new RegExp( `; `, 'g' ), ';' );
-  str = str.replaceAll( new RegExp( `, `, 'g' ), ',' );
-  str = str.replaceAll( new RegExp( `,}`, 'g' ), '}' );
-  str = str.replaceAll( new RegExp( `,]`, 'g' ), ']' );
+    str = str.replaceAll( new RegExp( `: `, 'g' ), ':' );
+    str = str.replaceAll( new RegExp( `; `, 'g' ), ';' );
+    str = str.replaceAll( new RegExp( `, `, 'g' ), ',' );
+    str = str.replaceAll( new RegExp( `,}`, 'g' ), '}' );
+    str = str.replaceAll( new RegExp( `,]`, 'g' ), ']' );
 
-  str = str.replaceAll( new RegExp( `${whitespace}*\\+${whitespace}*`, 'g' ), '+' );
-  str = str.replaceAll( new RegExp( `${whitespace}*-${whitespace}*`, 'g' ), '-' );
-  str = str.replaceAll( new RegExp( `${whitespace}*\\*${whitespace}*`, 'g' ), '*' );
-  str = str.replaceAll( new RegExp( `${whitespace}*/${whitespace}*`, 'g' ), '/' );
-  str = str.replaceAll( new RegExp( `${whitespace}*<${whitespace}*`, 'g' ), '<' );
-  str = str.replaceAll( new RegExp( `${whitespace}*>${whitespace}*`, 'g' ), '>' );
-  str = str.replaceAll( new RegExp( `${whitespace}*&${whitespace}*`, 'g' ), '&' );
-  str = str.replaceAll( new RegExp( `${whitespace}*\\|${whitespace}*`, 'g' ), '|' );
-  str = str.replaceAll( new RegExp( `${whitespace}*=${whitespace}*`, 'g' ), '=' );
-  str = str.replaceAll( new RegExp( `${whitespace}*\\(${whitespace}*`, 'g' ), '(' );
-  str = str.replaceAll( new RegExp( `${whitespace}*\\)${whitespace}*`, 'g' ), ')' );
+    str = str.replaceAll( new RegExp( `${whitespace}*\\+${whitespace}*`, 'g' ), '+' );
+    str = str.replaceAll( new RegExp( `${whitespace}*-${whitespace}*`, 'g' ), '-' );
+    str = str.replaceAll( new RegExp( `${whitespace}*\\*${whitespace}*`, 'g' ), '*' );
+    str = str.replaceAll( new RegExp( `${whitespace}*/${whitespace}*`, 'g' ), '/' );
+    str = str.replaceAll( new RegExp( `${whitespace}*<${whitespace}*`, 'g' ), '<' );
+    str = str.replaceAll( new RegExp( `${whitespace}*>${whitespace}*`, 'g' ), '>' );
+    str = str.replaceAll( new RegExp( `${whitespace}*&${whitespace}*`, 'g' ), '&' );
+    str = str.replaceAll( new RegExp( `${whitespace}*\\|${whitespace}*`, 'g' ), '|' );
+    str = str.replaceAll( new RegExp( `${whitespace}*=${whitespace}*`, 'g' ), '=' );
+    str = str.replaceAll( new RegExp( `${whitespace}*\\(${whitespace}*`, 'g' ), '(' );
+    str = str.replaceAll( new RegExp( `${whitespace}*\\)${whitespace}*`, 'g' ), ')' );
 
-  symbols.forEach( ( name, index ) => {
-    // TODO: OMG why do we need to iterate this? Something is WRONG with this code. See below
-    for ( let i = 0; i < 2; i++ ) {
-      [ ...str.matchAll( new RegExp( `[^\\w](${name})[^\\w]`, 'g' ) ) ].reverse().forEach( match => {
-        const index0 = match.index + 1;
-        const index1 = index0 + match[ 1 ].length;
-        const before = str.substring( 0, index0 );
-        const after = str.substring( index1 );
+    symbols.forEach( ( name, index ) => {
+      // TODO: OMG why do we need to iterate this? Something is WRONG with this code. See below
+      for ( let i = 0; i < 2; i++ ) {
+        [ ...str.matchAll( new RegExp( `[^\\w](${name})[^\\w]`, 'g' ) ) ].reverse().forEach( match => {
+          const index0 = match.index + 1;
+          const index1 = index0 + match[ 1 ].length;
+          const before = str.substring( 0, index0 );
+          const after = str.substring( index1 );
 
-        // We still have to do import stuff
-        if ( !before.endsWith( '#import ' ) ) {
-          const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          // We still have to do import stuff
+          if ( !before.endsWith( '#import ' ) ) {
+            const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-          let variable;
-          if ( index < alphabet.length ) {
-            variable = alphabet[ index ];
+            let variable;
+            if ( index < alphabet.length ) {
+              variable = alphabet[ index ];
+            }
+            else {
+              variable = alphabet[ Math.floor( index / alphabet.length ) - 1 ] + alphabet[ index % alphabet.length ];
+            }
+            // TODO: figure out how we could get rid of this underscore. What are we hitting?
+            variable = `_${variable}`;
+            str = before + variable + after;
           }
-          else {
-            variable = alphabet[ Math.floor( index / alphabet.length ) - 1 ] + alphabet[ index % alphabet.length ];
-          }
-          // TODO: figure out how we could get rid of this underscore. What are we hitting?
-          variable = `_${variable}`;
-          str = before + variable + after;
-        }
-      } );
-    }
-    // THIS is why the loop above is needed
-    // if ( name === 'linewidth' && str.includes( 'linewidth' ) ) {
-    //   console.log( 'EEEEEK' );
-    //   console.log( [ ...str.matchAll( new RegExp( `.linewidth.`, 'g' ) ) ].map( match => match[ 0 ] ) );
-    //   console.log( [ ...str.matchAll( new RegExp( `[^\\w](${name})[^\\w]`, 'g' ) ) ].map( match => match[ 0 ] ) );
-    // }
-  } );
+        } );
+      }
+      // THIS is why the loop above is needed
+      // if ( name === 'linewidth' && str.includes( 'linewidth' ) ) {
+      //   console.log( 'EEEEEK' );
+      //   console.log( [ ...str.matchAll( new RegExp( `.linewidth.`, 'g' ) ) ].map( match => match[ 0 ] ) );
+      //   console.log( [ ...str.matchAll( new RegExp( `[^\\w](${name})[^\\w]`, 'g' ) ) ].map( match => match[ 0 ] ) );
+      // }
+    } );
+  }
 
   return str;
 };

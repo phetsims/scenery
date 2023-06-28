@@ -18,6 +18,7 @@ export default class DeviceContext {
 
   public static currentDevice: GPUDevice | null = null;
   public static currentDeviceContext: DeviceContext | null = null;
+  public static supportsBGRATextureStorage = false;
   private static couldNotGetDevice = false;
   private static completedDeviceAttempt = false;
 
@@ -31,6 +32,10 @@ export default class DeviceContext {
     VelloShader.getShaders( device );
 
     this.preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
+    if ( this.preferredCanvasFormat === 'bgra8unorm' && !device.features.has( 'bgra8unorm-storage' ) ) {
+      // TODO: will we need a texture copy?
+      this.preferredCanvasFormat = 'rgba8unorm';
+    }
 
     // TODO: handle context losses, reconstruct with the device
     device.lost.then( info => {
@@ -92,6 +97,10 @@ export default class DeviceContext {
     const adapter = await navigator.gpu?.requestAdapter( {
       powerPreference: 'high-performance'
     } );
+
+    // console.log( [ ...( adapter?.features || [] ) ] );
+
+    DeviceContext.supportsBGRATextureStorage = adapter?.features.has( 'bgra8unorm-storage' ) || false;
 
     const device = await adapter?.requestDevice( {
       requiredFeatures: [ 'bgra8unorm-storage' ]

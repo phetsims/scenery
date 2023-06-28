@@ -146,8 +146,14 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
   // TODO: wgpu might not have this implemented? Do I need a manual clear?
   // TODO: actually, we're not reusing the buffer, so it might be zero'ed out? Check spec
   // TODO: See if this clearBuffer is insufficient (implied by engine.rs docs)
-  encoder.clearBuffer( bumpBuffer, 0 );
-  // device.queue.writeBuffer( bumpBuffer, 0, new Uint8Array( bumpBuffer.size ) );
+  if ( encoder.clearBuffer ) {
+    // NOTE: FIrefox nightly didn't have clearBuffer, so we're feature-detecting it
+    encoder.clearBuffer( bumpBuffer, 0 );
+  }
+  else {
+    // TODO: can we avoid this, and just fresh-create the buffer every time?
+    device.queue.writeBuffer( bumpBuffer, 0, new Uint8Array( bumpBuffer.size ) );
+  }
 
   shaders.binning.dispatch( encoder, workgroupCounts.binning, [
     configBuffer, drawMonoidBuffer, pathBBoxBuffer, clipBBoxBuffer, drawBBoxBuffer, bumpBuffer, infoBinDataBuffer, binHeaderBuffer
