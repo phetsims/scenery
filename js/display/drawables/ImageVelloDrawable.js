@@ -79,10 +79,10 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
 
     // if we are not loaded yet, just ignore
     if ( source ) {
-      this.encoding.encode_matrix( matrix );
-      this.encoding.encode_linewidth( -1 );
-      this.encoding.encode_rect( 0, 0, source.width, source.height );
-      this.encoding.encode_image( new SourceImage( source.width, source.height, source ) );
+      this.encoding.encodeMatrix( matrix );
+      this.encoding.encodeLineWidth( -1 );
+      this.encoding.encodeRect( 0, 0, source.width, source.height );
+      this.encoding.encodeImage( new SourceImage( source.width, source.height, source ) );
     }
 
     this.setToCleanState();

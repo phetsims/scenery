@@ -24,9 +24,9 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   const sceneBytes = renderInfo.packed;
 
-  const workgroupCounts = renderConfig.workgroup_counts;
-  const bufferSizes = renderConfig.buffer_sizes;
-  const configBytes = renderConfig.config_bytes;
+  const workgroupCounts = renderConfig.workgroupCounts;
+  const bufferSizes = renderConfig.bufferSizes;
+  const configBytes = renderConfig.configBytes;
 
   const bufferPool = new BufferPool( device );
 
@@ -42,11 +42,11 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
   } );
   device.queue.writeBuffer( configBuffer, 0, configBytes.buffer );
 
-  const infoBinDataBuffer = bufferPool.getBuffer( bufferSizes.bin_data.size_in_bytes(), 'info_bin_data buffer' );
-  const tileBuffer = bufferPool.getBuffer( bufferSizes.tiles.size_in_bytes(), 'tile buffer' );
-  const segmentsBuffer = bufferPool.getBuffer( bufferSizes.segments.size_in_bytes(), 'segments buffer' );
-  const ptclBuffer = bufferPool.getBuffer( bufferSizes.ptcl.size_in_bytes(), 'ptcl buffer' );
-  const reducedBuffer = bufferPool.getBuffer( bufferSizes.path_reduced.size_in_bytes(), 'reduced buffer' );
+  const infoBinDataBuffer = bufferPool.getBuffer( bufferSizes.bin_data.getSizeInBytes(), 'info_bin_data buffer' );
+  const tileBuffer = bufferPool.getBuffer( bufferSizes.tiles.getSizeInBytes(), 'tile buffer' );
+  const segmentsBuffer = bufferPool.getBuffer( bufferSizes.segments.getSizeInBytes(), 'segments buffer' );
+  const ptclBuffer = bufferPool.getBuffer( bufferSizes.ptcl.getSizeInBytes(), 'ptcl buffer' );
+  const reducedBuffer = bufferPool.getBuffer( bufferSizes.path_reduced.getSizeInBytes(), 'reduced buffer' );
 
   const encoder = device.createCommandEncoder( {
     label: 'the encoder'
@@ -60,14 +60,14 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   let reduced2Buffer;
   let reducedScanBuffer;
-  if ( workgroupCounts.use_large_path_scan ) {
-    reduced2Buffer = bufferPool.getBuffer( bufferSizes.path_reduced2.size_in_bytes(), 'reduced2 buffer' );
+  if ( workgroupCounts.useLargePathScan ) {
+    reduced2Buffer = bufferPool.getBuffer( bufferSizes.path_reduced2.getSizeInBytes(), 'reduced2 buffer' );
 
     shaders.pathtag_reduce2.dispatch( encoder, workgroupCounts.path_reduce2, [
       reducedBuffer, reduced2Buffer
     ] );
 
-    reducedScanBuffer = bufferPool.getBuffer( bufferSizes.path_reduced_scan.size_in_bytes(), 'reducedScan buffer' );
+    reducedScanBuffer = bufferPool.getBuffer( bufferSizes.path_reduced_scan.getSizeInBytes(), 'reducedScan buffer' );
 
     shaders.pathtag_scan1.dispatch( encoder, workgroupCounts.path_scan1, [
       reducedBuffer, reduced2Buffer, reducedScanBuffer
@@ -76,9 +76,9 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
     pathTagParentBuffer = reducedScanBuffer;
   }
 
-  const tagmonoidBuffer = bufferPool.getBuffer( bufferSizes.path_monoids.size_in_bytes(), 'tagmonoid buffer' );
+  const tagmonoidBuffer = bufferPool.getBuffer( bufferSizes.path_monoids.getSizeInBytes(), 'tagmonoid buffer' );
 
-  ( workgroupCounts.use_large_path_scan ? shaders.pathtag_scan_large : shaders.pathtag_scan_small ).dispatch( encoder, workgroupCounts.path_scan, [
+  ( workgroupCounts.useLargePathScan ? shaders.pathtag_scan_large : shaders.pathtag_scan_small ).dispatch( encoder, workgroupCounts.path_scan, [
     configBuffer, sceneBuffer, pathTagParentBuffer, tagmonoidBuffer
   ] );
 
@@ -86,27 +86,27 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
   reduced2Buffer && bufferPool.freeBuffer( reduced2Buffer );
   reducedScanBuffer && bufferPool.freeBuffer( reducedScanBuffer );
 
-  const pathBBoxBuffer = bufferPool.getBuffer( bufferSizes.path_bboxes.size_in_bytes(), 'pathBBox buffer' );
+  const pathBBoxBuffer = bufferPool.getBuffer( bufferSizes.path_bboxes.getSizeInBytes(), 'pathBBox buffer' );
 
   shaders.bbox_clear.dispatch( encoder, workgroupCounts.bbox_clear, [
     configBuffer, pathBBoxBuffer
   ] );
 
-  const cubicBuffer = bufferPool.getBuffer( bufferSizes.cubics.size_in_bytes(), 'cubic buffer' );
+  const cubicBuffer = bufferPool.getBuffer( bufferSizes.cubics.getSizeInBytes(), 'cubic buffer' );
 
   shaders.pathseg.dispatch( encoder, workgroupCounts.path_seg, [
     configBuffer, sceneBuffer, tagmonoidBuffer, pathBBoxBuffer, cubicBuffer
   ] );
 
-  const drawReducedBuffer = bufferPool.getBuffer( bufferSizes.draw_reduced.size_in_bytes(), 'drawReduced buffer' );
+  const drawReducedBuffer = bufferPool.getBuffer( bufferSizes.draw_reduced.getSizeInBytes(), 'drawReduced buffer' );
 
   shaders.draw_reduce.dispatch( encoder, workgroupCounts.draw_reduce, [
     configBuffer, sceneBuffer, drawReducedBuffer
   ] );
 
-  const drawMonoidBuffer = bufferPool.getBuffer( bufferSizes.draw_monoids.size_in_bytes(), 'drawMonoid buffer' );
+  const drawMonoidBuffer = bufferPool.getBuffer( bufferSizes.draw_monoids.getSizeInBytes(), 'drawMonoid buffer' );
 
-  const clipInpBuffer = bufferPool.getBuffer( bufferSizes.clip_inps.size_in_bytes(), 'clipInp buffer' );
+  const clipInpBuffer = bufferPool.getBuffer( bufferSizes.clip_inps.getSizeInBytes(), 'clipInp buffer' );
 
   shaders.draw_leaf.dispatch( encoder, workgroupCounts.draw_leaf, [
     configBuffer, sceneBuffer, drawReducedBuffer, pathBBoxBuffer, drawMonoidBuffer, infoBinDataBuffer, clipInpBuffer
@@ -114,9 +114,9 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   bufferPool.freeBuffer( drawReducedBuffer );
 
-  const clipElBuffer = bufferPool.getBuffer( bufferSizes.clip_els.size_in_bytes(), 'clipEl buffer' );
+  const clipElBuffer = bufferPool.getBuffer( bufferSizes.clip_els.getSizeInBytes(), 'clipEl buffer' );
 
-  const clipBicBuffer = bufferPool.getBuffer( bufferSizes.clip_bics.size_in_bytes(), 'clipBic buffer' );
+  const clipBicBuffer = bufferPool.getBuffer( bufferSizes.clip_bics.getSizeInBytes(), 'clipBic buffer' );
 
   if ( workgroupCounts.clip_reduce.x > 0 ) {
     shaders.clip_reduce.dispatch( encoder, workgroupCounts.clip_reduce, [
@@ -124,7 +124,7 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
     ] );
   }
 
-  const clipBBoxBuffer = bufferPool.getBuffer( bufferSizes.clip_bboxes.size_in_bytes(), 'clipBBox buffer' );
+  const clipBBoxBuffer = bufferPool.getBuffer( bufferSizes.clip_bboxes.getSizeInBytes(), 'clipBBox buffer' );
 
   if ( workgroupCounts.clip_leaf.x > 0 ) {
     shaders.clip_leaf.dispatch( encoder, workgroupCounts.clip_leaf, [
@@ -136,11 +136,11 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
   bufferPool.freeBuffer( clipBicBuffer );
   bufferPool.freeBuffer( clipElBuffer );
 
-  const drawBBoxBuffer = bufferPool.getBuffer( bufferSizes.draw_bboxes.size_in_bytes(), 'drawBBox buffer' );
+  const drawBBoxBuffer = bufferPool.getBuffer( bufferSizes.draw_bboxes.getSizeInBytes(), 'drawBBox buffer' );
 
-  const bumpBuffer = bufferPool.getBuffer( bufferSizes.bump_alloc.size_in_bytes(), 'bump buffer' );
+  const bumpBuffer = bufferPool.getBuffer( bufferSizes.bump_alloc.getSizeInBytes(), 'bump buffer' );
 
-  const binHeaderBuffer = bufferPool.getBuffer( bufferSizes.bin_headers.size_in_bytes(), 'binHeader buffer' );
+  const binHeaderBuffer = bufferPool.getBuffer( bufferSizes.bin_headers.getSizeInBytes(), 'binHeader buffer' );
 
 
   // TODO: wgpu might not have this implemented? Do I need a manual clear?
@@ -159,7 +159,7 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   // Note: this only needs to be rounded up because of the workaround to store the tile_offset
   // in storage rather than workgroup memory.
-  const pathBuffer = bufferPool.getBuffer( bufferSizes.paths.size_in_bytes(), 'path buffer' );
+  const pathBuffer = bufferPool.getBuffer( bufferSizes.paths.getSizeInBytes(), 'path buffer' );
 
   shaders.tile_alloc.dispatch( encoder, workgroupCounts.tile_alloc, [
     configBuffer, sceneBuffer, drawBBoxBuffer, bumpBuffer, pathBuffer, tileBuffer

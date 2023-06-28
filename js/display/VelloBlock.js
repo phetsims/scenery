@@ -174,7 +174,7 @@ class VelloBlock extends FittedBlock {
                                 `sb.append(&SceneFragment { data: encoding${encoding.id} }, None);\n`;
     }
 
-    encoding.finalize_scene();
+    encoding.finalizeScene();
 
     const outTexture = this.canvasContext.getCurrentTexture();
     const renderInfo = encoding.resolve( this.deviceContext );
@@ -236,7 +236,7 @@ class VelloBlock extends FittedBlock {
       }
 
       if ( needsEncodeEndClip ) {
-        encoding.encode_end_clip();
+        encoding.encodeEndClip();
       }
     }
   }
@@ -298,27 +298,27 @@ class VelloBlock extends FittedBlock {
 
         if ( clipArea ) {
           // +1 ideally to avoid including the filter root (ignore its parent coordinate frame, stay in its local)
-          encoding.encode_matrix( scalingMatrix.timesMatrix( trail.slice( this.transformRootInstance.trail.length, i + 1 ).getMatrix() ) );
+          encoding.encodeMatrix( scalingMatrix.timesMatrix( trail.slice( this.transformRootInstance.trail.length, i + 1 ).getMatrix() ) );
 
         }
         else {
-          encoding.encode_matrix( Matrix3.IDENTITY );
+          encoding.encodeMatrix( Matrix3.IDENTITY );
         }
 
-        encoding.encode_linewidth( -1 );
+        encoding.encodeLineWidth( -1 );
 
         if ( clipArea ) {
           // TODO: consolidate tolerance somewhere. Adaptively set this up? ACTUALLY we should really avoid
           // TODO: re-encoding the clips like this every frame, right?
-          encoding.encode_kite_shape( clipArea, true, true, 0.01 );
+          encoding.encodeShape( clipArea, true, true, 0.01 );
         }
         else {
-          encoding.encode_rect( 0, 0, this.canvas.width, this.canvas.height );
+          encoding.encodeRect( 0, 0, this.canvas.width, this.canvas.height );
         }
 
         // TODO: filters we can do with this
         // TODO: ensure NOT Mix.Clip when alpha < 1 (but we can gain performance if alpha is 1?)
-        encoding.encode_begin_clip( Mix.Normal, Compose.SrcOver, alpha );
+        encoding.encodeBeginClip( Mix.Normal, Compose.SrcOver, alpha );
       }
     }
   }

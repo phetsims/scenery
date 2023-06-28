@@ -100,10 +100,10 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         TextCanvasDrawable.paintTextNodeToCanvas( new CanvasContextWrapper( canvas, context ), node, matrix );
 
         // TODO: faster function, don't create an object?
-        this.encoding.encode_matrix( Matrix3.translation( bounds.minX, bounds.minY ) );
-        this.encoding.encode_linewidth( -1 );
-        this.encoding.encode_rect( 0, 0, canvas.width, canvas.height );
-        this.encoding.encode_image( new SourceImage( canvas.width, canvas.height, canvas ) );
+        this.encoding.encodeMatrix( Matrix3.translation( bounds.minX, bounds.minY ) );
+        this.encoding.encodeLineWidth( -1 );
+        this.encoding.encodeRect( 0, 0, canvas.width, canvas.height );
+        this.encoding.encodeImage( new SourceImage( canvas.width, canvas.height, canvas ) );
       }
     }
     else {
@@ -142,9 +142,9 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
       const encoding = TextVelloDrawable.getGlyphEncoding( glyph.shape, isFill );
 
-      if ( !encoding.is_empty() ) {
-        this.encoding.encode_matrix( glyphMatrix );
-        this.encoding.encode_linewidth( -1 );
+      if ( !encoding.isEmpty() ) {
+        this.encoding.encodeMatrix( glyphMatrix );
+        this.encoding.encodeLineWidth( -1 );
         this.encoding.append( encoding );
         hasEncodedGlyph = true;
       }
@@ -153,8 +153,8 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     } );
 
     if ( hasEncodedGlyph ) {
-      this.encoding.insert_path_marker();
-      this.encoding.encode_paint( isFill ? this.node.fill : this.node.stroke );
+      this.encoding.insertPathMarker();
+      this.encoding.encodePaint( isFill ? this.node.fill : this.node.stroke );
     }
   }
 
@@ -164,7 +164,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     let encoding = cache.get( shape );
     if ( !encoding ) {
       encoding = new PhetEncoding();
-      encoding.encode_kite_shape( shape, isFill, false, 1 ); // TODO: tolerance
+      encoding.encodeShape( shape, isFill, false, 1 ); // TODO: tolerance
       cache.set( shape, encoding );
     }
 

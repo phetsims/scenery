@@ -96,25 +96,25 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     if ( node.shape ) {
       if ( node.hasFill() ) {
-        this.encoding.encode_matrix( matrix );
-        this.encoding.encode_linewidth( -1 );
-        const numEncodedSegments = this.encoding.encode_kite_shape( node.shape, true, true, 1 );
+        this.encoding.encodeMatrix( matrix );
+        this.encoding.encodeLineWidth( -1 );
+        const numEncodedSegments = this.encoding.encodeShape( node.shape, true, true, 1 );
         if ( numEncodedSegments ) {
-          this.encoding.encode_paint( node.fill );
+          this.encoding.encodePaint( node.fill );
         }
       }
       if ( node.hasStroke() ) {
-        this.encoding.encode_matrix( matrix );
+        this.encoding.encodeMatrix( matrix );
         let shape = node.shape;
         if ( node.lineDash.length ) {
           // TODO: cache dashed shapes? OR AT LEAST DO NOT UPDATE THE IMAGE ENCODNG IF IT IS THE SAME
           // TODO: See SVG example
           shape = node.shape.getDashedShape( node.lineDash, node.lineDashOffset );
         }
-        this.encoding.encode_linewidth( node.lineWidth );
-        const numEncodedSegments = this.encoding.encode_kite_shape( shape, false, true, 1 );
+        this.encoding.encodeLineWidth( node.lineWidth );
+        const numEncodedSegments = this.encoding.encodeShape( shape, false, true, 1 );
         if ( numEncodedSegments ) {
-          this.encoding.encode_paint( node.stroke );
+          this.encoding.encodePaint( node.stroke );
         }
       }
     }

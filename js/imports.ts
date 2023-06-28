@@ -329,7 +329,7 @@ export type { ShaderMap } from './display/vello/VelloShader.js';
 export { default as DeviceContext } from './display/vello/DeviceContext.js';
 export { default as Atlas, AtlasSubImage } from './display/vello/Atlas.js';
 export { default as Ramps } from './display/vello/Ramps.js';
-export { default as Encoding, f32_to_bytes, u32_to_bytes, with_alpha_factor, to_premul_u32, lerp_rgba8, VelloColorStop, Extend, Mix, Compose, DrawTag, PathTag, Layout, SceneBufferSizes, ConfigUniform, WorkgroupCounts, BufferSize, BufferSizes, RenderConfig, u8ToBase64, base64ToU8, RenderInfo, VelloPatch, VelloImagePatch, VelloRampPatch } from './display/vello/Encoding.js';
+export { default as Encoding, f32ToBytes, u32ToBytes, withAlphaFactor, premultiplyRGBA8, lerpRGBA8, VelloColorStop, Extend, Mix, Compose, DrawTag, PathTag, Layout, SceneBufferSizes, ConfigUniform, WorkgroupCounts, BufferSize, BufferSizes, RenderConfig, u8ToBase64, base64ToU8, RenderInfo, VelloPatch, VelloImagePatch, VelloRampPatch } from './display/vello/Encoding.js';
 export type { ColorRGBA32, F32, U32, U8, EncodableImage } from './display/vello/Encoding.js';
 export { default as PhetEncoding } from './display/vello/PhetEncoding.js';
 export { default as render } from './display/vello/render.js';

@@ -49,36 +49,35 @@ export type U8 = number;
 // premultiplyAlpha: 'premultiply' option
 export type EncodableImage = SourceImage | BufferImage;
 
-const size_to_words = ( byte_size: number ): number => byte_size / 4;
+const sizeToWords = ( byteSize: number ): number => byteSize / 4;
 
-const align_up = ( len: number, alignment: number ): number => {
+const alignUp = ( len: number, alignment: number ): number => {
   return len + ( ( ( ~len ) + 1 ) & ( alignment - 1 ) );
 };
 
-const next_multiple_of = ( val: number, rhs: number ): number => {
+const nextMultipleOf = ( val: number, rhs: number ): number => {
   const r = val % rhs;
   return r === 0 ? val : val + ( rhs - r );
 };
 
-// TODO: rename methods!
 // Convert u32/f32 to 4 bytes in little endian order
-const scratch_to_bytes = new Uint8Array( 4 );
-export const f32_to_bytes = ( float: number ): U8[] => {
-  const view = new DataView( scratch_to_bytes.buffer );
+const scratchForBytes = new Uint8Array( 4 );
+export const f32ToBytes = ( float: number ): U8[] => {
+  const view = new DataView( scratchForBytes.buffer );
   view.setFloat32( 0, float );
-  return [ ...scratch_to_bytes ].reverse();
+  return [ ...scratchForBytes ].reverse();
 };
-export const u32_to_bytes = ( int: number ): U8[] => {
-  const view = new DataView( scratch_to_bytes.buffer );
+export const u32ToBytes = ( int: number ): U8[] => {
+  const view = new DataView( scratchForBytes.buffer );
   view.setUint32( 0, int );
-  return [ ...scratch_to_bytes ].reverse();
+  return [ ...scratchForBytes ].reverse();
 };
 
-export const with_alpha_factor = ( color: ColorRGBA32, alpha: number ): ColorRGBA32 => {
+export const withAlphaFactor = ( color: ColorRGBA32, alpha: number ): ColorRGBA32 => {
   return ( color & 0xffffff00 ) | ( Utils.roundSymmetric( ( color & 0xff ) * alpha ) & 0xff );
 };
 
-export const to_premul_u32 = ( rgba8color: ColorRGBA32 ): ColorRGBA32 => {
+export const premultiplyRGBA8 = ( rgba8color: ColorRGBA32 ): ColorRGBA32 => {
   const a = ( rgba8color & 0xff ) / 255;
   const r = Utils.roundSymmetric( ( ( rgba8color >>> 24 ) & 0xff ) * a >>> 0 );
   const g = Utils.roundSymmetric( ( ( rgba8color >>> 16 ) & 0xff ) * a >>> 0 );
@@ -90,7 +89,7 @@ const lerpChannel = ( x: number, y: number, a: number ) => {
   return Utils.roundSymmetric( x * ( 1 - a ) + y * a >>> 0 );
 };
 
-export const lerp_rgba8 = ( c1: ColorRGBA32, c2: ColorRGBA32, t: number ): ColorRGBA32 => {
+export const lerpRGBA8 = ( c1: ColorRGBA32, c2: ColorRGBA32, t: number ): ColorRGBA32 => {
   const r = lerpChannel( ( c1 >>> 24 ) & 0xff, ( c2 >>> 24 ) & 0xff, t );
   const g = lerpChannel( ( c1 >>> 16 ) & 0xff, ( c2 >>> 16 ) & 0xff, t );
   const b = lerpChannel( ( c1 >>> 8 ) & 0xff, ( c2 >>> 8 ) & 0xff, t );
@@ -271,7 +270,7 @@ export class DrawTag {
   public static readonly END_CLIP = 0x21;
 
   // Returns the size of the info buffer (in u32s) used by this tag.
-  public static info_size( drawTag: U32 ): U32 {
+  public static infoSize( drawTag: U32 ): U32 {
     return ( ( drawTag >>> 6 ) & 0xf ) >>> 0;
   }
 }
@@ -322,47 +321,47 @@ export class PathTag {
   public static readonly SEGMENT_MASK = 0x3;
 
   // Returns true if the tag is a segment.
-  public static is_path_segment( pathTag: U8 ): boolean {
-    return PathTag.path_segment_type( pathTag ) !== 0;
+  public static isPathSegment( pathTag: U8 ): boolean {
+    return PathTag.pathSegmentType( pathTag ) !== 0;
   }
 
   // Returns true if this is a 32-bit floating point segment.
-  public static is_f32( pathTag: U8 ): boolean {
+  public static isF32( pathTag: U8 ): boolean {
     return ( pathTag & PathTag.F32_BIT ) !== 0;
   }
 
   // Returns true if this segment ends a subpath.
-  public static is_subpath_end( pathTag: U8 ): boolean {
+  public static isSubpathEnd( pathTag: U8 ): boolean {
     return ( pathTag & PathTag.SUBPATH_END_BIT ) !== 0;
   }
 
   // Sets the subpath end bit.
-  public static with_subpath_end( pathTag: U8 ): U8 {
+  public static withSubpathEnd( pathTag: U8 ): U8 {
     return pathTag | PathTag.SUBPATH_END_BIT;
   }
 
   // Returns the segment type.
-  public static path_segment_type( pathTag: U8 ): U8 {
+  public static pathSegmentType( pathTag: U8 ): U8 {
     return pathTag & PathTag.SEGMENT_MASK;
   }
 }
 
 export class Layout {
 
-  public n_draw_objects: U32 = 0; // Number of draw objects.
-  public n_paths: U32 = 0; // Number of paths.
-  public n_clips: U32 = 0; // Number of clips.
-  public bin_data_start: U32 = 0; // Start of binning data.
-  public path_tag_base: U32 = 0; // Start of path tag stream.
-  public path_data_base: U32 = 0; // Start of path data stream.
-  public draw_tag_base: U32 = 0; // Start of draw tag stream.
-  public draw_data_base: U32 = 0; // Start of draw data stream.
-  public transform_base: U32 = 0; // Start of transform stream.
-  public linewidth_base: U32 = 0; // Start of linewidth stream.
+  public numDrawObjects: U32 = 0;
+  public numPaths: U32 = 0;
+  public numClips: U32 = 0;
+  public binningDataStart: U32 = 0;
+  public pathTagBase: U32 = 0;
+  public pathDataBase: U32 = 0;
+  public drawTagBase: U32 = 0;
+  public drawDataBase: U32 = 0;
+  public transformBase: U32 = 0;
+  public linewidthBase: U32 = 0;
 
-  public path_tags_size(): number {
-    const start = this.path_tag_base * 4;
-    const end = this.path_data_base * 4;
+  public getPathTagsSize(): number {
+    const start = this.pathTagBase * 4;
+    const end = this.pathDataBase * 4;
     return end - start;
   }
 }
@@ -370,22 +369,22 @@ export class Layout {
 export class SceneBufferSizes {
 
   // TODO: perhaps pooling objects like these?
-  public readonly path_tag_padded: number;
-  public readonly buffer_size: number;
+  public readonly pathTagPadded: number;
+  public readonly bufferSize: number;
 
   public constructor( encoding: Encoding ) {
-    const n_path_tags = encoding.pathTagsBuf.byteLength + encoding.n_open_clips;
+    const numPathTags = encoding.pathTagsBuf.byteLength + encoding.numOpenClips;
 
     // Padded length of the path tag stream in bytes.
-    this.path_tag_padded = align_up( n_path_tags, 4 * PATH_REDUCE_WG );
+    this.pathTagPadded = alignUp( numPathTags, 4 * PATH_REDUCE_WG );
 
     // Full size of the scene buffer in bytes.
-    this.buffer_size = this.path_tag_padded
-      + encoding.pathDataBuf.byteLength // u8
-      + encoding.drawTagsBuf.byteLength + encoding.n_open_clips * 4 // u32 in rust
-      + encoding.drawDataBuf.byteLength // u8
-      + encoding.transforms.length * 6 * 4 // 6xf32
-      + encoding.linewidths.length * 4; // f32
+    this.bufferSize = this.pathTagPadded
+                      + encoding.pathDataBuf.byteLength // u8
+                      + encoding.drawTagsBuf.byteLength + encoding.numOpenClips * 4 // u32 in rust
+                      + encoding.drawDataBuf.byteLength // u8
+                      + encoding.transforms.length * 6 * 4 // 6xf32
+                      + encoding.lineWidths.length * 4; // f32
 
     // NOTE: because of not using the glyphs feature, our patch_sizes are effectively zero
   }
@@ -396,56 +395,46 @@ export class SceneBufferSizes {
 // This data structure must be kept in sync with the definition in
 // shaders/shared/config.wgsl.
 export class ConfigUniform {
-  // Width of the scene in tiles.
-  public width_in_tiles = 0;
-  // Height of the scene in tiles.
-  public height_in_tiles = 0;
-  // Width of the target in pixels.
-  public target_width = 0;
-  // Height of the target in pixels.
-  public target_height = 0;
-  // The base background color applied to the target before any blends.
-  public base_color: ColorRGBA32 = 0;
-  // Layout of packed scene data.
+  public widthInTiles = 0;
+  public heightInTiles = 0;
+  public targetWidth = 0;
+  public targetHeight = 0;
+  public baseColor: ColorRGBA32 = 0;
   public layout: Layout;
-  // Size of binning buffer allocation (in u32s).
-  public binning_size = 0;
-  // Size of tile buffer allocation (in Tiles).
-  public tiles_size = 0;
-  // Size of segment buffer allocation (in PathSegments).
-  public segments_size = 0;
-  // Size of per-tile command list buffer allocation (in u32s).
-  public ptcl_size = 0;
+  public binningSize = 0; // Size of binning buffer allocation (in u32s).
+  public tilesSize = 0; // Size of tile buffer allocation (in Tiles).
+  public segmentsSize = 0; // Size of segment buffer allocation (in PathSegments).
+  public ptclSize = 0; // Size of per-tile command list buffer allocation (in u32s).
 
   public constructor( layout: Layout ) {
     this.layout = layout;
   }
 
-  public to_typed_array(): Uint8Array {
+  public toTypedArray(): Uint8Array {
     const buf = new ByteBuffer( CONFIG_UNIFORM_BYTES );
 
-    buf.pushU32( this.width_in_tiles );
-    buf.pushU32( this.height_in_tiles );
-    buf.pushU32( this.target_width );
-    buf.pushU32( this.target_height );
-    buf.pushU32( this.base_color );
+    buf.pushU32( this.widthInTiles );
+    buf.pushU32( this.heightInTiles );
+    buf.pushU32( this.targetWidth );
+    buf.pushU32( this.targetHeight );
+    buf.pushU32( this.baseColor );
 
     // Layout
-    buf.pushU32( this.layout.n_draw_objects );
-    buf.pushU32( this.layout.n_paths );
-    buf.pushU32( this.layout.n_clips );
-    buf.pushU32( this.layout.bin_data_start );
-    buf.pushU32( this.layout.path_tag_base );
-    buf.pushU32( this.layout.path_data_base );
-    buf.pushU32( this.layout.draw_tag_base );
-    buf.pushU32( this.layout.draw_data_base );
-    buf.pushU32( this.layout.transform_base );
-    buf.pushU32( this.layout.linewidth_base );
+    buf.pushU32( this.layout.numDrawObjects );
+    buf.pushU32( this.layout.numPaths );
+    buf.pushU32( this.layout.numClips );
+    buf.pushU32( this.layout.binningDataStart );
+    buf.pushU32( this.layout.pathTagBase );
+    buf.pushU32( this.layout.pathDataBase );
+    buf.pushU32( this.layout.drawTagBase );
+    buf.pushU32( this.layout.drawDataBase );
+    buf.pushU32( this.layout.transformBase );
+    buf.pushU32( this.layout.linewidthBase );
 
-    buf.pushU32( this.binning_size );
-    buf.pushU32( this.tiles_size );
-    buf.pushU32( this.segments_size );
-    buf.pushU32( this.ptcl_size );
+    buf.pushU32( this.binningSize );
+    buf.pushU32( this.tilesSize );
+    buf.pushU32( this.segmentsSize );
+    buf.pushU32( this.ptclSize );
 
     return buf.u8Array;
   }
@@ -454,7 +443,7 @@ export class ConfigUniform {
 export class WorkgroupCounts {
 
   // TODO: pooling
-  public use_large_path_scan: boolean;
+  public useLargePathScan: boolean;
   public path_reduce: WorkgroupSize;
   public path_reduce2: WorkgroupSize;
   public path_scan1: WorkgroupSize;
@@ -472,45 +461,45 @@ export class WorkgroupCounts {
   public coarse: WorkgroupSize;
   public fine: WorkgroupSize;
 
-  public constructor( layout: Layout, width_in_tiles: number, height_in_tiles: number, n_path_tags: number ) {
+  public constructor( layout: Layout, widthInTiles: number, heightInTiles: number, numPathTags: number ) {
 
-    const n_paths = layout.n_paths;
-    const n_draw_objects = layout.n_draw_objects;
-    const n_clips = layout.n_clips;
-    const path_tag_padded = align_up( n_path_tags, 4 * PATH_REDUCE_WG );
-    const path_tag_wgs = Math.floor( path_tag_padded / ( 4 * PATH_REDUCE_WG ) );
-    const use_large_path_scan = path_tag_wgs > PATH_REDUCE_WG;
-    const reduced_size = use_large_path_scan ? align_up( path_tag_wgs, PATH_REDUCE_WG ) : path_tag_wgs;
-    const draw_object_wgs = Math.floor( ( n_draw_objects + PATH_BBOX_WG - 1 ) / PATH_BBOX_WG );
-    const path_coarse_wgs = Math.floor( ( n_path_tags + PATH_COARSE_WG - 1 ) / PATH_COARSE_WG );
-    const clip_reduce_wgs = Math.floor( Math.max( 0, n_clips - 1 ) / CLIP_REDUCE_WG );
-    const clip_wgs = Math.floor( ( n_clips + CLIP_REDUCE_WG - 1 ) / CLIP_REDUCE_WG );
-    const path_wgs = Math.floor( ( n_paths + PATH_BBOX_WG - 1 ) / PATH_BBOX_WG );
-    const width_in_bins = Math.floor( ( width_in_tiles + 15 ) / 16 );
-    const height_in_bins = Math.floor( ( height_in_tiles + 15 ) / 16 );
+    const numPaths = layout.numPaths;
+    const numDrawObjects = layout.numDrawObjects;
+    const numClips = layout.numClips;
+    const pathTagAdded = alignUp( numPathTags, 4 * PATH_REDUCE_WG );
+    const pathTagSize = Math.floor( pathTagAdded / ( 4 * PATH_REDUCE_WG ) );
+    const useLargePathScan = pathTagSize > PATH_REDUCE_WG;
+    const reducedSize = useLargePathScan ? alignUp( pathTagSize, PATH_REDUCE_WG ) : pathTagSize;
+    const drawObjectSize = Math.floor( ( numDrawObjects + PATH_BBOX_WG - 1 ) / PATH_BBOX_WG );
+    const pathCoarseSize = Math.floor( ( numPathTags + PATH_COARSE_WG - 1 ) / PATH_COARSE_WG );
+    const clipReduceSize = Math.floor( Math.max( 0, numClips - 1 ) / CLIP_REDUCE_WG );
+    const clipSize = Math.floor( ( numClips + CLIP_REDUCE_WG - 1 ) / CLIP_REDUCE_WG );
+    const pathSize = Math.floor( ( numPaths + PATH_BBOX_WG - 1 ) / PATH_BBOX_WG );
+    const widthInBins = Math.floor( ( widthInTiles + 15 ) / 16 );
+    const heightInBins = Math.floor( ( heightInTiles + 15 ) / 16 );
 
-    this.use_large_path_scan = use_large_path_scan;
-    this.path_reduce = new WorkgroupSize( path_tag_wgs, 1, 1 );
+    this.useLargePathScan = useLargePathScan;
+    this.path_reduce = new WorkgroupSize( pathTagSize, 1, 1 );
     this.path_reduce2 = new WorkgroupSize( PATH_REDUCE_WG, 1, 1 );
-    this.path_scan1 = new WorkgroupSize( Math.floor( reduced_size / PATH_REDUCE_WG ), 1, 1 );
-    this.path_scan = new WorkgroupSize( path_tag_wgs, 1, 1 );
-    this.bbox_clear = new WorkgroupSize( draw_object_wgs, 1, 1 );
-    this.path_seg = new WorkgroupSize( path_coarse_wgs, 1, 1 );
-    this.draw_reduce = new WorkgroupSize( draw_object_wgs, 1, 1 );
-    this.draw_leaf = new WorkgroupSize( draw_object_wgs, 1, 1 );
-    this.clip_reduce = new WorkgroupSize( clip_reduce_wgs, 1, 1 );
-    this.clip_leaf = new WorkgroupSize( clip_wgs, 1, 1 );
-    this.binning = new WorkgroupSize( draw_object_wgs, 1, 1 );
-    this.tile_alloc = new WorkgroupSize( path_wgs, 1, 1 );
-    this.path_coarse = new WorkgroupSize( path_coarse_wgs, 1, 1 );
-    this.backdrop = new WorkgroupSize( path_wgs, 1, 1 );
-    this.coarse = new WorkgroupSize( width_in_bins, height_in_bins, 1 );
-    this.fine = new WorkgroupSize( width_in_tiles, height_in_tiles, 1 );
+    this.path_scan1 = new WorkgroupSize( Math.floor( reducedSize / PATH_REDUCE_WG ), 1, 1 );
+    this.path_scan = new WorkgroupSize( pathTagSize, 1, 1 );
+    this.bbox_clear = new WorkgroupSize( drawObjectSize, 1, 1 );
+    this.path_seg = new WorkgroupSize( pathCoarseSize, 1, 1 );
+    this.draw_reduce = new WorkgroupSize( drawObjectSize, 1, 1 );
+    this.draw_leaf = new WorkgroupSize( drawObjectSize, 1, 1 );
+    this.clip_reduce = new WorkgroupSize( clipReduceSize, 1, 1 );
+    this.clip_leaf = new WorkgroupSize( clipSize, 1, 1 );
+    this.binning = new WorkgroupSize( drawObjectSize, 1, 1 );
+    this.tile_alloc = new WorkgroupSize( pathSize, 1, 1 );
+    this.path_coarse = new WorkgroupSize( pathCoarseSize, 1, 1 );
+    this.backdrop = new WorkgroupSize( pathSize, 1, 1 );
+    this.coarse = new WorkgroupSize( widthInBins, heightInBins, 1 );
+    this.fine = new WorkgroupSize( widthInTiles, heightInTiles, 1 );
   }
 }
 
 export class BufferSize {
-  public constructor( public readonly length: number, public readonly bytes_per_element: number ) {}
+  public constructor( public readonly length: number, public readonly bytesPerElement: number ) {}
 
   // Creates a new buffer size from size in bytes (u32)
   public static from_size_in_bytes( size: number, bytes_per_element: number ): BufferSize {
@@ -523,13 +512,13 @@ export class BufferSize {
   }
 
   // Returns the size in bytes.
-  public size_in_bytes(): number {
-    return this.bytes_per_element * this.length;
+  public getSizeInBytes(): number {
+    return this.bytesPerElement * this.length;
   }
 
   // Returns the size in bytes aligned up to the given value.
-  public aligned_in_bytes( alignment: number ): number {
-    return align_up( this.size_in_bytes(), alignment );
+  public getAlignedInBytes( alignment: number ): number {
+    return alignUp( this.getSizeInBytes(), alignment );
   }
 }
 
@@ -589,30 +578,30 @@ export class BufferSizes {
   // layout: &Layout, workgroups: &WorkgroupCounts, n_path_tags: u32
   public constructor( layout: Layout, workgroups: WorkgroupCounts, n_path_tags: number ) {
 
-    const n_paths = layout.n_paths;
-    const n_draw_objects = layout.n_draw_objects;
-    const n_clips = layout.n_clips;
-    const path_tag_wgs = workgroups.path_reduce.x;
-    const reduced_size = workgroups.use_large_path_scan ? align_up( path_tag_wgs, PATH_REDUCE_WG ) : path_tag_wgs;
-    this.path_reduced = new BufferSize( reduced_size, PATH_MONOID_BYTES );
+    const numPaths = layout.numPaths;
+    const numDrawObjects = layout.numDrawObjects;
+    const numClips = layout.numClips;
+    const pathTagSize = workgroups.path_reduce.x;
+    const reducedSize = workgroups.useLargePathScan ? alignUp( pathTagSize, PATH_REDUCE_WG ) : pathTagSize;
+    this.path_reduced = new BufferSize( reducedSize, PATH_MONOID_BYTES );
     this.path_reduced2 = new BufferSize( PATH_REDUCE_WG, PATH_MONOID_BYTES );
-    this.path_reduced_scan = new BufferSize( path_tag_wgs, PATH_MONOID_BYTES );
-    this.path_monoids = new BufferSize( path_tag_wgs * PATH_REDUCE_WG, PATH_MONOID_BYTES );
-    this.path_bboxes = new BufferSize( n_paths, PATH_BBOX_BYTES );
+    this.path_reduced_scan = new BufferSize( pathTagSize, PATH_MONOID_BYTES );
+    this.path_monoids = new BufferSize( pathTagSize * PATH_REDUCE_WG, PATH_MONOID_BYTES );
+    this.path_bboxes = new BufferSize( numPaths, PATH_BBOX_BYTES );
     this.cubics = new BufferSize( n_path_tags, CUBIC_BYTES );
-    const draw_object_wgs = workgroups.draw_reduce.x;
-    this.draw_reduced = new BufferSize( draw_object_wgs, DRAW_MONOID_BYTES );
-    this.draw_monoids = new BufferSize( n_draw_objects, DRAW_MONOID_BYTES );
-    this.info = new BufferSize( layout.bin_data_start, 4 );
-    this.clip_inps = new BufferSize( n_clips, CLIP_BYTES );
-    this.clip_els = new BufferSize( n_clips, CLIP_ELEMENT_BYTES );
-    this.clip_bics = new BufferSize( Math.floor( n_clips / CLIP_REDUCE_WG ), CLIP_BIC_BYTES );
-    this.clip_bboxes = new BufferSize( n_clips, CLIP_BBOX_BYTES );
-    this.draw_bboxes = new BufferSize( n_paths, DRAW_BBOX_BYTES );
+    const drawObjectSize = workgroups.draw_reduce.x;
+    this.draw_reduced = new BufferSize( drawObjectSize, DRAW_MONOID_BYTES );
+    this.draw_monoids = new BufferSize( numDrawObjects, DRAW_MONOID_BYTES );
+    this.info = new BufferSize( layout.binningDataStart, 4 );
+    this.clip_inps = new BufferSize( numClips, CLIP_BYTES );
+    this.clip_els = new BufferSize( numClips, CLIP_ELEMENT_BYTES );
+    this.clip_bics = new BufferSize( Math.floor( numClips / CLIP_REDUCE_WG ), CLIP_BIC_BYTES );
+    this.clip_bboxes = new BufferSize( numClips, CLIP_BBOX_BYTES );
+    this.draw_bboxes = new BufferSize( numPaths, DRAW_BBOX_BYTES );
     this.bump_alloc = new BufferSize( 1, BUMP_ALLOCATORS_BYTES );
-    this.bin_headers = new BufferSize( draw_object_wgs * 256, BIN_HEADER_BYTES );
-    const n_paths_aligned = align_up( n_paths, 256 );
-    this.paths = new BufferSize( n_paths_aligned, PATH_BYTES );
+    this.bin_headers = new BufferSize( drawObjectSize * 256, BIN_HEADER_BYTES );
+    const numPathsAligned = alignUp( numPaths, 256 );
+    this.paths = new BufferSize( numPathsAligned, PATH_BYTES );
 
     // The following buffer sizes have been hand picked to accommodate the vello test scenes as
     // well as paris-30k. These should instead get derived from the scene layout using
@@ -628,48 +617,47 @@ export class BufferSizes {
 export class RenderConfig {
 
   // Workgroup counts for all compute pipelines.
-  public readonly workgroup_counts: WorkgroupCounts;
+  public readonly workgroupCounts: WorkgroupCounts;
 
   // Sizes of all buffer resources.
-  public readonly buffer_sizes: BufferSizes;
+  public readonly bufferSizes: BufferSizes;
 
-  // TODO: rename
-  public readonly gpu: ConfigUniform;
+  public readonly configUniform: ConfigUniform;
 
-  public readonly config_bytes: Uint8Array;
+  public readonly configBytes: Uint8Array;
 
   public constructor(
     layout: Layout,
     public readonly width: number,
     public readonly height: number,
-    public readonly base_color: ColorRGBA32
+    public readonly baseColor: ColorRGBA32
   ) {
     const configUniform = new ConfigUniform( layout );
 
-    const new_width = next_multiple_of( width, TILE_WIDTH );
-    const new_height = next_multiple_of( height, TILE_HEIGHT );
-    const width_in_tiles = new_width / TILE_WIDTH;
-    const height_in_tiles = new_height / TILE_HEIGHT;
-    const n_path_tags = layout.path_tags_size();
-    const workgroup_counts = new WorkgroupCounts( layout, width_in_tiles, height_in_tiles, n_path_tags );
-    const buffer_sizes = new BufferSizes( layout, workgroup_counts, n_path_tags );
+    const newWidth = nextMultipleOf( width, TILE_WIDTH );
+    const newHeight = nextMultipleOf( height, TILE_HEIGHT );
+    const widthInTiles = newWidth / TILE_WIDTH;
+    const heightInTiles = newHeight / TILE_HEIGHT;
+    const numPathTags = layout.getPathTagsSize();
+    const workgroupCounts = new WorkgroupCounts( layout, widthInTiles, heightInTiles, numPathTags );
+    const bufferSizes = new BufferSizes( layout, workgroupCounts, numPathTags );
 
-    this.workgroup_counts = workgroup_counts;
-    this.buffer_sizes = buffer_sizes;
+    this.workgroupCounts = workgroupCounts;
+    this.bufferSizes = bufferSizes;
 
-    configUniform.width_in_tiles = width_in_tiles;
-    configUniform.height_in_tiles = height_in_tiles;
-    configUniform.target_width = width;
-    configUniform.target_height = height;
-    configUniform.base_color = to_premul_u32( base_color );
-    configUniform.binning_size = buffer_sizes.bin_data.len() - layout.bin_data_start;
-    configUniform.tiles_size = buffer_sizes.tiles.len();
-    configUniform.segments_size = buffer_sizes.segments.len();
-    configUniform.ptcl_size = buffer_sizes.ptcl.len();
+    configUniform.widthInTiles = widthInTiles;
+    configUniform.heightInTiles = heightInTiles;
+    configUniform.targetWidth = width;
+    configUniform.targetHeight = height;
+    configUniform.baseColor = premultiplyRGBA8( baseColor );
+    configUniform.binningSize = bufferSizes.bin_data.len() - layout.binningDataStart;
+    configUniform.tilesSize = bufferSizes.tiles.len();
+    configUniform.segmentsSize = bufferSizes.segments.len();
+    configUniform.ptclSize = bufferSizes.ptcl.len();
 
-    this.gpu = configUniform;
+    this.configUniform = configUniform;
 
-    this.config_bytes = this.gpu.to_typed_array();
+    this.configBytes = this.configUniform.toTypedArray();
   }
 }
 
@@ -720,12 +708,12 @@ export class VelloImagePatch extends VelloPatch {
   // Filled in by Atlas
   public atlasSubImage: AtlasSubImage | null = null;
 
-  public constructor( draw_data_offset: number, public readonly image: EncodableImage ) {
-    super( draw_data_offset );
+  public constructor( drawDataOffset: number, public readonly image: EncodableImage ) {
+    super( drawDataOffset );
   }
 
-  public withOffset( draw_data_offset: number ): VelloImagePatch {
-    return new VelloImagePatch( draw_data_offset, this.image );
+  public withOffset( drawDataOffset: number ): VelloImagePatch {
+    return new VelloImagePatch( drawDataOffset, this.image );
   }
 }
 
@@ -737,15 +725,15 @@ export class VelloRampPatch extends VelloPatch {
   public id = -1;
 
   public constructor(
-    draw_data_offset: number,
+    drawDataOffset: number,
     public readonly stops: VelloColorStop[],
     public extend: Extend
   ) {
-    super( draw_data_offset );
+    super( drawDataOffset );
   }
 
-  public withOffset( draw_data_offset: number ): VelloRampPatch {
-    return new VelloRampPatch( draw_data_offset, this.stops, this.extend );
+  public withOffset( drawDataOffset: number ): VelloRampPatch {
+    return new VelloRampPatch( drawDataOffset, this.stops, this.extend );
   }
 }
 
@@ -777,19 +765,19 @@ export default class Encoding {
   public readonly drawTagsBuf = new ByteBuffer(); // draw_tags // NOTE: was u32 array (effectively) in rust
   public readonly drawDataBuf = new ByteBuffer(); // draw_data
   public readonly transforms: Affine[] = []; // Vec<Transform> in rust, Affine[] in js
-  public readonly linewidths: number[] = []; // Vec<f32> in rust, number[] in js
-  public n_paths = 0; // u32
-  public n_path_segments = 0; // u32,
-  public n_clips = 0; // u32
-  public n_open_clips = 0; // u32
+  public readonly lineWidths: number[] = []; // Vec<f32> in rust, number[] in js
+  public numPaths = 0; // u32
+  public numPathSegments = 0; // u32,
+  public numClips = 0; // u32
+  public numOpenClips = 0; // u32
   public readonly patches: ( VelloImagePatch | VelloRampPatch )[] = []; // Vec<Patch> in rust, Patch[] in js
-  public readonly color_stops: VelloColorStop[] = []; // Vec<ColorStop> in rust, VelloColorStop[] in js
+  public readonly colorStops: VelloColorStop[] = []; // Vec<ColorStop> in rust, VelloColorStop[] in js
 
   // Embedded PathEncoder
-  public readonly first_point: Vector2 = new Vector2( 0, 0 ); // mutated
+  public readonly firstPoint: Vector2 = new Vector2( 0, 0 ); // mutated
   public state: ( 0x1 | 0x2 | 0x3 ) = Encoding.PATH_START;
-  public n_encoded_segments = 0;
-  public is_fill = true;
+  public numEncodedSegments = 0;
+  public isFill = true;
 
   // State
   public static readonly PATH_START = 0x1;
@@ -809,31 +797,31 @@ export default class Encoding {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `let mut encoding${this.id}: Encoding = Encoding::new();\n` );
   }
 
-  public is_empty(): boolean {
+  public isEmpty(): boolean {
     return this.pathTagsBuf.byteLength === 0;
   }
 
   // Clears the encoding.
-  public reset( is_fragment: boolean ): void {
+  public reset( isFragment: boolean ): void {
     // Clears the rustEncoding too, reinitalizing it
-    // TODO: don't requre hardcoding TRUE for is_fragment?
+    // TODO: don't requre hardcoding TRUE for isFragment?
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding = `let mut encoding${this.id}: Encoding = Encoding::new();\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.reset(true);\n` );
     this.transforms.length = 0;
     this.pathTagsBuf.clear();
     this.pathDataBuf.clear();
-    this.linewidths.length = 0;
+    this.lineWidths.length = 0;
     this.drawDataBuf.clear();
     this.drawTagsBuf.clear();
-    this.n_paths = 0;
-    this.n_path_segments = 0;
-    this.n_clips = 0;
-    this.n_open_clips = 0;
+    this.numPaths = 0;
+    this.numPathSegments = 0;
+    this.numClips = 0;
+    this.numOpenClips = 0;
     this.patches.length = 0;
-    this.color_stops.length = 0;
-    if ( !is_fragment ) {
+    this.colorStops.length = 0;
+    if ( !isFragment ) {
       this.transforms.push( Affine.IDENTITY );
-      this.linewidths.push( -1.0 );
+      this.lineWidths.push( -1.0 );
     }
   }
 
@@ -841,25 +829,25 @@ export default class Encoding {
   public append( other: Encoding, transform: Affine | null = null ): void {
     assert && assert( !this.rustLock );
 
-    const initial_draw_data_length = this.drawDataBuf.byteLength;
+    const initialDrawDataLength = this.drawDataBuf.byteLength;
 
     this.pathTagsBuf.pushByteBuffer( other.pathTagsBuf );
     this.pathDataBuf.pushByteBuffer( other.pathDataBuf );
     this.drawTagsBuf.pushByteBuffer( other.drawTagsBuf );
     this.drawDataBuf.pushByteBuffer( other.drawDataBuf );
-    this.n_paths += other.n_paths;
-    this.n_path_segments += other.n_path_segments;
-    this.n_clips += other.n_clips;
-    this.n_open_clips += other.n_open_clips;
+    this.numPaths += other.numPaths;
+    this.numPathSegments += other.numPathSegments;
+    this.numClips += other.numClips;
+    this.numOpenClips += other.numOpenClips;
     if ( transform ) {
       this.transforms.push( ...other.transforms.map( t => transform.times( t ) ) );
     }
     else {
       this.transforms.push( ...other.transforms );
     }
-    this.linewidths.push( ...other.linewidths );
-    this.color_stops.push( ...other.color_stops );
-    this.patches.push( ...other.patches.map( patch => patch.withOffset( patch.draw_data_offset + initial_draw_data_length ) ) );
+    this.lineWidths.push( ...other.lineWidths );
+    this.colorStops.push( ...other.colorStops );
+    this.patches.push( ...other.patches.map( patch => patch.withOffset( patch.draw_data_offset + initialDrawDataLength ) ) );
 
     if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
       if ( !this.rustEncoding?.includes( `let mut encoding${other.id} ` ) ) {
@@ -869,20 +857,18 @@ export default class Encoding {
     }
   }
 
-  // Encodes a linewidth.
-  public encode_linewidth( linewidth: number ): void {
-    if ( this.linewidths[ this.linewidths.length - 1 ] !== linewidth ) {
-      sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linewidth(${rustF32( linewidth )});\n` );
+  public encodeLineWidth( lineWidth: number ): void {
+    if ( this.lineWidths[ this.lineWidths.length - 1 ] !== lineWidth ) {
+      sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linewidth(${rustF32( lineWidth )});\n` );
       this.pathTagsBuf.pushU8( PathTag.LINEWIDTH );
-      this.linewidths.push( linewidth );
+      this.lineWidths.push( lineWidth );
     }
   }
 
-  // Encodes a transform.
-  ///
-  // If the given transform is different from the current one, encodes it and
-  // returns true. Otherwise, encodes nothing and returns false.
-  public encode_transform( transform: Affine ): boolean {
+  /**
+   * @returns Whether a transform was added
+   */
+  public encodeTransform( transform: Affine ): boolean {
     const last = this.transforms[ this.transforms.length - 1 ];
     if ( !last || !last.equals( transform ) ) {
       sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_transform(${rustTransform( transform )});\n` );
@@ -895,33 +881,30 @@ export default class Encoding {
     }
   }
 
-  // If `is_fill` is true, all subpaths will
-  // be automatically closed.
-  public encode_path( is_fill: boolean ): void {
-    this.first_point.x = 0;
-    this.first_point.y = 0;
+  // If `isFill` is true, all subpaths will be automatically closed.
+  public encodePath( isFill: boolean ): void {
+    this.firstPoint.x = 0;
+    this.firstPoint.y = 0;
     this.state = Encoding.PATH_START;
-    this.n_encoded_segments = 0;
-    this.is_fill = is_fill;
+    this.numEncodedSegments = 0;
+    this.isFill = isFill;
 
     if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
       globalPathID++;
 
-      this.rustEncoding += `let mut path_encoder${globalPathID} = encoding${this.id}.encode_path(${is_fill});\n`;
+      this.rustEncoding += `let mut path_encoder${globalPathID} = encoding${this.id}.encode_path(${isFill});\n`;
     }
   }
 
-
-  // Encodes a move, starting a new subpath.
-  public move_to( x: number, y: number ): void {
+  public moveTo( x: number, y: number ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.move_to(${rustF32( x )}, ${rustF32( y )});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
-    if ( this.is_fill ) {
+    if ( this.isFill ) {
       this.close();
     }
-    this.first_point.x = x;
-    this.first_point.y = y;
+    this.firstPoint.x = x;
+    this.firstPoint.y = y;
     if ( this.state === Encoding.PATH_MOVE_TO ) {
       this.pathDataBuf.byteLength -= 8;
     }
@@ -935,42 +918,40 @@ export default class Encoding {
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
-  // Encodes a line.
-  public line_to( x: number, y: number ): void {
+  public lineTo( x: number, y: number ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.line_to(${rustF32( x )}, ${rustF32( y )});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
     if ( this.state === Encoding.PATH_START ) {
-      if ( this.n_encoded_segments === 0 ) {
+      if ( this.numEncodedSegments === 0 ) {
         // This copies the behavior of kurbo which treats an initial line, quad
         // or curve as a move.
-        this.move_to( x, y );
+        this.moveTo( x, y );
         sceneryLog && sceneryLog.Encoding && this.rustLock--;
         return;
       }
-      this.move_to( this.first_point.x, this.first_point.y );
+      this.moveTo( this.firstPoint.x, this.firstPoint.y );
     }
     this.pathDataBuf.pushF32( x );
     this.pathDataBuf.pushF32( y );
     this.pathTagsBuf.pushU8( PathTag.LINE_TO_F32 );
     this.state = Encoding.PATH_NONEMPTY_SUBPATH;
-    this.n_encoded_segments += 1;
+    this.numEncodedSegments += 1;
 
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
-  // Encodes a quadratic bezier.
-  public quad_to( x1: number, y1: number, x2: number, y2: number ): void {
+  public quadTo( x1: number, y1: number, x2: number, y2: number ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.quad_to(${rustF32( x1 )}, ${rustF32( y1 )}, ${rustF32( x2 )}, ${rustF32( y2 )});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
     if ( this.state === Encoding.PATH_START ) {
-      if ( this.n_encoded_segments === 0 ) {
-        this.move_to( x2, y2 );
+      if ( this.numEncodedSegments === 0 ) {
+        this.moveTo( x2, y2 );
         sceneryLog && sceneryLog.Encoding && this.rustLock--;
         return;
       }
-      this.move_to( this.first_point.x, this.first_point.y );
+      this.moveTo( this.firstPoint.x, this.firstPoint.y );
     }
     this.pathDataBuf.pushF32( x1 );
     this.pathDataBuf.pushF32( y1 );
@@ -978,23 +959,22 @@ export default class Encoding {
     this.pathDataBuf.pushF32( y2 );
     this.pathTagsBuf.pushU8( PathTag.QUAD_TO_F32 );
     this.state = Encoding.PATH_NONEMPTY_SUBPATH;
-    this.n_encoded_segments += 1;
+    this.numEncodedSegments += 1;
 
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
-  // Encodes a cubic bezier.
-  public cubic_to( x1: number, y1: number, x2: number, y2: number, x3: number, y3: number ): void {
+  public cubicTo( x1: number, y1: number, x2: number, y2: number, x3: number, y3: number ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.cubic_to(${rustF32( x1 )}, ${rustF32( y1 )}, ${rustF32( x2 )}, ${rustF32( y2 )}, ${rustF32( x3 )}, ${rustF32( y3 )});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
     if ( this.state === Encoding.PATH_START ) {
-      if ( this.n_encoded_segments === 0 ) {
-        this.move_to( x3, y3 );
+      if ( this.numEncodedSegments === 0 ) {
+        this.moveTo( x3, y3 );
         sceneryLog && sceneryLog.Encoding && this.rustLock--;
         return;
       }
-      this.move_to( this.first_point.x, this.first_point.y );
+      this.moveTo( this.firstPoint.x, this.firstPoint.y );
     }
     this.pathDataBuf.pushF32( x1 );
     this.pathDataBuf.pushF32( y1 );
@@ -1004,12 +984,11 @@ export default class Encoding {
     this.pathDataBuf.pushF32( y3 );
     this.pathTagsBuf.pushU8( PathTag.CUBIC_TO_F32 );
     this.state = Encoding.PATH_NONEMPTY_SUBPATH;
-    this.n_encoded_segments += 1;
+    this.numEncodedSegments += 1;
 
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
-  // Closes the current subpath.
   public close(): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.close();\n` );
 
@@ -1028,11 +1007,11 @@ export default class Encoding {
     }
     const lastX = this.pathDataBuf.fullF32Array[ len - 2 ];
     const lastY = this.pathDataBuf.fullF32Array[ len - 1 ];
-    if ( Math.abs( lastX - this.first_point.x ) > 1e-8 || Math.abs( lastY - this.first_point.y ) > 1e-8 ) {
-      this.pathDataBuf.pushF32( this.first_point.x );
-      this.pathDataBuf.pushF32( this.first_point.y );
-      this.pathTagsBuf.pushU8( PathTag.with_subpath_end( PathTag.LINE_TO_F32 ) );
-      this.n_encoded_segments += 1;
+    if ( Math.abs( lastX - this.firstPoint.x ) > 1e-8 || Math.abs( lastY - this.firstPoint.y ) > 1e-8 ) {
+      this.pathDataBuf.pushF32( this.firstPoint.x );
+      this.pathDataBuf.pushF32( this.firstPoint.y );
+      this.pathTagsBuf.pushU8( PathTag.withSubpathEnd( PathTag.LINE_TO_F32 ) );
+      this.numEncodedSegments += 1;
     }
     else {
       this.setSubpathEndTag();
@@ -1040,32 +1019,34 @@ export default class Encoding {
     this.state = Encoding.PATH_START;
   }
 
-  // Completes path encoding and returns the actual number of encoded segments.
-  ///
-  // If `insert_path_marker` is true, encodes the [PathTag::PATH] tag to signify
-  // the end of a complete path object. Setting this to false allows encoding
-  // multiple paths with differing transforms for a single draw object.
-  public finish( insert_path_marker: boolean ): number {
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.finish(${insert_path_marker});\n` );
+  /**
+   * Completes path encoding and returns the actual number of encoded segments.
+   *
+   * If `insertPathMarker` is true, encodes the [PathTag::PATH] tag to signify
+   * the end of a complete path object. Setting this to false allows encoding
+   * multiple paths with differing transforms for a single draw object.
+   */
+  public finish( insertPathMarker: boolean ): number {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `path_encoder${globalPathID}.finish(${insertPathMarker});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
-    if ( this.is_fill ) {
+    if ( this.isFill ) {
       this.close();
     }
     if ( this.state === Encoding.PATH_MOVE_TO ) {
       this.pathDataBuf.byteLength -= 8;
     }
-    if ( this.n_encoded_segments !== 0 ) {
+    if ( this.numEncodedSegments !== 0 ) {
       this.setSubpathEndTag();
-      this.n_path_segments += this.n_encoded_segments;
-      if ( insert_path_marker ) {
-        this.insert_path_marker();
+      this.numPathSegments += this.numEncodedSegments;
+      if ( insertPathMarker ) {
+        this.insertPathMarker();
       }
     }
 
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
 
-    return this.n_encoded_segments;
+    return this.numEncodedSegments;
   }
 
   public setSubpathEndTag(): void {
@@ -1073,46 +1054,46 @@ export default class Encoding {
       // In-place replace, add the "subpath end" flag
       const lastIndex = this.pathTagsBuf.byteLength - 1;
 
-      this.pathTagsBuf.fullU8Array[ lastIndex ] = PathTag.with_subpath_end( this.pathTagsBuf.fullU8Array[ lastIndex ] );
+      this.pathTagsBuf.fullU8Array[ lastIndex ] = PathTag.withSubpathEnd( this.pathTagsBuf.fullU8Array[ lastIndex ] );
     }
   }
 
   // Exposed for glyph handling
-  public insert_path_marker(): void {
+  public insertPathMarker(): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.path_tags.push(PathTag::PATH);\nencoding${this.id}.n_paths += 1;\n` );
     this.pathTagsBuf.pushU8( PathTag.PATH );
-    this.n_paths += 1;
+    this.numPaths += 1;
   }
 
   // Encodes a solid color brush.
-  public encode_color( color: ColorRGBA32 ): void {
+  public encodeColor( color: ColorRGBA32 ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_color(${rustDrawColor( color )});\n` );
 
     this.drawTagsBuf.pushU32( DrawTag.COLOR );
-    this.drawDataBuf.pushU32( to_premul_u32( color ) );
+    this.drawDataBuf.pushU32( premultiplyRGBA8( color ) );
   }
 
   // zero: => false, one => color, many => true (icky)
-  private add_ramp( color_stops: VelloColorStop[], alpha: number, extend: Extend ): null | true | ColorRGBA32 {
+  private addRamp( color_stops: VelloColorStop[], alpha: number, extend: Extend ): null | true | ColorRGBA32 {
     const offset = this.drawDataBuf.byteLength;
-    const stops_start = this.color_stops.length;
+    const stopsStart = this.colorStops.length;
     if ( alpha !== 1 ) {
-      this.color_stops.push( ...color_stops.map( stop => new VelloColorStop( stop.offset, with_alpha_factor( stop.color, alpha ) ) ) );
+      this.colorStops.push( ...color_stops.map( stop => new VelloColorStop( stop.offset, withAlphaFactor( stop.color, alpha ) ) ) );
     }
     else {
-      this.color_stops.push( ...color_stops );
+      this.colorStops.push( ...color_stops );
     }
-    const stops_end = this.color_stops.length;
+    const stopsEnd = this.colorStops.length;
 
-    const stopCount = stops_end - stops_start;
+    const stopCount = stopsEnd - stopsStart;
 
     if ( stopCount === 0 ) {
       return null;
     }
     else if ( stopCount === 1 ) {
-      assert && assert( this.color_stops.length );
+      assert && assert( this.colorStops.length );
 
-      return this.color_stops.pop()!.color;
+      return this.colorStops.pop()!.color;
     }
     else {
       this.patches.push( new VelloRampPatch( offset, color_stops, extend ) );
@@ -1120,15 +1101,13 @@ export default class Encoding {
     }
   }
 
-  // Encodes a linear gradient brush.
-  public encode_linear_gradient( x0: number, y0: number, x1: number, y1: number, color_stops: VelloColorStop[], alpha: number, extend: Extend ): void {
-    // TODO: not just pad
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linear_gradient(DrawLinearGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], p1: [${rustF32( x1 )}, ${rustF32( y1 )}]}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${ExtendMap[ extend ]});\n` );
+  public encodeLinearGradient( x0: number, y0: number, x1: number, y1: number, colorStops: VelloColorStop[], alpha: number, extend: Extend ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_linear_gradient(DrawLinearGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], p1: [${rustF32( x1 )}, ${rustF32( y1 )}]}, ${rustColorStops( colorStops )}, ${rustF32( alpha )}, ${ExtendMap[ extend ]});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
-    const result = this.add_ramp( color_stops, alpha, extend );
+    const result = this.addRamp( colorStops, alpha, extend );
     if ( result === null ) {
-      this.encode_color( 0 );
+      this.encodeColor( 0 );
     }
     else if ( result === true ) {
       this.drawTagsBuf.pushU32( DrawTag.LINEAR_GRADIENT );
@@ -1139,28 +1118,25 @@ export default class Encoding {
       this.drawDataBuf.pushF32( y1 );
     }
     else {
-      this.encode_color( result );
+      this.encodeColor( result );
     }
 
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
-  // TODO: note the parameter order?
-  // Encodes a radial gradient brush.
-  public encode_radial_gradient( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number, color_stops: VelloColorStop[], alpha: number, extend: Extend ): void {
-    // TODO: not just pad
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_radial_gradient(DrawRadialGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], r0: ${rustF32( r0 )}, p1: [${rustF32( x1 )}, ${rustF32( y1 )}], r1: ${rustF32( r1 )}}, ${rustColorStops( color_stops )}, ${rustF32( alpha )}, ${ExtendMap[ extend ]});\n` );
+  public encodeRadialGradient( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number, colorStops: VelloColorStop[], alpha: number, extend: Extend ): void {
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_radial_gradient(DrawRadialGradient {index: 0, p0: [${rustF32( x0 )}, ${rustF32( y0 )}], r0: ${rustF32( r0 )}, p1: [${rustF32( x1 )}, ${rustF32( y1 )}], r1: ${rustF32( r1 )}}, ${rustColorStops( colorStops )}, ${rustF32( alpha )}, ${ExtendMap[ extend ]});\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock++;
 
     // Match Skia's epsilon for radii comparison
     const SKIA_EPSILON = 1 / ( ( 1 << 12 ) >>> 0 );
     if ( x0 === x1 && y0 === y1 && Math.abs( r0 - r1 ) < SKIA_EPSILON ) {
-      this.encode_color( 0 );
+      this.encodeColor( 0 );
     }
     else {
-      const result = this.add_ramp( color_stops, alpha, extend );
+      const result = this.addRamp( colorStops, alpha, extend );
       if ( result === null ) {
-        this.encode_color( 0 );
+        this.encodeColor( 0 );
       }
       else if ( result === true ) {
         this.drawTagsBuf.pushU32( DrawTag.RADIAL_GRADIENT );
@@ -1173,15 +1149,14 @@ export default class Encoding {
         this.drawDataBuf.pushF32( r1 );
       }
       else {
-        this.encode_color( result );
+        this.encodeColor( result );
       }
     }
 
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
-  // Encodes an image brush.
-  public encode_image( image: EncodableImage ): void {
+  public encodeImage( image: EncodableImage ): void {
     if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
       let u8array;
       if ( image instanceof BufferImage ) {
@@ -1212,8 +1187,7 @@ export default class Encoding {
     this.drawDataBuf.pushU32( ( ( image.width << 16 ) >>> 0 ) | ( image.height & 0xFFFF ) );
   }
 
-  // Encodes a begin clip command.
-  public encode_begin_clip( mix: Mix, compose: Compose, alpha: number ): void {
+  public encodeBeginClip( mix: Mix, compose: Compose, alpha: number ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(BlendMode {mix: ${MixMap[ mix ]}, compose: ${ComposeMap[ compose ]}}, ${rustF32( alpha )});\n` );
     this.drawTagsBuf.pushU32( DrawTag.BEGIN_CLIP );
 
@@ -1221,64 +1195,64 @@ export default class Encoding {
     this.drawDataBuf.pushU32( ( ( mix << 8 ) >>> 0 ) | compose );
     this.drawDataBuf.pushF32( alpha );
 
-    this.n_clips += 1;
-    this.n_open_clips += 1;
+    this.numClips += 1;
+    this.numOpenClips += 1;
   }
 
-  // Encodes an end clip command.
-  public encode_end_clip(): void {
+  public encodeEndClip(): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_end_clip();\n` );
-    if ( this.n_open_clips > 0 ) {
+    if ( this.numOpenClips > 0 ) {
       this.drawTagsBuf.pushU32( DrawTag.END_CLIP );
       // This is a dummy path, and will go away with the new clip impl.
       this.pathTagsBuf.pushU8( PathTag.PATH );
-      this.n_paths += 1;
-      this.n_clips += 1;
-      this.n_open_clips -= 1;
+      this.numPaths += 1;
+      this.numClips += 1;
+      this.numOpenClips -= 1;
     }
   }
 
   // TODO: make this workaround not needed
-  public finalize_scene(): void {
-    this.encode_path( true );
-    this.move_to( 0, 0 );
-    this.line_to( 1, 0 );
+  public finalizeScene(): void {
+    this.encodePath( true );
+    this.moveTo( 0, 0 );
+    this.lineTo( 1, 0 );
     this.close();
     this.finish( true );
   }
 
-  public encode_bounds( bounds: Bounds2 ): number {
-    return this.encode_rect( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
+  public encodeBounds( bounds: Bounds2 ): number {
+    return this.encodeRect( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
   }
 
-  public encode_rect( x0: number, y0: number, x1: number, y1: number ): number {
-    this.encode_path( true );
-    this.move_to( x0, y0 );
-    this.line_to( x1, y0 );
-    this.line_to( x1, y1 );
-    this.line_to( x0, y1 );
+  public encodeRect( x0: number, y0: number, x1: number, y1: number ): number {
+    this.encodePath( true );
+    this.moveTo( x0, y0 );
+    this.lineTo( x1, y0 );
+    this.lineTo( x1, y1 );
+    this.lineTo( x0, y1 );
     this.close();
     return this.finish( true );
   }
 
   // To encode a kite shape, we'll need to split arcs/elliptical-arcs into bezier curves
-  public encode_kite_shape( shape: Shape, isFill: boolean, insertPathMarker: boolean, tolerance: number ): number {
-    this.encode_path( isFill );
+  public encodeShape( shape: Shape, isFill: boolean, insertPathMarker: boolean, tolerance: number ): number {
+    this.encodePath( isFill );
 
+    // TODO: better code that isn't tons of forEach's that will kill our GC and add jank
     shape.subpaths.forEach( subpath => {
       if ( subpath.isDrawable() ) {
         const startPoint = subpath.getFirstSegment().start;
-        this.move_to( startPoint.x, startPoint.y );
+        this.moveTo( startPoint.x, startPoint.y );
 
         subpath.segments.forEach( segment => {
           if ( segment instanceof Line ) {
-            this.line_to( segment.end.x, segment.end.y );
+            this.lineTo( segment.end.x, segment.end.y );
           }
           else if ( segment instanceof Quadratic ) {
-            this.quad_to( segment.control.x, segment.control.y, segment.end.x, segment.end.y );
+            this.quadTo( segment.control.x, segment.control.y, segment.end.x, segment.end.y );
           }
           else if ( segment instanceof Cubic ) {
-            this.cubic_to( segment.control1.x, segment.control1.y, segment.control2.x, segment.control2.y, segment.end.x, segment.end.y );
+            this.cubicTo( segment.control1.x, segment.control1.y, segment.control2.x, segment.control2.y, segment.end.x, segment.end.y );
           }
           else if ( segment instanceof Arc || segment instanceof EllipticalArc ) {
             // arc or elliptical arc, split with kurbo's setup (not the most optimal).
@@ -1310,7 +1284,7 @@ export default class Encoding {
               // mutates middle also
               const control = start.plus( end ).multiplyScalar( -0.5 ).add( middle.multiplyScalar( 2 ) );
 
-              this.quad_to( control.x, control.y, end.x, end.y );
+              this.quadTo( control.x, control.y, end.x, end.y );
             } );
           }
         } );
@@ -1324,17 +1298,17 @@ export default class Encoding {
     return this.finish( insertPathMarker );
   }
 
-  public print_debug(): void {
+  public printDebug(): void {
     console.log( `path_tags\n${[ ...this.pathTagsBuf.u8Array ].map( x => x.toString() ).join( ', ' )}` );
     console.log( `path_data\n${[ ...this.pathDataBuf.u8Array ].map( x => x.toString() ).join( ', ' )}` );
     console.log( `draw_tags\n${[ ...this.drawTagsBuf.u8Array ].map( x => x.toString() ).join( ', ' )}` );
     console.log( `draw_data\n${[ ...this.drawDataBuf.u8Array ].map( x => x.toString() ).join( ', ' )}` );
     console.log( `transforms\n${this.transforms.map( x => `_ a00:${x.a00} a10:${x.a10} a01:${x.a01} a11:${x.a11} a02:${x.a02} a12:${x.a12}_` ).join( '\n' )}` );
-    console.log( `linewidths\n${this.linewidths.map( x => x.toString() ).join( ', ' )}` );
-    console.log( `n_paths\n${this.n_paths}` );
-    console.log( `n_path_segments\n${this.n_path_segments}` );
-    console.log( `n_clips\n${this.n_clips}` );
-    console.log( `n_open_clips\n${this.n_open_clips}` );
+    console.log( `linewidths\n${this.lineWidths.map( x => x.toString() ).join( ', ' )}` );
+    console.log( `n_paths\n${this.numPaths}` );
+    console.log( `n_path_segments\n${this.numPathSegments}` );
+    console.log( `n_clips\n${this.numClips}` );
+    console.log( `n_open_clips\n${this.numOpenClips}` );
   }
 
   // Resolves late bound resources and packs an encoding. Returns the packed
@@ -1347,39 +1321,39 @@ export default class Encoding {
     deviceContext.atlas.updatePatches( this.patches.filter( patch => patch instanceof VelloImagePatch ) );
 
     const layout = new Layout();
-    layout.n_paths = this.n_paths;
-    layout.n_clips = this.n_clips;
+    layout.numPaths = this.numPaths;
+    layout.numClips = this.numClips;
 
     const sceneBufferSizes = new SceneBufferSizes( this );
-    const buffer_size = sceneBufferSizes.buffer_size;
-    const path_tag_padded = sceneBufferSizes.path_tag_padded;
+    const bufferSize = sceneBufferSizes.bufferSize;
+    const pathTagPadded = sceneBufferSizes.pathTagPadded;
 
-    const dataBuf = new ByteBuffer( sceneBufferSizes.buffer_size );
+    const dataBuf = new ByteBuffer( sceneBufferSizes.bufferSize );
 
     // Path tag stream
-    layout.path_tag_base = size_to_words( dataBuf.byteLength );
+    layout.pathTagBase = sizeToWords( dataBuf.byteLength );
     dataBuf.pushByteBuffer( this.pathTagsBuf );
     // TODO: what if we... just error if there are open clips? Why are we padding the streams to make this work?
-    for ( let i = 0; i < this.n_open_clips; i++ ) {
+    for ( let i = 0; i < this.numOpenClips; i++ ) {
       dataBuf.pushU8( PathTag.PATH );
     }
-    dataBuf.byteLength = path_tag_padded;
+    dataBuf.byteLength = pathTagPadded;
 
     // Path data stream
-    layout.path_data_base = size_to_words( dataBuf.byteLength );
+    layout.pathDataBase = sizeToWords( dataBuf.byteLength );
     dataBuf.pushByteBuffer( this.pathDataBuf );
 
     // Draw tag stream
-    layout.draw_tag_base = size_to_words( dataBuf.byteLength );
+    layout.drawTagBase = sizeToWords( dataBuf.byteLength );
     // Bin data follows draw info
-    layout.bin_data_start = _.sum( this.drawTagsBuf.u32Array.map( DrawTag.info_size ) );
+    layout.binningDataStart = _.sum( this.drawTagsBuf.u32Array.map( DrawTag.infoSize ) );
     dataBuf.pushByteBuffer( this.drawTagsBuf );
-    for ( let i = 0; i < this.n_open_clips; i++ ) {
+    for ( let i = 0; i < this.numOpenClips; i++ ) {
       dataBuf.pushU32( DrawTag.END_CLIP );
     }
 
     // Draw data stream
-    layout.draw_data_base = size_to_words( dataBuf.byteLength );
+    layout.drawDataBase = sizeToWords( dataBuf.byteLength );
     {
       const drawDataOffset = dataBuf.byteLength;
       dataBuf.pushByteBuffer( this.drawDataBuf );
@@ -1389,11 +1363,11 @@ export default class Encoding {
         let bytes;
 
         if ( patch instanceof VelloRampPatch ) {
-          bytes = u32_to_bytes( ( ( patch.id << 2 ) >>> 0 ) | patch.extend );
+          bytes = u32ToBytes( ( ( patch.id << 2 ) >>> 0 ) | patch.extend );
         }
         else {
           assert && assert( patch.atlasSubImage );
-          bytes = u32_to_bytes( ( patch.atlasSubImage!.x << 16 ) >>> 0 | patch.atlasSubImage!.y );
+          bytes = u32ToBytes( ( patch.atlasSubImage!.x << 16 ) >>> 0 | patch.atlasSubImage!.y );
           // TODO: assume the image fit (if not, we'll need to do something else)
         }
 
@@ -1404,7 +1378,7 @@ export default class Encoding {
 
     // Transform stream
     // TODO: Float32Array instead of Affine?
-    layout.transform_base = size_to_words( dataBuf.byteLength );
+    layout.transformBase = sizeToWords( dataBuf.byteLength );
     for ( let i = 0; i < this.transforms.length; i++ ) {
       const transform = this.transforms[ i ];
       dataBuf.pushF32( transform.a00 );
@@ -1416,14 +1390,14 @@ export default class Encoding {
     }
 
     // Linewidth stream
-    layout.linewidth_base = size_to_words( dataBuf.byteLength );
-    for ( let i = 0; i < this.linewidths.length; i++ ) {
-      dataBuf.pushF32( this.linewidths[ i ] );
+    layout.linewidthBase = sizeToWords( dataBuf.byteLength );
+    for ( let i = 0; i < this.lineWidths.length; i++ ) {
+      dataBuf.pushF32( this.lineWidths[ i ] );
     }
 
-    layout.n_draw_objects = layout.n_paths;
+    layout.numDrawObjects = layout.numPaths;
 
-    if ( dataBuf.byteLength !== buffer_size ) {
+    if ( dataBuf.byteLength !== bufferSize ) {
       throw new Error( 'buffer size mismatch' );
     }
 

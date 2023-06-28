@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { lerp_rgba8, scenery, to_premul_u32, VelloColorStop, VelloRampPatch } from '../../imports.js';
+import { lerpRGBA8, scenery, premultiplyRGBA8, VelloColorStop, VelloRampPatch } from '../../imports.js';
 
 const NUM_RAMP_SAMPLES = 512;
 const STARTING_RAMPS = 32;
@@ -151,7 +151,7 @@ export default class Ramps {
         }
       }
       const du = this_u - last_u;
-      const u32 = to_premul_u32( du < 1e-9 ? this_c : lerp_rgba8( last_c, this_c, ( u - last_u ) / du ) );
+      const u32 = premultiplyRGBA8( du < 1e-9 ? this_c : lerpRGBA8( last_c, this_c, ( u - last_u ) / du ) );
       this.arrayView.setUint32( offset + i * 4, u32, false );
     }
   }

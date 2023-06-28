@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { F32, f32_to_bytes, scenery, U32, u32_to_bytes, U8 } from '../../imports.js';
+import { F32, f32ToBytes, scenery, U32, u32ToBytes, U8 } from '../../imports.js';
 
 export default class ByteBuffer {
 
@@ -67,7 +67,7 @@ export default class ByteBuffer {
       this._f32Array[ this._byteLength / 4 ] = f32;
     }
     else {
-      const bytes = f32_to_bytes( f32 );
+      const bytes = f32ToBytes( f32 );
       this._u8Array.set( bytes, this._byteLength );
     }
     this._byteLength += 4;
@@ -80,7 +80,7 @@ export default class ByteBuffer {
       this._u32Array[ this._byteLength / 4 ] = u32;
     }
     else {
-      const bytes = u32_to_bytes( u32 );
+      const bytes = u32ToBytes( u32 );
       this._u8Array.set( bytes, this._byteLength );
     }
     this._byteLength += 4;
@@ -89,7 +89,7 @@ export default class ByteBuffer {
   public pushReversedU32( u32: U32 ): void {
     this.ensureSpaceFor( 4 );
 
-    const bytes = u32_to_bytes( u32 ).reverse();
+    const bytes = u32ToBytes( u32 ).reverse();
     this._u8Array.set( bytes, this._byteLength );
 
     this._byteLength += 4;
