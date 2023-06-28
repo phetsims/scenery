@@ -204,7 +204,9 @@ export default class Atlas {
             y: atlasSubImage.y,
             z: 0
           },
-          premultipliedAlpha: true
+          // TODO: WAIT, are we NOT supposed to premultiply images? It's working nicely with this, perhaps our
+          // TODO: ImageBitmap is already premultipled (with the createImageBitmap) and we were double-premultiplying?
+          premultipliedAlpha: false
         }, {
           width: image.width,
           height: image.height,
