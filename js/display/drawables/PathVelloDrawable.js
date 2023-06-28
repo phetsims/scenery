@@ -81,6 +81,9 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
       return false;
     }
 
+    // TODO: consider caching the encoded shape, and only re-encoding if the shape changes. We should be able to
+    // TODO: append out-of-order?
+
     this.encoding.reset( true );
 
     const node = this.node;
@@ -90,8 +93,10 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
       if ( node.hasFill() ) {
         this.encoding.encode_matrix( matrix );
         this.encoding.encode_linewidth( -1 );
-        this.encoding.encode_kite_shape( node.shape, true, true, 1 );
-        this.encoding.encode_paint( node.fill );
+        const numEncodedSegments = this.encoding.encode_kite_shape( node.shape, true, true, 1 );
+        if ( numEncodedSegments ) {
+          this.encoding.encode_paint( node.fill );
+        }
       }
       if ( node.hasStroke() ) {
         this.encoding.encode_matrix( matrix );
@@ -102,19 +107,12 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
           shape = node.shape.getDashedShape( node.lineDash, node.lineDashOffset );
         }
         this.encoding.encode_linewidth( node.lineWidth );
-        this.encoding.encode_kite_shape( shape, false, true, 1 );
-        this.encoding.encode_paint( node.stroke );
+        const numEncodedSegments = this.encoding.encode_kite_shape( shape, false, true, 1 );
+        if ( numEncodedSegments ) {
+          this.encoding.encode_paint( node.stroke );
+        }
       }
     }
-
-    // TODO: more fine-grained dirtying (have a path encoding perhaps?
-    // if ( this.paintDirty ) {
-    //   //
-    // }
-    //
-    // if ( this.dirtyShape ) {
-    //   //
-    // }
 
     this.setToCleanState();
     this.cleanPaintableState();
