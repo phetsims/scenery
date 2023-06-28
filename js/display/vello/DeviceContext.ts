@@ -175,7 +175,7 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
       return null;
     }
 
-    let device: GPUDevice;
+    let device: GPUDevice | null = null;
 
     try {
       const adapter = await navigator.gpu?.requestAdapter( {
@@ -188,11 +188,11 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
 
       device = await adapter?.requestDevice( {
         requiredFeatures: DeviceContext.supportsBGRATextureStorage ? [ 'bgra8unorm-storage' ] : []
-      } );
+      } ) || null;
     }
-    catch ( err ) {
+    catch( err ) {
       // For now, do nothing (WebGPU not enabled message perhaps?)
-      // console.log( err );
+      console.log( err );
     }
 
     DeviceContext.completedDeviceAttempt = true;
@@ -242,7 +242,7 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
   }
 }
 
-let velloLock = asyncLoader.createLock( { name: 'vello' } );
+const velloLock = asyncLoader.createLock( { name: 'vello' } );
 ( async () => {
   // This will cache it
   await DeviceContext.isVelloSupported();
