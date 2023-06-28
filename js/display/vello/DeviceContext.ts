@@ -15,6 +15,7 @@ export default class DeviceContext {
   public readonly ramps: Ramps;
   public readonly atlas: Atlas;
   public readonly preferredCanvasFormat: GPUTextureFormat; // TODO: support other formats?
+  public readonly preferredStorageFormat: 'bgra8unorm' | 'rgba8unorm';
 
   public static currentDevice: GPUDevice | null = null;
   public static currentDeviceContext: DeviceContext | null = null;
@@ -32,9 +33,10 @@ export default class DeviceContext {
     VelloShader.getShaders( device );
 
     this.preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
+    this.preferredStorageFormat = this.preferredCanvasFormat === 'bgra8unorm' ? 'bgra8unorm' : 'rgba8unorm';
     if ( this.preferredCanvasFormat === 'bgra8unorm' && !device.features.has( 'bgra8unorm-storage' ) ) {
       // TODO: will we need a texture copy?
-      this.preferredCanvasFormat = 'rgba8unorm';
+      this.preferredStorageFormat = 'rgba8unorm';
     }
 
     // TODO: handle context losses, reconstruct with the device
@@ -65,7 +67,9 @@ export default class DeviceContext {
     context.configure( {
       device: this.device,
       format: this.preferredCanvasFormat,
-      usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING,
+      usage: GPUTextureUsage.COPY_SRC |
+             GPUTextureUsage.RENDER_ATTACHMENT |
+             ( this.preferredCanvasFormat === this.preferredStorageFormat ? GPUTextureUsage.STORAGE_BINDING : 0 ),
 
       // Very important, otherwise we're opaque by default and alpha is ignored. We need to stack!!!
       alphaMode: 'premultiplied'

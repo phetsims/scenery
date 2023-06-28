@@ -14,11 +14,6 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   const shaders = VelloShader.getShaders( device );
 
-  const preferredFormat = outTexture.format;
-  if ( preferredFormat !== 'bgra8unorm' && preferredFormat !== 'rgba8unorm' ) {
-    throw new Error( 'unsupported format' );
-  }
-
   const renderConfig = renderInfo.renderConfig!;
   assert && assert( renderConfig );
 
@@ -196,24 +191,6 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
   bufferPool.freeBuffer( bumpBuffer );
 
 
-  // NOTE: This is relevant code for if we want to render to a different texture (how to create it)
-  // const outImage = device.createTexture( {
-  //   label: 'outImage',
-  //   size: {
-  //     width: width,
-  //     height: height,
-  //     depthOrArrayLayers: 1
-  //   },
-  //   format: actualFormat,
-  //   // TODO: wtf, usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
-  //   usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING
-  // } );
-  // const outImageView = outImage.createView( {
-  //   label: 'outImageView',
-  //   format: actualFormat,
-  //   dimension: '2d'
-  // } );
-
   deviceContext.ramps.updateTexture();
   deviceContext.atlas.updateTexture();
 
@@ -223,21 +200,58 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
   const atlasTextureView = deviceContext.atlas.textureView!;
   assert && assert( atlasTextureView );
 
+  // NOTE: This is relevant code for if we want to render to a different texture (how to create it)
+
+  const canvasTextureFormat = outTexture.format;
+  if ( canvasTextureFormat !== 'bgra8unorm' && canvasTextureFormat !== 'rgba8unorm' ) {
+    throw new Error( 'unsupported format' );
+  }
+
+  const canOutputToCanvas = canvasTextureFormat === deviceContext.preferredStorageFormat;
+  let fineOutputTextureView: GPUTextureView;
+  let fineOutputTexture: GPUTexture | null = null;
+
+  if ( canOutputToCanvas ) {
+    fineOutputTextureView = outTexture.createView();
+  }
+  else {
+    fineOutputTexture = device.createTexture( {
+      label: 'outputTexture',
+      size: {
+        width: outTexture.width,
+        height: outTexture.height,
+        depthOrArrayLayers: 1
+      },
+      format: deviceContext.preferredStorageFormat,
+      // TODO: wtf, usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
+      usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING
+    } );
+    fineOutputTextureView = fineOutputTexture.createView( {
+      label: 'outputTextureView',
+      format: deviceContext.preferredStorageFormat,
+      dimension: '2d'
+    } );
+  }
+
   // Have the fine-rasterization shader use the preferred format as output (for now)
-  ( preferredFormat === 'bgra8unorm' ? shaders.fine_bgra8unorm : shaders.fine_rgba8unorm ).dispatch( encoder, workgroupCounts.fine, [
-    configBuffer, tileBuffer, segmentsBuffer, outTexture.createView(), ptclBuffer, rampTextureView, infoBinDataBuffer, atlasTextureView
+  ( deviceContext.preferredStorageFormat === 'bgra8unorm' ? shaders.fine_bgra8unorm : shaders.fine_rgba8unorm ).dispatch( encoder, workgroupCounts.fine, [
+    configBuffer, tileBuffer, segmentsBuffer, fineOutputTextureView, ptclBuffer, rampTextureView, infoBinDataBuffer, atlasTextureView
   ] );
 
-  // NOTE: bgra8unorm vs rgba8unorm can't be copied, so this depends on the platform?
-  // encoder.copyTextureToTexture( {
-  //   texture: outImage
-  // }, {
-  //   texture: context.getCurrentTexture()
-  // }, {
-  //   width: width,
-  //   height: height,
-  //   depthOrArrayLayers: 1
-  // } );
+  if ( !canOutputToCanvas ) {
+    assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );
+
+    // NOTE: bgra8unorm vs rgba8unorm can't be copied, so this depends on the platform?
+    encoder.copyTextureToTexture( {
+      texture: fineOutputTexture!
+    }, {
+      texture: outTexture
+    }, {
+      width: outTexture.width,
+      height: outTexture.height,
+      depthOrArrayLayers: 1
+    } );
+  }
 
   // TODO: are these early frees acceptable? Are we going to badly reuse things?
   bufferPool.freeBuffer( tileBuffer );
