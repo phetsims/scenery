@@ -30,12 +30,9 @@ export default class DeviceContext {
 
   public lostEmitter = new TinyEmitter();
 
-  public constructor( public device: GPUDevice ) {
+  private constructor( public device: GPUDevice ) {
     this.ramps = new Ramps( device );
     this.atlas = new Atlas( device );
-
-    // Trigger shader compilation before anything (will be cached)
-    VelloShader.getShaders( device );
 
     this.preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
     this.preferredStorageFormat = this.preferredCanvasFormat === 'bgra8unorm' ? 'bgra8unorm' : 'rgba8unorm';
@@ -156,7 +153,7 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
 
   // TODO: have something call this early, so the await is not needed?
   public static async isVelloSupported(): Promise<boolean> {
-    return !!await DeviceContext.getDevice();
+    return !!await DeviceContext.getDeviceContext();
   }
 
   // TODO: have a Property perhaps?
@@ -199,6 +196,22 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
 
     if ( device ) {
       DeviceContext.currentDevice = device;
+
+      try {
+        // TODO: push error validation, see https://toji.dev/webgpu-best-practices/error-handling.html
+
+        // Trigger shader compilation before anything (will be cached)
+        VelloShader.getShaders( device );
+      }
+      catch( err ) {
+        console.log( err );
+
+        // Null things out!
+        DeviceContext.couldNotGetDevice = true;
+        DeviceContext.currentDevice = null;
+
+        return null;
+      }
     }
     else {
       DeviceContext.couldNotGetDevice = true;
@@ -223,8 +236,7 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
     }
   }
 
-  // TODO: rename
-  public static async create(): Promise<DeviceContext | null> {
+  public static async getDeviceContext(): Promise<DeviceContext | null> {
     if ( DeviceContext.currentDeviceContext ) {
       return DeviceContext.currentDeviceContext;
     }
