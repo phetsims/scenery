@@ -30,7 +30,7 @@ export default class PathFont {
   public unitsPerEM = 0;
 
   private swashFont: SwashFont | null = null;
-  private readonly glyphCache: Map<number, Shape> = new Map<number, Shape>();
+  private readonly glyphCache: Map<number, Shape | null> = new Map<number, Shape | null>();
 
   public constructor( dataString: string ) {
     if ( loaded ) {
@@ -52,24 +52,36 @@ export default class PathFont {
     this.unitsPerEM = this.swashFont.get_units_per_em();
   }
 
-  public shapeText( str: string, ltr: boolean ): PathGlyph[] {
+  // If ANY glyph isn't included, we bail out, and null is returned
+  public shapeText( str: string, ltr: boolean ): PathGlyph[] | null {
     if ( !this.swashFont ) {
       throw new Error( 'Font not loaded yet' );
     }
 
-    return JSON.parse( this.swashFont.shape_text( str, ltr ) ).map( ( glyph: { x: number; y: number; id: number; adv: number } ) => {
-      return new PathGlyph( glyph.id, this.getGlyph( glyph.id ), glyph.x, glyph.y, glyph.adv );
+    let success = true;
+    const pathGlyphs = JSON.parse( this.swashFont.shape_text( str, ltr ) ).map( ( glyph: { x: number; y: number; id: number; adv: number } ) => {
+      const shape = this.getGlyph( glyph.id );
+      if ( shape ) {
+        return new PathGlyph( glyph.id, shape, glyph.x, glyph.y, glyph.adv );
+      }
+      else {
+        success = false;
+        return null;
+      }
     } );
+
+    return success ? pathGlyphs : null;
   }
 
-  public getGlyph( id: number ): Shape {
+  public getGlyph( id: number ): Shape | null {
     if ( !this.swashFont ) {
       throw new Error( 'Font not loaded yet' );
     }
 
     if ( !this.glyphCache.has( id ) ) {
       // No embolden for now, if we're trying to use fonts directly
-      this.glyphCache.set( id, new Shape( this.swashFont.get_glyph( id, 0, 0 ) ).makeImmutable() );
+      const glyphResult = this.swashFont.get_glyph( id, 0, 0 );
+      this.glyphCache.set( id, glyphResult === 'MISSING' ? null : new Shape( glyphResult ).makeImmutable() );
     }
     return this.glyphCache.get( id )!;
   }

@@ -76,43 +76,59 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     const node = this.node;
     const matrix = scalingMatrix.timesMatrix( this.instance.relativeTransform.matrix );
 
-    // TODO: use glyph detection to see if we have everything for the text!! (will need to determine font first)
-    const useSwash = window.phet?.chipper?.queryParameters?.swashText;
+    if ( node.hasFill() || node.hasStroke() ) {
 
-    if ( !useSwash ) {
-      // TODO: pooling, but figure out if we need to wait for the device.queue.onSubmittedWorkDone()
-      const canvas = document.createElement( 'canvas' );
+      // TODO: font fallbacks!
+      const font = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont );
 
-      // NOTE: getting value directly, so we don't set off any bounds validation during rendering
-      // TODO: is 5px enough? too much?
-      const selfBounds = node.selfBoundsProperty._value;
-      if ( selfBounds.isValid() && selfBounds.hasNonzeroArea() ) {
-        const bounds = node.selfBoundsProperty._value.transformed( matrix ).dilate( 5 ).roundOut();
-        canvas.width = bounds.width;
-        canvas.height = bounds.height;
+      let useSwash = window.phet?.chipper?.queryParameters?.swashText;
 
-        // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture
-        const context = canvas.getContext( '2d' );
-        // context.scale( window.devicePixelRatio, window.devicePixelRatio );
-        context.translate( -bounds.minX, -bounds.minY );
-        matrix.canvasAppendTransform( context );
+      let shapedText;
+      if ( useSwash ) {
+        // Use a few "replacement" characters to see if we actually have some missing glyphs somehow
+        // Otherwise it was rendering square boxes
+        const badShapedText = font.shapeText( '\u25a1\ufffd', true );
+        const badIDs = badShapedText.map( glyph => glyph.id );
 
-        TextCanvasDrawable.paintTextNodeToCanvas( new CanvasContextWrapper( canvas, context ), node, matrix );
+        shapedText = font.shapeText( node.renderedText, true );
 
-        // TODO: faster function, don't create an object?
-        this.encoding.encodeMatrix( Matrix3.translation( bounds.minX, bounds.minY ) );
-        this.encoding.encodeLineWidth( -1 );
-        this.encoding.encodeRect( 0, 0, canvas.width, canvas.height );
-        this.encoding.encodeImage( new SourceImage( canvas.width, canvas.height, canvas ) );
+        // If we don't have all of the glyphs we'll need to render, fall back to the non-swash version
+        // TODO: don't create closures like this
+        if ( !shapedText || shapedText.some( glyph => badIDs.includes( glyph.id ) ) ) {
+          useSwash = false;
+        }
       }
-    }
-    else {
-      if ( node.hasFill() || node.hasStroke() ) {
-        const font = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont );
+
+      if ( !useSwash ) {
+        // TODO: pooling, but figure out if we need to wait for the device.queue.onSubmittedWorkDone()
+        const canvas = document.createElement( 'canvas' );
+
+        // NOTE: getting value directly, so we don't set off any bounds validation during rendering
+        // TODO: is 5px enough? too much?
+        const selfBounds = node.selfBoundsProperty._value;
+        if ( selfBounds.isValid() && selfBounds.hasNonzeroArea() ) {
+          const bounds = node.selfBoundsProperty._value.transformed( matrix ).dilate( 5 ).roundOut();
+          canvas.width = bounds.width;
+          canvas.height = bounds.height;
+
+          // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture
+          // TODO: NOTE: If a block resizes, WOULD we be marked as dirty? If not, we'd have to listen to it
+          const context = canvas.getContext( '2d' );
+          context.translate( -bounds.minX, -bounds.minY );
+          matrix.canvasAppendTransform( context );
+
+          TextCanvasDrawable.paintTextNodeToCanvas( new CanvasContextWrapper( canvas, context ), node, matrix );
+
+          // TODO: faster function, don't create an object?
+          this.encoding.encodeMatrix( Matrix3.translation( bounds.minX, bounds.minY ) );
+          this.encoding.encodeLineWidth( -1 );
+          this.encoding.encodeRect( 0, 0, canvas.width, canvas.height );
+          this.encoding.encodeImage( new SourceImage( canvas.width, canvas.height, canvas ) );
+        }
+      }
+      else {
         const scale = node._font.numericSize / font.unitsPerEM;
         const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
-
-        const shapedText = font.shapeText( node.renderedText, true );
 
         if ( node.hasFill() ) {
           this.encodeGlyphRun( shapedText, sizedMatrix, true );
@@ -123,6 +139,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
       }
     }
 
+
     this.setToCleanState();
     this.cleanPaintableState();
 
@@ -132,6 +149,8 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   // @private
   encodeGlyphRun( shapedText, sizedMatrix, isFill ) {
     let hasEncodedGlyph = false;
+
+    const swashTextColor = window.phet?.chipper?.queryParameters?.swashTextColor;
 
     // TODO: support this for text, so we can QUICKLY get the bounds of text
     // TODO: support these inside Font!!!
@@ -154,7 +173,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     if ( hasEncodedGlyph ) {
       this.encoding.insertPathMarker();
-      this.encoding.encodePaint( isFill ? this.node.fill : this.node.stroke );
+      this.encoding.encodePaint( swashTextColor ? swashTextColor : ( isFill ? this.node.fill : this.node.stroke ) );
     }
   }
 

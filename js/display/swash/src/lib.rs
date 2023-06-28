@@ -116,6 +116,9 @@ impl SwashFont {
                 }
             }
         }
+        else {
+            result.push_str( "MISSING" );
+        }
         result
     }
 }
