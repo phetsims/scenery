@@ -129,10 +129,6 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
           let x = 0;
           shapedText.forEach( glyph => {
             const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( flipMatrix );
-            x += glyph.advance;
-
-            this.encoding.encode_matrix( glyphMatrix );
-            this.encoding.encode_linewidth( -1 );
 
             let encoding = fillEncodingCache.get( glyph.shape );
             if ( !encoding ) {
@@ -141,10 +137,14 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
               fillEncodingCache.set( glyph.shape, encoding );
             }
 
+            this.encoding.encode_matrix( glyphMatrix );
+            this.encoding.encode_linewidth( -1 );
             this.encoding.append( encoding );
             if ( !encoding.is_empty() ) {
               hasEncodedGlyph = true;
             }
+
+            x += glyph.advance;
           } );
 
           if ( hasEncodedGlyph ) {
@@ -154,16 +154,6 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         }
       }
     }
-
-
-    // TODO: more fine-grained dirtying (have a path encoding perhaps?
-    // if ( this.paintDirty ) {
-    //   //
-    // }
-    //
-    // if ( this.dirtyShape ) {
-    //   //
-    // }
 
     this.setToCleanState();
     this.cleanPaintableState();
