@@ -11,7 +11,9 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { Affine, Compose, DeviceContext, FittedBlock, Mix, render, scenery, Utils } from '../imports.js';
+import { Compose, DeviceContext, FittedBlock, Mix, PhetEncoding, render, scenery, Utils } from '../imports.js';
+
+const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 
 class VelloBlock extends FittedBlock {
   /**
@@ -138,11 +140,8 @@ class VelloBlock extends FittedBlock {
     // TODO: make not fittable
     this.updateFit();
 
-    // TODO: imports and don't namespace things like this
-    const sceneEncoding = new phet.scenery.PhetEncoding();
-    sceneEncoding.reset( false );
-
-    const encoding = new phet.scenery.PhetEncoding();
+    const encoding = new PhetEncoding();
+    encoding.reset( false );
 
     // Iterate through all of our drawables (linked list)
     //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
@@ -169,19 +168,16 @@ class VelloBlock extends FittedBlock {
       this.walkDown( encoding, this.currentDrawable.instance.trail, 0 );
     }
 
-    // TODO: really get rid of Affine!!!
-    sceneEncoding.append( encoding, new Affine( window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0 ) );
-
     if ( sceneryLog && sceneryLog.Encoding ) {
 
-      this.lastEncodingString = sceneEncoding.rustEncoding +
-                                `sb.append(&SceneFragment { data: encoding${sceneEncoding.id} }, None);\n`;
+      this.lastEncodingString = encoding.rustEncoding +
+                                `sb.append(&SceneFragment { data: encoding${encoding.id} }, None);\n`;
     }
 
-    sceneEncoding.finalize_scene();
+    encoding.finalize_scene();
 
     const outTexture = this.canvasContext.getCurrentTexture();
-    const renderInfo = sceneEncoding.resolve( this.deviceContext );
+    const renderInfo = encoding.resolve( this.deviceContext );
     renderInfo.prepareRender( outTexture.width, outTexture.height, 0 );
 
     render( renderInfo, this.deviceContext, outTexture );
@@ -302,7 +298,7 @@ class VelloBlock extends FittedBlock {
 
         if ( clipArea ) {
           // +1 ideally to avoid including the filter root (ignore its parent coordinate frame, stay in its local)
-          encoding.encode_matrix( trail.slice( this.transformRootInstance.trail.length, i + 1 ).getMatrix() );
+          encoding.encode_matrix( scalingMatrix.timesMatrix( trail.slice( this.transformRootInstance.trail.length, i + 1 ).getMatrix() ) );
 
         }
         else {
@@ -317,14 +313,7 @@ class VelloBlock extends FittedBlock {
           encoding.encode_kite_shape( clipArea, true, true, 0.01 );
         }
         else {
-          // TODO: Can we... verify this? Perhaps store this encoding whenever size changes?
-          encoding.encode_path( true );
-          encoding.move_to( 0, 0 );
-          encoding.line_to( this.canvas.width, 0 );
-          encoding.line_to( this.canvas.width, this.canvas.height );
-          encoding.line_to( 0, this.canvas.height );
-          encoding.close();
-          encoding.finish( true );
+          encoding.encode_rect( 0, 0, this.canvas.width, this.canvas.height );
         }
 
         // TODO: filters we can do with this

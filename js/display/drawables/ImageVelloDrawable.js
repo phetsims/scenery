@@ -6,8 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { imageBitmapMap, ImageStatefulDrawable, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
+
+const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 
 class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
   /**
@@ -54,7 +57,7 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
     this.encoding.reset( true );
 
     const node = this.node;
-    const matrix = this.instance.relativeTransform.matrix;
+    const matrix = scalingMatrix.timesMatrix( this.instance.relativeTransform.matrix );
 
     // GPUImageCopyExternalImageSource
     let source;

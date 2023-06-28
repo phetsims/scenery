@@ -6,8 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { PathStatefulDrawable, PhetEncoding, scenery, VelloSelfDrawable } from '../../imports.js';
+
+const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 
 class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**
@@ -87,7 +90,9 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     this.encoding.reset( true );
 
     const node = this.node;
-    const matrix = this.instance.relativeTransform.matrix;
+
+    // TODO: can we have this included in the computation?
+    const matrix = scalingMatrix.timesMatrix( this.instance.relativeTransform.matrix );
 
     if ( node.shape ) {
       if ( node.hasFill() ) {

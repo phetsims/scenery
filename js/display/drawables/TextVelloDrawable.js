@@ -21,6 +21,8 @@ const flipMatrix = Matrix3.rowMajor(
   0, 0, 1
 );
 
+const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
+
 class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   /**
    * @public
@@ -72,7 +74,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     this.encoding.reset( true );
 
     const node = this.node;
-    const matrix = this.instance.relativeTransform.matrix;
+    const matrix = scalingMatrix.timesMatrix( this.instance.relativeTransform.matrix );
 
     // TODO: use glyph detection to see if we have everything for the text!! (will need to determine font first)
     const useSwash = window.phet?.chipper?.queryParameters?.swashText;
@@ -86,23 +88,19 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
       const selfBounds = node.selfBoundsProperty._value;
       if ( selfBounds.isValid() && selfBounds.hasNonzeroArea() ) {
         const bounds = node.selfBoundsProperty._value.transformed( matrix ).dilate( 5 ).roundOut();
-        canvas.width = bounds.width * window.devicePixelRatio;
-        canvas.height = bounds.height * window.devicePixelRatio;
+        canvas.width = bounds.width;
+        canvas.height = bounds.height;
 
         // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture
         const context = canvas.getContext( '2d' );
-        context.scale( window.devicePixelRatio, window.devicePixelRatio );
+        // context.scale( window.devicePixelRatio, window.devicePixelRatio );
         context.translate( -bounds.minX, -bounds.minY );
         matrix.canvasAppendTransform( context );
 
         TextCanvasDrawable.paintTextNodeToCanvas( new CanvasContextWrapper( canvas, context ), node, matrix );
 
         // TODO: faster function, don't create an object?
-        this.encoding.encode_matrix( Matrix3.rowMajor(
-          1 / window.devicePixelRatio, 0, bounds.minX,
-          0, 1 / window.devicePixelRatio, bounds.minY,
-          0, 0, 1
-        ) );
+        this.encoding.encode_matrix( Matrix3.translation( bounds.minX, bounds.minY ) );
         this.encoding.encode_linewidth( -1 );
         this.encoding.encode_rect( 0, 0, canvas.width, canvas.height );
         this.encoding.encode_image( new SourceImage( canvas.width, canvas.height, canvas ) );
