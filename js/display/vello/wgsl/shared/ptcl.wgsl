@@ -77,4 +77,6 @@ struct CmdEndClip {
     color_matrx_2: vec4<f32>,
     color_matrx_3: vec4<f32>,
     color_matrx_4: vec4<f32>,
+
+    needs_un_premultiply: bool,
 }

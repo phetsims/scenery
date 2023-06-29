@@ -115,7 +115,8 @@ fn read_end_clip(cmd_ix: u32) -> CmdEndClip {
     let color_matrx_2 = vec4(bitcast<f32>(ptcl[cmd_ix + 10u]), bitcast<f32>(ptcl[cmd_ix + 11u]), bitcast<f32>(ptcl[cmd_ix + 12u]), bitcast<f32>(ptcl[cmd_ix + 13u]));
     let color_matrx_3 = vec4(bitcast<f32>(ptcl[cmd_ix + 14u]), bitcast<f32>(ptcl[cmd_ix + 15u]), bitcast<f32>(ptcl[cmd_ix + 16u]), bitcast<f32>(ptcl[cmd_ix + 17u]));
     let color_matrx_4 = vec4(bitcast<f32>(ptcl[cmd_ix + 18u]), bitcast<f32>(ptcl[cmd_ix + 19u]), bitcast<f32>(ptcl[cmd_ix + 20u]), bitcast<f32>(ptcl[cmd_ix + 21u]));
-    return CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4);
+    let needs_un_premultiply = ptcl[cmd_ix + 22u] == 1u;
+    return CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4, needs_un_premultiply);
 }
 
 fn extend_mode(t: f32, mode: u32) -> f32 {
@@ -384,21 +385,6 @@ fn main(
             case 10u: {
                 let end_clip = read_end_clip(cmd_ix);
 
-                // SVG filter spec (https://www.w3.org/TR/SVG11/filters.html#feColorMatrixElement) notes:
-                // | These matrices often perform an identity mapping in the alpha channel. If that is the case, an
-                // | implementation can avoid the costly undoing and redoing of the premultiplication for all pixels
-                // | with A = 1.
-                // TODO: compute this for the clip command, and provide that info? (don't implement it in every fine shader)
-                let needs_un_premultiply = end_clip.color_matrx_0.a != 0.0 ||
-                                           end_clip.color_matrx_1.a != 0.0 ||
-                                           end_clip.color_matrx_2.a != 0.0 ||
-                                           end_clip.color_matrx_3.r != 0.0 ||
-                                           end_clip.color_matrx_3.g != 0.0 ||
-                                           end_clip.color_matrx_3.b != 0.0 ||
-                                           end_clip.color_matrx_3.a != 1.0 ||
-                                           // TODO: could actually adjust this to be multiplied by alpha
-                                           end_clip.color_matrx_4.a != 0.0;
-
                 clip_depth -= 1u;
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
                     var bg_rgba: u32;
@@ -411,7 +397,12 @@ fn main(
                     var rgb_mult = rgba[i];
 
                     var cmx: vec4<f32>;
-                    if needs_un_premultiply {
+
+                    // SVG filter spec (https://www.w3.org/TR/SVG11/filters.html#feColorMatrixElement) notes:
+                    // | These matrices often perform an identity mapping in the alpha channel. If that is the case, an
+                    // | implementation can avoid the costly undoing and redoing of the premultiplication for all pixels
+                    // | with A = 1.
+                    if end_clip.needs_un_premultiply {
                         // Max with a small epsilon to avoid NaNs
                         let a_inv = 1.0 / max(rgb_mult.a, 1e-6);
                         // Un-premultiply
@@ -442,7 +433,7 @@ fn main(
                     let fg = cmx * area[i];
                     rgba[i] = blend_mix_compose(bg, fg, end_clip.blend);
                 }
-                cmd_ix += 22u;
+                cmd_ix += 23u;
             }
             // CMD_JUMP
             case 11u: {

@@ -140,7 +140,7 @@ fn write_begin_clip() {
 }
 
 fn write_end_clip(end_clip: CmdEndClip) {
-    alloc_cmd(22u);
+    alloc_cmd(23u);
     ptcl[cmd_offset] = CMD_END_CLIP;
     ptcl[cmd_offset + 1u] = end_clip.blend;
     ptcl[cmd_offset + 2u] = bitcast<u32>(end_clip.color_matrx_0.x);
@@ -163,7 +163,8 @@ fn write_end_clip(end_clip: CmdEndClip) {
     ptcl[cmd_offset + 19u] = bitcast<u32>(end_clip.color_matrx_4.y);
     ptcl[cmd_offset + 20u] = bitcast<u32>(end_clip.color_matrx_4.z);
     ptcl[cmd_offset + 21u] = bitcast<u32>(end_clip.color_matrx_4.w);
-    cmd_offset += 22u;
+    ptcl[cmd_offset + 22u] = select(0u, 1u, end_clip.needs_un_premultiply);
+    cmd_offset += 23u;
 }
 
 @compute @workgroup_size(256)
@@ -431,7 +432,16 @@ fn main(
                         let color_matrx_2 = vec4(bitcast<f32>(scene[dd + 9u]), bitcast<f32>(scene[dd + 10u]), bitcast<f32>(scene[dd + 11u]), bitcast<f32>(scene[dd + 12u]));
                         let color_matrx_3 = vec4(bitcast<f32>(scene[dd + 13u]), bitcast<f32>(scene[dd + 14u]), bitcast<f32>(scene[dd + 15u]), bitcast<f32>(scene[dd + 16u]));
                         let color_matrx_4 = vec4(bitcast<f32>(scene[dd + 17u]), bitcast<f32>(scene[dd + 18u]), bitcast<f32>(scene[dd + 19u]), bitcast<f32>(scene[dd + 20u]));
-                        write_end_clip(CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4));
+                        let needs_un_premultiply =
+                           color_matrx_0.a != 0.0 ||
+                           color_matrx_1.a != 0.0 ||
+                           color_matrx_2.a != 0.0 ||
+                           color_matrx_3.r != 0.0 ||
+                           color_matrx_3.g != 0.0 ||
+                           color_matrx_3.b != 0.0 ||
+                           color_matrx_3.a != 1.0 ||
+                           color_matrx_4.a != 0.0;
+                        write_end_clip(CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4, needs_un_premultiply));
                         render_blend_depth -= 1u;
                     }
                     default: {}
