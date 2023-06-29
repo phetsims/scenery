@@ -200,23 +200,23 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
       try {
         // TODO: push error validation, see https://toji.dev/webgpu-best-practices/error-handling.html
 
-        device.pushErrorScope( 'validation' );
+        // device.pushErrorScope( 'validation' );
 
         // Trigger shader compilation before anything (will be cached)
         VelloShader.getShaders( device );
 
-        ( async () => {
-          const validationError = await device.popErrorScope();
-
-          if ( validationError ) {
-            console.error( 'WebGPU validation error:', validationError );
-            // TODO: this delayed action... might not be soon enough?
-            // Null things out!
-            DeviceContext.couldNotGetDevice = true;
-            DeviceContext.currentDevice = null;
-            DeviceContext.currentDeviceContext = null;
-          }
-        } )().catch( err => { throw err; } );
+        // ( async () => {
+        //   const validationError = await device.popErrorScope();
+        //
+        //   if ( validationError ) {
+        //     console.error( 'WebGPU validation error:', validationError );
+        //     // TODO: this delayed action... might not be soon enough?
+        //     // Null things out!
+        //     DeviceContext.couldNotGetDevice = true;
+        //     DeviceContext.currentDevice = null;
+        //     DeviceContext.currentDeviceContext = null;
+        //   }
+        // } )().catch( err => { throw err; } );
       }
       catch( err ) {
         console.log( err );
