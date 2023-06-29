@@ -162,7 +162,11 @@ fn main(
     
     
     
-    let failed = atomicLoad(&bump.failed);
+    if local_id.x == 0u {
+        
+        sh_part_count[0] = atomicLoad(&bump.failed);
+    }
+    let failed = workgroupUniformLoad(&sh_part_count[0]);
     if (failed & (STAGE_BINNING | STAGE_TILE_ALLOC | STAGE_PATH_COARSE)) != 0u {
         return;
     }
@@ -222,8 +226,7 @@ fn main(
                     workgroupBarrier();
                 }
                 sh_part_count[local_id.x] = part_start_ix + count;
-                workgroupBarrier();
-                ready_ix = sh_part_count[WG_SIZE - 1u];
+                ready_ix = workgroupUniformLoad(&sh_part_count[WG_SIZE - 1u]);
                 partition_ix += WG_SIZE;
             }
             
