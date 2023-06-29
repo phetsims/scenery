@@ -147,11 +147,30 @@ fn write_begin_clip() {
 }
 
 fn write_end_clip(end_clip: CmdEndClip) {
-    alloc_cmd(3u);
+    alloc_cmd(22u);
     ptcl[cmd_offset] = CMD_END_CLIP;
     ptcl[cmd_offset + 1u] = end_clip.blend;
-    ptcl[cmd_offset + 2u] = bitcast<u32>(end_clip.alpha);
-    cmd_offset += 3u;
+    ptcl[cmd_offset + 2u] = bitcast<u32>(end_clip.color_matrx_0.x);
+    ptcl[cmd_offset + 3u] = bitcast<u32>(end_clip.color_matrx_0.y);
+    ptcl[cmd_offset + 4u] = bitcast<u32>(end_clip.color_matrx_0.z);
+    ptcl[cmd_offset + 5u] = bitcast<u32>(end_clip.color_matrx_0.w);
+    ptcl[cmd_offset + 6u] = bitcast<u32>(end_clip.color_matrx_1.x);
+    ptcl[cmd_offset + 7u] = bitcast<u32>(end_clip.color_matrx_1.y);
+    ptcl[cmd_offset + 8u] = bitcast<u32>(end_clip.color_matrx_1.z);
+    ptcl[cmd_offset + 9u] = bitcast<u32>(end_clip.color_matrx_1.w);
+    ptcl[cmd_offset + 10u] = bitcast<u32>(end_clip.color_matrx_2.x);
+    ptcl[cmd_offset + 11u] = bitcast<u32>(end_clip.color_matrx_2.y);
+    ptcl[cmd_offset + 12u] = bitcast<u32>(end_clip.color_matrx_2.z);
+    ptcl[cmd_offset + 13u] = bitcast<u32>(end_clip.color_matrx_2.w);
+    ptcl[cmd_offset + 14u] = bitcast<u32>(end_clip.color_matrx_3.x);
+    ptcl[cmd_offset + 15u] = bitcast<u32>(end_clip.color_matrx_3.y);
+    ptcl[cmd_offset + 16u] = bitcast<u32>(end_clip.color_matrx_3.z);
+    ptcl[cmd_offset + 17u] = bitcast<u32>(end_clip.color_matrx_3.w);
+    ptcl[cmd_offset + 18u] = bitcast<u32>(end_clip.color_matrx_4.x);
+    ptcl[cmd_offset + 19u] = bitcast<u32>(end_clip.color_matrx_4.y);
+    ptcl[cmd_offset + 20u] = bitcast<u32>(end_clip.color_matrx_4.z);
+    ptcl[cmd_offset + 21u] = bitcast<u32>(end_clip.color_matrx_4.w);
+    cmd_offset += 22u;
 }
 
 @compute @workgroup_size(256)
@@ -406,7 +425,7 @@ fn main(
                         write_path(tile, -1.0);
                         let blend = scene[dd];
                         let alpha = bitcast<f32>(scene[dd + 1u]);
-                        write_end_clip(CmdEndClip(blend, alpha));
+                        write_end_clip(CmdEndClip(blend, vec4(alpha, 0.0, 0.0, 0.0), vec4(1.0, alpha, 0.0, 0.0), vec4(1.0, 0.0, alpha, 0.0), vec4(0.0, 0.0, 0.0, alpha), vec4(0.0, 0.0, 0.0, 0.0)));
                         render_blend_depth -= 1u;
                     }
                     default: {}

@@ -72,6 +72,12 @@ struct CmdImage {
 
 struct CmdEndClip {
     blend: u32,
-    alpha: f32,
+
+    
+    color_matrx_0: vec4<f32>,
+    color_matrx_1: vec4<f32>,
+    color_matrx_2: vec4<f32>,
+    color_matrx_3: vec4<f32>,
+    color_matrx_4: vec4<f32>,
 }
 `

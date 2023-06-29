@@ -248,6 +248,11 @@ scenery.register( 'Compose', Compose );
 
 // u32
 export class DrawTag {
+
+  // NOTE: 0x1 is whether it is a clip
+  // NOTE: 0x1c defines the scene_offset
+  // NOTE: 0x3c0 defines the info_offset
+
   // No operation.
   public static readonly NOP = 0;
 

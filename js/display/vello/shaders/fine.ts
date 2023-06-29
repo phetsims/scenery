@@ -115,8 +115,12 @@ fn read_image(cmd_ix: u32) -> CmdImage {
 
 fn read_end_clip(cmd_ix: u32) -> CmdEndClip {
     let blend = ptcl[cmd_ix + 1u];
-    let alpha = bitcast<f32>(ptcl[cmd_ix + 2u]);
-    return CmdEndClip(blend, alpha);
+    let color_matrx_0 = vec4(bitcast<f32>(ptcl[cmd_ix + 2u]), bitcast<f32>(ptcl[cmd_ix + 3u]), bitcast<f32>(ptcl[cmd_ix + 4u]), bitcast<f32>(ptcl[cmd_ix + 5u]));
+    let color_matrx_1 = vec4(bitcast<f32>(ptcl[cmd_ix + 6u]), bitcast<f32>(ptcl[cmd_ix + 7u]), bitcast<f32>(ptcl[cmd_ix + 8u]), bitcast<f32>(ptcl[cmd_ix + 9u]));
+    let color_matrx_2 = vec4(bitcast<f32>(ptcl[cmd_ix + 10u]), bitcast<f32>(ptcl[cmd_ix + 11u]), bitcast<f32>(ptcl[cmd_ix + 12u]), bitcast<f32>(ptcl[cmd_ix + 13u]));
+    let color_matrx_3 = vec4(bitcast<f32>(ptcl[cmd_ix + 14u]), bitcast<f32>(ptcl[cmd_ix + 15u]), bitcast<f32>(ptcl[cmd_ix + 16u]), bitcast<f32>(ptcl[cmd_ix + 17u]));
+    let color_matrx_4 = vec4(bitcast<f32>(ptcl[cmd_ix + 18u]), bitcast<f32>(ptcl[cmd_ix + 19u]), bitcast<f32>(ptcl[cmd_ix + 20u]), bitcast<f32>(ptcl[cmd_ix + 21u]));
+    return CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4);
 }
 
 fn extend_mode(t: f32, mode: u32) -> f32 {
@@ -386,10 +390,16 @@ fn main(
                         
                     }
                     let bg = unpack4x8unorm(bg_rgba);
-                    let fg = rgba[i] * area[i] * end_clip.alpha;
+                    let rgbx = rgba[i];
+                    let cmx = rgbx.r * end_clip.color_matrx_0 +
+                              rgbx.g * end_clip.color_matrx_1 +
+                              rgbx.b * end_clip.color_matrx_2 +
+                              rgbx.a * end_clip.color_matrx_3 +
+                              1.0 * end_clip.color_matrx_4;
+                    let fg = clamp(cmx, vec4(0.0), vec4(1.0)) * area[i];
                     rgba[i] = blend_mix_compose(bg, fg, end_clip.blend);
                 }
-                cmd_ix += 3u;
+                cmd_ix += 22u;
             }
             
             case 11u: {
