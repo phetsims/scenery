@@ -62,6 +62,15 @@ class VelloBlock extends FittedBlock {
     // list of {Drawable}s that need to be updated before we update
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
+    // @private {Object.<nodeId:number,number> - Maps node ID => count of how many listeners we WOULD have attached to
+    // it. We only attach at most one listener to each node. We need to listen to all ancestors up to our filter root,
+    // so that we can pick up opacity changes.
+    this.filterListenerCountMap = this.filterListenerCountMap || {};
+
+    // @private {function}
+    this.clipDirtyListener = this.clipDirtyListener || this.markDirty.bind( this );
+    this.opacityDirtyListener = this.opacityDirtyListener || this.markDirty.bind( this );
+
     // @private {Drawable|null} -- The drawable for which the current clip/filter setup has been applied (during the walk)
     this.currentDrawable = null;
 
@@ -371,6 +380,22 @@ class VelloBlock extends FittedBlock {
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `#${this.id}.addDrawable ${drawable.toString()}` );
 
     super.addDrawable( drawable );
+
+    // Add opacity listeners (from this node up to the filter root)
+    for ( let instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
+      const node = instance.node;
+
+      // Only add the listener if we don't already have one
+      if ( this.filterListenerCountMap[ node.id ] ) {
+        this.filterListenerCountMap[ node.id ]++;
+      }
+      else {
+        this.filterListenerCountMap[ node.id ] = 1;
+
+        node.filterChangeEmitter.addListener( this.opacityDirtyListener );
+        node.clipAreaProperty.lazyLink( this.clipDirtyListener );
+      }
+    }
   }
 
   /**
@@ -381,6 +406,19 @@ class VelloBlock extends FittedBlock {
    */
   removeDrawable( drawable ) {
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `#${this.id}.removeDrawable ${drawable.toString()}` );
+
+    // Remove opacity listeners (from this node up to the filter root)
+    for ( let instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
+      const node = instance.node;
+      assert && assert( this.filterListenerCountMap[ node.id ] > 0 );
+      this.filterListenerCountMap[ node.id ]--;
+      if ( this.filterListenerCountMap[ node.id ] === 0 ) {
+        delete this.filterListenerCountMap[ node.id ];
+
+        node.clipAreaProperty.unlink( this.clipDirtyListener );
+        node.filterChangeEmitter.removeListener( this.opacityDirtyListener );
+      }
+    }
 
     // Ensure a removed drawable is not present in the dirtyDrawables array afterwards. Don't want to update it.
     // See https://github.com/phetsims/scenery/issues/635

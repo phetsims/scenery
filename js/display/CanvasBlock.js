@@ -109,8 +109,8 @@ class CanvasBlock extends FittedBlock {
     // TODO: OH NO, we may need to figure out watching this?
 
     // @private {function}
-    this.clipDirtyListener = this.markDirty.bind( this );
-    this.opacityDirtyListener = this.markDirty.bind( this );
+    this.clipDirtyListener = this.clipDirtyListener || this.markDirty.bind( this );
+    this.opacityDirtyListener = this.opacityDirtyListener || this.markDirty.bind( this );
 
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `initialized #${this.id}` );
     // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)

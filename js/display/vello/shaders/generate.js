@@ -6,7 +6,16 @@
 
 /*
  * List of things I've had to patch for the shaders:
- * - fine.wgsl: don't premultiply output. For some reason (even though we're requesting premultiplied canvas texture)
+ *
+ * Don't premultiply output:
+ * - fine.wgsl
+ *
+ * Color Matrix filter support, changed DrawTag values, moving the scene_offset, and swapping it for alpha
+ * - coarse.ts
+ * - fine.ts
+ * - draw_leaf.ts
+ * - shared/drawtag.ts
+ * - shared/ptcl.ts
  */
 
 const fs = require( 'fs' );
