@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, scenery, WorkgroupSize } from '../../imports.js';
+import { BlitShader, DeviceContext, scenery, WorkgroupSize } from '../../imports.js';
 import fine from './shaders/fine.js';
 import backdrop_dyn from './shaders/backdrop_dyn.js';
 import bbox_clear from './shaders/bbox_clear.js';
@@ -72,6 +72,7 @@ const BUFFER_TYPE_MAP = {
 } as const;
 
 export type ShaderMap = {
+  blit: BlitShader;
   backdrop_dyn: VelloShader;
   bbox_clear: VelloShader;
   binning: VelloShader;
@@ -218,6 +219,7 @@ export default class VelloShader {
     };
 
     return {
+      blit: new BlitShader( device, navigator.gpu.getPreferredCanvasFormat() ),
       backdrop_dyn: new VelloShader( 'backdrop_dyn', {
         wgsl: backdrop_dyn,
         bindings: [ 'Uniform', 'BufReadOnly', 'Buffer' ]

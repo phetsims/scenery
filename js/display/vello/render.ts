@@ -240,47 +240,8 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   if ( !canOutputToCanvas ) {
     assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );
-    assert && assert( deviceContext.blitShaderPipeline );
-    assert && assert( deviceContext.blitShaderBindGroupLayout );
 
-    const pass = encoder.beginRenderPass( {
-      label: 'blit render pass',
-      colorAttachments: [
-        {
-          view: outTextureView,
-          clearValue: [ 0, 0, 0, 0 ],
-          loadOp: 'clear', // could be 'load'
-          storeOp: 'store' // or 'discard'
-        }
-      ]
-    } );
-
-    const bindGroup = device.createBindGroup( {
-      label: 'blit bind group',
-      layout: deviceContext.blitShaderBindGroupLayout!,
-      entries: [
-        {
-          binding: 0,
-          resource: fineOutputTextureView
-        }
-      ]
-    } );
-
-    pass.setPipeline( deviceContext.blitShaderPipeline! );
-    pass.setBindGroup( 0, bindGroup );
-    pass.draw( 6 );
-    pass.end();
-
-    // // NOTE: bgra8unorm vs rgba8unorm can't be copied, so this depends on the platform?
-    // encoder.copyTextureToTexture( {
-    //   texture: fineOutputTexture!
-    // }, {
-    //   texture: outTexture
-    // }, {
-    //   width: outTexture.width,
-    //   height: outTexture.height,
-    //   depthOrArrayLayers: 1
-    // } );
+    shaders.blit.dispatch( encoder, outTextureView, fineOutputTextureView );
   }
 
   // TODO: are these early frees acceptable? Are we going to badly reuse things?
