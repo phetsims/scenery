@@ -80,7 +80,10 @@ fn main(
         let draw_monoid = draw_monoids[element_ix];
         var clip_bbox = vec4(-1e9, -1e9, 1e9, 1e9);
         if draw_monoid.clip_ix > 0u {
-            clip_bbox = clip_bbox_buf[draw_monoid.clip_ix - 1u];
+            
+            
+            
+            clip_bbox = clip_bbox_buf[min(draw_monoid.clip_ix - 1u, config.n_clip - 1u)];
         }
         
         

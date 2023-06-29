@@ -289,6 +289,7 @@ convert( 'shared/', 'ptcl.wgsl' );
 convert( 'shared/', 'segment.wgsl' );
 convert( 'shared/', 'tile.wgsl' );
 convert( 'shared/', 'transform.wgsl' );
+convert( 'shared/', 'util.wgsl' );
 // convert( '', 'backdrop.wgsl' ); // NOT USED
 convert( '', 'backdrop_dyn.wgsl' );
 convert( '', 'bbox_clear.wgsl' );

@@ -1,4 +1,5 @@
 /* eslint-disable */
+import util from './shared/util.js';
 import transform from './shared/transform.js';
 import bbox from './shared/bbox.js';
 import drawtag from './shared/drawtag.js';
@@ -35,6 +36,8 @@ var<storage, read_write> info: array<u32>;
 
 @group(0) @binding(6)
 var<storage, read_write> clip_inp: array<ClipInp>;
+
+${util}
 
 const WG_SIZE = 256u;
 
@@ -80,7 +83,7 @@ fn main(
     workgroupBarrier();
     var m = sh_scratch[0];
     workgroupBarrier();
-    let tag_word = scene[config.drawtag_base + ix];
+    let tag_word = read_draw_tag_from_scene(ix);
     agg = map_draw_tag(tag_word);
     sh_scratch[local_id.x] = agg;
     for (var i = 0u; i < firstTrailingBit(WG_SIZE); i += 1u) {
@@ -97,7 +100,9 @@ fn main(
         m = combine_draw_monoid(m, sh_scratch[local_id.x - 1u]);
     }
     
-    draw_monoid[ix] = m;
+    if ix < config.n_drawobj {
+        draw_monoid[ix] = m;
+    }
     let dd = config.drawdata_base + m.scene_offset;
     let di = m.info_offset;
     if tag_word == DRAWTAG_FILL_COLOR || tag_word == DRAWTAG_FILL_LIN_GRADIENT ||

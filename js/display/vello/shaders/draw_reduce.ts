@@ -1,4 +1,5 @@
 /* eslint-disable */
+import util from './shared/util.js';
 import drawtag from './shared/drawtag.js';
 import config from './shared/config.js';
 
@@ -20,13 +21,15 @@ const WG_SIZE = 256u;
 
 var<workgroup> sh_scratch: array<DrawMonoid, WG_SIZE>;
 
+${util}
+
 @compute @workgroup_size(256)
 fn main(
     @builtin(global_invocation_id) global_id: vec3<u32>,
     @builtin(local_invocation_id) local_id: vec3<u32>,
 ) {
     let ix = global_id.x;
-    let tag_word = scene[config.drawtag_base + ix];
+    let tag_word = read_draw_tag_from_scene(ix);
     var agg = map_draw_tag(tag_word);
     sh_scratch[local_id.x] = agg;
     for (var i = 0u; i < firstTrailingBit(WG_SIZE); i += 1u) {
