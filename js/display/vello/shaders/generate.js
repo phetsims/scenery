@@ -249,7 +249,7 @@ const preprocess = ( str, defines ) => {
 };
 
 let byteSize = 0;
-const convert = ( dir, filename, defines = [ 'full' ], outputName ) => {
+const convert = ( dir, filename, defines = [], outputName ) => {
   outputName = outputName || filename;
   if ( filename.endsWith( '.wgsl' ) ) {
     let shaderString = minify( preprocess( stripComments( fs.readFileSync( `../wgsl/${dir}${filename}`, 'utf8' ) ), defines ) );
@@ -291,23 +291,23 @@ convert( 'shared/', 'tile.wgsl' );
 convert( 'shared/', 'transform.wgsl' );
 convert( 'shared/', 'util.wgsl' );
 // convert( '', 'backdrop.wgsl' ); // NOT USED
-convert( '', 'backdrop_dyn.wgsl' );
-convert( '', 'bbox_clear.wgsl' );
-convert( '', 'binning.wgsl' );
-convert( '', 'clip_leaf.wgsl' );
-convert( '', 'clip_reduce.wgsl' );
-convert( '', 'coarse.wgsl' );
-convert( '', 'draw_leaf.wgsl' );
-convert( '', 'draw_reduce.wgsl' );
-convert( '', 'fine.wgsl' );
-convert( '', 'path_coarse.wgsl' );
-convert( '', 'path_coarse_full.wgsl' );
-convert( '', 'pathseg.wgsl' );
-convert( '', 'pathtag_reduce.wgsl' );
-convert( '', 'pathtag_reduce2.wgsl' );
-convert( '', 'pathtag_scan.wgsl', [ 'full' ], 'pathtag_scan_large.wgsl' );
+// convert( '', 'path_coarse.wgsl' ); // NOT USED?
+convert( '', 'pathtag_reduce.wgsl', [ 'full' ] );
+convert( '', 'pathtag_reduce2.wgsl', [ 'full' ] );
+convert( '', 'pathtag_scan1.wgsl', [ 'full' ] );
 convert( '', 'pathtag_scan.wgsl', [ 'full', 'small' ], 'pathtag_scan_small.wgsl' );
-convert( '', 'pathtag_scan1.wgsl' );
-convert( '', 'tile_alloc.wgsl' );
+convert( '', 'pathtag_scan.wgsl', [ 'full' ], 'pathtag_scan_large.wgsl' );
+convert( '', 'bbox_clear.wgsl' );
+convert( '', 'pathseg.wgsl', [ 'full' ] );
+convert( '', 'draw_reduce.wgsl' );
+convert( '', 'draw_leaf.wgsl' );
+convert( '', 'clip_reduce.wgsl' );
+convert( '', 'clip_leaf.wgsl' );
+convert( '', 'binning.wgsl' );
+convert( '', 'tile_alloc.wgsl', [ 'have_uniform' ] );
+convert( '', 'path_coarse_full.wgsl', [ 'full' ] );
+convert( '', 'backdrop_dyn.wgsl' );
+convert( '', 'coarse.wgsl', [ 'have_uniform' ] );
+convert( '', 'fine.wgsl', [ 'full' ] );
 
 console.log( `bytes: ${byteSize}` );

@@ -47,7 +47,6 @@ import clip_reduce from './shaders/clip_reduce.js';
 import coarse from './shaders/coarse.js';
 import draw_leaf from './shaders/draw_leaf.js';
 import draw_reduce from './shaders/draw_reduce.js';
-import path_coarse from './shaders/path_coarse.js';
 import path_coarse_full from './shaders/path_coarse_full.js';
 import pathseg from './shaders/pathseg.js';
 import pathtag_reduce from './shaders/pathtag_reduce.js';
@@ -83,7 +82,6 @@ export type ShaderMap = {
   draw_reduce: VelloShader;
   fine_rgba8unorm: VelloShader;
   fine_bgra8unorm: VelloShader;
-  path_coarse: VelloShader;
   path_coarse_full: VelloShader;
   pathseg: VelloShader;
   pathtag_reduce: VelloShader;
@@ -260,10 +258,6 @@ export default class VelloShader {
         wgsl: getFineShaderWGSL( 'bgra8unorm' ),
         bindings: [ 'Uniform', 'BufReadOnly', 'BufReadOnly', 'Image', 'BufReadOnly', 'ImageRead', 'BufReadOnly', 'ImageRead' ]
       }, device, 'bgra8unorm' ),
-      path_coarse: new VelloShader( 'path_coarse', {
-        wgsl: path_coarse,
-        bindings: [ 'Uniform', 'BufReadOnly', 'BufReadOnly', 'Buffer', 'Buffer' ]
-      }, device ),
       path_coarse_full: new VelloShader( 'path_coarse_full', {
         wgsl: path_coarse_full,
         bindings: [ 'Uniform', 'BufReadOnly', 'BufReadOnly', 'BufReadOnly', 'BufReadOnly', 'Buffer', 'Buffer', 'Buffer' ]
