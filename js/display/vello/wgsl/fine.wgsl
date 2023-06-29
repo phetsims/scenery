@@ -392,8 +392,13 @@ fn main(
                 let needs_un_premultiply = end_clip.color_matrx_0.a != 0.0 ||
                                            end_clip.color_matrx_1.a != 0.0 ||
                                            end_clip.color_matrx_2.a != 0.0 ||
+                                           end_clip.color_matrx_3.r != 0.0 ||
+                                           end_clip.color_matrx_3.g != 0.0 ||
+                                           end_clip.color_matrx_3.b != 0.0 ||
                                            end_clip.color_matrx_3.a != 1.0 ||
+                                           // TODO: could actually adjust this to be multiplied by alpha
                                            end_clip.color_matrx_4.a != 0.0;
+
                 clip_depth -= 1u;
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
                     var bg_rgba: u32;
@@ -404,23 +409,36 @@ fn main(
                     }
                     let bg = unpack4x8unorm(bg_rgba);
                     var rgb_mult = rgba[i];
+
+                    var cmx: vec4<f32>;
                     if needs_un_premultiply {
                         // Max with a small epsilon to avoid NaNs
                         let a_inv = 1.0 / max(rgb_mult.a, 1e-6);
                         // Un-premultiply
                         rgb_mult = vec4(rgb_mult.rgb * a_inv, rgb_mult.a);
-                    }
-                    // Color-matrix multiply on the un-premultiplied color
-                    var cmx = rgb_mult.r * end_clip.color_matrx_0 +
+
+                        // Color-matrix multiply on the un-premultiplied color
+                        cmx = rgb_mult.r * end_clip.color_matrx_0 +
                               rgb_mult.g * end_clip.color_matrx_1 +
                               rgb_mult.b * end_clip.color_matrx_2 +
                               rgb_mult.a * end_clip.color_matrx_3 +
                               1.0 * end_clip.color_matrx_4;
-                    cmx = clamp(cmx, vec4(0.0), vec4(1.0));
-                    if needs_un_premultiply {
+
+                        cmx = clamp(cmx, vec4(0.0), vec4(1.0));
+
                         // Premultiply again
                         cmx = vec4(cmx.rgb * cmx.a, cmx.a);
+                    } else {
+                        cmx = rgb_mult.r * end_clip.color_matrx_0 +
+                              rgb_mult.g * end_clip.color_matrx_1 +
+                              rgb_mult.b * end_clip.color_matrx_2 +
+                              rgb_mult.a * end_clip.color_matrx_3 +
+                              rgb_mult.a * end_clip.color_matrx_4; // Allow color_matrx_4, just premultiply it
+
+                        // Clamp down to ensure we're still validly premultiplied
+                        cmx = clamp(cmx, vec4(0.0), vec4(min(1.0, cmx.a)));
                     }
+
                     let fg = cmx * area[i];
                     rgba[i] = blend_mix_compose(bg, fg, end_clip.blend);
                 }
