@@ -11,9 +11,10 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { Compose, DeviceContext, FittedBlock, Mix, PhetEncoding, render, scenery, Utils } from '../imports.js';
+import { Compose, DeviceContext, FilterMatrix, FittedBlock, Mix, PhetEncoding, render, scenery, Utils } from '../imports.js';
 
 const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
+const scratchFilterMatrix = new FilterMatrix();
 
 class VelloBlock extends FittedBlock {
   /**
@@ -219,7 +220,6 @@ class VelloBlock extends FittedBlock {
         if ( node._filters.length ) {
           sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Pop filters ${trail.subtrailTo( node ).toDebugString()}` );
 
-          // TODO: grayscale can be done with mix/compose!
           for ( let i = 0; i < node._filters.length; i++ ) {
             const filter = node._filters[ i ];
             if ( filter.isVelloCompatible() ) {
@@ -264,6 +264,9 @@ class VelloBlock extends FittedBlock {
       let alpha = 1;
       let clipArea = null;
 
+      const filterMatrix = scratchFilterMatrix;
+      filterMatrix.reset();
+
       // We should not apply opacity at or below the filter root
       if ( i > filterRootIndex ) {
         alpha = node.getEffectiveOpacity();
@@ -271,16 +274,20 @@ class VelloBlock extends FittedBlock {
           sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Push opacity ${trail.subtrailTo( node ).toDebugString()}` );
 
           needsEncodeBeginClip = true;
+
+          filterMatrix.multiplyAlpha( alpha );
         }
 
         if ( node._filters.length ) {
           sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `Push filters ${trail.subtrailTo( node ).toDebugString()}` );
 
-          // TODO: grayscale can be done with mix/compose!
           for ( let j = 0; j < node._filters.length; j++ ) {
             const filter = node._filters[ j ];
             if ( filter.isVelloCompatible() ) {
               needsEncodeBeginClip = true;
+
+              // NOTE: Assumes ColorMatrixFilter
+              filterMatrix.multiply( filter );
             }
           }
         }
@@ -318,7 +325,7 @@ class VelloBlock extends FittedBlock {
 
         // TODO: filters we can do with this
         // TODO: ensure NOT Mix.Clip when alpha < 1 (but we can gain performance if alpha is 1?)
-        encoding.encodeBeginClip( Mix.Normal, Compose.SrcOver, alpha );
+        encoding.encodeBeginClip( Mix.Normal, Compose.SrcOver, filterMatrix );
       }
     }
   }

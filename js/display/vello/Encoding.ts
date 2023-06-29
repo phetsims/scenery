@@ -9,7 +9,7 @@
 
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Utils from '../../../../dot/js/Utils.js';
-import { Affine, AtlasSubImage, BufferImage, ByteBuffer, DeviceContext, scenery, SourceImage, WorkgroupSize } from '../../imports.js';
+import { Affine, AtlasSubImage, BufferImage, ByteBuffer, ColorMatrixFilter, DeviceContext, scenery, SourceImage, WorkgroupSize } from '../../imports.js';
 import { Arc, Cubic, EllipticalArc, Line, Quadratic, Shape } from '../../../../kite/js/imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 
@@ -245,6 +245,123 @@ const ComposeMap = {
 };
 
 scenery.register( 'Compose', Compose );
+
+export class FilterMatrix {
+  public constructor(
+    public m00 = 1, public m01 = 0, public m02 = 0, public m03 = 0, public m04 = 0,
+    public m10 = 0, public m11 = 1, public m12 = 0, public m13 = 0, public m14 = 0,
+    public m20 = 0, public m21 = 0, public m22 = 1, public m23 = 0, public m24 = 0,
+    public m30 = 0, public m31 = 0, public m32 = 0, public m33 = 1, public m34 = 0
+  ) {
+
+    assert && assert( isFinite( m00 ), 'm00 should be a finite number' );
+    assert && assert( isFinite( m01 ), 'm01 should be a finite number' );
+    assert && assert( isFinite( m02 ), 'm02 should be a finite number' );
+    assert && assert( isFinite( m03 ), 'm03 should be a finite number' );
+    assert && assert( isFinite( m04 ), 'm04 should be a finite number' );
+
+    assert && assert( isFinite( m10 ), 'm10 should be a finite number' );
+    assert && assert( isFinite( m11 ), 'm11 should be a finite number' );
+    assert && assert( isFinite( m12 ), 'm12 should be a finite number' );
+    assert && assert( isFinite( m13 ), 'm13 should be a finite number' );
+    assert && assert( isFinite( m14 ), 'm14 should be a finite number' );
+
+    assert && assert( isFinite( m20 ), 'm20 should be a finite number' );
+    assert && assert( isFinite( m21 ), 'm21 should be a finite number' );
+    assert && assert( isFinite( m22 ), 'm22 should be a finite number' );
+    assert && assert( isFinite( m23 ), 'm23 should be a finite number' );
+    assert && assert( isFinite( m24 ), 'm24 should be a finite number' );
+
+    assert && assert( isFinite( m30 ), 'm30 should be a finite number' );
+    assert && assert( isFinite( m31 ), 'm31 should be a finite number' );
+    assert && assert( isFinite( m32 ), 'm32 should be a finite number' );
+    assert && assert( isFinite( m33 ), 'm33 should be a finite number' );
+    assert && assert( isFinite( m34 ), 'm34 should be a finite number' );
+  }
+
+  public reset(): void {
+    this.m00 = 1;
+    this.m01 = 0;
+    this.m02 = 0;
+    this.m03 = 0;
+    this.m04 = 0;
+    this.m10 = 0;
+    this.m11 = 1;
+    this.m12 = 0;
+    this.m13 = 0;
+    this.m14 = 0;
+    this.m20 = 0;
+    this.m21 = 0;
+    this.m22 = 1;
+    this.m23 = 0;
+    this.m24 = 0;
+    this.m30 = 0;
+    this.m31 = 0;
+    this.m32 = 0;
+    this.m33 = 1;
+    this.m34 = 0;
+  }
+
+  public multiplyAlpha( alpha: number ): void {
+    this.m03 *= alpha;
+    this.m13 *= alpha;
+    this.m23 *= alpha;
+    this.m33 *= alpha;
+  }
+
+  public multiply( other: FilterMatrix | ColorMatrixFilter ): void {
+
+    const m00 = this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20 + this.m03 * other.m30;
+    const m01 = this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21 + this.m03 * other.m31;
+    const m02 = this.m00 * other.m02 + this.m01 * other.m12 + this.m02 * other.m22 + this.m03 * other.m32;
+    const m03 = this.m00 * other.m03 + this.m01 * other.m13 + this.m02 * other.m23 + this.m03 * other.m33;
+    const m04 = this.m00 * other.m04 + this.m01 * other.m14 + this.m02 * other.m24 + this.m03 * other.m34 + this.m04;
+
+    const m10 = this.m10 * other.m00 + this.m11 * other.m10 + this.m12 * other.m20 + this.m13 * other.m30;
+    const m11 = this.m10 * other.m01 + this.m11 * other.m11 + this.m12 * other.m21 + this.m13 * other.m31;
+    const m12 = this.m10 * other.m02 + this.m11 * other.m12 + this.m12 * other.m22 + this.m13 * other.m32;
+    const m13 = this.m10 * other.m03 + this.m11 * other.m13 + this.m12 * other.m23 + this.m13 * other.m33;
+    const m14 = this.m10 * other.m04 + this.m11 * other.m14 + this.m12 * other.m24 + this.m13 * other.m34 + this.m14;
+
+    const m20 = this.m20 * other.m00 + this.m21 * other.m10 + this.m22 * other.m20 + this.m23 * other.m30;
+    const m21 = this.m20 * other.m01 + this.m21 * other.m11 + this.m22 * other.m21 + this.m23 * other.m31;
+    const m22 = this.m20 * other.m02 + this.m21 * other.m12 + this.m22 * other.m22 + this.m23 * other.m32;
+    const m23 = this.m20 * other.m03 + this.m21 * other.m13 + this.m22 * other.m23 + this.m23 * other.m33;
+    const m24 = this.m20 * other.m04 + this.m21 * other.m14 + this.m22 * other.m24 + this.m23 * other.m34 + this.m24;
+
+    const m30 = this.m30 * other.m00 + this.m31 * other.m10 + this.m32 * other.m20 + this.m33 * other.m30;
+    const m31 = this.m30 * other.m01 + this.m31 * other.m11 + this.m32 * other.m21 + this.m33 * other.m31;
+    const m32 = this.m30 * other.m02 + this.m31 * other.m12 + this.m32 * other.m22 + this.m33 * other.m32;
+    const m33 = this.m30 * other.m03 + this.m31 * other.m13 + this.m32 * other.m23 + this.m33 * other.m33;
+    const m34 = this.m30 * other.m04 + this.m31 * other.m14 + this.m32 * other.m24 + this.m33 * other.m34 + this.m34;
+
+    this.m00 = m00;
+    this.m01 = m01;
+    this.m02 = m02;
+    this.m03 = m03;
+    this.m04 = m04;
+
+    this.m10 = m10;
+    this.m11 = m11;
+    this.m12 = m12;
+    this.m13 = m13;
+    this.m14 = m14;
+
+    this.m20 = m20;
+    this.m21 = m21;
+    this.m22 = m22;
+    this.m23 = m23;
+    this.m24 = m24;
+
+    this.m30 = m30;
+    this.m31 = m31;
+    this.m32 = m32;
+    this.m33 = m33;
+    this.m34 = m34;
+  }
+}
+
+scenery.register( 'FilterMatrix', FilterMatrix );
 
 // used to be:
 // 0x1 is whether it is a clip (00_0000_0001)
@@ -1216,37 +1333,38 @@ export default class Encoding {
     this.drawDataBuf.pushU32( ( ( image.width << 16 ) >>> 0 ) | ( image.height & 0xFFFF ) );
   }
 
-  public encodeBeginClip( mix: Mix, compose: Compose, alpha: number ): void {
-    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(BlendMode {mix: ${MixMap[ mix ]}, compose: ${ComposeMap[ compose ]}}, ${rustF32( alpha )});\n` );
+  public encodeBeginClip( mix: Mix, compose: Compose, filterMatrix: FilterMatrix ): void {
+    // TODO: Get the encoding to support filters!
+    sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(BlendMode {mix: ${MixMap[ mix ]}, compose: ${ComposeMap[ compose ]}}, ${rustF32( filterMatrix.m33 )});\n` );
     this.drawTagsBuf.pushU32( DrawTag.BEGIN_CLIP );
 
     // u32 combination of mix and compose
     this.drawDataBuf.pushU32( ( ( mix << 8 ) >>> 0 ) | compose );
 
-    this.drawDataBuf.pushF32( alpha );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( filterMatrix.m00 );
+    this.drawDataBuf.pushF32( filterMatrix.m10 );
+    this.drawDataBuf.pushF32( filterMatrix.m20 );
+    this.drawDataBuf.pushF32( filterMatrix.m30 );
 
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( alpha );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( filterMatrix.m01 );
+    this.drawDataBuf.pushF32( filterMatrix.m11 );
+    this.drawDataBuf.pushF32( filterMatrix.m21 );
+    this.drawDataBuf.pushF32( filterMatrix.m31 );
 
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( alpha );
-    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( filterMatrix.m02 );
+    this.drawDataBuf.pushF32( filterMatrix.m12 );
+    this.drawDataBuf.pushF32( filterMatrix.m22 );
+    this.drawDataBuf.pushF32( filterMatrix.m32 );
 
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( alpha );
+    this.drawDataBuf.pushF32( filterMatrix.m03 );
+    this.drawDataBuf.pushF32( filterMatrix.m13 );
+    this.drawDataBuf.pushF32( filterMatrix.m23 );
+    this.drawDataBuf.pushF32( filterMatrix.m33 );
 
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
-    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( filterMatrix.m04 );
+    this.drawDataBuf.pushF32( filterMatrix.m14 );
+    this.drawDataBuf.pushF32( filterMatrix.m24 );
+    this.drawDataBuf.pushF32( filterMatrix.m34 );
 
     this.numClips += 1;
     this.numOpenClips += 1;

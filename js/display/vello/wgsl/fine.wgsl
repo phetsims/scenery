@@ -383,6 +383,17 @@ fn main(
             // CMD_END_CLIP
             case 10u: {
                 let end_clip = read_end_clip(cmd_ix);
+
+                // SVG filter spec (https://www.w3.org/TR/SVG11/filters.html#feColorMatrixElement) notes:
+                // | These matrices often perform an identity mapping in the alpha channel. If that is the case, an
+                // | implementation can avoid the costly undoing and redoing of the premultiplication for all pixels
+                // | with A = 1.
+                // TODO: compute this for the clip command, and provide that info? (don't implement it in every fine shader)
+                let needs_un_premultiply = end_clip.color_matrx_0.a != 0.0 ||
+                                           end_clip.color_matrx_1.a != 0.0 ||
+                                           end_clip.color_matrx_2.a != 0.0 ||
+                                           end_clip.color_matrx_3.a != 1.0 ||
+                                           end_clip.color_matrx_4.a != 0.0;
                 clip_depth -= 1u;
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
                     var bg_rgba: u32;
@@ -392,13 +403,25 @@ fn main(
                         // load from memory
                     }
                     let bg = unpack4x8unorm(bg_rgba);
-                    let rgbx = rgba[i];
-                    let cmx = rgbx.r * end_clip.color_matrx_0 +
-                              rgbx.g * end_clip.color_matrx_1 +
-                              rgbx.b * end_clip.color_matrx_2 +
-                              rgbx.a * end_clip.color_matrx_3 +
+                    var rgb_mult = rgba[i];
+                    if needs_un_premultiply {
+                        // Max with a small epsilon to avoid NaNs
+                        let a_inv = 1.0 / max(rgb_mult.a, 1e-6);
+                        // Un-premultiply
+                        rgb_mult = vec4(rgb_mult.rgb * a_inv, rgb_mult.a);
+                    }
+                    // Color-matrix multiply on the un-premultiplied color
+                    var cmx = rgb_mult.r * end_clip.color_matrx_0 +
+                              rgb_mult.g * end_clip.color_matrx_1 +
+                              rgb_mult.b * end_clip.color_matrx_2 +
+                              rgb_mult.a * end_clip.color_matrx_3 +
                               1.0 * end_clip.color_matrx_4;
-                    let fg = clamp(cmx, vec4(0.0), vec4(1.0)) * area[i];
+                    cmx = clamp(cmx, vec4(0.0), vec4(1.0));
+                    if needs_un_premultiply {
+                        // Premultiply again
+                        cmx = vec4(cmx.rgb * cmx.a, cmx.a);
+                    }
+                    let fg = cmx * area[i];
                     rgba[i] = blend_mix_compose(bg, fg, end_clip.blend);
                 }
                 cmd_ix += 22u;

@@ -15,26 +15,26 @@ const useFakeGamma = platform.chromium;
 
 export default class ColorMatrixFilter extends Filter {
 
-  private m00: number;
-  private m01: number;
-  private m02: number;
-  private m03: number;
-  private m04: number;
-  private m10: number;
-  private m11: number;
-  private m12: number;
-  private m13: number;
-  private m14: number;
-  private m20: number;
-  private m21: number;
-  private m22: number;
-  private m23: number;
-  private m24: number;
-  private m30: number;
-  private m31: number;
-  private m32: number;
-  private m33: number;
-  private m34: number;
+  public m00: number;
+  public m01: number;
+  public m02: number;
+  public m03: number;
+  public m04: number;
+  public m10: number;
+  public m11: number;
+  public m12: number;
+  public m13: number;
+  public m14: number;
+  public m20: number;
+  public m21: number;
+  public m22: number;
+  public m23: number;
+  public m24: number;
+  public m30: number;
+  public m31: number;
+  public m32: number;
+  public m33: number;
+  public m34: number;
 
   /**
    * NOTE: It is possible but not generally recommended to create custom ColorMatrixFilter types. They should be
@@ -175,6 +175,10 @@ export default class ColorMatrixFilter extends Filter {
 
   public override isCanvasCompatible(): boolean {
     return super.isCanvasCompatible() || isImageDataSupported;
+  }
+
+  public override isVelloCompatible(): boolean {
+    return true;
   }
 
   public getCSSFilterString(): string {
