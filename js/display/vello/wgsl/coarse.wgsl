@@ -378,7 +378,7 @@ fn main(
                 let tile = tiles[tile_ix];
                 switch drawtag {
                     // DRAWTAG_FILL_COLOR
-                    case 0x44u: {
+                    case 0x42u: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {
                             let rgba_color = scene[dd];
@@ -386,7 +386,7 @@ fn main(
                         }
                     }
                     // DRAWTAG_FILL_LIN_GRADIENT
-                    case 0x114u: {
+                    case 0x10au: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {
                             let index = scene[dd];
@@ -395,7 +395,7 @@ fn main(
                         }
                     }
                     // DRAWTAG_FILL_RAD_GRADIENT
-                    case 0x29cu: {
+                    case 0x28eu: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {
                             let index = scene[dd];
@@ -404,14 +404,14 @@ fn main(
                         }
                     }
                     // DRAWTAG_FILL_IMAGE
-                    case 0x248u: {
+                    case 0x244u: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {                            
                             write_image(di + 1u);
                         }
                     }
                     // DRAWTAG_BEGIN_CLIP
-                    case 0x9u: {
+                    case 0x2bu: {
                         if tile.segments == 0u && tile.backdrop == 0 {
                             clip_zero_depth = clip_depth + 1u;
                         } else {
@@ -422,12 +422,16 @@ fn main(
                         clip_depth += 1u;
                     }
                     // DRAWTAG_END_CLIP
-                    case 0x21u: {
+                    case 0x401u: {
                         clip_depth -= 1u;
                         write_path(tile, -1.0);
                         let blend = scene[dd];
-                        let alpha = bitcast<f32>(scene[dd + 1u]);
-                        write_end_clip(CmdEndClip(blend, vec4(alpha, 0.0, 0.0, 0.0), vec4(0.0, alpha, 0.0, 0.0), vec4(0.0, 0.0, alpha, 0.0), vec4(0.0, 0.0, 0.0, alpha), vec4(0.0, 0.0, 0.0, 0.0)));
+                        let color_matrx_0 = vec4(bitcast<f32>(scene[dd + 1u]), bitcast<f32>(scene[dd + 2u]), bitcast<f32>(scene[dd + 3u]), bitcast<f32>(scene[dd + 4u]));
+                        let color_matrx_1 = vec4(bitcast<f32>(scene[dd + 5u]), bitcast<f32>(scene[dd + 6u]), bitcast<f32>(scene[dd + 7u]), bitcast<f32>(scene[dd + 8u]));
+                        let color_matrx_2 = vec4(bitcast<f32>(scene[dd + 9u]), bitcast<f32>(scene[dd + 10u]), bitcast<f32>(scene[dd + 11u]), bitcast<f32>(scene[dd + 12u]));
+                        let color_matrx_3 = vec4(bitcast<f32>(scene[dd + 13u]), bitcast<f32>(scene[dd + 14u]), bitcast<f32>(scene[dd + 15u]), bitcast<f32>(scene[dd + 16u]));
+                        let color_matrx_4 = vec4(bitcast<f32>(scene[dd + 17u]), bitcast<f32>(scene[dd + 18u]), bitcast<f32>(scene[dd + 19u]), bitcast<f32>(scene[dd + 20u]));
+                        write_end_clip(CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4));
                         render_blend_depth -= 1u;
                     }
                     default: {}
@@ -436,11 +440,11 @@ fn main(
                 // In "clip zero" state, suppress all drawing
                 switch drawtag {
                     // DRAWTAG_BEGIN_CLIP
-                    case 0x9u: {
+                    case 0x2bu: {
                         clip_depth += 1u;
                     }
                     // DRAWTAG_END_CLIP
-                    case 0x21u: {
+                    case 0x401u: {
                         if clip_depth == clip_zero_depth {
                             clip_zero_depth = 0u;
                         }

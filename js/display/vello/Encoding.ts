@@ -246,37 +246,61 @@ const ComposeMap = {
 
 scenery.register( 'Compose', Compose );
 
+// used to be:
+// 0x1 is whether it is a clip (00_0000_0001)
+// 0x1c defines the scene_offset (00_0001_1100)   ( x >> 2 ) & 0x7
+// 0x3c0 defines the info_offset (11_1100_0000)   ( x >> 6 ) & 0xf
+// 0x20 is added on to end-clip (00_0010_0000)
+
+// now:
+// 0x1 is whether it is a clip (0000_0000_0001)
+// 0x3e is the scene_offset (0000_0011_1110)      ( x >> 1 ) & 0x1f
+// 0x3c0 is the info_offset (0011_1100_0000)      ( x >> 6 ) & 0xf
+// 0x400 is added on to end-clip (0100_0000_0000)
+const createDrawTag = ( isClip: boolean, infoSize: number, sceneSize: number, extra = 0 ): number => {
+  return ( isClip ? 1 : 0 ) | ( sceneSize << 1 ) | ( infoSize << 6 ) | extra;
+};
+
 // u32
 export class DrawTag {
-
-  // NOTE: 0x1 is whether it is a clip
-  // NOTE: 0x1c defines the scene_offset
-  // NOTE: 0x3c0 defines the info_offset
-
   // No operation.
   public static readonly NOP = 0;
 
   // Color fill.
-  public static readonly COLOR = 0x44;
+  // 0x44 => 0x42
+  public static readonly COLOR = createDrawTag( false, 1, 1 );
 
   // Linear gradient fill.
-  public static readonly LINEAR_GRADIENT = 0x114;
+  // 0x114 => 0x10a
+  public static readonly LINEAR_GRADIENT = createDrawTag( false, 4, 5 );
 
   // Radial gradient fill.
-  public static readonly RADIAL_GRADIENT = 0x29c;
+  // 0x29c => 0x28e
+  public static readonly RADIAL_GRADIENT = createDrawTag( false, 10, 7 );
 
   // Image fill.
-  public static readonly IMAGE = 0x248;
+  // 0x248 => 0x244
+  public static readonly IMAGE = createDrawTag( false, 9, 2 );
 
   // Begin layer/clip.
-  public static readonly BEGIN_CLIP = 0x9;
+  // 0x9 => 0x2b
+  public static readonly BEGIN_CLIP = createDrawTag( true, 0, 21 );
 
   // End layer/clip.
-  public static readonly END_CLIP = 0x21;
+  // 0x21 => 0x401
+  public static readonly END_CLIP = createDrawTag( true, 0, 0, 0x400 );
 
   // Returns the size of the info buffer (in u32s) used by this tag.
   public static infoSize( drawTag: U32 ): U32 {
     return ( ( drawTag >>> 6 ) & 0xf ) >>> 0;
+  }
+
+  public static sceneSize( drawTag: U32 ): U32 {
+    return ( ( drawTag >>> 1 ) & 0x7 ) >>> 0;
+  }
+
+  public static isClip( drawTag: U32 ): boolean {
+    return ( drawTag & 0x1 ) === 1;
   }
 }
 
@@ -1198,7 +1222,31 @@ export default class Encoding {
 
     // u32 combination of mix and compose
     this.drawDataBuf.pushU32( ( ( mix << 8 ) >>> 0 ) | compose );
+
     this.drawDataBuf.pushF32( alpha );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( alpha );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( alpha );
+    this.drawDataBuf.pushF32( 0 );
+
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( alpha );
+
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
+    this.drawDataBuf.pushF32( 0 );
 
     this.numClips += 1;
     this.numOpenClips += 1;

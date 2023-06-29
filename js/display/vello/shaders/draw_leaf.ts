@@ -131,11 +131,11 @@ fn main(
         }
         switch tag_word {
             
-            case 0x44u: {
+            case 0x42u: {
                 info[di] = bitcast<u32>(linewidth);
             }
             
-            case 0x114u: {
+            case 0x10au: {
                 info[di] = bitcast<u32>(linewidth);
                 var p0 = bitcast<vec2<f32>>(vec2(scene[dd + 1u], scene[dd + 2u]));
                 var p1 = bitcast<vec2<f32>>(vec2(scene[dd + 3u], scene[dd + 4u]));
@@ -150,7 +150,7 @@ fn main(
                 info[di + 3u] = bitcast<u32>(line_c);
             }
             
-            case 0x29cu: {
+            case 0x28eu: {
                 
                 
                 
@@ -234,7 +234,7 @@ fn main(
                 info[di + 9u] = bitcast<u32>((flags << 3u) | kind);
             }
             
-            case 0x248u: {
+            case 0x244u: {
                 info[di] = bitcast<u32>(linewidth);
                 let inv = transform_inverse(transform);
                 info[di + 1u] = bitcast<u32>(inv.matrx.x);
