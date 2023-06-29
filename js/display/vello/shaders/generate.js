@@ -277,19 +277,19 @@ const convert = ( dir, filename, defines = [], outputName ) => {
   }
 };
 
-convert( 'shared/', 'bbox.wgsl' );
-convert( 'shared/', 'blend.wgsl' );
-convert( 'shared/', 'bump.wgsl' );
-convert( 'shared/', 'clip.wgsl' );
-convert( 'shared/', 'config.wgsl' );
-convert( 'shared/', 'cubic.wgsl' );
-convert( 'shared/', 'drawtag.wgsl' );
-convert( 'shared/', 'pathtag.wgsl' );
-convert( 'shared/', 'ptcl.wgsl' );
-convert( 'shared/', 'segment.wgsl' );
-convert( 'shared/', 'tile.wgsl' );
-convert( 'shared/', 'transform.wgsl' );
-convert( 'shared/', 'util.wgsl' );
+convert( 'shared/', 'bbox.wgsl', [ 'full' ] );
+convert( 'shared/', 'blend.wgsl', [ 'full' ] );
+convert( 'shared/', 'bump.wgsl', [ 'full' ] );
+convert( 'shared/', 'clip.wgsl', [ 'full' ] );
+convert( 'shared/', 'config.wgsl', [ 'full' ] );
+convert( 'shared/', 'cubic.wgsl', [ 'full' ] );
+convert( 'shared/', 'drawtag.wgsl', [ 'full' ] );
+convert( 'shared/', 'pathtag.wgsl', [ 'full' ] );
+convert( 'shared/', 'ptcl.wgsl', [ 'full' ] );
+convert( 'shared/', 'segment.wgsl', [ 'full' ] );
+convert( 'shared/', 'tile.wgsl', [ 'full' ] );
+convert( 'shared/', 'transform.wgsl', [ 'full' ] );
+convert( 'shared/', 'util.wgsl', [ 'full' ] );
 // convert( '', 'backdrop.wgsl' ); // NOT USED
 // convert( '', 'path_coarse.wgsl' ); // NOT USED?
 convert( '', 'pathtag_reduce.wgsl', [ 'full' ] );
@@ -297,16 +297,16 @@ convert( '', 'pathtag_reduce2.wgsl', [ 'full' ] );
 convert( '', 'pathtag_scan1.wgsl', [ 'full' ] );
 convert( '', 'pathtag_scan.wgsl', [ 'full', 'small' ], 'pathtag_scan_small.wgsl' );
 convert( '', 'pathtag_scan.wgsl', [ 'full' ], 'pathtag_scan_large.wgsl' );
-convert( '', 'bbox_clear.wgsl' );
+convert( '', 'bbox_clear.wgsl', [] );
 convert( '', 'pathseg.wgsl', [ 'full' ] );
-convert( '', 'draw_reduce.wgsl' );
-convert( '', 'draw_leaf.wgsl' );
-convert( '', 'clip_reduce.wgsl' );
-convert( '', 'clip_leaf.wgsl' );
-convert( '', 'binning.wgsl' );
+convert( '', 'draw_reduce.wgsl', [] );
+convert( '', 'draw_leaf.wgsl', [] );
+convert( '', 'clip_reduce.wgsl', [] );
+convert( '', 'clip_leaf.wgsl', [] );
+convert( '', 'binning.wgsl', [] );
 convert( '', 'tile_alloc.wgsl', [ 'have_uniform' ] );
 convert( '', 'path_coarse_full.wgsl', [ 'full' ] );
-convert( '', 'backdrop_dyn.wgsl' );
+convert( '', 'backdrop_dyn.wgsl', [] );
 convert( '', 'coarse.wgsl', [ 'have_uniform' ] );
 convert( '', 'fine.wgsl', [ 'full' ] );
 
