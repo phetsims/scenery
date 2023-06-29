@@ -304,10 +304,12 @@ convert( '', 'draw_leaf.wgsl', [] );
 convert( '', 'clip_reduce.wgsl', [] );
 convert( '', 'clip_leaf.wgsl', [] );
 convert( '', 'binning.wgsl', [] );
-convert( '', 'tile_alloc.wgsl', [ 'have_uniform' ] );
+// convert( '', 'tile_alloc.wgsl', [ 'have_uniform' ] );
+convert( '', 'tile_alloc.wgsl', [] );
 convert( '', 'path_coarse_full.wgsl', [ 'full' ] );
 convert( '', 'backdrop_dyn.wgsl', [] );
-convert( '', 'coarse.wgsl', [ 'have_uniform' ] );
+// convert( '', 'coarse.wgsl', [ 'have_uniform' ] );
+convert( '', 'coarse.wgsl', [] );
 convert( '', 'fine.wgsl', [ 'full' ] );
 
 console.log( `bytes: ${byteSize}` );

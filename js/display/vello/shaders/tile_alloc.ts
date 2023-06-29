@@ -35,7 +35,6 @@ const WG_SIZE = 256u;
 
 var<workgroup> sh_tile_count: array<u32, WG_SIZE>;
 var<workgroup> sh_tile_offset: u32;
-var<workgroup> sh_atomic_failed: u32;
 
 @compute @workgroup_size(256)
 fn main(
@@ -45,10 +44,7 @@ fn main(
     
     
     
-    if local_id.x == 0u {
-        sh_atomic_failed = atomicLoad(&bump.failed);
-    }
-    let failed = workgroupUniformLoad(&sh_atomic_failed);
+    let failed = atomicLoad(&bump.failed);
     if (failed & STAGE_BINNING) != 0u {
         return;
     }    
