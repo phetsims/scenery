@@ -8,7 +8,7 @@
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { imageBitmapMap, ImageStatefulDrawable, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
+import { Compose, FilterMatrix, imageBitmapMap, ImageStatefulDrawable, Mix, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
 
 const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 
@@ -55,8 +55,6 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
     // TODO: only re-encode the image when IT changes, not when the transform changes!!!
     // TODO: This is fairly important for performance it seems
 
-    // TODO: implement imageOpacity
-
     this.encoding.reset( true );
 
     const node = this.node;
@@ -80,12 +78,28 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
       }
     }
 
+    const imageOpacity = node._imageOpacity;
+    const needsImageOpacity = imageOpacity !== 1;
+
     // if we are not loaded yet, just ignore
     if ( source ) {
+      // TODO: use an alpha parameter in the shaders once it is supported
+      if ( needsImageOpacity ) {
+        this.encoding.encodeMatrix( matrix );
+        this.encoding.encodeLineWidth( -1 );
+        this.encoding.encodeRect( 0, 0, source.width, source.height );
+
+        this.encoding.encodeBeginClip( Mix.Normal, Compose.SrcOver, new FilterMatrix().multiplyAlpha( imageOpacity ) );
+      }
+
       this.encoding.encodeMatrix( matrix );
       this.encoding.encodeLineWidth( -1 );
       this.encoding.encodeRect( 0, 0, source.width, source.height );
       this.encoding.encodeImage( new SourceImage( source.width, source.height, source ) );
+
+      if ( needsImageOpacity ) {
+        this.encoding.encodeEndClip();
+      }
     }
 
     this.setToCleanState();

@@ -279,7 +279,7 @@ export class FilterMatrix {
     assert && assert( isFinite( m34 ), 'm34 should be a finite number' );
   }
 
-  public reset(): void {
+  public reset(): this {
     this.m00 = 1;
     this.m01 = 0;
     this.m02 = 0;
@@ -300,16 +300,20 @@ export class FilterMatrix {
     this.m32 = 0;
     this.m33 = 1;
     this.m34 = 0;
+
+    return this;
   }
 
-  public multiplyAlpha( alpha: number ): void {
+  public multiplyAlpha( alpha: number ): this {
     this.m03 *= alpha;
     this.m13 *= alpha;
     this.m23 *= alpha;
     this.m33 *= alpha;
+
+    return this;
   }
 
-  public multiply( other: FilterMatrix | ColorMatrixFilter ): void {
+  public multiply( other: FilterMatrix | ColorMatrixFilter ): this {
 
     const m00 = this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20 + this.m03 * other.m30;
     const m01 = this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21 + this.m03 * other.m31;
@@ -358,6 +362,8 @@ export class FilterMatrix {
     this.m32 = m32;
     this.m33 = m33;
     this.m34 = m34;
+
+    return this;
   }
 }
 
