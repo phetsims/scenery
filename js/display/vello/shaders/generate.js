@@ -7,6 +7,8 @@
 /*
  * List of things I've had to patch for the shaders:
  *
+ * Shaders from 31f8d9ffa046d5c8cb2da8d99f24f65f00073215
+ *
  * Don't premultiply output:
  * - fine.wgsl
  *
