@@ -92,7 +92,6 @@ class VelloBlock extends FittedBlock {
       this.canvasContext = this.deviceContext.getCanvasContext( this.canvas );
     }
 
-    // TODO: perhaps these might reduce performance? kill them?
     // reset any fit transforms that were applied
     Utils.prepareForTransform( this.canvas ); // Apply CSS needed for future CSS transforms to work properly.
     Utils.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
@@ -198,7 +197,7 @@ class VelloBlock extends FittedBlock {
   }
 
   /**
-   * TODO: code share with Canvas?
+   * TODO: code share with Canvas, somehow perhaps?
    * Walk down towards the root, popping any clip/opacity effects that were needed.
    * @private
    *

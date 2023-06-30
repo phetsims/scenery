@@ -956,7 +956,7 @@ export default class Encoding {
   // Clears the encoding.
   public reset( isFragment: boolean ): void {
     // Clears the rustEncoding too, reinitalizing it
-    // TODO: don't requre hardcoding TRUE for isFragment?
+    // TODO: don't require hardcoding TRUE for isFragment?
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding = `let mut encoding${this.id}: Encoding = Encoding::new();\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.reset(true);\n` );
     this.transforms.length = 0;
@@ -1320,9 +1320,6 @@ export default class Encoding {
         canvas.height = image.height;
         const context = canvas.getContext( '2d' )!;
         context.drawImage( image.source, 0, 0 );
-
-        // TODO: see if this gets the premultiplication right - ImageBitmap was encoded as premultiplied?
-        // TODO: This probably does NOT get premultiplication right
         u8array = new Uint8Array( context.getImageData( 0, 0, image.width, image.height ).data.buffer );
       }
       const dataString = [ ...u8array ].join( ', ' );
@@ -1340,7 +1337,6 @@ export default class Encoding {
   }
 
   public encodeBeginClip( mix: Mix, compose: Compose, filterMatrix: FilterMatrix ): void {
-    // TODO: Get the encoding to support filters!
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(BlendMode {mix: ${MixMap[ mix ]}, compose: ${ComposeMap[ compose ]}}, ${rustF32( filterMatrix.m33 )});\n` );
     this.drawTagsBuf.pushU32( DrawTag.BEGIN_CLIP );
 

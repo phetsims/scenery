@@ -125,8 +125,6 @@ export default class DeviceContext {
       DeviceContext.currentDevice = device;
 
       try {
-        // TODO: push error validation, see https://toji.dev/webgpu-best-practices/error-handling.html
-
         device.pushErrorScope( 'validation' );
 
         // Trigger shader compilation before anything (will be cached)

@@ -86,6 +86,8 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     // TODO: consider caching the encoded shape, and only re-encoding if the shape changes. We should be able to
     // TODO: append out-of-order?
+    // TODO: If we cache the encoded shape, IF THE SHAPE CHANGES EVERY FRAME then are we getting performance loss?
+    // TODO: performance gain would only happen if it was MOVING but SELF-STATIC. Fully static won't call this update.
 
     this.encoding.reset( true );
 
