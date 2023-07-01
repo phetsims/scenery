@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Handles resources related to a GPUDevice
+ * Handles resources (atlas, ramps) related to a GPUDevice
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -20,7 +20,6 @@ export default class DeviceContext {
   public readonly preferredStorageFormat: 'bgra8unorm' | 'rgba8unorm';
 
   public static currentDevice: GPUDevice | null = null;
-  public static currentDeviceContext: DeviceContext | null = null;
   public static supportsBGRATextureStorage = false;
   private static couldNotGetDevice = false;
   private static completedDeviceAttempt = false;
@@ -41,13 +40,14 @@ export default class DeviceContext {
 
     // TODO: handle context losses, reconstruct with the device
     // TODO: get setup to manually trigger context losses
+    // TODO: If the GPU is unavailable, we will return ALREADY LOST contexts. We should try an immediate request for a
+    // TODO: device once, to see if we get a context back (transient loss), otherwise disable it for a while
     device.lost.then( info => {
       console.error( `WebGPU device was lost: ${info.message}` );
 
       this.lostEmitter.emit();
 
       DeviceContext.currentDevice = null;
-      DeviceContext.currentDeviceContext = null;
 
       // 'reason' will be 'destroyed' if we intentionally destroy the device.
       if ( info.reason !== 'destroyed' ) {
@@ -78,12 +78,12 @@ export default class DeviceContext {
     return context;
   }
 
-  // TODO: have something call this early, so the await is not needed?
   public static async isVelloSupported(): Promise<boolean> {
+    // We want to make sure our shaders are validating AND our atlas/ramp initial texture code is working, so we
+    // await a full device context here.
     return !!await DeviceContext.getDeviceContext();
   }
 
-  // TODO: have a Property perhaps?
   public static isVelloSupportedSync(): boolean {
     assert && assert( DeviceContext.completedDeviceAttempt, 'We should have awaited isVelloSupported() before calling this' );
 
@@ -125,25 +125,10 @@ export default class DeviceContext {
       DeviceContext.currentDevice = device;
 
       try {
-        device.pushErrorScope( 'validation' );
-
-        // Trigger shader compilation before anything (will be cached)
-        VelloShader.getShaders( device );
-
-        ( async () => {
-          const validationError = await device.popErrorScope();
-
-          if ( validationError ) {
-            console.error( 'WebGPU validation error:', validationError );
-            // TODO: this delayed action... might not be soon enough?
-            // Null things out!
-            DeviceContext.couldNotGetDevice = true;
-            DeviceContext.currentDevice = null;
-            DeviceContext.currentDeviceContext = null;
-          }
-        } )().catch( err => { throw err; } );
+        await VelloShader.getShadersWithValidation( device );
       }
       catch( err ) {
+        console.log( 'WebGPU validation error' );
         console.log( err );
 
         // Null things out!
@@ -164,10 +149,6 @@ export default class DeviceContext {
   public static getSync(): DeviceContext | null {
     assert && assert( DeviceContext.completedDeviceAttempt, 'We should have awaited isVelloSupported() before calling this' );
 
-    if ( DeviceContext.currentDeviceContext ) {
-      return DeviceContext.currentDeviceContext;
-    }
-
     if ( DeviceContext.currentDevice ) {
       return new DeviceContext( DeviceContext.currentDevice );
     }
@@ -177,10 +158,6 @@ export default class DeviceContext {
   }
 
   public static async getDeviceContext(): Promise<DeviceContext | null> {
-    if ( DeviceContext.currentDeviceContext ) {
-      return DeviceContext.currentDeviceContext;
-    }
-
     const device = await DeviceContext.getDevice();
 
     return device ? new DeviceContext( device ) : null;

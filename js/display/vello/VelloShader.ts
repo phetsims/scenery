@@ -208,6 +208,24 @@ export default class VelloShader {
     return map!;
   }
 
+  public static async getShadersWithValidation( device: GPUDevice ): Promise<ShaderMap> {
+    if ( shaderDeviceMap.has( device ) ) {
+      return shaderDeviceMap.get( device )!;
+    }
+    device.pushErrorScope( 'validation' );
+
+    // Trigger shader compilation before anything (will be cached)
+    const shaderMap = VelloShader.getShaders( device );
+
+    const validationError = await device.popErrorScope();
+
+    if ( validationError ) {
+      throw validationError;
+    }
+
+    return shaderMap;
+  }
+
   private static loadShaders( device: GPUDevice ): ShaderMap {
     const getFineShaderWGSL = ( format: VelloShaderFormat ) => {
       if ( !DeviceContext.supportsBGRATextureStorage && format === 'bgra8unorm' ) {

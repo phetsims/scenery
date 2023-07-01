@@ -9,7 +9,7 @@
 import { AtlasAllocator, AtlasBin, BufferImage, EncodableImage, scenery, VelloImagePatch } from '../../imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 
-const ATLAS_INITIAL_SIZE = 512;
+const ATLAS_INITIAL_SIZE = 256;
 const ATLAS_MAX_SIZE = 8192;
 
 // Amount of space along the edge of each image that is filled with the closest adjacent pixel value. This helps
