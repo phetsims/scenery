@@ -8,9 +8,13 @@
 
 import { BufferPool, DeviceContext, RenderInfo, scenery, VelloShader } from '../../imports.js';
 
+const DEBUG_ATLAS = false;
+
 // TODO: name change!
 const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTexture: GPUTexture ): void => {
   const device = deviceContext.device;
+
+  const onCompleteActions: ( () => void )[] = [];
 
   const shaders = VelloShader.getShaders( device );
 
@@ -194,11 +198,42 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
   deviceContext.ramps.updateTexture();
   deviceContext.atlas.updateTexture();
 
+  // TODO: TS change so this is always defined
   const rampTextureView = deviceContext.ramps.textureView!;
   assert && assert( rampTextureView );
 
   const atlasTextureView = deviceContext.atlas.textureView!;
   assert && assert( atlasTextureView );
+
+  if ( assert && DEBUG_ATLAS ) {
+    const debugCanvas = document.createElement( 'canvas' );
+    const debugContext = debugCanvas.getContext( 'webgpu' )!;
+    debugCanvas.width = deviceContext.atlas.texture!.width;
+    debugCanvas.height = deviceContext.atlas.texture!.height;
+    debugContext.configure( {
+      device: deviceContext.device,
+      format: navigator.gpu.getPreferredCanvasFormat(),
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+      alphaMode: 'premultiplied'
+    } );
+
+    shaders.blit.dispatch( encoder, debugContext.getCurrentTexture().createView(), atlasTextureView );
+
+    const atlasPainter = deviceContext.atlas.getDebugPainter();
+
+    onCompleteActions.push( () => {
+      const canvas = document.createElement( 'canvas' );
+      canvas.width = debugCanvas.width;
+      canvas.height = debugCanvas.height;
+      const context = canvas.getContext( '2d' )!;
+      context.drawImage( debugCanvas, 0, 0 );
+
+      atlasPainter( context );
+
+      // TODO: This is getting cut off at a certain amount of pixels?
+      console.log( canvas.toDataURL() );
+    } );
+  }
 
   // NOTE: This is relevant code for if we want to render to a different texture (how to create it)
 
@@ -252,7 +287,15 @@ const render = ( renderInfo: RenderInfo, deviceContext: DeviceContext, outTextur
 
   const commandBuffer = encoder.finish();
   device.queue.submit( [ commandBuffer ] );
-  // device.queue.onSubmittedWorkDone().then( () => {} );
+
+  // Conditionally listen to when the submitted work is done
+  if ( onCompleteActions.length ) {
+    device.queue.onSubmittedWorkDone().then( () => {
+      onCompleteActions.forEach( action => action() );
+    } ).catch( err => {
+      throw err;
+    } );
+  }
 
   // for now TODO: can we reuse? Likely get some from reusing these
   configBuffer.destroy();

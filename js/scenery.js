@@ -85,6 +85,10 @@ const logProperties = {
   // For Vello encoding
   Encoding: { name: 'Encoding', style: '' },
 
+  // Vello
+  Atlas: { name: 'Atlas', style: '' },
+  VelloBlock: { name: 'VelloBlock', style: '' },
+
   // Accessibility-related
   ParallelDOM: { name: 'ParallelDOM', style: '' },
   PDOMInstance: { name: 'PDOMInstance', style: '' },

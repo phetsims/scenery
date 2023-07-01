@@ -7,6 +7,7 @@
  */
 
 import { scenery } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class BufferImage {
   // TODO: perhaps reorder parameters
@@ -16,7 +17,14 @@ export default class BufferImage {
     public readonly width: number,
     public readonly height: number,
     public readonly buffer: ArrayBuffer
-  ) {}
+  ) {
+    assert && assert( isFinite( width ) && width >= 0 );
+    assert && assert( isFinite( height ) && height >= 0 );
+  }
+
+  public equals( other: IntentionalAny ): boolean {
+    return other instanceof BufferImage && this.buffer === other.buffer;
+  }
 }
 
 scenery.register( 'BufferImage', BufferImage );

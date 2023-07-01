@@ -12,6 +12,7 @@
  */
 
 import { scenery } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class SourceImage {
   // TODO: perhaps reorder parameters
@@ -19,7 +20,14 @@ export default class SourceImage {
     public readonly width: number,
     public readonly height: number,
     public readonly source: GPUImageCopyExternalImageSource
-  ) {}
+  ) {
+    assert && assert( isFinite( width ) && width >= 0 );
+    assert && assert( isFinite( height ) && height >= 0 );
+  }
+
+  public equals( other: IntentionalAny ): boolean {
+    return other instanceof SourceImage && this.source === other.source;
+  }
 }
 
 scenery.register( 'SourceImage', SourceImage );

@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Loading utilities for the async nature of using swash
+ * TypeScript wrapper and utilities around Swash text shaping and glyphs
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -17,9 +17,13 @@ const loadPromise = swash( base64ToU8( swash_wasm ) );
 
 // Record whether it's loaded, so we can skip the asyncLoader lock if so
 let loaded = false;
+const lock = asyncLoader.createLock( 'swash wasm' );
 loadPromise.then( () => {
+  // To debug memory leaks, give this function a `wasm` parameter, and access `wasm.memory.buffer.byteLength`.
   loaded = true;
+  lock();
 } ).catch( ( err: IntentionalAny ) => {
+  lock();
   throw err;
 } );
 
@@ -37,12 +41,8 @@ export default class PathFont {
       this.initialize( dataString );
     }
     else {
-      const lock = asyncLoader.createLock( 'font load' );
       loadPromise.then( () => {
-
         this.initialize( dataString );
-
-        lock();
       } ).catch( ( err: IntentionalAny ) => { throw err; } );
     }
   }

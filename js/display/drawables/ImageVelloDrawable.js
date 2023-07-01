@@ -68,8 +68,17 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
       if ( imageBitmap && imageBitmap.width && imageBitmap.height ) {
         source = imageBitmap;
       }
-      else {
-        console.log( 'ImageVelloDrawable: image not loaded yet' );
+      else if ( node.imageWidth && node.imageHeight ) {
+        // We generally end up here if the imageBitmap isn't computed yet (freshly drawn something!)
+        // We'll try drawing it to a Canvas
+
+        const canvas = document.createElement( 'canvas' );
+        canvas.width = node.imageWidth;
+        canvas.height = node.imageHeight;
+
+        const context = canvas.getContext( '2d' );
+        context.drawImage( node._image, 0, 0 );
+        source = canvas;
       }
     }
     else if ( node._image instanceof HTMLCanvasElement ) {

@@ -7,10 +7,7 @@ use swash::{
 };
 use wasm_bindgen::prelude::*;
 
-// Install rust
-// Ensure we have wasm32 target with `rustup target add wasm32-unknown-unknown`
-// Install wasm-pack
-// Build with: `wasm-pack build --target web swash-tests`
+// See generate.js for generation
 
 #[wasm_bindgen]
 pub struct SwashFont {

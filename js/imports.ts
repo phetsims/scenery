@@ -336,6 +336,7 @@ export type { ColorRGBA32, F32, U32, U8, EncodableImage } from './display/vello/
 export { default as PhetEncoding } from './display/vello/PhetEncoding.js';
 export { default as render } from './display/vello/render.js';
 export { default as PathFont } from './display/swash/PathFont.js';
+export { default as AtlasAllocator, AtlasBin } from './display/guillotiere/AtlasAllocator.js';
 
 
 export { default as Drawable } from './display/Drawable.js';
