@@ -1,18 +1,3 @@
 /* eslint-disable */
 
-export default `
-
-
-
-struct Path {
-    
-    bbox: vec4<u32>,
-    
-    tiles: u32,
-}
-
-struct Tile {
-    backdrop: i32,
-    segments: u32,
-}
-`
+export default `struct _aL{_b:vec4<u32>,_w:u32}struct _aK{_B:i32,_R:u32}`

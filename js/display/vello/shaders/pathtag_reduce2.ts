@@ -2,44 +2,6 @@
 import pathtag from './shared/pathtag.js';
 import config from './shared/config.js';
 
-export default `
-
-
-
-
-${config}
+export default `${config}
 ${pathtag}
-
-@group(0) @binding(0)
-var<storage> reduced_in: array<TagMonoid>;
-
-@group(0) @binding(1)
-var<storage, read_write> reduced: array<TagMonoid>;
-
-const LG_WG_SIZE = 8u;
-const WG_SIZE = 256u;
-
-var<workgroup> sh_scratch: array<TagMonoid, WG_SIZE>;
-
-@compute @workgroup_size(256)
-fn main(
-    @builtin(global_invocation_id) global_id: vec3<u32>,
-    @builtin(local_invocation_id) local_id: vec3<u32>,
-) {
-    let ix = global_id.x;
-    var agg = reduced_in[ix];
-    sh_scratch[local_id.x] = agg;
-    for (var i = 0u; i < firstTrailingBit(WG_SIZE); i += 1u) {
-        workgroupBarrier();
-        if local_id.x + (1u << i) < WG_SIZE {
-            let other = sh_scratch[local_id.x + (1u << i)];
-            agg = combine_tag_monoid(agg, other);
-        }
-        workgroupBarrier();
-        sh_scratch[local_id.x] = agg;
-    }
-    if local_id.x == 0u {
-        reduced[ix >> LG_WG_SIZE] = agg;
-    }
-}
-`
+@group(0)@binding(0)var<storage>_hf:array<_ad>;@group(0)@binding(1)var<storage,read_write>_aq:array<_ad>;const _bH=8u;const _j=256u;var<workgroup>_at:array<_ad,_j>;@compute @workgroup_size(256)fn main(@builtin(global_invocation_id)_G:vec3<u32>,@builtin(local_invocation_id)_f:vec3<u32>,){let ix=_G.x;var agg=_hf[ix];_at[_f.x]=agg;for(var i=0u;i<firstTrailingBit(_j);i+=1u){workgroupBarrier();if _f.x+(1u<<i)<_j{let _Z=_at[_f.x+(1u<<i)];agg=_bF(agg,_Z);}workgroupBarrier();_at[_f.x]=agg;}if _f.x==0u{_aq[ix>>_bH]=agg;}}`

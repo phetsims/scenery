@@ -1,26 +1,3 @@
 /* eslint-disable */
 
-export default `
-
-
-
-
-
-
-
-
-
-
-
-
-fn read_draw_tag_from_scene(ix: u32) -> u32 {
-    let tag_ix = config.drawtag_base + ix;
-    var tag_word: u32;
-    if tag_ix < config.drawtag_base + config.n_drawobj {
-        tag_word = scene[tag_ix];
-    } else {
-        tag_word = DRAWTAG_NOP;
-    }
-    return tag_word;
-}
-`
+export default `fn _gs(ix:u32)->u32{let _gr=_m._cS+ix;var _D:u32;if _gr<_m._cS+_m._cz{_D=_n[_gr];}else{_D=_cy;}return _D;}`

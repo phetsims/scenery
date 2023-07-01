@@ -1,21 +1,3 @@
 /* eslint-disable */
 
-export default `
-
-
-const STAGE_BINNING: u32 = 0x1u;
-const STAGE_TILE_ALLOC: u32 = 0x2u;
-const STAGE_PATH_COARSE: u32 = 0x4u;
-const STAGE_COARSE: u32 = 0x8u;
-
-
-struct BumpAllocators {
-    
-    failed: atomic<u32>,
-    binning: atomic<u32>,
-    ptcl: atomic<u32>,
-    tile: atomic<u32>,
-    segments: atomic<u32>,
-    blend: atomic<u32>,
-}
-`
+export default `const _et:u32=0x1u;const _fp:u32=0x2u;const _gV:u32=0x4u;const _iv:u32=0x8u;struct _eu{_ac:atomic<u32>,_dH:atomic<u32>,_q:atomic<u32>,_a:atomic<u32>,_R:atomic<u32>,_K:atomic<u32>}`

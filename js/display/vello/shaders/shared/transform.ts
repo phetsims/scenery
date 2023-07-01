@@ -1,29 +1,3 @@
 /* eslint-disable */
 
-export default `
-
-
-
-struct Transform {
-    matrx: vec4<f32>,
-    translate: vec2<f32>,
-}
-
-fn transform_apply(transform: Transform, p: vec2<f32>) -> vec2<f32> {
-    return transform.matrx.xy * p.x + transform.matrx.zw * p.y + transform.translate;
-}
-
-fn transform_inverse(transform: Transform) -> Transform {
-    let inv_det = 1.0 / (transform.matrx.x * transform.matrx.w - transform.matrx.y * transform.matrx.z);
-    let inv_mat = inv_det * vec4(transform.matrx.w, -transform.matrx.y, -transform.matrx.z, transform.matrx.x);
-    let inv_tr = mat2x2(inv_mat.xy, inv_mat.zw) * -transform.translate;
-    return Transform(inv_mat, inv_tr);
-}
-
-fn transform_mul(a: Transform, b: Transform) -> Transform {
-    return Transform(
-        a.matrx.xyxy * b.matrx.xxzz + a.matrx.zwzw * b.matrx.yyww,
-        a.matrx.xy * b.translate.x + a.matrx.zw * b.translate.y + a.translate
-    );
-}
-`
+export default `struct _az{_i:vec4<f32>,_bc:vec2<f32>}fn _cM(_x:_az,p:vec2<f32>)->vec2<f32>{return _x._i.xy*p.x+_x._i.zw*p.y+_x._bc;}fn _fe(_x:_az)->_az{let _ii=1./(_x._i.x*_x._i.w-_x._i.y*_x._i.z);let _fd=_ii*vec4(_x._i.w,-_x._i.y,-_x._i.z,_x._i.x);let _ih=mat2x2(_fd.xy,_fd.zw)*-_x._bc;return _az(_fd,_ih);}fn _dw(a:_az,b:_az)->_az{return _az(a._i.xyxy*b._i.xxzz+a._i.zwzw*b._i.yyww,a._i.xy*b._bc.x+a._i.zw*b._bc.y+a._bc);}`

@@ -24,12 +24,12 @@ const fs = require( 'fs' );
 const _ = require( 'lodash' );
 
 // Enable opting out of minification for debugging
-const MINIFY = false;
+const MINIFY = true;
 
 // go to this directory, then run `node generate.js` to generate the shaders (output is also in this directory)
 
 const stripComments = str => {
-  return str.replaceAll( '\r\n', '\n' ).split( '\n' ).map( line => {
+  return str.replace( /\r\n/g, '\n' ).split( '\n' ).map( line => {
     const index = line.indexOf( '//' );
     return index >= 0 ? line.substring( 0, index ) : line;
   } ).join( '\n' );
@@ -81,7 +81,8 @@ symbols = _.uniq( symbols ).filter( symbol => {
     return false;
   }
 
-  // TODO: update to < 2 once we get rid of underscore
+  // TODO: update to < 2 once we get rid of underscore (not worth changing symbols, and we assume there aren't existing
+  // TODO: ones starting with underscores)
   if ( symbol.length < 3 ) {
     return false;
   }
@@ -108,65 +109,75 @@ symbols = _.uniq( symbols ).filter( symbol => {
     'workgroup'
   ].includes( symbol );
 } );
+const symbolCounts = {};
+// Count symbols, and sort by the count. We'll use the count later to remove unused constants!
 symbols = _.sortBy( symbols, symbol => {
-  return [ ...totalStr.matchAll( new RegExp( symbol, 'g' ) ) ].length;
+  const count = [ ...totalStr.matchAll( new RegExp( symbol, 'g' ) ) ].length;
+  symbolCounts[ symbol ] = count;
+  return count;
 } ).reverse();
 // console.log( JSON.stringify( symbols, null, 2 ) );
 
-// TODO: we have... constants declared that aren't used! Can we just strip them out?
+// TODO: we have... constants declared that aren't used! Can we just strip them out? Presumably yes
 
 const minify = str => {
-  // TODO: could improve minification
+  // TODO: could improve minification significantly
 
-  str = str.replaceAll( '\r\n', '\n' );
+  str = str.replace( /\r\n/g, '\n' );
 
   // // Naga does not yet recognize `const` but web does not allow global `let`.
-  str = str.replaceAll( '\nlet ', '\nconst ' );
+  str = str.replace( /\nlet /g, '\nconst ' );
 
   if ( MINIFY ) {
     // According to WGSL spec:
     // line breaks: \u000A\u000B\u000C\u000D\u0085\u2028\u2029
     // white space: \u0020\u0009\u000A\u000B\u000C\u000D\u0085\u200E\u200F\u2028\u2029
 
+    // TODO: actually use a parser for all of this (make a rust crate for it)
+
     const linebreak = '[\u000A\u000B\u000C\u000D\u0085\u2028\u2029]';
-    const whitespace = '[\u0020\u0009\u0085\u200E\u200F\u2028\u2029]';
+    const whitespace = '[\u0020\u0009\u0085\u200E\u200F\u2028\u2029]'; // don't include most the linebreak ones
+    const linebreakOrWhitespace = '[\u000A\u000B\u000C\u000D\u0085\u2028\u2029\u0020\u0009\u0085\u200E\u200F]';
 
     // Collapse newlines
-    str = str.replaceAll( new RegExp( `${whitespace}*${linebreak}+${whitespace}*`, 'g' ), '\n' );
+    str = str.replace( new RegExp( `${whitespace}*${linebreak}+${whitespace}*`, 'g' ), '\n' );
     str = str.trim();
 
     // Collapse other whitespace
-    str = str.replaceAll( new RegExp( `${whitespace}+`, 'g' ), ' ' );
+    str = str.replace( new RegExp( `${whitespace}+`, 'g' ), ' ' );
 
     // Semicolon + newline => semicolon
-    str = str.replaceAll( new RegExp( `;${linebreak}`, 'g' ), ';' );
+    str = str.replace( new RegExp( `;${linebreak}`, 'g' ), ';' );
 
     // Comma + newline => comma
-    str = str.replaceAll( new RegExp( `,${linebreak}`, 'g' ), ',' );
+    str = str.replace( new RegExp( `,${linebreak}`, 'g' ), ',' );
 
-    // newlines around {}
-    str = str.replaceAll( new RegExp( `${linebreak}*\u007B${linebreak}*`, 'g' ), '{' );
-    str = str.replaceAll( new RegExp( `${linebreak}*\u007D${linebreak}*`, 'g' ), '}' );
-    str = str.replaceAll( new RegExp( `${whitespace}*\u007B${whitespace}*`, 'g' ), '{' );
-    str = str.replaceAll( new RegExp( `${whitespace}*\u007D${whitespace}*`, 'g' ), '}' );
+    // whitespace around {}
+    str = str.replace( new RegExp( `${linebreakOrWhitespace}*([\\{\\}])${linebreakOrWhitespace}*`, 'g' ), ( _, m ) => m );
 
-    str = str.replaceAll( new RegExp( `: `, 'g' ), ':' );
-    str = str.replaceAll( new RegExp( `; `, 'g' ), ';' );
-    str = str.replaceAll( new RegExp( `, `, 'g' ), ',' );
-    str = str.replaceAll( new RegExp( `,}`, 'g' ), '}' );
-    str = str.replaceAll( new RegExp( `,]`, 'g' ), ']' );
+    // Remove whitespace after :;,
+    str = str.replace( new RegExp( `([:;,])${linebreakOrWhitespace}+`, 'g' ), ( _, m ) => m );
 
-    str = str.replaceAll( new RegExp( `${whitespace}*\\+${whitespace}*`, 'g' ), '+' );
-    str = str.replaceAll( new RegExp( `${whitespace}*-${whitespace}*`, 'g' ), '-' );
-    str = str.replaceAll( new RegExp( `${whitespace}*\\*${whitespace}*`, 'g' ), '*' );
-    str = str.replaceAll( new RegExp( `${whitespace}*/${whitespace}*`, 'g' ), '/' );
-    str = str.replaceAll( new RegExp( `${whitespace}*<${whitespace}*`, 'g' ), '<' );
-    str = str.replaceAll( new RegExp( `${whitespace}*>${whitespace}*`, 'g' ), '>' );
-    str = str.replaceAll( new RegExp( `${whitespace}*&${whitespace}*`, 'g' ), '&' );
-    str = str.replaceAll( new RegExp( `${whitespace}*\\|${whitespace}*`, 'g' ), '|' );
-    str = str.replaceAll( new RegExp( `${whitespace}*=${whitespace}*`, 'g' ), '=' );
-    str = str.replaceAll( new RegExp( `${whitespace}*\\(${whitespace}*`, 'g' ), '(' );
-    str = str.replaceAll( new RegExp( `${whitespace}*\\)${whitespace}*`, 'g' ), ')' );
+    // Remove trailing commas before }]
+    str = str.replace( new RegExp( `,([\\}\\]])`, 'g' ), ( _, m ) => m );
+
+    // It's safe to remove whitespace before '-', however Firefox's tokenizer doesn't like 'x-1u' (presumably identifier + literal number, no operator)
+    // So we'll only replace whitespace after '-' if it's not followed by a digit
+    str = str.replace( new RegExp( `${linebreakOrWhitespace}*-`, 'g' ), '-' );
+    str = str.replace( new RegExp( `-${linebreakOrWhitespace}+([^0-9])`, 'g' ), ( _, m ) => `-${m}` );
+
+    // Operators don't need whitespace around them in general
+    str = str.replace( new RegExp( `${linebreakOrWhitespace}*([\\+\\*/<>&\\|=\\(\\)!])${linebreakOrWhitespace}*`, 'g' ), ( _, m ) => m );
+
+    str = str.replace( /\d+\.\d+/g, m => {
+      if ( m.endsWith( '.0' ) ) {
+        m = m.substring( 0, m.length - 1 );
+      }
+      if ( m.startsWith( '0.' ) && m.length > 2 ) {
+        m = m.substring( 1 );
+      }
+      return m;
+    } );
 
     symbols.forEach( ( name, index ) => {
       // TODO: OMG why do we need to iterate this? Something is WRONG with this code. See below
@@ -179,18 +190,25 @@ const minify = str => {
 
           // We still have to do import stuff
           if ( !before.endsWith( '#import ' ) ) {
-            const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-            let variable;
-            if ( index < alphabet.length ) {
-              variable = alphabet[ index ];
+            // Try to strip out unused variables
+            const afterMatch = /=\d+u;/.exec( after );
+            if ( symbolCounts[ name ] === 1 && before.endsWith( 'const ' ) && afterMatch ) {
+              str = before.slice( 0, before.length - 'const '.length ) + after.slice( afterMatch[ 0 ].length );
             }
             else {
-              variable = alphabet[ Math.floor( index / alphabet.length ) - 1 ] + alphabet[ index % alphabet.length ];
+              const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+              let variable;
+              if ( index < alphabet.length ) {
+                variable = alphabet[ index ];
+              }
+              else {
+                variable = alphabet[ Math.floor( index / alphabet.length ) - 1 ] + alphabet[ index % alphabet.length ];
+              }
+              // TODO: figure out how we could get rid of this underscore. What are we hitting?
+              variable = `_${variable}`;
+              str = before + variable + after;
             }
-            // TODO: figure out how we could get rid of this underscore. What are we hitting?
-            variable = `_${variable}`;
-            str = before + variable + after;
           }
         } );
       }
@@ -210,7 +228,7 @@ const minify = str => {
 const preprocess = ( str, defines ) => {
 
   // sanity check
-  str = str.replaceAll( '\r\n', '\n' );
+  str = str.replace( /\r\n/g, '\n' );
 
   const lines = str.split( '\n' );
   const outputLines = [];
@@ -276,7 +294,7 @@ const convert = ( dir, filename, defines = [], outputName ) => {
       shaderString = shaderString.substring( 0, index ) + `\$\{${importName}\}` + shaderString.substring( index + match[ 0 ].length );
     } );
 
-    const outputString = ( '`' + shaderString + '`' ).replaceAll( '`` + ', '' );
+    const outputString = ( '`' + shaderString + '`' ).replace( /`` \\+ /g, '' );
     byteSize += outputString.length;
 
     const importsString = importNames.map( name => `import ${name} from './shared/${name}.js';\n` ).join( '' );

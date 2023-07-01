@@ -1,11 +1,3 @@
 /* eslint-disable */
 
-export default `
-
-struct Segment {
-    origin: vec2<f32>,
-    delta: vec2<f32>,
-    y_edge: f32,
-    next: u32,
-}
-`
+export default `struct _dx{_cw:vec2<f32>,_as:vec2<f32>,_aU:f32,_aT:u32}`
