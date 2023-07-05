@@ -21,6 +21,10 @@
  */
 
 // TODO: could look at places where abstract int/float could be swapped in for the explicit types
+// TODO: could wrap long builtin function calls with a shorter named function (but that might reduce performance?)
+// TODO: looking at you, bitcast!!!
+// TODO: vec2(0.0, 0.0) => vec2(0.0) (and similar)
+// TODO: oh dear god, we can replace common numeric literals? 0., 1., 0u, etc. true/false? NOT in case statements though?
 
 // go to this directory, then run `node generate.js` to generate the shaders (output is also in this directory)
 
@@ -800,6 +804,7 @@ const minify = str => {
     // Operators don't need whitespace around them in general
     str = str.replace( new RegExp( `${linebreakOrWhitespace}*([\\+\\*/<>&\\|=\\(\\)!])${linebreakOrWhitespace}*`, 'g' ), ( _, m ) => m );
 
+    // e.g. 0.5 => .5, 10.0 => 10.
     str = str.replace( /\d+\.\d+/g, m => {
       if ( m.endsWith( '.0' ) ) {
         m = m.substring( 0, m.length - 1 );
@@ -810,6 +815,7 @@ const minify = str => {
       return m;
     } );
 
+    // Replace hex literals with decimal literals if they are shorter
     str = str.replace( /0x([0-9abcdefABCDEF]+)u/g, ( m, digits ) => {
       const str = '' + parseInt( digits, 16 ) + 'u';
       if ( str.length < m.length ) {
@@ -819,6 +825,11 @@ const minify = str => {
         return m;
       }
     } );
+
+    // Detect cases where abstract int can be used safely, instead of the explicit ones
+    // str = str.replace( /(==|!=)([0-9.])+[uif]/g, ( m, op, digits ) => {
+    //   return `${op}${digits}`;
+    // } );
 
     // Replace some predeclared aliases (vec2<f32> => vec2f)
     Object.keys( REPLACEMENT_MAP ).forEach( key => {
