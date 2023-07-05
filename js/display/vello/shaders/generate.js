@@ -899,6 +899,11 @@ const minify = str => {
     str = str.replace( /([^0-9a-fA-FxX])1u([^0-9a-fA-FxXeEfh:pP])/g, ( m, before, after ) => {
       return before + intOneSymbol + after;
     } );
+
+    // Remove whitespace around the replacement symbols, since it won't be interpreted as a literal
+    [ floatZeroSymbol, floatOneSymbol, intZeroSymbol, intOneSymbol ].forEach( symbol => {
+      str = str.replace( new RegExp( `- ${symbol}` ), `-${symbol}` );
+    } );
   }
 
   return str;
