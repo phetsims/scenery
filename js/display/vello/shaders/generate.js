@@ -17,6 +17,8 @@
  * - draw_leaf.ts
  * - shared/drawtag.ts
  * - shared/ptcl.ts
+ *
+ * Use constants in case expressions (assorted files)
  */
 
 // TODO: could look at places where abstract int/float could be swapped in for the explicit types
