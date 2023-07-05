@@ -119,17 +119,16 @@ fn read_end_clip(cmd_ix: u32) -> CmdEndClip {
     return CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4, needs_un_premultiply);
 }
 
+let EXTEND_PAD = 0u;
+let EXTEND_REPEAT = 1u;
+let EXTEND_REFLECT = 2u;
+
 fn extend_mode(t: f32, mode: u32) -> f32 {
-    let EXTEND_PAD = 0u;
-    let EXTEND_REPEAT = 1u;
-    let EXTEND_REFLECT = 2u;
     switch mode {
-        // EXTEND_PAD
-        case 0u: {
+        case EXTEND_PAD: {
             return clamp(t, 0.0, 1.0);
         }
-        // EXTEND_REPEAT
-        case 1u: {
+        case EXTEND_REPEAT: {
             return fract(t);
         }
         // EXTEND_REFLECT
@@ -255,8 +254,7 @@ fn main(
             break;
         }
         switch tag {
-            // CMD_FILL
-            case 1u: {
+            case CMD_FILL: {
                 let fill = read_fill(cmd_ix);
                 let segments = fill.tile >> 1u;
                 let even_odd = (fill.tile & 1u) != 0u;
@@ -264,21 +262,18 @@ fn main(
                 area = fill_path(tile, xy, even_odd);
                 cmd_ix += 3u;
             }
-            // CMD_STROKE
-            case 2u: {
+            case CMD_STROKE: {
                 let stroke = read_stroke(cmd_ix);
                 area = stroke_path(stroke.tile, stroke.half_width, xy);
                 cmd_ix += 3u;
             }
-            // CMD_SOLID
-            case 3u: {
+            case CMD_SOLID: {
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
                     area[i] = 1.0;
                 }
                 cmd_ix += 1u;
             }
-            // CMD_COLOR
-            case 5u: {
+            case CMD_COLOR: {
                 let color = read_color(cmd_ix);
                 let fg = unpack4x8unorm(color.rgba_color).wzyx;
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
@@ -287,8 +282,7 @@ fn main(
                 }
                 cmd_ix += 2u;
             }
-            // CMD_LIN_GRAD
-            case 6u: {
+            case CMD_LIN_GRAD: {
                 let lin = read_lin_grad(cmd_ix);
                 let d = lin.line_x * xy.x + lin.line_y * xy.y + lin.line_c;
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
@@ -300,8 +294,7 @@ fn main(
                 }
                 cmd_ix += 3u;
             }
-            // CMD_RAD_GRAD
-            case 7u: {
+            case CMD_RAD_GRAD: {
                 let rad = read_rad_grad(cmd_ix);
                 let focal_x = rad.focal_x;
                 let radius = rad.radius;
@@ -346,8 +339,7 @@ fn main(
                 }
                 cmd_ix += 3u;
             }
-            // CMD_IMAGE
-            case 8u: {
+            case CMD_IMAGE: {
                 let image = read_image(cmd_ix);
                 let atlas_extents = image.atlas_offset + image.extents;
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
@@ -368,8 +360,7 @@ fn main(
                 }
                 cmd_ix += 2u;
             }
-            // CMD_BEGIN_CLIP
-            case 9u: {
+            case CMD_BEGIN_CLIP: {
                 if clip_depth < BLEND_STACK_SPLIT {
                     for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
                         blend_stack[clip_depth][i] = pack4x8unorm(rgba[i]);
@@ -381,8 +372,7 @@ fn main(
                 clip_depth += 1u;
                 cmd_ix += 1u;
             }
-            // CMD_END_CLIP
-            case 10u: {
+            case CMD_END_CLIP: {
                 let end_clip = read_end_clip(cmd_ix);
 
                 clip_depth -= 1u;
@@ -463,8 +453,7 @@ fn main(
                 }
                 cmd_ix += 23u;
             }
-            // CMD_JUMP
-            case 11u: {
+            case CMD_JUMP: {
                 cmd_ix = ptcl[cmd_ix + 1u];
             }
             default: {}

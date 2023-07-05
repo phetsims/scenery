@@ -122,12 +122,10 @@ fn main(
             linewidth *= sqrt(abs(matrx.x * matrx.w - matrx.y * matrx.z));
         }
         switch tag_word {
-            // DRAWTAG_FILL_COLOR
-            case 0x42u: {
+            case DRAWTAG_FILL_COLOR: {
                 info[di] = bitcast<u32>(linewidth);
             }
-            // DRAWTAG_FILL_LIN_GRADIENT
-            case 0x10au: {
+            case DRAWTAG_FILL_LIN_GRADIENT: {
                 info[di] = bitcast<u32>(linewidth);
                 var p0 = bitcast<vec2<f32>>(vec2(scene[dd + 1u], scene[dd + 2u]));
                 var p1 = bitcast<vec2<f32>>(vec2(scene[dd + 3u], scene[dd + 4u]));
@@ -141,8 +139,7 @@ fn main(
                 info[di + 2u] = bitcast<u32>(line_xy.y);
                 info[di + 3u] = bitcast<u32>(line_c);
             }
-            // DRAWTAG_FILL_RAD_GRADIENT
-            case 0x28eu: {
+            case DRAWTAG_FILL_RAD_GRADIENT: {
                 // Two-point conical gradient implementation based
                 // on the algorithm at <https://skia.org/docs/dev/design/conical/>
                 // This epsilon matches what Skia uses
@@ -225,8 +222,7 @@ fn main(
                 info[di + 8u] = bitcast<u32>(radius);
                 info[di + 9u] = bitcast<u32>((flags << 3u) | kind);
             }
-            // DRAWTAG_FILL_IMAGE
-            case 0x244u: {
+            case DRAWTAG_FILL_IMAGE: {
                 info[di] = bitcast<u32>(linewidth);
                 let inv = transform_inverse(transform);
                 info[di + 1u] = bitcast<u32>(inv.matrx.x);

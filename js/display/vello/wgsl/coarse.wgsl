@@ -378,16 +378,14 @@ fn main(
                 let tile_ix = sh_tile_base[el_ix] + sh_tile_stride[el_ix] * tile_y + tile_x;
                 let tile = tiles[tile_ix];
                 switch drawtag {
-                    // DRAWTAG_FILL_COLOR
-                    case 0x42u: {
+                    case DRAWTAG_FILL_COLOR: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {
                             let rgba_color = scene[dd];
                             write_color(CmdColor(rgba_color));
                         }
                     }
-                    // DRAWTAG_FILL_LIN_GRADIENT
-                    case 0x10au: {
+                    case DRAWTAG_FILL_LIN_GRADIENT: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {
                             let index = scene[dd];
@@ -395,8 +393,7 @@ fn main(
                             write_grad(CMD_LIN_GRAD, index, info_offset);
                         }
                     }
-                    // DRAWTAG_FILL_RAD_GRADIENT
-                    case 0x28eu: {
+                    case DRAWTAG_FILL_RAD_GRADIENT: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {
                             let index = scene[dd];
@@ -404,15 +401,13 @@ fn main(
                             write_grad(CMD_RAD_GRAD, index, info_offset);
                         }
                     }
-                    // DRAWTAG_FILL_IMAGE
-                    case 0x244u: {
+                    case DRAWTAG_FILL_IMAGE: {
                         let linewidth = bitcast<f32>(info_bin_data[di]);
                         if write_path(tile, linewidth) {                            
                             write_image(di + 1u);
                         }
                     }
-                    // DRAWTAG_BEGIN_CLIP
-                    case 0x2bu: {
+                    case DRAWTAG_BEGIN_CLIP: {
                         if tile.segments == 0u && tile.backdrop == 0 {
                             clip_zero_depth = clip_depth + 1u;
                         } else {
@@ -422,8 +417,7 @@ fn main(
                         }
                         clip_depth += 1u;
                     }
-                    // DRAWTAG_END_CLIP
-                    case 0x401u: {
+                    case DRAWTAG_END_CLIP: {
                         clip_depth -= 1u;
                         write_path(tile, -1.0);
                         let blend = scene[dd];
@@ -447,12 +441,10 @@ fn main(
             } else {
                 // In "clip zero" state, suppress all drawing
                 switch drawtag {
-                    // DRAWTAG_BEGIN_CLIP
-                    case 0x2bu: {
+                    case DRAWTAG_BEGIN_CLIP: {
                         clip_depth += 1u;
                     }
-                    // DRAWTAG_END_CLIP
-                    case 0x401u: {
+                    case DRAWTAG_END_CLIP: {
                         if clip_depth == clip_zero_depth {
                             clip_zero_depth = 0u;
                         }
