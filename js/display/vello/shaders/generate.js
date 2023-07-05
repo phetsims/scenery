@@ -1,8 +1,7 @@
 /* eslint-disable */
 
 // Compiles and minifies the WGSL Vello shaders, turning them into ES6 modules
-// TODO: better minification with 3rd party library (if/when it exists?) - we rely on assumptions like
-// TODO: 'no variables starting with _ appended with one character are used', and don't do a lot of ideal things
+// TODO: better minification with 3rd party library (if/when it exists?)
 
 /*
  * List of things I've had to patch for the shaders:
@@ -23,8 +22,7 @@
 // TODO: could look at places where abstract int/float could be swapped in for the explicit types
 // TODO: could wrap long builtin function calls with a shorter named function (but that might reduce performance?)
 // TODO: looking at you, bitcast!!!
-// TODO: vec2(0.0, 0.0) => vec2(0.0) (and similar)
-// TODO: oh dear god, we can replace common numeric literals? 0., 1., 0u, etc. true/false? NOT in case statements though?
+// TODO: vec2(0.0, 0.0) => vec2(0.0) (and similar) -- doesn't happen often enough to bother
 
 // go to this directory, then run `node generate.js` to generate the shaders (output is also in this directory)
 
@@ -709,8 +707,6 @@ const globalAliases = _.sortBy( GLOBALLY_ALIASABLE_TYPES.filter( alias => {
 } ), alias => {
   return globalAliasesCounts[ alias ];
 } ).reverse();
-// console.log( globalAliases );
-// console.log( globalAliasesCounts );
 
 const combinedSymbolEntries = _.sortBy( [
   ...symbols.map( symbol => ( {
@@ -724,8 +720,6 @@ const combinedSymbolEntries = _.sortBy( [
 ], symbolEntry => {
   return ( symbolEntry.type === 'symbol' ? symbolCounts : globalAliasesCounts )[ symbolEntry.name ];
 } ).reverse();
-
-// console.log( combinedSymbolEntries );
 
 const newSymbols = [];
 const newGlobalAliases = [];
@@ -753,10 +747,6 @@ const preamble = globalAliases.map( ( alias, index ) => {
 
 symbols.push( ...globalAliases );
 newSymbols.push( ...newGlobalAliases );
-
-// console.log( preamble );
-
-// console.log( JSON.stringify( symbols, null, 2 ) );
 
 // TODO: we have... constants declared that aren't used! Can we just strip them out? Presumably yes
 
@@ -900,6 +890,7 @@ const minify = str => {
       }
     }
 
+    // Replace some numeric literals with replacement symbols that are shorter(!)
     str = str.replace( /([^0-9a-fA-FxX])0\.([^0-9a-fA-FxXeEfh:pP])/g, ( m, before, after ) => {
       return before + floatZeroSymbol + after;
     } );
