@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct _az{_i:vec4<f32>,_bc:vec2<f32>}fn _cM(_x:_az,p:vec2<f32>)->vec2<f32>{return _x._i.xy*p.x+_x._i.zw*p.y+_x._bc;}fn _fe(_x:_az)->_az{let _ii=1./(_x._i.x*_x._i.w-_x._i.y*_x._i.z);let _fd=_ii*vec4(_x._i.w,-_x._i.y,-_x._i.z,_x._i.x);let _ih=mat2x2(_fd.xy,_fd.zw)*-_x._bc;return _az(_fd,_ih);}fn _dw(a:_az,b:_az)->_az{return _az(a._i.xyxy*b._i.xxzz+a._i.zwzw*b._i.yyww,a._i.xy*b._bc.x+a._i.zw*b._bc.y+a._bc);}`
+export default `struct az{C:vec4f,a0:vec2f}fn cP(P:az,bF:vec2f)->vec2f{return P.C.xy*bF.x+P.C.zw*bF.y+P.a0;}fn e9(P:az)->az{let ia=1./(P.C.x*P.C.w-P.C.y*P.C.z);let e8=ia*vec4(P.C.w,-P.C.y,-P.C.z,P.C.x);let h9=mat2x2(e8.xy,e8.zw)*-P.a0;return az(e8,h9);}fn dw(a:az,b:az)->az{return az(a.C.xyxy*b.C.xxzz+a.C.zwzw*b.C.yyww,a.C.xy*b.a0.x+a.C.zw*b.a0.y+a.a0);}`

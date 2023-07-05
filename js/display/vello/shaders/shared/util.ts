@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `fn _gs(ix:u32)->u32{let _gr=_m._cS+ix;var _D:u32;if _gr<_m._cS+_m._cz{_D=_n[_gr];}else{_D=_cy;}return _D;}`
+export default `fn gt(i:u32)->u32{let gs=f.cV+i;var D:u32;if gs<f.cV+f.cA{D=k[gs];}else{D=cz;}return D;}`

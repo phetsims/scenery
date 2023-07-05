@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct _dx{_cw:vec2<f32>,_as:vec2<f32>,_aU:f32,_aT:u32}`
+export default `struct dx{cx:vec2f,aq:vec2f,aT:f32,d2:u32}`

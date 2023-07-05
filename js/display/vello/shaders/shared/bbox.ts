@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct _cf{x0:i32,y0:i32,x1:i32,y1:i32,_L:f32,_bz:u32}fn _dJ(a:vec4<f32>,b:vec4<f32>)->vec4<f32>{return vec4(max(a.xy,b.xy),min(a.zw,b.zw));}`
+export default `struct cY{B:i32,I:i32,J:i32,M:i32,S:f32,bA:u32}fn dG(a:vec4f,b:vec4f)->vec4f{return vec4(max(a.xy,b.xy),min(a.zw,b.zw));}`

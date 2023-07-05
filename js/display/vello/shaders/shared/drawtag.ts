@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct _aF{_P:u32,_ce:u32,_by:u32,_N:u32}const _cy=0u;const _fl=0x42u;const _ep=0x10au;const _eo=0x28eu;const _en=0x244u;const _dD=0x2bu;const _em=0x401u;fn _il()->_aF{return _aF();}fn _eq(a:_aF,b:_aF)->_aF{var c:_aF;c._P=a._P+b._P;c._ce=a._ce+b._ce;c._by=a._by+b._by;c._N=a._N+b._N;return c;}fn _gN(_D:u32)->_aF{var c:_aF;c._P=u32(_D!=_cy);c._ce=_D&1u;c._by=(_D>>1u)&0x1fu;c._N=(_D>>6u)&0xfu;return c;}`
+export default `struct aE{R:u32,b8:u32,by:u32,H:u32}const cz=0u;const fg=66u;const eb=0x10au;const ea=0x28eu;const d9=580u;const dC=0x2bu;const d8=1025u;fn ig()->aE{return aE();}fn ec(a:aE,b:aE)->aE{var m:aE;m.R=a.R+b.R;m.b8=a.b8+b.b8;m.by=a.by+b.by;m.H=a.H+b.H;return m;}fn gP(D:u32)->aE{var m:aE;m.R=u32(D!=cz);m.b8=D&1u;m.by=(D>>1u)&0x1fu;m.H=(D>>6u)&0xfu;return m;}`
