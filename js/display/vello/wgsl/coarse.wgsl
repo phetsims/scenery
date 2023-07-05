@@ -432,14 +432,12 @@ fn main(
                         let color_matrx_2 = vec4(bitcast<f32>(scene[dd + 9u]), bitcast<f32>(scene[dd + 10u]), bitcast<f32>(scene[dd + 11u]), bitcast<f32>(scene[dd + 12u]));
                         let color_matrx_3 = vec4(bitcast<f32>(scene[dd + 13u]), bitcast<f32>(scene[dd + 14u]), bitcast<f32>(scene[dd + 15u]), bitcast<f32>(scene[dd + 16u]));
                         let color_matrx_4 = vec4(bitcast<f32>(scene[dd + 17u]), bitcast<f32>(scene[dd + 18u]), bitcast<f32>(scene[dd + 19u]), bitcast<f32>(scene[dd + 20u]));
+
+                        // We'll handle the case where m33 (color_matrx_3.a) is non-1, as it's easy to do so.
                         let needs_un_premultiply =
                            color_matrx_0.a != 0.0 ||
                            color_matrx_1.a != 0.0 ||
                            color_matrx_2.a != 0.0 ||
-                           color_matrx_3.r != 0.0 ||
-                           color_matrx_3.g != 0.0 ||
-                           color_matrx_3.b != 0.0 ||
-                           color_matrx_3.a != 1.0 ||
                            color_matrx_4.a != 0.0;
                         write_end_clip(CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4, needs_un_premultiply));
                         render_blend_depth -= 1u;

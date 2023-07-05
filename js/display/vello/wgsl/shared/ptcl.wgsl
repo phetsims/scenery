@@ -78,5 +78,7 @@ struct CmdEndClip {
     color_matrx_3: vec4<f32>,
     color_matrx_4: vec4<f32>,
 
+    // Whether the output alpha is proportional to the input alpha (and does not depend on RGB)
+    // If this is true, we can skip handling premultiplication
     needs_un_premultiply: bool,
 }

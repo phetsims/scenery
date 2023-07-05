@@ -394,43 +394,71 @@ fn main(
                         // load from memory
                     }
                     let bg = unpack4x8unorm(bg_rgba);
-                    var rgb_mult = rgba[i];
 
-                    var cmx: vec4<f32>;
+                    var rgba_in = rgba[i];
+                    var rgba_out: vec4<f32>;
 
                     // SVG filter spec (https://www.w3.org/TR/SVG11/filters.html#feColorMatrixElement) notes:
                     // | These matrices often perform an identity mapping in the alpha channel. If that is the case, an
                     // | implementation can avoid the costly undoing and redoing of the premultiplication for all pixels
                     // | with A = 1.
+
+                    // The matrix multiplication is essentially:
+                    // [ r1 ]   [ m00 m01 m02 m03 m04 ]   [ r0 ]
+                    // [ g1 ]   [ m10 m11 m12 m13 m14 ]   [ g0 ]
+                    // [ b1 ] = [ m20 m21 m22 m23 m24 ] * [ b0 ]
+                    // [ a1 ]   [ m30 m31 m32 m33 m34 ]   [ a0 ]
+                    //                                    [ 1 ]
+
+                    // This condition should be the same for all invocations
                     if end_clip.needs_un_premultiply {
                         // Max with a small epsilon to avoid NaNs
-                        let a_inv = 1.0 / max(rgb_mult.a, 1e-6);
+                        let a_inv = 1.0 / max(rgba_in.a, 1e-6);
                         // Un-premultiply
-                        rgb_mult = vec4(rgb_mult.rgb * a_inv, rgb_mult.a);
+                        rgba_in = vec4(rgba_in.rgb * a_inv, rgba_in.a);
 
-                        // Color-matrix multiply on the un-premultiplied color
-                        cmx = rgb_mult.r * end_clip.color_matrx_0 +
-                              rgb_mult.g * end_clip.color_matrx_1 +
-                              rgb_mult.b * end_clip.color_matrx_2 +
-                              rgb_mult.a * end_clip.color_matrx_3 +
-                              1.0 * end_clip.color_matrx_4;
+                        // Homogeneous color-matrix multiply on the un-premultiplied color
+                        rgba_out =
+                            end_clip.color_matrx_0 * rgba_in.r +
+                            end_clip.color_matrx_1 * rgba_in.g +
+                            end_clip.color_matrx_2 * rgba_in.b +
+                            end_clip.color_matrx_3 * rgba_in.a +
+                            end_clip.color_matrx_4;
 
-                        cmx = clamp(cmx, vec4(0.0), vec4(1.0));
+                        rgba_out = clamp(rgba_out, vec4(0.0), vec4(1.0));
 
                         // Premultiply again
-                        cmx = vec4(cmx.rgb * cmx.a, cmx.a);
+                        rgba_out = vec4(rgba_out.rgb * rgba_out.a, rgba_out.a);
                     } else {
-                        cmx = rgb_mult.r * end_clip.color_matrx_0 +
-                              rgb_mult.g * end_clip.color_matrx_1 +
-                              rgb_mult.b * end_clip.color_matrx_2 +
-                              rgb_mult.a * end_clip.color_matrx_3 +
-                              rgb_mult.a * end_clip.color_matrx_4; // Allow color_matrx_4, just premultiply it
+                        // Handling the case where output alpha (a1) is proportional to input alpha (a0), and does not
+                        // depend on the RGB. This means m30=m31=m32=m34=0, and that a1=m33 * a0.
+                        //
+                        // Our matrix uses non-premultiplied alpha, so its input is (r0/a0, g0/a0, b0/a0, a0, 1)
+                        // (it's homogeneous), and the output is (r1/a1, g1/a1, b1/a1, a1, 1), as column vectors
+                        // (omitting the transpose notation)
+                        //
+                        // Thus for e.g. red:
+                        // r1/a1 = (r0/a0)m00 + (g0/a0)m01 + (b0/a0)m02 + (a0)m03 + (1)m04
+                        //
+                        // with a1 = m33 * a0 and solving for r1, this becomes:
+                        // r1 = m33 * ( (r0)m00 + (g0)m01 + (b0)m02 + (a0^2)m03 + (a0)m04 )
+                        //
+                        // thus:
+                        // (r1, g1, b1) = m33 * M * (r0, g0, b0, a0^2, a0)
+                        // a1 = m33 * a0
+                        let new_rgb =
+                            end_clip.color_matrx_0.rgb * rgba_in.r +
+                            end_clip.color_matrx_1.rgb * rgba_in.g +
+                            end_clip.color_matrx_2.rgb * rgba_in.b +
+                            end_clip.color_matrx_3.rgb * rgba_in.a * rgba_in.a +
+                            end_clip.color_matrx_4.rgb * rgba_in.a;
+                        rgba_out = end_clip.color_matrx_3.a * vec4(new_rgb, rgba_in.a);
 
                         // Clamp down to ensure we're still validly premultiplied
-                        cmx = clamp(cmx, vec4(0.0), vec4(min(1.0, cmx.a)));
+                        rgba_out = clamp(rgba_out, vec4(0.0), vec4(min(1.0, rgba_out.a)));
                     }
 
-                    let fg = cmx * area[i];
+                    let fg = rgba_out * area[i];
                     rgba[i] = blend_mix_compose(bg, fg, end_clip.blend);
                 }
                 cmd_ix += 23u;
