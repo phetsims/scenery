@@ -748,11 +748,7 @@ const preamble = globalAliases.map( ( alias, index ) => {
 symbols.push( ...globalAliases );
 newSymbols.push( ...newGlobalAliases );
 
-// TODO: we have... constants declared that aren't used! Can we just strip them out? Presumably yes
-
 const minify = str => {
-  // TODO: could improve minification significantly
-
   str = str.replace( /\r\n/g, '\n' );
 
   // // Naga does not yet recognize `const` but web does not allow global `let`.
