@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct aG{G:Z,a8:t}fn cY(U:aG,bN:t)->t{return U.G.xy*bN.x+U.G.zw*bN.y+U.a8;}fn fk(U:aG)->aG{let in=1./(U.G.x*U.G.w-U.G.y*U.G.z);let fj=in*vec4(U.G.w,-U.G.y,-U.G.z,U.G.x);let im=mat2x2(fj.xy,fj.zw)*-U.a8;return aG(fj,im);}fn dH(a:aG,b:aG)->aG{return aG(a.G.xyxy*b.G.xxzz+a.G.zwzw*b.G.yyww,a.G.xy*b.a8.x+a.G.zw*b.a8.y+a.a8);}`
+export default `struct aK{K:af,be:B}fn c1(Y:aK,bR:B)->B{return Y.K.xy*bR.x+Y.K.zw*bR.y+Y.be;}fn fp(Y:aK)->aK{let ir=d/(Y.K.x*Y.K.w-Y.K.y*Y.K.z);let fo=ir*vec4(Y.K.w,-Y.K.y,-Y.K.z,Y.K.x);let iq=mat2x2(fo.xy,fo.zw)*-Y.be;return aK(fo,iq);}fn dL(a:aK,b:aK)->aK{return aK(a.K.xyxy*b.K.xxzz+a.K.zwzw*b.K.yyww,a.K.xy*b.be.x+a.K.zw*b.be.y+a.be);}`

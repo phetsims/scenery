@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct aL{W:d,ch:d,bG:d,M:d}const cI=0u;const fs=66u;const em=266u;const el=654u;const ek=580u;const dN=43u;const ej=1025u;fn ir()->aL{return aL();}fn en(a:aL,b:aL)->aL{var p:aL;p.W=a.W+b.W;p.ch=a.ch+b.ch;p.bG=a.bG+b.bG;p.M=a.M+b.M;return p;}fn g_(H:d)->aL{var p:aL;p.W=d(H!=cI);p.ch=H&1u;p.bG=(H>>1u)&31u;p.M=(H>>6u)&15u;return p;}`
+export default `struct aP{ac:i,cl:i,bK:i,Q:i}const cM=e;const fw=66u;const eq=266u;const ep=654u;const eo=580u;const dR=43u;const en=1025u;fn iv()->aP{return aP();}fn er(a:aP,b:aP)->aP{var u:aP;u.ac=a.ac+b.ac;u.cl=a.cl+b.cl;u.bK=a.bK+b.bK;u.Q=a.Q+b.Q;return u;}fn g3(L:i)->aP{var u:aP;u.ac=i(L!=cM);u.cl=L&f;u.bK=(L>>f)&31u;u.Q=(L>>6u)&15u;return u;}`

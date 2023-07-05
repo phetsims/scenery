@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct c6{F:i,N:i,O:i,R:i,X:c,bI:d}fn dR(a:Z,b:Z)->Z{return vec4(max(a.xy,b.xy),min(a.zw,b.zw));}`
+export default `struct da{J:m,R:m,S:m,V:m,ad:h,bM:i}fn dV(a:af,b:af)->af{return vec4(max(a.xy,b.xy),min(a.zw,b.zw));}`

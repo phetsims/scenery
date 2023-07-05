@@ -730,6 +730,13 @@ const combinedSymbolEntries = _.sortBy( [
 const newSymbols = [];
 const newGlobalAliases = [];
 const symbolGenerator = generateSymbol();
+
+// TODO: this is a hack, order things correctly
+const floatZeroSymbol = symbolGenerator.next().value;
+const floatOneSymbol = symbolGenerator.next().value;
+const intZeroSymbol = symbolGenerator.next().value;
+const intOneSymbol = symbolGenerator.next().value;
+
 for ( let i = 0; i < combinedSymbolEntries.length; i++ ) {
   const entry = combinedSymbolEntries[ i ];
   if ( entry.type === 'symbol' ) {
@@ -742,7 +749,7 @@ for ( let i = 0; i < combinedSymbolEntries.length; i++ ) {
 
 const preamble = globalAliases.map( ( alias, index ) => {
   return `alias ${newGlobalAliases[ index ]}=${alias};`;
-} ).join( '' );
+} ).join( '' ) + `const ${floatZeroSymbol}=0.;const ${floatOneSymbol}=1.;const ${intZeroSymbol}=0u;const ${intOneSymbol}=1u;`;
 
 symbols.push( ...globalAliases );
 newSymbols.push( ...newGlobalAliases );
@@ -893,9 +900,18 @@ const minify = str => {
       }
     }
 
-    if ( str.includes( 'vec4<f32>' ) ) {
-      console.log( 'BAD' );
-    }
+    str = str.replace( /([^0-9a-fA-FxX])0\.([^0-9a-fA-FxXeEfh:pP])/g, ( m, before, after ) => {
+      return before + floatZeroSymbol + after;
+    } );
+    str = str.replace( /([^0-9a-fA-FxX])1\.([^0-9a-fA-FxXeEfh:pP])/g, ( m, before, after ) => {
+      return before + floatOneSymbol + after;
+    } );
+    str = str.replace( /([^0-9a-fA-FxX])0u([^0-9a-fA-FxXeEfh:pP])/g, ( m, before, after ) => {
+      return before + intZeroSymbol + after;
+    } );
+    str = str.replace( /([^0-9a-fA-FxX])1u([^0-9a-fA-FxXeEfh:pP])/g, ( m, before, after ) => {
+      return before + intOneSymbol + after;
+    } );
   }
 
   return str;

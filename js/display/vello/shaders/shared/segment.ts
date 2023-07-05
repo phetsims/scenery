@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct dI{cG:t,az:t,a0:c,ed:d}`
+export default `struct dM{cK:B,aD:B,a4:h,eh:i}`

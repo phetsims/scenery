@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `alias c=f32;alias d=u32;alias i=i32;alias t=vec2f;alias I=vec3u;alias Z=vec4f;alias at=vec3f;alias aS=array<u32>;alias bS=atomic<u32>;alias c7=atomic<i32>;alias c8=vec2i;`
+export default `alias h=f32;alias i=u32;alias m=i32;alias B=vec2f;alias M=vec3u;alias af=vec4f;alias ax=vec3f;alias aW=array<u32>;alias bW=atomic<u32>;alias db=atomic<i32>;alias dc=vec2i;const c=0.;const d=1.;const e=0u;const f=1u;`
