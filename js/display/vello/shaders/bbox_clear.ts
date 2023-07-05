@@ -1,5 +1,6 @@
 /* eslint-disable */
 import config from './shared/config.js';
+import pre from './shared/pre.js';
 
-export default `${config}
-@group(0)@binding(0)var<uniform>f:aF;struct cY{B:i32,I:i32,J:i32,M:i32,S:f32,bA:u32}@group(0)@binding(1)var<storage,read_write>bD:array<cY>;@compute @workgroup_size(256)fn main(@builtin(global_invocation_id)E:vec3u,){let i=E.x;if i<f.in{bD[i].B=0x7fffffff;bD[i].I=0x7fffffff;bD[i].J=-0x80000000;bD[i].M=-0x80000000;}}`
+export default `${pre}${config}
+@group(0)@binding(0)var<uniform>j:aM;struct c6{F:i,N:i,O:i,R:i,X:c,bI:d}@group(0)@binding(1)var<storage,read_write>bL:array<c6>;@compute @workgroup_size(256)fn main(@builtin(global_invocation_id)J:I){let l=J.x;if l<j.iy{bL[l].F=0x7fffffff;bL[l].N=0x7fffffff;bL[l].O=-0x80000000;bL[l].R=-0x80000000;}}`

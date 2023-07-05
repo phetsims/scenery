@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct fh{l:vec2f,n:vec2f,v:vec2f,G:vec2f,aO:vec2f,R:u32,at:u32}const ih=1u;`
+export default `struct ft{o:t,q:t,D:t,L:t,aW:t,W:d,aA:d}const is=1u;`

@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `const d4=64u;const fc=256u;const gF=2u;const gE=0u;const gD=1u;const gC=2u;const gB=3u;const gA=5u;const gz=6u;const gy=7u;const gx=8u;const gw=9u;const gv=10u;const gu=11u;struct fe{t:u32,F:i32}struct fd{t:u32,cS:f32}struct i5{i4:u32}struct d6{cR:u32}struct gI{aK:u32,bG:u32,d3:f32,fb:f32,dy:f32}struct gH{aK:u32,bG:u32,C:vec4f,cy:vec2f,aV:f32,aJ:f32,bx:u32,at:u32}struct gG{C:vec4f,cy:vec2f,fa:vec2f,ib:vec2f}struct d5{a2:u32,bw:vec4f,bv:vec4f,bu:vec4f,aU:vec4f,bf:vec4f,cQ:bool}`
+export default `const ef=64u;const fo=256u;const gQ=2u;const gP=0u;const gO=1u;const gN=2u;const gM=3u;const gL=5u;const gK=6u;const gJ=7u;const gI=8u;const gH=9u;const gG=10u;const gF=11u;struct fq{B:d,K:i}struct fp{B:d,c0:c}struct jg{jf:d}struct eh{c_:d}struct gT{aR:d,bO:d,ee:c,fm:c,dJ:c}struct gS{aR:d,bO:d,G:Z,cH:t,a2:c,aQ:c,bF:d,aA:d}struct gR{G:Z,cH:t,fl:t,io:t}struct eg{bc:d,bE:Z,bD:Z,bC:Z,a1:Z,bo:Z,cZ:bool}`

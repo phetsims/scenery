@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct cw{e:vec4u,N:u32}struct be{F:i32,W:u32}`
+export default `struct cF{h:vec4u,S:d}struct bn{K:i,ae:d}`

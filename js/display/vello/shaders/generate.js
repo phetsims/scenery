@@ -20,6 +20,8 @@
  * - shared/ptcl.ts
  */
 
+// TODO: could look at places where abstract int/float could be swapped in for the explicit types
+
 // go to this directory, then run `node generate.js` to generate the shaders (output is also in this directory)
 
 const fs = require( 'fs' );
@@ -544,6 +546,51 @@ const REPLACEMENT_MAP = {
   'mat4x4<f16>': 'mat4x4h'
 };
 
+const GLOBALLY_ALIASABLE_TYPES = [
+  'u32',
+  'i32',
+  'f32',
+  'bool',
+  'f16',
+  'vec2i',
+  'vec3i',
+  'vec4i',
+  'vec2u',
+  'vec3u',
+  'vec4u',
+  'vec2f',
+  'vec3f',
+  'vec4f',
+  'vec2h',
+  'vec3h',
+  'vec4h',
+  'mat2x2f',
+  'mat2x3f',
+  'mat2x4f',
+  'mat3x2f',
+  'mat3x3f',
+  'mat3x4f',
+  'mat4x2f',
+  'mat4x3f',
+  'mat4x4f',
+  'mat2x2h',
+  'mat2x3h',
+  'mat2x4h',
+  'mat3x2h',
+  'mat3x3h',
+  'mat3x4h',
+  'mat4x2h',
+  'mat4x3h',
+  'mat4x4h',
+  'atomic<u32>',
+  'atomic<i32>',
+  'array<u32>',
+  'array<i32>',
+  'array<f32>'
+  // TODO: potentially other arrays?
+  // TODO: potentially we can insert aliases AFTER struct defs that are for arrays of them?
+];
+
 const firstCharAlphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
 const otherCharAlphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789';
 
@@ -641,11 +688,62 @@ symbols = _.sortBy( symbols, symbol => {
   return count;
 } ).reverse();
 
+const globalAliasesCounts = {};
+const globalAliases = _.sortBy( GLOBALLY_ALIASABLE_TYPES.filter( alias => {
+  let count = [ ...totalStr.matchAll( new RegExp( `[^\\w]${alias}[^\\w]`, 'g' ) ) ].length;
+
+  // If vec2f, also check vec2<f32>
+  const expandedAlias = Object.keys( REPLACEMENT_MAP ).find( before => REPLACEMENT_MAP[ before ] === alias );
+  if ( expandedAlias ) {
+    count += [ ...totalStr.matchAll( new RegExp( `[^\\w]${expandedAlias}[^\\w]`, 'g' ) ) ].length
+  }
+
+  globalAliasesCounts[ alias ] = count;
+  // Just anticipate 2 characters per alias (though some might get 1 char?) - we don't want to blow up our preamble
+  // with useless things.
+  return count * ( alias.length - 2 ) > `alias ${alias}=XX;`.length;
+} ), alias => {
+  return globalAliasesCounts[ alias ];
+} ).reverse();
+// console.log( globalAliases );
+// console.log( globalAliasesCounts );
+
+const combinedSymbolEntries = _.sortBy( [
+  ...symbols.map( symbol => ( {
+    type: 'symbol',
+    name: symbol
+  } ) ),
+  ...globalAliases.map( alias => ( {
+    type: 'alias',
+    name: alias
+  } ) )
+], symbolEntry => {
+  return ( symbolEntry.type === 'symbol' ? symbolCounts : globalAliasesCounts )[ symbolEntry.name ];
+} ).reverse();
+
+// console.log( combinedSymbolEntries );
+
 const newSymbols = [];
+const newGlobalAliases = [];
 const symbolGenerator = generateSymbol();
-for ( let i = 0; i < symbols.length; i++ ) {
-  newSymbols.push( symbolGenerator.next().value );
+for ( let i = 0; i < combinedSymbolEntries.length; i++ ) {
+  const entry = combinedSymbolEntries[ i ];
+  if ( entry.type === 'symbol' ) {
+    newSymbols.push( symbolGenerator.next().value );
+  }
+  else {
+    newGlobalAliases.push( symbolGenerator.next().value );
+  }
 }
+
+const preamble = globalAliases.map( ( alias, index ) => {
+  return `alias ${newGlobalAliases[ index ]}=${alias};`;
+} ).join( '' );
+
+symbols.push( ...globalAliases );
+newSymbols.push( ...newGlobalAliases );
+
+// console.log( preamble );
 
 // console.log( JSON.stringify( symbols, null, 2 ) );
 
@@ -691,8 +789,8 @@ const minify = str => {
     // Remove whitespace after :;,
     str = str.replace( new RegExp( `([:;,])${linebreakOrWhitespace}+`, 'g' ), ( _, m ) => m );
 
-    // Remove trailing commas before }]
-    str = str.replace( new RegExp( `,([\\}\\]])`, 'g' ), ( _, m ) => m );
+    // Remove trailing commas before }])
+    str = str.replace( new RegExp( `,([\\}\\]\\)])`, 'g' ), ( _, m ) => m );
 
     // It's safe to remove whitespace before '-', however Firefox's tokenizer doesn't like 'x-1u' (presumably identifier + literal number, no operator)
     // So we'll only replace whitespace after '-' if it's not followed by a digit
@@ -712,13 +810,31 @@ const minify = str => {
       return m;
     } );
 
-    str = str.replace( /0x(\d+)u/g, ( m, digits ) => {
+    str = str.replace( /0x([0-9abcdefABCDEF]+)u/g, ( m, digits ) => {
       const str = '' + parseInt( digits, 16 ) + 'u';
       if ( str.length < m.length ) {
         return str;
       }
       else {
         return m;
+      }
+    } );
+
+    // Replace some predeclared aliases (vec2<f32> => vec2f)
+    Object.keys( REPLACEMENT_MAP ).forEach( key => {
+      while ( true ) {
+        const match = new RegExp( `[^\\w](${key})[^\\w]`, 'g' ).exec( str );
+
+        if ( match ) {
+          const index0 = match.index + 1;
+          const index1 = index0 + key.length;
+          const before = str.substring( 0, index0 );
+          const after = str.substring( index1 );
+          str = before + REPLACEMENT_MAP[ key ] + after;
+        }
+        else {
+          break;
+        }
       }
     } );
 
@@ -765,24 +881,6 @@ const minify = str => {
         firstIndex = index1 - 1;
       }
     }
-
-    // Replace some predeclared aliases (vec2<f32> => vec2f)
-    Object.keys( REPLACEMENT_MAP ).forEach( key => {
-      while ( true ) {
-        const match = new RegExp( `[^\\w](${key})[^\\w]`, 'g' ).exec( str );
-
-        if ( match ) {
-          const index0 = match.index + 1;
-          const index1 = index0 + key.length;
-          const before = str.substring( 0, index0 );
-          const after = str.substring( index1 );
-          str = before + REPLACEMENT_MAP[ key ] + after;
-        }
-        else {
-          break;
-        }
-      }
-    } );
 
     if ( str.includes( 'vec4<f32>' ) ) {
       console.log( 'BAD' );
@@ -846,6 +944,13 @@ const preprocess = ( str, defines ) => {
 };
 
 let byteSize = 0;
+const outputFile = ( path, importsString, outputString ) => {
+  byteSize += outputString.length;
+  fs.writeFileSync(
+    path,
+    `/* eslint-disable */\n${importsString}\nexport default ${outputString}\n`
+  );
+};
 const convert = ( dir, filename, defines = [], outputName ) => {
   outputName = outputName || filename;
   if ( filename.endsWith( '.wgsl' ) ) {
@@ -862,18 +967,22 @@ const convert = ( dir, filename, defines = [], outputName ) => {
       shaderString = shaderString.substring( 0, index ) + `\$\{${importName}\}` + shaderString.substring( index + match[ 0 ].length );
     } );
 
+    // If we are top-level, add the preamble
+    if ( !dir ) {
+      importNames.push( 'pre' );
+      shaderString = '${pre}' + shaderString;
+    }
+
     const outputString = ( '`' + shaderString + '`' ).replace( /`` \\+ /g, '' );
-    byteSize += outputString.length;
 
     const importsString = importNames.map( name => `import ${name} from './shared/${name}.js';\n` ).join( '' );
 
-    fs.writeFileSync(
-      `./${dir}${outputName.replace( '.wgsl', '.ts' )}`,
-      `/* eslint-disable */\n${importsString}\nexport default ${outputString}\n`
-    );
+    outputFile( `./${dir}${outputName.replace( '.wgsl', '.ts' )}`, importsString, outputString );
   }
 };
 
+// A preamble included in all shaders
+outputFile( './shared/pre.ts', '', `\`${preamble}\`` );
 convert( 'shared/', 'bbox.wgsl', [ 'full' ] );
 convert( 'shared/', 'blend.wgsl', [ 'full' ] );
 convert( 'shared/', 'bump.wgsl', [ 'full' ] );
