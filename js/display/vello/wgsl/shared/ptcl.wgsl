@@ -64,8 +64,8 @@ struct CmdRadGrad {
 struct CmdImage {
     matrx: vec4<f32>,
     xlat: vec2<f32>,
-    atlas_offset: vec2<f32>,
-    extents: vec2<f32>,
+    atlas_offset: vec2<i32>,
+    extents: vec2<i32>,
     extend: vec2<u32>,
 }
 

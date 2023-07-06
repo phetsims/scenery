@@ -104,10 +104,10 @@ fn read_image(cmd_ix: u32) -> CmdImage {
     let width_height = info[info_offset + 7u];
     let extend_mode = info[info_offset + 8u];
     // The following are not intended to be bitcasts
-    let x = f32(xy >> 16u);
-    let y = f32(xy & 0xffffu);
-    let width = f32(width_height >> 16u);
-    let height = f32(width_height & 0xffffu);
+    let x = i32(xy >> 16u);
+    let y = i32(xy & 0xffffu);
+    let width = i32(width_height >> 16u);
+    let height = i32(width_height & 0xffffu);
     let extend = vec2(extend_mode >> 2u, extend_mode & 0x3);
     return CmdImage(matrx, xlat, vec2(x, y), vec2(width, height), extend);
 }
@@ -138,6 +138,43 @@ fn extend_mode(t: f32, mode: u32) -> f32 {
         // EXTEND_REFLECT
         default: {
             return abs(t - 2.0 * round(0.5 * t));
+        }
+    }
+}
+
+// Integer version of extend_mode.
+// Given size=4, provide the following patterns:
+//
+// input:  -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+//
+// pad:     0,  0,  0,  0,  0,  0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3
+// repeat:  2,  3,  0,  1,  2,  3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1
+// reflect: 2,  3,  3,  2,  1,  0, 0, 1, 2, 3, 3, 2, 1, 0, 0, 1
+fn extend_mode_i32(i: i32, size: i32, mode: u32) -> i32 {
+    switch mode {
+        case EXTEND_PAD: {
+            return clamp(i, 0i, size - 1i);
+        }
+        case EXTEND_REPEAT: {
+            if i >= 0i {
+                return i % size;
+            } else {
+                return size - ((-i - 1i) % size) - 1i;
+            }
+        }
+        case EXTEND_REFLECT: {
+            // easier to convert both to positive (with a repeat offset)
+            let pos_i = select(i, -i - 1i, i < 0i);
+
+            let section = pos_i % (size * 2i);
+            if section < size {
+                return section;
+            } else {
+                return 2i * size - section - 1i;
+            }
+        }
+        default: {
+            return 0i;
         }
     }
 }
@@ -345,20 +382,40 @@ fn main(
             }
             case CMD_IMAGE: {
                 let image = read_image(cmd_ix);
-                let min_uv = image.atlas_offset;
-                let max_uv = image.atlas_offset + image.extents - 1.0; // Don't read pixels past the edge of the image.
-                let atlas_extents = image.atlas_offset + image.extents;
+                let width = image.extents.x;
+                let height = image.extents.y;
+
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
-                    let my_xy = vec2(xy.x + f32(i), xy.y);
-                    let unit_xy = (image.matrx.xy * my_xy.x + image.matrx.zw * my_xy.y + image.xlat) / image.extents;
-                    let mapped_unit_xy = vec2(
-                        extend_mode(unit_xy.x, image.extend.x),
-                        extend_mode(unit_xy.y, image.extend.y),
-                    );
-                    let atlas_uv = mapped_unit_xy * image.extents + image.atlas_offset;
                     if area[i] != 0.0 {
-                        let uv_quad = vec4<i32>(vec4(max(floor(atlas_uv), min_uv), min(ceil(atlas_uv), max_uv)));
-                        let uv_frac = fract(atlas_uv);
+                        let my_xy = vec2(xy.x + f32(i), xy.y);
+
+                        // Our "normal" unit_xy is in the exact range [0.0, image.extents.x - 1.0] / image.extents.x
+                        // This maps exactly to samples
+
+                        // Our "half-shifted" unit_xy is in the range [-0.5, image.extents.x - 0.5] / image.extents.x
+                        // So we get queried up to [-1, image.extents.x] / image.extents.x]?
+
+                        // So effectively the center of the pixels goes from 0/width to (width-1)/width
+                        // We get queried from -1/width to width/width (i.e. 1)
+
+                        // 0 is the center of the "first" pixel, (size-1) is the center of the "last" pixel
+                        // NOTE: we will get queries potentially from the range (-1, size) for rectangular images,
+                        // or unconstrained for repeated images (i.e. a shape that isn't just a rectangle for this image)
+                        let raw_xy = image.matrx.xy * my_xy.x + image.matrx.zw * my_xy.y + image.xlat;
+
+                        // Get the quad of pixels in "raw" coordinates that we need to sample. These are just integers,
+                        // and don't yet lie within the image's extents.
+                        let uv_quad_unmapped = vec4<i32>(vec4(floor(raw_xy), ceil(raw_xy)));
+
+                        // Use the extend mode to clamp the quad to the image's extents.
+                        let uv_quad = vec4(
+                            extend_mode_i32(uv_quad_unmapped.x, width, image.extend.x),
+                            extend_mode_i32(uv_quad_unmapped.y, height, image.extend.y),
+                            extend_mode_i32(uv_quad_unmapped.z, width, image.extend.x),
+                            extend_mode_i32(uv_quad_unmapped.w, height, image.extend.y)
+                        ) + vec4(image.atlas_offset, image.atlas_offset);
+
+                        let uv_frac = fract(raw_xy);
                         let a = premul_alpha(textureLoad(image_atlas, uv_quad.xy, 0));
                         let b = premul_alpha(textureLoad(image_atlas, uv_quad.xw, 0));
                         let c = premul_alpha(textureLoad(image_atlas, uv_quad.zy, 0));

@@ -380,8 +380,8 @@ an UI and Display made for visual testing and debugging.
         const pattern = new phet.scenery.Pattern( img );
         const gradient = new phet.scenery.LinearGradient( 0, 0, 400, 400 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' );
 
-        pattern.setTransformMatrix( phet.dot.Matrix3.translation( 12.5, 12.5 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ) );
-        gradient.setTransformMatrix( phet.dot.Matrix3.translation( 12.5, 12.5 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ) );
+        pattern.setTransformMatrix( phet.dot.Matrix3.translation( 12.5, 12.5 ).timesMatrix( phet.dot.Matrix3.scaling( 4 ) ) );
+        gradient.setTransformMatrix( phet.dot.Matrix3.translation( 12.5, 12.5 ).timesMatrix( phet.dot.Matrix3.scaling( 4 ) ) );
 
         window.r = new phet.scenery.Rectangle( -200, -200, 400, 400, {
           fill: pattern,
@@ -530,6 +530,52 @@ an UI and Display made for visual testing and debugging.
       // display.height = 120;
       // display.updateDisplay();
 
+    }, 400 );
+  };
+
+  window.rectTest = function() {
+    setTimeout( async function() {
+      const rect = new phet.scenery.Rectangle( 0, 0, 50, 50, {
+        fill: 'blue',
+        children: [
+          new phet.scenery.Rectangle( 0, -7.5, 200, 15, {
+            fill: 'red',
+            rotation: Math.PI / 4
+          } ),
+          new phet.scenery.Rectangle( 0, -7.5, 200, 15, {
+            fill: 'white',
+            rotation: -Math.PI / 4,
+            y: 50
+          } )
+        ]
+      } );
+      let url;
+      rect.toCanvas( canvas => {
+        url = canvas.toDataURL();
+      }, 0, 0, 50, 50 );
+
+      console.log( url );
+      const img = document.createElement( 'img' );
+      img.addEventListener( 'load', () => {
+        const pattern = new phet.scenery.Pattern( img );
+        const gradient = new phet.scenery.LinearGradient( 0, 0, 400, 400 ).addColorStop( 0, 'red' ).addColorStop( 1, 'blue' );
+
+        pattern.setTransformMatrix( phet.dot.Matrix3.translation( 0, 0 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ) );
+        gradient.setTransformMatrix( phet.dot.Matrix3.translation( 0, 0 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ) );
+
+        window.r = new phet.scenery.Rectangle( 0, 0, 25, 25, {
+          fill: pattern,
+          renderer: 'vello',
+          x: 200.1,
+          y: 200.9
+        } );
+        scene.addChild( r );
+
+        display.width = 512;
+        display.height = 800;
+        display.updateDisplay();
+      } );
+      img.src = url;
     }, 400 );
   };
 

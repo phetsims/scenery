@@ -743,9 +743,9 @@ for ( let i = 0; i < combinedSymbolEntries.length; i++ ) {
   }
 }
 
-const preamble = globalAliases.map( ( alias, index ) => {
+const preamble = MINIFY ? globalAliases.map( ( alias, index ) => {
   return `alias ${newGlobalAliases[ index ]}=${alias};`;
-} ).join( '' ) + `const ${floatZeroSymbol}=0.;const ${floatOneSymbol}=1.;const ${intZeroSymbol}=0u;const ${intOneSymbol}=1u;`;
+} ).join( '' ) + `const ${floatZeroSymbol}=0.;const ${floatOneSymbol}=1.;const ${intZeroSymbol}=0u;const ${intOneSymbol}=1u;` : '';
 
 symbols.push( ...globalAliases );
 newSymbols.push( ...newGlobalAliases );
