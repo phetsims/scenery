@@ -76,12 +76,13 @@ fn read_rad_grad(cmd_ix: u32) -> CmdRadGrad {
     let index = index_mode >> 2u;
     let extend_mode = index_mode & 0x3u;
     let info_offset = ptcl[cmd_ix + 2u];
-    let m0 = bitcast<f32>(info[info_offset]);
-    let m1 = bitcast<f32>(info[info_offset + 1u]);
-    let m2 = bitcast<f32>(info[info_offset + 2u]);
-    let m3 = bitcast<f32>(info[info_offset + 3u]);
-    let matrx = vec4(m0, m1, m2, m3);
-    let xlat = vec2(bitcast<f32>(info[info_offset + 4u]), bitcast<f32>(info[info_offset + 5u]));
+    let matrx = bitcast<vec4<f32>>(vec4(
+        info[info_offset],
+        info[info_offset + 1u],
+        info[info_offset + 2u],
+        info[info_offset + 3u]
+    ));
+    let xlat = bitcast<vec2<f32>>(vec2(info[info_offset + 4u], info[info_offset + 5u]));
     let focal_x = bitcast<f32>(info[info_offset + 6u]);
     let radius = bitcast<f32>(info[info_offset + 7u]);
     let flags_kind = info[info_offset + 8u];
@@ -92,12 +93,13 @@ fn read_rad_grad(cmd_ix: u32) -> CmdRadGrad {
 
 fn read_image(cmd_ix: u32) -> CmdImage {
     let info_offset = ptcl[cmd_ix + 1u];
-    let m0 = bitcast<f32>(info[info_offset]);
-    let m1 = bitcast<f32>(info[info_offset + 1u]);
-    let m2 = bitcast<f32>(info[info_offset + 2u]);
-    let m3 = bitcast<f32>(info[info_offset + 3u]);
-    let matrx = vec4(m0, m1, m2, m3);
-    let xlat = vec2(bitcast<f32>(info[info_offset + 4u]), bitcast<f32>(info[info_offset + 5u]));
+    let matrx = bitcast<vec4<f32>>(vec4(
+        info[info_offset],
+        info[info_offset + 1u],
+        info[info_offset + 2u],
+        info[info_offset + 3u]
+    ));
+    let xlat = bitcast<vec2<f32>>(vec2(info[info_offset + 4u], info[info_offset + 5u]));
     let xy = info[info_offset + 6u];
     let width_height = info[info_offset + 7u];
     // The following are not intended to be bitcasts
@@ -110,11 +112,11 @@ fn read_image(cmd_ix: u32) -> CmdImage {
 
 fn read_end_clip(cmd_ix: u32) -> CmdEndClip {
     let blend = ptcl[cmd_ix + 1u];
-    let color_matrx_0 = vec4(bitcast<f32>(ptcl[cmd_ix + 2u]), bitcast<f32>(ptcl[cmd_ix + 3u]), bitcast<f32>(ptcl[cmd_ix + 4u]), bitcast<f32>(ptcl[cmd_ix + 5u]));
-    let color_matrx_1 = vec4(bitcast<f32>(ptcl[cmd_ix + 6u]), bitcast<f32>(ptcl[cmd_ix + 7u]), bitcast<f32>(ptcl[cmd_ix + 8u]), bitcast<f32>(ptcl[cmd_ix + 9u]));
-    let color_matrx_2 = vec4(bitcast<f32>(ptcl[cmd_ix + 10u]), bitcast<f32>(ptcl[cmd_ix + 11u]), bitcast<f32>(ptcl[cmd_ix + 12u]), bitcast<f32>(ptcl[cmd_ix + 13u]));
-    let color_matrx_3 = vec4(bitcast<f32>(ptcl[cmd_ix + 14u]), bitcast<f32>(ptcl[cmd_ix + 15u]), bitcast<f32>(ptcl[cmd_ix + 16u]), bitcast<f32>(ptcl[cmd_ix + 17u]));
-    let color_matrx_4 = vec4(bitcast<f32>(ptcl[cmd_ix + 18u]), bitcast<f32>(ptcl[cmd_ix + 19u]), bitcast<f32>(ptcl[cmd_ix + 20u]), bitcast<f32>(ptcl[cmd_ix + 21u]));
+    let color_matrx_0 = bitcast<vec4<f32>>(vec4(ptcl[cmd_ix + 2u], ptcl[cmd_ix + 3u], ptcl[cmd_ix + 4u], ptcl[cmd_ix + 5u]));
+    let color_matrx_1 = bitcast<vec4<f32>>(vec4(ptcl[cmd_ix + 6u], ptcl[cmd_ix + 7u], ptcl[cmd_ix + 8u], ptcl[cmd_ix + 9u]));
+    let color_matrx_2 = bitcast<vec4<f32>>(vec4(ptcl[cmd_ix + 10u], ptcl[cmd_ix + 11u], ptcl[cmd_ix + 12u], ptcl[cmd_ix + 13u]));
+    let color_matrx_3 = bitcast<vec4<f32>>(vec4(ptcl[cmd_ix + 14u], ptcl[cmd_ix + 15u], ptcl[cmd_ix + 16u], ptcl[cmd_ix + 17u]));
+    let color_matrx_4 = bitcast<vec4<f32>>(vec4(ptcl[cmd_ix + 18u], ptcl[cmd_ix + 19u], ptcl[cmd_ix + 20u], ptcl[cmd_ix + 21u]));
     let needs_un_premultiply = ptcl[cmd_ix + 22u] == 1u;
     return CmdEndClip(blend, color_matrx_0, color_matrx_1, color_matrx_2, color_matrx_3, color_matrx_4, needs_un_premultiply);
 }

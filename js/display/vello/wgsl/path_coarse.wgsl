@@ -34,9 +34,7 @@ var<storage, read_write> segments: array<Segment>;
 var<private> pathdata_base: u32;
 
 fn read_f32_point(ix: u32) -> vec2<f32> {
-    let x = bitcast<f32>(scene[pathdata_base + ix]);
-    let y = bitcast<f32>(scene[pathdata_base + ix + 1u]);
-    return vec2(x, y);
+    return bitcast<vec2<f32>>(vec2(scene[pathdata_base + ix], scene[pathdata_base + ix + 1u]));
 }
 
 fn read_i16_point(ix: u32) -> vec2<f32> {

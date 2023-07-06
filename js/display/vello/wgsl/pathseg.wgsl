@@ -73,9 +73,7 @@ var<storage, read_write> cubics: array<Cubic>;
 var<private> pathdata_base: u32;
 
 fn read_f32_point(ix: u32) -> vec2<f32> {
-    let x = bitcast<f32>(scene[pathdata_base + ix]);
-    let y = bitcast<f32>(scene[pathdata_base + ix + 1u]);
-    return vec2(x, y);
+    return bitcast<vec2<f32>>(vec2(scene[pathdata_base + ix], scene[pathdata_base + ix + 1u]));
 }
 
 fn read_i16_point(ix: u32) -> vec2<f32> {
@@ -87,14 +85,16 @@ fn read_i16_point(ix: u32) -> vec2<f32> {
 
 fn read_transform(transform_base: u32, ix: u32) -> Transform {
     let base = transform_base + ix * 6u;
-    let c0 = bitcast<f32>(scene[base]);
-    let c1 = bitcast<f32>(scene[base + 1u]);
-    let c2 = bitcast<f32>(scene[base + 2u]);
-    let c3 = bitcast<f32>(scene[base + 3u]);
-    let c4 = bitcast<f32>(scene[base + 4u]);
-    let c5 = bitcast<f32>(scene[base + 5u]);
-    let matrx = vec4(c0, c1, c2, c3);
-    let translate = vec2(c4, c5);
+    let matrx = bitcast<vec4<f32>>(vec4(
+        scene[base],
+        scene[base + 1u],
+        scene[base + 2u],
+        scene[base + 3u],
+    ));
+    let translate = bitcast<vec2<f32>>(vec2(
+        scene[base + 4u],
+        scene[base + 5u],
+    ));
     return Transform(matrx, translate);
 }
 

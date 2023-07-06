@@ -140,29 +140,34 @@ fn write_begin_clip() {
 }
 
 fn write_end_clip(end_clip: CmdEndClip) {
+    let color_matrx_u32_0 = bitcast<vec4<u32>>(end_clip.color_matrx_0);
+    let color_matrx_u32_1 = bitcast<vec4<u32>>(end_clip.color_matrx_1);
+    let color_matrx_u32_2 = bitcast<vec4<u32>>(end_clip.color_matrx_2);
+    let color_matrx_u32_3 = bitcast<vec4<u32>>(end_clip.color_matrx_3);
+    let color_matrx_u32_4 = bitcast<vec4<u32>>(end_clip.color_matrx_4);
     alloc_cmd(23u);
     ptcl[cmd_offset] = CMD_END_CLIP;
     ptcl[cmd_offset + 1u] = end_clip.blend;
-    ptcl[cmd_offset + 2u] = bitcast<u32>(end_clip.color_matrx_0.x);
-    ptcl[cmd_offset + 3u] = bitcast<u32>(end_clip.color_matrx_0.y);
-    ptcl[cmd_offset + 4u] = bitcast<u32>(end_clip.color_matrx_0.z);
-    ptcl[cmd_offset + 5u] = bitcast<u32>(end_clip.color_matrx_0.w);
-    ptcl[cmd_offset + 6u] = bitcast<u32>(end_clip.color_matrx_1.x);
-    ptcl[cmd_offset + 7u] = bitcast<u32>(end_clip.color_matrx_1.y);
-    ptcl[cmd_offset + 8u] = bitcast<u32>(end_clip.color_matrx_1.z);
-    ptcl[cmd_offset + 9u] = bitcast<u32>(end_clip.color_matrx_1.w);
-    ptcl[cmd_offset + 10u] = bitcast<u32>(end_clip.color_matrx_2.x);
-    ptcl[cmd_offset + 11u] = bitcast<u32>(end_clip.color_matrx_2.y);
-    ptcl[cmd_offset + 12u] = bitcast<u32>(end_clip.color_matrx_2.z);
-    ptcl[cmd_offset + 13u] = bitcast<u32>(end_clip.color_matrx_2.w);
-    ptcl[cmd_offset + 14u] = bitcast<u32>(end_clip.color_matrx_3.x);
-    ptcl[cmd_offset + 15u] = bitcast<u32>(end_clip.color_matrx_3.y);
-    ptcl[cmd_offset + 16u] = bitcast<u32>(end_clip.color_matrx_3.z);
-    ptcl[cmd_offset + 17u] = bitcast<u32>(end_clip.color_matrx_3.w);
-    ptcl[cmd_offset + 18u] = bitcast<u32>(end_clip.color_matrx_4.x);
-    ptcl[cmd_offset + 19u] = bitcast<u32>(end_clip.color_matrx_4.y);
-    ptcl[cmd_offset + 20u] = bitcast<u32>(end_clip.color_matrx_4.z);
-    ptcl[cmd_offset + 21u] = bitcast<u32>(end_clip.color_matrx_4.w);
+    ptcl[cmd_offset + 2u] = color_matrx_u32_0.x;
+    ptcl[cmd_offset + 3u] = color_matrx_u32_0.y;
+    ptcl[cmd_offset + 4u] = color_matrx_u32_0.z;
+    ptcl[cmd_offset + 5u] = color_matrx_u32_0.w;
+    ptcl[cmd_offset + 6u] = color_matrx_u32_1.x;
+    ptcl[cmd_offset + 7u] = color_matrx_u32_1.y;
+    ptcl[cmd_offset + 8u] = color_matrx_u32_1.z;
+    ptcl[cmd_offset + 9u] = color_matrx_u32_1.w;
+    ptcl[cmd_offset + 10u] = color_matrx_u32_2.x;
+    ptcl[cmd_offset + 11u] = color_matrx_u32_2.y;
+    ptcl[cmd_offset + 12u] = color_matrx_u32_2.z;
+    ptcl[cmd_offset + 13u] = color_matrx_u32_2.w;
+    ptcl[cmd_offset + 14u] = color_matrx_u32_3.x;
+    ptcl[cmd_offset + 15u] = color_matrx_u32_3.y;
+    ptcl[cmd_offset + 16u] = color_matrx_u32_3.z;
+    ptcl[cmd_offset + 17u] = color_matrx_u32_3.w;
+    ptcl[cmd_offset + 18u] = color_matrx_u32_4.x;
+    ptcl[cmd_offset + 19u] = color_matrx_u32_4.y;
+    ptcl[cmd_offset + 20u] = color_matrx_u32_4.z;
+    ptcl[cmd_offset + 21u] = color_matrx_u32_4.w;
     ptcl[cmd_offset + 22u] = select(0u, 1u, end_clip.needs_un_premultiply);
     cmd_offset += 23u;
 }
@@ -421,11 +426,11 @@ fn main(
                         clip_depth -= 1u;
                         write_path(tile, -1.0);
                         let blend = scene[dd];
-                        let color_matrx_0 = vec4(bitcast<f32>(scene[dd + 1u]), bitcast<f32>(scene[dd + 2u]), bitcast<f32>(scene[dd + 3u]), bitcast<f32>(scene[dd + 4u]));
-                        let color_matrx_1 = vec4(bitcast<f32>(scene[dd + 5u]), bitcast<f32>(scene[dd + 6u]), bitcast<f32>(scene[dd + 7u]), bitcast<f32>(scene[dd + 8u]));
-                        let color_matrx_2 = vec4(bitcast<f32>(scene[dd + 9u]), bitcast<f32>(scene[dd + 10u]), bitcast<f32>(scene[dd + 11u]), bitcast<f32>(scene[dd + 12u]));
-                        let color_matrx_3 = vec4(bitcast<f32>(scene[dd + 13u]), bitcast<f32>(scene[dd + 14u]), bitcast<f32>(scene[dd + 15u]), bitcast<f32>(scene[dd + 16u]));
-                        let color_matrx_4 = vec4(bitcast<f32>(scene[dd + 17u]), bitcast<f32>(scene[dd + 18u]), bitcast<f32>(scene[dd + 19u]), bitcast<f32>(scene[dd + 20u]));
+                        let color_matrx_0 = bitcast<vec4<f32>>(vec4(scene[dd + 1u], scene[dd + 2u], scene[dd + 3u], scene[dd + 4u]));
+                        let color_matrx_1 = bitcast<vec4<f32>>(vec4(scene[dd + 5u], scene[dd + 6u], scene[dd + 7u], scene[dd + 8u]));
+                        let color_matrx_2 = bitcast<vec4<f32>>(vec4(scene[dd + 9u], scene[dd + 10u], scene[dd + 11u], scene[dd + 12u]));
+                        let color_matrx_3 = bitcast<vec4<f32>>(vec4(scene[dd + 13u], scene[dd + 14u], scene[dd + 15u], scene[dd + 16u]));
+                        let color_matrx_4 = bitcast<vec4<f32>>(vec4(scene[dd + 17u], scene[dd + 18u], scene[dd + 19u], scene[dd + 20u]));
 
                         // We'll handle the case where m33 (color_matrx_3.a) is non-1, as it's easy to do so.
                         let needs_un_premultiply =
