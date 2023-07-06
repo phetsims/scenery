@@ -19,6 +19,8 @@
  * - shared/ptcl.ts
  *
  * Use constants in case expressions (assorted files)
+ * Bitcasts around vectors (assorted files)
+ * Image extends (assorted files)
  */
 
 // TODO: could look at places where abstract int/float could be swapped in for the explicit types
