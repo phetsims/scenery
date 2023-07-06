@@ -980,7 +980,7 @@ const convert = ( dir, filename, defines = [], outputName ) => {
     // Replace imports
     let importNames = [];
     // Reversed, so we can do replacement "in place"
-    [ ...shaderString.matchAll( /#import [a-z]+/g ) ].reverse().forEach( match => {
+    [ ...shaderString.matchAll( /#import [a-z_]+/g ) ].reverse().forEach( match => {
       const index = match.index;
       const importName = match[ 0 ].substring( '#import '.length );
       importNames.push( importName );
@@ -1012,6 +1012,7 @@ convert( 'shared/', 'config.wgsl', [ 'full' ] );
 convert( 'shared/', 'cubic.wgsl', [ 'full' ] );
 convert( 'shared/', 'drawtag.wgsl', [ 'full' ] );
 convert( 'shared/', 'pathtag.wgsl', [ 'full' ] );
+convert( 'shared/', 'pathdata_util.wgsl', [ 'full' ] );
 convert( 'shared/', 'ptcl.wgsl', [ 'full' ] );
 convert( 'shared/', 'segment.wgsl', [ 'full' ] );
 convert( 'shared/', 'tile.wgsl', [ 'full' ] );

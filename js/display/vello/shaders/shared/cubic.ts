@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct fu{s:A,v:A,H:A,Q:A,a2:A,ac:j,aE:j}const iw=f;`
+export default `struct ft{s:B,v:B,H:B,Q:B,a2:B,ac:j,aE:j}const iw=f;`
