@@ -349,14 +349,13 @@ fn main(
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
                     let my_xy = vec2(xy.x + f32(i), xy.y);
                     let atlas_uv = image.matrx.xy * my_xy.x + image.matrx.zw * my_xy.y + image.xlat + image.atlas_offset;
-                    // This currently clips to the image bounds. TODO: extend modes
                     if all(atlas_uv < atlas_extents) && area[i] != 0.0 {
-                        let uv_quad = vec4(max(floor(atlas_uv), image.atlas_offset), min(ceil(atlas_uv), atlas_extents));
+                        let uv_quad = vec4<i32>(vec4(max(floor(atlas_uv), image.atlas_offset), min(ceil(atlas_uv), atlas_extents)));
                         let uv_frac = fract(atlas_uv);
-                        let a = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.xy), 0));
-                        let b = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.xw), 0));
-                        let c = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.zy), 0));
-                        let d = premul_alpha(textureLoad(image_atlas, vec2<i32>(uv_quad.zw), 0));
+                        let a = premul_alpha(textureLoad(image_atlas, uv_quad.xy, 0));
+                        let b = premul_alpha(textureLoad(image_atlas, uv_quad.xw, 0));
+                        let c = premul_alpha(textureLoad(image_atlas, uv_quad.zy, 0));
+                        let d = premul_alpha(textureLoad(image_atlas, uv_quad.zw, 0));
                         let fg_rgba = mix(mix(a, b, uv_frac.y), mix(c, d, uv_frac.y), uv_frac.x);
                         let fg_i = fg_rgba * area[i];
                         rgba[i] = rgba[i] * (1.0 - fg_i.a) + fg_i;
