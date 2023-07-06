@@ -19,8 +19,17 @@ const convertColorStop = ( color_stop: GradientStop ) => {
 
 export default class PhetEncoding extends Encoding {
 
-  public encodePaint( paint: TPaint ): void {
+  public encodePaint( paint: TPaint, baseMatrix: Matrix3 ): void {
     if ( paint instanceof Paint ) {
+      if ( paint.transformMatrix && !paint.transformMatrix.isIdentity() ) {
+        // We need to swap tags for these
+        const encoded = this.encodeMatrix( baseMatrix.timesMatrix( paint.transformMatrix ) );
+        if ( encoded ) {
+          // Should pretty much always do this
+          this.swapLastPathTags();
+        }
+      }
+
       if ( paint instanceof LinearGradient ) {
         // TODO: gradient transforms!
         this.encodeLinearGradient( paint.start.x, paint.start.y, paint.end.x, paint.end.y, paint.stops.map( convertColorStop ), 1, Extend.Pad );
@@ -46,8 +55,8 @@ export default class PhetEncoding extends Encoding {
     }
   }
 
-  public encodeMatrix( matrix: Matrix3 ): void {
-    this.encodeTransform( new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() ) );
+  public encodeMatrix( matrix: Matrix3 ): boolean {
+    return this.encodeTransform( new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() ) );
   }
 
   public static getSourceFromImage( image: HTMLImageElement | HTMLCanvasElement, imageWidth = 0, imageHeight = 0 ): HTMLCanvasElement | ImageBitmap | null {

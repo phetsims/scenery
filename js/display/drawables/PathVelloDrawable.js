@@ -102,7 +102,7 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         this.encoding.encodeLineWidth( -1 );
         const numEncodedSegments = this.encoding.encodeShape( node.shape, true, true, 1 );
         if ( numEncodedSegments ) {
-          this.encoding.encodePaint( node.fill );
+          this.encoding.encodePaint( node.fill, matrix );
         }
       }
       if ( node.hasStroke() ) {
@@ -116,7 +116,7 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         this.encoding.encodeLineWidth( node.lineWidth );
         const numEncodedSegments = this.encoding.encodeShape( shape, false, true, 1 );
         if ( numEncodedSegments ) {
-          this.encoding.encodePaint( node.stroke );
+          this.encoding.encodePaint( node.stroke, matrix );
         }
       }
     }

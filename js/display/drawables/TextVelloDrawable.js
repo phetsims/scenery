@@ -131,10 +131,10 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
 
         if ( node.hasFill() ) {
-          this.encodeGlyphRun( shapedText, sizedMatrix, true );
+          this.encodeGlyphRun( shapedText, sizedMatrix, true, matrix );
         }
         if ( node.hasStroke() ) {
-          this.encodeGlyphRun( shapedText, sizedMatrix, false );
+          this.encodeGlyphRun( shapedText, sizedMatrix, false, matrix );
         }
       }
     }
@@ -147,7 +147,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   }
 
   // @private
-  encodeGlyphRun( shapedText, sizedMatrix, isFill ) {
+  encodeGlyphRun( shapedText, sizedMatrix, isFill, matrix ) {
     let hasEncodedGlyph = false;
 
     const swashTextColor = window.phet?.chipper?.queryParameters?.swashTextColor;
@@ -173,7 +173,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     if ( hasEncodedGlyph ) {
       this.encoding.insertPathMarker();
-      this.encoding.encodePaint( swashTextColor ? swashTextColor : ( isFill ? this.node.fill : this.node.stroke ) );
+      this.encoding.encodePaint( swashTextColor ? swashTextColor : ( isFill ? this.node.fill : this.node.stroke ), matrix );
     }
   }
 

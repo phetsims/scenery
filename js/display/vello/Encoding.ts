@@ -1225,6 +1225,14 @@ export default class Encoding {
     this.drawDataBuf.pushU32( premultiplyRGBA8( color ) );
   }
 
+  // Swap the last two tags in the path tag stream; used for transformed paints.
+  public swapLastPathTags(): void {
+    const pathTagsArray = this.pathTagsBuf.fullU8Array;
+    const tag = pathTagsArray[ pathTagsArray.length - 2 ];
+    pathTagsArray[ pathTagsArray.length - 2 ] = pathTagsArray[ pathTagsArray.length - 1 ];
+    pathTagsArray[ pathTagsArray.length - 1 ] = tag;
+  }
+
   // zero: => false, one => color, many => true (icky)
   private addRamp( color_stops: VelloColorStop[], alpha: number, extend: Extend ): null | true | ColorRGBA32 {
     const offset = this.drawDataBuf.byteLength;
