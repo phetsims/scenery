@@ -530,7 +530,13 @@ fn main(
     for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
         let coords = xy_uint + vec2(i, 0u);
         if coords.x < config.target_width && coords.y < config.target_height {
-            textureStore(output, vec2<i32>(coords), rgba[i]);
+            var rgba_out = rgba[i];
+            if config.premultiply_output != 0u {
+                // Max with a small epsilon to avoid NaNs
+                let a_inv = 1.0 / max(rgba_out.a, 1e-6);
+                rgba_out = vec4(rgba_out.rgb * a_inv, rgba_out.a);
+            }
+            textureStore(output, vec2<i32>(coords), rgba_out);
         }
     } 
 #else

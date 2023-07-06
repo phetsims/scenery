@@ -187,7 +187,7 @@ class VelloBlock extends FittedBlock {
 
     const outTexture = this.canvasContext.getCurrentTexture();
     const renderInfo = encoding.resolve( this.deviceContext );
-    renderInfo.prepareRender( outTexture.width, outTexture.height, 0 );
+    renderInfo.prepareRender( outTexture.width, outTexture.height, 0, false );
 
     render( renderInfo, this.deviceContext, outTexture );
 

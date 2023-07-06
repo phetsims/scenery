@@ -21,7 +21,7 @@ const PATH_COARSE_WG = 256; // u32
 const CLIP_REDUCE_WG = 256; // u32
 
 const LAYOUT_BYTES = 10 * 4; // 10x u32
-const CONFIG_UNIFORM_BYTES = 9 * 4 + LAYOUT_BYTES; // 9x u32 + Layout
+const CONFIG_UNIFORM_BYTES = 10 * 4 + LAYOUT_BYTES; // 9x u32 + Layout
 const PATH_MONOID_BYTES = 5 * 4; // 5x u32
 const PATH_BBOX_BYTES = 6 * 4; // 4x i32, f32, u32
 const CUBIC_BYTES = 12 * 4; // 10x f32, 2x u32
@@ -552,6 +552,7 @@ export class ConfigUniform {
   public targetWidth = 0;
   public targetHeight = 0;
   public baseColor: ColorRGBA32 = 0;
+  public premultiplyOutput = false;
   public layout: Layout;
   public binningSize = 0; // Size of binning buffer allocation (in u32s).
   public tilesSize = 0; // Size of tile buffer allocation (in Tiles).
@@ -570,6 +571,7 @@ export class ConfigUniform {
     buf.pushU32( this.targetWidth );
     buf.pushU32( this.targetHeight );
     buf.pushU32( this.baseColor );
+    buf.pushU32( this.premultiplyOutput ? 1 : 0 );
 
     // Layout
     buf.pushU32( this.layout.numDrawObjects );
@@ -782,7 +784,8 @@ export class RenderConfig {
     layout: Layout,
     public readonly width: number,
     public readonly height: number,
-    public readonly baseColor: ColorRGBA32
+    public readonly baseColor: ColorRGBA32,
+    public readonly premultiplyOutput: boolean
   ) {
     const configUniform = new ConfigUniform( layout );
 
@@ -802,6 +805,7 @@ export class RenderConfig {
     configUniform.targetWidth = width;
     configUniform.targetHeight = height;
     configUniform.baseColor = premultiplyRGBA8( baseColor );
+    configUniform.premultiplyOutput = premultiplyOutput;
     configUniform.binningSize = bufferSizes.bin_data.len() - layout.binningDataStart;
     configUniform.tilesSize = bufferSizes.tiles.len();
     configUniform.segmentsSize = bufferSizes.segments.len();
@@ -844,8 +848,8 @@ export class RenderInfo {
     public readonly layout: Layout
   ) {}
 
-  public prepareRender( width: number, height: number, base_color: ColorRGBA32 ): void {
-    this.renderConfig = new RenderConfig( this.layout, width, height, base_color );
+  public prepareRender( width: number, height: number, base_color: ColorRGBA32, premultiplyOutput: boolean ): void {
+    this.renderConfig = new RenderConfig( this.layout, width, height, base_color, premultiplyOutput );
   }
 }
 

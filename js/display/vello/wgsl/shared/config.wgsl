@@ -13,6 +13,9 @@ struct Config {
     // order.
     base_color: u32,
 
+    // If it's a non-zero value, the fine rasterizer will premultiply the output when writing to the output texture.
+    premultiply_output: u32,
+
     n_drawobj: u32,
     n_path: u32,
     n_clip: u32,
