@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct aL{O:L,bF:v}fn c0(Y:aL,bO:v)->v{return Y.O.xy*bO.x+Y.O.zw*bO.y+Y.bF;}fn fm(Y:aL)->aL{let ir=d/(Y.O.x*Y.O.w-Y.O.y*Y.O.z);let fl=ir*vec4(Y.O.w,-Y.O.y,-Y.O.z,Y.O.x);let iq=mat2x2(fl.xy,fl.zw)*-Y.bF;return aL(fl,iq);}fn dK(a:aL,b:aL)->aL{return aL(a.O.xyxy*b.O.xxzz+a.O.zwzw*b.O.yyww,a.O.xy*b.bF.x+a.O.zw*b.bF.y+a.bF);}`
+export default `struct aP{P:L,b2:A}fn c0(Y:aP,bN:A)->A{return Y.P.xy*bN.x+Y.P.zw*bN.y+Y.b2;}fn fl(Y:aP)->aP{let ir=d/(Y.P.x*Y.P.w-Y.P.y*Y.P.z);let fk=ir*vec4(Y.P.w,-Y.P.y,-Y.P.z,Y.P.x);let iq=mat2x2(fk.xy,fk.zw)*-Y.b2;return aP(fk,iq);}fn dJ(a:aP,b:aP)->aP{return aP(a.P.xyxy*b.P.xxzz+a.P.zwzw*b.P.yyww,a.P.xy*b.b2.x+a.P.zw*b.b2.y+a.b2);}fn gI(ez:j,p:j)->aP{let aO=ez+p*6u;let P=bitcast<L>(vec4(u[aO],u[aO+f],u[aO+2u],u[aO+3u]));let b2=bitcast<A>(vec2(u[aO+4u],u[aO+5u]));return aP(P,b2);}`

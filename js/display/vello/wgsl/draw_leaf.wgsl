@@ -33,21 +33,6 @@ var<storage, read_write> clip_inp: array<ClipInp>;
 
 let WG_SIZE = 256u;
 
-fn read_transform(transform_base: u32, ix: u32) -> Transform {
-    let base = transform_base + ix * 6u;
-    let matrx = bitcast<vec4<f32>>(vec4(
-        scene[base],
-        scene[base + 1u],
-        scene[base + 2u],
-        scene[base + 3u],
-    ));
-    let translate = bitcast<vec2<f32>>(vec2(
-        scene[base + 4u],
-        scene[base + 5u],
-    ));
-    return Transform(matrx, translate);
-}
-
 var<workgroup> sh_scratch: array<DrawMonoid, WG_SIZE>;
 
 @compute @workgroup_size(256)

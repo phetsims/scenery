@@ -24,3 +24,18 @@ fn transform_mul(a: Transform, b: Transform) -> Transform {
         a.matrx.xy * b.translate.x + a.matrx.zw * b.translate.y + a.translate
     );
 }
+
+fn read_transform(transform_base: u32, ix: u32) -> Transform {
+    let base = transform_base + ix * 6u;
+    let matrx = bitcast<vec4<f32>>(vec4(
+        scene[base],
+        scene[base + 1u],
+        scene[base + 2u],
+        scene[base + 3u],
+    ));
+    let translate = bitcast<vec2<f32>>(vec2(
+        scene[base + 4u],
+        scene[base + 5u],
+    ));
+    return Transform(matrx, translate);
+}

@@ -83,21 +83,6 @@ fn read_i16_point(ix: u32) -> vec2<f32> {
     return vec2(x, y);
 }
 
-fn read_transform(transform_base: u32, ix: u32) -> Transform {
-    let base = transform_base + ix * 6u;
-    let matrx = bitcast<vec4<f32>>(vec4(
-        scene[base],
-        scene[base + 1u],
-        scene[base + 2u],
-        scene[base + 3u],
-    ));
-    let translate = bitcast<vec2<f32>>(vec2(
-        scene[base + 4u],
-        scene[base + 5u],
-    ));
-    return Transform(matrx, translate);
-}
-
 fn round_down(x: f32) -> i32 {
     return i32(floor(x));
 }
