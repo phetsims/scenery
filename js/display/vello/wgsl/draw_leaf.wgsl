@@ -6,7 +6,6 @@
 #import clip
 #import drawtag
 #import bbox
-#import transform
 
 @group(0) @binding(0)
 var<uniform> config: Config;
@@ -29,6 +28,7 @@ var<storage, read_write> info: array<u32>;
 @group(0) @binding(6)
 var<storage, read_write> clip_inp: array<ClipInp>;
 
+#import transform
 #import util
 
 let WG_SIZE = 256u;

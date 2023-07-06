@@ -14,7 +14,6 @@
 #import config
 #import pathtag
 #import cubic
-#import transform
 
 @group(0) @binding(0)
 var<uniform> config: Config;
@@ -39,6 +38,8 @@ var<storage, read_write> path_bboxes: array<AtomicPathBbox>;
 
 @group(0) @binding(4)
 var<storage, read_write> cubics: array<Cubic>;
+
+#import transform
 
 // Monoid is yagni, for future optimization
 

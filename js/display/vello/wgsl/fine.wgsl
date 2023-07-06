@@ -109,7 +109,7 @@ fn read_image(cmd_ix: u32) -> CmdImage {
     let y = i32(xy & 0xffffu);
     let width = i32(width_height >> 16u);
     let height = i32(width_height & 0xffffu);
-    let extend = vec2(extend_mode >> 2u, extend_mode & 0x3);
+    let extend = vec2(extend_mode >> 2u, extend_mode & 0x3u);
     return CmdImage(matrx, xlat, vec2(x, y), vec2(width, height), extend, alpha);
 }
 
