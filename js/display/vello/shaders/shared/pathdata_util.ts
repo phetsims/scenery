@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `fn cl(p:j)->B{return bitcast<B>(vec2(u[bT+p],u[bT+p+f]));}fn ck(p:j)->B{let fx=u[bT+p];let x=h(m(fx<<16u)>>16u);let y=h(m(fx)>>16u);return vec2(x,y);}`
+export default `fn cm(p:j)->B{return bitcast<B>(vec2(u[bU+p],u[bU+p+f]));}fn cl(p:j)->B{let fy=u[bU+p];let x=h(m(fy<<16u)>>16u);let y=h(m(fy)>>16u);return vec2(x,y);}`

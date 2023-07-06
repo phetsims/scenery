@@ -225,6 +225,7 @@ fn main(
                 info[di + 7u] = scene[dd]; // atlas x,y
                 info[di + 8u] = scene[dd + 1u]; // packed width/height
                 info[di + 9u] = scene[dd + 2u]; // packed extendX/extendY
+                info[di + 10u] = scene[dd + 3u]; // alpha
             }
             default: {}
         }

@@ -103,13 +103,14 @@ fn read_image(cmd_ix: u32) -> CmdImage {
     let xy = info[info_offset + 6u];
     let width_height = info[info_offset + 7u];
     let extend_mode = info[info_offset + 8u];
+    let alpha = bitcast<f32>(info[info_offset + 9u]);
     // The following are not intended to be bitcasts
     let x = i32(xy >> 16u);
     let y = i32(xy & 0xffffu);
     let width = i32(width_height >> 16u);
     let height = i32(width_height & 0xffffu);
     let extend = vec2(extend_mode >> 2u, extend_mode & 0x3);
-    return CmdImage(matrx, xlat, vec2(x, y), vec2(width, height), extend);
+    return CmdImage(matrx, xlat, vec2(x, y), vec2(width, height), extend, alpha);
 }
 
 fn read_end_clip(cmd_ix: u32) -> CmdEndClip {
@@ -421,7 +422,7 @@ fn main(
                         let c = premul_alpha(textureLoad(image_atlas, uv_quad.zy, 0));
                         let d = premul_alpha(textureLoad(image_atlas, uv_quad.zw, 0));
                         let fg_rgba = mix(mix(a, b, uv_frac.y), mix(c, d, uv_frac.y), uv_frac.x);
-                        let fg_i = fg_rgba * area[i];
+                        let fg_i = fg_rgba * image.alpha * area[i];
                         rgba[i] = rgba[i] * (1.0 - fg_i.a) + fg_i;
                     }
                 }

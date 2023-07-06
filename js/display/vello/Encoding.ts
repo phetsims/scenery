@@ -402,8 +402,8 @@ export class DrawTag {
   public static readonly RADIAL_GRADIENT = createDrawTag( false, 10, 7 );
 
   // Image fill.
-  // 0x248 => 0x244 => 0x286
-  public static readonly IMAGE = createDrawTag( false, 10, 3 );
+  // 0x248 => 0x244 => 0x286 => 0x2c8
+  public static readonly IMAGE = createDrawTag( false, 11, 4 );
 
   // Begin layer/clip.
   // 0x9 => 0x2b
@@ -1320,7 +1320,7 @@ export default class Encoding {
     sceneryLog && sceneryLog.Encoding && this.rustLock--;
   }
 
-  public encodeImage( image: EncodableImage, extendX: Extend = Extend.Pad, extendY: Extend = Extend.Pad ): void {
+  public encodeImage( image: EncodableImage, alpha = 1, extendX: Extend = Extend.Pad, extendY: Extend = Extend.Pad ): void {
     if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
       let u8array;
       if ( image instanceof BufferImage ) {
@@ -1349,6 +1349,8 @@ export default class Encoding {
 
     // Packed extend modes
     this.drawDataBuf.pushU32( ( ( extendX << 2 ) >>> 0 ) | extendY );
+
+    this.drawDataBuf.pushF32( alpha );
   }
 
   public encodeBeginClip( mix: Mix, compose: Compose, filterMatrix: FilterMatrix ): void {

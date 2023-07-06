@@ -8,7 +8,7 @@
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { Compose, FilterMatrix, ImageStatefulDrawable, Mix, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
+import { ImageStatefulDrawable, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
 
 const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 
@@ -62,28 +62,12 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
 
     const source = PhetEncoding.getSourceFromImage( node._image, node.imageWidth, node.imageHeight );
 
-    const imageOpacity = node._imageOpacity;
-    const needsImageOpacity = imageOpacity !== 1;
-
     // if we are not loaded yet, just ignore
     if ( source ) {
-      // TODO: use an alpha parameter in the shaders once it is supported
-      if ( needsImageOpacity ) {
-        this.encoding.encodeMatrix( matrix );
-        this.encoding.encodeLineWidth( -1 );
-        this.encoding.encodeRect( 0, 0, source.width, source.height );
-
-        this.encoding.encodeBeginClip( Mix.Normal, Compose.SrcOver, new FilterMatrix().multiplyAlpha( imageOpacity ) );
-      }
-
       this.encoding.encodeMatrix( matrix );
       this.encoding.encodeLineWidth( -1 );
       this.encoding.encodeRect( 0, 0, source.width, source.height );
-      this.encoding.encodeImage( new SourceImage( source.width, source.height, source ) );
-
-      if ( needsImageOpacity ) {
-        this.encoding.encodeEndClip();
-      }
+      this.encoding.encodeImage( new SourceImage( source.width, source.height, source ), node._imageOpacity );
     }
 
     this.setToCleanState();

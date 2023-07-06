@@ -39,7 +39,7 @@ export default class PhetEncoding extends Encoding {
       else if ( paint instanceof Pattern ) {
         const source = PhetEncoding.getSourceFromImage( paint.image, paint.image.naturalWidth, paint.image.naturalHeight );
         if ( source ) {
-          this.encodeImage( new SourceImage( source.width, source.height, source ), Extend.Repeat, Extend.Repeat );
+          this.encodeImage( new SourceImage( source.width, source.height, source ), 1, Extend.Repeat, Extend.Repeat );
         }
         else {
           // Not yet ready, just encode a transparent color

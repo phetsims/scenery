@@ -8,8 +8,9 @@
  *
  * Shaders from 31f8d9ffa046d5c8cb2da8d99f24f65f00073215
  *
- * Don't premultiply output:
+ * Don't premultiply output (config value):
  * - fine.wgsl
+ * - config.wgsl
  *
  * Color Matrix filter support, changed DrawTag values, moving the scene_offset, and swapping it for alpha
  * - coarse.ts
@@ -21,6 +22,8 @@
  * Use constants in case expressions (assorted files)
  * Bitcasts around vectors (assorted files)
  * Image extends (assorted files)
+ * Image proper quad interpolation (fine.wgsl)
+ * Image alpha (assorted files)
  */
 
 // TODO: could look at places where abstract int/float could be swapped in for the explicit types
