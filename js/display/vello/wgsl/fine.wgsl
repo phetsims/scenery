@@ -102,12 +102,14 @@ fn read_image(cmd_ix: u32) -> CmdImage {
     let xlat = bitcast<vec2<f32>>(vec2(info[info_offset + 4u], info[info_offset + 5u]));
     let xy = info[info_offset + 6u];
     let width_height = info[info_offset + 7u];
+    let extend_mode = info[info_offset + 8u];
     // The following are not intended to be bitcasts
     let x = f32(xy >> 16u);
     let y = f32(xy & 0xffffu);
     let width = f32(width_height >> 16u);
     let height = f32(width_height & 0xffffu);
-    return CmdImage(matrx, xlat, vec2(x, y), vec2(width, height));
+    let extend = vec2(extend_mode >> 2u, extend_mode & 0x3);
+    return CmdImage(matrx, xlat, vec2(x, y), vec2(width, height), extend);
 }
 
 fn read_end_clip(cmd_ix: u32) -> CmdEndClip {

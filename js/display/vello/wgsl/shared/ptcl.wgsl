@@ -66,6 +66,7 @@ struct CmdImage {
     xlat: vec2<f32>,
     atlas_offset: vec2<f32>,
     extents: vec2<f32>,
+    extend: vec2<u32>,
 }
 
 struct CmdEndClip {

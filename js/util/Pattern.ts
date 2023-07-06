@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Paint, scenery, SVGBlock, SVGPattern } from '../imports.js';
+import { Paint, registerImageBitmap, scenery, SVGBlock, SVGPattern } from '../imports.js';
 
 export default class Pattern extends Paint {
 
@@ -23,6 +23,9 @@ export default class Pattern extends Paint {
     super();
 
     this.image = image;
+
+    // Load it as an image bitmap, so that it can be used in Vello
+    registerImageBitmap( image );
 
     // Use the global scratch canvas instead of creating a new Canvas
     // @ts-expect-error TODO: scenery namespace

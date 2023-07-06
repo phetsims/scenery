@@ -222,8 +222,9 @@ fn main(
                 info[di + 4u] = inv_matrx_u32.w;
                 info[di + 5u] = inv_translate_u32.x;
                 info[di + 6u] = inv_translate_u32.y;
-                info[di + 7u] = scene[dd];
-                info[di + 8u] = scene[dd + 1u];
+                info[di + 7u] = scene[dd]; // atlas x,y
+                info[di + 8u] = scene[dd + 1u]; // packed width/height
+                info[di + 9u] = scene[dd + 2u]; // packed extendX/extendY
             }
             default: {}
         }

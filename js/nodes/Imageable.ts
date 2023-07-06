@@ -886,14 +886,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
     private _createImageBitmap(): void {
       // Closure, so if we set ANOTHER image in the meantime, we won't store the wrong thing
       const image = this._image;
-      if ( image instanceof HTMLImageElement && !imageBitmapMap.has( image ) ) {
-        createImageBitmap( image, {
-          premultiplyAlpha: 'premultiply'
-        } ).then( ( bitmap: ImageBitmap ) => {
-          imageBitmapMap.set( image, bitmap );
-        } ).catch( ( error: Error ) => {
-          throw error;
-        } );
+      if ( image instanceof HTMLImageElement ) {
+        registerImageBitmap( image );
       }
     }
 
@@ -1092,3 +1086,15 @@ export default Imageable;
 // Canvas/Vello/WebGL/etc.
 export const imageBitmapMap = new WeakMap<HTMLImageElement, ImageBitmap>();
 scenery.register( 'imageBitmapMap', imageBitmapMap );
+
+export const registerImageBitmap = ( image: HTMLImageElement ): void => {
+  if ( !imageBitmapMap.has( image ) ) {
+    createImageBitmap( image, {
+      premultiplyAlpha: 'premultiply'
+    } ).then( ( bitmap: ImageBitmap ) => {
+      imageBitmapMap.set( image, bitmap );
+    } ).catch( ( error: Error ) => {
+      throw error;
+    } );
+  }
+};
