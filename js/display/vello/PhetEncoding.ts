@@ -31,11 +31,9 @@ export default class PhetEncoding extends Encoding {
       }
 
       if ( paint instanceof LinearGradient ) {
-        // TODO: gradient transforms!
         this.encodeLinearGradient( paint.start.x, paint.start.y, paint.end.x, paint.end.y, paint.stops.map( convertColorStop ), 1, Extend.Pad );
       }
       else if ( paint instanceof RadialGradient ) {
-        // TODO: gradient transforms!
         this.encodeRadialGradient( paint.start.x, paint.start.y, paint.startRadius, paint.end.x, paint.end.y, paint.endRadius, paint.stops.map( convertColorStop ), 1, Extend.Pad );
       }
       else if ( paint instanceof Pattern ) {

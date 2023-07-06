@@ -1227,7 +1227,7 @@ export default class Encoding {
 
   // Swap the last two tags in the path tag stream; used for transformed paints.
   public swapLastPathTags(): void {
-    const pathTagsArray = this.pathTagsBuf.fullU8Array;
+    const pathTagsArray = this.pathTagsBuf.u8Array;
     const tag = pathTagsArray[ pathTagsArray.length - 2 ];
     pathTagsArray[ pathTagsArray.length - 2 ] = pathTagsArray[ pathTagsArray.length - 1 ];
     pathTagsArray[ pathTagsArray.length - 1 ] = tag;
