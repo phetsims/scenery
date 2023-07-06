@@ -345,12 +345,19 @@ fn main(
             }
             case CMD_IMAGE: {
                 let image = read_image(cmd_ix);
+                let min_uv = image.atlas_offset;
+                let max_uv = image.atlas_offset + image.extents - 1.0; // Don't read pixels past the edge of the image.
                 let atlas_extents = image.atlas_offset + image.extents;
                 for (var i = 0u; i < PIXELS_PER_THREAD; i += 1u) {
                     let my_xy = vec2(xy.x + f32(i), xy.y);
-                    let atlas_uv = image.matrx.xy * my_xy.x + image.matrx.zw * my_xy.y + image.xlat + image.atlas_offset;
-                    if all(atlas_uv < atlas_extents) && area[i] != 0.0 {
-                        let uv_quad = vec4<i32>(vec4(max(floor(atlas_uv), image.atlas_offset), min(ceil(atlas_uv), atlas_extents)));
+                    let unit_xy = (image.matrx.xy * my_xy.x + image.matrx.zw * my_xy.y + image.xlat) / image.extents;
+                    let mapped_unit_xy = vec2(
+                        extend_mode(unit_xy.x, image.extend.x),
+                        extend_mode(unit_xy.y, image.extend.y),
+                    );
+                    let atlas_uv = mapped_unit_xy * image.extents + image.atlas_offset;
+                    if area[i] != 0.0 {
+                        let uv_quad = vec4<i32>(vec4(max(floor(atlas_uv), min_uv), min(ceil(atlas_uv), max_uv)));
                         let uv_frac = fract(atlas_uv);
                         let a = premul_alpha(textureLoad(image_atlas, uv_quad.xy, 0));
                         let b = premul_alpha(textureLoad(image_atlas, uv_quad.xw, 0));

@@ -25,7 +25,17 @@ export default class Pattern extends Paint {
     this.image = image;
 
     // Load it as an image bitmap, so that it can be used in Vello
-    registerImageBitmap( image );
+    if ( image.width && image.height ) {
+      registerImageBitmap( image );
+    }
+    else {
+      // If it's not loaded yet, add a listener to register it when it is
+      image.addEventListener( 'load', () => {
+        if ( image.width && image.height ) {
+          registerImageBitmap( image );
+        }
+      } );
+    }
 
     // Use the global scratch canvas instead of creating a new Canvas
     // @ts-expect-error TODO: scenery namespace

@@ -1,3 +1,3 @@
 /* eslint-disable */
 
-export default `struct a3{a:j,b:j}fn dQ(x:a3,y:a3)->a3{let bv=min(x.b,y.a);return a3(x.a+y.a-bv,x.b+y.b-bv);}struct eA{p:j,ac:m}struct fu{dP:j,l:L}`
+export default `struct a4{a:j,b:j}fn dQ(x:a4,y:a4)->a4{let bw=min(x.b,y.a);return a4(x.a+y.a-bw,x.b+y.b-bw);}struct eC{p:j,ac:m}struct fw{dP:j,l:L}`
