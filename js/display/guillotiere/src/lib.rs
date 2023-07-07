@@ -1,5 +1,4 @@
 use guillotiere::*;
-use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
 // See generate.js for generation
@@ -64,7 +63,7 @@ impl GuillotiereAtlas {
     }
 
     pub fn rearrange(&mut self) -> String {
-        let change_list = self.allocator.rearrange().clone();
+        let change_list = self.allocator.rearrange();
         self.process_change_list(change_list)
     }
 
@@ -89,7 +88,7 @@ impl GuillotiereAtlas {
             let old_allocation = change.old;
             let new_allocation = change.new;
 
-            if (!is_first) {
+            if !is_first {
                 result.push_str(",");
             }
             is_first = false;
@@ -109,7 +108,7 @@ impl GuillotiereAtlas {
         for failure in change_list.failures {
             let old_allocation = failure;
 
-            if (!is_first) {
+            if !is_first {
                 result.push_str(",");
             }
             is_first = false;
