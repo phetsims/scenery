@@ -8,7 +8,7 @@
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { ImageStatefulDrawable, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
+import { Imageable, ImageStatefulDrawable, PhetEncoding, scenery, SourceImage, VelloSelfDrawable } from '../../imports.js';
 
 const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 
@@ -58,9 +58,17 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
     this.encoding.reset( true );
 
     const node = this.node;
-    const matrix = scalingMatrix.timesMatrix( this.instance.relativeTransform.matrix );
+    let matrix = scalingMatrix.timesMatrix( this.instance.relativeTransform.matrix );
 
-    const source = PhetEncoding.getSourceFromImage( node._image, node.imageWidth, node.imageHeight );
+    let source;
+    if ( node._mipmap && node.hasMipmaps() ) {
+      const level = node.getMipmapLevel( matrix, Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT );
+      source = node.getMipmapCanvas( level );
+      matrix = matrix.timesMatrix( Matrix3.scaling( Math.pow( 2, level ) ) );
+    }
+    else {
+      source = PhetEncoding.getSourceFromImage( node._image, node.imageWidth, node.imageHeight );
+    }
 
     // if we are not loaded yet, just ignore
     if ( source ) {
