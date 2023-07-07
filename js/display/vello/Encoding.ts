@@ -1327,6 +1327,7 @@ export default class Encoding {
         u8array = new Uint8Array( image.buffer );
       }
       else {
+        // TODO: Can we avoid this extra copy for a Canvas?
         const canvas = document.createElement( 'canvas' );
         canvas.width = image.width;
         canvas.height = image.height;

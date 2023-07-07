@@ -105,7 +105,7 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
 
     if ( Pattern && value instanceof Pattern ) {
       paintSerialization.type = 'Pattern';
-      paintSerialization.url = value.image.src;
+      paintSerialization.url = value.getImageURL();
     }
 
     return paintSerialization;

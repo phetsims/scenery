@@ -37,7 +37,16 @@ export default class PhetEncoding extends Encoding {
         this.encodeRadialGradient( paint.start.x, paint.start.y, paint.startRadius, paint.end.x, paint.end.y, paint.endRadius, paint.stops.map( convertColorStop ), 1, Extend.Pad );
       }
       else if ( paint instanceof Pattern ) {
-        const source = PhetEncoding.getSourceFromImage( paint.image, paint.image.naturalWidth, paint.image.naturalHeight );
+        let source;
+        if ( paint.image instanceof ImageBitmap && paint.image.width && paint.image.height ) {
+          source = paint.image;
+        }
+        else if ( paint.image instanceof HTMLImageElement ) {
+          source = PhetEncoding.getSourceFromImage( paint.image, paint.image.naturalWidth, paint.image.naturalHeight );
+        }
+        else if ( paint.image instanceof HTMLCanvasElement ) {
+          source = PhetEncoding.getSourceFromImage( paint.image, paint.image.width, paint.image.height );
+        }
         if ( source ) {
           this.encodeImage( new SourceImage( source.width, source.height, source ), 1, Extend.Repeat, Extend.Repeat );
         }

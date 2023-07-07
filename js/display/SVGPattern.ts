@@ -52,7 +52,8 @@ export default class SVGPattern implements TPoolable {
     this.imageElement.setAttribute( 'y', '0' );
     this.imageElement.setAttribute( 'width', `${pattern.image.width}px` );
     this.imageElement.setAttribute( 'height', `${pattern.image.height}px` );
-    this.imageElement.setAttributeNS( xlinkns, 'xlink:href', pattern.image.src );
+
+    this.imageElement.setAttributeNS( xlinkns, 'xlink:href', pattern.getImageURL() );
     if ( !hasPreviousDefinition ) {
       this.definition.appendChild( this.imageElement );
     }

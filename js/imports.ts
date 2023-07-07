@@ -59,6 +59,7 @@ export type { GradientStop } from './util/Gradient.js';
 export { default as LinearGradient } from './util/LinearGradient.js';
 export { default as RadialGradient } from './util/RadialGradient.js';
 export { default as Pattern } from './util/Pattern.js';
+export type { PatternImage } from './util/Pattern.js';
 export { default as NodePattern } from './util/NodePattern.js';
 export { default as Filter } from './filters/Filter.js';
 
@@ -103,7 +104,7 @@ export type { MatrixBetweenPropertyOptions } from './util/MatrixBetweenProperty.
 
 export { default as Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_DEFAULT_OPTIONS } from './nodes/Paintable.js';
 export type { PaintableOptions, PaintableNode } from './nodes/Paintable.js';
-export { default as Imageable, imageBitmapMap, registerImageBitmap } from './nodes/Imageable.js';
+export { default as Imageable, imageBitmapMap, registerImageBitmap, imageBitmapToCanvas } from './nodes/Imageable.js';
 export type { ImageableOptions, Mipmap, ImageableImage } from './nodes/Imageable.js';
 export { default as DelayedMutate } from './util/DelayedMutate.js';
 

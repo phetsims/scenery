@@ -1098,3 +1098,12 @@ export const registerImageBitmap = ( image: HTMLImageElement ): void => {
     } );
   }
 };
+
+export const imageBitmapToCanvas = ( imageBitmap: ImageBitmap ): HTMLCanvasElement => {
+  const canvas = document.createElement( 'canvas' );
+  canvas.width = imageBitmap.width;
+  canvas.height = imageBitmap.height;
+  const context = canvas.getContext( '2d' )!;
+  context.drawImage( imageBitmap, 0, 0 );
+  return canvas;
+};
