@@ -107,11 +107,13 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         // TODO: is 5px enough? too much?
         const selfBounds = node.selfBoundsProperty._value;
         if ( selfBounds.isValid() && selfBounds.hasNonzeroArea() ) {
+          // TODO: only use accurate bounds?!!!
           const bounds = node.selfBoundsProperty._value.transformed( matrix ).dilate( 5 ).roundOut();
           canvas.width = bounds.width;
           canvas.height = bounds.height;
 
           // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture
+          // TODO: Check... Ohm's Law?
           // TODO: NOTE: If a block resizes, WOULD we be marked as dirty? If not, we'd have to listen to it
           const context = canvas.getContext( '2d' );
           context.translate( -bounds.minX, -bounds.minY );
@@ -123,6 +125,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
           this.encoding.encodeMatrix( Matrix3.translation( bounds.minX, bounds.minY ) );
           this.encoding.encodeLineWidth( -1 );
           this.encoding.encodeRect( 0, 0, canvas.width, canvas.height );
+          // TODO: we don't seem to be getting premultiply correct here? Something looks off
           this.encoding.encodeImage( new SourceImage( canvas.width, canvas.height, canvas ) );
         }
       }
