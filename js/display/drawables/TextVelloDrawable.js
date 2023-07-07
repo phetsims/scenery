@@ -125,7 +125,6 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
           this.encoding.encodeMatrix( Matrix3.translation( bounds.minX, bounds.minY ) );
           this.encoding.encodeLineWidth( -1 );
           this.encoding.encodeRect( 0, 0, canvas.width, canvas.height );
-          // TODO: we don't seem to be getting premultiply correct here? Something looks off
           this.encoding.encodeImage( new SourceImage( canvas.width, canvas.height, canvas ) );
         }
       }
