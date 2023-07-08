@@ -8,7 +8,7 @@
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { CanvasContextWrapper, PathStatefulDrawable, PhetEncoding, scenery, SourceImage, TextCanvasDrawable, VelloSelfDrawable } from '../../imports.js';
+import { CanvasContextWrapper, PathStatefulDrawable, PhetEncoding, scenery, SourceImage, Utils, TextCanvasDrawable, VelloSelfDrawable } from '../../imports.js';
 import ArialBoldFont from '../vello/ArialBoldFont.js';
 import ArialFont from '../vello/ArialFont.js';
 
@@ -102,6 +102,14 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
       if ( !useSwash ) {
         // TODO: pooling, but figure out if we need to wait for the device.queue.onSubmittedWorkDone()
         const canvas = document.createElement( 'canvas' );
+        canvas.style.position = 'absolute';
+        canvas.style.left = '0';
+        canvas.style.top = '0';
+        canvas.style.pointerEvents = 'none';
+
+        // Reset any fit transforms that were applied
+        Utils.prepareForTransform( canvas ); // Apply CSS needed for future CSS transforms to work properly.
+        Utils.unsetTransform( canvas ); // clear out any transforms that could have been previously applied
 
         // NOTE: getting value directly, so we don't set off any bounds validation during rendering
         // TODO: is 5px enough? too much?
@@ -111,6 +119,8 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
           const bounds = node.selfBoundsProperty._value.transformed( matrix ).dilate( 5 ).roundOut();
           canvas.width = bounds.width;
           canvas.height = bounds.height;
+          canvas.style.width = `${bounds.width / window.devicePixelRatio}px`;
+          canvas.style.height = `${bounds.height / window.devicePixelRatio}px`;
 
           // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture
           // TODO: Check... Ohm's Law?
