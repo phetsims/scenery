@@ -304,6 +304,13 @@ export class FilterMatrix {
     return this;
   }
 
+  public isIdentity(): boolean {
+    return this.m00 === 1 && this.m01 === 0 && this.m02 === 0 && this.m03 === 0 && this.m04 === 0 &&
+           this.m10 === 0 && this.m11 === 1 && this.m12 === 0 && this.m13 === 0 && this.m14 === 0 &&
+           this.m20 === 0 && this.m21 === 0 && this.m22 === 1 && this.m23 === 0 && this.m24 === 0 &&
+           this.m30 === 0 && this.m31 === 0 && this.m32 === 0 && this.m33 === 1 && this.m34 === 0;
+  }
+
   public multiplyAlpha( alpha: number ): this {
     this.m03 *= alpha;
     this.m13 *= alpha;
@@ -1356,6 +1363,10 @@ export default class Encoding {
 
   public encodeBeginClip( mix: Mix, compose: Compose, filterMatrix: FilterMatrix ): void {
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_begin_clip(BlendMode {mix: ${MixMap[ mix ]}, compose: ${ComposeMap[ compose ]}}, ${rustF32( filterMatrix.m33 )});\n` );
+
+    assert && assert( mix !== Mix.Clip || filterMatrix.isIdentity(),
+      'Do not use a filter matrix if we use Mix.Clip, it will be buggy' );
+
     this.drawTagsBuf.pushU32( DrawTag.BEGIN_CLIP );
 
     // u32 combination of mix and compose
