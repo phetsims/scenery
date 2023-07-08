@@ -13,7 +13,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Renderer, scenery, Sprite, SpriteInstance, SpritesCanvasDrawable, SpritesWebGLDrawable, WebGLSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DeviceContext, Instance, Node, NodeOptions, Renderer, scenery, Sprite, SpriteInstance, SpritesCanvasDrawable, SpritesVelloDrawable, SpritesWebGLDrawable, VelloSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 
 type SelfOptions = {
   // Provide a fixed set of Sprite objects that will be used for this node. Currently, it cannot be modified after
@@ -51,7 +51,7 @@ export default class Sprites extends Node {
       hitTestSprites: false,
 
       // Sets the node's default renderer to WebGL (as we'll generally want that when using this type)
-      renderer: 'webgl'
+      renderer: DeviceContext.isVelloSupportedSync() ? 'vello' : 'webgl'
     }, providedOptions );
 
     super();
@@ -61,7 +61,7 @@ export default class Sprites extends Node {
     this._hitTestSprites = options.hitTestSprites;
 
     // WebGL and Canvas are supported.
-    this.setRendererBitmask( Renderer.bitmaskCanvas | Renderer.bitmaskWebGL );
+    this.setRendererBitmask( Renderer.bitmaskCanvas | Renderer.bitmaskWebGL | Renderer.bitmaskVello );
 
     this.mutate( options );
   }
@@ -118,6 +118,17 @@ export default class Sprites extends Node {
   public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-expect-error Pooling
     return SpritesWebGLDrawable.createFromPool( renderer, instance );
+  }
+
+  /**
+   * Creates a Vello drawable for this Image. (scenery-internal)
+   *
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
+   */
+  public override createVelloDrawable( renderer: number, instance: Instance ): VelloSelfDrawable {
+    // @ts-expect-error
+    return SpritesVelloDrawable.createFromPool( renderer, instance );
   }
 
   /**

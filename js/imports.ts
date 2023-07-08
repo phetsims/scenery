@@ -390,6 +390,7 @@ export { default as RectangleDOMDrawable } from './display/drawables/RectangleDO
 export { default as RectangleSVGDrawable } from './display/drawables/RectangleSVGDrawable.js';
 export { default as RectangleWebGLDrawable } from './display/drawables/RectangleWebGLDrawable.js';
 export { default as SpritesCanvasDrawable } from './display/drawables/SpritesCanvasDrawable.js';
+export { default as SpritesVelloDrawable } from './display/drawables/SpritesVelloDrawable.js';
 export { default as SpritesWebGLDrawable } from './display/drawables/SpritesWebGLDrawable.js';
 export { default as TextCanvasDrawable } from './display/drawables/TextCanvasDrawable.js';
 export { default as TextDOMDrawable } from './display/drawables/TextDOMDrawable.js';

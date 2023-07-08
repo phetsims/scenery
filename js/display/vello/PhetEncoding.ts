@@ -63,6 +63,7 @@ export default class PhetEncoding extends Encoding {
   }
 
   public encodeMatrix( matrix: Matrix3 ): boolean {
+    // NOTE: Don't just store the matrix, we're mutating those sometimes?
     return this.encodeTransform( new Affine( matrix.m00(), matrix.m10(), matrix.m01(), matrix.m11(), matrix.m02(), matrix.m12() ) );
   }
 
