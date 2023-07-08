@@ -101,16 +101,15 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
       if ( !useSwash ) {
         // TODO: pooling, but figure out if we need to wait for the device.queue.onSubmittedWorkDone()
-        const canvas = document.createElement( 'canvas' );
 
-        // NOTE: getting value directly, so we don't set off any bounds validation during rendering
-        // TODO: is 5px enough? too much?
         const selfBounds = node.selfBoundsProperty._value;
         if ( selfBounds.isValid() && selfBounds.hasNonzeroArea() ) {
           // TODO: only use accurate bounds?!!!
+          // NOTE: getting value directly, so we don't set off any bounds validation during rendering
+          // TODO: is 5px enough? too much?
           const bounds = node.selfBoundsProperty._value.transformed( matrix ).dilate( 5 ).roundOut();
-          canvas.width = bounds.width;
-          canvas.height = bounds.height;
+
+          const canvas = new OffscreenCanvas( bounds.width, bounds.height );
 
           // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture
           // TODO: Check... Ohm's Law?
