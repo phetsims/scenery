@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BlitShader, DeviceContext, scenery, WorkgroupSize } from '../../imports.js';
+import { BlitShader, DeviceContext, DispatchSize, scenery } from '../../imports.js';
 import fine from './shaders/fine.js';
 import backdrop_dyn from './shaders/backdrop_dyn.js';
 import bbox_clear from './shaders/bbox_clear.js';
@@ -174,7 +174,7 @@ export default class VelloShader {
     } );
   }
 
-  public dispatch( encoder: GPUCommandEncoder, workgroupSize: WorkgroupSize, resources: ( GPUBuffer | GPUTextureView )[] ): void {
+  public dispatch( encoder: GPUCommandEncoder, dispatchSize: DispatchSize, resources: ( GPUBuffer | GPUTextureView )[] ): void {
     const bindGroup = this.device.createBindGroup( {
       label: `${this.name} bindGroup`,
       layout: this.bindGroupLayout,
@@ -185,7 +185,7 @@ export default class VelloShader {
     } );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, bindGroup );
-    computePass.dispatchWorkgroups( workgroupSize.x, workgroupSize.y, workgroupSize.z );
+    computePass.dispatchWorkgroups( dispatchSize.x, dispatchSize.y, dispatchSize.z );
     computePass.end();
   }
 

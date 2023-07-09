@@ -9,7 +9,7 @@
 
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Utils from '../../../../dot/js/Utils.js';
-import { Affine, AtlasSubImage, BufferImage, ByteBuffer, ColorMatrixFilter, DeviceContext, scenery, SourceImage, WorkgroupSize } from '../../imports.js';
+import { Affine, AtlasSubImage, BufferImage, ByteBuffer, ColorMatrixFilter, DeviceContext, DispatchSize, scenery, SourceImage } from '../../imports.js';
 import { Arc, Cubic, EllipticalArc, Line, Quadratic, Shape } from '../../../../kite/js/imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 
@@ -601,26 +601,26 @@ export class ConfigUniform {
   }
 }
 
-export class WorkgroupCounts {
+export class DispatchSizes {
 
   // TODO: pooling
   public useLargePathScan: boolean;
-  public path_reduce: WorkgroupSize;
-  public path_reduce2: WorkgroupSize;
-  public path_scan1: WorkgroupSize;
-  public path_scan: WorkgroupSize;
-  public bbox_clear: WorkgroupSize;
-  public path_seg: WorkgroupSize;
-  public draw_reduce: WorkgroupSize;
-  public draw_leaf: WorkgroupSize;
-  public clip_reduce: WorkgroupSize;
-  public clip_leaf: WorkgroupSize;
-  public binning: WorkgroupSize;
-  public tile_alloc: WorkgroupSize;
-  public path_coarse: WorkgroupSize;
-  public backdrop: WorkgroupSize;
-  public coarse: WorkgroupSize;
-  public fine: WorkgroupSize;
+  public path_reduce: DispatchSize;
+  public path_reduce2: DispatchSize;
+  public path_scan1: DispatchSize;
+  public path_scan: DispatchSize;
+  public bbox_clear: DispatchSize;
+  public path_seg: DispatchSize;
+  public draw_reduce: DispatchSize;
+  public draw_leaf: DispatchSize;
+  public clip_reduce: DispatchSize;
+  public clip_leaf: DispatchSize;
+  public binning: DispatchSize;
+  public tile_alloc: DispatchSize;
+  public path_coarse: DispatchSize;
+  public backdrop: DispatchSize;
+  public coarse: DispatchSize;
+  public fine: DispatchSize;
 
   public constructor( layout: Layout, widthInTiles: number, heightInTiles: number, numPathTags: number ) {
 
@@ -640,22 +640,22 @@ export class WorkgroupCounts {
     const heightInBins = Math.floor( ( heightInTiles + 15 ) / 16 );
 
     this.useLargePathScan = useLargePathScan;
-    this.path_reduce = new WorkgroupSize( pathTagSize, 1, 1 );
-    this.path_reduce2 = new WorkgroupSize( PATH_REDUCE_WG, 1, 1 );
-    this.path_scan1 = new WorkgroupSize( Math.floor( reducedSize / PATH_REDUCE_WG ), 1, 1 );
-    this.path_scan = new WorkgroupSize( pathTagSize, 1, 1 );
-    this.bbox_clear = new WorkgroupSize( drawObjectSize, 1, 1 );
-    this.path_seg = new WorkgroupSize( pathCoarseSize, 1, 1 );
-    this.draw_reduce = new WorkgroupSize( drawObjectSize, 1, 1 );
-    this.draw_leaf = new WorkgroupSize( drawObjectSize, 1, 1 );
-    this.clip_reduce = new WorkgroupSize( clipReduceSize, 1, 1 );
-    this.clip_leaf = new WorkgroupSize( clipSize, 1, 1 );
-    this.binning = new WorkgroupSize( drawObjectSize, 1, 1 );
-    this.tile_alloc = new WorkgroupSize( pathSize, 1, 1 );
-    this.path_coarse = new WorkgroupSize( pathCoarseSize, 1, 1 );
-    this.backdrop = new WorkgroupSize( pathSize, 1, 1 );
-    this.coarse = new WorkgroupSize( widthInBins, heightInBins, 1 );
-    this.fine = new WorkgroupSize( widthInTiles, heightInTiles, 1 );
+    this.path_reduce = new DispatchSize( pathTagSize, 1, 1 );
+    this.path_reduce2 = new DispatchSize( PATH_REDUCE_WG, 1, 1 );
+    this.path_scan1 = new DispatchSize( Math.floor( reducedSize / PATH_REDUCE_WG ), 1, 1 );
+    this.path_scan = new DispatchSize( pathTagSize, 1, 1 );
+    this.bbox_clear = new DispatchSize( drawObjectSize, 1, 1 );
+    this.path_seg = new DispatchSize( pathCoarseSize, 1, 1 );
+    this.draw_reduce = new DispatchSize( drawObjectSize, 1, 1 );
+    this.draw_leaf = new DispatchSize( drawObjectSize, 1, 1 );
+    this.clip_reduce = new DispatchSize( clipReduceSize, 1, 1 );
+    this.clip_leaf = new DispatchSize( clipSize, 1, 1 );
+    this.binning = new DispatchSize( drawObjectSize, 1, 1 );
+    this.tile_alloc = new DispatchSize( pathSize, 1, 1 );
+    this.path_coarse = new DispatchSize( pathCoarseSize, 1, 1 );
+    this.backdrop = new DispatchSize( pathSize, 1, 1 );
+    this.coarse = new DispatchSize( widthInBins, heightInBins, 1 );
+    this.fine = new DispatchSize( widthInTiles, heightInTiles, 1 );
   }
 }
 
@@ -737,7 +737,7 @@ export class BufferSizes {
   public readonly ptcl: BufferSize;
 
   // layout: &Layout, workgroups: &WorkgroupCounts, n_path_tags: u32
-  public constructor( layout: Layout, workgroups: WorkgroupCounts, n_path_tags: number ) {
+  public constructor( layout: Layout, workgroups: DispatchSizes, n_path_tags: number ) {
 
     const numPaths = layout.numPaths;
     const numDrawObjects = layout.numDrawObjects;
@@ -777,8 +777,7 @@ export class BufferSizes {
 
 export class RenderConfig {
 
-  // Workgroup counts for all compute pipelines.
-  public readonly workgroupCounts: WorkgroupCounts;
+  public readonly dispatchSizes: DispatchSizes;
 
   // Sizes of all buffer resources.
   public readonly bufferSizes: BufferSizes;
@@ -801,10 +800,10 @@ export class RenderConfig {
     const widthInTiles = newWidth / TILE_WIDTH;
     const heightInTiles = newHeight / TILE_HEIGHT;
     const numPathTags = layout.getPathTagsSize();
-    const workgroupCounts = new WorkgroupCounts( layout, widthInTiles, heightInTiles, numPathTags );
-    const bufferSizes = new BufferSizes( layout, workgroupCounts, numPathTags );
+    const dispatchSizes = new DispatchSizes( layout, widthInTiles, heightInTiles, numPathTags );
+    const bufferSizes = new BufferSizes( layout, dispatchSizes, numPathTags );
 
-    this.workgroupCounts = workgroupCounts;
+    this.dispatchSizes = dispatchSizes;
     this.bufferSizes = bufferSizes;
 
     configUniform.widthInTiles = widthInTiles;
@@ -851,7 +850,7 @@ export class RenderInfo {
   public renderConfig: RenderConfig | null = null;
 
   public constructor(
-    public readonly packed: Uint8Array,
+    public readonly sceneBytes: Uint8Array,
     public readonly layout: Layout
   ) {}
 

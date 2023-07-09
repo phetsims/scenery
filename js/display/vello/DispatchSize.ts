@@ -3,12 +3,12 @@
 import { scenery } from '../../imports.js';
 
 /**
- * Stores a workgroup size (x, y, z) for a compute shader.
+ * Stores the dispatch size (x, y, z) for a compute shader.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default class WorkgroupSize {
+export default class DispatchSize {
   // u32 in rust
   public constructor(
     public readonly x: number,
@@ -21,4 +21,4 @@ export default class WorkgroupSize {
   }
 }
 
-scenery.register( 'WorkgroupSize', WorkgroupSize );
+scenery.register( 'DispatchSize', DispatchSize );
