@@ -335,7 +335,6 @@ export { default as Ramps } from './display/vello/Ramps.js';
 export { default as Encoding, f32ToBytes, u32ToBytes, withAlphaFactor, premultiplyRGBA8, lerpRGBA8, FilterMatrix, VelloColorStop, Extend, Mix, Compose, DrawTag, PathTag, Layout, SceneBufferSizes, ConfigUniform, DispatchSizes, BufferSize, BufferSizes, RenderConfig, u8ToBase64, base64ToU8, RenderInfo, VelloPatch, VelloImagePatch, VelloRampPatch } from './display/vello/Encoding.js';
 export type { ColorRGBA32, F32, U32, U8, EncodableImage } from './display/vello/Encoding.js';
 export { default as PhetEncoding } from './display/vello/PhetEncoding.js';
-export { default as render } from './display/vello/render.js';
 export { default as PathFont } from './display/swash/PathFont.js';
 export { default as AtlasAllocator, AtlasBin } from './display/guillotiere/AtlasAllocator.js';
 

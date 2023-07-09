@@ -11,7 +11,7 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { Compose, DeviceContext, FilterMatrix, FittedBlock, Mix, PhetEncoding, render, scenery, Utils } from '../imports.js';
+import { Compose, DeviceContext, FilterMatrix, FittedBlock, Mix, PhetEncoding, scenery, Utils } from '../imports.js';
 
 const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 const scratchFilterMatrix = new FilterMatrix();
@@ -189,7 +189,7 @@ class VelloBlock extends FittedBlock {
     const renderInfo = encoding.resolve( this.deviceContext );
     renderInfo.prepareRender( outTexture.width, outTexture.height, 0, false );
 
-    render( renderInfo, this.deviceContext, outTexture );
+    this.deviceContext.render( renderInfo, outTexture );
 
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.pop();
 
