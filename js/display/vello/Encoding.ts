@@ -12,6 +12,7 @@ import Utils from '../../../../dot/js/Utils.js';
 import { Affine, AtlasSubImage, BufferImage, ByteBuffer, ColorMatrixFilter, DeviceContext, DispatchSize, scenery, SourceImage } from '../../imports.js';
 import { Arc, Cubic, EllipticalArc, Line, Quadratic, Shape } from '../../../../kite/js/imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Pool from '../../../../phet-core/js/Pool.js';
 
 const TILE_WIDTH = 16; // u32
 const TILE_HEIGHT = 16; // u32
@@ -859,44 +860,80 @@ export class RenderInfo {
   }
 }
 
-export class VelloPatch {
-  public constructor( public readonly draw_data_offset: number ) {}
-}
+export class VelloImagePatch {
 
-export class VelloImagePatch extends VelloPatch {
-
+  public drawDataOffset!: number;
+  public image!: EncodableImage;
   public readonly type = 'image' as const;
 
   // Filled in by Atlas
   public atlasSubImage: AtlasSubImage | null = null;
 
-  public constructor( drawDataOffset: number, public readonly image: EncodableImage ) {
-    super( drawDataOffset );
+  public constructor( drawDataOffset: number, image: EncodableImage ) {
+    this.initialize( drawDataOffset, image );
+  }
+
+  public initialize( drawDataOffset: number, image: EncodableImage ): this {
+    this.drawDataOffset = drawDataOffset;
+    this.image = image;
+
+    return this;
   }
 
   public withOffset( drawDataOffset: number ): VelloImagePatch {
-    return new VelloImagePatch( drawDataOffset, this.image );
+    return VelloImagePatch.pool.create( drawDataOffset, this.image );
   }
+
+  public freeToPool(): void {
+    // @ts-expect-error
+    this.image = null;
+
+    VelloImagePatch.pool.freeToPool( this );
+  }
+
+  public static readonly pool = new Pool( VelloImagePatch, {
+    // We're only going to grab them from the pool
+    maxSize: Number.POSITIVE_INFINITY
+  } );
 }
 
-export class VelloRampPatch extends VelloPatch {
+export class VelloRampPatch {
 
+  public drawDataOffset!: number;
+  public stops!: VelloColorStop[];
+  public extend!: Extend;
   public readonly type = 'ramp' as const;
 
   // Filled in by Ramps
   public id = -1;
 
-  public constructor(
-    drawDataOffset: number,
-    public readonly stops: VelloColorStop[],
-    public extend: Extend
-  ) {
-    super( drawDataOffset );
+  public constructor( drawDataOffset: number, stops: VelloColorStop[], extend: Extend ) {
+    this.initialize( drawDataOffset, stops, extend );
+  }
+
+  public initialize( drawDataOffset: number, stops: VelloColorStop[], extend: Extend ): this {
+    this.drawDataOffset = drawDataOffset;
+    this.stops = stops;
+    this.extend = extend;
+
+    return this;
   }
 
   public withOffset( drawDataOffset: number ): VelloRampPatch {
-    return new VelloRampPatch( drawDataOffset, this.stops, this.extend );
+    return VelloRampPatch.pool.create( drawDataOffset, this.stops, this.extend );
   }
+
+  public freeToPool(): void {
+    // @ts-expect-error
+    this.stops = null;
+
+    VelloRampPatch.pool.freeToPool( this );
+  }
+
+  public static readonly pool = new Pool( VelloRampPatch, {
+    // We're only going to grab them from the pool
+    maxSize: Number.POSITIVE_INFINITY
+  } );
 }
 
 const rustF32 = ( f: number ): string => {
@@ -966,7 +1003,7 @@ export default class Encoding {
   // Clears the encoding.
   public reset( isFragment: boolean ): void {
     // Clears the rustEncoding too, reinitalizing it
-    // TODO: don't require hardcoding TRUE for isFragment?
+    // TODO: don't require hardcoding TRUE for isFragment? Almost all of them will be fragments
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding = `let mut encoding${this.id}: Encoding = Encoding::new();\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.reset(true);\n` );
     this.transforms.length = 0;
@@ -979,11 +1016,20 @@ export default class Encoding {
     this.numPathSegments = 0;
     this.numClips = 0;
     this.numOpenClips = 0;
-    this.patches.length = 0;
+    while ( this.patches.length ) {
+      this.patches.pop()!.freeToPool();
+    }
     this.colorStops.length = 0;
     if ( !isFragment ) {
       this.transforms.push( Affine.IDENTITY );
       this.lineWidths.push( -1.0 );
+    }
+  }
+
+  // TODO: pool the encodings!
+  public dispose(): void {
+    while ( this.patches.length ) {
+      this.patches.pop()!.freeToPool();
     }
   }
 
@@ -1009,7 +1055,7 @@ export default class Encoding {
     }
     this.lineWidths.push( ...other.lineWidths );
     this.colorStops.push( ...other.colorStops );
-    this.patches.push( ...other.patches.map( patch => patch.withOffset( patch.draw_data_offset + initialDrawDataLength ) ) );
+    this.patches.push( ...other.patches.map( patch => patch.withOffset( patch.drawDataOffset + initialDrawDataLength ) ) );
 
     if ( sceneryLog && sceneryLog.Encoding && this.rustLock === 0 ) {
       if ( !this.rustEncoding?.includes( `let mut encoding${other.id} ` ) ) {
@@ -1244,14 +1290,15 @@ export default class Encoding {
   }
 
   // zero: => false, one => color, many => true (icky)
-  private addRamp( color_stops: VelloColorStop[], alpha: number, extend: Extend ): null | true | ColorRGBA32 {
+  // TODO: better return values!
+  private addRamp( colorStops: VelloColorStop[], alpha: number, extend: Extend ): null | true | ColorRGBA32 {
     const offset = this.drawDataBuf.byteLength;
     const stopsStart = this.colorStops.length;
     if ( alpha !== 1 ) {
-      this.colorStops.push( ...color_stops.map( stop => new VelloColorStop( stop.offset, withAlphaFactor( stop.color, alpha ) ) ) );
+      this.colorStops.push( ...colorStops.map( stop => new VelloColorStop( stop.offset, withAlphaFactor( stop.color, alpha ) ) ) );
     }
     else {
-      this.colorStops.push( ...color_stops );
+      this.colorStops.push( ...colorStops );
     }
     const stopsEnd = this.colorStops.length;
 
@@ -1266,7 +1313,7 @@ export default class Encoding {
       return this.colorStops.pop()!.color;
     }
     else {
-      this.patches.push( new VelloRampPatch( offset, color_stops, extend ) );
+      this.patches.push( VelloRampPatch.pool.create( offset, colorStops, extend ) );
       return true;
     }
   }
@@ -1345,7 +1392,7 @@ export default class Encoding {
       sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.encode_image(&peniko::Image::new(peniko::Blob::new(std::sync::Arc::new([${dataString}].to_vec())), peniko::Format::Rgba8, ${image.width}, ${image.height}), 1.0);\n` );
     }
 
-    this.patches.push( new VelloImagePatch( this.drawDataBuf.byteLength, image ) );
+    this.patches.push( VelloImagePatch.pool.create( this.drawDataBuf.byteLength, image ) );
     this.drawTagsBuf.pushU32( DrawTag.IMAGE );
 
     // packed atlas coordinates (xy) u32
@@ -1560,7 +1607,7 @@ export default class Encoding {
       dataBuf.pushByteBuffer( this.drawDataBuf );
 
       this.patches.forEach( patch => {
-        const byteOffset = drawDataOffset + patch.draw_data_offset;
+        const byteOffset = drawDataOffset + patch.drawDataOffset;
         let bytes;
 
         if ( patch instanceof VelloRampPatch ) {
