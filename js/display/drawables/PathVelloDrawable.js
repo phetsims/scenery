@@ -23,7 +23,7 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
   initialize( renderer, instance ) {
     super.initialize( renderer, instance );
 
-    this.encoding = new PhetEncoding();
+    this.encoding = this.encoding || new PhetEncoding();
 
     this.transformDirty = true;
   }

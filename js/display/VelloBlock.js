@@ -74,6 +74,8 @@ class VelloBlock extends FittedBlock {
     // @private {Drawable|null} -- The drawable for which the current clip/filter setup has been applied (during the walk)
     this.currentDrawable = null;
 
+    this.encoding = this.encoding || new PhetEncoding();
+
     if ( !this.domElement ) {
       // @public (scenery-internal) {HTMLCanvasElement} - Div wrapper used so we can switch out Canvases if necessary.
       this.canvas = document.createElement( 'canvas' );
@@ -149,7 +151,7 @@ class VelloBlock extends FittedBlock {
     // TODO: make not fittable
     this.updateFit();
 
-    const encoding = new PhetEncoding();
+    const encoding = this.encoding;
     encoding.reset( false );
 
     // Iterate through all of our drawables (linked list)
