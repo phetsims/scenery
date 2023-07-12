@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * RichText that composes ReadingBlock, adding support for Voicing and input listeners that speak content upon
@@ -10,9 +10,12 @@
 import TReadOnlyProperty from '../../../../../axon/js/TReadOnlyProperty.js';
 import optionize, { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, RichText, RichTextOptions, scenery } from '../../../imports.js';
+import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 type SelfOptions = EmptySelfOptions;
-type ParentOptions = ReadingBlockOptions & RichTextOptions;
+
+// focusHighlight will always be set by this class
+type ParentOptions = ReadingBlockOptions & StrictOmit<RichTextOptions, 'focusHighlight'>;
 export type VoicingRichTextOptions = SelfOptions & ParentOptions;
 
 class VoicingRichText extends ReadingBlock( RichText ) {
@@ -34,11 +37,9 @@ class VoicingRichText extends ReadingBlock( RichText ) {
       readingBlockTagName: 'button'
     }, providedOptions );
 
-    super( text );
+    super( text, options );
 
     this.focusHighlight = new ReadingBlockHighlight( this );
-
-    this.mutate( options );
   }
 }
 

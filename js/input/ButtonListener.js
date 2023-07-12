@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * Basic button handling.
@@ -18,7 +18,6 @@
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
-import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { DownUpListener, scenery } from '../imports.js';
 
@@ -45,7 +44,6 @@ class ButtonListener extends DownUpListener {
     options = merge( {
 
       // When running in PhET-iO brand, the tandem must be supplied
-      tandem: Tandem.OPTIONAL,
       phetioType: ButtonListener.ButtonListenerIO,
       phetioState: false,
       phetioEventType: EventType.USER

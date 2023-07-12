@@ -25,7 +25,6 @@
 
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
-import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import { scenery } from '../imports.js';
@@ -139,8 +138,7 @@ export default class Font extends PhetioObject {
       // as spaces in a font name), the family should be surrounded by double quotes.
       family: 'sans-serif',
 
-      phetioType: Font.FontIO,
-      tandem: Tandem.OPTIONAL
+      phetioType: Font.FontIO
     }, providedOptions );
 
     assert && assert( typeof options.weight === 'string' || typeof options.weight === 'number', 'Font weight should be specified as a string or number' );

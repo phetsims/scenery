@@ -339,7 +339,6 @@ export default class RichText extends Node {
       fill: '#000000',
 
       // phet-io
-      tandem: Tandem.OPTIONAL,
       tandemNameSuffix: 'Text',
       phetioType: RichText.RichTextIO,
       phetioVisiblePropertyInstrumented: false

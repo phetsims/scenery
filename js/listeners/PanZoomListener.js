@@ -51,7 +51,7 @@ class PanZoomListener extends MultiListener {
       allowRotation: false,
 
       // {Tandem}
-      tandem: Tandem.OPTIONAL
+      tandem: Tandem.OPTIONAL // Override supertype which requires a tandem
     }, options );
 
     super( targetNode, options );
@@ -71,7 +71,7 @@ class PanZoomListener extends MultiListener {
     // When generating a PhET-iO API, the specific bounds of the window should be excluded from the initial state
     // so that the initial state part of the API doesn't depend on the window size.
     this.sourceFramePanBoundsProperty = new Property( Tandem.API_GENERATION ? new Bounds2( 0, 0, 0, 0 ) : this._panBounds, {
-      tandem: options.tandem.createTandem( 'sourceFramePanBoundsProperty' ),
+      tandem: options.tandem?.createTandem( 'sourceFramePanBoundsProperty' ),
       phetioReadOnly: true,
       phetioValueType: Bounds2.Bounds2IO
     } );
