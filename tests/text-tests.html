@@ -110,7 +110,7 @@
    *----------------------------------------------------------------------------*/
 
   // initialize our scene
-  var scene = new phet.scenery.Scene( main, {
+  var scene = new phet.scenery.FBScene( main, {
     // preferredSceneLayerType: phet.scenery.SVGDefaultLayerType
   } );
 
@@ -169,7 +169,7 @@
    * Displays of bounds for accuracy
    *----------------------------------------------------------------------------*/
 
-  var boundsScene = new phet.scenery.Scene( $( '#bounds' ) );
+  var boundsScene = new phet.scenery.FBScene( $( '#bounds' ) );
   boundsScene.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( svgBoundsA ), {
     fill: 'rgba(255,0,0,0.1)'
   } ) );

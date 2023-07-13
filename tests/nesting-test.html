@@ -39,7 +39,7 @@
 <div id="main" style="width: 512px; height: 512px;" class="scene"></div>
 <script>
 
-  var mainScene = new phet.scenery.Scene( $( '#main' ) );
+  var mainScene = new phet.scenery.FBScene( $( '#main' ) );
   mainScene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 512, 512 ), {
     fill: '#ffffaa'
   } ) );
@@ -47,7 +47,7 @@
   var $div = $( '<div>' );
   $div.width( 256 );
   $div.height( 256 );
-  var nestedScene = new phet.scenery.Scene( $div );
+  var nestedScene = new phet.scenery.FBScene( $div );
   nestedScene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 256, 256 ), {
     fill: '#aaffff'
   } ) );
