@@ -534,6 +534,278 @@ an UI and Display made for visual testing and debugging.
     }, 400 );
   };
 
+  window.ellipseTest = function() {
+    display.width = 700;
+    display.height = 600;
+
+    const DISPLAY_EXTRAS = false;
+
+    const DISPLAY_DEGENERATE_BACKGROUND = true;
+    const DEGENERATE_BACKGROUND_OPACITY = 0.5;
+    const DEGENERATE_BACKGROUND_MULTIPLIER = 1;
+
+    const DISPLAY_SOLUTION_VECTORS = DISPLAY_EXTRAS;
+    const SOLUTION_VECTOR_OPACITY = 0.5;
+
+    const DISPLAY_SOLUTION_LINES = DISPLAY_EXTRAS;
+    const SOLUTION_LINE_OPACITY = 0.5;
+
+    const DISPLAY_INTERSECTION_POINTS = false;
+    const INTERSECTION_POINT_OPACITY = 0.5;
+
+    const DISPLAY_INTERSECTION_LINES = DISPLAY_EXTRAS;
+    const INTERSECTION_LINE_OPACITY = 0.5;
+
+    const DISPLAY_CONICS = false;
+    const CONIC_OPACITY = 0.4;
+
+    const CONIC_SELECTION = -1;
+
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 300, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 400, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 405, 200 ), 100, 0, Math.PI * 2, false );
+
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 201, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.1, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.01, 200 ), 100, 0, Math.PI * 2, false );
+            const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+            const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.001, 200 ), 100, 0, Math.PI * 2, false );
+
+    // can't identify
+    //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.00001, 200 ), 100, 0, Math.PI * 2, false );
+
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 400, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 200 ), 200, 50, 0, 0, Math.PI * 2, false );
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 400, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 200 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 400, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 250 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
+
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 410, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 250 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 450, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 250 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
+
+    const intersections = phet.kite.intersectConicMatrices( segmentA.getConicMatrix(), segmentB.getConicMatrix() )
+    const points = intersections.points;
+
+    if ( DISPLAY_INTERSECTION_POINTS ) {
+      points.forEach( point => {
+        scene.addChild( new phet.scenery.Circle( 2, {
+          translation: point,
+          fill: 'black',
+          opacity: INTERSECTION_POINT_OPACITY
+        } ) );
+      } );
+    }
+
+    console.log( '----------' );
+    console.log( `lines: ${intersections.lines.length}` );
+
+    // TODO: display multiplication of multiples of these!!!!
+    if ( DISPLAY_DEGENERATE_BACKGROUND ) {
+      intersections.degenerateConicMatrices.forEach( ( m, i ) => {
+        if ( CONIC_SELECTION >= 0 && CONIC_SELECTION !== i ) {
+          return;
+        }
+        const scale = 1;
+        const canvas = document.createElement( 'canvas' );
+        const context = canvas.getContext( '2d' );
+        canvas.width = Math.ceil( display.width / scale );
+        canvas.height = Math.ceil( display.height / scale );
+
+        const values = new Float32Array( display.width * display.height );
+
+        let maxValue = 0;
+        for ( let x = 0; x < display.width; x += scale ) {
+          const xx = phet.dot.Complex.real( x + 0.5 * scale );
+          for ( let y = 0; y < display.height; y += scale ) {
+            const yy = phet.dot.Complex.real( y + 0.5 * scale );
+
+            const value = m[ 8 ].plus( m[ 2 ].times( xx ) ).plus( m[ 5 ].times( yy ) ).plus( xx.times( m[ 6 ].plus( m[ 0 ].times( xx ) ).plus( m[ 3 ].times( yy ) ) ) ).plus( yy.times( m[ 7 ].plus( m[ 1 ].times( xx ) ).plus( m[ 4 ].times( yy ) ) ) );
+
+            const storeValue = ( 1 / Math.cbrt( value.magnitude ) );
+            values[ x / scale + y / scale * canvas.width ] = storeValue;
+            maxValue = Math.max( maxValue, storeValue );
+          }
+        }
+
+        for ( let x = 0; x < display.width; x++ ) {
+          for ( let y = 0; y < display.height; y++ ) {
+            const value = values[ x + y * canvas.width ];
+
+            let alpha = ( DEGENERATE_BACKGROUND_MULTIPLIER * value / maxValue ).toFixed( 20 );
+            while ( alpha.length >= 2 && alpha.endsWith( '0' ) && alpha[ alpha.length - 2 ] !== '.' ) {
+              alpha = alpha.slice( 0, alpha.length - 1 );
+            }
+            context.fillStyle = `rgba(${i === 0 ? 255 : 0},${i === 1 ? 255 : 0},${i === 0 ? 255 : 0},${alpha})`;
+            context.fillRect( x, y, 1, 1 );
+          }
+        }
+
+        scene.addChild( new phet.scenery.Image( canvas, {
+          scale: scale,
+          opacity: DEGENERATE_BACKGROUND_OPACITY
+        } ) );
+      } );
+    }
+
+    intersections.lines.forEach( ( line, i ) => {
+      // ax + by + c = 0
+      const a = line[ 0 ];
+      const b = line[ 1 ];
+      const c = line[ 2 ];
+
+      console.log( `line: ${a} ${b} ${c}` );
+
+      // re(a) * x + re(b) * y + re(c) = 0
+      // im(a) * x + im(b) * y + im(c) = 0
+      // M * [ x, y ] = -c
+
+      let solutionVector = null; // Vector2
+      let solutionLine = null; // Ray2
+      // const M = new phet.dot.Matrix( 2, 2, [ a.real, a.imaginary, b.real, b.imaginary ] );
+      const M = new phet.dot.Matrix( 2, 2, [ a.real, b.real, a.imaginary, b.imaginary ] );
+      const lu = new phet.dot.LUDecomposition( M );
+      if ( lu.isNonsingular() ) {
+        const solved = lu.solve( new phet.dot.Matrix( 2, 1, [ -c.real, -c.imaginary ] ) );
+        solutionVector = new phet.dot.Vector2( solved.getArray()[ 0 ], solved.getArray()[ 1 ] );
+        console.log( 'solutionVector', solutionVector );
+      }
+      else {
+        const aZero = Math.abs( a.real ) < 1e-10;
+        const bZero = Math.abs( b.real ) < 1e-10;
+        if ( !aZero && !bZero ) {
+          if ( aZero ) {
+            const y = -c.real / b.real;
+            solutionLine = new phet.dot.Ray2( new phet.dot.Vector2( 0, y ), new phet.dot.Vector2( 1, 0 ) );
+          }
+          else if ( bZero ) {
+            const x = -c.real / a.real;
+            solutionLine = new phet.dot.Ray2( new phet.dot.Vector2( x, 0 ), new phet.dot.Vector2( 0, 1 ) );
+          }
+          else {
+            // solve for y=0 and y=1
+
+            // a.real * x + c.real = 0
+            const x0 = -c.real / a.real;
+
+            // a.real * x + b.real * 1 + c.real = 0
+            const x1 = -( c.real + b.real ) / a.real;
+
+            const position = new phet.dot.Vector2( x0, 0 );
+            const secondPosition = new phet.dot.Vector2( x1, 1 );
+
+            solutionLine = new phet.dot.Ray2( position, secondPosition.minus( position ).normalized() );
+          }
+          console.log( 'solutionLine', solutionLine );
+        }
+      }
+
+
+      const color = [
+        new phet.scenery.Color( 255, 0, 0, 0.5 ),
+        new phet.scenery.Color( 128, 128, 0, 0.5 ),
+        new phet.scenery.Color( 0, 255, 0, 0.5 ),
+        new phet.scenery.Color( 0, 128, 128, 0.5 ),
+        new phet.scenery.Color( 0, 0, 255, 0.5 ),
+        new phet.scenery.Color( 128, 0, 128, 0.5 )
+      ][ i ];
+
+      if ( DISPLAY_SOLUTION_VECTORS && solutionVector ) {
+        scene.addChild( new phet.scenery.Circle( 7 + i * 2, {
+          translation: solutionVector,
+          stroke: color,
+          lineWidth: 0.5,
+          opacity: SOLUTION_VECTOR_OPACITY
+        } ) );
+      }
+      if ( DISPLAY_SOLUTION_LINES && solutionLine ) {
+        scene.addChild( new phet.scenery.Line( solutionLine.pointAtDistance( -1e6 ), solutionLine.pointAtDistance( 1e6 ), {
+          stroke: color,
+          lineWidth: 5,
+          opacity: SOLUTION_LINE_OPACITY
+        } ) );
+      }
+
+      if ( DISPLAY_INTERSECTION_LINES && ( a.magnitude > 1e-10 || b.magnitude > 1e-10 ) ) {
+        let leftY = null;
+        let topX = null;
+        let rightY = null;
+        let bottomX = null;
+        let xm = null;
+        let xd = null;
+        let ym = null;
+        let yd = null;
+
+        if ( b.magnitude > 1e-10 ) {
+          // slope intercept form: y = -a/b * x - c/b = mx + d
+          ym = a.negated().dividedBy( b );
+          yd = c.negated().dividedBy( b );
+
+          // Just consider the real x,y values:
+          // re( y ) = re( mx + d ) = re( m ) * re( x ) - im( m ) * im( x ) + re( d ) = 0
+          // with im( x ) = 0:
+          // re( y ) = re( m ) * re( x ) + re( d ) = 0
+
+          leftY = yd.real;
+          rightY = ym.real * display.width + yd.real;
+
+          scene.addChild( new phet.scenery.Line( 0, leftY, display.width, rightY, {
+            stroke: color,
+            lineWidth: 0.5,
+            opacity: INTERSECTION_LINE_OPACITY
+          } ) );
+        }
+        if ( a.magnitude > 1e-10 ) {
+          // slope intercept form: x = -b/a * y - c/a = my + d
+          xm = b.negated().dividedBy( a );
+          xd = c.negated().dividedBy( a );
+
+          // Just consider the real x,y values:
+          // re( x ) = re( my + d ) = re( m ) * re( y ) - im( m ) * im( y ) + re( d ) = 0
+          // with im( y ) = 0:
+          // re( x ) = re( m ) * re( y ) + re( d ) = 0
+
+          topX = xd.real;
+          bottomX = xm.real * display.height + xd.real;
+
+          scene.addChild( new phet.scenery.Line( topX, 0, bottomX, display.height, {
+            stroke: color,
+            lineWidth: 0.5,
+            opacity: INTERSECTION_LINE_OPACITY
+          } ) );
+        }
+      }
+    } );
+
+    if ( DISPLAY_CONICS ) {
+      const pathA = new phet.scenery.Path( segmentA.toShape(), {
+        stroke: 'red',
+        lineWidth: 0.5,
+        opacity: CONIC_OPACITY
+      } );
+      scene.addChild( pathA );
+
+      const pathB = new phet.scenery.Path( segmentB.toShape(), {
+        stroke: 'blue',
+        lineWidth: 0.5,
+        opacity: CONIC_OPACITY
+      } );
+      scene.addChild( pathB );
+    }
+
+    display.updateDisplay();
+  };
+  // setTimeout( ellipseTest, 50 );
+
   window.rectTest = function() {
     setTimeout( async function() {
       const rect = new phet.scenery.Rectangle( 0, 0, 50, 50, {
