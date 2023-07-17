@@ -57,7 +57,7 @@ export type Mipmap = {
   updateCanvas?: () => void;
 }[];
 
-export type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap;
+export type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap | ImageBitmap;
 
 export type ImageableOptions = {
   image?: ImageableImage;
@@ -75,7 +75,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
   return class ImageableMixin extends type {
 
     // (scenery-internal) Internal stateful value, see setImage()
-    public _image: HTMLImageElement | HTMLCanvasElement | null;
+    public _image: HTMLImageElement | HTMLCanvasElement | ImageBitmap | null;
 
     // Internal stateful value, see setInitialWidth() for documentation.
     private _initialWidth: number;
@@ -273,7 +273,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
 
     public set image( value: ImageableImage ) { this.setImage( value ); }
 
-    public get image(): HTMLImageElement | HTMLCanvasElement { return this.getImage(); }
+    public get image(): HTMLImageElement | HTMLCanvasElement | ImageBitmap { return this.getImage(); }
 
     /**
      * Returns the current image's representation as either a Canvas or img element.
@@ -282,7 +282,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      *       instead provides the mapped result (or first mipmap level's image).
      *       TODO: return the original result instead.
      */
-    public getImage(): HTMLImageElement | HTMLCanvasElement {
+    public getImage(): HTMLImageElement | HTMLCanvasElement | ImageBitmap {
       assert && assert( this._image !== null );
 
       return this._image!;
@@ -912,7 +912,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
  * @param width - logical width of the image
  * @param height - logical height of the image
  */
-Imageable.getHitTestData = ( image: HTMLImageElement | HTMLCanvasElement, width: number, height: number ): ImageData | null => {
+Imageable.getHitTestData = ( image: HTMLImageElement | HTMLCanvasElement | ImageBitmap, width: number, height: number ): ImageData | null => {
   // If the image isn't loaded yet, we don't want to try loading anything
   if ( !( ( 'naturalWidth' in image ? image.naturalWidth : 0 ) || image.width ) || !( ( 'naturalHeight' in image ? image.naturalHeight : 0 ) || image.height ) ) {
     return null;
