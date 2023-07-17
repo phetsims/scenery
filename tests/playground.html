@@ -538,31 +538,32 @@ an UI and Display made for visual testing and debugging.
     display.width = 700;
     display.height = 600;
 
-    const DISPLAY_EXTRAS = false;
-
     const DISPLAY_DEGENERATE_BACKGROUND = true;
     const DEGENERATE_BACKGROUND_OPACITY = 0.5;
     const DEGENERATE_BACKGROUND_MULTIPLIER = 1;
+    const BACKGROUND_COMBINED = true;
+    const BACKGROUND_REAL = false;
+    const BACKGROUND_IMAGINARY = false;
 
-    const DISPLAY_SOLUTION_VECTORS = DISPLAY_EXTRAS;
+    const DISPLAY_SOLUTION_VECTORS = false;
     const SOLUTION_VECTOR_OPACITY = 0.5;
 
-    const DISPLAY_SOLUTION_LINES = DISPLAY_EXTRAS;
+    const DISPLAY_SOLUTION_LINES = false;
     const SOLUTION_LINE_OPACITY = 0.5;
 
     const DISPLAY_INTERSECTION_POINTS = false;
     const INTERSECTION_POINT_OPACITY = 0.5;
 
-    const DISPLAY_INTERSECTION_LINES = DISPLAY_EXTRAS;
+    const DISPLAY_INTERSECTION_LINES = true;
     const INTERSECTION_LINE_OPACITY = 0.5;
 
-    const DISPLAY_CONICS = false;
+    const DISPLAY_CONICS = true;
     const CONIC_OPACITY = 0.4;
 
     const CONIC_SELECTION = -1;
 
-    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
-    // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 300, 200 ), 100, 0, Math.PI * 2, false );
+    const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 300, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 400, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
@@ -574,8 +575,10 @@ an UI and Display made for visual testing and debugging.
     //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.1, 200 ), 100, 0, Math.PI * 2, false );
     //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
     //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.01, 200 ), 100, 0, Math.PI * 2, false );
-            const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
-            const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.001, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.005, 200 ), 100, 0, Math.PI * 2, false );
+            // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+            // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.001, 200 ), 100, 0, Math.PI * 2, false );
 
     // can't identify
     //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
@@ -606,54 +609,115 @@ an UI and Display made for visual testing and debugging.
       } );
     }
 
+    // (x,y,1)^T * M * (x,y,1) = 0
+    // m00 x^2 + ( m01 + m10 ) xy + m11 y^2 + ( m02 + m20 ) x + ( m12 + m21 ) y + m22 = 0
+    // x,y are real
+    // Real and imaginary constraints:
+    // Real:
+    //   re(m00) x^2 + re(m01 + m10) xy + re(m11) y^2 + re(m02 + m20) x + re(m12 + m21) y + re(m22) = 0
+    //   r00 * x^2 + ( r01 + r10 ) * xy + r11 * y^2 + ( r02 + r20 ) * x + ( r12 + r21 ) * y + r22 = 0
+    // Imaginary:
+    //   im(m00) x^2 + im(m01 + m10) xy + im(m11) y^2 + im(m02 + m20) x + im(m12 + m21) y + im(m22) = 0
+    //   i00 * x^2 + ( i01 + i10 ) * xy + i11 * y^2 + ( i02 + i20 ) * x + ( i12 + i21 ) * y + i22 = 0
+    // So effectively, it's two conics again? BUT they will be somehow degenerate?
+    // Can we classify them, then convert to standard form?
+
     console.log( '----------' );
     console.log( `lines: ${intersections.lines.length}` );
+
+    const drawValues = ( f, r, g, b, a ) => {
+      const scale = 1;
+      const canvas = document.createElement( 'canvas' );
+      const context = canvas.getContext( '2d' );
+      canvas.width = Math.ceil( display.width / scale );
+      canvas.height = Math.ceil( display.height / scale );
+
+      const values = new Float32Array( display.width * display.height );
+
+      let maxValue = 0;
+      for ( let x = 0; x < display.width; x += scale ) {
+        const xx = phet.dot.Complex.real( x + 0.5 * scale );
+        for ( let y = 0; y < display.height; y += scale ) {
+          const yy = phet.dot.Complex.real( y + 0.5 * scale );
+
+          const value = f( xx, yy );
+          values[ x / scale + y / scale * canvas.width ] = value;
+          maxValue = Math.max( maxValue, value );
+        }
+      }
+
+      for ( let x = 0; x < display.width; x++ ) {
+        for ( let y = 0; y < display.height; y++ ) {
+          const value = values[ x + y * canvas.width ];
+
+          let alpha = ( a * value / maxValue ).toFixed( 20 );
+          while ( alpha.length >= 2 && alpha.endsWith( '0' ) && alpha[ alpha.length - 2 ] !== '.' ) {
+            alpha = alpha.slice( 0, alpha.length - 1 );
+          }
+          context.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+          context.fillRect( x, y, 1, 1 );
+        }
+      }
+
+      scene.addChild( new phet.scenery.Image( canvas, {
+        scale: scale,
+        opacity: DEGENERATE_BACKGROUND_OPACITY
+      } ) );
+    };
 
     // TODO: display multiplication of multiples of these!!!!
     if ( DISPLAY_DEGENERATE_BACKGROUND ) {
       intersections.degenerateConicMatrices.forEach( ( m, i ) => {
+        console.log( 'matrix' );
+        console.log( m );
         if ( CONIC_SELECTION >= 0 && CONIC_SELECTION !== i ) {
           return;
         }
-        const scale = 1;
-        const canvas = document.createElement( 'canvas' );
-        const context = canvas.getContext( '2d' );
-        canvas.width = Math.ceil( display.width / scale );
-        canvas.height = Math.ceil( display.height / scale );
+        if ( BACKGROUND_COMBINED ) {
+          drawValues( ( x, y ) => {
+            const value = m[ 8 ].plus( m[ 2 ].times( x ) ).plus( m[ 5 ].times( y ) ).plus( x.times( m[ 6 ].plus( m[ 0 ].times( x ) ).plus( m[ 3 ].times( y ) ) ) ).plus( y.times( m[ 7 ].plus( m[ 1 ].times( x ) ).plus( m[ 4 ].times( y ) ) ) );
 
-        const values = new Float32Array( display.width * display.height );
-
-        let maxValue = 0;
-        for ( let x = 0; x < display.width; x += scale ) {
-          const xx = phet.dot.Complex.real( x + 0.5 * scale );
-          for ( let y = 0; y < display.height; y += scale ) {
-            const yy = phet.dot.Complex.real( y + 0.5 * scale );
-
-            const value = m[ 8 ].plus( m[ 2 ].times( xx ) ).plus( m[ 5 ].times( yy ) ).plus( xx.times( m[ 6 ].plus( m[ 0 ].times( xx ) ).plus( m[ 3 ].times( yy ) ) ) ).plus( yy.times( m[ 7 ].plus( m[ 1 ].times( xx ) ).plus( m[ 4 ].times( yy ) ) ) );
-
-            const storeValue = ( 1 / Math.cbrt( value.magnitude ) );
-            values[ x / scale + y / scale * canvas.width ] = storeValue;
-            maxValue = Math.max( maxValue, storeValue );
-          }
+            return ( 1 / Math.cbrt( value.magnitude ) );
+          }, i === 0 ? 255 : 0, i === 1 ? 255 : 0, i === 2 ? 255 : 0, DEGENERATE_BACKGROUND_MULTIPLIER );
         }
+        if ( BACKGROUND_REAL ) {
+          drawValues( ( x, y ) => {
+            const r00 = m[ 0 ].real;
+            const r01 = m[ 1 ].real;
+            const r02 = m[ 2 ].real;
+            const r10 = m[ 3 ].real;
+            const r11 = m[ 4 ].real;
+            const r12 = m[ 5 ].real;
+            const r20 = m[ 6 ].real;
+            const r21 = m[ 7 ].real;
+            const r22 = m[ 8 ].real;
+            x = x.real;
+            y = y.real;
 
-        for ( let x = 0; x < display.width; x++ ) {
-          for ( let y = 0; y < display.height; y++ ) {
-            const value = values[ x + y * canvas.width ];
+            const value = r00 * x * x + ( r01 + r10 ) * x * y + r11 * y * y + ( r02 + r20 ) * x + ( r12 + r21 ) * y + r22;
 
-            let alpha = ( DEGENERATE_BACKGROUND_MULTIPLIER * value / maxValue ).toFixed( 20 );
-            while ( alpha.length >= 2 && alpha.endsWith( '0' ) && alpha[ alpha.length - 2 ] !== '.' ) {
-              alpha = alpha.slice( 0, alpha.length - 1 );
-            }
-            context.fillStyle = `rgba(${i === 0 ? 255 : 0},${i === 1 ? 255 : 0},${i === 0 ? 255 : 0},${alpha})`;
-            context.fillRect( x, y, 1, 1 );
-          }
+            return ( 1 / Math.cbrt( Math.abs( value ) ) );
+          }, i === 0 ? 255 : 0, i === 1 ? 255 : 0, i === 2 ? 255 : 0, DEGENERATE_BACKGROUND_MULTIPLIER );
         }
+        if ( BACKGROUND_IMAGINARY ) {
+          drawValues( ( x, y ) => {
+            const i00 = m[ 0 ].imaginary;
+            const i01 = m[ 1 ].imaginary;
+            const i02 = m[ 2 ].imaginary;
+            const i10 = m[ 3 ].imaginary;
+            const i11 = m[ 4 ].imaginary;
+            const i12 = m[ 5 ].imaginary;
+            const i20 = m[ 6 ].imaginary;
+            const i21 = m[ 7 ].imaginary;
+            const i22 = m[ 8 ].imaginary;
+            x = x.real;
+            y = y.real;
 
-        scene.addChild( new phet.scenery.Image( canvas, {
-          scale: scale,
-          opacity: DEGENERATE_BACKGROUND_OPACITY
-        } ) );
+            const value = i00 * x * x + ( i01 + i10 ) * x * y + i11 * y * y + ( i02 + i20 ) * x + ( i12 + i21 ) * y + i22;
+
+            return ( 1 / Math.cbrt( Math.abs( value ) ) );
+          }, i === 0 ? 255 : 0, i === 1 ? 255 : 0, i === 2 ? 255 : 0, DEGENERATE_BACKGROUND_MULTIPLIER );
+        }
       } );
     }
 
@@ -804,7 +868,7 @@ an UI and Display made for visual testing and debugging.
 
     display.updateDisplay();
   };
-  // setTimeout( ellipseTest, 50 );
+  setTimeout( ellipseTest, 50 );
 
   window.rectTest = function() {
     setTimeout( async function() {
