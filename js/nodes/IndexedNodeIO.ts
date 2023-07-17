@@ -1,7 +1,7 @@
 // Copyright 2020-2023, University of Colorado Boulder
 
 /**
- * IO Type for Nodes that can save their own index (if phetioState: true).  Can be used to customize z-order
+ * IOType for Nodes that can save their own index (if phetioState: true).  Can be used to customize z-order
  * or layout order.
  *
  * This IOType supports PhET-iO state, but only when every child within a Node's children array is an IndexedNodeIO
