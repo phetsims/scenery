@@ -38,6 +38,7 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 
 type PressedKeyTiming = {
 
@@ -192,6 +193,9 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   private _moveOnHoldInterval!: number;
   private _hotkeyHoldInterval: number;
 
+  // (read-only) - Tracks whether this listener is "pressed" or not.
+  public readonly isPressedProperty: TProperty<boolean>;
+
   // Tracks the state of the keyboard. JavaScript doesn't handle multiple key presses, so we track which keys are
   // currently down and update based on state of this collection of objects.
   // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
@@ -292,6 +296,8 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
     this._hotkeyHoldInterval = options.hotkeyHoldInterval;
     this._keyboardDragDirection = options.keyboardDragDirection;
 
+    this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
+
     this.keyState = [];
     this._hotkeys = [];
     this.currentHotkey = null;
@@ -320,6 +326,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         assert && assert( this._pointer === null, 'We should have cleared the Pointer reference by now.' );
         this._pointer = event.pointer as PDOMPointer;
         event.pointer.addInputListener( this._pointerListener, true );
+        this.isPressedProperty.value = true;
       }
 
       // update the key state
@@ -369,6 +376,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         assert && assert( event.pointer === this._pointer, 'How could the event Pointer be anything other than this PDOMPointer?' );
         this._pointer!.removeInputListener( this._pointerListener );
         this._pointer = null;
+        this.isPressedProperty.value = false;
       }
 
       this._end && this._end( event );
@@ -396,6 +404,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
     // called in dispose
     this._disposeKeyboardDragListener = () => {
       stepTimer.removeListener( stepListener );
+      this.isPressedProperty.dispose();
     };
   }
 
@@ -1033,6 +1042,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         'A reference to the Pointer means it should have the pointerListener' );
       this._pointer.removeInputListener( this._pointerListener );
       this._pointer = null;
+      this.isPressedProperty.value = false;
 
       this._end && this._end();
     }
