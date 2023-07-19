@@ -299,29 +299,6 @@ const KeyboardUtils = {
     return MODIFIER_KEYS.includes( key );
   },
 
-  /**
-   * Returns true if the provided KeyboardEvent.code/KeyboardEvent.key is equivalent to the provided KeyboardEvent.code.
-   * Specifically comparing modifier keys. If both are `code`, returns true when they are equal. If first value is
-   * a `key` for alt/control/shift modifier key, then it returns true when the code is one of the matching
-   * left/right `codes` for that `key`. For example
-   *
-   * `keyOrCode` = 'Shift', `code` = 'ShiftLeft -> true
-   * `keyOrCode = 'Alt', `code` = 'AltRight' -> true
-   * `keyOrCode = 'Control`, `code` = 'KeyR' -> false
-   *
-   * @param keyOrCode - KeyboardEvent.key OR KeyboardEvent.code
-   * @param code - KeyboardEvent.code
-   */
-  areKeysEquivalent( keyOrCode: string, code: string ): boolean {
-    const equivalentModifierKeys = KeyboardUtils.MODIFIER_KEY_TO_CODE_MAP.get( keyOrCode );
-    if ( equivalentModifierKeys ) {
-      return equivalentModifierKeys.includes( code );
-    }
-    else {
-      return keyOrCode === code;
-    }
-  },
-
   ALL_KEYS: ALL_KEY_CODES
 };
 
