@@ -540,7 +540,7 @@ an UI and Display made for visual testing and debugging.
 
     const DISPLAY_DEGENERATE_BACKGROUND = true;
     const DEGENERATE_BACKGROUND_OPACITY = 0.5;
-    const DEGENERATE_BACKGROUND_MULTIPLIER = 1;
+    const DEGENERATE_BACKGROUND_MULTIPLIER = 10;
     const BACKGROUND_COMBINED = true;
     const BACKGROUND_REAL = false;
     const BACKGROUND_IMAGINARY = false;
@@ -562,8 +562,8 @@ an UI and Display made for visual testing and debugging.
 
     const CONIC_SELECTION = -1;
 
-    const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
-    const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 300, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 300, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 400, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
@@ -591,8 +591,8 @@ an UI and Display made for visual testing and debugging.
     // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 400, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 250 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
 
-    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 410, 200 ), 100, 0, Math.PI * 2, false );
-    // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 250 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
+    const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 410, 200 ), 100, 0, Math.PI * 2, false );
+    const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 250 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
     // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 450, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentB = new phet.kite.EllipticalArc( new phet.dot.Vector2( 400, 250 ), 200, 50, Math.PI / 6, 0, Math.PI * 2, false );
 
@@ -621,6 +621,160 @@ an UI and Display made for visual testing and debugging.
     //   i00 * x^2 + ( i01 + i10 ) * xy + i11 * y^2 + ( i02 + i20 ) * x + ( i12 + i21 ) * y + i22 = 0
     // So effectively, it's two conics again? BUT they will be somehow degenerate?
     // Can we classify them, then convert to standard form?
+
+    // Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
+    // degenerate factorable as (ax + by + c)(dx + ey + f) = 0, for complex a,b,c,d,e,f, resulting in:
+    // (ad)x^2 + (ae + bd)xy + (be)y^2 + (af + cd)x + (bf + ce)y + (cf) = 0
+    // A = ad
+    // B = ae + bd
+    // C = be
+    // D = af + cd
+    // E = bf + ce
+    // F = cf
+
+    // dp/dx = 2Ax + By + D
+    // dp/dy = 2Cy + Bx + E
+
+    // (rA + i*iA)(rx + i*ix)^2 + (rB + i*iB)(rx + i*ix)(ry + i*iy) + (rC + i*iC)(ry + i*iy)^2 + (rD + i*iD)(rx + i*ix) + (rE + i*iE)(ry + i*iy) + (rF + i*iF) = 0
+
+
+    // gradient for real part:
+    // dreal/drx = -2 iA ix - iB iy + rD + 2 rA rx + rB ry
+    // dreal/dry = -iB ix - 2 iC iy + rE + rB rx + 2 rC ry
+    // dreal/dix = -iD - 2 ix rA - iy rB - 2 iA rx - iB ry
+    // dreal/diy = -iE - ix rB - 2 iy rC - iB rx - 2 iC ry
+
+    // dimaginary/drx = iD + 2 ix rA + iy rB + 2 iA rx + iB ry
+    // dimaginary/dry = iE + ix rB + 2 iy rC + iB rx + 2 iC ry
+    // dimaginary/dix = -2 iA ix - iB iy + rD + 2 rA rx + rB ry
+    // dimaginary/diy = -iB ix - 2 iC iy + rE + rB rx + 2 rC ry
+
+
+    // if y=alpha:
+    // (A)x^2 + (B*alpha + D)x + (C*alpha^2 + E*alpha + F) = 0
+    // if x=alpha:
+    // (C)y^2 + (B*alpha + E)y + (A*alpha^2 + D*alpha + F) = 0
+
+    // "line" is Px + Qy + C = 0
+    // (rP + i*iP)(rx + i*ix) + (rQ + i*iQ)(ry + i*iY) + (rC + i*iC) = 0
+    // real part:
+    // (rP * rx - iP * ix) + (rQ * ry - iQ * iy) + rC = 0
+    // imaginary part:
+    // (rP * ix + iP * rx) + (rQ * iy + iQ * ry) + iC = 0
+    //
+    //                        [ rx ]
+    // [ rP  rQ  -iP  -iQ ] * [ ry ] = [ -rC ]
+    // [ iP  iQ   rP   rQ ]   [ ix ]   [ -iC ]
+    //                        [ iy ]
+    //
+    // given our two bases:
+    //
+    //                        [ B0rx  B1rx ]
+    // [ rP  rQ  -iP  -iQ ] * [ B0ry  B1ry ] = [ 0  0 ]   e.g. construct a matrix with a specific null space
+    // [ iP  iQ   rP   rQ ]   [ B0ix  B1ix ]   [ 0  0 ]
+    //                        [ B0iy  B1iy ]
+    //
+    // [ B0rx  B0ry -B0ix -B0iy ]   [ rP ]   [ 0 ]
+    // [ B1rx  B1ry -B1ix -B1iy ] * [ rQ ] = [ 0 ]
+    // [ B0ix  B0iy  B0rx  B0ry ]   [ iP ]   [ 0 ]
+    // [ B1ix  B1iy  B1rx  B1ry ]   [ iQ ]   [ 0 ]
+    // GET nullspace (row-reduced-echelon-form, then grab one, it should be singular), pick a vector!
+    // use our point x,y to get C
+    // [NOTE only used for checking] convert line to y = (-P/Q)x + (-C/Q) = mx + b
+
+    // Then (Px + Qy + C)(Sx + Ty + U) we need to factor!
+    // From Ax^2 + Bxy + Cy^2 + Dx + Ey + F
+    // Actually, S=A/P so SPx = (A/P)(P)x = Ax
+    // Similarly, T=C/Q,
+    // Similarly, U=F/C
+    // This MIGHT be the approach with the best error?
+    // NOPE did not work, ok let's factor
+
+    // (Px + Qy + C)((A/P)x + (C/Q)y + (F/C))
+    //
+
+    // Long division (Px + Qy + C)
+    // 0
+    // Ax^2 + Bxy + Cy^2 + Dx + Ey + F
+
+    // (A/P)x
+    // ||| Ax^2 + (QA/P)y + (CA/P)
+    // Bxy + Cy^2 + Dx + (E - QA/P)y + F - CA/P
+
+    // B/Py
+    // ||| Bxy + (QB/P)y^2 + (CB/P)y
+    // (C - QB/P)y^2 + Dx + (E - QA/P - CB/P)y + F - CA/P
+
+    // Example:
+    // ( (2+i)x + (3-2i)y + (4-i) )( (5+2i)x + (6-3i)y + (7+i) ) = 0
+    // (8+9i)x^2 + (34-4i)xy + (12-21i)y^2 + (35+12i)x + (44-29i)y + (29-3i)
+    // A = (8+9i)
+    // B = (34-4i)
+    // C = (12-21i)
+    // D = (35+12i)
+    // E = (44-29i)
+    // F = (29-3i)
+    // if y=1.423 - 2.543i
+    // then ~x -> -0.0858966 + 3.73976i, x -> 1.0218 + 5.2266i
+    // {x -> -0.08589655172413689` + 3.7397586206896554` I, y -> 1.423 - 2.543 I}
+    // subs: /. {rx -> -0.08589655172413689, ix ->  3.7397586206896554, ry -> 1.423, iy -> -2.543, rA -> 8, iA -> 9, rB -> 34, iB -> -4, rC -> 12, iC -> -21, rD -> 35, iD -> 12, rE -> 44, iE -> -29, rF -> 29, iF -> -3}
+    // real gradient: {4.520000000000017`, -16.61544827586204`, 21.863999999999983`, 22.30262068965518`}
+    // imaginary gradient: {-21.863999999999983`, -22.30262068965518`, 4.520000000000017`, -16.61544827586204`}
+    // point: {-0.08589655172413689, 1.423, 3.7397586206896554, -2.543}
+    // basis of plane: {-0.09672388203287421`, 0.5158607041753288`, 0.7737910562629933`, -0.35465423412053854`},
+    //                 {0.773791056262993`, -0.3546542341205386`, 0.09672388203287423`, -0.5158607041753287`}
+    // NOTE: cut here since we can't factor well
+    // row-reduced echelon form of basis matrix: {{1, 0.`, -0.8888888888888888`, 1.074074074074074`}, {0, 1, -1.6666666666666667`, 0.8888888888888888`}, {0, 0, 0, 0}, {0, 0, 0, 0}}
+    // nullspace: {{0.49216051416301365`, 0.0471141097980782`, -0.3868719687321505`, -0.7783883148956202`}, {-0.3868719687321505`, -0.77838831489562`, -0.49216051416301354`, -0.04711410979807762`}}
+    // picking first as line equation:
+    // (0.49216051416301365 + -0.3868719687321505i)*x + (0.0471141097980782 + -0.7783883148956202i)*y + ??? = 0
+    // plug in x,y of solution to get C
+    // (0.49216051416301365 + -0.3868719687321505i)*x + (0.0471141097980782 + -0.7783883148956202i)*y + 0.5078652174290392 + -0.6463347403640229i = 0
+    // P = (0.49216051416301365 + -0.3868719687321505i)
+    // Q = (0.0471141097980782 + -0.7783883148956202i)
+    // C = (0.5078652174290392 + -0.6463347403640229i)
+    // TESTING TESTING
+    // convert line to y = (-P/Q)x + (-C/Q) = mx + b
+    // m = -0.5333333333333333` - 0.5999999999999998` I
+    // b = -0.8666666666666653` - 0.5999999999999992` I
+    // test a random point, say.... (-0.5333333333333333 - 0.5999999999999998i) * (512 - 21i) + (-0.8666666666666653 - 0.5999999999999992i)
+    // x=(512 - 21i), y=(-286.5333333333333 - 296.5999999999999i)
+    // YES it's pretty decent (1e-10 error)
+    // ---- ALSO it seems to solve ( (5+2i)x + (6-3i)y + (7+i) )
+    // (Px + Qy + C)(Sx + Ty + U)
+    // S = (1.1621480416859242 + 19.20024510075862i)
+    // T = (27.810061574410806 + 13.733188822246595i)
+    // U = (24.667301379270675 + 25.485765491038986i)
+
+
+    //
+
+    // thus we have a plane defined by the basis vectors. We want to find the intersection of this plane with the real plane
+    // e.g. where ix=0, iy=0, thus P + jB0 + kB1 = (_, _, 0, 0)
+    // THINK all cases of planes
+    // reorthogonalize vectors so we have B0* = (_, _, 1, 0 ), B1* = (_, _, 0, 1)
+    // adjust P to a location on (_, _, 0, 0)
+
+    // https://math.stackexchange.com/questions/1768368/intersection-of-2d-planes-in-4d-space
+    // can we find a single value which is real?
+
+    // BASIS CASES:
+    // P real
+    // P partially complex?
+    // P complex
+    // full plane (all solutions) if P is real AND B0* and B1* are real
+    // line
+    // point
+
+
+
+
+
+
+    // if we pick alpha randomly = y, then, solve roots (and repeat), we have:
+    // (x00 + P)(x01 + Q) = 0
+    // (x10 + R)(x11 + S) = 0
+    // (A)x^2 + (B*alpha + D)x + (C*alpha^2 + E*alpha + F) = 0
 
     console.log( '----------' );
     console.log( `lines: ${intersections.lines.length}` );
