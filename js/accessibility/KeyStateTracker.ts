@@ -328,6 +328,35 @@ class KeyStateTracker {
   }
 
   /**
+   * Returns true if every key in the list is down but no other modifier keys are down, unless
+   * the modifier key is in the list. For example
+   * areKeysDownWithoutModifiers( [ 'ShiftLeft', 'ArrowLeft' ] ) -> true if left shift and left arrow keys are down.
+   * areKeysDownWithoutModifiers( [ 'ShiftLeft', 'ArrowLeft' ] ) -> true if left shift, left arrow, and J keys are down.
+   * areKeysDownWithoutModifiers( [ 'ArrowLeft' ] ) -> false if left shift and arrow left keys are down.
+   * areKeysDownWithoutModifiers( [ 'ArrowLeft' ] ) -> true if the left arrow key is down.
+   * areKeysDownWithoutModifiers( [ 'ArrowLeft' ] ) -> true if the left arrow and R keys are down.
+   *
+   * This is important for determining when keyboard events should fire listeners. Say you have two KeyboardListeners -
+   * One fires from key 'c' and another fires from 'shift-c'. If the user presses 'shift-c', you do NOT want both to
+   * fire.
+   *
+   * @param keyList - List of KeyboardEvent.code strings for keys you are interested in.
+   */
+  public areKeysDownWithoutExtraModifiers( keyList: string[] ): boolean {
+
+    // If any modifier keys are down that are not in the keyList, return false
+    for ( let i = 0; i < KeyboardUtils.MODIFIER_KEY_CODES.length; i++ ) {
+      const modifierKey = KeyboardUtils.MODIFIER_KEY_CODES[ i ];
+      if ( this.isKeyDown( modifierKey ) && !keyList.includes( modifierKey ) ) {
+        return false;
+      }
+    }
+
+    // Modifier state seems OK so return true if all keys in the list are down
+    return this.areKeysDown( keyList );
+  }
+
+  /**
    * Returns true if any keys are down according to teh keyState.
    */
   public keysAreDown(): boolean {

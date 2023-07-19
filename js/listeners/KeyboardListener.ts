@@ -80,11 +80,6 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // level documentation for more information and an example of providing keys.
   keys: Keys;
 
-  // If true, the listener will fire callbacks if keys other than keys in the key group happen to be down at the same
-  // time. If false, callbacks will fire only when the keys of a group are exclusively down. Setting this to true is
-  // also useful if you want multiple key groups from your provided keys to fire callbacks at the same time.
-  allowOtherKeys?: boolean;
-
   // If true, the listener will fire for keys regardless of where focus is in the document. Use this when you want
   // to add some key press behavior that will always fire no matter what the event target is. If this listener
   // is added to a Node, it will only fire if the Node (and all of its ancestors) are visible with inputEnabled: true.
@@ -175,7 +170,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _global: boolean;
   private readonly _handle: boolean;
   private readonly _abort: boolean;
-  private readonly _allowOtherKeys: boolean;
 
   private readonly _windowFocusListener: ( windowHasFocus: boolean ) => void;
 
@@ -190,8 +184,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       listenerFireTrigger: 'down',
       fireOnHold: false,
       fireOnHoldDelay: 400,
-      fireOnHoldInterval: 100,
-      allowOtherKeys: false
+      fireOnHoldInterval: 100
     }, providedOptions );
 
     this._callback = options.callback;
@@ -201,7 +194,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     this._fireOnHold = options.fireOnHold;
     this._fireOnHoldDelay = options.fireOnHoldDelay;
     this._fireOnHoldInterval = options.fireOnHoldInterval;
-    this._allowOtherKeys = options.allowOtherKeys;
 
     this._activeKeyGroups = [];
 
@@ -325,8 +317,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   /**
    * Returns true if keys are pressed such that the listener should fire. In order to fire, all modifier keys
-   * should be down and the final key of the group should be down. If allowOtherKeys is false then ONLY the
-   * keys of this keyGroup are allowed to be pressed. Used to determine if callbacks of this listener should fire.
+   * should be down and the final key of the group should be down. If any extra modifier keys are down that are
+   * not specified in the keyGroup, the listener will not fire.
    */
   private areKeysDownForListener( keyGroup: KeyGroup<Keys> ): boolean {
     const downModifierKeys = this.getDownModifierKeys( keyGroup );
@@ -341,7 +333,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
       // All keys are down.
       const allKeys = [ ...downModifierKeys, finalDownKey ];
-      return this._allowOtherKeys ? true : globalKeyStateTracker.areKeysExclusivelyDown( allKeys );
+
+      // If there are any extra modifier keys down, the listener will not fire
+      return globalKeyStateTracker.areKeysDownWithoutExtraModifiers( allKeys );
     }
     else {
       return false;
@@ -349,8 +343,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Returns true if the modifier keys of the provided key group are currently down. If allowOtherKeys is false then
-   * ONLY the modifier keys can be pressed. Used to determine if callbacks of this listener should fire.
+   * Returns true if the modifier keys of the provided key group are currently down. If any extra modifier keys are
+   * down that are not specified in the keyGroup, the listener will not fire.
    */
   private areModifierKeysDownForListener( keyGroup: KeyGroup<Keys> ): boolean {
     const downModifierKeys = this.getDownModifierKeys( keyGroup );
@@ -359,7 +353,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     const modifierKeysDown = downModifierKeys.length === keyGroup.modifierKeys.length;
 
     if ( modifierKeysDown ) {
-      return this._allowOtherKeys ? true : globalKeyStateTracker.areKeysExclusivelyDown( downModifierKeys );
+
+      // If there are any extra modifier keys down, the listener will not fire
+      return globalKeyStateTracker.areKeysDownWithoutExtraModifiers( downModifierKeys );
     }
     else {
       return false;
