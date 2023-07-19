@@ -56,8 +56,7 @@ type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | '
   'f' | 'g' | 'h' | 'j' | 'k' | 'l' | 'z' | 'x' | 'c' |
   'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
 
-// Keys of the EnglishStringToCodeMap, Extract makes sure they are strings (which they are declared to be, but
-// TypeScript doesn't know that for some reason).
+// Allowed keys are the keys of the EnglishStringToCodeMap.
 type AllowedKeys = keyof typeof EnglishStringToCodeMap;
 
 export type OneKeyStroke = `${AllowedKeys}` |
@@ -68,7 +67,7 @@ export type OneKeyStroke = `${AllowedKeys}` |
 // `${AllowedKeys}+${AllowedKeys}+${AllowedKeys}+${AllowedKeys}`;
 // type KeyCombinations = `${OneKeyStroke}` | `${OneKeyStroke},${OneKeyStroke}`;
 
-// Possible input types that decide when the callbacks of this listener should fire.
+// Controls when the callback listener fires.
 // - 'up': Callbacks fire on release of keys.
 // - 'down': Callbacks fire on press of keys.
 // - 'both': Callbacks fire on both press and release of keys.
@@ -86,8 +85,10 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // More specifically, this uses `globalKeyUp` and `globalKeyDown`. See definitions in Input.ts for more information.
   global?: boolean;
 
-  // If true, this listener is fired during the 'capture' phase, meaning BEFORE other listeners get fired during
-  // typical event dispatch. Only relevant for `global` key events.
+  // If true, this listener is fired during the 'capture' phase. Only relevant for `global` key events.
+  // When a listener uses capture, the callbacks will be fired BEFORE the dispatch through the scene graph
+  // (very similar to DOM's addEventListener with `useCapture` set to true - see
+  // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener).
   capture?: boolean;
 
   // If true, all SceneryEvents that trigger this listener (keydown and keyup) will be `handled` (no more
@@ -206,6 +207,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     // convert the provided keys to data that we can respond to with scenery's Input system
     this._keyGroups = this.convertKeysToKeyGroups( options.keys );
 
+    // Assign listener and capture to this, implementing TInputListener
     ( this as unknown as TInputListener ).listener = this;
     ( this as unknown as TInputListener ).capture = options.capture;
 
@@ -223,8 +225,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Part of the scenery listener API. Responding to a keydown event, update active KeyGroups and potentially
-   * fire callbacks and start CallbackTimers.
+   * Responding to a keydown event, update active KeyGroups and potentially fire callbacks and start CallbackTimers.
    */
   private handleKeyDown( event: SceneryEvent<KeyboardEvent> ): void {
     if ( this._listenerFireTrigger === 'down' || this._listenerFireTrigger === 'both' ) {
@@ -255,7 +256,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   /**
    * If there are any active KeyGroup firing stop and remove if KeyGroup keys are no longer down. Also, potentially
-   * fires a KeyGroup if the key that was released has all other modifier keys down.
+   * fires a KeyGroup callback if the key that was released has all other modifier keys down.
    */
   private handleKeyUp( event: SceneryEvent<KeyboardEvent> ): void {
 
