@@ -446,6 +446,14 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
+   * Interrupts and resets the listener on blur so that state is reset and active keyGroups are cleared.
+   * Public because this is called with the scenery listener API. Do not call this directly.
+   */
+  public focusout( event: SceneryEvent ): void {
+    this.interrupt();
+  }
+
+  /**
    * Dispose of this listener by disposing of any Callback timers. Then clear all KeyGroups.
    */
   public dispose(): void {
