@@ -7,7 +7,6 @@
  *
  */
 
-import Property from '../../../../axon/js/Property.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
@@ -15,7 +14,7 @@ import BooleanIO from '../../../../tandem/js/types/BooleanIO.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import centerAndVariability from '../../centerAndVariability.js';
 
-export const CreateGatedVisibleProperty = ( visibleProperty: Property<boolean>, tandem: Tandem ): TReadOnlyProperty<boolean> => {
+export const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem ): TReadOnlyProperty<boolean> => {
   return DerivedProperty.and( [ visibleProperty, new BooleanProperty( true, {
     tandem: tandem.createTandem( 'selfVisibleProperty' )
   } ) ], {
@@ -24,4 +23,4 @@ export const CreateGatedVisibleProperty = ( visibleProperty: Property<boolean>, 
   } );
 };
 
-centerAndVariability.register( 'CreateGatedVisibleProperty', CreateGatedVisibleProperty );
+centerAndVariability.register( 'createGatedVisibleProperty', createGatedVisibleProperty );
