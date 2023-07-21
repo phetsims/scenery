@@ -9,7 +9,7 @@
 
 import { KeyboardUtils, scenery } from '../imports.js';
 
-const EnglishStringToCodeMap: Record<string, string[]> = {
+const EnglishStringToCodeMap = {
 
   // Letter keys
   q: [ KeyboardUtils.KEY_Q ],

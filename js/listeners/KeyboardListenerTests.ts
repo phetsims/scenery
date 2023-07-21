@@ -52,6 +52,18 @@ QUnit.test( 'KeyboardListener Tests', assert => {
     }
   } );
 
+  // Test putting a key in keys that is not supported.
+  const bogusListener = new KeyboardListener( {
+
+    // @ts-expect-error - Make sure that putting a bad key in keys is a type error
+    keys: [ 'badKey' ],
+    callback: () => {
+
+      // just testing the typing, no work to do here
+    }
+  } );
+  bogusListener.dispose();
+
   const a = new Node( { tagName: 'div' } );
   rootNode.addChild( a );
   a.addInputListener( listener );
@@ -94,9 +106,10 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   triggerKeydownEvent( domElementA, KeyboardUtils.KEY_P, true );
   assert.ok( !pFired, 'p should not fire because control key is down' );
   assert.ok( ctrlPFired, 'ctrl P should have fired' );
-
   //////////////////////////////////////////////////////
 
+
+  //////////////////////////////////////////////////////
   // test handle/abort
   a.removeInputListener( listenerWithOverlappingKeys );
   const b = new Node( { tagName: 'div' } );
