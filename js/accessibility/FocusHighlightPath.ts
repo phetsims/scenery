@@ -140,9 +140,10 @@ class FocusHighlightPath extends Path {
   /**
    * Mutate both inner and outer Paths to make the stroke dashed by using `lineDash`.
    */
-  public makeDashed(): void {
+  public makeDashed( dashOn: boolean ): void {
+    const lineDash = dashOn ? [ 7, 7 ] : [];
     this.mutateWithInnerHighlight( {
-      lineDash: [ 7, 7 ]
+      lineDash: lineDash
     } );
   }
 
