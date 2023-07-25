@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * A Node for a focus highlight that takes a shape and creates a Path with the default styling of a focus highlight
