@@ -133,13 +133,29 @@ fn abs_i64( a: i64 ) -> i64 {
 
 const left_shift_u64Snippet = new Snippet( `
 fn left_shift_u64( a: u64, b: u32 ) -> u64 {
-  return vec2( a.x << b, ( a.y << b ) | ( a.x >> ( 32u - b ) ) );
+  if ( b == 0u ) {
+    return a;
+  }
+  else if ( b < 32u ) {
+    return vec2( a.x << b, ( a.y << b ) | ( a.x >> ( 32u - b ) ) );
+  }
+  else {
+    return vec2( 0u, a.x << ( b - 32u ) );
+  }
 }
 `, [ u64Snippet ] );
 
 const right_shift_u64Snippet = new Snippet( `
 fn right_shift_u64( a: u64, b: u32 ) -> u64 {
-  return vec2( ( a.x >> b ) | ( a.y << ( 32u - b ) ), a.y >> b );
+  if ( b == 0u ) {
+    return a;
+  }
+  else if ( b < 32u ) {
+    return vec2( ( a.x >> b ) | ( a.y << ( 32u - b ) ), a.y >> b );
+  }
+  else {
+    return vec2( a.y >> ( b - 32u ), 0u );
+  }
 }
 `, [ u64Snippet ] );
 
@@ -473,6 +489,168 @@ const main = async () => {
   }
 
   {
+    // left_shift_u64
+    await expectInOut( device, `
+      let out = i * 2u;
+      let a = vec2( input[ 0u ], input[ 1u ] );
+      let c = left_shift_u64( a, i );
+      output[ out + 0u ] = c.x;
+      output[ out + 1u ] = c.y;
+    `, [
+      left_shift_u64Snippet
+    ], 64, new Uint32Array( [
+      ...nToU32s( 0xf9fe432c7aca8bfan )
+    ] ).buffer, new Uint32Array( [
+      // TODO: simplify, I'm lazy
+      ...nToU32s( 0xf9fe432c7aca8bfan << 0n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 1n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 2n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 3n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 4n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 5n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 6n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 7n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 8n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 9n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 10n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 11n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 12n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 13n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 14n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 15n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 16n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 17n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 18n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 19n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 20n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 21n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 22n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 23n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 24n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 25n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 26n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 27n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 28n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 29n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 30n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 31n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 32n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 33n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 34n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 35n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 36n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 37n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 38n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 39n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 40n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 41n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 42n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 43n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 44n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 45n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 46n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 47n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 48n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 49n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 50n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 51n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 52n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 53n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 54n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 55n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 56n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 57n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 58n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 59n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 60n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 61n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 62n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan << 63n )
+    ] ).buffer, 'left_shift_u64' );
+  }
+
+  {
+    // right_shift_u64
+    await expectInOut( device, `
+      let out = i * 2u;
+      let a = vec2( input[ 0u ], input[ 1u ] );
+      let c = right_shift_u64( a, i );
+      output[ out + 0u ] = c.x;
+      output[ out + 1u ] = c.y;
+    `, [
+      right_shift_u64Snippet
+    ], 64, new Uint32Array( [
+      ...nToU32s( 0xf9fe432c7aca8bfan )
+    ] ).buffer, new Uint32Array( [
+      // TODO: simplify, I'm lazy
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 0n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 1n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 2n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 3n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 4n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 5n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 6n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 7n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 8n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 9n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 10n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 11n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 12n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 13n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 14n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 15n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 16n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 17n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 18n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 19n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 20n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 21n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 22n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 23n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 24n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 25n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 26n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 27n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 28n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 29n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 30n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 31n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 32n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 33n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 34n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 35n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 36n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 37n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 38n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 39n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 40n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 41n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 42n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 43n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 44n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 45n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 46n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 47n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 48n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 49n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 50n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 51n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 52n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 53n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 54n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 55n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 56n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 57n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 58n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 59n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 60n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 61n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 62n ),
+      ...nToU32s( 0xf9fe432c7aca8bfan >> 63n )
+    ] ).buffer, 'right_shift_u64' );
+  }
+
+  {
     // is_negative_i64
     await expectInOut( device, `
       let in = i * 2u;
@@ -671,6 +849,9 @@ const main = async () => {
       output[ out + 1u ] = c.y;
       output[ out + 2u ] = c.z;
       output[ out + 3u ] = c.w;
+      // output[ 0u ] = first_leading_bit_u64( vec2( 0xfffu, 0x0u ) );
+      // output[ 0u ] = left_shift_u64( vec2( 0xfu, 0x0u ), 50u ).x;
+      // output[ 1u ] = left_shift_u64( vec2( 0xfu, 0x0u ), 50u ).y;
     `, [
       div_u64_u64Snippet
     ], 3, new Uint32Array( [
