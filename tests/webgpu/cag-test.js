@@ -273,37 +273,74 @@ fn div_u64_u64( a: u64, b: u64 ) -> vec4<u32> {
   return vec4( result, remainder );
 }
 `, [ u64Snippet, first_leading_bit_u64Snippet, left_shift_u64Snippet, is_zero_u64Snippet, cmp_u64_u64Snippet, subtract_i64_i64Snippet, right_shift_u64Snippet ] );
-window.div_u64_u64 = ( a, b ) => {
-  if ( a === 0n ) {
-    return [ 0n, 0n ];
+// window.div_u64_u64 = ( a, b ) => {
+//   if ( a === 0n ) {
+//     return [ 0n, 0n ];
+//   }
+//   if ( b === 0n ) {
+//     throw new Error( 'Division by zero' );
+//   }
+//
+//   let result = 0n;
+//   let remainder = a;
+//
+//   const highBit = Math.min( a.toString( 2 ).length - 1, b.toString( 2 ).length - 1 );
+//   let count = 63 - highBit;
+//   let divisor = b << BigInt( count );
+//
+//   while ( remainder !== 0n ) {
+//     if ( remainder >= divisor ) {
+//       remainder -= divisor;
+//       result |= 1n << BigInt( count );
+//     }
+//     if ( count === 0 ) {
+//       break;
+//     }
+//     divisor >>= 1n;
+//     count -= 1;
+//   }
+//
+//   return [ result, remainder ];
+// };
+// // TODO: div_u64_u64 JS seems to be working, what is our problem here? Check dependencies
+
+// binary GCD
+const gcd_u64_u64Snippet = new Snippet( `
+fn gcd_u64_u64( a: u64, b: u64 ) -> u64 {
+  if ( is_zero_u64( a ) ) {
+    return b;
   }
-  if ( b === 0n ) {
-    throw new Error( 'Division by zero' );
+  else if ( is_zero_u64( b ) ) {
+    return a;
   }
-
-  let result = 0n;
-  let remainder = a;
-
-  const highBit = Math.min( a.toString( 2 ).length - 1, b.toString( 2 ).length - 1 );
-  let count = 63 - highBit;
-  let divisor = b << BigInt( count );
-
-  while ( remainder !== 0n ) {
-    if ( remainder >= divisor ) {
-      remainder -= divisor;
-      result |= 1n << BigInt( count );
+  
+  let gcd_two = first_trailing_bit_u64( a | b );
+  
+  var u = right_shift_u64( a, gcd_two );
+  var v = right_shift_u64( b, gcd_two );
+  
+  while ( u.x != v.x || u.y != v.y ) {
+    if ( cmp_u64_u64( u, v ) == -1i ) {
+      let t = u;
+      u = v;
+      v = t;
     }
-    if ( count === 0 ) {
-      break;
-    }
-    divisor >>= 1n;
-    count -= 1;
+    
+    u = subtract_i64_i64( u, v );
+    u = right_shift_u64( u, first_trailing_bit_u64( u ) );
   }
-
-  return [ result, remainder ];
+  
+  return left_shift_u64( u, gcd_two );
+}
+`, [ u64Snippet, is_zero_u64Snippet, first_trailing_bit_u64Snippet, left_shift_u64Snippet, cmp_u64_u64Snippet, subtract_i64_i64Snippet, right_shift_u64Snippet ] );
+window.gcd_u64_u64 = ( a, b ) => {
+  while ( b !== 0n ) {
+    const t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
 };
-// TODO: div_u64_u64 JS seems to be working, what is our problem here? Check dependencies
-
 
 const runInOut = async ( device, mainCode, dependencies, dispatchSize, inputArrayBuffer, outputArrayBuffer ) => {
   const code = new Snippet( `
@@ -839,6 +876,7 @@ const main = async () => {
   }
 
   {
+    // div_u64_u64
     await expectInOut( device, `
       let in = i * 4u;
       let out = i * 4u;
@@ -849,9 +887,6 @@ const main = async () => {
       output[ out + 1u ] = c.y;
       output[ out + 2u ] = c.z;
       output[ out + 3u ] = c.w;
-      // output[ 0u ] = first_leading_bit_u64( vec2( 0xfffu, 0x0u ) );
-      // output[ 0u ] = left_shift_u64( vec2( 0xfu, 0x0u ), 50u ).x;
-      // output[ 1u ] = left_shift_u64( vec2( 0xfu, 0x0u ), 50u ).y;
     `, [
       div_u64_u64Snippet
     ], 3, new Uint32Array( [
@@ -869,6 +904,33 @@ const main = async () => {
       ...nToU32s( 0x19fe432c7aca8bfan / 0x1b5dcn ),
       ...nToU32s( 0x19fe432c7aca8bfan % 0x1b5dcn )
     ] ).buffer, 'div_u64_u64' );
+  }
+
+  {
+    const gcd0 = 0xa519bc952f7n;
+    const a0 = gcd0 * 0x1542n;
+    const b0 = gcd0 * 0xa93n; // chosen as relatively prime
+
+    // gcd_u64_u64
+    await expectInOut( device, `
+      let in = i * 4u;
+      let out = i * 2u;
+      let a = vec2( input[ in + 0u ], input[ in + 1u ] );
+      let b = vec2( input[ in + 2u ], input[ in + 3u ] );
+      let c = gcd_u64_u64( a, b );
+      output[ out + 0u ] = c.x;
+      output[ out + 1u ] = c.y;
+    `, [
+      gcd_u64_u64Snippet
+    ], 2, new Uint32Array( [
+      ...nToU32s( 35n ),
+      ...nToU32s( 10n ),
+      ...nToU32s( a0 ),
+      ...nToU32s( b0 )
+    ] ).buffer, new Uint32Array( [
+      ...nToU32s( 5n ),
+      ...nToU32s( gcd0 )
+    ] ).buffer, 'gcd_u64_u64' );
   }
 };
 main();
