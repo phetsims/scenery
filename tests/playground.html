@@ -538,7 +538,7 @@ an UI and Display made for visual testing and debugging.
     display.width = 700;
     display.height = 600;
 
-    const DISPLAY_DEGENERATE_BACKGROUND = false;
+    const DISPLAY_DEGENERATE_BACKGROUND = true;
     const DEGENERATE_BACKGROUND_OPACITY = 0.5;
     const DEGENERATE_BACKGROUND_MULTIPLIER = 1;
     const BACKGROUND_COMBINED = true;
@@ -574,12 +574,12 @@ an UI and Display made for visual testing and debugging.
 
     // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
     // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 201, 200 ), 100, 0, Math.PI * 2, false );
-      const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
-      const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.1, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.1, 200 ), 100, 0, Math.PI * 2, false );
     //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
     //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.01, 200 ), 100, 0, Math.PI * 2, false );
-    //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
-    //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.005, 200 ), 100, 0, Math.PI * 2, false );
+      const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+      const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.005, 200 ), 100, 0, Math.PI * 2, false );
             // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
             // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.001, 200 ), 100, 0, Math.PI * 2, false );
 
@@ -878,6 +878,8 @@ an UI and Display made for visual testing and debugging.
       } );
     }
 
+    console.log( 'intersections' );
+    console.log( intersections.intersectionCollections );
     if ( DISPLAY_INTERSECTION_DATA ) {
       intersections.intersectionCollections.forEach( ( intersectionCollection, i ) => {
         const color = [
