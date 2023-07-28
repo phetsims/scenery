@@ -581,9 +581,8 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
     let u_raw = i64_to_q128( u_numerator, denominator );
     
     // 2i means totally internal, 1i means on an endpoint, 0i means totally external
-    // TODO: replace with ratio_test_q128 usage
-    let t_cmp = cmp_i64_i64( t_raw.xy, vec2( 0u, 0u ) ) + cmp_i64_i64( t_raw.zw, t_raw.xy );
-    let u_cmp = cmp_i64_i64( u_raw.xy, vec2( 0u, 0u ) ) + cmp_i64_i64( u_raw.zw, u_raw.xy );
+    let t_cmp = ratio_test_q128( t_raw );
+    let u_cmp = ratio_test_q128( u_raw );
     
     if ( t_cmp <= 0i || u_cmp <= 0i ) {
       return not_intersection; // outside one or both segments
@@ -615,78 +614,352 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
 }
 `, [ intersectionPointSnippet, line_segment_intersectionSnippet, q128Snippet, i32_to_i64Snippet, mul_i64_i64Snippet, subtract_i64_i64Snippet, is_zero_u64Snippet, i64_to_q128Snippet, reduce_q128Snippet, cmp_i64_i64Snippet, equals_cross_mul_q128Snippet, negate_i64Snippet, is_zero_q128Snippet, ratio_test_q128Snippet, add_i64_i64Snippet, whole_i64_to_q128Snippet, ZERO_q128Snippet, ONE_q128Snippet ] );
 
-/*
+const gcdBigInt = ( a, b ) => {
+  while ( b !== 0n ) {
+    const t = b;
+    b = a % b;
+    a = t;
+  }
+  return a;
+};
 
-    /*
-     * NOTE: For implementation details in this function, please see Cubic.getOverlaps. It goes over all of the
-     * same implementation details, but instead our bezier matrix is a 2x2:
-     *
-     * [  1  0 ]
-     * [ -1  1 ]
-     *
-     * And we use the upper-left section of (at+b) adjustment matrix relevant for the line.
-     *
+class Rational {
+  // BigInts
+  constructor( numerator, denominator ) {
+    this.numerator = BigInt( numerator );
+    this.denominator = BigInt( denominator );
 
-    const noOverlap: Overlap[] = [];
+    if ( denominator === 0n ) {
+      throw new Error( 'Division by zero' );
+    }
+    if ( denominator < 0n ) {
+      this.numerator = -this.numerator;
+      this.denominator = -this.denominator;
+    }
+  }
 
-    // Efficiently compute the multiplication of the bezier matrix:
-    const p0x = line1._start.x;
-    const p1x = -1 * line1._start.x + line1._end.x;
-    const p0y = line1._start.y;
-    const p1y = -1 * line1._start.y + line1._end.y;
-    const q0x = line2._start.x;
-    const q1x = -1 * line2._start.x + line2._end.x;
-    const q0y = line2._start.y;
-    const q1y = -1 * line2._start.y + line2._end.y;
+  // @public
+  copy() {
+    return new Rational( this.numerator, this.denominator );
+  }
 
-    // Determine the candidate overlap (preferring the dimension with the largest variation)
-    const xSpread = Math.abs( Math.max( line1._start.x, line1._end.x, line2._start.x, line2._end.x ) -
-                              Math.min( line1._start.x, line1._end.x, line2._start.x, line2._end.x ) );
-    const ySpread = Math.abs( Math.max( line1._start.y, line1._end.y, line2._start.y, line2._end.y ) -
-                              Math.min( line1._start.y, line1._end.y, line2._start.y, line2._end.y ) );
-    const xOverlap = Segment.polynomialGetOverlapLinear( p0x, p1x, q0x, q1x );
-    const yOverlap = Segment.polynomialGetOverlapLinear( p0y, p1y, q0y, q1y );
-    let overlap;
-    if ( xSpread > ySpread ) {
-      overlap = ( xOverlap === null || xOverlap === true ) ? yOverlap : xOverlap;
+  // @public - lazy implementation NOT meant to be in JS due to excess reduction
+  plus( rational ) {
+    return new Rational(
+      this.numerator * rational.denominator + this.denominator * rational.numerator,
+      this.denominator * rational.denominator
+    ).reduced();
+  }
+
+  // @public - lazy implementation NOT meant to be in JS due to excess reduction
+  minus( rational ) {
+    return new Rational(
+      this.numerator * rational.denominator - this.denominator * rational.numerator,
+      this.denominator * rational.denominator
+    ).reduced();
+  }
+
+  // @public - lazy implementation NOT meant to be in JS due to excess reduction
+  times( rational ) {
+    return new Rational(
+      this.numerator * rational.numerator,
+      this.denominator * rational.denominator
+    ).reduced();
+  }
+
+  // @public
+  reduce() {
+    if ( this.numerator === 0n ) {
+      this.denominator = 1n;
+      return;
+    }
+    else if ( this.denominator === 1n ) {
+      return;
+    }
+
+    const absNumerator = this.numerator < 0n ? -this.numerator : this.numerator;
+    const gcd = gcdBigInt( absNumerator, this.denominator );
+
+    if ( gcd !== 1n ) {
+      this.numerator /= gcd;
+      this.denominator /= gcd;
+    }
+  }
+
+  // @public
+  reduced() {
+    const result = this.copy();
+    result.reduce();
+    return result;
+  }
+
+  // @public
+  isZero() {
+    return this.numerator === 0n;
+  }
+
+  // @public
+  ratioTest() {
+    if ( this.numerator === 0n || this.numerator === this.denominator ) {
+      return 1n;
+    }
+    else if ( this.numerator > 0n && this.numerator < this.denominator ) {
+      return 2n;
     }
     else {
-      overlap = ( yOverlap === null || yOverlap === true ) ? xOverlap : yOverlap;
+      return 0n;
     }
-    if ( overlap === null || overlap === true ) {
-      return noOverlap; // No way to pin down an overlap
+  }
+
+  // @public
+  equalsCrossMul( other ) {
+    return this.numerator * other.denominator === this.denominator * other.numerator;
+  }
+
+  // @public --- NOT for WGSL, slow
+  equals( other ) {
+    return this.reduced().numerator === other.reduced().numerator && this.reduced().denominator === other.reduced().denominator;
+  }
+
+  // @public
+  toString() {
+    return this.denominator === 1n ? `${this.numerator}` : `${this.numerator}/${this.denominator}`;
+  }
+
+  // @public
+  static ZERO = new Rational( 0n, 1n );
+  static ONE = new Rational( 1n, 1n );
+
+  // @public
+  static whole( numerator ) {
+    return new Rational( numerator, 1n );
+  }
+}
+window.Rational = Rational;
+
+class BigIntPoint {
+  // BigInt/numbers
+  constructor( x, y ) {
+    this.x = BigInt( x );
+    this.y = BigInt( y );
+  }
+}
+
+// TODO: could use this?
+class RationalPoint {
+  // Rationals
+  constructor( x, y ) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+class IntersectionPoint {
+  constructor( t0, t1, px, py ) {
+    this.t0 = t0;
+    this.t1 = t1;
+    this.px = px;
+    this.py = py;
+  }
+
+  // @public
+  toString() {
+    return `t0=${this.t0}, t1=${this.t1}, px=${this.px}, py=${this.py}`;
+  }
+
+  // @public
+  verify( p0, p1, p2, p3 ) {
+    const px0 = Rational.whole( p0.x ).plus( this.t0.times( Rational.whole( p1.x - p0.x ) ) );
+    const py0 = Rational.whole( p0.y ).plus( this.t0.times( Rational.whole( p1.y - p0.y ) ) );
+    const px1 = Rational.whole( p2.x ).plus( this.t1.times( Rational.whole( p3.x - p2.x ) ) );
+    const py1 = Rational.whole( p2.y ).plus( this.t1.times( Rational.whole( p3.y - p2.y ) ) );
+    if ( !px0.equals( px1 ) || !py0.equals( py1 ) ) {
+      throw new Error( 'Intersection point does not match' );
+    }
+  }
+}
+
+const intersectLineSegments = ( p0, p1, p2, p3 ) => {
+  const p0x = BigInt( p0.x );
+  const p0y = BigInt( p0.y );
+  const p1x = BigInt( p1.x );
+  const p1y = BigInt( p1.y );
+  const p2x = BigInt( p2.x );
+  const p2y = BigInt( p2.y );
+  const p3x = BigInt( p3.x );
+  const p3y = BigInt( p3.y );
+
+  const d0x = p1x - p0x;
+  const d0y = p1y - p0y;
+  const d1x = p3x - p2x;
+  const d1y = p3y - p2y;
+
+  const cdx = p2x - p0x;
+  const cdy = p2y - p0y;
+
+  const denominator = d0x * d1y - d0y * d1x;
+
+  if ( denominator === 0n ) {
+    // such that p0 + t * ( p1 - p0 ) = p2 + ( a * t + b ) * ( p3 - p2 )
+    // an equivalency between lines
+    let a;
+    let b;
+
+    const d1x_zero = d1x === 0n;
+    const d1y_zero = d1y === 0n;
+
+    // if ( d0s === 0 || d1s === 0 ) {
+    //   return NO_OVERLAP;
+    // }
+    //
+    // a = d0s / d1s;
+    // b = ( p0s - p2s ) / d1s;
+
+    // TODO: can we reduce the branching here?
+    // Find a dimension where our line is not degenerate (e.g. covers multiple values in that dimension)
+    // Compute line equivalency there
+    if ( d1x_zero && d1y_zero ) {
+      // DEGENERATE case for second line, it's a point, bail out
+      return [];
+    }
+    else if ( d1x_zero ) {
+      // if d1x is zero AND our denominator is zero, that means d0x or d1y must be zero. We checked d1y above, so d0x must be zero
+      if ( p0.x !== p2.x ) {
+        // vertical lines, BUT not same x, so no intersection
+        return [];
+      }
+      a = new Rational( d0y, d1y );
+      b = new Rational( -cdy, d1y );
+    }
+    else if ( d1y_zero ) {
+      // if d1y is zero AND our denominator is zero, that means d0y or d1x must be zero. We checked d1x above, so d0y must be zero
+      if ( p0.y !== p2.y ) {
+        // horizontal lines, BUT not same y, so no intersection
+        return [];
+      }
+      a = new Rational( d0x, d1x );
+      b = new Rational( -cdx, d1x );
+    }
+    else {
+      // we have non-axis-aligned second line, use that to compute a,b for each dimension, and we're the same "line"
+      // iff those are consistent
+      if ( d0x === 0n && d0y === 0n ) {
+        // DEGENERATE first line, it's a point, bail out
+        return [];
+      }
+      const ax = new Rational( d0x, d1x );
+      const ay = new Rational( d0y, d1y );
+      if ( !ax.equalsCrossMul( ay ) ) {
+        return [];
+      }
+      const bx = new Rational( -cdx, d1x );
+      const by = new Rational( -cdy, d1y );
+      if ( !bx.equalsCrossMul( by ) ) {
+        return [];
+      }
+
+      // Pick the one with a non-zero a, so it is invertible
+      if ( ax.isZero() ) {
+        a = ay;
+        b = by;
+      }
+      else {
+        a = ax;
+        b = bx;
+      }
     }
 
-    const a = overlap.a;
-    const b = overlap.b;
+    const points = [];
 
-    // Compute linear coefficients for the difference between p(t) and q(a*t+b)
-    const d0x = q0x + b * q1x - p0x;
-    const d1x = a * q1x - p1x;
-    const d0y = q0y + b * q1y - p0y;
-    const d1y = a * q1y - p1y;
+    // p0 + t * ( p1 - p0 ) = p2 + ( a * t + b ) * ( p3 - p2 )
+    // i.e. line0( t ) = line1( a * t + b )
+    // replacements for endpoints:
+    // t=0       =>  t0=0,        t1=b
+    // t=1       =>  t0=1,        t1=a+b
+    // t=-b/a    =>  t0=-b/a,     t1=0
+    // t=(1-b)/a =>  t0=(1-b)/a,  t1=1
 
-    // Examine the single-coordinate distances between the "overlaps" at each extreme T value. If the distance is larger
-    // than our epsilon, then the "overlap" would not be valid.
-    if ( Math.abs( d0x ) > epsilon ||
-         Math.abs( d1x + d0x ) > epsilon ||
-         Math.abs( d0y ) > epsilon ||
-         Math.abs( d1y + d0y ) > epsilon ) {
-      // We're able to efficiently hardcode these for the line-line case, since there are no extreme t values that are
-      // not t=0 or t=1.
-      return noOverlap;
+    // NOTE: cases become identical if b=0, b=1, b=-a, b=1-a, HOWEVER these would not be internal, so they would be
+    // excluded, and we can ignore them
+
+    // t0=0, t1=b, p0
+    const case1t1 = b;
+    if ( case1t1.ratioTest === 2n ) {
+      const p = new IntersectionPoint( Rational.ZERO, case1t1.reduced(), Rational.whole( p0x ), Rational.whole( p0y ) );
+      p.verify( p0, p1, p2, p3 );
+      points.push( p );
     }
 
-    const qt0 = b;
-    const qt1 = a + b;
-
-    // TODO: do we want an epsilon in here to be permissive?
-    if ( ( qt0 > 1 && qt1 > 1 ) || ( qt0 < 0 && qt1 < 0 ) ) {
-      return noOverlap;
+    // t0=1, t1=a+b, p1
+    const case2t1 = new Rational( a.numerator + b.numerator, a.denominator ); // abuse a,b having same denominator
+    if ( case2t1.ratioTest() === 2n ) {
+      const p = new IntersectionPoint( Rational.ONE, case2t1.reduced(), Rational.whole( p1x ), Rational.whole( p1y ) );
+      p.verify( p0, p1, p2, p3 );
+      points.push( p );
     }
 
-    return [ new Overlap( a, b ) ];
- */
+    // t0=-b/a, t1=0, p2
+    const case3t0 = new Rational( -b.numerator, a.numerator ); // abuse a,b having same denominator
+    if ( case3t0.ratioTest() === 2n ) {
+      const p = new IntersectionPoint( case3t0.reduced(), Rational.ZERO, Rational.whole( p2x ), Rational.whole( p2y ) );
+      p.verify( p0, p1, p2, p3 );
+      points.push( p );
+    }
+
+    // t0=(1-b)/a, t1=1, p3
+    // ( 1 - b ) / a = ( denom - b_numer ) / denom / ( a_numer / denom ) = ( denom - b_numer ) / a_numer
+    const case4t0 = new Rational( a.denominator - b.numerator, a.numerator );
+    if ( case4t0.ratioTest() === 2n ) {
+      const p = new IntersectionPoint( case4t0.reduced(), Rational.ONE, Rational.whole( p3x ), Rational.whole( p3y ) );
+      p.verify( p0, p1, p2, p3 );
+      points.push( p );
+    }
+
+    return points;
+  }
+  else {
+    const t_numerator = cdx * d1y - cdy * d1x;
+    const u_numerator = cdx * d0y - cdy * d0x;
+
+    // This will move the sign to the numerator, BUT won't do the reduction (let us first see if there is an intersection)
+    const t_raw = new Rational( t_numerator, denominator );
+    const u_raw = new Rational( u_numerator, denominator );
+
+    // 2i means totally internal, 1i means on an endpoint, 0i means totally external
+    const t_cmp = t_raw.ratioTest();
+    const u_cmp = u_raw.ratioTest();
+
+    if ( t_cmp <= 0n || u_cmp <= 0n ) {
+      return []; // outside one or both segments
+    }
+    else if ( t_cmp === 1n && u_cmp === 1n ) {
+      return []; // on endpoints of both segments (we ignore that, we only want something internal to one)
+    }
+    else {
+      // use parametric segment definition to get the intersection point
+      // x0 + t * (x1 - x0)
+      // p0x + t_numerator / denominator * d0x
+      // ( denominator * p0x + t_numerator * d0x ) / denominator
+      const x_numerator = denominator * p0x + t_numerator * d0x;
+      const y_numerator = denominator * p0y + t_numerator * d0y;
+
+      const x_raw = new Rational( x_numerator, denominator );
+      const y_raw = new Rational( y_numerator, denominator );
+
+      const x = x_raw.reduced();
+      const y = y_raw.reduced();
+
+      const t = t_raw.reduced();
+      const u = u_raw.reduced();
+
+      // NOTE: will t/u be exactly 0,1 for endpoints if they are endpoints, no?
+      const point = new IntersectionPoint( t, u, x, y );
+      point.verify( p0, p1, p2, p3 );
+      return [ point ];
+    }
+  }
+};
+window.intersectLineSegments = intersectLineSegments;
 
 // window.div_u64_u64 = ( a, b ) => {
 //   if ( a === 0n ) {
@@ -718,16 +991,6 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
 //   return [ result, remainder ];
 // };
 // // TODO: div_u64_u64 JS seems to be working, what is our problem here? Check dependencies
-
-
-// window.gcd_u64_u64 = ( a, b ) => {
-//   while ( b !== 0n ) {
-//     const t = b;
-//     b = a % b;
-//     a = t;
-//   }
-//   return a;
-// };
 
 const runInOut = async ( device, mainCode, dependencies, dispatchSize, inputArrayBuffer, outputArrayBuffer ) => {
   const code = new Snippet( `
