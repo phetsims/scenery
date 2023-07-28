@@ -78,6 +78,8 @@ fn add_u32_u32_to_u64( a: u32, b: u32 ) -> u64 {
 }
 `, [ u64Snippet ] );
 
+// TODO: check all adds used internally, to see if we are overflowing things
+
 // ( a_low + a_high * 2^16 ) * ( b_low + b_high * 2^16 )
 // ( a_low * b_low ) + ( a_low * b_high + a_high * b_low ) * 2^16 + ( a_high * b_high ) * 2^32
 const mul_u32_u32_to_u64Snippet = new Snippet( `
@@ -89,9 +91,11 @@ fn mul_u32_u32_to_u64( a: u32, b: u32 ) -> u64 {
   let c_low = a_low * b_low;
   let c_mid = a_low * b_high + a_high * b_low;
   let c_high = a_high * b_high;
-  return vec2( c_low + ( c_mid << 16u ), ( c_mid >> 16u ) + c_high );
+  let low = add_u32_u32_to_u64( c_low, c_mid << 16u );
+  let high = vec2( 0u, ( c_mid >> 16u ) + c_high );
+  return low + high;
 }
-`, [ u64Snippet ] );
+`, [ u64Snippet, add_u32_u32_to_u64Snippet ] );
 
 // ( a_low + a_high * 2^32 ) + ( b_low + b_high * 2^32 ) mod 2^64
 // a_low + b_low + ( a_high + b_high ) * 2^32 mod 2^64
@@ -230,9 +234,25 @@ fn cmp_i64_i64( a: i64, b: i64 ) -> i32 {
 // = a_low * b_low + ( a_low * b_high + a_high * b_low ) * 2^32 mod 2^64
 const mul_u64_u64Snippet = new Snippet( `
 fn mul_u64_u64( a: u64, b: u64 ) -> u64 {
-  return mul_u32_u32_to_u64( a.x, b.x ) + vec2( 0u, mul_u32_u32_to_u64( a.x, b.y ).x + mul_u32_u32_to_u64( a.y, b.x ).x );
+  let low = mul_u32_u32_to_u64( a.x, b.x );
+  let mid0 = vec2( 0u, mul_u32_u32_to_u64( a.x, b.y ).x );
+  let mid1 = vec2( 0u, mul_u32_u32_to_u64( a.y, b.x ).x );
+  return add_u64_u64( add_u64_u64( low, mid0 ), mid1 );
 }
-`, [ u64Snippet, mul_u32_u32_to_u64Snippet ] );
+`, [ u64Snippet, mul_u32_u32_to_u64Snippet, add_u64_u64Snippet ] );
+
+const mul_i64_i64Snippet = new Snippet( `
+fn mul_i64_i64( a: i64, b: i64 ) -> i64 {
+  var result = mul_u64_u64( abs_i64( a ), abs_i64( b ) );
+  result.y &= 0x7fffffffu; // remove the sign bit
+  if ( is_negative_i64( a ) != is_negative_i64( b ) ) {
+    return negate_i64( result );
+  }
+  else {
+    return result;
+  }
+}
+`, [ i64Snippet, mul_u64_u64Snippet, abs_i64Snippet, is_negative_i64Snippet, negate_i64Snippet ] );
 
 // TODO: we can ignore division with https://en.wikipedia.org/wiki/Binary_GCD_algorithm perhaps?
 
@@ -342,6 +362,35 @@ fn reduce_q128( a: q128 ) -> q128 {
   }
 }
 `, [ q128Snippet, gcd_u64_u64Snippet, abs_i64Snippet, div_u64_u64Snippet, is_negative_i64Snippet, negate_i64Snippet ] );
+
+const intersectionPointSnippet = new Snippet( `
+struct IntersectionPoint {
+  t0: q128;
+  t1: q128;
+  px: q128;
+  py: q128;
+}
+`, [ q128Snippet ] );
+
+const line_segment_intersectionSnippet = new Snippet( `
+struct LineSegmentIntersection {
+  has_intersection: bool;
+  is_unique: bool;
+  p0: IntersectionPoint;
+  p1: IntersectionPoint;
+}
+`, [ intersectionPointSnippet ] );
+
+// const intersect_line_segmentsSnippet = new Snippet( `
+// fn intersect_line_segments( p0: vec2i, p1: vec2i ) -> IntersectionPoint {
+//   let p0x = i32_to_i64( p0.x );
+//   let p0y = i32_to_i64( p0.y );
+//   let p1x = i32_to_i64( p1.x );
+//   let p1y = i32_to_i64( p1.y );
+//
+//   let denominator = subtract_i64_i64( mu, p0x );
+// }
+// `, [ intersectionPointSnippet, q128Snippet, i32_to_i64Snippet ] );
 
 // window.div_u64_u64 = ( a, b ) => {
 //   if ( a === 0n ) {
@@ -897,24 +946,57 @@ const main = async () => {
 
   {
     // mul_u64_u64
-    const an = 0xf9fe432c7aca8bfan;
-    const bn = 0x583b15971ad94165n;
-    const cn = an * bn;
-
     await expectInOut( device, `
-      let a = vec2( input[ 0u ], input[ 1u ] );
-      let b = vec2( input[ 2u ], input[ 3u ] );
+      let in = i * 4u;
+      let out = i * 2u;
+      let a = vec2( input[ in + 0u ], input[ in + 1u ] );
+      let b = vec2( input[ in + 2u ], input[ in + 3u ] );
       let c = mul_u64_u64( a, b );
-      output[ 0u ] = c.x;
-      output[ 1u ] = c.y;
+      output[ out + 0u ] = c.x;
+      output[ out + 1u ] = c.y;
     `, [
       mul_u64_u64Snippet
-    ], 1, new Uint32Array( [
-      ...nToU32s( an ),
-      ...nToU32s( bn )
+    ], 2, new Uint32Array( [
+      ...nToU32s( 0xf9fe432c7aca8bfan ),
+      ...nToU32s( 0x583b15971ad94165n ),
+      ...nToU32s( 0x1a951ef9n ),
+      ...nToU32s( 0xa629b1b2n )
     ] ).buffer, new Uint32Array( [
-      ...nToU32s( cn )
-    ] ).buffer, `mul_u64_u64 ${an.toString( 16 )} ${bn.toString( 16 )} = ${cn.toString( 16 )}` );
+      ...nToU32s( 0xf9fe432c7aca8bfan * 0x583b15971ad94165n ),
+      ...nToU32s( 0x1a951ef9n * 0xa629b1b2n )
+    ] ).buffer, 'mul_u64_u64' );
+  }
+
+  {
+    // mul_i64_i64
+    await expectInOut( device, `
+      let in = i * 4u;
+      let out = i * 2u;
+      let a = vec2( input[ in + 0u ], input[ in + 1u ] );
+      let b = vec2( input[ in + 2u ], input[ in + 3u ] );
+      let c = mul_i64_i64( a, b );
+      output[ out + 0u ] = c.x;
+      output[ out + 1u ] = c.y;
+    `, [
+      mul_i64_i64Snippet
+    ], 5, new Uint32Array( [
+      ...nToU32s( 0x1a951ef9n ),
+      ...nToU32s( 0xa629b1b2n ),
+      ...nToU32s( 5n ),
+      ...nToU32s( 7n ),
+      ...nToU32s( -5n ),
+      ...nToU32s( 7n ),
+      ...nToU32s( 5n ),
+      ...nToU32s( -7n ),
+      ...nToU32s( -5n ),
+      ...nToU32s( -7n )
+    ] ).buffer, new Uint32Array( [
+      ...nToU32s( 0x1a951ef9n * 0xa629b1b2n ),
+      ...nToU32s( 35n ),
+      ...nToU32s( -35n ),
+      ...nToU32s( -35n ),
+      ...nToU32s( 35n )
+    ] ).buffer, 'mul_i64_i64' );
   }
 
   {
