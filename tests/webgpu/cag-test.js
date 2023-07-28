@@ -1427,19 +1427,31 @@ const main = async () => {
       output[ out + 31u ] = c.p1.py.w;
     `, [
       intersect_line_segmentsSnippet
-    ], 3, new Int32Array( [
-      // an X
+    ], 5, new Int32Array( [
+      // an X (diagonal)
       0, 0, 100, 100, 0, 100, 100, 0,
 
-      // overlap
+      // overlap (skewed)
       // --------
       //     --------
       0, 0, 100, 200, 50, 100, 150, 300,
 
-      // overlap
+      // overlap (skewed)
       //     --------
       // --------
-      50, 100, 150, 300, 0, 0, 100, 200
+      50, 100, 150, 300, 0, 0, 100, 200,
+
+      // overlap (and horizontal)
+      //   ----
+      // --------
+      25, 0, 75, 0, 0, 0, 100, 0,
+
+      // overlap (and vertical)
+      // |
+      // | |
+      // | |
+      // |
+      0, 0, 0, 15, 0, 5, 0, 10
     ] ).buffer, new Uint32Array( [
       // p0 t0
       ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
@@ -1490,7 +1502,41 @@ const main = async () => {
       // p1 px
       ...nToU32s( 100n ), ...nToU32s( 1n ), // 100
       // p1 py
-      ...nToU32s( 200n ), ...nToU32s( 1n ) // 200
+      ...nToU32s( 200n ), ...nToU32s( 1n ), // 200
+
+      // p0 t0
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p0 t1
+      ...nToU32s( 1n ), ...nToU32s( 4n ), // 1/4
+      // p0 px
+      ...nToU32s( 25n ), ...nToU32s( 1n ), // 25
+      // p0 py
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p1 t0
+      ...nToU32s( 1n ), ...nToU32s( 1n ), // 1
+      // p1 t1
+      ...nToU32s( 3n ), ...nToU32s( 4n ), // 3/4
+      // p1 px
+      ...nToU32s( 75n ), ...nToU32s( 1n ), // 75
+      // p1 py
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+
+      // p0 t0
+      ...nToU32s( 1n ), ...nToU32s( 3n ), // 1/3
+      // p0 t1
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p0 px
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p0 py
+      ...nToU32s( 5n ), ...nToU32s( 1n ), // 5
+      // p1 t0
+      ...nToU32s( 2n ), ...nToU32s( 3n ), // 2/3
+      // p1 t1
+      ...nToU32s( 1n ), ...nToU32s( 1n ), // 1
+      // p1 px
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p1 py
+      ...nToU32s( 10n ), ...nToU32s( 1n ) // 10
     ] ).buffer, 'intersect_line_segments' );
   }
 };
