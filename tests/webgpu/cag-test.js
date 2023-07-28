@@ -1436,8 +1436,9 @@ const main = async () => {
       output[ out + 31u ] = c.p1.py.w;
     `, [
       intersect_line_segmentsSnippet
-    ], 1, new Int32Array( [
-      0, 0, 100, 100, 0, 100, 100, 0
+    ], 2, new Int32Array( [
+      0, 0, 100, 100, 0, 100, 100, 0,
+      0, 0, 100, 200, 50, 100, 150, 300
     ] ).buffer, new Uint32Array( [
       // p0 t0
       ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
@@ -1454,7 +1455,24 @@ const main = async () => {
       // p1 px
       0, 0, 0, 0,
       // p1 py
-      0, 0, 0, 0
+      0, 0, 0, 0,
+
+      // p0 t0
+      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      // p0 t1
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p0 px
+      ...nToU32s( 50n ), ...nToU32s( 1n ), // 50
+      // p0 py
+      ...nToU32s( 100n ), ...nToU32s( 1n ), // 100
+      // p1 t0
+      ...nToU32s( 1n ), ...nToU32s( 1n ), // 1
+      // p1 t1
+      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      // p1 px
+      ...nToU32s( 100n ), ...nToU32s( 1n ), // 100
+      // p1 py
+      ...nToU32s( 200n ), ...nToU32s( 1n ) // 200
     ] ).buffer, 'intersect_line_segments' );
   }
 };
