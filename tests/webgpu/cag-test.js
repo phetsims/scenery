@@ -526,55 +526,46 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
     var points: u32 = 0u;
     var results = array<IntersectionPoint, 2u>( not_point, not_point );
     
-    // NOTE: these have common denominators!!!
-    // NOTE: we can assume a is non-zero, since we ruled out degeneracy above
-    // t0 = a * t1 + b 
-    // t0 = ( a_numerator / denominator ) * t1 + ( b_numerator / denominator )
-    // t0 = ( a_numerator * t1 + b_numerator ) / denominator <-----------
-    // t1 = ( t0 - b ) / a 
-    // check:
-    // t0 = b       t1 = 0
-    // t0 = a + b   t1 = 1
-    // t0 = 0       t1 = -b / a
-    // t0 = 1       t1 = ( 1 - b ) / a
+    // p0 + t * ( p1 - p0 ) = p2 + ( a * t + b ) * ( p3 - p2 )
+    // i.e. line0( t ) = line1( a * t + b )
+    // replacements for endpoints:
+    // t=0       =>  t0=0,        t1=b
+    // t=1       =>  t0=1,        t1=a+b
+    // t=-b/a    =>  t0=-b/a,     t1=0
+    // t=(1-b)/a =>  t0=(1-b)/a,  t1=1
     
-    // NOTE: cases identical if... b=0, b=1, b=-a, b=1-a
-    // b=0   => t0 = 0, t1 = 0 (case 1 and case 3)
-    // b=1   => t0 = 1, t1 = 0 (case 1 and case 4)
-    // b=-a  => t0 = 0, t1 = 1 (case 2 and case 3)
-    // b=1-a => t0 = 1, t1 = 1 (case 2 and case 4)
-    // HEY! HEY! if cases are identical... they aren't internal!!! So we just IGNORE them
+    // NOTE: cases become identical if b=0, b=1, b=-a, b=1-a, HOWEVER these would not be internal, so they would be
+    // excluded, and we can ignore them
     
-    // simple!
-    let case1t0 = b;
+    // t0=0, t1=b, p0
+    let case1t1 = b;
+    if ( ratio_test_q128( case1t1 ) == 2i ) {
+      let p = IntersectionPoint( ZERO_q128, reduce_q128( case1t1 ), whole_i64_to_q128( p0x ), whole_i64_to_q128( p0y ) );
+      results[ points ] = p;
+      points += 1u;
+    }
     
-    // abuse a,b having same denominator
-    let case2t0 = vec4( add_i64_i64( a.xy, b.xy ), a.zw );
+    // t0=1, t1=a+b, p1
+    let case2t1 = vec4( add_i64_i64( a.xy, b.xy ), a.zw ); // abuse a,b having same denominator
+    if ( ratio_test_q128( case2t1 ) == 2i ) {
+      let p = IntersectionPoint( ONE_q128, reduce_q128( case2t1 ), whole_i64_to_q128( p1x ), whole_i64_to_q128( p1y ) );
+      results[ points ] = p;
+      points += 1u;
+    }
     
-    // abuse a,b having same denominator, -b/a
-    let case3t1 = i64_to_q128( negate_i64( b.xy ), a.xy );
+    // t0=-b/a, t1=0, p2
+    let case3t0 = i64_to_q128( negate_i64( b.xy ), a.xy ); // abuse a,b having same denominator
+    if ( ratio_test_q128( case3t0 ) == 2i ) {
+      let p = IntersectionPoint( reduce_q128( case3t0 ), ZERO_q128, whole_i64_to_q128( p2x ), whole_i64_to_q128( p2y ) );
+      results[ points ] = p;
+      points += 1u;
+    }
     
+    // t0=(1-b)/a, t1=1, p3
     // ( 1 - b ) / a = ( denom - b_numer ) / denom / ( a_numer / denom ) = ( denom - b_numer ) / a_numer
-    let case4t1 = i64_to_q128( subtract_i64_i64( a.zw, b.xy ), a.xy );
-    
-    if ( ratio_test_q128( case1t0 ) == 2i ) { // p2, other fully internal
-      // TODO: zero/1/etc. rational constants
-      let p = IntersectionPoint( reduce_q128( case1t0 ), ZERO_q128, whole_i64_to_q128( p2x ), whole_i64_to_q128( p2y ) );
-      results[ points ] = p;
-      points += 1u;
-    }
-    if ( ratio_test_q128( case2t0 ) == 2i ) { // p3, other fully internal
-      let p = IntersectionPoint( reduce_q128( case2t0 ), ONE_q128, whole_i64_to_q128( p3x ), whole_i64_to_q128( p3y ) );
-      results[ points ] = p;
-      points += 1u;
-    }
-    if ( ratio_test_q128( case3t1 ) == 2i ) { // p0, other fully internal
-      let p = IntersectionPoint( ZERO_q128, reduce_q128( case3t1 ), whole_i64_to_q128( p0x ), whole_i64_to_q128( p0y ) );
-      results[ points ] = p;
-      points += 1u;
-    }
-    if ( ratio_test_q128( case4t1 ) == 2i ) { // p1, other fully internal
-      let p = IntersectionPoint( ONE_q128, reduce_q128( case4t1 ), whole_i64_to_q128( p1x ), whole_i64_to_q128( p1y ) );
+    let case4t0 = i64_to_q128( subtract_i64_i64( a.zw, b.xy ), a.xy );
+    if ( ratio_test_q128( case4t0 ) == 2i ) {
+      let p = IntersectionPoint( reduce_q128( case4t0 ), ONE_q128, whole_i64_to_q128( p3x ), whole_i64_to_q128( p3y ) );
       results[ points ] = p;
       points += 1u;
     }
@@ -1437,8 +1428,18 @@ const main = async () => {
     `, [
       intersect_line_segmentsSnippet
     ], 2, new Int32Array( [
+      // an X
       0, 0, 100, 100, 0, 100, 100, 0,
-      0, 0, 100, 200, 50, 100, 150, 300
+
+      // overlap
+      // --------
+      //     --------
+      0, 0, 100, 200, 50, 100, 150, 300,
+
+      // overlap
+      //     --------
+      // --------
+      50, 100, 150, 300, 0, 0, 100, 200
     ] ).buffer, new Uint32Array( [
       // p0 t0
       ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
@@ -1458,17 +1459,34 @@ const main = async () => {
       0, 0, 0, 0,
 
       // p0 t0
-      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      ...nToU32s( 1n ), ...nToU32s( 1n ), // 1
       // p0 t1
+      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      // p0 px
+      ...nToU32s( 100n ), ...nToU32s( 1n ), // 100
+      // p0 py
+      ...nToU32s( 200n ), ...nToU32s( 1n ), // 200
+      // p1 t0
+      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      // p1 t1
       ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p1 px
+      ...nToU32s( 50n ), ...nToU32s( 1n ), // 50
+      // p1 py
+      ...nToU32s( 100n ), ...nToU32s( 1n ), // 100
+
+      // p0 t0
+      ...nToU32s( 0n ), ...nToU32s( 1n ), // 0
+      // p0 t1
+      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
       // p0 px
       ...nToU32s( 50n ), ...nToU32s( 1n ), // 50
       // p0 py
       ...nToU32s( 100n ), ...nToU32s( 1n ), // 100
       // p1 t0
-      ...nToU32s( 1n ), ...nToU32s( 1n ), // 1
-      // p1 t1
       ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      // p1 t1
+      ...nToU32s( 1n ), ...nToU32s( 1n ), // 1
       // p1 px
       ...nToU32s( 100n ), ...nToU32s( 1n ), // 100
       // p1 py
