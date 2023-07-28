@@ -273,6 +273,76 @@ fn div_u64_u64( a: u64, b: u64 ) -> vec4<u32> {
   return vec4( result, remainder );
 }
 `, [ u64Snippet, first_leading_bit_u64Snippet, left_shift_u64Snippet, is_zero_u64Snippet, cmp_u64_u64Snippet, subtract_i64_i64Snippet, right_shift_u64Snippet ] );
+
+// binary GCD
+const gcd_u64_u64Snippet = new Snippet( `
+fn gcd_u64_u64( a: u64, b: u64 ) -> u64 {
+  if ( is_zero_u64( a ) ) {
+    return b;
+  }
+  else if ( is_zero_u64( b ) ) {
+    return a;
+  }
+  
+  let gcd_two = first_trailing_bit_u64( a | b );
+  
+  var u = right_shift_u64( a, gcd_two );
+  var v = right_shift_u64( b, gcd_two );
+  
+  while ( u.x != v.x || u.y != v.y ) {
+    if ( cmp_u64_u64( u, v ) == -1i ) {
+      let t = u;
+      u = v;
+      v = t;
+    }
+    
+    u = subtract_i64_i64( u, v );
+    u = right_shift_u64( u, first_trailing_bit_u64( u ) );
+  }
+  
+  return left_shift_u64( u, gcd_two );
+}
+`, [ u64Snippet, is_zero_u64Snippet, first_trailing_bit_u64Snippet, left_shift_u64Snippet, cmp_u64_u64Snippet, subtract_i64_i64Snippet, right_shift_u64Snippet ] );
+
+const i64_to_q128Snippet = new Snippet( `
+fn i64_to_q128( numerator: i64, denominator: i64 ) -> q128 {
+  if ( is_negative_i64( denominator ) ) {
+    return vec4( negate_i64( numerator ), negate_i64( denominator ) );
+  }
+  else {
+    return vec4( numerator, denominator );
+  }
+}
+`, [ q128Snippet, i64Snippet, is_negative_i64Snippet, negate_i64Snippet ] );
+
+const reduce_q128Snippet = new Snippet( `
+fn reduce_q128( a: q128 ) -> q128 {
+  let numerator = a.xy;
+  let denominator = a.zw;
+  if ( numerator.x == 0u && numerator.y == 0u ) {
+    return vec4( 0u, 0u, 1u, 0u ); // 0/1
+  }
+  else if ( denominator.x == 1 && denominator.y == 0u ) {
+    return a; // we're already reduced, x/1
+  }
+  let abs_numerator = abs_i64( numerator );
+  let gcd = gcd_u64_u64( abs_numerator, denominator );
+  if ( gcd.x == 1u && gcd.y == 0u ) {
+    return a;
+  }
+  else {
+    let reduced_numerator = div_u64_u64( abs_numerator, gcd ).xy;
+    let reduced_denominator = div_u64_u64( denominator, gcd ).xy;
+    if ( is_negative_i64( numerator ) ) {
+      return vec4( negate_i64( reduced_numerator ), reduced_denominator );
+    }
+    else {
+      return vec4( reduced_numerator, reduced_denominator );
+    }
+  }
+}
+`, [ q128Snippet, gcd_u64_u64Snippet, abs_i64Snippet, div_u64_u64Snippet, is_negative_i64Snippet, negate_i64Snippet ] );
+
 // window.div_u64_u64 = ( a, b ) => {
 //   if ( a === 0n ) {
 //     return [ 0n, 0n ];
@@ -304,43 +374,15 @@ fn div_u64_u64( a: u64, b: u64 ) -> vec4<u32> {
 // };
 // // TODO: div_u64_u64 JS seems to be working, what is our problem here? Check dependencies
 
-// binary GCD
-const gcd_u64_u64Snippet = new Snippet( `
-fn gcd_u64_u64( a: u64, b: u64 ) -> u64 {
-  if ( is_zero_u64( a ) ) {
-    return b;
-  }
-  else if ( is_zero_u64( b ) ) {
-    return a;
-  }
-  
-  let gcd_two = first_trailing_bit_u64( a | b );
-  
-  var u = right_shift_u64( a, gcd_two );
-  var v = right_shift_u64( b, gcd_two );
-  
-  while ( u.x != v.x || u.y != v.y ) {
-    if ( cmp_u64_u64( u, v ) == -1i ) {
-      let t = u;
-      u = v;
-      v = t;
-    }
-    
-    u = subtract_i64_i64( u, v );
-    u = right_shift_u64( u, first_trailing_bit_u64( u ) );
-  }
-  
-  return left_shift_u64( u, gcd_two );
-}
-`, [ u64Snippet, is_zero_u64Snippet, first_trailing_bit_u64Snippet, left_shift_u64Snippet, cmp_u64_u64Snippet, subtract_i64_i64Snippet, right_shift_u64Snippet ] );
-window.gcd_u64_u64 = ( a, b ) => {
-  while ( b !== 0n ) {
-    const t = b;
-    b = a % b;
-    a = t;
-  }
-  return a;
-};
+
+// window.gcd_u64_u64 = ( a, b ) => {
+//   while ( b !== 0n ) {
+//     const t = b;
+//     b = a % b;
+//     a = t;
+//   }
+//   return a;
+// };
 
 const runInOut = async ( device, mainCode, dependencies, dispatchSize, inputArrayBuffer, outputArrayBuffer ) => {
   const code = new Snippet( `
@@ -907,11 +949,11 @@ const main = async () => {
   }
 
   {
+    // gcd_u64_u64
     const gcd0 = 0xa519bc952f7n;
     const a0 = gcd0 * 0x1542n;
     const b0 = gcd0 * 0xa93n; // chosen as relatively prime
 
-    // gcd_u64_u64
     await expectInOut( device, `
       let in = i * 4u;
       let out = i * 2u;
@@ -931,6 +973,36 @@ const main = async () => {
       ...nToU32s( 5n ),
       ...nToU32s( gcd0 )
     ] ).buffer, 'gcd_u64_u64' );
+  }
+
+  {
+    // reduce_q128
+    await expectInOut( device, `
+      let in = i * 4u;
+      let out = i * 4u;
+      let a = vec4( input[ in + 0u ], input[ in + 1u ], input[ in + 2u ], input[ in + 3u ] );
+      let c = reduce_q128( a );
+      output[ out + 0u ] = c.x;
+      output[ out + 1u ] = c.y;
+      output[ out + 2u ] = c.z;
+      output[ out + 3u ] = c.w;
+    `, [
+      reduce_q128Snippet
+    ], 3, new Uint32Array( [
+      ...nToU32s( 4n ),
+      ...nToU32s( 12n ),
+      ...nToU32s( -32n ),
+      ...nToU32s( 100n ),
+      ...nToU32s( 0n ),
+      ...nToU32s( 100n )
+    ] ).buffer, new Uint32Array( [
+      ...nToU32s( 1n ), // 4/12 => 1/3
+      ...nToU32s( 3n ),
+      ...nToU32s( -8n ), // -32/100 => -8/25
+      ...nToU32s( 25n ),
+      ...nToU32s( 0n ), // 0/100 => 0/1
+      ...nToU32s( 1n )
+    ] ).buffer, 'reduce_q128' );
   }
 };
 main();
