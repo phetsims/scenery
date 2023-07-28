@@ -263,6 +263,9 @@ class CanvasBlock extends FittedBlock {
 
     // If we need to push an entirely new Canvas to the stack
     if ( this.wrapperStackIndex === this.wrapperStack.length ) {
+      // NOTE: Not sure why we don't need to apply fontSmoothing (-webkit-font-smoothing) here, it seems like we
+      // somehow are getting the option that is set in Display's applyCSSHacks().
+      // Some information about WHY it needs to be applied in https://github.com/phetsims/scenery/issues/431.
       const newCanvas = document.createElement( 'canvas' );
       const newContext = newCanvas.getContext( '2d' );
       newContext.save();
