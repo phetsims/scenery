@@ -429,18 +429,21 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
       return not_intersection; // on endpoints of both segments (we ignore that, we only want something internal to one)
     }
     else {
-      let t = reduce_q128( t_raw );
-      let u = reduce_q128( u_raw );
-      
       // use parametric segment definition to get the intersection point
-      let x_numerator = add_i64_i64( mul_i64_i64( t.zw, p0x ), mul_i64_i64( t.xy, d0x ) );
-      let y_numerator = add_i64_i64( mul_i64_i64( t.zw, p0y ), mul_i64_i64( t.xy, d0y ) );
+      // x0 + t * (x1 - x0)
+      // p0x + t_numerator / denominator * d0x
+      // ( denominator * p0x + t_numerator * d0x ) / denominator
+      let x_numerator = add_i64_i64( mul_i64_i64( denominator, p0x ), mul_i64_i64( t_numerator, d0x ) );
+      let y_numerator = add_i64_i64( mul_i64_i64( denominator, p0y ), mul_i64_i64( t_numerator, d0y ) );
       
       let x_raw = i64_to_q128( x_numerator, denominator );
       let y_raw = i64_to_q128( y_numerator, denominator );
       
       let x = reduce_q128( x_raw );
       let y = reduce_q128( y_raw );
+      
+      let t = reduce_q128( t_raw );
+      let u = reduce_q128( u_raw );
       
       // NOTE: will t/u be exactly 0,1 for endpoints if they are endpoints, no?
       return LineSegmentIntersection( 1u, IntersectionPoint( t, u, x, y ), not_point );
@@ -1145,33 +1148,68 @@ const main = async () => {
   }
 
   {
-    // reduce_q128
+    // intersect_line_segments
     await expectInOut( device, `
       let in = i * 8u;
       let out = i * 32u;
-      // let a = vec4( input[ in + 0u ], input[ in + 1u ], input[ in + 2u ], input[ in + 3u ] );
-      let c = intersect_line_segments( vec2( 0i, 0i ), vec2( 100i, 100i ), vec2( 0i, 100i ), vec2( 100i, 0i ) );
-      // output[ out + 0u ] = c.x;
-      // output[ out + 1u ] = c.y;
-      // output[ out + 2u ] = c.z;
-      // output[ out + 3u ] = c.w;
+      let p0 = bitcast<vec2i>( vec2( input[ in + 0u ], input[ in + 1u ] ) );
+      let p1 = bitcast<vec2i>( vec2( input[ in + 2u ], input[ in + 3u ] ) );
+      let p2 = bitcast<vec2i>( vec2( input[ in + 4u ], input[ in + 5u ] ) );
+      let p3 = bitcast<vec2i>( vec2( input[ in + 6u ], input[ in + 7u ] ) );
+      let c = intersect_line_segments( p0, p1, p2, p3 );
+      output[ out + 0u ] = c.p0.t0.x;
+      output[ out + 1u ] = c.p0.t0.y;
+      output[ out + 2u ] = c.p0.t0.z;
+      output[ out + 3u ] = c.p0.t0.w;
+      output[ out + 4u ] = c.p0.t1.x;
+      output[ out + 5u ] = c.p0.t1.y;
+      output[ out + 6u ] = c.p0.t1.z;
+      output[ out + 7u ] = c.p0.t1.w;
+      output[ out + 8u ] = c.p0.px.x;
+      output[ out + 9u ] = c.p0.px.y;
+      output[ out + 10u ] = c.p0.px.z;
+      output[ out + 11u ] = c.p0.px.w;
+      output[ out + 12u ] = c.p0.py.x;
+      output[ out + 13u ] = c.p0.py.y;
+      output[ out + 14u ] = c.p0.py.z;
+      output[ out + 15u ] = c.p0.py.w;
+      output[ out + 16u ] = c.p1.t0.x;
+      output[ out + 17u ] = c.p1.t0.y;
+      output[ out + 18u ] = c.p1.t0.z;
+      output[ out + 19u ] = c.p1.t0.w;
+      output[ out + 20u ] = c.p1.t1.x;
+      output[ out + 21u ] = c.p1.t1.y;
+      output[ out + 22u ] = c.p1.t1.z;
+      output[ out + 23u ] = c.p1.t1.w;
+      output[ out + 24u ] = c.p1.px.x;
+      output[ out + 25u ] = c.p1.px.y;
+      output[ out + 26u ] = c.p1.px.z;
+      output[ out + 27u ] = c.p1.px.w;
+      output[ out + 28u ] = c.p1.py.x;
+      output[ out + 29u ] = c.p1.py.y;
+      output[ out + 30u ] = c.p1.py.z;
+      output[ out + 31u ] = c.p1.py.w;
     `, [
       intersect_line_segmentsSnippet
-    ], 3, new Uint32Array( [
-      // TODO: get input/output hooked up to test
-      ...nToU32s( 4n ),
-      ...nToU32s( 12n ),
-      ...nToU32s( -32n ),
-      ...nToU32s( 100n ),
-      ...nToU32s( 0n ),
-      ...nToU32s( 100n )
+    ], 1, new Int32Array( [
+      0, 0, 100, 100, 0, 100, 100, 0
     ] ).buffer, new Uint32Array( [
-      ...nToU32s( 1n ), // 4/12 => 1/3
-      ...nToU32s( 3n ),
-      ...nToU32s( -8n ), // -32/100 => -8/25
-      ...nToU32s( 25n ),
-      ...nToU32s( 0n ), // 0/100 => 0/1
-      ...nToU32s( 1n )
+      // p0 t0
+      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      // p0 t1
+      ...nToU32s( 1n ), ...nToU32s( 2n ), // 1/2
+      // p0 px
+      ...nToU32s( 50n ), ...nToU32s( 1n ), // 50
+      // p0 py
+      ...nToU32s( 50n ), ...nToU32s( 1n ), // 50
+      // p1 t0
+      0, 0, 0, 0,
+      // p1 t1
+      0, 0, 0, 0,
+      // p1 px
+      0, 0, 0, 0,
+      // p1 py
+      0, 0, 0, 0
     ] ).buffer, 'intersect_line_segments' );
   }
 };
