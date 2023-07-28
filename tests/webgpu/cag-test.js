@@ -365,32 +365,89 @@ fn reduce_q128( a: q128 ) -> q128 {
 
 const intersectionPointSnippet = new Snippet( `
 struct IntersectionPoint {
-  t0: q128;
-  t1: q128;
-  px: q128;
-  py: q128;
+  t0: q128,
+  t1: q128,
+  px: q128,
+  py: q128
 }
 `, [ q128Snippet ] );
 
 const line_segment_intersectionSnippet = new Snippet( `
 struct LineSegmentIntersection {
-  has_intersection: bool;
-  is_unique: bool;
-  p0: IntersectionPoint;
-  p1: IntersectionPoint;
+  num_points: u32, // can include overlap points
+  p0: IntersectionPoint,
+  p1: IntersectionPoint
 }
 `, [ intersectionPointSnippet ] );
 
-// const intersect_line_segmentsSnippet = new Snippet( `
-// fn intersect_line_segments( p0: vec2i, p1: vec2i ) -> IntersectionPoint {
-//   let p0x = i32_to_i64( p0.x );
-//   let p0y = i32_to_i64( p0.y );
-//   let p1x = i32_to_i64( p1.x );
-//   let p1y = i32_to_i64( p1.y );
-//
-//   let denominator = subtract_i64_i64( mu, p0x );
-// }
-// `, [ intersectionPointSnippet, q128Snippet, i32_to_i64Snippet ] );
+// TODO: isolate constants
+const intersect_line_segmentsSnippet = new Snippet( `
+const not_rational = vec4( 0u, 0u, 0u, 0u );
+const not_point = IntersectionPoint( not_rational, not_rational, not_rational, not_rational );
+const not_intersection = LineSegmentIntersection( 0u, not_point, not_point );
+
+fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> LineSegmentIntersection {
+  let p0x = i32_to_i64( p0.x );
+  let p0y = i32_to_i64( p0.y );
+  let p1x = i32_to_i64( p1.x );
+  let p1y = i32_to_i64( p1.y );
+  let p2x = i32_to_i64( p2.x );
+  let p2y = i32_to_i64( p2.y );
+  let p3x = i32_to_i64( p3.x );
+  let p3y = i32_to_i64( p3.y );
+  
+  let d0x = subtract_i64_i64( p1x, p0x );
+  let d0y = subtract_i64_i64( p1y, p0y );
+  let d1x = subtract_i64_i64( p3x, p2x );
+  let d1y = subtract_i64_i64( p3y, p2y );
+  
+  let cdx = subtract_i64_i64( p2x, p0x );
+  let cdy = subtract_i64_i64( p2y, p0y );
+
+  let denominator = subtract_i64_i64( mul_i64_i64( d0x, d1y ), mul_i64_i64( d0y, d1x ) );
+  
+  if ( is_zero_u64( denominator ) ) {
+    // TODO: zero denominator! parallel lines, check for overlap or not
+    return not_intersection;
+  }
+  else {
+    let t_numerator = subtract_i64_i64( mul_i64_i64( cdx, d1y ), mul_i64_i64( cdy, d1x ) );
+    let u_numerator = subtract_i64_i64( mul_i64_i64( cdx, d0y ), mul_i64_i64( cdy, d0x ) );
+    
+    // This will move the sign to the numerator, BUT won't do the reduction (let us first see if there is an intersection)
+    let t_raw = i64_to_q128( t_numerator, denominator );
+    let u_raw = i64_to_q128( u_numerator, denominator );
+    
+    // 2i means totally internal, 1i means on an endpoint, 0i means totally external
+    let t_cmp = cmp_i64_i64( t_raw.xy, vec2( 0u, 0u ) ) + cmp_i64_i64( t_raw.zw, t_raw.xy );
+    let u_cmp = cmp_i64_i64( u_raw.xy, vec2( 0u, 0u ) ) + cmp_i64_i64( u_raw.zw, u_raw.xy );
+    
+    if ( t_cmp <= 0i || u_cmp <= 0i ) {
+      return not_intersection; // outside one or both segments
+    }
+    else if ( t_cmp == 1i && u_cmp == 1i ) {
+      return not_intersection; // on endpoints of both segments (we ignore that, we only want something internal to one)
+    }
+    else {
+      let t = reduce_q128( t_raw );
+      let u = reduce_q128( u_raw );
+      
+      // use parametric segment definition to get the intersection point
+      let x_numerator = add_i64_i64( mul_i64_i64( t.zw, p0x ), mul_i64_i64( t.xy, d0x ) );
+      let y_numerator = add_i64_i64( mul_i64_i64( t.zw, p0y ), mul_i64_i64( t.xy, d0y ) );
+      
+      let x_raw = i64_to_q128( x_numerator, denominator );
+      let y_raw = i64_to_q128( y_numerator, denominator );
+      
+      let x = reduce_q128( x_raw );
+      let y = reduce_q128( y_raw );
+      
+      // NOTE: will t/u be exactly 0,1 for endpoints if they are endpoints, no?
+      return LineSegmentIntersection( 1u, IntersectionPoint( t, u, x, y ), not_point );
+    }
+  }
+}
+`, [ intersectionPointSnippet, line_segment_intersectionSnippet, q128Snippet, i32_to_i64Snippet, mul_i64_i64Snippet, subtract_i64_i64Snippet, is_zero_u64Snippet, i64_to_q128Snippet, reduce_q128Snippet, cmp_i64_i64Snippet ] );
 
 // window.div_u64_u64 = ( a, b ) => {
 //   if ( a === 0n ) {
@@ -1085,6 +1142,37 @@ const main = async () => {
       ...nToU32s( 0n ), // 0/100 => 0/1
       ...nToU32s( 1n )
     ] ).buffer, 'reduce_q128' );
+  }
+
+  {
+    // reduce_q128
+    await expectInOut( device, `
+      let in = i * 8u;
+      let out = i * 32u;
+      // let a = vec4( input[ in + 0u ], input[ in + 1u ], input[ in + 2u ], input[ in + 3u ] );
+      let c = intersect_line_segments( vec2( 0i, 0i ), vec2( 100i, 100i ), vec2( 0i, 100i ), vec2( 100i, 0i ) );
+      // output[ out + 0u ] = c.x;
+      // output[ out + 1u ] = c.y;
+      // output[ out + 2u ] = c.z;
+      // output[ out + 3u ] = c.w;
+    `, [
+      intersect_line_segmentsSnippet
+    ], 3, new Uint32Array( [
+      // TODO: get input/output hooked up to test
+      ...nToU32s( 4n ),
+      ...nToU32s( 12n ),
+      ...nToU32s( -32n ),
+      ...nToU32s( 100n ),
+      ...nToU32s( 0n ),
+      ...nToU32s( 100n )
+    ] ).buffer, new Uint32Array( [
+      ...nToU32s( 1n ), // 4/12 => 1/3
+      ...nToU32s( 3n ),
+      ...nToU32s( -8n ), // -32/100 => -8/25
+      ...nToU32s( 25n ),
+      ...nToU32s( 0n ), // 0/100 => 0/1
+      ...nToU32s( 1n )
+    ] ).buffer, 'intersect_line_segments' );
   }
 };
 main();
