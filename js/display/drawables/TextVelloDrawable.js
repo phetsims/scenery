@@ -26,7 +26,8 @@ const scalingMatrix = Matrix3.scaling( window.devicePixelRatio );
 // Perhaps something under https://stackoverflow.com/questions/59268831/how-to-make-font-in-canvas-smooth-just-like-using-webkit-font-smoothing-antia
 // could be used for the future, if it is ever answered! For NOW, we need to place the Canvas WITHIN the DOM tree in
 // order for Chrome to apply macOS font smoothing to it.
-// Some information about this attribute is in https://github.com/phetsims/scenery/issues/431
+// Some information about this attribute is in https://github.com/phetsims/scenery/issues/431, and also
+// https://developer.mozilla.org/en-US/docs/Web/CSS/font-smooth
 // NOTE: Could combine with sceneryTextSizeContainer under something, for all items that need to be in the DOM, but
 // we don't want to be visible.
 const textRenderingCanvas = document.createElement( 'canvas' );
