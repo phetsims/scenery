@@ -59,6 +59,24 @@ const i64Snippet = new Snippet( 'alias i64 = vec2<u32>;' );
 // rational signed number, backed by four u32 (little-endian, signed numerator then unsigned divisor)
 const q128Snippet = new Snippet( 'alias q128 = vec4<u32>;' );
 
+// TODO use this
+const ZERO_u64Snippet = new Snippet( `
+const ZERO_u64 = vec2( 0u, 0u );
+` );
+
+// TODO use this
+const ONE_u64Snippet = new Snippet( `
+const ONE_u64 = vec2( 1u, 0u );
+` );
+
+const ZERO_q128Snippet = new Snippet( `
+const ZERO_q128 = vec4( 0u, 0u, 1u, 0u );
+` );
+
+const ONE_q128Snippet = new Snippet( `
+const ONE_q128 = vec4( 1u, 0u, 1u, 0u );
+` );
+
 const u32_to_u64Snippet = new Snippet( `
 fn u32_to_u64( x: u32 ) -> u64 {
   return vec2<u32>( x, 0u );
@@ -335,6 +353,34 @@ fn i64_to_q128( numerator: i64, denominator: i64 ) -> q128 {
 }
 `, [ q128Snippet, i64Snippet, is_negative_i64Snippet, negate_i64Snippet ] );
 
+const whole_i64_to_q128Snippet = new Snippet( `
+fn whole_i64_to_q128( numerator: i64 ) -> q128 {
+  return vec4( numerator, 1u, 0u );
+}
+`, [ q128Snippet, i64Snippet ] );
+
+// TODO: test
+// Check fraction equality with cross-multiply (if we have the bits to spare to avoid reduction... reduction would also
+// work).
+const equals_cross_mul_q128Snippet = new Snippet( `
+fn equals_cross_mul_q128( a: q128, b: q128 ) -> bool {
+  return is_zero_u64( subtract_i64_i64( mul_i64_i64( a.xy, b.zw ), mul_i64_i64( a.zw, b.xy ) ) );
+}
+`, [ q128Snippet, is_zero_u64Snippet, subtract_i64_i64Snippet, mul_i64_i64Snippet ] );
+
+const is_zero_q128Snippet = new Snippet( `
+fn is_zero_q128( a: q128 ) -> bool {
+  return a.x == 0u && a.y == 0u;
+}
+`, [ q128Snippet ] );
+
+// 2i means totally internal (0<q<1), 1i means on an endpoint (q=0 or q=1), 0i means totally external (q<0 or q>1)
+const ratio_test_q128Snippet = new Snippet( `
+fn ratio_test_q128( q: q128 ) -> i32 {
+  return cmp_i64_i64( q.xy, vec2( 0u, 0u ) ) + cmp_i64_i64( q.zw, q.xy );
+}
+`, [ q128Snippet, cmp_i64_i64Snippet ] );
+
 const reduce_q128Snippet = new Snippet( `
 fn reduce_q128( a: q128 ) -> q128 {
   let numerator = a.xy;
@@ -381,6 +427,7 @@ struct LineSegmentIntersection {
 `, [ intersectionPointSnippet ] );
 
 // TODO: isolate constants
+// NOTE: Should handle zero-length segments fine (will report no intersections, denominator will be 0)
 const intersect_line_segmentsSnippet = new Snippet( `
 const not_rational = vec4( 0u, 0u, 0u, 0u );
 const not_point = IntersectionPoint( not_rational, not_rational, not_rational, not_rational );
@@ -407,8 +454,132 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
   let denominator = subtract_i64_i64( mul_i64_i64( d0x, d1y ), mul_i64_i64( d0y, d1x ) );
   
   if ( is_zero_u64( denominator ) ) {
-    // TODO: zero denominator! parallel lines, check for overlap or not
-    return not_intersection;
+    // such that p0 + t * ( p1 - p0 ) = p2 + ( a * t + b ) * ( p3 - p2 )
+    // an equivalency between lines
+    var a: q128;
+    var b: q128;
+
+    let d1x_zero = is_zero_u64( d1x );
+    let d1y_zero = is_zero_u64( d1y );
+    
+    // if ( d0s === 0 || d1s === 0 ) {
+    //   return NO_OVERLAP;
+    // }
+    //
+    // a = d0s / d1s;
+    // b = ( p0s - p2s ) / d1s;
+    
+    // TODO: can we reduce the branching here?
+    // Find a dimension where our line is not degenerate (e.g. covers multiple values in that dimension)
+    // Compute line equivalency there
+    if ( d1x_zero && d1y_zero ) {
+      // DEGENERATE case for second line, it's a point, bail out
+      return not_intersection;
+    }
+    else if ( d1x_zero ) {
+      // if d1x is zero AND our denominator is zero, that means d0x or d1y must be zero. We checked d1y above, so d0x must be zero
+      if ( p0.x != p2.x ) {
+        // vertical lines, BUT not same x, so no intersection
+        return not_intersection;
+      }
+      a = i64_to_q128( d0y, d1y );
+      b = i64_to_q128( negate_i64( cdy ), d1y );
+    }
+    else if ( d1y_zero ) {
+      // if d1y is zero AND our denominator is zero, that means d0y or d1x must be zero. We checked d1x above, so d0y must be zero
+      if ( p0.y != p2.y ) {
+        // horizontal lines, BUT not same y, so no intersection
+        return not_intersection;
+      }
+      a = i64_to_q128( d0x, d1x );
+      b = i64_to_q128( negate_i64( cdx ), d1x );
+    }
+    else {
+      // we have non-axis-aligned second line, use that to compute a,b for each dimension, and we're the same "line"
+      // iff those are consistent  
+      if ( is_zero_u64( d0x ) && is_zero_u64( d0y ) ) {
+        // DEGENERATE first line, it's a point, bail out
+        return not_intersection;
+      }
+      let ax = i64_to_q128( d0x, d1x );
+      let ay = i64_to_q128( d0y, d1y );
+      if ( !equals_cross_mul_q128( ax, ay ) ) {
+        return not_intersection;
+      }
+      let bx = i64_to_q128( negate_i64( cdx ), d1x );
+      let by = i64_to_q128( negate_i64( cdy ), d1y );
+      if ( !equals_cross_mul_q128( bx, by ) ) {
+        return not_intersection;
+      }
+      
+      // Pick the one with a non-zero a, so it is invertible
+      if ( is_zero_q128( ax ) ) {
+        a = ay;
+        b = by;
+      }
+      else {
+        a = ax;
+        b = bx;
+      }
+    }
+    
+    var points: u32 = 0u;
+    var results = array<IntersectionPoint, 2u>( not_point, not_point );
+    
+    // NOTE: these have common denominators!!!
+    // NOTE: we can assume a is non-zero, since we ruled out degeneracy above
+    // t0 = a * t1 + b 
+    // t0 = ( a_numerator / denominator ) * t1 + ( b_numerator / denominator )
+    // t0 = ( a_numerator * t1 + b_numerator ) / denominator <-----------
+    // t1 = ( t0 - b ) / a 
+    // check:
+    // t0 = b       t1 = 0
+    // t0 = a + b   t1 = 1
+    // t0 = 0       t1 = -b / a
+    // t0 = 1       t1 = ( 1 - b ) / a
+    
+    // NOTE: cases identical if... b=0, b=1, b=-a, b=1-a
+    // b=0   => t0 = 0, t1 = 0 (case 1 and case 3)
+    // b=1   => t0 = 1, t1 = 0 (case 1 and case 4)
+    // b=-a  => t0 = 0, t1 = 1 (case 2 and case 3)
+    // b=1-a => t0 = 1, t1 = 1 (case 2 and case 4)
+    // HEY! HEY! if cases are identical... they aren't internal!!! So we just IGNORE them
+    
+    // simple!
+    let case1t0 = b;
+    
+    // abuse a,b having same denominator
+    let case2t0 = vec4( add_i64_i64( a.xy, b.xy ), a.zw );
+    
+    // abuse a,b having same denominator, -b/a
+    let case3t1 = i64_to_q128( negate_i64( b.xy ), a.xy );
+    
+    // ( 1 - b ) / a = ( denom - b_numer ) / denom / ( a_numer / denom ) = ( denom - b_numer ) / a_numer
+    let case4t1 = i64_to_q128( subtract_i64_i64( a.zw, b.xy ), a.xy );
+    
+    if ( ratio_test_q128( case1t0 ) == 2i ) { // p2, other fully internal
+      // TODO: zero/1/etc. rational constants
+      let p = IntersectionPoint( reduce_q128( case1t0 ), ZERO_q128, whole_i64_to_q128( p2x ), whole_i64_to_q128( p2y ) );
+      results[ points ] = p;
+      points += 1u;
+    }
+    if ( ratio_test_q128( case2t0 ) == 2i ) { // p3, other fully internal
+      let p = IntersectionPoint( reduce_q128( case2t0 ), ONE_q128, whole_i64_to_q128( p3x ), whole_i64_to_q128( p3y ) );
+      results[ points ] = p;
+      points += 1u;
+    }
+    if ( ratio_test_q128( case3t1 ) == 2i ) { // p0, other fully internal
+      let p = IntersectionPoint( ZERO_q128, reduce_q128( case3t1 ), whole_i64_to_q128( p0x ), whole_i64_to_q128( p0y ) );
+      results[ points ] = p;
+      points += 1u;
+    }
+    if ( ratio_test_q128( case4t1 ) == 2i ) { // p1, other fully internal
+      let p = IntersectionPoint( ONE_q128, reduce_q128( case4t1 ), whole_i64_to_q128( p1x ), whole_i64_to_q128( p1y ) );
+      results[ points ] = p;
+      points += 1u;
+    }
+    
+    return LineSegmentIntersection( points, results[ 0 ], results[ 1 ] );
   }
   else {
     let t_numerator = subtract_i64_i64( mul_i64_i64( cdx, d1y ), mul_i64_i64( cdy, d1x ) );
@@ -419,6 +590,7 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
     let u_raw = i64_to_q128( u_numerator, denominator );
     
     // 2i means totally internal, 1i means on an endpoint, 0i means totally external
+    // TODO: replace with ratio_test_q128 usage
     let t_cmp = cmp_i64_i64( t_raw.xy, vec2( 0u, 0u ) ) + cmp_i64_i64( t_raw.zw, t_raw.xy );
     let u_cmp = cmp_i64_i64( u_raw.xy, vec2( 0u, 0u ) ) + cmp_i64_i64( u_raw.zw, u_raw.xy );
     
@@ -450,7 +622,80 @@ fn intersect_line_segments( p0: vec2i, p1: vec2i, p2: vec2i, p3: vec2i ) -> Line
     }
   }
 }
-`, [ intersectionPointSnippet, line_segment_intersectionSnippet, q128Snippet, i32_to_i64Snippet, mul_i64_i64Snippet, subtract_i64_i64Snippet, is_zero_u64Snippet, i64_to_q128Snippet, reduce_q128Snippet, cmp_i64_i64Snippet ] );
+`, [ intersectionPointSnippet, line_segment_intersectionSnippet, q128Snippet, i32_to_i64Snippet, mul_i64_i64Snippet, subtract_i64_i64Snippet, is_zero_u64Snippet, i64_to_q128Snippet, reduce_q128Snippet, cmp_i64_i64Snippet, equals_cross_mul_q128Snippet, negate_i64Snippet, is_zero_q128Snippet, ratio_test_q128Snippet, add_i64_i64Snippet, whole_i64_to_q128Snippet, ZERO_q128Snippet, ONE_q128Snippet ] );
+
+/*
+
+    /*
+     * NOTE: For implementation details in this function, please see Cubic.getOverlaps. It goes over all of the
+     * same implementation details, but instead our bezier matrix is a 2x2:
+     *
+     * [  1  0 ]
+     * [ -1  1 ]
+     *
+     * And we use the upper-left section of (at+b) adjustment matrix relevant for the line.
+     *
+
+    const noOverlap: Overlap[] = [];
+
+    // Efficiently compute the multiplication of the bezier matrix:
+    const p0x = line1._start.x;
+    const p1x = -1 * line1._start.x + line1._end.x;
+    const p0y = line1._start.y;
+    const p1y = -1 * line1._start.y + line1._end.y;
+    const q0x = line2._start.x;
+    const q1x = -1 * line2._start.x + line2._end.x;
+    const q0y = line2._start.y;
+    const q1y = -1 * line2._start.y + line2._end.y;
+
+    // Determine the candidate overlap (preferring the dimension with the largest variation)
+    const xSpread = Math.abs( Math.max( line1._start.x, line1._end.x, line2._start.x, line2._end.x ) -
+                              Math.min( line1._start.x, line1._end.x, line2._start.x, line2._end.x ) );
+    const ySpread = Math.abs( Math.max( line1._start.y, line1._end.y, line2._start.y, line2._end.y ) -
+                              Math.min( line1._start.y, line1._end.y, line2._start.y, line2._end.y ) );
+    const xOverlap = Segment.polynomialGetOverlapLinear( p0x, p1x, q0x, q1x );
+    const yOverlap = Segment.polynomialGetOverlapLinear( p0y, p1y, q0y, q1y );
+    let overlap;
+    if ( xSpread > ySpread ) {
+      overlap = ( xOverlap === null || xOverlap === true ) ? yOverlap : xOverlap;
+    }
+    else {
+      overlap = ( yOverlap === null || yOverlap === true ) ? xOverlap : yOverlap;
+    }
+    if ( overlap === null || overlap === true ) {
+      return noOverlap; // No way to pin down an overlap
+    }
+
+    const a = overlap.a;
+    const b = overlap.b;
+
+    // Compute linear coefficients for the difference between p(t) and q(a*t+b)
+    const d0x = q0x + b * q1x - p0x;
+    const d1x = a * q1x - p1x;
+    const d0y = q0y + b * q1y - p0y;
+    const d1y = a * q1y - p1y;
+
+    // Examine the single-coordinate distances between the "overlaps" at each extreme T value. If the distance is larger
+    // than our epsilon, then the "overlap" would not be valid.
+    if ( Math.abs( d0x ) > epsilon ||
+         Math.abs( d1x + d0x ) > epsilon ||
+         Math.abs( d0y ) > epsilon ||
+         Math.abs( d1y + d0y ) > epsilon ) {
+      // We're able to efficiently hardcode these for the line-line case, since there are no extreme t values that are
+      // not t=0 or t=1.
+      return noOverlap;
+    }
+
+    const qt0 = b;
+    const qt1 = a + b;
+
+    // TODO: do we want an epsilon in here to be permissive?
+    if ( ( qt0 > 1 && qt1 > 1 ) || ( qt0 < 0 && qt1 < 0 ) ) {
+      return noOverlap;
+    }
+
+    return [ new Overlap( a, b ) ];
+ */
 
 // window.div_u64_u64 = ( a, b ) => {
 //   if ( a === 0n ) {
