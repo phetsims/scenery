@@ -1427,7 +1427,7 @@ const main = async () => {
       output[ out + 31u ] = c.p1.py.w;
     `, [
       intersect_line_segmentsSnippet
-    ], 2, new Int32Array( [
+    ], 3, new Int32Array( [
       // an X
       0, 0, 100, 100, 0, 100, 100, 0,
 
