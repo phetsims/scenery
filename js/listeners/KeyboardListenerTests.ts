@@ -53,16 +53,18 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   } );
 
   // Test putting a key in keys that is not supported.
-  const bogusListener = new KeyboardListener( {
+  assert.throws( () => {
+    const bogusListener = new KeyboardListener( {
 
-    // @ts-expect-error - Make sure that putting a bad key in keys is a type error
-    keys: [ 'badKey' ],
-    callback: () => {
+      // @ts-expect-error - Typescript should catch bad keys too
+      keys: [ 'badKey' ],
+      callback: () => {
 
-      // just testing the typing, no work to do here
-    }
-  } );
-  bogusListener.dispose();
+        // just testing the typing, no work to do here
+      }
+    } );
+    bogusListener.dispose();
+  }, Error, 'Constructor should catch providing bad keys at runtime' );
 
   const a = new Node( { tagName: 'div' } );
   rootNode.addChild( a );
