@@ -49,6 +49,10 @@ type SelfOptions = {
   outerLineWidth?: number | null;
   innerLineWidth?: number | null;
 
+  // If true, the highlight will appear dashed with a lineDash effect. Used often by PhET to indicate that an
+  // interactive component is currently picked up and being manipulated by the user.
+  dashed?: boolean;
+
   // If specified, this FocusHighlightPath will reposition with transform changes along the unique trail to this source
   // Node. Otherwise you will have to position this highlight node yourself.
   transformSourceNode?: Node | null;
@@ -98,6 +102,7 @@ class FocusHighlightPath extends Path {
       innerStroke: INNER_FOCUS_COLOR,
       outerLineWidth: null,
       innerLineWidth: null,
+      dashed: false,
       transformSourceNode: null
     }, providedOptions );
 
@@ -126,6 +131,10 @@ class FocusHighlightPath extends Path {
     this.addChild( this.innerHighlightPath );
 
     this.updateLineWidth();
+
+    if ( options.dashed ) {
+      this.makeDashed( true );
+    }
   }
 
   /**
