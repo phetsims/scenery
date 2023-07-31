@@ -884,7 +884,7 @@ const intersectLineSegments = ( p0, p1, p2, p3 ) => {
 
     // t0=0, t1=b, p0
     const case1t1 = b;
-    if ( case1t1.ratioTest === 2n ) {
+    if ( case1t1.ratioTest() === 2n ) {
       const p = new IntersectionPoint( Rational.ZERO, case1t1.reduced(), Rational.whole( p0x ), Rational.whole( p0y ) );
       p.verify( p0, p1, p2, p3 );
       points.push( p );
