@@ -433,6 +433,7 @@ export { default as BigIntVector2 } from './display/raster/BigIntVector2.js';
 export { default as BigRational } from './display/raster/BigRational.js';
 export { default as BigRationalVector2 } from './display/raster/BigRationalVector2.js';
 export { default as IntersectionPoint } from './display/raster/IntersectionPoint.js';
+export { default as PolygonClipping } from './display/raster/PolygonClipping.js';
 export { default as Snippet } from './display/raster/Snippet.js';
 
 export { default as Instance } from './display/Instance.js';

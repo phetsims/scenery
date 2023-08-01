@@ -354,6 +354,67 @@ an UI and Display made for visual testing and debugging.
     console.log( indentedLines.join( '\n' ) );
   };
 
+  window.clipTest = function() {
+    setTimeout( async function() {
+      const inPolygon = [
+        new phet.dot.Vector2( -10, -10 ),
+        new phet.dot.Vector2( 50, -30 ),
+        new phet.dot.Vector2( 40, 5 ),
+        new phet.dot.Vector2( 130, -20 ),
+        new phet.dot.Vector2( 50, 120 ),
+        new phet.dot.Vector2( -20, 120 ),
+        new phet.dot.Vector2( -50, -20 ),
+        new phet.dot.Vector2( -10, 80 ),
+        new phet.dot.Vector2( -10, 110 ),
+        new phet.dot.Vector2( 20, 110 ),
+        new phet.dot.Vector2( 60, 20 )
+      ];
+
+      const container = new phet.scenery.Node( {
+        children: [
+          new phet.scenery.Path( phet.kite.Shape.polygon( inPolygon ), {
+            stroke: 'red',
+            lineWidth: 0.2,
+            lineJoin: 'round'
+          } )
+        ],
+        x: 200,
+        y: 200,
+        scale: 2
+      } );
+      scene.addChild( container );
+
+      const addBounds = bounds => {
+        const outPolygon = phet.scenery.PolygonClipping.boundsClipPolygon( inPolygon, bounds );
+
+        container.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( bounds ), {
+          stroke: 'black',
+          lineWidth: 0.2,
+          lineJoin: 'round'
+        } ) );
+        container.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( outPolygon ), {
+          stroke: 'blue',
+          fill: 'rgba(0,0,0,0.1)',
+          lineWidth: 1,
+          lineJoin: 'round'
+        } ) );
+      };
+      addBounds( new phet.dot.Bounds2( 0, 0, 100, 100 ) );
+      addBounds( new phet.dot.Bounds2( 100, 0, 200, 100 ) );
+      addBounds( new phet.dot.Bounds2( -100, 0, 0, 100 ) );
+      addBounds( new phet.dot.Bounds2( 0, -100, 100, 0 ) );
+      addBounds( new phet.dot.Bounds2( 100, -100, 200, 0 ) );
+      addBounds( new phet.dot.Bounds2( -100, -100, 0, 0 ) );
+      addBounds( new phet.dot.Bounds2( 0, 100, 100, 200 ) );
+      addBounds( new phet.dot.Bounds2( 100, 100, 200, 200 ) );
+      addBounds( new phet.dot.Bounds2( -100, 100, 0, 200 ) );
+
+      display.width = 1024;
+      display.height = 1024;
+      display.updateDisplay();
+    } );
+  };
+
   window.displayTest = function() {
     setTimeout( async function() {
       const rect = new phet.scenery.Rectangle( 0, 0, 50, 50, {
@@ -1054,7 +1115,7 @@ an UI and Display made for visual testing and debugging.
 
     display.updateDisplay();
   };
-  setTimeout( ellipseTest, 50 );
+  // setTimeout( ellipseTest, 50 );
 
   window.rectTest = function() {
     setTimeout( async function() {
