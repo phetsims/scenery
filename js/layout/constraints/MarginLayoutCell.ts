@@ -134,14 +134,14 @@ export default class MarginLayoutCell extends LayoutCell {
   /**
    * (scenery-internal)
    */
-  public getEffectiveMinMargin( orientation: Orientation ): number {
+  public getEffectiveMinCoordinateMargin( orientation: Orientation ): number {
     return orientation === Orientation.HORIZONTAL ? this.effectiveLeftMargin : this.effectiveTopMargin;
   }
 
   /**
    * (scenery-internal)
    */
-  public getEffectiveMaxMargin( orientation: Orientation ): number {
+  public getEffectiveMaxCoordinateMargin( orientation: Orientation ): number {
     return orientation === Orientation.HORIZONTAL ? this.effectiveRightMargin : this.effectiveBottomMargin;
   }
 
@@ -196,9 +196,9 @@ export default class MarginLayoutCell extends LayoutCell {
    * (scenery-internal)
    */
   public getMinimumSize( orientation: Orientation ): number {
-    return this.getEffectiveMinMargin( orientation ) +
+    return this.getEffectiveMinCoordinateMargin( orientation ) +
            Math.max( this.proxy.getMinimum( orientation ), this.getEffectiveMinContent( orientation ) || 0 ) +
-           this.getEffectiveMaxMargin( orientation );
+           this.getEffectiveMaxCoordinateMargin( orientation );
   }
 
   /**
@@ -206,9 +206,9 @@ export default class MarginLayoutCell extends LayoutCell {
    * (scenery-internal)
    */
   public getMaximumSize( orientation: Orientation ): number {
-    return this.getEffectiveMinMargin( orientation ) +
+    return this.getEffectiveMinCoordinateMargin( orientation ) +
            ( this.getEffectiveMaxContent( orientation ) || Number.POSITIVE_INFINITY ) +
-           this.getEffectiveMaxMargin( orientation );
+           this.getEffectiveMaxCoordinateMargin( orientation );
   }
 
   /**
@@ -225,7 +225,7 @@ export default class MarginLayoutCell extends LayoutCell {
 
       value = Utils.clamp( value, minimumSize, maximumSize );
 
-      let preferredSize = value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation );
+      let preferredSize = value - this.getEffectiveMinCoordinateMargin( orientation ) - this.getEffectiveMaxCoordinateMargin( orientation );
       const maxSize = this.proxy.getMax( orientation );
       if ( maxSize !== null ) {
         preferredSize = Math.min( maxSize, preferredSize );
@@ -253,7 +253,7 @@ export default class MarginLayoutCell extends LayoutCell {
    * (scenery-internal)
    */
   public positionStart( orientation: Orientation, value: number ): void {
-    const start = this.getEffectiveMinMargin( orientation ) + value;
+    const start = this.getEffectiveMinCoordinateMargin( orientation ) + value;
 
     this._marginConstraint.setProxyMinSide( orientation, this.proxy, start );
   }
