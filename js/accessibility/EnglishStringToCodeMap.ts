@@ -77,5 +77,37 @@ const EnglishStringToCodeMap = {
   shift: [ KeyboardUtils.KEY_SHIFT_LEFT, KeyboardUtils.KEY_SHIFT_RIGHT ]
 };
 
+/**
+ * Returns true if the key maps to an arrow key. This is an EnglishStringToCodeMap key, NOT a KeyboardEvent.code.
+ */
+export function isArrowKey( key: keyof typeof EnglishStringToCodeMap ): boolean {
+  return key === 'arrowLeft' || key === 'arrowRight' || key === 'arrowUp' || key === 'arrowDown';
+}
+
+/**
+ * Returns true if the provided key maps to a typical "movement" key, using arrow and WASD keys. This is
+ * an EnglishStringToCodeMap key, NOT a KeyboardEvent.code.
+ */
+export function isMovementKey( key: keyof typeof EnglishStringToCodeMap ): boolean {
+  return isArrowKey( key ) || key === 'w' || key === 'a' || key === 's' || key === 'd';
+}
+
+/**
+ * Returns true if the key maps to a key used with "range" type input (like a slider). Provided key
+ * should be one of EnglishStringToCodeMap's keys, NOT a KeyboardEvent.code.
+ */
+export function isRangeKey( key: keyof typeof EnglishStringToCodeMap ): boolean {
+  return isArrowKey( key ) || key === 'page_up' || key === 'page_down' || key === 'end' || key === 'home';
+}
+
+/**
+ * Returns true if the key is a number key. Provided key should be one of EnglishStringToCodeMap's keys, NOT a
+ * KeyboardEvent.code.
+ */
+export function isNumberKey( key: keyof typeof EnglishStringToCodeMap ): boolean {
+  return key === 0 || key === 1 || key === 2 || key === 3 || key === 4 || key === 5 ||
+         key === 6 || key === 7 || key === 8 || key === 9;
+}
+
 scenery.register( 'EnglishStringToCodeMap', EnglishStringToCodeMap );
 export default EnglishStringToCodeMap;
