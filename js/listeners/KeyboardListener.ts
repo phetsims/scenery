@@ -241,6 +241,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
             this.keysDown = true;
 
+            // reserve the event for this listener, disabling more 'global' input listeners such as
+            // those for pan and zoom (this is similar to DOM event.preventDefault).
+            event.pointer.reserveForKeyboardDrag();
+
             if ( keyGroup.timer ) {
               keyGroup.timer.start();
             }
