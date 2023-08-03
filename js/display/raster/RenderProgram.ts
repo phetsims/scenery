@@ -642,10 +642,14 @@ export class RenderFilter extends RenderPathProgram {
   // TODO: inspect matrix to see when it will maintain transparency!
   public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
     const program = this.program.simplify( map );
-    if ( program instanceof RenderColor ) {
-      // TODO: gamma handling, see ColorMatrixFilter? WE NEED TO DEFINE WHAT THIS CLASS PRECISELY DOES
-      // TODO: replace this with a RenderColor!!!
-      return new RenderFilter( this.path, program, this.matrix );
+
+    // If we're outside our path
+    if ( this.path && map && !map.get( this.path ) ) {
+      return program;
+    }
+
+    if ( program instanceof RenderColor && ( !this.path || ( map && map.get( this.path ) ) ) ) {
+      return new RenderColor( program.path, RenderColor.premultiply( this.matrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
     }
     else {
       return new RenderFilter( this.path, program, this.matrix );
@@ -670,7 +674,7 @@ export class RenderFilter extends RenderPathProgram {
       return source;
     }
     else {
-      return this.matrix.timesVector4( source );
+      return RenderColor.premultiply( this.matrix.timesVector4( RenderColor.unpremultiply( source ) ) );
     }
   }
 }
