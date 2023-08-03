@@ -61,8 +61,8 @@ const EnglishStringToCodeMap = {
   escape: [ KeyboardUtils.KEY_ESCAPE ],
   delete: [ KeyboardUtils.KEY_DELETE ],
   backspace: [ KeyboardUtils.KEY_BACKSPACE ],
-  page_up: [ KeyboardUtils.KEY_PAGE_UP ],
-  page_down: [ KeyboardUtils.KEY_PAGE_DOWN ],
+  pageUp: [ KeyboardUtils.KEY_PAGE_UP ],
+  pageDown: [ KeyboardUtils.KEY_PAGE_DOWN ],
   end: [ KeyboardUtils.KEY_END ],
   home: [ KeyboardUtils.KEY_HOME ],
   space: [ KeyboardUtils.KEY_SPACE ],
@@ -97,7 +97,7 @@ export function isMovementKey( key: keyof typeof EnglishStringToCodeMap ): boole
  * should be one of EnglishStringToCodeMap's keys, NOT a KeyboardEvent.code.
  */
 export function isRangeKey( key: keyof typeof EnglishStringToCodeMap ): boolean {
-  return isArrowKey( key ) || key === 'page_up' || key === 'page_down' || key === 'end' || key === 'home';
+  return isArrowKey( key ) || key === 'pageUp' || key === 'pageDown' || key === 'end' || key === 'home';
 }
 
 /**
