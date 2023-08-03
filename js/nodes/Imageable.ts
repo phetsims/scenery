@@ -41,7 +41,9 @@ const getScratchCanvas = (): HTMLCanvasElement => {
 };
 const getScratchContext = () => {
   if ( !scratchContext ) {
-    scratchContext = getScratchCanvas().getContext( '2d' )!;
+    scratchContext = getScratchCanvas().getContext( '2d', {
+      willReadFrequently: true
+    } )!;
   }
   return scratchContext;
 };
