@@ -105,6 +105,12 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // Called when the listener is cancelled/interrupted.
   cancel?: ( listener: KeyboardListener<Keys> ) => void;
 
+  // Called when the listener target receives focus.
+  focus?: ( listener: KeyboardListener<Keys> ) => void;
+
+  // Called when the listener target loses focus.
+  blur?: ( listener: KeyboardListener<Keys> ) => void;
+
   // When true, the listener will fire continuously while keys are held down, at the following intervals.
   fireOnHold?: boolean;
 
@@ -144,6 +150,12 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // The optional function called when this listener is cancelled.
   private readonly _cancel: ( listener: KeyboardListener<Keys> ) => void;
 
+  // The optional function called when this listener's target receives focus.
+  private readonly _focus: ( listener: KeyboardListener<Keys> ) => void;
+
+  // The optional function called when this listener's target loses focus.
+  private readonly _blur: ( listener: KeyboardListener<Keys> ) => void;
+
   // When callbacks are fired in response to input. Could be on keys pressed down, up, or both.
   private readonly _listenerFireTrigger: ListenerFireTrigger;
 
@@ -178,6 +190,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
       cancel: _.noop,
+      focus: _.noop,
+      blur: _.noop,
       global: false,
       capture: false,
       handle: false,
@@ -190,6 +204,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     this._callback = options.callback;
     this._cancel = options.cancel;
+    this._focus = options.focus;
+    this._blur = options.blur;
 
     this._listenerFireTrigger = options.listenerFireTrigger;
     this._fireOnHold = options.fireOnHold;
@@ -455,6 +471,18 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    */
   public focusout( event: SceneryEvent ): void {
     this.interrupt();
+
+    // Optional work to do on blur.
+    this._blur( this );
+  }
+
+  /**
+   * Public because this is called through the scenery listener API. Do not call this directly.
+   */
+  public focusin( event: SceneryEvent ): void {
+
+    // Optional work to do on focus.
+    this._focus( this );
   }
 
   /**
