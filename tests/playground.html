@@ -354,6 +354,66 @@ an UI and Display made for visual testing and debugging.
     console.log( indentedLines.join( '\n' ) );
   };
 
+  window.rasterTest = function() {
+    setTimeout( async function() {
+      const pathA = new phet.scenery.RenderPath( 'nonzero', [
+        [
+          new phet.dot.Vector2( 0, 0 ),
+          new phet.dot.Vector2( 10, 0 ),
+          new phet.dot.Vector2( 13.52, 17.154 ),
+          new phet.dot.Vector2( 0, 10 )
+        ]
+      ] );
+      const pathB = new phet.scenery.RenderPath( 'nonzero', [
+        [
+          new phet.dot.Vector2( 5, 5 ),
+          new phet.dot.Vector2( 15, 5 ),
+          new phet.dot.Vector2( 24.2105, 21.5142 ),
+          new phet.dot.Vector2( 5, 15 )
+        ]
+      ] );
+      const pathC = new phet.scenery.RenderPath( 'nonzero', [
+        [
+          new phet.dot.Vector2( 0, 0 ),
+          new phet.dot.Vector2( 20, 0 ),
+          new phet.dot.Vector2( 20, 20 ),
+          new phet.dot.Vector2( 0, 20 )
+        ]
+      ] );
+      const pathD = new phet.scenery.RenderPath( 'nonzero', [
+        [
+          new phet.dot.Vector2( 0, 0 ),
+          new phet.dot.Vector2( 40, 0 ),
+          new phet.dot.Vector2( 32, 32 ),
+          new phet.dot.Vector2( 0, 40 )
+        ]
+      ] );
+
+      const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
+      const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
+      const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 0.7 ) );
+      const d = new phet.scenery.RenderLinearGradient( pathD, phet.dot.Matrix3.IDENTITY, new phet.dot.Vector2( 0, 32 ), new phet.dot.Vector2( 32, 0 ), [
+        new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,57,2, 1 ) ) ),
+        new phet.scenery.RenderGradientStop( 0.25, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,128,7, 1 ) ) ),
+        new phet.scenery.RenderGradientStop( 0.5, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,180,4, 1 ) ) ),
+        new phet.scenery.RenderGradientStop( 0.75, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 5,186,221, 1 ) ) ),
+        new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 43,72,113, 1 ) ) )
+      ], 0 );
+      const back = phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 128, 128, 128, 0.5 ) );
+
+      const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
+      const dx = new phet.scenery.RenderBlendCompose( 0, 0, d, back );
+      const bcd = new phet.scenery.RenderBlendCompose( 0, 0, bc, dx );
+      const program = new phet.scenery.RenderBlendCompose( 0, 0, a, bcd );
+
+      const canvas = program.slowRasterizeToCanvas( 64, 64, 8 );
+      canvas.style.width = ( canvas.width / window.devicePixelRatio ) + 'px';
+      canvas.style.height = ( canvas.height / window.devicePixelRatio ) + 'px';
+      document.body.appendChild( canvas );
+      console.log( canvas.toDataURL() );
+    } )
+  };
+
   window.clipTest = function() {
     setTimeout( async function() {
       const inPolygon = [
