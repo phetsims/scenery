@@ -414,6 +414,216 @@ an UI and Display made for visual testing and debugging.
     } )
   };
 
+  window.mitchellNetravaliTest1 = () => {
+    setTimeout( async function() {
+      const width = 1024;
+      const height = 1024;
+      const imageData = new ImageData( width, height );
+
+      const polygon = [
+        phet.dot.v2( 3, 3 ),
+        phet.dot.v2( 7, 3 ),
+        phet.dot.v2( 3, 7 )
+      ];
+
+      const bounds = new phet.dot.Bounds2( 0, 0, 10, 10 );
+
+      for ( let i = 0; i < height; i++ ) {
+        for ( let j = 0; j < width; j++ ) {
+          const x = bounds.minX + bounds.width * ( j / width );
+          const y = bounds.minY + bounds.height * ( i / height );
+
+          const value = phet.scenery.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
+          const floor = 50;
+
+          const r = value * ( 255 - floor ) + floor;
+          const g = value * ( 255 - floor ) + floor;
+          const b = value * ( 255 - floor ) + floor;
+          const a = 255;
+          const index = 4 * ( i * width + j );
+          imageData.data[ index ] = r;
+          imageData.data[ index + 1 ] = g;
+          imageData.data[ index + 2 ] = b;
+          imageData.data[ index + 3 ] = a;
+        }
+      }
+
+      const canvas = document.createElement( 'canvas' );
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = ( width / window.devicePixelRatio ) + 'px';
+      canvas.style.height = ( height / window.devicePixelRatio ) + 'px';
+      const context = canvas.getContext( '2d' );
+      context.putImageData( imageData, 0, 0 );
+
+      // example
+      const examplePoint = phet.dot.v2( 4.5, 5.5 );
+      const exampleBounds = new phet.dot.Bounds2( examplePoint.x, examplePoint.y, examplePoint.x + 1, examplePoint.y + 1 );
+
+      /*
+          const clippedPolygon = PolygonClipping.boundsClipPolygon( polygon, bounds );
+    // const clippedPolygon = PolygonClipping.sillyClipPolygon( polygon, bounds );
+    // const clippedPolygon = phet.kite.Shape.polygon( polygon ).shapeIntersection( phet.kite.Shape.bounds( bounds ) )?.subpaths[ 0 ]?.points || [];
+       */
+
+      const exampleClip = phet.scenery.PolygonClipping.boundsClipPolygon( polygon, exampleBounds );
+
+      console.log( exampleClip );
+
+      context.strokeStyle = 'red';
+      context.beginPath();
+      context.moveTo( polygon[ 0 ].x * width / bounds.width, polygon[ 0 ].y * height / bounds.height );
+      context.lineTo( polygon[ 1 ].x * width / bounds.width, polygon[ 1 ].y * height / bounds.height );
+      context.lineTo( polygon[ 2 ].x * width / bounds.width, polygon[ 2 ].y * height / bounds.height );
+      context.closePath();
+      context.stroke();
+
+      context.strokeStyle = 'blue';
+      context.beginPath();
+      context.moveTo( exampleBounds.minX * width / bounds.width, exampleBounds.minY * height / bounds.height );
+      context.lineTo( exampleBounds.maxX * width / bounds.width, exampleBounds.minY * height / bounds.height );
+      context.lineTo( exampleBounds.maxX * width / bounds.width, exampleBounds.maxY * height / bounds.height );
+      context.lineTo( exampleBounds.minX * width / bounds.width, exampleBounds.maxY * height / bounds.height );
+      context.closePath();
+      context.stroke();
+
+      if ( exampleClip.length ) {
+        context.fillStyle = 'rgba(255,0,0,0.3)';
+        context.beginPath();
+        context.moveTo( exampleClip[ 0 ].x * width / bounds.width, exampleClip[ 0 ].y * height / bounds.height );
+        for ( let i = 1; i < exampleClip.length; i++ ) {
+          context.lineTo( exampleClip[ i ].x * width / bounds.width, exampleClip[ i ].y * height / bounds.height );
+        }
+        context.closePath();
+        context.fill();
+      }
+
+      document.body.appendChild( canvas );
+    } );
+  };
+
+  window.mitchellNetravaliTest2 = () => {
+    setTimeout( async function() {
+      const width = 1024;
+      const height = 1024;
+      const imageData = new ImageData( width, height );
+
+      const polygon = [
+        phet.dot.v2( 300, 300 ),
+        phet.dot.v2( 700, 300 ),
+        phet.dot.v2( 300, 700 )
+      ];
+
+      const bounds = new phet.dot.Bounds2( 0, 0, width, height );
+
+      for ( let i = 0; i < height; i++ ) {
+        for ( let j = 0; j < width; j++ ) {
+          const x = bounds.minX + bounds.width * ( j / width ) + 0.5;
+          const y = bounds.minY + bounds.height * ( i / height ) + 0.5;
+
+          const value = phet.scenery.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
+
+          const paddedValue = 0.9 * value + 0.05;
+
+          const color = phet.scenery.RenderColor.premultipliedLinearToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+
+          const index = 4 * ( i * width + j );
+          imageData.data[ index ] = color.r;
+          imageData.data[ index + 1 ] = color.g;
+          imageData.data[ index + 2 ] = color.b;
+          imageData.data[ index + 3 ] = Math.floor( color.a * 255 );
+        }
+      }
+
+      const canvas = document.createElement( 'canvas' );
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = ( width / window.devicePixelRatio ) + 'px';
+      canvas.style.height = ( height / window.devicePixelRatio ) + 'px';
+      const context = canvas.getContext( '2d' );
+      context.putImageData( imageData, 0, 0 );
+
+      document.body.appendChild( canvas );
+    } );
+  };
+
+  // Siemens star
+  window.mitchellNetravaliTest3 = () => {
+    setTimeout( async function() {
+      assert = false;
+      assertSlow = false;
+
+      const width = 1024;
+      const height = 1024;
+      const imageData = new ImageData( width, height );
+
+      const center = phet.dot.v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
+      const radius = width / 3;
+      const pointCount = 100;
+
+      const polygon = [];
+      for ( let i = 0; i < pointCount; i++ ) {
+        const angle0 = i * 2 * Math.PI / pointCount;
+        const angle1 = ( i + 0.5 ) * 2 * Math.PI / pointCount;
+
+        const p0 = phet.dot.v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
+        const p1 = phet.dot.v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
+
+        polygon.push( center );
+        polygon.push( p0 );
+        polygon.push( p1 );
+      }
+
+      const bounds = new phet.dot.Bounds2( 0, 0, width, height );
+
+      for ( let i = 0; i < height; i++ ) {
+        console.log( i );
+        for ( let j = 0; j < width; j++ ) {
+          const x = bounds.minX + bounds.width * ( j / width ) + 0.5;
+          const y = bounds.minY + bounds.height * ( i / height ) + 0.5;
+
+          const value = phet.scenery.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
+
+
+          // const p = phet.dot.v2( x, y );
+          // const anglePart = ( Math.atan2( p.y - center.y, p.x - center.x ) + Math.PI ) / ( 2 * Math.PI );
+          // const value = p.distance( center ) < radius ? ( ( ( anglePart * pointCount ) % 1 ) < 0.5 ? 1 : 0 ) : 0;
+
+
+          // let sum = 0;
+          // for ( let k = 0; k < 1000; k++ ) {
+          //   const p = phet.dot.v2( x + Math.random() - 0.5, y + Math.random() - 0.5 );
+          //   const anglePart = ( Math.atan2( p.y - center.y, p.x - center.x ) + Math.PI ) / ( 2 * Math.PI );
+          //   sum += p.distance( center ) < radius ? ( ( ( anglePart * pointCount ) % 1 ) < 0.5 ? 1 : 0 ) : 0;
+          // }
+          // const value = sum / 1000;
+
+
+
+          const paddedValue = 0.95 - 0.9 * value;
+
+          const color = phet.scenery.RenderColor.premultipliedLinearToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+
+          const index = 4 * ( i * width + j );
+          imageData.data[ index ] = color.r;
+          imageData.data[ index + 1 ] = color.g;
+          imageData.data[ index + 2 ] = color.b;
+          imageData.data[ index + 3 ] = Math.floor( color.a * 255 );
+        }
+      }
+
+      const canvas = document.createElement( 'canvas' );
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = ( width / window.devicePixelRatio ) + 'px';
+      canvas.style.height = ( height / window.devicePixelRatio ) + 'px';
+      const context = canvas.getContext( '2d' );
+      context.putImageData( imageData, 0, 0 );
+
+      document.body.appendChild( canvas );
+    } );
+  };
+
   window.clipTest = function() {
     setTimeout( async function() {
       const inPolygon = [

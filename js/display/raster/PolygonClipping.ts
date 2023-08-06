@@ -211,7 +211,91 @@ export default class PolygonClipping {
     return ( l2.x - l1.x ) * ( p.y - l1.y ) > ( l2.y - l1.y ) * ( p.x - l1.x );
   }
 
+  // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
   public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
+    const simplifier = new Simplifier();
+
+    const center = bounds.center;
+
+    // TODO: optimize this
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const startPoint = polygon[ i ];
+      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+      const clippedStartPoint = CodedVector2.create( startPoint, bounds );
+      const clippedEndPoint = CodedVector2.create( endPoint, bounds );
+
+      // TODO: liang-barsky or something better!!!
+      const clipped = PolygonClipping.cohenSutherlandClip( clippedStartPoint, clippedEndPoint, bounds );
+
+      let startXLess;
+      let startYLess;
+      let endXLess;
+      let endYLess;
+
+      // TODO: we're adding all sorts of duplicate unnecessary points!
+
+      const needsStartCorner = !clipped || !startPoint.equals( clippedStartPoint );
+      const needsEndCorner = !clipped || !endPoint.equals( clippedEndPoint );
+
+      if ( needsStartCorner ) {
+        startXLess = startPoint.x < center.x;
+        startYLess = startPoint.y < center.y;
+      }
+      if ( needsEndCorner ) {
+        endXLess = endPoint.x < center.x;
+        endYLess = endPoint.y < center.y;
+      }
+
+      // TODO: don't rely on the simplifier so much! (especially with arrays?)
+      if ( needsStartCorner ) {
+        simplifier.add( new Vector2(
+          startXLess ? bounds.minX : bounds.maxX,
+          startYLess ? bounds.minY : bounds.maxY
+        ) );
+      }
+      if ( clipped ) {
+        simplifier.add( clippedStartPoint.toVector2() );
+        simplifier.add( clippedEndPoint.toVector2() );
+      }
+      else {
+        if ( startXLess !== endXLess && startYLess !== endYLess ) {
+          // we crossed from one corner to the opposite, but didn't hit. figure out which corner we passed
+          // we're diagonal, so solving for y=centerY should give us the info we need
+          const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( center.x - startPoint.x ) / ( endPoint.x - startPoint.x );
+
+          simplifier.add(
+            // Based on whether we are +x+y => -x-y or -x+y => +x-y
+            ( startXLess === startYLess ) ? (
+              y > 0 ? new Vector2( bounds.minX, bounds.maxY ) : new Vector2( bounds.maxX, bounds.minY )
+            ) : (
+              y > 0 ? new Vector2( bounds.maxX, bounds.maxY ) : new Vector2( bounds.minX, bounds.minY )
+            )
+          );
+        }
+      }
+      if ( needsEndCorner ) {
+        simplifier.add( new Vector2(
+          endXLess ? bounds.minX : bounds.maxX,
+          endYLess ? bounds.minY : bounds.maxY
+        ) );
+      }
+    }
+
+    return simplifier.finalize();
+  }
+
+  // TODO: bad case phet.scenery.PolygonClipping.boundsClipPolygon( [ phet.dot.v2( 500, 500 ), phet.dot.v2( 700, 500 ), phet.dot.v2( 700, 600 ) ], new phet.dot.Bounds2( 600, 505, 601, 506 ) )
+  /*
+     Adds points:
+     Vector2 {x: 601, y: 505}
+     Vector2 {x: 600, y: 505}
+     Vector2 {x: 601, y: 505}
+     Vector2 {x: 601, y: 506}
+   */
+  // Maillot '92 polygon clipping algorithm, using Cohen-Sutherland clipping
+  // TODO: get rid of if we're not using it
+  public static buggyMaillotClipping( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
 
     const minMin = new Vector2( bounds.minX, bounds.minY );
     const minMax = new Vector2( bounds.minX, bounds.maxY );
