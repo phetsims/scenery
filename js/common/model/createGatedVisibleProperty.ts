@@ -1,7 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Function that factors out the creation of a gated visible property for PhET-iO
+ * Function that factors out the creation of a gated visible property for PhET-iO. This is used when we want to grant
+ * visibility control to a studio or PhET-iO client to an object that already has its visibility controlled by the sim.
  *
  * @author Marla Schulz (PhET Interactive Simulations)
  *
