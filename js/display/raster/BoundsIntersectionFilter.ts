@@ -27,7 +27,7 @@ class ItemSegmentTree extends SegmentTree<Item> {
 
 export default class BoundsIntersectionFilter {
 
-  public static quadraticIntersect( maximumBounds: Bounds2, items: Item[], callback: ( itemA: Item, itemB: Item ) => void ): void {
+  public static quadraticIntersect<T extends Item>( maximumBounds: Bounds2, items: T[], callback: ( itemA: T, itemB: T ) => void ): void {
     for ( let i = 0; i < items.length; i++ ) {
       const itemA = items[ i ];
       const boundsA = itemA.bounds;

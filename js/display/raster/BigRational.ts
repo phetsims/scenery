@@ -99,6 +99,12 @@ export default class BigRational {
     return this.numerator * other.denominator === this.denominator * other.numerator;
   }
 
+  public compareCrossMul( other: BigRational ): number {
+    const thisCross = this.numerator * other.denominator;
+    const otherCross = this.denominator * other.numerator;
+    return thisCross < otherCross ? -1 : thisCross > otherCross ? 1 : 0;
+  }
+
   // NOT for WGSL, slow
   public equals( other: BigRational ): boolean {
     const thisReduced = this.reduced();
