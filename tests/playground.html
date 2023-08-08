@@ -322,6 +322,65 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.boundsTest = function() {
+    setTimeout( () => {
+      const bounds = new phet.dot.Bounds2( 0, 0, 1024, 1024 );
+      const count = 20000;
+      const items = _.range( 0, count ).map( i => {
+        const centerX = Math.floor( Math.random() * 1024 );
+        const centerY = Math.floor( Math.random() * 1024 );
+        const width = Math.floor( Math.pow( Math.random(), 20 ) * 1023 + 1 );
+        const height = Math.floor( Math.pow( Math.random(), 20 ) * 1023 + 1 );
+
+        return {
+          id: i,
+          bounds: new phet.dot.Bounds2(
+            Math.max( bounds.minX, centerX - width / 2 ),
+            Math.max( bounds.minY, centerY - height / 2 ),
+            Math.min( bounds.maxX, centerX + width / 2 ),
+            Math.min( bounds.maxY, centerY + height / 2 )
+          ),
+          internalData: {}
+        };
+      } );
+
+      const getCount = ( bounds, items, method ) => {
+        let count = 0;
+        let set = new Set();
+        method( bounds, items, ( a, b ) => {
+          const key1 = a.id + ',' + b.id;
+          const key2 = b.id + ',' + a.id;
+          if ( set.has( key1 ) || set.has( key2 ) ) {
+            throw new Error( 'duplicate' );
+          }
+          set.add( key1 );
+          set.add( key2 );
+          if ( !a.bounds.intersectsBounds( b.bounds ) ) {
+            throw new Error( 'bounds issue' );
+          }
+          count++;
+        } );
+        return count;
+      };
+
+      const beforeFilter = Date.now();
+      const filterCount = getCount( bounds, items, phet.scenery.BoundsIntersectionFilter.filterIntersect );
+      const afterFilter = Date.now();
+
+      const beforeSweep = Date.now();
+      const sweepCount = getCount( bounds, items, phet.scenery.BoundsIntersectionFilter.sweepLineIntersect );
+      const afterSweep = Date.now();
+
+      const beforeQuadratic = Date.now();
+      const quadraticCount = getCount( bounds, items, phet.scenery.BoundsIntersectionFilter.quadraticIntersect );
+      const afterQuadratic = Date.now();
+
+      console.log( 'filter', filterCount, afterFilter - beforeFilter );
+      console.log( 'sweep', sweepCount, afterSweep - beforeSweep );
+      console.log( 'quadratic', quadraticCount, afterQuadratic - beforeQuadratic );
+    } );
+  };
+
   window.debugPDOMInstances = function() {
     recurse( display._rootPDOMInstance, '' );
 

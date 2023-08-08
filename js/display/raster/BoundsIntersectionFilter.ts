@@ -48,7 +48,7 @@ export default class BoundsIntersectionFilter {
 
     // Our queue will store entries of { start: boolean, edge: Edge }, representing a sweep line similar to the
     // Bentley-Ottmann approach. We'll track which edges are passing through the sweep line.
-    // ts-ignore-line
+    // @ts-expect-error
     const queue = new FlatQueue();
 
     // Tracks which edges are through the sweep line, but in a graph structure like a segment/interval tree, so that we
@@ -59,7 +59,6 @@ export default class BoundsIntersectionFilter {
     const addToQueue = ( item: Item ) => {
       const bounds = item.bounds;
 
-      // TODO: see if object allocations are slow here
       queue.push( { start: true, item: item }, bounds.minY - epsilon );
       queue.push( { start: false, item: item }, bounds.maxY + epsilon );
     };
@@ -97,6 +96,7 @@ export default class BoundsIntersectionFilter {
       new OrientationPair( false, false ),
       new OrientationPair( false, false ),
       new OrientationPair( false, false ),
+      0,
       callback
     );
   }
@@ -110,12 +110,19 @@ export default class BoundsIntersectionFilter {
     for ( let i = 0; i < internalItems.length; i++ ) {
       const item = internalItems[ i ];
       for ( let j = 0; j < externalItems.length; j++ ) {
-        callback( item, externalItems[ j ] );
+        // TODO: get rid of checks we don't need
+        const otherItem = externalItems[ j ];
+        if ( item.bounds.intersectsBounds( otherItem.bounds ) ) {
+          callback( item, externalItems[ j ] );
+        }
       }
 
       if ( !external ) {
         for ( let j = i + 1; j < internalItems.length; j++ ) {
-          callback( item, internalItems[ j ] );
+          const otherItem = internalItems[ j ];
+          if ( item.bounds.intersectsBounds( otherItem.bounds ) ) {
+            callback( item, internalItems[ j ] );
+          }
         }
       }
     }
@@ -130,6 +137,7 @@ export default class BoundsIntersectionFilter {
     external: OrientationPair<boolean>,
     minSplitLast: OrientationPair<boolean>,
     clipped: OrientationPair<boolean>,
+    depth: number,
     callback: ( itemA: Item, itemB: Item ) => void
   ): void {
 
@@ -142,6 +150,11 @@ export default class BoundsIntersectionFilter {
 
     // If we have no internal items, nothing to do
     if ( internalItems.length === 0 ) {
+      return;
+    }
+
+    if ( internalItems.length <= 20 ) {
+      BoundsIntersectionFilter.intersect( internalItems, externalItems, anyExternal, callback );
       return;
     }
 
@@ -160,6 +173,7 @@ export default class BoundsIntersectionFilter {
           external,
           minSplitLast,
           clipped,
+          depth + 1,
           callback
         );
       }
@@ -169,10 +183,10 @@ export default class BoundsIntersectionFilter {
     let minValue = Number.POSITIVE_INFINITY;
     let maxValue = Number.NEGATIVE_INFINITY;
 
-    const isClipped = clipped.get( orientation );
-    const minSplitLastValue = minSplitLast.get( orientation );
     const minSide = orientation.minSide;
     const maxSide = orientation.maxSide;
+    const isOrientationClipped = clipped.get( orientation );
+    const orientationMinSplitLast = minSplitLast.get( orientation );
 
     const boundsMin = bounds[ minSide ];
     const boundsMax = bounds[ maxSide ];
@@ -185,8 +199,8 @@ export default class BoundsIntersectionFilter {
       minValue = Math.min( minValue, itemMin );
       maxValue = Math.max( maxValue, itemMax );
 
-      if ( external && isClipped ) {
-        split = minSplitLastValue ? itemMax : itemMin;
+      if ( external && isOrientationClipped ) {
+        split = orientationMinSplitLast ? itemMax : itemMin;
       }
       else {
         // the center of the item
@@ -202,8 +216,8 @@ export default class BoundsIntersectionFilter {
       maxValue = Math.max( maxValue, itemMax );
 
       // if it's clipped, we'll use the ending coordinate only
-      if ( isClipped ) {
-        split = minSplitLastValue ? itemMax : itemMin;
+      if ( isOrientationClipped ) {
+        split = orientationMinSplitLast ? itemMax : itemMin;
       }
       else {
         split += 0.5 * ( itemMin + itemMax );
@@ -242,16 +256,23 @@ export default class BoundsIntersectionFilter {
     const minSplit = minSplitLast.with( orientation, true );
     const maxSplit = minSplitLast.with( orientation, false );
 
+    const isOrientationExternal = external.get( orientation );
+
     // "minimum" case, internal for "min", moving "both" to external
     BoundsIntersectionFilter.recurse(
       otherComplete ? orientation : orientation.opposite,
       minBounds,
       minActiveItems,
-      external.get( orientation ) ? minInactiveItems : minInactiveItems.concat( bothActiveItems ),
+      [
+        ...minInactiveItems,
+        ...bothInactiveItems,
+        ...( isOrientationExternal ? [] : bothActiveItems )
+      ],
       otherComplete,
       external,
       minSplit,
       newClipped,
+      depth + 1,
       callback
     );
 
@@ -260,11 +281,16 @@ export default class BoundsIntersectionFilter {
       otherComplete ? orientation : orientation.opposite,
       maxBounds,
       maxActiveItems,
-      external.get( orientation ) ? maxInactiveItems : maxInactiveItems.concat( bothActiveItems ),
+      [
+        ...maxInactiveItems,
+        ...bothInactiveItems,
+        ...( isOrientationExternal ? [] : bothActiveItems )
+      ],
       otherComplete,
       external,
       maxSplit,
       newClipped,
+      depth + 1,
       callback
     );
 
@@ -283,11 +309,12 @@ export default class BoundsIntersectionFilter {
         external,
         minSplitLast,
         clipped, // we did NOT change clips!
+        depth + 1,
         callback
       );
     }
 
-    if ( !external.get( orientation ) ) {
+    if ( !isOrientationExternal ) {
       // min external "both" case
       BoundsIntersectionFilter.recurse(
         orientation,
@@ -298,6 +325,7 @@ export default class BoundsIntersectionFilter {
         newExternal,
         minSplit,
         newClipped,
+        depth + 1,
         callback
       );
 
@@ -311,6 +339,7 @@ export default class BoundsIntersectionFilter {
         newExternal,
         maxSplit,
         newClipped,
+        depth + 1,
         callback
       );
     }
