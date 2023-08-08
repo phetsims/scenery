@@ -9,12 +9,84 @@ import { scenery } from '../../imports.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
+import { SegmentTree } from '../../../../kite/js/imports.js';
 
 type Item = {
   bounds: Bounds2;
 };
 
+class ItemSegmentTree extends SegmentTree<Item> {
+  public getMinX( item: Item, epsilon: number ): number {
+    return item.bounds.left - epsilon;
+  }
+
+  public getMaxX( item: Item, epsilon: number ): number {
+    return item.bounds.right + epsilon;
+  }
+}
+
 export default class BoundsIntersectionFilter {
+
+  public static quadraticIntersect( maximumBounds: Bounds2, items: Item[], callback: ( itemA: Item, itemB: Item ) => void ): void {
+    for ( let i = 0; i < items.length; i++ ) {
+      const itemA = items[ i ];
+      const boundsA = itemA.bounds;
+      for ( let j = i + 1; j < items.length; j++ ) {
+        const itemB = items[ j ];
+        if ( boundsA.intersectsBounds( itemB.bounds ) ) {
+          callback( itemA, itemB );
+        }
+      }
+    }
+  }
+
+  public static sweepLineIntersect( maximumBounds: Bounds2, items: Item[], callback: ( itemA: Item, itemB: Item ) => void ): void {
+
+    // We'll expand bounds by this amount, so that "adjacent" bounds (with a potentially overlapping vertical or
+    // horizontal line) will have a non-zero amount of area overlapping.
+    const epsilon = 1e-10;
+
+    // Our queue will store entries of { start: boolean, edge: Edge }, representing a sweep line similar to the
+    // Bentley-Ottmann approach. We'll track which edges are passing through the sweep line.
+    // ts-ignore-line
+    const queue = new FlatQueue();
+
+    // Tracks which edges are through the sweep line, but in a graph structure like a segment/interval tree, so that we
+    // can have fast lookup (what edges are in a certain range) and also fast inserts/removals.
+    const segmentTree = new ItemSegmentTree( epsilon );
+
+    // Adds an edge to the queue
+    const addToQueue = ( item: Item ) => {
+      const bounds = item.bounds;
+
+      // TODO: see if object allocations are slow here
+      queue.push( { start: true, item: item }, bounds.minY - epsilon );
+      queue.push( { start: false, item: item }, bounds.maxY + epsilon );
+    };
+
+    for ( let i = 0; i < items.length; i++ ) {
+      addToQueue( items[ i ] );
+    }
+
+    while ( queue.length ) {
+      const entry: { start: boolean; item: Item } = queue.pop();
+      const item = entry.item;
+
+      if ( entry.start ) {
+        segmentTree.query( item, otherItem => {
+          callback( item, otherItem );
+          return false;
+        } );
+
+        segmentTree.addItem( item );
+      }
+      else {
+        // Removal can't trigger an intersection, so we can safely remove it
+        segmentTree.removeItem( item );
+      }
+    }
+  }
+
   public static filterIntersect( maximumBounds: Bounds2, items: Item[], callback: ( itemA: Item, itemB: Item ) => void ): void {
     BoundsIntersectionFilter.recurse(
       Orientation.HORIZONTAL,
