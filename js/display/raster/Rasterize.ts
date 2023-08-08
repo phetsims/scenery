@@ -37,12 +37,80 @@ class IntegerEdge {
   }
 }
 
-class RationalEdge {
+class Face {
+  public readonly boundary: RationalHalfEdge[] = [];
+  public readonly holes: RationalHalfEdge[] = [];
+}
+
+class RationalHalfEdge {
+
+  public face: Face | null = null;
+  public nextEdge: RationalHalfEdge | null = null;
+
+  public reversed!: RationalHalfEdge; // We will fill this in immediately
+  public windingMap = new Map<RenderPath, number>();
+
+  // 0 for straight +x, 1 for +y, 2 for straight -x, 3 for -y
+  public discriminator!: number; // filled in immediately
+
+  public slope!: BigRational; // filled in immediately
+
   public constructor(
-    public readonly renderPath: RenderPath,
+    public readonly edgeId: number,
     public readonly p0: BigRationalVector2,
     public readonly p1: BigRationalVector2
   ) {}
+
+  public static compareBigInt( a: bigint, b: bigint ): number {
+    return a < b ? -1 : ( a > b ? 1 : 0 );
+  }
+
+  // Provides a stable comparison, but this is NOT numerical!!!
+  public static quickCompareBigRational( a: BigRational, b: BigRational ): number {
+    const numeratorCompare = RationalHalfEdge.compareBigInt( a.numerator, b.numerator );
+    if ( numeratorCompare !== 0 ) {
+      return numeratorCompare;
+    }
+    return RationalHalfEdge.compareBigInt( a.denominator, b.denominator );
+  }
+
+  public static quickCompareBigRationalVector2( a: BigRationalVector2, b: BigRationalVector2 ): number {
+    const xCompare = RationalHalfEdge.quickCompareBigRational( a.x, b.x );
+    if ( xCompare !== 0 ) {
+      return xCompare;
+    }
+    return RationalHalfEdge.quickCompareBigRational( a.y, b.y );
+  }
+
+  public addWindingFrom( other: RationalHalfEdge ): void {
+    this.windingMap.forEach( ( winding, quantity ) => {
+      other.windingMap.set( quantity, ( other.windingMap.get( quantity ) || 0 ) + winding );
+    } );
+  }
+
+  public compare( other: RationalHalfEdge ): number {
+    // can have an arbitrary sort for the first point
+    const p0Compare = RationalHalfEdge.quickCompareBigRationalVector2( this.p0, other.p0 );
+    if ( p0Compare !== 0 ) {
+      return p0Compare;
+    }
+
+    // now an angle-based sort for the second point
+    if ( this.discriminator < other.discriminator ) {
+      return -1;
+    }
+    else if ( this.discriminator > other.discriminator ) {
+      return 1;
+    }
+    // NOTE: using x/y "slope", so it's a bit inverted
+    const slopeCompare = this.slope.compareCrossMul( other.slope );
+    if ( slopeCompare !== 0 ) {
+      return -slopeCompare;
+    }
+
+    // Now, we're sorting "identically overlapping" half-edges
+    return this.edgeId < other.edgeId ? -1 : ( this.edgeId > other.edgeId ? 1 : 0 );
+  }
 }
 
 export default class Rasterize {
@@ -111,7 +179,8 @@ export default class Rasterize {
       }
     } );
 
-    const rationalEdges: RationalEdge[] = [];
+    let edgeIdCounter = 0;
+    const rationalHalfEdges: RationalHalfEdge[] = [];
     integerEdges.forEach( integerEdge => {
       const points = [
         new BigRationalVector2( BigRational.whole( integerEdge.x0 ), BigRational.whole( integerEdge.y0 ) )
@@ -140,9 +209,60 @@ export default class Rasterize {
         const p0 = points[ i ];
         const p1 = points[ ( i + 1 ) % points.length ];
 
-        rationalEdges.push( new RationalEdge( integerEdge.renderPath, p0, p1 ) );
+        // We will remove degenerate edges now, so during the deduplication we won't collapse them together
+        if ( !p0.equals( p1 ) ) {
+          const edgeId = edgeIdCounter++;
+          const forwardEdge = new RationalHalfEdge( edgeId, p0, p1 );
+          const reverseEdge = new RationalHalfEdge( edgeId, p1, p0 );
+          forwardEdge.reversed = reverseEdge;
+          reverseEdge.reversed = forwardEdge;
+          forwardEdge.windingMap.set( integerEdge.renderPath, 1 );
+          reverseEdge.windingMap.set( integerEdge.renderPath, -1 );
+
+          const deltaX = integerEdge.x1 - integerEdge.x0;
+          const deltaY = integerEdge.y1 - integerEdge.y0;
+
+          const discriminator = deltaY === 0 ? ( deltaX > 0 ? 0 : 2 ) : ( deltaY > 0 ? 1 : 3 );
+          const slope = deltaY === 0 ? BigRational.ZERO : new BigRational( deltaX, deltaY ).reduced();
+
+          forwardEdge.discriminator = discriminator;
+          reverseEdge.discriminator = ( discriminator + 2 ) % 4;
+          forwardEdge.slope = slope;
+          reverseEdge.slope = slope;
+
+          rationalHalfEdges.push( forwardEdge );
+          rationalHalfEdges.push( reverseEdge );
+        }
       }
     } );
+
+    rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
+
+    // Do filtering for duplicate half-edges AND connecting edge linked list in the same traversal
+    let firstEdge = rationalHalfEdges[ 0 ];
+    let lastEdge = rationalHalfEdges[ 0 ];
+    const filteredRationalHalfEdges = [ lastEdge ];
+    for ( let i = 1; i < rationalHalfEdges.length; i++ ) {
+      const edge = rationalHalfEdges[ i ];
+
+      if ( edge.p0.equals( lastEdge.p0 ) ) {
+        if ( edge.p1.equals( lastEdge.p1 ) ) {
+          lastEdge.addWindingFrom( edge );
+        }
+        else {
+          filteredRationalHalfEdges.push( edge );
+          lastEdge.nextEdge = edge.reversed;
+          lastEdge = edge;
+        }
+      }
+      else {
+        lastEdge.nextEdge = firstEdge.reversed;
+        filteredRationalHalfEdges.push( edge );
+        firstEdge = edge;
+        lastEdge = edge;
+      }
+    }
+    lastEdge.reversed.nextEdge = firstEdge; // last connection
   }
 }
 

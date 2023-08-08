@@ -3,6 +3,8 @@
 /**
  * An affine matrix - TODO: just replace this with typed arrays
  *
+ * TODO: pooling?
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

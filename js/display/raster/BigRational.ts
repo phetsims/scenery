@@ -55,6 +55,14 @@ export default class BigRational {
     ).reduced();
   }
 
+  // lazy implementation NOT meant to be in JS due to excess reduction
+  public dividedBy( rational: BigRational ): BigRational {
+    return new BigRational(
+      this.numerator * rational.denominator,
+      this.denominator * rational.numerator
+    ).reduced();
+  }
+
   public reduce(): void {
     if ( this.numerator === 0n ) {
       this.denominator = 1n;
@@ -81,6 +89,14 @@ export default class BigRational {
 
   public isZero(): boolean {
     return this.numerator === 0n;
+  }
+
+  public isNegative(): boolean {
+    return this.numerator < 0n;
+  }
+
+  public isPositive(): boolean {
+    return this.numerator > 0n;
   }
 
   public ratioTest(): number {
