@@ -387,20 +387,14 @@ class Instance {
 
     const hasClip = this.node.hasClipArea();
     const hasFilters = this.node.effectiveOpacity !== 1 || node._usesOpacity || this.node._filters.length > 0;
-    // let hasNonDOMFilter = false;
     let hasNonSVGFilter = false;
     let hasNonCanvasFilter = false;
     let hasNonVelloFilter = false;
-    // let hasNonWebGLFilter = false;
     if ( hasFilters ) {
       // NOTE: opacity is OK with all of those (currently)
       for ( let i = 0; i < this.node._filters.length; i++ ) {
         const filter = this.node._filters[ i ];
 
-        // TODO: how to handle this, if we split AT the node?
-        // if ( !filter.isDOMCompatible() ) {
-        //   hasNonDOMFilter = true;
-        // }
         if ( !filter.isSVGCompatible() ) {
           hasNonSVGFilter = true;
         }
@@ -408,12 +402,8 @@ class Instance {
           hasNonCanvasFilter = true;
         }
         if ( !filter.isVelloCompatible() ) {
-          // TODO: Vello filters?
           hasNonVelloFilter = true;
         }
-        // if ( !filter.isWebGLCompatible() ) {
-        //   hasNonWebGLFilter = true;
-        // }
       }
     }
     const requiresSplit = node._cssTransform || node._layerSplit;
