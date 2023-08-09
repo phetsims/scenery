@@ -10,6 +10,8 @@ import { BigIntVector2, BigRational, BigRationalVector2, BoundsIntersectionFilte
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Utils from '../../../../dot/js/Utils.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 class RationalIntersection {
   public constructor( public readonly t: BigRational, public readonly point: BigRationalVector2 ) {}
@@ -46,6 +48,7 @@ class RationalHalfEdge {
 
   public face: Face | null = null;
   public nextEdge: RationalHalfEdge | null = null;
+  public boundary: RationalBoundary | null = null;
 
   public reversed!: RationalHalfEdge; // We will fill this in immediately
   public windingMap = new Map<RenderPath, number>();
@@ -55,11 +58,17 @@ class RationalHalfEdge {
 
   public slope!: BigRational; // filled in immediately
 
+  public p0float: Vector2;
+  public p1float: Vector2;
+
   public constructor(
     public readonly edgeId: number,
     public readonly p0: BigRationalVector2,
     public readonly p1: BigRationalVector2
-  ) {}
+  ) {
+    this.p0float = new Vector2( p0.x.toFloat(), p0.y.toFloat() );
+    this.p1float = new Vector2( p1.x.toFloat(), p1.y.toFloat() );
+  }
 
   public static compareBigInt( a: bigint, b: bigint ): number {
     return a < b ? -1 : ( a > b ? 1 : 0 );
@@ -113,14 +122,41 @@ class RationalHalfEdge {
   }
 }
 
+class RationalBoundary {
+  public readonly edges: RationalHalfEdge[] = [];
+
+  public getSignedArea(): number {
+    let sum = 0;
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i % this.edges.length ];
+
+      // PolygonIntegrals.evaluateShoelaceArea( p0.x, p0.y, p1.x, p1.y );
+      sum += 0.5 * ( edge.p1float.x + edge.p0float.x ) * ( edge.p1float.y - edge.p0float.y );
+    }
+
+    return sum;
+  }
+}
+
 export default class Rasterize {
-  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2 ): void {
+  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2 ): Record<string, IntentionalAny> | null {
+
+    let debugData: Record<string, IntentionalAny> | null;
+    if ( assert ) {
+      debugData = {};
+    }
+
+    // TODO: include "background" region in CAG!
 
     assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
 
     // const imageData = new ImageData( bounds.width, bounds.height, { colorSpace: 'srgb' } );
 
     const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( bounds.width, bounds.height ) ) ) );
+    if ( assert ) {
+      debugData!.scale = scale;
+    }
 
     const paths: RenderPath[] = [];
     renderProgram.depthFirst( program => {
@@ -128,6 +164,15 @@ export default class Rasterize {
         paths.push( program.path );
       }
     } );
+    const backgroundPath = new RenderPath( 'nonzero', [
+      [
+        bounds.leftTop,
+        bounds.rightTop,
+        bounds.rightBottom,
+        bounds.leftBottom
+      ]
+    ] );
+    paths.push( backgroundPath );
 
     const integerBounds = new Bounds2(
       Utils.roundSymmetric( bounds.minX * scale ),
@@ -135,8 +180,14 @@ export default class Rasterize {
       Utils.roundSymmetric( bounds.maxX * scale ),
       Utils.roundSymmetric( bounds.maxY * scale )
     );
+    if ( assert ) {
+      debugData!.integerBounds = integerBounds;
+    }
 
     const integerEdges: IntegerEdge[] = [];
+    if ( assert ) {
+      debugData!.integerEdges = integerEdges;
+    }
 
     paths.forEach( path => {
       path.subpaths.forEach( subpath => {
@@ -201,13 +252,11 @@ export default class Rasterize {
         lastT = intersection.t;
       } );
 
-      points.push( ...integerEdge.intersections.map( intersection => intersection.point ) );
-
       points.push( new BigRationalVector2( BigRational.whole( integerEdge.x1 ), BigRational.whole( integerEdge.y1 ) ) );
 
-      for ( let i = 0; i < points.length; i++ ) {
+      for ( let i = 0; i < points.length - 1; i++ ) {
         const p0 = points[ i ];
-        const p1 = points[ ( i + 1 ) % points.length ];
+        const p1 = points[ i + 1 ];
 
         // We will remove degenerate edges now, so during the deduplication we won't collapse them together
         if ( !p0.equals( p1 ) ) {
@@ -242,6 +291,9 @@ export default class Rasterize {
     let firstEdge = rationalHalfEdges[ 0 ];
     let lastEdge = rationalHalfEdges[ 0 ];
     const filteredRationalHalfEdges = [ lastEdge ];
+    if ( assert ) {
+      debugData!.filteredRationalHalfEdges = filteredRationalHalfEdges;
+    }
     for ( let i = 1; i < rationalHalfEdges.length; i++ ) {
       const edge = rationalHalfEdges[ i ];
 
@@ -251,18 +303,52 @@ export default class Rasterize {
         }
         else {
           filteredRationalHalfEdges.push( edge );
-          lastEdge.nextEdge = edge.reversed;
+          edge.reversed.nextEdge = lastEdge;
           lastEdge = edge;
         }
       }
       else {
-        lastEdge.nextEdge = firstEdge.reversed;
+        firstEdge.reversed.nextEdge = lastEdge;
         filteredRationalHalfEdges.push( edge );
         firstEdge = edge;
         lastEdge = edge;
       }
     }
-    lastEdge.reversed.nextEdge = firstEdge; // last connection
+    firstEdge.reversed.nextEdge = lastEdge; // last connection
+
+    const innerBoundaries: RationalBoundary[] = [];
+    const outerBoundaries: RationalBoundary[] = [];
+    if ( assert ) {
+      debugData!.innerBoundaries = innerBoundaries;
+      debugData!.outerBoundaries = outerBoundaries;
+    }
+    for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
+      const firstEdge = filteredRationalHalfEdges[ i ];
+      if ( !firstEdge.boundary ) {
+        const boundary = new RationalBoundary();
+        boundary.edges.push( firstEdge );
+        firstEdge.boundary = boundary;
+
+        let edge = firstEdge.nextEdge!;
+        while ( edge !== firstEdge ) {
+          edge.boundary = boundary;
+          boundary.edges.push( edge );
+          edge = edge.nextEdge!;
+        }
+
+        const signedArea = boundary.getSignedArea();
+        if ( Math.abs( signedArea ) > 1e-8 ) {
+          if ( signedArea > 0 ) {
+            innerBoundaries.push( boundary );
+          }
+          else {
+            outerBoundaries.push( boundary );
+          }
+        }
+      }
+    }
+
+    return ( debugData! ) || null;
   }
 }
 

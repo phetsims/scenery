@@ -415,28 +415,40 @@ an UI and Display made for visual testing and debugging.
 
   window.rasterTest = function() {
     setTimeout( async function() {
+      const boundsRect = bounds => [
+        new phet.dot.Vector2( bounds.minX, bounds.minY ),
+        new phet.dot.Vector2( bounds.maxX, bounds.minY ),
+        new phet.dot.Vector2( bounds.maxX, bounds.maxY ),
+        new phet.dot.Vector2( bounds.minX, bounds.maxY )
+      ];
+      const reversedBoundsRect = bounds => {
+        const result = boundsRect( bounds );
+        result.reverse();
+        return result;
+      }
       const pathA = new phet.scenery.RenderPath( 'nonzero', [
         [
-          new phet.dot.Vector2( 0, 0 ),
+          new phet.dot.Vector2( -5, -5 ),
           new phet.dot.Vector2( 10, 0 ),
-          new phet.dot.Vector2( 13.52, 17.154 ),
-          new phet.dot.Vector2( 0, 10 )
+          new phet.dot.Vector2( 14, 25 ),
+          new phet.dot.Vector2( 0, 5 )
         ]
       ] );
       const pathB = new phet.scenery.RenderPath( 'nonzero', [
         [
           new phet.dot.Vector2( 5, 5 ),
-          new phet.dot.Vector2( 15, 5 ),
-          new phet.dot.Vector2( 24.2105, 21.5142 ),
+          new phet.dot.Vector2( 25, 5 ),
+          new phet.dot.Vector2( 10, 10 ),
+          new phet.dot.Vector2( 20, 20 ),
           new phet.dot.Vector2( 5, 15 )
         ]
       ] );
       const pathC = new phet.scenery.RenderPath( 'nonzero', [
         [
-          new phet.dot.Vector2( 0, 0 ),
+          new phet.dot.Vector2( 5, 0 ),
           new phet.dot.Vector2( 20, 0 ),
           new phet.dot.Vector2( 20, 20 ),
-          new phet.dot.Vector2( 0, 20 )
+          new phet.dot.Vector2( 5, 20 )
         ]
       ] );
       const pathD = new phet.scenery.RenderPath( 'nonzero', [
@@ -446,6 +458,18 @@ an UI and Display made for visual testing and debugging.
           new phet.dot.Vector2( 32, 32 ),
           new phet.dot.Vector2( 0, 40 )
         ]
+      ] );
+      const pathE = new phet.scenery.RenderPath( 'nonzero', [
+        boundsRect( new phet.dot.Bounds2( 10, 40, 30, 60 ) ),
+        boundsRect( new phet.dot.Bounds2( 40, 40, 60, 60 ) ),
+        reversedBoundsRect( new phet.dot.Bounds2( 45, 45, 50, 50 ) ),
+        reversedBoundsRect( new phet.dot.Bounds2( 45, 35, 50, 42 ) ),
+      ] );
+      const pathF = new phet.scenery.RenderPath( 'nonzero', [
+        boundsRect( new phet.dot.Bounds2( 50, 50, 55, 55 ) ),
+        boundsRect( new phet.dot.Bounds2( 42, 53, 47, 58 ) ),
+        boundsRect( new phet.dot.Bounds2( 46, 46, 49, 49 ) ),
+        boundsRect( new phet.dot.Bounds2( 15, 45, 25, 55 ) )
       ] );
 
       const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
@@ -458,18 +482,149 @@ an UI and Display made for visual testing and debugging.
         new phet.scenery.RenderGradientStop( 0.75, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 5,186,221, 1 ) ) ),
         new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 43,72,113, 1 ) ) )
       ], 0 );
+      const e = phet.scenery.RenderColor.fromColor( pathE, new phet.scenery.Color( 255, 255, 255, 1 ) );
+      const f = phet.scenery.RenderColor.fromColor( pathF, new phet.scenery.Color( 0, 0, 0, 1 ) );
       const back = phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 128, 128, 128, 0.5 ) );
 
+      const normalBlendArray = arr => {
+        let result = arr[ 0 ];
+        for ( let i = 1; i < arr.length; i++ ) {
+          result = new phet.scenery.RenderBlendCompose( 0, 0, arr[ i ], result );
+        }
+        return result;
+      };
+
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const dx = new phet.scenery.RenderBlendCompose( 0, 0, d, back );
-      const bcd = new phet.scenery.RenderBlendCompose( 0, 0, bc, dx );
-      const program = new phet.scenery.RenderBlendCompose( 0, 0, a, bcd );
+      const program = normalBlendArray( [ back, e, f, d, bc, a ] );
 
       const canvas = program.slowRasterizeToCanvas( 64, 64, 8 );
-      canvas.style.width = ( canvas.width / window.devicePixelRatio ) + 'px';
-      canvas.style.height = ( canvas.height / window.devicePixelRatio ) + 'px';
+      // canvas.style.width = ( canvas.width / window.devicePixelRatio ) + 'px';
+      // canvas.style.height = ( canvas.height / window.devicePixelRatio ) + 'px';
+      canvas.style.width = '512px';
+      canvas.style.height = '512px';
+      canvas.style.imageRendering = 'pixelated';
+      canvas.style.position = 'absolute';
+      canvas.style.opacity = '0.4';
+      canvas.style.top = '20px';
+      canvas.style.left = '20px ';
       document.body.appendChild( canvas );
       console.log( canvas.toDataURL() );
+
+      const debugData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, 64, 64 ) );
+
+      console.log( debugData );
+
+      const displayScale = ( 512 / 64 ) / debugData.scale;
+
+      const offsetNode = new phet.scenery.Node( {
+        x: 20, y: 20
+      } );
+      scene.addChild( offsetNode );
+
+      const SHOW_INTEGER_EDGES = false;
+      const SHOW_INTERSECTIONS = false;
+      const SHOW_HALF_EDGES = false;
+      const SHOW_BOUNDARIES = true;
+
+      if ( SHOW_INTEGER_EDGES ) {
+        debugData.integerEdges.forEach( integerEdge => {
+          offsetNode.addChild( new phet.scenery.Line(
+            integerEdge.x0 * displayScale,
+            integerEdge.y0 * displayScale,
+            integerEdge.x1 * displayScale,
+            integerEdge.y1 * displayScale,
+            { stroke: 'black' } ) );
+        } );
+      }
+      if ( SHOW_INTERSECTIONS ) {
+        debugData.integerEdges.forEach( integerEdge => {
+          integerEdge.intersections.forEach( intersection => {
+            const point = new phet.dot.Vector2(
+              intersection.point.x.toFloat() * displayScale,
+              intersection.point.y.toFloat() * displayScale
+            );
+            offsetNode.addChild( new phet.scenery.Circle( 2, {
+              fill: 'black',
+              translation: point
+            } ) );
+          } );
+        } );
+      }
+      if ( SHOW_HALF_EDGES ) {
+        debugData.filteredRationalHalfEdges.forEach( halfEdge => {
+          const p0 = halfEdge.p0float;
+          const p1 = halfEdge.p1float;
+          const p2 = halfEdge.nextEdge.p1float;
+          const mid1 = p0.average( p1 );
+          const mid2 = p1.average( p2 );
+
+          const nextEdge = halfEdge.nextEdge;
+
+          offsetNode.addChild( new phet.scenery.Line(
+            mid1.x * displayScale,
+            mid1.y * displayScale,
+            p1.x * displayScale,
+            p1.y * displayScale,
+            { stroke: 'rgba(0,0,0,0.5)' } ) );
+
+          const offset1 = p1.minus( p0 ).normalized().perpendicular.negate().timesScalar( 2 );
+          const offset2 = p2.minus( p1 ).normalized().perpendicular.negate().timesScalar( 2 );
+
+          const q0 = mid1.timesScalar( displayScale ).plus( offset1 );
+          let q1 = p1.timesScalar( displayScale ).plus( offset1 );
+          let r0 = p1.timesScalar( displayScale ).plus( offset2 );
+          const r1 = mid2.timesScalar( displayScale ).plus( offset2 );
+
+          const intersection = phet.dot.Utils.lineLineIntersection( q0, q1, r0, r1 );
+          if ( intersection !== null ) {
+            q1 = intersection;
+            r0 = intersection;
+          }
+
+          offsetNode.addChild( new phet.scenery.Line( q0, q1, { stroke: 'rgba(255,0,0,0.5)' } ) );
+          offsetNode.addChild( new phet.scenery.Line( r0, r1, { stroke: 'rgba(0,0,255,0.5)' } ) );
+        } );
+      }
+
+      if ( SHOW_BOUNDARIES ) {
+        const showBoundary = ( boundary, offsetMagnitude, stroke ) => {
+          const polygon = boundary.edges.map( halfEdge => halfEdge.p0float.timesScalar( displayScale ) );
+          const offsetPolygon = polygon.map( ( point, index ) => {
+            const p0 = polygon[ ( ( index - 1 ) + polygon.length ) % polygon.length ];
+            const p1 = point;
+            const p2 = polygon[ ( index + 1 ) % polygon.length ];
+
+            const offset1 = p1.minus( p0 ).normalized().perpendicular.negate().timesScalar( offsetMagnitude );
+            const offset2 = p2.minus( p1 ).normalized().perpendicular.negate().timesScalar( offsetMagnitude );
+
+            const q0 = p0.plus( offset1 );
+            let q1 = p1.plus( offset1 );
+            let r0 = p1.plus( offset2 );
+            const r1 = p2.plus( offset2 );
+
+            const intersection = phet.dot.Utils.lineLineIntersection( q0, q1, r0, r1 );
+            if ( intersection !== null ) {
+              return intersection;
+            }
+            else {
+              // collinear, we don't need to change anything
+              return q1;
+            }
+          } );
+          offsetNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( offsetPolygon ), {
+            stroke: stroke
+          } ) );
+        };
+        debugData.innerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'blue' ) );
+        debugData.outerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'red' ) );
+      }
+
+      if ( offsetNode.bounds.isValid() ) {
+        display.backgroundColor = phet.scenery.Color.TRANSPARENT;
+        display.width = Math.ceil( offsetNode.right ) + 5;
+        display.height = Math.ceil( offsetNode.bottom ) + 5;
+        display.updateDisplay();
+      }
     } )
   };
 

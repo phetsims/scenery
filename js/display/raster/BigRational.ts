@@ -128,6 +128,11 @@ export default class BigRational {
     return thisReduced.numerator === otherReduced.numerator && thisReduced.denominator === otherReduced.denominator;
   }
 
+  // TODO: better way to do this?
+  public toFloat( precision = Number.MAX_SAFE_INTEGER ): number {
+    return Number( this.numerator * BigInt( precision ) / this.denominator ) / precision;
+  }
+
   public toString(): string {
     return this.denominator === 1n ? `${this.numerator}` : `${this.numerator}/${this.denominator}`;
   }
