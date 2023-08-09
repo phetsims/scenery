@@ -460,16 +460,40 @@ an UI and Display made for visual testing and debugging.
         ]
       ] );
       const pathE = new phet.scenery.RenderPath( 'nonzero', [
-        boundsRect( new phet.dot.Bounds2( 10, 40, 30, 60 ) ),
         boundsRect( new phet.dot.Bounds2( 40, 40, 60, 60 ) ),
         reversedBoundsRect( new phet.dot.Bounds2( 45, 45, 50, 50 ) ),
         reversedBoundsRect( new phet.dot.Bounds2( 45, 35, 50, 42 ) ),
+
+        [
+          new phet.dot.Vector2( 30, 50 ),
+          new phet.dot.Vector2( 10, 60 ),
+          new phet.dot.Vector2( 10, 40 )
+        ],
+        boundsRect( new phet.dot.Bounds2( 30, 40, 35, 50 ) ),
+
       ] );
       const pathF = new phet.scenery.RenderPath( 'nonzero', [
         boundsRect( new phet.dot.Bounds2( 50, 50, 55, 55 ) ),
         boundsRect( new phet.dot.Bounds2( 42, 53, 47, 58 ) ),
         boundsRect( new phet.dot.Bounds2( 46, 46, 49, 49 ) ),
-        boundsRect( new phet.dot.Bounds2( 15, 45, 25, 55 ) )
+        boundsRect( new phet.dot.Bounds2( 46, 50, 49, 51 ) ),
+        boundsRect( new phet.dot.Bounds2( 50, 46, 51, 49 ) ),
+        [
+          new phet.dot.Vector2( 25, 50 ),
+          new phet.dot.Vector2( 12, 45 ),
+          new phet.dot.Vector2( 12, 55 ),
+        ],
+        [
+          new phet.dot.Vector2( 30, 50 ),
+          new phet.dot.Vector2( 10, 60 ),
+          new phet.dot.Vector2( 30, 60 )
+        ],
+        [
+          new phet.dot.Vector2( 30, 50 ),
+          new phet.dot.Vector2( 10, 40 ),
+          new phet.dot.Vector2( 30, 40 )
+        ],
+        boundsRect( new phet.dot.Bounds2( 30, 50, 35, 60 ) ),
       ] );
 
       const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
