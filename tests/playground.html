@@ -466,11 +466,12 @@ an UI and Display made for visual testing and debugging.
 
         [
           new phet.dot.Vector2( 30, 50 ),
-          new phet.dot.Vector2( 10, 60 ),
-          new phet.dot.Vector2( 10, 40 )
+          new phet.dot.Vector2( 20, 60 ),
+          new phet.dot.Vector2( 10, 50 ),
+          new phet.dot.Vector2( 20, 40 )
         ],
         boundsRect( new phet.dot.Bounds2( 30, 40, 35, 50 ) ),
-
+        boundsRect( new phet.dot.Bounds2( 5, 50, 10, 60 ) ),
       ] );
       const pathF = new phet.scenery.RenderPath( 'nonzero', [
         boundsRect( new phet.dot.Bounds2( 50, 50, 55, 55 ) ),
@@ -479,21 +480,33 @@ an UI and Display made for visual testing and debugging.
         boundsRect( new phet.dot.Bounds2( 46, 50, 49, 51 ) ),
         boundsRect( new phet.dot.Bounds2( 50, 46, 51, 49 ) ),
         [
-          new phet.dot.Vector2( 25, 50 ),
-          new phet.dot.Vector2( 12, 45 ),
-          new phet.dot.Vector2( 12, 55 ),
+          new phet.dot.Vector2( 28, 50 ),
+          new phet.dot.Vector2( 20, 45 ),
+          new phet.dot.Vector2( 12, 50 ),
+          new phet.dot.Vector2( 20, 55 ),
         ],
         [
           new phet.dot.Vector2( 30, 50 ),
-          new phet.dot.Vector2( 10, 60 ),
+          new phet.dot.Vector2( 20, 60 ),
           new phet.dot.Vector2( 30, 60 )
         ],
         [
           new phet.dot.Vector2( 30, 50 ),
-          new phet.dot.Vector2( 10, 40 ),
+          new phet.dot.Vector2( 20, 40 ),
           new phet.dot.Vector2( 30, 40 )
         ],
+        [
+          new phet.dot.Vector2( 10, 50 ),
+          new phet.dot.Vector2( 20, 60 ),
+          new phet.dot.Vector2( 10, 60 )
+        ],
+        [
+          new phet.dot.Vector2( 10, 50 ),
+          new phet.dot.Vector2( 20, 40 ),
+          new phet.dot.Vector2( 10, 40 )
+        ],
         boundsRect( new phet.dot.Bounds2( 30, 50, 35, 60 ) ),
+        boundsRect( new phet.dot.Bounds2( 5, 40, 10, 50 ) ),
       ] );
 
       const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
