@@ -562,10 +562,12 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
-      const SHOW_FACE_CONSISTENT_FILL = false;
+      const SHOW_FACE_CONSISTENT_FILL = true;
       const SHOW_FACE_HUE_FILL = false;
       const SHOW_BOUNDARY_DEBUG = false;
       const SHOW_BOUNDARIES = true;
+      // const WINDING_DEBUG_PATH = pathD;
+      const WINDING_DEBUG_PATH = pathA;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
@@ -633,6 +635,10 @@ an UI and Display made for visual testing and debugging.
 
       if ( SHOW_FACE_CONSISTENT_FILL ) {
         debugData.faces.forEach( face => {
+          if ( WINDING_DEBUG_PATH && !face.windingMap.has( WINDING_DEBUG_PATH ) ) {
+            return;
+          }
+
           const boundary = face.boundary;
           const holes = face.holes;
 
@@ -651,13 +657,14 @@ an UI and Display made for visual testing and debugging.
             shape.close();
           } );
 
-          offsetNode.addChild( new phet.scenery.Path( shape, { fill: 'rgba(0,0,0,0.5)' } ) );
+          offsetNode.addChild( new phet.scenery.Path( shape, { fill: 'rgba(0,0,0,0.8)' } ) );
         } );
       }
 
       // TODO: dedup?
       if ( SHOW_FACE_HUE_FILL ) {
         debugData.faces.forEach( ( face, i ) => {
+
           // const color = phet.scenery.Color.hsla( i / debugData.boundaryDebugData.length * 360, 100, 50, 0.5 );
           const color = new phet.scenery.Color(
             Math.floor( 256 * Math.random() ),
