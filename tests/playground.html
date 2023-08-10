@@ -543,9 +543,30 @@ an UI and Display made for visual testing and debugging.
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
       const program = normalBlendArray( [ back, d, e, f, bc, a ] );
 
+      const displaySize = 768;
+      const outputSize = 192;
+
+      program.depthFirst( subProgram => {
+        if ( subProgram instanceof phet.scenery.RenderPathProgram ) {
+          const path = subProgram.path;
+
+          if ( path ) {
+            path.subpaths.forEach( subpath => {
+              for ( let i = 0; i < subpath.length; i++ ) {
+                subpath[ i ] = subpath[ i ].timesScalar( outputSize / 64 );
+              }
+            } );
+          }
+        }
+        if ( subProgram instanceof phet.scenery.RenderLinearGradient ) {
+          subProgram.start = subProgram.start.timesScalar( outputSize / 64 );
+          subProgram.end = subProgram.end.timesScalar( outputSize / 64 );
+        }
+      } );
+
       const styleCanvas = canvas => {
-        canvas.style.width = '512px';
-        canvas.style.height = '512px';
+        canvas.style.width = `${displaySize}px`;
+        canvas.style.height = `${displaySize}px`;
         canvas.style.imageRendering = 'pixelated';
         canvas.style.position = 'absolute';
         canvas.style.opacity = '0.4';
@@ -553,12 +574,12 @@ an UI and Display made for visual testing and debugging.
         canvas.style.left = '20px ';
       };
 
-      // const canvas = program.slowRasterizeToCanvas( 64, 64, 8 );
+      // const canvas = program.slowRasterizeToCanvas( outputSize, outputSize, 8 );
       // styleCanvas( canvas );
       // document.body.appendChild( canvas );
       // console.log( canvas.toDataURL() );
 
-      const debugData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, 64, 64 ) );
+      const debugData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
 
       const debugCanvas = debugData.canvas;
       styleCanvas( debugCanvas );
@@ -566,7 +587,7 @@ an UI and Display made for visual testing and debugging.
 
       console.log( debugData );
 
-      const displayScale = ( 512 / 64 ) / debugData.scale;
+      const displayScale = ( displaySize / outputSize ) / debugData.scale;
 
       const offsetNode = new phet.scenery.Node( {
         x: 20, y: 20
@@ -780,7 +801,7 @@ an UI and Display made for visual testing and debugging.
 
       if ( SHOW_FULL_AREAS ) {
         debugData.areas.forEach( bounds => {
-          bounds = bounds.transformed( phet.dot.Matrix3.scaling( 8 ) );
+          bounds = bounds.transformed( phet.dot.Matrix3.scaling( displaySize / outputSize ) );
           offsetNode.addChild( phet.scenery.Rectangle.bounds( bounds, { stroke: 'rgba(0,0,0,1)' } ) );
         } );
       }
