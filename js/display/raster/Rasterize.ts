@@ -255,7 +255,9 @@ export default class Rasterize {
 
     let debugData: Record<string, IntentionalAny> | null;
     if ( assert ) {
-      debugData = {};
+      debugData = {
+        areas: []
+      };
     }
 
     // TODO: include "background" region in CAG!
@@ -708,7 +710,8 @@ export default class Rasterize {
 
       const faceDebugData: IntentionalAny = assert ? {
         face: face,
-        pixels: []
+        pixels: [],
+        areas: []
       } : null;
       if ( assert ) {
         debugData!.faceDebugData = debugData!.faceDebugData || [];
@@ -757,44 +760,124 @@ export default class Rasterize {
 
       const constColor = faceRenderProgram instanceof RenderColor ? faceRenderProgram.color : null;
 
-      const pixelBounds = Bounds2.NOTHING.copy();
-      for ( let y = minY; y < maxY; y++ ) {
-        pixelBounds.minY = y;
-        pixelBounds.maxY = y + 1;
-        for ( let x = minX; x < maxX; x++ ) {
-          pixelBounds.minX = x;
-          pixelBounds.maxX = x + 1;
-
-          const pixelFace = polygonalFace.getClipped( pixelBounds );
+      const addPixel = ( pixelFace: PolygonalFace, area: number, x: number, y: number ) => {
+        if ( area > 1e-8 ) {
           if ( assert ) {
-            const area = pixelFace.getArea();
-            if ( Math.abs( area ) > 1e-8 ) {
-              faceDebugData.pixels.push( {
-                x: x,
-                y: y,
-                pixelBounds: pixelBounds.copy(),
-                pixelFace: pixelFace,
-                area: area,
-                centroid: pixelFace.getCentroid( area )
-              } );
-            }
+            debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
           }
-          const area = pixelFace.getArea();
-          if ( area > 1e-8 ) {
-            const index = y * rasterWidth + x;
+          const index = y * rasterWidth + x;
 
-            let color;
-            if ( constColor ) {
-              color = constColor;
+          let color;
+          if ( constColor ) {
+            color = constColor;
+          }
+          else {
+            const centroid = pixelFace.getCentroid( area ).minus( translation );
+            color = faceRenderProgram.evaluate( centroid );
+          }
+          accumulationBuffer[ index ].add( color.timesScalar( area ) );
+        }
+      };
+
+      const scratchVector = new Vector2( 0, 0 );
+      const addFullArea = ( face: PolygonalFace, minX: number, minY: number, maxX: number, maxY: number ) => {
+        if ( assert ) {
+          debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
+        }
+        if ( constColor ) {
+          for ( let y = minY; y < maxY; y++ ) {
+            for ( let x = minX; x < maxX; x++ ) {
+              accumulationBuffer[ y * rasterWidth + x ].add( constColor );
             }
-            else {
-              const centroid = pixelFace.getCentroid( area ).minus( translation );
-              color = faceRenderProgram.evaluate( centroid );
-            }
-            accumulationBuffer[ index ].add( color.timesScalar( area ) );
           }
         }
-      }
+        else {
+          for ( let y = minY; y < maxY; y++ ) {
+            for ( let x = minX; x < maxX; x++ ) {
+              const centroid = scratchVector.setXY( x + 0.5, y + 0.5 );
+              accumulationBuffer[ y * rasterWidth + x ].add( faceRenderProgram.evaluate( centroid ) );
+            }
+          }
+        }
+      };
+
+      // TODO: don't shadow
+      const binaryRender = ( face: PolygonalFace, area: number, minX: number, minY: number, maxX: number, maxY: number ) => {
+        const xDiff = maxX - minX;
+        const yDiff = maxY - minY;
+        if ( xDiff === 1 && yDiff === 1 ) {
+          addPixel( face, area, minX, minY );
+        }
+        else if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
+          addFullArea( face, minX, minY, maxX, maxY );
+        }
+        else {
+          if ( xDiff > yDiff ) {
+            const xSplit = Math.floor( ( minX + maxX ) / 2 );
+            // TODO: allocation?
+            const leftFace = face.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
+            const rightFace = face.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
+
+            const leftArea = leftFace.getArea();
+            const rightArea = rightFace.getArea();
+
+            if ( leftArea > 1e-8 ) {
+              binaryRender( leftFace, leftArea, minX, minY, xSplit, maxY );
+            }
+            if ( rightArea > 1e-8 ) {
+              binaryRender( rightFace, rightArea, xSplit, minY, maxX, maxY );
+            }
+          }
+          else {
+            const ySplit = Math.floor( ( minY + maxY ) / 2 );
+            // TODO: allocation?
+            const topFace = face.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
+            const bottomFace = face.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
+
+            const topArea = topFace.getArea();
+            const bottomArea = bottomFace.getArea();
+
+            if ( topArea > 1e-8 ) {
+              binaryRender( topFace, topArea, minX, minY, maxX, ySplit );
+            }
+            if ( bottomArea > 1e-8 ) {
+              binaryRender( bottomFace, bottomArea, minX, ySplit, maxX, maxY );
+            }
+          }
+        }
+      };
+
+      const fullRender = () => {
+        const pixelBounds = Bounds2.NOTHING.copy();
+        for ( let y = minY; y < maxY; y++ ) {
+          pixelBounds.minY = y;
+          pixelBounds.maxY = y + 1;
+          for ( let x = minX; x < maxX; x++ ) {
+            pixelBounds.minX = x;
+            pixelBounds.maxX = x + 1;
+
+            const pixelFace = polygonalFace.getClipped( pixelBounds );
+            // if ( assert ) {
+            //   const area = pixelFace.getArea();
+            //   if ( Math.abs( area ) > 1e-8 ) {
+            //     faceDebugData.pixels.push( {
+            //       x: x,
+            //       y: y,
+            //       pixelBounds: pixelBounds.copy(),
+            //       pixelFace: pixelFace,
+            //       area: area,
+            //       centroid: pixelFace.getCentroid( area )
+            //     } );
+            //   }
+            // }
+            const area = pixelFace.getArea();
+            addPixel( pixelFace, area, x, y );
+          }
+        }
+      };
+
+      binaryRender( polygonalFace, polygonalFace.getArea(), minX, minY, maxX, maxY );
+
 
       // TODO: more advanced handling
 

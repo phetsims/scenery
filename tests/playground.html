@@ -573,7 +573,7 @@ an UI and Display made for visual testing and debugging.
       } );
       scene.addChild( offsetNode );
 
-      const SHOW_INTEGER_EDGES = true;
+      const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
       const SHOW_FACE_CONSISTENT_FILL = false;
@@ -584,6 +584,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INCLUSION_DEBUG = false;
       const INCLUSION_DEBUG_PATH = pathF;
       const SHOW_SOLID_COLORS = false;
+      const SHOW_FULL_AREAS = true;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
@@ -774,6 +775,13 @@ an UI and Display made for visual testing and debugging.
           if ( face.renderProgram instanceof phet.scenery.RenderColor ) {
             offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: phet.scenery.RenderColor.premultipliedLinearToColor( face.renderProgram.color ) } ) );
           }
+        } );
+      }
+
+      if ( SHOW_FULL_AREAS ) {
+        debugData.areas.forEach( bounds => {
+          bounds = bounds.transformed( phet.dot.Matrix3.scaling( 8 ) );
+          offsetNode.addChild( phet.scenery.Rectangle.bounds( bounds, { stroke: 'rgba(0,0,0,1)' } ) );
         } );
       }
 
