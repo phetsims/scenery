@@ -562,7 +562,9 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
-      const SHOW_FACE_CONSISTENT_FILL = true;
+      const SHOW_FACE_CONSISTENT_FILL = false;
+      const SHOW_FACE_HUE_FILL = false;
+      const SHOW_BOUNDARY_DEBUG = false;
       const SHOW_BOUNDARIES = true;
 
       if ( SHOW_INTEGER_EDGES ) {
@@ -630,7 +632,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       if ( SHOW_FACE_CONSISTENT_FILL ) {
-        debugData.faces.slice( 2 ).forEach( face => {
+        debugData.faces.forEach( face => {
           const boundary = face.boundary;
           const holes = face.holes;
 
@@ -650,6 +652,70 @@ an UI and Display made for visual testing and debugging.
           } );
 
           offsetNode.addChild( new phet.scenery.Path( shape, { fill: 'rgba(0,0,0,0.5)' } ) );
+        } );
+      }
+
+      // TODO: dedup?
+      if ( SHOW_FACE_HUE_FILL ) {
+        debugData.faces.forEach( ( face, i ) => {
+          // const color = phet.scenery.Color.hsla( i / debugData.boundaryDebugData.length * 360, 100, 50, 0.5 );
+          const color = new phet.scenery.Color(
+            Math.floor( 256 * Math.random() ),
+            Math.floor( 256 * Math.random() ),
+            Math.floor( 256 * Math.random() ),
+            1
+          );
+
+          const boundary = face.boundary;
+          const holes = face.holes;
+
+          const polygons = [
+            boundaryToPolygon( boundary ),
+            ...holes.map( boundaryToPolygon )
+          ];
+
+          const shape = new phet.kite.Shape();
+
+          polygons.forEach( polygon => {
+            shape.moveToPoint( polygon[ 0 ] );
+            for ( let i = 1; i < polygon.length; i++ ) {
+              shape.lineToPoint( polygon[ i ] );
+            }
+            shape.close();
+          } );
+
+          offsetNode.addChild( new phet.scenery.Path( shape, { fill: color } ) );
+        } );
+      }
+
+      if ( SHOW_BOUNDARY_DEBUG ) {
+        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 1 ] ];
+        debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 2 ] ];
+        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 3 ] ];
+        debugData.boundaryDebugData.forEach( ( data, i ) => {
+          const connectedFace = data.connectedFace;
+          const maxIntersectionEdge = data.maxIntersectionEdge;
+          const maxIntersectionIsVertex = data.maxIntersectionIsVertex;
+          const maxIntersectionX = data.maxIntersectionX;
+          const outerBoundary = data.outerBoundary;
+
+          if ( maxIntersectionEdge ) {
+            const minimalXRationalPoint = outerBoundary.minimalXRationalPoint;
+
+            const minimalPoint = new phet.dot.Vector2(
+              minimalXRationalPoint.x.toFloat() * displayScale,
+              minimalXRationalPoint.y.toFloat() * displayScale
+            );
+            const intersectionPoint = new phet.dot.Vector2(
+              maxIntersectionX.toFloat() * displayScale,
+              minimalXRationalPoint.y.toFloat() * displayScale
+            );
+
+            const color = phet.scenery.Color.hsla( i / debugData.boundaryDebugData.length * 360, 100, 50, 0.5 );
+
+            offsetNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( boundaryToPolygon( connectedFace.boundary ) ), { fill: 'black' } ) );
+            offsetNode.addChild( new phet.scenery.Line( minimalPoint, intersectionPoint, { stroke: color, lineWidth: 2 } ) );
+          }
         } );
       }
 

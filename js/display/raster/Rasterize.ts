@@ -384,6 +384,14 @@ export default class Rasterize {
       const outerBoundary = outerBoundaries[ i ];
       const outerBounds = outerBoundary.bounds;
 
+      const boundaryDebugData: IntentionalAny = assert ? {
+        outerBoundary: outerBoundary
+      } : null;
+      if ( assert ) {
+        debugData!.boundaryDebugData = debugData!.boundaryDebugData || [];
+        debugData!.boundaryDebugData.push( boundaryDebugData );
+      }
+
       const minimalRationalPoint = outerBoundary.minimalXRationalPoint;
 
       let maxIntersectionX = new BigRational( -1, 1 );
@@ -461,6 +469,12 @@ export default class Rasterize {
         }
       }
 
+      if ( assert ) {
+        boundaryDebugData.maxIntersectionX = maxIntersectionX;
+        boundaryDebugData.maxIntersectionEdge = maxIntersectionEdge;
+        boundaryDebugData.maxIntersectionIsVertex = maxIntersectionIsVertex;
+      }
+
       let connectedFace: RationalFace | null = null;
       if ( maxIntersectionEdge ) {
         const edge0 = maxIntersectionEdge;
@@ -490,7 +504,7 @@ export default class Rasterize {
             }
             edge = edge.previousEdge!.reversed;
           }
-          connectedFace = edge.reversed.face!;
+          connectedFace = edge.face!; // TODO: why do we NOT reverse it here?!? reversed issues?
         }
         else {
           // non-vertex, a bit easier
@@ -502,6 +516,10 @@ export default class Rasterize {
 
         assert && assert( connectedFace );
         connectedFace.holes.push( outerBoundary );
+      }
+
+      if ( assert ) {
+        boundaryDebugData.connectedFace = connectedFace;
       }
     }
 
