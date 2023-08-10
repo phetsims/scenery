@@ -184,6 +184,7 @@ class RationalFace {
   public readonly holes: RationalBoundary[] = [];
   public windingMapMap = new Map<RationalFace, WindingMap>();
   public windingMap: WindingMap | null = null;
+  public renderProgram: RenderProgram | null = null;
 
   public constructor( public readonly boundary: RationalBoundary ) {}
 }
@@ -628,6 +629,18 @@ export default class Rasterize {
       }
     };
     recursiveWindingMap( unboundedFace );
+
+    for ( let i = 0; i < faces.length; i++ ) {
+      const face = faces[ i ];
+
+      const inclusionMap = new Map<RenderPath, boolean>();
+      for ( const renderPath of face.windingMap!.map.keys() ) {
+        const windingNumber = face.windingMap!.getWindingNumber( renderPath );
+        const included = renderPath.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 !== 0;
+        inclusionMap.set( renderPath, included );
+      }
+      face.renderProgram = renderProgram.simplify( inclusionMap );
+    }
 
     return ( debugData! ) || null;
   }
