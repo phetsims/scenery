@@ -426,10 +426,15 @@ an UI and Display made for visual testing and debugging.
         result.reverse();
         return result;
       }
+
+      const displaySize = 768;
+      const outputSize = 768 * 2;
+
       const piecewiseOptions = {
         minLevels: 1,
         maxLevels: 10,
-        distanceEpsilon: 0.02,
+        // distanceEpsilon: 0.02,
+        distanceEpsilon: 0.0002,
         curveEpsilon: 0.2
       };
       const pathA = new phet.scenery.RenderPath( 'nonzero', [
@@ -543,9 +548,6 @@ an UI and Display made for visual testing and debugging.
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
       const program = normalBlendArray( [ back, d, e, f, bc, a ] );
 
-      const displaySize = 768;
-      const outputSize = 192;
-
       program.depthFirst( subProgram => {
         if ( subProgram instanceof phet.scenery.RenderPathProgram ) {
           const path = subProgram.path;
@@ -605,7 +607,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INCLUSION_DEBUG = false;
       const INCLUSION_DEBUG_PATH = pathF;
       const SHOW_SOLID_COLORS = false;
-      const SHOW_FULL_AREAS = true;
+      const SHOW_FULL_AREAS = false;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {

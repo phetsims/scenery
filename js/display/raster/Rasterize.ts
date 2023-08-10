@@ -891,14 +891,30 @@ export default class Rasterize {
       debugData!.imageData = imageData;
     }
 
-    // TODO: reduce allocations?
     for ( let i = 0; i < accumulationBuffer.length; i++ ) {
-      const color = RenderColor.premultipliedLinearToColor( accumulationBuffer[ i ] );
+      const accumulation = accumulationBuffer[ i ];
+      let x = accumulation.x;
+      let y = accumulation.y;
+      let z = accumulation.z;
+      const a = accumulation.w;
+
+      // unpremultiply
+      if ( a > 0 ) {
+        x /= a;
+        y /= a;
+        z /= a;
+      }
+
+      // linear to sRGB
+      const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
+      const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
+      const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
+
       const index = 4 * i;
-      imageData.data[ index ] = color.r;
-      imageData.data[ index + 1 ] = color.g;
-      imageData.data[ index + 2 ] = color.b;
-      imageData.data[ index + 3 ] = color.a * 255;
+      imageData.data[ index ] = r * 255;
+      imageData.data[ index + 1 ] = g * 255;
+      imageData.data[ index + 2 ] = b * 255;
+      imageData.data[ index + 3 ] = a * 255;
     }
 
     if ( assert ) {
