@@ -6,12 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, BoundsIntersectionFilter, IntersectionPoint, PolygonClipping, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, BoundsIntersectionFilter, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Utils from '../../../../dot/js/Utils.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import Vector4 from '../../../../dot/js/Vector4.js';
 
 class RationalIntersection {
   public constructor( public readonly t: BigRational, public readonly point: BigRationalVector2 ) {}
@@ -178,6 +179,65 @@ class RationalBoundary {
     this.bounds = bounds;
     this.signedArea = signedArea;
   }
+
+  public toPolygon( scaleFactor = 1, translation = Vector2.ZERO ): Vector2[] {
+    const result: Vector2[] = [];
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      result.push( this.edges[ i ].p0float.timesScalar( scaleFactor ).plus( translation ) );
+    }
+    return result;
+  }
+}
+
+// Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
+class PolygonalFace {
+  public constructor( public readonly polygons: Vector2[][] ) {}
+
+  public getArea(): number {
+    let area = 0;
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+
+      // TODO: optimize more?
+      for ( let j = 0; j < polygon.length; j++ ) {
+        const p0 = polygon[ j ];
+        const p1 = polygon[ ( j + 1 ) % polygon.length ];
+        // PolygonIntegrals.evaluateShoelaceArea( p0.x, p0.y, p1.x, p1.y );
+        area += ( p1.x + p0.x ) * ( p1.y - p0.y );
+      }
+    }
+
+    return 0.5 * area;
+  }
+
+  public getCentroid( area: number ): Vector2 {
+    let x = 0;
+    let y = 0;
+
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+
+      // TODO: optimize more?
+      for ( let j = 0; j < polygon.length; j++ ) {
+        const p0 = polygon[ j ];
+        const p1 = polygon[ ( j + 1 ) % polygon.length ];
+
+        // evaluateCentroidPartial
+        const base = ( 1 / 6 ) * ( p0.x * p1.y - p1.x * p0.y );
+        x += ( p0.x + p1.x ) * base;
+        y += ( p0.y + p1.y ) * base;
+      }
+    }
+
+    return new Vector2(
+      x / area,
+      y / area
+    );
+  }
+
+  public getClipped( bounds: Bounds2 ): PolygonalFace {
+    return new PolygonalFace( this.polygons.map( polygon => PolygonClipping.boundsClipPolygon( polygon, bounds ) ) );
+  }
 }
 
 class RationalFace {
@@ -201,8 +261,6 @@ export default class Rasterize {
     // TODO: include "background" region in CAG!
 
     assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
-
-    // const imageData = new ImageData( bounds.width, bounds.height, { colorSpace: 'srgb' } );
 
     const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( bounds.width, bounds.height ) ) ) );
     if ( assert ) {
@@ -432,7 +490,7 @@ export default class Rasterize {
 
       const minimalRationalPoint = outerBoundary.minimalXRationalPoint;
 
-      let maxIntersectionX = new BigRational( -1, 1 );
+      let maxIntersectionX = new BigRational( integerBounds.left - 1, 1 );
       let maxIntersectionEdge: RationalHalfEdge | null = null;
       let maxIntersectionIsVertex = false;
 
@@ -631,8 +689,31 @@ export default class Rasterize {
     };
     recursiveWindingMap( unboundedFace );
 
+    const rasterWidth = bounds.width;
+    const rasterHeight = bounds.height;
+
+    const accumulationBuffer: Vector4[] = [];
+    if ( assert ) {
+      debugData!.accumulationBuffer = accumulationBuffer;
+    }
+    for ( let i = 0; i < rasterWidth * rasterHeight; i++ ) {
+      accumulationBuffer.push( Vector4.ZERO.copy() );
+    }
+
+    const inverseScale = 1 / scale;
+    const translation = new Vector2( -bounds.minX, -bounds.minY );
+
     for ( let i = 0; i < faces.length; i++ ) {
       const face = faces[ i ];
+
+      const faceDebugData: IntentionalAny = assert ? {
+        face: face,
+        pixels: []
+      } : null;
+      if ( assert ) {
+        debugData!.faceDebugData = debugData!.faceDebugData || [];
+        debugData!.faceDebugData.push( faceDebugData );
+      }
 
       face.inclusionSet = new Set<RenderPath>();
       for ( const renderPath of face.windingMap!.map.keys() ) {
@@ -642,7 +723,108 @@ export default class Rasterize {
           face.inclusionSet.add( renderPath );
         }
       }
-      face.renderProgram = renderProgram.simplify( renderPath => face.inclusionSet.has( renderPath ) );
+      const faceRenderProgram = renderProgram.simplify( renderPath => face.inclusionSet.has( renderPath ) );
+      face.renderProgram = faceRenderProgram;
+
+      // Now back in our normal coordinate frame!
+      const polygonalFace = new PolygonalFace( [
+        face.boundary.toPolygon( inverseScale, translation ),
+        ...face.holes.map( hole => hole.toPolygon( inverseScale, translation ) )
+      ] );
+      if ( assert ) {
+        faceDebugData.polygonalFace = polygonalFace;
+      }
+
+      // We'll avoid calculating this from the fresh polygon data, so we can avoid the performance cost
+      // (for when this is WGSL'ed).
+      const polygonalBounds = Bounds2.NOTHING.copy();
+      polygonalBounds.includeBounds( face.boundary.bounds );
+      for ( let j = 0; j < face.holes.length; j++ ) {
+        polygonalBounds.includeBounds( face.holes[ j ].bounds );
+      }
+      polygonalBounds.minX = polygonalBounds.minX * inverseScale + translation.x;
+      polygonalBounds.minY = polygonalBounds.minY * inverseScale + translation.y;
+      polygonalBounds.maxX = polygonalBounds.maxX * inverseScale + translation.x;
+      polygonalBounds.maxY = polygonalBounds.maxY * inverseScale + translation.y;
+      if ( assert ) {
+        faceDebugData.polygonalBounds = polygonalBounds;
+      }
+
+      const minX = Math.max( Math.floor( polygonalBounds.minX ), 0 );
+      const minY = Math.max( Math.floor( polygonalBounds.minY ), 0 );
+      const maxX = Math.min( Math.ceil( polygonalBounds.maxX ), rasterWidth );
+      const maxY = Math.min( Math.ceil( polygonalBounds.maxY ), rasterHeight );
+
+      const constColor = faceRenderProgram instanceof RenderColor ? faceRenderProgram.color : null;
+
+      const pixelBounds = Bounds2.NOTHING.copy();
+      for ( let y = minY; y < maxY; y++ ) {
+        pixelBounds.minY = y;
+        pixelBounds.maxY = y + 1;
+        for ( let x = minX; x < maxX; x++ ) {
+          pixelBounds.minX = x;
+          pixelBounds.maxX = x + 1;
+
+          const pixelFace = polygonalFace.getClipped( pixelBounds );
+          if ( assert ) {
+            const area = pixelFace.getArea();
+            if ( Math.abs( area ) > 1e-8 ) {
+              faceDebugData.pixels.push( {
+                x: x,
+                y: y,
+                pixelBounds: pixelBounds.copy(),
+                pixelFace: pixelFace,
+                area: area,
+                centroid: pixelFace.getCentroid( area )
+              } );
+            }
+          }
+          const area = pixelFace.getArea();
+          if ( area > 1e-8 ) {
+            const index = y * rasterWidth + x;
+
+            let color;
+            if ( constColor ) {
+              color = constColor;
+            }
+            else {
+              const centroid = pixelFace.getCentroid( area ).minus( translation );
+              color = faceRenderProgram.evaluate( centroid );
+            }
+            accumulationBuffer[ index ].add( color.timesScalar( area ) );
+          }
+        }
+      }
+
+      // TODO: more advanced handling
+
+      // TODO: potential filtering!!!
+
+      // TODO TODO TODO TODO TODO: non-zero-centered bounds! Verify everything
+    }
+
+    const imageData = new ImageData( rasterWidth, rasterHeight, { colorSpace: 'srgb' } );
+    if ( assert ) {
+      debugData!.imageData = imageData;
+    }
+
+    // TODO: reduce allocations?
+    for ( let i = 0; i < accumulationBuffer.length; i++ ) {
+      const color = RenderColor.premultipliedLinearToColor( accumulationBuffer[ i ] );
+      const index = 4 * i;
+      imageData.data[ index ] = color.r;
+      imageData.data[ index + 1 ] = color.g;
+      imageData.data[ index + 2 ] = color.b;
+      imageData.data[ index + 3 ] = color.a * 255;
+    }
+
+    if ( assert ) {
+      const canvas = document.createElement( 'canvas' );
+      canvas.width = rasterWidth;
+      canvas.height = rasterHeight;
+      const context = canvas.getContext( '2d' )!;
+      context.putImageData( imageData, 0, 0 );
+      debugData!.canvas = canvas;
     }
 
     return ( debugData! ) || null;

@@ -267,9 +267,9 @@ export default class PolygonClipping {
           simplifier.add(
             // Based on whether we are +x+y => -x-y or -x+y => +x-y
             ( startXLess === startYLess ) ? (
-              y > 0 ? new Vector2( bounds.minX, bounds.maxY ) : new Vector2( bounds.maxX, bounds.minY )
+              y > center.y ? new Vector2( bounds.minX, bounds.maxY ) : new Vector2( bounds.maxX, bounds.minY )
             ) : (
-              y > 0 ? new Vector2( bounds.maxX, bounds.maxY ) : new Vector2( bounds.minX, bounds.minY )
+              y > center.y ? new Vector2( bounds.maxX, bounds.maxY ) : new Vector2( bounds.minX, bounds.minY )
             )
           );
         }
