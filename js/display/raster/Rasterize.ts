@@ -184,6 +184,7 @@ class RationalFace {
   public readonly holes: RationalBoundary[] = [];
   public windingMapMap = new Map<RationalFace, WindingMap>();
   public windingMap: WindingMap | null = null;
+  public inclusionSet: Set<RenderPath> = new Set<RenderPath>();
   public renderProgram: RenderProgram | null = null;
 
   public constructor( public readonly boundary: RationalBoundary ) {}
@@ -633,13 +634,15 @@ export default class Rasterize {
     for ( let i = 0; i < faces.length; i++ ) {
       const face = faces[ i ];
 
-      const inclusionMap = new Map<RenderPath, boolean>();
+      face.inclusionSet = new Set<RenderPath>();
       for ( const renderPath of face.windingMap!.map.keys() ) {
         const windingNumber = face.windingMap!.getWindingNumber( renderPath );
         const included = renderPath.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 !== 0;
-        inclusionMap.set( renderPath, included );
+        if ( included ) {
+          face.inclusionSet.add( renderPath );
+        }
       }
-      face.renderProgram = renderProgram.simplify( inclusionMap );
+      face.renderProgram = renderProgram.simplify( renderPath => face.inclusionSet.has( renderPath ) );
     }
 
     return ( debugData! ) || null;

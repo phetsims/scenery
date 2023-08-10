@@ -52,15 +52,19 @@ export enum RenderExtend {
   Repeat = 2
 }
 
+const alwaysTrue: ( renderPath: RenderPath ) => boolean = _.constant( true );
+
 export default abstract class RenderProgram {
   public abstract isFullyTransparent(): boolean;
 
   public abstract isFullyOpaque(): boolean;
 
-  public abstract simplify( map?: Map<RenderPath, boolean> ): RenderProgram;
+  public abstract simplify( pathTest?: ( renderPath: RenderPath ) => boolean ): RenderProgram;
 
   // Premultiplied linear RGB, ignoring the path
-  public abstract evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4;
+  public abstract evaluate( point: Vector2, pathTest?: ( renderPath: RenderPath ) => boolean ): Vector4;
+
+  public abstract toRecursiveString( indent: string ): string;
 
   public depthFirst( callback: ( program: RenderProgram ) => void ): void {
     callback( this );
@@ -96,8 +100,6 @@ export default abstract class RenderProgram {
       return shape;
     } );
 
-    const map = new Map<RenderPath, boolean>();
-
     for ( let y = 0; y < height; y++ ) {
       for ( let x = 0; x < width; x++ ) {
         const accumulated = new Vector4( 0, 0, 0, 0 );
@@ -107,14 +109,18 @@ export default abstract class RenderProgram {
             // multisample it
             const point = new Vector2( x + ( dx + 0.5 ) / n, y + ( dy + 0.5 ) / n );
 
+            const set = new Set<RenderPath>();
+
             for ( let p = 0; p < paths.length; p++ ) {
               const path = paths[ p ];
               const shape = shapes[ p ];
               const inside = shape.containsPoint( point );
-              map.set( path, inside );
+              if ( inside ) {
+                set.add( path );
+              }
             }
 
-            const linearPremultiplied = this.evaluate( point, map );
+            const linearPremultiplied = this.evaluate( point, path => set.has( path ) );
             accumulated.add( linearPremultiplied );
           }
         }
@@ -150,10 +156,10 @@ export class RenderBlendCompose extends RenderProgram {
     callback( this );
   }
 
-  public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
     // a OP b
-    const a = this.a.simplify( map );
-    const b = this.b.simplify( map );
+    const a = this.a.simplify( pathTest );
+    const b = this.b.simplify( pathTest );
 
     const aTransparent = a.isFullyTransparent();
     const aOpaque = a.isFullyOpaque();
@@ -167,6 +173,7 @@ export class RenderBlendCompose extends RenderProgram {
     // e.g. only A's contribution
     const mixNormal = this.blendType === RenderBlendType.Normal;
 
+    // TODO: review these, there was a bug in atop!
     // over: fa: 1,   fb: 1-a   fa*a: a      fb*b: b(1-a) sum: a + b(1-a)
     // in:   fa: b,   fb: 0     fa*a: ab     fb*b: 0      sum: ab
     // out:  fa: 1-b, fb: 0     fa*a: a(1-b) fb*b: 0      sum: a(1-b)
@@ -203,7 +210,7 @@ export class RenderBlendCompose extends RenderProgram {
         if ( bTransparent ) {
           return RenderColor.TRANSPARENT;
         }
-        if ( mixNormal && bOpaque ) {
+        if ( mixNormal && aOpaque && bOpaque ) {
           return a;
         }
         if ( aTransparent ) {
@@ -307,11 +314,17 @@ export class RenderBlendCompose extends RenderProgram {
     }
   }
 
-  public override evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4 {
-    const a = this.a.evaluate( point, map );
-    const b = this.b.evaluate( point, map );
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    const a = this.a.evaluate( point, pathTest );
+    const b = this.b.evaluate( point, pathTest );
 
     return RenderBlendCompose.blendCompose( a, b, this.composeType, this.blendType );
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderBlendCompose(${RenderComposeType[ this.composeType ]}, ${RenderBlendType[ this.blendType ]}),\n` +
+           `${this.a.toRecursiveString( indent + '  ' )},\n` +
+           `${this.b.toRecursiveString( indent + '  ' )}`;
   }
 
   public static blendCompose( a: Vector4, b: Vector4, composeType: RenderComposeType, blendType: RenderBlendType ): Vector4 {
@@ -622,6 +635,10 @@ export abstract class RenderPathProgram extends RenderProgram {
   protected constructor( public readonly path: RenderPath | null ) {
     super();
   }
+
+  public isInPath( pathTest: ( renderPath: RenderPath ) => boolean ): boolean {
+    return !this.path || pathTest( this.path );
+  }
 }
 scenery.register( 'RenderPathProgram', RenderPathProgram );
 
@@ -640,19 +657,19 @@ export class RenderFilter extends RenderPathProgram {
   }
 
   // TODO: inspect matrix to see when it will maintain transparency!
-  public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
-    const program = this.program.simplify( map );
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    const program = this.program.simplify( pathTest );
 
-    // If we're outside our path
-    if ( this.path && map && !map.get( this.path ) ) {
-      return program;
-    }
-
-    if ( program instanceof RenderColor && ( !this.path || ( map && map.get( this.path ) ) ) ) {
-      return new RenderColor( program.path, RenderColor.premultiply( this.matrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
+    if ( this.isInPath( pathTest ) ) {
+      if ( program instanceof RenderColor ) {
+        return new RenderColor( null, RenderColor.premultiply( this.matrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
+      }
+      else {
+        return new RenderFilter( this.path, program, this.matrix );
+      }
     }
     else {
-      return new RenderFilter( this.path, program, this.matrix );
+      return program;
     }
   }
 
@@ -666,16 +683,20 @@ export class RenderFilter extends RenderPathProgram {
     return false;
   }
 
-  public override evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4 {
-    const source = this.program.evaluate( point, map );
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    const source = this.program.evaluate( point, pathTest );
 
-    // We're outside of the effect
-    if ( this.path && map && !map.get( this.path ) ) {
-      return source;
-    }
-    else {
+    if ( this.isInPath( pathTest ) ) {
       return RenderColor.premultiply( this.matrix.timesVector4( RenderColor.unpremultiply( source ) ) );
     }
+    else {
+      return source;
+    }
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderFilter (${this.path ? this.path.id : 'null'})\n` +
+           `${this.program.toRecursiveString( indent + '  ' )}`;
   }
 }
 scenery.register( 'RenderFilter', RenderFilter );
@@ -707,46 +728,40 @@ export class RenderAlpha extends RenderPathProgram {
     return this.alpha === 1 && this.program.isFullyOpaque();
   }
 
-  public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
-    const program = this.program.simplify( map );
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    const program = this.program.simplify( pathTest );
     if ( program.isFullyTransparent() || this.alpha === 0 ) {
       return RenderColor.TRANSPARENT;
     }
 
     // No difference inside-outside
-    if ( this.alpha === 1 ) {
-      return program;
-    }
-
-    // If we'll still have a path, we can't simplify more
-    if ( this.path && ( !map || !map.has( this.path ) ) ) {
-      return new RenderAlpha( this.path, program, this.alpha );
-    }
-
-    // If we are outside our path, we'll be a no-op
-    if ( this.path && map && map.has( this.path ) && !map.get( this.path ) ) {
+    if ( this.alpha === 1 || !this.isInPath( pathTest ) ) {
       return program;
     }
 
     // Now we're "inside" our path
     if ( program instanceof RenderColor ) {
-      return new RenderColor( program.path, program.color.timesScalar( this.alpha ) );
+      return new RenderColor( null, program.color.timesScalar( this.alpha ) );
     }
     else {
       return new RenderAlpha( null, program, this.alpha );
     }
   }
 
-  public override evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4 {
-    const source = this.program.evaluate( point, map );
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    const source = this.program.evaluate( point, pathTest );
 
-    // We're outside of the effect
-    if ( this.path && map && !map.get( this.path ) ) {
-      return source;
-    }
-    else {
+    if ( this.isInPath( pathTest ) ) {
       return source.timesScalar( this.alpha );
     }
+    else {
+      return source;
+    }
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderAlpha (${this.path ? this.path.id : 'null'}, alpha:${this.alpha})\n` +
+           `${this.program.toRecursiveString( indent + '  ' )}`;
   }
 }
 scenery.register( 'RenderAlpha', RenderAlpha );
@@ -766,26 +781,26 @@ export class RenderColor extends RenderPathProgram {
     return this.path === null && this.color.w === 1;
   }
 
-  public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
-    if ( this.path && map && map.has( this.path ) ) {
-      if ( map.get( this.path ) ) {
-        return new RenderColor( null, this.color );
-      }
-      else {
-        return RenderColor.TRANSPARENT;
-      }
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    if ( this.isInPath( pathTest ) ) {
+      return new RenderColor( null, this.color );
     }
     else {
-      return this;
+      return RenderColor.TRANSPARENT;
     }
   }
 
-  public override evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4 {
-    if ( this.path && map && !map.get( this.path ) ) {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    if ( this.isInPath( pathTest ) ) {
+      return this.color;
+    }
+    else {
       return Vector4.ZERO;
     }
+  }
 
-    return this.color;
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderColor (${this.path ? this.path.id : 'null'}, color:${this.color.toString()})`;
   }
 
   public static fromColor( path: RenderPath | null, color: Color ): RenderColor {
@@ -882,22 +897,17 @@ export class RenderImage extends RenderPathProgram {
     return false;
   }
 
-  public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
-    if ( this.path && map && map.has( this.path ) ) {
-      if ( map.get( this.path ) ) {
-        return new RenderImage( null, this.transform, this.image, this.extendX, this.extendY );
-      }
-      else {
-        return RenderColor.TRANSPARENT;
-      }
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    if ( this.isInPath( pathTest ) ) {
+      return new RenderImage( null, this.transform, this.image, this.extendX, this.extendY );
     }
     else {
-      return this;
+      return RenderColor.TRANSPARENT;
     }
   }
 
-  public override evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4 {
-    if ( this.path && map && !map.get( this.path ) ) {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
 
@@ -910,6 +920,10 @@ export class RenderImage extends RenderPathProgram {
     const color = this.image.evaluate( new Vector2( mappedX * this.image.width, mappedY * this.image.height ) );
 
     return RenderColor.colorToPremultipliedLinear( color );
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderImage (${this.path ? this.path.id : 'null'})`;
   }
 
   public static extend( extend: RenderExtend, t: number ): number {
@@ -958,28 +972,23 @@ export class RenderLinearGradient extends RenderPathProgram {
     return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
-  public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
-    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( map ) ) );
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( pathTest ) ) );
 
     if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
       return RenderColor.TRANSPARENT;
     }
 
-    if ( this.path && map && map.has( this.path ) ) {
-      if ( map.get( this.path ) ) {
-        return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend );
-      }
-      else {
-        return RenderColor.TRANSPARENT;
-      }
+    if ( this.isInPath( pathTest ) ) {
+      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend );
     }
     else {
-      return this;
+      return RenderColor.TRANSPARENT;
     }
   }
 
-  public override evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4 {
-    if ( this.path && map && !map.get( this.path ) ) {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
 
@@ -995,17 +1004,21 @@ export class RenderLinearGradient extends RenderPathProgram {
       i++;
     }
     if ( i === -1 ) {
-      return this.stops[ 0 ].program.evaluate( point, map );
+      return this.stops[ 0 ].program.evaluate( point, pathTest );
     }
     else if ( i === this.stops.length - 1 ) {
-      return this.stops[ i ].program.evaluate( point, map );
+      return this.stops[ i ].program.evaluate( point, pathTest );
     }
     else {
       const before = this.stops[ i ];
       const after = this.stops[ i + 1 ];
       const ratio = ( mappedT - before.ratio ) / ( after.ratio - before.ratio );
-      return before.program.evaluate( point, map ).times( 1 - ratio ).plus( after.program.evaluate( point, map ).times( ratio ) );
+      return before.program.evaluate( point, pathTest ).times( 1 - ratio ).plus( after.program.evaluate( point, pathTest ).times( ratio ) );
     }
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderLinearGradient (${this.path ? this.path.id : 'null'})`;
   }
 }
 scenery.register( 'RenderLinearGradient', RenderLinearGradient );
@@ -1037,29 +1050,28 @@ export class RenderRadialGradient extends RenderPathProgram {
     return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
-  public override simplify( map?: Map<RenderPath, boolean> ): RenderProgram {
-    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( map ) ) );
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( pathTest ) ) );
 
     if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
       return RenderColor.TRANSPARENT;
     }
 
-    if ( this.path && map && map.has( this.path ) ) {
-      if ( map.get( this.path ) ) {
-        return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend );
-      }
-      else {
-        return RenderColor.TRANSPARENT;
-      }
+    if ( this.isInPath( pathTest ) ) {
+      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend );
     }
     else {
-      return this;
+      return RenderColor.TRANSPARENT;
     }
   }
 
-  public override evaluate( point: Vector2, map?: Map<RenderPath, boolean> ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
     // TODO
     throw new Error( 'unimplemented' );
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderRadialGradient (${this.path ? this.path.id : 'null'})`;
   }
 }
 scenery.register( 'RenderRadialGradient', RenderRadialGradient );

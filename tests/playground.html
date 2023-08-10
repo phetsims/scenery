@@ -565,8 +565,11 @@ an UI and Display made for visual testing and debugging.
       const SHOW_FACE_CONSISTENT_FILL = false;
       const SHOW_FACE_HUE_FILL = false;
       const SHOW_BOUNDARY_DEBUG = false;
-      const SHOW_BOUNDARIES = true;
+      const SHOW_BOUNDARIES = false;
       const WINDING_DEBUG_PATH = pathF;
+      const SHOW_INCLUSION_DEBUG = false;
+      const INCLUSION_DEBUG_PATH = pathF;
+      const SHOW_SOLID_COLORS = true;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
@@ -632,31 +635,35 @@ an UI and Display made for visual testing and debugging.
         return boundary.edges.map( halfEdge => halfEdge.p0float.timesScalar( displayScale ) );
       };
 
+      const faceToShape = face => {
+        const shape = new phet.kite.Shape();
+
+        const boundary = face.boundary;
+        const holes = face.holes;
+
+        const polygons = [
+          boundaryToPolygon( boundary ),
+          ...holes.map( boundaryToPolygon )
+        ];
+
+        polygons.forEach( polygon => {
+          shape.moveToPoint( polygon[ 0 ] );
+          for ( let i = 1; i < polygon.length; i++ ) {
+            shape.lineToPoint( polygon[ i ] );
+          }
+          shape.close();
+        } );
+
+        return shape;
+      };
+
       if ( SHOW_FACE_CONSISTENT_FILL ) {
         debugData.faces.forEach( face => {
           if ( WINDING_DEBUG_PATH && face.windingMap.getWindingNumber( WINDING_DEBUG_PATH ) === 0 ) {
             return;
           }
 
-          const boundary = face.boundary;
-          const holes = face.holes;
-
-          const polygons = [
-            boundaryToPolygon( boundary ),
-            ...holes.map( boundaryToPolygon )
-          ];
-
-          const shape = new phet.kite.Shape();
-
-          polygons.forEach( polygon => {
-            shape.moveToPoint( polygon[ 0 ] );
-            for ( let i = 1; i < polygon.length; i++ ) {
-              shape.lineToPoint( polygon[ i ] );
-            }
-            shape.close();
-          } );
-
-          offsetNode.addChild( new phet.scenery.Path( shape, { fill: 'rgba(0,0,0,1)' } ) );
+          offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: 'rgba(0,0,0,1)' } ) );
         } );
       }
 
@@ -672,25 +679,7 @@ an UI and Display made for visual testing and debugging.
             1
           );
 
-          const boundary = face.boundary;
-          const holes = face.holes;
-
-          const polygons = [
-            boundaryToPolygon( boundary ),
-            ...holes.map( boundaryToPolygon )
-          ];
-
-          const shape = new phet.kite.Shape();
-
-          polygons.forEach( polygon => {
-            shape.moveToPoint( polygon[ 0 ] );
-            for ( let i = 1; i < polygon.length; i++ ) {
-              shape.lineToPoint( polygon[ i ] );
-            }
-            shape.close();
-          } );
-
-          offsetNode.addChild( new phet.scenery.Path( shape, { fill: color } ) );
+          offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: color } ) );
         } );
       }
 
@@ -758,6 +747,26 @@ an UI and Display made for visual testing and debugging.
         debugData.outerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'red' ) );
       }
 
+      if ( SHOW_INCLUSION_DEBUG ) {
+        debugData.faces.forEach( face => {
+          if ( face.inclusionMap.get( INCLUSION_DEBUG_PATH ) ) {
+            offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: 'rgba(0,0,0,1)' } ) );
+          }
+        } );
+      }
+
+      if ( SHOW_SOLID_COLORS ) {
+        debugData.faces.forEach( face => {
+          if ( face.renderProgram instanceof phet.scenery.RenderColor ) {
+            offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: phet.scenery.RenderColor.premultipliedLinearToColor( face.renderProgram.color ) } ) );
+          }
+        } );
+      }
+
+      // offsetNode.addChild( new phet.scenery.Path( faceToShape( debugData.faces[ 3 ] ), { fill: 'rgba(255,0,0,1)' } ) );
+      // offsetNode.addChild( new phet.scenery.Path( faceToShape( debugData.faces[ 4 ] ), { fill: 'rgba(0,255,0,1)' } ) );
+      // offsetNode.addChild( new phet.scenery.Path( faceToShape( debugData.faces[ 5 ] ), { fill: 'rgba(0,0,255,1)' } ) );
+
       if ( offsetNode.bounds.isValid() ) {
         display.backgroundColor = phet.scenery.Color.TRANSPARENT;
         display.width = Math.ceil( offsetNode.right ) + 5;
@@ -766,6 +775,7 @@ an UI and Display made for visual testing and debugging.
       }
 
       window.debugData = debugData;
+      window.renderProgram = program;
     } )
   };
 
