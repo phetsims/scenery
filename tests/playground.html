@@ -562,12 +562,11 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
-      const SHOW_FACE_CONSISTENT_FILL = true;
+      const SHOW_FACE_CONSISTENT_FILL = false;
       const SHOW_FACE_HUE_FILL = false;
       const SHOW_BOUNDARY_DEBUG = false;
       const SHOW_BOUNDARIES = true;
-      // const WINDING_DEBUG_PATH = pathD;
-      const WINDING_DEBUG_PATH = pathA;
+      const WINDING_DEBUG_PATH = pathF;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
@@ -635,7 +634,7 @@ an UI and Display made for visual testing and debugging.
 
       if ( SHOW_FACE_CONSISTENT_FILL ) {
         debugData.faces.forEach( face => {
-          if ( WINDING_DEBUG_PATH && !face.windingMap.has( WINDING_DEBUG_PATH ) ) {
+          if ( WINDING_DEBUG_PATH && face.windingMap.getWindingNumber( WINDING_DEBUG_PATH ) === 0 ) {
             return;
           }
 
@@ -657,7 +656,7 @@ an UI and Display made for visual testing and debugging.
             shape.close();
           } );
 
-          offsetNode.addChild( new phet.scenery.Path( shape, { fill: 'rgba(0,0,0,0.8)' } ) );
+          offsetNode.addChild( new phet.scenery.Path( shape, { fill: 'rgba(0,0,0,1)' } ) );
         } );
       }
 

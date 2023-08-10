@@ -39,6 +39,37 @@ class IntegerEdge {
   }
 }
 
+class WindingMap {
+  public constructor( public readonly map: Map<RenderPath, number> = new Map() ) {}
+
+  public getWindingNumber( renderPath: RenderPath ): number {
+    return this.map.get( renderPath ) || 0;
+  }
+
+  public addWindingNumber( renderPath: RenderPath, amount: number ): void {
+    const current = this.getWindingNumber( renderPath );
+    this.map.set( renderPath, current + amount );
+  }
+
+  public addWindingMap( windingMap: WindingMap ): void {
+    for ( const [ renderPath, winding ] of windingMap.map ) {
+      this.addWindingNumber( renderPath, winding );
+    }
+  }
+
+  public equals( windingMap: WindingMap ): boolean {
+    if ( this.map.size !== windingMap.map.size ) {
+      return false;
+    }
+    for ( const [ renderPath, winding ] of this.map ) {
+      if ( winding !== windingMap.getWindingNumber( renderPath ) ) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
 class RationalHalfEdge {
 
   public face: RationalFace | null = null;
@@ -47,7 +78,7 @@ class RationalHalfEdge {
   public boundary: RationalBoundary | null = null;
 
   public reversed!: RationalHalfEdge; // We will fill this in immediately
-  public windingMap = new Map<RenderPath, number>();
+  public windingMap = new WindingMap();
 
   // 0 for straight +x, 1 for +y, 2 for straight -x, 3 for -y
   public discriminator!: number; // filled in immediately
@@ -88,9 +119,7 @@ class RationalHalfEdge {
   }
 
   public addWindingFrom( other: RationalHalfEdge ): void {
-    this.windingMap.forEach( ( winding, quantity ) => {
-      other.windingMap.set( quantity, ( other.windingMap.get( quantity ) || 0 ) + winding );
-    } );
+    this.windingMap.addWindingMap( other.windingMap );
   }
 
   public compare( other: RationalHalfEdge ): number {
@@ -153,8 +182,8 @@ class RationalBoundary {
 
 class RationalFace {
   public readonly holes: RationalBoundary[] = [];
-  public windingMapMap = new Map<RationalFace, Map<RenderPath, number>>();
-  public windingMap: Map<RenderPath, number> | null = null;
+  public windingMapMap = new Map<RationalFace, WindingMap>();
+  public windingMap: WindingMap | null = null;
 
   public constructor( public readonly boundary: RationalBoundary ) {}
 }
@@ -285,8 +314,8 @@ export default class Rasterize {
           const reverseEdge = new RationalHalfEdge( edgeId, p1, p0 );
           forwardEdge.reversed = reverseEdge;
           reverseEdge.reversed = forwardEdge;
-          forwardEdge.windingMap.set( integerEdge.renderPath, 1 );
-          reverseEdge.windingMap.set( integerEdge.renderPath, -1 );
+          forwardEdge.windingMap.addWindingNumber( integerEdge.renderPath, 1 );
+          reverseEdge.windingMap.addWindingNumber( integerEdge.renderPath, -1 );
 
           const deltaX = integerEdge.x1 - integerEdge.x0;
           const deltaY = integerEdge.y1 - integerEdge.y0;
@@ -573,29 +602,28 @@ export default class Rasterize {
       }
     }
 
-    unboundedFace.windingMap = new Map(); // no windings, empty!
+    unboundedFace.windingMap = new WindingMap(); // no windings, empty!
     const recursiveWindingMap = ( solvedFace: RationalFace ) => {
       // TODO: no recursion, could blow recursion limits
       for ( const [ otherFace, windingMap ] of solvedFace.windingMapMap ) {
-        if ( !otherFace.windingMap ) {
-          otherFace.windingMap = new Map();
+        const needsNewWindingMap = !otherFace.windingMap;
 
+        if ( needsNewWindingMap || assert ) {
+          const newWindingMap = new WindingMap();
           const existingMap = solvedFace.windingMap!;
           const deltaMap = windingMap;
 
-          const renderPaths = _.uniq( [ ...existingMap.keys(), ...deltaMap.keys() ] );
-          for ( let i = 0; i < renderPaths.length; i++ ) {
-            const renderPath = renderPaths[ i ];
+          newWindingMap.addWindingMap( existingMap );
+          newWindingMap.addWindingMap( deltaMap );
 
-            const existingWinding = existingMap.get( renderPath ) || 0;
-            const deltaWinding = deltaMap.get( renderPath ) || 0;
-            const newWinding = existingWinding + deltaWinding;
-            if ( newWinding !== 0 ) {
-              otherFace.windingMap.set( renderPath, newWinding );
-            }
+          if ( assert ) {
+            // TODO: object for the winding map?
           }
+          otherFace.windingMap = newWindingMap;
 
-          recursiveWindingMap( otherFace );
+          if ( needsNewWindingMap ) {
+            recursiveWindingMap( otherFace );
+          }
         }
       }
     };
