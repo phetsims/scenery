@@ -426,6 +426,12 @@ an UI and Display made for visual testing and debugging.
         result.reverse();
         return result;
       }
+      const piecewiseOptions = {
+        minLevels: 1,
+        maxLevels: 10,
+        distanceEpsilon: 0.02,
+        curveEpsilon: 0.2
+      };
       const pathA = new phet.scenery.RenderPath( 'nonzero', [
         [
           new phet.dot.Vector2( -5, -5 ),
@@ -457,7 +463,9 @@ an UI and Display made for visual testing and debugging.
           new phet.dot.Vector2( 40, 0 ),
           new phet.dot.Vector2( 32, 32 ),
           new phet.dot.Vector2( 0, 40 )
-        ]
+        ],
+        phet.kite.Shape.circle( 48, 16, 5 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
+        phet.kite.Shape.circle( 48, 43, 10 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
       ] );
       const pathE = new phet.scenery.RenderPath( 'nonzero', [
         boundsRect( new phet.dot.Bounds2( 40, 40, 60, 60 ) ),
@@ -533,22 +541,22 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, e, f, d, bc, a ] );
+      const program = normalBlendArray( [ back, d, e, f, bc, a ] );
 
       const styleCanvas = canvas => {
         canvas.style.width = '512px';
         canvas.style.height = '512px';
         canvas.style.imageRendering = 'pixelated';
         canvas.style.position = 'absolute';
-        canvas.style.opacity = '1';
+        canvas.style.opacity = '0.4';
         canvas.style.top = '20px';
         canvas.style.left = '20px ';
       };
 
-      const canvas = program.slowRasterizeToCanvas( 64, 64, 8 );
-      styleCanvas( canvas );
+      // const canvas = program.slowRasterizeToCanvas( 64, 64, 8 );
+      // styleCanvas( canvas );
       // document.body.appendChild( canvas );
-      console.log( canvas.toDataURL() );
+      // console.log( canvas.toDataURL() );
 
       const debugData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, 64, 64 ) );
 
@@ -565,7 +573,7 @@ an UI and Display made for visual testing and debugging.
       } );
       scene.addChild( offsetNode );
 
-      const SHOW_INTEGER_EDGES = false;
+      const SHOW_INTEGER_EDGES = true;
       const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
       const SHOW_FACE_CONSISTENT_FILL = false;
