@@ -39,15 +39,11 @@ class IntegerEdge {
   }
 }
 
-class Face {
-  public readonly boundary: RationalHalfEdge[] = [];
-  public readonly holes: RationalHalfEdge[] = [];
-}
-
 class RationalHalfEdge {
 
-  public face: Face | null = null;
+  public face: RationalFace | null = null;
   public nextEdge: RationalHalfEdge | null = null;
+  public previousEdge: RationalHalfEdge | null = null; // exists so we can enumerate edges at a vertex
   public boundary: RationalBoundary | null = null;
 
   public reversed!: RationalHalfEdge; // We will fill this in immediately
@@ -124,19 +120,41 @@ class RationalHalfEdge {
 
 class RationalBoundary {
   public readonly edges: RationalHalfEdge[] = [];
+  public signedArea!: number;
+  public bounds!: Bounds2;
+  public minimalXRationalPoint!: BigRationalVector2;
 
-  public getSignedArea(): number {
-    let sum = 0;
+  public computeProperties(): void {
+    let signedArea = 0;
+    const bounds = Bounds2.NOTHING.copy();
+    let minimalXP0Edge = this.edges[ 0 ];
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i % this.edges.length ];
 
+      if ( edge.p0.x.compareCrossMul( minimalXP0Edge.p0.x ) < 0 ) {
+        minimalXP0Edge = edge;
+      }
+
+      const p0float = edge.p0float;
+      const p1float = edge.p1float;
+
+      bounds.addPoint( p0float );
+
       // PolygonIntegrals.evaluateShoelaceArea( p0.x, p0.y, p1.x, p1.y );
-      sum += 0.5 * ( edge.p1float.x + edge.p0float.x ) * ( edge.p1float.y - edge.p0float.y );
+      signedArea += 0.5 * ( p1float.x + p0float.x ) * ( p1float.y - p0float.y );
     }
 
-    return sum;
+    this.minimalXRationalPoint = minimalXP0Edge.p0;
+    this.bounds = bounds;
+    this.signedArea = signedArea;
   }
+}
+
+class RationalFace {
+  public readonly holes: RationalBoundary[] = [];
+
+  public constructor( public readonly boundary: RationalBoundary ) {}
 }
 
 export default class Rasterize {
@@ -304,23 +322,29 @@ export default class Rasterize {
         else {
           filteredRationalHalfEdges.push( edge );
           edge.reversed.nextEdge = lastEdge;
+          lastEdge.previousEdge = edge.reversed;
           lastEdge = edge;
         }
       }
       else {
         firstEdge.reversed.nextEdge = lastEdge;
+        lastEdge.previousEdge = firstEdge.reversed;
         filteredRationalHalfEdges.push( edge );
         firstEdge = edge;
         lastEdge = edge;
       }
     }
-    firstEdge.reversed.nextEdge = lastEdge; // last connection
+    // last connection
+    firstEdge.reversed.nextEdge = lastEdge;
+    lastEdge.previousEdge = firstEdge.reversed;
 
     const innerBoundaries: RationalBoundary[] = [];
     const outerBoundaries: RationalBoundary[] = [];
+    const faces: RationalFace[] = [];
     if ( assert ) {
       debugData!.innerBoundaries = innerBoundaries;
       debugData!.outerBoundaries = outerBoundaries;
+      debugData!.faces = faces;
     }
     for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
       const firstEdge = filteredRationalHalfEdges[ i ];
@@ -336,15 +360,148 @@ export default class Rasterize {
           edge = edge.nextEdge!;
         }
 
-        const signedArea = boundary.getSignedArea();
+        boundary.computeProperties();
+
+        const signedArea = boundary.signedArea;
         if ( Math.abs( signedArea ) > 1e-8 ) {
           if ( signedArea > 0 ) {
             innerBoundaries.push( boundary );
+            const face = new RationalFace( boundary );
+            faces.push( face );
+            for ( let j = 0; j < boundary.edges.length; j++ ) {
+              const edge = boundary.edges[ j ];
+              edge.face = face;
+            }
           }
           else {
             outerBoundaries.push( boundary );
           }
         }
+      }
+    }
+
+    for ( let i = 0; i < outerBoundaries.length; i++ ) {
+      const outerBoundary = outerBoundaries[ i ];
+      const outerBounds = outerBoundary.bounds;
+
+      const minimalRationalPoint = outerBoundary.minimalXRationalPoint;
+
+      let maxIntersectionX = new BigRational( -1, 1 );
+      let maxIntersectionEdge: RationalHalfEdge | null = null;
+      let maxIntersectionIsVertex = false;
+
+      for ( let j = 0; j < faces.length; j++ ) {
+        const face = faces[ j ];
+        const innerBoundary = face.boundary;
+        const innerBounds = innerBoundary.bounds;
+
+        // Check if the "inner" bounds actually fully contains (strictly) our "outer" bounds.
+        // This is a constraint that has to be satisfied for the outer boundary to be a hole.
+        if (
+          outerBounds.minX > innerBounds.minX &&
+          outerBounds.minY > innerBounds.minY &&
+          outerBounds.maxX < innerBounds.maxX &&
+          outerBounds.maxY < innerBounds.maxY
+        ) {
+          for ( let k = 0; k < innerBoundary.edges.length; k++ ) {
+            const edge = innerBoundary.edges[ k ];
+
+            // TODO: This will require a lot of precision, how do we handle this?
+            // TODO: we'll need to handle these anyway!
+            const dx0 = edge.p0.x.minus( minimalRationalPoint.x );
+            const dx1 = edge.p1.x.minus( minimalRationalPoint.x );
+
+            // If both x values of the segment are at or to the right, there will be no intersection
+            if ( dx0.isNegative() || dx1.isNegative() ) {
+
+              const dy0 = edge.p0.y.minus( minimalRationalPoint.y );
+              const dy1 = edge.p1.y.minus( minimalRationalPoint.y );
+
+              const bothPositive = dy0.isPositive() && dy1.isPositive();
+              const bothNegative = dy0.isNegative() && dy1.isNegative();
+
+              if ( !bothPositive && !bothNegative ) {
+                const isZero0 = dy0.isZero();
+                const isZero1 = dy1.isZero();
+
+                let candidateMaxIntersectionX: BigRational;
+                let isVertex: boolean;
+                if ( isZero0 && isZero1 ) {
+                  // NOTE: on a vertex
+                  const is0Less = edge.p0.x.compareCrossMul( edge.p1.x ) < 0;
+                  candidateMaxIntersectionX = is0Less ? edge.p1.x : edge.p0.x;
+                  isVertex = true;
+                }
+                else if ( isZero0 ) {
+                  // NOTE: on a vertex
+                  candidateMaxIntersectionX = edge.p0.x;
+                  isVertex = true;
+                }
+                else if ( isZero1 ) {
+                  // NOTE: on a vertex
+                  candidateMaxIntersectionX = edge.p1.x;
+                  isVertex = true;
+                }
+                else {
+                  // p0.x + ( p1.x - p0.x ) * ( minimalRationalPoint.y - p0.y ) / ( p1.y - p0.y );
+                  // TODO: could simplify by reversing sign and using dy1
+                  candidateMaxIntersectionX = edge.p0.x.plus( edge.p1.x.minus( edge.p0.x ).times( minimalRationalPoint.y.minus( edge.p0.y ) ).dividedBy( edge.p1.y.minus( edge.p0.y ) ) );
+                  isVertex = false;
+                }
+
+                // TODO: add less-than, etc.
+                if ( maxIntersectionX.compareCrossMul( candidateMaxIntersectionX ) < 0 ) {
+                  maxIntersectionX = candidateMaxIntersectionX;
+                  maxIntersectionEdge = edge;
+                  maxIntersectionIsVertex = isVertex;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      let connectedFace: RationalFace | null = null;
+      if ( maxIntersectionEdge ) {
+        const edge0 = maxIntersectionEdge;
+        const edge1 = maxIntersectionEdge.reversed;
+        if ( !edge0.face ) {
+          connectedFace = edge1.face!;
+        }
+        else if ( !edge1.face ) {
+          connectedFace = edge0.face!;
+        }
+        else if ( maxIntersectionIsVertex ) {
+          // We'll need to traverse around the vertex to find the face we need.
+
+          // Get a starting edge with p0 = intersection
+          const startEdge = ( edge0.p0.x.equalsCrossMul( maxIntersectionX ) && edge0.p0.y.equalsCrossMul( minimalRationalPoint.y ) ) ? edge0 : edge1;
+
+          assert && assert( startEdge.p0.x.equalsCrossMul( maxIntersectionX ) );
+          assert && assert( startEdge.p0.y.equalsCrossMul( minimalRationalPoint.y ) );
+
+          // TODO: for testing this, remember we'll need multiple "fully surrounding" boundaries?
+          // TODO: wait, no we won't
+          let bestEdge = startEdge;
+          let edge = startEdge.previousEdge!.reversed;
+          while ( edge !== startEdge ) {
+            if ( edge.compare( bestEdge ) < 0 ) {
+              bestEdge = edge;
+            }
+            edge = edge.previousEdge!.reversed;
+          }
+          connectedFace = edge.reversed.face!;
+        }
+        else {
+          // non-vertex, a bit easier
+          // TODO: could grab this value stored from earlier
+          const isP0YLess = edge0.p0.y.compareCrossMul( edge0.p1.y ) < 0;
+          // Because it should have a "positive" orientation, we want the "negative-y-facing edge"
+          connectedFace = isP0YLess ? edge1.face : edge0.face;
+        }
+
+        assert && assert( connectedFace );
+        connectedFace.holes.push( outerBoundary );
       }
     }
 

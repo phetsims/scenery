@@ -472,6 +472,7 @@ an UI and Display made for visual testing and debugging.
         ],
         boundsRect( new phet.dot.Bounds2( 30, 40, 35, 50 ) ),
         boundsRect( new phet.dot.Bounds2( 5, 50, 10, 60 ) ),
+        boundsRect( new phet.dot.Bounds2( 50, 5, 50, 10 ) ),
       ] );
       const pathF = new phet.scenery.RenderPath( 'nonzero', [
         boundsRect( new phet.dot.Bounds2( 50, 50, 55, 55 ) ),
@@ -561,6 +562,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
+      const SHOW_FACE_CONSISTENT_FILL = true;
       const SHOW_BOUNDARIES = true;
 
       if ( SHOW_INTEGER_EDGES ) {
@@ -623,9 +625,37 @@ an UI and Display made for visual testing and debugging.
         } );
       }
 
+      const boundaryToPolygon = boundary => {
+        return boundary.edges.map( halfEdge => halfEdge.p0float.timesScalar( displayScale ) );
+      };
+
+      if ( SHOW_FACE_CONSISTENT_FILL ) {
+        debugData.faces.slice( 2 ).forEach( face => {
+          const boundary = face.boundary;
+          const holes = face.holes;
+
+          const polygons = [
+            boundaryToPolygon( boundary ),
+            ...holes.map( boundaryToPolygon )
+          ];
+
+          const shape = new phet.kite.Shape();
+
+          polygons.forEach( polygon => {
+            shape.moveToPoint( polygon[ 0 ] );
+            for ( let i = 1; i < polygon.length; i++ ) {
+              shape.lineToPoint( polygon[ i ] );
+            }
+            shape.close();
+          } );
+
+          offsetNode.addChild( new phet.scenery.Path( shape, { fill: 'rgba(0,0,0,0.5)' } ) );
+        } );
+      }
+
       if ( SHOW_BOUNDARIES ) {
         const showBoundary = ( boundary, offsetMagnitude, stroke ) => {
-          const polygon = boundary.edges.map( halfEdge => halfEdge.p0float.timesScalar( displayScale ) );
+          const polygon = boundaryToPolygon( boundary );
           const offsetPolygon = polygon.map( ( point, index ) => {
             const p0 = polygon[ ( ( index - 1 ) + polygon.length ) % polygon.length ];
             const p1 = point;
