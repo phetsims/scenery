@@ -153,6 +153,8 @@ class RationalBoundary {
 
 class RationalFace {
   public readonly holes: RationalBoundary[] = [];
+  public windingMapMap = new Map<RationalFace, Map<RenderPath, number>>();
+  public windingMap: Map<RenderPath, number> | null = null;
 
   public constructor( public readonly boundary: RationalBoundary ) {}
 }
@@ -380,6 +382,11 @@ export default class Rasterize {
       }
     }
 
+    // Compute which boundaries are holes in which faces
+    let exteriorBoundary: RationalBoundary | null = null;
+    if ( assert ) {
+      debugData!.exteriorBoundary = exteriorBoundary;
+    }
     for ( let i = 0; i < outerBoundaries.length; i++ ) {
       const outerBoundary = outerBoundaries[ i ];
       const outerBounds = outerBoundary.bounds;
@@ -517,11 +524,82 @@ export default class Rasterize {
         assert && assert( connectedFace );
         connectedFace.holes.push( outerBoundary );
       }
+      else {
+        exteriorBoundary = outerBoundary;
+      }
 
       if ( assert ) {
         boundaryDebugData.connectedFace = connectedFace;
       }
     }
+
+    // Fill in face data for holes, so we can traverse nicely
+    for ( let i = 0; i < faces.length; i++ ) {
+      const face = faces[ i ];
+
+      for ( let j = 0; j < face.holes.length; j++ ) {
+        const hole = face.holes[ j ];
+
+        for ( let k = 0; k < hole.edges.length; k++ ) {
+          const edge = hole.edges[ k ];
+
+          edge.face = face;
+        }
+      }
+    }
+
+    // For ease of use, an unbounded face (it is essentially fake)
+    const unboundedFace = new RationalFace( exteriorBoundary! );
+    if ( assert ) {
+      debugData!.unboundedFace = unboundedFace;
+    }
+    for ( let i = 0; i < exteriorBoundary!.edges.length; i++ ) {
+      const edge = exteriorBoundary!.edges[ i ];
+      edge.face = unboundedFace;
+    }
+
+    for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
+      const edge = filteredRationalHalfEdges[ i ];
+
+      const face = edge.face!;
+      const otherFace = edge.reversed.face!;
+
+      assert && assert( face );
+      assert && assert( otherFace );
+
+      // TODO: possibly reverse this, check to see which winding map is correct
+      if ( !face.windingMapMap.has( otherFace ) ) {
+        face.windingMapMap.set( otherFace, edge.windingMap );
+      }
+    }
+
+    unboundedFace.windingMap = new Map(); // no windings, empty!
+    const recursiveWindingMap = ( solvedFace: RationalFace ) => {
+      // TODO: no recursion, could blow recursion limits
+      for ( const [ otherFace, windingMap ] of solvedFace.windingMapMap ) {
+        if ( !otherFace.windingMap ) {
+          otherFace.windingMap = new Map();
+
+          const existingMap = solvedFace.windingMap!;
+          const deltaMap = windingMap;
+
+          const renderPaths = _.uniq( [ ...existingMap.keys(), ...deltaMap.keys() ] );
+          for ( let i = 0; i < renderPaths.length; i++ ) {
+            const renderPath = renderPaths[ i ];
+
+            const existingWinding = existingMap.get( renderPath ) || 0;
+            const deltaWinding = deltaMap.get( renderPath ) || 0;
+            const newWinding = existingWinding + deltaWinding;
+            if ( newWinding !== 0 ) {
+              otherFace.windingMap.set( renderPath, newWinding );
+            }
+          }
+
+          recursiveWindingMap( otherFace );
+        }
+      }
+    };
+    recursiveWindingMap( unboundedFace );
 
     return ( debugData! ) || null;
   }
