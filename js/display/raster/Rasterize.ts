@@ -14,7 +14,7 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 
-let debugData: Record<string, IntentionalAny> | null = {};
+let debugData: Record<string, IntentionalAny> | null = null;
 
 class RationalIntersection {
   public constructor( public readonly t: BigRational, public readonly point: BigRationalVector2 ) {}
@@ -888,19 +888,6 @@ export default class Rasterize {
             pixelBounds.maxX = x + 1;
 
             const pixelFace = polygonalFace.getClipped( pixelBounds );
-            // if ( assert ) {
-            //   const area = pixelFace.getArea();
-            //   if ( Math.abs( area ) > 1e-8 ) {
-            //     faceDebugData.pixels.push( {
-            //       x: x,
-            //       y: y,
-            //       pixelBounds: pixelBounds.copy(),
-            //       pixelFace: pixelFace,
-            //       area: area,
-            //       centroid: pixelFace.getCentroid( area )
-            //     } );
-            //   }
-            // }
             const area = pixelFace.getArea();
             addPixel( pixelFace, area, x, y );
           }
