@@ -112,6 +112,146 @@ class Simplifier {
 
 export default class PolygonClipping {
 
+  // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
+  public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
+    const simplifier = new Simplifier();
+
+    const center = bounds.center;
+
+    // TODO: optimize this
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const startPoint = polygon[ i ];
+      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+      const clippedStartPoint = CodedVector2.create( startPoint, bounds );
+      const clippedEndPoint = CodedVector2.create( endPoint, bounds );
+
+      // TODO: liang-barsky or something better!!!
+      const clipped = PolygonClipping.matthesDrakopoulosClip( clippedStartPoint, clippedEndPoint, bounds );
+
+      let startXLess;
+      let startYLess;
+      let endXLess;
+      let endYLess;
+
+      // TODO: we're adding all sorts of duplicate unnecessary points!
+
+      const needsStartCorner = !clipped || !startPoint.equals( clippedStartPoint );
+      const needsEndCorner = !clipped || !endPoint.equals( clippedEndPoint );
+
+      if ( needsStartCorner ) {
+        startXLess = startPoint.x < center.x;
+        startYLess = startPoint.y < center.y;
+      }
+      if ( needsEndCorner ) {
+        endXLess = endPoint.x < center.x;
+        endYLess = endPoint.y < center.y;
+      }
+
+      // TODO: don't rely on the simplifier so much! (especially with arrays?)
+      if ( needsStartCorner ) {
+        simplifier.add( new Vector2(
+          startXLess ? bounds.minX : bounds.maxX,
+          startYLess ? bounds.minY : bounds.maxY
+        ) );
+      }
+      if ( clipped ) {
+        simplifier.add( clippedStartPoint.toVector2() );
+        simplifier.add( clippedEndPoint.toVector2() );
+      }
+      else {
+        if ( startXLess !== endXLess && startYLess !== endYLess ) {
+          // we crossed from one corner to the opposite, but didn't hit. figure out which corner we passed
+          // we're diagonal, so solving for y=centerY should give us the info we need
+          const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( center.x - startPoint.x ) / ( endPoint.x - startPoint.x );
+
+          simplifier.add(
+            // Based on whether we are +x+y => -x-y or -x+y => +x-y
+            ( startXLess === startYLess ) ? (
+              y > center.y ? new Vector2( bounds.minX, bounds.maxY ) : new Vector2( bounds.maxX, bounds.minY )
+            ) : (
+              y > center.y ? new Vector2( bounds.maxX, bounds.maxY ) : new Vector2( bounds.minX, bounds.minY )
+            )
+          );
+        }
+      }
+      if ( needsEndCorner ) {
+        simplifier.add( new Vector2(
+          endXLess ? bounds.minX : bounds.maxX,
+          endYLess ? bounds.minY : bounds.maxY
+        ) );
+      }
+    }
+
+    return simplifier.finalize();
+  }
+
+  /**
+   * From "Another Simple but Faster Method for 2D Line Clipping" (2019)
+   * by Dimitrios Matthes and Vasileios Drakopoulos
+   */
+  private static matthesDrakopoulosClip( p0: Vector2, p1: Vector2, bounds: Bounds2 ): boolean {
+    const x1 = p0.x;
+    const y1 = p0.y;
+    const x2 = p1.x;
+    const y2 = p1.y;
+    // TODO: a version without requiring a Bounds2?
+    const minX = bounds.minX;
+    const minY = bounds.minY;
+    const maxX = bounds.maxX;
+    const maxY = bounds.maxY;
+
+    if ( !( x1 < minX && x2 < minX ) && !( x1 > maxX && x2 > maxX ) ) {
+      if ( !( y1 < minY && y2 < minY ) && !( y1 > maxY && y2 > maxY ) ) {
+        // TODO: consider NOT computing these if we don't need them? We probably won't use both?
+        const ma = ( y2 - y1 ) / ( x2 - x1 );
+        const mb = ( x2 - x1 ) / ( y2 - y1 );
+
+        // TODO: on GPU, consider if we should extract out partial subexpressions below
+
+        // Unrolled (duplicated essentially)
+        if ( p0.x < minX ) {
+          p0.x = minX;
+          p0.y = ma * ( minX - x1 ) + y1;
+        }
+        else if ( p0.x > maxX ) {
+          p0.x = maxX;
+          p0.y = ma * ( maxX - x1 ) + y1;
+        }
+        if ( p0.y < minY ) {
+          p0.y = minY;
+          p0.x = mb * ( minY - y1 ) + x1;
+        }
+        else if ( p0.y > maxY ) {
+          p0.y = maxY;
+          p0.x = mb * ( maxY - y1 ) + x1;
+        }
+        // Second unrolled form
+        if ( p1.x < minX ) {
+          p1.x = minX;
+          p1.y = ma * ( minX - x1 ) + y1;
+        }
+        else if ( p1.x > maxX ) {
+          p1.x = maxX;
+          p1.y = ma * ( maxX - x1 ) + y1;
+        }
+        if ( p1.y < minY ) {
+          p1.y = minY;
+          p1.x = mb * ( minY - y1 ) + x1;
+        }
+        else if ( p1.y > maxY ) {
+          p1.y = maxY;
+          p1.x = mb * ( maxY - y1 ) + x1;
+        }
+        if ( !( p0.x < minX && p1.x < minX ) && !( p0.x > maxX && p1.x > maxX ) ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   // The Maillot extension of the Cohen-Sutherland encoding of points
   public static getCode( x: number, y: number, bounds: Bounds2 ): Code {
     if ( x < bounds.minX ) {
@@ -209,80 +349,6 @@ export default class PolygonClipping {
 
   private static isLeftOfLine( l1: Vector2, l2: Vector2, p: Vector2 ): boolean {
     return ( l2.x - l1.x ) * ( p.y - l1.y ) > ( l2.y - l1.y ) * ( p.x - l1.x );
-  }
-
-  // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
-  public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
-    const simplifier = new Simplifier();
-
-    const center = bounds.center;
-
-    // TODO: optimize this
-    for ( let i = 0; i < polygon.length; i++ ) {
-      const startPoint = polygon[ i ];
-      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
-
-      const clippedStartPoint = CodedVector2.create( startPoint, bounds );
-      const clippedEndPoint = CodedVector2.create( endPoint, bounds );
-
-      // TODO: liang-barsky or something better!!!
-      const clipped = PolygonClipping.cohenSutherlandClip( clippedStartPoint, clippedEndPoint, bounds );
-
-      let startXLess;
-      let startYLess;
-      let endXLess;
-      let endYLess;
-
-      // TODO: we're adding all sorts of duplicate unnecessary points!
-
-      const needsStartCorner = !clipped || !startPoint.equals( clippedStartPoint );
-      const needsEndCorner = !clipped || !endPoint.equals( clippedEndPoint );
-
-      if ( needsStartCorner ) {
-        startXLess = startPoint.x < center.x;
-        startYLess = startPoint.y < center.y;
-      }
-      if ( needsEndCorner ) {
-        endXLess = endPoint.x < center.x;
-        endYLess = endPoint.y < center.y;
-      }
-
-      // TODO: don't rely on the simplifier so much! (especially with arrays?)
-      if ( needsStartCorner ) {
-        simplifier.add( new Vector2(
-          startXLess ? bounds.minX : bounds.maxX,
-          startYLess ? bounds.minY : bounds.maxY
-        ) );
-      }
-      if ( clipped ) {
-        simplifier.add( clippedStartPoint.toVector2() );
-        simplifier.add( clippedEndPoint.toVector2() );
-      }
-      else {
-        if ( startXLess !== endXLess && startYLess !== endYLess ) {
-          // we crossed from one corner to the opposite, but didn't hit. figure out which corner we passed
-          // we're diagonal, so solving for y=centerY should give us the info we need
-          const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( center.x - startPoint.x ) / ( endPoint.x - startPoint.x );
-
-          simplifier.add(
-            // Based on whether we are +x+y => -x-y or -x+y => +x-y
-            ( startXLess === startYLess ) ? (
-              y > center.y ? new Vector2( bounds.minX, bounds.maxY ) : new Vector2( bounds.maxX, bounds.minY )
-            ) : (
-              y > center.y ? new Vector2( bounds.maxX, bounds.maxY ) : new Vector2( bounds.minX, bounds.minY )
-            )
-          );
-        }
-      }
-      if ( needsEndCorner ) {
-        simplifier.add( new Vector2(
-          endXLess ? bounds.minX : bounds.maxX,
-          endYLess ? bounds.minY : bounds.maxY
-        ) );
-      }
-    }
-
-    return simplifier.finalize();
   }
 
   // TODO: bad case phet.scenery.PolygonClipping.boundsClipPolygon( [ phet.dot.v2( 500, 500 ), phet.dot.v2( 700, 500 ), phet.dot.v2( 700, 600 ) ], new phet.dot.Bounds2( 600, 505, 601, 506 ) )
