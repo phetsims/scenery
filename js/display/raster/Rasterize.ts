@@ -324,6 +324,20 @@ class RationalFace {
       ...this.holes.map( hole => hole.toTransformedPolygon( inverseScale, translation ) )
     ] )
   }
+
+  public getBounds( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): Bounds2 {
+    const polygonalBounds = Bounds2.NOTHING.copy();
+    polygonalBounds.includeBounds( this.boundary.bounds );
+    for ( let i = 0; i < this.holes.length; i++ ) {
+      polygonalBounds.includeBounds( this.holes[ i ].bounds );
+    }
+    polygonalBounds.minX = polygonalBounds.minX * inverseScale + translation.x;
+    polygonalBounds.minY = polygonalBounds.minY * inverseScale + translation.y;
+    polygonalBounds.maxX = polygonalBounds.maxX * inverseScale + translation.x;
+    polygonalBounds.maxY = polygonalBounds.maxY * inverseScale + translation.y;
+
+    return polygonalBounds;
+  }
 }
 
 export default class Rasterize {
@@ -830,17 +844,7 @@ export default class Rasterize {
         faceDebugData.clippableFace = clippableFace;
       }
 
-      // We'll avoid calculating this from the fresh polygon data, so we can avoid the performance cost
-      // (for when this is WGSL'ed).
-      const polygonalBounds = Bounds2.NOTHING.copy();
-      polygonalBounds.includeBounds( face.boundary.bounds );
-      for ( let j = 0; j < face.holes.length; j++ ) {
-        polygonalBounds.includeBounds( face.holes[ j ].bounds );
-      }
-      polygonalBounds.minX = polygonalBounds.minX * inverseScale + translation.x;
-      polygonalBounds.minY = polygonalBounds.minY * inverseScale + translation.y;
-      polygonalBounds.maxX = polygonalBounds.maxX * inverseScale + translation.x;
-      polygonalBounds.maxY = polygonalBounds.maxY * inverseScale + translation.y;
+      const polygonalBounds = face.getBounds( inverseScale, translation );
       if ( assert ) {
         faceDebugData.polygonalBounds = polygonalBounds;
       }
