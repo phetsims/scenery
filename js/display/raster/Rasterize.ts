@@ -383,31 +383,128 @@ class AccumulationRaster implements OutputRaster {
 
     for ( let i = 0; i < this.accumulationBuffer.length; i++ ) {
       const accumulation = this.accumulationBuffer[ i ];
-      let x = accumulation.x;
-      let y = accumulation.y;
-      let z = accumulation.z;
       const a = accumulation.w;
 
       // unpremultiply
       if ( a > 0 ) {
-        x /= a;
-        y /= a;
-        z /= a;
+        const x = accumulation.x / a;
+        const y = accumulation.y / a;
+        const z = accumulation.z / a;
+
+        // linear to sRGB
+        const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
+        const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
+        const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
+
+        const index = 4 * i;
+        imageData.data[ index ] = r * 255;
+        imageData.data[ index + 1 ] = g * 255;
+        imageData.data[ index + 2 ] = b * 255;
+        imageData.data[ index + 3 ] = a * 255;
       }
+    }
+
+    return imageData;
+  }
+}
+
+const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
+
+// TODO: consider implementing a raster that JUST uses ImageData, and does NOT do linear (proper) blending
+class CombinedRaster implements OutputRaster {
+  public readonly accumulationBuffer: Vector4[] = [];
+  public readonly imageData: ImageData;
+
+  public constructor( public readonly width: number, public readonly height: number ) {
+    for ( let i = 0; i < width * height; i++ ) {
+      this.accumulationBuffer.push( Vector4.ZERO.copy() );
+    }
+    this.imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
+  }
+
+
+  public addPartialPixel( color: Vector4, x: number, y: number ): void {
+    const index = y * this.width + x;
+    this.accumulationBuffer[ index ].add( color );
+  }
+
+  public addFullPixel( color: Vector4, x: number, y: number ): void {
+    // Be lazy, we COULD convert here, but we'll just do it at the end
+    const index = y * this.width + x;
+    this.accumulationBuffer[ index ].set( color );
+  }
+
+  public addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
+    const sRGB = CombinedRaster.convertToSRGB( color );
+    for ( let j = 0; j < height; j++ ) {
+      const rowIndex = ( y + j ) * this.width + x;
+      for ( let i = 0; i < width; i++ ) {
+        const baseIndex = 4 * ( rowIndex + i );
+        const data = this.imageData.data;
+        data[ baseIndex ] = sRGB.x;
+        data[ baseIndex + 1 ] = sRGB.y;
+        data[ baseIndex + 2 ] = sRGB.z;
+        data[ baseIndex + 3 ] = sRGB.w;
+      }
+    }
+  }
+
+  // TODO: can we combine these methods of sRGB conversion without losing performance?
+  // TODO: move this somewhere?
+  private static convertToSRGB( color: Vector4 ): Vector4 {
+    const accumulation = color;
+    const a = accumulation.w;
+
+    // unpremultiply
+    if ( a > 0 ) {
+      const x = accumulation.x / a;
+      const y = accumulation.y / a;
+      const z = accumulation.z / a;
 
       // linear to sRGB
       const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
       const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
       const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
 
-      const index = 4 * i;
-      imageData.data[ index ] = r * 255;
-      imageData.data[ index + 1 ] = g * 255;
-      imageData.data[ index + 2 ] = b * 255;
-      imageData.data[ index + 3 ] = a * 255;
+      return scratchCombinedVector.setXYZW(
+        r * 255,
+        g * 255,
+        b * 255,
+        a * 255
+      );
+    }
+    else {
+      return scratchCombinedVector.setXYZW( 0, 0, 0, 0 );
+    }
+  }
+
+  // TODO: ensure this isn't called multiple times!
+  public toImageData(): ImageData {
+    for ( let i = 0; i < this.accumulationBuffer.length; i++ ) {
+      const accumulation = this.accumulationBuffer[ i ];
+      const a = accumulation.w;
+
+      // unpremultiply
+      if ( a > 0 ) {
+        let x = accumulation.x / a;
+        let y = accumulation.y / a;
+        let z = accumulation.z / a;
+
+        // linear to sRGB
+        const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
+        const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
+        const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
+
+        const index = 4 * i;
+        // NOTE: ADDING HERE!!!! Don't change (we've set this for some pixels already)
+        this.imageData.data[ index ] += r * 255;
+        this.imageData.data[ index + 1 ] += g * 255;
+        this.imageData.data[ index + 2 ] += b * 255;
+        this.imageData.data[ index + 3 ] += a * 255;
+      }
     }
 
-    return imageData;
+    return this.imageData;
   }
 }
 
@@ -1108,7 +1205,8 @@ export default class Rasterize {
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
 
-    const outputRaster = new AccumulationRaster( rasterWidth, rasterHeight );
+    // const outputRaster = new AccumulationRaster( rasterWidth, rasterHeight );
+    const outputRaster = new CombinedRaster( rasterWidth, rasterHeight );
 
     Rasterize.rasterizeAccumulate(
       outputRaster,
