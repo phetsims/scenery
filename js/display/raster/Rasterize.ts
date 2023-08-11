@@ -729,6 +729,11 @@ export default class Rasterize {
       const faceRenderProgram = renderProgram.simplify( renderPath => face.inclusionSet.has( renderPath ) );
       face.renderProgram = faceRenderProgram;
 
+      // Drop faces that will be fully transparent
+      if ( faceRenderProgram instanceof RenderColor && faceRenderProgram.color.w <= 1e-8 ) {
+        continue;
+      }
+
       // Now back in our normal coordinate frame!
       const polygonalFace = new PolygonalFace( [
         face.boundary.toPolygon( inverseScale, translation ),
