@@ -171,7 +171,99 @@ const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
 const simplifier = new Simplifier();
 
+class ClippedEdge {
+  public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2 ) {}
+}
+
 export default class PolygonClipping {
+
+  public static boundsClipEdge(
+    startPoint: Vector2,
+    endPoint: Vector2,
+    bounds: Bounds2,
+    result: ClippedEdge[] = [] // Will append into this (for performance)
+  ): ClippedEdge[] {
+
+    const centerX = bounds.centerX;
+    const centerY = bounds.centerY;
+
+    const clippedStartPoint = scratchStartPoint.set( startPoint );
+    const clippedEndPoint = scratchEndPoint.set( endPoint );
+
+    const clipped = PolygonClipping.matthesDrakopoulosClip( clippedStartPoint, clippedEndPoint, bounds );
+
+    let startXLess;
+    let startYLess;
+    let endXLess;
+    let endYLess;
+
+    const needsStartCorner = !clipped || !startPoint.equals( clippedStartPoint );
+    const needsEndCorner = !clipped || !endPoint.equals( clippedEndPoint );
+    let startCorner: Vector2;
+    let endCorner: Vector2;
+
+    if ( needsStartCorner ) {
+      startXLess = startPoint.x < centerX;
+      startYLess = startPoint.y < centerY;
+      startCorner = new Vector2(
+        startXLess ? bounds.minX : bounds.maxX,
+        startYLess ? bounds.minY : bounds.maxY
+      );
+    }
+    if ( needsEndCorner ) {
+      endXLess = endPoint.x < centerX;
+      endYLess = endPoint.y < centerY;
+      endCorner = new Vector2(
+        endXLess ? bounds.minX : bounds.maxX,
+        endYLess ? bounds.minY : bounds.maxY
+      );
+    }
+
+    if ( clipped ) {
+      const resultStartPoint = clippedStartPoint.copy();
+      const resultEndPoint = clippedEndPoint.copy();
+
+      if ( needsStartCorner && !startCorner!.equals( resultStartPoint ) ) {
+        assert && assert( startCorner! );
+
+        result.push( new ClippedEdge( startCorner!, resultStartPoint ) );
+      }
+
+      result.push( new ClippedEdge( resultStartPoint, resultEndPoint ) );
+
+      if ( needsEndCorner && !endCorner!.equals( resultEndPoint ) ) {
+        assert && assert( endCorner! );
+
+        result.push( new ClippedEdge( resultEndPoint, endCorner! ) );
+      }
+    }
+    else {
+      assert && assert( startCorner! && endCorner! );
+
+      if ( startXLess !== endXLess && startYLess !== endYLess ) {
+        // we crossed from one corner to the opposite, but didn't hit. figure out which corner we passed
+        // we're diagonal, so solving for y=centerY should give us the info we need
+        const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( centerX - startPoint.x ) / ( endPoint.x - startPoint.x );
+
+        // Based on whether we are +x+y => -x-y or -x+y => +x-y
+        const startSame = startXLess === startYLess;
+        const yGreater = y > centerY;
+
+        const middlePoint = new Vector2(
+          startSame === yGreater ? bounds.minX : bounds.maxX,
+          yGreater ? bounds.maxY : bounds.minY
+        );
+
+        result.push( new ClippedEdge( startCorner!, middlePoint ) );
+        result.push( new ClippedEdge( middlePoint, endCorner! ) );
+      }
+      else if ( !startCorner!.equals( endCorner! ) ) {
+        result.push( new ClippedEdge( startCorner!, endCorner! ) );
+      }
+    }
+
+    return result;
+  }
 
   // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
   public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
@@ -196,8 +288,6 @@ export default class PolygonClipping {
       let endXLess;
       let endYLess;
 
-      // TODO: we're adding all sorts of duplicate unnecessary points!
-
       const needsStartCorner = !clipped || !startPoint.equals( clippedStartPoint );
       const needsEndCorner = !clipped || !endPoint.equals( clippedEndPoint );
 
@@ -210,7 +300,6 @@ export default class PolygonClipping {
         endYLess = endPoint.y < centerY;
       }
 
-      // TODO: don't rely on the simplifier so much! (especially with arrays?)
       if ( needsStartCorner ) {
         simplifier.add(
           startXLess ? bounds.minX : bounds.maxX,
