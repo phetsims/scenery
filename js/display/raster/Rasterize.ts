@@ -318,6 +318,7 @@ export default class Rasterize {
 
     // Compute intersections
     BoundsIntersectionFilter.quadraticIntersect( integerBounds, integerEdges, ( edgeA, edgeB ) => {
+      // TODO: better filtering out with strict bounds checks in the case of non-horizontal non-vertical lines
       const intersectionPoints = IntersectionPoint.intersectLineSegments(
         new BigIntVector2( BigInt( edgeA.x0 ), BigInt( edgeA.y0 ) ),
         new BigIntVector2( BigInt( edgeA.x1 ), BigInt( edgeA.y1 ) ),
