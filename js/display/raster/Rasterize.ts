@@ -6,13 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, BoundsIntersectionFilter, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Utils from '../../../../dot/js/Utils.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
+
+let debugData: Record<string, IntentionalAny> | null = {};
 
 class RationalIntersection {
   public constructor( public readonly t: BigRational, public readonly point: BigRationalVector2 ) {}
@@ -261,53 +263,9 @@ class RationalFace {
 }
 
 export default class Rasterize {
-  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2 ): Record<string, IntentionalAny> | null {
 
-    let debugData: Record<string, IntentionalAny> | null;
-    if ( assert ) {
-      debugData = {
-        areas: []
-      };
-    }
-
-    assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
-
-    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( bounds.width, bounds.height ) ) ) );
-    if ( assert ) {
-      debugData!.scale = scale;
-    }
-
-    const paths: RenderPath[] = [];
-    renderProgram.depthFirst( program => {
-      if ( program instanceof RenderPathProgram && program.path !== null ) {
-        paths.push( program.path );
-      }
-    } );
-    const backgroundPath = new RenderPath( 'nonzero', [
-      [
-        bounds.leftTop,
-        bounds.rightTop,
-        bounds.rightBottom,
-        bounds.leftBottom
-      ]
-    ] );
-    paths.push( backgroundPath );
-
-    const integerBounds = new Bounds2(
-      Utils.roundSymmetric( bounds.minX * scale ),
-      Utils.roundSymmetric( bounds.minY * scale ),
-      Utils.roundSymmetric( bounds.maxX * scale ),
-      Utils.roundSymmetric( bounds.maxY * scale )
-    );
-    if ( assert ) {
-      debugData!.integerBounds = integerBounds;
-    }
-
-    const integerEdges: IntegerEdge[] = [];
-    if ( assert ) {
-      debugData!.integerEdges = integerEdges;
-    }
-
+  private static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, scale: number ): IntegerEdge[] {
+    const integerEdges = [];
     for ( let i = 0; i < paths.length; i++ ) {
       const path = paths[ i ];
 
@@ -323,7 +281,36 @@ export default class Rasterize {
         }
       }
     }
+    return integerEdges;
+  }
 
+  private static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge ): void {
+    const intersectionPoints = IntersectionPoint.intersectLineSegments(
+      new BigIntVector2( BigInt( edgeA.x0 ), BigInt( edgeA.y0 ) ),
+      new BigIntVector2( BigInt( edgeA.x1 ), BigInt( edgeA.y1 ) ),
+      new BigIntVector2( BigInt( edgeB.x0 ), BigInt( edgeB.y0 ) ),
+      new BigIntVector2( BigInt( edgeB.x1 ), BigInt( edgeB.y1 ) )
+    );
+
+    for ( let i = 0; i < intersectionPoints.length; i++ ) {
+      const intersectionPoint = intersectionPoints[ i ];
+
+      const t0 = intersectionPoint.t0;
+      const t1 = intersectionPoint.t1;
+      const point = intersectionPoint.point;
+
+      // TODO: in WGSL, use atomicExchange to write a linked list of these into each edge
+      // NOTE: We filter out endpoints of lines, since they wouldn't trigger a split in the segment anyway
+      if ( !t0.equals( BigRational.ZERO ) && !t0.equals( BigRational.ONE ) ) {
+        edgeA.intersections.push( new RationalIntersection( t0, point ) );
+      }
+      if ( !t1.equals( BigRational.ZERO ) && !t1.equals( BigRational.ONE ) ) {
+        edgeB.intersections.push( new RationalIntersection( t1, point ) );
+      }
+    }
+  }
+
+  private static edgeIntersectionQuadratic( integerEdges: IntegerEdge[] ): void {
     // Compute intersections
     // TODO: improve on the quadratic!!!!
     // similar to BoundsIntersectionFilter.quadraticIntersect( integerBounds, integerEdges, ( edgeA, edgeB ) => {
@@ -354,35 +341,17 @@ export default class Rasterize {
           someXEqual ? ( maxX >= minX ) : ( maxX > minX ) &&
           someYEqual ? ( maxY >= minY ) : ( maxY > minY )
         ) {
-          const intersectionPoints = IntersectionPoint.intersectLineSegments(
-            new BigIntVector2( BigInt( edgeA.x0 ), BigInt( edgeA.y0 ) ),
-            new BigIntVector2( BigInt( edgeA.x1 ), BigInt( edgeA.y1 ) ),
-            new BigIntVector2( BigInt( edgeB.x0 ), BigInt( edgeB.y0 ) ),
-            new BigIntVector2( BigInt( edgeB.x1 ), BigInt( edgeB.y1 ) )
-          );
-
-          for ( let i = 0; i < intersectionPoints.length; i++ ) {
-            const intersectionPoint = intersectionPoints[ i ];
-
-            const t0 = intersectionPoint.t0;
-            const t1 = intersectionPoint.t1;
-            const point = intersectionPoint.point;
-
-            // TODO: in WGSL, use atomicExchange to write a linked list of these into each edge
-            // NOTE: We filter out endpoints of lines, since they wouldn't trigger a split in the segment anyway
-            if ( !t0.equals( BigRational.ZERO ) && !t0.equals( BigRational.ONE ) ) {
-              edgeA.intersections.push( new RationalIntersection( t0, point ) );
-            }
-            if ( !t1.equals( BigRational.ZERO ) && !t1.equals( BigRational.ONE ) ) {
-              edgeB.intersections.push( new RationalIntersection( t1, point ) );
-            }
-          }
+          Rasterize.processIntegerEdgeIntersection( edgeA, edgeB );
         }
       }
     }
+  }
 
+  private static splitIntegerEdges( integerEdges: IntegerEdge[] ): RationalHalfEdge[] {
     let edgeIdCounter = 0;
     const rationalHalfEdges: RationalHalfEdge[] = [];
+
+    // TODO: reduce closures
     integerEdges.forEach( integerEdge => {
       const points = [
         new BigRationalVector2( BigRational.whole( integerEdge.x0 ), BigRational.whole( integerEdge.y0 ) )
@@ -441,9 +410,10 @@ export default class Rasterize {
         }
       }
     } );
+    return rationalHalfEdges;
+  }
 
-    rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
-
+  private static filterAndConnectHalfEdges( rationalHalfEdges: RationalHalfEdge[] ): RationalHalfEdge[] {
     // Do filtering for duplicate half-edges AND connecting edge linked list in the same traversal
     // NOTE: We don't NEED to filter "low-order" vertices (edge whose opposite is its next edge), but we could at
     // some point in the future. Note that removing a low-order edge then might create ANOTHER low-order edge, so
@@ -453,9 +423,6 @@ export default class Rasterize {
     let firstEdge = rationalHalfEdges[ 0 ];
     let lastEdge = rationalHalfEdges[ 0 ];
     const filteredRationalHalfEdges = [ lastEdge ];
-    if ( assert ) {
-      debugData!.filteredRationalHalfEdges = filteredRationalHalfEdges;
-    }
     for ( let i = 1; i < rationalHalfEdges.length; i++ ) {
       const edge = rationalHalfEdges[ i ];
 
@@ -481,15 +448,15 @@ export default class Rasterize {
     // last connection
     firstEdge.reversed.nextEdge = lastEdge;
     lastEdge.previousEdge = firstEdge.reversed;
+    return filteredRationalHalfEdges;
+  }
 
-    const innerBoundaries: RationalBoundary[] = [];
-    const outerBoundaries: RationalBoundary[] = [];
-    const faces: RationalFace[] = [];
-    if ( assert ) {
-      debugData!.innerBoundaries = innerBoundaries;
-      debugData!.outerBoundaries = outerBoundaries;
-      debugData!.faces = faces;
-    }
+  private static traceBoundaries(
+    filteredRationalHalfEdges: RationalHalfEdge[],
+    innerBoundaries: RationalBoundary[],
+    outerBoundaries: RationalBoundary[],
+    faces: RationalFace[]
+  ): void {
     for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
       const firstEdge = filteredRationalHalfEdges[ i ];
       if ( !firstEdge.boundary ) {
@@ -523,8 +490,14 @@ export default class Rasterize {
         }
       }
     }
+  }
 
-    // Compute which boundaries are holes in which faces
+  // Returns the fully exterior boundary (should be singular, since we added the exterior rectangle)
+  private static computeFaceHoles(
+    integerBounds: Bounds2,
+    outerBoundaries: RationalBoundary[],
+    faces: RationalFace[]
+  ): RationalBoundary {
     let exteriorBoundary: RationalBoundary | null = null;
     if ( assert ) {
       debugData!.exteriorBoundary = exteriorBoundary;
@@ -665,6 +638,11 @@ export default class Rasterize {
 
         assert && assert( connectedFace );
         connectedFace.holes.push( outerBoundary );
+
+        // Fill in face data for holes, so we can traverse nicely
+        for ( let k = 0; k < outerBoundary.edges.length; k++ ) {
+          outerBoundary.edges[ k ].face = connectedFace;
+        }
       }
       else {
         exteriorBoundary = outerBoundary;
@@ -675,31 +653,21 @@ export default class Rasterize {
       }
     }
 
-    // Fill in face data for holes, so we can traverse nicely
-    for ( let i = 0; i < faces.length; i++ ) {
-      const face = faces[ i ];
+    assert && assert( exteriorBoundary );
 
-      for ( let j = 0; j < face.holes.length; j++ ) {
-        const hole = face.holes[ j ];
+    return exteriorBoundary!;
+  }
 
-        for ( let k = 0; k < hole.edges.length; k++ ) {
-          const edge = hole.edges[ k ];
+  private static createUnboundedFace( exteriorBoundary: RationalBoundary ): RationalFace {
+    const unboundedFace = new RationalFace( exteriorBoundary );
 
-          edge.face = face;
-        }
-      }
-    }
-
-    // For ease of use, an unbounded face (it is essentially fake)
-    const unboundedFace = new RationalFace( exteriorBoundary! );
-    if ( assert ) {
-      debugData!.unboundedFace = unboundedFace;
-    }
     for ( let i = 0; i < exteriorBoundary!.edges.length; i++ ) {
-      const edge = exteriorBoundary!.edges[ i ];
-      edge.face = unboundedFace;
+      exteriorBoundary!.edges[ i ].face = unboundedFace;
     }
+    return unboundedFace;
+  }
 
+  private static computeWindingMaps( filteredRationalHalfEdges: RationalHalfEdge[], unboundedFace: RationalFace ): void {
     for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
       const edge = filteredRationalHalfEdges[ i ];
 
@@ -741,7 +709,14 @@ export default class Rasterize {
       }
     };
     recursiveWindingMap( unboundedFace );
+  }
 
+  private static rasterizeAccumulate(
+    renderProgram: RenderProgram,
+    faces: RationalFace[],
+    bounds: Bounds2,
+    scale: number
+  ): Vector4[] {
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
 
@@ -942,6 +917,10 @@ export default class Rasterize {
       // TODO TODO TODO TODO TODO: non-zero-centered bounds! Verify everything
     }
 
+    return accumulationBuffer;
+  }
+
+  private static accumulationToImageData( accumulationBuffer: Vector4[], rasterWidth: number, rasterHeight: number ): ImageData {
     const imageData = new ImageData( rasterWidth, rasterHeight, { colorSpace: 'srgb' } );
     if ( assert ) {
       debugData!.imageData = imageData;
@@ -972,6 +951,96 @@ export default class Rasterize {
       imageData.data[ index + 2 ] = b * 255;
       imageData.data[ index + 3 ] = a * 255;
     }
+
+    return imageData;
+  }
+
+  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2 ): Record<string, IntentionalAny> | null {
+
+    if ( assert ) {
+      debugData = {
+        areas: []
+      };
+    }
+
+    assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
+
+    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( bounds.width, bounds.height ) ) ) );
+    if ( assert ) {
+      debugData!.scale = scale;
+    }
+
+    const paths: RenderPath[] = [];
+    renderProgram.depthFirst( program => {
+      if ( program instanceof RenderPathProgram && program.path !== null ) {
+        paths.push( program.path );
+      }
+    } );
+    const backgroundPath = new RenderPath( 'nonzero', [
+      [
+        bounds.leftTop,
+        bounds.rightTop,
+        bounds.rightBottom,
+        bounds.leftBottom
+      ]
+    ] );
+    paths.push( backgroundPath );
+
+    const integerBounds = new Bounds2(
+      Utils.roundSymmetric( bounds.minX * scale ),
+      Utils.roundSymmetric( bounds.minY * scale ),
+      Utils.roundSymmetric( bounds.maxX * scale ),
+      Utils.roundSymmetric( bounds.maxY * scale )
+    );
+    if ( assert ) { debugData!.integerBounds = integerBounds; }
+
+    const integerEdges = Rasterize.clipScaleToIntegerEdges( paths, bounds, scale );
+    if ( assert ) { debugData!.integerEdges = integerEdges; }
+
+    Rasterize.edgeIntersectionQuadratic( integerEdges );
+
+    const rationalHalfEdges = Rasterize.splitIntegerEdges( integerEdges );
+
+    rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
+
+    const filteredRationalHalfEdges = Rasterize.filterAndConnectHalfEdges( rationalHalfEdges );
+    if ( assert ) { debugData!.filteredRationalHalfEdges = filteredRationalHalfEdges; }
+
+    const innerBoundaries: RationalBoundary[] = [];
+    const outerBoundaries: RationalBoundary[] = [];
+    const faces: RationalFace[] = [];
+    if ( assert ) {
+      debugData!.innerBoundaries = innerBoundaries;
+      debugData!.outerBoundaries = outerBoundaries;
+      debugData!.faces = faces;
+    }
+    Rasterize.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
+
+    const exteriorBoundary = Rasterize.computeFaceHoles(
+      integerBounds,
+      outerBoundaries,
+      faces
+    );
+
+    // For ease of use, an unbounded face (it is essentially fake)
+    const unboundedFace = Rasterize.createUnboundedFace( exteriorBoundary );
+    if ( assert ) {
+      debugData!.unboundedFace = unboundedFace;
+    }
+
+    Rasterize.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
+
+    const rasterWidth = bounds.width;
+    const rasterHeight = bounds.height;
+
+    const accumulationBuffer = Rasterize.rasterizeAccumulate(
+      renderProgram,
+      faces,
+      bounds,
+      scale
+    );
+
+    const imageData = Rasterize.accumulationToImageData( accumulationBuffer, rasterWidth, rasterHeight );
 
     if ( assert ) {
       const canvas = document.createElement( 'canvas' );
