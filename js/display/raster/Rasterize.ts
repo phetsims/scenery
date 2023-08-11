@@ -71,6 +71,8 @@ class WindingMap {
   }
 }
 
+// Instead of storing vertices, we can get away with storing half-edges, with a linked list of next/previous and the
+// opposite half edge. This is like a half-edge winged data structure.
 class RationalHalfEdge {
 
   public face: RationalFace | null = null;
@@ -180,7 +182,7 @@ class RationalBoundary {
     this.signedArea = signedArea;
   }
 
-  public toPolygon( scaleFactor = 1, translation = Vector2.ZERO ): Vector2[] {
+  public toTransformedPolygon( scaleFactor = 1, translation = Vector2.ZERO ): Vector2[] {
     const result: Vector2[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {
       result.push( this.edges[ i ].p0float.timesScalar( scaleFactor ).plus( translation ) );
@@ -260,8 +262,6 @@ export default class Rasterize {
       };
     }
 
-    // TODO: include "background" region in CAG!
-
     assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
 
     const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( bounds.width, bounds.height ) ) ) );
@@ -332,6 +332,8 @@ export default class Rasterize {
         const t1 = intersectionPoint.t1;
         const point = intersectionPoint.point;
 
+        // TODO: in WGSL, use atomicExchange to write a linked list of these into each edge
+        // NOTE: We filter out endpoints of lines, since they wouldn't trigger a split in the segment anyway
         if ( !t0.equals( BigRational.ZERO ) && !t0.equals( BigRational.ONE ) ) {
           edgeA.intersections.push( new RationalIntersection( t0, point ) );
         }
@@ -382,9 +384,15 @@ export default class Rasterize {
           const deltaX = integerEdge.x1 - integerEdge.x0;
           const deltaY = integerEdge.y1 - integerEdge.y0;
 
+          // We compute slope here due to rational precision (while it would be possible to create a larger rational
+          // number later and reduce it, here we're starting with integers, so we don't have to do as much).
           const discriminator = deltaY === 0 ? ( deltaX > 0 ? 0 : 2 ) : ( deltaY > 0 ? 1 : 3 );
           const slope = deltaY === 0 ? BigRational.ZERO : new BigRational( deltaX, deltaY ).reduced();
 
+          // We store the slope and discriminator here, as that allows us to tell the order-difference between two
+          // edges that have one point the same. This works here, because we have already broken lines up at the
+          // endpoints in the case of overlap, so that if it has the same start point, discriminator and slope, then it
+          // WILL have the same end point, and thus will be the same effective edge.
           forwardEdge.discriminator = discriminator;
           reverseEdge.discriminator = ( discriminator + 2 ) % 4;
           forwardEdge.slope = slope;
@@ -399,6 +407,11 @@ export default class Rasterize {
     rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
 
     // Do filtering for duplicate half-edges AND connecting edge linked list in the same traversal
+    // NOTE: We don't NEED to filter "low-order" vertices (edge whose opposite is its next edge), but we could at
+    // some point in the future. Note that removing a low-order edge then might create ANOTHER low-order edge, so
+    // it would need to chase these.
+    // NOTE: We could also remove "composite" edges that have no winding contribution (degenerate "touching" in the
+    // source path), however it's probably not too common so it's not done here.
     let firstEdge = rationalHalfEdges[ 0 ];
     let lastEdge = rationalHalfEdges[ 0 ];
     const filteredRationalHalfEdges = [ lastEdge ];
@@ -736,8 +749,8 @@ export default class Rasterize {
 
       // Now back in our normal coordinate frame!
       const polygonalFace = new PolygonalFace( [
-        face.boundary.toPolygon( inverseScale, translation ),
-        ...face.holes.map( hole => hole.toPolygon( inverseScale, translation ) )
+        face.boundary.toTransformedPolygon( inverseScale, translation ),
+        ...face.holes.map( hole => hole.toTransformedPolygon( inverseScale, translation ) )
       ] );
       if ( assert ) {
         faceDebugData.polygonalFace = polygonalFace;
