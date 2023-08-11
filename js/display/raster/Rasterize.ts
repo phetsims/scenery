@@ -317,6 +317,13 @@ class RationalFace {
   public renderProgram: RenderProgram | null = null;
 
   public constructor( public readonly boundary: RationalBoundary ) {}
+
+  public toPolygonalFace( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): PolygonalFace {
+    return new PolygonalFace( [
+      this.boundary.toTransformedPolygon( inverseScale, translation ),
+      ...this.holes.map( hole => hole.toTransformedPolygon( inverseScale, translation ) )
+    ] )
+  }
 }
 
 export default class Rasterize {
@@ -818,12 +825,9 @@ export default class Rasterize {
       }
 
       // Now back in our normal coordinate frame!
-      const polygonalFace = new PolygonalFace( [
-        face.boundary.toTransformedPolygon( inverseScale, translation ),
-        ...face.holes.map( hole => hole.toTransformedPolygon( inverseScale, translation ) )
-      ] );
+      const clippableFace = face.toPolygonalFace( inverseScale, translation );
       if ( assert ) {
-        faceDebugData.polygonalFace = polygonalFace;
+        faceDebugData.clippableFace = clippableFace;
       }
 
       // We'll avoid calculating this from the fresh polygon data, so we can avoid the performance cost
@@ -848,7 +852,7 @@ export default class Rasterize {
 
       const constColor = faceRenderProgram instanceof RenderColor ? faceRenderProgram.color : null;
 
-      const addPixel = ( pixelFace: PolygonalFace, area: number, x: number, y: number ) => {
+      const addPixel = ( pixelFace: ClippableFace, area: number, x: number, y: number ) => {
         if ( area > 1e-8 ) {
           if ( assert ) {
             debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
@@ -868,7 +872,7 @@ export default class Rasterize {
       };
 
       const scratchVector = new Vector2( 0, 0 );
-      const addFullArea = ( face: PolygonalFace, minX: number, minY: number, maxX: number, maxY: number ) => {
+      const addFullArea = ( face: ClippableFace, minX: number, minY: number, maxX: number, maxY: number ) => {
         if ( assert ) {
           debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
         }
@@ -890,7 +894,7 @@ export default class Rasterize {
       };
 
       // TODO: don't shadow
-      const binaryRender = ( face: PolygonalFace, area: number, minX: number, minY: number, maxX: number, maxY: number ) => {
+      const binaryRender = ( face: ClippableFace, area: number, minX: number, minY: number, maxX: number, maxY: number ) => {
         const xDiff = maxX - minX;
         const yDiff = maxY - minY;
         if ( xDiff === 1 && yDiff === 1 ) {
@@ -944,14 +948,14 @@ export default class Rasterize {
             pixelBounds.minX = x;
             pixelBounds.maxX = x + 1;
 
-            const pixelFace = polygonalFace.getClipped( pixelBounds );
+            const pixelFace = clippableFace.getClipped( pixelBounds );
             const area = pixelFace.getArea();
             addPixel( pixelFace, area, x, y );
           }
         }
       };
 
-      binaryRender( polygonalFace, polygonalFace.getArea(), minX, minY, maxX, maxY );
+      binaryRender( clippableFace, clippableFace.getArea(), minX, minY, maxX, maxY );
 
 
       // TODO: more advanced handling
