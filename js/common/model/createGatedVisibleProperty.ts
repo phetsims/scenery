@@ -17,7 +17,8 @@ import centerAndVariability from '../../centerAndVariability.js';
 
 export const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem ): TReadOnlyProperty<boolean> => {
   return DerivedProperty.and( [ visibleProperty, new BooleanProperty( true, {
-    tandem: tandem.createTandem( 'selfVisibleProperty' )
+    tandem: tandem.createTandem( 'selfVisibleProperty' ),
+    phetioFeatured: true
   } ) ], {
     tandem: tandem.createTandem( 'visibleProperty' ),
     phetioValueType: BooleanIO
