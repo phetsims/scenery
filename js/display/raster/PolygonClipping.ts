@@ -88,8 +88,9 @@ class Simplifier {
     } while ( needsSimplify );
   }
 
-  public add( point: Vector2 ): void {
-    this.points.push( point );
+  public add( x: number, y: number ): void {
+    // TODO: simplify allocations
+    this.points.push( new Vector2( x, y ) );
     this.simplifyLoop();
   }
 
@@ -110,23 +111,26 @@ class Simplifier {
   }
 }
 
+const scratchStartPoint = new Vector2( 0, 0 );
+const scratchEndPoint = new Vector2( 0, 0 );
+
 export default class PolygonClipping {
 
   // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
   public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
     const simplifier = new Simplifier();
 
-    const center = bounds.center;
+    const centerX = bounds.centerX;
+    const centerY = bounds.centerY;
 
     // TODO: optimize this
     for ( let i = 0; i < polygon.length; i++ ) {
       const startPoint = polygon[ i ];
       const endPoint = polygon[ ( i + 1 ) % polygon.length ];
 
-      const clippedStartPoint = CodedVector2.create( startPoint, bounds );
-      const clippedEndPoint = CodedVector2.create( endPoint, bounds );
+      const clippedStartPoint = scratchStartPoint.set( startPoint );
+      const clippedEndPoint = scratchEndPoint.set( endPoint );
 
-      // TODO: liang-barsky or something better!!!
       const clipped = PolygonClipping.matthesDrakopoulosClip( clippedStartPoint, clippedEndPoint, bounds );
 
       let startXLess;
@@ -140,46 +144,45 @@ export default class PolygonClipping {
       const needsEndCorner = !clipped || !endPoint.equals( clippedEndPoint );
 
       if ( needsStartCorner ) {
-        startXLess = startPoint.x < center.x;
-        startYLess = startPoint.y < center.y;
+        startXLess = startPoint.x < centerX;
+        startYLess = startPoint.y < centerY;
       }
       if ( needsEndCorner ) {
-        endXLess = endPoint.x < center.x;
-        endYLess = endPoint.y < center.y;
+        endXLess = endPoint.x < centerX;
+        endYLess = endPoint.y < centerY;
       }
 
       // TODO: don't rely on the simplifier so much! (especially with arrays?)
       if ( needsStartCorner ) {
-        simplifier.add( new Vector2(
+        simplifier.add(
           startXLess ? bounds.minX : bounds.maxX,
           startYLess ? bounds.minY : bounds.maxY
-        ) );
+        );
       }
       if ( clipped ) {
-        simplifier.add( clippedStartPoint.toVector2() );
-        simplifier.add( clippedEndPoint.toVector2() );
+        simplifier.add( clippedStartPoint.x, clippedStartPoint.y );
+        simplifier.add( clippedEndPoint.x, clippedEndPoint.y );
       }
       else {
         if ( startXLess !== endXLess && startYLess !== endYLess ) {
           // we crossed from one corner to the opposite, but didn't hit. figure out which corner we passed
           // we're diagonal, so solving for y=centerY should give us the info we need
-          const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( center.x - startPoint.x ) / ( endPoint.x - startPoint.x );
+          const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( centerX - startPoint.x ) / ( endPoint.x - startPoint.x );
 
+          // Based on whether we are +x+y => -x-y or -x+y => +x-y
+          const startSame = startXLess === startYLess;
+          const yGreater = y > centerY;
           simplifier.add(
-            // Based on whether we are +x+y => -x-y or -x+y => +x-y
-            ( startXLess === startYLess ) ? (
-              y > center.y ? new Vector2( bounds.minX, bounds.maxY ) : new Vector2( bounds.maxX, bounds.minY )
-            ) : (
-              y > center.y ? new Vector2( bounds.maxX, bounds.maxY ) : new Vector2( bounds.minX, bounds.minY )
-            )
+            startSame === yGreater ? bounds.minX : bounds.maxX,
+            yGreater ? bounds.maxY : bounds.minY
           );
         }
       }
       if ( needsEndCorner ) {
-        simplifier.add( new Vector2(
+        simplifier.add(
           endXLess ? bounds.minX : bounds.maxX,
           endYLess ? bounds.minY : bounds.maxY
-        ) );
+        );
       }
     }
 
