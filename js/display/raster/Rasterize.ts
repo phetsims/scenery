@@ -38,6 +38,14 @@ class IntegerEdge {
       Math.max( y0, y1 )
     );
   }
+
+  public static fromUnscaledPoints( path: RenderPath, scale: number, p0: Vector2, p1: Vector2 ): IntegerEdge {
+    const x0 = Utils.roundSymmetric( p0.x * scale );
+    const y0 = Utils.roundSymmetric( p0.y * scale );
+    const x1 = Utils.roundSymmetric( p1.x * scale );
+    const y1 = Utils.roundSymmetric( p1.y * scale );
+    return new IntegerEdge( path, x0, y0, x1, y1 );
+  }
 }
 
 class WindingMap {
@@ -300,49 +308,78 @@ export default class Rasterize {
       debugData!.integerEdges = integerEdges;
     }
 
-    paths.forEach( path => {
-      path.subpaths.forEach( subpath => {
+    for ( let i = 0; i < paths.length; i++ ) {
+      const path = paths[ i ];
+
+      for ( let j = 0; j < path.subpaths.length; j++ ) {
+        const subpath = path.subpaths[ j ];
         const clippedSubpath = PolygonClipping.boundsClipPolygon( subpath, bounds );
 
-        for ( let i = 0; i < clippedSubpath.length; i++ ) {
-          const p0 = clippedSubpath[ i ];
-          const p1 = clippedSubpath[ ( i + 1 ) % clippedSubpath.length ];
-          const x0 = Utils.roundSymmetric( p0.x * scale );
-          const y0 = Utils.roundSymmetric( p0.y * scale );
-          const x1 = Utils.roundSymmetric( p1.x * scale );
-          const y1 = Utils.roundSymmetric( p1.y * scale );
-          integerEdges.push( new IntegerEdge( path, x0, y0, x1, y1 ) );
-        }
-      } );
-    } );
-
-    // Compute intersections
-    BoundsIntersectionFilter.quadraticIntersect( integerBounds, integerEdges, ( edgeA, edgeB ) => {
-      // TODO: better filtering out with strict bounds checks in the case of non-horizontal non-vertical lines
-      const intersectionPoints = IntersectionPoint.intersectLineSegments(
-        new BigIntVector2( BigInt( edgeA.x0 ), BigInt( edgeA.y0 ) ),
-        new BigIntVector2( BigInt( edgeA.x1 ), BigInt( edgeA.y1 ) ),
-        new BigIntVector2( BigInt( edgeB.x0 ), BigInt( edgeB.y0 ) ),
-        new BigIntVector2( BigInt( edgeB.x1 ), BigInt( edgeB.y1 ) )
-      );
-
-      for ( let i = 0; i < intersectionPoints.length; i++ ) {
-        const intersectionPoint = intersectionPoints[ i ];
-
-        const t0 = intersectionPoint.t0;
-        const t1 = intersectionPoint.t1;
-        const point = intersectionPoint.point;
-
-        // TODO: in WGSL, use atomicExchange to write a linked list of these into each edge
-        // NOTE: We filter out endpoints of lines, since they wouldn't trigger a split in the segment anyway
-        if ( !t0.equals( BigRational.ZERO ) && !t0.equals( BigRational.ONE ) ) {
-          edgeA.intersections.push( new RationalIntersection( t0, point ) );
-        }
-        if ( !t1.equals( BigRational.ZERO ) && !t1.equals( BigRational.ONE ) ) {
-          edgeB.intersections.push( new RationalIntersection( t1, point ) );
+        for ( let k = 0; k < clippedSubpath.length; k++ ) {
+          // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
+          const p0 = clippedSubpath[ k ];
+          const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
+          integerEdges.push( IntegerEdge.fromUnscaledPoints( path, scale, p0, p1 ) );
         }
       }
-    } );
+    }
+
+    // Compute intersections
+    // TODO: improve on the quadratic!!!!
+    // similar to BoundsIntersectionFilter.quadraticIntersect( integerBounds, integerEdges, ( edgeA, edgeB ) => {
+    for ( let i = 0; i < integerEdges.length; i++ ) {
+      const edgeA = integerEdges[ i ];
+      const boundsA = edgeA.bounds;
+      const xAEqual = edgeA.x0 === edgeA.x1;
+      const yAEqual = edgeA.y0 === edgeA.y1;
+
+      for ( let j = i + 1; j < integerEdges.length; j++ ) {
+        const edgeB = integerEdges[ j ];
+        const boundsB = edgeB.bounds;
+        const someXEqual = xAEqual || edgeB.x0 === edgeB.x1;
+        const someYEqual = yAEqual || edgeB.y0 === edgeB.y1;
+
+        // Bounds min/max for overlap checks
+        const minX = Math.max( boundsA.minX, boundsB.minX );
+        const minY = Math.max( boundsA.minY, boundsB.minY );
+        const maxX = Math.min( boundsA.maxX, boundsB.maxX );
+        const maxY = Math.min( boundsA.maxY, boundsB.maxY );
+
+        // If one of the segments is (e.g.) vertical, we'll need to allow checks for overlap ONLY on the x value, otherwise
+        // we can have a strict inequality check. This also applies to horizontal segments and the y value.
+        // The reason this is OK is because if the segments are both (e.g.) non-vertical, then if the bounds only meet
+        // at a single x value (and not a continuos area of overlap), THEN the only intersection would be at the
+        // endpoints (which we would filter out and not want anyway).
+        if (
+          someXEqual ? ( maxX >= minX ) : ( maxX > minX ) &&
+          someYEqual ? ( maxY >= minY ) : ( maxY > minY )
+        ) {
+          const intersectionPoints = IntersectionPoint.intersectLineSegments(
+            new BigIntVector2( BigInt( edgeA.x0 ), BigInt( edgeA.y0 ) ),
+            new BigIntVector2( BigInt( edgeA.x1 ), BigInt( edgeA.y1 ) ),
+            new BigIntVector2( BigInt( edgeB.x0 ), BigInt( edgeB.y0 ) ),
+            new BigIntVector2( BigInt( edgeB.x1 ), BigInt( edgeB.y1 ) )
+          );
+
+          for ( let i = 0; i < intersectionPoints.length; i++ ) {
+            const intersectionPoint = intersectionPoints[ i ];
+
+            const t0 = intersectionPoint.t0;
+            const t1 = intersectionPoint.t1;
+            const point = intersectionPoint.point;
+
+            // TODO: in WGSL, use atomicExchange to write a linked list of these into each edge
+            // NOTE: We filter out endpoints of lines, since they wouldn't trigger a split in the segment anyway
+            if ( !t0.equals( BigRational.ZERO ) && !t0.equals( BigRational.ONE ) ) {
+              edgeA.intersections.push( new RationalIntersection( t0, point ) );
+            }
+            if ( !t1.equals( BigRational.ZERO ) && !t1.equals( BigRational.ONE ) ) {
+              edgeB.intersections.push( new RationalIntersection( t1, point ) );
+            }
+          }
+        }
+      }
+    }
 
     let edgeIdCounter = 0;
     const rationalHalfEdges: RationalHalfEdge[] = [];
