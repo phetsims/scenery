@@ -53,72 +53,130 @@ class Simplifier {
     // NOTHING NEEDED
   }
 
-  private simplify(): boolean {
-    // equality check
-    if ( this.points.length >= 2 ) {
-      const p0 = this.points[ this.points.length - 1 ];
-      const p1 = this.points[ this.points.length - 2 ];
-      if ( p0.equals( p1 ) ) {
-        this.points.pop();
-        return true;
-      }
-    }
-
-    // axis-aligned collinear check
-    if ( this.points.length >= 3 ) {
-      const p0 = this.points[ this.points.length - 1 ];
-      const p1 = this.points[ this.points.length - 2 ];
-      const p2 = this.points[ this.points.length - 3 ];
-
-      if ( ( p0.x === p1.x && p1.x === p2.x ) || ( p0.y === p1.y && p1.y === p2.y ) ) {
-        this.points.pop();
-        this.points.pop();
-        this.points.push( p0 );
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private simplifyLoop(): void {
-    let needsSimplify: boolean;
-    do {
-      needsSimplify = this.simplify();
-    } while ( needsSimplify );
+  public reset(): void {
+    this.points = [];
   }
 
   public add( x: number, y: number ): void {
-    // TODO: simplify allocations
+    if ( this.points.length >= 1 ) {
+
+      const lastPoint = this.points[ this.points.length - 1 ];
+      const xEquals = lastPoint.x === x;
+      const yEquals = lastPoint.y === y;
+
+      // If we are equal to the last point, NO-OP
+      if ( xEquals && yEquals ) {
+        return;
+      }
+
+      if ( this.points.length >= 2 ) {
+        const secondLastPoint = this.points[ this.points.length - 2 ];
+        const secondXEquals = secondLastPoint.x === x;
+        const secondYEquals = secondLastPoint.y === y;
+
+        // If we are equal to the second-to-last point, we can just undo our last point
+        if ( secondXEquals && secondYEquals ) {
+          this.points.pop(); // TODO: pooling freeToPool?
+          return;
+        }
+
+        // X-collinearity check (if we would have 3 points with the same X, we can just remove the middle one)
+        if ( xEquals && secondXEquals ) {
+          // Instead of adding new one and removing the middle one, we can just update the last one
+          lastPoint.y = y;
+          return;
+        }
+
+        // Y-collinearity check (if we would have 3 points with the same Y, we can just remove the middle one)
+        if ( yEquals && secondYEquals ) {
+          // Instead of adding new one and removing the middle one, we can just update the last one
+          lastPoint.x = x;
+          return;
+        }
+      }
+    }
+
+    // TODO: pooling?
     this.points.push( new Vector2( x, y ) );
-    this.simplifyLoop();
   }
 
   public finalize(): Vector2[] {
-    // If we don't have 3 points, we won't have any area
-    if ( this.points.length >= 3 ) {
-      // TODO: better logic that wouldn't be such bad performance?
-      // Handle collinearity/equality between the start/end
-      this.points.push( this.points.shift()! );
-      this.simplifyLoop();
-      this.points.push( this.points.shift()! );
-      this.simplifyLoop();
-      return this.points;
+    // TODO: add more comprehensive testing for this! Tested a simple example
+
+    // TODO: is this complexity worth porting to WGSL?
+    // We'll handle our equality and collinearity checks. Because we could have a situation where the end of our points
+    // retraces the start of our points (but backwards, is possible since the middle could be fine), we'll actually need
+    // iteration to rewind this. Repeatedly check equality/collinearity until we don't change anything.
+    let changed: boolean;
+    do {
+      changed = false;
+      // Equality check (start/end)
+      if ( this.points.length >= 2 ) {
+        const firstPoint = this.points[ 0 ];
+        const lastPoint = this.points[ this.points.length - 1 ];
+
+        // If the first and last points are equal, remove the last point
+        if ( firstPoint.equals( lastPoint ) ) {
+          this.points.pop(); // TODO: pooling freeToPool?
+          changed = true;
+        }
+      }
+
+      // Collinearity check (the first two points, and last two points)
+      if ( this.points.length >= 3 ) {
+        // NOTE: It is technically possible that this happens with exactly three points left (that are collinear).
+        // This should still work to reduce it, but will "garble" the order. We don't care, since the resulting
+        // polygon would have no area.
+        const firstPoint = this.points[ 0 ];
+        const lastPoint = this.points[ this.points.length - 1 ];
+
+        const xEquals = firstPoint.x === lastPoint.x;
+        const yEquals = firstPoint.y === lastPoint.y;
+
+        if ( xEquals || yEquals ) {
+          const secondPoint = this.points[ 1 ];
+          const secondLastPoint = this.points[ this.points.length - 2 ];
+
+          if (
+            ( xEquals && firstPoint.x === secondPoint.x ) ||
+            ( yEquals && firstPoint.y === secondPoint.y )
+          ) {
+            // TODO: We can record the "starting" index, and avoid repeated shifts (that are probably horrible for perf)
+            // TODO: See if this is significant, or needed for WGSL
+            this.points.shift(); // TODO: pooling freeToPool?
+            changed = true;
+          }
+
+          if (
+            ( xEquals && lastPoint.x === secondLastPoint.x ) ||
+            ( yEquals && lastPoint.y === secondLastPoint.y )
+          ) {
+            this.points.pop(); // TODO: pooling freeToPool?
+            changed = true;
+          }
+        }
+      }
+    } while ( changed );
+
+    // Clear out to an empty array if we won't have enough points to have any area
+    if ( this.points.length <= 2 ) {
+      this.points.length = 0;
     }
-    else {
-      return [];
-    }
+
+    return this.points;
   }
 }
 
 const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
+const simplifier = new Simplifier();
 
 export default class PolygonClipping {
 
   // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
   public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
-    const simplifier = new Simplifier();
+
+    simplifier.reset();
 
     const centerX = bounds.centerX;
     const centerY = bounds.centerY;
@@ -186,7 +244,11 @@ export default class PolygonClipping {
       }
     }
 
-    return simplifier.finalize();
+    const result = simplifier.finalize();;
+
+    simplifier.reset();
+
+    return result;
   }
 
   /**
@@ -388,9 +450,9 @@ export default class PolygonClipping {
       // If the edge is at least partially within our bounds, we can handle the simple case
       if ( clipped ) {
         if ( !clippedStartPoint.equals( startPoint ) ) {
-          simplifier.add( clippedStartPoint.toVector2() );
+          simplifier.add( clippedStartPoint.x, clippedStartPoint.y );
         }
-        simplifier.add( clippedEndPoint.toVector2() );
+        simplifier.add( clippedEndPoint.x, clippedStartPoint.y );
       }
       else {
         // Resolve cases
@@ -417,13 +479,13 @@ export default class PolygonClipping {
           else {
             turningPoint = maxMin;
           }
-          simplifier.add( turningPoint );
+          simplifier.add( turningPoint.x, turningPoint.y );
         }
         else if ( !startCorner && endCorner && ( startPoint.code & endPoint.code ) === 0 ) {
           // 1-2 case
           const code = endPoint.code + turningPointOffset[ startPoint.code ];
           const turningPoint = clippingWindow[ codeToCorner[ code & TWO_BITS_MASK ] ];
-          simplifier.add( turningPoint );
+          simplifier.add( turningPoint.x, turningPoint.y );
         }
         else if ( startCorner && !endCorner && ( startPoint.code & endPoint.code ) === 0 ) {
           // 2-1 case
@@ -438,7 +500,7 @@ export default class PolygonClipping {
       // Basic turning point test
       if ( ( turningPointCode & TWO_BITS_CODE ) !== 0 ) {
         const turningPoint = clippingWindow[ codeToCorner[ turningPointCode & TWO_BITS_MASK ] ];
-        simplifier.add( turningPoint );
+        simplifier.add( turningPoint.x, turningPoint.y );
       }
 
       startPoint = endPoint;
