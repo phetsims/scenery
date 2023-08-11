@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, ClippedEdge, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Utils from '../../../../dot/js/Utils.js';
@@ -201,8 +201,14 @@ class RationalBoundary {
   }
 }
 
+type ClippableFace = {
+  getArea(): number;
+  getCentroid( area: number ): Vector2;
+  getClipped( bounds: Bounds2 ): ClippableFace;
+};
+
 // Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
-class PolygonalFace {
+class PolygonalFace implements ClippableFace {
   public constructor( public readonly polygons: Vector2[][] ) {}
 
   public getArea(): number {
@@ -249,6 +255,57 @@ class PolygonalFace {
 
   public getClipped( bounds: Bounds2 ): PolygonalFace {
     return new PolygonalFace( this.polygons.map( polygon => PolygonClipping.boundsClipPolygon( polygon, bounds ) ) );
+  }
+}
+
+class EdgedFace implements ClippableFace {
+  public constructor( public readonly edges: ClippedEdge[] ) {}
+
+  public getArea(): number {
+    let area = 0;
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      const p0 = edge.startPoint;
+      const p1 = edge.endPoint;
+      // PolygonIntegrals.evaluateShoelaceArea( p0.x, p0.y, p1.x, p1.y );
+      area += ( p1.x + p0.x ) * ( p1.y - p0.y );
+    }
+
+    return 0.5 * area;
+  }
+
+  public getCentroid( area: number ): Vector2 {
+    let x = 0;
+    let y = 0;
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      const p0 = edge.startPoint;
+      const p1 = edge.endPoint;
+
+      // evaluateCentroidPartial
+      const base = ( 1 / 6 ) * ( p0.x * p1.y - p1.x * p0.y );
+      x += ( p0.x + p1.x ) * base;
+      y += ( p0.y + p1.y ) * base;
+    }
+
+    return new Vector2(
+      x / area,
+      y / area
+    );
+  }
+
+  public getClipped( bounds: Bounds2 ): EdgedFace {
+    const edges: ClippedEdge[] = [];
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+      PolygonClipping.boundsClipEdge( edge.startPoint, edge.endPoint, bounds, edges );
+    }
+
+    return new EdgedFace( edges );
   }
 }
 

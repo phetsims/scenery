@@ -171,7 +171,7 @@ const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
 const simplifier = new Simplifier();
 
-class ClippedEdge {
+export class ClippedEdge {
   public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2 ) {}
 }
 
