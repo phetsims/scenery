@@ -340,6 +340,77 @@ class RationalFace {
   }
 }
 
+type OutputRaster = {
+  addPartialPixel( color: Vector4, x: number, y: number ): void;
+  addFullPixel( color: Vector4, x: number, y: number ): void;
+  addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void;
+}
+
+// TODO: type of raster that applies itself to a rectangle in the future?
+class AccumulationRaster implements OutputRaster {
+  public readonly accumulationBuffer: Vector4[] = [];
+
+  public constructor( public readonly width: number, public readonly height: number ) {
+    for ( let i = 0; i < width * height; i++ ) {
+      this.accumulationBuffer.push( Vector4.ZERO.copy() );
+    }
+  }
+
+  public addPartialPixel( color: Vector4, x: number, y: number ): void {
+    const index = y * this.width + x;
+    this.accumulationBuffer[ index ].add( color );
+  }
+
+  public addFullPixel( color: Vector4, x: number, y: number ): void {
+    const index = y * this.width + x;
+    this.accumulationBuffer[ index ].set( color );
+  }
+
+  public addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
+    for ( let j = 0; j < height; j++ ) {
+      const rowIndex = ( y + j ) * this.width + x;
+      for ( let i = 0; i < width; i++ ) {
+        this.accumulationBuffer[ rowIndex + i ].set( color );
+      }
+    }
+  }
+
+  public toImageData(): ImageData {
+    const imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
+    if ( assert ) {
+      debugData!.imageData = imageData;
+    }
+
+    for ( let i = 0; i < this.accumulationBuffer.length; i++ ) {
+      const accumulation = this.accumulationBuffer[ i ];
+      let x = accumulation.x;
+      let y = accumulation.y;
+      let z = accumulation.z;
+      const a = accumulation.w;
+
+      // unpremultiply
+      if ( a > 0 ) {
+        x /= a;
+        y /= a;
+        z /= a;
+      }
+
+      // linear to sRGB
+      const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
+      const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
+      const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
+
+      const index = 4 * i;
+      imageData.data[ index ] = r * 255;
+      imageData.data[ index + 1 ] = g * 255;
+      imageData.data[ index + 2 ] = b * 255;
+      imageData.data[ index + 3 ] = a * 255;
+    }
+
+    return imageData;
+  }
+}
+
 export default class Rasterize {
 
   private static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, scale: number ): IntegerEdge[] {
@@ -790,21 +861,14 @@ export default class Rasterize {
   }
 
   private static rasterizeAccumulate(
+    outputRaster: OutputRaster,
     renderProgram: RenderProgram,
     faces: RationalFace[],
     bounds: Bounds2,
     scale: number
-  ): Vector4[] {
+  ): void {
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
-
-    const accumulationBuffer: Vector4[] = [];
-    if ( assert ) {
-      debugData!.accumulationBuffer = accumulationBuffer;
-    }
-    for ( let i = 0; i < rasterWidth * rasterHeight; i++ ) {
-      accumulationBuffer.push( Vector4.ZERO.copy() );
-    }
 
     const inverseScale = 1 / scale;
     const translation = new Vector2( -bounds.minX, -bounds.minY );
@@ -856,7 +920,7 @@ export default class Rasterize {
 
       const constColor = faceRenderProgram instanceof RenderColor ? faceRenderProgram.color : null;
 
-      const addPixel = ( pixelFace: ClippableFace, area: number, x: number, y: number ) => {
+      const addPartialPixel = ( pixelFace: ClippableFace, area: number, x: number, y: number ) => {
         if ( area > 1e-8 ) {
           if ( assert ) {
             debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
@@ -871,7 +935,7 @@ export default class Rasterize {
             const centroid = pixelFace.getCentroid( area ).minus( translation );
             color = faceRenderProgram.evaluate( centroid );
           }
-          accumulationBuffer[ index ].add( color.timesScalar( area ) );
+          outputRaster.addPartialPixel( color.timesScalar( area ), x, y );
         }
       };
 
@@ -881,17 +945,13 @@ export default class Rasterize {
           debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
         }
         if ( constColor ) {
-          for ( let y = minY; y < maxY; y++ ) {
-            for ( let x = minX; x < maxX; x++ ) {
-              accumulationBuffer[ y * rasterWidth + x ].add( constColor );
-            }
-          }
+          outputRaster.addFullRegion( constColor, minX, minY, maxX - minX, maxY - minY );
         }
         else {
           for ( let y = minY; y < maxY; y++ ) {
             for ( let x = minX; x < maxX; x++ ) {
               const centroid = scratchVector.setXY( x + 0.5, y + 0.5 );
-              accumulationBuffer[ y * rasterWidth + x ].add( faceRenderProgram.evaluate( centroid ) );
+              outputRaster.addFullPixel( faceRenderProgram.evaluate( centroid ), x, y );
             }
           }
         }
@@ -901,11 +961,11 @@ export default class Rasterize {
       const binaryRender = ( face: ClippableFace, area: number, minX: number, minY: number, maxX: number, maxY: number ) => {
         const xDiff = maxX - minX;
         const yDiff = maxY - minY;
-        if ( xDiff === 1 && yDiff === 1 ) {
-          addPixel( face, area, minX, minY );
-        }
-        else if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
+        if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
           addFullArea( face, minX, minY, maxX, maxY );
+        }
+        else if ( xDiff === 1 && yDiff === 1 ) {
+          addPartialPixel( face, area, minX, minY );
         }
         else {
           if ( xDiff > yDiff ) {
@@ -954,7 +1014,7 @@ export default class Rasterize {
 
             const pixelFace = clippableFace.getClipped( pixelBounds );
             const area = pixelFace.getArea();
-            addPixel( pixelFace, area, x, y );
+            addPartialPixel( pixelFace, area, x, y );
           }
         }
       };
@@ -968,43 +1028,6 @@ export default class Rasterize {
 
       // TODO TODO TODO TODO TODO: non-zero-centered bounds! Verify everything
     }
-
-    return accumulationBuffer;
-  }
-
-  private static accumulationToImageData( accumulationBuffer: Vector4[], rasterWidth: number, rasterHeight: number ): ImageData {
-    const imageData = new ImageData( rasterWidth, rasterHeight, { colorSpace: 'srgb' } );
-    if ( assert ) {
-      debugData!.imageData = imageData;
-    }
-
-    for ( let i = 0; i < accumulationBuffer.length; i++ ) {
-      const accumulation = accumulationBuffer[ i ];
-      let x = accumulation.x;
-      let y = accumulation.y;
-      let z = accumulation.z;
-      const a = accumulation.w;
-
-      // unpremultiply
-      if ( a > 0 ) {
-        x /= a;
-        y /= a;
-        z /= a;
-      }
-
-      // linear to sRGB
-      const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
-      const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
-      const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
-
-      const index = 4 * i;
-      imageData.data[ index ] = r * 255;
-      imageData.data[ index + 1 ] = g * 255;
-      imageData.data[ index + 2 ] = b * 255;
-      imageData.data[ index + 3 ] = a * 255;
-    }
-
-    return imageData;
   }
 
   public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2 ): Record<string, IntentionalAny> | null {
@@ -1085,14 +1108,17 @@ export default class Rasterize {
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
 
-    const accumulationBuffer = Rasterize.rasterizeAccumulate(
+    const outputRaster = new AccumulationRaster( rasterWidth, rasterHeight );
+
+    Rasterize.rasterizeAccumulate(
+      outputRaster,
       renderProgram,
       faces,
       bounds,
       scale
     );
 
-    const imageData = Rasterize.accumulationToImageData( accumulationBuffer, rasterWidth, rasterHeight );
+    const imageData = outputRaster.toImageData();
 
     if ( assert ) {
       const canvas = document.createElement( 'canvas' );
