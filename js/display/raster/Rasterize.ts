@@ -13,8 +13,11 @@ import Utils from '../../../../dot/js/Utils.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
+import Clip from '../vello/shaders/shared/clip.js';
 
 let debugData: Record<string, IntentionalAny> | null = null;
+
+const scratchFullAreaVector = new Vector2( 0, 0 );
 
 class RationalIntersection {
   public constructor( public readonly t: BigRational, public readonly point: BigRationalVector2 ) {}
@@ -988,6 +991,184 @@ export default class Rasterize {
     return renderProgrammedFaces;
   }
 
+  // TODO: inline eventually
+  private static addPartialPixel(
+    outputRaster: OutputRaster,
+    renderProgram: RenderProgram,
+    constColor: Vector4 | null,
+    translation: Vector2,
+    pixelFace: ClippableFace,
+    area: number,
+    x: number,
+    y: number
+  ): void {
+    if ( assert ) {
+      debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
+    }
+
+    const color = constColor || renderProgram.evaluate( pixelFace.getCentroid( area ).minus( translation ) );
+    outputRaster.addPartialPixel( color.timesScalar( area ), x, y );
+  }
+
+  // TODO: inline eventually
+  private static addFullArea(
+    outputRaster: OutputRaster,
+    renderProgram: RenderProgram,
+    constColor: Vector4 | null,
+    translation: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number
+  ): void {
+    if ( assert ) {
+      debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
+    }
+    if ( constColor ) {
+      outputRaster.addFullRegion( constColor, minX, minY, maxX - minX, maxY - minY );
+    }
+    else {
+      for ( let y = minY; y < maxY; y++ ) {
+        for ( let x = minX; x < maxX; x++ ) {
+          const centroid = scratchFullAreaVector.setXY( x + 0.5, y + 0.5 ).minus( translation );
+          outputRaster.addFullPixel( renderProgram.evaluate( centroid ), x, y );
+        }
+      }
+    }
+  }
+
+
+
+  private static fullRasterize(
+    outputRaster: OutputRaster,
+    renderProgram: RenderProgram,
+    clippableFace: ClippableFace,
+    constColor: Vector4 | null,
+    bounds: Bounds2, // TODO: check it's integral
+    translation: Vector2
+  ): void {
+    const pixelBounds = Bounds2.NOTHING.copy();
+    const minX = bounds.minX;
+    const minY = bounds.minY;
+    const maxX = bounds.maxX;
+    const maxY = bounds.maxY;
+
+    for ( let y = minY; y < maxY; y++ ) {
+      pixelBounds.minY = y;
+      pixelBounds.maxY = y + 1;
+      for ( let x = minX; x < maxX; x++ ) {
+        pixelBounds.minX = x;
+        pixelBounds.maxX = x + 1;
+
+        const pixelFace = clippableFace.getClipped( pixelBounds );
+        const area = pixelFace.getArea();
+        if ( area > 1e-8 ) {
+          Rasterize.addPartialPixel(
+            outputRaster, renderProgram, constColor, translation,
+            pixelFace, area, x, y
+          );
+        }
+      }
+    }
+  }
+
+  private static binaryInternalRasterize(
+    outputRaster: OutputRaster,
+    renderProgram: RenderProgram,
+    constColor: Vector4 | null,
+    translation: Vector2,
+    clippableFace: ClippableFace,
+    area: number,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number
+  ): void {
+
+    // TODO: more advanced handling
+
+    // TODO: potential filtering!!!
+
+    // TODO TODO TODO TODO TODO: non-zero-centered bounds! Verify everything
+
+    const xDiff = maxX - minX;
+    const yDiff = maxY - minY;
+    if ( area > 1e-8 ) {
+      if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
+        Rasterize.addFullArea(
+          outputRaster, renderProgram, constColor, translation,
+          minX, minY, maxX, maxY,
+        )
+      }
+      else if ( xDiff === 1 && yDiff === 1 ) {
+        Rasterize.addPartialPixel(
+          outputRaster, renderProgram, constColor, translation,
+          clippableFace, area, minX, minY
+        );
+      }
+      else {
+        if ( xDiff > yDiff ) {
+          const xSplit = Math.floor( ( minX + maxX ) / 2 );
+          // TODO: allocation?
+          const leftFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
+          const rightFace = clippableFace.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
+
+          const leftArea = leftFace.getArea();
+          const rightArea = rightFace.getArea();
+
+          if ( leftArea > 1e-8 ) {
+            Rasterize.binaryInternalRasterize(
+              outputRaster, renderProgram, constColor, translation,
+              leftFace, leftArea, minX, minY, xSplit, maxY
+            );
+          }
+          if ( rightArea > 1e-8 ) {
+            Rasterize.binaryInternalRasterize(
+              outputRaster, renderProgram, constColor, translation,
+              rightFace, rightArea, xSplit, minY, maxX, maxY
+            );
+          }
+        }
+        else {
+          const ySplit = Math.floor( ( minY + maxY ) / 2 );
+          // TODO: allocation?
+          const topFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
+          const bottomFace = clippableFace.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
+
+          const topArea = topFace.getArea();
+          const bottomArea = bottomFace.getArea();
+
+          if ( topArea > 1e-8 ) {
+            Rasterize.binaryInternalRasterize(
+              outputRaster, renderProgram, constColor, translation,
+              topFace, topArea, minX, minY, maxX, ySplit
+            );
+          }
+          if ( bottomArea > 1e-8 ) {
+            Rasterize.binaryInternalRasterize(
+              outputRaster, renderProgram, constColor, translation,
+              bottomFace, bottomArea, minX, ySplit, maxX, maxY
+            );
+          }
+        }
+      }
+    }
+  }
+
+  private static rasterize(
+    outputRaster: OutputRaster,
+    renderProgram: RenderProgram,
+    clippableFace: ClippableFace,
+    constColor: Vector4 | null,
+    bounds: Bounds2, // TODO: check it's integral
+    translation: Vector2
+  ): void {
+    Rasterize.binaryInternalRasterize(
+      outputRaster, renderProgram, constColor, translation,
+      clippableFace, clippableFace.getArea(), bounds.minX, bounds.minY, bounds.maxX, bounds.maxY
+    );
+  }
+
   private static rasterizeAccumulate(
     outputRaster: OutputRaster,
     faces: RationalFace[],
@@ -1031,114 +1212,18 @@ export default class Rasterize {
       const maxX = Math.min( Math.ceil( polygonalBounds.maxX ), rasterWidth );
       const maxY = Math.min( Math.ceil( polygonalBounds.maxY ), rasterHeight );
 
+      const faceBounds = new Bounds2( minX, minY, maxX, maxY );
+
       const constColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
 
-      const addPartialPixel = ( pixelFace: ClippableFace, area: number, x: number, y: number ) => {
-        if ( area > 1e-8 ) {
-          if ( assert ) {
-            debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
-          }
-
-          let color;
-          if ( constColor ) {
-            color = constColor;
-          }
-          else {
-            const centroid = pixelFace.getCentroid( area ).minus( translation );
-            color = renderProgram.evaluate( centroid );
-          }
-          outputRaster.addPartialPixel( color.timesScalar( area ), x, y );
-        }
-      };
-
-      const scratchVector = new Vector2( 0, 0 );
-      const addFullArea = ( face: ClippableFace, minX: number, minY: number, maxX: number, maxY: number ) => {
-        if ( assert ) {
-          debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
-        }
-        if ( constColor ) {
-          outputRaster.addFullRegion( constColor, minX, minY, maxX - minX, maxY - minY );
-        }
-        else {
-          for ( let y = minY; y < maxY; y++ ) {
-            for ( let x = minX; x < maxX; x++ ) {
-              const centroid = scratchVector.setXY( x + 0.5, y + 0.5 );
-              outputRaster.addFullPixel( renderProgram.evaluate( centroid ), x, y );
-            }
-          }
-        }
-      };
-
-      // TODO: don't shadow
-      const binaryRender = ( face: ClippableFace, area: number, minX: number, minY: number, maxX: number, maxY: number ) => {
-        const xDiff = maxX - minX;
-        const yDiff = maxY - minY;
-        if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
-          addFullArea( face, minX, minY, maxX, maxY );
-        }
-        else if ( xDiff === 1 && yDiff === 1 ) {
-          addPartialPixel( face, area, minX, minY );
-        }
-        else {
-          if ( xDiff > yDiff ) {
-            const xSplit = Math.floor( ( minX + maxX ) / 2 );
-            // TODO: allocation?
-            const leftFace = face.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
-            const rightFace = face.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
-
-            const leftArea = leftFace.getArea();
-            const rightArea = rightFace.getArea();
-
-            if ( leftArea > 1e-8 ) {
-              binaryRender( leftFace, leftArea, minX, minY, xSplit, maxY );
-            }
-            if ( rightArea > 1e-8 ) {
-              binaryRender( rightFace, rightArea, xSplit, minY, maxX, maxY );
-            }
-          }
-          else {
-            const ySplit = Math.floor( ( minY + maxY ) / 2 );
-            // TODO: allocation?
-            const topFace = face.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
-            const bottomFace = face.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
-
-            const topArea = topFace.getArea();
-            const bottomArea = bottomFace.getArea();
-
-            if ( topArea > 1e-8 ) {
-              binaryRender( topFace, topArea, minX, minY, maxX, ySplit );
-            }
-            if ( bottomArea > 1e-8 ) {
-              binaryRender( bottomFace, bottomArea, minX, ySplit, maxX, maxY );
-            }
-          }
-        }
-      };
-
-      const fullRender = () => {
-        const pixelBounds = Bounds2.NOTHING.copy();
-        for ( let y = minY; y < maxY; y++ ) {
-          pixelBounds.minY = y;
-          pixelBounds.maxY = y + 1;
-          for ( let x = minX; x < maxX; x++ ) {
-            pixelBounds.minX = x;
-            pixelBounds.maxX = x + 1;
-
-            const pixelFace = clippableFace.getClipped( pixelBounds );
-            const area = pixelFace.getArea();
-            addPartialPixel( pixelFace, area, x, y );
-          }
-        }
-      };
-
-      binaryRender( clippableFace, clippableFace.getArea(), minX, minY, maxX, maxY );
-
-
-      // TODO: more advanced handling
-
-      // TODO: potential filtering!!!
-
-      // TODO TODO TODO TODO TODO: non-zero-centered bounds! Verify everything
+      Rasterize.rasterize(
+        outputRaster,
+        renderProgram,
+        clippableFace,
+        constColor,
+        faceBounds,
+        translation
+      );
     }
   }
 
