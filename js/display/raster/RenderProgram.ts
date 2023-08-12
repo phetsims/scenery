@@ -925,7 +925,7 @@ type RenderImageable = {
   // TODO: derivatives for filtering? (don't really need that right?)
 
   // TODO: sampling of things, actually have methods that get samples (in any color space)
-  evaluate: ( point: Vector2 ) => Color
+  evaluate: ( point: Vector2 ) => Color;
 };
 
 export class RenderImage extends RenderPathProgram {
@@ -1009,7 +1009,7 @@ export class RenderImage extends RenderPathProgram {
   // repeat:  2,  3,  0,  1,  2,  3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1
   // reflect: 2,  3,  3,  2,  1,  0, 0, 1, 2, 3, 3, 2, 1, 0, 0, 1
   public static extendInteger( i: number, size: number, extend: RenderExtend ): number {
-    switch ( extend ) {
+    switch( extend ) {
       case RenderExtend.Pad: {
         return Utils.clamp( i, 0, size - 1 );
       }
@@ -1025,7 +1025,7 @@ export class RenderImage extends RenderPathProgram {
         // easier to convert both to positive (with a repeat offset)
         const positiveI = i < 0 ? -i - 1 : i;
 
-        let section = positiveI % ( size * 2 );
+        const section = positiveI % ( size * 2 );
         if ( section < size ) {
           return section;
         }
