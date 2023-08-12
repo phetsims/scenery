@@ -428,7 +428,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      const outputSize = 768 * 2;
+      // const outputSize = 768 * 2;
+      const outputSize = 768 / 4;
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -607,7 +608,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INCLUSION_DEBUG = false;
       const INCLUSION_DEBUG_PATH = pathF;
       const SHOW_SOLID_COLORS = false;
-      const SHOW_FULL_AREAS = false;
+      const SHOW_FULL_AREAS = true;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
