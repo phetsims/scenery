@@ -375,6 +375,14 @@ class RationalFace {
   }
 }
 
+class AccumulatingFace {
+  public faces = new Set<RationalFace>();
+  public facesToProcess: RationalFace[] = [];
+  public renderProgram: RenderProgram | null = null;
+  public bounds: Bounds2 = Bounds2.NOTHING.copy();
+  public clippedEdges: ClippedEdge[] = [];
+}
+
 type OutputRaster = {
   addPartialPixel( color: Vector4, x: number, y: number ): void;
   addFullPixel( color: Vector4, x: number, y: number ): void;
@@ -1061,7 +1069,7 @@ export default class Rasterize {
     return renderableFaces;
   }
 
-  private static toCombinedRenderableFaces(
+  private static toFullyCombinedRenderableFaces(
     faces: RationalFace[],
     scale: number,
     translation: Vector2
@@ -1123,6 +1131,78 @@ export default class Rasterize {
     }
 
     return renderableFaces;
+  }
+
+  private static toSimplifyingCombinedRenderableFaces(
+    faces: RationalFace[],
+    scale: number,
+    translation: Vector2
+  ): RenderableFace[] {
+
+    const inverseScale = 1 / scale;
+
+    const accumulatedFaces: AccumulatingFace[] = [];
+
+    // TODO: see if we need micro-optimizations here
+    faces.forEach( face => {
+      if ( accumulatedFaces.every( accumulatedFace => !accumulatedFace.faces.has( face ) ) ) {
+        const newAccumulatedFace = new AccumulatingFace();
+        newAccumulatedFace.faces.add( face );
+        newAccumulatedFace.facesToProcess.push( face );
+        newAccumulatedFace.renderProgram = face.renderProgram!;
+        newAccumulatedFace.bounds.includeBounds( face.getBounds( inverseScale, translation ) );
+
+        const incompatibleFaces = new Set<RationalFace>();
+
+        // NOTE: side effects!
+        const isFaceCompatible = ( face: RationalFace ): boolean => {
+          if ( incompatibleFaces.has( face ) ) {
+            return false;
+          }
+          if ( newAccumulatedFace.faces.has( face ) ) {
+            return true;
+          }
+
+          // Not in either place, we need to test
+          if ( face.renderProgram && newAccumulatedFace.renderProgram!.equals( face.renderProgram ) ) {
+            newAccumulatedFace.faces.add( face );
+            newAccumulatedFace.facesToProcess.push( face );
+            newAccumulatedFace.bounds.includeBounds( face.getBounds( inverseScale, translation ) );
+            return true;
+          }
+          else {
+            incompatibleFaces.add( face );
+            return false;
+          }
+        };
+
+        accumulatedFaces.push( newAccumulatedFace );
+
+        while ( newAccumulatedFace.facesToProcess.length ) {
+          const faceToProcess = newAccumulatedFace.facesToProcess.pop()!;
+
+          for ( const boundary of [
+            faceToProcess.boundary,
+            ...faceToProcess.holes
+          ] ) {
+            for ( const edge of boundary.edges ) {
+              if ( !isFaceCompatible( edge.reversed.face! ) ) {
+                newAccumulatedFace.clippedEdges.push( new ClippedEdge(
+                  edge.p0float.timesScalar( inverseScale ).plus( translation ),
+                  edge.p1float.timesScalar( inverseScale ).plus( translation )
+                ) );
+              }
+            }
+          }
+        }
+      }
+    } );
+
+    return accumulatedFaces.map( accumulatedFace => new RenderableFace(
+      new EdgedFace( accumulatedFace.clippedEdges ),
+      accumulatedFace.renderProgram!,
+      accumulatedFace.bounds
+    ) );
   }
 
   // TODO: inline eventually
@@ -1435,7 +1515,8 @@ export default class Rasterize {
     // TODO: naming with above!!
     // const renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, scale, translation );
     // const renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
-    const renderableFaces = Rasterize.toCombinedRenderableFaces( renderedFaces, scale, translation );
+    // const renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, scale, translation );
+    const renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, scale, translation );
 
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
