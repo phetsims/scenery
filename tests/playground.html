@@ -466,8 +466,15 @@ an UI and Display made for visual testing and debugging.
       const pathD = new phet.scenery.RenderPath( 'nonzero', [
         [
           new phet.dot.Vector2( 0, 0 ),
-          new phet.dot.Vector2( 40, 0 ),
-          new phet.dot.Vector2( 32, 32 ),
+          new phet.dot.Vector2( 48, 0 ),
+          new phet.dot.Vector2( 50, 32 ),
+          new phet.dot.Vector2( 64, 64 ),
+          new phet.dot.Vector2( 24, 32 ),
+          new phet.dot.Vector2( 48, 64 ),
+          new phet.dot.Vector2( 16, 32 ),
+          new phet.dot.Vector2( 32, 64 ),
+          new phet.dot.Vector2( 8, 32 ),
+          new phet.dot.Vector2( 16, 64 ),
           new phet.dot.Vector2( 0, 40 )
         ],
         phet.kite.Shape.circle( 48, 16, 5 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
@@ -527,13 +534,13 @@ an UI and Display made for visual testing and debugging.
       const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
       const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
       const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );
-      const d = new phet.scenery.RenderLinearGradient( pathD, phet.dot.Matrix3.IDENTITY, new phet.dot.Vector2( 0, 32 ), new phet.dot.Vector2( 32, 0 ), [
+      const d = new phet.scenery.RenderLinearGradient( pathD, phet.dot.Matrix3.IDENTITY, new phet.dot.Vector2( 0, 8 ), new phet.dot.Vector2( 8, 0 ), [
         new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,57,2, 1 ) ) ),
         new phet.scenery.RenderGradientStop( 0.25, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,128,7, 1 ) ) ),
         new phet.scenery.RenderGradientStop( 0.5, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,180,4, 1 ) ) ),
         new phet.scenery.RenderGradientStop( 0.75, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 5,186,221, 1 ) ) ),
         new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 43,72,113, 1 ) ) )
-      ], 0 );
+      ], 2 );
       const e = phet.scenery.RenderColor.fromColor( pathE, new phet.scenery.Color( 255, 255, 255, 1 ) );
       const f = phet.scenery.RenderColor.fromColor( pathF, new phet.scenery.Color( 0, 0, 0, 1 ) );
       const back = phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 128, 128, 128, 0.5 ) );
@@ -608,7 +615,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INCLUSION_DEBUG = false;
       const INCLUSION_DEBUG_PATH = pathF;
       const SHOW_SOLID_COLORS = false;
-      const SHOW_FULL_AREAS = true;
+      const SHOW_FULL_AREAS = false;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
