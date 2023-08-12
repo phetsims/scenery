@@ -960,9 +960,36 @@ export default class Rasterize {
     recursiveWindingMap( unboundedFace );
   }
 
+  private static getRenderProgrammedFaces( renderProgram: RenderProgram, faces: RationalFace[] ): RationalFace[] {
+    const renderProgrammedFaces: RationalFace[] = [];
+
+    for ( let i = 0; i < faces.length; i++ ) {
+      const face = faces[ i ];
+
+      face.inclusionSet = new Set<RenderPath>();
+      for ( const renderPath of face.windingMap!.map.keys() ) {
+        const windingNumber = face.windingMap!.getWindingNumber( renderPath );
+        const included = renderPath.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 !== 0;
+        if ( included ) {
+          face.inclusionSet.add( renderPath );
+        }
+      }
+      const faceRenderProgram = renderProgram.simplify( renderPath => face.inclusionSet.has( renderPath ) );
+      face.renderProgram = faceRenderProgram;
+
+      // Drop faces that will be fully transparent
+      const isFullyTransparent = faceRenderProgram instanceof RenderColor && faceRenderProgram.color.w <= 1e-8;
+
+      if ( !isFullyTransparent ) {
+        renderProgrammedFaces.push( face );
+      }
+    }
+
+    return renderProgrammedFaces;
+  }
+
   private static rasterizeAccumulate(
     outputRaster: OutputRaster,
-    renderProgram: RenderProgram,
     faces: RationalFace[],
     bounds: Bounds2,
     scale: number
@@ -986,21 +1013,7 @@ export default class Rasterize {
         debugData!.faceDebugData.push( faceDebugData );
       }
 
-      face.inclusionSet = new Set<RenderPath>();
-      for ( const renderPath of face.windingMap!.map.keys() ) {
-        const windingNumber = face.windingMap!.getWindingNumber( renderPath );
-        const included = renderPath.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 !== 0;
-        if ( included ) {
-          face.inclusionSet.add( renderPath );
-        }
-      }
-      const faceRenderProgram = renderProgram.simplify( renderPath => face.inclusionSet.has( renderPath ) );
-      face.renderProgram = faceRenderProgram;
-
-      // Drop faces that will be fully transparent
-      if ( faceRenderProgram instanceof RenderColor && faceRenderProgram.color.w <= 1e-8 ) {
-        continue;
-      }
+      const renderProgram = face.renderProgram!;
 
       // Now back in our normal coordinate frame!
       const clippableFace = face.toPolygonalFace( inverseScale, translation );
@@ -1018,7 +1031,7 @@ export default class Rasterize {
       const maxX = Math.min( Math.ceil( polygonalBounds.maxX ), rasterWidth );
       const maxY = Math.min( Math.ceil( polygonalBounds.maxY ), rasterHeight );
 
-      const constColor = faceRenderProgram instanceof RenderColor ? faceRenderProgram.color : null;
+      const constColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
 
       const addPartialPixel = ( pixelFace: ClippableFace, area: number, x: number, y: number ) => {
         if ( area > 1e-8 ) {
@@ -1033,7 +1046,7 @@ export default class Rasterize {
           }
           else {
             const centroid = pixelFace.getCentroid( area ).minus( translation );
-            color = faceRenderProgram.evaluate( centroid );
+            color = renderProgram.evaluate( centroid );
           }
           outputRaster.addPartialPixel( color.timesScalar( area ), x, y );
         }
@@ -1051,7 +1064,7 @@ export default class Rasterize {
           for ( let y = minY; y < maxY; y++ ) {
             for ( let x = minX; x < maxX; x++ ) {
               const centroid = scratchVector.setXY( x + 0.5, y + 0.5 );
-              outputRaster.addFullPixel( faceRenderProgram.evaluate( centroid ), x, y );
+              outputRaster.addFullPixel( renderProgram.evaluate( centroid ), x, y );
             }
           }
         }
@@ -1205,6 +1218,8 @@ export default class Rasterize {
 
     Rasterize.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
 
+    const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
+
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
 
@@ -1213,8 +1228,7 @@ export default class Rasterize {
 
     Rasterize.rasterizeAccumulate(
       outputRaster,
-      renderProgram,
-      faces,
+      renderedFaces,
       bounds,
       scale
     );
