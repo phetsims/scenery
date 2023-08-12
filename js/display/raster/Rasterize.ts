@@ -412,27 +412,26 @@ const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
 
 // TODO: consider implementing a raster that JUST uses ImageData, and does NOT do linear (proper) blending
 class CombinedRaster implements OutputRaster {
-  public readonly accumulationBuffer: Vector4[] = [];
+  public readonly accumulationArray: Float64Array;
   public readonly imageData: ImageData;
   private combined = false;
 
   public constructor( public readonly width: number, public readonly height: number ) {
-    for ( let i = 0; i < width * height; i++ ) {
-      this.accumulationBuffer.push( Vector4.ZERO.copy() );
-    }
+    this.accumulationArray = new Float64Array( width * height * 4 );
     this.imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
   }
 
-
   public addPartialPixel( color: Vector4, x: number, y: number ): void {
-    const index = y * this.width + x;
-    this.accumulationBuffer[ index ].add( color );
+    const baseIndex = 4 * ( y * this.width + x );
+    this.accumulationArray[ baseIndex ] += color.x;
+    this.accumulationArray[ baseIndex + 1 ] += color.y;
+    this.accumulationArray[ baseIndex + 2 ] += color.z;
+    this.accumulationArray[ baseIndex + 3 ] += color.w;
   }
 
   public addFullPixel( color: Vector4, x: number, y: number ): void {
     // Be lazy, we COULD convert here, but we'll just do it at the end
-    const index = y * this.width + x;
-    this.accumulationBuffer[ index ].set( color );
+    this.addPartialPixel( color, x, y );
   }
 
   public addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
@@ -481,15 +480,16 @@ class CombinedRaster implements OutputRaster {
 
   public toImageData(): ImageData {
     if ( !this.combined ) {
-      for ( let i = 0; i < this.accumulationBuffer.length; i++ ) {
-        const accumulation = this.accumulationBuffer[ i ];
-        const a = accumulation.w;
+      const quantity = this.accumulationArray.length / 4;
+      for ( let i = 0; i < quantity; i++ ) {
+        const baseIndex = i * 4;
+        const a = this.accumulationArray[ baseIndex + 3 ];
 
         // unpremultiply
         if ( a > 0 ) {
-          let x = accumulation.x / a;
-          let y = accumulation.y / a;
-          let z = accumulation.z / a;
+          let x = this.accumulationArray[ baseIndex ] / a;
+          let y = this.accumulationArray[ baseIndex + 1 ] / a;
+          let z = this.accumulationArray[ baseIndex + 2 ] / a;
 
           // linear to sRGB
           const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
