@@ -66,6 +66,8 @@ export default abstract class RenderProgram {
 
   public abstract toRecursiveString( indent: string ): string;
 
+  public abstract equals( other: RenderProgram ): boolean;
+
   public depthFirst( callback: ( program: RenderProgram ) => void ): void {
     callback( this );
   }
@@ -148,6 +150,15 @@ export class RenderBlendCompose extends RenderProgram {
     public readonly b: RenderProgram
   ) {
     super();
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return other instanceof RenderBlendCompose &&
+           this.composeType === other.composeType &&
+           this.blendType === other.blendType &&
+           this.a.equals( other.a ) &&
+           this.b.equals( other.b );
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -636,6 +647,12 @@ export abstract class RenderPathProgram extends RenderProgram {
     super();
   }
 
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return other instanceof RenderPathProgram &&
+           this.path === other.path;
+  }
+
   public isInPath( pathTest: ( renderPath: RenderPath ) => boolean ): boolean {
     return !this.path || pathTest( this.path );
   }
@@ -649,6 +666,14 @@ export class RenderFilter extends RenderPathProgram {
     public readonly matrix: Matrix4
   ) {
     super( path );
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return super.equals( other ) &&
+           other instanceof RenderFilter &&
+           this.program.equals( other.program ) &&
+           this.matrix.equals( other.matrix );
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -708,6 +733,14 @@ export class RenderAlpha extends RenderPathProgram {
     public readonly alpha: number
   ) {
     super( path );
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return super.equals( other ) &&
+           other instanceof RenderAlpha &&
+           this.program.equals( other.program ) &&
+           this.alpha === other.alpha;
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -771,6 +804,13 @@ scenery.register( 'RenderAlpha', RenderAlpha );
 export class RenderColor extends RenderPathProgram {
   public constructor( path: RenderPath | null, public color: Vector4 ) {
     super( path );
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return super.equals( other ) &&
+           other instanceof RenderColor &&
+           this.color.equals( other.color );
   }
 
   public override isFullyTransparent(): boolean {
@@ -889,6 +929,16 @@ export class RenderImage extends RenderPathProgram {
     super( path );
   }
 
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return super.equals( other ) &&
+      other instanceof RenderImage &&
+      this.transform.equals( other.transform ) &&
+      this.image === other.image &&
+      this.extendX === other.extendX &&
+      this.extendY === other.extendY;
+  }
+
   public override isFullyTransparent(): boolean {
     return false;
   }
@@ -969,6 +1019,19 @@ export class RenderLinearGradient extends RenderPathProgram {
     this.inverseTransform = transform.inverted();
     this.isIdentity = transform.isIdentity();
     this.gradDelta = end.minus( start );
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return super.equals( other ) &&
+      other instanceof RenderLinearGradient &&
+      this.transform.equals( other.transform ) &&
+      this.start.equals( other.start ) &&
+      this.end.equals( other.end ) &&
+      this.stops.length === other.stops.length &&
+      // TODO perf
+      this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
+      this.extend === other.extend;
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -1063,6 +1126,21 @@ export class RenderRadialGradient extends RenderPathProgram {
     public readonly extend: RenderExtend
   ) {
     super( path );
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return super.equals( other ) &&
+      other instanceof RenderRadialGradient &&
+      this.transform.equals( other.transform ) &&
+      this.start.equals( other.start ) &&
+      this.startRadius === other.startRadius &&
+      this.end.equals( other.end ) &&
+      this.endRadius === other.endRadius &&
+      this.stops.length === other.stops.length &&
+      // TODO perf
+      this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
+      this.extend === other.extend;
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
