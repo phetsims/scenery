@@ -195,21 +195,21 @@ class RationalBoundary {
   }
 
   // TODO: just have a matrix?
-  public toTransformedPolygon( scaleFactor = 1, translation = Vector2.ZERO ): Vector2[] {
+  public toTransformedPolygon( scale = 1, translation = Vector2.ZERO ): Vector2[] {
     const result: Vector2[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {
-      result.push( this.edges[ i ].p0float.timesScalar( scaleFactor ).plus( translation ) );
+      result.push( this.edges[ i ].p0float.timesScalar( scale ).plus( translation ) );
     }
     return result;
   }
 
-  public toTransformedClippedEdges( scaleFactor = 1, translation = Vector2.ZERO ): ClippedEdge[] {
+  public toTransformedClippedEdges( scale = 1, translation = Vector2.ZERO ): ClippedEdge[] {
     const result: ClippedEdge[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
       result.push( new ClippedEdge(
-        edge.p0float.timesScalar( scaleFactor ).plus( translation ),
-        edge.p1float.timesScalar( scaleFactor ).plus( translation )
+        edge.p0float.timesScalar( scale ).plus( translation ),
+        edge.p1float.timesScalar( scale ).plus( translation )
       ) );
     }
     return result;
@@ -1023,6 +1023,108 @@ export default class Rasterize {
     return renderProgrammedFaces;
   }
 
+  private static toPolygonalRenderableFaces(
+    faces: RationalFace[],
+    scale: number,
+    translation: Vector2
+  ): RenderableFace[] {
+
+    // TODO: naming with above!!
+    const renderableFaces: RenderableFace[] = [];
+    for ( let i = 0; i < faces.length; i++ ) {
+      const face = faces[ i ];
+      renderableFaces.push( new RenderableFace(
+        face.toPolygonalFace( 1 / scale, translation ),
+        face.renderProgram!,
+        face.getBounds( 1 / scale, translation )
+      ) );
+    }
+    return renderableFaces;
+  }
+
+  private static toEdgedRenderableFaces(
+    faces: RationalFace[],
+    scale: number,
+    translation: Vector2
+  ): RenderableFace[] {
+
+    // TODO: naming with above!!
+    const renderableFaces: RenderableFace[] = [];
+    for ( let i = 0; i < faces.length; i++ ) {
+      const face = faces[ i ];
+      renderableFaces.push( new RenderableFace(
+        face.toEdgedFace( 1 / scale, translation ),
+        face.renderProgram!,
+        face.getBounds( 1 / scale, translation )
+      ) );
+    }
+    return renderableFaces;
+  }
+
+  private static toCombinedRenderableFaces(
+    faces: RationalFace[],
+    scale: number,
+    translation: Vector2
+  ): RenderableFace[] {
+
+    const faceEquivalenceClasses: Set<RationalFace>[] = [];
+
+    for ( let i = 0; i < faces.length; i++ ) {
+      const face = faces[ i ];
+      let found = false;
+
+      for ( let j = 0; j < faceEquivalenceClasses.length; j++ ) {
+        const faceEquivalenceClass = faceEquivalenceClasses[ j ];
+        const representative: RationalFace = faceEquivalenceClass.values().next().value;
+        if ( face.renderProgram!.equals( representative.renderProgram! ) ) {
+          faceEquivalenceClass.add( face );
+          found = true;
+          break;
+        }
+      }
+
+      if ( !found ) {
+        const newSet = new Set<RationalFace>();
+        newSet.add( face );
+        faceEquivalenceClasses.push( newSet );
+      }
+    }
+
+    const inverseScale = 1 / scale;
+
+    const renderableFaces: RenderableFace[] = [];
+    for ( let i = 0; i < faceEquivalenceClasses.length; i++ ) {
+      const faces = faceEquivalenceClasses[ i ];
+
+      const clippedEdges: ClippedEdge[] = [];
+      let renderProgram: RenderProgram | null = null;
+      const bounds = Bounds2.NOTHING.copy();
+
+      for ( const face of faces ) {
+        renderProgram = face.renderProgram!;
+        bounds.includeBounds( face.getBounds( inverseScale, translation ) );
+
+        for ( const boundary of [
+          face.boundary,
+          ...face.holes
+        ] ) {
+          for ( const edge of boundary.edges ) {
+            if ( !faces.has( edge.reversed.face! ) ) {
+              clippedEdges.push( new ClippedEdge(
+                edge.p0float.timesScalar( inverseScale ).plus( translation ),
+                edge.p1float.timesScalar( inverseScale ).plus( translation )
+              ) );
+            }
+          }
+        }
+      }
+
+      renderableFaces.push( new RenderableFace( new EdgedFace( clippedEdges ), renderProgram!, bounds ) );
+    }
+
+    return renderableFaces;
+  }
+
   // TODO: inline eventually
   private static addPartialPixel(
     outputRaster: OutputRaster,
@@ -1068,8 +1170,6 @@ export default class Rasterize {
       }
     }
   }
-
-
 
   private static fullRasterize(
     outputRaster: OutputRaster,
@@ -1211,8 +1311,6 @@ export default class Rasterize {
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
 
-    const inverseScale = 1 / scale;
-
     for ( let i = 0; i < renderableFaces.length; i++ ) {
       const renderableFace = renderableFaces[ i ];
       const face = renderableFace.face;
@@ -1335,16 +1433,9 @@ export default class Rasterize {
     const translation = new Vector2( -bounds.minX, -bounds.minY );
 
     // TODO: naming with above!!
-    const renderableFaces: RenderableFace[] = [];
-    for ( let i = 0; i < renderedFaces.length; i++ ) {
-      const face = renderedFaces[ i ];
-      renderableFaces.push( new RenderableFace(
-        face.toPolygonalFace( 1 / scale, translation ),
-        // face.toEdgedFace( 1 / scale, translation ),
-        face.renderProgram!,
-        bounds )
-      );
-    }
+    // const renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, scale, translation );
+    // const renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
+    const renderableFaces = Rasterize.toCombinedRenderableFaces( renderedFaces, scale, translation );
 
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
