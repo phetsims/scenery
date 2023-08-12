@@ -918,11 +918,21 @@ export class RenderColor extends RenderPathProgram {
 }
 scenery.register( 'RenderColor', RenderColor );
 
+type RenderImageable = {
+  width: number;
+  height: number;
+
+  // TODO: derivatives for filtering? (don't really need that right?)
+
+  // TODO: sampling of things, actually have methods that get samples (in any color space)
+  evaluate: ( point: Vector2 ) => Color
+};
+
 export class RenderImage extends RenderPathProgram {
   public constructor(
     path: RenderPath | null,
     public readonly transform: Matrix3,
-    public readonly image: { width: number; height: number; evaluate: ( point: Vector2 ) => Color }, // TODO: derivatives for filtering
+    public readonly image: RenderImageable,
     public readonly extendX: RenderExtend,
     public readonly extendY: RenderExtend
   ) {
@@ -986,7 +996,46 @@ export class RenderImage extends RenderPathProgram {
         return Math.abs( t - 2.0 * Utils.roundSymmetric( 0.5 * t ) );
         // return ( Math.floor( t ) % 2 === 0 ? t : 1 - t ) - Math.floor( t );
       default:
-        throw new Error( 'Unreachable' );
+        throw new Error( 'Unknown RenderExtend' );
+    }
+  }
+
+  // Integer version of extend_mode.
+  // Given size=4, provide the following patterns:
+  //
+  // input:  -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+  //
+  // pad:     0,  0,  0,  0,  0,  0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3
+  // repeat:  2,  3,  0,  1,  2,  3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1
+  // reflect: 2,  3,  3,  2,  1,  0, 0, 1, 2, 3, 3, 2, 1, 0, 0, 1
+  public static extendInteger( i: number, size: number, extend: RenderExtend ): number {
+    switch ( extend ) {
+      case RenderExtend.Pad: {
+        return Utils.clamp( i, 0, size - 1 );
+      }
+      case RenderExtend.Repeat: {
+        if ( i >= 0 ) {
+          return i % size;
+        }
+        else {
+          return size - ( ( -i - 1 ) % size ) - 1;
+        }
+      }
+      case RenderExtend.Reflect: {
+        // easier to convert both to positive (with a repeat offset)
+        const positiveI = i < 0 ? -i - 1 : i;
+
+        let section = positiveI % ( size * 2 );
+        if ( section < size ) {
+          return section;
+        }
+        else {
+          return 2 * size - section - 1;
+        }
+      }
+      default: {
+        throw new Error( 'Unknown RenderExtend' );
+      }
     }
   }
 }
