@@ -414,6 +414,7 @@ const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
 class CombinedRaster implements OutputRaster {
   public readonly accumulationBuffer: Vector4[] = [];
   public readonly imageData: ImageData;
+  private combined = false;
 
   public constructor( public readonly width: number, public readonly height: number ) {
     for ( let i = 0; i < width * height; i++ ) {
@@ -478,30 +479,32 @@ class CombinedRaster implements OutputRaster {
     }
   }
 
-  // TODO: ensure this isn't called multiple times!
   public toImageData(): ImageData {
-    for ( let i = 0; i < this.accumulationBuffer.length; i++ ) {
-      const accumulation = this.accumulationBuffer[ i ];
-      const a = accumulation.w;
+    if ( !this.combined ) {
+      for ( let i = 0; i < this.accumulationBuffer.length; i++ ) {
+        const accumulation = this.accumulationBuffer[ i ];
+        const a = accumulation.w;
 
-      // unpremultiply
-      if ( a > 0 ) {
-        let x = accumulation.x / a;
-        let y = accumulation.y / a;
-        let z = accumulation.z / a;
+        // unpremultiply
+        if ( a > 0 ) {
+          let x = accumulation.x / a;
+          let y = accumulation.y / a;
+          let z = accumulation.z / a;
 
-        // linear to sRGB
-        const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
-        const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
-        const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
+          // linear to sRGB
+          const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
+          const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
+          const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
 
-        const index = 4 * i;
-        // NOTE: ADDING HERE!!!! Don't change (we've set this for some pixels already)
-        this.imageData.data[ index ] += r * 255;
-        this.imageData.data[ index + 1 ] += g * 255;
-        this.imageData.data[ index + 2 ] += b * 255;
-        this.imageData.data[ index + 3 ] += a * 255;
+          const index = 4 * i;
+          // NOTE: ADDING HERE!!!! Don't change (we've set this for some pixels already)
+          this.imageData.data[ index ] += r * 255;
+          this.imageData.data[ index + 1 ] += g * 255;
+          this.imageData.data[ index + 2 ] += b * 255;
+          this.imageData.data[ index + 3 ] += a * 255;
+        }
       }
+      this.combined = true;
     }
 
     return this.imageData;
