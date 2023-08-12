@@ -13,7 +13,6 @@ import Utils from '../../../../dot/js/Utils.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
-import Clip from '../vello/shaders/shared/clip.js';
 
 let debugData: Record<string, IntentionalAny> | null = null;
 
@@ -195,10 +194,23 @@ class RationalBoundary {
     this.signedArea = signedArea;
   }
 
+  // TODO: just have a matrix?
   public toTransformedPolygon( scaleFactor = 1, translation = Vector2.ZERO ): Vector2[] {
     const result: Vector2[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {
       result.push( this.edges[ i ].p0float.timesScalar( scaleFactor ).plus( translation ) );
+    }
+    return result;
+  }
+
+  public toTransformedClippedEdges( scaleFactor = 1, translation = Vector2.ZERO ): ClippedEdge[] {
+    const result: ClippedEdge[] = [];
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+      result.push( new ClippedEdge(
+        edge.p0float.timesScalar( scaleFactor ).plus( translation ),
+        edge.p1float.timesScalar( scaleFactor ).plus( translation )
+      ) );
     }
     return result;
   }
@@ -312,6 +324,15 @@ class EdgedFace implements ClippableFace {
   }
 }
 
+// TODO: naming, omg
+class RenderableFace {
+  public constructor(
+    public readonly face: ClippableFace,
+    public readonly renderProgram: RenderProgram,
+    public readonly bounds: Bounds2
+  ) {}
+}
+
 class RationalFace {
   public readonly holes: RationalBoundary[] = [];
   public windingMapMap = new Map<RationalFace, WindingMap>();
@@ -326,6 +347,17 @@ class RationalFace {
       this.boundary.toTransformedPolygon( inverseScale, translation ),
       ...this.holes.map( hole => hole.toTransformedPolygon( inverseScale, translation ) )
     ] )
+  }
+
+  public toEdgedFace( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): EdgedFace {
+    return new EdgedFace( this.toClippedEdges( inverseScale, translation ) );
+  }
+
+  public toClippedEdges( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): ClippedEdge[] {
+    return [
+      ...this.boundary.toTransformedClippedEdges( inverseScale, translation ),
+      ...this.holes.flatMap( hole => hole.toTransformedClippedEdges( inverseScale, translation ) )
+    ];
   }
 
   public getBounds( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): Bounds2 {
@@ -1171,18 +1203,22 @@ export default class Rasterize {
 
   private static rasterizeAccumulate(
     outputRaster: OutputRaster,
-    faces: RationalFace[],
+    renderableFaces: RenderableFace[],
     bounds: Bounds2,
-    scale: number
+    scale: number,
+    translation: Vector2,
   ): void {
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
 
     const inverseScale = 1 / scale;
-    const translation = new Vector2( -bounds.minX, -bounds.minY );
 
-    for ( let i = 0; i < faces.length; i++ ) {
-      const face = faces[ i ];
+    for ( let i = 0; i < renderableFaces.length; i++ ) {
+      const renderableFace = renderableFaces[ i ];
+      const face = renderableFace.face;
+      const renderProgram = renderableFace.renderProgram;
+      const polygonalBounds = renderableFace.bounds;
+      const clippableFace = renderableFace.face;
 
       const faceDebugData: IntentionalAny = assert ? {
         face: face,
@@ -1193,18 +1229,8 @@ export default class Rasterize {
         debugData!.faceDebugData = debugData!.faceDebugData || [];
         debugData!.faceDebugData.push( faceDebugData );
       }
-
-      const renderProgram = face.renderProgram!;
-
-      // Now back in our normal coordinate frame!
-      const clippableFace = face.toPolygonalFace( inverseScale, translation );
       if ( assert ) {
         faceDebugData.clippableFace = clippableFace;
-      }
-
-      const polygonalBounds = face.getBounds( inverseScale, translation );
-      if ( assert ) {
-        faceDebugData.polygonalBounds = polygonalBounds;
       }
 
       const minX = Math.max( Math.floor( polygonalBounds.minX ), 0 );
@@ -1304,6 +1330,22 @@ export default class Rasterize {
 
     const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
 
+    // TODO: translation is... just based on the bounds, right? Can we avoid passing it in?
+    // TODO: really test the translated (dirty region) bit
+    const translation = new Vector2( -bounds.minX, -bounds.minY );
+
+    // TODO: naming with above!!
+    const renderableFaces: RenderableFace[] = [];
+    for ( let i = 0; i < renderedFaces.length; i++ ) {
+      const face = renderedFaces[ i ];
+      renderableFaces.push( new RenderableFace(
+        face.toPolygonalFace( 1 / scale, translation ),
+        // face.toEdgedFace( 1 / scale, translation ),
+        face.renderProgram!,
+        bounds )
+      );
+    }
+
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
 
@@ -1312,9 +1354,10 @@ export default class Rasterize {
 
     Rasterize.rasterizeAccumulate(
       outputRaster,
-      renderedFaces,
+      renderableFaces,
       bounds,
-      scale
+      scale,
+      translation
     );
 
     const imageData = outputRaster.toImageData();
