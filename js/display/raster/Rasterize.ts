@@ -342,25 +342,25 @@ class RationalFace {
 
   public constructor( public readonly boundary: RationalBoundary ) {}
 
-  public toPolygonalFace( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): PolygonalFace {
+  public toPolygonalFace( inverseScale = 1, translation: Vector2 = Vector2.ZERO ): PolygonalFace {
     return new PolygonalFace( [
       this.boundary.toTransformedPolygon( inverseScale, translation ),
       ...this.holes.map( hole => hole.toTransformedPolygon( inverseScale, translation ) )
-    ] )
+    ] );
   }
 
-  public toEdgedFace( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): EdgedFace {
+  public toEdgedFace( inverseScale = 1, translation: Vector2 = Vector2.ZERO ): EdgedFace {
     return new EdgedFace( this.toClippedEdges( inverseScale, translation ) );
   }
 
-  public toClippedEdges( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): ClippedEdge[] {
+  public toClippedEdges( inverseScale = 1, translation: Vector2 = Vector2.ZERO ): ClippedEdge[] {
     return [
       ...this.boundary.toTransformedClippedEdges( inverseScale, translation ),
       ...this.holes.flatMap( hole => hole.toTransformedClippedEdges( inverseScale, translation ) )
     ];
   }
 
-  public getBounds( inverseScale: number = 1, translation: Vector2 = Vector2.ZERO ): Bounds2 {
+  public getBounds( inverseScale = 1, translation: Vector2 = Vector2.ZERO ): Bounds2 {
     const polygonalBounds = Bounds2.NOTHING.copy();
     polygonalBounds.includeBounds( this.boundary.bounds );
     for ( let i = 0; i < this.holes.length; i++ ) {
@@ -387,7 +387,7 @@ type OutputRaster = {
   addPartialPixel( color: Vector4, x: number, y: number ): void;
   addFullPixel( color: Vector4, x: number, y: number ): void;
   addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void;
-}
+};
 
 // TODO: type of raster that applies itself to a rectangle in the future?
 class AccumulationRaster implements OutputRaster {
@@ -530,9 +530,9 @@ class CombinedRaster implements OutputRaster {
 
         if ( a > 0 ) {
           // unpremultiply
-          let x = this.accumulationArray[ baseIndex ] / a;
-          let y = this.accumulationArray[ baseIndex + 1 ] / a;
-          let z = this.accumulationArray[ baseIndex + 2 ] / a;
+          const x = this.accumulationArray[ baseIndex ] / a;
+          const y = this.accumulationArray[ baseIndex + 1 ] / a;
+          const z = this.accumulationArray[ baseIndex + 2 ] / a;
 
           // linear to sRGB
           const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
@@ -953,8 +953,8 @@ export default class Rasterize {
   private static createUnboundedFace( exteriorBoundary: RationalBoundary ): RationalFace {
     const unboundedFace = new RationalFace( exteriorBoundary );
 
-    for ( let i = 0; i < exteriorBoundary!.edges.length; i++ ) {
-      exteriorBoundary!.edges[ i ].face = unboundedFace;
+    for ( let i = 0; i < exteriorBoundary.edges.length; i++ ) {
+      exteriorBoundary.edges[ i ].face = unboundedFace;
     }
     return unboundedFace;
   }
@@ -1309,8 +1309,8 @@ export default class Rasterize {
       if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
         Rasterize.addFullArea(
           outputRaster, renderProgram, constColor, translation,
-          minX, minY, maxX, maxY,
-        )
+          minX, minY, maxX, maxY
+        );
       }
       else if ( xDiff === 1 && yDiff === 1 ) {
         Rasterize.addPartialPixel(
@@ -1386,7 +1386,7 @@ export default class Rasterize {
     renderableFaces: RenderableFace[],
     bounds: Bounds2,
     scale: number,
-    translation: Vector2,
+    translation: Vector2
   ): void {
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;

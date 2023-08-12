@@ -333,7 +333,7 @@ export default class PolygonClipping {
       }
     }
 
-    const result = simplifier.finalize();;
+    const result = simplifier.finalize();
 
     simplifier.reset();
 
