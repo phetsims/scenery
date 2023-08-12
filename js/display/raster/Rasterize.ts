@@ -455,8 +455,8 @@ class CombinedRaster implements OutputRaster {
     const accumulation = color;
     const a = accumulation.w;
 
-    // unpremultiply
     if ( a > 0 ) {
+      // unpremultiply
       const x = accumulation.x / a;
       const y = accumulation.y / a;
       const z = accumulation.z / a;
@@ -485,8 +485,8 @@ class CombinedRaster implements OutputRaster {
         const baseIndex = i * 4;
         const a = this.accumulationArray[ baseIndex + 3 ];
 
-        // unpremultiply
         if ( a > 0 ) {
+          // unpremultiply
           let x = this.accumulationArray[ baseIndex ] / a;
           let y = this.accumulationArray[ baseIndex + 1 ] / a;
           let z = this.accumulationArray[ baseIndex + 2 ] / a;

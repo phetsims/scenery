@@ -947,7 +947,15 @@ export class RenderGradientStop {
 }
 scenery.register( 'RenderGradientStop', RenderGradientStop );
 
+const scratchLinearGradientVector0 = new Vector2( 0, 0 );
+const scratchLinearGradientVector1 = new Vector2( 0, 0 );
+
 export class RenderLinearGradient extends RenderPathProgram {
+
+  private readonly inverseTransform: Matrix3;
+  private readonly isIdentity: boolean;
+  private readonly gradDelta: Vector2;
+
   public constructor(
     path: RenderPath | null,
     public readonly transform: Matrix3,
@@ -957,6 +965,10 @@ export class RenderLinearGradient extends RenderPathProgram {
     public readonly extend: RenderExtend
   ) {
     super( path );
+
+    this.inverseTransform = transform.inverted();
+    this.isIdentity = transform.isIdentity();
+    this.gradDelta = end.minus( start );
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -992,9 +1004,13 @@ export class RenderLinearGradient extends RenderPathProgram {
       return Vector4.ZERO;
     }
 
-    const localPoint = this.transform.inverted().timesVector2( point );
-    const localDelta = localPoint.minus( this.start );
-    const gradDelta = this.end.minus( this.start );
+    const localPoint = scratchLinearGradientVector0.set( point );
+    if ( !this.isIdentity ) {
+      this.inverseTransform.multiplyVector2( localPoint );
+    }
+
+    const localDelta = localPoint.subtract( this.start ); // MUTABLE, changes localPoint
+    const gradDelta = this.gradDelta;
 
     const t = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
     const mappedT = RenderImage.extend( this.extend, t );
@@ -1013,7 +1029,19 @@ export class RenderLinearGradient extends RenderPathProgram {
       const before = this.stops[ i ];
       const after = this.stops[ i + 1 ];
       const ratio = ( mappedT - before.ratio ) / ( after.ratio - before.ratio );
-      return before.program.evaluate( point, pathTest ).times( 1 - ratio ).plus( after.program.evaluate( point, pathTest ).times( ratio ) );
+
+      const beforeColor = before.program.evaluate( point, pathTest );
+      const afterColor = after.program.evaluate( point, pathTest );
+
+      const minusRatio = 1 - ratio;
+
+      // TODO: reduce allocation
+      return new Vector4(
+        beforeColor.x * minusRatio + afterColor.x * ratio,
+        beforeColor.y * minusRatio + afterColor.y * ratio,
+        beforeColor.z * minusRatio + afterColor.z * ratio,
+        beforeColor.w * minusRatio + afterColor.w * ratio
+      );
     }
   }
 
