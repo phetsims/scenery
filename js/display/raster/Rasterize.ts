@@ -1038,7 +1038,6 @@ export default class Rasterize {
           if ( assert ) {
             debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
           }
-          const index = y * rasterWidth + x;
 
           let color;
           if ( constColor ) {
