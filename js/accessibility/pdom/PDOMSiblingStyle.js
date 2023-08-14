@@ -69,7 +69,7 @@ SceneryStyle.addRule( `.${ROOT_CLASS_NAME
                       // when the browser is left inactive for a few minutes. This z-index keeps the PDOM from interfering, while still
                       // allowing us to use `fixed`. If the PDOM elements are ever styled with position: 'absolute' (would require
                       // PDOM elements to be positioned relative to focusable ancestors rather than viewport), this could be removed.
-                      // See https://github.com/phetsims/joist/blob/master/js/Heartbeat.js as well for the workaround.
+                      // See https://github.com/phetsims/joist/blob/main/js/Heartbeat.js as well for the workaround.
                       'z-index: 1;' +
 
                       // JUST FOR DEBUGGING! So you can see the PDOM on top of other graphical content

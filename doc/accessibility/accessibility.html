@@ -281,7 +281,7 @@
       The following explains how to use the accessibility functionality of Scenery. For more information and up-to-date
       API
       documentation, see <a
-        href="https://github.com/phetsims/scenery/blob/master/js/accessibility/pdom/ParallelDOM.js#L4">
+        href="https://github.com/phetsims/scenery/blob/main/js/accessibility/pdom/ParallelDOM.js#L4">
       the source code</a>. On the side bar, options are categorized by
       where they are introduced and explained. In this file there is little "traditional" documentation, rather
       example-based explanation. The source code is the best place for specifics, documentation and implementation.
@@ -533,7 +533,7 @@
       interactive
       functionality, use <code>Node.addInputListener()</code>. The function takes in type
       <code>Object.&lt;string, function&gt;</code> where the key is the name of the DOM Event you want to listen to. See
-      <a href="https://github.com/phetsims/scenery/blob/master/js/input/Input.js#L4">Input.js documentation</a> for an
+      <a href="https://github.com/phetsims/scenery/blob/main/js/input/Input.js#L4">Input.js documentation</a> for an
       up-to-date list of supported scenery events, and the subset that come from the PDOM.
       This event is more often than not different than the listener needed for a mouse. Don't forget to remove the
       listener
@@ -585,7 +585,7 @@
     <p>
       Once the PDOM structure is as desired, and you know what events are expected from interacting with that node,
       use <code>Node.addInputListener()</code> to add event listeners to the PDOM events. See <a
-        href="https://github.com/phetsims/scenery/blob/master/js/input/Input.js">Input.js</a>
+        href="https://github.com/phetsims/scenery/blob/main/js/input/Input.js">Input.js</a>
       and its documentation for up-to-date notes on the events that are supported from PDOM elements. Among these are
       keydown, keyup, click, input, change, focus, and blur.
     </p>
@@ -609,7 +609,7 @@
       set the
       <code>Node.tagName = null</code>, this will clear all accessible content of the node.</p>
     <p>
-      Please see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/pdom/ParallelDOM.js">the
+      Please see <a href="https://github.com/phetsims/scenery/blob/main/js/accessibility/pdom/ParallelDOM.js">the
       ParallelDOM trait</a> for a complete and up-to-date list of getters/setters.
     </p>
 
@@ -675,7 +675,7 @@
       All interactive alerts are powered with the <a
         href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions">aria-live attribute</a>.
       PhET manages alerts in a custom queue, see <a
-        href="https://github.com/phetsims/utterance-queue/blob/master/js/utteranceQueue.js">utteranceQueue.js</a>
+        href="https://github.com/phetsims/utterance-queue/blob/main/js/utteranceQueue.js">utteranceQueue.js</a>
       Each accessible display is outfitted with an UtteranceQueue that can be passed alerts to it. All
       PhET alerts should go through utteranceQueue, <code>aria-live</code> should not be added to elements in the
       PDOM.
@@ -709,7 +709,7 @@
     </ul>
     <h4>Source Code</h4>
     <p>For up-to-date documentation and the latest API for accessibility in Scenery, please visit <a
-        href="https://github.com/phetsims/scenery/blob/master/js/accessibility/pdom/ParallelDOM.js">the source code</a>.
+        href="https://github.com/phetsims/scenery/blob/main/js/accessibility/pdom/ParallelDOM.js">the source code</a>.
 
     <p>Good luck and happy coding!</p>
   </div>
