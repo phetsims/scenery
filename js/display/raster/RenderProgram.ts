@@ -1166,6 +1166,85 @@ export class RenderLinearGradient extends RenderPathProgram {
 }
 scenery.register( 'RenderLinearGradient', RenderLinearGradient );
 
+const scratchLinearBlendVector = new Vector2( 0, 0 );
+export class RenderLinearBlend extends RenderPathProgram {
+
+  public constructor(
+    path: RenderPath | null,
+    public readonly scaledNormal: Vector2,
+    public readonly offset: number,
+    public readonly zero: RenderProgram,
+    public readonly one: RenderProgram
+  ) {
+    super( path );
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return super.equals( other ) &&
+      other instanceof RenderLinearBlend &&
+      this.scaledNormal.equals( other.scaledNormal ) &&
+      this.offset === other.offset &&
+      this.zero.equals( other.zero ) &&
+      this.one.equals( other.one );
+  }
+
+  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
+    this.zero.depthFirst( callback );
+    this.one.depthFirst( callback );
+    callback( this );
+  }
+
+  public override isFullyTransparent(): boolean {
+    return this.zero.isFullyTransparent() && this.one.isFullyTransparent();
+  }
+
+  public override isFullyOpaque(): boolean {
+    return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
+  }
+
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    const zero = this.zero.simplify( pathTest );
+    const one = this.one.simplify( pathTest );
+
+    if ( zero.isFullyTransparent() && one.isFullyTransparent() ) {
+      return RenderColor.TRANSPARENT;
+    }
+
+    if ( this.isInPath( pathTest ) ) {
+      return new RenderLinearBlend( null, this.scaledNormal, this.offset, zero, one );
+    }
+    else {
+      return RenderColor.TRANSPARENT;
+    }
+  }
+
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    if ( !this.isInPath( pathTest ) ) {
+      return Vector4.ZERO;
+    }
+
+    const localPoint = scratchLinearBlendVector.set( point );
+
+    const t = this.scaledNormal.dot( localPoint ) + this.offset;
+
+    if ( t >= 0 ) {
+      return this.zero.evaluate( point, pathTest );
+    }
+    else if ( t <= 1 ) {
+      return this.one.evaluate( point, pathTest );
+    }
+    else {
+      return this.zero.evaluate( point, pathTest ).timesScalar( 1 - t ).plus( this.one.evaluate( point, pathTest ).timesScalar( t ) );
+    }
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderLinearGradient (${this.path ? this.path.id : 'null'})`;
+  }
+}
+scenery.register( 'RenderLinearBlend', RenderLinearBlend );
+
 export enum RadialGradientType {
   Circular = 1,
   Strip = 2,
