@@ -541,6 +541,9 @@ class CombinedRaster implements OutputRaster {
 
           const index = 4 * i;
           // NOTE: ADDING HERE!!!! Don't change (we've set this for some pixels already)
+          // Also, if we have a weird case where something sneaks in that is above an epsilon, so that we have a
+          // barely non-zero linear value, we DO NOT want to wipe away something that saw a "almost full" pixel and
+          // wrote into the imageData.
           this.imageData.data[ index ] += r * 255;
           this.imageData.data[ index + 1 ] += g * 255;
           this.imageData.data[ index + 2 ] += b * 255;
