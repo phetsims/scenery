@@ -433,6 +433,7 @@ export { default as BigIntVector2 } from './display/raster/BigIntVector2.js';
 export { default as BigRational } from './display/raster/BigRational.js';
 export { default as BigRationalVector2 } from './display/raster/BigRationalVector2.js';
 export { default as BoundsIntersectionFilter } from './display/raster/BoundsIntersectionFilter.js';
+export { default as ClipSimplifier } from './display/raster/ClipSimplifier.js';
 export { default as CohenSutherlandClipping } from './display/raster/CohenSutherlandClipping.js';
 export { default as IntersectionPoint } from './display/raster/IntersectionPoint.js';
 export { default as LinearEdge } from './display/raster/LinearEdge.js';

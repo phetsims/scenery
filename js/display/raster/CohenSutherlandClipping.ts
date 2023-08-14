@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Contains an import-style snippet of shader code, with dependencies on other snippets.
+ * Cohen-Sutherland line clipping, with the Maillot coding extension
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
