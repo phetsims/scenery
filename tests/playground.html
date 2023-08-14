@@ -428,8 +428,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      // const outputSize = 768 * 2;
-      const outputSize = 768 / 4;
+      const outputSize = 768 * 2;
+      // const outputSize = 768 / 4;
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -548,7 +548,7 @@ an UI and Display made for visual testing and debugging.
         new phet.scenery.RenderGradientStop( 0.8, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#9B04DB' ) ) ),
         new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#6D1DC6' ) ) )
       ], 2 );
-      const d = new phet.scenery.RenderLinearGradient( pathD, phet.dot.Matrix3.IDENTITY, new phet.dot.Vector2( 0, 8 ), new phet.dot.Vector2( 8, 0 ), [
+      const d = new phet.scenery.RenderLinearGradient( pathD, phet.dot.Matrix3.IDENTITY, new phet.dot.Vector2( 0, 8 ), new phet.dot.Vector2( 9, 0 ), [
         new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 255, 255, 1 ) ) ),
         new phet.scenery.RenderGradientStop( 0.1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,57,2, 1 ) ) ),
         new phet.scenery.RenderGradientStop( 0.3, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,128,7, 1 ) ) ),

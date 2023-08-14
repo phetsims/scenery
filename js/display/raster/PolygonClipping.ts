@@ -170,12 +170,240 @@ class Simplifier {
 const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
 const simplifier = new Simplifier();
+const minSimplifier = new Simplifier();
+const maxSimplifier = new Simplifier();
 
 export class ClippedEdge {
-  public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2 ) {}
+  public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2 ) {
+    assert && assert( !startPoint.equals( endPoint ) );
+  }
 }
 
 export default class PolygonClipping {
+
+  public static binaryXClipEdge(
+    startPoint: Vector2,
+    endPoint: Vector2,
+    x: number,
+    fakeCornerY: number,
+    minClippedEdges: ClippedEdge[], // Will append into this (for performance)
+    maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
+  ): void {
+
+    if ( startPoint.x < x && endPoint.x < x ) {
+      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return
+    }
+    else if ( startPoint.x > x && endPoint.x > x ) {
+      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return
+    }
+    else if ( startPoint.x === x && endPoint.x === x ) {
+      // vertical line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return;
+    }
+
+    // There is a single crossing of our x.
+    const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( x - startPoint.x ) / ( endPoint.x - startPoint.x );
+    const intersection = new Vector2( x, y );
+    const fakeCorner = new Vector2( x, fakeCornerY );
+
+    const minClipped = startPoint.x <= x || endPoint.x <= x;
+    const maxClipped = startPoint.x >= x || endPoint.x >= x;
+
+    const needsMinStartCorner = !minClipped || startPoint.x > x;
+    const needsMinEndCorner = !minClipped || endPoint.x > x;
+    const needsMaxStartCorner = !maxClipped || startPoint.x < x;
+    const needsMaxEndCorner = !maxClipped || endPoint.x < x;
+
+    const minResultStartPoint = startPoint.x < x ? startPoint : intersection;
+    const minResultEndPoint = endPoint.x < x ? endPoint : intersection;
+    const maxResultStartPoint = startPoint.x > x ? startPoint : intersection;
+    const maxResultEndPoint = endPoint.x > x ? endPoint : intersection;
+
+    if ( minClipped ) {
+      if ( needsMinStartCorner && !fakeCorner.equals( minResultStartPoint ) ) {
+        minClippedEdges.push( new ClippedEdge( fakeCorner, minResultStartPoint ) );
+      }
+      if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
+        minClippedEdges.push( new ClippedEdge( minResultStartPoint, minResultEndPoint ) );
+      }
+      if ( needsMinEndCorner && !fakeCorner.equals( minResultEndPoint ) ) {
+        minClippedEdges.push( new ClippedEdge( minResultEndPoint, fakeCorner ) );
+      }
+    }
+    if ( maxClipped ) {
+      if ( needsMaxStartCorner && !fakeCorner.equals( maxResultStartPoint ) ) {
+        maxClippedEdges.push( new ClippedEdge( fakeCorner, maxResultStartPoint ) );
+      }
+      if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
+        maxClippedEdges.push( new ClippedEdge( maxResultStartPoint, maxResultEndPoint ) );
+      }
+      if ( needsMaxEndCorner && !fakeCorner.equals( maxResultEndPoint ) ) {
+        maxClippedEdges.push( new ClippedEdge( maxResultEndPoint, fakeCorner ) );
+      }
+    }
+  }
+
+  public static binaryYClipEdge(
+    startPoint: Vector2,
+    endPoint: Vector2,
+    y: number,
+    fakeCornerX: number,
+    minClippedEdges: ClippedEdge[], // Will append into this (for performance)
+    maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
+  ): void {
+
+    if ( startPoint.y < y && endPoint.y < y ) {
+      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return
+    }
+    else if ( startPoint.y > y && endPoint.y > y ) {
+      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return
+    }
+    else if ( startPoint.y === y && endPoint.y === y ) {
+      // horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return;
+    }
+
+    // There is a single crossing of our y.
+    const x = startPoint.x + ( endPoint.x - startPoint.x ) * ( y - startPoint.y ) / ( endPoint.y - startPoint.y );
+    const intersection = new Vector2( x, y );
+    const fakeCorner = new Vector2( fakeCornerX, y );
+
+    const minClipped = startPoint.y <= y || endPoint.y <= y;
+    const maxClipped = startPoint.y >= y || endPoint.y >= y;
+
+    const needsMinStartCorner = !minClipped || startPoint.y > y;
+    const needsMinEndCorner = !minClipped || endPoint.y > y;
+    const needsMaxStartCorner = !maxClipped || startPoint.y < y;
+    const needsMaxEndCorner = !maxClipped || endPoint.y < y;
+
+    const minResultStartPoint = startPoint.y < y ? startPoint : intersection;
+    const minResultEndPoint = endPoint.y < y ? endPoint : intersection;
+    const maxResultStartPoint = startPoint.y > y ? startPoint : intersection;
+    const maxResultEndPoint = endPoint.y > y ? endPoint : intersection;
+
+    if ( minClipped ) {
+      if ( needsMinStartCorner && !fakeCorner.equals( minResultStartPoint ) ) {
+        minClippedEdges.push( new ClippedEdge( fakeCorner, minResultStartPoint ) );
+      }
+      if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
+        minClippedEdges.push( new ClippedEdge( minResultStartPoint, minResultEndPoint ) );
+      }
+      if ( needsMinEndCorner && !fakeCorner.equals( minResultEndPoint ) ) {
+        minClippedEdges.push( new ClippedEdge( minResultEndPoint, fakeCorner ) );
+      }
+    }
+    if ( maxClipped ) {
+      if ( needsMaxStartCorner && !fakeCorner.equals( maxResultStartPoint ) ) {
+        maxClippedEdges.push( new ClippedEdge( fakeCorner, maxResultStartPoint ) );
+      }
+      if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
+        maxClippedEdges.push( new ClippedEdge( maxResultStartPoint, maxResultEndPoint ) );
+      }
+      if ( needsMaxEndCorner && !fakeCorner.equals( maxResultEndPoint ) ) {
+        maxClippedEdges.push( new ClippedEdge( maxResultEndPoint, fakeCorner ) );
+      }
+    }
+  }
+
+  public static binaryXClipPolygon(
+    polygon: Vector2[],
+    x: number,
+    fakeCornerY: number,
+    minPolygon: Vector2[], // Will append into this (for performance)
+    maxPolygon: Vector2[] // Will append into this (for performance)
+  ): void {
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const startPoint = polygon[ i ];
+      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+      if ( startPoint.x < x && endPoint.x < x ) {
+        minSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+      else if ( startPoint.x > x && endPoint.x > x ) {
+        maxSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+      else if ( startPoint.x === x && endPoint.x === x ) {
+        // vertical line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+        minSimplifier.add( endPoint.x, endPoint.y );
+        maxSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+
+      // There is a single crossing of our x.
+      const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( x - startPoint.x ) / ( endPoint.x - startPoint.x );
+
+      const startSimplifier = startPoint.x < endPoint.x ? minSimplifier : maxSimplifier;
+      const endSimplifier = startPoint.x < endPoint.x ? maxSimplifier : minSimplifier;
+
+      startSimplifier.add( x, y );
+      startSimplifier.add( x, fakeCornerY );
+      endSimplifier.add( x, fakeCornerY );
+      endSimplifier.add( x, y );
+      endSimplifier.add( endPoint.x, endPoint.y );
+    }
+
+    minPolygon.push( ...minSimplifier.finalize() );
+    maxPolygon.push( ...maxSimplifier.finalize() );
+
+    minSimplifier.reset();
+    maxSimplifier.reset();
+  }
+
+  public static binaryYClipPolygon(
+    polygon: Vector2[],
+    y: number,
+    fakeCornerX: number,
+    minPolygon: Vector2[], // Will append into this (for performance)
+    maxPolygon: Vector2[] // Will append into this (for performance)
+  ): void {
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const startPoint = polygon[ i ];
+      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+      if ( startPoint.y < y && endPoint.y < y ) {
+        minSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+      else if ( startPoint.y > y && endPoint.y > y ) {
+        maxSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+      else if ( startPoint.y === y && endPoint.y === y ) {
+        // horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+        minSimplifier.add( endPoint.x, endPoint.y );
+        maxSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+
+      // There is a single crossing of our y.
+      const x = startPoint.x + ( endPoint.x - startPoint.x ) * ( y - startPoint.y ) / ( endPoint.y - startPoint.y );
+
+      const startSimplifier = startPoint.y < endPoint.y ? minSimplifier : maxSimplifier;
+      const endSimplifier = startPoint.y < endPoint.y ? maxSimplifier : minSimplifier;
+
+      startSimplifier.add( x, y );
+      startSimplifier.add( fakeCornerX, y );
+      endSimplifier.add( fakeCornerX, y );
+      endSimplifier.add( x, y );
+      endSimplifier.add( endPoint.x, endPoint.y );
+    }
+
+    minPolygon.push( ...minSimplifier.finalize() );
+    maxPolygon.push( ...maxSimplifier.finalize() );
+
+    minSimplifier.reset();
+    maxSimplifier.reset();
+  }
 
   public static boundsClipEdge(
     startPoint: Vector2,
@@ -229,7 +457,9 @@ export default class PolygonClipping {
         result.push( new ClippedEdge( startCorner!, resultStartPoint ) );
       }
 
-      result.push( new ClippedEdge( resultStartPoint, resultEndPoint ) );
+      if ( !resultStartPoint.equals( resultEndPoint ) ) {
+        result.push( new ClippedEdge( resultStartPoint, resultEndPoint ) );
+      }
 
       if ( needsEndCorner && !endCorner!.equals( resultEndPoint ) ) {
         assert && assert( endCorner! );
