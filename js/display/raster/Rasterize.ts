@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, ClippedEdge, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, LinearEdge, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Utils from '../../../../dot/js/Utils.js';
@@ -203,11 +203,11 @@ class RationalBoundary {
     return result;
   }
 
-  public toTransformedClippedEdges( scale = 1, translation = Vector2.ZERO ): ClippedEdge[] {
-    const result: ClippedEdge[] = [];
+  public toTransformedLinearEdges( scale = 1, translation = Vector2.ZERO ): LinearEdge[] {
+    const result: LinearEdge[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
-      result.push( new ClippedEdge(
+      result.push( new LinearEdge(
         edge.p0float.timesScalar( scale ).plus( translation ),
         edge.p1float.timesScalar( scale ).plus( translation )
       ) );
@@ -380,7 +380,7 @@ class PolygonalFace implements ClippableFace {
 }
 
 class EdgedFace implements ClippableFace {
-  public constructor( public readonly edges: ClippedEdge[] ) {}
+  public constructor( public readonly edges: LinearEdge[] ) {}
 
   public getArea(): number {
     let area = 0;
@@ -419,7 +419,7 @@ class EdgedFace implements ClippableFace {
   }
 
   public getClipped( bounds: Bounds2 ): EdgedFace {
-    const edges: ClippedEdge[] = [];
+    const edges: LinearEdge[] = [];
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
@@ -430,8 +430,8 @@ class EdgedFace implements ClippableFace {
   }
 
   public getBinaryXClip( x: number, fakeCornerY: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
-    const minEdges: ClippedEdge[] = [];
-    const maxEdges: ClippedEdge[] = [];
+    const minEdges: LinearEdge[] = [];
+    const maxEdges: LinearEdge[] = [];
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
@@ -449,8 +449,8 @@ class EdgedFace implements ClippableFace {
   }
 
   public getBinaryYClip( y: number, fakeCornerX: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
-    const minEdges: ClippedEdge[] = [];
-    const maxEdges: ClippedEdge[] = [];
+    const minEdges: LinearEdge[] = [];
+    const maxEdges: LinearEdge[] = [];
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
@@ -468,8 +468,8 @@ class EdgedFace implements ClippableFace {
   }
 
   public getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
-    const minEdges: ClippedEdge[] = [];
-    const maxEdges: ClippedEdge[] = [];
+    const minEdges: LinearEdge[] = [];
+    const maxEdges: LinearEdge[] = [];
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
@@ -487,7 +487,7 @@ class EdgedFace implements ClippableFace {
   }
 
   public getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): EdgedFace[] {
-    const edgesCollection: ClippedEdge[][] = _.range( values.length + 1 ).map( () => [] );
+    const edgesCollection: LinearEdge[][] = _.range( values.length + 1 ).map( () => [] );
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
@@ -539,13 +539,13 @@ class RationalFace {
   }
 
   public toEdgedFace( inverseScale = 1, translation: Vector2 = Vector2.ZERO ): EdgedFace {
-    return new EdgedFace( this.toClippedEdges( inverseScale, translation ) );
+    return new EdgedFace( this.toLinearEdges( inverseScale, translation ) );
   }
 
-  public toClippedEdges( inverseScale = 1, translation: Vector2 = Vector2.ZERO ): ClippedEdge[] {
+  public toLinearEdges( inverseScale = 1, translation: Vector2 = Vector2.ZERO ): LinearEdge[] {
     return [
-      ...this.boundary.toTransformedClippedEdges( inverseScale, translation ),
-      ...this.holes.flatMap( hole => hole.toTransformedClippedEdges( inverseScale, translation ) )
+      ...this.boundary.toTransformedLinearEdges( inverseScale, translation ),
+      ...this.holes.flatMap( hole => hole.toTransformedLinearEdges( inverseScale, translation ) )
     ];
   }
 
@@ -569,7 +569,7 @@ class AccumulatingFace {
   public facesToProcess: RationalFace[] = [];
   public renderProgram: RenderProgram | null = null;
   public bounds: Bounds2 = Bounds2.NOTHING.copy();
-  public clippedEdges: ClippedEdge[] = [];
+  public clippedEdges: LinearEdge[] = [];
 }
 
 type OutputRaster = {
@@ -1296,7 +1296,7 @@ export default class Rasterize {
     for ( let i = 0; i < faceEquivalenceClasses.length; i++ ) {
       const faces = faceEquivalenceClasses[ i ];
 
-      const clippedEdges: ClippedEdge[] = [];
+      const clippedEdges: LinearEdge[] = [];
       let renderProgram: RenderProgram | null = null;
       const bounds = Bounds2.NOTHING.copy();
 
@@ -1310,7 +1310,7 @@ export default class Rasterize {
         ] ) {
           for ( const edge of boundary.edges ) {
             if ( !faces.has( edge.reversed.face! ) ) {
-              clippedEdges.push( new ClippedEdge(
+              clippedEdges.push( new LinearEdge(
                 edge.p0float.timesScalar( inverseScale ).plus( translation ),
                 edge.p1float.timesScalar( inverseScale ).plus( translation )
               ) );
@@ -1379,7 +1379,7 @@ export default class Rasterize {
           ] ) {
             for ( const edge of boundary.edges ) {
               if ( !isFaceCompatible( edge.reversed.face! ) ) {
-                newAccumulatedFace.clippedEdges.push( new ClippedEdge(
+                newAccumulatedFace.clippedEdges.push( new LinearEdge(
                   edge.p0float.timesScalar( inverseScale ).plus( translation ),
                   edge.p1float.timesScalar( inverseScale ).plus( translation )
                 ) );

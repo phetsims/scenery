@@ -7,7 +7,7 @@
  */
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { scenery } from '../../imports.js';
+import { LinearEdge, scenery } from '../../imports.js';
 
 type Code = number;
 
@@ -173,23 +173,6 @@ const simplifier = new Simplifier();
 const minSimplifier = new Simplifier();
 const maxSimplifier = new Simplifier();
 
-export class ClippedEdge {
-  public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2 ) {
-    assert && assert( !startPoint.equals( endPoint ) );
-  }
-
-  public getLineIntegralArea(): number {
-    return 0.5 * ( this.endPoint.x + this.startPoint.x ) * ( this.endPoint.y - this.startPoint.y );
-  }
-
-  // If these are added up for a closed polygon, it should be zero
-  // TODO: use this to check all of our ClippedEdge computations
-  public getLineIntegralZero(): number {
-    return ( this.startPoint.x - 0.1396 ) * ( this.startPoint.y + 1.422 ) -
-           ( this.endPoint.x - 0.1396 ) * ( this.endPoint.y + 1.422 );
-  }
-}
-
 export default class PolygonClipping {
 
   // Returns if all done
@@ -198,27 +181,27 @@ export default class PolygonClipping {
     endPoint: Vector2,
     startCmp: number,
     endCmp: number,
-    minClippedEdges: ClippedEdge[],
-    maxClippedEdges: ClippedEdge[]
+    minLinearEdges: LinearEdge[],
+    maxLinearEdges: LinearEdge[]
   ): boolean {
 
     // both values less than the split
     if ( startCmp === -1 && endCmp === -1 ) {
-      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      minLinearEdges.push( new LinearEdge( startPoint, endPoint ) );
       return true;
     }
 
     // both values greater than the split
     if ( startCmp === 1 && endCmp === 1 ) {
-      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      maxLinearEdges.push( new LinearEdge( startPoint, endPoint ) );
       return true;
     }
 
     // both values equal to the split
     if ( startCmp === 0 && endCmp === 0 ) {
       // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
-      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
-      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      minLinearEdges.push( new LinearEdge( startPoint, endPoint ) );
+      maxLinearEdges.push( new LinearEdge( startPoint, endPoint ) );
       return true;
     }
 
@@ -232,8 +215,8 @@ export default class PolygonClipping {
     endCmp: number,
     fakeCorner: Vector2,
     intersection: Vector2,
-    minClippedEdges: ClippedEdge[],
-    maxClippedEdges: ClippedEdge[]
+    minLinearEdges: LinearEdge[],
+    maxLinearEdges: LinearEdge[]
   ): void {
     const startLess = startCmp === -1;
     const startGreater = startCmp === 1;
@@ -247,32 +230,32 @@ export default class PolygonClipping {
 
     // min-start corner
     if ( startGreater && !fakeCorner.equals( minResultStartPoint ) ) {
-      minClippedEdges.push( new ClippedEdge( fakeCorner, minResultStartPoint ) );
+      minLinearEdges.push( new LinearEdge( fakeCorner, minResultStartPoint ) );
     }
 
     // main min section
     if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
-      minClippedEdges.push( new ClippedEdge( minResultStartPoint, minResultEndPoint ) );
+      minLinearEdges.push( new LinearEdge( minResultStartPoint, minResultEndPoint ) );
     }
 
     // min-end corner
     if ( endGreater && !fakeCorner.equals( minResultEndPoint ) ) {
-      minClippedEdges.push( new ClippedEdge( minResultEndPoint, fakeCorner ) );
+      minLinearEdges.push( new LinearEdge( minResultEndPoint, fakeCorner ) );
     }
 
     // max-start corner
     if ( startLess && !fakeCorner.equals( maxResultStartPoint ) ) {
-      maxClippedEdges.push( new ClippedEdge( fakeCorner, maxResultStartPoint ) );
+      maxLinearEdges.push( new LinearEdge( fakeCorner, maxResultStartPoint ) );
     }
 
     // main max section
     if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
-      maxClippedEdges.push( new ClippedEdge( maxResultStartPoint, maxResultEndPoint ) );
+      maxLinearEdges.push( new LinearEdge( maxResultStartPoint, maxResultEndPoint ) );
     }
 
     // max-end corner
     if ( endLess && !fakeCorner.equals( maxResultEndPoint ) ) {
-      maxClippedEdges.push( new ClippedEdge( maxResultEndPoint, fakeCorner ) );
+      maxLinearEdges.push( new LinearEdge( maxResultEndPoint, fakeCorner ) );
     }
   }
 
@@ -281,8 +264,8 @@ export default class PolygonClipping {
     endPoint: Vector2,
     x: number,
     fakeCornerY: number,
-    minClippedEdges: ClippedEdge[], // Will append into this (for performance)
-    maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
+    minLinearEdges: LinearEdge[], // Will append into this (for performance)
+    maxLinearEdges: LinearEdge[] // Will append into this (for performance)
   ): void {
 
     const startCmp = Math.sign( startPoint.x - x );
@@ -291,7 +274,7 @@ export default class PolygonClipping {
     const handled = this.binaryInitialPush(
       startPoint, endPoint,
       startCmp, endCmp,
-      minClippedEdges, maxClippedEdges
+      minLinearEdges, maxLinearEdges
     );
     if ( handled ) {
       return;
@@ -307,7 +290,7 @@ export default class PolygonClipping {
       startCmp, endCmp,
       fakeCorner,
       intersection,
-      minClippedEdges, maxClippedEdges
+      minLinearEdges, maxLinearEdges
     );
   }
 
@@ -316,8 +299,8 @@ export default class PolygonClipping {
     endPoint: Vector2,
     y: number,
     fakeCornerX: number,
-    minClippedEdges: ClippedEdge[], // Will append into this (for performance)
-    maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
+    minLinearEdges: LinearEdge[], // Will append into this (for performance)
+    maxLinearEdges: LinearEdge[] // Will append into this (for performance)
   ): void {
 
     const startCmp = Math.sign( startPoint.y - y );
@@ -326,7 +309,7 @@ export default class PolygonClipping {
     const handled = this.binaryInitialPush(
       startPoint, endPoint,
       startCmp, endCmp,
-      minClippedEdges, maxClippedEdges
+      minLinearEdges, maxLinearEdges
     );
     if ( handled ) {
       return;
@@ -342,7 +325,7 @@ export default class PolygonClipping {
       startCmp, endCmp,
       fakeCorner,
       intersection,
-      minClippedEdges, maxClippedEdges
+      minLinearEdges, maxLinearEdges
     );
   }
 
@@ -353,8 +336,8 @@ export default class PolygonClipping {
     normal: Vector2, // NOTE: does NOT need to be a unit vector
     value: number,
     fakeCornerPerpendicular: number,
-    minClippedEdges: ClippedEdge[], // Will append into this (for performance)
-    maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
+    minLinearEdges: LinearEdge[], // Will append into this (for performance)
+    maxLinearEdges: LinearEdge[] // Will append into this (for performance)
   ): void {
 
     const startDot = normal.dot( startPoint );
@@ -366,7 +349,7 @@ export default class PolygonClipping {
     const handled = this.binaryInitialPush(
       startPoint, endPoint,
       startCmp, endCmp,
-      minClippedEdges, maxClippedEdges
+      minLinearEdges, maxLinearEdges
     );
     if ( handled ) {
       return;
@@ -392,7 +375,7 @@ export default class PolygonClipping {
       startCmp, endCmp,
       fakeCorner,
       intersection,
-      minClippedEdges, maxClippedEdges
+      minLinearEdges, maxLinearEdges
     );
   }
 
@@ -403,7 +386,7 @@ export default class PolygonClipping {
     normal: Vector2, // NOTE: does NOT need to be a unit vector
     values: number[],
     fakeCornerPerpendicular: number,
-    clippedEdgeCollection: ClippedEdge[][] // Will append into this (for performance)
+    clippedEdgeCollection: LinearEdge[][] // Will append into this (for performance)
   ): void {
 
     const startDot = normal.dot( startPoint );
@@ -435,13 +418,13 @@ export default class PolygonClipping {
 
       // Fully-internal case
       if ( startDot > minValue && startDot < maxValue && endDot > minValue && endDot < maxValue ) {
-        clippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+        clippedEdges.push( new LinearEdge( startPoint, endPoint ) );
         continue;
       }
 
       // if ON one of the clip lines, consider it "inside"
       if ( startDot === endDot && ( startDot === minValue || startDot === maxValue ) ) {
-        clippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+        clippedEdges.push( new LinearEdge( startPoint, endPoint ) );
         continue;
       }
 
@@ -501,23 +484,23 @@ export default class PolygonClipping {
 
       if ( startIntersection ) {
         if ( startIntersection === minIntersection && !startIntersection.equals( minFakeCorner! ) ) {
-          clippedEdges.push( new ClippedEdge( minFakeCorner!, resultStartPoint ) );
+          clippedEdges.push( new LinearEdge( minFakeCorner!, resultStartPoint ) );
         }
         if ( startIntersection === maxIntersection && !startIntersection.equals( maxFakeCorner! ) ) {
-          clippedEdges.push( new ClippedEdge( maxFakeCorner!, resultStartPoint ) );
+          clippedEdges.push( new LinearEdge( maxFakeCorner!, resultStartPoint ) );
         }
       }
 
       if ( !resultStartPoint.equals( resultEndPoint ) ) {
-        clippedEdges.push( new ClippedEdge( resultStartPoint, resultEndPoint ) );
+        clippedEdges.push( new LinearEdge( resultStartPoint, resultEndPoint ) );
       }
 
       if ( endIntersection ) {
         if ( endIntersection === minIntersection && !endIntersection.equals( minFakeCorner! ) ) {
-          clippedEdges.push( new ClippedEdge( resultEndPoint, minFakeCorner! ) );
+          clippedEdges.push( new LinearEdge( resultEndPoint, minFakeCorner! ) );
         }
         if ( endIntersection === maxIntersection && !endIntersection.equals( maxFakeCorner! ) ) {
-          clippedEdges.push( new ClippedEdge( resultEndPoint, maxFakeCorner! ) );
+          clippedEdges.push( new LinearEdge( resultEndPoint, maxFakeCorner! ) );
         }
       }
     }
@@ -763,8 +746,8 @@ export default class PolygonClipping {
     startPoint: Vector2,
     endPoint: Vector2,
     bounds: Bounds2,
-    result: ClippedEdge[] = [] // Will append into this (for performance)
-  ): ClippedEdge[] {
+    result: LinearEdge[] = [] // Will append into this (for performance)
+  ): LinearEdge[] {
 
     const centerX = bounds.centerX;
     const centerY = bounds.centerY;
@@ -808,17 +791,17 @@ export default class PolygonClipping {
       if ( needsStartCorner && !startCorner!.equals( resultStartPoint ) ) {
         assert && assert( startCorner! );
 
-        result.push( new ClippedEdge( startCorner!, resultStartPoint ) );
+        result.push( new LinearEdge( startCorner!, resultStartPoint ) );
       }
 
       if ( !resultStartPoint.equals( resultEndPoint ) ) {
-        result.push( new ClippedEdge( resultStartPoint, resultEndPoint ) );
+        result.push( new LinearEdge( resultStartPoint, resultEndPoint ) );
       }
 
       if ( needsEndCorner && !endCorner!.equals( resultEndPoint ) ) {
         assert && assert( endCorner! );
 
-        result.push( new ClippedEdge( resultEndPoint, endCorner! ) );
+        result.push( new LinearEdge( resultEndPoint, endCorner! ) );
       }
     }
     else {
@@ -838,11 +821,11 @@ export default class PolygonClipping {
           yGreater ? bounds.maxY : bounds.minY
         );
 
-        result.push( new ClippedEdge( startCorner!, middlePoint ) );
-        result.push( new ClippedEdge( middlePoint, endCorner! ) );
+        result.push( new LinearEdge( startCorner!, middlePoint ) );
+        result.push( new LinearEdge( middlePoint, endCorner! ) );
       }
       else if ( !startCorner!.equals( endCorner! ) ) {
-        result.push( new ClippedEdge( startCorner!, endCorner! ) );
+        result.push( new LinearEdge( startCorner!, endCorner! ) );
       }
     }
 
