@@ -1166,6 +1166,7 @@ export class RenderLinearGradient extends RenderPathProgram {
 }
 scenery.register( 'RenderLinearGradient', RenderLinearGradient );
 
+// TODO: gradients/linears in... sRGB space? or perceptual? linear blends don't seem ideal
 const scratchLinearBlendVector = new Vector2( 0, 0 );
 export class RenderLinearBlend extends RenderPathProgram {
 
@@ -1226,12 +1227,12 @@ export class RenderLinearBlend extends RenderPathProgram {
 
     const localPoint = scratchLinearBlendVector.set( point );
 
-    const t = this.scaledNormal.dot( localPoint ) + this.offset;
+    const t = this.scaledNormal.dot( localPoint ) - this.offset;
 
-    if ( t >= 0 ) {
+    if ( t <= 0 ) {
       return this.zero.evaluate( point, pathTest );
     }
-    else if ( t <= 1 ) {
+    else if ( t >= 1 ) {
       return this.one.evaluate( point, pathTest );
     }
     else {

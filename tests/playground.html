@@ -428,8 +428,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      const outputSize = 768 * 2;
-      // const outputSize = 768 / 4;
+      // const outputSize = 768 * 2;
+      const outputSize = 768 / 4;
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -531,7 +531,14 @@ an UI and Display made for visual testing and debugging.
         boundsRect( new phet.dot.Bounds2( 5, 40, 10, 50 ) ),
       ] );
 
-      const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
+      // const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
+      const a = new phet.scenery.RenderLinearBlend(
+        pathA,
+        phet.dot.v2( 1 / 14, 0 ).timesScalar( 64 / outputSize ),
+        0,
+        phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ),
+        phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 0, 0, 1 ) )
+      );
       const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
       // const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );
       const c = new phet.scenery.RenderRadialGradient(
