@@ -1593,7 +1593,6 @@ export default class Rasterize {
     outputRaster: OutputRaster,
     renderableFaces: RenderableFace[],
     bounds: Bounds2,
-    scale: number,
     translation: Vector2
   ): void {
     const rasterWidth = bounds.width;
@@ -1736,7 +1735,6 @@ export default class Rasterize {
       outputRaster,
       renderableFaces,
       bounds,
-      scale,
       translation
     );
 
