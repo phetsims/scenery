@@ -220,8 +220,8 @@ type ClippableFace = {
   getArea(): number;
   getCentroid( area: number ): Vector2;
   getClipped( bounds: Bounds2 ): ClippableFace;
-  getBinaryXClip( x: number, fakeCornerY: number ): { minFace: ClippableFace, maxFace: ClippableFace };
-  getBinaryYClip( y: number, fakeCornerX: number ): { minFace: ClippableFace, maxFace: ClippableFace };
+  getBinaryXClip( x: number, fakeCornerY: number ): { minFace: ClippableFace; maxFace: ClippableFace };
+  getBinaryYClip( y: number, fakeCornerX: number ): { minFace: ClippableFace; maxFace: ClippableFace };
 };
 
 // Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
@@ -274,7 +274,7 @@ class PolygonalFace implements ClippableFace {
     return new PolygonalFace( this.polygons.map( polygon => PolygonClipping.boundsClipPolygon( polygon, bounds ) ) );
   }
 
-  public getBinaryXClip( x: number, fakeCornerY: number ): { minFace: PolygonalFace, maxFace: PolygonalFace } {
+  public getBinaryXClip( x: number, fakeCornerY: number ): { minFace: PolygonalFace; maxFace: PolygonalFace } {
     const minPolygons: Vector2[][] = [];
     const maxPolygons: Vector2[][] = [];
 
@@ -299,7 +299,7 @@ class PolygonalFace implements ClippableFace {
     };
   }
 
-  public getBinaryYClip( y: number, fakeCornerX: number ): { minFace: PolygonalFace, maxFace: PolygonalFace } {
+  public getBinaryYClip( y: number, fakeCornerX: number ): { minFace: PolygonalFace; maxFace: PolygonalFace } {
     const minPolygons: Vector2[][] = [];
     const maxPolygons: Vector2[][] = [];
 
@@ -375,7 +375,7 @@ class EdgedFace implements ClippableFace {
     return new EdgedFace( edges );
   }
 
-  public getBinaryXClip( x: number, fakeCornerY: number ): { minFace: EdgedFace, maxFace: EdgedFace } {
+  public getBinaryXClip( x: number, fakeCornerY: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
     const minEdges: ClippedEdge[] = [];
     const maxEdges: ClippedEdge[] = [];
 
@@ -394,7 +394,7 @@ class EdgedFace implements ClippableFace {
     };
   }
 
-  public getBinaryYClip( y: number, fakeCornerX: number ): { minFace: EdgedFace, maxFace: EdgedFace } {
+  public getBinaryYClip( y: number, fakeCornerX: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
     const minEdges: ClippedEdge[] = [];
     const maxEdges: ClippedEdge[] = [];
 
@@ -1417,14 +1417,14 @@ export default class Rasterize {
 
           const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, ( minY + maxY ) / 2 );
 
-          // if ( assert ) {
-          //   const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
-          //   const oldMaxFace = clippableFace.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
-          //
-          //   if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-          //     assert( false, 'binary X clip issue' );
-          //   }
-          // }
+          if ( assert ) {
+            const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
+            const oldMaxFace = clippableFace.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
+
+            if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
+              assert( false, 'binary X clip issue' );
+            }
+          }
 
           const minArea = minFace.getArea();
           const maxArea = maxFace.getArea();
@@ -1447,14 +1447,14 @@ export default class Rasterize {
 
           const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, ( minX + maxX ) / 2 );
 
-          // if ( assert ) {
-          //   const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
-          //   const oldMaxFace = clippableFace.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
-          //
-          //   if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-          //     assert( false, 'binary Y clip issue' );
-          //   }
-          // }
+          if ( assert ) {
+            const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
+            const oldMaxFace = clippableFace.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
+
+            if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
+              assert( false, 'binary Y clip issue' );
+            }
+          }
 
           const minArea = minFace.getArea();
           const maxArea = maxFace.getArea();

@@ -181,6 +181,90 @@ export class ClippedEdge {
 
 export default class PolygonClipping {
 
+  // Returns if all done
+  private static binaryInitialPush(
+    startPoint: Vector2,
+    endPoint: Vector2,
+    startCmp: number,
+    endCmp: number,
+    minClippedEdges: ClippedEdge[],
+    maxClippedEdges: ClippedEdge[]
+  ): boolean {
+
+    // both values less than the split
+    if ( startCmp === -1 && endCmp === -1 ) {
+      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return true;
+    }
+
+    // both values greater than the split
+    if ( startCmp === 1 && endCmp === 1 ) {
+      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return true;
+    }
+
+    // both values equal to the split
+    if ( startCmp === 0 && endCmp === 0 ) {
+      // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+      return true;
+    }
+
+    return false;
+  }
+
+  private static binaryPushClipEdges(
+    startPoint: Vector2,
+    endPoint: Vector2,
+    startCmp: number,
+    endCmp: number,
+    fakeCorner: Vector2,
+    intersection: Vector2,
+    minClippedEdges: ClippedEdge[],
+    maxClippedEdges: ClippedEdge[]
+  ): void {
+    const startLess = startCmp === -1;
+    const startGreater = startCmp === 1;
+    const endLess = endCmp === -1;
+    const endGreater = endCmp === 1;
+
+    const minResultStartPoint = startLess ? startPoint : intersection;
+    const minResultEndPoint = endLess ? endPoint : intersection;
+    const maxResultStartPoint = startGreater ? startPoint : intersection;
+    const maxResultEndPoint = endGreater ? endPoint : intersection;
+
+    // min-start corner
+    if ( startGreater && !fakeCorner.equals( minResultStartPoint ) ) {
+      minClippedEdges.push( new ClippedEdge( fakeCorner, minResultStartPoint ) );
+    }
+
+    // main min section
+    if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
+      minClippedEdges.push( new ClippedEdge( minResultStartPoint, minResultEndPoint ) );
+    }
+
+    // min-end corner
+    if ( endGreater && !fakeCorner.equals( minResultEndPoint ) ) {
+      minClippedEdges.push( new ClippedEdge( minResultEndPoint, fakeCorner ) );
+    }
+
+    // max-start corner
+    if ( startLess && !fakeCorner.equals( maxResultStartPoint ) ) {
+      maxClippedEdges.push( new ClippedEdge( fakeCorner, maxResultStartPoint ) );
+    }
+
+    // main max section
+    if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
+      maxClippedEdges.push( new ClippedEdge( maxResultStartPoint, maxResultEndPoint ) );
+    }
+
+    // max-end corner
+    if ( endLess && !fakeCorner.equals( maxResultEndPoint ) ) {
+      maxClippedEdges.push( new ClippedEdge( maxResultEndPoint, fakeCorner ) );
+    }
+  }
+
   public static binaryXClipEdge(
     startPoint: Vector2,
     endPoint: Vector2,
@@ -190,18 +274,15 @@ export default class PolygonClipping {
     maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
   ): void {
 
-    if ( startPoint.x < x && endPoint.x < x ) {
-      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
-      return
-    }
-    else if ( startPoint.x > x && endPoint.x > x ) {
-      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
-      return
-    }
-    else if ( startPoint.x === x && endPoint.x === x ) {
-      // vertical line ON our clip point. It is considered "inside" both, so we can just simply push it to both
-      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
-      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+    const startCmp = Math.sign( startPoint.x - x );
+    const endCmp = Math.sign( endPoint.x - x );
+
+    const handled = this.binaryInitialPush(
+      startPoint, endPoint,
+      startCmp, endCmp,
+      minClippedEdges, maxClippedEdges
+    );
+    if ( handled ) {
       return;
     }
 
@@ -210,41 +291,13 @@ export default class PolygonClipping {
     const intersection = new Vector2( x, y );
     const fakeCorner = new Vector2( x, fakeCornerY );
 
-    const minClipped = startPoint.x <= x || endPoint.x <= x;
-    const maxClipped = startPoint.x >= x || endPoint.x >= x;
-
-    const needsMinStartCorner = !minClipped || startPoint.x > x;
-    const needsMinEndCorner = !minClipped || endPoint.x > x;
-    const needsMaxStartCorner = !maxClipped || startPoint.x < x;
-    const needsMaxEndCorner = !maxClipped || endPoint.x < x;
-
-    const minResultStartPoint = startPoint.x < x ? startPoint : intersection;
-    const minResultEndPoint = endPoint.x < x ? endPoint : intersection;
-    const maxResultStartPoint = startPoint.x > x ? startPoint : intersection;
-    const maxResultEndPoint = endPoint.x > x ? endPoint : intersection;
-
-    if ( minClipped ) {
-      if ( needsMinStartCorner && !fakeCorner.equals( minResultStartPoint ) ) {
-        minClippedEdges.push( new ClippedEdge( fakeCorner, minResultStartPoint ) );
-      }
-      if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
-        minClippedEdges.push( new ClippedEdge( minResultStartPoint, minResultEndPoint ) );
-      }
-      if ( needsMinEndCorner && !fakeCorner.equals( minResultEndPoint ) ) {
-        minClippedEdges.push( new ClippedEdge( minResultEndPoint, fakeCorner ) );
-      }
-    }
-    if ( maxClipped ) {
-      if ( needsMaxStartCorner && !fakeCorner.equals( maxResultStartPoint ) ) {
-        maxClippedEdges.push( new ClippedEdge( fakeCorner, maxResultStartPoint ) );
-      }
-      if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
-        maxClippedEdges.push( new ClippedEdge( maxResultStartPoint, maxResultEndPoint ) );
-      }
-      if ( needsMaxEndCorner && !fakeCorner.equals( maxResultEndPoint ) ) {
-        maxClippedEdges.push( new ClippedEdge( maxResultEndPoint, fakeCorner ) );
-      }
-    }
+    PolygonClipping.binaryPushClipEdges(
+      startPoint, endPoint,
+      startCmp, endCmp,
+      fakeCorner,
+      intersection,
+      minClippedEdges, maxClippedEdges
+    );
   }
 
   public static binaryYClipEdge(
@@ -256,18 +309,15 @@ export default class PolygonClipping {
     maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
   ): void {
 
-    if ( startPoint.y < y && endPoint.y < y ) {
-      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
-      return
-    }
-    else if ( startPoint.y > y && endPoint.y > y ) {
-      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
-      return
-    }
-    else if ( startPoint.y === y && endPoint.y === y ) {
-      // horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
-      minClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
-      maxClippedEdges.push( new ClippedEdge( startPoint, endPoint ) );
+    const startCmp = Math.sign( startPoint.y - y );
+    const endCmp = Math.sign( endPoint.y - y );
+
+    const handled = this.binaryInitialPush(
+      startPoint, endPoint,
+      startCmp, endCmp,
+      minClippedEdges, maxClippedEdges
+    );
+    if ( handled ) {
       return;
     }
 
@@ -276,41 +326,13 @@ export default class PolygonClipping {
     const intersection = new Vector2( x, y );
     const fakeCorner = new Vector2( fakeCornerX, y );
 
-    const minClipped = startPoint.y <= y || endPoint.y <= y;
-    const maxClipped = startPoint.y >= y || endPoint.y >= y;
-
-    const needsMinStartCorner = !minClipped || startPoint.y > y;
-    const needsMinEndCorner = !minClipped || endPoint.y > y;
-    const needsMaxStartCorner = !maxClipped || startPoint.y < y;
-    const needsMaxEndCorner = !maxClipped || endPoint.y < y;
-
-    const minResultStartPoint = startPoint.y < y ? startPoint : intersection;
-    const minResultEndPoint = endPoint.y < y ? endPoint : intersection;
-    const maxResultStartPoint = startPoint.y > y ? startPoint : intersection;
-    const maxResultEndPoint = endPoint.y > y ? endPoint : intersection;
-
-    if ( minClipped ) {
-      if ( needsMinStartCorner && !fakeCorner.equals( minResultStartPoint ) ) {
-        minClippedEdges.push( new ClippedEdge( fakeCorner, minResultStartPoint ) );
-      }
-      if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
-        minClippedEdges.push( new ClippedEdge( minResultStartPoint, minResultEndPoint ) );
-      }
-      if ( needsMinEndCorner && !fakeCorner.equals( minResultEndPoint ) ) {
-        minClippedEdges.push( new ClippedEdge( minResultEndPoint, fakeCorner ) );
-      }
-    }
-    if ( maxClipped ) {
-      if ( needsMaxStartCorner && !fakeCorner.equals( maxResultStartPoint ) ) {
-        maxClippedEdges.push( new ClippedEdge( fakeCorner, maxResultStartPoint ) );
-      }
-      if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
-        maxClippedEdges.push( new ClippedEdge( maxResultStartPoint, maxResultEndPoint ) );
-      }
-      if ( needsMaxEndCorner && !fakeCorner.equals( maxResultEndPoint ) ) {
-        maxClippedEdges.push( new ClippedEdge( maxResultEndPoint, fakeCorner ) );
-      }
-    }
+    PolygonClipping.binaryPushClipEdges(
+      startPoint, endPoint,
+      startCmp, endCmp,
+      fakeCorner,
+      intersection,
+      minClippedEdges, maxClippedEdges
+    );
   }
 
   public static binaryXClipPolygon(
