@@ -284,7 +284,7 @@ class PolygonalFace implements ClippableFace {
       const minPolygon: Vector2[] = [];
       const maxPolygon: Vector2[] = [];
 
-      PolygonClipping.binaryXClipPolygon( polygon, x, fakeCornerY, minPolygon, maxPolygon );
+      PolygonClipping.binaryXClipPolygon( polygon, x, minPolygon, maxPolygon );
 
       minPolygon.length && minPolygons.push( minPolygon );
       maxPolygon.length && maxPolygons.push( maxPolygon );
@@ -309,7 +309,7 @@ class PolygonalFace implements ClippableFace {
       const minPolygon: Vector2[] = [];
       const maxPolygon: Vector2[] = [];
 
-      PolygonClipping.binaryYClipPolygon( polygon, y, fakeCornerX, minPolygon, maxPolygon );
+      PolygonClipping.binaryYClipPolygon( polygon, y, minPolygon, maxPolygon );
 
       minPolygon.length && minPolygons.push( minPolygon );
       maxPolygon.length && maxPolygons.push( maxPolygon );

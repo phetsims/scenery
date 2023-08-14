@@ -388,7 +388,6 @@ export default class PolygonClipping {
   public static binaryXClipPolygon(
     polygon: Vector2[],
     x: number,
-    fakeCornerY: number,
     minPolygon: Vector2[], // Will append into this (for performance)
     maxPolygon: Vector2[] // Will append into this (for performance)
   ): void {
@@ -418,8 +417,6 @@ export default class PolygonClipping {
       const endSimplifier = startPoint.x < endPoint.x ? maxSimplifier : minSimplifier;
 
       startSimplifier.add( x, y );
-      startSimplifier.add( x, fakeCornerY );
-      endSimplifier.add( x, fakeCornerY );
       endSimplifier.add( x, y );
       endSimplifier.add( endPoint.x, endPoint.y );
     }
@@ -434,7 +431,6 @@ export default class PolygonClipping {
   public static binaryYClipPolygon(
     polygon: Vector2[],
     y: number,
-    fakeCornerX: number,
     minPolygon: Vector2[], // Will append into this (for performance)
     maxPolygon: Vector2[] // Will append into this (for performance)
   ): void {
@@ -464,8 +460,6 @@ export default class PolygonClipping {
       const endSimplifier = startPoint.y < endPoint.y ? maxSimplifier : minSimplifier;
 
       startSimplifier.add( x, y );
-      startSimplifier.add( fakeCornerX, y );
-      endSimplifier.add( fakeCornerX, y );
       endSimplifier.add( x, y );
       endSimplifier.add( endPoint.x, endPoint.y );
     }
@@ -482,14 +476,12 @@ export default class PolygonClipping {
     polygon: Vector2[],
     normal: Vector2, // NOTE: does NOT need to be a unit vector
     value: number,
-    fakeCornerPerpendicular: number,
     minPolygon: Vector2[], // Will append into this (for performance)
     maxPolygon: Vector2[] // Will append into this (for performance)
   ): void {
 
     const perpendicular = normal.perpendicular;
     const basePoint = normal.timesScalar( value / normal.dot( normal ) );
-    const fakeCorner = perpendicular.timesScalar( fakeCornerPerpendicular ).add( basePoint );
     const perpPerp = perpendicular.dot( perpendicular );
 
     for ( let i = 0; i < polygon.length; i++ ) {
@@ -526,8 +518,6 @@ export default class PolygonClipping {
       const endSimplifier = startDot < endDot ? maxSimplifier : minSimplifier;
 
       startSimplifier.add( intersection.x, intersection.y );
-      startSimplifier.add( fakeCorner.x, fakeCorner.y );
-      endSimplifier.add( fakeCorner.x, fakeCorner.y );
       endSimplifier.add( intersection.x, intersection.y );
       endSimplifier.add( endPoint.x, endPoint.y );
     }
@@ -537,6 +527,96 @@ export default class PolygonClipping {
 
     minSimplifier.reset();
     maxSimplifier.reset();
+  }
+
+  // line where dot( normal, point ) - value = 0. "min" side is dot-products < value, "max" side is dot-products > value
+  public static binaryStripeClipPolygon(
+    polygon: Vector2[],
+    normal: Vector2, // NOTE: does NOT need to be a unit vector
+    values: number[] // SHOULD BE SORTED from low to high -- no duplicates (TODO verify, enforce in gradients)
+  ): Vector2[][] {
+    const perpendicular = normal.perpendicular;
+    const basePoints = values.map( value => normal.timesScalar( value / normal.dot( normal ) ) );
+    const perpPerp = perpendicular.dot( perpendicular );
+
+    const simplifiers = _.range( values.length + 1 ).map( () => new Simplifier() );
+
+    // TODO: export the bounds of each polygon (ignoring the fake corners)?
+
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const startPoint = polygon[ i ];
+      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+      const startDot = normal.dot( startPoint );
+      const endDot = normal.dot( endPoint );
+
+      for ( let j = 0; j < simplifiers.length; j++ ) {
+        const simplifier = simplifiers[ j ];
+        const minValue = j > 0 ? values[ j - 1 ] : Number.NEGATIVE_INFINITY;
+        const maxValue = j < values.length ? values[ j ] : Number.POSITIVE_INFINITY;
+
+        // Ignore lines that are completely outside of this stripe
+        if (
+          ( startDot < minValue && endDot < minValue ) ||
+          ( startDot > maxValue && endDot > maxValue )
+        ) {
+          continue;
+        }
+
+        // Fully-internal case
+        if ( startDot > minValue && startDot < maxValue && endDot > minValue && endDot < maxValue ) {
+          simplifier.add( startPoint.x, startPoint.y );
+          continue;
+        }
+
+        // if ON one of the clip lines, consider it "inside"
+        if ( startDot === endDot && ( startDot === minValue || startDot === maxValue ) ) {
+          simplifier.add( startPoint.x, startPoint.y );
+          continue;
+        }
+
+        const startPerp = perpendicular.dot( startPoint );
+        const endPerp = perpendicular.dot( endPoint );
+
+        // TODO: don't be recomputing intersections like this
+        // TODO: also don't recompute if not needed
+        const minIntersectionPerp = startPerp + ( endPerp - startPerp ) * ( minValue - startDot ) / ( endDot - startDot );
+        const maxIntersectionPerp = startPerp + ( endPerp - startPerp ) * ( maxValue - startDot ) / ( endDot - startDot );
+
+
+        if ( startDot <= minValue ) {
+          const minIntersection = perpendicular.timesScalar( minIntersectionPerp / perpPerp ).add( basePoints[ j - 1 ] );
+          simplifier.add( minIntersection.x, minIntersection.y );
+        }
+        else if ( startDot >= maxValue ) {
+          const maxIntersection = perpendicular.timesScalar( maxIntersectionPerp / perpPerp ).add( basePoints[ j ] );
+          simplifier.add( maxIntersection.x, maxIntersection.y );
+        }
+        else {
+          simplifier.add( startPoint.x, startPoint.y );
+        }
+
+        if ( endDot <= minValue ) {
+          const minIntersection = perpendicular.timesScalar( minIntersectionPerp / perpPerp ).add( basePoints[ j - 1 ] );
+          simplifier.add( minIntersection.x, minIntersection.y );
+        }
+        else if ( endDot >= maxValue ) {
+          const maxIntersection = perpendicular.timesScalar( maxIntersectionPerp / perpPerp ).add( basePoints[ j ] );
+          simplifier.add( maxIntersection.x, maxIntersection.y );
+        }
+        else {
+          simplifier.add( endPoint.x, endPoint.y );
+        }
+      }
+    }
+
+    return simplifiers.map( simplifier => {
+      const polygon = simplifier.finalize();
+
+      simplifier.reset();
+
+      return polygon;
+    } );
   }
 
   public static boundsClipEdge(

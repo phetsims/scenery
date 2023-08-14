@@ -1074,11 +1074,11 @@ an UI and Display made for visual testing and debugging.
       const left = [];
       const right = [];
 
-      // phet.scenery.PolygonClipping.binaryXClipPolygon( polygon, 0.25, 0.5, left, right );
-      // phet.scenery.PolygonClipping.binaryYClipPolygon( polygon, 0.25, 0.5, left, right );
+      // phet.scenery.PolygonClipping.binaryXClipPolygon( polygon, 0.25, left, right );
+      // phet.scenery.PolygonClipping.binaryYClipPolygon( polygon, 0.25, left, right );
 
-      // phet.scenery.PolygonClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), 0.5, 0, left, right );
-      phet.scenery.PolygonClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 1, 1 ), 1, 0, left, right );
+      // phet.scenery.PolygonClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), 0.5, left, right );
+      phet.scenery.PolygonClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 1, 1 ), 1, left, right );
 
       scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
         stroke: 'green',
@@ -1103,6 +1103,49 @@ an UI and Display made for visual testing and debugging.
         x: 100,
         y: 100
       } ) );
+
+      display.width = 1024;
+      display.height = 1024;
+      display.updateDisplay();
+    } );
+  };
+
+  window.stripeClipPolygonTest = function() {
+    setTimeout( async function() {
+      const polygon = [
+        new phet.dot.Vector2( 0, 0 ),
+        new phet.dot.Vector2( 0.5, 0 ),
+        new phet.dot.Vector2( 1, 0.5 ),
+        new phet.dot.Vector2( 1, 1 ),
+        new phet.dot.Vector2( 0.5, 0.75 ),
+        new phet.dot.Vector2( 0, 1 ),
+        new phet.dot.Vector2( 0, 0.5 ),
+        new phet.dot.Vector2( 0.5, 0.5 )
+      ];
+
+      const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), [ 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ] );
+      // const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, phet.dot.v2( 1, 0 ), [ 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ] );
+      // const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, phet.dot.v2( 0, 1 ), [ 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ] );
+
+      console.log( polygons );
+
+      scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
+        stroke: 'green',
+        scale: 300,
+        lineWidth: 1 / 300,
+        x: 100,
+        y: 100
+      } ) );
+
+      polygons.forEach( ( polygon, i ) => {
+        scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
+          fill: new phet.scenery.Color( 255 - i * 40, 0, i * 40, 0.5 ),
+          scale: 300,
+          lineWidth: 1 / 300,
+          x: 100,
+          y: 100
+        } ) );
+      } );
 
       display.width = 1024;
       display.height = 1024;
