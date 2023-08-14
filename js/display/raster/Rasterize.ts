@@ -222,6 +222,8 @@ type ClippableFace = {
   getClipped( bounds: Bounds2 ): ClippableFace;
   getBinaryXClip( x: number, fakeCornerY: number ): { minFace: ClippableFace; maxFace: ClippableFace };
   getBinaryYClip( y: number, fakeCornerX: number ): { minFace: ClippableFace; maxFace: ClippableFace };
+  getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: ClippableFace; maxFace: ClippableFace };
+  getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): ClippableFace[];
 };
 
 // Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
@@ -323,6 +325,58 @@ class PolygonalFace implements ClippableFace {
       maxFace: new PolygonalFace( maxPolygons )
     };
   }
+
+  public getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: PolygonalFace; maxFace: PolygonalFace } {
+    const minPolygons: Vector2[][] = [];
+    const maxPolygons: Vector2[][] = [];
+
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+
+      const minPolygon: Vector2[] = [];
+      const maxPolygon: Vector2[] = [];
+
+      PolygonClipping.binaryLineClipPolygon( polygon, normal, value, minPolygon, maxPolygon );
+
+      minPolygon.length && minPolygons.push( minPolygon );
+      maxPolygon.length && maxPolygons.push( maxPolygon );
+
+      assert && assert( minPolygon.every( p => normal.dot( p ) - 1e-8 <= value ) );
+      assert && assert( maxPolygon.every( p => normal.dot( p ) + 1e-8 >= value ) );
+    }
+
+    return {
+      minFace: new PolygonalFace( minPolygons ),
+      maxFace: new PolygonalFace( maxPolygons )
+    };
+  }
+
+  public getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): PolygonalFace[] {
+    const polygonsCollection: Vector2[][][] = _.range( values.length + 1 ).map( () => [] );
+
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+
+      const polygons = PolygonClipping.binaryStripeClipPolygon( polygon, normal, values );
+
+      assert && assert( polygonsCollection.length === polygons.length );
+
+      for ( let j = 0; j < polygons.length; j++ ) {
+        const slicePolygon = polygons[ j ];
+
+        polygonsCollection[ j ].push( slicePolygon );
+
+        if ( assert ) {
+          const minValue = j > 0 ? values[ j - 1 ] : Number.NEGATIVE_INFINITY;
+          const maxValue = j < values.length ? values[ j ] : Number.POSITIVE_INFINITY;
+
+          assert( slicePolygon.every( p => normal.dot( p ) + 1e-8 >= minValue && normal.dot( p ) - 1e-8 <= maxValue ) );
+        }
+      }
+    }
+
+    return polygonsCollection.map( polygons => new PolygonalFace( polygons ) );
+  }
 }
 
 class EdgedFace implements ClippableFace {
@@ -411,6 +465,51 @@ class EdgedFace implements ClippableFace {
       minFace: new EdgedFace( minEdges ),
       maxFace: new EdgedFace( maxEdges )
     };
+  }
+
+  public getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
+    const minEdges: ClippedEdge[] = [];
+    const maxEdges: ClippedEdge[] = [];
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      PolygonClipping.binaryLineClipEdge( edge.startPoint, edge.endPoint, normal, value, fakeCornerPerpendicular, minEdges, maxEdges );
+    }
+
+    assert && assert( minEdges.every( e => normal.dot( e.startPoint ) <= value && normal.dot( e.endPoint ) <= value ) );
+    assert && assert( maxEdges.every( e => normal.dot( e.startPoint ) >= value && normal.dot( e.endPoint ) >= value ) );
+
+    return {
+      minFace: new EdgedFace( minEdges ),
+      maxFace: new EdgedFace( maxEdges )
+    };
+  }
+
+  public getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): EdgedFace[] {
+    const edgesCollection: ClippedEdge[][] = _.range( values.length + 1 ).map( () => [] );
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      PolygonClipping.binaryStripeClipEdge( edge.startPoint, edge.endPoint, normal, values, fakeCornerPerpendicular, edgesCollection );
+    }
+
+    if ( assert ) {
+      for ( let i = 0; i < edgesCollection.length; i++ ) {
+        const edges = edgesCollection[ i ];
+
+        const minValue = i > 0 ? values[ i - 1 ] : Number.NEGATIVE_INFINITY;
+        const maxValue = i < values.length ? values[ i ] : Number.POSITIVE_INFINITY;
+
+        assert( edges.every( e => {
+          return normal.dot( e.startPoint ) + 1e-8 >= minValue && normal.dot( e.startPoint ) - 1e-8 <= maxValue &&
+                 normal.dot( e.endPoint ) + 1e-8 >= minValue && normal.dot( e.endPoint ) - 1e-8 <= maxValue;
+        } ) );
+      }
+    }
+
+    return edgesCollection.map( edges => new EdgedFace( edges ) );
   }
 }
 
