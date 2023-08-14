@@ -1123,11 +1123,35 @@ an UI and Display made for visual testing and debugging.
         new phet.dot.Vector2( 0.5, 0.5 )
       ];
 
-      const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), [ 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ] );
-      // const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, phet.dot.v2( 1, 0 ), [ 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ] );
-      // const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, phet.dot.v2( 0, 1 ), [ 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ] );
+      const values = [ 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ];
+      const normal = phet.dot.v2( 0.5, 0.5 );
+      // const normal = phet.dot.v2( 1, 0 );
+      // const normal = phet.dot.v2( 0, 1 );
+
+      const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, normal, values );
 
       console.log( polygons );
+
+      const clippedEdgeCollection = [ [], [], [], [], [], [], [] ];
+      for ( let i = 0; i < polygon.length; i++ ) {
+        const p0 = polygon[ i ];
+        const p1 = polygon[ ( i + 1 ) % polygon.length ];
+
+        phet.scenery.PolygonClipping.binaryStripeClipEdge( p0, p1, normal, values, 0.1111, clippedEdgeCollection );
+      }
+
+      console.log( clippedEdgeCollection );
+
+      for ( let i = 0; i < polygons.length; i++ ) {
+        const polygon = polygons[ i ];
+        const clippedEdges = clippedEdgeCollection[ i ];
+
+        const polygonArea = phet.scenery.PolygonIntegrals.getArea( polygon );
+        const clippedEdgeArea = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralArea() ));
+        const zero = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralZero() ) );
+
+        console.log( polygonArea, clippedEdgeArea, zero );
+      }
 
       scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
         stroke: 'green',
@@ -1137,14 +1161,30 @@ an UI and Display made for visual testing and debugging.
         y: 100
       } ) );
 
+      const testIndex = 0;
+      // const testIndex = polygons.length - 1;
+
       polygons.forEach( ( polygon, i ) => {
         scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
           fill: new phet.scenery.Color( 255 - i * 40, 0, i * 40, 0.5 ),
+          stroke: i === testIndex ? 'black' : null,
           scale: 300,
-          lineWidth: 1 / 300,
+          lineWidth: 2 / 300,
           x: 100,
           y: 100
         } ) );
+      } );
+
+      clippedEdgeCollection.forEach( ( clippedEdges, i ) => {
+        clippedEdges.forEach( clippedEdge => {
+          scene.addChild( new phet.scenery.Line( clippedEdge.startPoint, clippedEdge.endPoint, {
+            stroke: i === testIndex ? 'red' : null,
+            scale: 300,
+            lineWidth: 2 / 300,
+            x: 100,
+            y: 100
+          } ) );
+        } );
       } );
 
       display.width = 1024;
