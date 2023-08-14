@@ -335,6 +335,56 @@ export default class PolygonClipping {
     );
   }
 
+  // line where dot( normal, point ) - value = 0. "min" side is dot-products < value, "max" side is dot-products > value
+  public static binaryLineClipEdge(
+    startPoint: Vector2,
+    endPoint: Vector2,
+    normal: Vector2, // NOTE: does NOT need to be a unit vector
+    value: number,
+    fakeCornerPerpendicular: number,
+    minClippedEdges: ClippedEdge[], // Will append into this (for performance)
+    maxClippedEdges: ClippedEdge[] // Will append into this (for performance)
+  ): void {
+
+    const startDot = normal.dot( startPoint );
+    const endDot = normal.dot( endPoint );
+
+    const startCmp = Math.sign( startDot - value );
+    const endCmp = Math.sign( endDot - value );
+
+    const handled = this.binaryInitialPush(
+      startPoint, endPoint,
+      startCmp, endCmp,
+      minClippedEdges, maxClippedEdges
+    );
+    if ( handled ) {
+      return;
+    }
+
+    const perpendicular = normal.perpendicular;
+
+    const startPerp = perpendicular.dot( startPoint );
+    const endPerp = perpendicular.dot( endPoint );
+    const perpPerp = perpendicular.dot( perpendicular );
+
+    // There is a single crossing of our line
+    const intersectionPerp = startPerp + ( endPerp - startPerp ) * ( value - startDot ) / ( endDot - startDot );
+
+    // TODO: pass in the fake corner / basePoint for efficiency?
+    const basePoint = normal.timesScalar( value / normal.dot( normal ) );
+
+    const intersection = perpendicular.timesScalar( intersectionPerp / perpPerp ).add( basePoint );
+    const fakeCorner = perpendicular.timesScalar( fakeCornerPerpendicular ).add( basePoint );
+
+    PolygonClipping.binaryPushClipEdges(
+      startPoint, endPoint,
+      startCmp, endCmp,
+      fakeCorner,
+      intersection,
+      minClippedEdges, maxClippedEdges
+    );
+  }
+
   public static binaryXClipPolygon(
     polygon: Vector2[],
     x: number,
@@ -417,6 +467,68 @@ export default class PolygonClipping {
       startSimplifier.add( fakeCornerX, y );
       endSimplifier.add( fakeCornerX, y );
       endSimplifier.add( x, y );
+      endSimplifier.add( endPoint.x, endPoint.y );
+    }
+
+    minPolygon.push( ...minSimplifier.finalize() );
+    maxPolygon.push( ...maxSimplifier.finalize() );
+
+    minSimplifier.reset();
+    maxSimplifier.reset();
+  }
+
+  // line where dot( normal, point ) - value = 0. "min" side is dot-products < value, "max" side is dot-products > value
+  public static binaryLineClipPolygon(
+    polygon: Vector2[],
+    normal: Vector2, // NOTE: does NOT need to be a unit vector
+    value: number,
+    fakeCornerPerpendicular: number,
+    minPolygon: Vector2[], // Will append into this (for performance)
+    maxPolygon: Vector2[] // Will append into this (for performance)
+  ): void {
+
+    const perpendicular = normal.perpendicular;
+    const basePoint = normal.timesScalar( value / normal.dot( normal ) );
+    const fakeCorner = perpendicular.timesScalar( fakeCornerPerpendicular ).add( basePoint );
+    const perpPerp = perpendicular.dot( perpendicular );
+
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const startPoint = polygon[ i ];
+      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+      const startDot = normal.dot( startPoint );
+      const endDot = normal.dot( endPoint );
+
+      if ( startDot < value && endDot < value ) {
+        minSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+      else if ( startDot > value && endDot > value ) {
+        maxSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+      else if ( startDot === value && endDot === value ) {
+        // line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+        minSimplifier.add( endPoint.x, endPoint.y );
+        maxSimplifier.add( endPoint.x, endPoint.y );
+        continue;
+      }
+
+      const startPerp = perpendicular.dot( startPoint );
+      const endPerp = perpendicular.dot( endPoint );
+
+      const intersectionPerp = startPerp + ( endPerp - startPerp ) * ( value - startDot ) / ( endDot - startDot );
+
+      // There is a single crossing of our line.
+      const intersection = perpendicular.timesScalar( intersectionPerp / perpPerp ).add( basePoint );
+
+      const startSimplifier = startDot < endDot ? minSimplifier : maxSimplifier;
+      const endSimplifier = startDot < endDot ? maxSimplifier : minSimplifier;
+
+      startSimplifier.add( intersection.x, intersection.y );
+      startSimplifier.add( fakeCorner.x, fakeCorner.y );
+      endSimplifier.add( fakeCorner.x, fakeCorner.y );
+      endSimplifier.add( intersection.x, intersection.y );
       endSimplifier.add( endPoint.x, endPoint.y );
     }
 
