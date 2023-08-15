@@ -549,22 +549,31 @@ an UI and Display made for visual testing and debugging.
         0,
         new phet.dot.Vector2( 0, 0 ),
         20, [
-        new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FBDD49' ) ) ),
-        new phet.scenery.RenderGradientStop( 0.2, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF8103' ) ) ),
-        new phet.scenery.RenderGradientStop( 0.4, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF1C6A' ) ) ),
-        new phet.scenery.RenderGradientStop( 0.6, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#E200A3' ) ) ),
-        new phet.scenery.RenderGradientStop( 0.8, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#9B04DB' ) ) ),
-        new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#6D1DC6' ) ) )
-      ], 2, 2 );
-      const d = new phet.scenery.RenderLinearGradient( pathD, phet.dot.Matrix3.IDENTITY, new phet.dot.Vector2( 0, 8 ), new phet.dot.Vector2( 9, 0 ), [
-        new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 255, 255, 1 ) ) ),
-        new phet.scenery.RenderGradientStop( 0.1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,57,2, 1 ) ) ),
-        new phet.scenery.RenderGradientStop( 0.3, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,128,7, 1 ) ) ),
-        new phet.scenery.RenderGradientStop( 0.5, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,180,4, 1 ) ) ),
-        new phet.scenery.RenderGradientStop( 0.7, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 5,186,221, 1 ) ) ),
-        new phet.scenery.RenderGradientStop( 0.9, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 43,72,113, 1 ) ) ),
-        new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ) )
-      ], 2, 2 );
+          new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FBDD49' ) ) ),
+          new phet.scenery.RenderGradientStop( 0.2, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF8103' ) ) ),
+          new phet.scenery.RenderGradientStop( 0.4, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF1C6A' ) ) ),
+          new phet.scenery.RenderGradientStop( 0.6, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#E200A3' ) ) ),
+          new phet.scenery.RenderGradientStop( 0.8, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#9B04DB' ) ) ),
+          new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#6D1DC6' ) ) )
+        ],
+        2,
+        2 );
+      const d = new phet.scenery.RenderLinearGradient(
+        pathD,
+        phet.dot.Matrix3.IDENTITY,
+        new phet.dot.Vector2( 0, 8 ),
+        new phet.dot.Vector2( 9, 0 ),
+        [
+          new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 255, 255, 1 ) ) ),
+          new phet.scenery.RenderGradientStop( 0.1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,57,2, 1 ) ) ),
+          new phet.scenery.RenderGradientStop( 0.3, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,128,7, 1 ) ) ),
+          new phet.scenery.RenderGradientStop( 0.5, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,180,4, 1 ) ) ),
+          new phet.scenery.RenderGradientStop( 0.7, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 5,186,221, 1 ) ) ),
+          new phet.scenery.RenderGradientStop( 0.9, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 43,72,113, 1 ) ) ),
+          new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ) )
+        ],
+        2,
+        2 );
       const e = phet.scenery.RenderColor.fromColor( pathE, new phet.scenery.Color( 255, 255, 255, 1 ) );
       const f = phet.scenery.RenderColor.fromColor( pathF, new phet.scenery.Color( 0, 0, 0, 1 ) );
       const back = phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 128, 128, 128, 0.5 ) );

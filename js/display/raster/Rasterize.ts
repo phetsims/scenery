@@ -624,14 +624,17 @@ class RenderableFace {
 
       const linearGradient = findLinearGradient( face.renderProgram );
 
-      // TODO: OH NO, handle linear gradient transform!
       if ( linearGradient ) {
-        const delta = linearGradient.end.minus( linearGradient.start );
+
+        const start = linearGradient.transform.timesVector2( linearGradient.start );
+        const end = linearGradient.transform.timesVector2( linearGradient.end );
+
+        const delta = end.minus( start );
         const normal = delta.timesScalar( 1 / delta.magnitudeSquared );
-        const offset = normal.dot( linearGradient.start );
+        const offset = normal.dot( start );
 
         // Should evaluate to 1 at the end
-        assert && assert( Math.abs( normal.dot( linearGradient.end ) - offset - 1 ) < 1e-8 );
+        assert && assert( Math.abs( normal.dot( end ) - offset - 1 ) < 1e-8 );
 
         const dotRange = face.face.getDotRange( normal );
 
