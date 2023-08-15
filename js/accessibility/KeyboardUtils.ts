@@ -57,6 +57,8 @@ const META_KEYS = [ KEY_META_LEFT, KEY_META_RIGHT, KEY_META_LEFT_FIREFOX, KEY_ME
 // These are KeyboardEvent.key values, excluding left/right KeyboardEvent.codes
 const MODIFIER_KEYS = [ KEY_ALT, KEY_CONTROL, KEY_SHIFT ];
 
+const MODIFIER_KEY_CODES = [ KEY_ALT_LEFT, KEY_ALT_RIGHT, KEY_CONTROL_LEFT, KEY_CONTROL_RIGHT, KEY_SHIFT_LEFT, KEY_SHIFT_RIGHT ];
+
 const DOM_EVENT_VALIDATOR = { valueType: Event };
 const ALL_KEY_CODES: string[] = [];
 
@@ -155,6 +157,9 @@ const KeyboardUtils = {
   CONTROL_KEYS: CONTROL_KEYS,
   ALT_KEYS: ALT_KEYS,
   META_KEYS: META_KEYS,
+
+  // The collection of modifier key codes
+  MODIFIER_KEY_CODES: MODIFIER_KEY_CODES,
 
   // Maps a KeyboardEvent.key to the left/right pair of KeyboardEvent.code for modifier keys
   MODIFIER_KEY_TO_CODE_MAP: new Map( [
@@ -297,29 +302,6 @@ const KeyboardUtils = {
    */
   isModifierKey( key: string ): boolean {
     return MODIFIER_KEYS.includes( key );
-  },
-
-  /**
-   * Returns true if the provided KeyboardEvent.code/KeyboardEvent.key is equivalent to the provided KeyboardEvent.code.
-   * Specifically comparing modifier keys. If both are `code`, returns true when they are equal. If first value is
-   * a `key` for alt/control/shift modifier key, then it returns true when the code is one of the matching
-   * left/right `codes` for that `key`. For example
-   *
-   * `keyOrCode` = 'Shift', `code` = 'ShiftLeft -> true
-   * `keyOrCode = 'Alt', `code` = 'AltRight' -> true
-   * `keyOrCode = 'Control`, `code` = 'KeyR' -> false
-   *
-   * @param keyOrCode - KeyboardEvent.key OR KeyboardEvent.code
-   * @param code - KeyboardEvent.code
-   */
-  areKeysEquivalent( keyOrCode: string, code: string ): boolean {
-    const equivalentModifierKeys = KeyboardUtils.MODIFIER_KEY_TO_CODE_MAP.get( keyOrCode );
-    if ( equivalentModifierKeys ) {
-      return equivalentModifierKeys.includes( code );
-    }
-    else {
-      return keyOrCode === code;
-    }
   },
 
   ALL_KEYS: ALL_KEY_CODES

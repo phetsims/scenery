@@ -20,7 +20,7 @@ minified version [scenery.min.js](http://phetsims.github.io/scenery/dist/scenery
 
 We have a [list of examples](https://phetsims.github.io/scenery/examples/) to get started from
 
-The [PhET Development Overview](https://github.com/phetsims/phet-info/blob/master/doc/phet-development-overview.md) is
+The [PhET Development Overview](https://github.com/phetsims/phet-info/blob/main/doc/phet-development-overview.md) is
 the most complete guide to PhET Simulation Development. This guide includes how
 to obtain simulation code and its dependencies, notes about architecture & design, how to test and build the sims, as
 well as other important information.
@@ -65,4 +65,4 @@ Ensure you're in the kite directory and run `grunt --lint=false --report-media=f
 MIT license, see [LICENSE](LICENSE)
 
 ### Contributing
-If you would like to contribute to this repo, please read our [contributing guidelines](https://github.com/phetsims/community/blob/master/CONTRIBUTING.md).
+If you would like to contribute to this repo, please read our [contributing guidelines](https://github.com/phetsims/community/blob/main/CONTRIBUTING.md).

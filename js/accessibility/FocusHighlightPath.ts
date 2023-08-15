@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * A Node for a focus highlight that takes a shape and creates a Path with the default styling of a focus highlight
@@ -49,6 +49,10 @@ type SelfOptions = {
   outerLineWidth?: number | null;
   innerLineWidth?: number | null;
 
+  // If true, the highlight will appear dashed with a lineDash effect. Used often by PhET to indicate that an
+  // interactive component is currently picked up and being manipulated by the user.
+  dashed?: boolean;
+
   // If specified, this FocusHighlightPath will reposition with transform changes along the unique trail to this source
   // Node. Otherwise you will have to position this highlight node yourself.
   transformSourceNode?: Node | null;
@@ -98,6 +102,7 @@ class FocusHighlightPath extends Path {
       innerStroke: INNER_FOCUS_COLOR,
       outerLineWidth: null,
       innerLineWidth: null,
+      dashed: false,
       transformSourceNode: null
     }, providedOptions );
 
@@ -126,6 +131,10 @@ class FocusHighlightPath extends Path {
     this.addChild( this.innerHighlightPath );
 
     this.updateLineWidth();
+
+    if ( options.dashed ) {
+      this.makeDashed( true );
+    }
   }
 
   /**
@@ -140,9 +149,10 @@ class FocusHighlightPath extends Path {
   /**
    * Mutate both inner and outer Paths to make the stroke dashed by using `lineDash`.
    */
-  public makeDashed(): void {
+  public makeDashed( dashOn: boolean ): void {
+    const lineDash = dashOn ? [ 7, 7 ] : [];
     this.mutateWithInnerHighlight( {
-      lineDash: [ 7, 7 ]
+      lineDash: lineDash
     } );
   }
 

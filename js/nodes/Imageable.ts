@@ -1,4 +1,4 @@
-// Copyright 2020-2022, University of Colorado Boulder
+// Copyright 2020-2023, University of Colorado Boulder
 
 /**
  * Isolates Image handling with HTML/Canvas images, with mipmaps and general support.
@@ -41,7 +41,9 @@ const getScratchCanvas = (): HTMLCanvasElement => {
 };
 const getScratchContext = () => {
   if ( !scratchContext ) {
-    scratchContext = getScratchCanvas().getContext( '2d' )!;
+    scratchContext = getScratchCanvas().getContext( '2d', {
+      willReadFrequently: true
+    } )!;
   }
   return scratchContext;
 };

@@ -55,6 +55,8 @@ import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | 'a' | 's' | 'd' |
   'f' | 'g' | 'h' | 'j' | 'k' | 'l' | 'z' | 'x' | 'c' |
   'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
+
+// Allowed keys are the keys of the EnglishStringToCodeMap.
 type AllowedKeys = keyof typeof EnglishStringToCodeMap;
 
 export type OneKeyStroke = `${AllowedKeys}` |
@@ -65,7 +67,7 @@ export type OneKeyStroke = `${AllowedKeys}` |
 // `${AllowedKeys}+${AllowedKeys}+${AllowedKeys}+${AllowedKeys}`;
 // type KeyCombinations = `${OneKeyStroke}` | `${OneKeyStroke},${OneKeyStroke}`;
 
-// Possible input types that decide when the callbacks of this listener should fire.
+// Controls when the callback listener fires.
 // - 'up': Callbacks fire on release of keys.
 // - 'down': Callbacks fire on press of keys.
 // - 'both': Callbacks fire on both press and release of keys.
@@ -77,19 +79,16 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // level documentation for more information and an example of providing keys.
   keys: Keys;
 
-  // If true, the listener will fire callbacks if keys other than keys in the key group happen to be down at the same
-  // time. If false, callbacks will fire only when the keys of a group are exclusively down. Setting this to true is
-  // also useful if you want multiple key groups from your provided keys to fire callbacks at the same time.
-  allowOtherKeys?: boolean;
-
   // If true, the listener will fire for keys regardless of where focus is in the document. Use this when you want
   // to add some key press behavior that will always fire no matter what the event target is. If this listener
   // is added to a Node, it will only fire if the Node (and all of its ancestors) are visible with inputEnabled: true.
   // More specifically, this uses `globalKeyUp` and `globalKeyDown`. See definitions in Input.ts for more information.
   global?: boolean;
 
-  // If true, this listener is fired during the 'capture' phase, meaning BEFORE other listeners get fired during
-  // typical event dispatch. Only relevant for `global` key events.
+  // If true, this listener is fired during the 'capture' phase. Only relevant for `global` key events.
+  // When a listener uses capture, the callbacks will be fired BEFORE the dispatch through the scene graph
+  // (very similar to DOM's addEventListener with `useCapture` set to true - see
+  // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener).
   capture?: boolean;
 
   // If true, all SceneryEvents that trigger this listener (keydown and keyup) will be `handled` (no more
@@ -105,6 +104,12 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
   // Called when the listener is cancelled/interrupted.
   cancel?: ( listener: KeyboardListener<Keys> ) => void;
+
+  // Called when the listener target receives focus.
+  focus?: ( listener: KeyboardListener<Keys> ) => void;
+
+  // Called when the listener target loses focus.
+  blur?: ( listener: KeyboardListener<Keys> ) => void;
 
   // When true, the listener will fire continuously while keys are held down, at the following intervals.
   fireOnHold?: boolean;
@@ -123,13 +128,10 @@ type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
 
   // All must be pressed fully before the key is pressed to activate the command.
-  modifierKeys: string[];
+  modifierKeys: string[][];
 
-  // the final key that is pressed (after modifier keys) to trigger the listener
-  key: string;
-
-  // all keys in this KeyGroup as a KeyboardEvent.code
-  allKeys: string[];
+  // Contains the triggering key for the listener. One of these keys must be pressed to activate callbacks.
+  keys: string[];
 
   // All keys in this KeyGroup using the readable form
   naturalKeys: Keys[number];
@@ -147,6 +149,12 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   // The optional function called when this listener is cancelled.
   private readonly _cancel: ( listener: KeyboardListener<Keys> ) => void;
+
+  // The optional function called when this listener's target receives focus.
+  private readonly _focus: ( listener: KeyboardListener<Keys> ) => void;
+
+  // The optional function called when this listener's target loses focus.
+  private readonly _blur: ( listener: KeyboardListener<Keys> ) => void;
 
   // When callbacks are fired in response to input. Could be on keys pressed down, up, or both.
   private readonly _listenerFireTrigger: ListenerFireTrigger;
@@ -175,7 +183,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _global: boolean;
   private readonly _handle: boolean;
   private readonly _abort: boolean;
-  private readonly _allowOtherKeys: boolean;
 
   private readonly _windowFocusListener: ( windowHasFocus: boolean ) => void;
 
@@ -183,6 +190,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     const options = optionize<KeyboardListenerOptions<Keys>>()( {
       callback: _.noop,
       cancel: _.noop,
+      focus: _.noop,
+      blur: _.noop,
       global: false,
       capture: false,
       handle: false,
@@ -190,18 +199,18 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       listenerFireTrigger: 'down',
       fireOnHold: false,
       fireOnHoldDelay: 400,
-      fireOnHoldInterval: 100,
-      allowOtherKeys: false
+      fireOnHoldInterval: 100
     }, providedOptions );
 
     this._callback = options.callback;
     this._cancel = options.cancel;
+    this._focus = options.focus;
+    this._blur = options.blur;
 
     this._listenerFireTrigger = options.listenerFireTrigger;
     this._fireOnHold = options.fireOnHold;
     this._fireOnHoldDelay = options.fireOnHoldDelay;
     this._fireOnHoldInterval = options.fireOnHoldInterval;
-    this._allowOtherKeys = options.allowOtherKeys;
 
     this._activeKeyGroups = [];
 
@@ -214,6 +223,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     // convert the provided keys to data that we can respond to with scenery's Input system
     this._keyGroups = this.convertKeysToKeyGroups( options.keys );
 
+    // Assign listener and capture to this, implementing TInputListener
     ( this as unknown as TInputListener ).listener = this;
     ( this as unknown as TInputListener ).capture = options.capture;
 
@@ -231,8 +241,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Part of the scenery listener API. Responding to a keydown event, update active KeyGroups and potentially
-   * fire callbacks and start CallbackTimers.
+   * Responding to a keydown event, update active KeyGroups and potentially fire callbacks and start CallbackTimers.
    */
   private handleKeyDown( event: SceneryEvent<KeyboardEvent> ): void {
     if ( this._listenerFireTrigger === 'down' || this._listenerFireTrigger === 'both' ) {
@@ -241,12 +250,16 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       this._keyGroups.forEach( keyGroup => {
 
         if ( !this._activeKeyGroups.includes( keyGroup ) ) {
-          if ( this.areKeysDownForListener( keyGroup.allKeys ) &&
-               KeyboardUtils.areKeysEquivalent( keyGroup.key, globalKeyStateTracker.getLastKeyDown()! ) ) {
+          if ( this.areKeysDownForListener( keyGroup ) &&
+               keyGroup.keys.includes( globalKeyStateTracker.getLastKeyDown()! ) ) {
 
             this._activeKeyGroups.push( keyGroup );
 
             this.keysDown = true;
+
+            // reserve the event for this listener, disabling more 'global' input listeners such as
+            // those for pan and zoom (this is similar to DOM event.preventDefault).
+            event.pointer.reserveForKeyboardDrag();
 
             if ( keyGroup.timer ) {
               keyGroup.timer.start();
@@ -263,13 +276,13 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
   /**
    * If there are any active KeyGroup firing stop and remove if KeyGroup keys are no longer down. Also, potentially
-   * fires a KeyGroup if the key that was released has all other modifier keys down.
+   * fires a KeyGroup callback if the key that was released has all other modifier keys down.
    */
   private handleKeyUp( event: SceneryEvent<KeyboardEvent> ): void {
 
     if ( this._activeKeyGroups.length > 0 ) {
       this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
-        if ( !this.areKeysDownForListener( activeKeyGroup.allKeys ) ) {
+        if ( !this.areKeysDownForListener( activeKeyGroup ) ) {
           if ( activeKeyGroup.timer ) {
             activeKeyGroup.timer.stop( false );
           }
@@ -285,8 +298,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       // happens, see https://github.com/phetsims/scenery/issues/1534.
       if ( eventCode ) {
         this._keyGroups.forEach( keyGroup => {
-          if ( this.areKeysDownForListener( keyGroup.modifierKeys ) &&
-               KeyboardUtils.areKeysEquivalent( keyGroup.key, eventCode ) ) {
+          if ( this.areModifierKeysDownForListener( keyGroup ) &&
+               keyGroup.keys.includes( eventCode ) ) {
             this.keysDown = false;
             this.fireCallback( event, keyGroup );
           }
@@ -298,12 +311,76 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
-   * Are the provided keys currently pressed in a way that should start or stop firing callbacks? If this listener
-   * allows other keys to be pressed, returns true if the keys are down. If not, it returns true if ONLY the
-   * provided keys are down.
+   * Returns an array of KeyboardEvent.codes from the provided key group that are currently pressed down.
    */
-  private areKeysDownForListener( keys: string[] ): boolean {
-    return this._allowOtherKeys ? globalKeyStateTracker.areKeysDown( keys ) : globalKeyStateTracker.areKeysExclusivelyDown( keys );
+  private getDownModifierKeys( keyGroup: KeyGroup<Keys> ): string[] {
+
+    // Remember, this is a 2D array. The inner array is the list of 'equivalent' keys to be pressed for the required
+    // modifier key. For example [ 'shiftLeft', 'shiftRight' ]. If any of the keys in that inner array are pressed,
+    // that set of modifier keys is considered pressed.
+    const modifierKeysCollection = keyGroup.modifierKeys;
+
+    // The list of modifier keys that are actually pressed
+    const downModifierKeys: string[] = [];
+    modifierKeysCollection.forEach( modifierKeys => {
+      for ( const modifierKey of modifierKeys ) {
+        if ( globalKeyStateTracker.isKeyDown( modifierKey ) ) {
+          downModifierKeys.push( modifierKey );
+
+          // One modifier key from this inner set is down, stop looking
+          break;
+        }
+      }
+    } );
+
+    return downModifierKeys;
+  }
+
+  /**
+   * Returns true if keys are pressed such that the listener should fire. In order to fire, all modifier keys
+   * should be down and the final key of the group should be down. If any extra modifier keys are down that are
+   * not specified in the keyGroup, the listener will not fire.
+   */
+  private areKeysDownForListener( keyGroup: KeyGroup<Keys> ): boolean {
+    const downModifierKeys = this.getDownModifierKeys( keyGroup );
+
+    // modifier keys are down if one key from each inner array is down
+    const areModifierKeysDown = downModifierKeys.length === keyGroup.modifierKeys.length;
+
+    // The final key of the group is down if any of them are pressed
+    const finalDownKey = keyGroup.keys.find( key => globalKeyStateTracker.isKeyDown( key ) );
+
+    if ( areModifierKeysDown && !!finalDownKey ) {
+
+      // All keys are down.
+      const allKeys = [ ...downModifierKeys, finalDownKey ];
+
+      // If there are any extra modifier keys down, the listener will not fire
+      return globalKeyStateTracker.areKeysDownWithoutExtraModifiers( allKeys );
+    }
+    else {
+      return false;
+    }
+  }
+
+  /**
+   * Returns true if the modifier keys of the provided key group are currently down. If any extra modifier keys are
+   * down that are not specified in the keyGroup, the listener will not fire.
+   */
+  private areModifierKeysDownForListener( keyGroup: KeyGroup<Keys> ): boolean {
+    const downModifierKeys = this.getDownModifierKeys( keyGroup );
+
+    // modifier keys are down if one key from each inner array is down
+    const modifierKeysDown = downModifierKeys.length === keyGroup.modifierKeys.length;
+
+    if ( modifierKeysDown ) {
+
+      // If there are any extra modifier keys down, the listener will not fire
+      return globalKeyStateTracker.areKeysDownWithoutExtraModifiers( downModifierKeys );
+    }
+    else {
+      return false;
+    }
   }
 
   /**
@@ -389,6 +466,26 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   }
 
   /**
+   * Interrupts and resets the listener on blur so that state is reset and active keyGroups are cleared.
+   * Public because this is called with the scenery listener API. Do not call this directly.
+   */
+  public focusout( event: SceneryEvent ): void {
+    this.interrupt();
+
+    // Optional work to do on blur.
+    this._blur( this );
+  }
+
+  /**
+   * Public because this is called through the scenery listener API. Do not call this directly.
+   */
+  public focusin( event: SceneryEvent ): void {
+
+    // Optional work to do on focus.
+    this._focus( this );
+  }
+
+  /**
    * Dispose of this listener by disposing of any Callback timers. Then clear all KeyGroups.
    */
   public dispose(): void {
@@ -424,16 +521,17 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       const groupKeys = naturalKeys.split( '+' );
       assert && assert( groupKeys.length > 0, 'no keys provided?' );
 
-      const naturalKey = groupKeys.slice( -1 )[ 0 ];
-      const key = EnglishStringToCodeMap[ naturalKey ];
-      assert && assert( key, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalKey}` );
+      const naturalKey = groupKeys.slice( -1 )[ 0 ] as AllowedKeys;
+      const keys = EnglishStringToCodeMap[ naturalKey ]!;
+      assert && assert( keys, `Codes were not found, do you need to add it to EnglishStringToCodeMap? ${naturalKey}` );
 
-      let modifierKeys: string[] = [];
+      let modifierKeys: string[][] = [];
       if ( groupKeys.length > 1 ) {
-        modifierKeys = groupKeys.slice( 0, groupKeys.length - 1 ).map( naturalModifierKey => {
-          const modifierKey = EnglishStringToCodeMap[ naturalModifierKey ];
-          assert && assert( modifierKey, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalModifierKey}` );
-          return modifierKey;
+        const naturalModifierKeys = groupKeys.slice( 0, groupKeys.length - 1 ) as ModifierKey[];
+        modifierKeys = naturalModifierKeys.map( naturalModifierKey => {
+          const modifierKeys = EnglishStringToCodeMap[ naturalModifierKey ]!;
+          assert && assert( modifierKeys, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalModifierKey}` );
+          return modifierKeys;
         } );
       }
 
@@ -445,10 +543,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       } ) : null;
 
       const keyGroup: KeyGroup<Keys> = {
-        key: key,
+        keys: keys,
         modifierKeys: modifierKeys,
         naturalKeys: naturalKeys,
-        allKeys: modifierKeys.concat( key ),
         timer: timer
       };
       return keyGroup;

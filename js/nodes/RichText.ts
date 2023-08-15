@@ -108,6 +108,9 @@ export type RichTextHref = ( () => void ) | string;
 type RichTextLinksObject = Record<string, RichTextHref>;
 export type RichTextLinks = RichTextLinksObject | true;
 
+// Used only for guarding against assertions, we want to know that we aren't in stringTesting mode
+const isStringTest = window.QueryStringMachine && QueryStringMachine.containsKey( 'stringTest' );
+
 type SelfOptions = {
   // Sets how bounds are determined for text
   boundsMethod?: TextBoundsMethod;
@@ -579,12 +582,12 @@ export default class RichText extends Node {
     if ( assert ) {
       if ( this._links && this._links !== true ) {
         Object.keys( this._links ).forEach( link => {
-          assert && allowLinksProperty.value && assert( usedLinks.includes( link ), `Unused RichText link: ${link}` );
+          assert && allowLinksProperty.value && !isStringTest && assert( usedLinks.includes( link ), `Unused RichText link: ${link}` );
         } );
       }
       if ( this._nodes ) {
         Object.keys( this._nodes ).forEach( node => {
-          assert && allowLinksProperty.value && assert( usedNodes.includes( node ), `Unused RichText node: ${node}` );
+          assert && allowLinksProperty.value && !isStringTest && assert( usedNodes.includes( node ), `Unused RichText node: ${node}` );
         } );
       }
     }

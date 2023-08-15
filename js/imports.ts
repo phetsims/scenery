@@ -25,6 +25,8 @@ export { default as Utils } from './util/Utils.js';
 export { default as Focus } from './accessibility/Focus.js';
 export { default as KeyboardUtils } from './accessibility/KeyboardUtils.js';
 export { default as EnglishStringToCodeMap } from './accessibility/EnglishStringToCodeMap.js';
+export type { EnglishKey } from './accessibility/EnglishStringToCodeMap.js';
+export { default as EnglishStringKeyUtils } from './accessibility/EnglishStringKeyUtils.js';
 export { default as EventIO } from './input/EventIO.js';
 export { default as SceneryStyle } from './util/SceneryStyle.js';
 export { default as CanvasContextWrapper } from './util/CanvasContextWrapper.js';
