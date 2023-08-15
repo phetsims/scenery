@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, LinearEdge, PolygonClipping, RenderColor, RenderExtend, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, LinearEdge, PolygonClipping, RenderColor, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Range from '../../../../dot/js/Range.js';
@@ -14,7 +14,6 @@ import Utils from '../../../../dot/js/Utils.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
-import Render from '../../../../vello-tests/js/render.js';
 
 let debugData: Record<string, IntentionalAny> | null = null;
 
@@ -756,13 +755,24 @@ class RenderableFace {
                 return range.startProgram.replace( replacer );
               }
               else {
-                console.log( range.start, range.end );
-                console.log( normal );
+                // We need to rescale our normal for the linear blend, and then adjust our offset to point to the
+                // "start":
+                // From our original formulation:
+                //   normal.dot( startPoint ) = range.start
+                //   normal.dot( endPoint ) = range.end
+                // with a difference of (range.end - range.start). We want this to be zero, so we rescale our normal:
+                //   newNormal.dot( startPoint ) = range.start / ( range.end - range.start )
+                //   newNormal.dot( endPoint ) = range.end / ( range.end - range.start )
+                // And then we can adjust our offset such that:
+                //   newNormal.dot( startPoint ) - offset = 0
+                //   newNormal.dot( endPoint ) - offset = 1
+                const scaledNormal = normal.timesScalar( 1 / ( range.end - range.start ) );
+                const scaledOffset = range.start / ( range.end - range.start );
+
                 return new RenderLinearBlend(
                   null,
-                  normal,
-                  // normal.perpendicular.negated(), // TODO: remove, debugging
-                  range.start,
+                  scaledNormal,
+                  scaledOffset,
                   range.startProgram.replace( replacer ),
                   range.endProgram.replace( replacer )
                 );
@@ -771,13 +781,6 @@ class RenderableFace {
 
             return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ), clippedFace.getBounds() );
           } ).filter( face => face.face.getArea() > 1e-8 );
-
-          console.log( linearRanges );
-          console.log( splitValues );
-          console.log( clippedFaces );
-          console.log( renderableFaces );
-
-          // debugger;
 
           unprocessedFaces.push( ...renderableFaces );
         }
