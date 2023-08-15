@@ -428,8 +428,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      const outputSize = 768 * 2;
-      // const outputSize = 768 / 4;
+      // const outputSize = 768 * 2;
+      const outputSize = 768 / 4;
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -534,7 +534,7 @@ an UI and Display made for visual testing and debugging.
       // const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
       const a = new phet.scenery.RenderLinearBlend(
         pathA,
-        phet.dot.v2( 1 / 14, 0 ).timesScalar( 64 / outputSize ),
+        phet.dot.v2( 1 / 14, 0 ),
         0,
         phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ),
         phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 0, 0, 1 ) ),
@@ -587,25 +587,9 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a ] );
-
-      program.depthFirst( subProgram => {
-        if ( subProgram instanceof phet.scenery.RenderPathProgram ) {
-          const path = subProgram.path;
-
-          if ( path ) {
-            path.subpaths.forEach( subpath => {
-              for ( let i = 0; i < subpath.length; i++ ) {
-                subpath[ i ] = subpath[ i ].timesScalar( outputSize / 64 );
-              }
-            } );
-          }
-        }
-        if ( subProgram instanceof phet.scenery.RenderLinearGradient ) {
-          subProgram.start = subProgram.start.timesScalar( outputSize / 64 );
-          subProgram.end = subProgram.end.timesScalar( outputSize / 64 );
-        }
-      } );
+      const program = normalBlendArray( [ back, d, e, f, bc, a ] ).transformed(
+        phet.dot.Matrix3.scaling( outputSize / 64 )
+      );
 
       const styleCanvas = canvas => {
         canvas.style.width = `${displaySize}px`;

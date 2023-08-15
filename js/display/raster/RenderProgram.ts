@@ -1389,8 +1389,14 @@ export class RenderLinearBlend extends RenderPathProgram {
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
-    const beforeStartPoint = this.scaledNormal.timesScalar( this.offset );
-    const beforeEndPoint = this.scaledNormal.timesScalar( this.offset + 1 );
+    // scaledNormal dot startPoint = offset
+    // scaledNormal dot endPoint = offset + 1
+
+    // scaledNormal dot ( offset * inverseScaledNormal ) = offset
+    // scaledNormal dot ( ( offset + 1 ) * inverseScaledNormal ) = offset + 1
+
+    const beforeStartPoint = this.scaledNormal.timesScalar( this.offset / this.scaledNormal.magnitudeSquared );
+    const beforeEndPoint = this.scaledNormal.timesScalar( ( this.offset + 1 ) / this.scaledNormal.magnitudeSquared );
 
     const afterStartPoint = transform.timesVector2( beforeStartPoint );
     const afterEndPoint = transform.timesVector2( beforeEndPoint );
@@ -1399,7 +1405,7 @@ export class RenderLinearBlend extends RenderPathProgram {
     const afterNormal = afterDelta.normalized().timesScalar( 1 / afterDelta.magnitude );
     const afterOffset = afterNormal.dot( afterStartPoint );
 
-    assert && assert( Math.abs( afterNormal.dot( afterEndPoint ) - afterOffset ) < 1e-8, 'afterNormal.dot( afterEndPoint ) - afterOffset' );
+    assert && assert( Math.abs( afterNormal.dot( afterEndPoint ) - afterOffset - 1 ) < 1e-8, 'afterNormal.dot( afterEndPoint ) - afterOffset' );
 
     return new RenderLinearBlend(
       this.getTransformedPath( transform ),
