@@ -68,6 +68,8 @@ export default abstract class RenderProgram {
 
   public abstract equals( other: RenderProgram ): boolean;
 
+  public abstract replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram;
+
   public depthFirst( callback: ( program: RenderProgram ) => void ): void {
     callback( this );
   }
@@ -159,6 +161,18 @@ export class RenderBlendCompose extends RenderProgram {
            this.blendType === other.blendType &&
            this.a.equals( other.a ) &&
            this.b.equals( other.b );
+  }
+
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      const a = this.a.replace( callback );
+      const b = this.b.replace( callback );
+      return new RenderBlendCompose( this.composeType, this.blendType, a, b );
+    }
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -676,6 +690,16 @@ export class RenderFilter extends RenderPathProgram {
            this.matrix.equals( other.matrix );
   }
 
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return new RenderFilter( this.path, this.program.replace( callback ), this.matrix );
+    }
+  }
+
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
     this.program.depthFirst( callback );
     callback( this );
@@ -741,6 +765,16 @@ export class RenderAlpha extends RenderPathProgram {
            other instanceof RenderAlpha &&
            this.program.equals( other.program ) &&
            this.alpha === other.alpha;
+  }
+
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return new RenderAlpha( this.path, this.program.replace( callback ), this.alpha );
+    }
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -819,6 +853,16 @@ export class RenderColor extends RenderPathProgram {
 
   public override isFullyOpaque(): boolean {
     return this.path === null && this.color.w === 1;
+  }
+
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return new RenderColor( this.path, this.color );
+    }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
@@ -955,6 +999,16 @@ export class RenderImage extends RenderPathProgram {
 
   public override isFullyOpaque(): boolean {
     return false;
+  }
+
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return new RenderImage( this.path, this.transform, this.image, this.extendX, this.extendY );
+    }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
@@ -1113,6 +1167,23 @@ export class RenderLinearGradient extends RenderPathProgram {
       this.extend === other.extend;
   }
 
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return new RenderLinearGradient(
+        this.path,
+        this.transform,
+        this.start,
+        this.end,
+        this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) ),
+        this.extend
+      );
+    }
+  }
+
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
     this.stops.forEach( stop => stop.program.depthFirst( callback ) );
     callback( this );
@@ -1188,6 +1259,16 @@ export class RenderLinearBlend extends RenderPathProgram {
       this.offset === other.offset &&
       this.zero.equals( other.zero ) &&
       this.one.equals( other.one );
+  }
+
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.zero.replace( callback ), this.one.replace( callback ) );
+    }
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
@@ -1434,6 +1515,17 @@ export class RenderRadialGradient extends RenderPathProgram {
       // TODO perf
       this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
       this.extend === other.extend;
+  }
+
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      const stops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) );
+      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend );
+    }
   }
 
   public override depthFirst( callback: ( program: RenderProgram ) => void ): void {

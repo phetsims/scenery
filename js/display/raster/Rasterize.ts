@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, LinearEdge, PolygonClipping, RenderColor, RenderExtend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, LinearEdge, PolygonClipping, RenderColor, RenderExtend, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Range from '../../../../dot/js/Range.js';
@@ -14,6 +14,7 @@ import Utils from '../../../../dot/js/Utils.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
+import Render from '../../../../vello-tests/js/render.js';
 
 let debugData: Record<string, IntentionalAny> | null = null;
 
@@ -722,12 +723,47 @@ class RenderableFace {
           }
         }
 
-        throw new Error( 'unimplemented: turn the linear ranges into replacements!' );
+        if ( linearRanges.length < 2 ) {
+          processedFaces.push( face );
+        }
+        else {
+          const splitValues = linearRanges.map( range => range.start ).slice( 1 );
+          const clippedFaces = face.face.getStripeLineClip( normal, splitValues, 0 );
+
+          const renderableFaces = linearRanges.map( ( range, i ) => {
+            const clippedFace = clippedFaces[ i ];
+
+            const replacer = ( renderProgram: RenderProgram ): RenderProgram | null => {
+              if ( renderProgram !== linearGradient ) {
+                return null;
+              }
+
+              if ( range.startProgram === range.endProgram ) {
+                return range.startProgram.replace( replacer );
+              }
+              else {
+                return new RenderLinearBlend(
+                  null,
+                  normal,
+                  range.start,
+                  range.startProgram.replace( replacer ),
+                  range.endProgram.replace( replacer )
+                );
+              }
+            };
+
+            return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ), clippedFace.getBounds() );
+          } ).filter( face => face.face.getArea() > 1e-8 );
+
+          unprocessedFaces.push( ...renderableFaces );
+        }
       }
       else {
         processedFaces.push( face );
       }
     }
+
+    return processedFaces;
   }
 }
 
@@ -1929,13 +1965,16 @@ export default class Rasterize {
     const translation = new Vector2( -bounds.minX, -bounds.minY );
 
     // TODO: naming with above!!
-    // const renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, scale, translation );
-    // const renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
-    // const renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, scale, translation );
-    const renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, scale, translation );
+    // let renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, scale, translation );
+    // let renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
+    // let renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, scale, translation );
+    let renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, scale, translation );
 
     // TODO: FLESH OUT
-    // renderableFaces.forEach( face => face.splitLinearGradients() );
+    const SIMPLIFY_GRADIENTS = true;
+    if ( SIMPLIFY_GRADIENTS ) {
+      renderableFaces = renderableFaces.flatMap( face => face.splitLinearGradients() );
+    }
 
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;
