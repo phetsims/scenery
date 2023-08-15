@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, LinearEdge, IntersectionPoint, PolygonClipping, RenderColor, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, LinearEdge, PolygonClipping, RenderColor, RenderExtend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
 import { RenderPath } from './RenderProgram.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Range from '../../../../dot/js/Range.js';
 import Utils from '../../../../dot/js/Utils.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -217,6 +218,8 @@ class RationalBoundary {
 }
 
 type ClippableFace = {
+  getBounds(): Bounds2;
+  getDotRange( normal: Vector2 ): Range;
   getArea(): number;
   getCentroid( area: number ): Vector2;
   getClipped( bounds: Bounds2 ): ClippableFace;
@@ -229,6 +232,33 @@ type ClippableFace = {
 // Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
 class PolygonalFace implements ClippableFace {
   public constructor( public readonly polygons: Vector2[][] ) {}
+
+  public getBounds(): Bounds2 {
+    const result = Bounds2.NOTHING.copy();
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+      for ( let j = 0; j < polygon.length; j++ ) {
+        result.addPoint( polygon[ j ] );
+      }
+    }
+    return result;
+  }
+
+  public getDotRange( normal: Vector2 ): Range {
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+      for ( let j = 0; j < polygon.length; j++ ) {
+        const dot = polygon[ j ].dot( normal );
+        min = Math.min( min, dot );
+        max = Math.max( max, dot );
+      }
+    }
+
+    return new Range( min, max );
+  }
 
   public getArea(): number {
     let area = 0;
@@ -382,6 +412,38 @@ class PolygonalFace implements ClippableFace {
 class EdgedFace implements ClippableFace {
   public constructor( public readonly edges: LinearEdge[] ) {}
 
+  public getBounds(): Bounds2 {
+    const result = Bounds2.NOTHING.copy();
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      if ( !edge.containsFakeCorner ) {
+        result.addPoint( edge.startPoint );
+        result.addPoint( edge.endPoint );
+      }
+    }
+    return result;
+  }
+
+  public getDotRange( normal: Vector2 ): Range {
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      // TODO: containsFakeCorner should... propagate with clipping operations, no?
+      if ( !edge.containsFakeCorner ) {
+        const dotStart = edge.startPoint.dot( normal );
+        const dotEnd = edge.endPoint.dot( normal );
+        min = Math.min( min, dotStart, dotEnd );
+        max = Math.max( max, dotStart, dotEnd );
+      }
+    }
+
+    return new Range( min, max );
+  }
+
   public getArea(): number {
     let area = 0;
     for ( let i = 0; i < this.edges.length; i++ ) {
@@ -513,6 +575,25 @@ class EdgedFace implements ClippableFace {
   }
 }
 
+class RenderLinearRange {
+  public constructor(
+    public readonly start: number,
+    public readonly end: number,
+
+    // NOTE: equal start/end programs means constant!
+    public readonly startProgram: RenderProgram,
+    public readonly endProgram: RenderProgram
+  ) {}
+
+  public getUnitReversed(): RenderLinearRange {
+    return new RenderLinearRange( 1 - this.end, 1 - this.start, this.endProgram, this.startProgram );
+  }
+
+  public withOffset( offset: number ): RenderLinearRange {
+    return new RenderLinearRange( this.start + offset, this.end + offset, this.startProgram, this.endProgram );
+  }
+}
+
 // TODO: naming, omg
 class RenderableFace {
   public constructor(
@@ -520,6 +601,134 @@ class RenderableFace {
     public readonly renderProgram: RenderProgram,
     public readonly bounds: Bounds2
   ) {}
+
+  public splitLinearGradients(): RenderableFace[] {
+    const processedFaces: RenderableFace[] = [];
+    const unprocessedFaces: RenderableFace[] = [ this ];
+
+    const findLinearGradient = ( renderProgram: RenderProgram ): RenderLinearGradient | null => {
+      let result: RenderLinearGradient | null = null;
+
+      renderProgram.depthFirst( subProgram => {
+        // TODO: early exit?
+        if ( subProgram instanceof RenderLinearGradient ) {
+          result = subProgram;
+        }
+      } );
+
+      return result;
+    };
+
+    // TODO: replacement!!!
+
+    while ( unprocessedFaces.length ) {
+      const face = unprocessedFaces.pop()!;
+
+      const linearGradient = findLinearGradient( face.renderProgram );
+
+      if ( linearGradient ) {
+        const delta = linearGradient.end.minus( linearGradient.start );
+        const normal = delta.timesScalar( 1 / delta.magnitudeSquared );
+        const offset = normal.dot( linearGradient.start );
+
+        // Should evaluate to 1 at the end
+        assert && assert( Math.abs( normal.dot( linearGradient.end ) - offset - 1 ) < 1e-8 );
+
+        const dotRange = face.face.getDotRange( normal );
+
+        // relative to gradient "origin"
+        const min = dotRange.min - offset;
+        const max = dotRange.max - offset;
+
+        const unitRanges: RenderLinearRange[] = [];
+        if ( linearGradient.stops[ 0 ].ratio > 0 ) {
+          unitRanges.push( new RenderLinearRange(
+            0,
+            linearGradient.stops[ 0 ].ratio,
+            linearGradient.stops[ 0 ].program,
+            linearGradient.stops[ 0 ].program
+          ) );
+        }
+        for ( let i = 0; i < linearGradient.stops.length - 1; i++ ) {
+          const start = linearGradient.stops[ i ];
+          const end = linearGradient.stops[ i + 1 ];
+
+          unitRanges.push( new RenderLinearRange(
+            start.ratio,
+            end.ratio,
+            start.program,
+            end.program
+          ) );
+        }
+        if ( linearGradient.stops[ linearGradient.stops.length - 1 ].ratio < 1 ) {
+          unitRanges.push( new RenderLinearRange(
+            linearGradient.stops[ linearGradient.stops.length - 1 ].ratio,
+            1,
+            linearGradient.stops[ linearGradient.stops.length - 1 ].program,
+            linearGradient.stops[ linearGradient.stops.length - 1 ].program
+          ) );
+        }
+        const reversedUnitRanges: RenderLinearRange[] = unitRanges.map( r => r.getUnitReversed() ).reverse();
+
+        // Our used linear ranges
+        const linearRanges: RenderLinearRange[] = [];
+
+        const addSectionRanges = ( sectionOffset: number, reversed: boolean ): void => {
+          // now relative to our section!
+          const sectionMin = min - sectionOffset;
+          const sectionMax = max - sectionOffset;
+
+          const ranges = reversed ? reversedUnitRanges : unitRanges;
+          ranges.forEach( range => {
+            if ( sectionMin < range.end && sectionMax > range.start ) {
+              linearRanges.push( range.withOffset( sectionOffset ) );
+            }
+          } );
+        };
+
+        // TODO: better enum values outside
+        // Pad
+        if ( linearGradient.extend === 0 ) {
+          if ( min < 0 ) {
+            const firstProgram = linearGradient.stops[ 0 ].program;
+            linearRanges.push( new RenderLinearRange(
+              Number.NEGATIVE_INFINITY,
+              0,
+              firstProgram,
+              firstProgram
+            ) );
+          }
+          if ( min <= 1 && max >= 0 ) {
+            addSectionRanges( 0, false );
+          }
+          if ( max > 1 ) {
+            const lastProgram = linearGradient.stops[ linearGradient.stops.length - 1 ].program;
+            linearRanges.push( new RenderLinearRange(
+              1,
+              Number.POSITIVE_INFINITY,
+              lastProgram,
+              lastProgram
+            ) );
+          }
+        }
+        else {
+          const isReflect = linearGradient.extend === 1;
+
+          const floorMin = Math.floor( min );
+          const ceilMax = Math.ceil( max );
+
+          for ( let i = floorMin; i < ceilMax; i++ ) {
+            addSectionRanges( i, isReflect ? i % 2 === 0 : false );
+          }
+        }
+
+        throw new Error( 'unimplemented: turn the linear ranges into replacements!' );
+      }
+      else {
+        processedFaces.push( face );
+      }
+    }
+  }
 }
 
 class RationalFace {
@@ -1724,6 +1933,9 @@ export default class Rasterize {
     // const renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
     // const renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, scale, translation );
     const renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, scale, translation );
+
+    // TODO: FLESH OUT
+    // renderableFaces.forEach( face => face.splitLinearGradients() );
 
     const rasterWidth = bounds.width;
     const rasterHeight = bounds.height;

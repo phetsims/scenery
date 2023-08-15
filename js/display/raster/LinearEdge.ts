@@ -10,7 +10,12 @@ import { scenery } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class LinearEdge {
-  public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2 ) {
+
+  // NOTE: We'll flag these, so that we can accurately compute bounds later when desired (and can skip edges with
+  // corner vertices).
+  // TODO: how to handle this for performance?
+
+  public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2, public readonly containsFakeCorner: boolean = false ) {
     assert && assert( !startPoint.equals( endPoint ) );
   }
 

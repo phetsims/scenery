@@ -74,7 +74,7 @@ export default class PolygonClipping {
 
     // min-start corner
     if ( startGreater && !fakeCorner.equals( minResultStartPoint ) ) {
-      minLinearEdges.push( new LinearEdge( fakeCorner, minResultStartPoint ) );
+      minLinearEdges.push( new LinearEdge( fakeCorner, minResultStartPoint, true ) );
     }
 
     // main min section
@@ -84,12 +84,12 @@ export default class PolygonClipping {
 
     // min-end corner
     if ( endGreater && !fakeCorner.equals( minResultEndPoint ) ) {
-      minLinearEdges.push( new LinearEdge( minResultEndPoint, fakeCorner ) );
+      minLinearEdges.push( new LinearEdge( minResultEndPoint, fakeCorner, true ) );
     }
 
     // max-start corner
     if ( startLess && !fakeCorner.equals( maxResultStartPoint ) ) {
-      maxLinearEdges.push( new LinearEdge( fakeCorner, maxResultStartPoint ) );
+      maxLinearEdges.push( new LinearEdge( fakeCorner, maxResultStartPoint, true ) );
     }
 
     // main max section
@@ -99,7 +99,7 @@ export default class PolygonClipping {
 
     // max-end corner
     if ( endLess && !fakeCorner.equals( maxResultEndPoint ) ) {
-      maxLinearEdges.push( new LinearEdge( maxResultEndPoint, fakeCorner ) );
+      maxLinearEdges.push( new LinearEdge( maxResultEndPoint, fakeCorner, true ) );
     }
   }
 
@@ -328,10 +328,10 @@ export default class PolygonClipping {
 
       if ( startIntersection ) {
         if ( startIntersection === minIntersection && !startIntersection.equals( minFakeCorner! ) ) {
-          clippedEdges.push( new LinearEdge( minFakeCorner!, resultStartPoint ) );
+          clippedEdges.push( new LinearEdge( minFakeCorner!, resultStartPoint, true ) );
         }
         if ( startIntersection === maxIntersection && !startIntersection.equals( maxFakeCorner! ) ) {
-          clippedEdges.push( new LinearEdge( maxFakeCorner!, resultStartPoint ) );
+          clippedEdges.push( new LinearEdge( maxFakeCorner!, resultStartPoint, true ) );
         }
       }
 
@@ -341,10 +341,10 @@ export default class PolygonClipping {
 
       if ( endIntersection ) {
         if ( endIntersection === minIntersection && !endIntersection.equals( minFakeCorner! ) ) {
-          clippedEdges.push( new LinearEdge( resultEndPoint, minFakeCorner! ) );
+          clippedEdges.push( new LinearEdge( resultEndPoint, minFakeCorner!, true ) );
         }
         if ( endIntersection === maxIntersection && !endIntersection.equals( maxFakeCorner! ) ) {
-          clippedEdges.push( new LinearEdge( resultEndPoint, maxFakeCorner! ) );
+          clippedEdges.push( new LinearEdge( resultEndPoint, maxFakeCorner!, true ) );
         }
       }
     }
