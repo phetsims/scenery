@@ -14,12 +14,14 @@ import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 import BooleanIO from '../../../../tandem/js/types/BooleanIO.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import centerAndVariability from '../../centerAndVariability.js';
+import { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
+import { combineOptions } from '../../../../phet-core/js/optionize.js';
 
-export const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem ): TReadOnlyProperty<boolean> => {
-  return DerivedProperty.and( [ visibleProperty, new BooleanProperty( true, {
+export const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, selfVisiblePropertyOptions?: PhetioObjectOptions ): TReadOnlyProperty<boolean> => {
+  return DerivedProperty.and( [ visibleProperty, new BooleanProperty( true, combineOptions<PhetioObjectOptions>( {
     tandem: tandem.createTandem( 'selfVisibleProperty' ),
     phetioFeatured: true
-  } ) ], {
+  }, selfVisiblePropertyOptions ) ) ], {
     tandem: tandem.createTandem( 'visibleProperty' ),
     phetioValueType: BooleanIO
   } );
