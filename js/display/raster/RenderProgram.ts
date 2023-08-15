@@ -1299,7 +1299,8 @@ export class RenderLinearGradient extends RenderPathProgram {
       this.stops.length === other.stops.length &&
       // TODO perf
       this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
-      this.extend === other.extend;
+      this.extend === other.extend &&
+      this.colorSpace === other.colorSpace;
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
@@ -1373,7 +1374,6 @@ export class RenderLinearGradient extends RenderPathProgram {
 }
 scenery.register( 'RenderLinearGradient', RenderLinearGradient );
 
-// TODO: gradients/linears in... sRGB space? or perceptual? linear blends don't seem ideal
 const scratchLinearBlendVector = new Vector2( 0, 0 );
 export class RenderLinearBlend extends RenderPathProgram {
 
@@ -1424,7 +1424,8 @@ export class RenderLinearBlend extends RenderPathProgram {
       this.scaledNormal.equals( other.scaledNormal ) &&
       this.offset === other.offset &&
       this.zero.equals( other.zero ) &&
-      this.one.equals( other.one );
+      this.one.equals( other.one ) &&
+      this.colorSpace === other.colorSpace;
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
@@ -1493,7 +1494,7 @@ export class RenderLinearBlend extends RenderPathProgram {
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderLinearGradient (${this.path ? this.path.id : 'null'})`;
+    return `${indent}RenderLinearBlend (${this.path ? this.path.id : 'null'})`;
   }
 }
 scenery.register( 'RenderLinearBlend', RenderLinearBlend );
@@ -1656,6 +1657,123 @@ class RadialGradientLogic {
   }
 }
 
+const scratchRadialBlendVector = new Vector2( 0, 0 );
+export class RenderRadialBlend extends RenderPathProgram {
+
+  private readonly inverseTransform: Matrix3;
+
+  public constructor(
+    path: RenderPath | null,
+    public readonly transform: Matrix3,
+    public readonly radius0: number,
+    public readonly radius1: number,
+    public readonly zero: RenderProgram,
+    public readonly one: RenderProgram,
+    public readonly colorSpace: RenderColorSpace
+  ) {
+    super( path );
+
+    this.inverseTransform = transform.inverted();
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderRadialBlend(
+      this.getTransformedPath( transform ),
+      transform.timesMatrix( this.transform ),
+      this.radius0,
+      this.radius1,
+      this.zero.transformed( transform ),
+      this.one.transformed( transform ),
+      this.colorSpace
+    );
+  }
+
+  public override equals( other: RenderProgram ): boolean {
+    if ( this === other ) { return true; }
+    return other instanceof RenderRadialBlend &&
+      this.path === other.path &&
+      this.transform.equals( other.transform ) &&
+      this.radius0 === other.radius0 &&
+      this.radius1 === other.radius1 &&
+      this.zero.equals( other.zero ) &&
+      this.one.equals( other.one ) &&
+      this.colorSpace === other.colorSpace;
+  }
+
+  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return new RenderRadialBlend( this.path, this.transform, this.radius0, this.radius1, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
+    }
+  }
+
+  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
+    this.zero.depthFirst( callback );
+    this.one.depthFirst( callback );
+    callback( this );
+  }
+
+  public override isFullyTransparent(): boolean {
+    return this.zero.isFullyTransparent() && this.one.isFullyTransparent();
+  }
+
+  public override isFullyOpaque(): boolean {
+    return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
+  }
+
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+    const zero = this.zero.simplify( pathTest );
+    const one = this.one.simplify( pathTest );
+
+    if ( zero.isFullyTransparent() && one.isFullyTransparent() ) {
+      return RenderColor.TRANSPARENT;
+    }
+
+    if ( this.isInPath( pathTest ) ) {
+      return new RenderRadialBlend( null, this.transform, this.radius0, this.radius1, zero, one, this.colorSpace );
+    }
+    else {
+      return RenderColor.TRANSPARENT;
+    }
+  }
+
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+    if ( !this.isInPath( pathTest ) ) {
+      return Vector4.ZERO;
+    }
+
+    const localPoint = scratchRadialBlendVector.set( point );
+
+    this.inverseTransform.multiplyVector2( localPoint );
+
+    // TODO: assuming no actual order, BUT needs positive radii?
+    const t = ( localPoint.magnitude - this.radius0 ) / ( this.radius1 - this.radius0 );
+
+    if ( t <= 0 ) {
+      return this.zero.evaluate( point, pathTest );
+    }
+    else if ( t >= 1 ) {
+      return this.one.evaluate( point, pathTest );
+    }
+    else {
+      return RenderColor.ratioBlend(
+        this.zero.evaluate( point, pathTest ),
+        this.one.evaluate( point, pathTest ),
+        t,
+        this.colorSpace
+      );
+    }
+  }
+
+  public override toRecursiveString( indent: string ): string {
+    return `${indent}RenderRadialBlend (${this.path ? this.path.id : 'null'})`;
+  }
+}
+scenery.register( 'RenderRadialBlend', RenderRadialBlend );
+
 export class RenderRadialGradient extends RenderPathProgram {
 
   private logic: RadialGradientLogic | null = null;
@@ -1700,7 +1818,8 @@ export class RenderRadialGradient extends RenderPathProgram {
       this.stops.length === other.stops.length &&
       // TODO perf
       this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
-      this.extend === other.extend;
+      this.extend === other.extend &&
+      this.colorSpace === other.colorSpace;
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {

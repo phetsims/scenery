@@ -532,10 +532,11 @@ an UI and Display made for visual testing and debugging.
       ] );
 
       // const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
-      const a = new phet.scenery.RenderLinearBlend(
+      const a = new phet.scenery.RenderRadialBlend(
         pathA,
-        phet.dot.v2( 1 / 14, 0 ),
-        0,
+        phet.dot.Matrix3.IDENTITY,
+        6,
+        8,
         phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ),
         phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 0, 0, 1 ) ),
         2

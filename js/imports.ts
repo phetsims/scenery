@@ -440,7 +440,7 @@ export { default as LinearEdge } from './display/raster/LinearEdge.js';
 export { default as PolygonClipping } from './display/raster/PolygonClipping.js';
 export { default as PolygonMitchellNetravali } from './display/raster/PolygonMitchellNetravali.js';
 export { default as Rasterize } from './display/raster/Rasterize.js';
-export { default as RenderProgram, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialGradient } from './display/raster/RenderProgram.js';
+export { default as RenderProgram, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialBlend, RenderRadialGradient } from './display/raster/RenderProgram.js';
 export type { FillRule, RenderComposeType, RenderBlendType, RenderExtend } from './display/raster/RenderProgram.js';
 export { default as Snippet } from './display/raster/Snippet.js';
 
