@@ -624,6 +624,7 @@ class RenderableFace {
 
       const linearGradient = findLinearGradient( face.renderProgram );
 
+      // TODO: OH NO, handle linear gradient transform!
       if ( linearGradient ) {
         const delta = linearGradient.end.minus( linearGradient.start );
         const normal = delta.timesScalar( 1 / delta.magnitudeSquared );

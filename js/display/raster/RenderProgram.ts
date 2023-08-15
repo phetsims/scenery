@@ -65,6 +65,8 @@ export default abstract class RenderProgram {
 
   public abstract isFullyOpaque(): boolean;
 
+  public abstract transformed( transform: Matrix3 ): RenderProgram;
+
   public abstract simplify( pathTest?: ( renderPath: RenderPath ) => boolean ): RenderProgram;
 
   // Premultiplied linear RGB, ignoring the path
@@ -158,6 +160,15 @@ export class RenderBlendCompose extends RenderProgram {
     public readonly b: RenderProgram
   ) {
     super();
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderBlendCompose(
+      this.composeType,
+      this.blendType,
+      this.a.transformed( transform ),
+      this.b.transformed( transform )
+    );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -659,6 +670,10 @@ export class RenderPath {
   public readonly id = globalPathId++;
 
   public constructor( public readonly fillRule: FillRule, public readonly subpaths: Vector2[][] ) {}
+
+  public transformed( transform: Matrix3 ): RenderPath {
+    return new RenderPath( this.fillRule, this.subpaths.map( subpath => subpath.map( point => transform.timesVector2( point ) ) ) );
+  }
 }
 scenery.register( 'RenderPath', RenderPath );
 
@@ -676,6 +691,10 @@ export abstract class RenderPathProgram extends RenderProgram {
   public isInPath( pathTest: ( renderPath: RenderPath ) => boolean ): boolean {
     return !this.path || pathTest( this.path );
   }
+
+  public getTransformedPath( transform: Matrix3 ): RenderPath | null {
+    return this.path ? this.path.transformed( transform ) : null;
+  }
 }
 scenery.register( 'RenderPathProgram', RenderPathProgram );
 
@@ -686,6 +705,10 @@ export class RenderFilter extends RenderPathProgram {
     public readonly matrix: Matrix4
   ) {
     super( path );
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderFilter( this.getTransformedPath( transform ), this.program.transformed( transform ), this.matrix );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -763,6 +786,10 @@ export class RenderAlpha extends RenderPathProgram {
     public readonly alpha: number
   ) {
     super( path );
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderAlpha( this.getTransformedPath( transform ), this.program.transformed( transform ), this.alpha );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -844,6 +871,10 @@ scenery.register( 'RenderAlpha', RenderAlpha );
 export class RenderColor extends RenderPathProgram {
   public constructor( path: RenderPath | null, public color: Vector4 ) {
     super( path );
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderColor( this.getTransformedPath( transform ), this.color );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -1072,6 +1103,10 @@ export class RenderImage extends RenderPathProgram {
     super( path );
   }
 
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderImage( this.getTransformedPath( transform ), transform.timesMatrix( this.transform ), this.image, this.extendX, this.extendY );
+  }
+
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
     return super.equals( other ) &&
@@ -1222,7 +1257,7 @@ const scratchLinearGradientVector0 = new Vector2( 0, 0 );
 
 export class RenderLinearGradient extends RenderPathProgram {
 
-  private readonly inverseTransform: Matrix3;
+  public readonly inverseTransform: Matrix3;
   private readonly isIdentity: boolean;
   private readonly gradDelta: Vector2;
 
@@ -1240,6 +1275,18 @@ export class RenderLinearGradient extends RenderPathProgram {
     this.inverseTransform = transform.inverted();
     this.isIdentity = transform.isIdentity();
     this.gradDelta = end.minus( start );
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderLinearGradient(
+      this.getTransformedPath( transform ),
+      transform.timesMatrix( this.transform ),
+      this.start,
+      this.end,
+      this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.transformed( transform ) ) ),
+      this.extend,
+      this.colorSpace
+    );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -1339,6 +1386,29 @@ export class RenderLinearBlend extends RenderPathProgram {
     public readonly colorSpace: RenderColorSpace
   ) {
     super( path );
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    const beforeStartPoint = this.scaledNormal.timesScalar( this.offset );
+    const beforeEndPoint = this.scaledNormal.timesScalar( this.offset + 1 );
+
+    const afterStartPoint = transform.timesVector2( beforeStartPoint );
+    const afterEndPoint = transform.timesVector2( beforeEndPoint );
+    const afterDelta = afterEndPoint.minus( afterStartPoint );
+
+    const afterNormal = afterDelta.normalized().timesScalar( 1 / afterDelta.magnitude );
+    const afterOffset = afterNormal.dot( afterStartPoint );
+
+    assert && assert( Math.abs( afterNormal.dot( afterEndPoint ) - afterOffset ) < 1e-8, 'afterNormal.dot( afterEndPoint ) - afterOffset' );
+
+    return new RenderLinearBlend(
+      this.getTransformedPath( transform ),
+      afterNormal,
+      afterOffset,
+      this.zero.transformed( transform ),
+      this.one.transformed( transform ),
+      this.colorSpace
+    );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -1596,6 +1666,20 @@ export class RenderRadialGradient extends RenderPathProgram {
     public readonly colorSpace: RenderColorSpace
   ) {
     super( path );
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderRadialGradient(
+      this.getTransformedPath( transform ),
+      this.transform.timesMatrix( transform ),
+      this.start,
+      this.startRadius,
+      this.end,
+      this.endRadius,
+      this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.transformed( transform ) ) ),
+      this.extend,
+      this.colorSpace
+    );
   }
 
   public override equals( other: RenderProgram ): boolean {
