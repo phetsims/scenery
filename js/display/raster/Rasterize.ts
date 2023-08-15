@@ -774,7 +774,8 @@ class RenderableFace {
                   scaledNormal,
                   scaledOffset,
                   range.startProgram.replace( replacer ),
-                  range.endProgram.replace( replacer )
+                  range.endProgram.replace( replacer ),
+                  linearGradient.colorSpace
                 );
               }
             };

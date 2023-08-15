@@ -52,6 +52,12 @@ export enum RenderExtend {
   Repeat = 2
 }
 
+export enum RenderColorSpace {
+  LinearUnpremultipliedSRGB = 0,
+  SRGB = 1,
+  Oklab = 2
+}
+
 const alwaysTrue: ( renderPath: RenderPath ) => boolean = _.constant( true );
 
 export default abstract class RenderProgram {
@@ -996,6 +1002,51 @@ export class RenderColor extends RenderPathProgram {
     );
   }
 
+  public static ratioBlend(
+    zeroColor: Vector4,
+    oneColor: Vector4,
+    ratio: number,
+    colorSpace: RenderColorSpace = RenderColorSpace.LinearUnpremultipliedSRGB
+  ): Vector4 {
+    const minusRatio = 1 - ratio;
+
+    switch( colorSpace ) {
+      case RenderColorSpace.LinearUnpremultipliedSRGB:
+        return new Vector4(
+          zeroColor.x * minusRatio + oneColor.x * ratio,
+          zeroColor.y * minusRatio + oneColor.y * ratio,
+          zeroColor.z * minusRatio + oneColor.z * ratio,
+          zeroColor.w * minusRatio + oneColor.w * ratio
+        );
+      case RenderColorSpace.SRGB:
+      {
+        // TODO: reduce allocations?
+        const zeroSRGB = RenderColor.linearToSRGB( RenderColor.unpremultiply( zeroColor ) );
+        const oneSRGB = RenderColor.linearToSRGB( RenderColor.unpremultiply( oneColor ) );
+        return RenderColor.premultiply( RenderColor.sRGBToLinear( new Vector4(
+          zeroSRGB.x * minusRatio + oneSRGB.x * ratio,
+          zeroSRGB.y * minusRatio + oneSRGB.y * ratio,
+          zeroSRGB.z * minusRatio + oneSRGB.z * ratio,
+          zeroSRGB.w * minusRatio + oneSRGB.w * ratio
+        ) ) );
+      }
+      case RenderColorSpace.Oklab:
+      {
+        // TODO: reduce allocations?
+        const zeroOklab = RenderColor.linearToOklab( RenderColor.unpremultiply( zeroColor ) );
+        const oneOklab = RenderColor.linearToOklab( RenderColor.unpremultiply( oneColor ) );
+        return RenderColor.premultiply( RenderColor.oklabToLinear( new Vector4(
+          zeroOklab.x * minusRatio + oneOklab.x * ratio,
+          zeroOklab.y * minusRatio + oneOklab.y * ratio,
+          zeroOklab.z * minusRatio + oneOklab.z * ratio,
+          zeroOklab.w * minusRatio + oneOklab.w * ratio
+        ) ) );
+      }
+      default:
+        throw new Error( `Invalid color space: ${colorSpace}` );
+    }
+  }
+
   public static readonly TRANSPARENT = new RenderColor( null, Vector4.ZERO );
 }
 scenery.register( 'RenderColor', RenderColor );
@@ -1136,7 +1187,13 @@ scenery.register( 'RenderImage', RenderImage );
 export class RenderGradientStop {
   public constructor( public readonly ratio: number, public readonly program: RenderProgram ) {}
 
-  public static evaluate( point: Vector2, stops: RenderGradientStop[], t: number, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public static evaluate(
+    point: Vector2,
+    stops: RenderGradientStop[],
+    t: number,
+    colorSpace: RenderColorSpace,
+    pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue
+  ): Vector4 {
     let i = -1;
     while ( i < stops.length - 1 && stops[ i + 1 ].ratio < t ) {
       i++;
@@ -1155,15 +1212,7 @@ export class RenderGradientStop {
       const beforeColor = before.program.evaluate( point, pathTest );
       const afterColor = after.program.evaluate( point, pathTest );
 
-      const minusRatio = 1 - ratio;
-
-      // TODO: reduce allocation
-      return new Vector4(
-        beforeColor.x * minusRatio + afterColor.x * ratio,
-        beforeColor.y * minusRatio + afterColor.y * ratio,
-        beforeColor.z * minusRatio + afterColor.z * ratio,
-        beforeColor.w * minusRatio + afterColor.w * ratio
-      );
+      return RenderColor.ratioBlend( beforeColor, afterColor, ratio, colorSpace );
     }
   }
 }
@@ -1183,7 +1232,8 @@ export class RenderLinearGradient extends RenderPathProgram {
     public readonly start: Vector2,
     public readonly end: Vector2,
     public readonly stops: RenderGradientStop[], // should be sorted!!
-    public readonly extend: RenderExtend
+    public readonly extend: RenderExtend,
+    public readonly colorSpace: RenderColorSpace
   ) {
     super( path );
 
@@ -1217,7 +1267,8 @@ export class RenderLinearGradient extends RenderPathProgram {
         this.start,
         this.end,
         this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) ),
-        this.extend
+        this.extend,
+        this.colorSpace
       );
     }
   }
@@ -1243,7 +1294,7 @@ export class RenderLinearGradient extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend );
+      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.colorSpace );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -1266,7 +1317,7 @@ export class RenderLinearGradient extends RenderPathProgram {
     const t = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
     const mappedT = RenderImage.extend( this.extend, t );
 
-    return RenderGradientStop.evaluate( point, this.stops, mappedT, pathTest );
+    return RenderGradientStop.evaluate( point, this.stops, mappedT, this.colorSpace, pathTest );
   }
 
   public override toRecursiveString( indent: string ): string {
@@ -1284,7 +1335,8 @@ export class RenderLinearBlend extends RenderPathProgram {
     public readonly scaledNormal: Vector2,
     public readonly offset: number,
     public readonly zero: RenderProgram,
-    public readonly one: RenderProgram
+    public readonly one: RenderProgram,
+    public readonly colorSpace: RenderColorSpace
   ) {
     super( path );
   }
@@ -1305,7 +1357,7 @@ export class RenderLinearBlend extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.zero.replace( callback ), this.one.replace( callback ) );
+      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
     }
   }
 
@@ -1332,7 +1384,7 @@ export class RenderLinearBlend extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearBlend( null, this.scaledNormal, this.offset, zero, one );
+      return new RenderLinearBlend( null, this.scaledNormal, this.offset, zero, one, this.colorSpace );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -1355,7 +1407,12 @@ export class RenderLinearBlend extends RenderPathProgram {
       return this.one.evaluate( point, pathTest );
     }
     else {
-      return this.zero.evaluate( point, pathTest ).timesScalar( 1 - t ).plus( this.one.evaluate( point, pathTest ).timesScalar( t ) );
+      return RenderColor.ratioBlend(
+        this.zero.evaluate( point, pathTest ),
+        this.one.evaluate( point, pathTest ),
+        t,
+        this.colorSpace
+      );
     }
   }
 
@@ -1514,7 +1571,7 @@ class RadialGradientLogic {
         t = 1 - t;
       }
 
-      return RenderGradientStop.evaluate( point, this.radialGradient.stops, t, pathTest );
+      return RenderGradientStop.evaluate( point, this.radialGradient.stops, t, this.radialGradient.colorSpace, pathTest );
     }
     else {
       // Invalid is a checkerboard red/yellow
@@ -1535,7 +1592,8 @@ export class RenderRadialGradient extends RenderPathProgram {
     public readonly end: Vector2,
     public readonly endRadius: number,
     public readonly stops: RenderGradientStop[], // should be sorted!!
-    public readonly extend: RenderExtend
+    public readonly extend: RenderExtend,
+    public readonly colorSpace: RenderColorSpace
   ) {
     super( path );
   }
@@ -1562,7 +1620,7 @@ export class RenderRadialGradient extends RenderPathProgram {
     }
     else {
       const stops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) );
-      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend );
+      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.colorSpace );
     }
   }
 
@@ -1587,7 +1645,7 @@ export class RenderRadialGradient extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend );
+      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.colorSpace );
     }
     else {
       return RenderColor.TRANSPARENT;
