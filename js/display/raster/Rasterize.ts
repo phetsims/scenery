@@ -620,8 +620,6 @@ class RenderableFace {
       return result;
     };
 
-    // TODO: replacement!!!
-
     while ( unprocessedFaces.length ) {
       const face = unprocessedFaces.pop()!;
 
@@ -682,7 +680,7 @@ class RenderableFace {
           const ranges = reversed ? reversedUnitRanges : unitRanges;
           ranges.forEach( range => {
             if ( sectionMin < range.end && sectionMax > range.start ) {
-              linearRanges.push( range.withOffset( sectionOffset ) );
+              linearRanges.push( range.withOffset( sectionOffset + offset ) );
             }
           } );
         };
@@ -694,7 +692,7 @@ class RenderableFace {
             const firstProgram = linearGradient.stops[ 0 ].program;
             linearRanges.push( new RenderLinearRange(
               Number.NEGATIVE_INFINITY,
-              0,
+              0 + offset,
               firstProgram,
               firstProgram
             ) );
@@ -705,7 +703,7 @@ class RenderableFace {
           if ( max > 1 ) {
             const lastProgram = linearGradient.stops[ linearGradient.stops.length - 1 ].program;
             linearRanges.push( new RenderLinearRange(
-              1,
+              1 + offset,
               Number.POSITIVE_INFINITY,
               lastProgram,
               lastProgram
@@ -720,6 +718,22 @@ class RenderableFace {
 
           for ( let i = floorMin; i < ceilMax; i++ ) {
             addSectionRanges( i, isReflect ? i % 2 === 0 : false );
+          }
+        }
+
+        // Merge adjacent ranges with the same (constant) program
+        for ( let i = 0; i < linearRanges.length - 1; i++ ) {
+          const range = linearRanges[ i ];
+          const nextRange = linearRanges[ i + 1 ];
+
+          if ( range.startProgram === range.endProgram && nextRange.startProgram === nextRange.endProgram && range.startProgram === nextRange.startProgram ) {
+            linearRanges.splice( i, 2, new RenderLinearRange(
+              range.start,
+              nextRange.end,
+              range.startProgram,
+              range.startProgram
+            ) );
+            i--;
           }
         }
 
@@ -742,9 +756,12 @@ class RenderableFace {
                 return range.startProgram.replace( replacer );
               }
               else {
+                console.log( range.start, range.end );
+                console.log( normal );
                 return new RenderLinearBlend(
                   null,
                   normal,
+                  // normal.perpendicular.negated(), // TODO: remove, debugging
                   range.start,
                   range.startProgram.replace( replacer ),
                   range.endProgram.replace( replacer )
@@ -754,6 +771,13 @@ class RenderableFace {
 
             return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ), clippedFace.getBounds() );
           } ).filter( face => face.face.getArea() > 1e-8 );
+
+          console.log( linearRanges );
+          console.log( splitValues );
+          console.log( clippedFaces );
+          console.log( renderableFaces );
+
+          // debugger;
 
           unprocessedFaces.push( ...renderableFaces );
         }

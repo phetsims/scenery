@@ -577,7 +577,8 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a ] );
+      // const program = normalBlendArray( [ back, d, e, f, bc, a ] );
+      const program = normalBlendArray( [ back, e, f, bc, a, d ] );
 
       program.depthFirst( subProgram => {
         if ( subProgram instanceof phet.scenery.RenderPathProgram ) {
