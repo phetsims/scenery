@@ -438,7 +438,6 @@ export { default as CohenSutherlandClipping } from './display/raster/CohenSuther
 export { default as IntersectionPoint } from './display/raster/IntersectionPoint.js';
 export { default as LinearEdge } from './display/raster/LinearEdge.js';
 export { default as PolygonClipping } from './display/raster/PolygonClipping.js';
-export { default as PolygonIntegrals } from './display/raster/PolygonIntegrals.js';
 export { default as PolygonMitchellNetravali } from './display/raster/PolygonMitchellNetravali.js';
 export { default as Rasterize } from './display/raster/Rasterize.js';
 export { default as RenderProgram, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialGradient } from './display/raster/RenderProgram.js';

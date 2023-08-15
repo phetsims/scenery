@@ -1153,7 +1153,7 @@ an UI and Display made for visual testing and debugging.
         const polygon = polygons[ i ];
         const clippedEdges = clippedEdgeCollection[ i ];
 
-        const polygonArea = phet.scenery.PolygonIntegrals.getArea( polygon );
+        const polygonArea = phet.scenery.LinearEdge.getPolygonArea( polygon );
         const clippedEdgeArea = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralArea() ));
         const zero = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralZero() ) );
 
