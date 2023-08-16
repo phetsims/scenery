@@ -1,7 +1,7 @@
 // Copyright 2017-2022, University of Colorado Boulder
 
 /**
- * A FocusHighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
+ * A HighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
  * the node. The focusHighlight will update as the Node's bounds changes. Handles transformations so that when the
  * source node is transformed, the FocusHighlightFromNode will
  * updated be as well.
@@ -15,8 +15,8 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { FocusHighlightPath, Node, scenery } from '../imports.js';
-import { FocusHighlightPathOptions } from './FocusHighlightPath.js';
+import { HighlightPath, Node, scenery } from '../imports.js';
+import { HighlightPathOptions } from './HighlightPath.js';
 
 type SelfOptions = {
 
@@ -24,7 +24,7 @@ type SelfOptions = {
   useLocalBounds?: boolean;
 
   // default value is function of node transform (minus translation), but can be set explicitly.
-  // see FocusHighlightPath.getDilationCoefficient(). A number here refers to the amount in global coordinates to
+  // see HighlightPath.getDilationCoefficient(). A number here refers to the amount in global coordinates to
   // dilate the focus highlight.
   dilationCoefficient?: number | null;
 
@@ -33,9 +33,9 @@ type SelfOptions = {
 };
 
 // The transformSourceNode for this highlight will be the provided Node.
-export type FocusHighlightFromNodeOptions = SelfOptions & StrictOmit<FocusHighlightPathOptions, 'transformSourceNode'>;
+export type FocusHighlightFromNodeOptions = SelfOptions & StrictOmit<HighlightPathOptions, 'transformSourceNode'>;
 
-class FocusHighlightFromNode extends FocusHighlightPath {
+class FocusHighlightFromNode extends HighlightPath {
 
   // See options for documentation.
   private readonly useLocalBounds: boolean;
@@ -51,7 +51,7 @@ class FocusHighlightFromNode extends FocusHighlightPath {
 
   public constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
 
-    const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, FocusHighlightPathOptions>()( {
+    const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, HighlightPathOptions>()( {
       useLocalBounds: true,
       dilationCoefficient: null,
       useGroupDilation: false
@@ -99,8 +99,8 @@ class FocusHighlightFromNode extends FocusHighlightPath {
       // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
       // with options
       if ( this.dilationCoefficient === null ) {
-        dilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
-                                FocusHighlightPath.getDilationCoefficient( node ) );
+        dilationCoefficient = ( this.useGroupDilation ? HighlightPath.getGroupDilationCoefficient( node ) :
+                                HighlightPath.getDilationCoefficient( node ) );
       }
       const dilatedBounds = bounds.dilated( dilationCoefficient! );
 

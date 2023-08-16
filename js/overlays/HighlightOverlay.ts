@@ -12,25 +12,25 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, HighlightPath, FocusManager, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
 import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import TProperty from '../../../axon/js/TProperty.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.
-let outerHighlightColor: TPaint = FocusHighlightPath.OUTER_FOCUS_COLOR;
-let innerHighlightColor: TPaint = FocusHighlightPath.INNER_FOCUS_COLOR;
+let outerHighlightColor: TPaint = HighlightPath.OUTER_FOCUS_COLOR;
+let innerHighlightColor: TPaint = HighlightPath.INNER_FOCUS_COLOR;
 
-let innerGroupHighlightColor: TPaint = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
-let outerGroupHighlightColor: TPaint = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
+let innerGroupHighlightColor: TPaint = HighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
+let outerGroupHighlightColor: TPaint = HighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
 // Type for the "mode" of a particular highlight, signifying behavior for handling the active highlight.
 type HighlightMode = null | 'bounds' | 'node' | 'shape' | 'invisible';
 
 // Highlights displayed by the overlay support these types. Highlight behavior works like the following:
-// - If value is null, the highlight will use default stylings of FocusHighlightPath and surround the Node with focus.
-// - If value is a Shape the Shape is set to a FocusHighlightPath with default stylings in the global coordinate frame.
+// - If value is null, the highlight will use default stylings of HighlightPath and surround the Node with focus.
+// - If value is a Shape the Shape is set to a HighlightPath with default stylings in the global coordinate frame.
 // - If you provide a Node it is your responsibility to position it in the global coordinate frame.
 // - If the value is 'invisible' no highlight will be displayed at all.
 export type Highlight = Node | Shape | null | 'invisible';
@@ -133,7 +133,7 @@ export default class HighlightOverlay implements TOverlay {
   public readonly domElement: HTMLElement;
 
   // Used as the focus highlight when the overlay is passed a shape
-  private readonly shapeFocusHighlightPath: FocusHighlightPath;
+  private readonly shapeFocusHighlightPath: HighlightPath;
 
   // Used as the default case for the highlight when the highlight value is null
   private readonly boundsFocusHighlightPath: FocusHighlightFromNode;
@@ -197,7 +197,7 @@ export default class HighlightOverlay implements TOverlay {
     this.domElement = this.focusDisplay.domElement;
     this.domElement.style.pointerEvents = 'none';
 
-    this.shapeFocusHighlightPath = new FocusHighlightPath( null );
+    this.shapeFocusHighlightPath = new HighlightPath( null );
     this.boundsFocusHighlightPath = new FocusHighlightFromNode( null, {
       useLocalBounds: true
     } );
@@ -208,9 +208,9 @@ export default class HighlightOverlay implements TOverlay {
     this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
       useLocalBounds: true,
       useGroupDilation: true,
-      outerLineWidth: FocusHighlightPath.GROUP_OUTER_LINE_WIDTH,
-      innerLineWidth: FocusHighlightPath.GROUP_INNER_LINE_WIDTH,
-      innerStroke: FocusHighlightPath.OUTER_FOCUS_COLOR
+      outerLineWidth: HighlightPath.GROUP_OUTER_LINE_WIDTH,
+      innerLineWidth: HighlightPath.GROUP_INNER_LINE_WIDTH,
+      innerStroke: HighlightPath.OUTER_FOCUS_COLOR
     } );
 
     this.groupFocusHighlightParent = new Node( {
@@ -315,7 +315,7 @@ export default class HighlightOverlay implements TOverlay {
       this.mode = 'node';
 
       // if using a focus highlight from another node, we will track that node's transform instead of the focused node
-      if ( highlight instanceof FocusHighlightPath ) {
+      if ( highlight instanceof HighlightPath ) {
         const highlightPath = highlight;
         assert && assert( highlight.shape !== null, 'The shape of the Node highlight should be set by now. Does it have bounds?' );
 
@@ -660,7 +660,7 @@ export default class HighlightOverlay implements TOverlay {
     else if ( this.mode === 'bounds' ) {
       this.boundsFocusHighlightPath.updateLineWidth();
     }
-    else if ( this.mode === 'node' && this.activeHighlight instanceof FocusHighlightPath && this.activeHighlight.updateLineWidth ) {
+    else if ( this.mode === 'node' && this.activeHighlight instanceof HighlightPath && this.activeHighlight.updateLineWidth ) {
 
       // Update the transform based on the transform of the node that the focusHighlight is highlighting.
       assert && assert( this.node, 'Need an active Node to update line width' );

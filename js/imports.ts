@@ -180,7 +180,7 @@ export { default as ReadingBlockUtterance } from './accessibility/voicing/Readin
 export type { ReadingBlockUtteranceOptions } from './accessibility/voicing/ReadingBlockUtterance.js';
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
 export { default as FocusManager } from './accessibility/FocusManager.js';
-export { default as FocusHighlightPath } from './accessibility/FocusHighlightPath.js';
+export { default as HighlightPath } from './accessibility/HighlightPath.js';
 export { default as FocusHighlightFromNode } from './accessibility/FocusHighlightFromNode.js';
 export type { FocusHighlightFromNodeOptions } from './accessibility/FocusHighlightFromNode.js';
 export { default as ReadingBlockHighlight } from './accessibility/voicing/ReadingBlockHighlight.js';
