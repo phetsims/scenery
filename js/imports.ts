@@ -438,7 +438,16 @@ export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js'
 export { default as BigRational } from './display/raster/cag/BigRational.js';
 export { default as BigRationalVector2 } from './display/raster/cag/BigRationalVector2.js';
 export { default as BoundsIntersectionFilter } from './display/raster/cag/BoundsIntersectionFilter.js';
+export type { default as ClippableFace } from './display/raster/cag/ClippableFace.js';
+export { default as EdgedFace } from './display/raster/cag/EdgedFace.js';
+export { default as IntegerEdge } from './display/raster/cag/IntegerEdge.js';
 export { default as IntersectionPoint } from './display/raster/cag/IntersectionPoint.js';
+export { default as PolygonalFace } from './display/raster/cag/PolygonalFace.js';
+export { default as RationalBoundary } from './display/raster/cag/RationalBoundary.js';
+export { default as RationalFace } from './display/raster/cag/RationalFace.js';
+export { default as RationalHalfEdge } from './display/raster/cag/RationalHalfEdge.js';
+export { default as RationalIntersection } from './display/raster/cag/RationalIntersection.js';
+export { default as WindingMap } from './display/raster/cag/WindingMap.js';
 
 export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.js';
 export { default as CohenSutherlandClipping } from './display/raster/clip/CohenSutherlandClipping.js';
