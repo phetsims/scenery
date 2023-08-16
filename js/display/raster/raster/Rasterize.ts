@@ -273,6 +273,46 @@ class RenderableFace {
         const center = radialGradient.start;
 
         const distanceRange = localClippableFace.getDistanceRange( center );
+
+        const isReversed = radialGradient.startRadius > radialGradient.endRadius;
+
+        const minRadius = isReversed ? radialGradient.endRadius : radialGradient.startRadius;
+        const maxRadius = isReversed ? radialGradient.startRadius : radialGradient.endRadius;
+        const stops = isReversed ? radialGradient.stops.map( stop => {
+          return new RenderGradientStop( 1 - stop.ratio, stop.program );
+        } ).reverse() : radialGradient.stops;
+
+        const deltaRadius = maxRadius - minRadius;
+        const offset = minRadius / deltaRadius;
+
+        const min = ( distanceRange.min / deltaRadius ) - offset;
+        const max = ( distanceRange.max / deltaRadius ) - offset;
+
+        const linearRanges = RenderableFace.getGradientLinearRanges( min, max, offset, radialGradient.extend, stops );
+
+        if ( linearRanges.length < 2 ) {
+          processedFaces.push( face );
+        }
+        else {
+          const splitValues = linearRanges.map( range => range.start ).slice( 1 );
+
+          // Compute clippedFaces
+          const clippedFaces: ClippableFace[] = [];
+          let remainingFace = localClippableFace;
+          for ( let i = 0; i < splitValues.length; i++ ) {
+            const splitValue = splitValues[ i ];
+
+            // TODO: get maxAngleSplit based on magnitude!!!
+            const maxAngleSplit = Math.PI / 64;
+
+            const { insideFace, outsideFace } = remainingFace.getBinaryCircularClip( center, splitValue, maxAngleSplit );
+
+            clippedFaces.push( insideFace );
+            remainingFace = outsideFace;
+          }
+          clippedFaces.push( remainingFace );
+
+        }
       }
       else {
         processedFaces.push( face );
