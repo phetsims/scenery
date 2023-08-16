@@ -12,7 +12,7 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { ActivatedReadingBlockHighlight, Display, Focus, HighlightFromNode, HighlightPath, FocusManager, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, FocusManager, HighlightFromNode, HighlightPath, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
 import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import TProperty from '../../../axon/js/TProperty.js';
@@ -795,7 +795,11 @@ export default class HighlightOverlay implements TOverlay {
         'Update should only be necessary if Node is activated with a Pointer or pointer focus is locked during interaction' );
     }
 
-    this.updateInteractiveHighlight( this.display.focusManager.lockedPointerFocusProperty.value );
+    // Prefer the trail to the 'locked' highlight
+    this.updateInteractiveHighlight(
+      this.display.focusManager.lockedPointerFocusProperty.value ||
+      this.display.focusManager.pointerFocusProperty.value
+    );
   }
 
   /**
