@@ -15,8 +15,55 @@ export default class LinearEdge {
   // corner vertices).
   // TODO: how to handle this for performance?
 
-  public constructor( public readonly startPoint: Vector2, public readonly endPoint: Vector2, public readonly containsFakeCorner: boolean = false ) {
+  public constructor(
+    public readonly startPoint: Vector2,
+    public readonly endPoint: Vector2,
+    public readonly containsFakeCorner: boolean = false // TODO: propagate fake corners
+  ) {
     assert && assert( !startPoint.equals( endPoint ) );
+  }
+
+  public static fromPolygon( polygon: Vector2[] ): LinearEdge[] {
+    const edges: LinearEdge[] = [];
+
+    for ( let i = 0; i < polygon.length; i++ ) {
+      edges.push( new LinearEdge(
+        polygon[ i ],
+        polygon[ ( i + 1 ) % polygon.length ]
+      ) );
+    }
+
+    return edges;
+  }
+
+  public static fromPolygons( polygons: Vector2[][] ): LinearEdge[] {
+    return polygons.flatMap( LinearEdge.fromPolygon );
+  }
+
+  // TODO: ideally a better version of this?
+  public static toPolygons( edges: LinearEdge[] ): Vector2[][] {
+    const polygons: Vector2[][] = [];
+
+    const remainingEdges = new Set<LinearEdge>( edges );
+
+    while ( remainingEdges.size > 0 ) {
+      const edge: LinearEdge = remainingEdges.values().next().value;
+
+      const polygon: Vector2[] = [];
+
+      let currentEdge = edge;
+      do {
+        polygon.push( currentEdge.startPoint );
+        remainingEdges.delete( currentEdge );
+        currentEdge = [ ...remainingEdges ].find( e => e.startPoint.equalsEpsilon( currentEdge.endPoint, 1e-8 ) )!; // eslint-disable-line @typescript-eslint/no-loop-func
+      } while ( currentEdge !== edge );
+
+      assert && assert( polygon.length >= 3 );
+
+      polygons.push( polygon );
+    }
+
+    return polygons;
   }
 
   // Cancelled subexpressions for fewer multiplications
