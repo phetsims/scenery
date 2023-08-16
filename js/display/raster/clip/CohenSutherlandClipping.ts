@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../../imports.js';
-import Vector2 from '../../../../dot/js/Vector2.js';
-import Bounds2 from '../../../../dot/js/Bounds2.js';
+import { scenery } from '../../../imports.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 type Code = number;
 

@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, scenery } from '../../imports.js';
-import { Shape } from '../../../../kite/js/imports.js';
-import Vector2 from '../../../../dot/js/Vector2.js';
-import Matrix4 from '../../../../dot/js/Matrix4.js';
-import Matrix3 from '../../../../dot/js/Matrix3.js';
-import Vector4 from '../../../../dot/js/Vector4.js';
-import Utils from '../../../../dot/js/Utils.js';
-import Vector3 from '../../../../dot/js/Vector3.js';
+import { Color, scenery } from '../../../imports.js';
+import { Shape } from '../../../../../kite/js/imports.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import Matrix4 from '../../../../../dot/js/Matrix4.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import Vector4 from '../../../../../dot/js/Vector4.js';
+import Utils from '../../../../../dot/js/Utils.js';
+import Vector3 from '../../../../../dot/js/Vector3.js';
 
 export type FillRule = 'nonzero' | 'evenodd';
 

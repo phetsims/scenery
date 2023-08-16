@@ -5,9 +5,9 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import { PolygonClipping, scenery } from '../../imports.js';
-import Vector2 from '../../../../dot/js/Vector2.js';
-import Bounds2 from '../../../../dot/js/Bounds2.js';
+import { PolygonClipping, scenery } from '../../../imports.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 const bounds00 = new Bounds2( 0, 0, 1, 1 );
 const bounds10 = bounds00.shiftedXY( 1, 0 );

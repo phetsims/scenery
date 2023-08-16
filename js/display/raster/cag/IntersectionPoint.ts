@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, scenery } from '../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, scenery } from '../../../imports.js';
 
 export default class IntersectionPoint {
   public constructor( public t0: BigRational, public t1: BigRational, public point: BigRationalVector2 ) {}

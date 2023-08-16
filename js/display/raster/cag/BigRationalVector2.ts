@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, scenery } from '../../imports.js';
+import { BigRational, scenery } from '../../../imports.js';
 
 export default class BigRationalVector2 {
   public constructor( public x: BigRational, public y: BigRational ) {}

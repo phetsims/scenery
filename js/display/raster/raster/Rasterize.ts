@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, LinearEdge, PolygonClipping, RenderColor, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery } from '../../imports.js';
-import { RenderPath } from './RenderProgram.js';
-import Bounds2 from '../../../../dot/js/Bounds2.js';
-import Range from '../../../../dot/js/Range.js';
-import Utils from '../../../../dot/js/Utils.js';
-import Vector2 from '../../../../dot/js/Vector2.js';
-import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import Vector4 from '../../../../dot/js/Vector4.js';
+import { BigIntVector2, BigRational, BigRationalVector2, IntersectionPoint, LinearEdge, PolygonClipping, RenderColor, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { RenderPath } from '../render-program/RenderProgram.js';
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
+import Range from '../../../../../dot/js/Range.js';
+import Utils from '../../../../../dot/js/Utils.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
+import Vector4 from '../../../../../dot/js/Vector4.js';
 
 let debugData: Record<string, IntentionalAny> | null = null;
 

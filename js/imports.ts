@@ -431,20 +431,25 @@ export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js'
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
 export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundOverlay.js';
 
-export { default as BigIntVector2 } from './display/raster/BigIntVector2.js';
-export { default as BigRational } from './display/raster/BigRational.js';
-export { default as BigRationalVector2 } from './display/raster/BigRationalVector2.js';
-export { default as BoundsIntersectionFilter } from './display/raster/BoundsIntersectionFilter.js';
-export { default as ClipSimplifier } from './display/raster/ClipSimplifier.js';
-export { default as CohenSutherlandClipping } from './display/raster/CohenSutherlandClipping.js';
-export { default as IntersectionPoint } from './display/raster/IntersectionPoint.js';
-export { default as LinearEdge } from './display/raster/LinearEdge.js';
-export { default as PolygonClipping } from './display/raster/PolygonClipping.js';
-export { default as PolygonMitchellNetravali } from './display/raster/PolygonMitchellNetravali.js';
-export { default as Rasterize } from './display/raster/Rasterize.js';
-export { default as RenderProgram, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialBlend, RenderRadialGradient } from './display/raster/RenderProgram.js';
-export type { FillRule, RenderComposeType, RenderBlendType, RenderExtend } from './display/raster/RenderProgram.js';
-export { default as Snippet } from './display/raster/Snippet.js';
+export { default as RenderProgram, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialBlend, RenderRadialGradient } from './display/raster/render-program/RenderProgram.js';
+export type { FillRule, RenderComposeType, RenderBlendType, RenderExtend } from './display/raster/render-program/RenderProgram.js';
+
+export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js';
+export { default as BigRational } from './display/raster/cag/BigRational.js';
+export { default as BigRationalVector2 } from './display/raster/cag/BigRationalVector2.js';
+export { default as BoundsIntersectionFilter } from './display/raster/cag/BoundsIntersectionFilter.js';
+export { default as IntersectionPoint } from './display/raster/cag/IntersectionPoint.js';
+
+export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.js';
+export { default as CohenSutherlandClipping } from './display/raster/clip/CohenSutherlandClipping.js';
+export { default as PolygonClipping } from './display/raster/clip/PolygonClipping.js';
+
+export { default as Snippet } from './display/raster/webgpu/Snippet.js';
+
+export { default as PolygonMitchellNetravali } from './display/raster/raster/PolygonMitchellNetravali.js';
+export { default as Rasterize } from './display/raster/raster/Rasterize.js';
+
+export { default as LinearEdge } from './display/raster/util/LinearEdge.js';
 
 export { default as Instance } from './display/Instance.js';
 export type { default as TOverlay } from './overlays/TOverlay.js';

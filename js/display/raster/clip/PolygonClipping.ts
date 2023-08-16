@@ -5,9 +5,9 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import Vector2 from '../../../../dot/js/Vector2.js';
-import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { ClipSimplifier, LinearEdge, scenery } from '../../imports.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
+import { ClipSimplifier, LinearEdge, scenery } from '../../../imports.js';
 
 // TODO: parallelize this (should be possible)
 

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../../imports.js';
+import { scenery } from '../../../imports.js';
 
 export default class BigIntVector2 {
   public constructor( public x: bigint, public y: bigint ) {}
