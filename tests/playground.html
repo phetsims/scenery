@@ -1122,7 +1122,7 @@ an UI and Display made for visual testing and debugging.
         new phet.dot.Vector2( 0.5, 0.75 ),
         new phet.dot.Vector2( 0, 1 ),
         new phet.dot.Vector2( 0, 0.5 ),
-        new phet.dot.Vector2( 0.5, 0.5 )
+        new phet.dot.Vector2( 0.77, 0.6 )
       ];
       // const polygon = [
       //   new phet.dot.Vector2( 0, 0 ),
@@ -1138,9 +1138,11 @@ an UI and Display made for visual testing and debugging.
 
       const radius = 0.3;
       const center = phet.dot.v2( 0.5, 0.5 );
+      // const maxAngle = Math.PI / 32;
+      const maxAngle = Math.PI / 4;
       // const center = phet.dot.v2( 0.25, 0.25 );
 
-      phet.scenery.PolygonClipping.binaryCircularClipEdges( edges, center, radius, Math.PI / 32, left, right );
+      phet.scenery.PolygonClipping.binaryCircularClipEdges( edges, center, radius, maxAngle, left, right );
 
       left = phet.scenery.LinearEdge.withOppositesRemoved( left );
       right = phet.scenery.LinearEdge.withOppositesRemoved( right );

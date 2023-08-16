@@ -826,6 +826,16 @@ export default class PolygonClipping {
     inside: LinearEdge[] = [], // Will append into this (for performance)
     outside: LinearEdge[] = [] // Will append into this (for performance)
   ): void {
+
+    // If we inscribed a circle inside a regular polygon split at angle `maxAngleSplit`, we'd have this radius.
+    // Because we're turning our circular arcs into line segments at the end, we need to make sure that content inside
+    // the circle doesn't go OUTSIDE the "inner" polygon (in that sliver between the circle and regular polygon).
+    // We'll do that by adding "critical angles" for any points between the radius and inradus, so that our polygonal
+    // approximation of the circle has a split there.
+    // inradius = r cos( pi / n ) for n segments
+    // n = 2pi / maxAngleSplit
+    const inradius = radius * Math.cos( 0.5 * maxAngleSplit );
+
     const insideCircularEdges: CircularEdge[] = [];
 
     // between [-pi,pi], from atan2, tracked so we can turn the arcs piecewise-linear in a consistent fashion later
@@ -833,6 +843,16 @@ export default class PolygonClipping {
 
     const processInternal = ( edge: LinearEdge ) => {
       inside.push( edge );
+
+      const localStart = edge.startPoint.minus( center );
+      const localEnd = edge.endPoint.minus( center );
+
+      if ( localStart.magnitude > inradius ) {
+        angles.push( localStart.angle );
+      }
+      if ( localEnd.magnitude > inradius ) {
+        angles.push( localEnd.angle );
+      }
     };
 
     const processExternal = ( edge: LinearEdge ) => {
