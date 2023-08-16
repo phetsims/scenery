@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderColor, RenderExtend, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderColor, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, RenderRadialGradient, scenery, WindingMap } from '../../../imports.js';
 import { RenderPath } from '../render-program/RenderProgram.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
@@ -44,6 +44,106 @@ class RenderableFace {
     public readonly renderProgram: RenderProgram,
     public readonly bounds: Bounds2
   ) {}
+
+  public static getGradientLinearRanges( min: number, max: number, offset: number, extend: RenderExtend, stops: RenderGradientStop[] ): RenderLinearRange[] {
+    const unitRanges: RenderLinearRange[] = [];
+    if ( stops[ 0 ].ratio > 0 ) {
+      unitRanges.push( new RenderLinearRange(
+        0,
+        stops[ 0 ].ratio,
+        stops[ 0 ].program,
+        stops[ 0 ].program
+      ) );
+    }
+    for ( let i = 0; i < stops.length - 1; i++ ) {
+      const start = stops[ i ];
+      const end = stops[ i + 1 ];
+
+      unitRanges.push( new RenderLinearRange(
+        start.ratio,
+        end.ratio,
+        start.program,
+        end.program
+      ) );
+    }
+    if ( stops[ stops.length - 1 ].ratio < 1 ) {
+      unitRanges.push( new RenderLinearRange(
+        stops[ stops.length - 1 ].ratio,
+        1,
+        stops[ stops.length - 1 ].program,
+        stops[ stops.length - 1 ].program
+      ) );
+    }
+    const reversedUnitRanges: RenderLinearRange[] = unitRanges.map( r => r.getUnitReversed() ).reverse();
+
+    // Our used linear ranges
+    const linearRanges: RenderLinearRange[] = [];
+
+    const addSectionRanges = ( sectionOffset: number, reversed: boolean ): void => {
+      // now relative to our section!
+      const sectionMin = min - sectionOffset;
+      const sectionMax = max - sectionOffset;
+
+      const ranges = reversed ? reversedUnitRanges : unitRanges;
+      ranges.forEach( range => {
+        if ( sectionMin < range.end && sectionMax > range.start ) {
+          linearRanges.push( range.withOffset( sectionOffset + offset ) );
+        }
+      } );
+    };
+
+    if ( extend === RenderExtend.Pad ) {
+      if ( min < 0 ) {
+        const firstProgram = stops[ 0 ].program;
+        linearRanges.push( new RenderLinearRange(
+          Number.NEGATIVE_INFINITY,
+          offset,
+          firstProgram,
+          firstProgram
+        ) );
+      }
+      if ( min <= 1 && max >= 0 ) {
+        addSectionRanges( 0, false );
+      }
+      if ( max > 1 ) {
+        const lastProgram = stops[ stops.length - 1 ].program;
+        linearRanges.push( new RenderLinearRange(
+          1 + offset,
+          Number.POSITIVE_INFINITY,
+          lastProgram,
+          lastProgram
+        ) );
+      }
+    }
+    else {
+      const isReflect = extend === RenderExtend.Reflect;
+
+      const floorMin = Math.floor( min );
+      const ceilMax = Math.ceil( max );
+
+      for ( let i = floorMin; i < ceilMax; i++ ) {
+        addSectionRanges( i, isReflect ? i % 2 === 0 : false );
+      }
+    }
+
+    // Merge adjacent ranges with the same (constant) program
+    for ( let i = 0; i < linearRanges.length - 1; i++ ) {
+      const range = linearRanges[ i ];
+      const nextRange = linearRanges[ i + 1 ];
+
+      if ( range.startProgram === range.endProgram && nextRange.startProgram === nextRange.endProgram && range.startProgram === nextRange.startProgram ) {
+        linearRanges.splice( i, 2, new RenderLinearRange(
+          range.start,
+          nextRange.end,
+          range.startProgram,
+          range.startProgram
+        ) );
+        i--;
+      }
+    }
+
+    return linearRanges;
+  }
 
   public splitLinearGradients(): RenderableFace[] {
     const processedFaces: RenderableFace[] = [];
@@ -85,101 +185,7 @@ class RenderableFace {
         const min = dotRange.min - offset;
         const max = dotRange.max - offset;
 
-        const unitRanges: RenderLinearRange[] = [];
-        if ( linearGradient.stops[ 0 ].ratio > 0 ) {
-          unitRanges.push( new RenderLinearRange(
-            0,
-            linearGradient.stops[ 0 ].ratio,
-            linearGradient.stops[ 0 ].program,
-            linearGradient.stops[ 0 ].program
-          ) );
-        }
-        for ( let i = 0; i < linearGradient.stops.length - 1; i++ ) {
-          const start = linearGradient.stops[ i ];
-          const end = linearGradient.stops[ i + 1 ];
-
-          unitRanges.push( new RenderLinearRange(
-            start.ratio,
-            end.ratio,
-            start.program,
-            end.program
-          ) );
-        }
-        if ( linearGradient.stops[ linearGradient.stops.length - 1 ].ratio < 1 ) {
-          unitRanges.push( new RenderLinearRange(
-            linearGradient.stops[ linearGradient.stops.length - 1 ].ratio,
-            1,
-            linearGradient.stops[ linearGradient.stops.length - 1 ].program,
-            linearGradient.stops[ linearGradient.stops.length - 1 ].program
-          ) );
-        }
-        const reversedUnitRanges: RenderLinearRange[] = unitRanges.map( r => r.getUnitReversed() ).reverse();
-
-        // Our used linear ranges
-        const linearRanges: RenderLinearRange[] = [];
-
-        const addSectionRanges = ( sectionOffset: number, reversed: boolean ): void => {
-          // now relative to our section!
-          const sectionMin = min - sectionOffset;
-          const sectionMax = max - sectionOffset;
-
-          const ranges = reversed ? reversedUnitRanges : unitRanges;
-          ranges.forEach( range => {
-            if ( sectionMin < range.end && sectionMax > range.start ) {
-              linearRanges.push( range.withOffset( sectionOffset + offset ) );
-            }
-          } );
-        };
-
-        if ( linearGradient.extend === RenderExtend.Pad ) {
-          if ( min < 0 ) {
-            const firstProgram = linearGradient.stops[ 0 ].program;
-            linearRanges.push( new RenderLinearRange(
-              Number.NEGATIVE_INFINITY,
-              offset,
-              firstProgram,
-              firstProgram
-            ) );
-          }
-          if ( min <= 1 && max >= 0 ) {
-            addSectionRanges( 0, false );
-          }
-          if ( max > 1 ) {
-            const lastProgram = linearGradient.stops[ linearGradient.stops.length - 1 ].program;
-            linearRanges.push( new RenderLinearRange(
-              1 + offset,
-              Number.POSITIVE_INFINITY,
-              lastProgram,
-              lastProgram
-            ) );
-          }
-        }
-        else {
-          const isReflect = linearGradient.extend === RenderExtend.Reflect;
-
-          const floorMin = Math.floor( min );
-          const ceilMax = Math.ceil( max );
-
-          for ( let i = floorMin; i < ceilMax; i++ ) {
-            addSectionRanges( i, isReflect ? i % 2 === 0 : false );
-          }
-        }
-
-        // Merge adjacent ranges with the same (constant) program
-        for ( let i = 0; i < linearRanges.length - 1; i++ ) {
-          const range = linearRanges[ i ];
-          const nextRange = linearRanges[ i + 1 ];
-
-          if ( range.startProgram === range.endProgram && nextRange.startProgram === nextRange.endProgram && range.startProgram === nextRange.startProgram ) {
-            linearRanges.splice( i, 2, new RenderLinearRange(
-              range.start,
-              nextRange.end,
-              range.startProgram,
-              range.startProgram
-            ) );
-            i--;
-          }
-        }
+        const linearRanges = RenderableFace.getGradientLinearRanges( min, max, offset, linearGradient.extend, linearGradient.stops );
 
         if ( linearRanges.length < 2 ) {
           processedFaces.push( face );
@@ -230,6 +236,43 @@ class RenderableFace {
 
           unprocessedFaces.push( ...renderableFaces );
         }
+      }
+      else {
+        processedFaces.push( face );
+      }
+    }
+
+    return processedFaces;
+  }
+
+  public splitRadialGradients(): RenderableFace[] {
+    const processedFaces: RenderableFace[] = [];
+    const unprocessedFaces: RenderableFace[] = [ this ];
+
+    const findCircularRadialGradient = ( renderProgram: RenderProgram ): RenderRadialGradient | null => {
+      let result: RenderRadialGradient | null = null;
+
+      renderProgram.depthFirst( subProgram => {
+        // TODO: early exit?
+        if ( subProgram instanceof RenderRadialGradient && subProgram.start.equals( subProgram.end ) ) {
+          result = subProgram;
+        }
+      } );
+
+      return result;
+    };
+
+    while ( unprocessedFaces.length ) {
+      const face = unprocessedFaces.pop()!;
+
+      const radialGradient = findCircularRadialGradient( face.renderProgram );
+
+      if ( radialGradient ) {
+        const localClippableFace = face.face.getTransformed( radialGradient.transform.inverted() );
+
+        const center = radialGradient.start;
+
+        const distanceRange = localClippableFace.getDistanceRange( center );
       }
       else {
         processedFaces.push( face );

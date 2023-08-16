@@ -10,6 +10,7 @@ import { ClippableFace, EdgedFace, LinearEdge, PolygonClipping, scenery } from '
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 // Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
 export default class PolygonalFace implements ClippableFace {
@@ -40,6 +41,29 @@ export default class PolygonalFace implements ClippableFace {
         const dot = polygon[ j ].dot( normal );
         min = Math.min( min, dot );
         max = Math.max( max, dot );
+      }
+    }
+
+    return new Range( min, max );
+  }
+
+  public getDistanceRange( point: Vector2 ): Range {
+    let min = Number.POSITIVE_INFINITY;
+    let max = 0;
+
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+      for ( let j = 0; j < polygon.length; j++ ) {
+        const p0 = polygon[ j ];
+        const p1 = polygon[ ( j + 1 ) % polygon.length ];
+
+        const p0x = p0.x - point.x;
+        const p0y = p0.y - point.y;
+        const p1x = p1.x - point.x;
+        const p1y = p1.y - point.y;
+
+        min = Math.min( min, LinearEdge.evaluateClosestDistanceToOrigin( p0x, p0y, p1x, p1y ) );
+        max = Math.max( max, Math.sqrt( p0x * p0x + p0y * p0y ), Math.sqrt( p1x * p1x + p1y * p1y ) );
       }
     }
 
@@ -198,6 +222,17 @@ export default class PolygonalFace implements ClippableFace {
   // harder
   public getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: EdgedFace; outsideFace: EdgedFace } {
     return this.toEdgedFace().getBinaryCircularClip( center, radius, maxAngleSplit );
+  }
+
+  public getTransformed( transform: Matrix3 ): PolygonalFace {
+    if ( transform.isIdentity() ) {
+      return this;
+    }
+    else {
+      return new PolygonalFace( this.polygons.map( polygon => polygon.map( vertex => {
+        return transform.timesVector2( vertex );
+      } ) ) );
+    }
   }
 }
 

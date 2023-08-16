@@ -11,6 +11,7 @@ import { ClippableFace, LinearEdge, PolygonalFace, PolygonClipping, scenery } fr
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export default class EdgedFace implements ClippableFace {
   public constructor( public readonly edges: LinearEdge[] ) {}
@@ -46,6 +47,25 @@ export default class EdgedFace implements ClippableFace {
         min = Math.min( min, dotStart, dotEnd );
         max = Math.max( max, dotStart, dotEnd );
       }
+    }
+
+    return new Range( min, max );
+  }
+
+  public getDistanceRange( point: Vector2 ): Range {
+    let min = Number.POSITIVE_INFINITY;
+    let max = 0;
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      const p0x = edge.startPoint.x - point.x;
+      const p0y = edge.startPoint.y - point.y;
+      const p1x = edge.endPoint.x - point.x;
+      const p1y = edge.endPoint.y - point.y;
+
+      min = Math.min( min, LinearEdge.evaluateClosestDistanceToOrigin( p0x, p0y, p1x, p1y ) );
+      max = Math.max( max, Math.sqrt( p0x * p0x + p0y * p0y ), Math.sqrt( p1x * p1x + p1y * p1y ) );
     }
 
     return new Range( min, max );
@@ -191,6 +211,18 @@ export default class EdgedFace implements ClippableFace {
       insideFace: new EdgedFace( insideEdges ),
       outsideFace: new EdgedFace( outsideEdges )
     };
+  }
+
+  public getTransformed( transform: Matrix3 ): EdgedFace {
+    if ( transform.isIdentity() ) {
+      return this;
+    }
+    else {
+      return new EdgedFace( this.edges.map( edge => new LinearEdge(
+        transform.timesVector2( edge.startPoint ),
+        transform.timesVector2( edge.endPoint ),
+      ) ) );
+    }
   }
 }
 

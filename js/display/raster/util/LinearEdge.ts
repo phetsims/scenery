@@ -245,6 +245,34 @@ export default class LinearEdge {
 
     return sum;
   }
+
+  public static evaluateClosestDistanceToOrigin( p0x: number, p0y: number, p1x: number, p1y: number ): number {
+    const dx = p1x - p0x;
+    const dy = p1y - p0y;
+
+    const dMagnitude = Math.sqrt( dx * dx + dy * dy );
+
+    // Normalized start => end
+    const normalizedDX = dx / dMagnitude;
+    const normalizedDY = dy / dMagnitude;
+
+    const startU = p0x * normalizedDX + p0y * normalizedDY;
+    const endU = p1x * normalizedDX + p1y * normalizedDY;
+
+    if ( startU * endU < 0 ) {
+      // Projected origin is between start and end
+
+      // Normalized perpendicular to start => end
+      const perpendicularX = -normalizedDY;
+      const perpendicularY = normalizedDX;
+
+      return Math.abs( p0x * perpendicularX + p0y * perpendicularY );
+    }
+    else {
+      // Endpoint is the closest
+      return Math.abs( startU ) < Math.abs( endU ) ? Math.sqrt( p0x * p0x + p0y * p0y ) : Math.sqrt( p1x * p1x + p1y * p1y );
+    }
+  }
 }
 
 scenery.register( 'LinearEdge', LinearEdge );
