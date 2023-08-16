@@ -220,7 +220,7 @@ export default class EdgedFace implements ClippableFace {
     else {
       return new EdgedFace( this.edges.map( edge => new LinearEdge(
         transform.timesVector2( edge.startPoint ),
-        transform.timesVector2( edge.endPoint ),
+        transform.timesVector2( edge.endPoint )
       ) ) );
     }
   }

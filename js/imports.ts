@@ -460,8 +460,12 @@ export { default as PolygonClipping } from './display/raster/clip/PolygonClippin
 
 export { default as Snippet } from './display/raster/webgpu/Snippet.js';
 
+export { default as AccumulationRaster } from './display/raster/raster/AccumulationRaster.js';
+export { default as CombinedRaster } from './display/raster/raster/CombinedRaster.js';
+export type { default as OutputRaster } from './display/raster/raster/OutputRaster.js';
 export { default as PolygonMitchellNetravali } from './display/raster/raster/PolygonMitchellNetravali.js';
 export { default as Rasterize } from './display/raster/raster/Rasterize.js';
+export { default as RenderableFace } from './display/raster/raster/RenderableFace.js';
 
 export { default as LinearEdge } from './display/raster/util/LinearEdge.js';
 
