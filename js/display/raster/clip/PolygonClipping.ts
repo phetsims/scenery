@@ -822,21 +822,21 @@ export default class PolygonClipping {
     edges: LinearEdge[],
     center: Vector2,
     radius: number,
+    maxAngleSplit: number, // angle of the largest arc that could be converted into a linear edge
     inside: LinearEdge[] = [], // Will append into this (for performance)
     outside: LinearEdge[] = [] // Will append into this (for performance)
-  ): LinearEdge[] {
-    const insideComplexEdges: ( LinearEdge | CircularEdge )[] = [];
-    const outsideComplexEdges: ( LinearEdge | CircularEdge )[] = [];
+  ): void {
+    const insideCircularEdges: CircularEdge[] = [];
 
     // between [-pi,pi], from atan2, tracked so we can turn the arcs piecewise-linear in a consistent fashion later
-    const angles = [];
+    let angles: number[] = [];
 
     const processInternal = ( edge: LinearEdge ) => {
-      insideComplexEdges.push( edge );
+      inside.push( edge );
     };
 
     const processExternal = ( edge: LinearEdge ) => {
-      outsideComplexEdges.push( edge );
+      outside.push( edge );
 
       const localStart = edge.startPoint.minus( center );
       const localEnd = edge.endPoint.minus( center );
@@ -858,8 +858,7 @@ export default class PolygonClipping {
         angles.push( startAngle );
         angles.push( endAngle );
 
-        insideComplexEdges.push( new CircularEdge( startAngle, endAngle, !isClockwise ) );
-        outsideComplexEdges.push( new CircularEdge( endAngle, startAngle, isClockwise ) );
+        insideCircularEdges.push( new CircularEdge( startAngle, endAngle, !isClockwise ) );
       }
     };
 
@@ -936,6 +935,50 @@ export default class PolygonClipping {
       }
       else {
         assert && assert( false, 'Should not reach this point, due to the boolean constraints above' );
+      }
+    }
+
+    angles = _.uniq( angles.sort() );
+
+    for ( let i = 0; i < insideCircularEdges.length; i++ ) {
+      const edge = insideCircularEdges[ i ];
+
+      const startIndex = angles.indexOf( edge.startAngle );
+      const endIndex = angles.indexOf( edge.endAngle );
+
+      const subAngles: number[] = [];
+
+      const dirSign = edge.counterClockwise ? 1 : -1;
+      for ( let index = startIndex; index !== endIndex; index = ( index + dirSign + angles.length ) % angles.length ) {
+        subAngles.push( angles[ index ] );
+      }
+
+      for ( let j = 0; j < subAngles.length - 1; j++ ) {
+        const startAngle = subAngles[ j ];
+        const endAngle = subAngles[ j + 1 ];
+
+        // Skip "negligible" angles
+        const absDiff = Math.abs( startAngle - endAngle );
+        if ( absDiff < 1e-9 || Math.abs( absDiff - Math.PI * 2 ) < 1e-9 ) {
+          continue;
+        }
+
+        // Put our end angle in the dirSign direction from our startAngle
+        const relativeEndAngle = ( edge.counterClockwise === ( startAngle < endAngle ) ) ? endAngle : endAngle + dirSign * Math.PI * 2;
+
+        const angleDiff = relativeEndAngle - startAngle;
+        const numSegments = Math.ceil( Math.abs( angleDiff ) / maxAngleSplit );
+
+        for ( let k = 0; k < numSegments; k++ ) {
+          const startTheta = startAngle + angleDiff * ( k / numSegments );
+          const endTheta = startAngle + angleDiff * ( ( k + 1 ) / numSegments );
+
+          const startPoint = Vector2.createPolar( radius, startTheta ).add( center );
+          const endPoint = Vector2.createPolar( radius, endTheta ).add( center );
+
+          inside.push( new LinearEdge( startPoint, endPoint ) );
+          outside.push( new LinearEdge( endPoint, startPoint ) );
+        }
       }
     }
   }
