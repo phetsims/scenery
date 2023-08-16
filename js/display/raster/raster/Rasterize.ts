@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderColor, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderColor, RenderExtend, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import { RenderPath } from '../render-program/RenderProgram.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
@@ -131,14 +131,12 @@ class RenderableFace {
           } );
         };
 
-        // TODO: better enum values outside
-        // Pad
-        if ( linearGradient.extend === 0 ) {
+        if ( linearGradient.extend === RenderExtend.Pad ) {
           if ( min < 0 ) {
             const firstProgram = linearGradient.stops[ 0 ].program;
             linearRanges.push( new RenderLinearRange(
               Number.NEGATIVE_INFINITY,
-              0 + offset,
+              offset,
               firstProgram,
               firstProgram
             ) );
@@ -157,7 +155,7 @@ class RenderableFace {
           }
         }
         else {
-          const isReflect = linearGradient.extend === 1;
+          const isReflect = linearGradient.extend === RenderExtend.Reflect;
 
           const floorMin = Math.floor( min );
           const ceilMax = Math.ceil( max );
