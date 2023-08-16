@@ -8,6 +8,7 @@
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import { ClipSimplifier, LinearEdge, scenery } from '../../../imports.js';
+import Utils from '../../../../../dot/js/Utils.js';
 
 // TODO: parallelize this (should be possible)
 
@@ -816,6 +817,137 @@ export default class PolygonClipping {
 
     return false;
   }
+
+  public static binaryCircularClipEdges(
+    edges: LinearEdge[],
+    center: Vector2,
+    radius: number,
+    inside: LinearEdge[] = [], // Will append into this (for performance)
+    outside: LinearEdge[] = [] // Will append into this (for performance)
+  ): LinearEdge[] {
+    const insideComplexEdges: ( LinearEdge | CircularEdge )[] = [];
+    const outsideComplexEdges: ( LinearEdge | CircularEdge )[] = [];
+
+    // between [-pi,pi], from atan2, tracked so we can turn the arcs piecewise-linear in a consistent fashion later
+    const angles = [];
+
+    const processInternal = ( edge: LinearEdge ) => {
+      insideComplexEdges.push( edge );
+    };
+
+    const processExternal = ( edge: LinearEdge ) => {
+      outsideComplexEdges.push( edge );
+
+      const localStart = edge.startPoint.minus( center );
+      const localEnd = edge.endPoint.minus( center );
+
+      // Modify them into points of the given radius
+      localStart.multiplyScalar( radius / localStart.magnitude );
+      localEnd.multiplyScalar( radius / localEnd.magnitude );
+
+      // We'll only need to do extra work if the projected points are not equal
+      if ( !localStart.equalsEpsilon( localEnd, 1e-8 ) ) {
+        // Check to see which way we went "around" the circle
+
+        // (y, -x) perpendicular, so a clockwise pi/2 rotation
+        const isClockwise = localStart.perpendicular.dot( localEnd ) > 0;
+
+        const startAngle = localStart.angle;
+        const endAngle = localEnd.angle;
+
+        angles.push( startAngle );
+        angles.push( endAngle );
+
+        insideComplexEdges.push( new CircularEdge( startAngle, endAngle, !isClockwise ) );
+        outsideComplexEdges.push( new CircularEdge( endAngle, startAngle, isClockwise ) );
+      }
+    };
+
+    for ( let i = 0; i < edges.length; i++ ) {
+      const edge = edges[ i ];
+
+      const startInside = edge.startPoint.distance( center ) <= radius;
+      const endInside = edge.endPoint.distance( center ) <= radius;
+
+      if ( startInside && endInside ) {
+        processInternal( edge );
+        continue;
+      }
+
+      const p0x = edge.startPoint.x - center.x;
+      const p0y = edge.startPoint.y - center.y;
+      const p1x = edge.endPoint.x - center.x;
+      const p1y = edge.endPoint.y - center.y;
+      const dx = p1x - p0x;
+      const dy = p1y - p0y;
+
+      // quadratic to solve
+      const a = dx * dx + dy * dy;
+      const b = 2 * ( p0x * dx + p0y * dy );
+      const c = p0x * p0x + p0y * p0y - radius * radius;
+
+      assert && assert( a > 0, 'We should have a delta, assumed in code below' );
+
+      const roots = Utils.solveQuadraticRootsReal( a, b, c );
+
+      let isFullyExternal = false;
+
+      if ( !roots || roots.length === 0 ) {
+        isFullyExternal = true;
+      }
+      else {
+        assert && assert( roots.length === 2 );
+        assert && assert( roots[ 0 ] <= roots[ 1 ], 'Easier for us to assume root ordering' );
+        const rootA = roots[ 0 ];
+        const rootB = roots[ 1 ];
+
+        if ( rootB <= 0 || rootA >= 1 ) {
+          isFullyExternal = true;
+        }
+      }
+
+      if ( isFullyExternal ) {
+        processExternal( edge );
+        continue;
+      }
+
+      assert && assert( roots![ 0 ] <= roots![ 1 ], 'Easier for us to assume root ordering' );
+      const rootA = roots![ 0 ];
+      const rootB = roots![ 1 ];
+
+      const rootAInSegment = rootA > 0 && rootA < 1;
+      const rootBInSegment = rootB > 0 && rootB < 1;
+      const deltaPoints = edge.endPoint.minus( edge.startPoint );
+      const rootAPoint = rootAInSegment ? ( edge.startPoint.plus( deltaPoints.timesScalar( rootA ) ) ) : Vector2.ZERO; // ignore the zero, it's mainly for typing
+      const rootBPoint = rootBInSegment ? ( edge.startPoint.plus( deltaPoints.timesScalar( rootB ) ) ) : Vector2.ZERO; // ignore the zero, it's mainly for typing
+
+      if ( rootAInSegment && rootBInSegment ) {
+        processExternal( new LinearEdge( edge.startPoint, rootAPoint ) );
+        processInternal( new LinearEdge( rootAPoint, rootBPoint ) );
+        processExternal( new LinearEdge( rootBPoint, edge.endPoint ) );
+      }
+      else if ( rootAInSegment ) {
+        processExternal( new LinearEdge( edge.startPoint, rootAPoint ) );
+        processInternal( new LinearEdge( rootAPoint, edge.endPoint ) );
+      }
+      else if ( rootBInSegment ) {
+        processInternal( new LinearEdge( edge.startPoint, rootBPoint ) );
+        processExternal( new LinearEdge( rootBPoint, edge.endPoint ) );
+      }
+      else {
+        assert && assert( false, 'Should not reach this point, due to the boolean constraints above' );
+      }
+    }
+  }
+}
+
+class CircularEdge {
+  public constructor(
+    public readonly startAngle: number,
+    public readonly endAngle: number,
+    public readonly counterClockwise: boolean,
+    public readonly containsFakeCorner: boolean = false
+  ) {}
 }
 
 scenery.register( 'PolygonClipping', PolygonClipping );
