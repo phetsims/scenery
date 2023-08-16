@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderColor, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, RenderRadialGradient, scenery, WindingMap } from '../../../imports.js';
+import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderColor, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearGradient, RenderPathProgram, RenderProgram, RenderRadialBlend, RenderRadialGradient, scenery, WindingMap } from '../../../imports.js';
 import { RenderPath } from '../render-program/RenderProgram.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
@@ -59,12 +59,15 @@ class RenderableFace {
       const start = stops[ i ];
       const end = stops[ i + 1 ];
 
-      unitRanges.push( new RenderLinearRange(
-        start.ratio,
-        end.ratio,
-        start.program,
-        end.program
-      ) );
+      // If we get a zero-length range, ignore it (it's probably an immediate transition between two colors)
+      if ( start.ratio !== end.ratio ) {
+        unitRanges.push( new RenderLinearRange(
+          start.ratio,
+          end.ratio,
+          start.program,
+          end.program
+        ) );
+      }
     }
     if ( stops[ stops.length - 1 ].ratio < 1 ) {
       unitRanges.push( new RenderLinearRange(
@@ -312,6 +315,37 @@ class RenderableFace {
           }
           clippedFaces.push( remainingFace );
 
+          const renderableFaces = linearRanges.map( ( range, i ) => {
+            const clippedFace = clippedFaces[ i ];
+
+            const replacer = ( renderProgram: RenderProgram ): RenderProgram | null => {
+              if ( renderProgram !== radialGradient ) {
+                return null;
+              }
+
+              if ( range.startProgram === range.endProgram ) {
+                return range.startProgram.replace( replacer );
+              }
+              else {
+                const startRadius = minRadius + range.start * deltaRadius;
+                const endRadius = minRadius + range.end * deltaRadius;
+
+                return new RenderRadialBlend(
+                  null,
+                  radialGradient.transform,
+                  startRadius,
+                  endRadius,
+                  range.startProgram.replace( replacer ),
+                  range.endProgram.replace( replacer ),
+                  radialGradient.colorSpace
+                );
+              }
+            };
+
+            return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ), clippedFace.getBounds() );
+          } ).filter( face => face.face.getArea() > 1e-8 );
+
+          unprocessedFaces.push( ...renderableFaces );
         }
       }
       else {
@@ -1488,6 +1522,7 @@ export default class Rasterize {
     const SIMPLIFY_GRADIENTS = true;
     if ( SIMPLIFY_GRADIENTS ) {
       renderableFaces = renderableFaces.flatMap( face => face.splitLinearGradients() );
+      // renderableFaces = renderableFaces.flatMap( face => face.splitRadialGradients() );
     }
 
     const rasterWidth = bounds.width;

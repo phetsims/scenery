@@ -1175,7 +1175,9 @@ export class RenderImage extends RenderPathProgram {
 scenery.register( 'RenderImage', RenderImage );
 
 export class RenderGradientStop {
-  public constructor( public readonly ratio: number, public readonly program: RenderProgram ) {}
+  public constructor( public readonly ratio: number, public readonly program: RenderProgram ) {
+    assert && assert( ratio >= 0 && ratio <= 1 );
+  }
 
   public static evaluate(
     point: Vector2,
@@ -1225,6 +1227,11 @@ export class RenderLinearGradient extends RenderPathProgram {
     public readonly extend: RenderExtend,
     public readonly colorSpace: RenderColorSpace
   ) {
+    assert && assert( transform.isFinite() );
+    assert && assert( start.isFinite() );
+    assert && assert( end.isFinite() );
+    assert && assert( !start.equals( end ) );
+
     super( path );
 
     this.inverseTransform = transform.inverted();
@@ -1340,6 +1347,9 @@ export class RenderLinearBlend extends RenderPathProgram {
     public readonly one: RenderProgram,
     public readonly colorSpace: RenderColorSpace
   ) {
+    assert && assert( scaledNormal.isFinite() && scaledNormal.magnitude > 0 );
+    assert && assert( isFinite( offset ) );
+
     super( path );
   }
 
@@ -1626,6 +1636,10 @@ export class RenderRadialBlend extends RenderPathProgram {
     public readonly one: RenderProgram,
     public readonly colorSpace: RenderColorSpace
   ) {
+    assert && assert( transform.isFinite() );
+    assert && assert( isFinite( radius0 ) && radius0 >= 0 );
+    assert && assert( isFinite( radius1 ) && radius1 >= 0 );
+
     super( path );
 
     this.inverseTransform = transform.inverted();
@@ -1744,6 +1758,12 @@ export class RenderRadialGradient extends RenderPathProgram {
     public readonly extend: RenderExtend,
     public readonly colorSpace: RenderColorSpace
   ) {
+    assert && assert( transform.isFinite() );
+    assert && assert( start.isFinite() );
+    assert && assert( isFinite( startRadius ) && startRadius >= 0 );
+    assert && assert( end.isFinite() );
+    assert && assert( isFinite( endRadius ) && endRadius >= 0 );
+
     super( path );
   }
 
