@@ -12,7 +12,7 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, HighlightPath, FocusManager, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, HighlightFromNode, HighlightPath, FocusManager, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
 import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import TProperty from '../../../axon/js/TProperty.js';
@@ -136,11 +136,11 @@ export default class HighlightOverlay implements TOverlay {
   private readonly shapeFocusHighlightPath: HighlightPath;
 
   // Used as the default case for the highlight when the highlight value is null
-  private readonly boundsFocusHighlightPath: FocusHighlightFromNode;
+  private readonly boundsFocusHighlightPath: HighlightFromNode;
 
   // Focus highlight for 'groups' of Nodes. When descendant node has focus, ancestor with groupFocusHighlight flag will
   // have this extra focus highlight surround its local bounds
-  private readonly groupFocusHighlightPath: FocusHighlightFromNode;
+  private readonly groupFocusHighlightPath: HighlightFromNode;
 
   // A parent Node for group focus highlights so visibility of all group highlights can easily be controlled
   private readonly groupFocusHighlightParent: Node;
@@ -198,14 +198,14 @@ export default class HighlightOverlay implements TOverlay {
     this.domElement.style.pointerEvents = 'none';
 
     this.shapeFocusHighlightPath = new HighlightPath( null );
-    this.boundsFocusHighlightPath = new FocusHighlightFromNode( null, {
+    this.boundsFocusHighlightPath = new HighlightFromNode( null, {
       useLocalBounds: true
     } );
 
     this.highlightNode.addChild( this.shapeFocusHighlightPath );
     this.highlightNode.addChild( this.boundsFocusHighlightPath );
 
-    this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
+    this.groupFocusHighlightPath = new HighlightFromNode( null, {
       useLocalBounds: true,
       useGroupDilation: true,
       outerLineWidth: HighlightPath.GROUP_OUTER_LINE_WIDTH,

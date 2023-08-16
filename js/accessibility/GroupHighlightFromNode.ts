@@ -8,15 +8,15 @@
  */
 
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, HighlightPath, Node, scenery } from '../imports.js';
+import { HighlightFromNode, HighlightFromNodeOptions, HighlightPath, Node, scenery } from '../imports.js';
 
 type SelfOptions = EmptySelfOptions;
-type GroupFocusHighlightFromNodeOptions = FocusHighlightFromNodeOptions;
+type GroupHighlightFromNodeOptions = HighlightFromNodeOptions;
 
-class GroupFocusHighlightFromNode extends FocusHighlightFromNode {
-  public constructor( node: Node | null, providedOptions?: GroupFocusHighlightFromNodeOptions ) {
+class GroupHighlightFromNode extends HighlightFromNode {
+  public constructor( node: Node | null, providedOptions?: GroupHighlightFromNodeOptions ) {
 
-    const options = optionize<GroupFocusHighlightFromNodeOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
+    const options = optionize<GroupHighlightFromNodeOptions, SelfOptions, HighlightFromNodeOptions>()( {
       outerStroke: HighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR,
       innerStroke: HighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR,
 
@@ -30,5 +30,5 @@ class GroupFocusHighlightFromNode extends FocusHighlightFromNode {
   }
 }
 
-scenery.register( 'GroupFocusHighlightFromNode', GroupFocusHighlightFromNode );
-export default GroupFocusHighlightFromNode;
+scenery.register( 'GroupHighlightFromNode', GroupHighlightFromNode );
+export default GroupHighlightFromNode;

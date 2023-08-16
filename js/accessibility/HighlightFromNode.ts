@@ -3,7 +3,7 @@
 /**
  * A HighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
  * the node. The focusHighlight will update as the Node's bounds changes. Handles transformations so that when the
- * source node is transformed, the FocusHighlightFromNode will
+ * source node is transformed, the HighlightFromNode will
  * updated be as well.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -33,9 +33,9 @@ type SelfOptions = {
 };
 
 // The transformSourceNode for this highlight will be the provided Node.
-export type FocusHighlightFromNodeOptions = SelfOptions & StrictOmit<HighlightPathOptions, 'transformSourceNode'>;
+export type HighlightFromNodeOptions = SelfOptions & StrictOmit<HighlightPathOptions, 'transformSourceNode'>;
 
-class FocusHighlightFromNode extends HighlightPath {
+class HighlightFromNode extends HighlightPath {
 
   // See options for documentation.
   private readonly useLocalBounds: boolean;
@@ -49,9 +49,9 @@ class FocusHighlightFromNode extends HighlightPath {
   // Listener that sets the shape of this highlight when the Node bounds change. Referenced so it can be removed later.
   private boundsListener: null | ( ( bounds: Bounds2 ) => void ) = null;
 
-  public constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
+  public constructor( node: Node | null, providedOptions?: HighlightFromNodeOptions ) {
 
-    const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, HighlightPathOptions>()( {
+    const options = optionize<HighlightFromNodeOptions, SelfOptions, HighlightPathOptions>()( {
       useLocalBounds: true,
       dilationCoefficient: null,
       useGroupDilation: false
@@ -73,7 +73,7 @@ class FocusHighlightFromNode extends HighlightPath {
 
   /**
    * Update the focusHighlight shape on the path given the node passed in. Depending on options supplied to this
-   * FocusHighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
+   * HighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
    * that is dependent on whether or not this highlight is for group content or for the node itself. See
    * ParallelDOM.setGroupFocusHighlight() for more information on group highlights.
    */
@@ -122,6 +122,6 @@ class FocusHighlightFromNode extends HighlightPath {
   }
 }
 
-scenery.register( 'FocusHighlightFromNode', FocusHighlightFromNode );
+scenery.register( 'HighlightFromNode', HighlightFromNode );
 
-export default FocusHighlightFromNode;
+export default HighlightFromNode;

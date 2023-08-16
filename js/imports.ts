@@ -181,14 +181,14 @@ export type { ReadingBlockUtteranceOptions } from './accessibility/voicing/Readi
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
 export { default as FocusManager } from './accessibility/FocusManager.js';
 export { default as HighlightPath } from './accessibility/HighlightPath.js';
-export { default as FocusHighlightFromNode } from './accessibility/FocusHighlightFromNode.js';
-export type { FocusHighlightFromNodeOptions } from './accessibility/FocusHighlightFromNode.js';
+export { default as HighlightFromNode } from './accessibility/HighlightFromNode.js';
+export type { HighlightFromNodeOptions } from './accessibility/HighlightFromNode.js';
 export { default as ReadingBlockHighlight } from './accessibility/voicing/ReadingBlockHighlight.js';
 export { default as ReadingBlock } from './accessibility/voicing/ReadingBlock.js';
 export type { ReadingBlockOptions } from './accessibility/voicing/ReadingBlock.js';
 export { default as KeyboardZoomUtils } from './accessibility/KeyboardZoomUtils.js';
 export { default as KeyboardFuzzer } from './accessibility/KeyboardFuzzer.js';
-export { default as GroupFocusHighlightFromNode } from './accessibility/GroupFocusHighlightFromNode.js';
+export { default as GroupHighlightFromNode } from './accessibility/GroupHighlightFromNode.js';
 export { default as ActivatedReadingBlockHighlight } from './accessibility/voicing/ActivatedReadingBlockHighlight.js';
 
 

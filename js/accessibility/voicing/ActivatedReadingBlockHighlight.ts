@@ -8,21 +8,21 @@
  */
 
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, Node, scenery } from '../../imports.js';
+import { HighlightFromNode, HighlightFromNodeOptions, Node, scenery } from '../../imports.js';
 
 // constants
 const ACTIVATED_HIGHLIGHT_COLOR = 'rgba(255,255,0,0.5)';
 
 
 type SelfOptions = EmptySelfOptions;
-type ActivatedReadingBlockHighlightOptions = SelfOptions & FocusHighlightFromNodeOptions;
+type ActivatedReadingBlockHighlightOptions = SelfOptions & HighlightFromNodeOptions;
 
-class ActivatedReadingBlockHighlight extends FocusHighlightFromNode {
+class ActivatedReadingBlockHighlight extends HighlightFromNode {
   public static readonly ACTIVATED_HIGHLIGHT_COLOR = ACTIVATED_HIGHLIGHT_COLOR;
 
   public constructor( node: Node | null, providedOptions?: ActivatedReadingBlockHighlightOptions ) {
 
-    const options = optionize<ActivatedReadingBlockHighlightOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
+    const options = optionize<ActivatedReadingBlockHighlightOptions, SelfOptions, HighlightFromNodeOptions>()( {
       innerStroke: null,
       outerStroke: null,
       fill: ACTIVATED_HIGHLIGHT_COLOR

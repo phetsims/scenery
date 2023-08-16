@@ -10,15 +10,15 @@
  */
 
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, Node, scenery } from '../../imports.js';
+import { HighlightFromNode, HighlightFromNodeOptions, Node, scenery } from '../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
-type ReadingBlockHighlightOptions = SelfOptions & FocusHighlightFromNodeOptions;
+type ReadingBlockHighlightOptions = SelfOptions & HighlightFromNodeOptions;
 
-class ReadingBlockHighlight extends FocusHighlightFromNode {
+class ReadingBlockHighlight extends HighlightFromNode {
   public constructor( node: Node, providedOptions?: ReadingBlockHighlightOptions ) {
 
-    const options = optionize<ReadingBlockHighlightOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
+    const options = optionize<ReadingBlockHighlightOptions, SelfOptions, HighlightFromNodeOptions>()( {
       outerStroke: 'grey',
       innerStroke: 'black'
     }, providedOptions );
