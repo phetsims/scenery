@@ -1112,6 +1112,93 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.binaryCircularClipTest = function() {
+    setTimeout( async function() {
+      const polygon = [
+        new phet.dot.Vector2( 0, 0 ),
+        new phet.dot.Vector2( 0.5, 0 ),
+        new phet.dot.Vector2( 1, 0.5 ),
+        new phet.dot.Vector2( 1, 1 ),
+        new phet.dot.Vector2( 0.5, 0.75 ),
+        new phet.dot.Vector2( 0, 1 ),
+        new phet.dot.Vector2( 0, 0.5 ),
+        new phet.dot.Vector2( 0.5, 0.5 )
+      ];
+      // const polygon = [
+      //   new phet.dot.Vector2( 0, 0 ),
+      //   new phet.dot.Vector2( 0.5, 0 ),
+      //   new phet.dot.Vector2( 0.5, 0.5 ),
+      //   new phet.dot.Vector2( 0, 0.5 )
+      // ];
+
+      const edges = phet.scenery.LinearEdge.fromPolygon( polygon );
+
+      let left = [];
+      let right = [];
+
+      const radius = 0.3;
+      const center = phet.dot.v2( 0.5, 0.5 );
+      // const center = phet.dot.v2( 0.25, 0.25 );
+
+      phet.scenery.PolygonClipping.binaryCircularClipEdges( edges, center, radius, Math.PI / 32, left, right );
+
+      left = phet.scenery.LinearEdge.withOppositesRemoved( left );
+      right = phet.scenery.LinearEdge.withOppositesRemoved( right );
+
+      const leftPolygons = phet.scenery.LinearEdge.toPolygons( left );
+      const rightPolygons = phet.scenery.LinearEdge.toPolygons( right );
+
+      // console.log( left.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
+      // console.log( right.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
+
+      const scaledNode = new phet.scenery.Node( {
+        x: 100,
+        y: 400,
+      } );
+      scaledNode.setScaleMagnitude( 300, -300 )
+      scene.addChild( scaledNode );
+
+      scaledNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
+        stroke: 'green',
+        lineWidth: 1 / 300,
+      } ) );
+
+      // scaledNode.addChild( new phet.scenery.Circle( radius, {
+      //   translation: center,
+      //   stroke: 'black',
+      //   lineWidth: 1 / 300,
+      // } ) );
+
+      // left.forEach( edge => {
+      //   scaledNode.addChild( new phet.scenery.Line( edge.startPoint, edge.endPoint, {
+      //     stroke: 'red',
+      //     lineWidth: 1 / 300,
+      //   } ) );
+      // } );
+
+      // right.forEach( edge => {
+      //   scaledNode.addChild( new phet.scenery.Line( edge.startPoint, edge.endPoint, {
+      //     stroke: 'blue',
+      //     lineWidth: 1 / 300,
+      //   } ) );
+      // } );
+
+      scaledNode.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( leftPolygons ), {
+        fill: 'rgba(255,0,0,0.5)',
+        lineWidth: 1 / 300,
+      } ) );
+
+      scaledNode.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( rightPolygons ), {
+        fill: 'rgba(0,0,255,0.5)',
+        lineWidth: 1 / 300,
+      } ) );
+
+      display.width = 1024;
+      display.height = 1024;
+      display.updateDisplay();
+    } );
+  };
+
   window.stripeClipPolygonTest = function() {
     setTimeout( async function() {
       const polygon = [

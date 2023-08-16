@@ -938,7 +938,7 @@ export default class PolygonClipping {
       }
     }
 
-    angles = _.uniq( angles.sort() );
+    angles = _.uniq( angles.sort( ( a, b ) => a - b ) );
 
     for ( let i = 0; i < insideCircularEdges.length; i++ ) {
       const edge = insideCircularEdges[ i ];
@@ -952,6 +952,7 @@ export default class PolygonClipping {
       for ( let index = startIndex; index !== endIndex; index = ( index + dirSign + angles.length ) % angles.length ) {
         subAngles.push( angles[ index ] );
       }
+      subAngles.push( angles[ endIndex ] );
 
       for ( let j = 0; j < subAngles.length - 1; j++ ) {
         const startAngle = subAngles[ j ];

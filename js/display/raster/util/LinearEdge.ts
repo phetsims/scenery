@@ -8,6 +8,7 @@
 
 import { scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
+import { Shape } from '../../../../../kite/js/imports.js';
 
 export default class LinearEdge {
 
@@ -41,7 +42,7 @@ export default class LinearEdge {
   }
 
   // TODO: ideally a better version of this?
-  public static toPolygons( edges: LinearEdge[] ): Vector2[][] {
+  public static toPolygons( edges: LinearEdge[], epsilon = 1e-8 ): Vector2[][] {
     const polygons: Vector2[][] = [];
 
     const remainingEdges = new Set<LinearEdge>( edges );
@@ -55,7 +56,14 @@ export default class LinearEdge {
       do {
         polygon.push( currentEdge.startPoint );
         remainingEdges.delete( currentEdge );
-        currentEdge = [ ...remainingEdges ].find( e => e.startPoint.equalsEpsilon( currentEdge.endPoint, 1e-8 ) )!; // eslint-disable-line @typescript-eslint/no-loop-func
+        if ( edge.startPoint.equalsEpsilon( currentEdge.endPoint, epsilon ) ) {
+          break;
+        }
+        else {
+          currentEdge = [ ...remainingEdges ].find( candidateEdge => { // eslint-disable-line @typescript-eslint/no-loop-func
+            return candidateEdge.startPoint.equalsEpsilon( currentEdge.endPoint, epsilon );
+          } )!;
+        }
       } while ( currentEdge !== edge );
 
       assert && assert( polygon.length >= 3 );
@@ -64,6 +72,41 @@ export default class LinearEdge {
     }
 
     return polygons;
+  }
+
+  // TODO: can we go with a stronger form also, that finds everything collinear, and simplifies it?
+  public static withOppositesRemoved( edges: LinearEdge[] ): LinearEdge[] {
+    const outputEdges = [];
+    const remainingEdges = new Set<LinearEdge>( edges );
+
+    while ( remainingEdges.size > 0 ) {
+      const edge: LinearEdge = remainingEdges.values().next().value;
+      remainingEdges.delete( edge );
+
+      const opposite = [ ...remainingEdges ].find( e => e.startPoint.equalsEpsilon( edge.endPoint, 1e-8 ) && e.endPoint.equalsEpsilon( edge.startPoint, 1e-8 ) );
+      if ( opposite ) {
+        remainingEdges.delete( opposite );
+      }
+      else {
+        outputEdges.push( edge );
+      }
+    }
+
+    return outputEdges;
+  }
+
+  public static polygonsToShape( polygons: Vector2[][] ): Shape {
+    const shape = new Shape();
+
+    polygons.forEach( polygon => {
+      shape.moveToPoint( polygon[ 0 ] );
+      for ( let i = 1; i < polygon.length; i++ ) {
+        shape.lineToPoint( polygon[ i ] );
+      }
+      shape.close();
+    } );
+
+    return shape;
   }
 
   // Cancelled subexpressions for fewer multiplications
