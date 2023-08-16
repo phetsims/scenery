@@ -61,9 +61,6 @@ export default class HighlightOverlay implements TOverlay {
   // Node with focus, modified when focus changes
   private node: Node | null = null;
 
-  // Node with the group focus highlight, will be an ancestor of this.node, modified when focus changes
-  private groupNode: Node | null = null;
-
   // A references to the highlight from the Node that is highlighted.
   private activeHighlight: Highlight = null;
 
@@ -153,7 +150,6 @@ export default class HighlightOverlay implements TOverlay {
   private readonly domFocusListener: ( focus: Focus | null ) => void;
   private readonly readingBlockTransformListener: () => void;
   private readonly focusHighlightListener: () => void;
-  private readonly groupFocusHighlightChangeListener: () => void;
   private readonly interactiveHighlightListener: () => void;
   private readonly focusHighlightsVisibleListener: () => void;
   private readonly voicingHighlightsVisibleListener: () => void;
@@ -227,7 +223,6 @@ export default class HighlightOverlay implements TOverlay {
     this.domFocusListener = this.onFocusChange.bind( this );
     this.readingBlockTransformListener = this.onReadingBlockTransformChange.bind( this );
     this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
-    this.groupFocusHighlightChangeListener = this.onFocusHighlightChange.bind( this );
     this.interactiveHighlightListener = this.onInteractiveHighlightChange.bind( this );
     this.focusHighlightsVisibleListener = this.onFocusHighlightsVisibleChange.bind( this );
     this.voicingHighlightsVisibleListener = this.onVoicingHighlightsVisibleChange.bind( this );
@@ -554,15 +549,10 @@ export default class HighlightOverlay implements TOverlay {
       const highlight = node.groupFocusHighlight;
       if ( highlight ) {
 
-        this.groupNode = node;
-
         // update transform tracker
         const trailToParent = trail.upToNode( node );
         this.groupTransformTracker = new TransformTracker( trailToParent );
         this.groupTransformTracker.addListener( this.transformListener );
-
-        // Will redraw highlights if the group highlight changes.
-        node.focusHighlightChangedEmitter.addListener( this.groupFocusHighlightChangeListener );
 
         if ( typeof highlight === 'boolean' ) {
 
@@ -643,10 +633,6 @@ export default class HighlightOverlay implements TOverlay {
       this.groupTransformTracker!.removeListener( this.transformListener );
       this.groupTransformTracker!.dispose();
       this.groupTransformTracker = null;
-
-      assert && assert( this.groupNode, 'A groupNode is needed to remove listeners, where did it go?' );
-      this.groupNode!.focusHighlightChangedEmitter.removeListener( this.groupFocusHighlightChangeListener );
-      this.groupNode = null;
     }
   }
 

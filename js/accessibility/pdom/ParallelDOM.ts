@@ -1589,7 +1589,6 @@ export default class ParallelDOM extends PhetioObject {
    */
   public setGroupFocusHighlight( groupHighlight: Node | boolean ): void {
     this._groupFocusHighlight = groupHighlight;
-    this.focusHighlightChangedEmitter.emit();
   }
 
   public set groupFocusHighlight( groupHighlight: Node | boolean ) { this.setGroupFocusHighlight( groupHighlight ); }
