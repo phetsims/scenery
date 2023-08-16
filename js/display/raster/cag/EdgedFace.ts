@@ -1,7 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Test rasterization
+ * A ClippableFace from a set of line segment edges. Should still represent multiple closed loops, but it is not
+ * explicit.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

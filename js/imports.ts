@@ -431,8 +431,13 @@ export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js'
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
 export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundOverlay.js';
 
-export { default as RenderProgram, RenderComposeType, RenderBlendType, RenderExtend, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialBlend, RenderRadialGradient } from './display/raster/render-program/RenderProgram.js';
-export type { FillRule } from './display/raster/render-program/RenderProgram.js';
+export { default as constantTrue } from './display/raster/render-program/constantTrue.js';
+export { default as RenderBlendType } from './display/raster/render-program/RenderBlendType.js';
+export { default as RenderColorSpace } from './display/raster/render-program/RenderColorSpace.js';
+export { default as RenderComposeType } from './display/raster/render-program/RenderComposeType.js';
+export { default as RenderExtend } from './display/raster/render-program/RenderExtend.js';
+export { default as RenderProgram, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialBlend, RenderRadialGradient } from './display/raster/render-program/RenderProgram.js';
+export type { default as FillRule } from './display/raster/render-program/FillRule.js';
 
 export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js';
 export { default as BigRational } from './display/raster/cag/BigRational.js';

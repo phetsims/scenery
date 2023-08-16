@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Test rasterization
+ * Represents a face with a main (positive-oriented) boundary and zero or more (negative-oriented) holes.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, scenery } from '../../../imports.js';
+import { Color, constantTrue, FillRule, RenderBlendType, RenderColorSpace, RenderComposeType, RenderExtend, scenery } from '../../../imports.js';
 import { Shape } from '../../../../../kite/js/imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
@@ -14,51 +14,6 @@ import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
-
-export type FillRule = 'nonzero' | 'evenodd';
-
-export enum RenderComposeType {
-  Over = 0,
-  In = 1,
-  Out = 2,
-  Atop = 3,
-  Xor = 4,
-  Plus = 5,
-  PlusLighter = 6
-}
-
-export enum RenderBlendType {
-  Normal = 0,
-  Multiply = 1,
-  Screen = 2,
-  Overlay = 3,
-  Darken = 4,
-  Lighten = 5,
-  ColorDodge = 6,
-  ColorBurn = 7,
-  HardLight = 8,
-  SoftLight = 9,
-  Difference = 10,
-  Exclusion = 11,
-  Hue = 12,
-  Saturation = 13,
-  Color = 14,
-  Luminosity = 15
-}
-
-export enum RenderExtend {
-  Pad = 0,
-  Reflect = 1,
-  Repeat = 2
-}
-
-export enum RenderColorSpace {
-  LinearUnpremultipliedSRGB = 0,
-  SRGB = 1,
-  Oklab = 2
-}
-
-const alwaysTrue: ( renderPath: RenderPath ) => boolean = _.constant( true );
 
 export default abstract class RenderProgram {
   public abstract isFullyTransparent(): boolean;
@@ -198,7 +153,7 @@ export class RenderBlendCompose extends RenderProgram {
     callback( this );
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     // a OP b
     const a = this.a.simplify( pathTest );
     const b = this.b.simplify( pathTest );
@@ -356,7 +311,7 @@ export class RenderBlendCompose extends RenderProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     const a = this.a.evaluate( point, pathTest );
     const b = this.b.evaluate( point, pathTest );
 
@@ -735,7 +690,7 @@ export class RenderFilter extends RenderPathProgram {
   }
 
   // TODO: inspect matrix to see when it will maintain transparency!
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
 
     if ( this.isInPath( pathTest ) ) {
@@ -761,7 +716,7 @@ export class RenderFilter extends RenderPathProgram {
     return false;
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     const source = this.program.evaluate( point, pathTest );
 
     if ( this.isInPath( pathTest ) ) {
@@ -828,7 +783,7 @@ export class RenderAlpha extends RenderPathProgram {
     return this.alpha === 1 && this.program.isFullyOpaque();
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
     if ( program.isFullyTransparent() || this.alpha === 0 ) {
       return RenderColor.TRANSPARENT;
@@ -848,7 +803,7 @@ export class RenderAlpha extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     const source = this.program.evaluate( point, pathTest );
 
     if ( this.isInPath( pathTest ) ) {
@@ -902,7 +857,7 @@ export class RenderColor extends RenderPathProgram {
     }
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     if ( this.isInPath( pathTest ) ) {
       return new RenderColor( null, this.color );
     }
@@ -911,7 +866,7 @@ export class RenderColor extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     if ( this.isInPath( pathTest ) ) {
       return this.color;
     }
@@ -1135,7 +1090,7 @@ export class RenderImage extends RenderPathProgram {
     }
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     if ( this.isInPath( pathTest ) ) {
       return new RenderImage( null, this.transform, this.image, this.extendX, this.extendY );
     }
@@ -1144,7 +1099,7 @@ export class RenderImage extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
@@ -1227,7 +1182,7 @@ export class RenderGradientStop {
     stops: RenderGradientStop[],
     t: number,
     colorSpace: RenderColorSpace,
-    pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
     let i = -1;
     while ( i < stops.length - 1 && stops[ i + 1 ].ratio < t ) {
@@ -1334,7 +1289,7 @@ export class RenderLinearGradient extends RenderPathProgram {
     return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( pathTest ) ) );
 
     if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
@@ -1349,7 +1304,7 @@ export class RenderLinearGradient extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
@@ -1452,7 +1407,7 @@ export class RenderLinearBlend extends RenderPathProgram {
     return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const zero = this.zero.simplify( pathTest );
     const one = this.one.simplify( pathTest );
 
@@ -1468,7 +1423,7 @@ export class RenderLinearBlend extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
@@ -1601,7 +1556,7 @@ class RadialGradientLogic {
     this.isSwapped = isSwapped;
   }
 
-  public evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     const focal_x = this.focal_x;
     const radius = this.radius;
     const kind = this.kind;
@@ -1724,7 +1679,7 @@ export class RenderRadialBlend extends RenderPathProgram {
     return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const zero = this.zero.simplify( pathTest );
     const one = this.one.simplify( pathTest );
 
@@ -1740,7 +1695,7 @@ export class RenderRadialBlend extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
@@ -1846,7 +1801,7 @@ export class RenderRadialGradient extends RenderPathProgram {
     return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): RenderProgram {
+  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( pathTest ) ) );
 
     if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
@@ -1861,7 +1816,7 @@ export class RenderRadialGradient extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = alwaysTrue ): Vector4 {
+  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
     if ( this.logic === null ) {
       this.logic = new RadialGradientLogic( this );
     }

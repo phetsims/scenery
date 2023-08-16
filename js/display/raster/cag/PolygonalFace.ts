@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Test rasterization
+ * A ClippableFace from a set of polygons (each one is a closed loop of Vector2s)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

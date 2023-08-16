@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Test rasterization
+ * An interface for clippable/subdivide-able faces, with defined bounds and area.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
