@@ -43,9 +43,11 @@ export default class LinearEdge {
 
   // TODO: ideally a better version of this?
   public static toPolygons( edges: LinearEdge[], epsilon = 1e-8 ): Vector2[][] {
+    const filteredEdges = LinearEdge.withOppositesRemoved( edges );
+
     const polygons: Vector2[][] = [];
 
-    const remainingEdges = new Set<LinearEdge>( edges );
+    const remainingEdges = new Set<LinearEdge>( filteredEdges );
 
     while ( remainingEdges.size > 0 ) {
       const edge: LinearEdge = remainingEdges.values().next().value;
@@ -75,7 +77,7 @@ export default class LinearEdge {
   }
 
   // TODO: can we go with a stronger form also, that finds everything collinear, and simplifies it?
-  public static withOppositesRemoved( edges: LinearEdge[] ): LinearEdge[] {
+  public static withOppositesRemoved( edges: LinearEdge[], epsilon = 1e-8 ): LinearEdge[] {
     const outputEdges = [];
     const remainingEdges = new Set<LinearEdge>( edges );
 
@@ -83,7 +85,10 @@ export default class LinearEdge {
       const edge: LinearEdge = remainingEdges.values().next().value;
       remainingEdges.delete( edge );
 
-      const opposite = [ ...remainingEdges ].find( e => e.startPoint.equalsEpsilon( edge.endPoint, 1e-8 ) && e.endPoint.equalsEpsilon( edge.startPoint, 1e-8 ) );
+      const opposite = [ ...remainingEdges ].find( candidateEdge => {
+        return candidateEdge.startPoint.equalsEpsilon( edge.endPoint, epsilon ) &&
+               candidateEdge.endPoint.equalsEpsilon( edge.startPoint, epsilon );
+      } );
       if ( opposite ) {
         remainingEdges.delete( opposite );
       }

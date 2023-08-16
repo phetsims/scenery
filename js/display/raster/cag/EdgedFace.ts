@@ -7,13 +7,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, LinearEdge, PolygonClipping, scenery } from '../../../imports.js';
+import { ClippableFace, LinearEdge, PolygonalFace, PolygonClipping, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 
 export default class EdgedFace implements ClippableFace {
   public constructor( public readonly edges: LinearEdge[] ) {}
+
+  public toPolygonalFace( epsilon = 1e-8 ): PolygonalFace {
+    return new PolygonalFace( LinearEdge.toPolygons( this.edges, epsilon ) );
+  }
 
   public getBounds(): Bounds2 {
     const result = Bounds2.NOTHING.copy();
@@ -175,6 +179,18 @@ export default class EdgedFace implements ClippableFace {
     }
 
     return edgesCollection.map( edges => new EdgedFace( edges ) );
+  }
+
+  public getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: EdgedFace; outsideFace: EdgedFace } {
+    const insideEdges: LinearEdge[] = [];
+    const outsideEdges: LinearEdge[] = [];
+
+    PolygonClipping.binaryCircularClipEdges( this.edges, center, radius, maxAngleSplit, insideEdges, outsideEdges );
+
+    return {
+      insideFace: new EdgedFace( insideEdges ),
+      outsideFace: new EdgedFace( outsideEdges )
+    };
   }
 }
 

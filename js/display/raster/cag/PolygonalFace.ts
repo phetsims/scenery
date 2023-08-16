@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonClipping, scenery } from '../../../imports.js';
+import { ClippableFace, EdgedFace, LinearEdge, PolygonClipping, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -14,6 +14,10 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
 // Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
 export default class PolygonalFace implements ClippableFace {
   public constructor( public readonly polygons: Vector2[][] ) {}
+
+  public toEdgedFace(): EdgedFace {
+    return new EdgedFace( LinearEdge.fromPolygons( this.polygons ) );
+  }
 
   public getBounds(): Bounds2 {
     const result = Bounds2.NOTHING.copy();
@@ -188,6 +192,12 @@ export default class PolygonalFace implements ClippableFace {
     }
 
     return polygonsCollection.map( polygons => new PolygonalFace( polygons ) );
+  }
+
+  // NOTE: switches to EdgedFaces! Could probably implement the binary circular clip for polygons, but it seems a bit
+  // harder
+  public getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: EdgedFace; outsideFace: EdgedFace } {
+    return this.toEdgedFace().getBinaryCircularClip( center, radius, maxAngleSplit );
   }
 }
 
