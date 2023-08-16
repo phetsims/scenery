@@ -260,8 +260,15 @@ export default class RenderableFace {
         const deltaRadius = maxRadius - minRadius;
         const offset = minRadius / deltaRadius;
 
-        const min = ( distanceRange.min / deltaRadius ) - offset;
-        const max = ( distanceRange.max / deltaRadius ) - offset;
+        const radiusToStop = ( radius: number ): number => {
+          return ( radius / deltaRadius ) - offset;
+        };
+        const stopToRadius = ( ratio: number ): number => {
+          return ( ratio + offset ) * deltaRadius;
+        };
+
+        const min = radiusToStop( distanceRange.min );
+        const max = radiusToStop( distanceRange.max );
 
         const linearRanges = RenderableFace.getGradientLinearRanges( min, max, offset, radialGradient.extend, stops );
 
@@ -276,11 +283,12 @@ export default class RenderableFace {
           let remainingFace = localClippableFace;
           for ( let i = 0; i < splitValues.length; i++ ) {
             const splitValue = splitValues[ i ];
+            const splitRadius = stopToRadius( splitValue );
 
             // TODO: get maxAngleSplit based on magnitude!!!
             const maxAngleSplit = Math.PI / 64;
 
-            const { insideFace, outsideFace } = remainingFace.getBinaryCircularClip( center, splitValue, maxAngleSplit );
+            const { insideFace, outsideFace } = remainingFace.getBinaryCircularClip( center, splitRadius, maxAngleSplit );
 
             clippedFaces.push( insideFace );
             remainingFace = outsideFace;
@@ -289,6 +297,8 @@ export default class RenderableFace {
 
           const renderableFaces = linearRanges.map( ( range, i ) => {
             const clippedFace = clippedFaces[ i ];
+
+            const transformedClippedFace = clippedFace.getTransformed( radialGradient.transform );
 
             const replacer = ( renderProgram: RenderProgram ): RenderProgram | null => {
               if ( renderProgram !== radialGradient ) {
@@ -314,7 +324,8 @@ export default class RenderableFace {
               }
             };
 
-            return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ), clippedFace.getBounds() );
+            // TODO: propagate "fake" edge flags
+            return new RenderableFace( transformedClippedFace, face.renderProgram.replace( replacer ), transformedClippedFace.getBounds() );
           } ).filter( face => face.face.getArea() > 1e-8 );
 
           unprocessedFaces.push( ...renderableFaces );

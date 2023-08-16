@@ -413,6 +413,31 @@ an UI and Display made for visual testing and debugging.
     console.log( indentedLines.join( '\n' ) );
   };
 
+  window.badClipTest = function() {
+    setTimeout( async function() {
+      const xSplit = 56;
+      const minX = 54;
+      const minY = 14;
+      const maxX = 58;
+      const maxY = 16;
+
+      const edges = [
+        new phet.scenery.LinearEdge( phet.dot.v2( 55.61258850296397, 15 ), phet.dot.v2( 54, 15 ), false ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 54, 15 ), phet.dot.v2( 54, 14 ), false ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 54, 14 ), phet.dot.v2( 56, 14 ), true ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 56, 14 ), phet.dot.v2( 55.87242638405207, 14 ), true ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 55.87242638405207, 14 ), phet.dot.v2( 55.61258850296397, 14.999999999999996 ), false )
+      ];
+
+      const face = new phet.scenery.EdgedFace( edges );
+
+      const { minFace, maxFace } = face.getBinaryXClip( xSplit, ( minY + maxY ) / 2 );
+
+      console.log( maxFace.getArea() );
+      console.log( face.getClipped( new phet.dot.Bounds2( xSplit, minY, maxX, maxY ) ).getArea() );
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [
@@ -549,7 +574,7 @@ an UI and Display made for visual testing and debugging.
         new phet.dot.Vector2( 0, 0 ),
         0,
         new phet.dot.Vector2( 0, 0 ),
-        20, [
+        5, [
           new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FBDD49' ) ) ),
           new phet.scenery.RenderGradientStop( 0.2, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF8103' ) ) ),
           new phet.scenery.RenderGradientStop( 0.4, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF1C6A' ) ) ),
@@ -588,7 +613,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a ] ).transformed(
+      const program = normalBlendArray( [ back, d, e, f, a, bc ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );
 

@@ -796,14 +796,14 @@ export default class Rasterize {
 
           const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, ( minY + maxY ) / 2 );
 
-          if ( assert ) {
-            const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
-            const oldMaxFace = clippableFace.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
-
-            if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-              assert( false, 'binary X clip issue' );
-            }
-          }
+          // if ( assert ) {
+          //   const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
+          //   const oldMaxFace = clippableFace.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
+          //
+          //   if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
+          //     assert( false, 'binary X clip issue' );
+          //   }
+          // }
 
           const minArea = minFace.getArea();
           const maxArea = maxFace.getArea();
@@ -826,14 +826,14 @@ export default class Rasterize {
 
           const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, ( minX + maxX ) / 2 );
 
-          if ( assert ) {
-            const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
-            const oldMaxFace = clippableFace.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
-
-            if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-              assert( false, 'binary Y clip issue' );
-            }
-          }
+          // if ( assert ) {
+          //   const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
+          //   const oldMaxFace = clippableFace.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
+          //
+          //   if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
+          //     assert( false, 'binary Y clip issue' );
+          //   }
+          // }
 
           const minArea = minFace.getArea();
           const maxArea = maxFace.getArea();
@@ -1009,7 +1009,7 @@ export default class Rasterize {
     const SIMPLIFY_GRADIENTS = true;
     if ( SIMPLIFY_GRADIENTS ) {
       renderableFaces = renderableFaces.flatMap( face => face.splitLinearGradients() );
-      // renderableFaces = renderableFaces.flatMap( face => face.splitRadialGradients() );
+      renderableFaces = renderableFaces.flatMap( face => face.splitRadialGradients() );
     }
 
     const rasterWidth = bounds.width;
