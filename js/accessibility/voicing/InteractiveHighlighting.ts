@@ -88,6 +88,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 
       this._activationListener = {
         enter: this._onPointerEntered.bind( this ),
+        over: this._onPointerOver.bind( this ),
         move: this._onPointerMove.bind( this ),
         exit: this._onPointerExited.bind( this ),
         down: this._onPointerDown.bind( this )
@@ -252,6 +253,34 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       }
 
       super.dispose && super.dispose();
+    }
+
+    /**
+     * When the pointer goes 'over' a node (not including children), look for a group focus highlight to
+     * activate. This is most useful for InteractiveHighlighting Nodes that act as a "group" container
+     * for other nodes. When the pointer leaves a child, we get the 'exited' event on the child, immediately
+     * followed by an 'over' event on the parent. This keeps the group highlight remains visible without any flickering.
+     * The group parent must be composed with InteractiveHighlighting so that it has these event listeners.
+     */
+    private _onPointerOver( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+
+      // If there is an ancestor that is a group focus highlight that is composed with InteractiveHighlight (
+      // (should activate with pointer input)...
+      const groupHighlightNode = event.trail.nodes.find( node => ( node.groupFocusHighlight && ( node as InteractiveHighlightingNode ).isInteractiveHighlighting ) );
+      if ( groupHighlightNode ) {
+
+        // trail to the group highlight Node
+        const rootToGroupNode = event.trail.subtrailTo( groupHighlightNode );
+        const displays = Object.values( this.displays );
+        for ( let i = 0; i < displays.length; i++ ) {
+          const display = displays[ i ];
+
+          // only set focus if current Pointer focus is not defined (from a more descendant Node)
+          if ( display.focusManager.pointerFocusProperty.value === null ) {
+            display.focusManager.pointerFocusProperty.set( new Focus( display, rootToGroupNode ) );
+          }
+        }
+      }
     }
 
     /**

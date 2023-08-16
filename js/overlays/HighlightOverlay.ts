@@ -398,9 +398,12 @@ export default class HighlightOverlay implements TOverlay {
       this.interactiveHighlightsVisibleProperty
     );
 
-    // handle changes to the highlight while it is active - Since the highlight can fall back to the focus highlight
-    // watch for updates to redraw when that highlight changes as well
+    // sanity check that our Node actually uses InteractiveHighlighting
+    assert && assert( node.isInteractiveHighlighting, 'Node does not support any kind of interactive highlighting.' );
     node.interactiveHighlightChangedEmitter.addListener( this.interactiveHighlightListener );
+
+    // handle changes to the highlight while it is active - Since the highlight can fall back to the focus highlight
+    // watch for updates to redraw when that highlight changes as well.
     node.focusHighlightChangedEmitter.addListener( this.interactiveHighlightListener );
   }
 
