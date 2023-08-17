@@ -166,9 +166,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   // All the KeyGroups that are currently firing
   private readonly _activeKeyGroups: KeyGroup<Keys>[];
 
-  // Current keys pressed that are having their listeners fired now.
-  public keysPressed: Keys[number] | null = null;
-
   // True when keys are pressed down. If listenerFireTrigger is 'both', you can look at this in your callback to
   // determine if keys are pressed or released.
   public keysDown: boolean;
@@ -233,9 +230,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * Mostly required to fire with CallbackTimer since the callback cannot take arguments.
    */
   public fireCallback( event: SceneryEvent<KeyboardEvent> | null, keyGroup: KeyGroup<Keys> ): void {
-    this.keysPressed = keyGroup.naturalKeys;
-    this._callback( event, this.keysPressed, this );
-    this.keysPressed = null;
+    this._callback( event, keyGroup.naturalKeys, this );
   }
 
   /**
