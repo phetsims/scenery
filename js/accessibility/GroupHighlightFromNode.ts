@@ -1,4 +1,4 @@
-// Copyright 2018-2022, University of Colorado Boulder
+// Copyright 2018-2023, University of Colorado Boulder
 
 /**
  * A HighlightPath subtype that is based around a Node, with styling that makes it look like a group focus
