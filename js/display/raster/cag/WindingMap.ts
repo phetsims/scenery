@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../../../imports.js';
-import { RenderPath } from '../render-program/RenderProgram.js';
+import { RenderPath, scenery } from '../../../imports.js';
 
 export default class WindingMap {
   public constructor( public readonly map: Map<RenderPath, number> = new Map() ) {}

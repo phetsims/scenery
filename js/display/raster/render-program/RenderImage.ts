@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { constantTrue, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -65,12 +65,21 @@ export default class RenderImage extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
+  public override evaluate(
+    face: ClippableFace | null,
+    area: number,
+    centroid: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+  ): Vector4 {
     if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
 
-    const localPoint = this.transform.inverted().timesVector2( point );
+    const localPoint = this.transform.inverted().timesVector2( centroid );
     const tx = localPoint.x / this.image.width;
     const ty = localPoint.y / this.image.height;
     const mappedX = RenderImage.extend( this.extendX, tx );

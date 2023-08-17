@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -109,12 +109,21 @@ export default class RenderRadialGradient extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
+  public override evaluate(
+    face: ClippableFace | null,
+    area: number,
+    centroid: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+  ): Vector4 {
     if ( this.logic === null ) {
       this.logic = new RadialGradientLogic( this );
     }
 
-    return this.logic.evaluate( point, pathTest );
+    return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
   }
 
   public override toRecursiveString( indent: string ): string {
@@ -224,7 +233,16 @@ class RadialGradientLogic {
     this.isSwapped = isSwapped;
   }
 
-  public evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
+  public evaluate(
+    face: ClippableFace | null,
+    area: number,
+    centroid: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+  ): Vector4 {
     const focal_x = this.focal_x;
     const radius = this.radius;
     const kind = this.kind;
@@ -241,7 +259,7 @@ class RadialGradientLogic {
     const t_sign = Math.sign( 1 - focal_x );
 
     // Pixel-specifics
-    const local_xy = this.xform.timesVector2( point );
+    const local_xy = this.xform.timesVector2( centroid );
     const x = local_xy.x;
     const y = local_xy.y;
     const xx = x * x;
@@ -271,11 +289,11 @@ class RadialGradientLogic {
         t = 1 - t;
       }
 
-      return RenderGradientStop.evaluate( point, this.radialGradient.stops, t, this.radialGradient.colorSpace, pathTest );
+      return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.radialGradient.stops, t, this.radialGradient.colorSpace, pathTest );
     }
     else {
       // Invalid is a checkerboard red/yellow
-      return ( Utils.roundSymmetric( point.x ) + Utils.roundSymmetric( point.y ) ) % 2 === 0 ? new Vector4( 1, 0, 0, 1 ) : new Vector4( 1, 1, 0, 1 );
+      return ( Utils.roundSymmetric( centroid.x ) + Utils.roundSymmetric( centroid.y ) ) % 2 === 0 ? new Vector4( 1, 0, 0, 1 ) : new Vector4( 1, 1, 0, 1 );
     }
   }
 }

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -116,12 +116,21 @@ export default class RenderLinearGradient extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
+  public override evaluate(
+    face: ClippableFace | null,
+    area: number,
+    centroid: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+  ): Vector4 {
     if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
 
-    const localPoint = scratchLinearGradientVector0.set( point );
+    const localPoint = scratchLinearGradientVector0.set( centroid );
     if ( !this.isIdentity ) {
       this.inverseTransform.multiplyVector2( localPoint );
     }
@@ -132,7 +141,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
     const t = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
     const mappedT = RenderImage.extend( this.extend, t );
 
-    return RenderGradientStop.evaluate( point, this.stops, mappedT, this.colorSpace, pathTest );
+    return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.stops, mappedT, this.colorSpace, pathTest );
   }
 
   public override toRecursiveString( indent: string ): string {

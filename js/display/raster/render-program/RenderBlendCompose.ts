@@ -6,12 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { constantTrue, RenderBlendType, RenderColor, RenderComposeType, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderBlendType, RenderColor, RenderComposeType, RenderPath, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
-import { RenderPath } from './RenderProgram.js';
 
 export default class RenderBlendCompose extends RenderProgram {
   public constructor(
@@ -217,9 +216,18 @@ export default class RenderBlendCompose extends RenderProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
-    const a = this.a.evaluate( point, pathTest );
-    const b = this.b.evaluate( point, pathTest );
+  public override evaluate(
+    face: ClippableFace | null,
+    area: number,
+    centroid: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+  ): Vector4 {
+    const a = this.a.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+    const b = this.b.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
 
     return RenderBlendCompose.blendCompose( a, b, this.composeType, this.blendType );
   }

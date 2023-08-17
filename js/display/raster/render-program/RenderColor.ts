@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, constantTrue, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, Color, constantTrue, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -56,7 +56,16 @@ export default class RenderColor extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
+  public override evaluate(
+    face: ClippableFace | null,
+    area: number,
+    centroid: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+  ): Vector4 {
     if ( this.isInPath( pathTest ) ) {
       return this.color;
     }

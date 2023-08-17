@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -110,25 +110,35 @@ export default class RenderLinearBlend extends RenderPathProgram {
     }
   }
 
-  public override evaluate( point: Vector2, pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): Vector4 {
+  public override evaluate(
+    face: ClippableFace | null,
+    area: number,
+    centroid: Vector2,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+  ): Vector4 {
     if ( !this.isInPath( pathTest ) ) {
       return Vector4.ZERO;
     }
 
-    const localPoint = scratchLinearBlendVector.set( point );
+    // TODO: scratch vector isn't doing anything, clear it out?
+    const localPoint = scratchLinearBlendVector.set( centroid );
 
     const t = this.scaledNormal.dot( localPoint ) - this.offset;
 
     if ( t <= 0 ) {
-      return this.zero.evaluate( point, pathTest );
+      return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
     }
     else if ( t >= 1 ) {
-      return this.one.evaluate( point, pathTest );
+      return this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
     }
     else {
       return RenderColor.ratioBlend(
-        this.zero.evaluate( point, pathTest ),
-        this.one.evaluate( point, pathTest ),
+        this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
+        this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
         t,
         this.colorSpace
       );

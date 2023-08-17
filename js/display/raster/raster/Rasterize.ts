@@ -694,7 +694,17 @@ export default class Rasterize {
       debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
     }
 
-    const color = constColor || renderProgram.evaluate( pixelFace.getCentroid( area ) );
+    // TODO: potentially cache the centroid, if we have multiple overlapping gradients?
+    // pixelFace.getCentroid( area )
+    const color = constColor || renderProgram.evaluate(
+      pixelFace,
+      area,
+      pixelFace.getCentroid( area ),
+      x,
+      y,
+      x + 1,
+      y + 1
+    );
     outputRaster.addPartialPixel( color.timesScalar( area ), x + translation.x, y + translation.y );
   }
 
@@ -719,7 +729,16 @@ export default class Rasterize {
       for ( let y = minY; y < maxY; y++ ) {
         for ( let x = minX; x < maxX; x++ ) {
           const centroid = scratchFullAreaVector.setXY( x + 0.5, y + 0.5 );
-          outputRaster.addFullPixel( renderProgram.evaluate( centroid ), x + translation.x, y + translation.y );
+          const color = renderProgram.evaluate(
+            null,
+            1,
+            centroid,
+            x,
+            y,
+            x + 1,
+            y + 1
+          );
+          outputRaster.addFullPixel( color, x + translation.x, y + translation.y );
         }
       }
     }

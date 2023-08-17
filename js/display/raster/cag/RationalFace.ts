@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EdgedFace, LinearEdge, PolygonalFace, RationalBoundary, RenderProgram, scenery, WindingMap } from '../../../imports.js';
-import { RenderPath } from '../render-program/RenderProgram.js';
+import { EdgedFace, LinearEdge, PolygonalFace, RationalBoundary, RenderPath, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 
