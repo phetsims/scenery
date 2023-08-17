@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, RenderColorSpace } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { RenderColorSpace } from '../../../imports.js';
+import Vector4 from '../../../../../dot/js/Vector4.js';
 
 type RenderImageable = {
   width: number;
@@ -15,7 +15,7 @@ type RenderImageable = {
   colorSpace: RenderColorSpace;
 
   // TODO: sampling of things, actually have methods that get samples (in any color space)
-  evaluate: ( point: Vector2 ) => Color;
+  evaluate: ( x: number, y: number ) => Vector4;
 };
 
 export default RenderImageable;

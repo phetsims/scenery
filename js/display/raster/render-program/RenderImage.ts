@@ -11,6 +11,7 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Utils from '../../../../../dot/js/Utils.js';
+import RenderColorSpace from './RenderColorSpace.js';
 
 export default class RenderImage extends RenderPathProgram {
   public constructor(
@@ -75,9 +76,19 @@ export default class RenderImage extends RenderPathProgram {
     const mappedX = RenderImage.extend( this.extendX, tx );
     const mappedY = RenderImage.extend( this.extendY, ty );
 
-    const color = this.image.evaluate( new Vector2( mappedX * this.image.width, mappedY * this.image.height ) );
+    // TODO: better sampling
+    const color = this.image.evaluate( Math.floor( mappedX * this.image.width ), Math.floor( mappedY * this.image.height ) );
 
-    return RenderColor.colorToPremultipliedLinear( color );
+    switch( this.image.colorSpace ) {
+      case RenderColorSpace.LinearUnpremultipliedSRGB:
+        return color;
+      case RenderColorSpace.SRGB:
+        return RenderColor.premultiply( RenderColor.sRGBToLinear( color ) );
+      case RenderColorSpace.Oklab:
+        return RenderColor.premultiply( RenderColor.oklabToLinear( color ) );
+      default:
+        throw new Error( 'unknown color space: ' + this.image.colorSpace );
+    }
   }
 
   public override toRecursiveString( indent: string ): string {
