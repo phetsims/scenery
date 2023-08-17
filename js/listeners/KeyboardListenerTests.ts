@@ -52,8 +52,8 @@ QUnit.test( 'KeyboardListener Tests', assert => {
     }
   } );
 
-  // Test putting a key in keys that is not supported.
-  assert.throws( () => {
+  // Test putting a key in keys that is not supported (error only thrown with assertions enabled)
+  window.assert && assert.throws( () => {
     const bogusListener = new KeyboardListener( {
 
       // @ts-expect-error - Typescript should catch bad keys too
