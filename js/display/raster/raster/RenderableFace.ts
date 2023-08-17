@@ -298,7 +298,10 @@ export default class RenderableFace {
           const renderableFaces = linearRanges.map( ( range, i ) => {
             const clippedFace = clippedFaces[ i ];
 
-            const transformedClippedFace = clippedFace.getTransformed( radialGradient.transform );
+            // NOTE: We need to slightly round things for later parts to work ok.
+            // There result in very slight differences between vertex end points without rounding, and that is relevant
+            // for the accurate clipping we do later.
+            const transformedClippedFace = clippedFace.getTransformed( radialGradient.transform ).getRounded( 1e-10 );
 
             const replacer = ( renderProgram: RenderProgram ): RenderProgram | null => {
               if ( renderProgram !== radialGradient ) {

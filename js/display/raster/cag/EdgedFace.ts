@@ -12,6 +12,7 @@ import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import Utils from '../../../../../dot/js/Utils.js';
 
 export default class EdgedFace implements ClippableFace {
   public constructor( public readonly edges: LinearEdge[] ) {}
@@ -223,6 +224,20 @@ export default class EdgedFace implements ClippableFace {
         transform.timesVector2( edge.endPoint )
       ) ) );
     }
+  }
+
+  public getRounded( epsilon: number ): EdgedFace {
+    return new EdgedFace( this.edges.map( edge => new LinearEdge(
+      new Vector2(
+        Utils.roundSymmetric( edge.startPoint.x / epsilon ) * epsilon,
+        Utils.roundSymmetric( edge.startPoint.y / epsilon ) * epsilon
+      ),
+      new Vector2(
+        Utils.roundSymmetric( edge.endPoint.x / epsilon ) * epsilon,
+        Utils.roundSymmetric( edge.endPoint.y / epsilon ) * epsilon
+      ),
+      edge.containsFakeCorner
+    ) ) );
   }
 }
 

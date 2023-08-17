@@ -430,11 +430,20 @@ an UI and Display made for visual testing and debugging.
       ];
 
       const face = new phet.scenery.EdgedFace( edges );
+      const polyFace = face.toPolygonalFace();
+      console.log( polyFace );
 
       const { minFace, maxFace } = face.getBinaryXClip( xSplit, ( minY + maxY ) / 2 );
 
       console.log( maxFace.getArea() );
       console.log( face.getClipped( new phet.dot.Bounds2( xSplit, minY, maxX, maxY ) ).getArea() );
+      console.log( maxFace );
+      console.log( face.getClipped( new phet.dot.Bounds2( xSplit, minY, maxX, maxY ) ) );
+      console.log( face.getClipped( new phet.dot.Bounds2( xSplit, minY, maxX, maxY ) ) );
+
+      debugger;
+      const arr = [];
+      phet.scenery.PolygonClipping.boundsClipEdge( phet.dot.v2( 54, 15 ), phet.dot.v2( 54, 14 ), new phet.dot.Bounds2( 56, 14, 58, 16 ), arr );
     } );
   };
 

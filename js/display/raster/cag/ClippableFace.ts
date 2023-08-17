@@ -18,6 +18,7 @@ type ClippableFace = {
   getArea(): number;
   getCentroid( area: number ): Vector2;
   getTransformed( transform: Matrix3 ): ClippableFace;
+  getRounded( epsilon: number ): ClippableFace; // rounds [-epsilon/2, epsilon/2] to 0, etc.
   getClipped( bounds: Bounds2 ): ClippableFace;
   getBinaryXClip( x: number, fakeCornerY: number ): { minFace: ClippableFace; maxFace: ClippableFace };
   getBinaryYClip( y: number, fakeCornerX: number ): { minFace: ClippableFace; maxFace: ClippableFace };

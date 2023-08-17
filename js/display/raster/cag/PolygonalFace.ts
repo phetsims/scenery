@@ -11,6 +11,7 @@ import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import Utils from '../../../../../dot/js/Utils.js';
 
 // Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
 export default class PolygonalFace implements ClippableFace {
@@ -233,6 +234,15 @@ export default class PolygonalFace implements ClippableFace {
         return transform.timesVector2( vertex );
       } ) ) );
     }
+  }
+
+  public getRounded( epsilon: number ): PolygonalFace {
+    return new PolygonalFace( this.polygons.map( polygon => polygon.map( vertex => {
+      return new Vector2(
+        Utils.roundSymmetric( vertex.x / epsilon ) * epsilon,
+        Utils.roundSymmetric( vertex.y / epsilon ) * epsilon
+      );
+    } ) ) );
   }
 }
 
