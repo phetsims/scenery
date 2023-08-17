@@ -436,7 +436,20 @@ export { default as RenderBlendType } from './display/raster/render-program/Rend
 export { default as RenderColorSpace } from './display/raster/render-program/RenderColorSpace.js';
 export { default as RenderComposeType } from './display/raster/render-program/RenderComposeType.js';
 export { default as RenderExtend } from './display/raster/render-program/RenderExtend.js';
-export { default as RenderProgram, RenderBlendCompose, RenderPathProgram, RenderFilter, RenderAlpha, RenderColor, RenderImage, RenderGradientStop, RenderLinearGradient, RenderLinearBlend, RenderRadialBlend, RenderRadialGradient } from './display/raster/render-program/RenderProgram.js';
+export { default as RenderProgram } from './display/raster/render-program/RenderProgram.js';
+export { default as RenderPath } from './display/raster/render-program/RenderPath.js';
+export { default as RenderPathProgram } from './display/raster/render-program/RenderPathProgram.js';
+export { default as RenderColor } from './display/raster/render-program/RenderColor.js';
+export { default as RenderAlpha } from './display/raster/render-program/RenderAlpha.js';
+export { default as RenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
+export { default as RenderFilter } from './display/raster/render-program/RenderFilter.js';
+export { default as RenderGradientStop } from './display/raster/render-program/RenderGradientStop.js';
+export { default as RenderImage } from './display/raster/render-program/RenderImage.js';
+export type { default as RenderImageable } from './display/raster/render-program/RenderImageable.js';
+export { default as RenderLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
+export { default as RenderLinearGradient } from './display/raster/render-program/RenderLinearGradient.js';
+export { default as RenderRadialBlend } from './display/raster/render-program/RenderRadialBlend.js';
+export { default as RenderRadialGradient } from './display/raster/render-program/RenderRadialGradient.js';
 export type { default as FillRule } from './display/raster/render-program/FillRule.js';
 
 export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js';

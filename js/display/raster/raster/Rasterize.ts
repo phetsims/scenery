@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, CombinedRaster, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, OutputRaster, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderableFace, RenderColor, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
-import { RenderPath } from '../render-program/RenderProgram.js';
+import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, CombinedRaster, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, OutputRaster, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
