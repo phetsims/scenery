@@ -818,13 +818,24 @@ export default class PolygonClipping {
     return false;
   }
 
+  /**
+   * Clips a polygon (represented by unsorted LinearEdges) by a circle. This will output both the inside and outside,
+   * appending LinearEdges to the given arrays.
+   *
+   * @param edges - the edges of the polygon to clip
+   * @param center - the center of the circle
+   * @param radius - the radius of the circle
+   * @param maxAngleSplit - the maximum angle of a circular arc that will be converted into a linear edge
+   * @param inside - (OUTPUT) the edges that are inside the circle (will be appended to)
+   * @param outside - (OUTPUT) the edges that are outside the circle (will be appended to)
+   */
   public static binaryCircularClipEdges(
     edges: LinearEdge[],
     center: Vector2,
     radius: number,
-    maxAngleSplit: number, // angle of the largest arc that could be converted into a linear edge
-    inside: LinearEdge[] = [], // Will append into this (for performance)
-    outside: LinearEdge[] = [] // Will append into this (for performance)
+    maxAngleSplit: number,
+    inside: LinearEdge[] = [],
+    outside: LinearEdge[] = []
   ): void {
 
     // If we inscribed a circle inside a regular polygon split at angle `maxAngleSplit`, we'd have this radius.
@@ -836,17 +847,48 @@ export default class PolygonClipping {
     // n = 2pi / maxAngleSplit
     const inradius = radius * Math.cos( 0.5 * maxAngleSplit );
 
+    // Our general plan will be to clip by keeping things "inside" the circle, and using the duality of clipping with
+    // edges to also get the "outside" edges.
+    // The duality follows from the fact that if we have a "full" polygon represented by edges, and then we have a
+    // "subset" of it also represented by edges, then the "full - subset" difference can be represented by including
+    // both all the edges of the "full" polygon PLUS all of the edges of the "subset" polygon with their direction
+    // reversed.
+    // Additionally in general, instead of "appending" both of those lists, we can do MUCH better! Instead whenever
+    // we INCLUDE part of an original edge in the "subset", we DO NOT include it in the other disjoint polygon, and
+    // vice versa. Additionally, when we add in "new" edges (or fake ones), we need to add the REVERSE to the
+    // disjoint polygon.
+    // Thus we essentially get "dual" binary polygons for free.
+
+    // Because we are clipping to "keep the inside", any edges outside we can actually just "project" down to the circle
+    // (imagine wrapping the exterior edge around the circle). For the duality, we can output the internal/external
+    // "parts" directly to the inside/outside result arrays, but these wrapped circular projections will need to be
+    // stored for later here.
+    // Each "edge" in our input will have between 0 and 1 "internal" edges, and 0 and 2 "external" edges.
     const insideCircularEdges: CircularEdge[] = [];
+
+    // We'll also need to store "critical" angles for the future polygonalization of the circles. If we were outputting
+    // true circular edges, we could just include `insideCircularEdges`, however we want to convert it to line segments
+    // so that future stages don't have to deal with this.
+    // We'll need the angles so that those points on the circle will be exact (for ALL of the circular edges).
+    // This is because we may be wrapping back-and-forth across the circle multiple times, with different start/end
+    // angles, and we need the polygonal parts of these overlaps to be identical (to avoid precision issues later,
+    // and ESPECIALLY to avoid little polygonal bits with "negative" area where the winding orientation is flipped.
+    // There are two types of points where we'll need to store the angles:
+    // 1. Intersections with our circle (where we'll need to "split" the edge into two at that point)
+    // 2. Points where we are between the circumradius and inradius of the roughest "regular" polygon we might generate.
 
     // between [-pi,pi], from atan2, tracked so we can turn the arcs piecewise-linear in a consistent fashion later
     let angles: number[] = [];
 
+    // Process a fully-inside-the-circle part of an edge
     const processInternal = ( edge: LinearEdge ) => {
       inside.push( edge );
 
       const localStart = edge.startPoint.minus( center );
       const localEnd = edge.endPoint.minus( center );
 
+      // We're already inside the circle, so the circumradius check isn't needed. If we're inside the inradius,
+      // ensure the critical angles are added.
       if ( localStart.magnitude > inradius ) {
         angles.push( localStart.angle );
       }
@@ -855,17 +897,20 @@ export default class PolygonClipping {
       }
     };
 
+    // Process a fully-outside-the-circle part of an edge
     const processExternal = ( edge: LinearEdge ) => {
       outside.push( edge );
 
       const localStart = edge.startPoint.minus( center );
       const localEnd = edge.endPoint.minus( center );
 
-      // Modify them into points of the given radius
+      // Modify (project) them into points of the given radius.
       localStart.multiplyScalar( radius / localStart.magnitude );
       localEnd.multiplyScalar( radius / localEnd.magnitude );
 
-      // We'll only need to do extra work if the projected points are not equal
+      // Handle projecting the edge to the circle.
+      // We'll only need to do extra work if the projected points are not equal. If we had a line that was pointed
+      // toward the center of the circle, it would project down to a single point, and we wouldn't have any contribution.
       if ( !localStart.equalsEpsilon( localEnd, 1e-8 ) ) {
         // Check to see which way we went "around" the circle
 

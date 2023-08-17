@@ -21,6 +21,8 @@ export default class LinearEdge {
     public readonly endPoint: Vector2,
     public readonly containsFakeCorner: boolean = false // TODO: propagate fake corners
   ) {
+    assert && assert( startPoint.isFinite() );
+    assert && assert( endPoint.isFinite() );
     assert && assert( !startPoint.equals( endPoint ) );
   }
 
@@ -246,31 +248,41 @@ export default class LinearEdge {
     return sum;
   }
 
+  /**
+   * Given a line segment, returns the distance from the origin to the closest point on the line segment.
+   */
   public static evaluateClosestDistanceToOrigin( p0x: number, p0y: number, p1x: number, p1y: number ): number {
     const dx = p1x - p0x;
     const dy = p1y - p0y;
-
     const dMagnitude = Math.sqrt( dx * dx + dy * dy );
 
-    // Normalized start => end
+    // Normalized delta (start => end)
     const normalizedDX = dx / dMagnitude;
     const normalizedDY = dy / dMagnitude;
 
+    // dot-products of our normalized delta with the start points. This is essentially projecting our start/end points
+    // onto a line that is parallel to start-end, but GOES THROUGH THE ORIGIN.
     const startU = p0x * normalizedDX + p0y * normalizedDY;
     const endU = p1x * normalizedDX + p1y * normalizedDY;
 
+    // If the signs are different, then the projection of our segment goes THROUGH the origin, which means that the
+    // closest point is in the middle of the line segment
     if ( startU * endU < 0 ) {
-      // Projected origin is between start and end
-
       // Normalized perpendicular to start => end
       const perpendicularX = -normalizedDY;
       const perpendicularY = normalizedDX;
 
+      // We can essentially look now at things from the perpendicular orientation. If we take a perpendicular vector
+      // that is normalized, its dot-product with both the start and ending point will be the distance to the line
+      // (it should be the same).
       return Math.abs( p0x * perpendicularX + p0y * perpendicularY );
     }
     else {
-      // Endpoint is the closest
-      return Math.abs( startU ) < Math.abs( endU ) ? Math.sqrt( p0x * p0x + p0y * p0y ) : Math.sqrt( p1x * p1x + p1y * p1y );
+      // Endpoint is the closest, just compute the distance to the closer point (which we can identify by its projection
+      // being closer to the origin).
+      return Math.abs( startU ) < Math.abs( endU )
+             ? Math.sqrt( p0x * p0x + p0y * p0y )
+             : Math.sqrt( p1x * p1x + p1y * p1y );
     }
   }
 }

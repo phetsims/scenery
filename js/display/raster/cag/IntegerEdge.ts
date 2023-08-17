@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A line-segment edge with integer coordinates.
+ * A line-segment edge with integer coordinates, as part of the rendering
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -24,6 +24,11 @@ export default class IntegerEdge {
     public readonly x1: number,
     public readonly y1: number
   ) {
+    assert && assert( Number.isInteger( x0 ) );
+    assert && assert( Number.isInteger( y0 ) );
+    assert && assert( Number.isInteger( x1 ) );
+    assert && assert( Number.isInteger( y1 ) );
+
     // TODO: maybe don't compute this here? Can we compute it in the other work?
     this.bounds = new Bounds2(
       Math.min( x0, x1 ),
