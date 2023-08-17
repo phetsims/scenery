@@ -205,20 +205,29 @@ export default class RenderImage extends RenderPathProgram {
           for ( let x = localBounds.minX - 1; x < localBounds.maxX + 2; x++ ) {
             const mappedX = RenderImage.extendInteger( x, this.image.width, this.extendX );
             let contribution = 0;
-            for ( let py = y - 2; py < y + 2; py++ ) {
-              for ( let px = x - 2; px < x + 2; px++ ) {
-                const pixelArea = getPixelArea( px, py );
-                if ( pixelArea > 1e-8 ) {
-                  if ( pixelArea > 1 - 1e-8 ) {
-                    contribution += PolygonMitchellNetravali.evaluateFull( x, y, px, py );
-                  }
-                  else {
-                    const pixelFace = getPixelFace( px, py );
-                    const clippedEdges = pixelFace.toEdgedFace().edges; // TODO: optimize this, especially if we are polygonal
-                    contribution += PolygonMitchellNetravali.evaluateClippedEdges( clippedEdges, x, y, px, py );
-                  }
-                }
-              }
+
+
+            // for ( let py = y - 2; py < y + 2; py++ ) {
+            //   for ( let px = x - 2; px < x + 2; px++ ) {
+            //     const pixelArea = getPixelArea( px, py );
+            //     if ( pixelArea > 1e-8 ) {
+            //       if ( pixelArea > 1 - 1e-8 ) {
+            //         contribution += PolygonMitchellNetravali.evaluateFull( x, y, px, py );
+            //       }
+            //       else {
+            //         const pixelFace = getPixelFace( px, py );
+            //         const clippedEdges = pixelFace.toEdgedFace().edges; // TODO: optimize this, especially if we are polygonal
+            //         contribution += PolygonMitchellNetravali.evaluateClippedEdges( clippedEdges, x, y, px, py );
+            //       }
+            //     }
+            //   }
+            // }
+
+            // TODO: unhack
+            const polygons = localFace.toPolygonalFace().polygons;
+            for ( let i = 0; i < polygons.length; i++ ) {
+              const polygon = polygons[ i ];
+              contribution = PolygonMitchellNetravali.evaluate( polygon, new Vector2( x, y ) );
             }
 
             if ( contribution > 1e-8 ) {
@@ -232,12 +241,6 @@ export default class RenderImage extends RenderPathProgram {
         color.multiplyScalar( 1 / localFace.getArea() );
 
         assert && assert( !this.image.isFullyOpaque || color.w >= 1 - 1e-6 );
-
-        // console.log( face.getArea(), area );
-
-        // const totalArea = _.sum( areas.map( _.sum ) );
-        //
-        // console.log( Math.abs( totalArea - localFace.getArea() ) > 1e-6 );
 
         return color;
       }
