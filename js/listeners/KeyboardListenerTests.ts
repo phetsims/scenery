@@ -91,8 +91,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   const listenerWithOverlappingKeys = new KeyboardListener( {
     keys: [ 'p', 'ctrl+p' ],
 
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFired = true;
       }
@@ -124,8 +123,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   let pFiredFromB = false;
   const listenerPreventedByHandle = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed, listener ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromA = true;
       }
@@ -135,8 +133,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
   const handlingListener = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromB = true;
 
@@ -160,8 +157,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   // test abort
   const listenerPreventedByAbort = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromA = true;
       }
@@ -171,8 +167,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
   const abortingListener = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromB = true;
 
