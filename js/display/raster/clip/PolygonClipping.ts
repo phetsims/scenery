@@ -933,11 +933,14 @@ export default class PolygonClipping {
       const startInside = edge.startPoint.distance( center ) <= radius;
       const endInside = edge.endPoint.distance( center ) <= radius;
 
+      // If the endpoints are within the circle, the entire contents will be also (shortcut)
       if ( startInside && endInside ) {
         processInternal( edge );
         continue;
       }
 
+      // Now, we'll solve for the t-values of the intersection of the line and the circle.
+      // e.g. p0 + t * ( p1 - p0 ) will be on the circle. This is solvable with a quadratic equation.
       const p0x = edge.startPoint.x - center.x;
       const p0y = edge.startPoint.y - center.y;
       const p1x = edge.endPoint.x - center.x;
@@ -956,6 +959,7 @@ export default class PolygonClipping {
 
       let isFullyExternal = false;
 
+      // If we have no roots, we're fully outside the circle!
       if ( !roots || roots.length === 0 ) {
         isFullyExternal = true;
       }
@@ -966,6 +970,12 @@ export default class PolygonClipping {
         const rootB = roots[ 1 ];
 
         if ( rootB <= 0 || rootA >= 1 ) {
+          isFullyExternal = true;
+        }
+
+        // If our roots are identical, we are TANGENT to the circle. We can consider this to be fully external, since
+        // there will not be an internal section.
+        if ( rootA === rootB ) {
           isFullyExternal = true;
         }
       }
@@ -979,6 +989,7 @@ export default class PolygonClipping {
       const rootA = roots![ 0 ];
       const rootB = roots![ 1 ];
 
+      // Compute intersection points (when the t values are in the range [0,1])
       const rootAInSegment = rootA > 0 && rootA < 1;
       const rootBInSegment = rootB > 0 && rootB < 1;
       const deltaPoints = edge.endPoint.minus( edge.startPoint );
@@ -1003,6 +1014,7 @@ export default class PolygonClipping {
       }
     }
 
+    // Sort our critical angles, so we can iterate through unique values in-order
     angles = _.uniq( angles.sort( ( a, b ) => a - b ) );
 
     for ( let i = 0; i < insideCircularEdges.length; i++ ) {
@@ -1013,6 +1025,7 @@ export default class PolygonClipping {
 
       const subAngles: number[] = [];
 
+      // Iterate (in the specific direction) through the angles we cover, and add them to our subAngles list.
       const dirSign = edge.counterClockwise ? 1 : -1;
       for ( let index = startIndex; index !== endIndex; index = ( index + dirSign + angles.length ) % angles.length ) {
         subAngles.push( angles[ index ] );
@@ -1029,12 +1042,14 @@ export default class PolygonClipping {
           continue;
         }
 
-        // Put our end angle in the dirSign direction from our startAngle
+        // Put our end angle in the dirSign direction from our startAngle (if we're counterclockwise and our angle increases,
+        // our relativeEndAngle should be greater than our startAngle, and similarly if we're clockwise and our angle decreases,
+        // our relativeEndAngle should be less than our startAngle)
         const relativeEndAngle = ( edge.counterClockwise === ( startAngle < endAngle ) ) ? endAngle : endAngle + dirSign * Math.PI * 2;
 
+        // Split our circular arc into segments!
         const angleDiff = relativeEndAngle - startAngle;
         const numSegments = Math.ceil( Math.abs( angleDiff ) / maxAngleSplit );
-
         for ( let k = 0; k < numSegments; k++ ) {
           const startTheta = startAngle + angleDiff * ( k / numSegments );
           const endTheta = startAngle + angleDiff * ( ( k + 1 ) / numSegments );
@@ -1050,6 +1065,7 @@ export default class PolygonClipping {
   }
 }
 
+// Stores data for binaryCircularClipEdges
 class CircularEdge {
   public constructor(
     public readonly startAngle: number,
