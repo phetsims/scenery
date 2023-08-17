@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../../../imports.js';
+import { ClipSimplifier, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import { Shape } from '../../../../../kite/js/imports.js';
 
@@ -54,11 +54,11 @@ export default class LinearEdge {
     while ( remainingEdges.size > 0 ) {
       const edge: LinearEdge = remainingEdges.values().next().value;
 
-      const polygon: Vector2[] = [];
+      const simplifier = new ClipSimplifier( true );
 
       let currentEdge = edge;
       do {
-        polygon.push( currentEdge.startPoint );
+        simplifier.add( currentEdge.startPoint.x, currentEdge.startPoint.y );
         remainingEdges.delete( currentEdge );
         if ( edge.startPoint.equalsEpsilon( currentEdge.endPoint, epsilon ) ) {
           break;
@@ -70,9 +70,11 @@ export default class LinearEdge {
         }
       } while ( currentEdge !== edge );
 
-      assert && assert( polygon.length >= 3 );
+      const polygon = simplifier.finalize();
 
-      polygons.push( polygon );
+      if ( polygon.length >= 3 ) {
+        polygons.push( polygon );
+      }
     }
 
     return polygons;

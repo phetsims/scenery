@@ -8,12 +8,16 @@
 
 import { scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
+import Utils from '../../../../../dot/js/Utils.js';
+
+const collinearEpsilon = 1e-9;
 
 export default class ClipSimplifier {
 
   private points: Vector2[] = [];
 
-  public constructor() {
+  // NOTE: somewhat less performance when general collinearity is checked
+  public constructor( private readonly checkGeneralCollinearity = false ) {
     // NOTHING NEEDED
   }
 
@@ -35,27 +39,37 @@ export default class ClipSimplifier {
 
       if ( this.points.length >= 2 ) {
         const secondLastPoint = this.points[ this.points.length - 2 ];
-        const secondXEquals = secondLastPoint.x === x;
-        const secondYEquals = secondLastPoint.y === y;
 
-        // If we are equal to the second-to-last point, we can just undo our last point
-        if ( secondXEquals && secondYEquals ) {
-          this.points.pop(); // TODO: pooling freeToPool?
-          return;
+        if ( this.checkGeneralCollinearity ) {
+          if ( Utils.arePointsCollinear( new Vector2( x, y ), lastPoint, secondLastPoint, collinearEpsilon ) ) {
+            lastPoint.x = x;
+            lastPoint.y = y;
+            return;
+          }
         }
+        else {
+          const secondXEquals = secondLastPoint.x === x;
+          const secondYEquals = secondLastPoint.y === y;
 
-        // X-collinearity check (if we would have 3 points with the same X, we can just remove the middle one)
-        if ( xEquals && secondXEquals ) {
-          // Instead of adding new one and removing the middle one, we can just update the last one
-          lastPoint.y = y;
-          return;
-        }
+          // If we are equal to the second-to-last point, we can just undo our last point
+          if ( secondXEquals && secondYEquals ) {
+            this.points.pop(); // TODO: pooling freeToPool?
+            return;
+          }
 
-        // Y-collinearity check (if we would have 3 points with the same Y, we can just remove the middle one)
-        if ( yEquals && secondYEquals ) {
-          // Instead of adding new one and removing the middle one, we can just update the last one
-          lastPoint.x = x;
-          return;
+          // X-collinearity check (if we would have 3 points with the same X, we can just remove the middle one)
+          if ( xEquals && secondXEquals ) {
+            // Instead of adding new one and removing the middle one, we can just update the last one
+            lastPoint.y = y;
+            return;
+          }
+
+          // Y-collinearity check (if we would have 3 points with the same Y, we can just remove the middle one)
+          if ( yEquals && secondYEquals ) {
+            // Instead of adding new one and removing the middle one, we can just update the last one
+            lastPoint.x = x;
+            return;
+          }
         }
       }
     }
@@ -88,35 +102,52 @@ export default class ClipSimplifier {
 
       // Collinearity check (the first two points, and last two points)
       if ( this.points.length >= 3 ) {
-        // NOTE: It is technically possible that this happens with exactly three points left (that are collinear).
-        // This should still work to reduce it, but will "garble" the order. We don't care, since the resulting
-        // polygon would have no area.
-        const firstPoint = this.points[ 0 ];
-        const lastPoint = this.points[ this.points.length - 1 ];
-
-        const xEquals = firstPoint.x === lastPoint.x;
-        const yEquals = firstPoint.y === lastPoint.y;
-
-        if ( xEquals || yEquals ) {
+        if ( this.checkGeneralCollinearity ) {
+          const firstPoint = this.points[ 0 ];
           const secondPoint = this.points[ 1 ];
+          const lastPoint = this.points[ this.points.length - 1 ];
           const secondLastPoint = this.points[ this.points.length - 2 ];
 
-          if (
-            ( xEquals && firstPoint.x === secondPoint.x ) ||
-            ( yEquals && firstPoint.y === secondPoint.y )
-          ) {
-            // TODO: We can record the "starting" index, and avoid repeated shifts (that are probably horrible for perf)
-            // TODO: See if this is significant, or needed for WGSL
-            this.points.shift(); // TODO: pooling freeToPool?
+          if ( Utils.arePointsCollinear( secondPoint, firstPoint, lastPoint, collinearEpsilon ) ) {
+            this.points.shift();
             changed = true;
           }
-
-          if (
-            ( xEquals && lastPoint.x === secondLastPoint.x ) ||
-            ( yEquals && lastPoint.y === secondLastPoint.y )
-          ) {
-            this.points.pop(); // TODO: pooling freeToPool?
+          if ( Utils.arePointsCollinear( firstPoint, lastPoint, secondLastPoint, collinearEpsilon ) ) {
+            this.points.pop();
             changed = true;
+          }
+        }
+        else {
+          // NOTE: It is technically possible that this happens with exactly three points left (that are collinear).
+          // This should still work to reduce it, but will "garble" the order. We don't care, since the resulting
+          // polygon would have no area.
+          const firstPoint = this.points[ 0 ];
+          const lastPoint = this.points[ this.points.length - 1 ];
+
+          const xEquals = firstPoint.x === lastPoint.x;
+          const yEquals = firstPoint.y === lastPoint.y;
+
+          if ( xEquals || yEquals ) {
+            const secondPoint = this.points[ 1 ];
+            const secondLastPoint = this.points[ this.points.length - 2 ];
+
+            if (
+              ( xEquals && firstPoint.x === secondPoint.x ) ||
+              ( yEquals && firstPoint.y === secondPoint.y )
+            ) {
+              // TODO: We can record the "starting" index, and avoid repeated shifts (that are probably horrible for perf)
+              // TODO: See if this is significant, or needed for WGSL
+              this.points.shift(); // TODO: pooling freeToPool?
+              changed = true;
+            }
+
+            if (
+              ( xEquals && lastPoint.x === secondLastPoint.x ) ||
+              ( yEquals && lastPoint.y === secondLastPoint.y )
+            ) {
+              this.points.pop(); // TODO: pooling freeToPool?
+              changed = true;
+            }
           }
         }
       }

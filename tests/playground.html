@@ -668,6 +668,7 @@ an UI and Display made for visual testing and debugging.
       const INCLUSION_DEBUG_PATH = pathF;
       const SHOW_SOLID_COLORS = false;
       const SHOW_FULL_AREAS = false;
+      const SHOW_RENDERABLE_FACES = false;
 
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
@@ -865,6 +866,15 @@ an UI and Display made for visual testing and debugging.
         debugData.areas.forEach( bounds => {
           bounds = bounds.transformed( phet.dot.Matrix3.scaling( displaySize / outputSize ) );
           offsetNode.addChild( phet.scenery.Rectangle.bounds( bounds, { stroke: 'rgba(0,0,0,1)' } ) );
+        } );
+      }
+
+      if ( SHOW_RENDERABLE_FACES ) {
+        debugData.faceDebugData.forEach( data => {
+          const shape = data.clippableFace.getShape().transformed( phet.dot.Matrix3.scaling( displaySize / outputSize ) );
+          offsetNode.addChild( new phet.scenery.Path( shape, {
+            stroke: 'black'
+          } ) );
         } );
       }
 

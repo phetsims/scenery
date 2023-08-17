@@ -13,12 +13,21 @@ import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Utils from '../../../../../dot/js/Utils.js';
+import { Shape } from '../../../../../kite/js/imports.js';
 
 export default class EdgedFace implements ClippableFace {
   public constructor( public readonly edges: LinearEdge[] ) {}
 
   public toPolygonalFace( epsilon = 1e-8 ): PolygonalFace {
     return new PolygonalFace( LinearEdge.toPolygons( this.edges, epsilon ) );
+  }
+
+  public toEdgedFace(): EdgedFace {
+    return this;
+  }
+
+  public getShape( epsilon = 1e-8 ): Shape {
+    return this.toPolygonalFace( epsilon ).getShape();
   }
 
   public getBounds(): Bounds2 {

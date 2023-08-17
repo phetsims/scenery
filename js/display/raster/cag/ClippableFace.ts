@@ -10,6 +10,8 @@ import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import { EdgedFace, PolygonalFace } from '../../../imports.js';
+import { Shape } from '../../../../../kite/js/imports.js';
 
 type ClippableFace = {
   getBounds(): Bounds2;
@@ -25,6 +27,9 @@ type ClippableFace = {
   getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: ClippableFace; maxFace: ClippableFace };
   getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): ClippableFace[];
   getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: ClippableFace; outsideFace: ClippableFace };
+  toPolygonalFace( epsilon?: number ): PolygonalFace;
+  toEdgedFace(): EdgedFace;
+  getShape( epsilon?: number ): Shape;
 };
 
 export default ClippableFace;
