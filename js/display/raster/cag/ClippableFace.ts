@@ -30,6 +30,7 @@ type ClippableFace = {
   toPolygonalFace( epsilon?: number ): PolygonalFace;
   toEdgedFace(): EdgedFace;
   getShape( epsilon?: number ): Shape;
+  forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void;
 };
 
 export default ClippableFace;

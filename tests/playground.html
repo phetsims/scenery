@@ -569,6 +569,7 @@ an UI and Display made for visual testing and debugging.
         width: 1024,
         height: 1024,
         colorSpace: phet.scenery.RenderColorSpace.SRGB,
+        isFullyOpaque: true,
         evaluate: ( x, y ) => {
           const baseIndex = ( y * testImageData.width + x ) * 4;
           return new phet.dot.Vector4(
@@ -584,13 +585,16 @@ an UI and Display made for visual testing and debugging.
       const a = new phet.scenery.RenderImage(
         pathA,
         // phet.dot.Matrix3.affine( 15 / 1024, 0, 20, 0, 15 / 1024, 0 ),
+        // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         testImageable,
         phet.scenery.RenderExtend.Repeat,
-        phet.scenery.RenderExtend.Repeat
+        phet.scenery.RenderExtend.Repeat,
+        phet.scenery.RenderResampleType.NearestNeighbor
+        // phet.scenery.RenderResampleType.AnalyticMitchellNetravali
       );
       const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
       // const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );

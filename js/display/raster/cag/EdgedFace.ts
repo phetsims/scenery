@@ -186,6 +186,10 @@ export default class EdgedFace implements ClippableFace {
   }
 
   public getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): EdgedFace[] {
+    if ( values.length === 0 ) {
+      return [ this ];
+    }
+
     const edgesCollection: LinearEdge[][] = _.range( values.length + 1 ).map( () => [] );
 
     for ( let i = 0; i < this.edges.length; i++ ) {
@@ -228,10 +232,20 @@ export default class EdgedFace implements ClippableFace {
       return this;
     }
     else {
-      return new EdgedFace( this.edges.map( edge => new LinearEdge(
-        transform.timesVector2( edge.startPoint ),
-        transform.timesVector2( edge.endPoint )
-      ) ) );
+      const transformedEdges: LinearEdge[] = [];
+
+      for ( let i = 0; i < this.edges.length; i++ ) {
+        const edge = this.edges[ i ];
+
+        const start = transform.timesVector2( edge.startPoint );
+        const end = transform.timesVector2( edge.endPoint );
+
+        if ( !start.equals( end ) ) {
+          transformedEdges.push( new LinearEdge( start, end ) );
+        }
+      }
+
+      return new EdgedFace( transformedEdges );
     }
   }
 
@@ -247,6 +261,13 @@ export default class EdgedFace implements ClippableFace {
       ),
       edge.containsFakeCorner
     ) ) );
+  }
+
+  public forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void {
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+      callback( edge.startPoint, edge.endPoint );
+    }
   }
 }
 

@@ -5,7 +5,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import { PolygonClipping, scenery } from '../../../imports.js';
+import { LinearEdge, PolygonClipping, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
@@ -29,6 +29,94 @@ const boundsn1n1 = bounds00.shiftedXY( -2, -2 );
 type Case = ( p0x: number, p0y: number, p1x: number, p1y: number ) => number;
 
 export default class PolygonMitchellNetravali {
+  // Values for the three cases, if presented with a full "pixel", e.g.
+  // PolygonMitchellNetravali.evaluateCase00( 0, 0, 1, 0 ) +
+  // PolygonMitchellNetravali.evaluateCase00( 1, 0, 1, 1 ) +
+  // PolygonMitchellNetravali.evaluateCase00( 1, 1, 0, 1 ) +
+  // PolygonMitchellNetravali.evaluateCase00( 0, 1, 0, 0 )
+  // 0.2640817901234568
+  // PolygonMitchellNetravali.evaluateCase10( 1, 0, 2, 0 ) +
+  // PolygonMitchellNetravali.evaluateCase10( 2, 0, 2, 1 ) +
+  // PolygonMitchellNetravali.evaluateCase10( 2, 1, 1, 1 ) +
+  // PolygonMitchellNetravali.evaluateCase10( 1, 1, 1, 0 )
+  // -0.007137345679012345
+  // PolygonMitchellNetravali.evaluateCase11( 1, 1, 2, 1 ) +
+  // PolygonMitchellNetravali.evaluateCase11( 2, 1, 2, 2 ) +
+  // PolygonMitchellNetravali.evaluateCase11( 2, 2, 1, 2 ) +
+  // PolygonMitchellNetravali.evaluateCase11( 1, 2, 1, 1 )
+  // 0.0001929012345679021
+  public static full00 = 0.2640817901234568;
+  public static full10 = -0.007137345679012345;
+  public static full11 = 0.0001929012345679021;
+
+  public static evaluateFull( pointX: number, pointY: number, minX: number, minY: number ): number {
+    const offsetX = minX - pointX;
+    const offsetY = minY - pointY;
+
+    assert && assert( offsetX === -2 || offsetX === -1 || offsetX === 0 || offsetX === 1 );
+    assert && assert( offsetY === -2 || offsetY === -1 || offsetY === 0 || offsetY === 1 );
+
+    const xCentral = offsetX === 0 || offsetX === -1;
+    const yCentral = offsetY === 0 || offsetY === -1;
+
+    if ( xCentral && yCentral ) {
+      return PolygonMitchellNetravali.full00;
+    }
+    else if ( !xCentral && !yCentral ) {
+      return PolygonMitchellNetravali.full11;
+    }
+    else {
+      return PolygonMitchellNetravali.full10;
+    }
+  }
+
+  /**
+   * Evaluates the contribution of the (clipped) polygon to the filter at the given point. minX/minY note the lower
+   * coordinates of the clipped polygon unit pixel.
+   */
+  public static evaluateClippedEdges( edges: LinearEdge[], pointX: number, pointY: number, minX: number, minY: number ): number {
+    const offsetX = minX - pointX;
+    const offsetY = minY - pointY;
+
+    // TODO: hardcode things more, so we don't need this logic
+
+    assert && assert( offsetX === -2 || offsetX === -1 || offsetX === 0 || offsetX === 1 );
+    assert && assert( offsetY === -2 || offsetY === -1 || offsetY === 0 || offsetY === 1 );
+
+    const xCentral = offsetX === 0 || offsetX === -1;
+    const yCentral = offsetY === 0 || offsetY === -1;
+    const xPositive = offsetX >= 0;
+    const yPositive = offsetY >= 0;
+
+    const sign = ( xPositive === yPositive ) ? 1 : -1;
+    let evaluator: ( p0x: number, p0y: number, p1x: number, p1y: number ) => number;
+    if ( xCentral && yCentral ) {
+      evaluator = PolygonMitchellNetravali.evaluateCase00;
+    }
+    else if ( !xCentral && !yCentral ) {
+      evaluator = PolygonMitchellNetravali.evaluateCase11;
+    }
+    else {
+      evaluator = PolygonMitchellNetravali.evaluateCase10;
+    }
+    const transpose = xCentral && !yCentral;
+
+    let sum = 0;
+
+    for ( let i = 0; i < edges.length; i++ ) {
+      const edge = edges[ i ];
+
+      const p0x = Math.abs( edge.startPoint.x - pointX );
+      const p0y = Math.abs( edge.startPoint.y - pointY );
+      const p1x = Math.abs( edge.endPoint.x - pointX );
+      const p1y = Math.abs( edge.endPoint.y - pointY );
+
+      sum += transpose ? evaluator( p0y, p0x, p1y, p1x ) : evaluator( p0x, p0y, p1x, p1y );
+    }
+
+    return sum * sign;
+  }
+
   public static evaluate( polygon: Vector2[], point: Vector2 ): number {
     const relativePolygon = polygon.map( p => p.minus( point ) );
 

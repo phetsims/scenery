@@ -13,6 +13,7 @@ type RenderImageable = {
   width: number;
   height: number;
   colorSpace: RenderColorSpace;
+  isFullyOpaque: boolean;
 
   // TODO: sampling of things, actually have methods that get samples (in any color space)
   evaluate: ( x: number, y: number ) => Vector4;

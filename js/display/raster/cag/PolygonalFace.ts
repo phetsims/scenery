@@ -253,6 +253,15 @@ export default class PolygonalFace implements ClippableFace {
       );
     } ) ) );
   }
+
+  public forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void {
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+      for ( let j = 0; j < polygon.length; j++ ) {
+        callback( polygon[ j ], polygon[ ( j + 1 ) % polygon.length ] );
+      }
+    }
+  }
 }
 
 scenery.register( 'PolygonalFace', PolygonalFace );
