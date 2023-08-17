@@ -201,7 +201,9 @@ export default class RenderImage extends RenderPathProgram {
         };
 
         for ( let y = localBounds.minY - 1; y < localBounds.maxY + 2; y++ ) {
+          const mappedY = RenderImage.extendInteger( y, this.image.height, this.extendY );
           for ( let x = localBounds.minX - 1; x < localBounds.maxX + 2; x++ ) {
+            const mappedX = RenderImage.extendInteger( x, this.image.width, this.extendX );
             let contribution = 0;
             for ( let py = y - 2; py < y + 2; py++ ) {
               for ( let px = x - 2; px < x + 2; px++ ) {
@@ -220,7 +222,7 @@ export default class RenderImage extends RenderPathProgram {
             }
 
             if ( contribution > 1e-8 ) {
-              const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( x, y ) );
+              const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( mappedX, mappedY ) );
               color.add( imageColor.timesScalar( contribution ) );
             }
           }
