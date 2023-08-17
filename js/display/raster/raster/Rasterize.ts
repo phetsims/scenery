@@ -28,6 +28,9 @@ class AccumulatingFace {
 export default class Rasterize {
 
   private static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, scale: number ): IntegerEdge[] {
+
+    const translation = new Vector2( -bounds.minX, -bounds.minY );
+
     const integerEdges = [];
     for ( let i = 0; i < paths.length; i++ ) {
       const path = paths[ i ];
@@ -40,7 +43,7 @@ export default class Rasterize {
           // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
           const p0 = clippedSubpath[ k ];
           const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
-          integerEdges.push( IntegerEdge.fromUnscaledPoints( path, scale, p0, p1 ) );
+          integerEdges.push( IntegerEdge.fromUnscaledPoints( path, scale, translation, p0, p1 ) );
         }
       }
     }
@@ -691,8 +694,8 @@ export default class Rasterize {
       debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
     }
 
-    const color = constColor || renderProgram.evaluate( pixelFace.getCentroid( area ).minus( translation ) );
-    outputRaster.addPartialPixel( color.timesScalar( area ), x, y );
+    const color = constColor || renderProgram.evaluate( pixelFace.getCentroid( area ) );
+    outputRaster.addPartialPixel( color.timesScalar( area ), x + translation.x, y + translation.y );
   }
 
   // TODO: inline eventually
@@ -715,8 +718,8 @@ export default class Rasterize {
     else {
       for ( let y = minY; y < maxY; y++ ) {
         for ( let x = minX; x < maxX; x++ ) {
-          const centroid = scratchFullAreaVector.setXY( x + 0.5, y + 0.5 ).minus( translation );
-          outputRaster.addFullPixel( renderProgram.evaluate( centroid ), x, y );
+          const centroid = scratchFullAreaVector.setXY( x + 0.5, y + 0.5 );
+          outputRaster.addFullPixel( renderProgram.evaluate( centroid ), x + translation.x, y + translation.y );
         }
       }
     }

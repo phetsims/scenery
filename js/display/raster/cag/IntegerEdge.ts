@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RationalIntersection, scenery } from '../../../imports.js';
-import { RenderPath } from '../render-program/RenderProgram.js';
+import { RationalIntersection, RenderPath, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -38,11 +37,11 @@ export default class IntegerEdge {
     );
   }
 
-  public static fromUnscaledPoints( path: RenderPath, scale: number, p0: Vector2, p1: Vector2 ): IntegerEdge {
-    const x0 = Utils.roundSymmetric( p0.x * scale );
-    const y0 = Utils.roundSymmetric( p0.y * scale );
-    const x1 = Utils.roundSymmetric( p1.x * scale );
-    const y1 = Utils.roundSymmetric( p1.y * scale );
+  public static fromUnscaledPoints( path: RenderPath, scale: number, translation: Vector2, p0: Vector2, p1: Vector2 ): IntegerEdge {
+    const x0 = Utils.roundSymmetric( ( p0.x + translation.x ) * scale );
+    const y0 = Utils.roundSymmetric( ( p0.y + translation.y ) * scale );
+    const x1 = Utils.roundSymmetric( ( p1.x + translation.x ) * scale );
+    const y1 = Utils.roundSymmetric( ( p1.y + translation.y ) * scale );
     return new IntegerEdge( path, x0, y0, x1, y1 );
   }
 }

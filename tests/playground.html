@@ -661,6 +661,7 @@ an UI and Display made for visual testing and debugging.
       // console.log( canvas.toDataURL() );
 
       const debugData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
+      // const debugData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 20, 0, 20 + outputSize / 2, outputSize / 2 ) );
 
       const debugCanvas = debugData.canvas;
       styleCanvas( debugCanvas );
