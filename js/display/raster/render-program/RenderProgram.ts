@@ -1232,6 +1232,10 @@ export class RenderLinearGradient extends RenderPathProgram {
     assert && assert( end.isFinite() );
     assert && assert( !start.equals( end ) );
 
+    assert && assert( _.range( 0, stops.length - 1 ).every( i => {
+      return stops[ i ].ratio <= stops[ i + 1 ].ratio;
+    } ), 'RenderLinearGradient stops not monotonically increasing' );
+
     super( path );
 
     this.inverseTransform = transform.inverted();
@@ -1763,6 +1767,10 @@ export class RenderRadialGradient extends RenderPathProgram {
     assert && assert( isFinite( startRadius ) && startRadius >= 0 );
     assert && assert( end.isFinite() );
     assert && assert( isFinite( endRadius ) && endRadius >= 0 );
+
+    assert && assert( _.range( 0, stops.length - 1 ).every( i => {
+      return stops[ i ].ratio <= stops[ i + 1 ].ratio;
+    } ), 'RenderLinearGradient stops not monotonically increasing' );
 
     super( path );
   }
