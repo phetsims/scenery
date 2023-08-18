@@ -210,6 +210,7 @@ export default class RenderImage extends RenderPathProgram {
         );
       }
       case RenderResampleType.AnalyticMitchellNetravali: {
+        // TODO: look into separated polygon components to see if we get better precision!
         return RenderImage.evaluateAnalyticFilter(
           this, face,
           minX, minY, maxX, maxY,
@@ -255,9 +256,6 @@ export default class RenderImage extends RenderPathProgram {
     // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
     // at every integer coordinate pair.
     const localFace = edgedFace.getTransformed( inverseTransform );
-    // TODO: how to handle... reversing edges if this causes a flip? we might have flipped our orientation.
-
-    // TODO: We need to detect flips so we can reverse our "full" computations
 
     const localBounds = localFace.getBounds().roundedOut();
     assert && assert( localBounds.minX < localBounds.maxX );
@@ -271,67 +269,65 @@ export default class RenderImage extends RenderPathProgram {
     // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
     const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, ( minX + maxX ) / 2 ) : [ localFace ];
 
-    // assert && assert( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
+    assertSlow && assertSlow( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
 
     const areas: number[][] = [];
     const pixelFaces = rows.map( face => {
       const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, ( minY + maxY ) / 2 ) : [ face ];
 
-      // assert && assert( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
+      assertSlow && assertSlow( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
 
       areas.push( row.map( face => face.getArea() ) );
       return row;
     } );
 
-    const getPixelFace = ( x: number, y: number ): EdgedFace => {
-      const xIndex = x - localBounds.minX;
-      const yIndex = y - localBounds.minY;
-
-      assert && assert( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount );
-
-      return pixelFaces[ yIndex ][ xIndex ];
-    };
-    const getPixelArea = ( x: number, y: number ): number => {
-      const xIndex = x - localBounds.minX;
-      const yIndex = y - localBounds.minY;
-
-      if ( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount ) {
-        return areas[ yIndex ][ xIndex ];
-      }
-      else {
-        return 0;
-      }
-    };
-
     const localIndexMin = minExpand + boundsShift + 1;
     const localIndexMax = maxExpand + boundsShift;
+
+    const iterMinX = localBounds.minX - localIndexMin;
+    const iterMinY = localBounds.minY - localIndexMin;
+    const iterMaxX = localBounds.maxX + localIndexMax;
+    const iterMaxY = localBounds.maxY + localIndexMax;
 
     // box: -0, +0
     // bilinear: 0, +1
     // mitchell: -1, +2
     // TODO: factor out some of these constants
-    for ( let y = localBounds.minY - localIndexMin; y < localBounds.maxY + localIndexMax; y++ ) {
+    for ( let y = iterMinY; y < iterMaxY; y++ ) {
       const mappedY = RenderImage.extendInteger( y, renderImage.image.height, renderImage.extendY );
-      for ( let x = localBounds.minX - localIndexMin; x < localBounds.maxX + localIndexMax; x++ ) {
+
+      const subIterMinY = y - minExpand;
+      const subIterMaxY = y + maxExpand;
+
+      for ( let x = iterMinX; x < iterMaxX; x++ ) {
         const mappedX = RenderImage.extendInteger( x, renderImage.image.width, renderImage.extendX );
         let contribution = 0;
+
+        const subIterMinX = x - minExpand;
+        const subIterMaxX = x + maxExpand;
 
         // box: -0, +1
         // bilinear: -1, +1
         // mitchell: -2, +2
-        for ( let py = y - minExpand; py < y + maxExpand; py++ ) {
-          for ( let px = x - minExpand; px < x + maxExpand; px++ ) {
-            const pixelArea = getPixelArea( px, py );
+        for ( let py = subIterMinY; py < subIterMaxY; py++ ) {
+          const yIndex = py - localBounds.minY;
 
-            const absArea = Math.abs( pixelArea );
-            if ( absArea > 1e-8 ) {
-              if ( absArea > 1 - 1e-8 ) {
-                contribution += Math.sign( pixelArea ) * evaluateFull( x, y, px, py );
-              }
-              else {
-                const clippedEdges = getPixelFace( px, py ).edges;
-                const partialContribution = evaluateClipped( clippedEdges, x, y, px, py, pixelArea );
-                contribution += partialContribution;
+          if ( yIndex >= 0 && yIndex < verticalCount ) {
+            for ( let px = subIterMinX; px < subIterMaxX; px++ ) {
+              const xIndex = px - localBounds.minX;
+
+              if ( xIndex >= 0 && xIndex < horizontalCount ) {
+                const pixelArea = areas[ yIndex ][ xIndex ];
+
+                const absPixelArea = Math.abs( pixelArea );
+                if ( absPixelArea > 1e-8 ) {
+                  if ( absPixelArea > 1 - 1e-8 ) {
+                    contribution += Math.sign( pixelArea ) * evaluateFull( x, y, px, py );
+                  }
+                  else {
+                    contribution += evaluateClipped( pixelFaces[ yIndex ][ xIndex ].edges, x, y, px, py, pixelArea );
+                  }
+                }
               }
             }
           }
@@ -347,7 +343,6 @@ export default class RenderImage extends RenderPathProgram {
     // NOTE: this might flip the sign back to positive of the color (if our transform flipped the orientation)
     if ( renderImage.image.isFullyOpaque ) {
       // Our precision is actually... not great with these equations.
-      // TODO: look into separated polygon components to see if we get better precision!
       assert && assert( !renderImage.image.isFullyOpaque || ( color.w / localFace.getArea() >= 1 - 1e-2 ) );
 
       // We can get an exact alpha here
