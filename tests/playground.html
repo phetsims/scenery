@@ -607,12 +607,20 @@ an UI and Display made for visual testing and debugging.
       // const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
       const a = new phet.scenery.RenderImage(
         pathA,
-        phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 2, -2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
+
+        // far distance
+        phet.dot.Matrix3.affine( 15 / 1024, 0, 20, 0, 15 / 1024, 0 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ),
+
+        // medium distance
+        // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 0.2, -0.2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
+
+
+
+        // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 2, -2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
 
 
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
 
-        // phet.dot.Matrix3.affine( 15 / 1024, 0, 20, 0, 15 / 1024, 0 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
 
 
@@ -629,9 +637,9 @@ an UI and Display made for visual testing and debugging.
         // phet.scenery.RenderResampleType.NearestNeighbor
         // phet.scenery.RenderResampleType.Bilinear
         // phet.scenery.RenderResampleType.MitchellNetravali
-        // phet.scenery.RenderResampleType.AnalyticBox
+        phet.scenery.RenderResampleType.AnalyticBox
         // phet.scenery.RenderResampleType.AnalyticBilinear
-        phet.scenery.RenderResampleType.AnalyticMitchellNetravali
+        // phet.scenery.RenderResampleType.AnalyticMitchellNetravali
       );
       const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
       // const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );

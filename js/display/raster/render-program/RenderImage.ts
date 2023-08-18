@@ -105,14 +105,12 @@ export default class RenderImage extends RenderPathProgram {
     switch( this.resampleType ) {
       case RenderResampleType.NearestNeighbor: {
         const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
-        const tx = localPoint.x / this.image.width;
-        const ty = localPoint.y / this.image.height;
-        const mappedX = RenderImage.extend( this.extendX, tx );
-        const mappedY = RenderImage.extend( this.extendY, ty );
-        const roundedX = Utils.roundSymmetric( mappedX * this.image.width );
-        const roundedY = Utils.roundSymmetric( mappedY * this.image.height );
+        const roundedX = Utils.roundSymmetric( localPoint.x );
+        const roundedY = Utils.roundSymmetric( localPoint.y );
+        const x = RenderImage.extendInteger( roundedX, this.image.width, this.extendX );
+        const y = RenderImage.extendInteger( roundedY, this.image.height, this.extendY );
 
-        color = this.image.evaluate( roundedX, roundedY );
+        color = this.image.evaluate( x, y );
         return this.colorToLinearPremultiplied( color );
       }
       case RenderResampleType.Bilinear: {
@@ -147,23 +145,32 @@ export default class RenderImage extends RenderPathProgram {
         const floorX = Math.floor( localPoint.x );
         const floorY = Math.floor( localPoint.y );
 
-        const x0 = RenderImage.extendInteger( floorX - 1, this.image.width, this.extendX );
-        const x1 = RenderImage.extendInteger( floorX, this.image.width, this.extendX );
-        const x2 = RenderImage.extendInteger( floorX + 1, this.image.width, this.extendX );
-        const x3 = RenderImage.extendInteger( floorX + 2, this.image.width, this.extendX );
-        const y0 = RenderImage.extendInteger( floorY - 1, this.image.height, this.extendY );
-        const y1 = RenderImage.extendInteger( floorY, this.image.height, this.extendY );
-        const y2 = RenderImage.extendInteger( floorY + 1, this.image.height, this.extendY );
-        const y3 = RenderImage.extendInteger( floorY + 2, this.image.height, this.extendY );
+        const px0 = floorX - 1;
+        const px1 = floorX;
+        const px2 = floorX + 1;
+        const px3 = floorX + 2;
+        const py0 = floorY - 1;
+        const py1 = floorY;
+        const py2 = floorY + 1;
+        const py3 = floorY + 2;
 
-        const filterX0 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x0 );
-        const filterX1 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x1 );
-        const filterX2 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x2 );
-        const filterX3 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x3 );
-        const filterY0 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y0 );
-        const filterY1 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y1 );
-        const filterY2 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y2 );
-        const filterY3 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y3 );
+        const x0 = RenderImage.extendInteger( px0, this.image.width, this.extendX );
+        const x1 = RenderImage.extendInteger( px1, this.image.width, this.extendX );
+        const x2 = RenderImage.extendInteger( px2, this.image.width, this.extendX );
+        const x3 = RenderImage.extendInteger( px3, this.image.width, this.extendX );
+        const y0 = RenderImage.extendInteger( py0, this.image.height, this.extendY );
+        const y1 = RenderImage.extendInteger( py1, this.image.height, this.extendY );
+        const y2 = RenderImage.extendInteger( py2, this.image.height, this.extendY );
+        const y3 = RenderImage.extendInteger( py3, this.image.height, this.extendY );
+
+        const filterX0 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - px0 );
+        const filterX1 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - px1 );
+        const filterX2 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - px2 );
+        const filterX3 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - px3 );
+        const filterY0 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - py0 );
+        const filterY1 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - py1 );
+        const filterY2 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - py2 );
+        const filterY3 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - py3 );
 
         const color = Vector4.ZERO.copy();
 
@@ -282,6 +289,9 @@ export default class RenderImage extends RenderPathProgram {
     evaluateClipped: ( edges: LinearEdge[], x: number, y: number, px: number, py: number, area: number ) => number,
     evaluateFull: ( x: number, y: number, px: number, py: number ) => number
   ): Vector4 {
+
+    // TODO: perhaps switch to our binary clipping, because we could potentially get massive speed ups by determining
+    // TODO: which regions our full "grid" is included inside (so we could just sum the pixel)
 
     // If we don't have a face (i.e. we are taking up the full bounds specified by minX/minY/maxX/maxY), we'll
     // construct a face that covers the entire bounds.
