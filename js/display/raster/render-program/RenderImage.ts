@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, EdgedFace, LinearEdge, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -188,283 +188,36 @@ export default class RenderImage extends RenderPathProgram {
         return color;
       }
       case RenderResampleType.AnalyticBox: {
-        face = ( face || new PolygonalFace( [ [
-          new Vector2( minX, minY ),
-          new Vector2( maxX, minY ),
-          new Vector2( maxX, maxY ),
-          new Vector2( minX, maxY )
-        ] ] ) ).toEdgedFace();
-
-        color = Vector4.ZERO.copy();
-
-        // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
-        // at every integer coordinate pair.
-        // TODO: WHY WHY WHY do we... not use the half-offset transform?
-        const localFace = face.getTransformed( this.inverseTransform );
-
-        const localBounds = localFace.getBounds().roundedOut();
-        assert && assert( localBounds.minX < localBounds.maxX );
-        assert && assert( localBounds.minY < localBounds.maxY );
-
-        const horizontalSplitValues = _.range( localBounds.minX + 1, localBounds.maxX );
-        const verticalSplitValues = _.range( localBounds.minY + 1, localBounds.maxY );
-
-        // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
-        const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, ( minX + maxX ) / 2 ) : [ localFace ];
-
-        // assert && assert( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
-
-        const pixelFaces = rows.map( face => {
-          return horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, ( minY + maxY ) / 2 ) : [ face ];
-        } );
-
-        for ( let y = localBounds.minY; y < localBounds.maxY; y++ ) {
-          const mappedY = RenderImage.extendInteger( y, this.image.height, this.extendY );
-          const yIndex = y - localBounds.minY;
-          for ( let x = localBounds.minX; x < localBounds.maxX; x++ ) {
-            const mappedX = RenderImage.extendInteger( x, this.image.width, this.extendX );
-            const xIndex = x - localBounds.minX;
-
-            const contribution = pixelFaces[ yIndex ][ xIndex ].getArea();
-
-            if ( Math.abs( contribution ) > 1e-8 ) {
-              const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( mappedX, mappedY ) );
-              color.add( imageColor.timesScalar( contribution ) );
-            }
-          }
-        }
-
-        // NOTE: this might flip the sign back to positive of the color (if our transform flipped the orientation)
-        color.multiplyScalar( 1 / localFace.getArea() );
-
-        assert && assert( !this.image.isFullyOpaque || color.w >= 1 - 1e-6 );
-
-        return color;
+        return RenderImage.evaluateAnalyticFilter(
+          this, face,
+          minX, minY, maxX, maxY,
+          this.inverseTransform,
+          0, 1, -1,
+          ( edges: LinearEdge[], x: number, y: number, px: number, py: number, area: number ) => {
+            return area;
+          },
+          _.constant( 1 )
+        );
       }
       case RenderResampleType.AnalyticBilinear: {
-        face = ( face || new PolygonalFace( [ [
-          new Vector2( minX, minY ),
-          new Vector2( maxX, minY ),
-          new Vector2( maxX, maxY ),
-          new Vector2( minX, maxY )
-        ] ] ) ).toEdgedFace();
-
-        color = Vector4.ZERO.copy();
-
-        // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
-        // at every integer coordinate pair.
-        const localFace = face.getTransformed( this.inverseTransformWithHalfOffset );
-        // TODO: how to handle... reversing edges if this causes a flip? we might have flipped our orientation.
-
-        const localBounds = localFace.getBounds().roundedOut();
-        assert && assert( localBounds.minX < localBounds.maxX );
-        assert && assert( localBounds.minY < localBounds.maxY );
-
-        const horizontalSplitValues = _.range( localBounds.minX + 1, localBounds.maxX );
-        const verticalSplitValues = _.range( localBounds.minY + 1, localBounds.maxY );
-        const horizontalCount = horizontalSplitValues.length + 1;
-        const verticalCount = verticalSplitValues.length + 1;
-
-        // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
-        const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, ( minX + maxX ) / 2 ) : [ localFace ];
-
-        // assert && assert( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
-
-        const areas: number[][] = [];
-        const pixelFaces = rows.map( face => {
-          const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, ( minY + maxY ) / 2 ) : [ face ];
-
-          // assert && assert( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
-
-          areas.push( row.map( face => face.getArea() ) );
-          return row;
-        } );
-
-        const getPixelFace = ( x: number, y: number ): ClippableFace => {
-          const xIndex = x - localBounds.minX;
-          const yIndex = y - localBounds.minY;
-
-          assert && assert( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount );
-
-          return pixelFaces[ yIndex ][ xIndex ];
-        };
-        const getPixelArea = ( x: number, y: number ): number => {
-          const xIndex = x - localBounds.minX;
-          const yIndex = y - localBounds.minY;
-
-          if ( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount ) {
-            return areas[ yIndex ][ xIndex ];
-          }
-          else {
-            return 0;
-          }
-        };
-
-        for ( let y = localBounds.minY; y < localBounds.maxY + 1; y++ ) {
-          const mappedY = RenderImage.extendInteger( y, this.image.height, this.extendY );
-          for ( let x = localBounds.minX; x < localBounds.maxX + 1; x++ ) {
-            const mappedX = RenderImage.extendInteger( x, this.image.width, this.extendX );
-            let contribution = 0;
-
-
-            for ( let py = y - 1; py < y + 1; py++ ) {
-              for ( let px = x - 1; px < x + 1; px++ ) {
-                const pixelArea = getPixelArea( px, py );
-                if ( pixelArea > 1e-8 ) {
-                  if ( pixelArea > 1 - 1e-8 ) {
-                    contribution += 0.25;
-                  }
-                  else {
-                    const pixelFace = getPixelFace( px, py );
-                    const clippedEdges = pixelFace.toEdgedFace().edges; // TODO: optimize this, especially if we are polygonal
-                    const partialContribution = PolygonMitchellNetravali.evaluateBilinearClippedEdges( clippedEdges, x, y, px, py );
-                    contribution += partialContribution;
-                  }
-                }
-              }
-            }
-
-            if ( Math.abs( contribution ) > 1e-8 ) {
-              const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( mappedX, mappedY ) );
-              color.add( imageColor.timesScalar( contribution ) );
-            }
-          }
-        }
-
-        // NOTE: this might flip the sign back to positive of the color (if our transform flipped the orientation)
-        if ( this.image.isFullyOpaque ) {
-          // Our precision is actually... not great with these equations.
-          // TODO: look into separated polygon components to see if we get better precision!
-          assert && assert( !this.image.isFullyOpaque || ( color.w / localFace.getArea() >= 1 - 1e-2 ) );
-
-          // We can get an exact alpha here
-          color.multiplyScalar( 1 / color.w );
-        }
-        else {
-          color.multiplyScalar( 1 / localFace.getArea() );
-        }
-
-        return color;
+        return RenderImage.evaluateAnalyticFilter(
+          this, face,
+          minX, minY, maxX, maxY,
+          this.inverseTransformWithHalfOffset,
+          1, 1, 0,
+          PolygonMitchellNetravali.evaluateBilinearClippedEdges,
+          _.constant( 0.25 )
+        );
       }
       case RenderResampleType.AnalyticMitchellNetravali: {
-        face = ( face || new PolygonalFace( [ [
-          new Vector2( minX, minY ),
-          new Vector2( maxX, minY ),
-          new Vector2( maxX, maxY ),
-          new Vector2( minX, maxY )
-        ] ] ) ).toEdgedFace();
-
-        color = Vector4.ZERO.copy();
-
-        // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
-        // at every integer coordinate pair.
-        const localFace = face.getTransformed( this.inverseTransformWithHalfOffset );
-        // TODO: how to handle... reversing edges if this causes a flip? we might have flipped our orientation.
-
-        const localBounds = localFace.getBounds().roundedOut();
-        assert && assert( localBounds.minX < localBounds.maxX );
-        assert && assert( localBounds.minY < localBounds.maxY );
-
-        const horizontalSplitValues = _.range( localBounds.minX + 1, localBounds.maxX );
-        const verticalSplitValues = _.range( localBounds.minY + 1, localBounds.maxY );
-        const horizontalCount = horizontalSplitValues.length + 1;
-        const verticalCount = verticalSplitValues.length + 1;
-
-        // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
-        const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, ( minX + maxX ) / 2 ) : [ localFace ];
-
-        // assert && assert( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
-
-        const areas: number[][] = [];
-        const pixelFaces = rows.map( face => {
-          const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, ( minY + maxY ) / 2 ) : [ face ];
-
-          // assert && assert( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
-
-          areas.push( row.map( face => face.getArea() ) );
-          return row;
-        } );
-
-        const getPixelFace = ( x: number, y: number ): ClippableFace => {
-          const xIndex = x - localBounds.minX;
-          const yIndex = y - localBounds.minY;
-
-          assert && assert( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount );
-
-          return pixelFaces[ yIndex ][ xIndex ];
-        };
-        const getPixelArea = ( x: number, y: number ): number => {
-          const xIndex = x - localBounds.minX;
-          const yIndex = y - localBounds.minY;
-
-          if ( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount ) {
-            return areas[ yIndex ][ xIndex ];
-          }
-          else {
-            return 0;
-          }
-        };
-
-        for ( let y = localBounds.minY - 1; y < localBounds.maxY + 2; y++ ) {
-          const mappedY = RenderImage.extendInteger( y, this.image.height, this.extendY );
-          for ( let x = localBounds.minX - 1; x < localBounds.maxX + 2; x++ ) {
-            const mappedX = RenderImage.extendInteger( x, this.image.width, this.extendX );
-            let contribution = 0;
-
-
-            for ( let py = y - 2; py < y + 2; py++ ) {
-              for ( let px = x - 2; px < x + 2; px++ ) {
-                const pixelArea = getPixelArea( px, py );
-                if ( pixelArea > 1e-8 ) {
-                  if ( pixelArea > 1 - 1e-8 ) {
-                    contribution += PolygonMitchellNetravali.evaluateFull( x, y, px, py );
-                  }
-                  else {
-                    const pixelFace = getPixelFace( px, py );
-                    const clippedEdges = pixelFace.toEdgedFace().edges; // TODO: optimize this, especially if we are polygonal
-                    const partialContribution = PolygonMitchellNetravali.evaluateClippedEdges( clippedEdges, x, y, px, py );
-                    contribution += partialContribution;
-
-                    // console.log( 'separate', px - x, py - y, partialContribution );
-                  }
-                }
-              }
-            }
-
-            // // TODO: unhack
-            // let rawContribution = 0;
-            // const polygons = localFace.toPolygonalFace().polygons;
-            // for ( let i = 0; i < polygons.length; i++ ) {
-            //   const polygon = polygons[ i ];
-            //   rawContribution += PolygonMitchellNetravali.evaluate( polygon, new Vector2( x, y ) );
-            // }
-            //
-            // if ( Math.abs( contribution - rawContribution ) > 1e-2 ) {
-            //   debugger;
-            //   PolygonMitchellNetravali.evaluate( localFace.toPolygonalFace().polygons[ 0 ], new Vector2( x, y ) );
-            // }
-
-            if ( Math.abs( contribution ) > 1e-8 ) {
-              const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( mappedX, mappedY ) );
-              color.add( imageColor.timesScalar( contribution ) );
-            }
-          }
-        }
-
-        // NOTE: this might flip the sign back to positive of the color (if our transform flipped the orientation)
-        if ( this.image.isFullyOpaque ) {
-          // Our precision is actually... not great with these equations.
-          // TODO: look into separated polygon components to see if we get better precision!
-          assert && assert( !this.image.isFullyOpaque || ( color.w / localFace.getArea() >= 1 - 1e-2 ) );
-
-          // We can get an exact alpha here
-          color.multiplyScalar( 1 / color.w );
-        }
-        else {
-          color.multiplyScalar( 1 / localFace.getArea() );
-        }
-
-        return color;
+        return RenderImage.evaluateAnalyticFilter(
+          this, face,
+          minX, minY, maxX, maxY,
+          this.inverseTransformWithHalfOffset,
+          2, 2, 0,
+          PolygonMitchellNetravali.evaluateClippedEdges,
+          PolygonMitchellNetravali.evaluateFull
+        );
       }
       default:
         throw new Error( 'unknown resample type: ' + this.resampleType );
@@ -473,6 +226,136 @@ export default class RenderImage extends RenderPathProgram {
 
   public override toRecursiveString( indent: string ): string {
     return `${indent}RenderImage (${this.path ? this.path.id : 'null'})`;
+  }
+
+  public static evaluateAnalyticFilter(
+    renderImage: RenderImage,
+    face: ClippableFace | null,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number,
+    inverseTransform: Matrix3,
+    minExpand: number, // 0 box, 1 bilinear, 2 mitchell
+    maxExpand: number, // 1 box, 1 bilinear, 2 mitchell
+    boundsShift: number, // -1 for box, 0 for the aligned filters
+    evaluateClipped: ( edges: LinearEdge[], x: number, y: number, px: number, py: number, area: number ) => number,
+    evaluateFull: ( x: number, y: number, px: number, py: number ) => number
+  ): Vector4 {
+
+    const edgedFace = ( face || new PolygonalFace( [ [
+      new Vector2( minX, minY ),
+      new Vector2( maxX, minY ),
+      new Vector2( maxX, maxY ),
+      new Vector2( minX, maxY )
+    ] ] ) ).toEdgedFace();
+
+    const color = Vector4.ZERO.copy();
+
+    // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
+    // at every integer coordinate pair.
+    const localFace = edgedFace.getTransformed( inverseTransform );
+    // TODO: how to handle... reversing edges if this causes a flip? we might have flipped our orientation.
+
+    // TODO: We need to detect flips so we can reverse our "full" computations
+
+    const localBounds = localFace.getBounds().roundedOut();
+    assert && assert( localBounds.minX < localBounds.maxX );
+    assert && assert( localBounds.minY < localBounds.maxY );
+
+    const horizontalSplitValues = _.range( localBounds.minX + 1, localBounds.maxX );
+    const verticalSplitValues = _.range( localBounds.minY + 1, localBounds.maxY );
+    const horizontalCount = horizontalSplitValues.length + 1;
+    const verticalCount = verticalSplitValues.length + 1;
+
+    // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
+    const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, ( minX + maxX ) / 2 ) : [ localFace ];
+
+    // assert && assert( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
+
+    const areas: number[][] = [];
+    const pixelFaces = rows.map( face => {
+      const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, ( minY + maxY ) / 2 ) : [ face ];
+
+      // assert && assert( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
+
+      areas.push( row.map( face => face.getArea() ) );
+      return row;
+    } );
+
+    const getPixelFace = ( x: number, y: number ): EdgedFace => {
+      const xIndex = x - localBounds.minX;
+      const yIndex = y - localBounds.minY;
+
+      assert && assert( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount );
+
+      return pixelFaces[ yIndex ][ xIndex ];
+    };
+    const getPixelArea = ( x: number, y: number ): number => {
+      const xIndex = x - localBounds.minX;
+      const yIndex = y - localBounds.minY;
+
+      if ( xIndex >= 0 && xIndex < horizontalCount && yIndex >= 0 && yIndex < verticalCount ) {
+        return areas[ yIndex ][ xIndex ];
+      }
+      else {
+        return 0;
+      }
+    };
+
+    const localIndexMin = minExpand + boundsShift + 1;
+    const localIndexMax = maxExpand + boundsShift;
+
+    // box: -0, +0
+    // bilinear: 0, +1
+    // mitchell: -1, +2
+    // TODO: factor out some of these constants
+    for ( let y = localBounds.minY - localIndexMin; y < localBounds.maxY + localIndexMax; y++ ) {
+      const mappedY = RenderImage.extendInteger( y, renderImage.image.height, renderImage.extendY );
+      for ( let x = localBounds.minX - localIndexMin; x < localBounds.maxX + localIndexMax; x++ ) {
+        const mappedX = RenderImage.extendInteger( x, renderImage.image.width, renderImage.extendX );
+        let contribution = 0;
+
+        // box: -0, +1
+        // bilinear: -1, +1
+        // mitchell: -2, +2
+        for ( let py = y - minExpand; py < y + maxExpand; py++ ) {
+          for ( let px = x - minExpand; px < x + maxExpand; px++ ) {
+            const pixelArea = getPixelArea( px, py );
+            if ( pixelArea > 1e-8 ) {
+              if ( pixelArea > 1 - 1e-8 ) {
+                contribution += evaluateFull( x, y, px, py );
+              }
+              else {
+                const clippedEdges = getPixelFace( px, py ).edges;
+                const partialContribution = evaluateClipped( clippedEdges, x, y, px, py, pixelArea );
+                contribution += partialContribution;
+              }
+            }
+          }
+        }
+
+        if ( Math.abs( contribution ) > 1e-8 ) {
+          const imageColor = renderImage.colorToLinearPremultiplied( renderImage.image.evaluate( mappedX, mappedY ) );
+          color.add( imageColor.timesScalar( contribution ) );
+        }
+      }
+    }
+
+    // NOTE: this might flip the sign back to positive of the color (if our transform flipped the orientation)
+    if ( renderImage.image.isFullyOpaque ) {
+      // Our precision is actually... not great with these equations.
+      // TODO: look into separated polygon components to see if we get better precision!
+      assert && assert( !renderImage.image.isFullyOpaque || ( color.w / localFace.getArea() >= 1 - 1e-2 ) );
+
+      // We can get an exact alpha here
+      color.multiplyScalar( 1 / color.w );
+    }
+    else {
+      color.multiplyScalar( 1 / localFace.getArea() );
+    }
+
+    return color;
   }
 
   public static extend( extend: RenderExtend, t: number ): number {
