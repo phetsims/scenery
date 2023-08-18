@@ -13,7 +13,8 @@ enum RenderResampleType {
   AnalyticMitchellNetravali = 1,
   Bilinear = 2,
   MitchellNetravali = 3,
-  AnalyticBox = 4
+  AnalyticBox = 4,
+  AnalyticBilinear = 5
 }
 
 export default RenderResampleType;

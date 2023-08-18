@@ -379,6 +379,39 @@ export default class PolygonMitchellNetravali {
       )
     );
   }
+
+  public static evaluateBilinear( p0x: number, p0y: number, p1x: number, p1y: number ): number {
+    const c01 = p0x * p1y;
+    const c10 = p1x * p0y;
+    return ( c01 - c10 ) * ( 12 - 4 * ( p0x + p0y + p1x + p1y ) + 2 * ( p0x * p0y + p1x * p1y ) + c10 + c01 ) / 24;
+  }
+
+  public static evaluateBilinearClippedEdges( edges: LinearEdge[], pointX: number, pointY: number, minX: number, minY: number ): number {
+    const offsetX = minX - pointX;
+    const offsetY = minY - pointY;
+
+    // TODO: hardcode things more, so we don't need this logic
+
+    assert && assert( offsetX === -1 || offsetX === 0 );
+    assert && assert( offsetY === -1 || offsetY === 0 );
+
+    const sign = ( offsetX === offsetY ) ? 1 : -1;
+
+    let sum = 0;
+
+    for ( let i = 0; i < edges.length; i++ ) {
+      const edge = edges[ i ];
+
+      const p0x = Math.abs( edge.startPoint.x - pointX );
+      const p0y = Math.abs( edge.startPoint.y - pointY );
+      const p1x = Math.abs( edge.endPoint.x - pointX );
+      const p1y = Math.abs( edge.endPoint.y - pointY );
+
+      sum += PolygonMitchellNetravali.evaluateBilinear( p0x, p0y, p1x, p1y );
+    }
+
+    return sum * sign;
+  }
 }
 
 scenery.register( 'PolygonMitchellNetravali', PolygonMitchellNetravali );
