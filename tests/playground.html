@@ -598,7 +598,7 @@ an UI and Display made for visual testing and debugging.
         width: 1024,
         height: 1024,
         colorSpace: phet.scenery.RenderColorSpace.LinearUnpremultipliedSRGB,
-        isFullyOpaque: false, // TODO change
+        isFullyOpaque: true,
         evaluate: ( x, y ) => {
           return linearPremultipliedTestImageData[ y * testImageData.width + x ];
         }
@@ -623,10 +623,10 @@ an UI and Display made for visual testing and debugging.
         phet.scenery.RenderExtend.Repeat,
         phet.scenery.RenderExtend.Repeat,
         // phet.scenery.RenderResampleType.NearestNeighbor
-        phet.scenery.RenderResampleType.AnalyticBox
+        // phet.scenery.RenderResampleType.AnalyticBox
         // phet.scenery.RenderResampleType.Bilinear
         // phet.scenery.RenderResampleType.MitchellNetravali
-        // phet.scenery.RenderResampleType.AnalyticMitchellNetravali
+        phet.scenery.RenderResampleType.AnalyticMitchellNetravali
       );
       const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
       // const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );

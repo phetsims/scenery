@@ -307,28 +307,37 @@ export default class RenderImage extends RenderPathProgram {
             let contribution = 0;
 
 
-            // for ( let py = y - 2; py < y + 2; py++ ) {
-            //   for ( let px = x - 2; px < x + 2; px++ ) {
-            //     const pixelArea = getPixelArea( px, py );
-            //     if ( pixelArea > 1e-8 ) {
-            //       if ( pixelArea > 1 - 1e-8 ) {
-            //         contribution += PolygonMitchellNetravali.evaluateFull( x, y, px, py );
-            //       }
-            //       else {
-            //         const pixelFace = getPixelFace( px, py );
-            //         const clippedEdges = pixelFace.toEdgedFace().edges; // TODO: optimize this, especially if we are polygonal
-            //         contribution += PolygonMitchellNetravali.evaluateClippedEdges( clippedEdges, x, y, px, py );
-            //       }
-            //     }
-            //   }
-            // }
+            for ( let py = y - 2; py < y + 2; py++ ) {
+              for ( let px = x - 2; px < x + 2; px++ ) {
+                const pixelArea = getPixelArea( px, py );
+                if ( pixelArea > 1e-8 ) {
+                  if ( pixelArea > 1 - 1e-8 ) {
+                    contribution += PolygonMitchellNetravali.evaluateFull( x, y, px, py );
+                  }
+                  else {
+                    const pixelFace = getPixelFace( px, py );
+                    const clippedEdges = pixelFace.toEdgedFace().edges; // TODO: optimize this, especially if we are polygonal
+                    const partialContribution = PolygonMitchellNetravali.evaluateClippedEdges( clippedEdges, x, y, px, py );
+                    contribution += partialContribution;
 
-            // TODO: unhack
-            const polygons = localFace.toPolygonalFace().polygons;
-            for ( let i = 0; i < polygons.length; i++ ) {
-              const polygon = polygons[ i ];
-              contribution = PolygonMitchellNetravali.evaluate( polygon, new Vector2( x, y ) );
+                    // console.log( 'separate', px - x, py - y, partialContribution );
+                  }
+                }
+              }
             }
+
+            // // TODO: unhack
+            // let rawContribution = 0;
+            // const polygons = localFace.toPolygonalFace().polygons;
+            // for ( let i = 0; i < polygons.length; i++ ) {
+            //   const polygon = polygons[ i ];
+            //   rawContribution += PolygonMitchellNetravali.evaluate( polygon, new Vector2( x, y ) );
+            // }
+            //
+            // if ( Math.abs( contribution - rawContribution ) > 1e-2 ) {
+            //   debugger;
+            //   PolygonMitchellNetravali.evaluate( localFace.toPolygonalFace().polygons[ 0 ], new Vector2( x, y ) );
+            // }
 
             if ( Math.abs( contribution ) > 1e-8 ) {
               const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( mappedX, mappedY ) );
@@ -338,9 +347,17 @@ export default class RenderImage extends RenderPathProgram {
         }
 
         // NOTE: this might flip the sign back to positive of the color (if our transform flipped the orientation)
-        color.multiplyScalar( 1 / localFace.getArea() );
+        if ( this.image.isFullyOpaque ) {
+          // Our precision is actually... not great with these equations.
+          // TODO: look into separated polygon components to see if we get better precision!
+          assert && assert( !this.image.isFullyOpaque || ( color.w / localFace.getArea() >= 1 - 1e-2 ) );
 
-        assert && assert( !this.image.isFullyOpaque || color.w >= 1 - 1e-6 );
+          // We can get an exact alpha here
+          color.multiplyScalar( 1 / color.w );
+        }
+        else {
+          color.multiplyScalar( 1 / localFace.getArea() );
+        }
 
         return color;
       }

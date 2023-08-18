@@ -97,7 +97,6 @@ export default class PolygonMitchellNetravali {
     const xPositive = offsetX >= 0;
     const yPositive = offsetY >= 0;
 
-    const sign = ( xPositive === yPositive ) ? 1 : -1;
     let evaluator: ( p0x: number, p0y: number, p1x: number, p1y: number ) => number;
     if ( xCentral && yCentral ) {
       evaluator = PolygonMitchellNetravali.evaluateCase00;
@@ -109,6 +108,7 @@ export default class PolygonMitchellNetravali {
       evaluator = PolygonMitchellNetravali.evaluateCase10;
     }
     const transpose = xCentral && !yCentral;
+    const sign = ( xPositive === yPositive ) ? 1 : -1;
 
     let sum = 0;
 
@@ -120,8 +120,19 @@ export default class PolygonMitchellNetravali {
       const p1x = Math.abs( edge.endPoint.x - pointX );
       const p1y = Math.abs( edge.endPoint.y - pointY );
 
-      sum += transpose ? evaluator( p0y, p0x, p1y, p1x ) : evaluator( p0x, p0y, p1x, p1y );
+      // console.log( 'edge', p0x, p0y, p1x, p1y );
+
+      if ( transpose ) {
+        // console.log( 'sep eval', -evaluator( p0y, p0x, p1y, p1x ), evaluator.name, p0y, p0x, p1y, p1x );
+      }
+      else {
+        // console.log( 'sep eval', evaluator( p0x, p0y, p1x, p1y ), evaluator.name, p0x, p0y, p1x, p1y );
+      }
+
+      sum += transpose ? -evaluator( p0y, p0x, p1y, p1x ) : evaluator( p0x, p0y, p1x, p1y );
     }
+
+    // console.log( 'separate', offsetX, offsetY, sum * sign, sign, xCentral, yCentral, transpose );
 
     return sum * sign;
   }
@@ -177,6 +188,40 @@ export default class PolygonMitchellNetravali {
     const nx0ny1 = f( case10, true, boundsn0n1 );
     const nx1ny1 = f( case11, false, boundsn1n1 );
 
+    // const nx1ny1 = f( case11, false, boundsn1n1 );
+    // // console.log( 'full', -2, -2, nx1ny1 );
+    // const nx0ny1 = f( case10, true, boundsn0n1 );
+    // // console.log( 'full', -1, -2, nx0ny1 );
+    // const x0ny1 = -f( case10, true, bounds0n1 );
+    // // console.log( 'full', 0, -2, x0ny1 );
+    // const x1ny1 = -f( case11, false, bounds1n1 );
+    // // console.log( 'full', 1, -2, x1ny1 );
+    // const nx1ny0 = f( case10, false, boundsn1n0 );
+    // // console.log( 'full', -2, -1, nx1ny0 );
+    // const nx0ny0 = f( case00, false, boundsn0n0 );
+    // // console.log( 'full', -1, -1, nx0ny0 );
+    // const x0ny0 = -f( case00, false, bounds0n0 );
+    // // console.log( 'full', 0, -1, x0ny0 );
+    // const x1ny0 = -f( case10, false, bounds1n0 );
+    // // console.log( 'full', 1, -1, x1ny0 );
+    // const nx1y0 = -f( case10, false, boundsn10 );
+    // // console.log( 'full', -2, 0, nx1y0 );
+    // const nx0y0 = -f( case00, false, boundsn00 );
+    // // console.log( 'full', -1, 0, nx0y0 );
+    // const x0y0 = f( case00, false, bounds00 );
+    // // console.log( 'full', 0, 0, x0y0 );
+    // const x1y0 = f( case10, false, bounds10 );
+    // // console.log( 'full', 1, 0, x1y0 );
+    // const nx1y1 = -f( case11, false, boundsn11 );
+    // // console.log( 'full', -2, 1, nx1y1 );
+    // const nx0y1 = -f( case10, true, boundsn01 );
+    // // console.log( 'full', -1, 1, nx0y1 );
+    // const x0y1 = f( case10, true, bounds01 );
+    // // console.log( 'full', 0, 1, x0y1 );
+    // const x1y1 = f( case11, false, bounds11 );
+    // // console.log( 'full', 1, 1, x1y1 );
+
+
     return x0y0 + x1y0 + x0y1 + x1y1 +
            nx0y0 + nx1y0 + nx0y1 + nx1y1 +
            x0ny0 + x1ny0 + x0ny1 + x1ny1 +
@@ -187,16 +232,20 @@ export default class PolygonMitchellNetravali {
     let sum = 0;
 
     const clippedPolygon = PolygonClipping.boundsClipPolygon( polygon, bounds );
+    // console.log( 'poly', clippedPolygon );
 
     for ( let i = 0; i < clippedPolygon.length; i++ ) {
       const p0 = clippedPolygon[ i % clippedPolygon.length ];
       const p1 = clippedPolygon[ ( i + 1 ) % clippedPolygon.length ];
 
+      // // console.log( 'sep eval', -evaluator( p0y, p0x, p1y, p1x ), evaluator.name, p0y, p0x, p1y, p1x );
       if ( transpose ) {
         // flip reverses orientation
+        // console.log( 'eval', evaluator( Math.abs( p0.y ), Math.abs( p0.x ), Math.abs( p1.y ), Math.abs( p1.x ) ), evaluator.name, Math.abs( p0.y ), Math.abs( p0.x ), Math.abs( p1.y ), Math.abs( p1.x ) );
         sum -= evaluator( Math.abs( p0.y ), Math.abs( p0.x ), Math.abs( p1.y ), Math.abs( p1.x ) );
       }
       else {
+        // console.log( 'eval', evaluator( Math.abs( p0.x ), Math.abs( p0.y ), Math.abs( p1.x ), Math.abs( p1.y ) ), evaluator.name, Math.abs( p0.x ), Math.abs( p0.y ), Math.abs( p1.x ), Math.abs( p1.y ) );
         sum += evaluator( Math.abs( p0.x ), Math.abs( p0.y ), Math.abs( p1.x ), Math.abs( p1.y ) );
       }
     }
