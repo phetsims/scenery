@@ -322,9 +322,11 @@ export default class RenderImage extends RenderPathProgram {
         for ( let py = y - minExpand; py < y + maxExpand; py++ ) {
           for ( let px = x - minExpand; px < x + maxExpand; px++ ) {
             const pixelArea = getPixelArea( px, py );
-            if ( pixelArea > 1e-8 ) {
-              if ( pixelArea > 1 - 1e-8 ) {
-                contribution += evaluateFull( x, y, px, py );
+
+            const absArea = Math.abs( pixelArea );
+            if ( absArea > 1e-8 ) {
+              if ( absArea > 1 - 1e-8 ) {
+                contribution += Math.sign( pixelArea ) * evaluateFull( x, y, px, py );
               }
               else {
                 const clippedEdges = getPixelFace( px, py ).edges;
