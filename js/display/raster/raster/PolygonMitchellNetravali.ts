@@ -28,6 +28,15 @@ const boundsn1n1 = bounds00.shiftedXY( -2, -2 );
 
 type Case = ( p0x: number, p0y: number, p1x: number, p1y: number ) => number;
 
+const a0 = 7 / 6;
+const b0 = -2;
+const d0 = 8 / 9;
+
+const a1 = -7 / 18;
+const b1 = 2;
+const c1 = -10 / 3;
+const d1 = 16 / 9;
+
 export default class PolygonMitchellNetravali {
   // Values for the three cases, if presented with a full "pixel", e.g.
   // PolygonMitchellNetravali.evaluateCase00( 0, 0, 1, 0 ) +
@@ -115,6 +124,24 @@ export default class PolygonMitchellNetravali {
     }
 
     return sum * sign;
+  }
+
+  public static evaluateFilter( t: number ): number {
+    t = Math.abs( t );
+    if ( t <= 2 ) {
+      const tt = t * t;
+      const ttt = t * t * t;
+
+      if ( t <= 1 ) {
+        return a0 * ttt + b0 * tt + d0;
+      }
+      else {
+        return a1 * ttt + b1 * tt + c1 * t + d1;
+      }
+    }
+    else {
+      return 0;
+    }
   }
 
   public static evaluate( polygon: Vector2[], point: Vector2 ): number {

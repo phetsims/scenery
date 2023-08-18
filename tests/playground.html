@@ -581,19 +581,44 @@ an UI and Display made for visual testing and debugging.
         }
       };
 
+      const linearPremultipliedTestImageData = [];
+      for ( let i = 0; i < testImageData.data.length / 4; i++ ) {
+        const baseIndex = i * 4;
+        const r = testImageData.data[ baseIndex ] / 255;
+        const g = testImageData.data[ baseIndex + 1 ] / 255;
+        const b = testImageData.data[ baseIndex + 2 ] / 255;
+        const a = testImageData.data[ baseIndex + 3 ] / 255;
+        const srgb = new phet.dot.Vector4( r, g, b, a );
+        const linear = phet.scenery.RenderColor.sRGBToLinear( srgb );
+        const premultiplied = phet.scenery.RenderColor.premultiply( linear );
+        linearPremultipliedTestImageData.push( premultiplied );
+      }
+
+      const testImageablePremultiplied = {
+        width: 1024,
+        height: 1024,
+        colorSpace: phet.scenery.RenderColorSpace.LinearUnpremultipliedSRGB,
+        isFullyOpaque: true,
+        evaluate: ( x, y ) => {
+          return linearPremultipliedTestImageData[ y * testImageData.width + x ];
+        }
+      };
+
       // const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
       const a = new phet.scenery.RenderImage(
         pathA,
         // phet.dot.Matrix3.affine( 15 / 1024, 0, 20, 0, 15 / 1024, 0 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
-        // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
+        phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
-        phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
+        // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
-        testImageable,
+        testImageablePremultiplied,
         phet.scenery.RenderExtend.Repeat,
         phet.scenery.RenderExtend.Repeat,
-        phet.scenery.RenderResampleType.NearestNeighbor
+        // phet.scenery.RenderResampleType.NearestNeighbor
+        phet.scenery.RenderResampleType.Bilinear
+        // phet.scenery.RenderResampleType.MitchellNetravali
         // phet.scenery.RenderResampleType.AnalyticMitchellNetravali
       );
       const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );

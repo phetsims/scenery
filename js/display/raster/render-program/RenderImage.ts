@@ -104,43 +104,89 @@ export default class RenderImage extends RenderPathProgram {
     let color;
     switch( this.resampleType ) {
       case RenderResampleType.NearestNeighbor: {
-        const localPoint = this.inverseTransform.timesVector2( centroid );
+        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
         const tx = localPoint.x / this.image.width;
         const ty = localPoint.y / this.image.height;
         const mappedX = RenderImage.extend( this.extendX, tx );
         const mappedY = RenderImage.extend( this.extendY, ty );
+        const roundedX = Utils.roundSymmetric( mappedX * this.image.width );
+        const roundedY = Utils.roundSymmetric( mappedY * this.image.height );
 
-        color = this.image.evaluate( Math.floor( mappedX * this.image.width ), Math.floor( mappedY * this.image.height ) );
+        color = this.image.evaluate( roundedX, roundedY );
         return this.colorToLinearPremultiplied( color );
       }
-      // Copilot bilinear
-      // case RenderResampleType.Bilinear: {
-      //   const localPoint = this.inverseTransform.timesVector2( centroid );
-      //   const tx = localPoint.x / this.image.width;
-      //   const ty = localPoint.y / this.image.height;
-      //   const mappedX = RenderImage.extend( this.extendX, tx );
-      //   const mappedY = RenderImage.extend( this.extendY, ty );
-      //
-      //   const x0 = Math.floor( mappedX * this.image.width );
-      //   const y0 = Math.floor( mappedY * this.image.height );
-      //   const x1 = Math.ceil( mappedX * this.image.width );
-      //   const y1 = Math.ceil( mappedY * this.image.height );
-      //
-      //   const c00 = this.image.evaluate( x0, y0 );
-      //   const c10 = this.image.evaluate( x1, y0 );
-      //   const c01 = this.image.evaluate( x0, y1 );
-      //   const c11 = this.image.evaluate( x1, y1 );
-      //
-      //   const dx = mappedX * this.image.width - x0;
-      //   const dy = mappedY * this.image.height - y0;
-      //
-      //   color = Vector4.ZERO;
-      //   color.x = ( 1 - dx ) * ( 1 - dy ) * c00.x + dx * ( 1 - dy ) * c10.x + ( 1 - dx ) * dy * c01.x + dx * dy * c11.x;
-      //   color.y = ( 1 - dx ) * ( 1 - dy ) * c00.y + dx * ( 1 - dy ) * c10.y + ( 1 - dx ) * dy * c01.y + dx * dy * c11.y;
-      //   color.z = ( 1 - dx ) * ( 1 - dy ) * c00.z + dx * ( 1 - dy ) * c10.z + ( 1 - dx ) * dy * c01.z + dx * dy * c11.z;
-      //   color.w = ( 1 - dx ) * ( 1 - dy ) * c00.w + dx * ( 1 - dy ) * c10.w + ( 1 - dx ) * dy * c01.w + dx * dy * c11.w;
-      //   break;
-      // }
+      case RenderResampleType.Bilinear: {
+        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
+
+        const floorX = Math.floor( localPoint.x );
+        const floorY = Math.floor( localPoint.y );
+        const ceilX = Math.ceil( localPoint.x );
+        const ceilY = Math.ceil( localPoint.y );
+
+        const minX = RenderImage.extendInteger( floorX, this.image.width, this.extendX );
+        const minY = RenderImage.extendInteger( floorY, this.image.height, this.extendY );
+        const maxX = RenderImage.extendInteger( ceilX, this.image.width, this.extendX );
+        const maxY = RenderImage.extendInteger( ceilY, this.image.height, this.extendY );
+
+        const fractionX = localPoint.x - floorX;
+        const fractionY = localPoint.y - floorY;
+
+        const a = this.colorToLinearPremultiplied( this.image.evaluate( minX, minY ) );
+        const b = this.colorToLinearPremultiplied( this.image.evaluate( minX, maxY ) );
+        const c = this.colorToLinearPremultiplied( this.image.evaluate( maxX, minY ) );
+        const d = this.colorToLinearPremultiplied( this.image.evaluate( maxX, maxY ) );
+
+        // TODO: allocation reduction?
+        const ab = a.timesScalar( 1 - fractionY ).plus( b.timesScalar( fractionY ) );
+        const cd = c.timesScalar( 1 - fractionY ).plus( d.timesScalar( fractionY ) );
+        return ab.timesScalar( 1 - fractionX ).plus( cd.timesScalar( fractionX ) );
+      }
+      case RenderResampleType.MitchellNetravali: {
+        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
+
+        const floorX = Math.floor( localPoint.x );
+        const floorY = Math.floor( localPoint.y );
+
+        const x0 = RenderImage.extendInteger( floorX - 1, this.image.width, this.extendX );
+        const x1 = RenderImage.extendInteger( floorX, this.image.width, this.extendX );
+        const x2 = RenderImage.extendInteger( floorX + 1, this.image.width, this.extendX );
+        const x3 = RenderImage.extendInteger( floorX + 2, this.image.width, this.extendX );
+        const y0 = RenderImage.extendInteger( floorY - 1, this.image.height, this.extendY );
+        const y1 = RenderImage.extendInteger( floorY, this.image.height, this.extendY );
+        const y2 = RenderImage.extendInteger( floorY + 1, this.image.height, this.extendY );
+        const y3 = RenderImage.extendInteger( floorY + 2, this.image.height, this.extendY );
+
+        const filterX0 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x0 );
+        const filterX1 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x1 );
+        const filterX2 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x2 );
+        const filterX3 = PolygonMitchellNetravali.evaluateFilter( localPoint.x - x3 );
+        const filterY0 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y0 );
+        const filterY1 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y1 );
+        const filterY2 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y2 );
+        const filterY3 = PolygonMitchellNetravali.evaluateFilter( localPoint.y - y3 );
+
+        const color = Vector4.ZERO.copy();
+
+        // TODO: allocation reduction?
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y0 ) ).timesScalar( filterX0 * filterY0 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y1 ) ).timesScalar( filterX0 * filterY1 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y2 ) ).timesScalar( filterX0 * filterY2 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y3 ) ).timesScalar( filterX0 * filterY3 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y0 ) ).timesScalar( filterX1 * filterY0 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y1 ) ).timesScalar( filterX1 * filterY1 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y2 ) ).timesScalar( filterX1 * filterY2 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y3 ) ).timesScalar( filterX1 * filterY3 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y0 ) ).timesScalar( filterX2 * filterY0 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y1 ) ).timesScalar( filterX2 * filterY1 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y2 ) ).timesScalar( filterX2 * filterY2 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y3 ) ).timesScalar( filterX2 * filterY3 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y0 ) ).timesScalar( filterX3 * filterY0 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y1 ) ).timesScalar( filterX3 * filterY1 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y2 ) ).timesScalar( filterX3 * filterY2 ) );
+        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y3 ) ).timesScalar( filterX3 * filterY3 ) );
+
+        return color;
+      }
       case RenderResampleType.AnalyticMitchellNetravali: {
         face = ( face || new PolygonalFace( [ [
           new Vector2( minX, minY ),

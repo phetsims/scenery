@@ -10,7 +10,9 @@ import { scenery } from '../../../imports.js';
 
 enum RenderResampleType {
   NearestNeighbor = 0,
-  AnalyticMitchellNetravali = 1
+  AnalyticMitchellNetravali = 1,
+  Bilinear = 2,
+  MitchellNetravali = 3
 }
 
 export default RenderResampleType;
