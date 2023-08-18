@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, EdgedFace, LinearEdge, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -229,6 +229,45 @@ export default class RenderImage extends RenderPathProgram {
     return `${indent}RenderImage (${this.path ? this.path.id : 'null'})`;
   }
 
+  /**
+   * Evaluates a section of a filter analytically.
+   *
+   * Basically, we transform the shape (that is presumably clipped to a user-space "pixel") into our image's
+   * coordinate frame. It might overlap one image-coordinate-frame pixel, or many. We'll figure out which pixels it
+   * overlaps, clip it to each of those individually, and then we'll evaluate the filter for each of those.
+   *
+   * For most filters, the contribution of a single image-pixel (to our user-pixel) will then be determined by
+   * convolving the filter with the clipped shape, and summing up the integral. For our filters, we're able to
+   * use Green's theorem to evaluate this integral analytically, by doing a line integral along the edges of the
+   * indvidual areas.
+   *
+   * The filters we are using have piecewise-polynomial functions, and thus their line integrals are similiarly
+   * "split in pieces". So for e.g. bilinear, we need to evaluate a 2x2 grid of "clipped" image-pixels individually to
+   * figure out the contribution. This means we need to get the clipped path for each image-pixel, and then we evaluate
+   * a specific line integral on the outline of that (and sum it up for each image-pixel in the grid).
+   *
+   * We'll need to divide out the image-space result by the image-space area at the end
+   *
+   * NOTE: we might have a flipped transform, so our signed area might be NEGATIVE in this case, so this code handles
+   * positive or negative areas.
+   *
+   * NOTE: some filters can result in negative contributions for some pixels, so we need to handle that too!
+   *
+   * @param renderImage
+   * @param face
+   * @param minX
+   * @param minY
+   * @param maxX
+   * @param maxY
+   * @param inverseTransform - The transform to put the face within the image's coordinate frame
+   * @param minExpand - How far our filter expands to the min direction (left/top) - 0 box, 1 bilinear, 2 mitchell
+   * @param maxExpand - How far our filter expands to the max direction (right/bottom) - 1 box, 1 bilinear, 2 mitchell
+   * @param boundsShift - A shift of indices, should be -1 for the box filter (since it is offset)
+   * @param evaluateClipped - Evaluation function for a partial pixel. Evaluates the filter centered at x,y with the
+   * bounds of the clipped pixel in the range of px,py,px+1,py+1
+   * @param evaluateFull - Evaluation function for a full pixel. Evaluates the filter centered at x,y with a full
+   * pixel of the bounds px,py,px+1,py+1
+   */
   public static evaluateAnalyticFilter(
     renderImage: RenderImage,
     face: ClippableFace | null,
@@ -237,13 +276,15 @@ export default class RenderImage extends RenderPathProgram {
     maxX: number,
     maxY: number,
     inverseTransform: Matrix3,
-    minExpand: number, // 0 box, 1 bilinear, 2 mitchell
-    maxExpand: number, // 1 box, 1 bilinear, 2 mitchell
-    boundsShift: number, // -1 for box, 0 for the aligned filters
+    minExpand: number,
+    maxExpand: number,
+    boundsShift: number,
     evaluateClipped: ( edges: LinearEdge[], x: number, y: number, px: number, py: number, area: number ) => number,
     evaluateFull: ( x: number, y: number, px: number, py: number ) => number
   ): Vector4 {
 
+    // If we don't have a face (i.e. we are taking up the full bounds specified by minX/minY/maxX/maxY), we'll
+    // construct a face that covers the entire bounds.
     const edgedFace = ( face || new PolygonalFace( [ [
       new Vector2( minX, minY ),
       new Vector2( maxX, minY ),
@@ -251,16 +292,18 @@ export default class RenderImage extends RenderPathProgram {
       new Vector2( minX, maxY )
     ] ] ) ).toEdgedFace();
 
+    // We'll mutate and return this
     const color = Vector4.ZERO.copy();
 
     // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
-    // at every integer coordinate pair.
+    // at every integer coordinate pair. (or in the case of the box filter, we have an offset).
     const localFace = edgedFace.getTransformed( inverseTransform );
 
     const localBounds = localFace.getBounds().roundedOut();
     assert && assert( localBounds.minX < localBounds.maxX );
     assert && assert( localBounds.minY < localBounds.maxY );
 
+    // Splits for our image-space pixels
     const horizontalSplitValues = _.range( localBounds.minX + 1, localBounds.maxX );
     const verticalSplitValues = _.range( localBounds.minY + 1, localBounds.maxY );
     const horizontalCount = horizontalSplitValues.length + 1;
@@ -284,18 +327,21 @@ export default class RenderImage extends RenderPathProgram {
     const localIndexMin = minExpand + boundsShift + 1;
     const localIndexMax = maxExpand + boundsShift;
 
+    // box: -0, +0
+    // bilinear: 0, +1
+    // mitchell: -1, +2
     const iterMinX = localBounds.minX - localIndexMin;
     const iterMinY = localBounds.minY - localIndexMin;
     const iterMaxX = localBounds.maxX + localIndexMax;
     const iterMaxY = localBounds.maxY + localIndexMax;
 
-    // box: -0, +0
-    // bilinear: 0, +1
-    // mitchell: -1, +2
-    // TODO: factor out some of these constants
+    // For each image-space pixel whose evaluation grid will overlap with our shape's image-space pixel coverage
     for ( let y = iterMinY; y < iterMaxY; y++ ) {
       const mappedY = RenderImage.extendInteger( y, renderImage.image.height, renderImage.extendY );
 
+      // box: -0, +1
+      // bilinear: -1, +1
+      // mitchell: -2, +2
       const subIterMinY = y - minExpand;
       const subIterMaxY = y + maxExpand;
 
@@ -306,9 +352,7 @@ export default class RenderImage extends RenderPathProgram {
         const subIterMinX = x - minExpand;
         const subIterMaxX = x + maxExpand;
 
-        // box: -0, +1
-        // bilinear: -1, +1
-        // mitchell: -2, +2
+        // For each image-space pixel in that grid
         for ( let py = subIterMinY; py < subIterMaxY; py++ ) {
           const yIndex = py - localBounds.minY;
 
@@ -320,7 +364,11 @@ export default class RenderImage extends RenderPathProgram {
                 const pixelArea = areas[ yIndex ][ xIndex ];
 
                 const absPixelArea = Math.abs( pixelArea );
+
+                // If it has zero area, it won't have contribution
                 if ( absPixelArea > 1e-8 ) {
+
+                  // If it has a full pixel of area, we can simplify computation SIGNIFICANTLY
                   if ( absPixelArea > 1 - 1e-8 ) {
                     contribution += Math.sign( pixelArea ) * evaluateFull( x, y, px, py );
                   }
