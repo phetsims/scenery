@@ -9,6 +9,8 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import platform from '../../../phet-core/js/platform.js';
 import { CanvasContextWrapper, Filter, scenery, Utils } from '../imports.js';
+import Matrix4 from '../../../dot/js/Matrix4.js';
+import Vector4 from '../../../dot/js/Vector4.js';
 
 const isImageDataSupported = Utils.supportsImageDataCanvasFilter();
 const useFakeGamma = platform.chromium;
@@ -179,6 +181,19 @@ export default class ColorMatrixFilter extends Filter {
 
   public override isVelloCompatible(): boolean {
     return true;
+  }
+
+  public getMatrix(): Matrix4 {
+    return new Matrix4(
+      this.m00, this.m01, this.m02, this.m03,
+      this.m10, this.m11, this.m12, this.m13,
+      this.m20, this.m21, this.m22, this.m23,
+      this.m30, this.m31, this.m32, this.m33
+    );
+  }
+
+  public getTranslation(): Vector4 {
+    return new Vector4( this.m04, this.m14, this.m24, this.m34 );
   }
 
   public getCSSFilterString(): string {

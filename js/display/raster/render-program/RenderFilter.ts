@@ -16,13 +16,14 @@ export default class RenderFilter extends RenderPathProgram {
   public constructor(
     path: RenderPath | null,
     public readonly program: RenderProgram,
-    public readonly matrix: Matrix4
+    public readonly colorMatrix: Matrix4,
+    public readonly colorTranslation: Vector4
   ) {
     super( path );
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderFilter( this.getTransformedPath( transform ), this.program.transformed( transform ), this.matrix );
+    return new RenderFilter( this.getTransformedPath( transform ), this.program.transformed( transform ), this.colorMatrix, this.colorTranslation );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -30,7 +31,8 @@ export default class RenderFilter extends RenderPathProgram {
     return super.equals( other ) &&
            other instanceof RenderFilter &&
            this.program.equals( other.program ) &&
-           this.matrix.equals( other.matrix );
+           this.colorMatrix.equals( other.colorMatrix ) &&
+           this.colorTranslation.equals( other.colorTranslation );
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
@@ -39,7 +41,7 @@ export default class RenderFilter extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderFilter( this.path, this.program.replace( callback ), this.matrix );
+      return new RenderFilter( this.path, this.program.replace( callback ), this.colorMatrix, this.colorTranslation );
     }
   }
 
@@ -48,16 +50,16 @@ export default class RenderFilter extends RenderPathProgram {
     callback( this );
   }
 
-  // TODO: inspect matrix to see when it will maintain transparency!
+  // TODO: inspect colorMatrix to see when it will maintain transparency!
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
 
     if ( this.isInPath( pathTest ) ) {
       if ( program instanceof RenderColor ) {
-        return new RenderColor( null, RenderColor.premultiply( this.matrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
+        return new RenderColor( null, RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
       }
       else {
-        return new RenderFilter( this.path, program, this.matrix );
+        return new RenderFilter( this.path, program, this.colorMatrix, this.colorTranslation );
       }
     }
     else {
@@ -66,12 +68,12 @@ export default class RenderFilter extends RenderPathProgram {
   }
 
   public override isFullyTransparent(): boolean {
-    // TODO: color matrix check. Homogeneous?
+    // TODO: colorMatrix check. Homogeneous?
     return false;
   }
 
   public override isFullyOpaque(): boolean {
-    // TODO: color matrix check. Homogeneous?
+    // TODO: colorMatrix check. Homogeneous?
     return false;
   }
 
@@ -88,7 +90,7 @@ export default class RenderFilter extends RenderPathProgram {
     const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
 
     if ( this.isInPath( pathTest ) ) {
-      return RenderColor.premultiply( this.matrix.timesVector4( RenderColor.unpremultiply( source ) ) );
+      return RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( source ) ).plus( this.colorTranslation ) );
     }
     else {
       return source;

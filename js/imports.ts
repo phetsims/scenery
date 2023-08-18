@@ -452,6 +452,7 @@ export { default as RenderRadialBlend } from './display/raster/render-program/Re
 export { default as RenderRadialGradient } from './display/raster/render-program/RenderRadialGradient.js';
 export { default as RenderResampleType } from './display/raster/render-program/RenderResampleType.js';
 export type { default as FillRule } from './display/raster/render-program/FillRule.js';
+export { default as RenderFromNode } from './display/raster/render-program/RenderFromNode.js';
 
 export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js';
 export { default as BigRational } from './display/raster/cag/BigRational.js';

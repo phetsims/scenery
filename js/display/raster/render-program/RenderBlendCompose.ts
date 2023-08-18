@@ -389,7 +389,7 @@ export default class RenderBlendCompose extends RenderProgram {
       Math.min( fa * blended.x + fb * b.x, 1 ),
       Math.min( fa * blended.y + fb * b.y, 1 ),
       Math.min( fa * blended.z + fb * b.z, 1 ),
-      Math.min( a.w * fa + b.w * fb, 1 )
+      Math.min( fa * a.w + fb * b.w, 1 )
     );
   }
 

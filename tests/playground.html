@@ -462,8 +462,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      // const outputSize = 768 * 2;
-      const outputSize = 768 / 4;
+      const outputSize = 768 * 2;
+      // const outputSize = 768 / 4;
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -634,10 +634,10 @@ an UI and Display made for visual testing and debugging.
         testImageablePremultiplied,
         phet.scenery.RenderExtend.Repeat,
         phet.scenery.RenderExtend.Repeat,
-        // phet.scenery.RenderResampleType.NearestNeighbor
+        phet.scenery.RenderResampleType.NearestNeighbor
         // phet.scenery.RenderResampleType.Bilinear
         // phet.scenery.RenderResampleType.MitchellNetravali
-        phet.scenery.RenderResampleType.AnalyticBox
+        // phet.scenery.RenderResampleType.AnalyticBox
         // phet.scenery.RenderResampleType.AnalyticBilinear
         // phet.scenery.RenderResampleType.AnalyticMitchellNetravali
       );
