@@ -12,7 +12,8 @@ enum RenderResampleType {
   NearestNeighbor = 0,
   AnalyticMitchellNetravali = 1,
   Bilinear = 2,
-  MitchellNetravali = 3
+  MitchellNetravali = 3,
+  AnalyticBox = 4
 }
 
 export default RenderResampleType;

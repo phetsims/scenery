@@ -187,6 +187,60 @@ export default class RenderImage extends RenderPathProgram {
 
         return color;
       }
+      case RenderResampleType.AnalyticBox: {
+        face = ( face || new PolygonalFace( [ [
+          new Vector2( minX, minY ),
+          new Vector2( maxX, minY ),
+          new Vector2( maxX, maxY ),
+          new Vector2( minX, maxY )
+        ] ] ) ).toEdgedFace();
+
+        color = Vector4.ZERO.copy();
+
+        // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
+        // at every integer coordinate pair.
+        // TODO: WHY WHY WHY do we... not use the half-offset transform?
+        const localFace = face.getTransformed( this.inverseTransform );
+
+        const localBounds = localFace.getBounds().roundedOut();
+        assert && assert( localBounds.minX < localBounds.maxX );
+        assert && assert( localBounds.minY < localBounds.maxY );
+
+        const horizontalSplitValues = _.range( localBounds.minX + 1, localBounds.maxX );
+        const verticalSplitValues = _.range( localBounds.minY + 1, localBounds.maxY );
+
+        // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
+        const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, ( minX + maxX ) / 2 ) : [ localFace ];
+
+        // assert && assert( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
+
+        const pixelFaces = rows.map( face => {
+          return horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, ( minY + maxY ) / 2 ) : [ face ];
+        } );
+
+        for ( let y = localBounds.minY; y < localBounds.maxY; y++ ) {
+          const mappedY = RenderImage.extendInteger( y, this.image.height, this.extendY );
+          const yIndex = y - localBounds.minY;
+          for ( let x = localBounds.minX; x < localBounds.maxX; x++ ) {
+            const mappedX = RenderImage.extendInteger( x, this.image.width, this.extendX );
+            const xIndex = x - localBounds.minX;
+
+            const contribution = pixelFaces[ yIndex ][ xIndex ].getArea();
+
+            if ( Math.abs( contribution ) > 1e-8 ) {
+              const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( mappedX, mappedY ) );
+              color.add( imageColor.timesScalar( contribution ) );
+            }
+          }
+        }
+
+        // NOTE: this might flip the sign back to positive of the color (if our transform flipped the orientation)
+        color.multiplyScalar( 1 / localFace.getArea() );
+
+        assert && assert( !this.image.isFullyOpaque || color.w >= 1 - 1e-6 );
+
+        return color;
+      }
       case RenderResampleType.AnalyticMitchellNetravali: {
         face = ( face || new PolygonalFace( [ [
           new Vector2( minX, minY ),
@@ -276,7 +330,7 @@ export default class RenderImage extends RenderPathProgram {
               contribution = PolygonMitchellNetravali.evaluate( polygon, new Vector2( x, y ) );
             }
 
-            if ( contribution > 1e-8 ) {
+            if ( Math.abs( contribution ) > 1e-8 ) {
               const imageColor = this.colorToLinearPremultiplied( this.image.evaluate( mappedX, mappedY ) );
               color.add( imageColor.timesScalar( contribution ) );
             }

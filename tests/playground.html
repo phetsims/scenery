@@ -462,8 +462,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      const outputSize = 768 * 2;
-      // const outputSize = 768 / 4;
+      // const outputSize = 768 * 2;
+      const outputSize = 768 / 4;
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -598,7 +598,7 @@ an UI and Display made for visual testing and debugging.
         width: 1024,
         height: 1024,
         colorSpace: phet.scenery.RenderColorSpace.LinearUnpremultipliedSRGB,
-        isFullyOpaque: true,
+        isFullyOpaque: false, // TODO change
         evaluate: ( x, y ) => {
           return linearPremultipliedTestImageData[ y * testImageData.width + x ];
         }
@@ -608,8 +608,14 @@ an UI and Display made for visual testing and debugging.
       const a = new phet.scenery.RenderImage(
         pathA,
         // phet.dot.Matrix3.affine( 15 / 1024, 0, 20, 0, 15 / 1024, 0 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ),
+        phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
+        // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
+
+
+
+
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
-        phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
+        // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
@@ -617,7 +623,8 @@ an UI and Display made for visual testing and debugging.
         phet.scenery.RenderExtend.Repeat,
         phet.scenery.RenderExtend.Repeat,
         // phet.scenery.RenderResampleType.NearestNeighbor
-        phet.scenery.RenderResampleType.Bilinear
+        phet.scenery.RenderResampleType.AnalyticBox
+        // phet.scenery.RenderResampleType.Bilinear
         // phet.scenery.RenderResampleType.MitchellNetravali
         // phet.scenery.RenderResampleType.AnalyticMitchellNetravali
       );
