@@ -875,6 +875,7 @@ export default class Rasterize {
     ] );
     paths.push( backgroundPath );
 
+    // TODO: These are WRONG given our translation! We should fix these.
     const integerBounds = new Bounds2(
       Utils.roundSymmetric( bounds.minX * scale ),
       Utils.roundSymmetric( bounds.minY * scale ),
