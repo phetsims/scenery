@@ -474,6 +474,8 @@ export type { default as ClippableFace } from './display/raster/cag/ClippableFac
 export { default as EdgedFace } from './display/raster/cag/EdgedFace.js';
 export { default as IntegerEdge } from './display/raster/cag/IntegerEdge.js';
 export { default as IntersectionPoint } from './display/raster/cag/IntersectionPoint.js';
+export { default as LineIntersector } from './display/raster/cag/LineIntersector.js';
+export { default as LineSplitter } from './display/raster/cag/LineSplitter.js';
 export { default as PolygonalFace } from './display/raster/cag/PolygonalFace.js';
 export { default as RationalBoundary } from './display/raster/cag/RationalBoundary.js';
 export { default as RationalFace } from './display/raster/cag/RationalFace.js';
