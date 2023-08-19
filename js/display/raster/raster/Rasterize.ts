@@ -716,12 +716,12 @@ export default class Rasterize {
 
           const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, ( minY + maxY ) / 2 );
 
-          if ( assert ) {
+          if ( assertSlow ) {
             const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
             const oldMaxFace = clippableFace.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
 
             if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-              assert( false, 'binary X clip issue' );
+              assertSlow( false, 'binary X clip issue' );
             }
           }
 
@@ -746,12 +746,12 @@ export default class Rasterize {
 
           const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, ( minX + maxX ) / 2 );
 
-          if ( assert ) {
+          if ( assertSlow ) {
             const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
             const oldMaxFace = clippableFace.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
 
             if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-              assert( false, 'binary Y clip issue' );
+              assertSlow( false, 'binary Y clip issue' );
             }
           }
 
