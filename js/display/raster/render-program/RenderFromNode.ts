@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderPath, RenderProgram, RenderRadialGradient, RenderResampleType, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
+import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderPath, RenderProgram, RenderRadialGradient, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import RenderComposeType from './RenderComposeType.js';
 import RenderBlendType from './RenderBlendType.js';
@@ -18,6 +18,7 @@ import RenderColorSpace from './RenderColorSpace.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import ArialBoldFont from '../../vello/ArialBoldFont.js';
 import ArialFont from '../../vello/ArialFont.js';
+import RenderResampleType from './RenderResampleType.js';
 
 // TODO: better for this?
 const piecewiseOptions = {
@@ -330,6 +331,40 @@ export default class RenderFromNode {
     canvas.style.left = '0';
     canvas.style.zIndex = '1000000';
     document.body.appendChild( canvas );
+  }
+
+  public static nodeToJSON( node: Node ): string {
+    const padding = 5;
+    const addBackground = true;
+    const pretty = false;
+    const scale = 1;
+
+    let program = RenderFromNode.nodeToRenderProgram( node );
+
+    program = program.transformed( Matrix3.scaling( scale ).timesMatrix( Matrix3.translation( padding - node.bounds.minX, padding - node.bounds.minY ) ) );
+
+    if ( addBackground ) {
+      program = combine( program, new RenderImage(
+        null,
+        Matrix3.scaling( 5 ),
+        {
+          width: 2,
+          height: 2,
+          colorSpace: RenderColorSpace.SRGB,
+          isFullyOpaque: true,
+          evaluate: ( x: number, y: number ) => {
+            const value = ( x + y ) % 2 === 0 ? 0.9 : 0.85;
+            return new Vector4( value, value, value, 1 );
+          }
+        },
+        RenderExtend.Repeat,
+        RenderExtend.Repeat,
+        RenderResampleType.NearestNeighbor
+      ) );
+    }
+
+    const obj = program.serialize();
+    return pretty ? JSON.stringify( obj, null, 2 ) : JSON.stringify( obj );
   }
 }
 

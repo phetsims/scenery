@@ -447,6 +447,32 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.serialTest = function( serialized ) {
+    setTimeout( async function() {
+      const displaySize = 768;
+      const outputSize = 768 * 2;
+      // const outputSize = 768 / 4;
+      const scale = 20;
+
+      const program = phet.scenery.RenderProgram.deserialize( serialized ).transformed( phet.dot.Matrix3.scaling( scale ) );
+      const styleCanvas = canvas => {
+        canvas.style.width = `${displaySize}px`;
+        canvas.style.height = `${displaySize}px`;
+        canvas.style.imageRendering = 'pixelated';
+        canvas.style.position = 'absolute';
+        // canvas.style.opacity = '0.4';
+        canvas.style.top = '20px';
+        canvas.style.left = '20px ';
+      };
+
+      const debugData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
+
+      const debugCanvas = debugData.canvas;
+      styleCanvas( debugCanvas );
+      document.body.appendChild( debugCanvas );
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [
@@ -699,7 +725,7 @@ an UI and Display made for visual testing and debugging.
         canvas.style.height = `${displaySize}px`;
         canvas.style.imageRendering = 'pixelated';
         canvas.style.position = 'absolute';
-        canvas.style.opacity = '0.4';
+        // canvas.style.opacity = '0.4';
         canvas.style.top = '20px';
         canvas.style.left = '20px ';
       };
