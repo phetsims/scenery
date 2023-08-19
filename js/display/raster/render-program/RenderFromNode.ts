@@ -322,8 +322,8 @@ export default class RenderFromNode {
     const sizedProgram = program.transformed( Matrix3.scaling( window.devicePixelRatio ) );
     const width = display.width * window.devicePixelRatio;
     const height = display.height * window.devicePixelRatio;
-    const debugData = Rasterize.rasterizeRenderProgram( sizedProgram, new Bounds2( 0, 0, width, height ) );
-    const canvas = debugData!.canvas;
+    const imageData = Rasterize.rasterizeRenderProgram( sizedProgram, new Bounds2( 0, 0, width, height ) );
+    const canvas = Rasterize.imageDataToCanvas( imageData );
     canvas.style.width = `${canvas.width / window.devicePixelRatio}px`;
     canvas.style.height = `${canvas.height / window.devicePixelRatio}px`;
     canvas.style.position = 'absolute';

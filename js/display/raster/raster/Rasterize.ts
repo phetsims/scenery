@@ -838,7 +838,7 @@ export default class Rasterize {
     }
   }
 
-  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2, providedOptions?: RasterizationOptions ): Record<string, IntentionalAny> | null {
+  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2, providedOptions?: RasterizationOptions ): ImageData {
 
     const options = optionize3<RasterizationOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
@@ -846,6 +846,10 @@ export default class Rasterize {
       debugData = {
         areas: []
       };
+
+      // NOTE: find a better way of doing this?
+      // @ts-expect-error
+      window.debugData = debugData;
     }
 
     assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
@@ -972,18 +976,16 @@ export default class Rasterize {
       translation
     );
 
-    const imageData = outputRaster.toImageData();
+    return outputRaster.toImageData();
+  }
 
-    if ( assert ) {
-      const canvas = document.createElement( 'canvas' );
-      canvas.width = rasterWidth;
-      canvas.height = rasterHeight;
-      const context = canvas.getContext( '2d' )!;
-      context.putImageData( imageData, 0, 0 );
-      debugData!.canvas = canvas;
-    }
-
-    return ( debugData! ) || null;
+  public static imageDataToCanvas( imageData: ImageData ): HTMLCanvasElement {
+    const canvas = document.createElement( 'canvas' );
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    const context = canvas.getContext( '2d' )!;
+    context.putImageData( imageData, 0, 0 );
+    return canvas;
   }
 }
 
