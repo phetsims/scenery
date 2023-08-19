@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderBlendType, RenderColor, RenderComposeType, RenderPath, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderBlendType, RenderColor, RenderComposeType, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -529,6 +529,28 @@ export default class RenderBlendCompose extends RenderProgram {
       }
     }
   }
+
+  public override serialize(): SerializedRenderBlendCompose {
+    return {
+      type: 'RenderBlendCompose',
+      composeType: this.composeType,
+      blendType: this.blendType,
+      a: this.a.serialize(),
+      b: this.b.serialize()
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderBlendCompose ): RenderBlendCompose {
+    return new RenderBlendCompose( obj.composeType, obj.blendType, RenderProgram.deserialize( obj.a ), RenderProgram.deserialize( obj.b ) );
+  }
 }
 
 scenery.register( 'RenderBlendCompose', RenderBlendCompose );
+
+export type SerializedRenderBlendCompose = {
+  type: 'RenderBlendCompose';
+  composeType: RenderComposeType;
+  blendType: RenderBlendType;
+  a: SerializedRenderProgram;
+  b: SerializedRenderProgram;
+};

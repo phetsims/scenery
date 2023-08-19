@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -140,6 +140,50 @@ export default class RenderRadialBlend extends RenderPathProgram {
   public override toRecursiveString( indent: string ): string {
     return `${indent}RenderRadialBlend (${this.path ? this.path.id : 'null'})`;
   }
+
+  public override serialize(): SerializedRenderRadialBlend {
+    return {
+      type: 'RenderRadialBlend',
+      path: this.path ? this.path.serialize() : null,
+      transform: [
+        this.transform.m00(), this.transform.m01(), this.transform.m02(),
+        this.transform.m10(), this.transform.m11(), this.transform.m12(),
+        this.transform.m20(), this.transform.m21(), this.transform.m22()
+      ],
+      radius0: this.radius0,
+      radius1: this.radius1,
+      zero: this.zero.serialize(),
+      one: this.one.serialize(),
+      colorSpace: this.colorSpace
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderRadialBlend ): RenderRadialBlend {
+    return new RenderRadialBlend(
+      obj.path ? RenderPath.deserialize( obj.path ) : null,
+      Matrix3.rowMajor(
+        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
+        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
+        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
+      ),
+      obj.radius0,
+      obj.radius1,
+      RenderProgram.deserialize( obj.zero ),
+      RenderProgram.deserialize( obj.one ),
+      obj.colorSpace
+    );
+  }
 }
 
 scenery.register( 'RenderRadialBlend', RenderRadialBlend );
+
+export type SerializedRenderRadialBlend = {
+  type: 'RenderRadialBlend';
+  path: SerializedRenderPath | null;
+  transform: number[];
+  radius0: number;
+  radius1: number;
+  zero: SerializedRenderProgram;
+  one: SerializedRenderProgram;
+  colorSpace: RenderColorSpace;
+};

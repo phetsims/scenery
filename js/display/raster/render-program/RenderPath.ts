@@ -21,6 +21,22 @@ export default class RenderPath {
   public transformed( transform: Matrix3 ): RenderPath {
     return new RenderPath( this.fillRule, this.subpaths.map( subpath => subpath.map( point => transform.timesVector2( point ) ) ) );
   }
+
+  public serialize(): SerializedRenderPath {
+    return {
+      fillRule: this.fillRule,
+      subpaths: this.subpaths.map( subpath => subpath.map( point => ( { x: point.x, y: point.y } ) ) )
+    };
+  }
+
+  public static deserialize( obj: SerializedRenderPath ): RenderPath {
+    return new RenderPath( obj.fillRule, obj.subpaths.map( subpath => subpath.map( point => new Vector2( point.x, point.y ) ) ) );
+  }
 }
 
 scenery.register( 'RenderPath', RenderPath );
+
+export type SerializedRenderPath = {
+  fillRule: FillRule;
+  subpaths: { x: number; y: number }[][];
+};

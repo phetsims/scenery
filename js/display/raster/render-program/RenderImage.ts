@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -465,6 +465,80 @@ export default class RenderImage extends RenderPathProgram {
       }
     }
   }
+
+  public override serialize(): SerializedRenderImage {
+    return {
+      type: 'RenderImage',
+      path: this.path ? this.path.serialize() : null,
+      transform: [
+        this.transform.m00(), this.transform.m01(), this.transform.m02(),
+        this.transform.m10(), this.transform.m11(), this.transform.m12(),
+        this.transform.m20(), this.transform.m21(), this.transform.m22()
+      ],
+      image: RenderImage.serializeRenderImageable( this.image ),
+      extendX: this.extendX,
+      extendY: this.extendY,
+      resampleType: this.resampleType
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderImage ): RenderImage {
+    return new RenderImage(
+      obj.path ? RenderPath.deserialize( obj.path ) : null,
+      Matrix3.rowMajor(
+        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
+        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
+        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
+      ),
+      RenderImage.deserializeRenderImageable( obj.image ),
+      obj.extendX,
+      obj.extendY,
+      obj.resampleType
+    );
+  }
+
+  public static serializeRenderImageable( imageable: RenderImageable ): SerializedRenderImageable {
+    return {
+      width: imageable.width,
+      height: imageable.height,
+      colorSpace: imageable.colorSpace,
+      isFullyOpaque: imageable.isFullyOpaque,
+      data: _.range( 0, imageable.height ).flatMap( y => {
+        return _.range( 0, imageable.width ).flatMap( x => {
+          const color = imageable.evaluate( x, y );
+          return [
+            color.x,
+            color.y,
+            color.z,
+            color.w
+          ];
+        } );
+      } )
+    };
+  }
+
+  public static deserializeRenderImageable( obj: SerializedRenderImageable ): RenderImageable {
+    return {
+      width: obj.width,
+      height: obj.height,
+      colorSpace: obj.colorSpace,
+      isFullyOpaque: obj.isFullyOpaque,
+      evaluate: ( x: number, y: number ) => {
+        const index = ( y * obj.width + x ) * 4;
+        return new Vector4( obj.data[ index ], obj.data[ index + 1 ], obj.data[ index + 2 ], obj.data[ index + 3 ] );
+      }
+    };
+  }
 }
 
 scenery.register( 'RenderImage', RenderImage );
+
+export type SerializedRenderImage = {
+  type: 'RenderImage';
+  path: SerializedRenderPath | null;
+  transform: number[];
+  image: SerializedRenderImageable;
+  extendX: RenderExtend;
+  extendY: RenderExtend;
+  resampleType: RenderResampleType;
+};

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
@@ -49,6 +49,22 @@ export default class RenderGradientStop {
       return RenderColor.ratioBlend( beforeColor, afterColor, ratio, colorSpace );
     }
   }
+
+  public serialize(): SerializedRenderGradientStop {
+    return {
+      ratio: this.ratio,
+      program: this.program.serialize()
+    };
+  }
+
+  public static deserialize( obj: SerializedRenderGradientStop ): RenderGradientStop {
+    return new RenderGradientStop( obj.ratio, RenderProgram.deserialize( obj.program ) );
+  }
 }
 
 scenery.register( 'RenderGradientStop', RenderGradientStop );
+
+export type SerializedRenderGradientStop = {
+  ratio: number;
+  program: SerializedRenderProgram;
+};

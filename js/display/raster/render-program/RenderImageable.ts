@@ -20,3 +20,11 @@ type RenderImageable = {
 };
 
 export default RenderImageable;
+
+export type SerializedRenderImageable = {
+  width: number;
+  height: number;
+  colorSpace: RenderColorSpace;
+  isFullyOpaque: boolean;
+  data: number[];
+};

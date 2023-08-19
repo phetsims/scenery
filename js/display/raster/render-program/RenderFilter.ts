@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
@@ -101,5 +101,40 @@ export default class RenderFilter extends RenderPathProgram {
     return `${indent}RenderFilter (${this.path ? this.path.id : 'null'})\n` +
            `${this.program.toRecursiveString( indent + '  ' )}`;
   }
+
+  public override serialize(): SerializedRenderFilter {
+    return {
+      type: 'RenderFilter',
+      path: this.path ? this.path.serialize() : null,
+      program: this.program.serialize(),
+      colorMatrix: [
+        this.colorMatrix.m00(), this.colorMatrix.m01(), this.colorMatrix.m02(), this.colorMatrix.m03(),
+        this.colorMatrix.m10(), this.colorMatrix.m11(), this.colorMatrix.m12(), this.colorMatrix.m13(),
+        this.colorMatrix.m20(), this.colorMatrix.m21(), this.colorMatrix.m22(), this.colorMatrix.m23(),
+        this.colorMatrix.m30(), this.colorMatrix.m31(), this.colorMatrix.m32(), this.colorMatrix.m33()
+      ],
+      colorTranslation: [
+        this.colorTranslation.x, this.colorTranslation.y, this.colorTranslation.z, this.colorTranslation.w
+      ]
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderFilter ): RenderFilter {
+    return new RenderFilter(
+      obj.path ? RenderPath.deserialize( obj.path ) : null,
+      RenderProgram.deserialize( obj.program ),
+      new Matrix4( ...obj.colorMatrix ),
+      new Vector4( obj.colorTranslation[ 0 ], obj.colorTranslation[ 1 ], obj.colorTranslation[ 2 ], obj.colorTranslation[ 3 ] )
+    );
+  }
 }
+
 scenery.register( 'RenderFilter', RenderFilter );
+
+export type SerializedRenderFilter = {
+  type: 'RenderFilter';
+  path: SerializedRenderPath | null;
+  program: SerializedRenderProgram;
+  colorMatrix: number[];
+  colorTranslation: number[];
+};

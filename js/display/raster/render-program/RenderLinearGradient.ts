@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -147,6 +147,50 @@ export default class RenderLinearGradient extends RenderPathProgram {
   public override toRecursiveString( indent: string ): string {
     return `${indent}RenderLinearGradient (${this.path ? this.path.id : 'null'})`;
   }
+
+  public override serialize(): SerializedRenderLinearGradient {
+    return {
+      type: 'RenderLinearGradient',
+      path: this.path ? this.path.serialize() : null,
+      transform: [
+        this.transform.m00(), this.transform.m01(), this.transform.m02(),
+        this.transform.m10(), this.transform.m11(), this.transform.m12(),
+        this.transform.m20(), this.transform.m21(), this.transform.m22()
+      ],
+      start: [ this.start.x, this.start.y ],
+      end: [ this.end.x, this.end.y ],
+      stops: this.stops.map( stop => stop.serialize() ),
+      extend: this.extend,
+      colorSpace: this.colorSpace
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderLinearGradient ): RenderLinearGradient {
+    return new RenderLinearGradient(
+      obj.path ? RenderPath.deserialize( obj.path ) : null,
+      Matrix3.rowMajor(
+        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
+        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
+        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
+      ),
+      new Vector2( obj.start[ 0 ], obj.start[ 1 ] ),
+      new Vector2( obj.end[ 0 ], obj.end[ 1 ] ),
+      obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
+      obj.extend,
+      obj.colorSpace
+    );
+  }
 }
 
 scenery.register( 'RenderLinearGradient', RenderLinearGradient );
+
+export type SerializedRenderLinearGradient = {
+  type: 'RenderLinearGradient';
+  path: SerializedRenderPath | null;
+  transform: number[];
+  start: number[];
+  end: number[];
+  stops: SerializedRenderGradientStop[];
+  extend: RenderExtend;
+  colorSpace: RenderColorSpace;
+};

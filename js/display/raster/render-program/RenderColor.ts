@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, Color, constantTrue, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, Color, constantTrue, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -233,6 +233,24 @@ export default class RenderColor extends RenderPathProgram {
   }
 
   public static readonly TRANSPARENT = new RenderColor( null, Vector4.ZERO );
+
+  public override serialize(): SerializedRenderColor {
+    return {
+      type: 'RenderColor',
+      path: this.path ? this.path.serialize() : null,
+      color: { r: this.color.x, g: this.color.y, b: this.color.z, a: this.color.w }
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderColor ): RenderColor {
+    return new RenderColor( obj.path ? RenderPath.deserialize( obj.path ) : null, new Vector4( obj.color.r, obj.color.g, obj.color.b, obj.color.a ) );
+  }
 }
 
 scenery.register( 'RenderColor', RenderColor );
+
+export type SerializedRenderColor = {
+  type: 'RenderColor';
+  path: SerializedRenderPath | null;
+  color: { r: number; g: number; b: number; a: number };
+};

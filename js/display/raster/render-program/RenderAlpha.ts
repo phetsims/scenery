@@ -6,10 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, constantTrue, scenery } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, SerializedRenderProgram, constantTrue, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
+import { SerializedRenderPath } from './RenderPath.js';
 
 export default class RenderAlpha extends RenderPathProgram {
   public constructor(
@@ -104,6 +105,24 @@ export default class RenderAlpha extends RenderPathProgram {
     return `${indent}RenderAlpha (${this.path ? this.path.id : 'null'}, alpha:${this.alpha})\n` +
            `${this.program.toRecursiveString( indent + '  ' )}`;
   }
+
+  public override serialize(): SerializedRenderAlpha {
+    return {
+      type: 'RenderAlpha',
+      path: this.path ? this.path.serialize() : null,
+      program: this.program.serialize()
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderAlpha ): RenderAlpha {
+    return new RenderAlpha( obj.path ? RenderPath.deserialize( obj.path ) : null, RenderProgram.deserialize( obj.program ), 1 );
+  }
 }
 
 scenery.register( 'RenderAlpha', RenderAlpha );
+
+export type SerializedRenderAlpha = {
+  type: 'RenderAlpha';
+  path: SerializedRenderPath | null;
+  program: SerializedRenderProgram;
+};

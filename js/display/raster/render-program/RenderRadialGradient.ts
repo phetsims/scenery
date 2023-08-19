@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -128,6 +128,43 @@ export default class RenderRadialGradient extends RenderPathProgram {
 
   public override toRecursiveString( indent: string ): string {
     return `${indent}RenderRadialGradient (${this.path ? this.path.id : 'null'})`;
+  }
+
+  public override serialize(): SerializedRenderRadialGradient {
+    return {
+      type: 'RenderRadialGradient',
+      path: this.path ? this.path.serialize() : null,
+      transform: [
+        this.transform.m00(), this.transform.m01(), this.transform.m02(),
+        this.transform.m10(), this.transform.m11(), this.transform.m12(),
+        this.transform.m20(), this.transform.m21(), this.transform.m22()
+      ],
+      start: [ this.start.x, this.start.y ],
+      startRadius: this.startRadius,
+      end: [ this.end.x, this.end.y ],
+      endRadius: this.endRadius,
+      stops: this.stops.map( stop => stop.serialize() ),
+      extend: this.extend,
+      colorSpace: this.colorSpace
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderRadialGradient ): RenderRadialGradient {
+    return new RenderRadialGradient(
+      obj.path ? RenderPath.deserialize( obj.path ) : null,
+      Matrix3.rowMajor(
+        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
+        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
+        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
+      ),
+      new Vector2( obj.start[ 0 ], obj.start[ 1 ] ),
+      obj.startRadius,
+      new Vector2( obj.end[ 0 ], obj.end[ 1 ] ),
+      obj.endRadius,
+      obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
+      obj.extend,
+      obj.colorSpace
+    );
   }
 }
 
@@ -299,3 +336,16 @@ class RadialGradientLogic {
 }
 
 scenery.register( 'RenderRadialGradient', RenderRadialGradient );
+
+export type SerializedRenderRadialGradient = {
+  type: 'RenderRadialGradient';
+  path: SerializedRenderPath | null;
+  transform: number[];
+  start: number[];
+  startRadius: number;
+  end: number[];
+  endRadius: number;
+  stops: SerializedRenderGradientStop[];
+  extend: RenderExtend;
+  colorSpace: RenderColorSpace;
+};

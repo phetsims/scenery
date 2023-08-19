@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -148,6 +148,39 @@ export default class RenderLinearBlend extends RenderPathProgram {
   public override toRecursiveString( indent: string ): string {
     return `${indent}RenderLinearBlend (${this.path ? this.path.id : 'null'})`;
   }
+
+  public override serialize(): SerializedRenderLinearBlend {
+    return {
+      type: 'RenderLinearBlend',
+      path: this.path ? this.path.serialize() : null,
+      scaledNormal: [ this.scaledNormal.x, this.scaledNormal.y ],
+      offset: this.offset,
+      zero: this.zero.serialize(),
+      one: this.one.serialize(),
+      colorSpace: this.colorSpace
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderLinearBlend ): RenderLinearBlend {
+    return new RenderLinearBlend(
+      obj.path ? RenderPath.deserialize( obj.path ) : null,
+      new Vector2( obj.scaledNormal[ 0 ], obj.scaledNormal[ 1 ] ),
+      obj.offset,
+      RenderProgram.deserialize( obj.zero ),
+      RenderProgram.deserialize( obj.one ),
+      obj.colorSpace
+    );
+  }
 }
 
 scenery.register( 'RenderLinearBlend', RenderLinearBlend );
+
+export type SerializedRenderLinearBlend = {
+  type: 'RenderLinearBlend';
+  path: SerializedRenderPath | null;
+  scaledNormal: number[];
+  offset: number;
+  zero: SerializedRenderProgram;
+  one: SerializedRenderProgram;
+  colorSpace: RenderColorSpace;
+};
