@@ -349,7 +349,11 @@ export default class Rasterize {
                 }
 
                 // TODO: add less-than, etc.
-                if ( maxIntersectionX.compareCrossMul( candidateMaxIntersectionX ) < 0 ) {
+                if (
+                  maxIntersectionX.compareCrossMul( candidateMaxIntersectionX ) < 0 &&
+                  // NOTE: Need to ensure that our actual intersection is to the left of our minimal point!!!
+                  candidateMaxIntersectionX.compareCrossMul( minimalRationalPoint.x ) < 0
+                ) {
                   maxIntersectionX = candidateMaxIntersectionX;
                   maxIntersectionEdge = edge;
                   maxIntersectionIsVertex = isVertex;

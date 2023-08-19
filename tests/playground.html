@@ -759,11 +759,11 @@ an UI and Display made for visual testing and debugging.
       const SHOW_FACE_HUE_FILL = false;
       const SHOW_BOUNDARY_DEBUG = false;
       const SHOW_BOUNDARIES = false;
-      const WINDING_DEBUG_PATH = program.a.path;
+      const WINDING_DEBUG_PATH = null;
       const SHOW_INCLUSION_DEBUG = false;
       const INCLUSION_DEBUG_PATH = program.a.path;
       const SHOW_SOLID_COLORS = false;
-      const SHOW_FULL_AREAS = true;
+      const SHOW_FULL_AREAS = false;
       const SHOW_RENDERABLE_FACES = false;
 
       if ( SHOW_INTEGER_EDGES ) {
@@ -858,7 +858,7 @@ an UI and Display made for visual testing and debugging.
             return;
           }
 
-          offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: 'rgba(0,0,0,1)' } ) );
+          offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: 'rgba(255,0,0,0.5)' } ) );
         } );
       }
 
@@ -879,6 +879,7 @@ an UI and Display made for visual testing and debugging.
       }
 
       if ( SHOW_BOUNDARY_DEBUG ) {
+        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 0 ] ];
         // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 1 ] ];
         debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 2 ] ];
         // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 3 ] ];
@@ -903,7 +904,7 @@ an UI and Display made for visual testing and debugging.
 
             const color = phet.scenery.Color.hsla( i / debugData.boundaryDebugData.length * 360, 100, 50, 0.5 );
 
-            offsetNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( boundaryToPolygon( connectedFace.boundary ) ), { fill: 'black' } ) );
+            offsetNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( boundaryToPolygon( connectedFace.boundary ) ), { fill: 'rgba(0,50,0,0.5)' } ) );
             offsetNode.addChild( new phet.scenery.Line( minimalPoint, intersectionPoint, { stroke: color, lineWidth: 2 } ) );
           }
         } );
