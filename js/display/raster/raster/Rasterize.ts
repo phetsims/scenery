@@ -616,7 +616,13 @@ export default class Rasterize {
       debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
     }
     if ( constColor ) {
-      outputRaster.addFullRegion( constColor, minX, minY, maxX - minX, maxY - minY );
+      outputRaster.addFullRegion(
+        constColor,
+        minX + outputRasterOffset.x,
+        minY + outputRasterOffset.y,
+        maxX - minX,
+        maxY - minY
+      );
     }
     else {
       for ( let y = minY; y < maxY; y++ ) {
