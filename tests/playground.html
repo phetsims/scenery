@@ -598,7 +598,7 @@ an UI and Display made for visual testing and debugging.
         width: 1024,
         height: 1024,
         colorSpace: phet.scenery.RenderColorSpace.LinearUnpremultipliedSRGB,
-        isFullyOpaque: false, // TODO: put back on!
+        isFullyOpaque: true,
         evaluate: ( x, y ) => {
           return linearPremultipliedTestImageData[ y * testImageData.width + x ];
         }

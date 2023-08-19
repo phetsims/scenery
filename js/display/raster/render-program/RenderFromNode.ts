@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderLinearGradient, RenderPath, RenderProgram, RenderRadialGradient, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
+import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderPath, RenderProgram, RenderRadialGradient, RenderResampleType, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import RenderComposeType from './RenderComposeType.js';
 import RenderBlendType from './RenderBlendType.js';
@@ -27,6 +27,8 @@ const piecewiseOptions = {
   distanceEpsilon: 0.0002,
   curveEpsilon: 0.2
 };
+
+const resampleType = RenderResampleType.AnalyticBilinear;
 
 const combine = ( a: RenderProgram, b: RenderProgram ) => new RenderBlendCompose(
   RenderComposeType.Over,
@@ -54,10 +56,12 @@ const shapeToRenderPath = ( shape: Shape ) => new RenderPath(
     } );
   } )
 );
+
 const shapesToRenderPath = ( shapes: Shape[] ) => new RenderPath(
   'nonzero',
   shapes.flatMap( shape => shapeToRenderPath( shape ).subpaths )
 );
+
 const renderPathPaintToRenderProgram = ( renderPath: RenderPath, paint: TPaint, matrix: Matrix3 ): RenderProgram => {
   if ( isTReadOnlyProperty( paint ) ) {
     paint = paint.value;
@@ -105,14 +109,60 @@ const renderPathPaintToRenderProgram = ( renderPath: RenderPath, paint: TPaint, 
       );
     }
     else if ( paint instanceof Pattern ) {
-      // TODO: Patterns
-      console.log( 'PATTERN UNIMPLEMENTED' );
+      return new RenderImage(
+        renderPath,
+        paintMatrix,
+        imagelikeToRenderImageable( paint.image ),
+        RenderExtend.Repeat,
+        RenderExtend.Repeat,
+        resampleType
+      );
     }
   }
 
   // If unimplemented
-  // TODO
+  console.log( 'SOME PAINT TYPE UNIMPLEMENTED?!?' );
   return RenderColor.TRANSPARENT;
+};
+
+const imagelikeToRenderImageable = ( imagelike: HTMLImageElement | HTMLCanvasElement | ImageBitmap ): RenderImageable => {
+  const canvas = document.createElement( 'canvas' );
+  canvas.width = imagelike.width;
+  canvas.height = imagelike.height;
+  const context = canvas.getContext( '2d', {
+    willReadFrequently: true
+  } )!;
+  context.drawImage( imagelike, 0, 0 );
+
+  const imageData = context.getImageData( 0, 0, canvas.width, canvas.height );
+
+  let isFullyOpaque = true;
+
+  const linearPremultipliedData: Vector4[] = [];
+  for ( let i = 0; i < imageData.data.length / 4; i++ ) {
+    const baseIndex = i * 4;
+    const r = imageData.data[ baseIndex ] / 255;
+    const g = imageData.data[ baseIndex + 1 ] / 255;
+    const b = imageData.data[ baseIndex + 2 ] / 255;
+    const a = imageData.data[ baseIndex + 3 ] / 255;
+    if ( a < 1 ) {
+      isFullyOpaque = false;
+    }
+    const srgb = new Vector4( r, g, b, a );
+    const linear = RenderColor.sRGBToLinear( srgb );
+    const premultiplied = RenderColor.premultiply( linear );
+    linearPremultipliedData.push( premultiplied );
+  }
+
+  return {
+    width: imageData.width,
+    height: imageData.height,
+    colorSpace: RenderColorSpace.LinearUnpremultipliedSRGB,
+    isFullyOpaque: isFullyOpaque,
+    evaluate: ( x, y ) => {
+      return linearPremultipliedData[ y * imageData.width + x ];
+    }
+  };
 };
 
 const colorFromTColor = ( paint: TColor ): Vector4 => {
@@ -154,7 +204,6 @@ export default class RenderFromNode {
       matrix = matrix.timesMatrix( node.matrix );
     }
 
-    // TODO: self
     if ( node instanceof Path ) {
       const addShape = ( shape: Shape, paint: TPaint ) => {
         const renderPath = shapeToRenderPath( shape.transformed( matrix ) );
@@ -185,8 +234,6 @@ export default class RenderFromNode {
       );
 
       if ( shapedText ) {
-        console.log( 'TEXT UNSHAPED' );
-
         const glyphShapes: Shape[] = [];
 
         let x = 0;
@@ -210,14 +257,29 @@ export default class RenderFromNode {
           addResult( renderPathPaintToRenderProgram( renderPath, node.getStroke(), matrix ) );
         }
       }
+      else {
+        console.log( 'TEXT UNSHAPED', node.renderedText );
+      }
     }
     else if ( node instanceof Sprites ) {
       // TODO: Sprites
       console.log( 'SPRITES UNIMPLEMENTED' );
     }
     else if ( node instanceof Image ) {
-      // TODO: Image
-      console.log( 'IMAGE UNIMPLEMENTED' );
+
+      const nodeImage = node.image;
+      if ( nodeImage ) {
+        const renderPath = shapeToRenderPath( Shape.bounds( node.selfBounds ).transformed( matrix ) );
+
+        addResult( new RenderImage(
+          renderPath,
+          matrix,
+          imagelikeToRenderImageable( node.image ),
+          RenderExtend.Pad,
+          RenderExtend.Pad,
+          resampleType
+        ) );
+      }
     }
 
     // Children
