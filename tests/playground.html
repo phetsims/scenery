@@ -737,8 +737,17 @@ an UI and Display made for visual testing and debugging.
       // console.log( canvas.toDataURL() );
 
       // const raster = new phet.scenery.AccumulatedRaster( outputSize, outputSize );
+      // const raster = new phet.scenery.CombinedRaster( outputSize + 100, outputSize + 100 );
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
       phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), {
+
+        // TODO: fix outputRasterOffset
+        // outputRasterOffset: phet.dot.v2( 100, 100 ),
+
+        // polygonFiltering: phet.scenery.PolygonFilterType.Box,
+        // polygonFiltering: phet.scenery.PolygonFilterType.Bilinear,
+        // polygonFiltering: phet.scenery.PolygonFilterType.MitchellNetravali,
+
         // edgeIntersectionMethod: 'quadratic',
         // edgeIntersectionMethod: 'boundsTree',
         // edgeIntersectionMethod: 'arrayBoundsTree',
@@ -765,8 +774,9 @@ an UI and Display made for visual testing and debugging.
       } );
       scene.addChild( offsetNode );
 
-      const SHOW_INTEGER_EDGES = true;
-      const SHOW_INTERSECTIONS = true;
+      // TODO: CHECK MORE OF THESE AFTER COORDINATE CHANGES
+      const SHOW_INTEGER_EDGES = false;
+      const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
       const SHOW_FACE_CONSISTENT_FILL = false;
       const SHOW_FACE_HUE_FILL = false;
@@ -779,26 +789,33 @@ an UI and Display made for visual testing and debugging.
       const SHOW_FULL_AREAS = false;
       const SHOW_RENDERABLE_FACES = false;
 
+      const fromRenderPoint = renderPoint => renderPoint.timesScalar( displaySize / outputSize );
+      const fromRenderX = renderX => renderX * displaySize / outputSize;
+      const fromRenderY = renderY => renderY * displaySize / outputSize;
+
+      const fromIntegerMatrix = debugData.fromIntegerMatrix;
+      const fromIntegerPoint = integerPoint => fromRenderPoint( fromIntegerMatrix.timesVector2( integerPoint ) );
+      const fromIntegerX = integerX => fromRenderX( fromIntegerPoint( phet.dot.v2( integerX, 0 ) ).x );
+      const fromIntegerY = integerY => fromRenderY( fromIntegerPoint( phet.dot.v2( 0, integerY ) ).y );
+
       if ( SHOW_INTEGER_EDGES ) {
         debugData.integerEdges.forEach( integerEdge => {
-          offsetNode.addChild( new phet.scenery.Line(
-            integerEdge.x0 * displayScale,
-            integerEdge.y0 * displayScale,
-            integerEdge.x1 * displayScale,
-            integerEdge.y1 * displayScale,
-            { stroke: 'black' } ) );
+          const p0 = fromIntegerPoint( phet.dot.v2( integerEdge.x0, integerEdge.y0 ) );
+          const p1 = fromIntegerPoint( phet.dot.v2( integerEdge.x1, integerEdge.y1 ) );
+          offsetNode.addChild( new phet.scenery.Line( p0, p1, { stroke: 'black', lineCap: 'round', lineJoin: 'round' } ) );
         } );
       }
       if ( SHOW_INTERSECTIONS ) {
         debugData.integerEdges.forEach( integerEdge => {
           integerEdge.intersections.forEach( intersection => {
+
             const point = new phet.dot.Vector2(
-              intersection.point.x.toFloat() * displayScale,
-              intersection.point.y.toFloat() * displayScale
+              intersection.point.x.toFloat(),
+              intersection.point.y.toFloat()
             );
             offsetNode.addChild( new phet.scenery.Circle( 2, {
               fill: 'black',
-              translation: point
+              translation: fromIntegerPoint( point )
             } ) );
           } );
         } );
@@ -814,19 +831,17 @@ an UI and Display made for visual testing and debugging.
           const nextEdge = halfEdge.nextEdge;
 
           offsetNode.addChild( new phet.scenery.Line(
-            mid1.x * displayScale,
-            mid1.y * displayScale,
-            p1.x * displayScale,
-            p1.y * displayScale,
+            fromIntegerPoint( mid1 ),
+            fromIntegerPoint( p1 ),
             { stroke: 'rgba(0,0,0,0.5)' } ) );
 
           const offset1 = p1.minus( p0 ).normalized().perpendicular.negate().timesScalar( 2 );
           const offset2 = p2.minus( p1 ).normalized().perpendicular.negate().timesScalar( 2 );
 
-          const q0 = mid1.timesScalar( displayScale ).plus( offset1 );
-          let q1 = p1.timesScalar( displayScale ).plus( offset1 );
-          let r0 = p1.timesScalar( displayScale ).plus( offset2 );
-          const r1 = mid2.timesScalar( displayScale ).plus( offset2 );
+          const q0 = fromIntegerPoint( mid1 ).plus( offset1 );
+          let q1 = fromIntegerPoint( p1 ).plus( offset1 );
+          let r0 = fromIntegerPoint( p1 ).plus( offset2 );
+          const r1 = fromIntegerPoint( mid2 ).plus( offset2 );
 
           const intersection = phet.dot.Utils.lineLineIntersection( q0, q1, r0, r1 );
           if ( intersection !== null ) {
@@ -840,7 +855,7 @@ an UI and Display made for visual testing and debugging.
       }
 
       const boundaryToPolygon = boundary => {
-        return boundary.edges.map( halfEdge => halfEdge.p0float.timesScalar( displayScale ) );
+        return boundary.edges.map( halfEdge => fromIntegerPoint( halfEdge.p0float ) );
       };
 
       const faceToShape = face => {
@@ -894,7 +909,7 @@ an UI and Display made for visual testing and debugging.
       if ( SHOW_BOUNDARY_DEBUG ) {
         // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 0 ] ];
         // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 1 ] ];
-        debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 2 ] ];
+        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 2 ] ];
         // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 3 ] ];
         debugData.boundaryDebugData.forEach( ( data, i ) => {
           const connectedFace = data.connectedFace;
@@ -906,14 +921,14 @@ an UI and Display made for visual testing and debugging.
           if ( maxIntersectionEdge ) {
             const minimalXRationalPoint = outerBoundary.minimalXRationalPoint;
 
-            const minimalPoint = new phet.dot.Vector2(
-              minimalXRationalPoint.x.toFloat() * displayScale,
-              minimalXRationalPoint.y.toFloat() * displayScale
-            );
-            const intersectionPoint = new phet.dot.Vector2(
-              maxIntersectionX.toFloat() * displayScale,
-              minimalXRationalPoint.y.toFloat() * displayScale
-            );
+            const minimalPoint = fromIntegerPoint( new phet.dot.Vector2(
+              minimalXRationalPoint.x.toFloat(),
+              minimalXRationalPoint.y.toFloat()
+            ) );
+            const intersectionPoint = fromIntegerPoint( new phet.dot.Vector2(
+              maxIntersectionX.toFloat(),
+              minimalXRationalPoint.y.toFloat()
+            ) );
 
             const color = phet.scenery.Color.hsla( i / debugData.boundaryDebugData.length * 360, 100, 50, 0.5 );
 

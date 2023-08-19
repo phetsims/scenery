@@ -9,6 +9,7 @@
 import { BigRationalVector2, LinearEdge, RationalHalfEdge, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export default class RationalBoundary {
   public readonly edges: RationalHalfEdge[] = [];
@@ -42,22 +43,21 @@ export default class RationalBoundary {
     this.signedArea = signedArea;
   }
 
-  // TODO: just have a matrix?
-  public toTransformedPolygon( scale = 1, translation = Vector2.ZERO ): Vector2[] {
+  public toTransformedPolygon( matrix: Matrix3 ): Vector2[] {
     const result: Vector2[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {
-      result.push( this.edges[ i ].p0float.timesScalar( scale ).plus( translation ) );
+      result.push( matrix.timesVector2( this.edges[ i ].p0float ) );
     }
     return result;
   }
 
-  public toTransformedLinearEdges( scale = 1, translation = Vector2.ZERO ): LinearEdge[] {
+  public toTransformedLinearEdges( matrix: Matrix3 ): LinearEdge[] {
     const result: LinearEdge[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
       result.push( new LinearEdge(
-        edge.p0float.timesScalar( scale ).plus( translation ),
-        edge.p1float.timesScalar( scale ).plus( translation )
+        matrix.timesVector2( edge.p0float ),
+        matrix.timesVector2( edge.p1float )
       ) );
     }
     return result;

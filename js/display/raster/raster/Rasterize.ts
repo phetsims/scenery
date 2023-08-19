@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClippableFace, CombinedRaster, EdgedFace, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClippableFace, EdgedFace, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
-import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export type RasterizationOptions = {
 
@@ -50,10 +50,7 @@ class AccumulatingFace {
 
 export default class Rasterize {
 
-  private static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, scale: number ): IntegerEdge[] {
-
-    const translation = new Vector2( -bounds.minX, -bounds.minY );
-
+  private static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
     const integerEdges: IntegerEdge[] = [];
     for ( let i = 0; i < paths.length; i++ ) {
       const path = paths[ i ];
@@ -66,7 +63,7 @@ export default class Rasterize {
           // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
           const p0 = clippedSubpath[ k ];
           const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
-          const edge = IntegerEdge.fromUnscaledPoints( path, scale, translation, p0, p1 );
+          const edge = IntegerEdge.createTransformed( path, toIntegerMatrix, p0, p1 );
           if ( edge !== null ) {
             integerEdges.push( edge );
           }
@@ -408,8 +405,7 @@ export default class Rasterize {
 
   private static toPolygonalRenderableFaces(
     faces: RationalFace[],
-    scale: number,
-    translation: Vector2
+    fromIntegerMatrix: Matrix3
   ): RenderableFace[] {
 
     // TODO: naming with above!!
@@ -417,9 +413,9 @@ export default class Rasterize {
     for ( let i = 0; i < faces.length; i++ ) {
       const face = faces[ i ];
       renderableFaces.push( new RenderableFace(
-        face.toPolygonalFace( 1 / scale, translation ),
+        face.toPolygonalFace( fromIntegerMatrix ),
         face.renderProgram!,
-        face.getBounds( 1 / scale, translation )
+        face.getBounds( fromIntegerMatrix )
       ) );
     }
     return renderableFaces;
@@ -427,8 +423,7 @@ export default class Rasterize {
 
   private static toEdgedRenderableFaces(
     faces: RationalFace[],
-    scale: number,
-    translation: Vector2
+    fromIntegerMatrix: Matrix3
   ): RenderableFace[] {
 
     // TODO: naming with above!!
@@ -436,9 +431,9 @@ export default class Rasterize {
     for ( let i = 0; i < faces.length; i++ ) {
       const face = faces[ i ];
       renderableFaces.push( new RenderableFace(
-        face.toEdgedFace( 1 / scale, translation ),
+        face.toEdgedFace( fromIntegerMatrix ),
         face.renderProgram!,
-        face.getBounds( 1 / scale, translation )
+        face.getBounds( fromIntegerMatrix )
       ) );
     }
     return renderableFaces;
@@ -446,8 +441,7 @@ export default class Rasterize {
 
   private static toFullyCombinedRenderableFaces(
     faces: RationalFace[],
-    scale: number,
-    translation: Vector2
+    fromIntegerMatrix: Matrix3
   ): RenderableFace[] {
 
     const faceEquivalenceClasses: Set<RationalFace>[] = [];
@@ -473,8 +467,6 @@ export default class Rasterize {
       }
     }
 
-    const inverseScale = 1 / scale;
-
     const renderableFaces: RenderableFace[] = [];
     for ( let i = 0; i < faceEquivalenceClasses.length; i++ ) {
       const faces = faceEquivalenceClasses[ i ];
@@ -485,7 +477,7 @@ export default class Rasterize {
 
       for ( const face of faces ) {
         renderProgram = face.renderProgram!;
-        bounds.includeBounds( face.getBounds( inverseScale, translation ) );
+        bounds.includeBounds( face.getBounds( fromIntegerMatrix ) );
 
         for ( const boundary of [
           face.boundary,
@@ -494,8 +486,8 @@ export default class Rasterize {
           for ( const edge of boundary.edges ) {
             if ( !faces.has( edge.reversed.face! ) ) {
               clippedEdges.push( new LinearEdge(
-                edge.p0float.timesScalar( inverseScale ).plus( translation ),
-                edge.p1float.timesScalar( inverseScale ).plus( translation )
+                fromIntegerMatrix.timesVector2( edge.p0float ),
+                fromIntegerMatrix.timesVector2( edge.p1float )
               ) );
             }
           }
@@ -513,11 +505,8 @@ export default class Rasterize {
   // that we combine (thus switching to EdgedFaces with unsorted edges).
   private static toSimplifyingCombinedRenderableFaces(
     faces: RationalFace[],
-    scale: number,
-    translation: Vector2
+    fromIntegerMatrix: Matrix3
   ): RenderableFace[] {
-
-    const inverseScale = 1 / scale;
 
     const accumulatedFaces: AccumulatingFace[] = [];
 
@@ -528,7 +517,7 @@ export default class Rasterize {
         newAccumulatedFace.faces.add( face );
         newAccumulatedFace.facesToProcess.push( face );
         newAccumulatedFace.renderProgram = face.renderProgram!;
-        newAccumulatedFace.bounds.includeBounds( face.getBounds( inverseScale, translation ) );
+        newAccumulatedFace.bounds.includeBounds( face.getBounds( fromIntegerMatrix ) );
 
         const incompatibleFaces = new Set<RationalFace>();
 
@@ -545,7 +534,7 @@ export default class Rasterize {
           if ( face.renderProgram && newAccumulatedFace.renderProgram!.equals( face.renderProgram ) ) {
             newAccumulatedFace.faces.add( face );
             newAccumulatedFace.facesToProcess.push( face );
-            newAccumulatedFace.bounds.includeBounds( face.getBounds( inverseScale, translation ) );
+            newAccumulatedFace.bounds.includeBounds( face.getBounds( fromIntegerMatrix ) );
             return true;
           }
           else {
@@ -566,8 +555,8 @@ export default class Rasterize {
             for ( const edge of boundary.edges ) {
               if ( !isFaceCompatible( edge.reversed.face! ) ) {
                 newAccumulatedFace.clippedEdges.push( new LinearEdge(
-                  edge.p0float.timesScalar( inverseScale ).plus( translation ),
-                  edge.p1float.timesScalar( inverseScale ).plus( translation )
+                  fromIntegerMatrix.timesVector2( edge.p0float ),
+                  fromIntegerMatrix.timesVector2( edge.p1float )
                 ) );
               }
             }
@@ -588,7 +577,7 @@ export default class Rasterize {
     outputRaster: OutputRaster,
     renderProgram: RenderProgram,
     constColor: Vector4 | null,
-    translation: Vector2,
+    outputRasterOffset: Vector2,
     pixelFace: ClippableFace,
     area: number,
     x: number,
@@ -609,7 +598,7 @@ export default class Rasterize {
       x + 1,
       y + 1
     );
-    outputRaster.addPartialPixel( color.timesScalar( area ), x + translation.x, y + translation.y );
+    outputRaster.addPartialPixel( color.timesScalar( area ), x + outputRasterOffset.x, y + outputRasterOffset.y );
   }
 
   // TODO: inline eventually
@@ -617,7 +606,7 @@ export default class Rasterize {
     outputRaster: OutputRaster,
     renderProgram: RenderProgram,
     constColor: Vector4 | null,
-    translation: Vector2,
+    outputRasterOffset: Vector2,
     minX: number,
     minY: number,
     maxX: number,
@@ -642,7 +631,7 @@ export default class Rasterize {
             x + 1,
             y + 1
           );
-          outputRaster.addFullPixel( color, x + translation.x, y + translation.y );
+          outputRaster.addFullPixel( color, x + outputRasterOffset.x, y + outputRasterOffset.y );
         }
       }
     }
@@ -685,7 +674,7 @@ export default class Rasterize {
     outputRaster: OutputRaster,
     renderProgram: RenderProgram,
     constColor: Vector4 | null,
-    translation: Vector2,
+    outputRasterOffset: Vector2,
     clippableFace: ClippableFace,
     area: number,
     minX: number,
@@ -705,13 +694,13 @@ export default class Rasterize {
     if ( area > 1e-8 ) {
       if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
         Rasterize.addFullArea(
-          outputRaster, renderProgram, constColor, translation,
+          outputRaster, renderProgram, constColor, outputRasterOffset,
           minX, minY, maxX, maxY
         );
       }
       else if ( xDiff === 1 && yDiff === 1 ) {
         Rasterize.addPartialPixel(
-          outputRaster, renderProgram, constColor, translation,
+          outputRaster, renderProgram, constColor, outputRasterOffset,
           clippableFace, area, minX, minY
         );
       }
@@ -735,13 +724,13 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, translation,
+              outputRaster, renderProgram, constColor, outputRasterOffset,
               minFace, minArea, minX, minY, xSplit, maxY
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, translation,
+              outputRaster, renderProgram, constColor, outputRasterOffset,
               maxFace, maxArea, xSplit, minY, maxX, maxY
             );
           }
@@ -765,13 +754,13 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, translation,
+              outputRaster, renderProgram, constColor, outputRasterOffset,
               minFace, minArea, minX, minY, maxX, ySplit
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, translation,
+              outputRaster, renderProgram, constColor, outputRasterOffset,
               maxFace, maxArea, minX, ySplit, maxX, maxY
             );
           }
@@ -785,11 +774,15 @@ export default class Rasterize {
     renderProgram: RenderProgram,
     clippableFace: ClippableFace,
     constColor: Vector4 | null,
-    bounds: Bounds2, // TODO: check it's integral
-    translation: Vector2
+    bounds: Bounds2,
+    outputRasterOffset: Vector2,
+    polygonFiltering: PolygonFilterType
   ): void {
+    // TODO: eeek! FILTERING WORK HERE
+    bounds = bounds.roundedOut();
+
     Rasterize.binaryInternalRasterize(
-      outputRaster, renderProgram, constColor, translation,
+      outputRaster, renderProgram, constColor, outputRasterOffset,
       clippableFace, clippableFace.getArea(), bounds.minX, bounds.minY, bounds.maxX, bounds.maxY
     );
   }
@@ -797,12 +790,10 @@ export default class Rasterize {
   private static rasterizeAccumulate(
     outputRaster: OutputRaster,
     renderableFaces: RenderableFace[],
-    bounds: Bounds2,
-    translation: Vector2
+    gridBounds: Bounds2,
+    outputRasterOffset: Vector2,
+    polygonFiltering: PolygonFilterType
   ): void {
-    const rasterWidth = bounds.width;
-    const rasterHeight = bounds.height;
-
     for ( let i = 0; i < renderableFaces.length; i++ ) {
       const renderableFace = renderableFaces[ i ];
       const face = renderableFace.face;
@@ -823,12 +814,8 @@ export default class Rasterize {
         faceDebugData.clippableFace = clippableFace;
       }
 
-      const minX = Math.max( Math.floor( polygonalBounds.minX ), 0 );
-      const minY = Math.max( Math.floor( polygonalBounds.minY ), 0 );
-      const maxX = Math.min( Math.ceil( polygonalBounds.maxX ), rasterWidth );
-      const maxY = Math.min( Math.ceil( polygonalBounds.maxY ), rasterHeight );
-
-      const faceBounds = new Bounds2( minX, minY, maxX, maxY );
+      // TODO: would the bounds show up OUTSIDE of this?
+      const faceBounds = polygonalBounds.intersection( gridBounds );
 
       const constColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
 
@@ -838,7 +825,8 @@ export default class Rasterize {
         clippableFace,
         constColor,
         faceBounds,
-        translation
+        outputRasterOffset,
+        polygonFiltering
       );
     }
   }
@@ -861,13 +849,49 @@ export default class Rasterize {
       window.debugData = debugData;
     }
 
+    // TODO: outputRasterOffset totally broken?!!!
     const outputRasterOffset: Vector2 = options.outputRasterOffset;
     const polygonFiltering: PolygonFilterType = options.polygonFiltering;
 
-    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( bounds.width, bounds.height ) ) ) );
-    if ( assert ) {
-      debugData!.scale = scale;
-    }
+    const filterAdditionalPixels = getPolygonFilterExtraPixels( polygonFiltering );
+    const filterGridOffset = getPolygonFilterGridOffset( polygonFiltering );
+
+    const outputWidth = bounds.width;
+    const outputHeight = bounds.height;
+    const gridWidth = outputWidth + filterAdditionalPixels;
+    const gridHeight = outputHeight + filterAdditionalPixels;
+
+    // in RenderProgram coordinate frame
+    const gridBounds = new Bounds2(
+      bounds.minX + filterGridOffset,
+      bounds.minY + filterGridOffset,
+      bounds.maxX + filterGridOffset + filterAdditionalPixels,
+      bounds.maxY + filterGridOffset + filterAdditionalPixels
+    );
+
+    // Keep us at 20 bits of precision (after rounding)
+    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( gridWidth, gridHeight ) ) ) );
+    if ( assert ) { debugData!.scale = scale; }
+
+    // -( scale * ( bounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( bounds.maxX + filterGridOffset.x ) + translation.x
+    const translation = new Vector2(
+      -0.5 * scale * ( 2 * filterGridOffset + filterAdditionalPixels + bounds.minX + bounds.maxX ),
+      -0.5 * scale * ( 2 * filterGridOffset + filterAdditionalPixels + bounds.minY + bounds.maxY )
+    );
+    if ( assert ) { debugData!.translation = translation; }
+
+    const toIntegerMatrix = Matrix3.affine( scale, 0, translation.x, 0, scale, translation.y );
+    if ( assert ) { debugData!.toIntegerMatrix = toIntegerMatrix; }
+
+    const fromIntegerMatrix = toIntegerMatrix.inverted();
+    if ( assert ) { debugData!.fromIntegerMatrix = fromIntegerMatrix; }
+
+    // Verify our math! Make sure we will be perfectly centered in our integer grid!
+    assert && assert( Math.abs( ( scale * gridBounds.minX + translation.x ) + ( scale * gridBounds.maxX + translation.x ) ) < 1e-10 );
+    assert && assert( Math.abs( ( scale * gridBounds.minY + translation.y ) + ( scale * gridBounds.maxY + translation.y ) ) < 1e-10 );
+
+    const integerBounds = gridBounds.transformed( toIntegerMatrix );
+    if ( assert ) { debugData!.integerBounds = integerBounds; }
 
     const paths: RenderPath[] = [];
     renderProgram.depthFirst( program => {
@@ -885,16 +909,7 @@ export default class Rasterize {
     ] );
     paths.push( backgroundPath );
 
-    // TODO: These are WRONG given our translation! We should fix these.
-    const integerBounds = new Bounds2(
-      Utils.roundSymmetric( bounds.minX * scale ),
-      Utils.roundSymmetric( bounds.minY * scale ),
-      Utils.roundSymmetric( bounds.maxX * scale ),
-      Utils.roundSymmetric( bounds.maxY * scale )
-    );
-    if ( assert ) { debugData!.integerBounds = integerBounds; }
-
-    const integerEdges = Rasterize.clipScaleToIntegerEdges( paths, bounds, scale );
+    const integerEdges = Rasterize.clipScaleToIntegerEdges( paths, gridBounds, toIntegerMatrix );
     if ( assert ) { debugData!.integerEdges = integerEdges; }
 
     // TODO: optional hilbert space-fill sort here?
@@ -949,21 +964,21 @@ export default class Rasterize {
 
     // TODO: translation is... just based on the bounds, right? Can we avoid passing it in?
     // TODO: really test the translated (dirty region) bit
-    const translation = new Vector2( -bounds.minX, -bounds.minY );
+    // const translation = new Vector2( -bounds.minX, -bounds.minY );
 
     // TODO: naming with above!!
     let renderableFaces: RenderableFace[];
     if ( options.renderableFaceMethod === 'polygonal' ) {
-      renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, scale, translation );
+      renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, fromIntegerMatrix );
     }
     else if ( options.renderableFaceMethod === 'edged' ) {
-      renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
+      renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, fromIntegerMatrix );
     }
     else if ( options.renderableFaceMethod === 'fullyCombined' ) {
-      renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, scale, translation );
+      renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
     }
     else if ( options.renderableFaceMethod === 'simplifyingCombined' ) {
-      renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, scale, translation );
+      renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
     }
     else {
       throw new Error( 'unknown renderableFaceMethod' );
@@ -979,8 +994,9 @@ export default class Rasterize {
     Rasterize.rasterizeAccumulate(
       outputRaster,
       renderableFaces,
-      bounds,
-      translation
+      gridBounds,
+      outputRasterOffset,
+      polygonFiltering
     );
   }
 

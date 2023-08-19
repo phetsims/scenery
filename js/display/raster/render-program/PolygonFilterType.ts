@@ -16,4 +16,34 @@ enum PolygonFilterType {
 
 export default PolygonFilterType;
 
+export const getPolygonFilterExtraPixels = ( filterType: PolygonFilterType ): number => {
+  if ( filterType === PolygonFilterType.Box ) {
+    return 0;
+  }
+  else if ( filterType === PolygonFilterType.Bilinear ) {
+    return 1;
+  }
+  else if ( filterType === PolygonFilterType.MitchellNetravali ) {
+    return 3;
+  }
+  else {
+    throw new Error( `Unknown PolygonFilterType: ${filterType}` );
+  }
+};
+
+export const getPolygonFilterGridOffset = ( filterType: PolygonFilterType ): number => {
+  if ( filterType === PolygonFilterType.Box ) {
+    return 0;
+  }
+  else if ( filterType === PolygonFilterType.Bilinear ) {
+    return -0.5;
+  }
+  else if ( filterType === PolygonFilterType.MitchellNetravali ) {
+    return -1.5;
+  }
+  else {
+    throw new Error( `Unknown PolygonFilterType: ${filterType}` );
+  }
+};
+
 scenery.register( 'PolygonFilterType', PolygonFilterType );

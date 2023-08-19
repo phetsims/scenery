@@ -432,7 +432,7 @@ export { default as PointerOverlay } from './overlays/PointerOverlay.js';
 export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundOverlay.js';
 
 export { default as constantTrue } from './display/raster/render-program/constantTrue.js';
-export { default as PolygonFilterType } from './display/raster/render-program/PolygonFilterType.js';
+export { default as PolygonFilterType, getPolygonFilterExtraPixels, getPolygonFilterGridOffset } from './display/raster/render-program/PolygonFilterType.js';
 export { default as RenderBlendType } from './display/raster/render-program/RenderBlendType.js';
 export { default as RenderColorSpace } from './display/raster/render-program/RenderColorSpace.js';
 export { default as RenderComposeType } from './display/raster/render-program/RenderComposeType.js';

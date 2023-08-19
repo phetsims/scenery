@@ -10,6 +10,7 @@ import { RationalIntersection, RenderPath, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export default class IntegerEdge {
 
@@ -62,11 +63,17 @@ export default class IntegerEdge {
     return ( someXEqual ? ( maxX >= minX ) : ( maxX > minX ) ) && ( someYEqual ? ( maxY >= minY ) : ( maxY > minY ) );
   }
 
-  public static fromUnscaledPoints( path: RenderPath, scale: number, translation: Vector2, p0: Vector2, p1: Vector2 ): IntegerEdge | null {
-    const x0 = Utils.roundSymmetric( ( p0.x + translation.x ) * scale );
-    const y0 = Utils.roundSymmetric( ( p0.y + translation.y ) * scale );
-    const x1 = Utils.roundSymmetric( ( p1.x + translation.x ) * scale );
-    const y1 = Utils.roundSymmetric( ( p1.y + translation.y ) * scale );
+  public static createTransformed( path: RenderPath, toIntegerMatrix: Matrix3, p0: Vector2, p1: Vector2 ): IntegerEdge | null {
+    const m00 = toIntegerMatrix.m00();
+    const m01 = toIntegerMatrix.m01();
+    const m02 = toIntegerMatrix.m02();
+    const m10 = toIntegerMatrix.m10();
+    const m11 = toIntegerMatrix.m11();
+    const m12 = toIntegerMatrix.m12();
+    const x0 = Utils.roundSymmetric( p0.x * m00 + p0.y * m01 + m02 );
+    const y0 = Utils.roundSymmetric( p0.x * m10 + p0.y * m11 + m12 );
+    const x1 = Utils.roundSymmetric( p1.x * m00 + p1.y * m01 + m02 );
+    const y1 = Utils.roundSymmetric( p1.x * m10 + p1.y * m11 + m12 );
     if ( x0 !== x1 || y0 !== y1 ) {
       return new IntegerEdge( path, x0, y0, x1, y1 );
     }
