@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClippableFace, CombinedRaster, EdgedFace, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClippableFace, CombinedRaster, EdgedFace, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -15,6 +15,9 @@ import Vector4 from '../../../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type RasterizationOptions = {
+
+  outputRasterOffset?: Vector2;
+  polygonFiltering?: PolygonFilterType;
 
   edgeIntersectionMethod?: 'quadratic' | 'boundsTree' | 'arrayBoundsTree';
 
@@ -25,6 +28,8 @@ export type RasterizationOptions = {
 };
 
 const DEFAULT_OPTIONS = {
+  outputRasterOffset: Vector2.ZERO,
+  polygonFiltering: PolygonFilterType.Box,
   edgeIntersectionMethod: 'arrayBoundsTree',
   renderableFaceMethod: 'simplifyingCombined',
   splitLinearGradients: true,
@@ -838,7 +843,11 @@ export default class Rasterize {
     }
   }
 
-  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2, providedOptions?: RasterizationOptions ): ImageData {
+  // TODO: name change?
+  public static rasterizeRenderProgram( renderProgram: RenderProgram, outputRaster: OutputRaster, bounds: Bounds2, providedOptions?: RasterizationOptions ): void {
+
+    assert && assert( bounds.isValid() && !bounds.isEmpty(), 'Rasterization bounds should be valid and non-empty' );
+    assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
 
     const options = optionize3<RasterizationOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
@@ -852,7 +861,8 @@ export default class Rasterize {
       window.debugData = debugData;
     }
 
-    assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
+    const outputRasterOffset: Vector2 = options.outputRasterOffset;
+    const polygonFiltering: PolygonFilterType = options.polygonFiltering;
 
     const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( bounds.width, bounds.height ) ) ) );
     if ( assert ) {
@@ -919,6 +929,8 @@ export default class Rasterize {
     }
     Rasterize.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
 
+    // TODO: a good way to optimize this? For certain scenes we might be computing a lot of intersections that we
+    // TODO: don't need.
     const exteriorBoundary = Rasterize.computeFaceHoles(
       integerBounds,
       outerBoundaries,
@@ -964,20 +976,12 @@ export default class Rasterize {
       renderableFaces = renderableFaces.flatMap( face => face.splitRadialGradients() );
     }
 
-    const rasterWidth = bounds.width;
-    const rasterHeight = bounds.height;
-
-    // const outputRaster = new AccumulationRaster( rasterWidth, rasterHeight );
-    const outputRaster = new CombinedRaster( rasterWidth, rasterHeight );
-
     Rasterize.rasterizeAccumulate(
       outputRaster,
       renderableFaces,
       bounds,
       translation
     );
-
-    return outputRaster.toImageData();
   }
 
   public static imageDataToCanvas( imageData: ImageData ): HTMLCanvasElement {

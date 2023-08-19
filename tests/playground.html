@@ -465,8 +465,9 @@ an UI and Display made for visual testing and debugging.
         canvas.style.left = '20px ';
       };
 
-      const imageData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
-      const canvas = phet.scenery.Rasterize.imageDataToCanvas( imageData );
+      const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
+      phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
+      const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
 
       styleCanvas( canvas );
       document.body.appendChild( canvas );
@@ -735,7 +736,9 @@ an UI and Display made for visual testing and debugging.
       // document.body.appendChild( canvas );
       // console.log( canvas.toDataURL() );
 
-      const imageData = phet.scenery.Rasterize.rasterizeRenderProgram( program, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), {
+      // const raster = new phet.scenery.AccumulatedRaster( outputSize, outputSize );
+      const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
+      phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), {
         // edgeIntersectionMethod: 'quadratic',
         // edgeIntersectionMethod: 'boundsTree',
         // edgeIntersectionMethod: 'arrayBoundsTree',
@@ -749,7 +752,7 @@ an UI and Display made for visual testing and debugging.
         // splitRadialGradients: true
       } );
 
-      const debugCanvas = phet.scenery.Rasterize.imageDataToCanvas( imageData );
+      const debugCanvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
       styleCanvas( debugCanvas );
       document.body.appendChild( debugCanvas );
 
