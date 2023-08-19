@@ -27,6 +27,7 @@ export default class IntegerEdge {
     assert && assert( Number.isInteger( y0 ) );
     assert && assert( Number.isInteger( x1 ) );
     assert && assert( Number.isInteger( y1 ) );
+    assert && assert( x0 !== x1 || y0 !== y1 );
 
     // TODO: maybe don't compute this here? Can we compute it in the other work?
     this.bounds = new Bounds2(
@@ -37,12 +38,17 @@ export default class IntegerEdge {
     );
   }
 
-  public static fromUnscaledPoints( path: RenderPath, scale: number, translation: Vector2, p0: Vector2, p1: Vector2 ): IntegerEdge {
+  public static fromUnscaledPoints( path: RenderPath, scale: number, translation: Vector2, p0: Vector2, p1: Vector2 ): IntegerEdge | null {
     const x0 = Utils.roundSymmetric( ( p0.x + translation.x ) * scale );
     const y0 = Utils.roundSymmetric( ( p0.y + translation.y ) * scale );
     const x1 = Utils.roundSymmetric( ( p1.x + translation.x ) * scale );
     const y1 = Utils.roundSymmetric( ( p1.y + translation.y ) * scale );
-    return new IntegerEdge( path, x0, y0, x1, y1 );
+    if ( x0 !== x1 || y0 !== y1 ) {
+      return new IntegerEdge( path, x0, y0, x1, y1 );
+    }
+    else {
+      return null;
+    }
   }
 }
 

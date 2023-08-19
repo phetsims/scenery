@@ -31,7 +31,7 @@ export default class Rasterize {
 
     const translation = new Vector2( -bounds.minX, -bounds.minY );
 
-    const integerEdges = [];
+    const integerEdges: IntegerEdge[] = [];
     for ( let i = 0; i < paths.length; i++ ) {
       const path = paths[ i ];
 
@@ -43,7 +43,10 @@ export default class Rasterize {
           // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
           const p0 = clippedSubpath[ k ];
           const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
-          integerEdges.push( IntegerEdge.fromUnscaledPoints( path, scale, translation, p0, p1 ) );
+          const edge = IntegerEdge.fromUnscaledPoints( path, scale, translation, p0, p1 );
+          if ( edge !== null ) {
+            integerEdges.push( edge );
+          }
         }
       }
     }
