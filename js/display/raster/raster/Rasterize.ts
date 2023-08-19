@@ -6,12 +6,30 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, BigRationalVector2, ClippableFace, CombinedRaster, EdgedFace, IntegerEdge, IntersectionPoint, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RationalIntersection, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClippableFace, CombinedRaster, EdgedFace, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+
+export type RasterizationOptions = {
+
+  edgeIntersectionMethod?: 'quadratic' | 'boundsTree' | 'arrayBoundsTree';
+
+  renderableFaceMethod?: 'polygonal' | 'edged' | 'fullyCombined' | 'simplifyingCombined';
+
+  splitLinearGradients?: boolean;
+  splitRadialGradients?: boolean;
+};
+
+const DEFAULT_OPTIONS = {
+  edgeIntersectionMethod: 'arrayBoundsTree',
+  renderableFaceMethod: 'simplifyingCombined',
+  splitLinearGradients: true,
+  splitRadialGradients: true
+} as const;
 
 let debugData: Record<string, IntentionalAny> | null = null;
 
@@ -820,7 +838,9 @@ export default class Rasterize {
     }
   }
 
-  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2 ): Record<string, IntentionalAny> | null {
+  public static rasterizeRenderProgram( renderProgram: RenderProgram, bounds: Bounds2, providedOptions?: RasterizationOptions ): Record<string, IntentionalAny> | null {
+
+    const options = optionize3<RasterizationOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     if ( assert ) {
       debugData = {
@@ -862,7 +882,20 @@ export default class Rasterize {
     const integerEdges = Rasterize.clipScaleToIntegerEdges( paths, bounds, scale );
     if ( assert ) { debugData!.integerEdges = integerEdges; }
 
-    LineIntersector.edgeIntersectionQuadratic( integerEdges );
+    // TODO: optional hilbert space-fill sort here?
+
+    if ( options.edgeIntersectionMethod === 'quadratic' ) {
+      LineIntersector.edgeIntersectionQuadratic( integerEdges );
+    }
+    else if ( options.edgeIntersectionMethod === 'boundsTree' ) {
+      LineIntersector.edgeIntersectionBoundsTree( integerEdges );
+    }
+    else if ( options.edgeIntersectionMethod === 'arrayBoundsTree' ) {
+      LineIntersector.edgeIntersectionArrayBoundsTree( integerEdges );
+    }
+    else {
+      throw new Error( `unknown edgeIntersectionMethod: ${options.edgeIntersectionMethod}` );
+    }
 
     const rationalHalfEdges = LineSplitter.splitIntegerEdges( integerEdges );
 
@@ -902,15 +935,27 @@ export default class Rasterize {
     const translation = new Vector2( -bounds.minX, -bounds.minY );
 
     // TODO: naming with above!!
-    // let renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, scale, translation );
-    // let renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
-    // let renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, scale, translation );
-    let renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, scale, translation );
+    let renderableFaces: RenderableFace[];
+    if ( options.renderableFaceMethod === 'polygonal' ) {
+      renderableFaces = Rasterize.toPolygonalRenderableFaces( renderedFaces, scale, translation );
+    }
+    else if ( options.renderableFaceMethod === 'edged' ) {
+      renderableFaces = Rasterize.toEdgedRenderableFaces( renderedFaces, scale, translation );
+    }
+    else if ( options.renderableFaceMethod === 'fullyCombined' ) {
+      renderableFaces = Rasterize.toFullyCombinedRenderableFaces( renderedFaces, scale, translation );
+    }
+    else if ( options.renderableFaceMethod === 'simplifyingCombined' ) {
+      renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, scale, translation );
+    }
+    else {
+      throw new Error( 'unknown renderableFaceMethod' );
+    }
 
-    // TODO: FLESH OUT
-    const SIMPLIFY_GRADIENTS = true;
-    if ( SIMPLIFY_GRADIENTS ) {
+    if ( options.splitLinearGradients ) {
       renderableFaces = renderableFaces.flatMap( face => face.splitLinearGradients() );
+    }
+    if ( options.splitRadialGradients ) {
       renderableFaces = renderableFaces.flatMap( face => face.splitRadialGradients() );
     }
 

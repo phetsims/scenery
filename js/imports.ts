@@ -494,6 +494,7 @@ export { default as CombinedRaster } from './display/raster/raster/CombinedRaste
 export type { default as OutputRaster } from './display/raster/raster/OutputRaster.js';
 export { default as PolygonMitchellNetravali } from './display/raster/raster/PolygonMitchellNetravali.js';
 export { default as Rasterize } from './display/raster/raster/Rasterize.js';
+export type { RasterizationOptions } from './display/raster/raster/Rasterize.js';
 export { default as RenderableFace } from './display/raster/raster/RenderableFace.js';
 
 export { default as LinearEdge } from './display/raster/util/LinearEdge.js';

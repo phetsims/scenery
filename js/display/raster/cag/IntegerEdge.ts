@@ -38,6 +38,30 @@ export default class IntegerEdge {
     );
   }
 
+  public hasBoundsIntersectionWith( other: IntegerEdge ): boolean {
+    return IntegerEdge.hasBoundsIntersection(
+      this.bounds,
+      other.bounds,
+      this.x0 === this.x1 || other.x0 === other.x1,
+      this.y0 === this.y1 || other.y0 === other.y1
+    );
+  }
+
+  // If one of the segments is (e.g.) vertical, we'll need to allow checks for overlap ONLY on the x value, otherwise
+  // we can have a strict inequality check. This also applies to horizontal segments and the y value.
+  // The reason this is OK is because if the segments are both (e.g.) non-vertical, then if the bounds only meet
+  // at a single x value (and not a continuos area of overlap), THEN the only intersection would be at the
+  // endpoints (which we would filter out and not want anyway).
+  public static hasBoundsIntersection( boundsA: Bounds2, boundsB: Bounds2, someXEqual: boolean, someYEqual: boolean ): boolean {
+    // Bounds min/max for overlap checks
+    const minX = Math.max( boundsA.minX, boundsB.minX );
+    const minY = Math.max( boundsA.minY, boundsB.minY );
+    const maxX = Math.min( boundsA.maxX, boundsB.maxX );
+    const maxY = Math.min( boundsA.maxY, boundsB.maxY );
+
+    return ( someXEqual ? ( maxX >= minX ) : ( maxX > minX ) ) && ( someYEqual ? ( maxY >= minY ) : ( maxY > minY ) );
+  }
+
   public static fromUnscaledPoints( path: RenderPath, scale: number, translation: Vector2, p0: Vector2, p1: Vector2 ): IntegerEdge | null {
     const x0 = Utils.roundSymmetric( ( p0.x + translation.x ) * scale );
     const y0 = Utils.roundSymmetric( ( p0.y + translation.y ) * scale );
