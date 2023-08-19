@@ -610,6 +610,9 @@ export default class Rasterize {
     return renderableFaces;
   }
 
+  // Will combine faces that have equivalent RenderPrograms IFF they border each other (leaving separate programs with
+  // equivalent RenderPrograms separate if they don't border). It will also remove edges that border between faces
+  // that we combine (thus switching to EdgedFaces with unsorted edges).
   private static toSimplifyingCombinedRenderableFaces(
     faces: RationalFace[],
     scale: number,
