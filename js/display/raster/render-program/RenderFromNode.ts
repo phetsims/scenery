@@ -16,6 +16,8 @@ import { isTReadOnlyProperty } from '../../../../../axon/js/TReadOnlyProperty.js
 import RenderExtend from './RenderExtend.js';
 import RenderColorSpace from './RenderColorSpace.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
+import ArialBoldFont from '../../vello/ArialBoldFont.js';
+import ArialFont from '../../vello/ArialFont.js';
 
 // TODO: better for this?
 const piecewiseOptions = {
@@ -52,6 +54,66 @@ const shapeToRenderPath = ( shape: Shape ) => new RenderPath(
     } );
   } )
 );
+const shapesToRenderPath = ( shapes: Shape[] ) => new RenderPath(
+  'nonzero',
+  shapes.flatMap( shape => shapeToRenderPath( shape ).subpaths )
+);
+const renderPathPaintToRenderProgram = ( renderPath: RenderPath, paint: TPaint, matrix: Matrix3 ): RenderProgram => {
+  if ( isTReadOnlyProperty( paint ) ) {
+    paint = paint.value;
+  }
+
+  if ( paint === null ) {
+    return RenderColor.TRANSPARENT;
+  }
+
+  if ( typeof paint === 'string' ) {
+    paint = new Color( paint );
+  }
+
+  if ( paint instanceof Color ) {
+    return RenderColor.fromColor( renderPath, paint );
+  }
+  else {
+    const paintMatrix = paint.transformMatrix ? matrix.timesMatrix( paint.transformMatrix ) : matrix;
+    if ( paint instanceof LinearGradient ) {
+      return new RenderLinearGradient(
+        renderPath,
+        paintMatrix,
+        paint.start,
+        paint.end,
+        paint.stops.map( stop => {
+          return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
+        } ),
+        RenderExtend.Pad,
+        RenderColorSpace.SRGB
+      );
+    }
+    else if ( paint instanceof RadialGradient ) {
+      return new RenderRadialGradient(
+        renderPath,
+        paintMatrix,
+        paint.start,
+        paint.startRadius,
+        paint.end,
+        paint.endRadius,
+        paint.stops.map( stop => {
+          return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
+        } ),
+        RenderExtend.Pad,
+        RenderColorSpace.SRGB
+      );
+    }
+    else if ( paint instanceof Pattern ) {
+      // TODO: Patterns
+      console.log( 'PATTERN UNIMPLEMENTED' );
+    }
+  }
+
+  // If unimplemented
+  // TODO
+  return RenderColor.TRANSPARENT;
+};
 
 const colorFromTColor = ( paint: TColor ): Vector4 => {
   if ( isTReadOnlyProperty( paint ) ) {
@@ -95,59 +157,9 @@ export default class RenderFromNode {
     // TODO: self
     if ( node instanceof Path ) {
       const addShape = ( shape: Shape, paint: TPaint ) => {
-
-        if ( isTReadOnlyProperty( paint ) ) {
-          paint = paint.value;
-        }
-
-        if ( paint === null ) {
-          return;
-        }
-
         const renderPath = shapeToRenderPath( shape.transformed( matrix ) );
 
-        if ( typeof paint === 'string' ) {
-          paint = new Color( paint );
-        }
-
-        if ( paint instanceof Color ) {
-          addResult( RenderColor.fromColor( renderPath, paint ) );
-        }
-        else {
-          const paintMatrix = paint.transformMatrix ? matrix.timesMatrix( paint.transformMatrix ) : matrix;
-          if ( paint instanceof LinearGradient ) {
-            addResult( new RenderLinearGradient(
-              renderPath,
-              paintMatrix,
-              paint.start,
-              paint.end,
-              paint.stops.map( stop => {
-                return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
-              } ),
-              RenderExtend.Pad,
-              RenderColorSpace.SRGB
-            ) );
-          }
-          else if ( paint instanceof RadialGradient ) {
-            addResult( new RenderRadialGradient(
-              renderPath,
-              paintMatrix,
-              paint.start,
-              paint.startRadius,
-              paint.end,
-              paint.endRadius,
-              paint.stops.map( stop => {
-                return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
-              } ),
-              RenderExtend.Pad,
-              RenderColorSpace.SRGB
-            ) );
-          }
-          else if ( paint instanceof Pattern ) {
-            // TODO: Patterns
-            console.log( 'PATTERN UNIMPLEMENTED' );
-          }
-        }
+        addResult( renderPathPaintToRenderProgram( renderPath, paint, matrix ) );
       };
 
       if ( node.hasFill() ) {
@@ -159,8 +171,45 @@ export default class RenderFromNode {
       }
     }
     else if ( node instanceof Text ) {
-      // TODO: Text
-      console.log( 'TEXT UNIMPLEMENTED' );
+      const font = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont );
+      const scale = node._font.numericSize / font.unitsPerEM;
+      const sizedMatrix = matrix.timesMatrix( Matrix3.scaling( scale ) );
+
+      const shapedText = font.shapeText( node.renderedText, true );
+
+      // TODO: isolate out if we're using this
+      const flipMatrix = Matrix3.rowMajor(
+        1, 0, 0,
+        0, -1, 0, // vertical flip
+        0, 0, 1
+      );
+
+      if ( shapedText ) {
+        console.log( 'TEXT UNSHAPED' );
+
+        const glyphShapes: Shape[] = [];
+
+        let x = 0;
+        shapedText.forEach( glyph => {
+          const glyphMatrix = sizedMatrix.timesMatrix( Matrix3.translation( x + glyph.x, glyph.y ) ).timesMatrix( flipMatrix );
+
+          glyphShapes.push( glyph.shape.transformed( glyphMatrix ) );
+
+          x += glyph.advance;
+        } );
+
+        if ( node.hasFill() ) {
+          const renderPath = shapesToRenderPath( glyphShapes );
+          addResult( renderPathPaintToRenderProgram( renderPath, node.getFill(), matrix ) );
+        }
+
+        if ( node.hasStroke() ) {
+          const renderPath = shapesToRenderPath( glyphShapes.map( shape => {
+            return shape.getStrokedShape( node._lineDrawingStyles );
+          } ) );
+          addResult( renderPathPaintToRenderProgram( renderPath, node.getStroke(), matrix ) );
+        }
+      }
     }
     else if ( node instanceof Sprites ) {
       // TODO: Sprites
