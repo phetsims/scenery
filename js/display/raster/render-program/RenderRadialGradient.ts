@@ -43,7 +43,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderRadialGradient(
       this.getTransformedPath( transform ),
-      this.transform.timesMatrix( transform ),
+      transform.timesMatrix( this.transform ),
       this.start,
       this.startRadius,
       this.end,
