@@ -205,27 +205,31 @@ export default class RenderColor extends RenderPathProgram {
         );
       case RenderColorSpace.SRGB:
       {
+        // TODO: This is.... crazy to have so many premultiply/unpremultiply calls, just to work around the sRGB
+        // TODO: nonlinear transfer function?
+
         // TODO: reduce allocations?
-        const zeroSRGB = RenderColor.linearToSRGB( RenderColor.unpremultiply( zeroColor ) );
-        const oneSRGB = RenderColor.linearToSRGB( RenderColor.unpremultiply( oneColor ) );
-        return RenderColor.premultiply( RenderColor.sRGBToLinear( new Vector4(
+        const zeroSRGB = RenderColor.premultiply( RenderColor.linearToSRGB( RenderColor.unpremultiply( zeroColor ) ) );
+        const oneSRGB = RenderColor.premultiply( RenderColor.linearToSRGB( RenderColor.unpremultiply( oneColor ) ) );
+        return RenderColor.premultiply( RenderColor.sRGBToLinear( RenderColor.unpremultiply( new Vector4(
           zeroSRGB.x * minusRatio + oneSRGB.x * ratio,
           zeroSRGB.y * minusRatio + oneSRGB.y * ratio,
           zeroSRGB.z * minusRatio + oneSRGB.z * ratio,
           zeroSRGB.w * minusRatio + oneSRGB.w * ratio
-        ) ) );
+        ) ) ) );
       }
       case RenderColorSpace.Oklab:
       {
+        // TODO: DO we really have a need to blend in this space?
         // TODO: reduce allocations?
-        const zeroOklab = RenderColor.linearToOklab( RenderColor.unpremultiply( zeroColor ) );
-        const oneOklab = RenderColor.linearToOklab( RenderColor.unpremultiply( oneColor ) );
-        return RenderColor.premultiply( RenderColor.oklabToLinear( new Vector4(
+        const zeroOklab = RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.unpremultiply( zeroColor ) ) );
+        const oneOklab = RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.unpremultiply( oneColor ) ) );
+        return RenderColor.premultiply( RenderColor.oklabToLinear( RenderColor.unpremultiply( new Vector4(
           zeroOklab.x * minusRatio + oneOklab.x * ratio,
           zeroOklab.y * minusRatio + oneOklab.y * ratio,
           zeroOklab.z * minusRatio + oneOklab.z * ratio,
           zeroOklab.w * minusRatio + oneOklab.w * ratio
-        ) ) );
+        ) ) ) );
       }
       default:
         throw new Error( `Invalid color space: ${colorSpace}` );
