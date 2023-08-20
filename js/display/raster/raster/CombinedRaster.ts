@@ -23,6 +23,11 @@ export default class CombinedRaster implements OutputRaster {
   }
 
   public addPartialPixel( color: Vector4, x: number, y: number ): void {
+    assert && assert( color.isFinite() );
+    assert && assert( isFinite( x ) && isFinite( y ) );
+    assert && assert( x >= 0 && x < this.width );
+    assert && assert( y >= 0 && y < this.height );
+
     const baseIndex = 4 * ( y * this.width + x );
     this.accumulationArray[ baseIndex ] += color.x;
     this.accumulationArray[ baseIndex + 1 ] += color.y;
@@ -31,11 +36,25 @@ export default class CombinedRaster implements OutputRaster {
   }
 
   public addFullPixel( color: Vector4, x: number, y: number ): void {
+    assert && assert( color.isFinite() );
+    assert && assert( isFinite( x ) && isFinite( y ) );
+    assert && assert( x >= 0 && x < this.width );
+    assert && assert( y >= 0 && y < this.height );
+
     // Be lazy, we COULD convert here, but we'll just do it at the end
     this.addPartialPixel( color, x, y );
   }
 
   public addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
+    assert && assert( color.isFinite() );
+    assert && assert( isFinite( x ) && isFinite( y ) );
+    assert && assert( x >= 0 && x < this.width );
+    assert && assert( y >= 0 && y < this.height );
+    assert && assert( isFinite( width ) && isFinite( height ) );
+    assert && assert( width > 0 && height > 0 );
+    assert && assert( x + width <= this.width );
+    assert && assert( y + height <= this.height );
+
     const sRGB = CombinedRaster.convertToSRGB( color );
     for ( let j = 0; j < height; j++ ) {
       const rowIndex = ( y + j ) * this.width + x;

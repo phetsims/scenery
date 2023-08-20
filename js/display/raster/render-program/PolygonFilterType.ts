@@ -46,4 +46,34 @@ export const getPolygonFilterGridOffset = ( filterType: PolygonFilterType ): num
   }
 };
 
+export const getPolygonFilterMinExpand = ( filterType: PolygonFilterType ): number => {
+  if ( filterType === PolygonFilterType.Box ) {
+    return 0;
+  }
+  else if ( filterType === PolygonFilterType.Bilinear ) {
+    return 1;
+  }
+  else if ( filterType === PolygonFilterType.MitchellNetravali ) {
+    return 2;
+  }
+  else {
+    throw new Error( `Unknown PolygonFilterType: ${filterType}` );
+  }
+};
+
+export const getPolygonFilterMaxExpand = ( filterType: PolygonFilterType ): number => {
+  if ( filterType === PolygonFilterType.Box ) {
+    return 1;
+  }
+  else if ( filterType === PolygonFilterType.Bilinear ) {
+    return 1;
+  }
+  else if ( filterType === PolygonFilterType.MitchellNetravali ) {
+    return 2;
+  }
+  else {
+    throw new Error( `Unknown PolygonFilterType: ${filterType}` );
+  }
+};
+
 scenery.register( 'PolygonFilterType', PolygonFilterType );

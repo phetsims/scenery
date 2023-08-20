@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClippableFace, EdgedFace, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClippableFace, EdgedFace, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMaxExpand, getPolygonFilterMinExpand, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -780,22 +780,167 @@ export default class Rasterize {
     renderProgram: RenderProgram,
     clippableFace: ClippableFace,
     constColor: Vector4 | null,
+    faceBounds: Bounds2,
     bounds: Bounds2,
     outputRasterOffset: Vector2,
     polygonFiltering: PolygonFilterType
   ): void {
-    // TODO: eeek! FILTERING WORK HERE
-    bounds = bounds.roundedOut();
+    if ( polygonFiltering === PolygonFilterType.Box ) {
+      faceBounds = faceBounds.roundedOut();
 
-    Rasterize.binaryInternalRasterize(
-      outputRaster, renderProgram, constColor, outputRasterOffset,
-      clippableFace, clippableFace.getArea(), bounds.minX, bounds.minY, bounds.maxX, bounds.maxY
-    );
+      Rasterize.binaryInternalRasterize(
+        outputRaster, renderProgram, constColor, outputRasterOffset,
+        clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
+      );
+    }
+    else {
+      const edgedFace = clippableFace.toEdgedFace();
+
+      assert && assert( polygonFiltering === PolygonFilterType.Bilinear || polygonFiltering === PolygonFilterType.MitchellNetravali );
+
+      // TODO: WAIT, we can just GRID clip, and detect if it is surrounded?
+      const minExpand = getPolygonFilterMinExpand( polygonFiltering );
+      const maxExpand = getPolygonFilterMaxExpand( polygonFiltering );
+
+      const minXRounded = Math.floor( faceBounds.minX + 0.5 ) - 0.5;
+      const minYRounded = Math.floor( faceBounds.minY + 0.5 ) - 0.5;
+      const maxXRounded = Math.floor( faceBounds.maxX + 0.5 ) - 0.5;
+      const maxYRounded = Math.floor( faceBounds.maxY + 0.5 ) - 0.5;
+
+      // TODO: grid clip!!!!!
+      const horizontalSplitValues = _.range( minXRounded + 1, maxXRounded );
+      const verticalSplitValues = _.range( minYRounded + 1, maxYRounded );
+      const horizontalCount = horizontalSplitValues.length + 1;
+      const verticalCount = verticalSplitValues.length + 1;
+
+      // TODO: isolate this out?
+      // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
+      const rows = verticalSplitValues.length ? edgedFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, faceBounds.centerX ) : [ edgedFace ];
+
+      assertSlow && assertSlow( Math.abs( clippableFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
+
+      const areas: number[][] = [];
+      const colors: Vector4[][] = [];
+      const pixelFaces = rows.map( ( face, rowIndex ) => {
+        const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, faceBounds.centerY ) : [ face ];
+
+        assertSlow && assertSlow( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
+
+        const areaRow: number[] = [];
+        const colorRow: Vector4[] = [];
+        for ( let i = 0; i < row.length; i++ ) {
+          const face = row[ i ];
+          const area = face.getArea();
+          areaRow.push( area );
+
+          if ( constColor ) {
+            colorRow.push( constColor );
+          }
+          else if ( area > 1e-8 ) {
+            const x = minXRounded + i;
+            const y = minYRounded + rowIndex;
+            const centroid = area > 1 - 1e-8 ? scratchFullAreaVector.setXY( x + 0.5, y + 0.5 ) : face.getCentroid( area );
+            colorRow.push( renderProgram.evaluate(
+              face,
+              area,
+              centroid,
+              x,
+              y,
+              x + 1,
+              y + 1
+            ) );
+          }
+          else {
+            colorRow.push( Vector4.ZERO );
+          }
+        }
+        areas.push( areaRow );
+        colors.push( colorRow );
+
+        return row;
+      } );
+
+      // TODO: detect if a pixel is surrounded by a const color? (quick case)
+      // TODO: detect if a pixel is surrounded by something else (blending will be easier?)
+
+      const localIndexMin = minExpand + 1;
+      const localIndexMax = maxExpand;
+
+      // box: -0, +0
+      // bilinear: 0, +1
+      // mitchell: -1, +2
+      const iterMinX = minXRounded - localIndexMin;
+      const iterMinY = minYRounded - localIndexMin;
+      const iterMaxX = maxXRounded + localIndexMax;
+      const iterMaxY = maxYRounded + localIndexMax;
+
+      // For each user pixel whose evaluation grid will overlap with our shape's pixel coverage
+      for ( let y = iterMinY; y < iterMaxY; y++ ) {
+        // Ignore user pixels outside of our bounds
+        if ( y < bounds.minY || y > bounds.maxY ) { continue; }
+
+        // box: -0, +1
+        // bilinear: -1, +1
+        // mitchell: -2, +2
+        const subIterMinY = y - minExpand;
+        const subIterMaxY = y + maxExpand;
+
+        for ( let x = iterMinX; x < iterMaxX; x++ ) {
+          // Ignore user pixels outside of our bounds
+          if ( x < bounds.minX || x > bounds.maxX ) { continue; }
+
+          // TODO: are we iterating over a lot of pixels that just... have NOTHING?
+          const color = Vector4.ZERO.copy();
+
+          const subIterMinX = x - minExpand;
+          const subIterMaxX = x + maxExpand;
+
+          // For each image-space pixel in that grid
+          for ( let py = subIterMinY; py < subIterMaxY; py++ ) {
+            const yIndex = py - minYRounded;
+
+            if ( yIndex >= 0 && yIndex < verticalCount ) {
+              for ( let px = subIterMinX; px < subIterMaxX; px++ ) {
+                const xIndex = px - minXRounded;
+
+                if ( xIndex >= 0 && xIndex < horizontalCount ) {
+                  const pixelArea = areas[ yIndex ][ xIndex ];
+
+
+                  // If it has zero area, it won't have contribution
+                  if ( pixelArea > 1e-8 ) {
+
+                    // If it has a full pixel of area, we can simplify computation SIGNIFICANTLY
+                    let contribution;
+                    if ( pixelArea > 1 - 1e-8 ) {
+                      // only bilinear and mitchell-netravali
+                      contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ? PolygonMitchellNetravali.evaluateFull( x, y, px, py ) : 0.25;
+                    }
+                    else {
+                      const edges = pixelFaces[ yIndex ][ xIndex ].edges;
+                      contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ?
+                                     PolygonMitchellNetravali.evaluateClippedEdges( edges, x, y, px, py ) :
+                                     PolygonMitchellNetravali.evaluateBilinearClippedEdges( edges, x, y, px, py );
+                    }
+                    color.add( colors[ yIndex ][ xIndex ].timesScalar( contribution ) );
+                  }
+                }
+              }
+            }
+          }
+
+          if ( Math.abs( color.w ) > 1e-8 ) {
+            outputRaster.addPartialPixel( color, x - 0.5 + outputRasterOffset.x, y - 0.5 + outputRasterOffset.y );
+          }
+        }
+      }
+    }
   }
 
   private static rasterizeAccumulate(
     outputRaster: OutputRaster,
     renderableFaces: RenderableFace[],
+    bounds: Bounds2,
     gridBounds: Bounds2,
     outputRasterOffset: Vector2,
     polygonFiltering: PolygonFilterType
@@ -831,6 +976,7 @@ export default class Rasterize {
         clippableFace,
         constColor,
         faceBounds,
+        bounds,
         outputRasterOffset,
         polygonFiltering
       );
@@ -1000,6 +1146,7 @@ export default class Rasterize {
     Rasterize.rasterizeAccumulate(
       outputRaster,
       renderableFaces,
+      bounds,
       gridBounds,
       outputRasterOffset,
       polygonFiltering
