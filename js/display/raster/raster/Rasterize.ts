@@ -652,6 +652,14 @@ export default class Rasterize {
           assert && assert( pixelFace );
           // TODO: implement these for polygonal faces
           const edges = pixelFace!.toEdgedFace().edges;
+
+          assertSlow && assertSlow( edges.every( edge => {
+            return edge.startPoint.x >= x && edge.startPoint.x <= x + 1 &&
+                   edge.startPoint.y >= y && edge.startPoint.y <= y + 1 &&
+                   edge.endPoint.x >= x && edge.endPoint.x <= x + 1 &&
+                   edge.endPoint.y >= y && edge.endPoint.y <= y + 1;
+          } ) );
+
           contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ?
                          PolygonMitchellNetravali.evaluateClippedEdges( edges, x, y, px, py ) :
                          PolygonMitchellNetravali.evaluateBilinearClippedEdges( edges, x, y, px, py );
@@ -788,6 +796,14 @@ export default class Rasterize {
 
     const xDiff = maxX - minX;
     const yDiff = maxY - minY;
+
+    assert && assert( xDiff >= 1 && yDiff >= 1 );
+    assert && assert( Number.isInteger( xDiff ) && Number.isInteger( yDiff ) );
+    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minX ) : minX - Math.floor( minX ) === 0.5 );
+    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minY ) : minY - Math.floor( minY ) === 0.5 );
+    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxX ) : maxX - Math.floor( maxX ) === 0.5 );
+    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxY ) : maxY - Math.floor( maxY ) === 0.5 );
+
     if ( area > 1e-8 ) {
       if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
         Rasterize.addFullArea(
@@ -806,7 +822,9 @@ export default class Rasterize {
         const averageY = ( minY + maxY ) / 2;
 
         if ( xDiff > yDiff ) {
-          const xSplit = Math.floor( averageX );
+          const xSplit = minX + Math.floor( 0.5 * xDiff );
+
+          assert && assert( xSplit !== minX && xSplit !== maxX );
 
           const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, averageY );
 
@@ -836,7 +854,7 @@ export default class Rasterize {
           }
         }
         else {
-          const ySplit = Math.floor( averageY );
+          const ySplit = minY + Math.floor( 0.5 * yDiff );
 
           const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, averageX );
 
@@ -879,7 +897,11 @@ export default class Rasterize {
     outputRasterOffset: Vector2,
     polygonFiltering: PolygonFilterType
   ): void {
-    faceBounds = faceBounds.shifted( outputRasterOffset ).roundedOut().shifted( outputRasterOffset.negated() );
+    const gridOffset = getPolygonFilterGridOffset( polygonFiltering );
+    faceBounds = faceBounds.shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
+
+    // TODO: Can we avoid having to do this? Can we include this in places where it could cause this? (gradient splits?)
+    clippableFace = clippableFace.getClipped( faceBounds );
 
     Rasterize.binaryInternalRasterize(
       outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
