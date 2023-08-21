@@ -618,6 +618,8 @@ export default class Rasterize {
     color: Vector4
   ): void {
 
+    // TODO NOTE: DO NOT stripe-clip for the filtering, the far-away points are killing us.
+
     assert && assert( polygonFiltering === PolygonFilterType.Bilinear || polygonFiltering === PolygonFilterType.MitchellNetravali,
       'Only supports these filters currently' );
 

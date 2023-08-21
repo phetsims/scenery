@@ -18,6 +18,8 @@ export default class RenderImage extends RenderPathProgram {
   public readonly inverseTransform: Matrix3;
   public readonly inverseTransformWithHalfOffset: Matrix3;
 
+  // TODO: Support mipmaps
+  // TODO: For mipmaps, see if our approach is ideal. See Gaussian pyramid, blur before subsampling (ours might be ideal?)
   public constructor(
     path: RenderPath | null,
     public readonly transform: Matrix3,
@@ -289,6 +291,12 @@ export default class RenderImage extends RenderPathProgram {
     evaluateClipped: ( edges: LinearEdge[], x: number, y: number, px: number, py: number, area: number ) => number,
     evaluateFull: ( x: number, y: number, px: number, py: number ) => number
   ): Vector4 {
+
+    // TODO: binary clipping will likely help prevent the "normal" filtering artifacts we were seeing.
+    // TODO: The "fake" points that are far away blow up the numerical precision of the results.
+    // TODO: Try to follow our normal rasterization setup.
+
+    // TODO: Can we fo with the binary clipping, and avoid computing sections that we don't need?
 
     // TODO: perhaps switch to our binary clipping, because we could potentially get massive speed ups by determining
     // TODO: which regions our full "grid" is included inside (so we could just sum the pixel)
