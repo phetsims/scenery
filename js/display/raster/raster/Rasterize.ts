@@ -617,16 +617,20 @@ export default class Rasterize {
     y: number,
     color: Vector4
   ): void {
-    // TODO: optimize!
-    const minExpand = getPolygonFilterMinExpand( polygonFiltering );
-    const maxExpand = getPolygonFilterMaxExpand( polygonFiltering );
 
-    const subIterMinX = x - minExpand;
-    const subIterMinY = y - minExpand;
-    const subIterMaxX = x + maxExpand;
-    const subIterMaxY = y + maxExpand;
+    assert && assert( polygonFiltering === PolygonFilterType.Bilinear || polygonFiltering === PolygonFilterType.MitchellNetravali,
+      'Only supports these filters currently' );
 
-    // For each image-space pixel in that grid
+    const expand = polygonFiltering === PolygonFilterType.MitchellNetravali ? 2 : 1;
+
+    // e.g. x - px is 0,-1 for bilinear, 1,-2 for mitchell-netravali
+    // px = x + (0,1) for bilinear, x + (-1,2) for mitchell-netravali
+
+    const subIterMinX = x - expand + 1;
+    const subIterMinY = y - expand + 1;
+    const subIterMaxX = x + expand + 1;
+    const subIterMaxY = y + expand + 1;
+
     for ( let py = subIterMinY; py < subIterMaxY; py++ ) {
 
       const pixelY = py - 0.5;
@@ -642,11 +646,12 @@ export default class Rasterize {
           continue;
         }
 
-        // If it has a full pixel of area, we can simplify computation SIGNIFICANTLY
         let contribution;
+
+        // If it has a full pixel of area, we can simplify computation SIGNIFICANTLY
         if ( area > 1 - 1e-8 ) {
           // only bilinear and mitchell-netravali
-          contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ? PolygonMitchellNetravali.evaluateFull( x, y, px, py ) : 0.25;
+          contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ? PolygonMitchellNetravali.evaluateFull( px, py, x, y ) : 0.25;
         }
         else {
           assert && assert( pixelFace );
@@ -661,8 +666,8 @@ export default class Rasterize {
           } ) );
 
           contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ?
-                         PolygonMitchellNetravali.evaluateClippedEdges( edges, x, y, px, py ) :
-                         PolygonMitchellNetravali.evaluateBilinearClippedEdges( edges, x, y, px, py );
+                         PolygonMitchellNetravali.evaluateClippedEdges( edges, px, py, x, y ) :
+                         PolygonMitchellNetravali.evaluateBilinearClippedEdges( edges, px, py, x, y );
         }
 
         outputRaster.addPartialPixel( color.timesScalar( contribution ), pixelX + outputRasterOffset.x, pixelY + outputRasterOffset.y );
