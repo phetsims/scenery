@@ -427,6 +427,72 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.siemensTest = function( type, pointCount = 100 ) {
+    setTimeout( async function() {
+      const width = 800;
+      const height = 800;
+
+      const center = phet.dot.v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
+      const radius = width * 0.45;
+
+      const polygon = [];
+      for ( let i = 0; i < pointCount; i++ ) {
+        const angle0 = i * 2 * Math.PI / pointCount;
+        const angle1 = ( i + 0.5 ) * 2 * Math.PI / pointCount;
+
+        const p0 = phet.dot.v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
+        const p1 = phet.dot.v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
+
+        polygon.push( center );
+        polygon.push( p0 );
+        polygon.push( p1 );
+      }
+
+      if ( type === 'svg' || type === 'canvas' ) {
+        display.width = width;
+        display.height = height;
+        scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), { fill: 'black', renderer: type } ) );
+        display.backgroundColor = 'white';
+        display.updateDisplay();
+      }
+      else if ( type === 'box' || type === 'bilinear' || type === 'mitchellNetravali' ) {
+
+        const filtering = {
+          box: phet.scenery.PolygonFilterType.Box,
+          bilinear: phet.scenery.PolygonFilterType.Bilinear,
+          mitchellNetravali: phet.scenery.PolygonFilterType.MitchellNetravali
+        }[ type ];
+
+        const program = new phet.scenery.RenderBlendCompose(
+          phet.scenery.RenderComposeType.Over,
+          phet.scenery.RenderBlendType.Normal,
+          new phet.scenery.RenderColor( new phet.scenery.RenderPath( 'nonzero', [ polygon ] ), phet.dot.v4( 0, 0, 0, 1 ) ),
+          new phet.scenery.RenderColor( null, phet.dot.v4( 1, 1, 1, 1 ) )
+        ).transformed( phet.dot.Matrix3.scaling( window.devicePixelRatio ) );
+
+        const outputWidth = width * window.devicePixelRatio;
+        const outputHeight = height * window.devicePixelRatio;
+
+        const raster = new phet.scenery.CombinedRaster( outputWidth, outputHeight );
+        phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputWidth, outputHeight ), {
+          polygonFiltering: filtering
+        } );
+        const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
+
+        const styleCanvas = canvas => {
+          canvas.style.width = `${width}px`;
+          canvas.style.height = `${height}px`;
+          canvas.style.position = 'absolute';
+          canvas.style.top = '0';
+          canvas.style.left = '0';
+        };
+
+        styleCanvas( canvas );
+        document.body.appendChild( canvas );
+      }
+    } );
+  };
+
   window.serialTest = function( serialized ) {
     setTimeout( async function() {
       const displaySize = 768;
