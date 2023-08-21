@@ -202,6 +202,22 @@ export default class LinearEdge {
     );
   }
 
+  public serialize(): SerializedLinearEdge {
+    return {
+      startPoint: { x: this.startPoint.x, y: this.startPoint.y },
+      endPoint: { x: this.endPoint.x, y: this.endPoint.y },
+      containsFakeCorner: this.containsFakeCorner
+    };
+  }
+
+  public static deserialize( obj: SerializedLinearEdge ): LinearEdge {
+    return new LinearEdge(
+      new Vector2( obj.startPoint.x, obj.startPoint.y ),
+      new Vector2( obj.endPoint.x, obj.endPoint.y ),
+      obj.containsFakeCorner
+    );
+  }
+
   public static getPolygonArea( polygon: Vector2[] ): number {
     let sum = 0;
 
@@ -290,3 +306,9 @@ export default class LinearEdge {
 }
 
 scenery.register( 'LinearEdge', LinearEdge );
+
+export type SerializedLinearEdge = {
+  startPoint: { x: number; y: number };
+  endPoint: { x: number; y: number };
+  containsFakeCorner: boolean;
+};

@@ -262,6 +262,24 @@ export default class PolygonalFace implements ClippableFace {
       }
     }
   }
+
+  public toString(): string {
+    return this.polygons.map( polygon => polygon.map( p => `${p.x},${p.y}` ).join( ' ' ) ).join( '\n' );
+  }
+
+  public serialize(): SerializedPolygonalFace {
+    return {
+      polygons: this.polygons.map( polygon => polygon.map( p => ( { x: p.x, y: p.y } ) ) )
+    };
+  }
+
+  public static deserialize( serialized: SerializedPolygonalFace ): PolygonalFace {
+    return new PolygonalFace( serialized.polygons.map( polygon => polygon.map( p => new Vector2( p.x, p.y ) ) ) );
+  }
 }
 
 scenery.register( 'PolygonalFace', PolygonalFace );
+
+export type SerializedPolygonalFace = {
+  polygons: { x: number; y: number }[][];
+};

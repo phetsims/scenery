@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, LinearEdge, PolygonalFace, PolygonClipping, scenery } from '../../../imports.js';
+import { ClippableFace, LinearEdge, PolygonalFace, PolygonClipping, scenery, SerializedLinearEdge } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -269,6 +269,24 @@ export default class EdgedFace implements ClippableFace {
       callback( edge.startPoint, edge.endPoint );
     }
   }
+
+  public toString(): string {
+    return this.edges.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' );
+  }
+
+  public serialize(): SerializedEdgedFace {
+    return {
+      edges: this.edges.map( edge => edge.serialize() )
+    };
+  }
+
+  public static deserialize( serialized: SerializedEdgedFace ): EdgedFace {
+    return new EdgedFace( serialized.edges.map( edge => LinearEdge.deserialize( edge ) ) );
+  }
 }
 
 scenery.register( 'EdgedFace', EdgedFace );
+
+export type SerializedEdgedFace = {
+  edges: SerializedLinearEdge[];
+};

@@ -19,7 +19,9 @@ export default class CombinedRaster implements OutputRaster {
 
   public constructor( public readonly width: number, public readonly height: number ) {
     this.accumulationArray = new Float64Array( width * height * 4 );
-    this.imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
+    this.imageData = new ImageData( this.width, this.height );
+    // TODO: Firefox complains about this
+    // this.imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
   }
 
   public addPartialPixel( color: Vector4, x: number, y: number ): void {

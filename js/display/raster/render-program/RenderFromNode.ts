@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, OutputRaster, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderPath, RenderProgram, RenderRadialGradient, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
+import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderPath, RenderProgram, RenderRadialGradient, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import RenderComposeType from './RenderComposeType.js';
 import RenderBlendType from './RenderBlendType.js';

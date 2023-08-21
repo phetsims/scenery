@@ -572,12 +572,104 @@ export default class Rasterize {
     ) );
   }
 
+  // TODO: reconstitute this into an alternative non-binary setup!
+  // private static fullRasterize(
+  //   outputRaster: OutputRaster,
+  //   renderProgram: RenderProgram,
+  //   clippableFace: ClippableFace,
+  //   constColor: Vector4 | null,
+  //   bounds: Bounds2, // TODO: check it's integral
+  //   translation: Vector2
+  // ): void {
+  //   const pixelBounds = Bounds2.NOTHING.copy();
+  //   const minX = bounds.minX;
+  //   const minY = bounds.minY;
+  //   const maxX = bounds.maxX;
+  //   const maxY = bounds.maxY;
+  //
+  //   for ( let y = minY; y < maxY; y++ ) {
+  //     pixelBounds.minY = y;
+  //     pixelBounds.maxY = y + 1;
+  //     for ( let x = minX; x < maxX; x++ ) {
+  //       pixelBounds.minX = x;
+  //       pixelBounds.maxX = x + 1;
+  //
+  //       const pixelFace = clippableFace.getClipped( pixelBounds );
+  //       const area = pixelFace.getArea();
+  //       if ( area > 1e-8 ) {
+  //         Rasterize.addPartialPixel(
+  //           outputRaster, renderProgram, constColor, translation,
+  //           pixelFace, area, x, y
+  //         );
+  //       }
+  //     }
+  //   }
+  // }
+
+  private static addFilterPixel(
+    outputRaster: OutputRaster,
+    outputRasterOffset: Vector2,
+    bounds: Bounds2,
+    polygonFiltering: PolygonFilterType,
+    pixelFace: ClippableFace | null,
+    area: number,
+    x: number,
+    y: number,
+    color: Vector4
+  ): void {
+    // TODO: optimize!
+    const minExpand = getPolygonFilterMinExpand( polygonFiltering );
+    const maxExpand = getPolygonFilterMaxExpand( polygonFiltering );
+
+    const subIterMinX = x - minExpand;
+    const subIterMinY = y - minExpand;
+    const subIterMaxX = x + maxExpand;
+    const subIterMaxY = y + maxExpand;
+
+    // For each image-space pixel in that grid
+    for ( let py = subIterMinY; py < subIterMaxY; py++ ) {
+
+      const pixelY = py - 0.5;
+      // TODO: put these in the subIter values above
+      if ( pixelY < bounds.minY || pixelY >= bounds.maxY ) {
+        continue;
+      }
+
+      for ( let px = subIterMinX; px < subIterMaxX; px++ ) {
+
+        const pixelX = px - 0.5;
+        if ( pixelX < bounds.minX || pixelX >= bounds.maxX ) {
+          continue;
+        }
+
+        // If it has a full pixel of area, we can simplify computation SIGNIFICANTLY
+        let contribution;
+        if ( area > 1 - 1e-8 ) {
+          // only bilinear and mitchell-netravali
+          contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ? PolygonMitchellNetravali.evaluateFull( x, y, px, py ) : 0.25;
+        }
+        else {
+          assert && assert( pixelFace );
+          // TODO: implement these for polygonal faces
+          const edges = pixelFace!.toEdgedFace().edges;
+          contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ?
+                         PolygonMitchellNetravali.evaluateClippedEdges( edges, x, y, px, py ) :
+                         PolygonMitchellNetravali.evaluateBilinearClippedEdges( edges, x, y, px, py );
+        }
+
+        outputRaster.addPartialPixel( color.timesScalar( contribution ), pixelX + outputRasterOffset.x, pixelY + outputRasterOffset.y );
+      }
+    }
+  }
+
   // TODO: inline eventually
   private static addPartialPixel(
     outputRaster: OutputRaster,
     renderProgram: RenderProgram,
     constColor: Vector4 | null,
     outputRasterOffset: Vector2,
+    bounds: Bounds2,
+    polygonFiltering: PolygonFilterType,
     pixelFace: ClippableFace,
     area: number,
     x: number,
@@ -598,7 +690,16 @@ export default class Rasterize {
       x + 1,
       y + 1
     );
-    outputRaster.addPartialPixel( color.timesScalar( area ), x + outputRasterOffset.x, y + outputRasterOffset.y );
+
+    if ( polygonFiltering === PolygonFilterType.Box ) {
+      outputRaster.addPartialPixel( color.timesScalar( area ), x + outputRasterOffset.x, y + outputRasterOffset.y );
+    }
+    else {
+      Rasterize.addFilterPixel(
+        outputRaster, outputRasterOffset, bounds, polygonFiltering,
+        pixelFace, area, x, y, color
+      );
+    }
   }
 
   // TODO: inline eventually
@@ -607,6 +708,8 @@ export default class Rasterize {
     renderProgram: RenderProgram,
     constColor: Vector4 | null,
     outputRasterOffset: Vector2,
+    bounds: Bounds2,
+    polygonFiltering: PolygonFilterType,
     minX: number,
     minY: number,
     maxX: number,
@@ -615,14 +718,29 @@ export default class Rasterize {
     if ( assert ) {
       debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
     }
+
     if ( constColor ) {
-      outputRaster.addFullRegion(
-        constColor,
-        minX + outputRasterOffset.x,
-        minY + outputRasterOffset.y,
-        maxX - minX,
-        maxY - minY
-      );
+      if ( polygonFiltering === PolygonFilterType.Box ) {
+        outputRaster.addFullRegion(
+          constColor,
+          minX + outputRasterOffset.x,
+          minY + outputRasterOffset.y,
+          maxX - minX,
+          maxY - minY
+        );
+      }
+      else {
+        // TODO: ideally we can optimize this if it has a significant number of contained pixels. We only need to
+        // "filter" the outside ones (the inside will be a constant color)
+        for ( let y = minY; y < maxY; y++ ) {
+          for ( let x = minX; x < maxX; x++ ) {
+            Rasterize.addFilterPixel(
+              outputRaster, outputRasterOffset, bounds, polygonFiltering,
+              null, 1, x, y, constColor
+            );
+          }
+        }
+      }
     }
     else {
       for ( let y = minY; y < maxY; y++ ) {
@@ -637,40 +755,15 @@ export default class Rasterize {
             x + 1,
             y + 1
           );
-          outputRaster.addFullPixel( color, x + outputRasterOffset.x, y + outputRasterOffset.y );
-        }
-      }
-    }
-  }
-
-  private static fullRasterize(
-    outputRaster: OutputRaster,
-    renderProgram: RenderProgram,
-    clippableFace: ClippableFace,
-    constColor: Vector4 | null,
-    bounds: Bounds2, // TODO: check it's integral
-    translation: Vector2
-  ): void {
-    const pixelBounds = Bounds2.NOTHING.copy();
-    const minX = bounds.minX;
-    const minY = bounds.minY;
-    const maxX = bounds.maxX;
-    const maxY = bounds.maxY;
-
-    for ( let y = minY; y < maxY; y++ ) {
-      pixelBounds.minY = y;
-      pixelBounds.maxY = y + 1;
-      for ( let x = minX; x < maxX; x++ ) {
-        pixelBounds.minX = x;
-        pixelBounds.maxX = x + 1;
-
-        const pixelFace = clippableFace.getClipped( pixelBounds );
-        const area = pixelFace.getArea();
-        if ( area > 1e-8 ) {
-          Rasterize.addPartialPixel(
-            outputRaster, renderProgram, constColor, translation,
-            pixelFace, area, x, y
-          );
+          if ( polygonFiltering === PolygonFilterType.Box ) {
+            outputRaster.addFullPixel( color, x + outputRasterOffset.x, y + outputRasterOffset.y );
+          }
+          else {
+            Rasterize.addFilterPixel(
+              outputRaster, outputRasterOffset, bounds, polygonFiltering,
+              null, 1, x, y, color
+            );
+          }
         }
       }
     }
@@ -681,6 +774,8 @@ export default class Rasterize {
     renderProgram: RenderProgram,
     constColor: Vector4 | null,
     outputRasterOffset: Vector2,
+    bounds: Bounds2,
+    polygonFiltering: PolygonFilterType,
     clippableFace: ClippableFace,
     area: number,
     minX: number,
@@ -691,30 +786,29 @@ export default class Rasterize {
 
     // TODO: more advanced handling
 
-    // TODO: potential filtering!!!
-
-    // TODO TODO TODO TODO TODO: non-zero-centered bounds! Verify everything
-
     const xDiff = maxX - minX;
     const yDiff = maxY - minY;
     if ( area > 1e-8 ) {
       if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
         Rasterize.addFullArea(
-          outputRaster, renderProgram, constColor, outputRasterOffset,
+          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
           minX, minY, maxX, maxY
         );
       }
       else if ( xDiff === 1 && yDiff === 1 ) {
         Rasterize.addPartialPixel(
-          outputRaster, renderProgram, constColor, outputRasterOffset,
+          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
           clippableFace, area, minX, minY
         );
       }
       else {
-        if ( xDiff > yDiff ) {
-          const xSplit = Math.floor( ( minX + maxX ) / 2 );
+        const averageX = ( minX + maxX ) / 2;
+        const averageY = ( minY + maxY ) / 2;
 
-          const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, ( minY + maxY ) / 2 );
+        if ( xDiff > yDiff ) {
+          const xSplit = Math.floor( averageX );
+
+          const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, averageY );
 
           if ( assertSlow ) {
             const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
@@ -730,21 +824,21 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
               minFace, minArea, minX, minY, xSplit, maxY
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
               maxFace, maxArea, xSplit, minY, maxX, maxY
             );
           }
         }
         else {
-          const ySplit = Math.floor( ( minY + maxY ) / 2 );
+          const ySplit = Math.floor( averageY );
 
-          const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, ( minX + maxX ) / 2 );
+          const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, averageX );
 
           if ( assertSlow ) {
             const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
@@ -760,13 +854,13 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
               minFace, minArea, minX, minY, maxX, ySplit
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
               maxFace, maxArea, minX, ySplit, maxX, maxY
             );
           }
@@ -785,156 +879,12 @@ export default class Rasterize {
     outputRasterOffset: Vector2,
     polygonFiltering: PolygonFilterType
   ): void {
-    if ( polygonFiltering === PolygonFilterType.Box ) {
-      faceBounds = faceBounds.roundedOut();
+    faceBounds = faceBounds.shifted( outputRasterOffset ).roundedOut().shifted( outputRasterOffset.negated() );
 
-      Rasterize.binaryInternalRasterize(
-        outputRaster, renderProgram, constColor, outputRasterOffset,
-        clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
-      );
-    }
-    else {
-      const edgedFace = clippableFace.toEdgedFace();
-
-      assert && assert( polygonFiltering === PolygonFilterType.Bilinear || polygonFiltering === PolygonFilterType.MitchellNetravali );
-
-      // TODO: WAIT, we can just GRID clip, and detect if it is surrounded?
-      const minExpand = getPolygonFilterMinExpand( polygonFiltering );
-      const maxExpand = getPolygonFilterMaxExpand( polygonFiltering );
-
-      const minXRounded = Math.floor( faceBounds.minX + 0.5 ) - 0.5;
-      const minYRounded = Math.floor( faceBounds.minY + 0.5 ) - 0.5;
-      const maxXRounded = Math.floor( faceBounds.maxX + 0.5 ) - 0.5;
-      const maxYRounded = Math.floor( faceBounds.maxY + 0.5 ) - 0.5;
-
-      // TODO: grid clip!!!!!
-      const horizontalSplitValues = _.range( minXRounded + 1, maxXRounded );
-      const verticalSplitValues = _.range( minYRounded + 1, maxYRounded );
-      const horizontalCount = horizontalSplitValues.length + 1;
-      const verticalCount = verticalSplitValues.length + 1;
-
-      // TODO: isolate this out?
-      // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
-      const rows = verticalSplitValues.length ? edgedFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, faceBounds.centerX ) : [ edgedFace ];
-
-      assertSlow && assertSlow( Math.abs( clippableFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
-
-      const areas: number[][] = [];
-      const colors: Vector4[][] = [];
-      const pixelFaces = rows.map( ( face, rowIndex ) => {
-        const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, faceBounds.centerY ) : [ face ];
-
-        assertSlow && assertSlow( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
-
-        const areaRow: number[] = [];
-        const colorRow: Vector4[] = [];
-        for ( let i = 0; i < row.length; i++ ) {
-          const face = row[ i ];
-          const area = face.getArea();
-          areaRow.push( area );
-
-          if ( constColor ) {
-            colorRow.push( constColor );
-          }
-          else if ( area > 1e-8 ) {
-            const x = minXRounded + i;
-            const y = minYRounded + rowIndex;
-            const centroid = area > 1 - 1e-8 ? scratchFullAreaVector.setXY( x + 0.5, y + 0.5 ) : face.getCentroid( area );
-            colorRow.push( renderProgram.evaluate(
-              face,
-              area,
-              centroid,
-              x,
-              y,
-              x + 1,
-              y + 1
-            ) );
-          }
-          else {
-            colorRow.push( Vector4.ZERO );
-          }
-        }
-        areas.push( areaRow );
-        colors.push( colorRow );
-
-        return row;
-      } );
-
-      // TODO: detect if a pixel is surrounded by a const color? (quick case)
-      // TODO: detect if a pixel is surrounded by something else (blending will be easier?)
-
-      const localIndexMin = minExpand + 1;
-      const localIndexMax = maxExpand;
-
-      // box: -0, +0
-      // bilinear: 0, +1
-      // mitchell: -1, +2
-      const iterMinX = minXRounded - localIndexMin;
-      const iterMinY = minYRounded - localIndexMin;
-      const iterMaxX = maxXRounded + localIndexMax;
-      const iterMaxY = maxYRounded + localIndexMax;
-
-      // For each user pixel whose evaluation grid will overlap with our shape's pixel coverage
-      for ( let y = iterMinY; y < iterMaxY; y++ ) {
-        // Ignore user pixels outside of our bounds
-        if ( y < bounds.minY || y > bounds.maxY ) { continue; }
-
-        // box: -0, +1
-        // bilinear: -1, +1
-        // mitchell: -2, +2
-        const subIterMinY = y - minExpand;
-        const subIterMaxY = y + maxExpand;
-
-        for ( let x = iterMinX; x < iterMaxX; x++ ) {
-          // Ignore user pixels outside of our bounds
-          if ( x < bounds.minX || x > bounds.maxX ) { continue; }
-
-          // TODO: are we iterating over a lot of pixels that just... have NOTHING?
-          const color = Vector4.ZERO.copy();
-
-          const subIterMinX = x - minExpand;
-          const subIterMaxX = x + maxExpand;
-
-          // For each image-space pixel in that grid
-          for ( let py = subIterMinY; py < subIterMaxY; py++ ) {
-            const yIndex = py - minYRounded;
-
-            if ( yIndex >= 0 && yIndex < verticalCount ) {
-              for ( let px = subIterMinX; px < subIterMaxX; px++ ) {
-                const xIndex = px - minXRounded;
-
-                if ( xIndex >= 0 && xIndex < horizontalCount ) {
-                  const pixelArea = areas[ yIndex ][ xIndex ];
-
-
-                  // If it has zero area, it won't have contribution
-                  if ( pixelArea > 1e-8 ) {
-
-                    // If it has a full pixel of area, we can simplify computation SIGNIFICANTLY
-                    let contribution;
-                    if ( pixelArea > 1 - 1e-8 ) {
-                      // only bilinear and mitchell-netravali
-                      contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ? PolygonMitchellNetravali.evaluateFull( x, y, px, py ) : 0.25;
-                    }
-                    else {
-                      const edges = pixelFaces[ yIndex ][ xIndex ].edges;
-                      contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ?
-                                     PolygonMitchellNetravali.evaluateClippedEdges( edges, x, y, px, py ) :
-                                     PolygonMitchellNetravali.evaluateBilinearClippedEdges( edges, x, y, px, py );
-                    }
-                    color.add( colors[ yIndex ][ xIndex ].timesScalar( contribution ) );
-                  }
-                }
-              }
-            }
-          }
-
-          if ( Math.abs( color.w ) > 1e-8 ) {
-            outputRaster.addPartialPixel( color, x - 0.5 + outputRasterOffset.x, y - 0.5 + outputRasterOffset.y );
-          }
-        }
-      }
-    }
+    Rasterize.binaryInternalRasterize(
+      outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+      clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
+    );
   }
 
   private static rasterizeAccumulate(

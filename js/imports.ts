@@ -471,13 +471,18 @@ export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js'
 export { default as BigRational } from './display/raster/cag/BigRational.js';
 export { default as BigRationalVector2 } from './display/raster/cag/BigRationalVector2.js';
 export { default as BoundsIntersectionFilter } from './display/raster/cag/BoundsIntersectionFilter.js';
+
+export { serializeClippableFace, deserializeClippableFace } from './display/raster/cag/ClippableFace.js';
 export type { default as ClippableFace } from './display/raster/cag/ClippableFace.js';
 export { default as EdgedFace } from './display/raster/cag/EdgedFace.js';
+export type { SerializedEdgedFace } from './display/raster/cag/EdgedFace.js';
+export { default as PolygonalFace } from './display/raster/cag/PolygonalFace.js';
+export type { SerializedPolygonalFace } from './display/raster/cag/PolygonalFace.js';
+
 export { default as IntegerEdge } from './display/raster/cag/IntegerEdge.js';
 export { default as IntersectionPoint } from './display/raster/cag/IntersectionPoint.js';
 export { default as LineIntersector } from './display/raster/cag/LineIntersector.js';
 export { default as LineSplitter } from './display/raster/cag/LineSplitter.js';
-export { default as PolygonalFace } from './display/raster/cag/PolygonalFace.js';
 export { default as RationalBoundary } from './display/raster/cag/RationalBoundary.js';
 export { default as RationalFace } from './display/raster/cag/RationalFace.js';
 export { default as RationalHalfEdge } from './display/raster/cag/RationalHalfEdge.js';
@@ -499,6 +504,7 @@ export type { RasterizationOptions } from './display/raster/raster/Rasterize.js'
 export { default as RenderableFace } from './display/raster/raster/RenderableFace.js';
 
 export { default as LinearEdge } from './display/raster/util/LinearEdge.js';
+export type { SerializedLinearEdge } from './display/raster/util/LinearEdge.js';
 
 export { default as Instance } from './display/Instance.js';
 export type { default as TOverlay } from './overlays/TOverlay.js';

@@ -10,7 +10,8 @@ import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
-import { EdgedFace, PolygonalFace } from '../../../imports.js';
+import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
+import { EdgedFace, PolygonalFace, SerializedEdgedFace, SerializedPolygonalFace } from '../../../imports.js';
 import { Shape } from '../../../../../kite/js/imports.js';
 
 type ClippableFace = {
@@ -31,6 +32,31 @@ type ClippableFace = {
   toEdgedFace(): EdgedFace;
   getShape( epsilon?: number ): Shape;
   forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void;
+  toString(): string;
+  serialize(): IntentionalAny;
 };
 
 export default ClippableFace;
+
+export type SerializedClippableFace = {
+  type: 'PolygonalFace';
+  face: SerializedPolygonalFace;
+} | {
+  type: 'EdgedFace';
+  face: SerializedEdgedFace;
+};
+
+export const serializeClippableFace = ( clippableFace: ClippableFace ): SerializedClippableFace => {
+  // We are not checking the given type! We're wrapping these
+  // eslint-disable-next-line no-simple-type-checking-assertions
+  assert && assert( clippableFace instanceof PolygonalFace || clippableFace instanceof EdgedFace );
+
+  return {
+    type: clippableFace instanceof PolygonalFace ? 'PolygonalFace' : 'EdgedFace',
+    face: clippableFace.serialize()
+  };
+};
+
+export const deserializeClippableFace = ( serialized: SerializedClippableFace ): ClippableFace => {
+  return serialized.type === 'PolygonalFace' ? PolygonalFace.deserialize( serialized.face ) : EdgedFace.deserialize( serialized.face );
+};
