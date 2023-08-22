@@ -7,7 +7,7 @@ Using [Green's Theorem](https://en.wikipedia.org/wiki/Green%27s_theorem), we can
 For curves parameterized on $`t`$:
 
 $`
-\oint\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dx\,dy
+\oint_P\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dx\,dy
 `$
 
 For polygons, this means that if we can evaluate a line integral over each edge (point $`(x_i,y_i)`$ to point $`(x_{i+1},y_{i+1})`$), we can sum up each edge's contribution to get the double integral over the polygon. Notably our line segments are parameterized:
@@ -151,7 +151,7 @@ $`\theta=\tan^{-1}\frac{y}{x}`$
 We'll want to evaluate with Green's Theorem in polar coordinates:
 
 $`
-\oint\left(L\,\frac{dr}{dt}+M\,\frac{d\theta}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial r}-\frac{\partial L}{\partial \theta} \right)\,dA
+\oint_P\left(L\,\frac{dr}{dt}+M\,\frac{d\theta}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial r}-\frac{\partial L}{\partial \theta} \right)\,dA
 `$
 
 but we'll want to evaluate $`r^2`$ due to the coordinate change.
@@ -165,7 +165,7 @@ $`\frac{d\theta}{dt}=\frac{d}{dt}\tan^{-1}\frac{y}{x}=\frac{d}{dt}\tan^{-1}\frac
 Thus given $`M`$ and $`\frac{d\theta}{dt}`$, we can evaluate (with Mathematica in this case):
 
 $`
-\oint\left(M\,\frac{d\theta}{dt}\right)dt=\int_0^1\frac{1}{3}r^3\frac{d\theta}{dt}\,dt=
+\oint_P\left(M\,\frac{d\theta}{dt}\right)dt=\int_0^1\frac{1}{3}r^3\frac{d\theta}{dt}\,dt=
 \frac{s}{6d_{xy}^3}\left[
   d_{xy}\left( q_0( x_i^2 - x_ix_{i+1} - y_id_y ) + q_1( k_x + y_{i+1}d_y ) \right) +
   s^2\log\frac{k_x + k_y + d_{xy}q_1}{x_id_x + q_0d_{xy} + y_id_y}
