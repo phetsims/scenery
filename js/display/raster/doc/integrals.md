@@ -111,6 +111,7 @@ $`
 `$
 
 where we can divide the integrals of $`x`$ and $`y`$ by the area to get the centroid of the polygon:
+
 $`
 centroid_x=
 \frac{1}{3}
