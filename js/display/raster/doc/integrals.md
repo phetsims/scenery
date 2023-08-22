@@ -1,5 +1,7 @@
 # Integrals over Polygons
 
+Jonathan Olson (jonathan.olson@colorado.edu, 2023-08-22)
+
 ## Green's Theorem and Polygons
 
 Using [Green's Theorem](https://en.wikipedia.org/wiki/Green%27s_theorem), we can convert a double integral over a region into a line integral over the (closed, oriented counter-clockwise) boundary of the region:
