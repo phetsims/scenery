@@ -106,19 +106,15 @@ For $`x`$ and $`y`$, we have:
 
 $`
 \iint_Px\,dx\,dy=
-\frac{1}{6}
-\sum_{i}
-(x_iy_{i+1}-x_{i+1}y_i)(x_i+x_{i+1})
+\frac{1}{6} \sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i+x_{i+1})
 `$
 
 $`
 \iint_Py\,dx\,dy=
-\frac{1}{6}
-\sum_{i}
-(x_iy_{i+1}-x_{i+1}y_i)(y_i+y_{i+1})
+\frac{1}{6} \sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(y_i+y_{i+1})
 `$
 
-where we can divide the integrals of $`x`$ and $`y`$ by the area to get the centroid of the polygon:
+We can divide the integrals of $`x`$ and $`y`$ by the area to get the centroid of the polygon:
 
 $`
 centroid_x=
@@ -216,3 +212,66 @@ $`0=\sum_{i}(x_iy_i-x_{i+1}y_{i+1})`$
 This test (and any other tests of this type) will have false-negatives (for instance, if all the points are on an x or y axis, this formula won't detect non-closed polygons). However the useful probability of that happening can be reduced by using a random point as a translation:
 
 $`0=\sum_{i}\left[(x_i-p_x)(y_i-p_y)-(x_{i+1}-p_x)(y_{i+1}-p_y)\right]`$
+
+## Assorted formulas
+
+Cases where we can adjust the formulas for integrals that might be useful
+
+$`
+\iint_P1\,dx\,dy
+=\frac{1}{2}\sum_{i}(x_i+x_{i+1})(y_{i+1}-y_i)
+=\frac{1}{2}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)
+=\frac{1}{2}\sum_{i}(y_i+y_{i+1})(x_i-x_{i+1})
+`$
+
+$`
+\iint_Px\,dx\,dy
+=\frac{1}{6}\sum_{i}(x_i + x_{i+1}) (x_i y_{i+1}-y_i x_{i+1})
+=\frac{1}{6}\sum_{i}(x_i^2 + x_i x_{i+1} + x_{i+1}^2) (y_{i+1} - y_i)
+`$
+
+$`
+\iint_Py\,dx\,dy
+=\frac{1}{6}\sum_{i}(y_i + y_{i+1}) (x_i y_{i+1} - y_i x_{i+1})
+=\frac{1}{6}\sum_{i}(x_i^2 + x_i x_{i+1} + x_{i+1}^2) (y_{i+1} - y_i)
+`$
+
+$`
+\iint_Px^2\,dx\,dy
+=\frac{1}{12}\sum_{i}(x_i + x_{i+1}) (x_i^2 + x_{i+1}^2) (y_{i+1} - y_i)
+=\frac{1}{12}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^2 + x_i x_{i+1} + x_{i+1}^2)
+`$
+
+$`
+\iint_Pxy\,dx\,dy
+=\frac{1}{24}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i (2 y_i + y_{i+1}) + x_{i+1} (y_i + 2 y_{i+1}))
+`$
+
+$`
+\iint_Py^2\,dx\,dy
+=\frac{1}{12}\sum_{i}(y_i + y_{i+1})(y_i^2 + y_{i+1}^2)(x_i - x_{i+1})
+=\frac{1}{12}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(y_i^2 + y_i y_{i+1} + y_{i+1}^2)
+`$
+
+Additionally, powers of $`x^m`$ or $`y^n`$ on their own show a prime-factorization-like pattern when factored:
+
+$`\iint_Px^0\,dx\,dy=\frac{1}{2}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)`$
+$`\iint_Px^1\,dx\,dy=\frac{1}{6}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1})`$
+$`\iint_Px^2\,dx\,dy=\frac{1}{12}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^2 + x_i x_{i+1} + x_{i+1}^2)`$
+$`\iint_Px^3\,dx\,dy=\frac{1}{20}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1}) (x_i^2 + x_{i+1}^2)`$
+$`\iint_Px^4\,dx\,dy=\frac{1}{30}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^4 + x_i^3 x_{i+1} + x_i^2 x_{i+1}^2 + x_i x_{i+1}^3 + x_{i+1}^4)`$
+$`\iint_Px^5\,dx\,dy=\frac{1}{42}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1}) (x_i^2 - x_i x_{i+1} + x_{i+1}^2) (x_i^2 + x_i x_{i+1} + x_{i+1}^2)`$
+$`\iint_Px^6\,dx\,dy=\frac{1}{56}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^6 + x_i^5 x_{i+1} + x_i^4 x_{i+1}^2 + x_i^3 x_{i+1}^3 + x_i^2 x_{i+1}^4 + 
+  x_i x_{i+1}^5 + x_{i+1}^6)`$
+$`\iint_Px^7\,dx\,dy=\frac{1}{72}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1}) (x_i^2 + x_{i+1}^2) (x_i^4 + x_{i+1}^4)`$
+$`\iint_Px^8\,dx\,dy=\frac{1}{90}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^2 + x_i x_{i+1} + x_{i+1}^2) (x_i^6 + x_i^3 x_{i+1}^3 + x_{i+1}^6)`$
+$`\iint_Px^9\,dx\,dy=\frac{1}{110}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1}) (x_i^4 - x_i^3 x_{i+1} + x_i^2 x_{i+1}^2 - x_i x_{i+1}^3 + 
+   x_{i+1}^4) (x_i^4 + x_i^3 x_{i+1} + x_i^2 x_{i+1}^2 + x_i x_{i+1}^3 + x_{i+1}^4)`$
+$`\iint_Px^{10}\,dx\,dy=\frac{1}{132}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^10 + x_i^9 x_{i+1} + x_i^8 x_{i+1}^2 + x_i^7 x_{i+1}^3 + x_i^6 x_{i+1}^4 + 
+  x_i^5 x_{i+1}^5 + x_i^4 x_{i+1}^6 + x_i^3 x_{i+1}^7 + x_i^2 x_{i+1}^8 + x_i x_{i+1}^9 + 
+  x_{i+1}^10) `$
+
+So some powers are more efficient to evaluate than others:
+
+$`\iint_Px^{127}\,dx\,dy=\frac{1}{16512}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1})(x_i^2 + x_{i+1}^2)(x_i^4 + x_{i+1}^4)(x_i^8 + x_{i+1}^8)(x_i^16 + x_{i+1}^16)(x_i^32 + x_{i+1}^32)(x_i^64 + x_{i+1}^64)`$
+$`\iint_Px^{80}\,dx\,dy=\frac{1}{6642}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^{2}+x_ix_{i+1}+x_{i+1}^{2})(x_i^{6}+x_i^{3}x_{i+1}^{3}+x_{i+1}^{6})(x_i^{18}+x_i^{9}x_{i+1}^{9}+x_{i+1}^{18})(x_i^{54}+x_i^{27}x_{i+1}^{27}+x_{i+1}^{54})`$
