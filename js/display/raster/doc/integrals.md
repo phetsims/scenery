@@ -13,21 +13,21 @@ $`
 For polygons, this means that if we can evaluate a line integral over each edge (point $`(x_i,y_i)`$ to point $`(x_{i+1},y_{i+1})`$), we can sum up each edge's contribution to get the double integral over the polygon. Notably our line segments are parameterized:
 
 $`
-x(t)=(1-t)x_i+(t)x_{i+1}=x_i+t(x_{i+1}-x_i)
+x=x(t)=(1-t)x_i+(t)x_{i+1}=x_i+t(x_{i+1}-x_i)
 `$
 
 $`
-y(t)=(1-t)y_i+(t)y_{i+1}=y_i+t(y_{i+1}-y_i)
+y=y(t)=(1-t)y_i+(t)y_{i+1}=y_i+t(y_{i+1}-y_i)
 `$
 
 with the derivatives:
 
 $`
-x'(t)=x_{i+1}-x_i
+\frac{dx}{dt}=x_{i+1}-x_i
 `$
 
 $`
-y'(t)=y_{i+1}-y_i
+\frac{dy}{dt}=y_{i+1}-y_i
 `$
 
 There are two notable observations:
