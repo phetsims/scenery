@@ -7,7 +7,7 @@ Using [Green's Theorem](https://en.wikipedia.org/wiki/Green%27s_theorem), we can
 For curves parameterized on $`t`$:
 
 $`
-\oint\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dxdy
+\oint\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dx\,dy
 `$
 
 For polygons, this means that if we can evaluate a line integral over each edge (point $`(x_i,y_i)`$ to point $`(x_{i+1},y_{i+1})`$), we can sum up each edge's contribution to get the double integral over the polygon. Notably our line segments are parameterized:
@@ -55,14 +55,14 @@ It turns out, evaluating Green's Theorem over line segments for polynomial terms
 
 If we zero out all of the canceled terms, it turns out that we can evaluate the integral of any polynomial term $`x^my^n`$ over a polygon $`P`$ by summing up the contributions of each edge:
 
-$`\iint_Px^my^n\,dxdy=\frac{m!n!}{(m+n+2)!}\sum_{i}\left[ (x_iy_{i+1}-x_{i+1}y_i) \sum_{p=0}^m\sum_{q=0}^n \binom{p+q}{q}\binom{m+n-p-q}{n-q}x_i^{m-p}x_{i+1}^py_i^{n-q}y_{i+1}^q \right]`$
+$`\iint_Px^my^n\,dx\,dy=\frac{m!n!}{(m+n+2)!}\sum_{i}\left[ (x_iy_{i+1}-x_{i+1}y_i) \sum_{p=0}^m\sum_{q=0}^n \binom{p+q}{q}\binom{m+n-p-q}{n-q}x_i^{m-p}x_{i+1}^py_i^{n-q}y_{i+1}^q \right]`$
 
 (Conjecture, matches Mathematica output precisely). The contributions of each term can be summed up individually to integrate arbitrary polynomials.
 
 e.g. for $`x^4y^2`$ in matrix form:
 
 $`
-\iint_Px^4y^2\,dxdy=
+\iint_Px^4y^2\,dx\,dy=
 \frac{1}{840}
 (x_iy_{i+1}-x_{i+1}y_i)
 \begin{bmatrix}
@@ -87,7 +87,7 @@ y_{i+1}
 For $`x^0y^0=1`$, we'll have the [Shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula) for finding the area of a polygon:
 
 $`
-area_P=\iint_P1\,dxdy=
+area_P=\iint_P1\,dx\,dy=
 \frac{1}{2}
 \sum_{i}
 (x_i+x_{i+1})(y_{i+1}-y_i)
@@ -98,14 +98,14 @@ area_P=\iint_P1\,dxdy=
 For $`x`$ and $`y`$, we have:
 
 $`
-\iint_Px\,dxdy=
+\iint_Px\,dx\,dy=
 \frac{1}{6}
 \sum_{i}
 (x_iy_{i+1}-x_{i+1}y_i)(x_i+x_{i+1})
 `$
 
 $`
-\iint_Py\,dxdy=
+\iint_Py\,dx\,dy=
 \frac{1}{6}
 \sum_{i}
 (x_iy_{i+1}-x_{i+1}y_i)(y_i+y_{i+1})
@@ -193,7 +193,7 @@ $`k_y = y_{i+1}y_{i+1} - y_iy_{i+1}`$
 thus
 
 $`
-\iint_P\sqrt{x^2+y^2}\,dxdy=
+\iint_P\sqrt{x^2+y^2}\,dx\,dy=
 \frac{s}{6d_{xy}^3}\left[
   d_{xy}\left( q_0( x_i^2 - x_ix_{i+1} - y_id_y ) + q_1( k_x + y_{i+1}d_y ) \right) +
   s^2\log\frac{k_x + k_y + d_{xy}q_1}{x_id_x + q_0d_{xy} + y_id_y}
