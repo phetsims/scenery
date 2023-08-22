@@ -14,6 +14,7 @@ For polygons, this means that if we can evaluate a line integral over each edge 
 $`
 x(t)=(1-t)x_i+tx_{i+1}=x_i+t(x_{i+1}-x_i)
 `$
+
 $`
 y(t)=(1-t)y_i+ty_{i+1}=y_i+t(y_{i+1}-y_i)
 `$
@@ -23,6 +24,7 @@ with the derivatives:
 $`
 x'(t)=x_{i+1}-x_i
 `$
+
 $`
 y'(t)=y_{i+1}-y_i
 `$
@@ -39,6 +41,7 @@ We can pick $`L`$ and $`M`$ below:
 $`
 L=(n-1)\int f\,dy
 `$
+
 $`
 M=n\int f\,dx
 `$
@@ -92,12 +95,14 @@ area_P=\iint_P1\,dxdy=
 ## Centroids of Polygons
 
 For $`x`$ and $`y`$, we have:
+
 $`
 \iint_Px\,dxdy=
 \frac{1}{6}
 \sum_{i}
 (x_iy_{i+1}-x_{i+1}y_i)(x_i+x_{i+1})
 `$
+
 $`
 \iint_Py\,dxdy=
 \frac{1}{6}
@@ -111,6 +116,7 @@ centroid_x=
 \frac{1}{3}
 \frac{\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i+x_{i+1})}{\sum_{i}(x_i+x_{i+1})(y_{i+1}-y_i)}
 `$
+
 $`
 centroid_y=
 \frac{1}{3}
@@ -137,6 +143,7 @@ Above, we saw the centroid is useful to compute exact linear gradient contributi
 We'll need to transform to polar coordinates first:
 
 $`r=\sqrt{x^2+y^2}`$
+
 $`\theta=\tan^{-1}\frac{y}{x}`$
 
 We'll want to evaluate with Green's Theorem in polar coordinates:
@@ -166,12 +173,19 @@ $`
 with
 
 $`d_x = x_{i+1} - x_i`$
+
 $`d_y = y_{i+1} - y_i`$
+
 $`s = x_iy_{i+1} - y_ix_{i+1}`$
+
 $`d_{xy} = \sqrt{d_xd_x + d_yd_y}`$
+
 $`q_0 = \sqrt{x_ix_i + y_iy_i}`$
+
 $`q_1 = \sqrt{x_{i+1}x_{i+1} + y_{i+1}y_{i+1}}`$
+
 $`k_x = x_{i+1}x_{i+1} - x_ix_{i+1}`$
+
 $`k_y = y_{i+1}y_{i+1} - y_iy_{i+1}`$
 
 thus
