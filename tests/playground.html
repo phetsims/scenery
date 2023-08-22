@@ -433,7 +433,7 @@ an UI and Display made for visual testing and debugging.
       const height = 800;
 
       const center = phet.dot.v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
-      const radius = width * 0.45;
+      const radius = width * 0.8;
 
       const polygon = [];
       for ( let i = 0; i < pointCount; i++ ) {
@@ -448,7 +448,7 @@ an UI and Display made for visual testing and debugging.
         polygon.push( p1 );
       }
 
-      if ( type === 'svg' || type === 'canvas' ) {
+      if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
         display.width = width;
         display.height = height;
         scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), { fill: 'black', renderer: type } ) );
@@ -475,7 +475,8 @@ an UI and Display made for visual testing and debugging.
 
         const raster = new phet.scenery.CombinedRaster( outputWidth, outputHeight );
         phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputWidth, outputHeight ), {
-          polygonFiltering: filtering
+          polygonFiltering: filtering,
+          renderableFaceMethod: 'polygonal'
         } );
         const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
 
