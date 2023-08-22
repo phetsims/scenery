@@ -183,3 +183,13 @@ $`
   s^2\log\frac{k_x + k_y + d_{xy}q_1}{x_id_x + q_0d_{xy} + y_id_y}
 \right]
 `$
+
+## Checking if a Polygon is not Closed
+
+We can integrate $`0`$ over a polygon's edges in a similar way, to compute if the polygon is not closed (there are some cases where this happens and is useful).
+
+$`0=\sum_{i}(x_iy_i-x_{i+1}y_{i+1})`$
+
+This test (and any other tests of this type) will have false-negatives (for instance, if all the points are on an x or y axis, this formula won't detect non-closed polygons). However the useful probability of that happening can be reduced by using a random point as a translation:
+
+$`0=\sum_{i}\left[(x_i-p_x)(y_i-p_y)-(x_{i+1}-p_x)(y_{i+1}-p_y)\right]`$
