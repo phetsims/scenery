@@ -9,12 +9,30 @@ $`
 \oint\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dxdy
 `$
 
-For polygons, this means that if we can evaluate a line integral over each edge (point $`(x_i,y_i)`$ to point $`(x_{i+1},y_{i+1})`$), we can sum up each edge's contribution to get the double integral over the polygon.
+For polygons, this means that if we can evaluate a line integral over each edge (point $`(x_i,y_i)`$ to point $`(x_{i+1},y_{i+1})`$), we can sum up each edge's contribution to get the double integral over the polygon. Notably our line segments are parameterized:
 
-There are two notable things:
+$`
+x(t)=(1-t)x_i+tx_{i+1}=x_i+t(x_{i+1}-x_i)
+`$
+$`
+y(t)=(1-t)y_i+ty_{i+1}=y_i+t(y_{i+1}-y_i)
+`$
+
+with the derivatives:
+
+$`
+x'(t)=x_{i+1}-x_i
+`$
+$`
+y'(t)=y_{i+1}-y_i
+`$
+
+There are two notable observations:
 
 1. If we reverse an edge (swap its endpoints), it will swap the sign of the contribution to the integral.
 2. We are evaluating this on closed polygons, so any terms that only depend on one endpoint will cancel out (e.g. $`x_i^2y_i`$ and $`-x_{i+1}^2y_{i+1}`$ in summations will cancel out, and those terms will always be the additive inverse of each other$)
+
+This means that polygons with holes can be evaluated by visiting the holes with the opposite orientation (clockwise).
 
 We can pick $`L`$ and $`M`$ below:
 
@@ -24,6 +42,7 @@ L=(n-1)\int f\,dy
 $`
 M=n\int f\,dx
 `$
+
 for any antiderivatives and real $`n`$, since the double integral will then be integrating our function $`f`$.
 
 It turns out, evaluating Green's Theorem over line segments for polynomial terms for any linear blend (any $`n`$) of $`L`$ and $`M`$ will differ only in the "canceled out" edges, so they are all equivalent.
@@ -34,7 +53,7 @@ If we zero out all of the canceled terms, it turns out that we can evaluate the 
 
 $`\iint_Px^my^n\,dxdy=\frac{m!n!}{(m+n+2)!}\sum_{i}\left[ (x_iy_{i+1}-x_{i+1}y_i) \sum_{p=0}^m\sum_{q=0}^n \binom{p+q}{q}\binom{m+n-p-q}{n-q}x_i^{m-p}x_{i+1}^py_i^{n-q}y_{i+1}^q \right]`$
 
-The contributions of each term can be summed up individually to integrate arbitrary polynomials.
+(Conjecture, matches Mathematica output precisely). The contributions of each term can be summed up individually to integrate arbitrary polynomials.
 
 e.g. for $`x^4y^2`$ in matrix form:
 
@@ -111,3 +130,56 @@ $`
 x_iy_{i+1}+x_{i+1}y_i)
 `$
 
+## Evaluation of Distance over Polygons
+
+Above, we saw the centroid is useful to compute exact linear gradient contributions. For purely-circular radial gradients, the equivalent is also possible to compute! We'll need to instead integrate $`r=\sqrt{x^2+y^2}`$ (we can determine the average by dividing by the area).
+
+We'll need to transform to polar coordinates first:
+
+$`r=\sqrt{x^2+y^2}`$
+$`\theta=\tan^{-1}\frac{y}{x}`$
+
+We'll want to evaluate with Green's Theorem in polar coordinates:
+
+$`
+\oint\left(L\,\frac{dr}{dt}+M\,\frac{d\theta}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial r}-\frac{\partial L}{\partial \theta} \right)\,dA
+`$
+
+but we'll want to evaluate $`r^2`$ due to the coordinate change.
+
+If we pick $`M=\frac{1}{3}r^3`$ and $`L=0`$, the double integral will be our desired integral (note, $`M=\frac{1}{2}r^2`$ gives us the same Shoelace-like area formula).
+
+Given our definitions of $`x=x_i+t(x_{i+1}-x_i)`$ and $`y=y_i+t(y_{i+1}-y_i)`$:
+
+$`\frac{d\theta}{dt}=\frac{d}{dt}\tan^{-1}\frac{y}{x}=\frac{d}{dt}\tan^{-1}\frac{y_i+t(y_{i+1}-y_i)}{x_i+t(x_{i+1}-x_i)}=\frac{x_iy_{i+1}-x_{i+1}y_i}{t^2((x_{i_1}-x_i)^2+(y_{i+1}-y_i)^2)-2t(x_i^2-x_ix_{i+1}-y_iy_{i+1}+y_i^2)+(x_i^2+y_i^2)}`$
+
+Thus given $`M`$ and $`\frac{d\theta}{dt}`$, we can evaluate (with Mathematica in this case):
+
+$`
+\oint\left(M\,\frac{d\theta}{dt}\right)dt=\int_0^1\frac{1}{3}r^3\frac{d\theta}{dt}\,dt=
+\frac{s}{6d_{xy}^3}\left[
+  d_{xy}\left( q_0( x_i^2 - x_ix_{i+1} - y_id_y ) + q_1( k_x + y_{i+1}d_y ) \right) +
+  s^2\log\frac{k_x + k_y + d_{xy}q_1}{x_id_x + q_0d_{xy} + y_id_y}
+\right]
+`$
+
+with
+
+$`d_x = x_{i+1} - x_i`$
+$`d_y = y_{i+1} - y_i`$
+$`s = x_iy_{i+1} - y_ix_{i+1}`$
+$`d_{xy} = \sqrt{d_xd_x + d_yd_y}`$
+$`q_0 = \sqrt{x_ix_i + y_iy_i}`$
+$`q_1 = \sqrt{x_{i+1}x_{i+1} + y_{i+1}y_{i+1}}`$
+$`k_x = x_{i+1}x_{i+1} - x_ix_{i+1}`$
+$`k_y = y_{i+1}y_{i+1} - y_iy_{i+1}`$
+
+thus
+
+$`
+\iint_P\sqrt{x^2+y^2}\,dxdy=
+\frac{s}{6d_{xy}^3}\left[
+  d_{xy}\left( q_0( x_i^2 - x_ix_{i+1} - y_id_y ) + q_1( k_x + y_{i+1}d_y ) \right) +
+  s^2\log\frac{k_x + k_y + d_{xy}q_1}{x_id_x + q_0d_{xy} + y_id_y}
+\right]
+`$
