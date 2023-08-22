@@ -91,7 +91,7 @@ y_{i+1}
 
 ## Area of Polygons
 
-For $`x^0y^0=1`$, we'll have the [Shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula) for finding the area of a polygon:
+For $`x^0y^0=1`$, with adding some canceling terms to better factor, we'll obtain the [Shoelace formula](https://en.wikipedia.org/wiki/Shoelace_formula) for finding the area of a polygon:
 
 $`
 area_P=\iint_P1\,dx\,dy=
