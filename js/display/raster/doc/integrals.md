@@ -85,7 +85,7 @@ x_i^4 & x_i^3x_{i+1} & x_i^2x_{i+1}^2 & x_ix_{i+1}^3 & x_{i+1}^4
 \begin{bmatrix}
 y_i^2\\
 y_iy_{i+1}\\
-y_{i+1}
+y_{i+1}^2
 \end{bmatrix}
 `$
 
