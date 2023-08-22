@@ -273,5 +273,5 @@ $`\iint_Px^{10}\,dx\,dy=\frac{1}{132}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^10 + x_
 
 So some powers are more efficient to evaluate than others:
 
-$`\iint_Px^{127}\,dx\,dy=\frac{1}{16512}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1})(x_i^2 + x_{i+1}^2)(x_i^4 + x_{i+1}^4)(x_i^8 + x_{i+1}^8)(x_i^16 + x_{i+1}^16)(x_i^32 + x_{i+1}^32)(x_i^64 + x_{i+1}^64)`$
-$`\iint_Px^{80}\,dx\,dy=\frac{1}{6642}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^{2}+x_ix_{i+1}+x_{i+1}^{2})(x_i^{6}+x_i^{3}x_{i+1}^{3}+x_{i+1}^{6})(x_i^{18}+x_i^{9}x_{i+1}^{9}+x_{i+1}^{18})(x_i^{54}+x_i^{27}x_{i+1}^{27}+x_{i+1}^{54})`$
+$`\iint_Px^{128-1}\,dx\,dy=\frac{1}{16512}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1})(x_i^2 + x_{i+1}^2)(x_i^4 + x_{i+1}^4)(x_i^8 + x_{i+1}^8)(x_i^16 + x_{i+1}^16)(x_i^32 + x_{i+1}^32)(x_i^64 + x_{i+1}^64)`$
+$`\iint_Px^{81-1}\,dx\,dy=\frac{1}{6642}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^{2}+x_ix_{i+1}+x_{i+1}^{2})(x_i^{6}+x_i^{3}x_{i+1}^{3}+x_{i+1}^{6})(x_i^{18}+x_i^{9}x_{i+1}^{9}+x_{i+1}^{18})(x_i^{54}+x_i^{27}x_{i+1}^{27}+x_{i+1}^{54})`$
