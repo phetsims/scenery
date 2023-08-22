@@ -1,7 +1,32 @@
+# Integrals over Polygons
 
-TODO: flesh this out, and document! For now, it's a place where dumped formulas will be
+Using [Green's Theorem](https://en.wikipedia.org/wiki/Green%27s_theorem), we can convert a double integral over a region into a line integral over the (closed, oriented counterclockwise) boundary of the region:
 
-Arbitrary polynomial:
+For curves parameterized on $`t`$:
+$`
+\oint\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dxdy
+`$
+
+For polygons, this means that if we can evaluate a line integral over each edge (point $`(x_i,y_i)`$ to point $`(x_{i+1},y_{i+1})`$), we can sum up each edge's contribution to get the double integral over the polygon.
+
+There are two notable things:
+
+1. If we reverse an edge (swap its endpoints), it will swap the sign of the contribution to the integral.
+2. We are evaluating this on closed polygons, so any terms that only depend on one endpoint will cancel out (e.g. $`x_i^2y_i`$ and $`-x_{i+1}^2y_{i+1}`$ in summations will cancel out, and those terms will always be the additive inverse of each other$)
+
+We can pick $`L`$ and $`M`$ below:
+
+$`
+L=(n-1)\int f\,dy
+`$
+$`
+M=n\int f\,dx
+`$
+for any antiderivatives and real $`n`$, since the double integral will then be integrating our function $`f`$.
+
+It turns out, evaluating Green's Theorem over line segments for polynomial terms for any linear blend (any $`n`$) of $`L`$ and $`M`$ will differ only in the "canceled out" edges, so they are all equivalent.
+
+If we zero out all of the canceled terms, it turns out that we can evaluate the integral of any polynomial term $`x^my^n`$ over a polygon $`P`$ by summing up the contributions of each edge:
 
 $`\iint_Px^my^n\,dxdy=\frac{m!n!}{(m+n+2)!}\sum_{i}\left[ (x_iy_{i+1}-x_{i+1}y_i) \sum_{p=0}^m\sum_{q=0}^n \binom{p+q}{q}\binom{m+n-p-q}{n-q}x_i^{m-p}x_{i+1}^py_i^{n-q}y_{i+1}^q \right]`$
 
@@ -65,4 +90,12 @@ centroid_y=
 \frac{\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(y_i+y_{i+1})}{\sum_{i}(x_i+x_{i+1})(y_{i+1}-y_i)}
 `$
 
-The tent filter (for [Bilinear filtering](https://en.wikipedia.org/wiki/Bilinear_interpolation)) is 
+This is particularly useful, since if we have any linear function over $`(x,y)`$ (say, a linear gradient between two colors), the average color in the polygon would be the value of that function at the centroid!
+
+The tent filter (for [Bilinear filtering](https://en.wikipedia.org/wiki/Bilinear_interpolation)) is effectively evaluating the integral $`(1-x)(1-y)=xy-x-y+1`$ over $`0\le x\le1,0\le y\le1`$, which we can now evaluate as:
+
+$`
+\frac{1}{24}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(12-4( x_i+y_i+x_{i+1}+y_{i+1})+2(x_iy_i+x_{i+1}y_{i+1})+ 
+x_iy_{i+1}+x_{i+1}y_i)
+`$
+
