@@ -5,6 +5,7 @@
 Using [Green's Theorem](https://en.wikipedia.org/wiki/Green%27s_theorem), we can convert a double integral over a region into a line integral over the (closed, oriented counterclockwise) boundary of the region:
 
 For curves parameterized on $`t`$:
+
 $`
 \oint\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dxdy
 `$
