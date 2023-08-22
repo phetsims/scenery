@@ -2,15 +2,15 @@
 
 ## Green's Theorem and Polygons
 
-Using [Green's Theorem](https://en.wikipedia.org/wiki/Green%27s_theorem), we can convert a double integral over a region into a line integral over the (closed, oriented counterclockwise) boundary of the region:
-
-For curves parameterized on $`t`$:
+Using [Green's Theorem](https://en.wikipedia.org/wiki/Green%27s_theorem), we can convert a double integral over a region into a line integral over the (closed, oriented counter-clockwise) boundary of the region:
 
 $`
 \oint_P\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dx\,dy
 `$
 
-For polygons, this means that if we can evaluate a line integral over each edge (point $`(x_i,y_i)`$ to point $`(x_{i+1},y_{i+1})`$), we can sum up each edge's contribution to get the double integral over the polygon. Notably our line segments are parameterized:
+for curves parameterized on $`t`$
+
+For polygons, this means that if we can evaluate a line integral over each line segment (between $`(x_i,y_i)`$ and $`(x_{i+1},y_{i+1})`$, finishing with $`(x_i,y_i)`$ to $`(x_0,y_0)`$), we can sum up each edge's contribution to evaluate the double integral for the region inside the polygon. Each line segment is parameterized curve:
 
 $`
 x=x(t)=(1-t)x_i+(t)x_{i+1}=x_i+t(x_{i+1}-x_i)
@@ -20,7 +20,7 @@ $`
 y=y(t)=(1-t)y_i+(t)y_{i+1}=y_i+t(y_{i+1}-y_i)
 `$
 
-with the derivatives:
+For $`0 \le t \le 1`$, with the derivatives:
 
 $`
 \frac{dx}{dt}=x_{i+1}-x_i
@@ -33,7 +33,7 @@ $`
 There are two notable observations:
 
 1. If we reverse an edge (swap its endpoints), it will swap the sign of the contribution to the integral.
-2. We are evaluating this on closed polygons, so any terms that only depend on one endpoint will cancel out (e.g. $`x_i^2y_i`$ and $`-x_{i+1}^2y_{i+1}`$ in summations will cancel out, and those terms will always be the additive inverse of each other$)
+2. We are evaluating this on closed polygons, so any terms that only depend on one endpoint will cancel out (e.g. $`x_i^2y_i`$ and $`-x_{i+1}^2y_{i+1}`$ in summations will cancel out, and those terms will always be the additive inverse of each other)
 
 This means that polygons with holes can be evaluated by visiting the holes with the opposite orientation (clockwise).
 
