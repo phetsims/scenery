@@ -8,7 +8,7 @@ $`
 \oint_P\left(L\,\frac{dx}{dt}+M\,\frac{dy}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dx\,dy
 `$
 
-for curves parameterized on $`t`$
+for curves parameterized on $`t`$.
 
 For polygons, this means that if we can evaluate a line integral over each line segment (between $`(x_i,y_i)`$ and $`(x_{i+1},y_{i+1})`$, finishing with $`(x_i,y_i)`$ to $`(x_0,y_0)`$), we can sum up each edge's contribution to evaluate the double integral for the region inside the polygon. Each line segment is parameterized curve:
 
@@ -20,7 +20,7 @@ $`
 y=y(t)=(1-t)y_i+(t)y_{i+1}=y_i+t(y_{i+1}-y_i)
 `$
 
-For $`0 \le t \le 1`$, with the derivatives:
+for $`0 \le t \le 1`$, with the derivatives:
 
 $`
 \frac{dx}{dt}=x_{i+1}-x_i
@@ -30,12 +30,10 @@ $`
 \frac{dy}{dt}=y_{i+1}-y_i
 `$
 
-There are two notable observations:
+Note:
 
-1. If we reverse an edge (swap its endpoints), it will swap the sign of the contribution to the integral.
-2. We are evaluating this on closed polygons, so any terms that only depend on one endpoint will cancel out (e.g. $`x_i^2y_i`$ and $`-x_{i+1}^2y_{i+1}`$ in summations will cancel out, and those terms will always be the additive inverse of each other)
-
-This means that polygons with holes can be evaluated by visiting the holes with the opposite orientation (clockwise).
+1. If we reverse an edge (swap its endpoints), it will swap the sign of the contribution to the integral (a polygon can make a degenerate turn and double-back precisely, with no contribution to area). Thus for terms, swapping $`i`$ and $`i+1`$ will swap the sign of the contribution. This means that polygons with holes can be evaluated by visiting the holes with the opposite orientation (clockwise).
+2. This is evaluated on closed polygons, so any terms that only depend on one endpoint will cancel out (e.g. $`x_i^2y_i`$ and $`-x_{i+1}^2y_{i+1}`$ will have their contributions cancel out, since both of those will be evaluated for every point in the polygon). It is useful to adjust the coefficients to these terms, since they can allow us to factor the expressions into simpler forms (e.g. the Shoelace formula below).
 
 We can pick $`L`$ and $`M`$ below:
 
@@ -47,9 +45,7 @@ $`
 M=n\int f\,dx
 `$
 
-for any antiderivatives and real $`n`$, since the double integral will then be integrating our function $`f`$.
-
-It turns out, evaluating Green's Theorem over line segments for polynomial terms for any linear blend (any $`n`$) of $`L`$ and $`M`$ will differ only in the "canceled out" edges, so they are all equivalent.
+for any antiderivatives and real $`n`$, since the double integral will then be integrating our function $`f`$. It turns out, evaluating Green's Theorem over line segments for polynomial terms for any linear blend (any $`n`$) of $`L`$ and $`M`$ will differ only in the "canceled out" terms, so each edge's contribution will be the same.
 
 ## Integrating Arbitrary Polynomials over Polygons
 
