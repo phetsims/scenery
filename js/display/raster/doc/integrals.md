@@ -44,8 +44,17 @@ L=(n-1)\int f\,dy
 `$
 
 $`
-M=n\int f\,dx
+M=(n)\int f\,dx
 `$
+
+so that
+
+$`
+\iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dx\,dy=
+\iint_P \left( (n)f - (n-1)f \right)\,dx\,dy=
+\iint_P f\,dx\,dy=
+`$
+
 
 for any antiderivatives and real $`n`$, since the double integral will then be integrating our function $`f`$. It turns out, evaluating Green's Theorem over line segments for polynomial terms for any linear blend (any $`n`$) of $`L`$ and $`M`$ will differ only in the "canceled out" terms, so each edge's contribution will be the same.
 
