@@ -52,7 +52,7 @@ so that
 $`
 \iint_P \left( \frac{\partial M}{\partial x}-\frac{\partial L}{\partial y} \right)\,dx\,dy=
 \iint_P \left( (n)f - (n-1)f \right)\,dx\,dy=
-\iint_P f\,dx\,dy=
+\iint_P f\,dx\,dy
 `$
 
 
