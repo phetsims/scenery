@@ -691,7 +691,7 @@ export default class Rasterize {
     return renderableFaces;
   }
 
-  // TODO: reconstitute this into an alternative non-binary setup!
+  // TODO: reconstitute this into an alternative non-binary setup! (filtering will be a bit more annoying?)
   // private static fullRasterize(
   //   outputRaster: OutputRaster,
   //   renderProgram: RenderProgram,
@@ -736,8 +736,6 @@ export default class Rasterize {
     y: number,
     color: Vector4
   ): void {
-
-    // TODO NOTE: DO NOT stripe-clip for the filtering, the far-away points are killing us.
 
     assert && assert( polygonFiltering === PolygonFilterType.Bilinear || polygonFiltering === PolygonFilterType.MitchellNetravali,
       'Only supports these filters currently' );
@@ -959,6 +957,8 @@ export default class Rasterize {
 
           assert && assert( xSplit !== minX && xSplit !== maxX );
 
+          // TODO: If this is the LAST level of clipping, can we perhaps skip the actual face output (and only get
+          // TODO: area output)?
           const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, averageY );
 
           if ( assertSlow ) {
@@ -1092,6 +1092,25 @@ export default class Rasterize {
 
   // TODO: name change?
   public static rasterizeRenderProgram( renderProgram: RenderProgram, outputRaster: OutputRaster, bounds: Bounds2, providedOptions?: RasterizationOptions ): void {
+
+    // Coordinate frames:
+    //
+    // First, we start with the RenderProgram coordinate frame (the coordinate frame of the paths inside the renderPrograms,
+    // and the bounds provided to us.
+    //
+    // We will then transfer over to the "integer" coordinate frame, where each of our input edges will have
+    // integer-valued coordinates. Additionally, we've shifted/scaled this, so that the integers lie within about
+    // 20-bits of precision (and are centered in the integer grid). We do this so that we can do exact operations for
+    // intersection/etc., which solves most of the robustness issues (the intersection point x,y between two of these
+    // line segments can be stored each with a 64-bit numerator and a 64-bit denominator, and we can do the needed
+    // arithmetic with the rationals).
+    //
+    // Once we have determined the intersections AND connected half-edges (which requires sorting the half-edges with
+    // the exact values), we can then transfer back to the RenderProgram coordinate frame, and rasterize the faces
+    // in this coordinate frame.
+    //
+    // Of note, when we're filtering with bilinear or Mitchell-Netravali filters, we'll be cutting up the faces into
+    // half-pixel offset expanded regions, so that we can evaluate the filters AT the pixel centers.
 
     assert && assert( bounds.isValid() && !bounds.isEmpty(), 'Rasterization bounds should be valid and non-empty' );
     assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
