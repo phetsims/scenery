@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery, WindingMap } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -43,334 +43,6 @@ const scratchFullAreaVector = new Vector2( 0, 0 );
 const nanVector = new Vector2( NaN, NaN );
 
 export default class Rasterize {
-
-  private static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
-    const integerEdges: IntegerEdge[] = [];
-    for ( let i = 0; i < paths.length; i++ ) {
-      const path = paths[ i ];
-
-      for ( let j = 0; j < path.subpaths.length; j++ ) {
-        const subpath = path.subpaths[ j ];
-
-        // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
-        // If a path is fully outside of the clip region, we won't create integer edges out of it.
-        const clippedSubpath = PolygonClipping.boundsClipPolygon( subpath, bounds );
-
-        for ( let k = 0; k < clippedSubpath.length; k++ ) {
-          // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
-          const p0 = clippedSubpath[ k ];
-          const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
-          const edge = IntegerEdge.createTransformed( path, toIntegerMatrix, p0, p1 );
-          if ( edge !== null ) {
-            integerEdges.push( edge );
-          }
-        }
-      }
-    }
-    return integerEdges;
-  }
-
-  private static filterAndConnectHalfEdges( rationalHalfEdges: RationalHalfEdge[] ): RationalHalfEdge[] {
-    // Do filtering for duplicate half-edges AND connecting edge linked list in the same traversal
-    // NOTE: We don't NEED to filter "low-order" vertices (edge whose opposite is its next edge), but we could at
-    // some point in the future. Note that removing a low-order edge then might create ANOTHER low-order edge, so
-    // it would need to chase these.
-    // NOTE: We could also remove "composite" edges that have no winding contribution (degenerate "touching" in the
-    // source path), however it's probably not too common so it's not done here.
-    let firstEdge = rationalHalfEdges[ 0 ];
-    let lastEdge = rationalHalfEdges[ 0 ];
-    const filteredRationalHalfEdges = [ lastEdge ];
-    for ( let i = 1; i < rationalHalfEdges.length; i++ ) {
-      const edge = rationalHalfEdges[ i ];
-
-      if ( edge.p0.equals( lastEdge.p0 ) ) {
-        if ( edge.p1.equals( lastEdge.p1 ) ) {
-          lastEdge.addWindingFrom( edge );
-        }
-        else {
-          filteredRationalHalfEdges.push( edge );
-          edge.reversed.nextEdge = lastEdge;
-          lastEdge.previousEdge = edge.reversed;
-          lastEdge = edge;
-        }
-      }
-      else {
-        firstEdge.reversed.nextEdge = lastEdge;
-        lastEdge.previousEdge = firstEdge.reversed;
-        filteredRationalHalfEdges.push( edge );
-        firstEdge = edge;
-        lastEdge = edge;
-      }
-    }
-    // last connection
-    firstEdge.reversed.nextEdge = lastEdge;
-    lastEdge.previousEdge = firstEdge.reversed;
-    return filteredRationalHalfEdges;
-  }
-
-  private static traceBoundaries(
-    filteredRationalHalfEdges: RationalHalfEdge[],
-    innerBoundaries: RationalBoundary[],
-    outerBoundaries: RationalBoundary[],
-    faces: RationalFace[]
-  ): void {
-    for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
-      const firstEdge = filteredRationalHalfEdges[ i ];
-      if ( !firstEdge.boundary ) {
-        const boundary = new RationalBoundary();
-        boundary.edges.push( firstEdge );
-        firstEdge.boundary = boundary;
-
-        let edge = firstEdge.nextEdge!;
-        while ( edge !== firstEdge ) {
-          edge.boundary = boundary;
-          boundary.edges.push( edge );
-          edge = edge.nextEdge!;
-        }
-
-        boundary.computeProperties();
-
-        const signedArea = boundary.signedArea;
-        if ( Math.abs( signedArea ) > 1e-8 ) {
-          if ( signedArea > 0 ) {
-            innerBoundaries.push( boundary );
-            const face = new RationalFace( boundary );
-            faces.push( face );
-            for ( let j = 0; j < boundary.edges.length; j++ ) {
-              const edge = boundary.edges[ j ];
-              edge.face = face;
-            }
-          }
-          else {
-            outerBoundaries.push( boundary );
-          }
-        }
-      }
-    }
-  }
-
-  // Returns the fully exterior boundary (should be singular, since we added the exterior rectangle)
-  private static computeFaceHoles(
-    integerBounds: Bounds2,
-    outerBoundaries: RationalBoundary[],
-    faces: RationalFace[]
-  ): RationalBoundary {
-    let exteriorBoundary: RationalBoundary | null = null;
-    if ( assert ) {
-      debugData!.exteriorBoundary = exteriorBoundary;
-    }
-    for ( let i = 0; i < outerBoundaries.length; i++ ) {
-      const outerBoundary = outerBoundaries[ i ];
-      const outerBounds = outerBoundary.bounds;
-
-      const boundaryDebugData: IntentionalAny = assert ? {
-        outerBoundary: outerBoundary
-      } : null;
-      if ( assert ) {
-        debugData!.boundaryDebugData = debugData!.boundaryDebugData || [];
-        debugData!.boundaryDebugData.push( boundaryDebugData );
-      }
-
-      const minimalRationalPoint = outerBoundary.minimalXRationalPoint;
-
-      let maxIntersectionX = new BigRational( integerBounds.left - 1, 1 );
-      let maxIntersectionEdge: RationalHalfEdge | null = null;
-      let maxIntersectionIsVertex = false;
-
-      for ( let j = 0; j < faces.length; j++ ) {
-        const face = faces[ j ];
-        const innerBoundary = face.boundary;
-        const innerBounds = innerBoundary.bounds;
-
-        // Check if the "inner" bounds actually fully contains (strictly) our "outer" bounds.
-        // This is a constraint that has to be satisfied for the outer boundary to be a hole.
-        if (
-          outerBounds.minX > innerBounds.minX &&
-          outerBounds.minY > innerBounds.minY &&
-          outerBounds.maxX < innerBounds.maxX &&
-          outerBounds.maxY < innerBounds.maxY
-        ) {
-          for ( let k = 0; k < innerBoundary.edges.length; k++ ) {
-            const edge = innerBoundary.edges[ k ];
-
-            // TODO: This will require a lot of precision, how do we handle this?
-            // TODO: we'll need to handle these anyway!
-            const dx0 = edge.p0.x.minus( minimalRationalPoint.x );
-            const dx1 = edge.p1.x.minus( minimalRationalPoint.x );
-
-            // If both x values of the segment are at or to the right, there will be no intersection
-            if ( dx0.isNegative() || dx1.isNegative() ) {
-
-              const dy0 = edge.p0.y.minus( minimalRationalPoint.y );
-              const dy1 = edge.p1.y.minus( minimalRationalPoint.y );
-
-              const bothPositive = dy0.isPositive() && dy1.isPositive();
-              const bothNegative = dy0.isNegative() && dy1.isNegative();
-
-              if ( !bothPositive && !bothNegative ) {
-                const isZero0 = dy0.isZero();
-                const isZero1 = dy1.isZero();
-
-                let candidateMaxIntersectionX: BigRational;
-                let isVertex: boolean;
-                if ( isZero0 && isZero1 ) {
-                  // NOTE: on a vertex
-                  const is0Less = edge.p0.x.compareCrossMul( edge.p1.x ) < 0;
-                  candidateMaxIntersectionX = is0Less ? edge.p1.x : edge.p0.x;
-                  isVertex = true;
-                }
-                else if ( isZero0 ) {
-                  // NOTE: on a vertex
-                  candidateMaxIntersectionX = edge.p0.x;
-                  isVertex = true;
-                }
-                else if ( isZero1 ) {
-                  // NOTE: on a vertex
-                  candidateMaxIntersectionX = edge.p1.x;
-                  isVertex = true;
-                }
-                else {
-                  // p0.x + ( p1.x - p0.x ) * ( minimalRationalPoint.y - p0.y ) / ( p1.y - p0.y );
-                  // TODO: could simplify by reversing sign and using dy1
-                  candidateMaxIntersectionX = edge.p0.x.plus( edge.p1.x.minus( edge.p0.x ).times( minimalRationalPoint.y.minus( edge.p0.y ) ).dividedBy( edge.p1.y.minus( edge.p0.y ) ) );
-                  isVertex = false;
-                }
-
-                // TODO: add less-than, etc.
-                if (
-                  maxIntersectionX.compareCrossMul( candidateMaxIntersectionX ) < 0 &&
-                  // NOTE: Need to ensure that our actual intersection is to the left of our minimal point!!!
-                  candidateMaxIntersectionX.compareCrossMul( minimalRationalPoint.x ) < 0
-                ) {
-                  maxIntersectionX = candidateMaxIntersectionX;
-                  maxIntersectionEdge = edge;
-                  maxIntersectionIsVertex = isVertex;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if ( assert ) {
-        boundaryDebugData.maxIntersectionX = maxIntersectionX;
-        boundaryDebugData.maxIntersectionEdge = maxIntersectionEdge;
-        boundaryDebugData.maxIntersectionIsVertex = maxIntersectionIsVertex;
-      }
-
-      let connectedFace: RationalFace | null = null;
-      if ( maxIntersectionEdge ) {
-        const edge0 = maxIntersectionEdge;
-        const edge1 = maxIntersectionEdge.reversed;
-        if ( !edge0.face ) {
-          connectedFace = edge1.face!;
-        }
-        else if ( !edge1.face ) {
-          connectedFace = edge0.face!;
-        }
-        else if ( maxIntersectionIsVertex ) {
-          // We'll need to traverse around the vertex to find the face we need.
-
-          // Get a starting edge with p0 = intersection
-          const startEdge = ( edge0.p0.x.equalsCrossMul( maxIntersectionX ) && edge0.p0.y.equalsCrossMul( minimalRationalPoint.y ) ) ? edge0 : edge1;
-
-          assert && assert( startEdge.p0.x.equalsCrossMul( maxIntersectionX ) );
-          assert && assert( startEdge.p0.y.equalsCrossMul( minimalRationalPoint.y ) );
-
-          // TODO: for testing this, remember we'll need multiple "fully surrounding" boundaries?
-          // TODO: wait, no we won't
-          let bestEdge = startEdge;
-          let edge = startEdge.previousEdge!.reversed;
-          while ( edge !== startEdge ) {
-            if ( edge.compare( bestEdge ) < 0 ) {
-              bestEdge = edge;
-            }
-            edge = edge.previousEdge!.reversed;
-          }
-          connectedFace = edge.face!; // TODO: why do we NOT reverse it here?!? reversed issues?
-        }
-        else {
-          // non-vertex, a bit easier
-          // TODO: could grab this value stored from earlier
-          const isP0YLess = edge0.p0.y.compareCrossMul( edge0.p1.y ) < 0;
-          // Because it should have a "positive" orientation, we want the "negative-y-facing edge"
-          connectedFace = isP0YLess ? edge1.face : edge0.face;
-        }
-
-        assert && assert( connectedFace );
-        connectedFace.holes.push( outerBoundary );
-
-        // Fill in face data for holes, so we can traverse nicely
-        for ( let k = 0; k < outerBoundary.edges.length; k++ ) {
-          outerBoundary.edges[ k ].face = connectedFace;
-        }
-      }
-      else {
-        exteriorBoundary = outerBoundary;
-      }
-
-      if ( assert ) {
-        boundaryDebugData.connectedFace = connectedFace;
-      }
-    }
-
-    assert && assert( exteriorBoundary );
-
-    return exteriorBoundary!;
-  }
-
-  private static createUnboundedFace( exteriorBoundary: RationalBoundary ): RationalFace {
-    const unboundedFace = new RationalFace( exteriorBoundary );
-
-    for ( let i = 0; i < exteriorBoundary.edges.length; i++ ) {
-      exteriorBoundary.edges[ i ].face = unboundedFace;
-    }
-    return unboundedFace;
-  }
-
-  private static computeWindingMaps( filteredRationalHalfEdges: RationalHalfEdge[], unboundedFace: RationalFace ): void {
-    for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
-      const edge = filteredRationalHalfEdges[ i ];
-
-      const face = edge.face!;
-      const otherFace = edge.reversed.face!;
-
-      assert && assert( face );
-      assert && assert( otherFace );
-
-      // TODO: possibly reverse this, check to see which winding map is correct
-      if ( !face.windingMapMap.has( otherFace ) ) {
-        face.windingMapMap.set( otherFace, edge.windingMap );
-      }
-    }
-
-    unboundedFace.windingMap = new WindingMap(); // no windings, empty!
-    const recursiveWindingMap = ( solvedFace: RationalFace ) => {
-      // TODO: no recursion, could blow recursion limits
-      for ( const [ otherFace, windingMap ] of solvedFace.windingMapMap ) {
-        const needsNewWindingMap = !otherFace.windingMap;
-
-        if ( needsNewWindingMap || assert ) {
-          const newWindingMap = new WindingMap();
-          const existingMap = solvedFace.windingMap!;
-          const deltaMap = windingMap;
-
-          newWindingMap.addWindingMap( existingMap );
-          newWindingMap.addWindingMap( deltaMap );
-
-          if ( assert ) {
-            // TODO: object for the winding map?
-          }
-          otherFace.windingMap = newWindingMap;
-
-          if ( needsNewWindingMap ) {
-            recursiveWindingMap( otherFace );
-          }
-        }
-      }
-    };
-    recursiveWindingMap( unboundedFace );
-  }
 
   private static getRenderProgrammedFaces( renderProgram: RenderProgram, faces: RationalFace[] ): RationalFace[] {
     const renderProgrammedFaces: RationalFace[] = [];
@@ -887,7 +559,7 @@ export default class Rasterize {
     ] );
     paths.push( backgroundPath );
 
-    const integerEdges = Rasterize.clipScaleToIntegerEdges( paths, gridBounds, toIntegerMatrix );
+    const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, gridBounds, toIntegerMatrix );
     if ( assert ) { debugData!.integerEdges = integerEdges; }
 
     // TODO: optional hilbert space-fill sort here?
@@ -909,7 +581,7 @@ export default class Rasterize {
 
     rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
 
-    const filteredRationalHalfEdges = Rasterize.filterAndConnectHalfEdges( rationalHalfEdges );
+    const filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
     if ( assert ) { debugData!.filteredRationalHalfEdges = filteredRationalHalfEdges; }
 
     const innerBoundaries: RationalBoundary[] = [];
@@ -920,23 +592,30 @@ export default class Rasterize {
       debugData!.outerBoundaries = outerBoundaries;
       debugData!.faces = faces;
     }
-    Rasterize.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
+    RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
+
+    let faceHoleLog = null;
+    if ( assert ) {
+      debugData!.boundaryDebugData = [];
+      faceHoleLog = { entries: debugData!.boundaryDebugData };
+    }
 
     // TODO: a good way to optimize this? For certain scenes we might be computing a lot of intersections that we
     // TODO: don't need.
-    const exteriorBoundary = Rasterize.computeFaceHoles(
+    const exteriorBoundary = RationalFace.computeFaceHoles(
       integerBounds,
       outerBoundaries,
-      faces
+      faces,
+      faceHoleLog
     );
 
     // For ease of use, an unbounded face (it is essentially fake)
-    const unboundedFace = Rasterize.createUnboundedFace( exteriorBoundary );
+    const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );
     if ( assert ) {
       debugData!.unboundedFace = unboundedFace;
     }
 
-    Rasterize.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
+    RationalFace.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
 
     const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
 

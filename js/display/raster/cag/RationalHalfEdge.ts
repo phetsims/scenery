@@ -88,6 +88,44 @@ export default class RationalHalfEdge {
     // Now, we're sorting "identically overlapping" half-edges
     return this.edgeId < other.edgeId ? -1 : ( this.edgeId > other.edgeId ? 1 : 0 );
   }
+
+  public static filterAndConnectHalfEdges( rationalHalfEdges: RationalHalfEdge[] ): RationalHalfEdge[] {
+    // Do filtering for duplicate half-edges AND connecting edge linked list in the same traversal
+    // NOTE: We don't NEED to filter "low-order" vertices (edge whose opposite is its next edge), but we could at
+    // some point in the future. Note that removing a low-order edge then might create ANOTHER low-order edge, so
+    // it would need to chase these.
+    // NOTE: We could also remove "composite" edges that have no winding contribution (degenerate "touching" in the
+    // source path), however it's probably not too common so it's not done here.
+    let firstEdge = rationalHalfEdges[ 0 ];
+    let lastEdge = rationalHalfEdges[ 0 ];
+    const filteredRationalHalfEdges = [ lastEdge ];
+    for ( let i = 1; i < rationalHalfEdges.length; i++ ) {
+      const edge = rationalHalfEdges[ i ];
+
+      if ( edge.p0.equals( lastEdge.p0 ) ) {
+        if ( edge.p1.equals( lastEdge.p1 ) ) {
+          lastEdge.addWindingFrom( edge );
+        }
+        else {
+          filteredRationalHalfEdges.push( edge );
+          edge.reversed.nextEdge = lastEdge;
+          lastEdge.previousEdge = edge.reversed;
+          lastEdge = edge;
+        }
+      }
+      else {
+        firstEdge.reversed.nextEdge = lastEdge;
+        lastEdge.previousEdge = firstEdge.reversed;
+        filteredRationalHalfEdges.push( edge );
+        firstEdge = edge;
+        lastEdge = edge;
+      }
+    }
+    // last connection
+    firstEdge.reversed.nextEdge = lastEdge;
+    lastEdge.previousEdge = firstEdge.reversed;
+    return filteredRationalHalfEdges;
+  }
 }
 
 scenery.register( 'RationalHalfEdge', RationalHalfEdge );

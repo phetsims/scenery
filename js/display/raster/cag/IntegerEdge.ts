@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RationalIntersection, RenderPath, scenery } from '../../../imports.js';
+import { PolygonClipping, RationalIntersection, RenderPath, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -80,6 +80,38 @@ export default class IntegerEdge {
     else {
       return null;
     }
+  }
+
+  /**
+   * Returns a list of integer edges (tagged with their respective RenderPaths) that are clipped to within the given
+   * bounds.
+   *
+   * Since we also need to apply the to-integer-coordinate-frame conversion at the same time, this step is included.
+   */
+  public static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
+    const integerEdges: IntegerEdge[] = [];
+    for ( let i = 0; i < paths.length; i++ ) {
+      const path = paths[ i ];
+
+      for ( let j = 0; j < path.subpaths.length; j++ ) {
+        const subpath = path.subpaths[ j ];
+
+        // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
+        // If a path is fully outside of the clip region, we won't create integer edges out of it.
+        const clippedSubpath = PolygonClipping.boundsClipPolygon( subpath, bounds );
+
+        for ( let k = 0; k < clippedSubpath.length; k++ ) {
+          // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
+          const p0 = clippedSubpath[ k ];
+          const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
+          const edge = IntegerEdge.createTransformed( path, toIntegerMatrix, p0, p1 );
+          if ( edge !== null ) {
+            integerEdges.push( edge );
+          }
+        }
+      }
+    }
+    return integerEdges;
   }
 }
 

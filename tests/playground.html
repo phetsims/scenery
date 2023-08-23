@@ -1024,7 +1024,9 @@ an UI and Display made for visual testing and debugging.
             }
           } );
           offsetNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( offsetPolygon ), {
-            stroke: stroke
+            stroke: stroke,
+            lineJoin: 'round',
+            lineCap: 'round'
           } ) );
         };
         debugData.innerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'blue' ) );

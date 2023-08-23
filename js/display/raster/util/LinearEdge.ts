@@ -108,11 +108,13 @@ export default class LinearEdge {
     const shape = new Shape();
 
     polygons.forEach( polygon => {
-      shape.moveToPoint( polygon[ 0 ] );
-      for ( let i = 1; i < polygon.length; i++ ) {
-        shape.lineToPoint( polygon[ i ] );
+      if ( polygon.length >= 3 ) {
+        shape.moveToPoint( polygon[ 0 ] );
+        for ( let i = 1; i < polygon.length; i++ ) {
+          shape.lineToPoint( polygon[ i ] );
+        }
+        shape.close();
       }
-      shape.close();
     } );
 
     return shape;
