@@ -592,8 +592,6 @@ export default class Rasterize {
       faceHoleLog = { entries: debugData!.boundaryDebugData };
     }
 
-    // TODO: a good way to optimize this? For certain scenes we might be computing a lot of intersections that we
-    // TODO: don't need.
     const exteriorBoundary = RationalFace.computeFaceHoles(
       integerBounds,
       outerBoundaries,
@@ -611,11 +609,6 @@ export default class Rasterize {
 
     const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
 
-    // TODO: translation is... just based on the bounds, right? Can we avoid passing it in?
-    // TODO: really test the translated (dirty region) bit
-    // const translation = new Vector2( -bounds.minX, -bounds.minY );
-
-    // TODO: naming with above!!
     let renderableFaces: RenderableFace[];
     if ( options.renderableFaceMethod === 'polygonal' ) {
       renderableFaces = FaceConversion.toPolygonalRenderableFaces( renderedFaces, fromIntegerMatrix );
