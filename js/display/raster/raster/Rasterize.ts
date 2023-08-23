@@ -41,6 +41,18 @@ const scratchFullAreaVector = new Vector2( 0, 0 );
 
 const nanVector = new Vector2( NaN, NaN );
 
+class RasterizationContext {
+  public constructor(
+    public outputRaster: OutputRaster,
+    public renderProgram: RenderProgram,
+    public constColor: Vector4 | null,
+    public outputRasterOffset: Vector2,
+    public bounds: Bounds2,
+    public polygonFiltering: PolygonFilterType,
+    public needs: RenderProgramNeeds
+  ) {}
+}
+
 export default class Rasterize {
 
   private static getRenderProgrammedFaces( renderProgram: RenderProgram, faces: RationalFace[] ): RationalFace[] {
@@ -97,16 +109,18 @@ export default class Rasterize {
   // }
 
   private static addFilterPixel(
-    outputRaster: OutputRaster,
-    outputRasterOffset: Vector2,
-    bounds: Bounds2,
-    polygonFiltering: PolygonFilterType,
+    context: RasterizationContext,
     pixelFace: ClippableFace | null,
     area: number,
     x: number,
     y: number,
     color: Vector4
   ): void {
+
+    const polygonFiltering = context.polygonFiltering;
+    const bounds = context.bounds;
+    const outputRaster = context.outputRaster;
+    const outputRasterOffset = context.outputRasterOffset;
 
     assert && assert( polygonFiltering === PolygonFilterType.Bilinear || polygonFiltering === PolygonFilterType.MitchellNetravali,
       'Only supports these filters currently' );
@@ -170,13 +184,7 @@ export default class Rasterize {
 
   // TODO: inline eventually
   private static addPartialPixel(
-    outputRaster: OutputRaster,
-    renderProgram: RenderProgram,
-    constColor: Vector4 | null,
-    outputRasterOffset: Vector2,
-    bounds: Bounds2,
-    polygonFiltering: PolygonFilterType,
-    needs: RenderProgramNeeds,
+    context: RasterizationContext,
     pixelFace: ClippableFace,
     area: number,
     x: number,
@@ -187,22 +195,22 @@ export default class Rasterize {
     }
 
     // TODO: potentially cache the centroid, if we have multiple overlapping gradients?
-    const color = constColor || renderProgram.evaluate(
+    const color = context.constColor || context.renderProgram.evaluate(
       pixelFace,
-      needs.needsArea ? area : NaN, // NaNs to hopefully hard-error
-      needs.needsCentroid ? pixelFace.getCentroid( area ) : nanVector,
+      context.needs.needsArea ? area : NaN, // NaNs to hopefully hard-error
+      context.needs.needsCentroid ? pixelFace.getCentroid( area ) : nanVector,
       x,
       y,
       x + 1,
       y + 1
     );
 
-    if ( polygonFiltering === PolygonFilterType.Box ) {
-      outputRaster.addPartialPixel( color.timesScalar( area ), x + outputRasterOffset.x, y + outputRasterOffset.y );
+    if ( context.polygonFiltering === PolygonFilterType.Box ) {
+      context.outputRaster.addPartialPixel( color.timesScalar( area ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
     }
     else {
       Rasterize.addFilterPixel(
-        outputRaster, outputRasterOffset, bounds, polygonFiltering,
+        context,
         pixelFace, area, x, y, color
       );
     }
@@ -210,13 +218,7 @@ export default class Rasterize {
 
   // TODO: inline eventually
   private static addFullArea(
-    outputRaster: OutputRaster,
-    renderProgram: RenderProgram,
-    constColor: Vector4 | null,
-    outputRasterOffset: Vector2,
-    bounds: Bounds2,
-    polygonFiltering: PolygonFilterType,
-    needs: RenderProgramNeeds,
+    context: RasterizationContext,
     minX: number,
     minY: number,
     maxX: number,
@@ -226,14 +228,16 @@ export default class Rasterize {
       debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
     }
 
-    if ( constColor ) {
-      assert && assert( !needs.needsArea && !needs.needsCentroid );
+    const constColor = context.constColor;
 
-      if ( polygonFiltering === PolygonFilterType.Box ) {
-        outputRaster.addFullRegion(
+    if ( constColor ) {
+      assert && assert( !context.needs.needsArea && !context.needs.needsCentroid );
+
+      if ( context.polygonFiltering === PolygonFilterType.Box ) {
+        context.outputRaster.addFullRegion(
           constColor,
-          minX + outputRasterOffset.x,
-          minY + outputRasterOffset.y,
+          minX + context.outputRasterOffset.x,
+          minY + context.outputRasterOffset.y,
           maxX - minX,
           maxY - minY
         );
@@ -243,15 +247,18 @@ export default class Rasterize {
         // "filter" the outside ones (the inside will be a constant color)
         for ( let y = minY; y < maxY; y++ ) {
           for ( let x = minX; x < maxX; x++ ) {
-            Rasterize.addFilterPixel(
-              outputRaster, outputRasterOffset, bounds, polygonFiltering,
-              null, 1, x, y, constColor
-            );
+            Rasterize.addFilterPixel( context, null, 1, x, y, constColor );
           }
         }
       }
     }
     else {
+      const renderProgram = context.renderProgram;
+      const needs = context.needs;
+      const polygonFiltering = context.polygonFiltering;
+      const outputRaster = context.outputRaster;
+      const outputRasterOffset = context.outputRasterOffset;
+
       const pixelArea = needs.needsArea ? 1 : NaN; // NaNs to hopefully hard-error
       for ( let y = minY; y < maxY; y++ ) {
         for ( let x = minX; x < maxX; x++ ) {
@@ -268,10 +275,7 @@ export default class Rasterize {
             outputRaster.addFullPixel( color, x + outputRasterOffset.x, y + outputRasterOffset.y );
           }
           else {
-            Rasterize.addFilterPixel(
-              outputRaster, outputRasterOffset, bounds, polygonFiltering,
-              null, 1, x, y, color
-            );
+            Rasterize.addFilterPixel( context, null, 1, x, y, color );
           }
         }
       }
@@ -279,13 +283,7 @@ export default class Rasterize {
   }
 
   private static binaryInternalRasterize(
-    outputRaster: OutputRaster,
-    renderProgram: RenderProgram,
-    constColor: Vector4 | null,
-    outputRasterOffset: Vector2,
-    bounds: Bounds2,
-    polygonFiltering: PolygonFilterType,
-    needs: RenderProgramNeeds,
+    context: RasterizationContext,
     clippableFace: ClippableFace,
     area: number,
     minX: number,
@@ -301,21 +299,21 @@ export default class Rasterize {
 
     assert && assert( xDiff >= 1 && yDiff >= 1 );
     assert && assert( Number.isInteger( xDiff ) && Number.isInteger( yDiff ) );
-    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minX ) : minX - Math.floor( minX ) === 0.5 );
-    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minY ) : minY - Math.floor( minY ) === 0.5 );
-    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxX ) : maxX - Math.floor( maxX ) === 0.5 );
-    assert && assert( polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxY ) : maxY - Math.floor( maxY ) === 0.5 );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minX ) : minX - Math.floor( minX ) === 0.5 );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minY ) : minY - Math.floor( minY ) === 0.5 );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxX ) : maxX - Math.floor( maxX ) === 0.5 );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxY ) : maxY - Math.floor( maxY ) === 0.5 );
 
     if ( area > 1e-8 ) {
       if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
         Rasterize.addFullArea(
-          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
+          context,
           minX, minY, maxX, maxY
         );
       }
       else if ( xDiff === 1 && yDiff === 1 ) {
         Rasterize.addPartialPixel(
-          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
+          context,
           clippableFace, area, minX, minY
         );
       }
@@ -346,13 +344,13 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
+              context,
               minFace, minArea, minX, minY, xSplit, maxY
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
+              context,
               maxFace, maxArea, xSplit, minY, maxX, maxY
             );
           }
@@ -376,13 +374,13 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
+              context,
               minFace, minArea, minX, minY, maxX, ySplit
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
+              context,
               maxFace, maxArea, minX, ySplit, maxX, maxY
             );
           }
@@ -392,26 +390,18 @@ export default class Rasterize {
   }
 
   private static rasterize(
-    outputRaster: OutputRaster,
-    renderProgram: RenderProgram,
+    context: RasterizationContext,
     clippableFace: ClippableFace,
-    constColor: Vector4 | null,
-    faceBounds: Bounds2,
-    bounds: Bounds2,
-    outputRasterOffset: Vector2,
-    polygonFiltering: PolygonFilterType
+    faceBounds: Bounds2
   ): void {
-    const gridOffset = getPolygonFilterGridOffset( polygonFiltering );
+    const gridOffset = getPolygonFilterGridOffset( context.polygonFiltering );
     faceBounds = faceBounds.shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
 
     // TODO: Can we avoid having to do this? Can we include this in places where it could cause this? (gradient splits?)
     clippableFace = clippableFace.getClipped( faceBounds );
 
-    const needs = renderProgram.getNeeds();
-
     Rasterize.binaryInternalRasterize(
-      outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
-      clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
+      context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
     );
   }
 
@@ -448,15 +438,20 @@ export default class Rasterize {
 
       const constColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
 
-      Rasterize.rasterize(
+      const context = new RasterizationContext(
         outputRaster,
         renderProgram,
-        clippableFace,
         constColor,
-        faceBounds,
-        bounds,
         outputRasterOffset,
-        polygonFiltering
+        bounds,
+        polygonFiltering,
+        renderProgram.getNeeds()
+      );
+
+      Rasterize.rasterize(
+        context,
+        clippableFace,
+        faceBounds
       );
     }
   }
