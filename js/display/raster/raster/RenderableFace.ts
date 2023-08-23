@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearGradient, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, scenery } from '../../../imports.js';
+import { ClippableFace, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearGradient, RenderLinearGradientAccuracy, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 // TODO: naming, omg
@@ -129,7 +129,7 @@ export default class RenderableFace {
 
       renderProgram.depthFirst( subProgram => {
         // TODO: early exit?
-        if ( subProgram instanceof RenderLinearGradient ) {
+        if ( subProgram instanceof RenderLinearGradient && subProgram.isSplittable() ) {
           result = subProgram;
         }
       } );
@@ -146,6 +146,10 @@ export default class RenderableFace {
 
         const start = linearGradient.transform.timesVector2( linearGradient.start );
         const end = linearGradient.transform.timesVector2( linearGradient.end );
+
+        const blendAccuracy = linearGradient.accuracy === RenderLinearGradientAccuracy.SplitAccurate ?
+                              RenderLinearBlendAccuracy.Accurate :
+                              RenderLinearBlendAccuracy.PixelCenter;
 
         const delta = end.minus( start );
         const normal = delta.timesScalar( 1 / delta.magnitudeSquared );
@@ -199,6 +203,7 @@ export default class RenderableFace {
                   null,
                   scaledNormal,
                   scaledOffset,
+                  blendAccuracy,
                   range.startProgram.replace( replacer ),
                   range.endProgram.replace( replacer ),
                   linearGradient.colorSpace
@@ -244,6 +249,10 @@ export default class RenderableFace {
 
       if ( radialGradient ) {
         const localClippableFace = face.face.getTransformed( radialGradient.transform.inverted() );
+
+        const blendAccuracy = radialGradient.accuracy === RenderRadialGradientAccuracy.SplitAccurate ? RenderRadialBlendAccuracy.Accurate :
+                              radialGradient.accuracy === RenderRadialGradientAccuracy.SplitCentroid ? RenderRadialBlendAccuracy.Centroid :
+                              RenderRadialBlendAccuracy.PixelCenter;
 
         const center = radialGradient.start;
 
@@ -314,10 +323,6 @@ export default class RenderableFace {
               else {
                 const startRadius = minRadius + range.start * deltaRadius;
                 const endRadius = minRadius + range.end * deltaRadius;
-
-                const blendAccuracy = radialGradient.accuracy === RenderRadialGradientAccuracy.SplitAccurate ? RenderRadialBlendAccuracy.Accurate :
-                                      radialGradient.accuracy === RenderRadialGradientAccuracy.SplitCentroid ? RenderRadialBlendAccuracy.Centroid :
-                                      RenderRadialBlendAccuracy.PixelCenter;
 
                 return new RenderRadialBlend(
                   null,

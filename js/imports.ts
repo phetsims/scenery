@@ -455,9 +455,9 @@ export type { SerializedRenderGradientStop } from './display/raster/render-progr
 export { default as RenderImage } from './display/raster/render-program/RenderImage.js';
 export type { SerializedRenderImage } from './display/raster/render-program/RenderImage.js';
 export type { default as RenderImageable, SerializedRenderImageable } from './display/raster/render-program/RenderImageable.js';
-export { default as RenderLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
+export { default as RenderLinearBlend, RenderLinearBlendAccuracy } from './display/raster/render-program/RenderLinearBlend.js';
 export type { SerializedRenderLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
-export { default as RenderLinearGradient } from './display/raster/render-program/RenderLinearGradient.js';
+export { default as RenderLinearGradient, RenderLinearGradientAccuracy } from './display/raster/render-program/RenderLinearGradient.js';
 export type { SerializedRenderLinearGradient } from './display/raster/render-program/RenderLinearGradient.js';
 export { default as RenderRadialBlend, RenderRadialBlendAccuracy } from './display/raster/render-program/RenderRadialBlend.js';
 export type { SerializedRenderRadialBlend } from './display/raster/render-program/RenderRadialBlend.js';

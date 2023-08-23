@@ -11,6 +11,15 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
+export enum RenderLinearGradientAccuracy {
+  SplitAccurate = 0,
+  SplitPixelCenter = 2,
+  UnsplitCentroid = 3,
+  UnsplitPixelCenter = 4
+}
+
+scenery.register( 'RenderLinearGradientAccuracy', RenderLinearGradientAccuracy );
+
 const scratchLinearGradientVector0 = new Vector2( 0, 0 );
 
 export default class RenderLinearGradient extends RenderPathProgram {
@@ -26,7 +35,8 @@ export default class RenderLinearGradient extends RenderPathProgram {
     public readonly end: Vector2,
     public readonly stops: RenderGradientStop[], // should be sorted!!
     public readonly extend: RenderExtend,
-    public readonly colorSpace: RenderColorSpace
+    public readonly colorSpace: RenderColorSpace,
+    public readonly accuracy: RenderLinearGradientAccuracy
   ) {
     assert && assert( transform.isFinite() );
     assert && assert( start.isFinite() );
@@ -44,6 +54,11 @@ export default class RenderLinearGradient extends RenderPathProgram {
     this.gradDelta = end.minus( start );
   }
 
+  public isSplittable(): boolean {
+    return this.accuracy === RenderLinearGradientAccuracy.SplitAccurate ||
+           this.accuracy === RenderLinearGradientAccuracy.SplitPixelCenter;
+  }
+
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderLinearGradient(
       this.getTransformedPath( transform ),
@@ -52,7 +67,8 @@ export default class RenderLinearGradient extends RenderPathProgram {
       this.end,
       this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.transformed( transform ) ) ),
       this.extend,
-      this.colorSpace
+      this.colorSpace,
+      this.accuracy
     );
   }
 
@@ -83,7 +99,8 @@ export default class RenderLinearGradient extends RenderPathProgram {
         this.end,
         this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) ),
         this.extend,
-        this.colorSpace
+        this.colorSpace,
+        this.accuracy
       );
     }
   }
@@ -109,7 +126,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.colorSpace );
+      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.colorSpace, this.accuracy );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -130,7 +147,12 @@ export default class RenderLinearGradient extends RenderPathProgram {
       return Vector4.ZERO;
     }
 
-    const localPoint = scratchLinearGradientVector0.set( centroid );
+    const useCentroid = ( this.accuracy === RenderLinearGradientAccuracy.UnsplitCentroid || this.accuracy === RenderLinearGradientAccuracy.SplitAccurate );
+    const point = useCentroid ?
+                  scratchLinearGradientVector0.set( centroid ) :
+                  scratchLinearGradientVector0.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+
+    const localPoint = point;
     if ( !this.isIdentity ) {
       this.inverseTransform.multiplyVector2( localPoint );
     }
@@ -161,7 +183,8 @@ export default class RenderLinearGradient extends RenderPathProgram {
       end: [ this.end.x, this.end.y ],
       stops: this.stops.map( stop => stop.serialize() ),
       extend: this.extend,
-      colorSpace: this.colorSpace
+      colorSpace: this.colorSpace,
+      accuracy: this.accuracy
     };
   }
 
@@ -177,7 +200,8 @@ export default class RenderLinearGradient extends RenderPathProgram {
       new Vector2( obj.end[ 0 ], obj.end[ 1 ] ),
       obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
       obj.extend,
-      obj.colorSpace
+      obj.colorSpace,
+      obj.accuracy
     );
   }
 }
@@ -193,4 +217,5 @@ export type SerializedRenderLinearGradient = {
   stops: SerializedRenderGradientStop[];
   extend: RenderExtend;
   colorSpace: RenderColorSpace;
+  accuracy: RenderLinearGradientAccuracy;
 };

@@ -12,7 +12,12 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
-const scratchLinearBlendVector = new Vector2( 0, 0 );
+export enum RenderLinearBlendAccuracy {
+  Accurate = 0,
+  PixelCenter = 1
+}
+
+scenery.register( 'RenderLinearBlendAccuracy', RenderLinearBlendAccuracy );
 
 export default class RenderLinearBlend extends RenderPathProgram {
 
@@ -20,6 +25,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
     path: RenderPath | null,
     public readonly scaledNormal: Vector2,
     public readonly offset: number,
+    public readonly accuracy: RenderLinearBlendAccuracy,
     public readonly zero: RenderProgram,
     public readonly one: RenderProgram,
     public readonly colorSpace: RenderColorSpace
@@ -53,6 +59,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       this.getTransformedPath( transform ),
       afterNormal,
       afterOffset,
+      this.accuracy,
       this.zero.transformed( transform ),
       this.one.transformed( transform ),
       this.colorSpace
@@ -76,7 +83,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
+      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
     }
   }
 
@@ -103,7 +110,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearBlend( null, this.scaledNormal, this.offset, zero, one, this.colorSpace );
+      return new RenderLinearBlend( null, this.scaledNormal, this.offset, this.accuracy, zero, one, this.colorSpace );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -124,10 +131,11 @@ export default class RenderLinearBlend extends RenderPathProgram {
       return Vector4.ZERO;
     }
 
-    // TODO: scratch vector isn't doing anything, clear it out?
-    const localPoint = scratchLinearBlendVector.set( centroid );
+    const dot = this.accuracy === RenderLinearBlendAccuracy.Accurate ?
+                this.scaledNormal.dot( centroid ) :
+                this.scaledNormal.x * ( minX + maxX ) / 2 + this.scaledNormal.y * ( minY + maxY ) / 2;
 
-    const t = this.scaledNormal.dot( localPoint ) - this.offset;
+    const t = dot - this.offset;
 
     if ( t <= 0 ) {
       return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
@@ -155,6 +163,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       path: this.path ? this.path.serialize() : null,
       scaledNormal: [ this.scaledNormal.x, this.scaledNormal.y ],
       offset: this.offset,
+      accuracy: this.accuracy,
       zero: this.zero.serialize(),
       one: this.one.serialize(),
       colorSpace: this.colorSpace
@@ -166,6 +175,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       obj.path ? RenderPath.deserialize( obj.path ) : null,
       new Vector2( obj.scaledNormal[ 0 ], obj.scaledNormal[ 1 ] ),
       obj.offset,
+      obj.accuracy,
       RenderProgram.deserialize( obj.zero ),
       RenderProgram.deserialize( obj.one ),
       obj.colorSpace
@@ -180,6 +190,7 @@ export type SerializedRenderLinearBlend = {
   path: SerializedRenderPath | null;
   scaledNormal: number[];
   offset: number;
+  accuracy: RenderLinearBlendAccuracy;
   zero: SerializedRenderProgram;
   one: SerializedRenderProgram;
   colorSpace: RenderColorSpace;
