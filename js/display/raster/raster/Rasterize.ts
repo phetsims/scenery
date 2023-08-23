@@ -15,7 +15,6 @@ import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export type RasterizationOptions = {
-
   outputRasterOffset?: Vector2;
   polygonFiltering?: PolygonFilterType;
 
@@ -499,8 +498,6 @@ export default class Rasterize {
       window.debugData = debugData;
     }
 
-    // TODO: outputRasterOffset totally broken?!!!
-    const outputRasterOffset: Vector2 = options.outputRasterOffset;
     const polygonFiltering: PolygonFilterType = options.polygonFiltering;
 
     const filterAdditionalPixels = getPolygonFilterExtraPixels( polygonFiltering );
@@ -656,7 +653,7 @@ export default class Rasterize {
       renderableFaces,
       bounds,
       gridBounds,
-      outputRasterOffset,
+      options.outputRasterOffset,
       polygonFiltering
     );
   }
