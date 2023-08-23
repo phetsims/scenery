@@ -475,8 +475,7 @@ an UI and Display made for visual testing and debugging.
 
         const raster = new phet.scenery.CombinedRaster( outputWidth, outputHeight );
         phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputWidth, outputHeight ), {
-          polygonFiltering: filtering,
-          renderableFaceMethod: 'polygonal'
+          polygonFiltering: filtering
         } );
         const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
 

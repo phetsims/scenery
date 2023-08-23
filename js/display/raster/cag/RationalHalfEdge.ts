@@ -29,6 +29,8 @@ export default class RationalHalfEdge {
   public p0float: Vector2;
   public p1float: Vector2;
 
+  public processed = false; // used in some algorithms!
+
   public constructor(
     public readonly edgeId: number,
     public readonly p0: BigRationalVector2,

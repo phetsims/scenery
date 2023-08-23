@@ -9,6 +9,7 @@
 import { scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Utils from '../../../../../dot/js/Utils.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 const collinearEpsilon = 1e-9;
 
@@ -23,6 +24,13 @@ export default class ClipSimplifier {
 
   public reset(): void {
     this.points = [];
+  }
+
+  public addTransformed( matrix: Matrix3, x: number, y: number ): void {
+    this.add(
+      matrix.m00() * x + matrix.m01() * y + matrix.m02(),
+      matrix.m10() * x + matrix.m11() * y + matrix.m12()
+    );
   }
 
   public add( x: number, y: number ): void {

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EdgedFace, LinearEdge, PolygonalFace, RationalBoundary, RenderPath, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { EdgedFace, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
@@ -16,6 +16,7 @@ export default class RationalFace {
   public windingMap: WindingMap | null = null;
   public inclusionSet: Set<RenderPath> = new Set<RenderPath>();
   public renderProgram: RenderProgram | null = null;
+  public processed = false;
 
   public constructor( public readonly boundary: RationalBoundary ) {}
 
@@ -34,6 +35,14 @@ export default class RationalFace {
     return [
       ...this.boundary.toTransformedLinearEdges( matrix ),
       ...this.holes.flatMap( hole => hole.toTransformedLinearEdges( matrix ) )
+    ];
+  }
+
+  public getEdges(): RationalHalfEdge[] {
+    // TODO: create less garbage with iteration?
+    return [
+      ...this.boundary.edges,
+      ...this.holes.flatMap( hole => hole.edges )
     ];
   }
 

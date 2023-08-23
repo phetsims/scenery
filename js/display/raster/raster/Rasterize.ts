@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClippableFace, EdgedFace, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMaxExpand, getPolygonFilterMinExpand, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClippableFace, ClipSimplifier, EdgedFace, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -21,7 +21,7 @@ export type RasterizationOptions = {
 
   edgeIntersectionMethod?: 'quadratic' | 'boundsTree' | 'arrayBoundsTree';
 
-  renderableFaceMethod?: 'polygonal' | 'edged' | 'fullyCombined' | 'simplifyingCombined';
+  renderableFaceMethod?: 'polygonal' | 'edged' | 'fullyCombined' | 'simplifyingCombined' | 'traced';
 
   splitLinearGradients?: boolean;
   splitRadialGradients?: boolean;
@@ -31,7 +31,7 @@ const DEFAULT_OPTIONS = {
   outputRasterOffset: Vector2.ZERO,
   polygonFiltering: PolygonFilterType.Box,
   edgeIntersectionMethod: 'arrayBoundsTree',
-  renderableFaceMethod: 'simplifyingCombined',
+  renderableFaceMethod: 'traced',
   splitLinearGradients: true,
   splitRadialGradients: true
 } as const;
@@ -39,6 +39,8 @@ const DEFAULT_OPTIONS = {
 let debugData: Record<string, IntentionalAny> | null = null;
 
 const scratchFullAreaVector = new Vector2( 0, 0 );
+
+const traceSimplifier = new ClipSimplifier();
 
 class AccumulatingFace {
   public faces = new Set<RationalFace>();
@@ -570,6 +572,117 @@ export default class Rasterize {
       accumulatedFace.renderProgram!,
       accumulatedFace.bounds
     ) );
+  }
+
+  // Will combine faces that have equivalent RenderPrograms IFF they border each other (leaving separate programs with
+  // equivalent RenderPrograms separate if they don't border). It will also remove edges that border between faces
+  // that we combine, and will connect edges to keep things polygonal!
+  private static toTracedRenderableFaces(
+    faces: RationalFace[],
+    fromIntegerMatrix: Matrix3
+  ): RenderableFace[] {
+
+    // TODO: add algorithm description docs!!! This one is important
+
+    const renderableFaces: RenderableFace[] = [];
+
+    for ( let i = 0; i < faces.length; i++ ) {
+      const startingFace = faces[ i ];
+
+      if ( !startingFace.processed ) {
+        startingFace.processed = true;
+
+        const polygons: Vector2[][] = []; // A list of polygons we'll append into
+        const edges: RationalHalfEdge[] = [
+          ...startingFace.getEdges() // defensive copy, could remove sometime
+        ]; // A list of edges to process
+        const bounds = startingFace.getBounds( fromIntegerMatrix ).copy(); // we're going to mutate this
+        const renderProgram = startingFace.renderProgram!;
+        assert && assert( renderProgram );
+
+        // Effectively, we cache whether faces or compatible or not
+        const compatibleFaces = new Set<RationalFace>();
+        const incompatibleFaces = new Set<RationalFace>();
+        compatibleFaces.add( startingFace );
+
+        // NOTE: side effects!
+        const isFaceCompatible = ( candidateFace: RationalFace ): boolean => {
+          if ( compatibleFaces.has( candidateFace ) ) {
+            return true;
+          }
+          else if ( incompatibleFaces.has( candidateFace ) ) {
+            return false;
+          }
+          else {
+            // Not in either place, we need to test (also, the unbounded face won't have a RenderProgram)
+            if ( candidateFace.renderProgram && candidateFace.renderProgram.equals( renderProgram ) ) {
+              // ADD it to the current renderable face
+              assert && assert( !candidateFace.processed, 'We should have already found this' );
+              candidateFace.processed = true;
+              compatibleFaces.add( candidateFace );
+              bounds.includeBounds( candidateFace.getBounds( fromIntegerMatrix ) );
+              edges.push( ...candidateFace.getEdges() );
+              return true;
+            }
+            else {
+              incompatibleFaces.add( candidateFace );
+              return false;
+            }
+          }
+        };
+
+        // We'll have edges appended sometimes in isFaceCompatible() checks.
+        while ( edges.length ) {
+          const startingEdge = edges.pop()!;
+
+          // If the edge is processed OR both faces are compatible, we'll just skip it anyway. We don't want to start
+          // tracing on a loop that we will completely remove
+          if ( !startingEdge.processed && ( !isFaceCompatible( startingEdge.face! ) || !isFaceCompatible( startingEdge.reversed.face! ) ) ) {
+            // Start an edge trace!
+
+            // We'll use the simplifier to remove duplicate or walked-back points.
+            // TODO: check to see if removing arbitrary collinear points helps us a lot here. It might be good, but
+            // TODO: we don't want to introduce a lot of error. Probably is additional cost
+            traceSimplifier.reset();
+
+            let currentEdge = startingEdge;
+            traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
+            currentEdge.processed = true;
+
+            do {
+              // Walk edges
+              let nextEdge = currentEdge.nextEdge!;
+              assert && assert( nextEdge.face === currentEdge.face );
+
+              // BUT don't walk edges that are between compatible faces. Instead, wind around until we find either
+              // an incompatible face, OR we walk back our edge (the simplifier will take care of removing this)
+              while ( nextEdge !== currentEdge.reversed && isFaceCompatible( nextEdge.reversed.face! ) ) {
+                nextEdge = nextEdge.reversed.nextEdge!;
+              }
+
+              assert && assert( isFaceCompatible( nextEdge.face! ) || isFaceCompatible( nextEdge.reversed.face! ) );
+
+              currentEdge = nextEdge;
+              traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
+              currentEdge.processed = true;
+            } while ( currentEdge !== startingEdge );
+
+            const polygon = traceSimplifier.finalize();
+            if ( polygon.length >= 3 ) {
+              polygons.push( polygon );
+            }
+          }
+        }
+
+        renderableFaces.push( new RenderableFace(
+          new PolygonalFace( polygons ),
+          startingFace.renderProgram!,
+          bounds
+        ) );
+      }
+    }
+
+    return renderableFaces;
   }
 
   // TODO: reconstitute this into an alternative non-binary setup!
@@ -1110,6 +1223,9 @@ export default class Rasterize {
     }
     else if ( options.renderableFaceMethod === 'simplifyingCombined' ) {
       renderableFaces = Rasterize.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
+    }
+    else if ( options.renderableFaceMethod === 'traced' ) {
+      renderableFaces = Rasterize.toTracedRenderableFaces( renderedFaces, fromIntegerMatrix );
     }
     else {
       throw new Error( 'unknown renderableFaceMethod' );
