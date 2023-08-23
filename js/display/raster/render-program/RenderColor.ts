@@ -37,6 +37,18 @@ export default class RenderColor extends RenderPathProgram {
     return this.path === null && this.color.w === 1;
   }
 
+  public override needsFace(): boolean {
+    return false;
+  }
+
+  public override needsArea(): boolean {
+    return false;
+  }
+
+  public override needsCentroid(): boolean {
+    return false;
+  }
+
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
     const replaced = callback( this );
     if ( replaced ) {

@@ -6,13 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClippableFace, ClipSimplifier, EdgedFace, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClippableFace, ClipSimplifier, EdgedFace, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import render from '../../../../../vello-tests/js/render.js';
 
 export type RasterizationOptions = {
 
@@ -39,6 +40,8 @@ const DEFAULT_OPTIONS = {
 let debugData: Record<string, IntentionalAny> | null = null;
 
 const scratchFullAreaVector = new Vector2( 0, 0 );
+
+const nanVector = new Vector2( NaN, NaN );
 
 const traceSimplifier = new ClipSimplifier();
 
@@ -773,15 +776,18 @@ export default class Rasterize {
         }
         else {
           assert && assert( pixelFace );
-          // TODO: implement these for polygonal faces
-          const edges = pixelFace!.toEdgedFace().edges;
 
-          assertSlow && assertSlow( edges.every( edge => {
-            return edge.startPoint.x >= x && edge.startPoint.x <= x + 1 &&
-                   edge.startPoint.y >= y && edge.startPoint.y <= y + 1 &&
-                   edge.endPoint.x >= x && edge.endPoint.x <= x + 1 &&
-                   edge.endPoint.y >= y && edge.endPoint.y <= y + 1;
-          } ) );
+          if ( assertSlow ) {
+            // TODO: implement these for polygonal faces
+            const edges = pixelFace!.toEdgedFace().edges;
+
+            assertSlow( edges.every( edge => {
+              return edge.startPoint.x >= x && edge.startPoint.x <= x + 1 &&
+                     edge.startPoint.y >= y && edge.startPoint.y <= y + 1 &&
+                     edge.endPoint.x >= x && edge.endPoint.x <= x + 1 &&
+                     edge.endPoint.y >= y && edge.endPoint.y <= y + 1;
+            } ) );
+          }
 
           contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ?
                          pixelFace!.getMitchellNetravaliFiltered( px, py, x, y ) :
@@ -801,6 +807,7 @@ export default class Rasterize {
     outputRasterOffset: Vector2,
     bounds: Bounds2,
     polygonFiltering: PolygonFilterType,
+    needs: RenderProgramNeeds,
     pixelFace: ClippableFace,
     area: number,
     x: number,
@@ -811,11 +818,10 @@ export default class Rasterize {
     }
 
     // TODO: potentially cache the centroid, if we have multiple overlapping gradients?
-    // pixelFace.getCentroid( area )
     const color = constColor || renderProgram.evaluate(
       pixelFace,
-      area,
-      pixelFace.getCentroid( area ),
+      needs.needsArea ? area : NaN, // NaNs to hopefully hard-error
+      needs.needsCentroid ? pixelFace.getCentroid( area ) : nanVector,
       x,
       y,
       x + 1,
@@ -841,6 +847,7 @@ export default class Rasterize {
     outputRasterOffset: Vector2,
     bounds: Bounds2,
     polygonFiltering: PolygonFilterType,
+    needs: RenderProgramNeeds,
     minX: number,
     minY: number,
     maxX: number,
@@ -851,6 +858,8 @@ export default class Rasterize {
     }
 
     if ( constColor ) {
+      assert && assert( !needs.needsArea && !needs.needsCentroid );
+
       if ( polygonFiltering === PolygonFilterType.Box ) {
         outputRaster.addFullRegion(
           constColor,
@@ -874,13 +883,13 @@ export default class Rasterize {
       }
     }
     else {
+      const pixelArea = needs.needsArea ? 1 : NaN; // NaNs to hopefully hard-error
       for ( let y = minY; y < maxY; y++ ) {
         for ( let x = minX; x < maxX; x++ ) {
-          const centroid = scratchFullAreaVector.setXY( x + 0.5, y + 0.5 );
           const color = renderProgram.evaluate(
             null,
-            1,
-            centroid,
+            pixelArea,
+            needs.needsCentroid ? scratchFullAreaVector.setXY( x + 0.5, y + 0.5 ) : nanVector,
             x,
             y,
             x + 1,
@@ -907,6 +916,7 @@ export default class Rasterize {
     outputRasterOffset: Vector2,
     bounds: Bounds2,
     polygonFiltering: PolygonFilterType,
+    needs: RenderProgramNeeds,
     clippableFace: ClippableFace,
     area: number,
     minX: number,
@@ -930,13 +940,13 @@ export default class Rasterize {
     if ( area > 1e-8 ) {
       if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
         Rasterize.addFullArea(
-          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
           minX, minY, maxX, maxY
         );
       }
       else if ( xDiff === 1 && yDiff === 1 ) {
         Rasterize.addPartialPixel(
-          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+          outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
           clippableFace, area, minX, minY
         );
       }
@@ -965,13 +975,13 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
               minFace, minArea, minX, minY, xSplit, maxY
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
               maxFace, maxArea, xSplit, minY, maxX, maxY
             );
           }
@@ -995,13 +1005,13 @@ export default class Rasterize {
 
           if ( minArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
               minFace, minArea, minX, minY, maxX, ySplit
             );
           }
           if ( maxArea > 1e-8 ) {
             Rasterize.binaryInternalRasterize(
-              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+              outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
               maxFace, maxArea, minX, ySplit, maxX, maxY
             );
           }
@@ -1026,8 +1036,10 @@ export default class Rasterize {
     // TODO: Can we avoid having to do this? Can we include this in places where it could cause this? (gradient splits?)
     clippableFace = clippableFace.getClipped( faceBounds );
 
+    const needs = renderProgram.getNeeds();
+
     Rasterize.binaryInternalRasterize(
-      outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering,
+      outputRaster, renderProgram, constColor, outputRasterOffset, bounds, polygonFiltering, needs,
       clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
     );
   }

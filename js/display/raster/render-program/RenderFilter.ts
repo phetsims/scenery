@@ -77,6 +77,18 @@ export default class RenderFilter extends RenderPathProgram {
     return false;
   }
 
+  public override needsFace(): boolean {
+    return this.program.needsFace();
+  }
+
+  public override needsArea(): boolean {
+    return this.program.needsArea();
+  }
+
+  public override needsCentroid(): boolean {
+    return this.program.needsCentroid();
+  }
+
   public override evaluate(
     face: ClippableFace | null,
     area: number,

@@ -330,6 +330,24 @@ export default class EdgedFace implements ClippableFace {
   public static deserialize( serialized: SerializedEdgedFace ): EdgedFace {
     return new EdgedFace( serialized.edges.map( edge => LinearEdge.deserialize( edge ) ) );
   }
+
+  public static fromBounds( bounds: Bounds2 ): EdgedFace {
+    return EdgedFace.fromBoundsValues( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
+  }
+
+  public static fromBoundsValues( minX: number, minY: number, maxX: number, maxY: number ): EdgedFace {
+    const p0 = new Vector2( minX, minY );
+    const p1 = new Vector2( maxX, minY );
+    const p2 = new Vector2( maxX, maxY );
+    const p3 = new Vector2( minX, maxY );
+
+    return new EdgedFace( [
+      new LinearEdge( p0, p1 ),
+      new LinearEdge( p1, p2 ),
+      new LinearEdge( p2, p3 ),
+      new LinearEdge( p3, p0 )
+    ] );
+  }
 }
 
 scenery.register( 'EdgedFace', EdgedFace );

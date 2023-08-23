@@ -61,6 +61,18 @@ export default class RenderAlpha extends RenderPathProgram {
     return this.alpha === 1 && this.program.isFullyOpaque();
   }
 
+  public override needsFace(): boolean {
+    return this.program.needsFace();
+  }
+
+  public override needsArea(): boolean {
+    return this.program.needsArea();
+  }
+
+  public override needsCentroid(): boolean {
+    return this.program.needsCentroid();
+  }
+
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
     if ( program.isFullyTransparent() || this.alpha === 0 ) {

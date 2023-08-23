@@ -100,6 +100,18 @@ export default class RenderRadialBlend extends RenderPathProgram {
     return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
   }
 
+  public override needsFace(): boolean {
+    return this.zero.needsFace() || this.one.needsFace();
+  }
+
+  public override needsArea(): boolean {
+    return this.accuracy === RenderRadialBlendAccuracy.Accurate || this.zero.needsArea() || this.one.needsArea();
+  }
+
+  public override needsCentroid(): boolean {
+    return this.accuracy === RenderRadialBlendAccuracy.Centroid || this.zero.needsCentroid() || this.one.needsCentroid();
+  }
+
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const zero = this.zero.simplify( pathTest );
     const one = this.one.simplify( pathTest );
@@ -132,39 +144,54 @@ export default class RenderRadialBlend extends RenderPathProgram {
 
     // TODO: flag to control whether this gets set? TODO: Flag to just use centroid
     let averageDistance;
-    if ( face ) {
-      averageDistance = face.getAverageDistanceTransformedToOrigin( this.inverseTransform, area );
+    if ( this.accuracy === RenderRadialBlendAccuracy.Accurate ) {
+      if ( face ) {
+        averageDistance = face.getAverageDistanceTransformedToOrigin( this.inverseTransform, area );
+      }
+      else {
+        // NOTE: Do the equivalent of the above, but without creating a face and a ton of garbage
+
+        const p0 = this.inverseTransform.multiplyVector2( scratchVectorA.setXY( minX, minY ) );
+        const p1 = this.inverseTransform.multiplyVector2( scratchVectorB.setXY( maxX, minY ) );
+        const p2 = this.inverseTransform.multiplyVector2( scratchVectorC.setXY( maxX, maxY ) );
+        const p3 = this.inverseTransform.multiplyVector2( scratchVectorD.setXY( minX, maxY ) );
+
+        // Needs CCW orientation
+        averageDistance = (
+                            LinearEdge.evaluateLineIntegralDistance( p0.x, p0.y, p1.x, p1.y ) +
+                            LinearEdge.evaluateLineIntegralDistance( p1.x, p1.y, p2.x, p2.y ) +
+                            LinearEdge.evaluateLineIntegralDistance( p2.x, p2.y, p3.x, p3.y ) +
+                            LinearEdge.evaluateLineIntegralDistance( p3.x, p3.y, p0.x, p0.y )
+                          ) / ( area * this.inverseTransform.getSignedScale() );
+
+        assert && assert( averageDistance === new PolygonalFace( [
+          [
+            new Vector2( minX, minY ),
+            new Vector2( maxX, minY ),
+            new Vector2( maxX, maxY ),
+            new Vector2( minX, maxY )
+          ]
+        ] ).getAverageDistanceTransformedToOrigin( this.inverseTransform, area ) );
+      }
+    }
+    else if ( this.accuracy === RenderRadialBlendAccuracy.Centroid ) {
+      const localPoint = scratchRadialBlendVector.set( centroid );
+      this.inverseTransform.multiplyVector2( localPoint );
+
+      averageDistance = localPoint.magnitude;
+    }
+    else if ( this.accuracy === RenderRadialBlendAccuracy.PixelCenter ) {
+      const localPoint = scratchRadialBlendVector.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+      this.inverseTransform.multiplyVector2( localPoint );
+
+      averageDistance = localPoint.magnitude;
     }
     else {
-      // NOTE: Do the equivalent of the above, but without creating a face and a ton of garbage
-
-      const p0 = this.inverseTransform.multiplyVector2( scratchVectorA.setXY( minX, minY ) );
-      const p1 = this.inverseTransform.multiplyVector2( scratchVectorB.setXY( maxX, minY ) );
-      const p2 = this.inverseTransform.multiplyVector2( scratchVectorC.setXY( maxX, maxY ) );
-      const p3 = this.inverseTransform.multiplyVector2( scratchVectorD.setXY( minX, maxY ) );
-
-      // Needs CCW orientation
-      averageDistance = (
-        LinearEdge.evaluateLineIntegralDistance( p0.x, p0.y, p1.x, p1.y ) +
-        LinearEdge.evaluateLineIntegralDistance( p1.x, p1.y, p2.x, p2.y ) +
-        LinearEdge.evaluateLineIntegralDistance( p2.x, p2.y, p3.x, p3.y ) +
-        LinearEdge.evaluateLineIntegralDistance( p3.x, p3.y, p0.x, p0.y )
-      ) / ( area * this.inverseTransform.getSignedScale() );
-
-      assert && assert( averageDistance === new PolygonalFace( [
-        [
-          new Vector2( minX, minY ),
-          new Vector2( maxX, minY ),
-          new Vector2( maxX, maxY ),
-          new Vector2( minX, maxY )
-        ]
-      ] ).getAverageDistanceTransformedToOrigin( this.inverseTransform, area ) );
+      throw new Error( 'unreachable' );
     }
     assert && assert( isFinite( averageDistance ) );
 
     // if ( assert ) {
-    //   const localPoint = scratchRadialBlendVector.set( centroid );
-    //   this.inverseTransform.multiplyVector2( localPoint );
     //
     //   const maxDistance = Math.sqrt( ( maxX - minX ) ** 2 + ( maxY - minY ) ** 2 );
     //   assert( Math.abs( averageDistance - localPoint.magnitude ) < maxDistance * 5 );

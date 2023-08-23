@@ -114,6 +114,36 @@ export default class RenderRadialGradient extends RenderPathProgram {
     return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
+  public override needsFace(): boolean {
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      if ( this.stops[ i ].program.needsFace() ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public override needsArea(): boolean {
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      if ( this.stops[ i ].program.needsArea() ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public override needsCentroid(): boolean {
+    if ( this.accuracy === RenderRadialGradientAccuracy.UnsplitCentroid || this.accuracy === RenderRadialGradientAccuracy.SplitCentroid || this.accuracy === RenderRadialGradientAccuracy.SplitAccurate ) {
+      return true;
+    }
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      if ( this.stops[ i ].program.needsCentroid() ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( pathTest ) ) );
 
@@ -318,7 +348,11 @@ class RadialGradientLogic {
     // let less_scale = select(1, -1, is_swapped || (1 - focal_x) < 0);
     const t_sign = Math.sign( 1 - focal_x );
 
-    const point = accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ? centroid : scratchVectorA.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+    const point = (
+      accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ||
+      accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
+      accuracy === RenderRadialGradientAccuracy.SplitAccurate
+    ) ? centroid : scratchVectorA.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
 
     // Pixel-specifics
     const local_xy = this.xform.timesVector2( point );

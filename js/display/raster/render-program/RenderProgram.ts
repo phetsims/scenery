@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderRadialBlend, RenderRadialGradient, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderRadialBlend, SerializedRenderRadialGradient } from '../../../imports.js';
+import { ClippableFace, PolygonalFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderRadialBlend, SerializedRenderRadialGradient } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -15,6 +15,11 @@ export default abstract class RenderProgram {
   public abstract isFullyTransparent(): boolean;
 
   public abstract isFullyOpaque(): boolean;
+
+  // Stated needs for the program to be evaluated. If it's not needed, we can give bonus info to the program.
+  public abstract needsFace(): boolean;
+  public abstract needsArea(): boolean;
+  public abstract needsCentroid(): boolean;
 
   public abstract transformed( transform: Matrix3 ): RenderProgram;
 
@@ -40,6 +45,10 @@ export default abstract class RenderProgram {
 
   public depthFirst( callback: ( program: RenderProgram ) => void ): void {
     callback( this );
+  }
+
+  public getNeeds(): RenderProgramNeeds {
+    return new RenderProgramNeeds( this.needsFace(), this.needsArea(), this.needsCentroid() );
   }
 
   public abstract serialize(): SerializedRenderProgram;
@@ -74,6 +83,14 @@ export default abstract class RenderProgram {
     }
 
     throw new Error( `Unrecognized RenderProgram type: ${obj.type}` );
+  }
+
+  public static ensureFace( face: ClippableFace | null, minX: number, minY: number, maxX: number, maxY: number ): ClippableFace {
+    return face || PolygonalFace.fromBoundsValues( minX, minY, maxX, maxY );
+  }
+
+  public static ensureCentroid( face: ClippableFace | null, area: number, minX: number, minY: number, maxX: number, maxY: number ): Vector2 {
+    return face ? face.getCentroid( area ) : new Vector2( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
   }
 }
 

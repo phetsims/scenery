@@ -101,6 +101,18 @@ export default class RenderLinearBlend extends RenderPathProgram {
     return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
   }
 
+  public override needsFace(): boolean {
+    return this.zero.needsFace() || this.one.needsFace();
+  }
+
+  public override needsArea(): boolean {
+    return this.zero.needsArea() || this.one.needsArea();
+  }
+
+  public override needsCentroid(): boolean {
+    return this.accuracy === RenderLinearBlendAccuracy.Accurate || this.zero.needsCentroid() || this.one.needsCentroid();
+  }
+
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const zero = this.zero.simplify( pathTest );
     const one = this.one.simplify( pathTest );

@@ -56,6 +56,23 @@ export default class RenderImage extends RenderPathProgram {
     return this.path === null && this.image.isFullyOpaque;
   }
 
+  public override needsFace(): boolean {
+    return this.resampleType === RenderResampleType.AnalyticBox ||
+           this.resampleType === RenderResampleType.AnalyticBilinear ||
+           this.resampleType === RenderResampleType.AnalyticMitchellNetravali;
+  }
+
+  public override needsArea(): boolean {
+    return false;
+  }
+
+  public override needsCentroid(): boolean {
+    // TODO: Consider NOT getting centroid for some filtering, as a performance boost
+    return this.resampleType === RenderResampleType.NearestNeighbor ||
+           this.resampleType === RenderResampleType.Bilinear ||
+           this.resampleType === RenderResampleType.MitchellNetravali;
+  }
+
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
     const replaced = callback( this );
     if ( replaced ) {
@@ -306,12 +323,7 @@ export default class RenderImage extends RenderPathProgram {
 
     // If we don't have a face (i.e. we are taking up the full bounds specified by minX/minY/maxX/maxY), we'll
     // construct a face that covers the entire bounds.
-    face = face || new PolygonalFace( [ [
-      new Vector2( minX, minY ),
-      new Vector2( maxX, minY ),
-      new Vector2( maxX, maxY ),
-      new Vector2( minX, maxY )
-    ] ] );
+    face = RenderProgram.ensureFace( face, minX, minY, maxX, maxY );
 
     // We'll mutate and return this
     const color = Vector4.ZERO.copy();

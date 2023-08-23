@@ -118,6 +118,36 @@ export default class RenderLinearGradient extends RenderPathProgram {
     return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
+  public override needsFace(): boolean {
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      if ( this.stops[ i ].program.needsFace() ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public override needsArea(): boolean {
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      if ( this.stops[ i ].program.needsArea() ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public override needsCentroid(): boolean {
+    if ( this.useInternalCentroid() ) {
+      return true;
+    }
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      if ( this.stops[ i ].program.needsCentroid() ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( pathTest ) ) );
 
@@ -131,6 +161,10 @@ export default class RenderLinearGradient extends RenderPathProgram {
     else {
       return RenderColor.TRANSPARENT;
     }
+  }
+
+  private useInternalCentroid(): boolean {
+    return this.accuracy === RenderLinearGradientAccuracy.UnsplitCentroid || this.accuracy === RenderLinearGradientAccuracy.SplitAccurate;
   }
 
   public override evaluate(
@@ -147,8 +181,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
       return Vector4.ZERO;
     }
 
-    const useCentroid = ( this.accuracy === RenderLinearGradientAccuracy.UnsplitCentroid || this.accuracy === RenderLinearGradientAccuracy.SplitAccurate );
-    const point = useCentroid ?
+    const point = this.useInternalCentroid() ?
                   scratchLinearGradientVector0.set( centroid ) :
                   scratchLinearGradientVector0.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
 

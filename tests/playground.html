@@ -535,8 +535,49 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      const outputSize = 768 * 2;
-      // const outputSize = 768 / 4;
+      // const outputSize = 768 * 2;
+      const outputSize = 768 / 4;
+
+      // const imageResampleType = phet.scenery.RenderResampleType.NearestNeighbor
+      const imageResampleType = phet.scenery.RenderResampleType.Bilinear;
+      // const imageResampleType = phet.scenery.RenderResampleType.MitchellNetravali;
+      // const imageResampleType = phet.scenery.RenderResampleType.AnalyticBox;
+      // const imageResampleType = phet.scenery.RenderResampleType.AnalyticBilinear;
+      // const imageResampleType = phet.scenery.RenderResampleType.AnalyticMitchellNetravali;
+
+      const radialGradientAccuracy = phet.scenery.RenderRadialGradientAccuracy.SplitAccurate;
+      // const radialGradientAccuracy = phet.scenery.RenderRadialGradientAccuracy.SplitCentroid;
+      // const radialGradientAccuracy = phet.scenery.RenderRadialGradientAccuracy.SplitPixelCenter;
+      // const radialGradientAccuracy = phet.scenery.RenderRadialGradientAccuracy.UnsplitCentroid;
+      // const radialGradientAccuracy = phet.scenery.RenderRadialGradientAccuracy.UnsplitPixelCenter;
+
+      const linearGradientAccuracy = phet.scenery.RenderLinearGradientAccuracy.SplitAccurate;
+      // const linearGradientAccuracy = phet.scenery.RenderLinearGradientAccuracy.SplitPixelCenter;
+      // const linearGradientAccuracy = phet.scenery.RenderLinearGradientAccuracy.UnsplitCentroid;
+      // const linearGradientAccuracy = phet.scenery.RenderLinearGradientAccuracy.UnsplitPixelCenter;
+
+      // const gradientColorSpace = phet.scenery.RenderColorSpace.LinearUnpremultipliedSRGB;
+      // const gradientColorSpace = phet.scenery.RenderColorSpace.SRGB;
+      const gradientColorSpace = phet.scenery.RenderColorSpace.Oklab;
+
+      const rasterizeOptions = {
+        // polygonFiltering: phet.scenery.PolygonFilterType.Box,
+        // polygonFiltering: phet.scenery.PolygonFilterType.Bilinear,
+        // polygonFiltering: phet.scenery.PolygonFilterType.MitchellNetravali,
+
+        // edgeIntersectionMethod: 'quadratic',
+        // edgeIntersectionMethod: 'boundsTree',
+        // edgeIntersectionMethod: 'arrayBoundsTree',
+
+        // renderableFaceMethod: 'polygonal',
+        // renderableFaceMethod: 'edged',
+        // renderableFaceMethod: 'fullyCombined',
+        // renderableFaceMethod: 'simplifyingCombined',
+        // renderableFaceMethod: 'traced',
+
+        // splitLinearGradients: true,
+        // splitRadialGradients: true
+      };
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -696,9 +737,6 @@ an UI and Display made for visual testing and debugging.
 
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
 
-
-
-
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 1 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.scaling( 0.5 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
@@ -707,12 +745,7 @@ an UI and Display made for visual testing and debugging.
         testImageablePremultiplied,
         phet.scenery.RenderExtend.Repeat,
         phet.scenery.RenderExtend.Repeat,
-        phet.scenery.RenderResampleType.NearestNeighbor
-        // phet.scenery.RenderResampleType.Bilinear
-        // phet.scenery.RenderResampleType.MitchellNetravali
-        // phet.scenery.RenderResampleType.AnalyticBox
-        // phet.scenery.RenderResampleType.AnalyticBilinear
-        // phet.scenery.RenderResampleType.AnalyticMitchellNetravali
+        imageResampleType
       );
       const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
       // const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );
@@ -730,9 +763,9 @@ an UI and Display made for visual testing and debugging.
           new phet.scenery.RenderGradientStop( 0.8, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#9B04DB' ) ) ),
           new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#6D1DC6' ) ) )
         ],
-        2,
-        2,
-        phet.scenery.RenderRadialGradientAccuracy.SplitAccurate
+        phet.scenery.RenderExtend.Repeat,
+        gradientColorSpace,
+        radialGradientAccuracy
       );
       const d = new phet.scenery.RenderLinearGradient(
         pathD,
@@ -750,9 +783,9 @@ an UI and Display made for visual testing and debugging.
           new phet.scenery.RenderGradientStop( 0.9, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ) ),
           new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ) )
         ],
-        2,
-        2,
-        phet.scenery.RenderLinearGradientAccuracy.SplitAccurate
+        phet.scenery.RenderExtend.Repeat,
+        gradientColorSpace,
+        linearGradientAccuracy
       );
       const e = phet.scenery.RenderColor.fromColor( pathE, new phet.scenery.Color( 255, 255, 255, 1 ) );
       const f = phet.scenery.RenderColor.fromColor( pathF, new phet.scenery.Color( 0, 0, 0, 1 ) );
@@ -789,28 +822,7 @@ an UI and Display made for visual testing and debugging.
       // const raster = new phet.scenery.AccumulatedRaster( outputSize, outputSize );
       // const raster = new phet.scenery.CombinedRaster( outputSize + 100, outputSize + 100 );
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
-      phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), {
-
-        // TODO: fix outputRasterOffset
-        // outputRasterOffset: phet.dot.v2( -300, -300 ),
-
-        // polygonFiltering: phet.scenery.PolygonFilterType.Box,
-        // polygonFiltering: phet.scenery.PolygonFilterType.Bilinear,
-        // polygonFiltering: phet.scenery.PolygonFilterType.MitchellNetravali,
-
-        // edgeIntersectionMethod: 'quadratic',
-        // edgeIntersectionMethod: 'boundsTree',
-        // edgeIntersectionMethod: 'arrayBoundsTree',
-
-        // renderableFaceMethod: 'polygonal',
-        // renderableFaceMethod: 'edged',
-        // renderableFaceMethod: 'fullyCombined',
-        // renderableFaceMethod: 'simplifyingCombined',
-        // renderableFaceMethod: 'traced',
-
-        // splitLinearGradients: true,
-        // splitRadialGradients: true
-      } );
+      phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
 
       const debugCanvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
       styleCanvas( debugCanvas );

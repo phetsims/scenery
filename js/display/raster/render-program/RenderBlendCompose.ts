@@ -216,6 +216,18 @@ export default class RenderBlendCompose extends RenderProgram {
     }
   }
 
+  public override needsFace(): boolean {
+    return this.a.needsFace() || this.b.needsFace();
+  }
+
+  public override needsArea(): boolean {
+    return this.a.needsArea() || this.b.needsArea();
+  }
+
+  public override needsCentroid(): boolean {
+    return this.a.needsCentroid() || this.b.needsCentroid();
+  }
+
   public override evaluate(
     face: ClippableFace | null,
     area: number,

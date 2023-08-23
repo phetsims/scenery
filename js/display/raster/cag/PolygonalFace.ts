@@ -328,6 +328,19 @@ export default class PolygonalFace implements ClippableFace {
   public static deserialize( serialized: SerializedPolygonalFace ): PolygonalFace {
     return new PolygonalFace( serialized.polygons.map( polygon => polygon.map( p => new Vector2( p.x, p.y ) ) ) );
   }
+
+  public static fromBounds( bounds: Bounds2 ): PolygonalFace {
+    return PolygonalFace.fromBoundsValues( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
+  }
+
+  public static fromBoundsValues( minX: number, minY: number, maxX: number, maxY: number ): PolygonalFace {
+    return new PolygonalFace( [ [
+      new Vector2( minX, minY ),
+      new Vector2( maxX, minY ),
+      new Vector2( maxX, maxY ),
+      new Vector2( minX, maxY )
+    ] ] );
+  }
 }
 
 scenery.register( 'PolygonalFace', PolygonalFace );
