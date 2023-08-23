@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, PolygonBilinear, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, constantTrue, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -202,7 +202,7 @@ export default class RenderImage extends RenderPathProgram {
           minX, minY, maxX, maxY,
           this.inverseTransform,
           0, 1, -1,
-          ( edges: LinearEdge[], x: number, y: number, px: number, py: number, area: number ) => {
+          ( face: ClippableFace, x: number, y: number, px: number, py: number, area: number ) => {
             return area;
           },
           _.constant( 1 )
@@ -214,18 +214,21 @@ export default class RenderImage extends RenderPathProgram {
           minX, minY, maxX, maxY,
           this.inverseTransformWithHalfOffset,
           1, 1, 0,
-          PolygonBilinear.evaluateLinearEdges,
+          ( face: ClippableFace, x: number, y: number, px: number, py: number, area: number ) => {
+            return face.getBilinearFiltered( x, y, px, py );
+          },
           _.constant( 0.25 )
         );
       }
       case RenderResampleType.AnalyticMitchellNetravali: {
-        // TODO: look into separated polygon components to see if we get better precision!
         return RenderImage.evaluateAnalyticFilter(
           this, face,
           minX, minY, maxX, maxY,
           this.inverseTransformWithHalfOffset,
           2, 2, 0,
-          PolygonMitchellNetravali.evaluateLinearEdges,
+          ( face: ClippableFace, x: number, y: number, px: number, py: number, area: number ) => {
+            return face.getMitchellNetravaliFiltered( x, y, px, py );
+          },
           PolygonMitchellNetravali.evaluateFull
         );
       }
@@ -272,7 +275,7 @@ export default class RenderImage extends RenderPathProgram {
    * @param minExpand - How far our filter expands to the min direction (left/top) - 0 box, 1 bilinear, 2 mitchell
    * @param maxExpand - How far our filter expands to the max direction (right/bottom) - 1 box, 1 bilinear, 2 mitchell
    * @param boundsShift - A shift of indices, should be -1 for the box filter (since it is offset)
-   * @param evaluateClipped - Evaluation function for a partial pixel. Evaluates the filter centered at x,y with the
+   * @param evaluateFace - Evaluation function for a partial pixel. Evaluates the filter centered at x,y with the
    * bounds of the clipped pixel in the range of px,py,px+1,py+1
    * @param evaluateFull - Evaluation function for a full pixel. Evaluates the filter centered at x,y with a full
    * pixel of the bounds px,py,px+1,py+1
@@ -288,7 +291,7 @@ export default class RenderImage extends RenderPathProgram {
     minExpand: number,
     maxExpand: number,
     boundsShift: number,
-    evaluateClipped: ( edges: LinearEdge[], x: number, y: number, px: number, py: number, area: number ) => number,
+    evaluateFace: ( face: ClippableFace, x: number, y: number, px: number, py: number, area: number ) => number,
     evaluateFull: ( x: number, y: number, px: number, py: number ) => number
   ): Vector4 {
 
@@ -303,19 +306,19 @@ export default class RenderImage extends RenderPathProgram {
 
     // If we don't have a face (i.e. we are taking up the full bounds specified by minX/minY/maxX/maxY), we'll
     // construct a face that covers the entire bounds.
-    const edgedFace = ( face || new PolygonalFace( [ [
+    face = face || new PolygonalFace( [ [
       new Vector2( minX, minY ),
       new Vector2( maxX, minY ),
       new Vector2( maxX, maxY ),
       new Vector2( minX, maxY )
-    ] ] ) ).toEdgedFace();
+    ] ] );
 
     // We'll mutate and return this
     const color = Vector4.ZERO.copy();
 
     // Such that 0,0 now aligns with the center of our 0,0 pixel sample, and is scaled so that pixel samples are
     // at every integer coordinate pair. (or in the case of the box filter, we have an offset).
-    const localFace = edgedFace.getTransformed( inverseTransform );
+    const localFace = face.getTransformed( inverseTransform );
 
     const localBounds = localFace.getBounds().roundedOut();
     assert && assert( localBounds.minX < localBounds.maxX );
@@ -391,7 +394,7 @@ export default class RenderImage extends RenderPathProgram {
                     contribution += Math.sign( pixelArea ) * evaluateFull( x, y, px, py );
                   }
                   else {
-                    contribution += evaluateClipped( pixelFaces[ yIndex ][ xIndex ].edges, x, y, px, py, pixelArea );
+                    contribution += evaluateFace( pixelFaces[ yIndex ][ xIndex ], x, y, px, py, pixelArea );
                   }
                 }
               }
