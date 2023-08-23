@@ -274,14 +274,16 @@ export default class RenderFromNode {
       if ( nodeImage ) {
         const renderPath = shapeToRenderPath( Shape.bounds( node.selfBounds ).transformed( matrix ) );
 
-        addResult( new RenderImage(
+        const renderImage = new RenderImage(
           renderPath,
           matrix,
           imagelikeToRenderImageable( node.image ),
           RenderExtend.Pad,
           RenderExtend.Pad,
           resampleType
-        ) );
+        );
+
+        addResult( node.imageOpacity === 1 ? renderImage : new RenderAlpha( null, renderImage, node.imageOpacity ) );
       }
     }
 
