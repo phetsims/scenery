@@ -194,15 +194,35 @@ export default class FaceConversion {
     ) );
   }
 
-  // Will combine faces that have equivalent RenderPrograms IFF they border each other (leaving separate programs with
-  // equivalent RenderPrograms separate if they don't border). It will also remove edges that border between faces
-  // that we combine, and will connect edges to keep things polygonal!
+  /**
+   * Combines faces that have equivalent RenderPrograms IFF they border each other (leaving separate programs with
+   * equivalent RenderPrograms separate if they don't border). It will also remove edges that border between faces
+   * that we combine, and will connect edges to keep things polygonal!
+   */
   public static toTracedRenderableFaces(
     faces: RationalFace[],
     fromIntegerMatrix: Matrix3
   ): RenderableFace[] {
 
-    // TODO: add algorithm description docs!!! This one is important
+    // In summary, we'll find an edge between incompatible faces, and then we'll trace that edge (staying only on edges
+    // between incompatible faces) until we get back to the starting edge. Once we've done this, we have constructed one
+    // polygon.
+    //
+    // For this algorithm, we mark faces and edges as processed when we've already handled their contribution (or marked
+    // them to contribute).
+    //
+    // We'll naturally run into "compatible" faces as we trace the edges. Whenever we run into a new compatible face,
+    // (in isFaceCompatible), we'll add its edges to the pool of edges to trace for this RenderableFace.
+    //
+    // When we trace edges, we'll always start with one between "incompatible" faces. If its nextEdge is between
+    // compatible faces, we can skip it (and use the winged edge data structure to try the "next" edge). Thus we'll
+    // skip visiting edges between compatible faces. IF they are all compatible, we'll end back up to our starting
+    // edge's reversed edge, and we'll essentially trace backward. If this happens, our simplifier will remove the
+    // evidence of this. So it should handle "degenerate" cases (e.g. same face on both sides, or a vertex with only
+    // one incident edge) just fine.
+    //
+    // ADDITIONALLY, we'll only be processing non-fully-transparent faces (they should have been sorted out earlier),
+    // so nothing will be compatible with the "unbounded" face.
 
     const renderableFaces: RenderableFace[] = [];
 
@@ -212,15 +232,23 @@ export default class FaceConversion {
       if ( !startingFace.processed ) {
         startingFace.processed = true;
 
-        const polygons: Vector2[][] = []; // A list of polygons we'll append into
+        // A list of polygons we'll append into (for our RenderableFace).
+        const polygons: Vector2[][] = [];
+
+        // A list of edges remaining to process. NOTE: some of these may be marked as "processed", we will just ignore
+        // those. Any time we run across a new compatible face, we'll dump its edges in here.
         const edges: RationalHalfEdge[] = [
           ...startingFace.getEdges() // defensive copy, could remove sometime
-        ]; // A list of edges to process
-        const bounds = startingFace.getBounds( fromIntegerMatrix ).copy(); // we're going to mutate this
+        ];
+
+        // We'll need to pass bounds to the RenderableFace constructor, we'll accumulate them here.
+        const bounds = startingFace.getBounds( fromIntegerMatrix ).copy(); // we'll mutate this
+
+        // All RenderPrograms should be equivalent, so we'll just use the first one
         const renderProgram = startingFace.renderProgram!;
         assert && assert( renderProgram );
 
-        // Effectively, we cache whether faces or compatible or not
+        // Cache whether faces or compatible or not
         const compatibleFaces = new Set<RationalFace>();
         const incompatibleFaces = new Set<RationalFace>();
         compatibleFaces.add( startingFace );
@@ -239,9 +267,10 @@ export default class FaceConversion {
               // ADD it to the current renderable face
               assert && assert( !candidateFace.processed, 'We should have already found this' );
               candidateFace.processed = true;
-              compatibleFaces.add( candidateFace );
               bounds.includeBounds( candidateFace.getBounds( fromIntegerMatrix ) );
               edges.push( ...candidateFace.getEdges() );
+
+              compatibleFaces.add( candidateFace );
               return true;
             }
             else {
@@ -265,6 +294,7 @@ export default class FaceConversion {
             // TODO: we don't want to introduce a lot of error. Probably is additional cost
             traceSimplifier.reset();
 
+            // Add the first edge
             let currentEdge = startingEdge;
             traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
             currentEdge.processed = true;
@@ -282,6 +312,7 @@ export default class FaceConversion {
 
               assert && assert( isFaceCompatible( nextEdge.face! ) || isFaceCompatible( nextEdge.reversed.face! ) );
 
+              // Add subsequent edges
               currentEdge = nextEdge;
               traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
               currentEdge.processed = true;
