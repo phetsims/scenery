@@ -494,6 +494,8 @@ export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.
 export { default as CohenSutherlandClipping } from './display/raster/clip/CohenSutherlandClipping.js';
 export { default as PolygonClipping } from './display/raster/clip/PolygonClipping.js';
 
+export { default as FaceConversion } from './display/raster/cag/FaceConversion.js';
+
 export { default as Snippet } from './display/raster/webgpu/Snippet.js';
 
 export { default as AccumulationRaster } from './display/raster/raster/AccumulationRaster.js';
