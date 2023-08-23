@@ -14,7 +14,6 @@ export default class RationalFace {
   public readonly holes: RationalBoundary[] = [];
   public windingMapMap = new Map<RationalFace, WindingMap>();
   public windingMap: WindingMap | null = null;
-  public inclusionSet: Set<RenderPath> = new Set<RenderPath>();
   public renderProgram: RenderProgram | null = null;
   public processed = false;
 
@@ -55,6 +54,32 @@ export default class RationalFace {
     polygonalBounds.transform( matrix );
 
     return polygonalBounds;
+  }
+
+  /**
+   * Returns a set of render paths that are included in this face (based on winding numbers).
+   *
+   * REQUIRED: Should have computed the winding map first.
+   */
+  public getIncludedRenderPaths(): Set<RenderPath> {
+    const inclusionSet = new Set<RenderPath>();
+
+    for ( const renderPath of this.windingMap!.map.keys() ) {
+      const windingNumber = this.windingMap!.getWindingNumber( renderPath );
+      const included = renderPath.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 !== 0;
+      if ( included ) {
+        inclusionSet.add( renderPath );
+      }
+    }
+
+    return inclusionSet;
+  }
+
+  public postWindingRenderProgram( renderProgram: RenderProgram ): void {
+    const inclusionSet = this.getIncludedRenderPaths();
+
+    // TODO: for extracting a non-render-program based setup, can we create a new class here?
+    this.renderProgram = renderProgram.simplify( renderPath => inclusionSet.has( renderPath ) );
   }
 }
 

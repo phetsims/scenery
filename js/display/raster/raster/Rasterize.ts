@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClippableFace, ClipSimplifier, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LinearEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonClipping, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -378,19 +378,10 @@ export default class Rasterize {
     for ( let i = 0; i < faces.length; i++ ) {
       const face = faces[ i ];
 
-      face.inclusionSet = new Set<RenderPath>();
-      for ( const renderPath of face.windingMap!.map.keys() ) {
-        const windingNumber = face.windingMap!.getWindingNumber( renderPath );
-        const included = renderPath.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 !== 0;
-        if ( included ) {
-          face.inclusionSet.add( renderPath );
-        }
-      }
-      const faceRenderProgram = renderProgram.simplify( renderPath => face.inclusionSet.has( renderPath ) );
-      face.renderProgram = faceRenderProgram;
+      face.postWindingRenderProgram( renderProgram );
 
       // Drop faces that will be fully transparent
-      const isFullyTransparent = faceRenderProgram instanceof RenderColor && faceRenderProgram.color.w <= 1e-8;
+      const isFullyTransparent = face.renderProgram instanceof RenderColor && face.renderProgram.color.w <= 1e-8;
 
       if ( !isFullyTransparent ) {
         renderProgrammedFaces.push( face );
