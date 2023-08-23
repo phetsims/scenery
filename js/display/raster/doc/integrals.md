@@ -71,6 +71,7 @@ e.g. for $`x^4y^2`$ in matrix form:
 $`
 \iint_Px^4y^2\,dx\,dy=
 \frac{1}{840}
+\sum_{i}
 (x_iy_{i+1}-x_{i+1}y_i)
 \begin{bmatrix}
 x_i^4 & x_i^3x_{i+1} & x_i^2x_{i+1}^2 & x_ix_{i+1}^3 & x_{i+1}^4
