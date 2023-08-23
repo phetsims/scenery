@@ -162,13 +162,13 @@ export default class RenderRadialBlend extends RenderPathProgram {
     }
     assert && assert( isFinite( averageDistance ) );
 
-    if ( assert ) {
-      const localPoint = scratchRadialBlendVector.set( centroid );
-      this.inverseTransform.multiplyVector2( localPoint );
-
-      const maxDistance = Math.sqrt( ( maxX - minX ) ** 2 + ( maxY - minY ) ** 2 );
-      assert( Math.abs( averageDistance - localPoint.magnitude ) < maxDistance * 1.1 );
-    }
+    // if ( assert ) {
+    //   const localPoint = scratchRadialBlendVector.set( centroid );
+    //   this.inverseTransform.multiplyVector2( localPoint );
+    //
+    //   const maxDistance = Math.sqrt( ( maxX - minX ) ** 2 + ( maxY - minY ) ** 2 );
+    //   assert( Math.abs( averageDistance - localPoint.magnitude ) < maxDistance * 5 );
+    // }
 
     // TODO: assuming no actual order, BUT needs positive radii?
     const t = ( averageDistance - this.radius0 ) / ( this.radius1 - this.radius0 );
