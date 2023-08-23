@@ -427,6 +427,40 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.badClipTest2 = function() {
+    setTimeout( async function() {
+      const xSplit = 56;
+      const minX = 54;
+      const minY = 14;
+      const maxX = 58;
+      const maxY = 16;
+
+      const edges = [
+        new phet.scenery.LinearEdge( phet.dot.v2( 55.61258850296397, 15 ), phet.dot.v2( 54, 15 ), false ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 54, 15 ), phet.dot.v2( 54, 14 ), false ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 54, 14 ), phet.dot.v2( 56, 14 ), true ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 56, 14 ), phet.dot.v2( 55.87242638405207, 14 ), true ),
+        new phet.scenery.LinearEdge( phet.dot.v2( 55.87242638405207, 14 ), phet.dot.v2( 55.61258850296397, 14.999999999999996 ), false )
+      ];
+
+      const face = new phet.scenery.EdgedFace( edges );
+      const polyFace = face.toPolygonalFace();
+      console.log( polyFace );
+
+      const { minFace, maxFace } = face.getBinaryXClip( xSplit, ( minY + maxY ) / 2 );
+
+      console.log( maxFace.getArea() );
+      console.log( face.getClipped( new phet.dot.Bounds2( xSplit, minY, maxX, maxY ) ).getArea() );
+      console.log( maxFace );
+      console.log( face.getClipped( new phet.dot.Bounds2( xSplit, minY, maxX, maxY ) ) );
+      console.log( face.getClipped( new phet.dot.Bounds2( xSplit, minY, maxX, maxY ) ) );
+
+      debugger;
+      const arr = [];
+      phet.scenery.PolygonClipping.boundsClipEdge( phet.dot.v2( 54, 15 ), phet.dot.v2( 54, 14 ), new phet.dot.Bounds2( 56, 14, 58, 16 ), arr );
+    } );
+  };
+
   window.siemensTest = function( type, pointCount = 100 ) {
     setTimeout( async function() {
       const width = 800;
