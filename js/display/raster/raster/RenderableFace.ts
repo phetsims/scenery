@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearGradient, RenderProgram, RenderRadialBlend, RenderRadialGradient, scenery } from '../../../imports.js';
+import { ClippableFace, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearGradient, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 // TODO: naming, omg
@@ -229,7 +229,7 @@ export default class RenderableFace {
 
       renderProgram.depthFirst( subProgram => {
         // TODO: early exit?
-        if ( subProgram instanceof RenderRadialGradient && subProgram.start.equals( subProgram.end ) ) {
+        if ( subProgram instanceof RenderRadialGradient && subProgram.start.equals( subProgram.end ) && subProgram.isSplittable() ) {
           result = subProgram;
         }
       } );
@@ -315,11 +315,16 @@ export default class RenderableFace {
                 const startRadius = minRadius + range.start * deltaRadius;
                 const endRadius = minRadius + range.end * deltaRadius;
 
+                const blendAccuracy = radialGradient.accuracy === RenderRadialGradientAccuracy.SplitAccurate ? RenderRadialBlendAccuracy.Accurate :
+                                      radialGradient.accuracy === RenderRadialGradientAccuracy.SplitCentroid ? RenderRadialBlendAccuracy.Centroid :
+                                      RenderRadialBlendAccuracy.PixelCenter;
+
                 return new RenderRadialBlend(
                   null,
                   radialGradient.transform,
                   startRadius,
                   endRadius,
+                  blendAccuracy,
                   range.startProgram.replace( replacer ),
                   range.endProgram.replace( replacer ),
                   radialGradient.colorSpace

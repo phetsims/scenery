@@ -12,6 +12,18 @@ import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Utils from '../../../../../dot/js/Utils.js';
 
+export enum RenderRadialGradientAccuracy {
+  SplitAccurate = 0,
+  SplitCentroid = 1,
+  SplitPixelCenter = 2,
+  UnsplitCentroid = 3,
+  UnsplitPixelCenter = 4
+}
+
+scenery.register( 'RenderRadialGradientAccuracy', RenderRadialGradientAccuracy );
+
+const scratchVectorA = new Vector2( 0, 0 );
+
 export default class RenderRadialGradient extends RenderPathProgram {
 
   private logic: RadialGradientLogic | null = null;
@@ -25,7 +37,8 @@ export default class RenderRadialGradient extends RenderPathProgram {
     public readonly endRadius: number,
     public readonly stops: RenderGradientStop[], // should be sorted!!
     public readonly extend: RenderExtend,
-    public readonly colorSpace: RenderColorSpace
+    public readonly colorSpace: RenderColorSpace,
+    public readonly accuracy: RenderRadialGradientAccuracy
   ) {
     assert && assert( transform.isFinite() );
     assert && assert( start.isFinite() );
@@ -40,6 +53,12 @@ export default class RenderRadialGradient extends RenderPathProgram {
     super( path );
   }
 
+  public isSplittable(): boolean {
+    return this.accuracy === RenderRadialGradientAccuracy.SplitAccurate ||
+           this.accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
+           this.accuracy === RenderRadialGradientAccuracy.SplitPixelCenter;
+  }
+
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderRadialGradient(
       this.getTransformedPath( transform ),
@@ -50,7 +69,8 @@ export default class RenderRadialGradient extends RenderPathProgram {
       this.endRadius,
       this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.transformed( transform ) ) ),
       this.extend,
-      this.colorSpace
+      this.colorSpace,
+      this.accuracy
     );
   }
 
@@ -77,7 +97,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
     }
     else {
       const stops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) );
-      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.colorSpace );
+      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.colorSpace, this.accuracy );
     }
   }
 
@@ -102,7 +122,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.colorSpace );
+      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.colorSpace, this.accuracy );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -123,7 +143,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
       this.logic = new RadialGradientLogic( this );
     }
 
-    return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+    return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.accuracy, pathTest );
   }
 
   public override toRecursiveString( indent: string ): string {
@@ -145,7 +165,8 @@ export default class RenderRadialGradient extends RenderPathProgram {
       endRadius: this.endRadius,
       stops: this.stops.map( stop => stop.serialize() ),
       extend: this.extend,
-      colorSpace: this.colorSpace
+      colorSpace: this.colorSpace,
+      accuracy: this.accuracy
     };
   }
 
@@ -163,7 +184,8 @@ export default class RenderRadialGradient extends RenderPathProgram {
       obj.endRadius,
       obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
       obj.extend,
-      obj.colorSpace
+      obj.colorSpace,
+      obj.accuracy
     );
   }
 }
@@ -278,6 +300,7 @@ class RadialGradientLogic {
     minY: number,
     maxX: number,
     maxY: number,
+    accuracy: RenderRadialGradientAccuracy,
     pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
     const focal_x = this.focal_x;
@@ -295,8 +318,10 @@ class RadialGradientLogic {
     // let less_scale = select(1, -1, is_swapped || (1 - focal_x) < 0);
     const t_sign = Math.sign( 1 - focal_x );
 
+    const point = accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ? centroid : scratchVectorA.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+
     // Pixel-specifics
-    const local_xy = this.xform.timesVector2( centroid );
+    const local_xy = this.xform.timesVector2( point );
     const x = local_xy.x;
     const y = local_xy.y;
     const xx = x * x;
@@ -348,4 +373,5 @@ export type SerializedRenderRadialGradient = {
   stops: SerializedRenderGradientStop[];
   extend: RenderExtend;
   colorSpace: RenderColorSpace;
+  accuracy: RenderRadialGradientAccuracy;
 };

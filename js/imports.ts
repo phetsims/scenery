@@ -459,9 +459,9 @@ export { default as RenderLinearBlend } from './display/raster/render-program/Re
 export type { SerializedRenderLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
 export { default as RenderLinearGradient } from './display/raster/render-program/RenderLinearGradient.js';
 export type { SerializedRenderLinearGradient } from './display/raster/render-program/RenderLinearGradient.js';
-export { default as RenderRadialBlend } from './display/raster/render-program/RenderRadialBlend.js';
+export { default as RenderRadialBlend, RenderRadialBlendAccuracy } from './display/raster/render-program/RenderRadialBlend.js';
 export type { SerializedRenderRadialBlend } from './display/raster/render-program/RenderRadialBlend.js';
-export { default as RenderRadialGradient } from './display/raster/render-program/RenderRadialGradient.js';
+export { default as RenderRadialGradient, RenderRadialGradientAccuracy } from './display/raster/render-program/RenderRadialGradient.js';
 export type { SerializedRenderRadialGradient } from './display/raster/render-program/RenderRadialGradient.js';
 export { default as RenderResampleType } from './display/raster/render-program/RenderResampleType.js';
 export type { default as FillRule } from './display/raster/render-program/FillRule.js';

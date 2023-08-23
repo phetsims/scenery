@@ -19,6 +19,14 @@ const scratchVectorB = new Vector2( 0, 0 );
 const scratchVectorC = new Vector2( 0, 0 );
 const scratchVectorD = new Vector2( 0, 0 );
 
+export enum RenderRadialBlendAccuracy {
+  Accurate = 0,
+  Centroid = 1,
+  PixelCenter = 2
+}
+
+scenery.register( 'RenderRadialBlendAccuracy', RenderRadialBlendAccuracy );
+
 export default class RenderRadialBlend extends RenderPathProgram {
 
   private readonly inverseTransform: Matrix3;
@@ -28,6 +36,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
     public readonly transform: Matrix3,
     public readonly radius0: number,
     public readonly radius1: number,
+    public readonly accuracy: RenderRadialBlendAccuracy,
     public readonly zero: RenderProgram,
     public readonly one: RenderProgram,
     public readonly colorSpace: RenderColorSpace
@@ -48,6 +57,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       transform.timesMatrix( this.transform ),
       this.radius0,
       this.radius1,
+      this.accuracy,
       this.zero.transformed( transform ),
       this.one.transformed( transform ),
       this.colorSpace
@@ -72,7 +82,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderRadialBlend( this.path, this.transform, this.radius0, this.radius1, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
+      return new RenderRadialBlend( this.path, this.transform, this.radius0, this.radius1, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
     }
   }
 
@@ -99,7 +109,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderRadialBlend( null, this.transform, this.radius0, this.radius1, zero, one, this.colorSpace );
+      return new RenderRadialBlend( null, this.transform, this.radius0, this.radius1, this.accuracy, zero, one, this.colorSpace );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -195,6 +205,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       ],
       radius0: this.radius0,
       radius1: this.radius1,
+      accuracy: this.accuracy,
       zero: this.zero.serialize(),
       one: this.one.serialize(),
       colorSpace: this.colorSpace
@@ -211,6 +222,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       ),
       obj.radius0,
       obj.radius1,
+      obj.accuracy,
       RenderProgram.deserialize( obj.zero ),
       RenderProgram.deserialize( obj.one ),
       obj.colorSpace
@@ -226,6 +238,7 @@ export type SerializedRenderRadialBlend = {
   transform: number[];
   radius0: number;
   radius1: number;
+  accuracy: RenderRadialBlendAccuracy;
   zero: SerializedRenderProgram;
   one: SerializedRenderProgram;
   colorSpace: RenderColorSpace;
