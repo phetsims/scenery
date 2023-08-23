@@ -7,12 +7,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 const scratchRadialBlendVector = new Vector2( 0, 0 );
+
+const scratchVectorA = new Vector2( 0, 0 );
+const scratchVectorB = new Vector2( 0, 0 );
+const scratchVectorC = new Vector2( 0, 0 );
+const scratchVectorD = new Vector2( 0, 0 );
 
 export default class RenderRadialBlend extends RenderPathProgram {
 
@@ -30,6 +35,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
     assert && assert( transform.isFinite() );
     assert && assert( isFinite( radius0 ) && radius0 >= 0 );
     assert && assert( isFinite( radius1 ) && radius1 >= 0 );
+    assert && assert( radius0 !== radius1 );
 
     super( path );
 
@@ -114,12 +120,49 @@ export default class RenderRadialBlend extends RenderPathProgram {
       return Vector4.ZERO;
     }
 
-    const localPoint = scratchRadialBlendVector.set( centroid );
+    // TODO: flag to control whether this gets set? TODO: Flag to just use centroid
+    let averageDistance;
+    if ( face ) {
+      averageDistance = face.getAverageDistanceTransformedToOrigin( this.inverseTransform, area );
+    }
+    else {
+      // NOTE: Do the equivalent of the above, but without creating a face and a ton of garbage
 
-    this.inverseTransform.multiplyVector2( localPoint );
+      const p0 = this.inverseTransform.multiplyVector2( scratchVectorA.setXY( minX, minY ) );
+      const p1 = this.inverseTransform.multiplyVector2( scratchVectorB.setXY( maxX, minY ) );
+      const p2 = this.inverseTransform.multiplyVector2( scratchVectorC.setXY( maxX, maxY ) );
+      const p3 = this.inverseTransform.multiplyVector2( scratchVectorD.setXY( minX, maxY ) );
+
+      // Needs CCW orientation
+      averageDistance = (
+        LinearEdge.evaluateLineIntegralDistance( p0.x, p0.y, p1.x, p1.y ) +
+        LinearEdge.evaluateLineIntegralDistance( p1.x, p1.y, p2.x, p2.y ) +
+        LinearEdge.evaluateLineIntegralDistance( p2.x, p2.y, p3.x, p3.y ) +
+        LinearEdge.evaluateLineIntegralDistance( p3.x, p3.y, p0.x, p0.y )
+      ) / ( area * this.inverseTransform.getSignedScale() );
+
+      assert && assert( averageDistance === new PolygonalFace( [
+        [
+          new Vector2( minX, minY ),
+          new Vector2( maxX, minY ),
+          new Vector2( maxX, maxY ),
+          new Vector2( minX, maxY )
+        ]
+      ] ).getAverageDistanceTransformedToOrigin( this.inverseTransform, area ) );
+    }
+    assert && assert( isFinite( averageDistance ) );
+
+    if ( assert ) {
+      const localPoint = scratchRadialBlendVector.set( centroid );
+      this.inverseTransform.multiplyVector2( localPoint );
+
+      const maxDistance = Math.sqrt( ( maxX - minX ) ** 2 + ( maxY - minY ) ** 2 );
+      assert( Math.abs( averageDistance - localPoint.magnitude ) < maxDistance * 1.1 );
+    }
 
     // TODO: assuming no actual order, BUT needs positive radii?
-    const t = ( localPoint.magnitude - this.radius0 ) / ( this.radius1 - this.radius0 );
+    const t = ( averageDistance - this.radius0 ) / ( this.radius1 - this.radius0 );
+    assert && assert( isFinite( t ) );
 
     if ( t <= 0 ) {
       return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );

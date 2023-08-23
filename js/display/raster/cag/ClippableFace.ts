@@ -20,6 +20,8 @@ type ClippableFace = {
   getDistanceRange( point: Vector2 ): Range;
   getArea(): number;
   getCentroid( area: number ): Vector2;
+  getAverageDistance( point: Vector2, area: number ): number;
+  getAverageDistanceTransformedToOrigin( transform: Matrix3, area: number ): number;
   getTransformed( transform: Matrix3 ): ClippableFace;
   getRounded( epsilon: number ): ClippableFace; // rounds [-epsilon/2, epsilon/2] to 0, etc.
   getClipped( bounds: Bounds2 ): ClippableFace;

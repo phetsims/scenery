@@ -148,18 +148,36 @@ export default class LinearEdge {
   public static evaluateLineIntegralDistance( p0x: number, p0y: number, p1x: number, p1y: number ): number {
     const dx = p1x - p0x;
     const dy = p1y - p0y;
-    const a = p0x * p1y - p0y * p1x;
     const qd = Math.sqrt( dx * dx + dy * dy );
+
+    if ( Math.abs( qd ) < 1e-8 ) {
+      return 0;
+    }
+
     const q0 = Math.sqrt( p0x * p0x + p0y * p0y );
+    const denom = ( p0x * dx + q0 * qd + p0y * dy );
+
+    if ( Math.abs( denom ) < 1e-8 ) {
+      return 0;
+    }
+
     const q1 = Math.sqrt( p1x * p1x + p1y * p1y );
     const kx = p1x * p1x - p0x * p1x;
     const ky = p1y * p1y - p0y * p1y;
+
+    const logger = ( kx + ky + qd * q1 ) / denom;
+
+    if ( Math.abs( logger ) < 1e-8 ) {
+      return 0;
+    }
+
+    const a = p0x * p1y - p0y * p1x;
 
     // TODO: return zero for when we would return NaN?
 
     return a / ( 6 * qd * qd * qd ) * (
       qd * ( q0 * ( p0x * p0x - p0x * p1x - p0y * dy ) + q1 * ( kx + p1y * dy ) ) +
-      a * a * ( Math.log( ( kx + ky + qd * q1 ) / ( p0x * dx + q0 * qd + p0y * dy ) ) )
+      a * a * ( Math.log( logger ) )
     );
   }
 

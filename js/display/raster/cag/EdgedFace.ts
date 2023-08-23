@@ -15,6 +15,9 @@ import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import { Shape } from '../../../../../kite/js/imports.js';
 
+const scratchVectorA = new Vector2( 0, 0 );
+const scratchVectorB = new Vector2( 0, 0 );
+
 export default class EdgedFace implements ClippableFace {
   public constructor( public readonly edges: LinearEdge[] ) {}
 
@@ -115,6 +118,42 @@ export default class EdgedFace implements ClippableFace {
       x / area,
       y / area
     );
+  }
+
+  public getAverageDistance( point: Vector2, area: number ): number {
+    let sum = 0;
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      const p0 = edge.startPoint;
+      const p1 = edge.endPoint;
+
+      sum += LinearEdge.evaluateLineIntegralDistance(
+        p0.x - point.x,
+        p0.y - point.y,
+        p1.x - point.x,
+        p1.y - point.y
+      );
+    }
+
+    return sum / area;
+  }
+
+  public getAverageDistanceTransformedToOrigin( transform: Matrix3, area: number ): number {
+    let sum = 0;
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      const p0 = transform.multiplyVector2( scratchVectorA.set( edge.startPoint ) );
+      const p1 = transform.multiplyVector2( scratchVectorB.set( edge.endPoint ) );
+
+      sum += LinearEdge.evaluateLineIntegralDistance( p0.x, p0.y, p1.x, p1.y );
+    }
+
+    // We need to account for how much the transform will scale the area
+    return sum / ( area * transform.getSignedScale() );
   }
 
   public getClipped( bounds: Bounds2 ): EdgedFace {
