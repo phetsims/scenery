@@ -28,6 +28,8 @@ type ClippableFace = {
   getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: ClippableFace; maxFace: ClippableFace };
   getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): ClippableFace[];
   getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: ClippableFace; outsideFace: ClippableFace };
+  getBilinearFiltered( pointX: number, pointY: number, minX: number, minY: number ): number;
+  getMitchellNetravaliFiltered( pointX: number, pointY: number, minX: number, minY: number ): number;
   toPolygonalFace( epsilon?: number ): PolygonalFace;
   toEdgedFace(): EdgedFace;
   getShape( epsilon?: number ): Shape;

@@ -83,11 +83,9 @@ export default class PolygonMitchellNetravali {
    * Evaluates the contribution of the (clipped) polygon to the filter at the given point. minX/minY note the lower
    * coordinates of the clipped polygon unit pixel.
    */
-  public static evaluateClippedEdges( edges: LinearEdge[], pointX: number, pointY: number, minX: number, minY: number ): number {
+  public static evaluateLinearEdges( edges: LinearEdge[], pointX: number, pointY: number, minX: number, minY: number ): number {
     const offsetX = minX - pointX;
     const offsetY = minY - pointY;
-
-    // TODO: hardcode things more, so we don't need this logic
 
     assert && assert( offsetX === -2 || offsetX === -1 || offsetX === 0 || offsetX === 1 );
     assert && assert( offsetY === -2 || offsetY === -1 || offsetY === 0 || offsetY === 1 );
@@ -126,6 +124,68 @@ export default class PolygonMitchellNetravali {
     return sum * sign;
   }
 
+  /**
+   * Evaluates the contribution of the (clipped) polygon to the filter at the given point. minX/minY note the lower
+   * coordinates of the clipped polygon unit pixel.
+   */
+  public static evaluatePolygons( polygons: Vector2[][], pointX: number, pointY: number, minX: number, minY: number ): number {
+    const offsetX = minX - pointX;
+    const offsetY = minY - pointY;
+
+    // TODO: Find a good way to get rid of this duplicated logic
+
+    assert && assert( offsetX === -2 || offsetX === -1 || offsetX === 0 || offsetX === 1 );
+    assert && assert( offsetY === -2 || offsetY === -1 || offsetY === 0 || offsetY === 1 );
+
+    const xCentral = offsetX === 0 || offsetX === -1;
+    const yCentral = offsetY === 0 || offsetY === -1;
+    const xPositive = offsetX >= 0;
+    const yPositive = offsetY >= 0;
+
+    let evaluator: ( p0x: number, p0y: number, p1x: number, p1y: number ) => number;
+    if ( xCentral && yCentral ) {
+      evaluator = PolygonMitchellNetravali.evaluateCase00;
+    }
+    else if ( !xCentral && !yCentral ) {
+      evaluator = PolygonMitchellNetravali.evaluateCase11;
+    }
+    else {
+      evaluator = PolygonMitchellNetravali.evaluateCase10;
+    }
+    const transpose = xCentral && !yCentral;
+    const sign = ( xPositive === yPositive ) ? 1 : -1;
+
+    let sum = 0;
+
+    for ( let i = 0; i < polygons.length; i++ ) {
+      const polygon = polygons[ i ];
+
+      const lastPoint = polygon[ polygon.length - 1 ];
+      let lastX = Math.abs( lastPoint.x - pointX );
+      let lastY = Math.abs( lastPoint.y - pointY );
+      for ( let j = 0; j < polygon.length; j++ ) {
+        const point = polygon[ j ];
+        const x = Math.abs( point.x - pointX );
+        const y = Math.abs( point.y - pointY );
+
+        // TODO: we can optimize out the negation by flipping the sign flag(!)
+        sum += transpose ? -evaluator( lastY, lastX, y, x ) : evaluator( lastX, lastY, x, y );
+
+        lastX = x;
+        lastY = y;
+      }
+    }
+
+    return sum * sign;
+  }
+
+  /**
+   * Evaluates the 1-dimensional Mitchell-Netravali filter at the given point. Outside -2<=t<=2, the filter will be
+   * zero.
+   *
+   * NOTE: It is a separable filter, so if you need the 2D equivalent, just do
+   * evaluateFilter( x ) * evaluateFilter( y )
+   */
   public static evaluateFilter( t: number ): number {
     t = Math.abs( t );
     if ( t <= 2 ) {
@@ -329,39 +389,6 @@ export default class PolygonMitchellNetravali {
         ( -1792 + p0x73 + p0x2 * ( 35 * p1x - 96 ) + 5 * p0x * ( 112 + 3 * p1x * ( p1x7 - 32 ) ) + 5 * p1x * ( 560 + p1x * ( 49 * p1x - 288 ) ) ) * p1y3
       )
     );
-  }
-
-  public static evaluateBilinear( p0x: number, p0y: number, p1x: number, p1y: number ): number {
-    const c01 = p0x * p1y;
-    const c10 = p1x * p0y;
-    return ( c01 - c10 ) * ( 12 - 4 * ( p0x + p0y + p1x + p1y ) + 2 * ( p0x * p0y + p1x * p1y ) + c10 + c01 ) / 24;
-  }
-
-  public static evaluateBilinearClippedEdges( edges: LinearEdge[], pointX: number, pointY: number, minX: number, minY: number ): number {
-    const offsetX = minX - pointX;
-    const offsetY = minY - pointY;
-
-    // TODO: hardcode things more, so we don't need this logic
-
-    assert && assert( offsetX === -1 || offsetX === 0 );
-    assert && assert( offsetY === -1 || offsetY === 0 );
-
-    const sign = ( offsetX === offsetY ) ? 1 : -1;
-
-    let sum = 0;
-
-    for ( let i = 0; i < edges.length; i++ ) {
-      const edge = edges[ i ];
-
-      const p0x = Math.abs( edge.startPoint.x - pointX );
-      const p0y = Math.abs( edge.startPoint.y - pointY );
-      const p1x = Math.abs( edge.endPoint.x - pointX );
-      const p1y = Math.abs( edge.endPoint.y - pointY );
-
-      sum += PolygonMitchellNetravali.evaluateBilinear( p0x, p0y, p1x, p1y );
-    }
-
-    return sum * sign;
   }
 }
 

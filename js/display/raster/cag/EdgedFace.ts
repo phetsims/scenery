@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, LinearEdge, PolygonalFace, PolygonClipping, scenery, SerializedLinearEdge } from '../../../imports.js';
+import { ClippableFace, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonMitchellNetravali, scenery, SerializedLinearEdge } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -225,6 +225,14 @@ export default class EdgedFace implements ClippableFace {
       insideFace: new EdgedFace( insideEdges ),
       outsideFace: new EdgedFace( outsideEdges )
     };
+  }
+
+  public getBilinearFiltered( pointX: number, pointY: number, minX: number, minY: number ): number {
+    return PolygonBilinear.evaluateLinearEdges( this.edges, pointX, pointY, minX, minY );
+  }
+
+  public getMitchellNetravaliFiltered( pointX: number, pointY: number, minX: number, minY: number ): number {
+    return PolygonMitchellNetravali.evaluateLinearEdges( this.edges, pointX, pointY, minX, minY );
   }
 
   public getTransformed( transform: Matrix3 ): EdgedFace {

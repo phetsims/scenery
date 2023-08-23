@@ -498,6 +498,7 @@ export { default as Snippet } from './display/raster/webgpu/Snippet.js';
 export { default as AccumulationRaster } from './display/raster/raster/AccumulationRaster.js';
 export { default as CombinedRaster } from './display/raster/raster/CombinedRaster.js';
 export type { default as OutputRaster } from './display/raster/raster/OutputRaster.js';
+export { default as PolygonBilinear } from './display/raster/raster/PolygonBilinear.js';
 export { default as PolygonMitchellNetravali } from './display/raster/raster/PolygonMitchellNetravali.js';
 export { default as Rasterize } from './display/raster/raster/Rasterize.js';
 export type { RasterizationOptions } from './display/raster/raster/Rasterize.js';

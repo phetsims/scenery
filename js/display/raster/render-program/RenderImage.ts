@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, PolygonBilinear, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -214,7 +214,7 @@ export default class RenderImage extends RenderPathProgram {
           minX, minY, maxX, maxY,
           this.inverseTransformWithHalfOffset,
           1, 1, 0,
-          PolygonMitchellNetravali.evaluateBilinearClippedEdges,
+          PolygonBilinear.evaluateLinearEdges,
           _.constant( 0.25 )
         );
       }
@@ -225,7 +225,7 @@ export default class RenderImage extends RenderPathProgram {
           minX, minY, maxX, maxY,
           this.inverseTransformWithHalfOffset,
           2, 2, 0,
-          PolygonMitchellNetravali.evaluateClippedEdges,
+          PolygonMitchellNetravali.evaluateLinearEdges,
           PolygonMitchellNetravali.evaluateFull
         );
       }

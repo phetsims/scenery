@@ -781,8 +781,8 @@ export default class Rasterize {
           } ) );
 
           contribution = polygonFiltering === PolygonFilterType.MitchellNetravali ?
-                         PolygonMitchellNetravali.evaluateClippedEdges( edges, px, py, x, y ) :
-                         PolygonMitchellNetravali.evaluateBilinearClippedEdges( edges, px, py, x, y );
+                         pixelFace!.getMitchellNetravaliFiltered( px, py, x, y ) :
+                         pixelFace!.getBilinearFiltered( px, py, x, y );
         }
 
         outputRaster.addPartialPixel( color.timesScalar( contribution ), pixelX + outputRasterOffset.x, pixelY + outputRasterOffset.y );
