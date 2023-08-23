@@ -59,6 +59,9 @@ export default class Rasterize {
 
       for ( let j = 0; j < path.subpaths.length; j++ ) {
         const subpath = path.subpaths[ j ];
+
+        // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
+        // If a path is fully outside of the clip region, we won't create integer edges out of it.
         const clippedSubpath = PolygonClipping.boundsClipPolygon( subpath, bounds );
 
         for ( let k = 0; k < clippedSubpath.length; k++ ) {
