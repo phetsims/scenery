@@ -327,7 +327,7 @@ export default class RenderFromNode {
     const width = display.width * window.devicePixelRatio;
     const height = display.height * window.devicePixelRatio;
     const raster = new CombinedRaster( width, height );
-    Rasterize.rasterizeRenderProgram( sizedProgram, raster, new Bounds2( 0, 0, width, height ) );
+    Rasterize.rasterize( sizedProgram, raster, new Bounds2( 0, 0, width, height ) );
     const canvas = Rasterize.imageDataToCanvas( raster.toImageData() );
     canvas.style.width = `${canvas.width / window.devicePixelRatio}px`;
     canvas.style.height = `${canvas.height / window.devicePixelRatio}px`;

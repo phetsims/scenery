@@ -444,8 +444,7 @@ export default class Rasterize {
     }
   }
 
-  // TODO: name change?
-  public static rasterizeRenderProgram( renderProgram: RenderProgram, outputRaster: OutputRaster, bounds: Bounds2, providedOptions?: RasterizationOptions ): void {
+  public static rasterize( renderProgram: RenderProgram, outputRaster: OutputRaster, bounds: Bounds2, providedOptions?: RasterizationOptions ): void {
 
     // Coordinate frames:
     //

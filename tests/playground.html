@@ -474,7 +474,7 @@ an UI and Display made for visual testing and debugging.
         const outputHeight = height * window.devicePixelRatio;
 
         const raster = new phet.scenery.CombinedRaster( outputWidth, outputHeight );
-        phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputWidth, outputHeight ), {
+        phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputWidth, outputHeight ), {
           polygonFiltering: filtering
         } );
         const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
@@ -512,7 +512,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
-      phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
+      phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
       const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
 
       styleCanvas( canvas );
@@ -822,7 +822,7 @@ an UI and Display made for visual testing and debugging.
       // const raster = new phet.scenery.AccumulatedRaster( outputSize, outputSize );
       // const raster = new phet.scenery.CombinedRaster( outputSize + 100, outputSize + 100 );
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
-      phet.scenery.Rasterize.rasterizeRenderProgram( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
+      phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
 
       const debugCanvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
       styleCanvas( debugCanvas );
