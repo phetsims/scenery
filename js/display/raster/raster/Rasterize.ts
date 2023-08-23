@@ -389,22 +389,6 @@ export default class Rasterize {
     }
   }
 
-  private static rasterize(
-    context: RasterizationContext,
-    clippableFace: ClippableFace,
-    faceBounds: Bounds2
-  ): void {
-    const gridOffset = getPolygonFilterGridOffset( context.polygonFiltering );
-    faceBounds = faceBounds.shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
-
-    // TODO: Can we avoid having to do this? Can we include this in places where it could cause this? (gradient splits?)
-    clippableFace = clippableFace.getClipped( faceBounds );
-
-    Rasterize.binaryInternalRasterize(
-      context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
-    );
-  }
-
   private static rasterizeAccumulate(
     outputRaster: OutputRaster,
     renderableFaces: RenderableFace[],
@@ -418,7 +402,6 @@ export default class Rasterize {
       const face = renderableFace.face;
       const renderProgram = renderableFace.renderProgram;
       const polygonalBounds = renderableFace.bounds;
-      const clippableFace = renderableFace.face;
 
       const faceDebugData: IntentionalAny = assert ? {
         face: face,
@@ -429,14 +412,9 @@ export default class Rasterize {
         debugData!.faceDebugData = debugData!.faceDebugData || [];
         debugData!.faceDebugData.push( faceDebugData );
       }
-      if ( assert ) {
-        faceDebugData.clippableFace = clippableFace;
-      }
-
-      // TODO: would the bounds show up OUTSIDE of this?
-      const faceBounds = polygonalBounds.intersection( gridBounds );
 
       const constColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
+      // TODO: constSRGBColor
 
       const context = new RasterizationContext(
         outputRaster,
@@ -448,10 +426,20 @@ export default class Rasterize {
         renderProgram.getNeeds()
       );
 
-      Rasterize.rasterize(
-        context,
-        clippableFace,
-        faceBounds
+      // For filtering, we'll want to round our faceBounds to the nearest (shifted) integer.
+      const gridOffset = getPolygonFilterGridOffset( context.polygonFiltering );
+      const faceBounds = polygonalBounds.intersection( gridBounds ).shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
+
+      // We will clip off anything outside the "bounds", since if we're based on EdgedFace we don't want those "fake"
+      // edges that might be outside.
+      const clippableFace = renderableFace.face.getClipped( faceBounds );
+      if ( assert ) {
+        faceDebugData.clippableFace = renderableFace.face;
+        faceDebugData.clippedFace = clippableFace;
+      }
+
+      Rasterize.binaryInternalRasterize(
+        context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
       );
     }
   }
