@@ -38,6 +38,10 @@ export default class AccumulationRaster implements OutputRaster {
     }
   }
 
+  public addFullRegionSRGB255( color: Vector4, x: number, y: number, width: number, height: number ): void {
+    throw new Error( 'unimplemented' );
+  }
+
   public toImageData(): ImageData {
     const imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
 

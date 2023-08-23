@@ -46,6 +46,7 @@ class RasterizationContext {
     public outputRaster: OutputRaster,
     public renderProgram: RenderProgram,
     public constColor: Vector4 | null,
+    public constSRGBColor: Vector4 | null,
     public outputRasterOffset: Vector2,
     public bounds: Bounds2,
     public polygonFiltering: PolygonFilterType,
@@ -234,13 +235,24 @@ export default class Rasterize {
       assert && assert( !context.needs.needsArea && !context.needs.needsCentroid );
 
       if ( context.polygonFiltering === PolygonFilterType.Box ) {
-        context.outputRaster.addFullRegion(
-          constColor,
-          minX + context.outputRasterOffset.x,
-          minY + context.outputRasterOffset.y,
-          maxX - minX,
-          maxY - minY
-        );
+        if ( context.constSRGBColor ) {
+          context.outputRaster.addFullRegionSRGB255(
+            context.constSRGBColor,
+            minX + context.outputRasterOffset.x,
+            minY + context.outputRasterOffset.y,
+            maxX - minX,
+            maxY - minY
+          );
+        }
+        else {
+          context.outputRaster.addFullRegion(
+            constColor,
+            minX + context.outputRasterOffset.x,
+            minY + context.outputRasterOffset.y,
+            maxX - minX,
+            maxY - minY
+          );
+        }
       }
       else {
         // TODO: ideally we can optimize this if it has a significant number of contained pixels. We only need to
@@ -414,12 +426,13 @@ export default class Rasterize {
       }
 
       const constColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
-      // TODO: constSRGBColor
+      const constSRGBColor = constColor !== null ? RenderColor.convertLinearPremultipliedToSRGB( constColor ) : null;
 
       const context = new RasterizationContext(
         outputRaster,
         renderProgram,
         constColor,
+        constSRGBColor,
         outputRasterOffset,
         bounds,
         polygonFiltering,

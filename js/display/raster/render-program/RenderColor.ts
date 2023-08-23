@@ -13,6 +13,8 @@ import Vector4 from '../../../../../dot/js/Vector4.js';
 
 // TODO: consider transforms as a node itself? Meh probably excessive?
 
+const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
+
 export default class RenderColor extends RenderPathProgram {
   public constructor( path: RenderPath | null, public color: Vector4 ) {
     super( path );
@@ -88,6 +90,35 @@ export default class RenderColor extends RenderPathProgram {
 
   public override toRecursiveString( indent: string ): string {
     return `${indent}RenderColor (${this.path ? this.path.id : 'null'}, color:${this.color.toString()})`;
+  }
+
+
+  // TODO: can we combine these methods of sRGB conversion without losing performance?
+  public static convertLinearPremultipliedToSRGB( color: Vector4 ): Vector4 {
+    const accumulation = color;
+    const a = accumulation.w;
+
+    if ( a > 0 ) {
+      // unpremultiply
+      const x = accumulation.x / a;
+      const y = accumulation.y / a;
+      const z = accumulation.z / a;
+
+      // linear to sRGB
+      const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
+      const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
+      const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
+
+      return scratchCombinedVector.setXYZW(
+        r * 255,
+        g * 255,
+        b * 255,
+        a * 255
+      );
+    }
+    else {
+      return scratchCombinedVector.setXYZW( 0, 0, 0, 0 );
+    }
   }
 
   public static fromColor( path: RenderPath | null, color: Color ): RenderColor {

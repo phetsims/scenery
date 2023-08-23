@@ -6,10 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { OutputRaster, scenery } from '../../../imports.js';
+import { OutputRaster, RenderColor, scenery } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-
-const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
 
 // TODO: consider implementing a raster that JUST uses ImageData, and does NOT do linear (proper) blending
 export default class CombinedRaster implements OutputRaster {
@@ -49,6 +47,14 @@ export default class CombinedRaster implements OutputRaster {
 
   public addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
     assert && assert( color.isFinite() );
+
+    const sRGB = RenderColor.convertLinearPremultipliedToSRGB( color );
+
+    this.addFullRegionSRGB255( sRGB, x, y, width, height );
+  }
+
+  public addFullRegionSRGB255( sRGB: Vector4, x: number, y: number, width: number, height: number ): void {
+    assert && assert( sRGB.isFinite() );
     assert && assert( isFinite( x ) && isFinite( y ) );
     assert && assert( x >= 0 && x < this.width );
     assert && assert( y >= 0 && y < this.height );
@@ -57,7 +63,6 @@ export default class CombinedRaster implements OutputRaster {
     assert && assert( x + width <= this.width );
     assert && assert( y + height <= this.height );
 
-    const sRGB = CombinedRaster.convertToSRGB( color );
     for ( let j = 0; j < height; j++ ) {
       const rowIndex = ( y + j ) * this.width + x;
       for ( let i = 0; i < width; i++ ) {
@@ -68,35 +73,6 @@ export default class CombinedRaster implements OutputRaster {
         data[ baseIndex + 2 ] = sRGB.z;
         data[ baseIndex + 3 ] = sRGB.w;
       }
-    }
-  }
-
-  // TODO: can we combine these methods of sRGB conversion without losing performance?
-  // TODO: move this somewhere?
-  private static convertToSRGB( color: Vector4 ): Vector4 {
-    const accumulation = color;
-    const a = accumulation.w;
-
-    if ( a > 0 ) {
-      // unpremultiply
-      const x = accumulation.x / a;
-      const y = accumulation.y / a;
-      const z = accumulation.z / a;
-
-      // linear to sRGB
-      const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
-      const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
-      const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
-
-      return scratchCombinedVector.setXYZW(
-        r * 255,
-        g * 255,
-        b * 255,
-        a * 255
-      );
-    }
-    else {
-      return scratchCombinedVector.setXYZW( 0, 0, 0, 0 );
     }
   }
 

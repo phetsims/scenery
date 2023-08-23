@@ -12,6 +12,7 @@ type OutputRaster = {
   addPartialPixel( color: Vector4, x: number, y: number ): void;
   addFullPixel( color: Vector4, x: number, y: number ): void;
   addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void;
+  addFullRegionSRGB255( sRGB: Vector4, x: number, y: number, width: number, height: number ): void;
 };
 
 export default OutputRaster;
