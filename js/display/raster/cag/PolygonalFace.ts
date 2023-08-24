@@ -274,8 +274,20 @@ export default class PolygonalFace implements ClippableFace {
 
   // NOTE: switches to EdgedFaces! Could probably implement the binary circular clip for polygons, but it seems a bit
   // harder
-  public getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: EdgedFace; outsideFace: EdgedFace } {
-    return this.toEdgedFace().getBinaryCircularClip( center, radius, maxAngleSplit );
+  public getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: PolygonalFace; outsideFace: PolygonalFace } {
+
+    // TODO: This can be deleted after we've fully tested the new clipping. It's a good 450 lines of complicated stuff
+    // return this.toEdgedFace().getBinaryCircularClip( center, radius, maxAngleSplit );
+
+    const insidePolygons: Vector2[][] = [];
+    const outsidePolygons: Vector2[][] = [];
+
+    PolygonClipping.binaryCircularClipPolygon( this.polygons, center, radius, maxAngleSplit, insidePolygons, outsidePolygons );
+
+    return {
+      insideFace: new PolygonalFace( insidePolygons ),
+      outsideFace: new PolygonalFace( outsidePolygons )
+    };
   }
 
   public getBilinearFiltered( pointX: number, pointY: number, minX: number, minY: number ): number {

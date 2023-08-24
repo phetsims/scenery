@@ -7,7 +7,7 @@
  */
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
-import { ClipSimplifier, LinearEdge, scenery } from '../../../imports.js';
+import { ClipSimplifier, LinearEdge, PolygonalFace, scenery } from '../../../imports.js';
 import Utils from '../../../../../dot/js/Utils.js';
 
 // TODO: parallelize this (should be possible)
@@ -1382,30 +1382,6 @@ export default class PolygonClipping {
         outsideCandidateReversedEdges.reverse();
         outsideStartOutsideCandidateReversedEdges.reverse();
 
-        // Ensure that all of our points must match up
-        if ( assert ) {
-          const getForwardStart = ( edges: LinearEdge[] ) => edges[ 0 ].startPoint;
-          const getForwardEnd = ( edges: LinearEdge[] ) => edges[ edges.length - 1 ].endPoint;
-          const getReverseStart = ( edges: CircularEdge[] ) => Vector2.createPolar( radius, edges[ 0 ].startAngle ).add( center );
-          const getReverseEnd = ( edges: CircularEdge[] ) => Vector2.createPolar( radius, edges[ edges.length - 1 ].endAngle ).add( center );
-
-          const p00 = getForwardEnd( outsideCandidateForwardEdges );
-          const p01 = getForwardStart( outsideStartOutsideCandidateForwardEdges );
-          assert( p00.equalsEpsilon( p01, 1e-6 ) );
-
-          const p10 = getForwardEnd( outsideStartOutsideCandidateForwardEdges );
-          const p11 = getReverseStart( outsideStartOutsideCandidateReversedEdges );
-          assert( p10.equalsEpsilon( p11, 1e-6 ) );
-
-          const p20 = getReverseEnd( outsideStartOutsideCandidateReversedEdges );
-          const p21 = getReverseStart( outsideCandidateReversedEdges );
-          assert( p20.equalsEpsilon( p21, 1e-6 ) );
-
-          const p30 = getReverseEnd( outsideCandidateReversedEdges );
-          const p31 = getForwardStart( outsideCandidateForwardEdges );
-          assert( p30.equalsEpsilon( p31, 1e-6 ) );
-        }
-
         const candidatePolygon = [
           ...outsideCandidateForwardEdges,
           ...outsideStartOutsideCandidateForwardEdges,
@@ -1413,6 +1389,19 @@ export default class PolygonClipping {
           ...outsideCandidateReversedEdges
         ];
         outsideCandidatePolygons.push( candidatePolygon );
+
+        // Ensure that all of our points must match up
+        if ( assertSlow ) {
+          for ( let i = 0; i < candidatePolygon.length; i++ ) {
+            const edge = candidatePolygon[ i ];
+            const nextEdge = candidatePolygon[ ( i + 1 ) % candidatePolygon.length ];
+
+            const endPoint = edge instanceof LinearEdge ? edge.endPoint : Vector2.createPolar( radius, edge.endAngle ).add( center );
+            const startPoint = nextEdge instanceof LinearEdge ? nextEdge.startPoint : Vector2.createPolar( radius, nextEdge.startAngle ).add( center );
+
+            assertSlow( endPoint.equalsEpsilon( startPoint, 1e-6 ) );
+          }
+        }
 
         outsideCandidateForwardEdges.length = 0;
         outsideCandidateReversedEdges.length = 0;
@@ -1476,6 +1465,8 @@ export default class PolygonClipping {
       }
     };
 
+    let totalArea = 0; // For assertions
+
     const addPolygonTo = ( edges: ( LinearEdge | CircularEdge )[], polygons: Vector2[][] ) => {
       simplifier.reset();
 
@@ -1487,6 +1478,10 @@ export default class PolygonClipping {
 
       if ( polygon.length >= 3 ) {
         polygons.push( polygon );
+
+        if ( assertSlow ) {
+          totalArea += new PolygonalFace( [ polygon ] ).getArea();
+        }
       }
     };
 
@@ -1496,6 +1491,12 @@ export default class PolygonClipping {
 
     for ( let i = 0; i < outsideCandidatePolygons.length; i++ ) {
       addPolygonTo( outsideCandidatePolygons[ i ], outside );
+    }
+
+    if ( assertSlow ) {
+      const beforeArea = new PolygonalFace( polygons ).getArea();
+
+      assertSlow( Math.abs( totalArea - beforeArea ) < 1e-5 );
     }
 
     // Final one, because paranoia
