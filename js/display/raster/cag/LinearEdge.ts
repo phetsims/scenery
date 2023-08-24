@@ -8,7 +8,8 @@
 
 import { ClipSimplifier, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
-import { Shape } from '../../../../../kite/js/imports.js';
+import { Line, Shape } from '../../../../../kite/js/imports.js';
+import Utils from '../../../../../dot/js/Utils.js';
 
 export default class LinearEdge {
 
@@ -43,9 +44,13 @@ export default class LinearEdge {
     return polygons.flatMap( LinearEdge.fromPolygon );
   }
 
-  // TODO: ideally a better version of this?
+  /**
+   * Returns a simplified version of the edges as a list of polygons.
+   *
+   * NOTE: This is a low-performance method, mainly intended for debugging display.
+   */
   public static toPolygons( edges: LinearEdge[], epsilon = 1e-8 ): Vector2[][] {
-    const filteredEdges = LinearEdge.withOppositesRemoved( edges );
+    const filteredEdges = LinearEdge.withOverlappingRemoved( edges );
 
     const polygons: Vector2[][] = [];
 
@@ -80,7 +85,9 @@ export default class LinearEdge {
     return polygons;
   }
 
-  // TODO: can we go with a stronger form also, that finds everything collinear, and simplifies it?
+  /**
+   * Detects edges that are exact opposites of other edges, and returns a new list of edges with those removed.
+   */
   public static withOppositesRemoved( edges: LinearEdge[], epsilon = 1e-8 ): LinearEdge[] {
     const outputEdges = [];
     const remainingEdges = new Set<LinearEdge>( edges );
@@ -104,8 +111,105 @@ export default class LinearEdge {
     return outputEdges;
   }
 
+  /**
+   * Detects ANY "opposite-direction" overlap between edges, and returns a new list of edges with those removed.
+   *
+   * NOTE: This is a low-performance method, mainly intended for debugging display.
+   */
+  public static withOverlappingRemoved( edges: LinearEdge[], epsilon = 1e-8 ): LinearEdge[] {
+    const outputEdges = new Set<LinearEdge>();
+    const remainingEdges = new Set<LinearEdge>( edges );
+
+    // Append any edges that are not overlapping. If we detect an overlap, eject the overlapping edges and add their
+    // non-overlapped portions.
+    while ( remainingEdges.size > 0 ) {
+      const edge: LinearEdge = remainingEdges.values().next().value;
+      remainingEdges.delete( edge );
+
+      let overlapped = false;
+      for ( const outputEdge of outputEdges ) {
+        // See if the edges are collinear
+        if ( Utils.arePointsCollinear( edge.startPoint, edge.endPoint, outputEdge.startPoint, epsilon ) &&
+             Utils.arePointsCollinear( edge.startPoint, edge.endPoint, outputEdge.endPoint, epsilon ) ) {
+          const overlaps = Line.getOverlaps( new Line( edge.startPoint, edge.endPoint ), new Line( outputEdge.startPoint, outputEdge.endPoint ), epsilon );
+
+          if ( overlaps.length > 0 ) {
+            // Lines will just have one potential overlap
+            const overlap = overlaps[ 0 ];
+
+            // Ensure that we're removing "opposites" to maintain winding order and signed area.
+            // Additionally, make sure that our overlap is non-trivial (i.e. not just a single point).
+            if ( overlap.a >= 0 || overlap.t0 + epsilon >= overlap.t1 || overlap.qt0 + epsilon >= overlap.qt1 ) {
+              continue;
+            }
+
+            const deltaEdge = edge.endPoint.minus( edge.startPoint );
+            const deltaOutputEdge = outputEdge.endPoint.minus( outputEdge.startPoint );
+
+            const newEdgeStart = edge.startPoint.plus( deltaEdge.times( overlap.t0 ) );
+            const newEdgeEnd = edge.startPoint.plus( deltaEdge.times( overlap.t1 ) );
+            const newOutputEdgeStart = outputEdge.startPoint.plus( deltaOutputEdge.times( overlap.qt0 ) );
+            const newOutputEdgeEnd = outputEdge.startPoint.plus( deltaOutputEdge.times( overlap.qt1 ) );
+
+            if ( assertSlow ) {
+              assertSlow( overlap.t0 < overlap.t1 );
+              assertSlow( overlap.qt0 < overlap.qt1 );
+
+              // We should be matching one of the orientations!
+              assertSlow(
+                ( newEdgeStart.equalsEpsilon( newOutputEdgeStart, epsilon ) && newEdgeEnd.equalsEpsilon( newOutputEdgeEnd, epsilon ) ) ||
+                ( newEdgeStart.equalsEpsilon( newOutputEdgeEnd, epsilon ) && newEdgeEnd.equalsEpsilon( newOutputEdgeStart, epsilon ) )
+              );
+            }
+
+            outputEdges.delete( outputEdge );
+
+            if ( !edge.startPoint.equalsEpsilon( newEdgeStart, epsilon ) ) {
+              remainingEdges.add( new LinearEdge( edge.startPoint, newEdgeStart ) );
+            }
+            if ( !edge.endPoint.equalsEpsilon( newEdgeEnd, epsilon ) ) {
+              remainingEdges.add( new LinearEdge( newEdgeEnd, edge.endPoint ) );
+            }
+            if ( !outputEdge.startPoint.equalsEpsilon( newOutputEdgeStart, epsilon ) ) {
+              remainingEdges.add( new LinearEdge( outputEdge.startPoint, newOutputEdgeStart ) );
+            }
+            if ( !outputEdge.endPoint.equalsEpsilon( newOutputEdgeEnd, epsilon ) ) {
+              remainingEdges.add( new LinearEdge( newOutputEdgeEnd, outputEdge.endPoint ) );
+            }
+
+            overlapped = true;
+            break;
+          }
+        }
+      }
+
+      if ( !overlapped ) {
+        outputEdges.add( edge );
+      }
+    }
+
+    const result = [ ...outputEdges ];
+
+    if ( assertSlow ) {
+      const beforeArea = LinearEdge.getEdgesArea( edges );
+      const afterArea = LinearEdge.getEdgesArea( result );
+
+      assertSlow( Math.abs( beforeArea - afterArea ) < 1e-6 );
+    }
+
+    return result;
+  }
+
+  /**
+   * Returns a simplified version of the polygons as a kite Shape.
+   *
+   * NOTE: This is a low-performance method, mainly intended for debugging display.
+   */
   public static polygonsToShape( polygons: Vector2[][] ): Shape {
     const shape = new Shape();
+
+    // Apply our cleanup methods, that will remove overlap
+    polygons = LinearEdge.toPolygons( LinearEdge.fromPolygons( polygons ) );
 
     polygons.forEach( polygon => {
       if ( polygon.length >= 3 ) {

@@ -172,6 +172,14 @@ export default class ClipSimplifier {
 
     return this.points;
   }
+
+  public static simplifyPolygon( points: Vector2[], checkGeneralCollinearity = false ): Vector2[] {
+    const simplifier = new ClipSimplifier( checkGeneralCollinearity );
+    for ( let i = 0; i < points.length; i++ ) {
+      simplifier.addPoint( points[ i ] );
+    }
+    return simplifier.finalize();
+  }
 }
 
 scenery.register( 'ClipSimplifier', ClipSimplifier );

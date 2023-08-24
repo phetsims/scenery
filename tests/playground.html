@@ -880,7 +880,8 @@ an UI and Display made for visual testing and debugging.
       const INCLUSION_DEBUG_PATH = program.a.path;
       const SHOW_SOLID_COLORS = false;
       const SHOW_FULL_AREAS = false;
-      const SHOW_RENDERABLE_FACES = false;
+      const SHOW_RENDERABLE_FACES = true;
+      const SHOW_RENDERABLE_FACE_INDICES = false;
 
       const fromRenderPoint = renderPoint => renderPoint.timesScalar( displaySize / outputSize );
       const fromRenderX = renderX => renderX * displaySize / outputSize;
@@ -1093,12 +1094,25 @@ an UI and Display made for visual testing and debugging.
       }
 
       if ( SHOW_RENDERABLE_FACES ) {
-        debugData.faceDebugData.forEach( data => {
+        debugData.faceDebugData.forEach( ( data, index ) => {
+          // if ( index !== 104 ) {
+          //   return;
+          // }
           const shape = data.clippableFace.getShape().transformed( fromRenderMatrix );
           offsetNode.addChild( new phet.scenery.Path( shape, {
             stroke: 'black',
             lineJoin: 'round',
             lineCap: 'round'
+          } ) );
+        } );
+      }
+
+      if ( SHOW_RENDERABLE_FACE_INDICES ) {
+        debugData.faceDebugData.forEach( ( data, index ) => {
+          const centroid = fromRenderMatrix.timesVector2( data.clippableFace.getCentroid( data.clippableFace.getArea() ) );
+          offsetNode.addChild( new phet.scenery.Text( index, {
+            fill: 'black',
+            center: centroid
           } ) );
         } );
       }

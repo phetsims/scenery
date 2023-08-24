@@ -34,7 +34,7 @@ type ClippableFace = {
   getMitchellNetravaliFiltered( pointX: number, pointY: number, minX: number, minY: number ): number;
   toPolygonalFace( epsilon?: number ): PolygonalFace;
   toEdgedFace(): EdgedFace;
-  getShape( epsilon?: number ): Shape;
+  getShape( epsilon?: number ): Shape; // NOTE: this is only for debugging, performance won't be great
   forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void;
   toString(): string;
   serialize(): IntentionalAny;
