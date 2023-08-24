@@ -834,8 +834,8 @@ export default class PolygonClipping {
     center: Vector2,
     radius: number,
     maxAngleSplit: number,
-    inside: LinearEdge[] = [],
-    outside: LinearEdge[] = []
+    inside: LinearEdge[],
+    outside: LinearEdge[]
   ): void {
 
     // If we inscribed a circle inside a regular polygon split at angle `maxAngleSplit`, we'd have this radius.
@@ -1063,6 +1063,393 @@ export default class PolygonClipping {
       }
     }
   }
+
+  /**
+   * Clips a polygon (represented by polygonal vertex lists) by a circle. This will output both the inside and outside,
+   * appending vertices to the arrays
+   *
+   * @param polygons
+   * @param center - the center of the circle
+   * @param radius - the radius of the circle
+   * @param maxAngleSplit - the maximum angle of a circular arc that will be converted into a linear edge
+   * @param inside - (OUTPUT) the polygon that is inside the circle (will be appended to)
+   * @param outside - (OUTPUT) the polygon that is outside the circle (will be appended to)
+   */
+  public static binaryCircularClipPolygon(
+    polygons: Vector2[][],
+    center: Vector2,
+    radius: number,
+    maxAngleSplit: number,
+    inside: Vector2[][],
+    outside: Vector2[][]
+  ): void {
+
+    const radiusSquared = radius * radius;
+
+    // If we inscribed a circle inside a regular polygon split at angle `maxAngleSplit`, we'd have this radius.
+    // Because we're turning our circular arcs into line segments at the end, we need to make sure that content inside
+    // the circle doesn't go OUTSIDE the "inner" polygon (in that sliver between the circle and regular polygon).
+    // We'll do that by adding "critical angles" for any points between the radius and inradus, so that our polygonal
+    // approximation of the circle has a split there.
+    // inradius = r cos( pi / n ) for n segments
+    // n = 2pi / maxAngleSplit
+    const inradius = radius * Math.cos( 0.5 * maxAngleSplit );
+
+    // Our general plan will be to clip by keeping things "inside" the circle, and using the duality of clipping with
+    // edges to also get the "outside" edges.
+    // The duality follows from the fact that if we have a "full" polygon represented by edges, and then we have a
+    // "subset" of it also represented by edges, then the "full - subset" difference can be represented by including
+    // both all the edges of the "full" polygon PLUS all of the edges of the "subset" polygon with their direction
+    // reversed.
+    // Additionally in general, instead of "appending" both of those lists, we can do MUCH better! Instead whenever
+    // we INCLUDE part of an original edge in the "subset", we DO NOT include it in the other disjoint polygon, and
+    // vice versa. Additionally, when we add in "new" edges (or fake ones), we need to add the REVERSE to the
+    // disjoint polygon.
+    // Thus we essentially get "dual" binary polygons for free.
+
+    // Because we are clipping to "keep the inside", any edges outside we can actually just "project" down to the circle
+    // (imagine wrapping the exterior edge around the circle). For the duality, we can output the internal/external
+    // "parts" directly to the inside/outside result arrays, but these wrapped circular projections will need to be
+    // stored for later here.
+    // Each "edge" in our input will have between 0 and 1 "internal" edges, and 0 and 2 "external" edges.
+
+    // TODO: docs for the polygonal approach
+    const insideCandidatePolygons: ( LinearEdge | CircularEdge )[][] = [];
+    const outsideCandidatePolygons: ( LinearEdge | CircularEdge )[][] = [];
+
+    const insideCandidateEdges: ( LinearEdge | CircularEdge )[] = [];
+
+    // TODO: WHAT about when we start OUTSIDE, and have to loop back around?
+    const outsideCandidateForwardEdges: LinearEdge[] = [];
+    const outsideCandidateReversedEdges: CircularEdge[] = [];
+
+    // We'll need to handle the cases where we start "outside", and thus don't have the matching "outside" edges yet.
+    // If we have an outside start point, we'll need to store the edges until we are completely done with that input
+    // polygon, then will connect them up!
+    let hasOutsideStartPoint = false;
+    const outsideStartOutsideCandidateForwardEdges: LinearEdge[] = [];
+    const outsideStartOutsideCandidateReversedEdges: CircularEdge[] = [];
+
+    // We'll also need to store "critical" angles for the future polygonalization of the circles. If we were outputting
+    // true circular edges, we could just include `insideCircularEdges`, however we want to convert it to line segments
+    // so that future stages don't have to deal with this.
+    // We'll need the angles so that those points on the circle will be exact (for ALL of the circular edges).
+    // This is because we may be wrapping back-and-forth across the circle multiple times, with different start/end
+    // angles, and we need the polygonal parts of these overlaps to be identical (to avoid precision issues later,
+    // and ESPECIALLY to avoid little polygonal bits with "negative" area where the winding orientation is flipped.
+    // There are two types of points where we'll need to store the angles:
+    // 1. Intersections with our circle (where we'll need to "split" the edge into two at that point)
+    // 2. Points where we are between the circumradius and inradius of the roughest "regular" polygon we might generate.
+
+    // between [-pi,pi], from atan2, tracked so we can turn the arcs piecewise-linear in a consistent fashion later
+    let angles: number[] = [];
+
+    const processCrossing = () => {
+      // We crossed! Now our future "outside" handling will have a "joined" start point
+      hasOutsideStartPoint = false;
+
+      if ( outsideCandidateForwardEdges.length ) {
+        outsideCandidateReversedEdges.reverse();
+
+        // Ensure that our start and end points match up
+        if ( assert ) {
+          const startEdgePoint = outsideCandidateForwardEdges[ 0 ].startPoint;
+          const endEdgePoint = outsideCandidateForwardEdges[ outsideCandidateForwardEdges.length - 1 ].endPoint;
+          const startRadialPoint = Vector2.createPolar( radius, outsideCandidateReversedEdges[ 0 ].startAngle ).add( center );
+          const endRadialPoint = Vector2.createPolar( radius, outsideCandidateReversedEdges[ outsideCandidateReversedEdges.length - 1 ].endAngle ).add( center );
+
+          assert( startEdgePoint.equalsEpsilon( endRadialPoint, 1e-6 ) );
+          assert( endEdgePoint.equalsEpsilon( startRadialPoint, 1e-6 ) );
+        }
+
+        const candidatePolygon = [
+          ...outsideCandidateForwardEdges,
+          ...outsideCandidateReversedEdges
+        ];
+        outsideCandidatePolygons.push( candidatePolygon );
+
+        outsideCandidateForwardEdges.length = 0;
+        outsideCandidateReversedEdges.length = 0;
+      }
+    };
+
+    // Process a fully-inside-the-circle part of an edge
+    const processInternal = ( start: Vector2, end: Vector2 ) => {
+      insideCandidateEdges.push( new LinearEdge( start, end ) );
+
+      const localStart = start.minus( center );
+      const localEnd = end.minus( center );
+
+      // We're already inside the circle, so the circumradius check isn't needed. If we're inside the inradius,
+      // ensure the critical angles are added.
+      if ( localStart.magnitude > inradius ) {
+        angles.push( localStart.angle );
+      }
+      if ( localEnd.magnitude > inradius ) {
+        angles.push( localEnd.angle );
+      }
+    };
+
+    // Process a fully-outside-the-circle part of an edge
+    const processExternal = ( start: Vector2, end: Vector2 ) => {
+
+      if ( hasOutsideStartPoint ) {
+        outsideStartOutsideCandidateForwardEdges.push( new LinearEdge( start, end ) );
+      }
+      else {
+        outsideCandidateForwardEdges.push( new LinearEdge( start, end ) );
+      }
+
+      const localStart = start.minus( center );
+      const localEnd = end.minus( center );
+
+      // Modify (project) them into points of the given radius.
+      localStart.multiplyScalar( radius / localStart.magnitude );
+      localEnd.multiplyScalar( radius / localEnd.magnitude );
+
+      // Handle projecting the edge to the circle.
+      // We'll only need to do extra work if the projected points are not equal. If we had a line that was pointed
+      // toward the center of the circle, it would project down to a single point, and we wouldn't have any contribution.
+      if ( !localStart.equalsEpsilon( localEnd, 1e-8 ) ) {
+        // Check to see which way we went "around" the circle
+
+        // (y, -x) perpendicular, so a clockwise pi/2 rotation
+        const isClockwise = localStart.perpendicular.dot( localEnd ) > 0;
+
+        const startAngle = localStart.angle;
+        const endAngle = localEnd.angle;
+
+        angles.push( startAngle );
+        angles.push( endAngle );
+
+        insideCandidateEdges.push( new CircularEdge( startAngle, endAngle, !isClockwise ) );
+        if ( hasOutsideStartPoint ) {
+          outsideStartOutsideCandidateReversedEdges.push( new CircularEdge( endAngle, startAngle, isClockwise ) );
+        }
+        else {
+          outsideCandidateReversedEdges.push( new CircularEdge( endAngle, startAngle, isClockwise ) );
+        }
+      }
+    };
+
+    for ( let i = 0; i < polygons.length; i++ ) {
+      const polygon = polygons[ i ];
+
+      for ( let j = 0; j < polygon.length; j++ ) {
+        const start = polygon[ j ];
+        const end = polygon[ ( j + 1 ) % polygon.length ];
+
+        const p0x = start.x - center.x;
+        const p0y = start.y - center.y;
+        const p1x = end.x - center.x;
+        const p1y = end.y - center.y;
+
+        // We'll use squared comparisons to avoid square roots
+        const startDistanceSquared = p0x * p0x + p0y * p0y;
+        const endDistanceSquared = p1x * p1x + p1y * p1y;
+
+        const startInside = startDistanceSquared <= radiusSquared;
+        const endInside = endDistanceSquared <= radiusSquared;
+
+        // If we meet these thresholds, we'll process a crossing
+        const startOnCircle = Math.abs( startDistanceSquared - radiusSquared ) < 1e-8;
+        const endOnCircle = Math.abs( endDistanceSquared - radiusSquared ) < 1e-8;
+
+        // If we're the first edge, set up our starting conditions
+        if ( j === 0 ) {
+          hasOutsideStartPoint = !startInside && !startOnCircle;
+        }
+
+        // If the endpoints are within the circle, the entire contents will be also (shortcut)
+        if ( startInside && endInside ) {
+          processInternal( start, end );
+          if ( startOnCircle || endOnCircle ) {
+            processCrossing();
+          }
+          continue;
+        }
+
+        // Now, we'll solve for the t-values of the intersection of the line and the circle.
+        // e.g. p0 + t * ( p1 - p0 ) will be on the circle. This is solvable with a quadratic equation.
+
+        const dx = p1x - p0x;
+        const dy = p1y - p0y;
+
+        // quadratic to solve
+        const a = dx * dx + dy * dy;
+        const b = 2 * ( p0x * dx + p0y * dy );
+        const c = p0x * p0x + p0y * p0y - radius * radius;
+
+        assert && assert( a > 0, 'We should have a delta, assumed in code below' );
+
+        const roots = Utils.solveQuadraticRootsReal( a, b, c );
+
+        let isFullyExternal = false;
+
+        // If we have no roots, we're fully outside the circle!
+        if ( !roots || roots.length === 0 ) {
+          isFullyExternal = true;
+        }
+        else {
+          assert && assert( roots.length === 2 );
+          assert && assert( roots[ 0 ] <= roots[ 1 ], 'Easier for us to assume root ordering' );
+          const rootA = roots[ 0 ];
+          const rootB = roots[ 1 ];
+
+          if ( rootB <= 0 || rootA >= 1 ) {
+            isFullyExternal = true;
+          }
+
+          // If our roots are identical, we are TANGENT to the circle. We can consider this to be fully external, since
+          // there will not be an internal section.
+          if ( rootA === rootB ) {
+            isFullyExternal = true;
+          }
+        }
+
+        if ( isFullyExternal ) {
+          processExternal( start, end );
+          continue;
+        }
+
+        assert && assert( roots![ 0 ] <= roots![ 1 ], 'Easier for us to assume root ordering' );
+        const rootA = roots![ 0 ];
+        const rootB = roots![ 1 ];
+
+        // Compute intersection points (when the t values are in the range [0,1])
+        const rootAInSegment = rootA > 0 && rootA < 1;
+        const rootBInSegment = rootB > 0 && rootB < 1;
+        const deltaPoints = end.minus( start );
+        const rootAPoint = rootAInSegment ? ( start.plus( deltaPoints.timesScalar( rootA ) ) ) : Vector2.ZERO; // ignore the zero, it's mainly for typing
+        const rootBPoint = rootBInSegment ? ( start.plus( deltaPoints.timesScalar( rootB ) ) ) : Vector2.ZERO; // ignore the zero, it's mainly for typing
+
+        if ( rootAInSegment && rootBInSegment ) {
+          processExternal( start, rootAPoint );
+          processCrossing();
+          processInternal( rootAPoint, rootBPoint );
+          processCrossing();
+          processExternal( rootBPoint, end );
+        }
+        else if ( rootAInSegment ) {
+          processExternal( start, rootAPoint );
+          processCrossing();
+          processInternal( rootAPoint, end );
+          if ( endOnCircle ) {
+            processCrossing();
+          }
+        }
+        else if ( rootBInSegment ) {
+          if ( startOnCircle ) {
+            processCrossing();
+          }
+          processInternal( start, rootBPoint );
+          processCrossing();
+          processExternal( rootBPoint, end );
+        }
+        else {
+          assert && assert( false, 'Should not reach this point, due to the boolean constraints above' );
+        }
+      }
+
+      // We finished the input polygon! Now we need to connect up things if we started outside.
+      if ( outsideCandidateForwardEdges.length || outsideStartOutsideCandidateForwardEdges.length ) {
+        // We... really should have both? Let's be permissive with epsilon checks?
+
+        outsideCandidateReversedEdges.reverse();
+        outsideStartOutsideCandidateReversedEdges.reverse();
+
+        // Ensure that all of our points must match up
+        if ( assert ) {
+          const getForwardStart = ( edges: LinearEdge[] ) => edges[ 0 ].startPoint;
+          const getForwardEnd = ( edges: LinearEdge[] ) => edges[ edges.length - 1 ].endPoint;
+          const getReverseStart = ( edges: CircularEdge[] ) => Vector2.createPolar( radius, edges[ 0 ].startAngle ).add( center );
+          const getReverseEnd = ( edges: CircularEdge[] ) => Vector2.createPolar( radius, edges[ edges.length - 1 ].endAngle ).add( center );
+
+          const p00 = getForwardEnd( outsideCandidateForwardEdges );
+          const p01 = getForwardStart( outsideStartOutsideCandidateForwardEdges );
+          assert( p00.equalsEpsilon( p01, 1e-6 ) );
+
+          const p10 = getForwardEnd( outsideStartOutsideCandidateForwardEdges );
+          const p11 = getReverseStart( outsideStartOutsideCandidateReversedEdges );
+          assert( p10.equalsEpsilon( p11, 1e-6 ) );
+
+          const p20 = getReverseEnd( outsideStartOutsideCandidateReversedEdges );
+          const p21 = getReverseStart( outsideCandidateReversedEdges );
+          assert( p20.equalsEpsilon( p21, 1e-6 ) );
+
+          const p30 = getReverseEnd( outsideCandidateReversedEdges );
+          const p31 = getForwardStart( outsideCandidateForwardEdges );
+          assert( p30.equalsEpsilon( p31, 1e-6 ) );
+        }
+
+        const candidatePolygon = [
+          ...outsideCandidateForwardEdges,
+          ...outsideStartOutsideCandidateForwardEdges,
+          ...outsideStartOutsideCandidateReversedEdges,
+          ...outsideCandidateReversedEdges
+        ];
+        outsideCandidatePolygons.push( candidatePolygon );
+
+        outsideCandidateForwardEdges.length = 0;
+        outsideCandidateReversedEdges.length = 0;
+        outsideStartOutsideCandidateForwardEdges.length = 0;
+        outsideStartOutsideCandidateReversedEdges.length = 0;
+      }
+
+      // TODO: should we assertion-check that these match up?
+      insideCandidatePolygons.push( insideCandidateEdges.slice() );
+      insideCandidateEdges.length = 0;
+    }
+
+    // Sort our critical angles, so we can iterate through unique values in-order
+    angles = _.uniq( angles.sort( ( a, b ) => a - b ) );
+
+    for ( let i = 0; i < insideCircularEdges.length; i++ ) {
+      const edge = insideCircularEdges[ i ];
+
+      const startIndex = angles.indexOf( edge.startAngle );
+      const endIndex = angles.indexOf( edge.endAngle );
+
+      const subAngles: number[] = [];
+
+      // Iterate (in the specific direction) through the angles we cover, and add them to our subAngles list.
+      const dirSign = edge.counterClockwise ? 1 : -1;
+      for ( let index = startIndex; index !== endIndex; index = ( index + dirSign + angles.length ) % angles.length ) {
+        subAngles.push( angles[ index ] );
+      }
+      subAngles.push( angles[ endIndex ] );
+
+      for ( let j = 0; j < subAngles.length - 1; j++ ) {
+        const startAngle = subAngles[ j ];
+        const endAngle = subAngles[ j + 1 ];
+
+        // Skip "negligible" angles
+        const absDiff = Math.abs( startAngle - endAngle );
+        if ( absDiff < 1e-9 || Math.abs( absDiff - Math.PI * 2 ) < 1e-9 ) {
+          continue;
+        }
+
+        // Put our end angle in the dirSign direction from our startAngle (if we're counterclockwise and our angle increases,
+        // our relativeEndAngle should be greater than our startAngle, and similarly if we're clockwise and our angle decreases,
+        // our relativeEndAngle should be less than our startAngle)
+        const relativeEndAngle = ( edge.counterClockwise === ( startAngle < endAngle ) ) ? endAngle : endAngle + dirSign * Math.PI * 2;
+
+        // Split our circular arc into segments!
+        const angleDiff = relativeEndAngle - startAngle;
+        const numSegments = Math.ceil( Math.abs( angleDiff ) / maxAngleSplit );
+        for ( let k = 0; k < numSegments; k++ ) {
+          const startTheta = startAngle + angleDiff * ( k / numSegments );
+          const endTheta = startAngle + angleDiff * ( ( k + 1 ) / numSegments );
+
+          const startPoint = Vector2.createPolar( radius, startTheta ).add( center );
+          const endPoint = Vector2.createPolar( radius, endTheta ).add( center );
+
+          inside.push( new LinearEdge( startPoint, endPoint ) );
+          outside.push( new LinearEdge( endPoint, startPoint ) );
+        }
+      }
+    }
+  }
 }
 
 // Stores data for binaryCircularClipEdges
@@ -1070,8 +1457,7 @@ class CircularEdge {
   public constructor(
     public readonly startAngle: number,
     public readonly endAngle: number,
-    public readonly counterClockwise: boolean,
-    public readonly containsFakeCorner: boolean = false
+    public readonly counterClockwise: boolean
   ) {}
 }
 
