@@ -68,6 +68,10 @@ export default class CombinedRaster implements OutputRaster {
       for ( let i = 0; i < width; i++ ) {
         const baseIndex = 4 * ( rowIndex + i );
         const data = this.imageData.data;
+        // For debugging, useful to quickly see regions
+        // data[ baseIndex ] = ( i === 0 || i === width - 1 || j === 0 || j === height - 1 ) ? 0 : sRGB.x;
+        // data[ baseIndex + 1 ] = ( i === 0 || i === width - 1 || j === 0 || j === height - 1 ) ? 0 : sRGB.y;
+        // data[ baseIndex + 2 ] = ( i === 0 || i === width - 1 || j === 0 || j === height - 1 ) ? 0 : sRGB.z;
         data[ baseIndex ] = sRGB.x;
         data[ baseIndex + 1 ] = sRGB.y;
         data[ baseIndex + 2 ] = sRGB.z;
