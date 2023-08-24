@@ -40,6 +40,34 @@ export default class RationalHalfEdge {
     this.p1float = new Vector2( p1.x.toFloat(), p1.y.toFloat() );
   }
 
+  // See LinearEdge.leftComparison
+  private leftComparison( x: BigRational, y: BigRational ): BigRational {
+    // TODO: estimate how many bits we will need!
+    // ( p1x - p0x ) * ( y - p0y ) - ( x - p0x ) * ( p1y - p0y );
+    return this.p1.x.minus( this.p0.x ).times( y.minus( this.p0.y ) ).minus( x.minus( this.p0.x ).times( this.p1.y.minus( this.p0.y ) ) );
+  }
+
+  // See LinearEdge.windingContribution
+  public windingContribution( x: BigRational, y: BigRational ): number {
+    const cmp0 = this.p0.y.compareCrossMul( y );
+    const cmp1 = this.p1.y.compareCrossMul( y );
+
+    if ( cmp0 <= 0 ) {
+      // If it's an upward crossing and P is to the left of the edge
+      if ( cmp1 > 0 && this.leftComparison( x, y ).isPositive() ) {
+        return 1; // have a valid "up" intersection
+      }
+    }
+    else { // p0y > y (no test needed)
+      // If it's a downward crossing and P is to the right of the edge
+      if ( cmp1 <= 0 && this.leftComparison( x, y ).isNegative() ) {
+        return -1; // have a valid "down" intersection
+      }
+    }
+
+    return 0;
+  }
+
   public static compareBigInt( a: bigint, b: bigint ): number {
     return a < b ? -1 : ( a > b ? 1 : 0 );
   }

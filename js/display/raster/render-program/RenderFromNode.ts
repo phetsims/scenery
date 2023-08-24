@@ -29,7 +29,8 @@ const piecewiseOptions = {
   curveEpsilon: 0.2
 };
 
-const resampleType = RenderResampleType.AnalyticBilinear;
+const resampleType = RenderResampleType.Bilinear;
+// const resampleType = RenderResampleType.AnalyticBilinear;
 
 const combine = ( a: RenderProgram, b: RenderProgram ) => new RenderBlendCompose(
   RenderComposeType.Over,

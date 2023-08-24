@@ -43,6 +43,16 @@ export default class RationalBoundary {
     this.signedArea = signedArea;
   }
 
+  public containsPoint( point: BigRationalVector2 ): boolean {
+    let windingNumber = 0;
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      windingNumber += this.edges[ i ].windingContribution( point.x, point.y );
+    }
+
+    return windingNumber !== 0;
+  }
+
   public toTransformedPolygon( matrix: Matrix3 ): Vector2[] {
     const result: Vector2[] = [];
     for ( let i = 0; i < this.edges.length; i++ ) {

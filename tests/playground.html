@@ -569,8 +569,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      const outputSize = 768 * 2;
-      // const outputSize = 768 / 4;
+      // const outputSize = 768 * 2;
+      const outputSize = 768 / 4;
 
       // const imageResampleType = phet.scenery.RenderResampleType.NearestNeighbor
       const imageResampleType = phet.scenery.RenderResampleType.Bilinear;
@@ -619,7 +619,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_FACE_CONSISTENT_FILL = false;
       const SHOW_FACE_HUE_FILL = false;
       const SHOW_BOUNDARY_DEBUG = false;
-      const SHOW_BOUNDARIES = false;
+      const SHOW_BOUNDARIES = true;
       const SHOW_INCLUSION_DEBUG = false;
       const SHOW_SOLID_COLORS = false;
       const SHOW_FULL_AREAS = false;
@@ -638,7 +638,7 @@ an UI and Display made for visual testing and debugging.
           new phet.dot.Vector2( 20, 0 ),
           new phet.dot.Vector2( 40, 0 ),
           new phet.dot.Vector2( 55, 30 ),
-          new phet.dot.Vector2( 30, 40 )
+          new phet.dot.Vector2( 30, 35 )
         ]
       ] );
       const pathB = new phet.scenery.RenderPath( 'nonzero', [
@@ -847,7 +847,8 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a ] ).transformed(
+      // const program = normalBlendArray( [ back, d, e, f, bc, a ] ).transformed(
+      const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );
 

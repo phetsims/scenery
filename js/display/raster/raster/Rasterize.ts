@@ -532,9 +532,6 @@ export default class Rasterize {
     assert && assert( Math.abs( ( scale * gridBounds.minX + translation.x ) + ( scale * gridBounds.maxX + translation.x ) ) < 1e-10 );
     assert && assert( Math.abs( ( scale * gridBounds.minY + translation.y ) + ( scale * gridBounds.maxY + translation.y ) ) < 1e-10 );
 
-    const integerBounds = gridBounds.transformed( toIntegerMatrix );
-    if ( assert ) { debugData!.integerBounds = integerBounds; }
-
     const paths: RenderPath[] = [];
     renderProgram.depthFirst( program => {
       if ( program instanceof RenderPathProgram && program.path !== null ) {
@@ -586,17 +583,9 @@ export default class Rasterize {
     }
     RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
 
-    let faceHoleLog = null;
-    if ( assert ) {
-      debugData!.boundaryDebugData = [];
-      faceHoleLog = { entries: debugData!.boundaryDebugData };
-    }
-
-    const exteriorBoundary = RationalFace.computeFaceHoles(
-      integerBounds,
+    const exteriorBoundary = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
       outerBoundaries,
-      faces,
-      faceHoleLog
+      faces
     );
 
     // For ease of use, an unbounded face (it is essentially fake)

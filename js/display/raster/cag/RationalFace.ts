@@ -124,6 +124,76 @@ export default class RationalFace {
   }
 
   // Returns the fully exterior boundary (should be singular, since we added the exterior rectangle)
+  // NOTE: mutates faces order
+  public static computeFaceHolesWithOrderedWindingNumbers(
+    outerBoundaries: RationalBoundary[],
+    faces: RationalFace[]
+  ): RationalBoundary {
+    let exteriorBoundary: RationalBoundary | null = null;
+
+    // Sort faces by their exterior signed areas (when we find our point is included in the smallest face boundary,
+    // we'll be able to exit without testing others).
+    faces.sort( ( a, b ) => a.boundary.signedArea - b.boundary.signedArea );
+
+    for ( let i = 0; i < outerBoundaries.length; i++ ) {
+      const outerBoundary = outerBoundaries[ i ];
+      const outerBounds = outerBoundary.bounds;
+      const outerArea = -outerBoundary.signedArea;
+      assert && assert( outerArea > 0 );
+
+      const minimalRationalPoint = outerBoundary.minimalXRationalPoint;
+
+      let found = false;
+
+      for ( let j = 0; j < faces.length; j++ ) {
+        const face = faces[ j ];
+        const innerBoundary = face.boundary;
+
+        // Skip through faces that are smaller than our hole
+        if ( outerArea > innerBoundary.signedArea ) {
+          continue;
+        }
+
+        const innerBounds = innerBoundary.bounds;
+
+        // Check if the "inner" bounds actually fully contains (strictly) our "outer" bounds.
+        // This is a constraint that has to be satisfied for the outer boundary to be a hole.
+        if (
+          outerBounds.minX > innerBounds.minX &&
+          outerBounds.minY > innerBounds.minY &&
+          outerBounds.maxX < innerBounds.maxX &&
+          outerBounds.maxY < innerBounds.maxY
+        ) {
+          // Now we check for inclusion!
+          if ( innerBoundary.containsPoint( minimalRationalPoint ) ) {
+            // FOUND IT!
+            face.holes.push( outerBoundary );
+
+            // Fill in face data for holes, so we can traverse nicely
+            for ( let k = 0; k < outerBoundary.edges.length; k++ ) {
+              outerBoundary.edges[ k ].face = face;
+            }
+
+            found = true;
+            break;
+          }
+        }
+      }
+
+      // We should only find one exterior boundary
+      if ( !found ) {
+        assert && assert( !exteriorBoundary );
+        exteriorBoundary = outerBoundary;
+      }
+    }
+
+    assert && assert( exteriorBoundary );
+    return exteriorBoundary!;
+  }
+
+  // Returns the fully exterior boundary (should be singular, since we added the exterior rectangle)
+  // TODO: DOUBTS on the correctness of this, the filtering of boundaries seems sketchy. Probably not as high-performance
+  // TODO: BUT perhaps it is more parallelizable?
   public static computeFaceHoles(
     integerBounds: Bounds2,
     outerBoundaries: RationalBoundary[],
