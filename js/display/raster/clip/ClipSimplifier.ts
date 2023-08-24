@@ -33,6 +33,10 @@ export default class ClipSimplifier {
     );
   }
 
+  public addPoint( p: Vector2 ): void {
+    this.add( p.x, p.y );
+  }
+
   public add( x: number, y: number ): void {
     if ( this.points.length >= 1 ) {
 

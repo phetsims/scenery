@@ -1113,13 +1113,33 @@ export default class PolygonClipping {
     // stored for later here.
     // Each "edge" in our input will have between 0 and 1 "internal" edges, and 0 and 2 "external" edges.
 
-    // TODO: docs for the polygonal approach
+    // Because we're handling the polygonal form, we'll need to do some complicated handling for the outside. Whenever
+    // we have a transition to the outside (at a specific point), we'll start recording the "outside" edges in one
+    // "forward" list, and the corresponding circular movements in the "reverse" list (it will be in the wrong order,
+    // and will be reversed later). Once our polygon goes back inside, we'll be able to stitch these together to create
+    // an "outside" polygon (forward edges + reversed reverse edges).
+
+    // This gets TRICKIER because if we start outside, we'll have an "unclosed" section of a polygon. We'll need to
+    // store THOSE edges in the "outsideStartOutside" list, so that once we finish the polygon, we can rejoin them with
+    // the other unprocessed "outside" edges.
+
+    // We'll need to detect crossings of the circle, so that we can "join" the outside edges together. This is somewhat
+    // complicated by the fact that the endpoints of a segment may be on the circle, so one edge might be fully
+    // internal, and the next might be fully external. We'll use an epsilon to detect this.
+
+    // -------------
+
+    // Our edges of output polygons (that will need to be "split up" if they are circular) will be stored here. These
+    // are in "final" form, except for the splitting.
     const insideCandidatePolygons: ( LinearEdge | CircularEdge )[][] = [];
     const outsideCandidatePolygons: ( LinearEdge | CircularEdge )[][] = [];
 
+    // Our "inside" edges are always stored in the "forward" order. For every input polygon, we'll push here and then
+    // put this into the insideCandidatePolygons array (one input polygon to one potential output polygon).
     const insideCandidateEdges: ( LinearEdge | CircularEdge )[] = [];
 
-    // TODO: WHAT about when we start OUTSIDE, and have to loop back around?
+    // The arrays we push outside edges when hasOutsideStartPoint = false. When we have a crossing, we'll have a
+    // complete outside polygon to push to outsideCandidatePolygons.
     const outsideCandidateForwardEdges: LinearEdge[] = [];
     const outsideCandidateReversedEdges: CircularEdge[] = [];
 
@@ -1140,6 +1160,9 @@ export default class PolygonClipping {
     // There are two types of points where we'll need to store the angles:
     // 1. Intersections with our circle (where we'll need to "split" the edge into two at that point)
     // 2. Points where we are between the circumradius and inradius of the roughest "regular" polygon we might generate.
+
+    // Because we need to output polygon data in order, we'll need to process ALL of the data, determine the angles,
+    // and then output all of it.
 
     // between [-pi,pi], from atan2, tracked so we can turn the arcs piecewise-linear in a consistent fashion later
     let angles: number[] = [];
@@ -1232,6 +1255,7 @@ export default class PolygonClipping {
       }
     };
 
+    // Stage to process the edges into the insideCandidatesPolygons/outsideCandidatesPolygons arrays.
     for ( let i = 0; i < polygons.length; i++ ) {
       const polygon = polygons[ i ];
 
@@ -1397,58 +1421,85 @@ export default class PolygonClipping {
       }
 
       // TODO: should we assertion-check that these match up?
-      insideCandidatePolygons.push( insideCandidateEdges.slice() );
-      insideCandidateEdges.length = 0;
+      if ( insideCandidateEdges.length ) {
+        insideCandidatePolygons.push( insideCandidateEdges.slice() );
+        insideCandidateEdges.length = 0;
+      }
     }
 
     // Sort our critical angles, so we can iterate through unique values in-order
     angles = _.uniq( angles.sort( ( a, b ) => a - b ) );
 
-    for ( let i = 0; i < insideCircularEdges.length; i++ ) {
-      const edge = insideCircularEdges[ i ];
-
-      const startIndex = angles.indexOf( edge.startAngle );
-      const endIndex = angles.indexOf( edge.endAngle );
-
-      const subAngles: number[] = [];
-
-      // Iterate (in the specific direction) through the angles we cover, and add them to our subAngles list.
-      const dirSign = edge.counterClockwise ? 1 : -1;
-      for ( let index = startIndex; index !== endIndex; index = ( index + dirSign + angles.length ) % angles.length ) {
-        subAngles.push( angles[ index ] );
+    // We'll just add the start point(s)
+    const addEdgeTo = ( edge: LinearEdge | CircularEdge, simplifier: ClipSimplifier ) => {
+      if ( edge instanceof LinearEdge ) {
+        simplifier.addPoint( edge.startPoint );
       }
-      subAngles.push( angles[ endIndex ] );
+      else {
+        const startIndex = angles.indexOf( edge.startAngle );
+        const endIndex = angles.indexOf( edge.endAngle );
 
-      for ( let j = 0; j < subAngles.length - 1; j++ ) {
-        const startAngle = subAngles[ j ];
-        const endAngle = subAngles[ j + 1 ];
+        const subAngles: number[] = [];
 
-        // Skip "negligible" angles
-        const absDiff = Math.abs( startAngle - endAngle );
-        if ( absDiff < 1e-9 || Math.abs( absDiff - Math.PI * 2 ) < 1e-9 ) {
-          continue;
+        // Iterate (in the specific direction) through the angles we cover, and add them to our subAngles list.
+        const dirSign = edge.counterClockwise ? 1 : -1;
+        for ( let index = startIndex; index !== endIndex; index = ( index + dirSign + angles.length ) % angles.length ) {
+          subAngles.push( angles[ index ] );
         }
+        subAngles.push( angles[ endIndex ] );
 
-        // Put our end angle in the dirSign direction from our startAngle (if we're counterclockwise and our angle increases,
-        // our relativeEndAngle should be greater than our startAngle, and similarly if we're clockwise and our angle decreases,
-        // our relativeEndAngle should be less than our startAngle)
-        const relativeEndAngle = ( edge.counterClockwise === ( startAngle < endAngle ) ) ? endAngle : endAngle + dirSign * Math.PI * 2;
+        for ( let j = 0; j < subAngles.length - 1; j++ ) {
+          const startAngle = subAngles[ j ];
+          const endAngle = subAngles[ j + 1 ];
 
-        // Split our circular arc into segments!
-        const angleDiff = relativeEndAngle - startAngle;
-        const numSegments = Math.ceil( Math.abs( angleDiff ) / maxAngleSplit );
-        for ( let k = 0; k < numSegments; k++ ) {
-          const startTheta = startAngle + angleDiff * ( k / numSegments );
-          const endTheta = startAngle + angleDiff * ( ( k + 1 ) / numSegments );
+          // Skip "negligible" angles
+          const absDiff = Math.abs( startAngle - endAngle );
+          if ( absDiff < 1e-9 || Math.abs( absDiff - Math.PI * 2 ) < 1e-9 ) {
+            continue;
+          }
 
-          const startPoint = Vector2.createPolar( radius, startTheta ).add( center );
-          const endPoint = Vector2.createPolar( radius, endTheta ).add( center );
+          // Put our end angle in the dirSign direction from our startAngle (if we're counterclockwise and our angle increases,
+          // our relativeEndAngle should be greater than our startAngle, and similarly if we're clockwise and our angle decreases,
+          // our relativeEndAngle should be less than our startAngle)
+          const relativeEndAngle = ( edge.counterClockwise === ( startAngle < endAngle ) ) ? endAngle : endAngle + dirSign * Math.PI * 2;
 
-          inside.push( new LinearEdge( startPoint, endPoint ) );
-          outside.push( new LinearEdge( endPoint, startPoint ) );
+          // Split our circular arc into segments!
+          const angleDiff = relativeEndAngle - startAngle;
+          const numSegments = Math.ceil( Math.abs( angleDiff ) / maxAngleSplit );
+          for ( let k = 0; k < numSegments; k++ ) {
+            const startTheta = startAngle + angleDiff * ( k / numSegments );
+            const startPoint = Vector2.createPolar( radius, startTheta ).add( center );
+
+            simplifier.addPoint( startPoint );
+          }
         }
       }
+    };
+
+    const addPolygonTo = ( edges: ( LinearEdge | CircularEdge )[], polygons: Vector2[][] ) => {
+      simplifier.reset();
+
+      for ( let j = 0; j < edges.length; j++ ) {
+        addEdgeTo( edges[ j ], simplifier );
+      }
+
+      const polygon = simplifier.finalize();
+
+      if ( polygon.length >= 3 ) {
+        polygons.push( polygon );
+      }
+    };
+
+    for ( let i = 0; i < insideCandidatePolygons.length; i++ ) {
+      addPolygonTo( insideCandidatePolygons[ i ], inside );
     }
+
+    for ( let i = 0; i < outsideCandidatePolygons.length; i++ ) {
+      addPolygonTo( outsideCandidatePolygons[ i ], outside );
+    }
+
+    // Final one, because paranoia
+    simplifier.reset();
   }
 }
 
