@@ -431,6 +431,7 @@ export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js'
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
 export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundOverlay.js';
 
+
 export { default as constantTrue } from './display/raster/render-program/constantTrue.js';
 export { default as PolygonFilterType, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand } from './display/raster/render-program/PolygonFilterType.js';
 export { default as RenderBlendType } from './display/raster/render-program/RenderBlendType.js';
@@ -467,6 +468,9 @@ export type { SerializedRenderRadialGradient } from './display/raster/render-pro
 export { default as RenderResampleType } from './display/raster/render-program/RenderResampleType.js';
 export type { default as FillRule } from './display/raster/render-program/FillRule.js';
 export { default as RenderFromNode } from './display/raster/render-program/RenderFromNode.js';
+
+export { default as LinearEdge } from './display/raster/cag/LinearEdge.js';
+export type { SerializedLinearEdge } from './display/raster/cag/LinearEdge.js';
 
 export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js';
 export { default as BigRational } from './display/raster/cag/BigRational.js';
@@ -506,9 +510,6 @@ export { default as PolygonMitchellNetravali } from './display/raster/raster/Pol
 export { default as Rasterize } from './display/raster/raster/Rasterize.js';
 export type { RasterizationOptions } from './display/raster/raster/Rasterize.js';
 export { default as RenderableFace } from './display/raster/raster/RenderableFace.js';
-
-export { default as LinearEdge } from './display/raster/util/LinearEdge.js';
-export type { SerializedLinearEdge } from './display/raster/util/LinearEdge.js';
 
 export { default as Instance } from './display/Instance.js';
 export type { default as TOverlay } from './overlays/TOverlay.js';
