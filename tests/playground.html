@@ -569,8 +569,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      // const outputSize = 768 * 2;
-      const outputSize = 768 / 4;
+      const outputSize = 768 * 2;
+      // const outputSize = 768 / 4;
 
       // const imageResampleType = phet.scenery.RenderResampleType.NearestNeighbor
       const imageResampleType = phet.scenery.RenderResampleType.Bilinear;
@@ -612,6 +612,19 @@ an UI and Display made for visual testing and debugging.
         // splitLinearGradients: true,
         // splitRadialGradients: true
       };
+
+      const SHOW_INTEGER_EDGES = false;
+      const SHOW_INTERSECTIONS = false;
+      const SHOW_HALF_EDGES = false;
+      const SHOW_FACE_CONSISTENT_FILL = false;
+      const SHOW_FACE_HUE_FILL = false;
+      const SHOW_BOUNDARY_DEBUG = false;
+      const SHOW_BOUNDARIES = false;
+      const SHOW_INCLUSION_DEBUG = false;
+      const SHOW_SOLID_COLORS = false;
+      const SHOW_FULL_AREAS = false;
+      const SHOW_RENDERABLE_FACES = false;
+      const SHOW_RENDERABLE_FACE_INDICES = false;
 
       const piecewiseOptions = {
         minLevels: 1,
@@ -867,21 +880,8 @@ an UI and Display made for visual testing and debugging.
       } );
       scene.addChild( offsetNode );
 
-      // TODO: CHECK MORE OF THESE AFTER COORDINATE CHANGES
-      const SHOW_INTEGER_EDGES = false;
-      const SHOW_INTERSECTIONS = false;
-      const SHOW_HALF_EDGES = false;
-      const SHOW_FACE_CONSISTENT_FILL = false;
-      const SHOW_FACE_HUE_FILL = false;
-      const SHOW_BOUNDARY_DEBUG = false;
-      const SHOW_BOUNDARIES = false;
       const WINDING_DEBUG_PATH = null;
-      const SHOW_INCLUSION_DEBUG = false;
-      const INCLUSION_DEBUG_PATH = program.a.path;
-      const SHOW_SOLID_COLORS = false;
-      const SHOW_FULL_AREAS = false;
-      const SHOW_RENDERABLE_FACES = true;
-      const SHOW_RENDERABLE_FACE_INDICES = false;
+      const INCLUSION_DEBUG_PATH = null;
 
       const fromRenderPoint = renderPoint => renderPoint.timesScalar( displaySize / outputSize );
       const fromRenderX = renderX => renderX * displaySize / outputSize;
@@ -1100,9 +1100,10 @@ an UI and Display made for visual testing and debugging.
           // }
           const shape = data.clippableFace.getShape().transformed( fromRenderMatrix );
           offsetNode.addChild( new phet.scenery.Path( shape, {
-            stroke: 'black',
+            stroke: 'rgba(0,0,0,0.8)',
             lineJoin: 'round',
-            lineCap: 'round'
+            lineCap: 'round',
+            lineWidth: 0.5
           } ) );
         } );
       }
