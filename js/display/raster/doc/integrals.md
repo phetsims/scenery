@@ -64,7 +64,7 @@ If we zero out all of the canceled terms, it turns out that we can evaluate the 
 
 $`\iint_Px^my^n\,dx\,dy=\frac{m!n!}{(m+n+2)!}\sum_{i}\left[ (x_iy_{i+1}-x_{i+1}y_i) \sum_{p=0}^m\sum_{q=0}^n \binom{p+q}{q}\binom{m+n-p-q}{n-q}x_i^{m-p}x_{i+1}^py_i^{n-q}y_{i+1}^q \right]`$
 
-(Conjecture, matches Mathematica output precisely). The contributions of each term can be summed up individually to integrate arbitrary polynomials.
+This was first discovered by Soerjadi (1968) in [On the Computation of the Moments of a Polygon, with some Applications](https://repository.tudelft.nl/islandora/object/uuid:963296a1-8940-4439-9404-eca1bd2f8638/datastream/OBJ/download). The contributions of each term can be summed up individually to integrate arbitrary polynomials.
 
 e.g. for $`x^4y^2`$ in matrix form:
 
