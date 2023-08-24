@@ -1568,6 +1568,49 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.windingNumberInclusionTest = function() {
+    setTimeout( async function() {
+      const polygon = [
+        new phet.dot.Vector2( 0, 0 ),
+        new phet.dot.Vector2( 0.5, 0 ),
+        new phet.dot.Vector2( 1, 0.5 ),
+        new phet.dot.Vector2( 1, 1 ),
+        new phet.dot.Vector2( 0.5, 0.75 ),
+        new phet.dot.Vector2( 0, 1 ),
+        new phet.dot.Vector2( 0, 0.5 ),
+        new phet.dot.Vector2( 0.77, 0.6 )
+      ];
+
+      const scaledNode = new phet.scenery.Node( {
+        x: 100,
+        y: 400,
+      } );
+      scaledNode.setScaleMagnitude( 300, -300 )
+      scene.addChild( scaledNode );
+
+      scaledNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
+        stroke: 'green',
+        lineWidth: 1 / 300,
+      } ) );
+
+      for ( let x = -0.205; x < 1.205; x += 0.025 ) {
+        for ( let y = -0.205; y < 1.205; y += 0.025 ) {
+          const included = phet.scenery.LinearEdge.getWindingNumberPolygon( polygon, phet.dot.v2( x, y ) ) !== 0;
+
+          scaledNode.addChild( new phet.scenery.Circle( 0.003, {
+            fill: included ? 'green' : 'red',
+            x: x,
+            y: y
+          } ) );
+        }
+      }
+
+      display.width = 1024;
+      display.height = 1024;
+      display.updateDisplay();
+    } );
+  };
+
   window.stripeClipPolygonTest = function() {
     setTimeout( async function() {
       const polygon = [

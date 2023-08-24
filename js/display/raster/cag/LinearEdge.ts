@@ -427,6 +427,75 @@ export default class LinearEdge {
              : Math.sqrt( p1x * p1x + p1y * p1y );
     }
   }
+
+  /**
+   * Tests if the point (x,y) is left/on/right of the infinite line determined by (p0x,p0y) and (p1x,p1y).
+   * Return: >0 for P2 left of the line through P0 and P1
+   *         =0 for P2  on the line
+   *         <0 for P2  right of the line
+   */
+  public static leftComparison( p0x: number, p0y: number, p1x: number, p1y: number, x: number, y: number ): number {
+    return ( p1x - p0x ) * ( y - p0y ) - ( x - p0x ) * ( p1y - p0y );
+  }
+
+  /**
+   * Gets the winding contribution of an edge segment to a point with the Dan Sunday winding number algorithm.
+   *
+   * See https://web.archive.org/web/20130126163405/http://geomalgorithms.com/a03-_inclusion.html
+   */
+  public static windingContribution( p0x: number, p0y: number, p1x: number, p1y: number, x: number, y: number ): number {
+    if ( p0y <= y ) {
+      // If it's an upward crossing and P is to the left of the edge
+      if ( p1y > y && LinearEdge.leftComparison( p0x, p0y, p1x, p1y, x, y ) > 0 ) {
+        return 1; // have a valid "up" intersection
+      }
+    }
+    else { // p0y > y (no test needed)
+      // If it's a downward crossing and P is to the right of the edge
+      if ( p1y <= y && LinearEdge.leftComparison( p0x, p0y, p1x, p1y, x, y ) < 0 ) {
+        return -1; // have a valid "down" intersection
+      }
+    }
+
+    return 0;
+  }
+
+  public static getWindingNumberEdges( edges: LinearEdge[], point: Vector2 ): number {
+    let windingNumber = 0;
+
+    for ( let i = 0; i < edges.length; i++ ) {
+      const edge = edges[ i ];
+      windingNumber += LinearEdge.windingContribution(
+        edge.startPoint.x, edge.startPoint.y, edge.endPoint.x, edge.endPoint.y, point.x, point.y
+      );
+    }
+
+    return windingNumber;
+  }
+
+  public static getWindingNumberPolygon( polygon: Vector2[], point: Vector2 ): number {
+    let windingNumber = 0;
+
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const p0 = polygon[ i ];
+      const p1 = polygon[ ( i + 1 ) % polygon.length ];
+      windingNumber += LinearEdge.windingContribution(
+        p0.x, p0.y, p1.x, p1.y, point.x, point.y
+      );
+    }
+
+    return windingNumber;
+  }
+
+  public static getWindingNumberPolygons( polygons: Vector2[][], point: Vector2 ): number {
+    let windingNumber = 0;
+
+    for ( let i = 0; i < polygons.length; i++ ) {
+      windingNumber += LinearEdge.getWindingNumberPolygon( polygons[ i ], point );
+    }
+
+    return windingNumber;
+  }
 }
 
 scenery.register( 'LinearEdge', LinearEdge );

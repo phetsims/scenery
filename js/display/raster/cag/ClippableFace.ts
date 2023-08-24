@@ -32,6 +32,7 @@ type ClippableFace = {
   getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: ClippableFace; outsideFace: ClippableFace };
   getBilinearFiltered( pointX: number, pointY: number, minX: number, minY: number ): number;
   getMitchellNetravaliFiltered( pointX: number, pointY: number, minX: number, minY: number ): number;
+  containsPoint( point: Vector2 ): boolean;
   toPolygonalFace( epsilon?: number ): PolygonalFace;
   toEdgedFace(): EdgedFace;
   getShape( epsilon?: number ): Shape; // NOTE: this is only for debugging, performance won't be great

@@ -274,6 +274,10 @@ export default class EdgedFace implements ClippableFace {
     return PolygonMitchellNetravali.evaluateLinearEdges( this.edges, pointX, pointY, minX, minY );
   }
 
+  public containsPoint( point: Vector2 ): boolean {
+    return LinearEdge.getWindingNumberEdges( this.edges, point ) !== 0;
+  }
+
   public getTransformed( transform: Matrix3 ): EdgedFace {
     if ( transform.isIdentity() ) {
       return this;

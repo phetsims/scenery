@@ -298,6 +298,10 @@ export default class PolygonalFace implements ClippableFace {
     return PolygonMitchellNetravali.evaluatePolygons( this.polygons, pointX, pointY, minX, minY );
   }
 
+  public containsPoint( point: Vector2 ): boolean {
+    return LinearEdge.getWindingNumberPolygons( this.polygons, point ) !== 0;
+  }
+
   public getTransformed( transform: Matrix3 ): PolygonalFace {
     if ( transform.isIdentity() ) {
       return this;
