@@ -452,6 +452,14 @@ export { default as RenderPremultiply } from './display/raster/render-program/Re
 export type { SerializedRenderPremultiply } from './display/raster/render-program/RenderPremultiply.js';
 export { default as RenderUnpremultiply } from './display/raster/render-program/RenderUnpremultiply.js';
 export type { SerializedRenderUnpremultiply } from './display/raster/render-program/RenderUnpremultiply.js';
+export { default as RenderLinearSRGBToOklab } from './display/raster/render-program/RenderLinearSRGBToOklab.js';
+export type { SerializedRenderLinearSRGBToOklab } from './display/raster/render-program/RenderLinearSRGBToOklab.js';
+export { default as RenderLinearSRGBToSRGB } from './display/raster/render-program/RenderLinearSRGBToSRGB.js';
+export type { SerializedRenderLinearSRGBToSRGB } from './display/raster/render-program/RenderLinearSRGBToSRGB.js';
+export { default as RenderOklabToLinearSRGB } from './display/raster/render-program/RenderOklabToLinearSRGB.js';
+export type { SerializedRenderOklabToLinearSRGB } from './display/raster/render-program/RenderOklabToLinearSRGB.js';
+export { default as RenderSRGBToLinearSRGB } from './display/raster/render-program/RenderSRGBToLinearSRGB.js';
+export type { SerializedRenderSRGBToLinearSRGB } from './display/raster/render-program/RenderSRGBToLinearSRGB.js';
 export { default as RenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export type { SerializedRenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export { default as RenderFilter } from './display/raster/render-program/RenderFilter.js';
