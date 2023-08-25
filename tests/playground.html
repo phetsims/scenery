@@ -619,7 +619,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_FACE_CONSISTENT_FILL = false;
       const SHOW_FACE_HUE_FILL = false;
       const SHOW_BOUNDARY_DEBUG = false;
-      const SHOW_BOUNDARIES = true;
+      const SHOW_BOUNDARIES = false;
       const SHOW_INCLUSION_DEBUG = false;
       const SHOW_SOLID_COLORS = false;
       const SHOW_FULL_AREAS = false;
@@ -663,17 +663,17 @@ an UI and Display made for visual testing and debugging.
           new phet.dot.Vector2( 0, 0 ),
           new phet.dot.Vector2( 48, 0 ),
           new phet.dot.Vector2( 50, 32 ),
-          new phet.dot.Vector2( 64, 64 ),
+          new phet.dot.Vector2( 64, 35 ),
           new phet.dot.Vector2( 24, 32 ),
-          new phet.dot.Vector2( 48, 64 ),
+          new phet.dot.Vector2( 20, 35 ),
           new phet.dot.Vector2( 16, 32 ),
-          new phet.dot.Vector2( 32, 64 ),
+          new phet.dot.Vector2( 12, 35 ),
           new phet.dot.Vector2( 8, 32 ),
-          new phet.dot.Vector2( 16, 64 ),
+          new phet.dot.Vector2( 4, 35 ),
           new phet.dot.Vector2( 0, 40 )
         ],
         phet.kite.Shape.circle( 48, 16, 5 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
-        phet.kite.Shape.circle( 48, 43, 10 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
+        phet.kite.Shape.circle( 57, 5, 4 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
       ] );
       const pathE = new phet.scenery.RenderPath( 'nonzero', [
         boundsRect( new phet.dot.Bounds2( 40, 40, 60, 60 ) ),
@@ -847,8 +847,8 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      // const program = normalBlendArray( [ back, d, e, f, bc, a ] ).transformed(
-      const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
+      const program = normalBlendArray( [ back, d, e, f, bc, a ] ).transformed(
+      // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );
 

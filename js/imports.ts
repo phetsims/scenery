@@ -448,6 +448,10 @@ export { default as RenderColor } from './display/raster/render-program/RenderCo
 export type { SerializedRenderColor } from './display/raster/render-program/RenderColor.js';
 export { default as RenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export type { SerializedRenderAlpha } from './display/raster/render-program/RenderAlpha.js';
+export { default as RenderPremultiply } from './display/raster/render-program/RenderPremultiply.js';
+export type { SerializedRenderPremultiply } from './display/raster/render-program/RenderPremultiply.js';
+export { default as RenderUnpremultiply } from './display/raster/render-program/RenderUnpremultiply.js';
+export type { SerializedRenderUnpremultiply } from './display/raster/render-program/RenderUnpremultiply.js';
 export { default as RenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export type { SerializedRenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export { default as RenderFilter } from './display/raster/render-program/RenderFilter.js';
