@@ -776,7 +776,6 @@ an UI and Display made for visual testing and debugging.
         return new phet.scenery.RenderPremultiply( new phet.scenery.RenderLinearSRGBToSRGB( new phet.scenery.RenderOklabToLinearSRGB( new phet.scenery.RenderUnpremultiply( renderProgram ) ) ) );
       };
 
-      // const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
       const a = premulLinearSRGBToPremulSRGB( new phet.scenery.RenderImage(
         pathA,
 
@@ -806,7 +805,6 @@ an UI and Display made for visual testing and debugging.
         imageResampleType
       ) );
       const b = toPremulSRGBPath( pathB, 0, 255, 0, 1 );
-      // const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );
       const c = new phet.scenery.RenderRadialGradient(
         pathC,
         phet.dot.Matrix3.IDENTITY,
@@ -1090,7 +1088,7 @@ an UI and Display made for visual testing and debugging.
       if ( SHOW_SOLID_COLORS ) {
         debugData.faces.forEach( face => {
           if ( face.renderProgram instanceof phet.scenery.RenderColor ) {
-            offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: phet.scenery.RenderColor.premultipliedLinearToColor( face.renderProgram.color ) } ) );
+            offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: phet.scenery.RenderColor.premultipliedSRGBToColor( face.renderProgram.color ) } ) );
           }
         } );
       }
@@ -1256,7 +1254,7 @@ an UI and Display made for visual testing and debugging.
 
           const paddedValue = 0.9 * value + 0.05;
 
-          const color = phet.scenery.RenderColor.premultipliedLinearToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+          const color = phet.scenery.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
 
           const index = 4 * ( i * width + j );
           imageData.data[ index ] = color.r;
@@ -1333,7 +1331,7 @@ an UI and Display made for visual testing and debugging.
 
           const paddedValue = 0.95 - 0.9 * value;
 
-          const color = phet.scenery.RenderColor.premultipliedLinearToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+          const color = phet.scenery.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
 
           const index = 4 * ( i * width + j );
           imageData.data[ index ] = color.r;

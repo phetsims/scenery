@@ -77,7 +77,7 @@ const renderPathPaintToRenderProgram = ( renderPath: RenderPath, paint: TPaint, 
   }
 
   if ( paint instanceof Color ) {
-    return RenderColor.fromColor( renderPath, paint );
+    return new RenderColor( renderPath, colorFromTColor( paint ) );
   }
   else {
     const paintMatrix = paint.transformMatrix ? matrix.timesMatrix( paint.transformMatrix ) : matrix;
@@ -328,7 +328,7 @@ export default class RenderFromNode {
   }
 
   public static addBackgroundColor( renderProgram: RenderProgram, color: Color ): RenderProgram {
-    return combine( renderProgram, RenderColor.fromColor( null, color ) );
+    return combine( renderProgram, new RenderColor( null, colorFromTColor( color ) ) );
   }
 
   public static showSim(): void {

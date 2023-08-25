@@ -126,23 +126,12 @@ export default class RenderColor extends RenderPathProgram {
     }
   }
 
-  // TODO: better name for this? (we really should be operating in premultiplied spaces!)
-  public static sRGBFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
-    return new RenderColor( path, RenderColor.colorToSRGB( color ) );
-  }
-
   public static premultipliedSRGBFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
     return new RenderColor( path, RenderColor.premultiply( RenderColor.colorToSRGB( color ) ) );
   }
 
   public static premultipliedOklabFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
     return new RenderColor( path, RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) );
-  }
-
-  // TODO: remove this! Deprecated
-  // @deprecated
-  public static fromColor( path: RenderPath | null, color: Color ): RenderColor {
-    return new RenderColor( path, RenderColor.colorToPremultipliedLinear( color ) );
   }
 
   public static colorToSRGB( color: Color ): Vector4 {
@@ -154,29 +143,8 @@ export default class RenderColor extends RenderPathProgram {
     );
   }
 
-  // TODO: Can we get rid of this direct color conversion? Obviously doc the inner comments
-  public static colorToPremultipliedLinear( color: Color ): Vector4 {
-    // https://entropymine.com/imageworsener/srgbformula/
-    // sRGB to Linear
-    // 0 ≤ S ≤ 0.0404482362771082 : L = S/12.92
-    // 0.0404482362771082 < S ≤ 1 : L = ((S+0.055)/1.055)^2.4
-
-    // Linear to sRGB
-    // 0 ≤ L ≤ 0.00313066844250063 : S = L×12.92
-    // 0.00313066844250063 < L ≤ 1 : S = 1.055×L^1/2.4 − 0.055
-
-    const sRGB = new Vector4(
-      color.red / 255,
-      color.green / 255,
-      color.blue / 255,
-      color.alpha
-    );
-
-    return RenderColor.premultiply( RenderColor.sRGBToLinear( sRGB ) );
-  }
-
-  public static premultipliedLinearToColor( premultiplied: Vector4 ): Color {
-    const sRGB = RenderColor.linearToSRGB( RenderColor.unpremultiply( premultiplied ) );
+  public static premultipliedSRGBToColor( premultiplied: Vector4 ): Color {
+    const sRGB = RenderColor.unpremultiply( premultiplied );
 
     return new Color(
       sRGB.x * 255,
@@ -187,6 +155,10 @@ export default class RenderColor extends RenderPathProgram {
   }
 
   public static sRGBToLinear( sRGB: Vector4 ): Vector4 {
+    // https://entropymine.com/imageworsener/srgbformula/ (a more precise formula for sRGB)
+    // sRGB to Linear
+    // 0 ≤ S ≤ 0.0404482362771082 : L = S/12.92
+    // 0.0404482362771082 < S ≤ 1 : L = ((S+0.055)/1.055)^2.4
     return new Vector4(
       sRGB.x <= 0.0404482362771082 ? sRGB.x / 12.92 : Math.pow( ( sRGB.x + 0.055 ) / 1.055, 2.4 ),
       sRGB.y <= 0.0404482362771082 ? sRGB.y / 12.92 : Math.pow( ( sRGB.y + 0.055 ) / 1.055, 2.4 ),
@@ -196,6 +168,10 @@ export default class RenderColor extends RenderPathProgram {
   }
 
   public static linearToSRGB( linear: Vector4 ): Vector4 {
+    // https://entropymine.com/imageworsener/srgbformula/ (a more precise formula for sRGB)
+    // Linear to sRGB
+    // 0 ≤ L ≤ 0.00313066844250063 : S = L×12.92
+    // 0.00313066844250063 < L ≤ 1 : S = 1.055×L^1/2.4 − 0.055
     return new Vector4(
       linear.x <= 0.00313066844250063 ? linear.x * 12.92 : 1.055 * Math.pow( linear.x, 1 / 2.4 ) - 0.055,
       linear.y <= 0.00313066844250063 ? linear.y * 12.92 : 1.055 * Math.pow( linear.y, 1 / 2.4 ) - 0.055,
