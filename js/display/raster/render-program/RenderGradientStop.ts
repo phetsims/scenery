@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
@@ -25,7 +25,6 @@ export default class RenderGradientStop {
     maxY: number,
     stops: RenderGradientStop[],
     t: number,
-    colorSpace: RenderColorSpace,
     pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
     let i = -1;
@@ -46,7 +45,7 @@ export default class RenderGradientStop {
       const beforeColor = before.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
       const afterColor = after.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
 
-      return RenderColor.ratioBlend( beforeColor, afterColor, ratio, colorSpace );
+      return RenderColor.ratioBlend( beforeColor, afterColor, ratio );
     }
   }
 

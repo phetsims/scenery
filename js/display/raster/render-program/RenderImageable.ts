@@ -6,13 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColorSpace } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 type RenderImageable = {
   width: number;
   height: number;
-  colorSpace: RenderColorSpace;
   isFullyOpaque: boolean;
 
   // TODO: sampling of things, actually have methods that get samples (in any color space)
@@ -24,7 +22,6 @@ export default RenderImageable;
 export type SerializedRenderImageable = {
   width: number;
   height: number;
-  colorSpace: RenderColorSpace;
   isFullyOpaque: boolean;
   data: number[];
 };

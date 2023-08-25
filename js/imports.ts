@@ -435,7 +435,6 @@ export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundO
 export { default as constantTrue } from './display/raster/render-program/constantTrue.js';
 export { default as PolygonFilterType, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand } from './display/raster/render-program/PolygonFilterType.js';
 export { default as RenderBlendType } from './display/raster/render-program/RenderBlendType.js';
-export { default as RenderColorSpace } from './display/raster/render-program/RenderColorSpace.js';
 export { default as RenderComposeType } from './display/raster/render-program/RenderComposeType.js';
 export { default as RenderExtend } from './display/raster/render-program/RenderExtend.js';
 export { default as RenderProgramNeeds } from './display/raster/render-program/RenderProgramNeeds.js';
@@ -514,7 +513,8 @@ export { default as FaceConversion } from './display/raster/cag/FaceConversion.j
 
 export { default as Snippet } from './display/raster/webgpu/Snippet.js';
 
-export { default as AccumulationRaster } from './display/raster/raster/AccumulationRaster.js';
+export type { default as RasterColorConverter } from './display/raster/raster/RasterColorConverter.js';
+export { default as RasterConvertPremultipliedSRGBToSRGB255 } from './display/raster/raster/RasterConvertPremultipliedSRGBToSRGB255.js';
 export { default as CombinedRaster } from './display/raster/raster/CombinedRaster.js';
 export type { default as OutputRaster } from './display/raster/raster/OutputRaster.js';
 export { default as PolygonBilinear } from './display/raster/raster/PolygonBilinear.js';

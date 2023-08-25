@@ -6,8 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { OutputRaster, RenderColor, scenery } from '../../../imports.js';
+import { OutputRaster, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, scenery } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
+
+const defaultColorConverter = new RasterConvertPremultipliedSRGBToSRGB255();
 
 // TODO: consider implementing a raster that JUST uses ImageData, and does NOT do linear (proper) blending
 export default class CombinedRaster implements OutputRaster {
@@ -15,46 +17,60 @@ export default class CombinedRaster implements OutputRaster {
   public readonly imageData: ImageData;
   private combined = false;
 
-  public constructor( public readonly width: number, public readonly height: number ) {
+  public constructor(
+    public readonly width: number,
+    public readonly height: number,
+    public readonly colorConverter: RasterColorConverter = defaultColorConverter
+  ) {
     this.accumulationArray = new Float64Array( width * height * 4 );
     this.imageData = new ImageData( this.width, this.height );
     // TODO: Firefox complains about this
     // this.imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
   }
 
-  public addPartialPixel( color: Vector4, x: number, y: number ): void {
+  public addClientPartialPixel( color: Vector4, x: number, y: number ): void {
+    assert && assert( color.isFinite() );
+    assert && assert( isFinite( x ) && isFinite( y ) );
+    assert && assert( x >= 0 && x < this.width );
+    assert && assert( y >= 0 && y < this.height );
+
+    const accumulation = this.colorConverter.clientToAccumulation( color );
+
+    const baseIndex = 4 * ( y * this.width + x );
+    this.accumulationArray[ baseIndex ] += accumulation.x;
+    this.accumulationArray[ baseIndex + 1 ] += accumulation.y;
+    this.accumulationArray[ baseIndex + 2 ] += accumulation.z;
+    this.accumulationArray[ baseIndex + 3 ] += accumulation.w;
+  }
+
+  public addClientFullPixel( color: Vector4, x: number, y: number ): void {
+    assert && assert( color.isFinite() );
+
+    this.addOutputFullPixel( this.colorConverter.clientToOutput( color ), x, y );
+  }
+
+  public addOutputFullPixel( color: Vector4, x: number, y: number ): void {
     assert && assert( color.isFinite() );
     assert && assert( isFinite( x ) && isFinite( y ) );
     assert && assert( x >= 0 && x < this.width );
     assert && assert( y >= 0 && y < this.height );
 
     const baseIndex = 4 * ( y * this.width + x );
-    this.accumulationArray[ baseIndex ] += color.x;
-    this.accumulationArray[ baseIndex + 1 ] += color.y;
-    this.accumulationArray[ baseIndex + 2 ] += color.z;
-    this.accumulationArray[ baseIndex + 3 ] += color.w;
+    const data = this.imageData.data;
+    data[ baseIndex ] = color.x;
+    data[ baseIndex + 1 ] = color.y;
+    data[ baseIndex + 2 ] = color.z;
+    data[ baseIndex + 3 ] = color.w;
   }
 
-  public addFullPixel( color: Vector4, x: number, y: number ): void {
-    assert && assert( color.isFinite() );
-    assert && assert( isFinite( x ) && isFinite( y ) );
-    assert && assert( x >= 0 && x < this.width );
-    assert && assert( y >= 0 && y < this.height );
-
-    // Be lazy, we COULD convert here, but we'll just do it at the end
-    this.addPartialPixel( color, x, y );
-  }
-
-  public addFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
+  public addClientFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
     assert && assert( color.isFinite() );
 
-    const sRGB = RenderColor.convertLinearPremultipliedToSRGB( color );
-
-    this.addFullRegionSRGB255( sRGB, x, y, width, height );
+    this.addOutputFullRegion( this.colorConverter.clientToOutput( color ), x, y, width, height );
   }
 
-  public addFullRegionSRGB255( sRGB: Vector4, x: number, y: number, width: number, height: number ): void {
-    assert && assert( sRGB.isFinite() );
+  public addOutputFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void {
+    assert && assert( color.isFinite() );
     assert && assert( isFinite( x ) && isFinite( y ) );
     assert && assert( x >= 0 && x < this.width );
     assert && assert( y >= 0 && y < this.height );
@@ -63,19 +79,20 @@ export default class CombinedRaster implements OutputRaster {
     assert && assert( x + width <= this.width );
     assert && assert( y + height <= this.height );
 
+    const data = this.imageData.data;
+
     for ( let j = 0; j < height; j++ ) {
       const rowIndex = ( y + j ) * this.width + x;
       for ( let i = 0; i < width; i++ ) {
         const baseIndex = 4 * ( rowIndex + i );
-        const data = this.imageData.data;
         // For debugging, useful to quickly see regions
         // data[ baseIndex ] = ( i === 0 || i === width - 1 || j === 0 || j === height - 1 ) ? 0 : sRGB.x;
         // data[ baseIndex + 1 ] = ( i === 0 || i === width - 1 || j === 0 || j === height - 1 ) ? 0 : sRGB.y;
         // data[ baseIndex + 2 ] = ( i === 0 || i === width - 1 || j === 0 || j === height - 1 ) ? 0 : sRGB.z;
-        data[ baseIndex ] = sRGB.x;
-        data[ baseIndex + 1 ] = sRGB.y;
-        data[ baseIndex + 2 ] = sRGB.z;
-        data[ baseIndex + 3 ] = sRGB.w;
+        data[ baseIndex ] = color.x;
+        data[ baseIndex + 1 ] = color.y;
+        data[ baseIndex + 2 ] = color.z;
+        data[ baseIndex + 3 ] = color.w;
       }
     }
   }

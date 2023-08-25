@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, Color, constantTrue, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, Color, constantTrue, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -92,9 +92,14 @@ export default class RenderColor extends RenderPathProgram {
     return `${indent}RenderColor (${this.path ? this.path.id : 'null'}, color:${this.color.toString()})`;
   }
 
+  public static premultipliedSRGBToLinearPremultipliedSRGB( color: Vector4 ): Vector4 {
+    // TODO: performance improvements? We'll be killing the GC with all these Vector4s
+    return RenderColor.premultiply( RenderColor.sRGBToLinear( RenderColor.unpremultiply( color ) ) );
+  }
 
   // TODO: can we combine these methods of sRGB conversion without losing performance?
-  public static convertLinearPremultipliedToSRGB( color: Vector4 ): Vector4 {
+  // TODO: TODO: TODO: NOTE IN THIS FUNCTION it goes to sRGB255
+  public static linearPremultipliedSRGBToSRGB255( color: Vector4 ): Vector4 {
     const accumulation = color;
     const a = accumulation.w;
 
@@ -121,10 +126,35 @@ export default class RenderColor extends RenderPathProgram {
     }
   }
 
+  // TODO: better name for this? (we really should be operating in premultiplied spaces!)
+  public static sRGBFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
+    return new RenderColor( path, RenderColor.colorToSRGB( color ) );
+  }
+
+  public static premultipliedSRGBFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
+    return new RenderColor( path, RenderColor.premultiply( RenderColor.colorToSRGB( color ) ) );
+  }
+
+  public static premultipliedOklabFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
+    return new RenderColor( path, RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) );
+  }
+
+  // TODO: remove this! Deprecated
+  // @deprecated
   public static fromColor( path: RenderPath | null, color: Color ): RenderColor {
     return new RenderColor( path, RenderColor.colorToPremultipliedLinear( color ) );
   }
 
+  public static colorToSRGB( color: Color ): Vector4 {
+    return new Vector4(
+      color.red / 255,
+      color.green / 255,
+      color.blue / 255,
+      color.alpha
+    );
+  }
+
+  // TODO: Can we get rid of this direct color conversion? Obviously doc the inner comments
   public static colorToPremultipliedLinear( color: Color ): Vector4 {
     // https://entropymine.com/imageworsener/srgbformula/
     // sRGB to Linear
@@ -233,50 +263,16 @@ export default class RenderColor extends RenderPathProgram {
   public static ratioBlend(
     zeroColor: Vector4,
     oneColor: Vector4,
-    ratio: number,
-    colorSpace: RenderColorSpace = RenderColorSpace.LinearUnpremultipliedSRGB
+    ratio: number
   ): Vector4 {
     const minusRatio = 1 - ratio;
 
-    switch( colorSpace ) {
-      case RenderColorSpace.LinearUnpremultipliedSRGB:
-        return new Vector4(
-          zeroColor.x * minusRatio + oneColor.x * ratio,
-          zeroColor.y * minusRatio + oneColor.y * ratio,
-          zeroColor.z * minusRatio + oneColor.z * ratio,
-          zeroColor.w * minusRatio + oneColor.w * ratio
-        );
-      case RenderColorSpace.SRGB:
-      {
-        // TODO: This is.... crazy to have so many premultiply/unpremultiply calls, just to work around the sRGB
-        // TODO: nonlinear transfer function?
-
-        // TODO: reduce allocations?
-        const zeroSRGB = RenderColor.premultiply( RenderColor.linearToSRGB( RenderColor.unpremultiply( zeroColor ) ) );
-        const oneSRGB = RenderColor.premultiply( RenderColor.linearToSRGB( RenderColor.unpremultiply( oneColor ) ) );
-        return RenderColor.premultiply( RenderColor.sRGBToLinear( RenderColor.unpremultiply( new Vector4(
-          zeroSRGB.x * minusRatio + oneSRGB.x * ratio,
-          zeroSRGB.y * minusRatio + oneSRGB.y * ratio,
-          zeroSRGB.z * minusRatio + oneSRGB.z * ratio,
-          zeroSRGB.w * minusRatio + oneSRGB.w * ratio
-        ) ) ) );
-      }
-      case RenderColorSpace.Oklab:
-      {
-        // TODO: DO we really have a need to blend in this space?
-        // TODO: reduce allocations?
-        const zeroOklab = RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.unpremultiply( zeroColor ) ) );
-        const oneOklab = RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.unpremultiply( oneColor ) ) );
-        return RenderColor.premultiply( RenderColor.oklabToLinear( RenderColor.unpremultiply( new Vector4(
-          zeroOklab.x * minusRatio + oneOklab.x * ratio,
-          zeroOklab.y * minusRatio + oneOklab.y * ratio,
-          zeroOklab.z * minusRatio + oneOklab.z * ratio,
-          zeroOklab.w * minusRatio + oneOklab.w * ratio
-        ) ) ) );
-      }
-      default:
-        throw new Error( `Invalid color space: ${colorSpace}` );
-    }
+    return new Vector4(
+      zeroColor.x * minusRatio + oneColor.x * ratio,
+      zeroColor.y * minusRatio + oneColor.y * ratio,
+      zeroColor.z * minusRatio + oneColor.z * ratio,
+      zeroColor.w * minusRatio + oneColor.w * ratio
+    );
   }
 
   public static readonly TRANSPARENT = new RenderColor( null, Vector4.ZERO );

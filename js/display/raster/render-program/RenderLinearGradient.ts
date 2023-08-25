@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -35,7 +35,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
     public readonly end: Vector2,
     public readonly stops: RenderGradientStop[], // should be sorted!!
     public readonly extend: RenderExtend,
-    public readonly colorSpace: RenderColorSpace,
     public readonly accuracy: RenderLinearGradientAccuracy
   ) {
     assert && assert( transform.isFinite() );
@@ -67,7 +66,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
       this.end,
       this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.transformed( transform ) ) ),
       this.extend,
-      this.colorSpace,
       this.accuracy
     );
   }
@@ -83,7 +81,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
       // TODO perf
       this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
       this.extend === other.extend &&
-      this.colorSpace === other.colorSpace;
+      this.accuracy === other.accuracy;
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
@@ -99,7 +97,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
         this.end,
         this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) ),
         this.extend,
-        this.colorSpace,
         this.accuracy
       );
     }
@@ -156,7 +153,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.colorSpace, this.accuracy );
+      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.accuracy );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -196,7 +193,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
     const t = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
     const mappedT = RenderImage.extend( this.extend, t );
 
-    return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.stops, mappedT, this.colorSpace, pathTest );
+    return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.stops, mappedT, pathTest );
   }
 
   public override toRecursiveString( indent: string ): string {
@@ -216,7 +213,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
       end: [ this.end.x, this.end.y ],
       stops: this.stops.map( stop => stop.serialize() ),
       extend: this.extend,
-      colorSpace: this.colorSpace,
       accuracy: this.accuracy
     };
   }
@@ -233,7 +229,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
       new Vector2( obj.end[ 0 ], obj.end[ 1 ] ),
       obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
       obj.extend,
-      obj.colorSpace,
       obj.accuracy
     );
   }
@@ -249,6 +244,5 @@ export type SerializedRenderLinearGradient = {
   end: number[];
   stops: SerializedRenderGradientStop[];
   extend: RenderExtend;
-  colorSpace: RenderColorSpace;
   accuracy: RenderLinearGradientAccuracy;
 };

@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -38,8 +38,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
     public readonly radius1: number,
     public readonly accuracy: RenderRadialBlendAccuracy,
     public readonly zero: RenderProgram,
-    public readonly one: RenderProgram,
-    public readonly colorSpace: RenderColorSpace
+    public readonly one: RenderProgram
   ) {
     assert && assert( transform.isFinite() );
     assert && assert( isFinite( radius0 ) && radius0 >= 0 );
@@ -59,8 +58,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       this.radius1,
       this.accuracy,
       this.zero.transformed( transform ),
-      this.one.transformed( transform ),
-      this.colorSpace
+      this.one.transformed( transform )
     );
   }
 
@@ -72,8 +70,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
            this.radius0 === other.radius0 &&
            this.radius1 === other.radius1 &&
            this.zero.equals( other.zero ) &&
-           this.one.equals( other.one ) &&
-           this.colorSpace === other.colorSpace;
+           this.one.equals( other.one );
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
@@ -82,7 +79,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderRadialBlend( this.path, this.transform, this.radius0, this.radius1, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
+      return new RenderRadialBlend( this.path, this.transform, this.radius0, this.radius1, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
     }
   }
 
@@ -121,7 +118,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderRadialBlend( null, this.transform, this.radius0, this.radius1, this.accuracy, zero, one, this.colorSpace );
+      return new RenderRadialBlend( null, this.transform, this.radius0, this.radius1, this.accuracy, zero, one );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -211,8 +208,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       return RenderColor.ratioBlend(
         this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
         this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
-        t,
-        this.colorSpace
+        t
       );
     }
   }
@@ -234,8 +230,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       radius1: this.radius1,
       accuracy: this.accuracy,
       zero: this.zero.serialize(),
-      one: this.one.serialize(),
-      colorSpace: this.colorSpace
+      one: this.one.serialize()
     };
   }
 
@@ -251,8 +246,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       obj.radius1,
       obj.accuracy,
       RenderProgram.deserialize( obj.zero ),
-      RenderProgram.deserialize( obj.one ),
-      obj.colorSpace
+      RenderProgram.deserialize( obj.one )
     );
   }
 }
@@ -268,5 +262,4 @@ export type SerializedRenderRadialBlend = {
   accuracy: RenderRadialBlendAccuracy;
   zero: SerializedRenderProgram;
   one: SerializedRenderProgram;
-  colorSpace: RenderColorSpace;
 };

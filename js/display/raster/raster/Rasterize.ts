@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -15,6 +15,8 @@ import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export type RasterizationOptions = {
+  colorConverter: RasterColorConverter;
+
   outputRasterOffset?: Vector2;
   polygonFiltering?: PolygonFilterType;
 
@@ -27,6 +29,7 @@ export type RasterizationOptions = {
 };
 
 const DEFAULT_OPTIONS = {
+  colorConverter: new RasterConvertPremultipliedSRGBToSRGB255(),
   outputRasterOffset: Vector2.ZERO,
   polygonFiltering: PolygonFilterType.Box,
   edgeIntersectionMethod: 'arrayBoundsTree',
@@ -45,8 +48,8 @@ class RasterizationContext {
   public constructor(
     public outputRaster: OutputRaster,
     public renderProgram: RenderProgram,
-    public constColor: Vector4 | null,
-    public constSRGBColor: Vector4 | null,
+    public constClientColor: Vector4 | null,
+    public constOutputColor: Vector4 | null,
     public outputRasterOffset: Vector2,
     public bounds: Bounds2,
     public polygonFiltering: PolygonFilterType,
@@ -178,7 +181,7 @@ export default class Rasterize {
                          pixelFace!.getBilinearFiltered( px, py, x, y );
         }
 
-        outputRaster.addPartialPixel( color.timesScalar( contribution ), pixelX + outputRasterOffset.x, pixelY + outputRasterOffset.y );
+        outputRaster.addClientPartialPixel( color.timesScalar( contribution ), pixelX + outputRasterOffset.x, pixelY + outputRasterOffset.y );
       }
     }
   }
@@ -196,7 +199,7 @@ export default class Rasterize {
     }
 
     // TODO: potentially cache the centroid, if we have multiple overlapping gradients?
-    const color = context.constColor || context.renderProgram.evaluate(
+    const color = context.constClientColor || context.renderProgram.evaluate(
       pixelFace,
       context.needs.needsArea ? area : NaN, // NaNs to hopefully hard-error
       context.needs.needsCentroid ? pixelFace.getCentroid( area ) : nanVector,
@@ -207,7 +210,7 @@ export default class Rasterize {
     );
 
     if ( context.polygonFiltering === PolygonFilterType.Box ) {
-      context.outputRaster.addPartialPixel( color.timesScalar( area ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
+      context.outputRaster.addClientPartialPixel( color.timesScalar( area ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
     }
     else {
       Rasterize.addFilterPixel(
@@ -229,15 +232,15 @@ export default class Rasterize {
       debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
     }
 
-    const constColor = context.constColor;
+    const constClientColor = context.constClientColor;
 
-    if ( constColor ) {
+    if ( constClientColor ) {
       assert && assert( !context.needs.needsArea && !context.needs.needsCentroid );
 
       if ( context.polygonFiltering === PolygonFilterType.Box ) {
-        if ( context.constSRGBColor ) {
-          context.outputRaster.addFullRegionSRGB255(
-            context.constSRGBColor,
+        if ( context.constOutputColor ) {
+          context.outputRaster.addOutputFullRegion(
+            context.constOutputColor,
             minX + context.outputRasterOffset.x,
             minY + context.outputRasterOffset.y,
             maxX - minX,
@@ -245,8 +248,8 @@ export default class Rasterize {
           );
         }
         else {
-          context.outputRaster.addFullRegion(
-            constColor,
+          context.outputRaster.addClientFullRegion(
+            constClientColor,
             minX + context.outputRasterOffset.x,
             minY + context.outputRasterOffset.y,
             maxX - minX,
@@ -259,7 +262,7 @@ export default class Rasterize {
         // "filter" the outside ones (the inside will be a constant color)
         for ( let y = minY; y < maxY; y++ ) {
           for ( let x = minX; x < maxX; x++ ) {
-            Rasterize.addFilterPixel( context, null, 1, x, y, constColor );
+            Rasterize.addFilterPixel( context, null, 1, x, y, constClientColor );
           }
         }
       }
@@ -284,7 +287,7 @@ export default class Rasterize {
             y + 1
           );
           if ( polygonFiltering === PolygonFilterType.Box ) {
-            outputRaster.addFullPixel( color, x + outputRasterOffset.x, y + outputRasterOffset.y );
+            outputRaster.addClientFullPixel( color, x + outputRasterOffset.x, y + outputRasterOffset.y );
           }
           else {
             Rasterize.addFilterPixel( context, null, 1, x, y, color );
@@ -407,7 +410,8 @@ export default class Rasterize {
     bounds: Bounds2,
     gridBounds: Bounds2,
     outputRasterOffset: Vector2,
-    polygonFiltering: PolygonFilterType
+    polygonFiltering: PolygonFilterType,
+    colorConverter: RasterColorConverter
   ): void {
     for ( let i = 0; i < renderableFaces.length; i++ ) {
       const renderableFace = renderableFaces[ i ];
@@ -425,14 +429,15 @@ export default class Rasterize {
         debugData!.faceDebugData.push( faceDebugData );
       }
 
-      const constColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
-      const constSRGBColor = constColor !== null ? RenderColor.convertLinearPremultipliedToSRGB( constColor ) : null;
+      // TODO: be really careful about the colorConverter... the copy() missing already hit me once.
+      const constClientColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
+      const constOutputColor = constClientColor !== null ? colorConverter.clientToOutput( constClientColor ).copy() : null;
 
       const context = new RasterizationContext(
         outputRaster,
         renderProgram,
-        constColor,
-        constSRGBColor,
+        constClientColor,
+        constOutputColor,
         outputRasterOffset,
         bounds,
         polygonFiltering,
@@ -631,7 +636,8 @@ export default class Rasterize {
       bounds,
       gridBounds,
       options.outputRasterOffset,
-      polygonFiltering
+      polygonFiltering,
+      options.colorConverter
     );
   }
 

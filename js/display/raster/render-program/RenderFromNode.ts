@@ -14,7 +14,6 @@ import Vector4 from '../../../../../dot/js/Vector4.js';
 import { Shape } from '../../../../../kite/js/imports.js';
 import { isTReadOnlyProperty } from '../../../../../axon/js/TReadOnlyProperty.js';
 import RenderExtend from './RenderExtend.js';
-import RenderColorSpace from './RenderColorSpace.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import ArialBoldFont from '../../vello/ArialBoldFont.js';
 import ArialFont from '../../vello/ArialFont.js';
@@ -29,8 +28,8 @@ const piecewiseOptions = {
   curveEpsilon: 0.2
 };
 
-const resampleType = RenderResampleType.Bilinear;
-// const resampleType = RenderResampleType.AnalyticBilinear;
+// const resampleType = RenderResampleType.Bilinear;
+const resampleType = RenderResampleType.AnalyticBilinear; // TODO: handle mipmapping!
 
 const combine = ( a: RenderProgram, b: RenderProgram ) => new RenderBlendCompose(
   RenderComposeType.Over,
@@ -92,7 +91,6 @@ const renderPathPaintToRenderProgram = ( renderPath: RenderPath, paint: TPaint, 
           return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
         } ),
         RenderExtend.Pad,
-        RenderColorSpace.SRGB,
         RenderLinearGradientAccuracy.SplitAccurate
       );
     }
@@ -108,7 +106,6 @@ const renderPathPaintToRenderProgram = ( renderPath: RenderPath, paint: TPaint, 
           return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
         } ),
         RenderExtend.Pad,
-        RenderColorSpace.SRGB,
         RenderRadialGradientAccuracy.SplitAccurate
       );
     }
@@ -142,7 +139,7 @@ const imagelikeToRenderImageable = ( imagelike: HTMLImageElement | HTMLCanvasEle
 
   let isFullyOpaque = true;
 
-  const linearPremultipliedData: Vector4[] = [];
+  const premultipliedData: Vector4[] = [];
   for ( let i = 0; i < imageData.data.length / 4; i++ ) {
     const baseIndex = i * 4;
     const r = imageData.data[ baseIndex ] / 255;
@@ -153,18 +150,32 @@ const imagelikeToRenderImageable = ( imagelike: HTMLImageElement | HTMLCanvasEle
       isFullyOpaque = false;
     }
     const srgb = new Vector4( r, g, b, a );
-    const linear = RenderColor.sRGBToLinear( srgb );
-    const premultiplied = RenderColor.premultiply( linear );
-    linearPremultipliedData.push( premultiplied );
+    const premultiplied = RenderColor.premultiply( srgb );
+    premultipliedData.push( premultiplied );
   }
+
+  // const linearPremultipliedData: Vector4[] = [];
+  // for ( let i = 0; i < imageData.data.length / 4; i++ ) {
+  //   const baseIndex = i * 4;
+  //   const r = imageData.data[ baseIndex ] / 255;
+  //   const g = imageData.data[ baseIndex + 1 ] / 255;
+  //   const b = imageData.data[ baseIndex + 2 ] / 255;
+  //   const a = imageData.data[ baseIndex + 3 ] / 255;
+  //   if ( a < 1 ) {
+  //     isFullyOpaque = false;
+  //   }
+  //   const srgb = new Vector4( r, g, b, a );
+  //   const linear = RenderColor.sRGBToLinear( srgb );
+  //   const premultiplied = RenderColor.premultiply( linear );
+  //   linearPremultipliedData.push( premultiplied );
+  // }
 
   return {
     width: imageData.width,
     height: imageData.height,
-    colorSpace: RenderColorSpace.LinearUnpremultipliedSRGB,
     isFullyOpaque: isFullyOpaque,
     evaluate: ( x, y ) => {
-      return linearPremultipliedData[ y * imageData.width + x ];
+      return premultipliedData[ y * imageData.width + x ];
     }
   };
 };
@@ -182,7 +193,7 @@ const colorFromTColor = ( paint: TColor ): Vector4 => {
     paint = new Color( paint );
   }
 
-  return RenderColor.colorToPremultipliedLinear( paint );
+  return RenderColor.premultiply( RenderColor.colorToSRGB( paint ) );
 };
 
 export default class RenderFromNode {
@@ -356,7 +367,6 @@ export default class RenderFromNode {
         {
           width: 2,
           height: 2,
-          colorSpace: RenderColorSpace.SRGB,
           isFullyOpaque: true,
           evaluate: ( x: number, y: number ) => {
             const value = ( x + y ) % 2 === 0 ? 0.9 : 0.85;

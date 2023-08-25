@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -27,8 +27,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
     public readonly offset: number,
     public readonly accuracy: RenderLinearBlendAccuracy,
     public readonly zero: RenderProgram,
-    public readonly one: RenderProgram,
-    public readonly colorSpace: RenderColorSpace
+    public readonly one: RenderProgram
   ) {
     assert && assert( scaledNormal.isFinite() && scaledNormal.magnitude > 0 );
     assert && assert( isFinite( offset ) );
@@ -61,8 +60,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       afterOffset,
       this.accuracy,
       this.zero.transformed( transform ),
-      this.one.transformed( transform ),
-      this.colorSpace
+      this.one.transformed( transform )
     );
   }
 
@@ -73,8 +71,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       this.scaledNormal.equals( other.scaledNormal ) &&
       this.offset === other.offset &&
       this.zero.equals( other.zero ) &&
-      this.one.equals( other.one ) &&
-      this.colorSpace === other.colorSpace;
+      this.one.equals( other.one );
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
@@ -83,7 +80,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ), this.colorSpace );
+      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
     }
   }
 
@@ -122,7 +119,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearBlend( null, this.scaledNormal, this.offset, this.accuracy, zero, one, this.colorSpace );
+      return new RenderLinearBlend( null, this.scaledNormal, this.offset, this.accuracy, zero, one );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -159,8 +156,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       return RenderColor.ratioBlend(
         this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
         this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
-        t,
-        this.colorSpace
+        t
       );
     }
   }
@@ -177,8 +173,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       offset: this.offset,
       accuracy: this.accuracy,
       zero: this.zero.serialize(),
-      one: this.one.serialize(),
-      colorSpace: this.colorSpace
+      one: this.one.serialize()
     };
   }
 
@@ -189,8 +184,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       obj.offset,
       obj.accuracy,
       RenderProgram.deserialize( obj.zero ),
-      RenderProgram.deserialize( obj.one ),
-      obj.colorSpace
+      RenderProgram.deserialize( obj.one )
     );
   }
 }
@@ -205,5 +199,4 @@ export type SerializedRenderLinearBlend = {
   accuracy: RenderLinearBlendAccuracy;
   zero: SerializedRenderProgram;
   one: SerializedRenderProgram;
-  colorSpace: RenderColorSpace;
 };

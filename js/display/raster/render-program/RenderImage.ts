@@ -11,7 +11,6 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Utils from '../../../../../dot/js/Utils.js';
-import RenderColorSpace from './RenderColorSpace.js';
 
 export default class RenderImage extends RenderPathProgram {
 
@@ -92,19 +91,6 @@ export default class RenderImage extends RenderPathProgram {
     }
   }
 
-  private colorToLinearPremultiplied( color: Vector4 ): Vector4 {
-    switch( this.image.colorSpace ) {
-      case RenderColorSpace.LinearUnpremultipliedSRGB:
-        return color;
-      case RenderColorSpace.SRGB:
-        return RenderColor.premultiply( RenderColor.sRGBToLinear( color ) );
-      case RenderColorSpace.Oklab:
-        return RenderColor.premultiply( RenderColor.oklabToLinear( color ) );
-      default:
-        throw new Error( 'unknown color space: ' + this.image.colorSpace );
-    }
-  }
-
   public override evaluate(
     face: ClippableFace | null,
     area: number,
@@ -120,7 +106,6 @@ export default class RenderImage extends RenderPathProgram {
     }
 
     // TODO: analytic box! Bilinear! Bicubic! (can we mipmap for those?)
-    let color;
     switch( this.resampleType ) {
       case RenderResampleType.NearestNeighbor: {
         const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
@@ -129,8 +114,7 @@ export default class RenderImage extends RenderPathProgram {
         const x = RenderImage.extendInteger( roundedX, this.image.width, this.extendX );
         const y = RenderImage.extendInteger( roundedY, this.image.height, this.extendY );
 
-        color = this.image.evaluate( x, y );
-        return this.colorToLinearPremultiplied( color );
+        return this.image.evaluate( x, y );
       }
       case RenderResampleType.Bilinear: {
         const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
@@ -148,10 +132,10 @@ export default class RenderImage extends RenderPathProgram {
         const fractionX = localPoint.x - floorX;
         const fractionY = localPoint.y - floorY;
 
-        const a = this.colorToLinearPremultiplied( this.image.evaluate( minX, minY ) );
-        const b = this.colorToLinearPremultiplied( this.image.evaluate( minX, maxY ) );
-        const c = this.colorToLinearPremultiplied( this.image.evaluate( maxX, minY ) );
-        const d = this.colorToLinearPremultiplied( this.image.evaluate( maxX, maxY ) );
+        const a = this.image.evaluate( minX, minY );
+        const b = this.image.evaluate( minX, maxY );
+        const c = this.image.evaluate( maxX, minY );
+        const d = this.image.evaluate( maxX, maxY );
 
         // TODO: allocation reduction?
         const ab = a.timesScalar( 1 - fractionY ).plus( b.timesScalar( fractionY ) );
@@ -194,22 +178,22 @@ export default class RenderImage extends RenderPathProgram {
         const color = Vector4.ZERO.copy();
 
         // TODO: allocation reduction?
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y0 ) ).timesScalar( filterX0 * filterY0 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y1 ) ).timesScalar( filterX0 * filterY1 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y2 ) ).timesScalar( filterX0 * filterY2 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x0, y3 ) ).timesScalar( filterX0 * filterY3 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y0 ) ).timesScalar( filterX1 * filterY0 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y1 ) ).timesScalar( filterX1 * filterY1 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y2 ) ).timesScalar( filterX1 * filterY2 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x1, y3 ) ).timesScalar( filterX1 * filterY3 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y0 ) ).timesScalar( filterX2 * filterY0 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y1 ) ).timesScalar( filterX2 * filterY1 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y2 ) ).timesScalar( filterX2 * filterY2 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x2, y3 ) ).timesScalar( filterX2 * filterY3 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y0 ) ).timesScalar( filterX3 * filterY0 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y1 ) ).timesScalar( filterX3 * filterY1 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y2 ) ).timesScalar( filterX3 * filterY2 ) );
-        color.add( this.colorToLinearPremultiplied( this.image.evaluate( x3, y3 ) ).timesScalar( filterX3 * filterY3 ) );
+        color.add( this.image.evaluate( x0, y0 ).timesScalar( filterX0 * filterY0 ) );
+        color.add( this.image.evaluate( x0, y1 ).timesScalar( filterX0 * filterY1 ) );
+        color.add( this.image.evaluate( x0, y2 ).timesScalar( filterX0 * filterY2 ) );
+        color.add( this.image.evaluate( x0, y3 ).timesScalar( filterX0 * filterY3 ) );
+        color.add( this.image.evaluate( x1, y0 ).timesScalar( filterX1 * filterY0 ) );
+        color.add( this.image.evaluate( x1, y1 ).timesScalar( filterX1 * filterY1 ) );
+        color.add( this.image.evaluate( x1, y2 ).timesScalar( filterX1 * filterY2 ) );
+        color.add( this.image.evaluate( x1, y3 ).timesScalar( filterX1 * filterY3 ) );
+        color.add( this.image.evaluate( x2, y0 ).timesScalar( filterX2 * filterY0 ) );
+        color.add( this.image.evaluate( x2, y1 ).timesScalar( filterX2 * filterY1 ) );
+        color.add( this.image.evaluate( x2, y2 ).timesScalar( filterX2 * filterY2 ) );
+        color.add( this.image.evaluate( x2, y3 ).timesScalar( filterX2 * filterY3 ) );
+        color.add( this.image.evaluate( x3, y0 ).timesScalar( filterX3 * filterY0 ) );
+        color.add( this.image.evaluate( x3, y1 ).timesScalar( filterX3 * filterY1 ) );
+        color.add( this.image.evaluate( x3, y2 ).timesScalar( filterX3 * filterY2 ) );
+        color.add( this.image.evaluate( x3, y3 ).timesScalar( filterX3 * filterY3 ) );
 
         return color;
       }
@@ -415,7 +399,7 @@ export default class RenderImage extends RenderPathProgram {
         }
 
         if ( Math.abs( contribution ) > 1e-8 ) {
-          const imageColor = renderImage.colorToLinearPremultiplied( renderImage.image.evaluate( mappedX, mappedY ) );
+          const imageColor = renderImage.image.evaluate( mappedX, mappedY );
           color.add( imageColor.timesScalar( contribution ) );
         }
       }
@@ -524,7 +508,6 @@ export default class RenderImage extends RenderPathProgram {
     return {
       width: imageable.width,
       height: imageable.height,
-      colorSpace: imageable.colorSpace,
       isFullyOpaque: imageable.isFullyOpaque,
       data: _.range( 0, imageable.height ).flatMap( y => {
         return _.range( 0, imageable.width ).flatMap( x => {
@@ -544,7 +527,6 @@ export default class RenderImage extends RenderPathProgram {
     return {
       width: obj.width,
       height: obj.height,
-      colorSpace: obj.colorSpace,
       isFullyOpaque: obj.isFullyOpaque,
       evaluate: ( x: number, y: number ) => {
         const index = ( y * obj.width + x ) * 4;

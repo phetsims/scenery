@@ -205,8 +205,7 @@ export default class RenderableFace {
                   scaledOffset,
                   blendAccuracy,
                   range.startProgram.replace( replacer ),
-                  range.endProgram.replace( replacer ),
-                  linearGradient.colorSpace
+                  range.endProgram.replace( replacer )
                 );
               }
             };
@@ -331,8 +330,7 @@ export default class RenderableFace {
                   endRadius,
                   blendAccuracy,
                   range.startProgram.replace( replacer ),
-                  range.endProgram.replace( replacer ),
-                  radialGradient.colorSpace
+                  range.endProgram.replace( replacer )
                 );
               }
             };

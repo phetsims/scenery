@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -37,7 +37,6 @@ export default class RenderRadialGradient extends RenderPathProgram {
     public readonly endRadius: number,
     public readonly stops: RenderGradientStop[], // should be sorted!!
     public readonly extend: RenderExtend,
-    public readonly colorSpace: RenderColorSpace,
     public readonly accuracy: RenderRadialGradientAccuracy
   ) {
     assert && assert( transform.isFinite() );
@@ -69,7 +68,6 @@ export default class RenderRadialGradient extends RenderPathProgram {
       this.endRadius,
       this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.transformed( transform ) ) ),
       this.extend,
-      this.colorSpace,
       this.accuracy
     );
   }
@@ -87,7 +85,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
       // TODO perf
       this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
       this.extend === other.extend &&
-      this.colorSpace === other.colorSpace;
+      this.accuracy === other.accuracy;
   }
 
   public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
@@ -97,7 +95,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
     }
     else {
       const stops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) );
-      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.colorSpace, this.accuracy );
+      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.accuracy );
     }
   }
 
@@ -152,7 +150,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
     }
 
     if ( this.isInPath( pathTest ) ) {
-      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.colorSpace, this.accuracy );
+      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.accuracy );
     }
     else {
       return RenderColor.TRANSPARENT;
@@ -195,7 +193,6 @@ export default class RenderRadialGradient extends RenderPathProgram {
       endRadius: this.endRadius,
       stops: this.stops.map( stop => stop.serialize() ),
       extend: this.extend,
-      colorSpace: this.colorSpace,
       accuracy: this.accuracy
     };
   }
@@ -214,7 +211,6 @@ export default class RenderRadialGradient extends RenderPathProgram {
       obj.endRadius,
       obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
       obj.extend,
-      obj.colorSpace,
       obj.accuracy
     );
   }
@@ -385,7 +381,7 @@ class RadialGradientLogic {
         t = 1 - t;
       }
 
-      return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.radialGradient.stops, t, this.radialGradient.colorSpace, pathTest );
+      return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.radialGradient.stops, t, pathTest );
     }
     else {
       // Invalid is a checkerboard red/yellow
@@ -406,6 +402,5 @@ export type SerializedRenderRadialGradient = {
   endRadius: number;
   stops: SerializedRenderGradientStop[];
   extend: RenderExtend;
-  colorSpace: RenderColorSpace;
   accuracy: RenderRadialGradientAccuracy;
 };

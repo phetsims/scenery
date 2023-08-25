@@ -590,10 +590,6 @@ an UI and Display made for visual testing and debugging.
       // const linearGradientAccuracy = phet.scenery.RenderLinearGradientAccuracy.UnsplitCentroid;
       // const linearGradientAccuracy = phet.scenery.RenderLinearGradientAccuracy.UnsplitPixelCenter;
 
-      // const gradientColorSpace = phet.scenery.RenderColorSpace.LinearUnpremultipliedSRGB;
-      // const gradientColorSpace = phet.scenery.RenderColorSpace.SRGB;
-      const gradientColorSpace = phet.scenery.RenderColorSpace.Oklab;
-
       const rasterizeOptions = {
         // polygonFiltering: phet.scenery.PolygonFilterType.Box,
         // polygonFiltering: phet.scenery.PolygonFilterType.Bilinear,
@@ -729,7 +725,6 @@ an UI and Display made for visual testing and debugging.
       const testImageable = {
         width: 1024,
         height: 1024,
-        colorSpace: phet.scenery.RenderColorSpace.SRGB,
         isFullyOpaque: true,
         evaluate: ( x, y ) => {
           const baseIndex = ( y * testImageData.width + x ) * 4;
@@ -758,15 +753,31 @@ an UI and Display made for visual testing and debugging.
       const testImageablePremultiplied = {
         width: 1024,
         height: 1024,
-        colorSpace: phet.scenery.RenderColorSpace.LinearUnpremultipliedSRGB,
         isFullyOpaque: true,
         evaluate: ( x, y ) => {
           return linearPremultipliedTestImageData[ y * testImageData.width + x ];
         }
       };
 
+      const toPremulSRGB = ( ...args ) => {
+        return phet.scenery.RenderColor.premultipliedSRGBFromColor( new phet.scenery.Color( ...args ) );
+      };
+      const toPremulOklab = ( ...args ) => {
+        return phet.scenery.RenderColor.premultipliedOklabFromColor( new phet.scenery.Color( ...args ) );
+      };
+      // TODO: Path as an extra thing
+      const toPremulSRGBPath = ( path, ...args ) => {
+        return phet.scenery.RenderColor.premultipliedSRGBFromColor( new phet.scenery.Color( ...args ), path );
+      };
+      const premulLinearSRGBToPremulSRGB = renderProgram => {
+        return new phet.scenery.RenderPremultiply( new phet.scenery.RenderLinearSRGBToSRGB( new phet.scenery.RenderUnpremultiply( renderProgram ) ) );
+      };
+      const premulOklabToPremulSRGB = renderProgram => {
+        return new phet.scenery.RenderPremultiply( new phet.scenery.RenderLinearSRGBToSRGB( new phet.scenery.RenderOklabToLinearSRGB( new phet.scenery.RenderUnpremultiply( renderProgram ) ) ) );
+      };
+
       // const a = phet.scenery.RenderColor.fromColor( pathA, new phet.scenery.Color( 255, 0, 0, 1 ) );
-      const a = new phet.scenery.RenderImage(
+      const a = premulLinearSRGBToPremulSRGB( new phet.scenery.RenderImage(
         pathA,
 
         // far distance
@@ -793,8 +804,8 @@ an UI and Display made for visual testing and debugging.
         phet.scenery.RenderExtend.Repeat,
         phet.scenery.RenderExtend.Repeat,
         imageResampleType
-      );
-      const b = phet.scenery.RenderColor.fromColor( pathB, new phet.scenery.Color( 0, 255, 0, 1 ) );
+      ) );
+      const b = toPremulSRGBPath( pathB, 0, 255, 0, 1 );
       // const c = phet.scenery.RenderColor.fromColor( pathC, new phet.scenery.Color( 0, 0, 255, 1 ) );
       const c = new phet.scenery.RenderRadialGradient(
         pathC,
@@ -803,40 +814,39 @@ an UI and Display made for visual testing and debugging.
         0,
         new phet.dot.Vector2( 0, 0 ),
         5, [
-          new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FBDD49' ) ) ),
-          new phet.scenery.RenderGradientStop( 0.2, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF8103' ) ) ),
-          new phet.scenery.RenderGradientStop( 0.4, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#FF1C6A' ) ) ),
-          new phet.scenery.RenderGradientStop( 0.6, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#E200A3' ) ) ),
-          new phet.scenery.RenderGradientStop( 0.8, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#9B04DB' ) ) ),
-          new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( '#6D1DC6' ) ) )
+          // NOTE: LEFT this gradient in sRGB because of the strong colors, perceptulal interpolation might go out of gamut
+          new phet.scenery.RenderGradientStop( 0, toPremulSRGB( '#FBDD49' ) ),
+          new phet.scenery.RenderGradientStop( 0.2, toPremulSRGB( '#FF8103' ) ),
+          new phet.scenery.RenderGradientStop( 0.4, toPremulSRGB( '#FF1C6A' ) ),
+          new phet.scenery.RenderGradientStop( 0.6, toPremulSRGB( '#E200A3' ) ),
+          new phet.scenery.RenderGradientStop( 0.8, toPremulSRGB( '#9B04DB' ) ),
+          new phet.scenery.RenderGradientStop( 1, toPremulSRGB( '#6D1DC6' ) )
         ],
         phet.scenery.RenderExtend.Repeat,
-        gradientColorSpace,
         radialGradientAccuracy
       );
-      const d = new phet.scenery.RenderLinearGradient(
+      const d = premulOklabToPremulSRGB( new phet.scenery.RenderLinearGradient(
         pathD,
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 0, 8 ),
         new phet.dot.Vector2( 9, 0 ),
         [
-          new phet.scenery.RenderGradientStop( 0, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 255, 255, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 0.1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255, 255, 255, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 0.1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,57,2, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 0.3, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,128,7, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 0.5, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 255,180,4, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 0.7, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 5,186,221, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 0.9, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 43,72,113, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 0.9, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ) ),
-          new phet.scenery.RenderGradientStop( 1, phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 0, 0, 0, 1 ) ) )
+          new phet.scenery.RenderGradientStop( 0, toPremulOklab( 255, 255, 255, 1 ) ),
+          new phet.scenery.RenderGradientStop( 0.1, toPremulOklab( 255, 255, 255, 1 ) ),
+          new phet.scenery.RenderGradientStop( 0.1, toPremulOklab( 255,57,2, 1 ) ),
+          new phet.scenery.RenderGradientStop( 0.3, toPremulOklab( 255,128,7, 1 ) ),
+          new phet.scenery.RenderGradientStop( 0.5, toPremulOklab( 255,180,4, 1 ) ),
+          new phet.scenery.RenderGradientStop( 0.7, toPremulOklab( 5,186,221, 1 ) ),
+          new phet.scenery.RenderGradientStop( 0.9, toPremulOklab( 43,72,113, 1 ) ),
+          new phet.scenery.RenderGradientStop( 0.9, toPremulOklab( 0, 0, 0, 1 ) ),
+          new phet.scenery.RenderGradientStop( 1, toPremulOklab( 0, 0, 0, 1 ) )
         ],
         phet.scenery.RenderExtend.Repeat,
-        gradientColorSpace,
         linearGradientAccuracy
-      );
-      const e = phet.scenery.RenderColor.fromColor( pathE, new phet.scenery.Color( 255, 255, 255, 1 ) );
-      const f = phet.scenery.RenderColor.fromColor( pathF, new phet.scenery.Color( 0, 0, 0, 1 ) );
-      const back = phet.scenery.RenderColor.fromColor( null, new phet.scenery.Color( 128, 128, 128, 0.5 ) );
+      ) );
+      const e = toPremulSRGBPath( pathE, 255, 255, 255, 1 );
+      const f = toPremulSRGBPath( pathF, 0, 0, 0, 1 );
+      const back = toPremulSRGB( 128, 128, 128, 0.5 );
 
       const normalBlendArray = arr => {
         let result = arr[ 0 ];
