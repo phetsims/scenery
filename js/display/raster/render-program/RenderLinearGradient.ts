@@ -83,17 +83,14 @@ export default class RenderLinearGradient extends RenderProgram {
     );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderLinearGradient &&
-      this.transform.equals( other.transform ) &&
+  protected override equalsTyped( other: this ): boolean {
+    return this.transform.equals( other.transform ) &&
       this.start.equals( other.start ) &&
       this.end.equals( other.end ) &&
-      this.stops.length === other.stops.length &&
-      // TODO perf
-      this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
       this.extend === other.extend &&
-      this.accuracy === other.accuracy;
+      this.accuracy === other.accuracy &&
+      this.stops.length === other.stops.length &&
+      _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
   }
 
   public override needsCentroid(): boolean {

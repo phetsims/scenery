@@ -49,13 +49,12 @@ export default class RenderImage extends RenderProgram {
     return new RenderImage( transform.timesMatrix( this.transform ), this.image, this.extendX, this.extendY, this.resampleType );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderImage &&
-      this.transform.equals( other.transform ) &&
+  protected override equalsTyped( other: this ): boolean {
+    return this.transform.equals( other.transform ) &&
       this.image === other.image &&
       this.extendX === other.extendX &&
-      this.extendY === other.extendY;
+      this.extendY === other.extendY &&
+      this.resampleType === other.resampleType;
   }
 
   public override isFullyTransparent(): boolean {

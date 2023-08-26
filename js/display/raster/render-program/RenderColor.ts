@@ -34,10 +34,8 @@ export default class RenderColor extends RenderProgram {
     return this;
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderColor &&
-           this.color.equals( other.color );
+  protected override equalsTyped( other: this ): boolean {
+    return this.color.equals( other.color );
   }
 
   public override isFullyTransparent(): boolean {

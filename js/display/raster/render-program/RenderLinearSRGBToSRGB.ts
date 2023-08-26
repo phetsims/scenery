@@ -30,12 +30,6 @@ export default class RenderLinearSRGBToSRGB extends RenderProgram {
     return new RenderLinearSRGBToSRGB( children[ 0 ] );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderLinearSRGBToSRGB &&
-           this.program.equals( other.program );
-  }
-
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
 

@@ -30,12 +30,6 @@ export default class RenderUnpremultiply extends RenderProgram {
     return new RenderUnpremultiply( children[ 0 ] );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderUnpremultiply &&
-           this.program.equals( other.program );
-  }
-
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
 

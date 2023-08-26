@@ -75,13 +75,10 @@ export default class RenderLinearBlend extends RenderProgram {
     );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderLinearBlend &&
-      this.scaledNormal.equals( other.scaledNormal ) &&
-      this.offset === other.offset &&
-      this.zero.equals( other.zero ) &&
-      this.one.equals( other.one );
+  protected override equalsTyped( other: this ): boolean {
+    return this.scaledNormal.equals( other.scaledNormal ) &&
+           this.offset === other.offset &&
+           this.accuracy === other.accuracy;
   }
 
   public override needsCentroid(): boolean {

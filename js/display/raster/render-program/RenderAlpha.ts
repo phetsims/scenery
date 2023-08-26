@@ -31,11 +31,8 @@ export default class RenderAlpha extends RenderProgram {
     return new RenderAlpha( children[ 0 ], this.alpha );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderAlpha &&
-           this.program.equals( other.program ) &&
-           this.alpha === other.alpha;
+  protected override equalsTyped( other: this ): boolean {
+    return this.alpha === other.alpha;
   }
 
   public override isFullyTransparent(): boolean {

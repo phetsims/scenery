@@ -73,14 +73,11 @@ export default class RenderRadialBlend extends RenderProgram {
     );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderRadialBlend &&
-           this.transform.equals( other.transform ) &&
+  protected override equalsTyped( other: this ): boolean {
+    return this.transform.equals( other.transform ) &&
            this.radius0 === other.radius0 &&
            this.radius1 === other.radius1 &&
-           this.zero.equals( other.zero ) &&
-           this.one.equals( other.one );
+           this.accuracy === other.accuracy;
   }
 
   public override needsArea(): boolean {

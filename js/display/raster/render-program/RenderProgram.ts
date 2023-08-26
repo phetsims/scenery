@@ -98,7 +98,18 @@ export default abstract class RenderProgram {
     pathTest?: ( renderPath: RenderPath ) => boolean
   ): Vector4;
 
-  public abstract equals( other: RenderProgram ): boolean;
+  public equals( other: RenderProgram ): boolean {
+    return this === other || (
+      this.getName() === other.getName() &&
+      this.getChildren().length === other.getChildren().length &&
+      _.every( this.getChildren(), ( child, i ) => child.equals( other.getChildren()[ i ] ) ) &&
+      this.equalsTyped( other as this ) // If they have the same name, should be the same type(!)
+    );
+  }
+
+  protected equalsTyped( other: this ): boolean {
+    return true;
+  }
 
   /**
    * Returns a new RenderProgram with the given transform applied to it.

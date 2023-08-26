@@ -38,12 +38,8 @@ export default class RenderPathBoolean extends RenderProgram {
     return new RenderPathBoolean( this.path.transformed( transform ), this.inside.transformed( transform ), this.outside.transformed( transform ) );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderPathBoolean &&
-           this.path === other.path &&
-           this.inside.equals( other.inside ) &&
-           this.outside.equals( other.outside );
+  protected override equalsTyped( other: this ): boolean {
+    return this.path === other.path;
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {

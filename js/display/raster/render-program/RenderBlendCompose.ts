@@ -34,13 +34,9 @@ export default class RenderBlendCompose extends RenderProgram {
     return new RenderBlendCompose( this.composeType, this.blendType, children[ 0 ], children[ 1 ] );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderBlendCompose &&
-           this.composeType === other.composeType &&
-           this.blendType === other.blendType &&
-           this.a.equals( other.a ) &&
-           this.b.equals( other.b );
+  protected override equalsTyped( other: this ): boolean {
+    return this.composeType === other.composeType &&
+           this.blendType === other.blendType;
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {

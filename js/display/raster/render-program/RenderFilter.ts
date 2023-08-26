@@ -33,11 +33,8 @@ export default class RenderFilter extends RenderProgram {
     return new RenderFilter( children[ 0 ], this.colorMatrix, this.colorTranslation );
   }
 
-  public override equals( other: RenderProgram ): boolean {
-    if ( this === other ) { return true; }
-    return other instanceof RenderFilter &&
-           this.program.equals( other.program ) &&
-           this.colorMatrix.equals( other.colorMatrix ) &&
+  protected override equalsTyped( other: this ): boolean {
+    return this.colorMatrix.equals( other.colorMatrix ) &&
            this.colorTranslation.equals( other.colorTranslation );
   }
 
