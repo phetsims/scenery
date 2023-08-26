@@ -880,7 +880,7 @@ an UI and Display made for visual testing and debugging.
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
       phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
 
-      const debugCanvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
+      const debugCanvas = raster.toCanvas();
       styleCanvas( debugCanvas );
       document.body.appendChild( debugCanvas );
 
@@ -1700,6 +1700,32 @@ an UI and Display made for visual testing and debugging.
       display.width = 1024;
       display.height = 1024;
       display.updateDisplay();
+    } );
+  };
+
+  window.colorSpaceTest = function() {
+    setTimeout( async function() {
+
+      // const colorSpace = 'srgb';
+      const colorSpace = 'display-p3';
+
+      const canvas = document.createElement( 'canvas' );
+      canvas.width = 1;
+      canvas.height = 1;
+      canvas.style.width = ( 1024 / window.devicePixelRatio ) + 'px';
+      canvas.style.height = ( 1024 / window.devicePixelRatio ) + 'px';
+      const context = canvas.getContext( '2d', {
+        colorSpace: colorSpace
+      } );
+
+      const imageData = new ImageData( 1, 1, { colorSpace: colorSpace } );
+      imageData.data[ 0 ] = 255;
+      imageData.data[ 1 ] = 0;
+      imageData.data[ 2 ] = 0;
+      imageData.data[ 3 ] = 255;
+      context.putImageData( imageData, 0, 0 );
+
+      document.body.appendChild( canvas );
     } );
   };
 

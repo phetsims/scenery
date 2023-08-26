@@ -645,7 +645,9 @@ export default class Rasterize {
     const canvas = document.createElement( 'canvas' );
     canvas.width = imageData.width;
     canvas.height = imageData.height;
-    const context = canvas.getContext( '2d' )!;
+    const context = ( imageData.colorSpace && imageData.colorSpace !== 'srgb' ) ?
+                    canvas.getContext( '2d', { colorSpace: imageData.colorSpace } )! :
+                    canvas.getContext( '2d' )!;
     context.putImageData( imageData, 0, 0 );
     return canvas;
   }

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { OutputRaster, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, scenery } from '../../../imports.js';
+import { OutputRaster, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, Rasterize, scenery } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 const defaultColorConverter = new RasterConvertPremultipliedSRGBToSRGB255();
@@ -20,12 +20,21 @@ export default class CombinedRaster implements OutputRaster {
   public constructor(
     public readonly width: number,
     public readonly height: number,
+    public readonly imageDataColorspace: 'srgb' | 'display-p3' = 'srgb',
     public readonly colorConverter: RasterColorConverter = defaultColorConverter
   ) {
     this.accumulationArray = new Float64Array( width * height * 4 );
-    this.imageData = new ImageData( this.width, this.height );
-    // TODO: Firefox complains about this
-    // this.imageData = new ImageData( this.width, this.height, { colorSpace: 'srgb' } );
+
+    // TODO: can we get 16 bits for display-p3?
+    // TODO: can we get HDR support somehow?
+
+    // NOTE: Firefox does not currently support display-p3
+    this.imageData = imageDataColorspace === 'srgb' ?
+                     new ImageData( this.width, this.height ) :
+                     new ImageData( this.width, this.height, { colorSpace: imageDataColorspace } );
+
+    assert && assert( imageDataColorspace === 'srgb' || this.imageData.colorSpace === imageDataColorspace,
+      'Check with RenderColor.canvasSupportsDisplayP3() before using display-p3' );
   }
 
   public addClientPartialPixel( color: Vector4, x: number, y: number ): void {
@@ -130,6 +139,10 @@ export default class CombinedRaster implements OutputRaster {
     }
 
     return this.imageData;
+  }
+
+  public toCanvas(): HTMLCanvasElement {
+    return Rasterize.imageDataToCanvas( this.toImageData() );
   }
 }
 

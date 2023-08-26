@@ -215,6 +215,28 @@ export default class RenderColor extends RenderProgram {
     );
   }
 
+  public static linearToLinearDisplayP3( linear: Vector4 ): Vector4 {
+    const m = RenderColor.sRGBToDisplayP3Matrix;
+
+    return new Vector4(
+      m.m00() * linear.x + m.m01() * linear.y + m.m02() * linear.z,
+      m.m10() * linear.x + m.m11() * linear.y + m.m12() * linear.z,
+      m.m20() * linear.x + m.m21() * linear.y + m.m22() * linear.z,
+      linear.w
+    );
+  }
+
+  public static linearDisplayP3ToLinear( linear: Vector4 ): Vector4 {
+    const m = RenderColor.displayP3TosRGBMatrix;
+
+    return new Vector4(
+      m.m00() * linear.x + m.m01() * linear.y + m.m02() * linear.z,
+      m.m10() * linear.x + m.m11() * linear.y + m.m12() * linear.z,
+      m.m20() * linear.x + m.m21() * linear.y + m.m22() * linear.z,
+      linear.w
+    );
+  }
+
   public static premultiply( color: Vector4 ): Vector4 {
     return new Vector4(
       color.x * color.w,
@@ -292,6 +314,18 @@ export default class RenderColor extends RenderProgram {
   public static sRGBToDisplayP3Matrix = RenderColor.XYZToDisplayP3Matrix.timesMatrix( RenderColor.sRGBToXYZMatrix );
 
   public static displayP3TosRGBMatrix = RenderColor.sRGBToDisplayP3Matrix.inverted();
+
+  public static canvasSupportsDisplayP3(): boolean {
+    const canvas = document.createElement( 'canvas' );
+    try {
+      // Errors might be thrown if the option is supported but system requirements are not met
+      const context = canvas.getContext( '2d', { colorSpace: 'display-p3' } );
+      return context!.getContextAttributes().colorSpace === 'display-p3';
+    }
+    catch{
+      return false;
+    }
+  }
 
   public static ratioBlend(
     zeroColor: Vector4,

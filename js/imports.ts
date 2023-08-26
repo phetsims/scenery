@@ -456,6 +456,8 @@ export { default as RenderLinearSRGBToOklab } from './display/raster/render-prog
 export { default as RenderLinearSRGBToSRGB } from './display/raster/render-program/RenderLinearSRGBToSRGB.js';
 export { default as RenderOklabToLinearSRGB } from './display/raster/render-program/RenderOklabToLinearSRGB.js';
 export { default as RenderSRGBToLinearSRGB } from './display/raster/render-program/RenderSRGBToLinearSRGB.js';
+export { default as RenderLinearDisplayP3ToLinearSRGB } from './display/raster/render-program/RenderLinearDisplayP3ToLinearSRGB.js';
+export { default as RenderLinearSRGBToLinearDisplayP3 } from './display/raster/render-program/RenderLinearSRGBToLinearDisplayP3.js';
 export { default as RenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export type { SerializedRenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export { default as RenderStack } from './display/raster/render-program/RenderStack.js';

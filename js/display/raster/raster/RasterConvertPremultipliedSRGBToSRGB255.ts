@@ -6,6 +6,8 @@
  * - accumulation space: premultiplied linear sRGB
  * - output space: sRGB255, so we can write to ImageData
  *
+ * NOTE: Because the same transfer curve is used with Display P3, this also works with Display P3.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
