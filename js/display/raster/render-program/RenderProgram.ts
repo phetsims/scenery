@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonalFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderColorSpaceConversion, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderPathBoolean, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderPathBoolean, SerializedRenderRadialBlend, SerializedRenderRadialGradient } from '../../../imports.js';
+import { ClippableFace, PolygonalFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderColorSpaceConversion, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderPathBoolean, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderPathBoolean, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -176,14 +176,17 @@ export default abstract class RenderProgram {
   public abstract serialize(): SerializedRenderProgram;
 
   public static deserialize( obj: SerializedRenderProgram ): RenderProgram {
-    if ( obj.type === 'RenderAlpha' ) {
+    if ( obj.type === 'RenderStack' ) {
+      return RenderStack.deserialize( obj as SerializedRenderStack );
+    }
+    else if ( obj.type === 'RenderColor' ) {
+      return RenderColor.deserialize( obj as SerializedRenderColor );
+    }
+    else if ( obj.type === 'RenderAlpha' ) {
       return RenderAlpha.deserialize( obj as SerializedRenderAlpha );
     }
     else if ( obj.type === 'RenderBlendCompose' ) {
       return RenderBlendCompose.deserialize( obj as SerializedRenderBlendCompose );
-    }
-    else if ( obj.type === 'RenderColor' ) {
-      return RenderColor.deserialize( obj as SerializedRenderColor );
     }
     else if ( obj.type === 'RenderPathBoolean' ) {
       return RenderPathBoolean.deserialize( obj as SerializedRenderPathBoolean );

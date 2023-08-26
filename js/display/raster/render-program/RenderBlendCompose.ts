@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderBlendType, RenderColor, RenderComposeType, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderBlendType, RenderColor, RenderComposeType, RenderProgram, RenderStack, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
@@ -40,6 +40,11 @@ export default class RenderBlendCompose extends RenderProgram {
   }
 
   public override simplified(): RenderProgram {
+    // If we are normal blending and source-over, we can simplify to a RenderStack, and simplify that!
+    if ( this.blendType === RenderBlendType.Normal && this.composeType === RenderComposeType.Over ) {
+      return new RenderStack( [ this.b, this.a ] ).simplified();
+    }
+
     // a OP b
     const a = this.a.simplified();
     const b = this.b.simplified();
@@ -362,12 +367,12 @@ export default class RenderBlendCompose extends RenderProgram {
         throw new Error( 'unimplemented composeType' );
     }
 
+    // NO clamping, because of color spaces and filters with negative lobes
     return new Vector4(
-      // Modes like COMPOSE_PLUS can generate alpha > 1.0, so clamp.
-      Math.min( fa * blended.x + fb * b.x, 1 ),
-      Math.min( fa * blended.y + fb * b.y, 1 ),
-      Math.min( fa * blended.z + fb * b.z, 1 ),
-      Math.min( fa * a.w + fb * b.w, 1 )
+      fa * blended.x + fb * b.x,
+      fa * blended.y + fb * b.y,
+      fa * blended.z + fb * b.z,
+      fa * a.w + fb * b.w
     );
   }
 

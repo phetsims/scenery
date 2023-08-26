@@ -209,7 +209,7 @@ export default class RenderableFace {
               }
             };
 
-            return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ), clippedFace.getBounds() );
+            return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ).simplified(), clippedFace.getBounds() );
           } ).filter( face => face.face.getArea() > 1e-8 );
 
           unprocessedFaces.push( ...renderableFaces );
@@ -334,7 +334,7 @@ export default class RenderableFace {
             };
 
             // TODO: propagate "fake" edge flags
-            return new RenderableFace( transformedClippedFace, face.renderProgram.replace( replacer ), transformedClippedFace.getBounds() );
+            return new RenderableFace( transformedClippedFace, face.renderProgram.replace( replacer ).simplified(), transformedClippedFace.getBounds() );
           } ).filter( face => face.face.getArea() > 1e-8 );
 
           unprocessedFaces.push( ...renderableFaces );

@@ -96,6 +96,10 @@ export default class RenderRadialBlend extends RenderProgram {
       return RenderColor.TRANSPARENT;
     }
 
+    if ( zero.equals( one ) ) {
+      return zero;
+    }
+
     return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, zero, one );
   }
 

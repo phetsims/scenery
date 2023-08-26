@@ -458,6 +458,8 @@ export { default as RenderOklabToLinearSRGB } from './display/raster/render-prog
 export { default as RenderSRGBToLinearSRGB } from './display/raster/render-program/RenderSRGBToLinearSRGB.js';
 export { default as RenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export type { SerializedRenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
+export { default as RenderStack } from './display/raster/render-program/RenderStack.js';
+export type { SerializedRenderStack } from './display/raster/render-program/RenderStack.js';
 export { default as RenderFilter } from './display/raster/render-program/RenderFilter.js';
 export type { SerializedRenderFilter } from './display/raster/render-program/RenderFilter.js';
 export { default as RenderGradientStop } from './display/raster/render-program/RenderGradientStop.js';

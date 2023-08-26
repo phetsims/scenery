@@ -93,6 +93,10 @@ export default class RenderLinearBlend extends RenderProgram {
       return RenderColor.TRANSPARENT;
     }
 
+    if ( zero.equals( one ) ) {
+      return zero;
+    }
+
     return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, zero, one );
   }
 

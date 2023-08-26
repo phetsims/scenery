@@ -780,7 +780,7 @@ an UI and Display made for visual testing and debugging.
         return new phet.scenery.RenderPremultiply( new phet.scenery.RenderLinearSRGBToSRGB( new phet.scenery.RenderOklabToLinearSRGB( new phet.scenery.RenderUnpremultiply( renderProgram ) ) ) );
       };
 
-      const a = phet.scenery.RenderPathBoolean.fromInside( pathA, premulLinearSRGBToPremulSRGB( new phet.scenery.RenderImage(
+      const a = new phet.scenery.RenderAlpha( phet.scenery.RenderPathBoolean.fromInside( pathA, premulLinearSRGBToPremulSRGB( new phet.scenery.RenderImage(
         // far distance
         phet.dot.Matrix3.affine( 15 / 1024, 0, 20, 0, 15 / 1024, 0 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ),
 
@@ -805,7 +805,7 @@ an UI and Display made for visual testing and debugging.
         phet.scenery.RenderExtend.Repeat,
         phet.scenery.RenderExtend.Repeat,
         imageResampleType
-      ) ) );
+      ) ) ), 0.8 );
       const b = toPremulSRGBPath( pathB, 0, 255, 0, 1 );
       const c = phet.scenery.RenderPathBoolean.fromInside( pathC, new phet.scenery.RenderRadialGradient(
         phet.dot.Matrix3.IDENTITY,
