@@ -389,9 +389,6 @@ export default class PolygonClipping {
 
     minPolygon.push( ...minSimplifier.finalize() );
     maxPolygon.push( ...maxSimplifier.finalize() );
-
-    minSimplifier.reset();
-    maxSimplifier.reset();
   }
 
   public static binaryYClipPolygon(
@@ -432,9 +429,6 @@ export default class PolygonClipping {
 
     minPolygon.push( ...minSimplifier.finalize() );
     maxPolygon.push( ...maxSimplifier.finalize() );
-
-    minSimplifier.reset();
-    maxSimplifier.reset();
   }
 
   // line where dot( normal, point ) - value = 0. "min" side is dot-products < value, "max" side is dot-products > value
@@ -490,9 +484,6 @@ export default class PolygonClipping {
 
     minPolygon.push( ...minSimplifier.finalize() );
     maxPolygon.push( ...maxSimplifier.finalize() );
-
-    minSimplifier.reset();
-    maxSimplifier.reset();
   }
 
   // line where dot( normal, point ) - value = 0. "min" side is dot-products < value, "max" side is dot-products > value
@@ -578,13 +569,7 @@ export default class PolygonClipping {
       }
     }
 
-    return simplifiers.map( simplifier => {
-      const polygon = simplifier.finalize();
-
-      simplifier.reset();
-
-      return polygon;
-    } );
+    return simplifiers.map( simplifier => simplifier.finalize() );
   }
 
   public static boundsClipEdge(
@@ -680,8 +665,6 @@ export default class PolygonClipping {
   // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
   public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
 
-    simplifier.reset();
-
     const centerX = bounds.centerX;
     const centerY = bounds.centerY;
 
@@ -745,11 +728,7 @@ export default class PolygonClipping {
       }
     }
 
-    const result = simplifier.finalize();
-
-    simplifier.reset();
-
-    return result;
+    return simplifier.finalize();
   }
 
   /**
@@ -1468,7 +1447,6 @@ export default class PolygonClipping {
     let totalArea = 0; // For assertions
 
     const addPolygonTo = ( edges: ( LinearEdge | CircularEdge )[], polygons: Vector2[][] ) => {
-      simplifier.reset();
 
       for ( let j = 0; j < edges.length; j++ ) {
         addEdgeTo( edges[ j ], simplifier );
@@ -1498,9 +1476,6 @@ export default class PolygonClipping {
 
       assertSlow( Math.abs( totalArea - beforeArea ) < 1e-5 );
     }
-
-    // Final one, because paranoia
-    simplifier.reset();
   }
 }
 

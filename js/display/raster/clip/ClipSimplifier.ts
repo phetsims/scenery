@@ -22,10 +22,6 @@ export default class ClipSimplifier {
     // NOTHING NEEDED
   }
 
-  public reset(): void {
-    this.points = [];
-  }
-
   public addTransformed( matrix: Matrix3, x: number, y: number ): void {
     this.add(
       matrix.m00() * x + matrix.m01() * y + matrix.m02(),
@@ -90,6 +86,10 @@ export default class ClipSimplifier {
     this.points.push( new Vector2( x, y ) );
   }
 
+  /**
+   * Treats the entire list of points so far as a closed polygon, completes simplification (between the start/end),
+   * returns the simplified points, AND resets the state for the next time
+   */
   public finalize(): Vector2[] {
     // TODO: add more comprehensive testing for this! Tested a simple example
 
@@ -170,7 +170,10 @@ export default class ClipSimplifier {
       this.points.length = 0;
     }
 
-    return this.points;
+    // Reset our own list of points, so the next time we add points we don't have to clear out the old ones
+    const points = this.points;
+    this.points = [];
+    return points;
   }
 
   public static simplifyPolygon( points: Vector2[], checkGeneralCollinearity = false ): Vector2[] {
