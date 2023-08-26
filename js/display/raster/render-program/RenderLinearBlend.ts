@@ -34,6 +34,10 @@ export default class RenderLinearBlend extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderLinearBlend';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [ this.zero, this.one ];
   }
@@ -80,16 +84,6 @@ export default class RenderLinearBlend extends RenderProgram {
       this.one.equals( other.one );
   }
 
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
-    }
-  }
-
   public override needsCentroid(): boolean {
     return this.accuracy === RenderLinearBlendAccuracy.Accurate || super.needsCentroid();
   }
@@ -134,10 +128,6 @@ export default class RenderLinearBlend extends RenderProgram {
         t
       );
     }
-  }
-
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderLinearBlend`;
   }
 
   public override serialize(): SerializedRenderLinearBlend {

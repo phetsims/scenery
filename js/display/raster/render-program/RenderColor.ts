@@ -21,6 +21,10 @@ export default class RenderColor extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderColor';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [];
   }
@@ -56,16 +60,6 @@ export default class RenderColor extends RenderProgram {
     return false;
   }
 
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderColor( this.color );
-    }
-  }
-
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     return this;
   }
@@ -83,8 +77,8 @@ export default class RenderColor extends RenderProgram {
     return this.color;
   }
 
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderColor color:${this.color.toString()})`;
+  protected override getExtraDebugString(): string {
+    return `${this.color.x}, ${this.color.y}, ${this.color.z}, ${this.color.w}`;
   }
 
   public static premultipliedSRGBToLinearPremultipliedSRGB( color: Vector4 ): Vector4 {

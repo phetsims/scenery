@@ -32,6 +32,10 @@ export default class RenderImage extends RenderProgram {
     this.inverseTransformWithHalfOffset = Matrix3.translation( -0.5, -0.5 ).timesMatrix( this.inverseTransform );
   }
 
+  public override getName(): string {
+    return 'RenderImage';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [];
   }
@@ -77,16 +81,6 @@ export default class RenderImage extends RenderProgram {
     return this.resampleType === RenderResampleType.NearestNeighbor ||
            this.resampleType === RenderResampleType.Bilinear ||
            this.resampleType === RenderResampleType.MitchellNetravali;
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderImage( this.transform, this.image, this.extendX, this.extendY, this.resampleType );
-    }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
@@ -234,10 +228,6 @@ export default class RenderImage extends RenderProgram {
       default:
         throw new Error( 'unknown resample type: ' + this.resampleType );
     }
-  }
-
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderImage`;
   }
 
   /**

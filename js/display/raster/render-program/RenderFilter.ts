@@ -20,6 +20,10 @@ export default class RenderFilter extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderFilter';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [ this.program ];
   }
@@ -35,16 +39,6 @@ export default class RenderFilter extends RenderProgram {
            this.program.equals( other.program ) &&
            this.colorMatrix.equals( other.colorMatrix ) &&
            this.colorTranslation.equals( other.colorTranslation );
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderFilter( this.program.replace( callback ), this.colorMatrix, this.colorTranslation );
-    }
   }
 
   // TODO: inspect colorMatrix to see when it will maintain transparency!
@@ -106,11 +100,6 @@ export default class RenderFilter extends RenderProgram {
     const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
 
     return RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( source ) ).plus( this.colorTranslation ) );
-  }
-
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderFilter\n` +
-           `${this.program.toRecursiveString( indent + '  ' )}`;
   }
 
   public override serialize(): SerializedRenderFilter {

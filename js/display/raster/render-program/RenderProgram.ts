@@ -14,6 +14,7 @@ import Vector4 from '../../../../../dot/js/Vector4.js';
 export default abstract class RenderProgram {
   public abstract getChildren(): RenderProgram[];
   public abstract withChildren( children: RenderProgram[] ): RenderProgram;
+  public abstract getName(): string;
 
   /**
    * Whether this RenderProgram will return an evaluation (regardless of the position) with an empty alpha value (0).
@@ -97,11 +98,7 @@ export default abstract class RenderProgram {
     pathTest?: ( renderPath: RenderPath ) => boolean
   ): Vector4;
 
-  public abstract toRecursiveString( indent: string ): string;
-
   public abstract equals( other: RenderProgram ): boolean;
-
-  public abstract replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram;
 
   /**
    * Returns a new RenderProgram with the given transform applied to it.
@@ -117,8 +114,33 @@ export default abstract class RenderProgram {
     callback( this );
   }
 
+  public replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    const replaced = callback( this );
+    if ( replaced ) {
+      return replaced;
+    }
+    else {
+      return this.withChildren( this.getChildren().map( child => child.replace( callback ) ) );
+    }
+  }
+
   public getNeeds(): RenderProgramNeeds {
     return new RenderProgramNeeds( this.needsFace(), this.needsArea(), this.needsCentroid() );
+  }
+
+  public toRecursiveString( indent: string ): string {
+    const extra = this.getExtraDebugString();
+    let string = `${indent}${this.getName()}${extra ? ` (${extra})` : ''}`;
+
+    this.getChildren().forEach( child => {
+      string += '\n' + child.toRecursiveString( indent + '  ' );
+    } );
+
+    return string;
+  }
+
+  protected getExtraDebugString(): string {
+    return '';
   }
 
   public abstract serialize(): SerializedRenderProgram;

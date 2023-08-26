@@ -21,6 +21,10 @@ export default class RenderPathBoolean extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderPathBoolean';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [ this.inside, this.outside ];
   }
@@ -40,16 +44,6 @@ export default class RenderPathBoolean extends RenderProgram {
            this.path === other.path &&
            this.inside.equals( other.inside ) &&
            this.outside.equals( other.outside );
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderPathBoolean( this.path, this.inside.replace( callback ), this.outside.replace( callback ) );
-    }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
@@ -81,10 +75,8 @@ export default class RenderPathBoolean extends RenderProgram {
     }
   }
 
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderPathBoolean (${this.path.id}\n` +
-           `${this.inside.toRecursiveString( indent + '  ' )}\n` +
-           `${this.outside.toRecursiveString( indent + '  ' )}`;
+  protected override getExtraDebugString(): string {
+    return `${this.path.id}`;
   }
 
   public override serialize(): SerializedRenderPathBoolean {

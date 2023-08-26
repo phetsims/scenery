@@ -18,6 +18,10 @@ export default class RenderAlpha extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderAlpha';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [ this.program ];
   }
@@ -32,16 +36,6 @@ export default class RenderAlpha extends RenderProgram {
     return other instanceof RenderAlpha &&
            this.program.equals( other.program ) &&
            this.alpha === other.alpha;
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderAlpha( this.program.replace( callback ), this.alpha );
-    }
   }
 
   public override isFullyTransparent(): boolean {
@@ -87,9 +81,8 @@ export default class RenderAlpha extends RenderProgram {
     return source.timesScalar( this.alpha );
   }
 
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderAlpha alpha:${this.alpha})\n` +
-           `${this.program.toRecursiveString( indent + '  ' )}`;
+  protected override getExtraDebugString(): string {
+    return `${this.alpha}`;
   }
 
   public override serialize(): SerializedRenderAlpha {

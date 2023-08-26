@@ -49,6 +49,10 @@ export default class RenderRadialBlend extends RenderProgram {
     this.inverseTransform = transform.inverted();
   }
 
+  public override getName(): string {
+    return 'RenderRadialBlend';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [ this.zero, this.one ];
   }
@@ -77,16 +81,6 @@ export default class RenderRadialBlend extends RenderProgram {
            this.radius1 === other.radius1 &&
            this.zero.equals( other.zero ) &&
            this.one.equals( other.one );
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
-    }
   }
 
   public override needsArea(): boolean {
@@ -190,10 +184,6 @@ export default class RenderRadialBlend extends RenderProgram {
         t
       );
     }
-  }
-
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderRadialBlend`;
   }
 
   public override serialize(): SerializedRenderRadialBlend {

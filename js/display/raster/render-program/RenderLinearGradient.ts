@@ -52,6 +52,10 @@ export default class RenderLinearGradient extends RenderProgram {
     this.gradDelta = end.minus( start );
   }
 
+  public override getName(): string {
+    return 'RenderLinearGradient';
+  }
+
   public override getChildren(): RenderProgram[] {
     return this.stops.map( stop => stop.program );
   }
@@ -90,23 +94,6 @@ export default class RenderLinearGradient extends RenderProgram {
       this.stops.every( ( stop, i ) => stop.ratio === other.stops[ i ].ratio && stop.program.equals( other.stops[ i ].program ) ) &&
       this.extend === other.extend &&
       this.accuracy === other.accuracy;
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderLinearGradient(
-        this.transform,
-        this.start,
-        this.end,
-        this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) ),
-        this.extend,
-        this.accuracy
-      );
-    }
   }
 
   public override needsCentroid(): boolean {
@@ -157,10 +144,6 @@ export default class RenderLinearGradient extends RenderProgram {
     const mappedT = RenderImage.extend( this.extend, t );
 
     return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.stops, mappedT, pathTest );
-  }
-
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderLinearGradient`;
   }
 
   public override serialize(): SerializedRenderLinearGradient {

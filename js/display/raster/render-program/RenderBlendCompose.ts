@@ -21,6 +21,10 @@ export default class RenderBlendCompose extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderBlendCompose';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [ this.a, this.b ];
   }
@@ -37,18 +41,6 @@ export default class RenderBlendCompose extends RenderProgram {
            this.blendType === other.blendType &&
            this.a.equals( other.a ) &&
            this.b.equals( other.b );
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      const a = this.a.replace( callback );
-      const b = this.b.replace( callback );
-      return new RenderBlendCompose( this.composeType, this.blendType, a, b );
-    }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
@@ -225,10 +217,8 @@ export default class RenderBlendCompose extends RenderProgram {
     return RenderBlendCompose.blendCompose( a, b, this.composeType, this.blendType );
   }
 
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderBlendCompose(${RenderComposeType[ this.composeType ]}, ${RenderBlendType[ this.blendType ]}),\n` +
-           `${this.a.toRecursiveString( indent + '  ' )}\n` +
-           `${this.b.toRecursiveString( indent + '  ' )}`;
+  protected override getExtraDebugString(): string {
+    return `${RenderComposeType[ this.composeType ]}, ${RenderBlendType[ this.blendType ]}`;
   }
 
   public static blendCompose( a: Vector4, b: Vector4, composeType: RenderComposeType, blendType: RenderBlendType ): Vector4 {

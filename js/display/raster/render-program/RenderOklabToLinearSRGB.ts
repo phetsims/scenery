@@ -17,6 +17,10 @@ export default class RenderOklabToLinearSRGB extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderOklabToLinearSRGB';
+  }
+
   public override getChildren(): RenderProgram[] {
     return [ this.program ];
   }
@@ -30,16 +34,6 @@ export default class RenderOklabToLinearSRGB extends RenderProgram {
     if ( this === other ) { return true; }
     return other instanceof RenderOklabToLinearSRGB &&
            this.program.equals( other.program );
-  }
-
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      return new RenderOklabToLinearSRGB( this.program.replace( callback ) );
-    }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
@@ -71,11 +65,6 @@ export default class RenderOklabToLinearSRGB extends RenderProgram {
     const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
 
     return RenderColor.oklabToLinear( source );
-  }
-
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderOklabToLinearSRGB\n` +
-           `${this.program.toRecursiveString( indent + '  ' )}`;
   }
 
   public override serialize(): SerializedRenderOklabToLinearSRGB {

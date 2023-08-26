@@ -51,6 +51,10 @@ export default class RenderRadialGradient extends RenderProgram {
     super();
   }
 
+  public override getName(): string {
+    return 'RenderRadialGradient';
+  }
+
   public override getChildren(): RenderProgram[] {
     return this.stops.map( stop => stop.program );
   }
@@ -96,17 +100,6 @@ export default class RenderRadialGradient extends RenderProgram {
       this.accuracy === other.accuracy;
   }
 
-  public override replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
-    const replaced = callback( this );
-    if ( replaced ) {
-      return replaced;
-    }
-    else {
-      const stops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) );
-      return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.accuracy );
-    }
-  }
-
   public override needsCentroid(): boolean {
     if ( this.accuracy === RenderRadialGradientAccuracy.UnsplitCentroid || this.accuracy === RenderRadialGradientAccuracy.SplitCentroid || this.accuracy === RenderRadialGradientAccuracy.SplitAccurate ) {
       return true;
@@ -140,10 +133,6 @@ export default class RenderRadialGradient extends RenderProgram {
     }
 
     return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.accuracy, pathTest );
-  }
-
-  public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderRadialGradient`;
   }
 
   public override serialize(): SerializedRenderRadialGradient {
