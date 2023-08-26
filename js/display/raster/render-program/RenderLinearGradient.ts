@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -22,14 +22,13 @@ scenery.register( 'RenderLinearGradientAccuracy', RenderLinearGradientAccuracy )
 
 const scratchLinearGradientVector0 = new Vector2( 0, 0 );
 
-export default class RenderLinearGradient extends RenderPathProgram {
+export default class RenderLinearGradient extends RenderProgram {
 
   public readonly inverseTransform: Matrix3;
   private readonly isIdentity: boolean;
   private readonly gradDelta: Vector2;
 
   public constructor(
-    path: RenderPath | null,
     public readonly transform: Matrix3,
     public readonly start: Vector2,
     public readonly end: Vector2,
@@ -46,7 +45,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
       return stops[ i ].ratio <= stops[ i + 1 ].ratio;
     } ), 'RenderLinearGradient stops not monotonically increasing' );
 
-    super( path );
+    super();
 
     this.inverseTransform = transform.inverted();
     this.isIdentity = transform.isIdentity();
@@ -60,7 +59,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
 
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderLinearGradient(
-      this.getTransformedPath( transform ),
       transform.timesMatrix( this.transform ),
       this.start,
       this.end,
@@ -72,8 +70,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
 
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
-    return super.equals( other ) &&
-      other instanceof RenderLinearGradient &&
+    return other instanceof RenderLinearGradient &&
       this.transform.equals( other.transform ) &&
       this.start.equals( other.start ) &&
       this.end.equals( other.end ) &&
@@ -91,7 +88,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
     }
     else {
       return new RenderLinearGradient(
-        this.path,
         this.transform,
         this.start,
         this.end,
@@ -112,7 +108,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
   }
 
   public override isFullyOpaque(): boolean {
-    return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
+    return this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
   public override needsFace(): boolean {
@@ -152,12 +148,7 @@ export default class RenderLinearGradient extends RenderPathProgram {
       return RenderColor.TRANSPARENT;
     }
 
-    if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearGradient( null, this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.accuracy );
-    }
-    else {
-      return RenderColor.TRANSPARENT;
-    }
+    return new RenderLinearGradient( this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.accuracy );
   }
 
   private useInternalCentroid(): boolean {
@@ -174,10 +165,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
     maxY: number,
     pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
-    if ( !this.isInPath( pathTest ) ) {
-      return Vector4.ZERO;
-    }
-
     const point = this.useInternalCentroid() ?
                   scratchLinearGradientVector0.set( centroid ) :
                   scratchLinearGradientVector0.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
@@ -197,13 +184,12 @@ export default class RenderLinearGradient extends RenderPathProgram {
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderLinearGradient (${this.path ? this.path.id : 'null'})`;
+    return `${indent}RenderLinearGradient`;
   }
 
   public override serialize(): SerializedRenderLinearGradient {
     return {
       type: 'RenderLinearGradient',
-      path: this.path ? this.path.serialize() : null,
       transform: [
         this.transform.m00(), this.transform.m01(), this.transform.m02(),
         this.transform.m10(), this.transform.m11(), this.transform.m12(),
@@ -219,7 +205,6 @@ export default class RenderLinearGradient extends RenderPathProgram {
 
   public static override deserialize( obj: SerializedRenderLinearGradient ): RenderLinearGradient {
     return new RenderLinearGradient(
-      obj.path ? RenderPath.deserialize( obj.path ) : null,
       Matrix3.rowMajor(
         obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
         obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
@@ -238,7 +223,6 @@ scenery.register( 'RenderLinearGradient', RenderLinearGradient );
 
 export type SerializedRenderLinearGradient = {
   type: 'RenderLinearGradient';
-  path: SerializedRenderPath | null;
   transform: number[];
   start: number[];
   end: number[];

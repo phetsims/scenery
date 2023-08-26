@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, Color, constantTrue, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, Color, constantTrue, RenderPath, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -15,19 +15,20 @@ import Vector4 from '../../../../../dot/js/Vector4.js';
 
 const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
 
-export default class RenderColor extends RenderPathProgram {
-  public constructor( path: RenderPath | null, public color: Vector4 ) {
-    super( path );
+export default class RenderColor extends RenderProgram {
+  public constructor(
+    public color: Vector4
+  ) {
+    super();
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderColor( this.getTransformedPath( transform ), this.color );
+    return new RenderColor( this.color );
   }
 
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
-    return super.equals( other ) &&
-           other instanceof RenderColor &&
+    return other instanceof RenderColor &&
            this.color.equals( other.color );
   }
 
@@ -36,7 +37,7 @@ export default class RenderColor extends RenderPathProgram {
   }
 
   public override isFullyOpaque(): boolean {
-    return this.path === null && this.color.w === 1;
+    return this.color.w === 1;
   }
 
   public override needsFace(): boolean {
@@ -57,17 +58,12 @@ export default class RenderColor extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderColor( this.path, this.color );
+      return new RenderColor( this.color );
     }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    if ( this.isInPath( pathTest ) ) {
-      return new RenderColor( null, this.color );
-    }
-    else {
-      return RenderColor.TRANSPARENT;
-    }
+    return this;
   }
 
   public override evaluate(
@@ -80,16 +76,11 @@ export default class RenderColor extends RenderPathProgram {
     maxY: number,
     pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
-    if ( this.isInPath( pathTest ) ) {
-      return this.color;
-    }
-    else {
-      return Vector4.ZERO;
-    }
+    return this.color;
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderColor (${this.path ? this.path.id : 'null'}, color:${this.color.toString()})`;
+    return `${indent}RenderColor color:${this.color.toString()})`;
   }
 
   public static premultipliedSRGBToLinearPremultipliedSRGB( color: Vector4 ): Vector4 {
@@ -126,12 +117,12 @@ export default class RenderColor extends RenderPathProgram {
     }
   }
 
-  public static premultipliedSRGBFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
-    return new RenderColor( path, RenderColor.premultiply( RenderColor.colorToSRGB( color ) ) );
+  public static premultipliedSRGBFromColor( color: Color ): RenderColor {
+    return new RenderColor( RenderColor.premultiply( RenderColor.colorToSRGB( color ) ) );
   }
 
-  public static premultipliedOklabFromColor( color: Color, path: RenderPath | null = null ): RenderColor {
-    return new RenderColor( path, RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) );
+  public static premultipliedOklabFromColor( color: Color ): RenderColor {
+    return new RenderColor( RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) );
   }
 
   public static colorToSRGB( color: Color ): Vector4 {
@@ -251,18 +242,17 @@ export default class RenderColor extends RenderPathProgram {
     );
   }
 
-  public static readonly TRANSPARENT = new RenderColor( null, Vector4.ZERO );
+  public static readonly TRANSPARENT = new RenderColor( Vector4.ZERO );
 
   public override serialize(): SerializedRenderColor {
     return {
       type: 'RenderColor',
-      path: this.path ? this.path.serialize() : null,
       color: { r: this.color.x, g: this.color.y, b: this.color.z, a: this.color.w }
     };
   }
 
   public static override deserialize( obj: SerializedRenderColor ): RenderColor {
-    return new RenderColor( obj.path ? RenderPath.deserialize( obj.path ) : null, new Vector4( obj.color.r, obj.color.g, obj.color.b, obj.color.a ) );
+    return new RenderColor( new Vector4( obj.color.r, obj.color.g, obj.color.b, obj.color.a ) );
   }
 }
 
@@ -270,6 +260,5 @@ scenery.register( 'RenderColor', RenderColor );
 
 export type SerializedRenderColor = {
   type: 'RenderColor';
-  path: SerializedRenderPath | null;
   color: { r: number; g: number; b: number; a: number };
 };

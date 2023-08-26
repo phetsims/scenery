@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -19,10 +19,9 @@ export enum RenderLinearBlendAccuracy {
 
 scenery.register( 'RenderLinearBlendAccuracy', RenderLinearBlendAccuracy );
 
-export default class RenderLinearBlend extends RenderPathProgram {
+export default class RenderLinearBlend extends RenderProgram {
 
   public constructor(
-    path: RenderPath | null,
     public readonly scaledNormal: Vector2,
     public readonly offset: number,
     public readonly accuracy: RenderLinearBlendAccuracy,
@@ -32,7 +31,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
     assert && assert( scaledNormal.isFinite() && scaledNormal.magnitude > 0 );
     assert && assert( isFinite( offset ) );
 
-    super( path );
+    super();
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
@@ -55,7 +54,6 @@ export default class RenderLinearBlend extends RenderPathProgram {
     assert && assert( Math.abs( afterNormal.dot( afterEndPoint ) - afterOffset - 1 ) < 1e-8, 'afterNormal.dot( afterEndPoint ) - afterOffset' );
 
     return new RenderLinearBlend(
-      this.getTransformedPath( transform ),
       afterNormal,
       afterOffset,
       this.accuracy,
@@ -66,8 +64,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
 
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
-    return super.equals( other ) &&
-      other instanceof RenderLinearBlend &&
+    return other instanceof RenderLinearBlend &&
       this.scaledNormal.equals( other.scaledNormal ) &&
       this.offset === other.offset &&
       this.zero.equals( other.zero ) &&
@@ -80,7 +77,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderLinearBlend( this.path, this.scaledNormal, this.offset, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
+      return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
     }
   }
 
@@ -95,7 +92,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
   }
 
   public override isFullyOpaque(): boolean {
-    return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
+    return this.zero.isFullyOpaque() && this.one.isFullyOpaque();
   }
 
   public override needsFace(): boolean {
@@ -118,12 +115,7 @@ export default class RenderLinearBlend extends RenderPathProgram {
       return RenderColor.TRANSPARENT;
     }
 
-    if ( this.isInPath( pathTest ) ) {
-      return new RenderLinearBlend( null, this.scaledNormal, this.offset, this.accuracy, zero, one );
-    }
-    else {
-      return RenderColor.TRANSPARENT;
-    }
+    return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, zero, one );
   }
 
   public override evaluate(
@@ -136,10 +128,6 @@ export default class RenderLinearBlend extends RenderPathProgram {
     maxY: number,
     pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
-    if ( !this.isInPath( pathTest ) ) {
-      return Vector4.ZERO;
-    }
-
     const dot = this.accuracy === RenderLinearBlendAccuracy.Accurate ?
                 this.scaledNormal.dot( centroid ) :
                 this.scaledNormal.x * ( minX + maxX ) / 2 + this.scaledNormal.y * ( minY + maxY ) / 2;
@@ -162,13 +150,12 @@ export default class RenderLinearBlend extends RenderPathProgram {
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderLinearBlend (${this.path ? this.path.id : 'null'})`;
+    return `${indent}RenderLinearBlend`;
   }
 
   public override serialize(): SerializedRenderLinearBlend {
     return {
       type: 'RenderLinearBlend',
-      path: this.path ? this.path.serialize() : null,
       scaledNormal: [ this.scaledNormal.x, this.scaledNormal.y ],
       offset: this.offset,
       accuracy: this.accuracy,
@@ -179,7 +166,6 @@ export default class RenderLinearBlend extends RenderPathProgram {
 
   public static override deserialize( obj: SerializedRenderLinearBlend ): RenderLinearBlend {
     return new RenderLinearBlend(
-      obj.path ? RenderPath.deserialize( obj.path ) : null,
       new Vector2( obj.scaledNormal[ 0 ], obj.scaledNormal[ 1 ] ),
       obj.offset,
       obj.accuracy,
@@ -193,7 +179,6 @@ scenery.register( 'RenderLinearBlend', RenderLinearBlend );
 
 export type SerializedRenderLinearBlend = {
   type: 'RenderLinearBlend';
-  path: SerializedRenderPath | null;
   scaledNormal: number[];
   offset: number;
   accuracy: RenderLinearBlendAccuracy;

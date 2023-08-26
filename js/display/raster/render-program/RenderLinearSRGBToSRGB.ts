@@ -73,7 +73,7 @@ export default class RenderLinearSRGBToSRGB extends RenderProgram {
 
     // Now we're "inside" our path
     if ( program instanceof RenderColor ) {
-      return new RenderColor( null, RenderColor.linearToSRGB( program.color ) );
+      return new RenderColor( RenderColor.linearToSRGB( program.color ) );
     }
     else {
       return new RenderLinearSRGBToSRGB( program );

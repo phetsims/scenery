@@ -6,30 +6,28 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
-export default class RenderFilter extends RenderPathProgram {
+export default class RenderFilter extends RenderProgram {
   public constructor(
-    path: RenderPath | null,
     public readonly program: RenderProgram,
     public readonly colorMatrix: Matrix4,
     public readonly colorTranslation: Vector4
   ) {
-    super( path );
+    super();
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderFilter( this.getTransformedPath( transform ), this.program.transformed( transform ), this.colorMatrix, this.colorTranslation );
+    return new RenderFilter( this.program.transformed( transform ), this.colorMatrix, this.colorTranslation );
   }
 
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
-    return super.equals( other ) &&
-           other instanceof RenderFilter &&
+    return other instanceof RenderFilter &&
            this.program.equals( other.program ) &&
            this.colorMatrix.equals( other.colorMatrix ) &&
            this.colorTranslation.equals( other.colorTranslation );
@@ -41,7 +39,7 @@ export default class RenderFilter extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderFilter( this.path, this.program.replace( callback ), this.colorMatrix, this.colorTranslation );
+      return new RenderFilter( this.program.replace( callback ), this.colorMatrix, this.colorTranslation );
     }
   }
 
@@ -54,16 +52,11 @@ export default class RenderFilter extends RenderPathProgram {
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
 
-    if ( this.isInPath( pathTest ) ) {
-      if ( program instanceof RenderColor ) {
-        return new RenderColor( null, RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
-      }
-      else {
-        return new RenderFilter( this.path, program, this.colorMatrix, this.colorTranslation );
-      }
+    if ( program instanceof RenderColor ) {
+      return new RenderColor( RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
     }
     else {
-      return program;
+      return new RenderFilter( program, this.colorMatrix, this.colorTranslation );
     }
   }
 
@@ -101,23 +94,17 @@ export default class RenderFilter extends RenderPathProgram {
   ): Vector4 {
     const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
 
-    if ( this.isInPath( pathTest ) ) {
-      return RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( source ) ).plus( this.colorTranslation ) );
-    }
-    else {
-      return source;
-    }
+    return RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( source ) ).plus( this.colorTranslation ) );
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderFilter (${this.path ? this.path.id : 'null'})\n` +
+    return `${indent}RenderFilter\n` +
            `${this.program.toRecursiveString( indent + '  ' )}`;
   }
 
   public override serialize(): SerializedRenderFilter {
     return {
       type: 'RenderFilter',
-      path: this.path ? this.path.serialize() : null,
       program: this.program.serialize(),
       colorMatrix: [
         this.colorMatrix.m00(), this.colorMatrix.m01(), this.colorMatrix.m02(), this.colorMatrix.m03(),
@@ -133,7 +120,6 @@ export default class RenderFilter extends RenderPathProgram {
 
   public static override deserialize( obj: SerializedRenderFilter ): RenderFilter {
     return new RenderFilter(
-      obj.path ? RenderPath.deserialize( obj.path ) : null,
       RenderProgram.deserialize( obj.program ),
       new Matrix4( ...obj.colorMatrix ),
       new Vector4( obj.colorTranslation[ 0 ], obj.colorTranslation[ 1 ], obj.colorTranslation[ 2 ], obj.colorTranslation[ 3 ] )
@@ -145,7 +131,6 @@ scenery.register( 'RenderFilter', RenderFilter );
 
 export type SerializedRenderFilter = {
   type: 'RenderFilter';
-  path: SerializedRenderPath | null;
   program: SerializedRenderProgram;
   colorMatrix: number[];
   colorTranslation: number[];

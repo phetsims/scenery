@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, PolygonMitchellNetravali, RenderColor, RenderExtend, RenderImageable, RenderPath, RenderPathProgram, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, constantTrue, PolygonMitchellNetravali, RenderExtend, RenderImageable, RenderPath, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Utils from '../../../../../dot/js/Utils.js';
 
-export default class RenderImage extends RenderPathProgram {
+export default class RenderImage extends RenderProgram {
 
   public readonly inverseTransform: Matrix3;
   public readonly inverseTransformWithHalfOffset: Matrix3;
@@ -20,27 +20,25 @@ export default class RenderImage extends RenderPathProgram {
   // TODO: Support mipmaps
   // TODO: For mipmaps, see if our approach is ideal. See Gaussian pyramid, blur before subsampling (ours might be ideal?)
   public constructor(
-    path: RenderPath | null,
     public readonly transform: Matrix3,
     public readonly image: RenderImageable,
     public readonly extendX: RenderExtend,
     public readonly extendY: RenderExtend,
     public readonly resampleType: RenderResampleType
   ) {
-    super( path );
+    super();
 
     this.inverseTransform = transform.inverted();
     this.inverseTransformWithHalfOffset = Matrix3.translation( -0.5, -0.5 ).timesMatrix( this.inverseTransform );
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderImage( this.getTransformedPath( transform ), transform.timesMatrix( this.transform ), this.image, this.extendX, this.extendY, this.resampleType );
+    return new RenderImage( transform.timesMatrix( this.transform ), this.image, this.extendX, this.extendY, this.resampleType );
   }
 
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
-    return super.equals( other ) &&
-      other instanceof RenderImage &&
+    return other instanceof RenderImage &&
       this.transform.equals( other.transform ) &&
       this.image === other.image &&
       this.extendX === other.extendX &&
@@ -52,7 +50,7 @@ export default class RenderImage extends RenderPathProgram {
   }
 
   public override isFullyOpaque(): boolean {
-    return this.path === null && this.image.isFullyOpaque;
+    return this.image.isFullyOpaque;
   }
 
   public override needsFace(): boolean {
@@ -78,17 +76,12 @@ export default class RenderImage extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderImage( this.path, this.transform, this.image, this.extendX, this.extendY, this.resampleType );
+      return new RenderImage( this.transform, this.image, this.extendX, this.extendY, this.resampleType );
     }
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    if ( this.isInPath( pathTest ) ) {
-      return new RenderImage( null, this.transform, this.image, this.extendX, this.extendY, this.resampleType );
-    }
-    else {
-      return RenderColor.TRANSPARENT;
-    }
+    return this;
   }
 
   public override evaluate(
@@ -101,10 +94,6 @@ export default class RenderImage extends RenderPathProgram {
     maxY: number,
     pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
-    if ( !this.isInPath( pathTest ) ) {
-      return Vector4.ZERO;
-    }
-
     // TODO: analytic box! Bilinear! Bicubic! (can we mipmap for those?)
     switch( this.resampleType ) {
       case RenderResampleType.NearestNeighbor: {
@@ -239,7 +228,7 @@ export default class RenderImage extends RenderPathProgram {
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderImage (${this.path ? this.path.id : 'null'})`;
+    return `${indent}RenderImage`;
   }
 
   /**
@@ -476,7 +465,6 @@ export default class RenderImage extends RenderPathProgram {
   public override serialize(): SerializedRenderImage {
     return {
       type: 'RenderImage',
-      path: this.path ? this.path.serialize() : null,
       transform: [
         this.transform.m00(), this.transform.m01(), this.transform.m02(),
         this.transform.m10(), this.transform.m11(), this.transform.m12(),
@@ -491,7 +479,6 @@ export default class RenderImage extends RenderPathProgram {
 
   public static override deserialize( obj: SerializedRenderImage ): RenderImage {
     return new RenderImage(
-      obj.path ? RenderPath.deserialize( obj.path ) : null,
       Matrix3.rowMajor(
         obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
         obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
@@ -540,7 +527,6 @@ scenery.register( 'RenderImage', RenderImage );
 
 export type SerializedRenderImage = {
   type: 'RenderImage';
-  path: SerializedRenderPath | null;
   transform: number[];
   image: SerializedRenderImageable;
   extendX: RenderExtend;

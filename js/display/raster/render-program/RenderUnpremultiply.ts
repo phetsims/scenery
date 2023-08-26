@@ -73,7 +73,7 @@ export default class RenderUnpremultiply extends RenderProgram {
 
     // Now we're "inside" our path
     if ( program instanceof RenderColor ) {
-      return new RenderColor( null, RenderColor.unpremultiply( program.color ) );
+      return new RenderColor( RenderColor.unpremultiply( program.color ) );
     }
     else {
       return new RenderUnpremultiply( program );

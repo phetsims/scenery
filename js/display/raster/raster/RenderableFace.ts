@@ -200,7 +200,6 @@ export default class RenderableFace {
                 const scaledOffset = range.start / ( range.end - range.start );
 
                 return new RenderLinearBlend(
-                  null,
                   scaledNormal,
                   scaledOffset,
                   blendAccuracy,
@@ -324,7 +323,6 @@ export default class RenderableFace {
                 const endRadius = minRadius + range.end * deltaRadius;
 
                 return new RenderRadialBlend(
-                  null,
                   radialGradient.transform,
                   startRadius,
                   endRadius,

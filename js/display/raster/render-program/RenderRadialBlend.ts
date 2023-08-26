@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderPath, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -27,12 +27,11 @@ export enum RenderRadialBlendAccuracy {
 
 scenery.register( 'RenderRadialBlendAccuracy', RenderRadialBlendAccuracy );
 
-export default class RenderRadialBlend extends RenderPathProgram {
+export default class RenderRadialBlend extends RenderProgram {
 
   private readonly inverseTransform: Matrix3;
 
   public constructor(
-    path: RenderPath | null,
     public readonly transform: Matrix3,
     public readonly radius0: number,
     public readonly radius1: number,
@@ -45,14 +44,13 @@ export default class RenderRadialBlend extends RenderPathProgram {
     assert && assert( isFinite( radius1 ) && radius1 >= 0 );
     assert && assert( radius0 !== radius1 );
 
-    super( path );
+    super();
 
     this.inverseTransform = transform.inverted();
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderRadialBlend(
-      this.getTransformedPath( transform ),
       transform.timesMatrix( this.transform ),
       this.radius0,
       this.radius1,
@@ -65,7 +63,6 @@ export default class RenderRadialBlend extends RenderPathProgram {
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
     return other instanceof RenderRadialBlend &&
-           this.path === other.path &&
            this.transform.equals( other.transform ) &&
            this.radius0 === other.radius0 &&
            this.radius1 === other.radius1 &&
@@ -79,7 +76,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       return replaced;
     }
     else {
-      return new RenderRadialBlend( this.path, this.transform, this.radius0, this.radius1, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
+      return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
     }
   }
 
@@ -94,7 +91,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
   }
 
   public override isFullyOpaque(): boolean {
-    return this.path === null && this.zero.isFullyOpaque() && this.one.isFullyOpaque();
+    return this.zero.isFullyOpaque() && this.one.isFullyOpaque();
   }
 
   public override needsFace(): boolean {
@@ -117,12 +114,7 @@ export default class RenderRadialBlend extends RenderPathProgram {
       return RenderColor.TRANSPARENT;
     }
 
-    if ( this.isInPath( pathTest ) ) {
-      return new RenderRadialBlend( null, this.transform, this.radius0, this.radius1, this.accuracy, zero, one );
-    }
-    else {
-      return RenderColor.TRANSPARENT;
-    }
+    return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, zero, one );
   }
 
   public override evaluate(
@@ -135,10 +127,6 @@ export default class RenderRadialBlend extends RenderPathProgram {
     maxY: number,
     pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
   ): Vector4 {
-    if ( !this.isInPath( pathTest ) ) {
-      return Vector4.ZERO;
-    }
-
     // TODO: flag to control whether this gets set? TODO: Flag to just use centroid
     let averageDistance;
     if ( this.accuracy === RenderRadialBlendAccuracy.Accurate ) {
@@ -214,13 +202,12 @@ export default class RenderRadialBlend extends RenderPathProgram {
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderRadialBlend (${this.path ? this.path.id : 'null'})`;
+    return `${indent}RenderRadialBlend`;
   }
 
   public override serialize(): SerializedRenderRadialBlend {
     return {
       type: 'RenderRadialBlend',
-      path: this.path ? this.path.serialize() : null,
       transform: [
         this.transform.m00(), this.transform.m01(), this.transform.m02(),
         this.transform.m10(), this.transform.m11(), this.transform.m12(),
@@ -236,7 +223,6 @@ export default class RenderRadialBlend extends RenderPathProgram {
 
   public static override deserialize( obj: SerializedRenderRadialBlend ): RenderRadialBlend {
     return new RenderRadialBlend(
-      obj.path ? RenderPath.deserialize( obj.path ) : null,
       Matrix3.rowMajor(
         obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
         obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
@@ -255,7 +241,6 @@ scenery.register( 'RenderRadialBlend', RenderRadialBlend );
 
 export type SerializedRenderRadialBlend = {
   type: 'RenderRadialBlend';
-  path: SerializedRenderPath | null;
   transform: number[];
   radius0: number;
   radius1: number;

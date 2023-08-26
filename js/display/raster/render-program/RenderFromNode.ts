@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
+import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import RenderComposeType from './RenderComposeType.js';
 import RenderBlendType from './RenderBlendType.js';
@@ -77,47 +77,47 @@ const renderPathPaintToRenderProgram = ( renderPath: RenderPath, paint: TPaint, 
   }
 
   if ( paint instanceof Color ) {
-    return new RenderColor( renderPath, colorFromTColor( paint ) );
+    return RenderPathBoolean.fromInside(
+      renderPath,
+      new RenderColor( colorFromTColor( paint ) )
+    );
   }
   else {
     const paintMatrix = paint.transformMatrix ? matrix.timesMatrix( paint.transformMatrix ) : matrix;
     if ( paint instanceof LinearGradient ) {
-      return new RenderLinearGradient(
-        renderPath,
+      return RenderPathBoolean.fromInside( renderPath, new RenderLinearGradient(
         paintMatrix,
         paint.start,
         paint.end,
         paint.stops.map( stop => {
-          return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
+          return new RenderGradientStop( stop.ratio, new RenderColor( colorFromTColor( stop.color ) ) );
         } ),
         RenderExtend.Pad,
         RenderLinearGradientAccuracy.SplitAccurate
-      );
+      ) );
     }
     else if ( paint instanceof RadialGradient ) {
-      return new RenderRadialGradient(
-        renderPath,
+      return RenderPathBoolean.fromInside( renderPath, new RenderRadialGradient(
         paintMatrix,
         paint.start,
         paint.startRadius,
         paint.end,
         paint.endRadius,
         paint.stops.map( stop => {
-          return new RenderGradientStop( stop.ratio, new RenderColor( null, colorFromTColor( stop.color ) ) );
+          return new RenderGradientStop( stop.ratio, new RenderColor( colorFromTColor( stop.color ) ) );
         } ),
         RenderExtend.Pad,
         RenderRadialGradientAccuracy.SplitAccurate
-      );
+      ) );
     }
     else if ( paint instanceof Pattern ) {
-      return new RenderImage(
-        renderPath,
+      return RenderPathBoolean.fromInside( renderPath, new RenderImage(
         paintMatrix,
         imagelikeToRenderImageable( paint.image ),
         RenderExtend.Repeat,
         RenderExtend.Repeat,
         resampleType
-      );
+      ) );
     }
   }
 
@@ -286,16 +286,15 @@ export default class RenderFromNode {
       if ( nodeImage ) {
         const renderPath = shapeToRenderPath( Shape.bounds( node.selfBounds ).transformed( matrix ) );
 
-        const renderImage = new RenderImage(
-          renderPath,
+        const renderImage = RenderPathBoolean.fromInside( renderPath, new RenderImage(
           matrix,
           imagelikeToRenderImageable( node.image ),
           RenderExtend.Pad,
           RenderExtend.Pad,
           resampleType
-        );
+        ) );
 
-        addResult( node.imageOpacity === 1 ? renderImage : new RenderAlpha( null, renderImage, node.imageOpacity ) );
+        addResult( node.imageOpacity === 1 ? renderImage : new RenderAlpha( renderImage, node.imageOpacity ) );
       }
     }
 
@@ -309,18 +308,19 @@ export default class RenderFromNode {
     node.filters.forEach( filter => {
       if ( filter instanceof ColorMatrixFilter ) {
         // NOTE: Apply them no matter what, we'll rely on later simplify (because filters can take transparent to NOT)
-        result = new RenderFilter( null, result, filter.getMatrix(), filter.getTranslation() );
+        result = new RenderFilter( result, filter.getMatrix(), filter.getTranslation() );
       }
     } );
 
     if ( node.effectiveOpacity !== 1 && !result.isFullyTransparent() ) {
-      result = new RenderAlpha( null, result, node.effectiveOpacity );
+      result = new RenderAlpha( result, node.effectiveOpacity );
     }
 
     if ( node.clipArea && !result.isFullyTransparent() ) {
-      result = new RenderBlendCompose( RenderComposeType.In, RenderBlendType.Normal, result, new RenderColor(
+      result = new RenderBlendCompose( RenderComposeType.In, RenderBlendType.Normal, result, new RenderPathBoolean(
         shapeToRenderPath( node.clipArea ),
-        new Vector4( 1, 1, 1, 1 )
+        new RenderColor( new Vector4( 1, 1, 1, 1 ) ),
+        RenderColor.TRANSPARENT
       ) );
     }
 
@@ -328,7 +328,7 @@ export default class RenderFromNode {
   }
 
   public static addBackgroundColor( renderProgram: RenderProgram, color: Color ): RenderProgram {
-    return combine( renderProgram, new RenderColor( null, colorFromTColor( color ) ) );
+    return combine( renderProgram, new RenderColor( colorFromTColor( color ) ) );
   }
 
   public static showSim(): void {
@@ -362,7 +362,6 @@ export default class RenderFromNode {
 
     if ( addBackground ) {
       program = combine( program, new RenderImage(
-        null,
         Matrix3.scaling( 5 ),
         {
           width: 2,

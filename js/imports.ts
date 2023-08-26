@@ -442,9 +442,10 @@ export { default as RenderProgram } from './display/raster/render-program/Render
 export type { SerializedRenderProgram } from './display/raster/render-program/RenderProgram.js';
 export { default as RenderPath } from './display/raster/render-program/RenderPath.js';
 export type { SerializedRenderPath } from './display/raster/render-program/RenderPath.js';
-export { default as RenderPathProgram } from './display/raster/render-program/RenderPathProgram.js';
 export { default as RenderColor } from './display/raster/render-program/RenderColor.js';
 export type { SerializedRenderColor } from './display/raster/render-program/RenderColor.js';
+export { default as RenderPathBoolean } from './display/raster/render-program/RenderPathBoolean.js';
+export type { SerializedRenderPathBoolean } from './display/raster/render-program/RenderPathBoolean.js';
 export { default as RenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export type { SerializedRenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export { default as RenderPremultiply } from './display/raster/render-program/RenderPremultiply.js';

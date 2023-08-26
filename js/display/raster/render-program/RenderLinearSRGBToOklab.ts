@@ -73,7 +73,7 @@ export default class RenderLinearSRGBToOklab extends RenderProgram {
 
     // Now we're "inside" our path
     if ( program instanceof RenderColor ) {
-      return new RenderColor( null, RenderColor.linearToOklab( program.color ) );
+      return new RenderColor( RenderColor.linearToOklab( program.color ) );
     }
     else {
       return new RenderLinearSRGBToOklab( program );

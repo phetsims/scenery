@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathProgram, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -539,7 +539,7 @@ export default class Rasterize {
 
     const paths: RenderPath[] = [];
     renderProgram.depthFirst( program => {
-      if ( program instanceof RenderPathProgram && program.path !== null ) {
+      if ( program instanceof RenderPathBoolean ) {
         paths.push( program.path );
       }
     } );

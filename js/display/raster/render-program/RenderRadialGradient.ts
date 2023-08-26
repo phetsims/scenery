@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderPathProgram, RenderProgram, scenery, SerializedRenderGradientStop, SerializedRenderPath } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -24,12 +24,11 @@ scenery.register( 'RenderRadialGradientAccuracy', RenderRadialGradientAccuracy )
 
 const scratchVectorA = new Vector2( 0, 0 );
 
-export default class RenderRadialGradient extends RenderPathProgram {
+export default class RenderRadialGradient extends RenderProgram {
 
   private logic: RadialGradientLogic | null = null;
 
   public constructor(
-    path: RenderPath | null,
     public readonly transform: Matrix3,
     public readonly start: Vector2,
     public readonly startRadius: number,
@@ -49,7 +48,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
       return stops[ i ].ratio <= stops[ i + 1 ].ratio;
     } ), 'RenderLinearGradient stops not monotonically increasing' );
 
-    super( path );
+    super();
   }
 
   public isSplittable(): boolean {
@@ -60,7 +59,6 @@ export default class RenderRadialGradient extends RenderPathProgram {
 
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderRadialGradient(
-      this.getTransformedPath( transform ),
       transform.timesMatrix( this.transform ),
       this.start,
       this.startRadius,
@@ -74,8 +72,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
 
   public override equals( other: RenderProgram ): boolean {
     if ( this === other ) { return true; }
-    return super.equals( other ) &&
-      other instanceof RenderRadialGradient &&
+    return other instanceof RenderRadialGradient &&
       this.transform.equals( other.transform ) &&
       this.start.equals( other.start ) &&
       this.startRadius === other.startRadius &&
@@ -95,7 +92,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
     }
     else {
       const stops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) );
-      return new RenderRadialGradient( this.path, this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.accuracy );
+      return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.accuracy );
     }
   }
 
@@ -109,7 +106,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
   }
 
   public override isFullyOpaque(): boolean {
-    return this.path === null && this.stops.every( stop => stop.program.isFullyOpaque() );
+    return this.stops.every( stop => stop.program.isFullyOpaque() );
   }
 
   public override needsFace(): boolean {
@@ -149,12 +146,7 @@ export default class RenderRadialGradient extends RenderPathProgram {
       return RenderColor.TRANSPARENT;
     }
 
-    if ( this.isInPath( pathTest ) ) {
-      return new RenderRadialGradient( null, this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.accuracy );
-    }
-    else {
-      return RenderColor.TRANSPARENT;
-    }
+    return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.accuracy );
   }
 
   public override evaluate(
@@ -175,13 +167,12 @@ export default class RenderRadialGradient extends RenderPathProgram {
   }
 
   public override toRecursiveString( indent: string ): string {
-    return `${indent}RenderRadialGradient (${this.path ? this.path.id : 'null'})`;
+    return `${indent}RenderRadialGradient`;
   }
 
   public override serialize(): SerializedRenderRadialGradient {
     return {
       type: 'RenderRadialGradient',
-      path: this.path ? this.path.serialize() : null,
       transform: [
         this.transform.m00(), this.transform.m01(), this.transform.m02(),
         this.transform.m10(), this.transform.m11(), this.transform.m12(),
@@ -199,7 +190,6 @@ export default class RenderRadialGradient extends RenderPathProgram {
 
   public static override deserialize( obj: SerializedRenderRadialGradient ): RenderRadialGradient {
     return new RenderRadialGradient(
-      obj.path ? RenderPath.deserialize( obj.path ) : null,
       Matrix3.rowMajor(
         obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
         obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
@@ -394,7 +384,6 @@ scenery.register( 'RenderRadialGradient', RenderRadialGradient );
 
 export type SerializedRenderRadialGradient = {
   type: 'RenderRadialGradient';
-  path: SerializedRenderPath | null;
   transform: number[];
   start: number[];
   startRadius: number;

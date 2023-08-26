@@ -143,8 +143,8 @@ export default class RenderBlendCompose extends RenderProgram {
         break;
     }
 
-    if ( a instanceof RenderColor && b instanceof RenderColor && a.path === null && b.path === null ) {
-      return new RenderColor( null, RenderBlendCompose.blendCompose( a.color, b.color, this.composeType, this.blendType ) );
+    if ( a instanceof RenderColor && b instanceof RenderColor ) {
+      return new RenderColor( RenderBlendCompose.blendCompose( a.color, b.color, this.composeType, this.blendType ) );
     }
 
     return new RenderBlendCompose( this.composeType, this.blendType, a, b );
@@ -246,7 +246,7 @@ export default class RenderBlendCompose extends RenderProgram {
 
   public override toRecursiveString( indent: string ): string {
     return `${indent}RenderBlendCompose(${RenderComposeType[ this.composeType ]}, ${RenderBlendType[ this.blendType ]}),\n` +
-           `${this.a.toRecursiveString( indent + '  ' )},\n` +
+           `${this.a.toRecursiveString( indent + '  ' )}\n` +
            `${this.b.toRecursiveString( indent + '  ' )}`;
   }
 
