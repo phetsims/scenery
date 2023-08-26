@@ -132,7 +132,7 @@ export default class RenderColor extends RenderProgram {
   }
 
   public static premultipliedDisplayP3FromColor( color: Color ): RenderColor {
-    return new RenderColor( RenderColor.premultiply( RenderColor.linearToSRGB( RenderColor.linearToLinearDisplayP3( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) ) );
+    return new RenderColor( RenderColor.premultiply( RenderColor.linearDisplayP3ToDisplayP3( RenderColor.linearToLinearDisplayP3( RenderColor.displayP3ToLinearDisplayP3( RenderColor.colorToSRGB( color ) ) ) ) ) );
   }
 
   public static colorToSRGB( color: Color ): Vector4 {
@@ -239,6 +239,177 @@ export default class RenderColor extends RenderProgram {
       m.m20() * linear.x + m.m21() * linear.y + m.m22() * linear.z,
       linear.w
     );
+  }
+
+  public static linearDisplayP3ToDisplayP3( linear: Vector4 ): Vector4 {
+    return RenderColor.linearToSRGB( linear ); // same transfer curve
+  }
+
+  public static displayP3ToLinearDisplayP3( displayP3: Vector4 ): Vector4 {
+    return RenderColor.sRGBToLinear( displayP3 ); // same transfer curve
+  }
+
+  // A radian-based oklch?
+  public static oklabToOklch( oklab: Vector4 ): Vector4 {
+    const c = Math.sqrt( oklab.y * oklab.y + oklab.z * oklab.z );
+    const h = Math.atan2( oklab.z, oklab.y );
+    return new Vector4( oklab.x, c, h, oklab.w );
+  }
+
+  // A radian-based oklch
+  public static oklchToOklab( oklch: Vector4 ): Vector4 {
+    return new Vector4( oklch.x, oklch.y * Math.cos( oklch.z ), oklch.y * Math.sin( oklch.z ), oklch.w );
+  }
+
+  public static linearToOklch( linear: Vector4 ): Vector4 {
+    return RenderColor.oklabToOklch( RenderColor.linearToOklab( linear ) );
+  }
+
+  // TODO: consistent "linear" naming? (means linear SRGB here)
+  public static oklchToLinear( oklch: Vector4 ): Vector4 {
+    return RenderColor.oklabToLinear( RenderColor.oklchToOklab( oklch ) );
+  }
+
+  public static linearDisplayP3ToOklch( linear: Vector4 ): Vector4 {
+    return RenderColor.linearToOklch( RenderColor.linearDisplayP3ToLinear( linear ) );
+  }
+
+  public static oklchToLinearDisplayP3( oklch: Vector4 ): Vector4 {
+    return RenderColor.linearToLinearDisplayP3( RenderColor.oklchToLinear( oklch ) );
+  }
+
+  // ONLY remaps the r,g,b parts, not alpha
+  public static isColorInRange( color: Vector4 ): boolean {
+    return color.x >= 0 && color.x <= 1 &&
+           color.y >= 0 && color.y <= 1 &&
+           color.z >= 0 && color.z <= 1;
+  }
+
+  public static gamutClipOklch( color: Vector4, toOklch: ( c: Vector4 ) => Vector4, fromOklch: ( c: Vector4 ) => Vector4 ): Vector4 {
+    const converted = fromOklch( color );
+    if ( RenderColor.isColorInRange( converted ) ) {
+      return color;
+    }
+    else {
+      return toOklch( new Vector4(
+        Math.max( 0, Math.min( 1, converted.x ) ),
+        Math.max( 0, Math.min( 1, converted.y ) ),
+        Math.max( 0, Math.min( 1, converted.z ) ),
+        converted.w
+      ) );
+    }
+  }
+
+  /**
+   * Relative colorimetric mapping. We could add more of a perceptual intent, but this is a good start.
+   */
+  public static gamutMapColor( color: Vector4, toOklch: ( c: Vector4 ) => Vector4, fromOklch: ( c: Vector4 ) => Vector4 ): Vector4 {
+    if ( RenderColor.isColorInRange( color ) ) {
+      return color;
+    }
+
+    const oklch = toOklch( color );
+    if ( oklch.x <= 0 ) {
+      return new Vector4( 0, 0, 0, color.w );
+    }
+    else if ( oklch.x >= 1 ) {
+      return new Vector4( 1, 1, 1, color.w );
+    }
+
+    // Bisection of chroma
+    let lowChroma = 0;
+    let highChroma = oklch.y; // chroma
+    let clipped = RenderColor.gamutClipOklch( oklch, toOklch, fromOklch );
+    while ( highChroma - lowChroma > 1e-4 ) {
+      oklch.y = ( lowChroma + highChroma ) * 0.5;
+      clipped = RenderColor.gamutClipOklch( oklch, toOklch, fromOklch );
+
+      // JND (just noticeable difference) of 0.02, per the spec at https://drafts.csswg.org/css-color/#css-gamut-mapping
+      if ( RenderColor.isColorInRange( clipped ) || ( clipped.distance( oklch ) <= 0.02 ) ) {
+        lowChroma = oklch.y;
+      }
+      else {
+        highChroma = oklch.y;
+      }
+    }
+
+    const potentialResult = fromOklch( oklch );
+    if ( RenderColor.isColorInRange( potentialResult ) ) {
+      return potentialResult;
+    }
+    else {
+      return clipped;
+    }
+  }
+
+  public static gamutMapLinearSRGB( color: Vector4 ): Vector4 {
+    return RenderColor.gamutMapColor( color, RenderColor.linearToOklch, RenderColor.oklchToLinear );
+  }
+
+  public static gamutMapLinearDisplayP3( color: Vector4 ): Vector4 {
+    return RenderColor.gamutMapColor( color, RenderColor.linearDisplayP3ToOklch, RenderColor.oklchToLinearDisplayP3 );
+  }
+
+  public static gamutMapSRGB( color: Vector4 ): Vector4 {
+    if ( RenderColor.isColorInRange( color ) ) {
+      return color;
+    }
+    else {
+      return RenderColor.linearToSRGB( RenderColor.gamutMapLinearSRGB( RenderColor.sRGBToLinear( color ) ) );
+    }
+  }
+
+  public static gamutMapDisplayP3( color: Vector4 ): Vector4 {
+    if ( RenderColor.isColorInRange( color ) ) {
+      return color;
+    }
+    else {
+      return RenderColor.linearDisplayP3ToDisplayP3( RenderColor.gamutMapLinearDisplayP3( RenderColor.displayP3ToLinearDisplayP3( color ) ) );
+    }
+  }
+
+  /**
+   * OUTPUTS unpremultiplied sRGB
+   */
+  public static gamutMapPremultipliedSRGB( color: Vector4 ): Vector4 {
+    if ( color.w <= 1e-8 ) {
+      return Vector4.ZERO;
+    }
+
+    const mapped = RenderColor.gamutMapSRGB( RenderColor.unpremultiply( color ) );
+
+    if ( color.w > 1 ) {
+      return new Vector4( mapped.x, mapped.y, mapped.z, 1 );
+    }
+    else {
+      return mapped;
+    }
+  }
+
+  /**
+   * OUTPUTS unpremultiplied Display P3
+   */
+  public static gamutMapPremultipliedDisplayP3( color: Vector4 ): Vector4 {
+    if ( color.w <= 1e-8 ) {
+      return Vector4.ZERO;
+    }
+
+    const mapped = RenderColor.gamutMapDisplayP3( RenderColor.unpremultiply( color ) );
+
+    if ( color.w > 1 ) {
+      return new Vector4( mapped.x, mapped.y, mapped.z, 1 );
+    }
+    else {
+      return mapped;
+    }
+  }
+
+  public static oklabToLinearDisplayP3( oklab: Vector4 ): Vector4 {
+    return RenderColor.linearToLinearDisplayP3( RenderColor.oklabToLinear( oklab ) );
+  }
+
+  public static linearDisplayP3ToOklab( linearP3: Vector4 ): Vector4 {
+    return RenderColor.linearToOklab( RenderColor.linearDisplayP3ToLinear( linearP3 ) );
   }
 
   public static premultiply( color: Vector4 ): Vector4 {
