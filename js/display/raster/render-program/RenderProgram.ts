@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonalFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderLinearSRGBToOklab, SerializedRenderLinearSRGBToSRGB, SerializedRenderOklabToLinearSRGB, SerializedRenderPathBoolean, SerializedRenderPremultiply, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderSRGBToLinearSRGB, SerializedRenderUnpremultiply } from '../../../imports.js';
+import { ClippableFace, PolygonalFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderColorSpaceConversion, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderPathBoolean, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderPathBoolean, SerializedRenderRadialBlend, SerializedRenderRadialGradient } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -187,23 +187,8 @@ export default abstract class RenderProgram {
     else if ( obj.type === 'RenderRadialGradient' ) {
       return RenderRadialGradient.deserialize( obj as SerializedRenderRadialGradient );
     }
-    else if ( obj.type === 'RenderPremultiply' ) {
-      return RenderPremultiply.deserialize( obj as SerializedRenderPremultiply );
-    }
-    else if ( obj.type === 'RenderUnpremultiply' ) {
-      return RenderUnpremultiply.deserialize( obj as SerializedRenderUnpremultiply );
-    }
-    else if ( obj.type === 'RenderLinearSRGBToOklab' ) {
-      return RenderLinearSRGBToOklab.deserialize( obj as SerializedRenderLinearSRGBToOklab );
-    }
-    else if ( obj.type === 'RenderLinearSRGBToSRGB' ) {
-      return RenderLinearSRGBToSRGB.deserialize( obj as SerializedRenderLinearSRGBToSRGB );
-    }
-    else if ( obj.type === 'RenderOklabToLinearSRGB' ) {
-      return RenderOklabToLinearSRGB.deserialize( obj as SerializedRenderOklabToLinearSRGB );
-    }
-    else if ( obj.type === 'RenderSRGBToLinearSRGB' ) {
-      return RenderSRGBToLinearSRGB.deserialize( obj as SerializedRenderSRGBToLinearSRGB );
+    else if ( obj.type === 'RenderColorSpaceConversion' ) {
+      return RenderColorSpaceConversion.deserialize( obj as SerializedRenderColorSpaceConversion );
     }
 
     throw new Error( `Unrecognized RenderProgram type: ${obj.type}` );

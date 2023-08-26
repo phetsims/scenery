@@ -6,26 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, RenderUnary, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
-export default class RenderFilter extends RenderProgram {
+export default class RenderFilter extends RenderUnary {
   public constructor(
-    public readonly program: RenderProgram,
+    program: RenderProgram,
     public readonly colorMatrix: Matrix4,
     public readonly colorTranslation: Vector4
   ) {
-    super();
+    super( program );
   }
 
   public override getName(): string {
     return 'RenderFilter';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.program ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderFilter {

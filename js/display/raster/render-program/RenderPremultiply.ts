@@ -6,76 +6,23 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
-import Vector4 from '../../../../../dot/js/Vector4.js';
+import { RenderColor, RenderColorSpaceConversion, RenderProgram, scenery } from '../../../imports.js';
 
-export default class RenderPremultiply extends RenderProgram {
+export default class RenderPremultiply extends RenderColorSpaceConversion {
   public constructor(
-    public readonly program: RenderProgram
+    program: RenderProgram
   ) {
-    super();
+    super( program, RenderColor.premultiply );
   }
 
   public override getName(): string {
     return 'RenderPremultiply';
   }
 
-  public override getChildren(): RenderProgram[] {
-    return [ this.program ];
-  }
-
   public override withChildren( children: RenderProgram[] ): RenderPremultiply {
     assert && assert( children.length === 1 );
     return new RenderPremultiply( children[ 0 ] );
   }
-
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    const program = this.program.simplify( pathTest );
-
-    if ( program.isFullyTransparent() ) {
-      return RenderColor.TRANSPARENT;
-    }
-
-    // Now we're "inside" our path
-    if ( program instanceof RenderColor ) {
-      return new RenderColor( RenderColor.premultiply( program.color ) );
-    }
-    else {
-      return new RenderPremultiply( program );
-    }
-  }
-
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
-  ): Vector4 {
-    const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
-
-    return RenderColor.premultiply( source );
-  }
-
-  public override serialize(): SerializedRenderPremultiply {
-    return {
-      type: 'RenderPremultiply',
-      program: this.program.serialize()
-    };
-  }
-
-  public static override deserialize( obj: SerializedRenderPremultiply ): RenderPremultiply {
-    return new RenderPremultiply( RenderProgram.deserialize( obj.program ) );
-  }
 }
 
 scenery.register( 'RenderPremultiply', RenderPremultiply );
-
-export type SerializedRenderPremultiply = {
-  type: 'RenderPremultiply';
-  program: SerializedRenderProgram;
-};

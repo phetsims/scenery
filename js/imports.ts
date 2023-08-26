@@ -439,6 +439,9 @@ export { default as RenderComposeType } from './display/raster/render-program/Re
 export { default as RenderExtend } from './display/raster/render-program/RenderExtend.js';
 export { default as RenderProgramNeeds } from './display/raster/render-program/RenderProgramNeeds.js';
 export { default as RenderProgram } from './display/raster/render-program/RenderProgram.js';
+export { default as RenderUnary } from './display/raster/render-program/RenderUnary.js';
+export { default as RenderColorSpaceConversion } from './display/raster/render-program/RenderColorSpaceConversion.js';
+export type { SerializedRenderColorSpaceConversion } from './display/raster/render-program/RenderColorSpaceConversion.js';
 export type { SerializedRenderProgram } from './display/raster/render-program/RenderProgram.js';
 export { default as RenderPath } from './display/raster/render-program/RenderPath.js';
 export type { SerializedRenderPath } from './display/raster/render-program/RenderPath.js';
@@ -449,7 +452,6 @@ export type { SerializedRenderPathBoolean } from './display/raster/render-progra
 export { default as RenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export type { SerializedRenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export { default as RenderPremultiply } from './display/raster/render-program/RenderPremultiply.js';
-export type { SerializedRenderPremultiply } from './display/raster/render-program/RenderPremultiply.js';
 export { default as RenderUnpremultiply } from './display/raster/render-program/RenderUnpremultiply.js';
 export type { SerializedRenderUnpremultiply } from './display/raster/render-program/RenderUnpremultiply.js';
 export { default as RenderLinearSRGBToOklab } from './display/raster/render-program/RenderLinearSRGBToOklab.js';

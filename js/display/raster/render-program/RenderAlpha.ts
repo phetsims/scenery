@@ -6,24 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, RenderUnary, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
-export default class RenderAlpha extends RenderProgram {
+export default class RenderAlpha extends RenderUnary {
   public constructor(
-    public readonly program: RenderProgram,
+    program: RenderProgram,
     public readonly alpha: number
   ) {
-    super();
+    super( program );
   }
 
   public override getName(): string {
     return 'RenderAlpha';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.program ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderAlpha {
