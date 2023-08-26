@@ -9,10 +9,21 @@
 import { ClippableFace, Color, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
+import Vector3 from '../../../../../dot/js/Vector3.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 // TODO: consider transforms as a node itself? Meh probably excessive?
 
 const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
+
+const sRGBRedChromaticity = new Vector2( 0.64, 0.33 );
+const sRGBGreenChromaticity = new Vector2( 0.3, 0.6 );
+const sRGBBlueChromaticity = new Vector2( 0.15, 0.06 );
+const sRGBWhiteChromaticity = new Vector2( 0.312713, 0.329016 );
+
+const dciP3RedChromaticity = new Vector2( 0.68, 0.32 );
+const dciP3GreenChromaticity = new Vector2( 0.265, 0.69 );
+const dciP3BlueChromaticity = new Vector2( 0.15, 0.06 );
 
 export default class RenderColor extends RenderProgram {
   public constructor(
@@ -221,6 +232,66 @@ export default class RenderColor extends RenderProgram {
       color.w
     );
   }
+
+  public static xyYToXYZ( xyY: Vector3 ): Vector3 {
+    return new Vector3(
+      xyY.x * xyY.z / xyY.y,
+      xyY.z,
+      ( 1 - xyY.x - xyY.y ) * xyY.z / xyY.y
+    );
+  }
+
+  public static xyToXYZ( xy: Vector2 ): Vector3 {
+    return RenderColor.xyYToXYZ( new Vector3( xy.x, xy.y, 1 ) );
+  }
+
+  public static getMatrixRGBToXYZ(
+    redChromaticity: Vector2,
+    greenChromaticity: Vector2,
+    blueChromaticity: Vector2,
+    whiteChromaticity: Vector2
+  ): Matrix3 {
+
+    // Based on https://mina86.com/2019/srgb-xyz-matrix/, could not get Bruce Lindbloom's formulas to work.
+
+    const whiteXYZ = RenderColor.xyToXYZ( whiteChromaticity );
+    const redPrimeXYZ = RenderColor.xyToXYZ( redChromaticity );
+    const greenPrimeXYZ = RenderColor.xyToXYZ( greenChromaticity );
+    const bluePrimeXYZ = RenderColor.xyToXYZ( blueChromaticity );
+    const matrixPrime = Matrix3.rowMajor(
+      redPrimeXYZ.x, greenPrimeXYZ.x, bluePrimeXYZ.x,
+      redPrimeXYZ.y, greenPrimeXYZ.y, bluePrimeXYZ.y,
+      redPrimeXYZ.z, greenPrimeXYZ.z, bluePrimeXYZ.z
+    );
+    const rgbY = matrixPrime.inverted().timesVector3( whiteXYZ );
+    return matrixPrime.timesMatrix( Matrix3.rowMajor(
+      rgbY.x, 0, 0,
+      0, rgbY.y, 0,
+      0, 0, rgbY.z
+    ) );
+  }
+
+  public static sRGBToXYZMatrix = RenderColor.getMatrixRGBToXYZ(
+    sRGBRedChromaticity,
+    sRGBGreenChromaticity,
+    sRGBBlueChromaticity,
+    sRGBWhiteChromaticity
+  );
+
+  public static XYZTosRGBMatrix = RenderColor.sRGBToXYZMatrix.inverted();
+
+  public static displayP3ToXYZMatrix = RenderColor.getMatrixRGBToXYZ(
+    dciP3RedChromaticity,
+    dciP3GreenChromaticity,
+    dciP3BlueChromaticity,
+    sRGBWhiteChromaticity
+  );
+
+  public static XYZToDisplayP3Matrix = RenderColor.displayP3ToXYZMatrix.inverted();
+
+  public static sRGBToDisplayP3Matrix = RenderColor.XYZToDisplayP3Matrix.timesMatrix( RenderColor.sRGBToXYZMatrix );
+
+  public static displayP3TosRGBMatrix = RenderColor.sRGBToDisplayP3Matrix.inverted();
 
   public static ratioBlend(
     zeroColor: Vector4,
