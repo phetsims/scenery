@@ -8,7 +8,6 @@
 
 import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
-import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default class RenderAlpha extends RenderProgram {
@@ -19,8 +18,13 @@ export default class RenderAlpha extends RenderProgram {
     super();
   }
 
-  public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderAlpha( this.program.transformed( transform ), this.alpha );
+  public override getChildren(): RenderProgram[] {
+    return [ this.program ];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderAlpha {
+    assert && assert( children.length === 1 );
+    return new RenderAlpha( children[ 0 ], this.alpha );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -38,11 +42,6 @@ export default class RenderAlpha extends RenderProgram {
     else {
       return new RenderAlpha( this.program.replace( callback ), this.alpha );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.program.depthFirst( callback );
-    callback( this );
   }
 
   public override isFullyTransparent(): boolean {

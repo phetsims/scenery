@@ -34,6 +34,15 @@ export default class RenderLinearBlend extends RenderProgram {
     super();
   }
 
+  public override getChildren(): RenderProgram[] {
+    return [ this.zero, this.one ];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderLinearBlend {
+    assert && assert( children.length === 2 );
+    return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, children[ 0 ], children[ 1 ] );
+  }
+
   public override transformed( transform: Matrix3 ): RenderProgram {
     // scaledNormal dot startPoint = offset
     // scaledNormal dot endPoint = offset + 1
@@ -79,12 +88,6 @@ export default class RenderLinearBlend extends RenderProgram {
     else {
       return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.zero.depthFirst( callback );
-    this.one.depthFirst( callback );
-    callback( this );
   }
 
   public override isFullyTransparent(): boolean {

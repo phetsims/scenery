@@ -51,6 +51,17 @@ export default class RenderRadialGradient extends RenderProgram {
     super();
   }
 
+  public override getChildren(): RenderProgram[] {
+    return this.stops.map( stop => stop.program );
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderRadialGradient {
+    assert && assert( children.length === this.stops.length );
+    return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, this.stops.map( ( stop, i ) => {
+      return new RenderGradientStop( stop.ratio, children[ i ] );
+    } ), this.extend, this.accuracy );
+  }
+
   public isSplittable(): boolean {
     return this.accuracy === RenderRadialGradientAccuracy.SplitAccurate ||
            this.accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
@@ -94,11 +105,6 @@ export default class RenderRadialGradient extends RenderProgram {
       const stops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.replace( callback ) ) );
       return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, stops, this.extend, this.accuracy );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.stops.forEach( stop => stop.program.depthFirst( callback ) );
-    callback( this );
   }
 
   public override isFullyTransparent(): boolean {

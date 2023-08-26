@@ -21,6 +21,15 @@ export default class RenderPathBoolean extends RenderProgram {
     super();
   }
 
+  public override getChildren(): RenderProgram[] {
+    return [ this.inside, this.outside ];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderPathBoolean {
+    assert && assert( children.length === 2 );
+    return new RenderPathBoolean( this.path, children[ 0 ], children[ 1 ] );
+  }
+
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderPathBoolean( this.path.transformed( transform ), this.inside.transformed( transform ), this.outside.transformed( transform ) );
   }
@@ -41,12 +50,6 @@ export default class RenderPathBoolean extends RenderProgram {
     else {
       return new RenderPathBoolean( this.path, this.inside.replace( callback ), this.outside.replace( callback ) );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.inside.depthFirst( callback );
-    this.outside.depthFirst( callback );
-    callback( this );
   }
 
   public override isFullyTransparent(): boolean {

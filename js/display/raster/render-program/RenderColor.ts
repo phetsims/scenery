@@ -8,7 +8,6 @@
 
 import { ClippableFace, Color, constantTrue, RenderPath, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
-import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 // TODO: consider transforms as a node itself? Meh probably excessive?
@@ -22,8 +21,13 @@ export default class RenderColor extends RenderProgram {
     super();
   }
 
-  public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderColor( this.color );
+  public override getChildren(): RenderProgram[] {
+    return [];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderColor {
+    assert && assert( children.length === 0 );
+    return this;
   }
 
   public override equals( other: RenderProgram ): boolean {

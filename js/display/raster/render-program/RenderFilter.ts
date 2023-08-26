@@ -9,7 +9,6 @@
 import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
-import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default class RenderFilter extends RenderProgram {
@@ -21,8 +20,13 @@ export default class RenderFilter extends RenderProgram {
     super();
   }
 
-  public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderFilter( this.program.transformed( transform ), this.colorMatrix, this.colorTranslation );
+  public override getChildren(): RenderProgram[] {
+    return [ this.program ];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderFilter {
+    assert && assert( children.length === 1 );
+    return new RenderFilter( children[ 0 ], this.colorMatrix, this.colorTranslation );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -41,11 +45,6 @@ export default class RenderFilter extends RenderProgram {
     else {
       return new RenderFilter( this.program.replace( callback ), this.colorMatrix, this.colorTranslation );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.program.depthFirst( callback );
-    callback( this );
   }
 
   // TODO: inspect colorMatrix to see when it will maintain transparency!

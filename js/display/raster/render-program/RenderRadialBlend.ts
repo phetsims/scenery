@@ -49,6 +49,15 @@ export default class RenderRadialBlend extends RenderProgram {
     this.inverseTransform = transform.inverted();
   }
 
+  public override getChildren(): RenderProgram[] {
+    return [ this.zero, this.one ];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderRadialBlend {
+    assert && assert( children.length === 2 );
+    return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, children[ 0 ], children[ 1 ] );
+  }
+
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderRadialBlend(
       transform.timesMatrix( this.transform ),
@@ -78,12 +87,6 @@ export default class RenderRadialBlend extends RenderProgram {
     else {
       return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, this.zero.replace( callback ), this.one.replace( callback ) );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.zero.depthFirst( callback );
-    this.one.depthFirst( callback );
-    callback( this );
   }
 
   public override isFullyTransparent(): boolean {

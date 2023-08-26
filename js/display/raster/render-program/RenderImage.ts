@@ -32,6 +32,15 @@ export default class RenderImage extends RenderProgram {
     this.inverseTransformWithHalfOffset = Matrix3.translation( -0.5, -0.5 ).timesMatrix( this.inverseTransform );
   }
 
+  public override getChildren(): RenderProgram[] {
+    return [];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderImage {
+    assert && assert( children.length === 0 );
+    return this;
+  }
+
   public override transformed( transform: Matrix3 ): RenderProgram {
     return new RenderImage( transform.timesMatrix( this.transform ), this.image, this.extendX, this.extendY, this.resampleType );
   }

@@ -8,7 +8,6 @@
 
 import { ClippableFace, constantTrue, RenderBlendType, RenderColor, RenderComposeType, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
-import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 
@@ -22,13 +21,13 @@ export default class RenderBlendCompose extends RenderProgram {
     super();
   }
 
-  public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderBlendCompose(
-      this.composeType,
-      this.blendType,
-      this.a.transformed( transform ),
-      this.b.transformed( transform )
-    );
+  public override getChildren(): RenderProgram[] {
+    return [ this.a, this.b ];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderBlendCompose {
+    assert && assert( children.length === 2 );
+    return new RenderBlendCompose( this.composeType, this.blendType, children[ 0 ], children[ 1 ] );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -50,12 +49,6 @@ export default class RenderBlendCompose extends RenderProgram {
       const b = this.b.replace( callback );
       return new RenderBlendCompose( this.composeType, this.blendType, a, b );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.a.depthFirst( callback );
-    this.b.depthFirst( callback );
-    callback( this );
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {

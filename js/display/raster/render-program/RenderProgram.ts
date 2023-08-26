@@ -6,22 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonalFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPath, RenderPremultiply, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderLinearSRGBToOklab, SerializedRenderLinearSRGBToSRGB, SerializedRenderOklabToLinearSRGB, SerializedRenderPremultiply, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderSRGBToLinearSRGB, SerializedRenderUnpremultiply } from '../../../imports.js';
+import { ClippableFace, PolygonalFace, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderAlpha, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderLinearSRGBToOklab, SerializedRenderLinearSRGBToSRGB, SerializedRenderOklabToLinearSRGB, SerializedRenderPathBoolean, SerializedRenderPremultiply, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderSRGBToLinearSRGB, SerializedRenderUnpremultiply } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default abstract class RenderProgram {
-  public abstract isFullyTransparent(): boolean;
+  public abstract getChildren(): RenderProgram[];
+  public abstract withChildren( children: RenderProgram[] ): RenderProgram;
 
+  public abstract isFullyTransparent(): boolean;
   public abstract isFullyOpaque(): boolean;
 
   // Stated needs for the program to be evaluated. If it's not needed, we can give bonus info to the program.
   public abstract needsFace(): boolean;
   public abstract needsArea(): boolean;
   public abstract needsCentroid(): boolean;
-
-  public abstract transformed( transform: Matrix3 ): RenderProgram;
 
   public abstract simplify( pathTest?: ( renderPath: RenderPath ) => boolean ): RenderProgram;
 
@@ -43,7 +43,17 @@ export default abstract class RenderProgram {
 
   public abstract replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram;
 
+  /**
+   * Returns a new RenderProgram with the given transform applied to it.
+   *
+   * NOTE: Default implementation, should be overridden by subclasses that have positioning information embedded inside
+   */
+  public transformed( transform: Matrix3 ): RenderProgram {
+    return this.withChildren( this.getChildren().map( child => child.transformed( transform ) ) );
+  }
+
   public depthFirst( callback: ( program: RenderProgram ) => void ): void {
+    this.getChildren().forEach( child => child.depthFirst( callback ) );
     callback( this );
   }
 
@@ -62,6 +72,9 @@ export default abstract class RenderProgram {
     }
     else if ( obj.type === 'RenderColor' ) {
       return RenderColor.deserialize( obj as SerializedRenderColor );
+    }
+    else if ( obj.type === 'RenderPathBoolean' ) {
+      return RenderPathBoolean.deserialize( obj as SerializedRenderPathBoolean );
     }
     else if ( obj.type === 'RenderFilter' ) {
       return RenderFilter.deserialize( obj as SerializedRenderFilter );

@@ -52,6 +52,17 @@ export default class RenderLinearGradient extends RenderProgram {
     this.gradDelta = end.minus( start );
   }
 
+  public override getChildren(): RenderProgram[] {
+    return this.stops.map( stop => stop.program );
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderLinearGradient {
+    assert && assert( children.length === this.stops.length );
+    return new RenderLinearGradient( this.transform, this.start, this.end, this.stops.map( ( stop, i ) => {
+      return new RenderGradientStop( stop.ratio, children[ i ] );
+    } ), this.extend, this.accuracy );
+  }
+
   public isSplittable(): boolean {
     return this.accuracy === RenderLinearGradientAccuracy.SplitAccurate ||
            this.accuracy === RenderLinearGradientAccuracy.SplitPixelCenter;
@@ -96,11 +107,6 @@ export default class RenderLinearGradient extends RenderProgram {
         this.accuracy
       );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.stops.forEach( stop => stop.program.depthFirst( callback ) );
-    callback( this );
   }
 
   public override isFullyTransparent(): boolean {

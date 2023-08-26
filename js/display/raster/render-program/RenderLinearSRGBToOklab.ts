@@ -6,9 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderPath, RenderProgram, SerializedRenderProgram, constantTrue, scenery } from '../../../imports.js';
+import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
-import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default class RenderLinearSRGBToOklab extends RenderProgram {
@@ -18,9 +17,13 @@ export default class RenderLinearSRGBToOklab extends RenderProgram {
     super();
   }
 
-  // TODO: How to get rid of the amounts of boilerplate here?
-  public override transformed( transform: Matrix3 ): RenderProgram {
-    return new RenderLinearSRGBToOklab( this.program.transformed( transform ) );
+  public override getChildren(): RenderProgram[] {
+    return [ this.program ];
+  }
+
+  public override withChildren( children: RenderProgram[] ): RenderLinearSRGBToOklab {
+    assert && assert( children.length === 1 );
+    return new RenderLinearSRGBToOklab( children[ 0 ] );
   }
 
   public override equals( other: RenderProgram ): boolean {
@@ -37,11 +40,6 @@ export default class RenderLinearSRGBToOklab extends RenderProgram {
     else {
       return new RenderLinearSRGBToOklab( this.program.replace( callback ) );
     }
-  }
-
-  public override depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.program.depthFirst( callback );
-    callback( this );
   }
 
   public override isFullyTransparent(): boolean {
