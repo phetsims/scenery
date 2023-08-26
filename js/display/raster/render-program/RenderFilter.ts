@@ -60,25 +60,37 @@ export default class RenderFilter extends RenderProgram {
   }
 
   public override isFullyTransparent(): boolean {
-    // TODO: colorMatrix check. Homogeneous?
-    return false;
+    // If we modify alpha based on color value, we can't make guarantees
+    if ( this.colorMatrix.m30() !== 0 || this.colorMatrix.m31() !== 0 || this.colorMatrix.m32() !== 0 ) {
+      return false;
+    }
+
+    if ( this.program.isFullyTransparent() ) {
+      return this.colorTranslation.w === 0;
+    }
+    else if ( this.program.isFullyOpaque() ) {
+      return this.colorMatrix.m33() + this.colorTranslation.w === 0;
+    }
+    else {
+      return this.colorMatrix.m33() === 0 && this.colorTranslation.w === 0;
+    }
   }
 
   public override isFullyOpaque(): boolean {
-    // TODO: colorMatrix check. Homogeneous?
-    return false;
-  }
+    // If we modify alpha based on color value, we can't make guarantees
+    if ( this.colorMatrix.m30() !== 0 || this.colorMatrix.m31() !== 0 || this.colorMatrix.m32() !== 0 ) {
+      return false;
+    }
 
-  public override needsFace(): boolean {
-    return this.program.needsFace();
-  }
-
-  public override needsArea(): boolean {
-    return this.program.needsArea();
-  }
-
-  public override needsCentroid(): boolean {
-    return this.program.needsCentroid();
+    if ( this.program.isFullyOpaque() ) {
+      return this.colorMatrix.m33() + this.colorTranslation.w === 1;
+    }
+    else if ( this.program.isFullyTransparent() ) {
+      return this.colorTranslation.w === 1;
+    }
+    else {
+      return this.colorMatrix.m33() === 0 && this.colorTranslation.w === 1;
+    }
   }
 
   public override evaluate(

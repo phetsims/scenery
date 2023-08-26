@@ -52,26 +52,6 @@ export default class RenderPathBoolean extends RenderProgram {
     }
   }
 
-  public override isFullyTransparent(): boolean {
-    return this.inside.isFullyTransparent() && this.outside.isFullyTransparent();
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.inside.isFullyOpaque() && this.outside.isFullyOpaque();
-  }
-
-  public override needsFace(): boolean {
-    return this.inside.needsFace() || this.outside.needsFace();
-  }
-
-  public override needsArea(): boolean {
-    return this.inside.needsArea() || this.outside.needsArea();
-  }
-
-  public override needsCentroid(): boolean {
-    return this.inside.needsCentroid() || this.outside.needsCentroid();
-  }
-
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     // TODO: partial simplification! like if inside === outside, fully transparent, etc.
 

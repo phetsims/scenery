@@ -109,42 +109,12 @@ export default class RenderLinearGradient extends RenderProgram {
     }
   }
 
-  public override isFullyTransparent(): boolean {
-    return this.stops.every( stop => stop.program.isFullyTransparent() );
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.stops.every( stop => stop.program.isFullyOpaque() );
-  }
-
-  public override needsFace(): boolean {
-    for ( let i = 0; i < this.stops.length; i++ ) {
-      if ( this.stops[ i ].program.needsFace() ) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public override needsArea(): boolean {
-    for ( let i = 0; i < this.stops.length; i++ ) {
-      if ( this.stops[ i ].program.needsArea() ) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   public override needsCentroid(): boolean {
     if ( this.useInternalCentroid() ) {
       return true;
     }
-    for ( let i = 0; i < this.stops.length; i++ ) {
-      if ( this.stops[ i ].program.needsCentroid() ) {
-        return true;
-      }
-    }
-    return false;
+
+    return super.needsCentroid();
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {

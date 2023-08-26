@@ -89,24 +89,12 @@ export default class RenderRadialBlend extends RenderProgram {
     }
   }
 
-  public override isFullyTransparent(): boolean {
-    return this.zero.isFullyTransparent() && this.one.isFullyTransparent();
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.zero.isFullyOpaque() && this.one.isFullyOpaque();
-  }
-
-  public override needsFace(): boolean {
-    return this.zero.needsFace() || this.one.needsFace();
-  }
-
   public override needsArea(): boolean {
-    return this.accuracy === RenderRadialBlendAccuracy.Accurate || this.zero.needsArea() || this.one.needsArea();
+    return this.accuracy === RenderRadialBlendAccuracy.Accurate || super.needsArea();
   }
 
   public override needsCentroid(): boolean {
-    return this.accuracy === RenderRadialBlendAccuracy.Centroid || this.zero.needsCentroid() || this.one.needsCentroid();
+    return this.accuracy === RenderRadialBlendAccuracy.Centroid || super.needsCentroid();
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {

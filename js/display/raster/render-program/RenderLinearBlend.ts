@@ -90,24 +90,8 @@ export default class RenderLinearBlend extends RenderProgram {
     }
   }
 
-  public override isFullyTransparent(): boolean {
-    return this.zero.isFullyTransparent() && this.one.isFullyTransparent();
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.zero.isFullyOpaque() && this.one.isFullyOpaque();
-  }
-
-  public override needsFace(): boolean {
-    return this.zero.needsFace() || this.one.needsFace();
-  }
-
-  public override needsArea(): boolean {
-    return this.zero.needsArea() || this.one.needsArea();
-  }
-
   public override needsCentroid(): boolean {
-    return this.accuracy === RenderLinearBlendAccuracy.Accurate || this.zero.needsCentroid() || this.one.needsCentroid();
+    return this.accuracy === RenderLinearBlendAccuracy.Accurate || super.needsCentroid();
   }
 
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {

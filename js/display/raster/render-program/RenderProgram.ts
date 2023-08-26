@@ -15,13 +15,73 @@ export default abstract class RenderProgram {
   public abstract getChildren(): RenderProgram[];
   public abstract withChildren( children: RenderProgram[] ): RenderProgram;
 
-  public abstract isFullyTransparent(): boolean;
-  public abstract isFullyOpaque(): boolean;
+  /**
+   * Whether this RenderProgram will return an evaluation (regardless of the position) with an empty alpha value (0).
+   * If this is true, we can potentially simplify parts of the RenderProgram tree.
+   *
+   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
+   */
+  public isFullyTransparent(): boolean {
+    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
 
-  // Stated needs for the program to be evaluated. If it's not needed, we can give bonus info to the program.
-  public abstract needsFace(): boolean;
-  public abstract needsArea(): boolean;
-  public abstract needsCentroid(): boolean;
+    return _.every( this.getChildren(), child => child.isFullyTransparent() );
+  }
+
+  /**
+   * Whether this RenderProgram will return an evaluation (regardless of the position) with full alpha value (1).
+   * If this is true, we can potentially simplify parts of the RenderProgram tree.
+   *
+   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
+   */
+  public isFullyOpaque(): boolean {
+    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
+
+    return _.every( this.getChildren(), child => child.isFullyOpaque() );
+  }
+
+  /**
+   * Whether this RenderProgram will want a computed face for its evaluation
+   * If it's not needed, we can give bogus info to the program.
+   *
+   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
+   */
+  public needsFace(): boolean {
+    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
+
+    return _.some( this.getChildren(), child => child.needsFace() );
+  }
+
+  /**
+   * Whether this RenderProgram will want a computed area for its evaluation
+   * If it's not needed, we can give bogus info to the program.
+   *
+   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
+   */
+  public needsArea(): boolean {
+    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
+
+    return _.some( this.getChildren(), child => child.needsArea() );
+  }
+
+  /**
+   * Whether this RenderProgram will want a computed centroid for its evaluation
+   * If it's not needed, we can give bogus info to the program.
+   *
+   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
+   */
+  public needsCentroid(): boolean {
+    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
+
+    return _.some( this.getChildren(), child => child.needsCentroid() );
+  }
+
+  // public abstract isFullyTransparent(): boolean;
+  // public abstract isFullyOpaque(): boolean;
+  //
+  //
+  // public abstract needsFace(): boolean;
+  // public abstract needsArea(): boolean;
+  // public abstract needsCentroid(): boolean;
 
   public abstract simplify( pathTest?: ( renderPath: RenderPath ) => boolean ): RenderProgram;
 

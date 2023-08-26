@@ -42,26 +42,6 @@ export default class RenderPremultiply extends RenderProgram {
     }
   }
 
-  public override isFullyTransparent(): boolean {
-    return this.program.isFullyTransparent();
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.program.isFullyOpaque();
-  }
-
-  public override needsFace(): boolean {
-    return this.program.needsFace();
-  }
-
-  public override needsArea(): boolean {
-    return this.program.needsArea();
-  }
-
-  public override needsCentroid(): boolean {
-    return this.program.needsCentroid();
-  }
-
   public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
     const program = this.program.simplify( pathTest );
 
