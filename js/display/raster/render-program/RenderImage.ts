@@ -82,7 +82,7 @@ export default class RenderImage extends RenderProgram {
            this.resampleType === RenderResampleType.MitchellNetravali;
   }
 
-  public override simplify(): RenderProgram {
+  public override simplified(): RenderProgram {
     return this;
   }
 
@@ -371,7 +371,7 @@ export default class RenderImage extends RenderProgram {
                 // If it has zero area, it won't have contribution
                 if ( absPixelArea > 1e-8 ) {
 
-                  // If it has a full pixel of area, we can simplify computation SIGNIFICANTLY
+                  // If it has a full pixel of area, we can simplified computation SIGNIFICANTLY
                   if ( absPixelArea > 1 - 1e-8 ) {
                     contribution += Math.sign( pixelArea ) * evaluateFull( x, y, px, py );
                   }

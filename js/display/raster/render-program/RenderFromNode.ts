@@ -307,7 +307,7 @@ export default class RenderFromNode {
     // Filters are applied before
     node.filters.forEach( filter => {
       if ( filter instanceof ColorMatrixFilter ) {
-        // NOTE: Apply them no matter what, we'll rely on later simplify (because filters can take transparent to NOT)
+        // NOTE: Apply them no matter what, we'll rely on later simplified (because filters can take transparent to NOT)
         result = new RenderFilter( result, filter.getMatrix(), filter.getTranslation() );
       }
     } );

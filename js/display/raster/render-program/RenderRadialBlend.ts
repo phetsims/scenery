@@ -88,9 +88,9 @@ export default class RenderRadialBlend extends RenderProgram {
     return this.accuracy === RenderRadialBlendAccuracy.Centroid || super.needsCentroid();
   }
 
-  public override simplify(): RenderProgram {
-    const zero = this.zero.simplify();
-    const one = this.one.simplify();
+  public override simplified(): RenderProgram {
+    const zero = this.zero.simplified();
+    const one = this.one.simplified();
 
     if ( zero.isFullyTransparent() && one.isFullyTransparent() ) {
       return RenderColor.TRANSPARENT;

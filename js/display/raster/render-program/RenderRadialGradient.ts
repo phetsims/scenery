@@ -105,8 +105,8 @@ export default class RenderRadialGradient extends RenderProgram {
     return super.needsCentroid();
   }
 
-  public override simplify(): RenderProgram {
-    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify() ) );
+  public override simplified(): RenderProgram {
+    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplified() ) );
 
     if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
       return RenderColor.TRANSPARENT;

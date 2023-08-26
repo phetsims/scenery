@@ -34,8 +34,8 @@ export default class RenderFilter extends RenderUnary {
            this.colorTranslation.equals( other.colorTranslation );
   }
 
-  public override simplify(): RenderProgram {
-    const program = this.program.simplify();
+  public override simplified(): RenderProgram {
+    const program = this.program.simplified();
 
     if ( program instanceof RenderColor ) {
       return new RenderColor( RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );

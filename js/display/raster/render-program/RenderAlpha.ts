@@ -39,8 +39,8 @@ export default class RenderAlpha extends RenderUnary {
     return this.alpha === 1 && super.isFullyOpaque();
   }
 
-  public override simplify(): RenderProgram {
-    const program = this.program.simplify();
+  public override simplified(): RenderProgram {
+    const program = this.program.simplified();
 
     if ( program.isFullyTransparent() || this.alpha === 0 ) {
       return RenderColor.TRANSPARENT;

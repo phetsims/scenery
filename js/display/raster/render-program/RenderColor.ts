@@ -58,7 +58,7 @@ export default class RenderColor extends RenderProgram {
     return false;
   }
 
-  public override simplify(): RenderProgram {
+  public override simplified(): RenderProgram {
     return this;
   }
 

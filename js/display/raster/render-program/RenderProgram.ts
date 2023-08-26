@@ -30,7 +30,7 @@ export default abstract class RenderProgram {
 
   /**
    * Whether this RenderProgram will return an evaluation (regardless of the position) with an empty alpha value (0).
-   * If this is true, we can potentially simplify parts of the RenderProgram tree.
+   * If this is true, we can potentially simplified parts of the RenderProgram tree.
    *
    * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
    */
@@ -42,7 +42,7 @@ export default abstract class RenderProgram {
 
   /**
    * Whether this RenderProgram will return an evaluation (regardless of the position) with full alpha value (1).
-   * If this is true, we can potentially simplify parts of the RenderProgram tree.
+   * If this is true, we can potentially simplified parts of the RenderProgram tree.
    *
    * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
    */
@@ -88,8 +88,8 @@ export default abstract class RenderProgram {
     return _.some( this.getChildren(), child => child.needsCentroid() );
   }
 
-  public simplify(): RenderProgram {
-    return this.withChildren( this.getChildren().map( child => child.simplify() ) );
+  public simplified(): RenderProgram {
+    return this.withChildren( this.getChildren().map( child => child.simplified() ) );
   }
 
   // Premultiplied linear RGB, ignoring the path

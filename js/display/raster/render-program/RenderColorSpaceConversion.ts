@@ -18,8 +18,8 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
     super( program );
   }
 
-  public override simplify(): RenderProgram {
-    const program = this.program.simplify();
+  public override simplified(): RenderProgram {
+    const program = this.program.simplified();
 
     if ( program.isFullyTransparent() ) {
       return RenderColor.TRANSPARENT;

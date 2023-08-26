@@ -39,10 +39,10 @@ export default class RenderBlendCompose extends RenderProgram {
            this.blendType === other.blendType;
   }
 
-  public override simplify(): RenderProgram {
+  public override simplified(): RenderProgram {
     // a OP b
-    const a = this.a.simplify();
-    const b = this.b.simplify();
+    const a = this.a.simplified();
+    const b = this.b.simplified();
 
     const aTransparent = a.isFullyTransparent();
     const aOpaque = a.isFullyOpaque();

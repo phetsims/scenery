@@ -42,10 +42,10 @@ export default class RenderPathBoolean extends RenderProgram {
     return this.path === other.path;
   }
 
-  public override simplify(): RenderProgram {
+  public override simplified(): RenderProgram {
 
-    const inside = this.inside.simplify();
-    const outside = this.outside.simplify();
+    const inside = this.inside.simplified();
+    const outside = this.outside.simplified();
 
     if ( inside.isFullyTransparent() && outside.isFullyTransparent() ) {
       return RenderColor.TRANSPARENT;
