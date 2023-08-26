@@ -12,8 +12,20 @@ import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default abstract class RenderProgram {
+  /**
+   * Should return all of the "child" RenderPrograms that this RenderProgram is composed of (the ones it uses to compute
+   * a result color).
+   */
   public abstract getChildren(): RenderProgram[];
+
+  /**
+   * Should return an otherwise-identical version of the RenderProgram with the given children.
+   */
   public abstract withChildren( children: RenderProgram[] ): RenderProgram;
+
+  /**
+   * Should return the name of the RenderProgram, for serialization and debugging purposes.
+   */
   public abstract getName(): string;
 
   /**
@@ -75,14 +87,6 @@ export default abstract class RenderProgram {
 
     return _.some( this.getChildren(), child => child.needsCentroid() );
   }
-
-  // public abstract isFullyTransparent(): boolean;
-  // public abstract isFullyOpaque(): boolean;
-  //
-  //
-  // public abstract needsFace(): boolean;
-  // public abstract needsArea(): boolean;
-  // public abstract needsCentroid(): boolean;
 
   public abstract simplify( pathTest?: ( renderPath: RenderPath ) => boolean ): RenderProgram;
 
@@ -196,10 +200,6 @@ export default abstract class RenderProgram {
 
   public static ensureFace( face: ClippableFace | null, minX: number, minY: number, maxX: number, maxY: number ): ClippableFace {
     return face || PolygonalFace.fromBoundsValues( minX, minY, maxX, maxY );
-  }
-
-  public static ensureCentroid( face: ClippableFace | null, area: number, minX: number, minY: number, maxX: number, maxY: number ): Vector2 {
-    return face ? face.getCentroid( area ) : new Vector2( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
   }
 }
 
