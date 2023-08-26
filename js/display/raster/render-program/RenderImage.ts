@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, PolygonMitchellNetravali, RenderExtend, RenderImageable, RenderPath, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable } from '../../../imports.js';
+import { ClippableFace, PolygonMitchellNetravali, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -82,7 +82,7 @@ export default class RenderImage extends RenderProgram {
            this.resampleType === RenderResampleType.MitchellNetravali;
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
+  public override simplify(): RenderProgram {
     return this;
   }
 
@@ -93,8 +93,7 @@ export default class RenderImage extends RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
     // TODO: analytic box! Bilinear! Bicubic! (can we mipmap for those?)
     switch( this.resampleType ) {

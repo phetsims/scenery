@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderPath, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -105,8 +105,8 @@ export default class RenderRadialGradient extends RenderProgram {
     return super.needsCentroid();
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify( pathTest ) ) );
+  public override simplify(): RenderProgram {
+    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplify() ) );
 
     if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
       return RenderColor.TRANSPARENT;
@@ -122,14 +122,13 @@ export default class RenderRadialGradient extends RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
     if ( this.logic === null ) {
       this.logic = new RadialGradientLogic( this );
     }
 
-    return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.accuracy, pathTest );
+    return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.accuracy );
   }
 
   public override serialize(): SerializedRenderRadialGradient {
@@ -278,8 +277,7 @@ class RadialGradientLogic {
     minY: number,
     maxX: number,
     maxY: number,
-    accuracy: RenderRadialGradientAccuracy,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    accuracy: RenderRadialGradientAccuracy
   ): Vector4 {
     const focal_x = this.focal_x;
     const radius = this.radius;
@@ -333,7 +331,7 @@ class RadialGradientLogic {
         t = 1 - t;
       }
 
-      return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.radialGradient.stops, t, pathTest );
+      return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.radialGradient.stops, t );
     }
     else {
       // Invalid is a checkerboard red/yellow

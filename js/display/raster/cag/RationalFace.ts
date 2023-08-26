@@ -79,7 +79,7 @@ export default class RationalFace {
     const inclusionSet = this.getIncludedRenderPaths();
 
     // TODO: for extracting a non-render-program based setup, can we create a new class here?
-    this.renderProgram = renderProgram.simplify( renderPath => inclusionSet.has( renderPath ) );
+    this.renderProgram = renderProgram.withPathInclusion( renderPath => inclusionSet.has( renderPath ) ).simplify();
   }
 
   public static traceBoundaries(

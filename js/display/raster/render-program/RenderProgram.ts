@@ -88,7 +88,9 @@ export default abstract class RenderProgram {
     return _.some( this.getChildren(), child => child.needsCentroid() );
   }
 
-  public abstract simplify( pathTest?: ( renderPath: RenderPath ) => boolean ): RenderProgram;
+  public simplify(): RenderProgram {
+    return this.withChildren( this.getChildren().map( child => child.simplify() ) );
+  }
 
   // Premultiplied linear RGB, ignoring the path
   public abstract evaluate(
@@ -98,8 +100,7 @@ export default abstract class RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest?: ( renderPath: RenderPath ) => boolean
+    maxY: number
   ): Vector4;
 
   public equals( other: RenderProgram ): boolean {
@@ -136,6 +137,20 @@ export default abstract class RenderProgram {
     }
     else {
       return this.withChildren( this.getChildren().map( child => child.replace( callback ) ) );
+    }
+  }
+
+  public withPathInclusion( pathTest: ( renderPath: RenderPath ) => boolean ): RenderProgram {
+    if ( this instanceof RenderPathBoolean ) {
+      if ( pathTest( this.path ) ) {
+        return this.inside.withPathInclusion( pathTest );
+      }
+      else {
+        return this.outside.withPathInclusion( pathTest );
+      }
+    }
+    else {
+      return this.withChildren( this.getChildren().map( child => child.withPathInclusion( pathTest ) ) );
     }
   }
 

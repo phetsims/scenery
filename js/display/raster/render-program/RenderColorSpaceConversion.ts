@@ -6,20 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPath, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnary, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnary, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default abstract class RenderColorSpaceConversion extends RenderUnary {
-  public constructor(
+  protected constructor(
     program: RenderProgram,
     public readonly convert: ( color: Vector4 ) => Vector4
   ) {
     super( program );
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    const program = this.program.simplify( pathTest );
+  public override simplify(): RenderProgram {
+    const program = this.program.simplify();
 
     if ( program.isFullyTransparent() ) {
       return RenderColor.TRANSPARENT;
@@ -40,10 +40,9 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
-    const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+    const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
 
     return this.convert( source );
   }

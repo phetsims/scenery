@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, LinearEdge, PolygonalFace, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, LinearEdge, PolygonalFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -88,9 +88,9 @@ export default class RenderRadialBlend extends RenderProgram {
     return this.accuracy === RenderRadialBlendAccuracy.Centroid || super.needsCentroid();
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    const zero = this.zero.simplify( pathTest );
-    const one = this.one.simplify( pathTest );
+  public override simplify(): RenderProgram {
+    const zero = this.zero.simplify();
+    const one = this.one.simplify();
 
     if ( zero.isFullyTransparent() && one.isFullyTransparent() ) {
       return RenderColor.TRANSPARENT;
@@ -106,8 +106,7 @@ export default class RenderRadialBlend extends RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
     // TODO: flag to control whether this gets set? TODO: Flag to just use centroid
     let averageDistance;
@@ -169,15 +168,15 @@ export default class RenderRadialBlend extends RenderProgram {
     assert && assert( isFinite( t ) );
 
     if ( t <= 0 ) {
-      return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+      return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY );
     }
     else if ( t >= 1 ) {
-      return this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+      return this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY );
     }
     else {
       return RenderColor.ratioBlend(
-        this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
-        this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
+        this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
+        this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
         t
       );
     }

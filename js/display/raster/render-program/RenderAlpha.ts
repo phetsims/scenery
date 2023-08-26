@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, RenderUnary, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderProgram, RenderUnary, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
@@ -39,8 +39,8 @@ export default class RenderAlpha extends RenderUnary {
     return this.alpha === 1 && super.isFullyOpaque();
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    const program = this.program.simplify( pathTest );
+  public override simplify(): RenderProgram {
+    const program = this.program.simplify();
 
     if ( program.isFullyTransparent() || this.alpha === 0 ) {
       return RenderColor.TRANSPARENT;
@@ -66,10 +66,9 @@ export default class RenderAlpha extends RenderUnary {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
-    const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+    const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
 
     return source.timesScalar( this.alpha );
   }

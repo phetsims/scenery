@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, LinearEdge, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -42,15 +42,25 @@ export default class RenderPathBoolean extends RenderProgram {
     return this.path === other.path;
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    // TODO: partial simplification! like if inside === outside, fully transparent, etc.
+  public override simplify(): RenderProgram {
 
-    if ( pathTest( this.path ) ) {
-      return this.inside.simplify( pathTest );
+    const inside = this.inside.simplify();
+    const outside = this.outside.simplify();
+
+    if ( inside.isFullyTransparent() && outside.isFullyTransparent() ) {
+      return RenderColor.TRANSPARENT;
     }
-    else {
-      return this.outside.simplify( pathTest );
+
+    if ( inside.equals( outside ) ) {
+      return inside;
     }
+
+    return this.withChildren( [ inside, outside ] );
+  }
+
+  public override needsCentroid(): boolean {
+    // We'll use the centroid as the point for determining whether we are on the interior of our path
+    return true;
   }
 
   public override evaluate(
@@ -60,15 +70,13 @@ export default class RenderPathBoolean extends RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
-    if ( pathTest( this.path ) ) {
-      return this.inside.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
-    }
-    else {
-      return this.outside.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
-    }
+    // TODO: ACTUALLY, we should clip the face with our path....
+    const windingNumber = LinearEdge.getWindingNumberPolygons( this.path.subpaths, centroid );
+    const included = this.path.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 === 1;
+
+    return ( included ? this.inside : this.outside ).evaluate( face, area, centroid, minX, minY, maxX, maxY );
   }
 
   protected override getExtraDebugString(): string {

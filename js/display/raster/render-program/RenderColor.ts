@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, Color, constantTrue, RenderPath, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, Color, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
@@ -58,7 +58,7 @@ export default class RenderColor extends RenderProgram {
     return false;
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
+  public override simplify(): RenderProgram {
     return this;
   }
 
@@ -69,8 +69,7 @@ export default class RenderColor extends RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
     return this.color;
   }

@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -85,9 +85,9 @@ export default class RenderLinearBlend extends RenderProgram {
     return this.accuracy === RenderLinearBlendAccuracy.Accurate || super.needsCentroid();
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
-    const zero = this.zero.simplify( pathTest );
-    const one = this.one.simplify( pathTest );
+  public override simplify(): RenderProgram {
+    const zero = this.zero.simplify();
+    const one = this.one.simplify();
 
     if ( zero.isFullyTransparent() && one.isFullyTransparent() ) {
       return RenderColor.TRANSPARENT;
@@ -103,8 +103,7 @@ export default class RenderLinearBlend extends RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
     const dot = this.accuracy === RenderLinearBlendAccuracy.Accurate ?
                 this.scaledNormal.dot( centroid ) :
@@ -113,15 +112,15 @@ export default class RenderLinearBlend extends RenderProgram {
     const t = dot - this.offset;
 
     if ( t <= 0 ) {
-      return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+      return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY );
     }
     else if ( t >= 1 ) {
-      return this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+      return this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY );
     }
     else {
       return RenderColor.ratioBlend(
-        this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
-        this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest ),
+        this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
+        this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
         t
       );
     }

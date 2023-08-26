@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, constantTrue, RenderBlendType, RenderColor, RenderComposeType, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderBlendType, RenderColor, RenderComposeType, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
@@ -39,10 +39,10 @@ export default class RenderBlendCompose extends RenderProgram {
            this.blendType === other.blendType;
   }
 
-  public override simplify( pathTest: ( renderPath: RenderPath ) => boolean = constantTrue ): RenderProgram {
+  public override simplify(): RenderProgram {
     // a OP b
-    const a = this.a.simplify( pathTest );
-    const b = this.b.simplify( pathTest );
+    const a = this.a.simplify();
+    const b = this.b.simplify();
 
     const aTransparent = a.isFullyTransparent();
     const aOpaque = a.isFullyOpaque();
@@ -204,11 +204,10 @@ export default class RenderBlendCompose extends RenderProgram {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
-    pathTest: ( renderPath: RenderPath ) => boolean = constantTrue
+    maxY: number
   ): Vector4 {
-    const a = this.a.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
-    const b = this.b.evaluate( face, area, centroid, minX, minY, maxX, maxY, pathTest );
+    const a = this.a.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+    const b = this.b.evaluate( face, area, centroid, minX, minY, maxX, maxY );
 
     return RenderBlendCompose.blendCompose( a, b, this.composeType, this.blendType );
   }
