@@ -55,6 +55,14 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
     return new RenderLinearSRGBToSRGB( new RenderLinearSRGBToLinearDisplayP3( new RenderSRGBToLinearSRGB( renderProgram ) ) );
   }
 
+  public static displayP3ToLinearSRGB( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderLinearDisplayP3ToLinearSRGB( new RenderSRGBToLinearSRGB( renderProgram ) );
+  }
+
+  public static linearSRGBToDisplayP3( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderLinearSRGBToSRGB( new RenderLinearSRGBToLinearDisplayP3( renderProgram ) );
+  }
+
   public static oklabToSRGB( renderProgram: RenderProgram ): RenderProgram {
     return new RenderLinearSRGBToSRGB( new RenderOklabToLinearSRGB( renderProgram ) );
   }
@@ -63,12 +71,28 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
     return new RenderLinearSRGBToOklab( new RenderSRGBToLinearSRGB( renderProgram ) );
   }
 
+  public static oklabToDisplayP3( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderLinearSRGBToSRGB( new RenderLinearSRGBToLinearDisplayP3( new RenderOklabToLinearSRGB( renderProgram ) ) );
+  }
+
+  public static displayP3ToOklab( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderLinearSRGBToOklab( new RenderLinearDisplayP3ToLinearSRGB( new RenderSRGBToLinearSRGB( renderProgram ) ) );
+  }
+
   public static premulSRGBToPremulLinearSRGB( renderProgram: RenderProgram ): RenderProgram {
     return new RenderPremultiply( new RenderSRGBToLinearSRGB( new RenderUnpremultiply( renderProgram ) ) );
   }
 
   public static premulLinearSRGBToPremulSRGB( renderProgram: RenderProgram ): RenderProgram {
     return new RenderPremultiply( new RenderLinearSRGBToSRGB( new RenderUnpremultiply( renderProgram ) ) );
+  }
+
+  public static premulLinearSRGBToPremulDisplayP3( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderPremultiply( RenderColorSpaceConversion.linearSRGBToDisplayP3( new RenderUnpremultiply( renderProgram ) ) );
+  }
+
+  public static premulDisplayP3ToPremulLinearSRGB( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderPremultiply( RenderColorSpaceConversion.displayP3ToLinearSRGB( new RenderUnpremultiply( renderProgram ) ) );
   }
 
   public static premulDisplayP3ToPremulSRGB( renderProgram: RenderProgram ): RenderProgram {
@@ -85,6 +109,14 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
 
   public static premulSRGBToPremulOklab( renderProgram: RenderProgram ): RenderProgram {
     return new RenderPremultiply( RenderColorSpaceConversion.sRGBToOklab( new RenderUnpremultiply( renderProgram ) ) );
+  }
+
+  public static premulOklabToPremulDisplayP3( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderPremultiply( RenderColorSpaceConversion.oklabToDisplayP3( new RenderUnpremultiply( renderProgram ) ) );
+  }
+
+  public static premulDisplayP3ToPremulOklab( renderProgram: RenderProgram ): RenderProgram {
+    return new RenderPremultiply( RenderColorSpaceConversion.displayP3ToOklab( new RenderUnpremultiply( renderProgram ) ) );
   }
 
   public override serialize(): SerializedRenderColorSpaceConversion {

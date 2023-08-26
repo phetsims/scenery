@@ -576,6 +576,9 @@ an UI and Display made for visual testing and debugging.
       // const outputSize = 768 * 2;
       const outputSize = 768 / 4;
 
+      const colorSpace = 'srgb';
+      // const colorSpace = 'display-p3';
+
       // const imageResampleType = phet.scenery.RenderResampleType.NearestNeighbor
       const imageResampleType = phet.scenery.RenderResampleType.Bilinear;
       // const imageResampleType = phet.scenery.RenderResampleType.MitchellNetravali;
@@ -612,6 +615,8 @@ an UI and Display made for visual testing and debugging.
         // splitLinearGradients: true,
         // splitRadialGradients: true
       };
+
+      const APPLY_OPACITY = false;
 
       const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
@@ -763,34 +768,27 @@ an UI and Display made for visual testing and debugging.
         }
       };
 
-      const toPremulSRGB = ( ...args ) => {
-        return phet.scenery.RenderColor.premultipliedSRGBFromColor( new phet.scenery.Color( ...args ) );
+      const colorToPremulClient = colorSpace === 'srgb' ? phet.scenery.RenderColor.premultipliedSRGBFromColor : phet.scenery.RenderColor.premultipliedDisplayP3FromColor;
+
+      const toPremulClient = ( ...args ) => {
+        return colorToPremulClient( new phet.scenery.Color( ...args ) );
       };
+      const premulOklabToPremulClient = colorSpace === 'srgb' ? phet.scenery.RenderColorSpaceConversion.premulOklabToPremulSRGB : phet.scenery.RenderColorSpaceConversion.premulOklabToPremulDisplayP3;
+
       const toPremulOklab = ( ...args ) => {
         return phet.scenery.RenderColor.premultipliedOklabFromColor( new phet.scenery.Color( ...args ) );
       };
-      // TODO: Path as an extra thing
-      const toPremulSRGBPath = ( path, ...args ) => {
-        return new phet.scenery.RenderPathBoolean( path, phet.scenery.RenderColor.premultipliedSRGBFromColor( new phet.scenery.Color( ...args ) ), phet.scenery.RenderColor.TRANSPARENT );
-      };
-      const premulLinearSRGBToPremulSRGB = renderProgram => {
-        return new phet.scenery.RenderPremultiply( new phet.scenery.RenderLinearSRGBToSRGB( new phet.scenery.RenderUnpremultiply( renderProgram ) ) );
-      };
-      const premulOklabToPremulSRGB = renderProgram => {
-        return new phet.scenery.RenderPremultiply( new phet.scenery.RenderLinearSRGBToSRGB( new phet.scenery.RenderOklabToLinearSRGB( new phet.scenery.RenderUnpremultiply( renderProgram ) ) ) );
-      };
 
-      const a = new phet.scenery.RenderAlpha( phet.scenery.RenderPathBoolean.fromInside( pathA, premulLinearSRGBToPremulSRGB( new phet.scenery.RenderImage(
+      const premulLinearToClient = colorSpace === 'srgb' ? phet.scenery.RenderColorSpaceConversion.premulLinearSRGBToPremulSRGB : phet.scenery.RenderColorSpaceConversion.premulLinearSRGBToPremulDisplayP3;
+
+      const a = new phet.scenery.RenderAlpha( phet.scenery.RenderPathBoolean.fromInside( pathA, premulLinearToClient( new phet.scenery.RenderImage(
         // far distance
         phet.dot.Matrix3.affine( 15 / 1024, 0, 20, 0, 15 / 1024, 0 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ),
 
         // medium distance
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 0.2, -0.2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
 
-
-
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 2, -2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
-
 
         // phet.dot.Matrix3.translation( 35, 20 ).timesMatrix( phet.dot.Matrix3.rotationZ( 0.3 ) ).timesMatrix( phet.dot.Matrix3.scaling( 2 ) ).timesMatrix( phet.dot.Matrix3.translation( -410, -570 ) ),
 
@@ -806,25 +804,25 @@ an UI and Display made for visual testing and debugging.
         phet.scenery.RenderExtend.Repeat,
         imageResampleType
       ) ) ), 0.8 );
-      const b = toPremulSRGBPath( pathB, 0, 255, 0, 1 );
+      const b = phet.scenery.RenderPathBoolean.fromInside( pathB, new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ) );
       const c = phet.scenery.RenderPathBoolean.fromInside( pathC, new phet.scenery.RenderRadialGradient(
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 0, 0 ),
         0,
         new phet.dot.Vector2( 0, 0 ),
         5, [
-          // NOTE: LEFT this gradient in sRGB because of the strong colors, perceptulal interpolation might go out of gamut
-          new phet.scenery.RenderGradientStop( 0, toPremulSRGB( '#FBDD49' ) ),
-          new phet.scenery.RenderGradientStop( 0.2, toPremulSRGB( '#FF8103' ) ),
-          new phet.scenery.RenderGradientStop( 0.4, toPremulSRGB( '#FF1C6A' ) ),
-          new phet.scenery.RenderGradientStop( 0.6, toPremulSRGB( '#E200A3' ) ),
-          new phet.scenery.RenderGradientStop( 0.8, toPremulSRGB( '#9B04DB' ) ),
-          new phet.scenery.RenderGradientStop( 1, toPremulSRGB( '#6D1DC6' ) )
+          // NOTE: LEFT this gradient in sRGB because of the strong colors, perceptual interpolation might go out of gamut
+          new phet.scenery.RenderGradientStop( 0, toPremulClient( '#FBDD49' ) ),
+          new phet.scenery.RenderGradientStop( 0.2, toPremulClient( '#FF8103' ) ),
+          new phet.scenery.RenderGradientStop( 0.4, toPremulClient( '#FF1C6A' ) ),
+          new phet.scenery.RenderGradientStop( 0.6, toPremulClient( '#E200A3' ) ),
+          new phet.scenery.RenderGradientStop( 0.8, toPremulClient( '#9B04DB' ) ),
+          new phet.scenery.RenderGradientStop( 1, toPremulClient( '#6D1DC6' ) )
         ],
         phet.scenery.RenderExtend.Repeat,
         radialGradientAccuracy
       ) );
-      const d = phet.scenery.RenderPathBoolean.fromInside( pathD, premulOklabToPremulSRGB( new phet.scenery.RenderLinearGradient(
+      const d = phet.scenery.RenderPathBoolean.fromInside( pathD, premulOklabToPremulClient( new phet.scenery.RenderLinearGradient(
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 0, 8 ),
         new phet.dot.Vector2( 9, 0 ),
@@ -842,9 +840,9 @@ an UI and Display made for visual testing and debugging.
         phet.scenery.RenderExtend.Repeat,
         linearGradientAccuracy
       ) ) );
-      const e = toPremulSRGBPath( pathE, 255, 255, 255, 1 );
-      const f = toPremulSRGBPath( pathF, 0, 0, 0, 1 );
-      const back = toPremulSRGB( 128, 128, 128, 0.5 );
+      const e = phet.scenery.RenderPathBoolean.fromInside( pathE, toPremulClient( 255, 255, 255, 1 ) );
+      const f = phet.scenery.RenderPathBoolean.fromInside( pathF, toPremulClient( 0, 0, 0, 1 ) );
+      const back = toPremulClient( 128, 128, 128, 0.5 );
 
       const normalBlendArray = arr => {
         let result = arr[ 0 ];
@@ -865,7 +863,9 @@ an UI and Display made for visual testing and debugging.
         canvas.style.height = `${displaySize}px`;
         canvas.style.imageRendering = 'pixelated';
         canvas.style.position = 'absolute';
-        canvas.style.opacity = '0.4';
+        if ( APPLY_OPACITY ) {
+          canvas.style.opacity = '0.4';
+        }
         canvas.style.top = '20px';
         canvas.style.left = '20px ';
       };
@@ -877,7 +877,7 @@ an UI and Display made for visual testing and debugging.
 
       // const raster = new phet.scenery.AccumulatedRaster( outputSize, outputSize );
       // const raster = new phet.scenery.CombinedRaster( outputSize + 100, outputSize + 100 );
-      const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
+      const raster = new phet.scenery.CombinedRaster( outputSize, outputSize, colorSpace );
       phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
 
       const debugCanvas = raster.toCanvas();

@@ -131,6 +131,10 @@ export default class RenderColor extends RenderProgram {
     return new RenderColor( RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) );
   }
 
+  public static premultipliedDisplayP3FromColor( color: Color ): RenderColor {
+    return new RenderColor( RenderColor.premultiply( RenderColor.linearToSRGB( RenderColor.linearToLinearDisplayP3( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) ) );
+  }
+
   public static colorToSRGB( color: Color ): Vector4 {
     return new Vector4(
       color.red / 255,
