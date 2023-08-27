@@ -7,6 +7,7 @@
  */
 
 import Vector4 from '../../../../../dot/js/Vector4.js';
+import { RasterColorConverter } from '../../../imports.js';
 
 type OutputRaster = {
   addClientPartialPixel( color: Vector4, x: number, y: number ): void;
@@ -14,6 +15,7 @@ type OutputRaster = {
   addOutputFullPixel( color: Vector4, x: number, y: number ): void;
   addClientFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void;
   addOutputFullRegion( color: Vector4, x: number, y: number, width: number, height: number ): void;
+  colorConverter: RasterColorConverter;
 };
 
 export default OutputRaster;

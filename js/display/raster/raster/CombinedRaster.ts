@@ -6,10 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { OutputRaster, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, Rasterize, scenery } from '../../../imports.js';
+import { OutputRaster, RasterColorConverter, RasterPremultipliedConverter, Rasterize, scenery } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-
-const defaultColorConverter = new RasterConvertPremultipliedSRGBToSRGB255();
 
 // TODO: consider implementing a raster that JUST uses ImageData, and does NOT do linear (proper) blending
 export default class CombinedRaster implements OutputRaster {
@@ -17,13 +15,19 @@ export default class CombinedRaster implements OutputRaster {
   public readonly imageData: ImageData;
   private combined = false;
 
+  // implements this for OutputRaster
+  public readonly colorConverter: RasterColorConverter;
+
   public constructor(
     public readonly width: number,
     public readonly height: number,
-    public readonly imageDataColorspace: 'srgb' | 'display-p3' = 'srgb',
-    public readonly colorConverter: RasterColorConverter = defaultColorConverter
+    public readonly imageDataColorspace: 'srgb' | 'display-p3' = 'srgb'
   ) {
     this.accumulationArray = new Float64Array( width * height * 4 );
+
+    this.colorConverter = imageDataColorspace === 'srgb' ?
+                          RasterPremultipliedConverter.SRGB :
+                          RasterPremultipliedConverter.DISPLAY_P3;
 
     // TODO: can we get 16 bits for display-p3?
     // TODO: can we get HDR support somehow?

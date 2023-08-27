@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterColorConverter, RasterConvertPremultipliedSRGBToSRGB255, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -15,8 +15,6 @@ import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export type RasterizationOptions = {
-  colorConverter: RasterColorConverter;
-
   outputRasterOffset?: Vector2;
   polygonFiltering?: PolygonFilterType;
 
@@ -29,7 +27,6 @@ export type RasterizationOptions = {
 };
 
 const DEFAULT_OPTIONS = {
-  colorConverter: new RasterConvertPremultipliedSRGBToSRGB255(),
   outputRasterOffset: Vector2.ZERO,
   polygonFiltering: PolygonFilterType.Box,
   edgeIntersectionMethod: 'arrayBoundsTree',
@@ -410,8 +407,7 @@ export default class Rasterize {
     bounds: Bounds2,
     gridBounds: Bounds2,
     outputRasterOffset: Vector2,
-    polygonFiltering: PolygonFilterType,
-    colorConverter: RasterColorConverter
+    polygonFiltering: PolygonFilterType
   ): void {
     for ( let i = 0; i < renderableFaces.length; i++ ) {
       const renderableFace = renderableFaces[ i ];
@@ -431,7 +427,7 @@ export default class Rasterize {
 
       // TODO: be really careful about the colorConverter... the copy() missing already hit me once.
       const constClientColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
-      const constOutputColor = constClientColor !== null ? colorConverter.clientToOutput( constClientColor ).copy() : null;
+      const constOutputColor = constClientColor !== null ? outputRaster.colorConverter.clientToOutput( constClientColor ).copy() : null;
 
       const context = new RasterizationContext(
         outputRaster,
@@ -636,8 +632,7 @@ export default class Rasterize {
       bounds,
       gridBounds,
       options.outputRasterOffset,
-      polygonFiltering,
-      options.colorConverter
+      polygonFiltering
     );
   }
 
