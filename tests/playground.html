@@ -803,7 +803,22 @@ an UI and Display made for visual testing and debugging.
         phet.scenery.RenderExtend.Repeat,
         imageResampleType
       ) ) ), 0.8 );
-      const b = phet.scenery.RenderPathBoolean.fromInside( pathB, new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.scenery.RenderColorSpace.displayP3, clientColorSpace ) );
+      // const b = phet.scenery.RenderPathBoolean.fromInside( pathB, new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.scenery.RenderColorSpace.displayP3, clientColorSpace ) );
+      const b = phet.scenery.RenderPathBoolean.fromInside( pathB, new phet.scenery.RenderRadialGradient(
+        phet.dot.Matrix3.IDENTITY,
+        new phet.dot.Vector2( 10, 10 ),
+        0,
+        new phet.dot.Vector2( 10, 10 ),
+        5, [
+          // NOTE: LEFT this gradient in sRGB because of the strong colors, perceptual interpolation might go out of gamut
+          new phet.scenery.RenderGradientStop( 0, new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ).colorConverted( phet.scenery.RenderColorSpace.displayP3, clientColorSpace ) ),
+          new phet.scenery.RenderGradientStop( 0.3333, new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.scenery.RenderColorSpace.displayP3, clientColorSpace ) ),
+          new phet.scenery.RenderGradientStop( 0.6666, new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ).colorConverted( phet.scenery.RenderColorSpace.displayP3, clientColorSpace ) ),
+          new phet.scenery.RenderGradientStop( 1, new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ).colorConverted( phet.scenery.RenderColorSpace.displayP3, clientColorSpace ) )
+        ],
+        phet.scenery.RenderExtend.Repeat,
+        radialGradientAccuracy
+      ) );
       const c = phet.scenery.RenderPathBoolean.fromInside( pathC, new phet.scenery.RenderRadialGradient(
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 0, 0 ),
