@@ -8,6 +8,7 @@
 
 import { ClippableFace, RenderExtend, RenderGradientStop, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearGradient, RenderLinearGradientAccuracy, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 // TODO: naming, omg
 export default class RenderableFace {
@@ -302,6 +303,8 @@ export default class RenderableFace {
           }
           clippedFaces.push( remainingFace );
 
+          const blendTransform = radialGradient.transform.timesMatrix( Matrix3.translation( center.x, center.y ) );
+
           const renderableFaces = linearRanges.map( ( range, i ) => {
             const clippedFace = clippedFaces[ i ];
 
@@ -323,7 +326,7 @@ export default class RenderableFace {
                 const endRadius = minRadius + range.end * deltaRadius;
 
                 return new RenderRadialBlend(
-                  radialGradient.transform,
+                  blendTransform,
                   startRadius,
                   endRadius,
                   blendAccuracy,
