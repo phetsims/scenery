@@ -6,11 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, Color, RenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, Color, RenderColorSpace, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import ConstructorOf from '../../../../../phet-core/js/types/ConstructorOf.js';
 
 // TODO: consider transforms as a node itself? Meh probably excessive?
 
@@ -30,6 +31,17 @@ export default class RenderColor extends RenderProgram {
     public color: Vector4
   ) {
     super();
+  }
+
+  public static from( ...args: ConstructorParameters<ConstructorOf<Color>> ): RenderColor {
+    // @ts-expect-error We're passing Color's constructor arguments in
+    const color = new Color( ...args );
+    return new RenderColor( new Vector4(
+      color.red / 255,
+      color.green / 255,
+      color.blue / 255,
+      color.alpha
+    ) );
   }
 
   public override getName(): string {
@@ -219,26 +231,21 @@ export default class RenderColor extends RenderProgram {
     );
   }
 
-  public static linearToLinearDisplayP3( linear: Vector4 ): Vector4 {
-    const m = RenderColor.sRGBToDisplayP3Matrix;
-
+  public static multiplyMatrixTimesColor( matrix: Matrix3, color: Vector4 ): Vector4 {
     return new Vector4(
-      m.m00() * linear.x + m.m01() * linear.y + m.m02() * linear.z,
-      m.m10() * linear.x + m.m11() * linear.y + m.m12() * linear.z,
-      m.m20() * linear.x + m.m21() * linear.y + m.m22() * linear.z,
-      linear.w
+      matrix.m00() * color.x + matrix.m01() * color.y + matrix.m02() * color.z,
+      matrix.m10() * color.x + matrix.m11() * color.y + matrix.m12() * color.z,
+      matrix.m20() * color.x + matrix.m21() * color.y + matrix.m22() * color.z,
+      color.w
     );
   }
 
-  public static linearDisplayP3ToLinear( linear: Vector4 ): Vector4 {
-    const m = RenderColor.displayP3TosRGBMatrix;
+  public static linearToLinearDisplayP3( color: Vector4 ): Vector4 {
+    return RenderColor.multiplyMatrixTimesColor( RenderColor.sRGBToDisplayP3Matrix, color );
+  }
 
-    return new Vector4(
-      m.m00() * linear.x + m.m01() * linear.y + m.m02() * linear.z,
-      m.m10() * linear.x + m.m11() * linear.y + m.m12() * linear.z,
-      m.m20() * linear.x + m.m21() * linear.y + m.m22() * linear.z,
-      linear.w
-    );
+  public static linearDisplayP3ToLinear( color: Vector4 ): Vector4 {
+    return RenderColor.multiplyMatrixTimesColor( RenderColor.displayP3TosRGBMatrix, color );
   }
 
   public static linearDisplayP3ToDisplayP3( linear: Vector4 ): Vector4 {
@@ -276,6 +283,131 @@ export default class RenderColor extends RenderProgram {
 
   public static oklchToLinearDisplayP3( oklch: Vector4 ): Vector4 {
     return RenderColor.linearToLinearDisplayP3( RenderColor.oklchToLinear( oklch ) );
+  }
+
+  public static convert( color: Vector4, fromSpace: RenderColorSpace, toSpace: RenderColorSpace ): Vector4 {
+    if ( fromSpace === toSpace ) {
+      return color;
+    }
+
+    if ( assert ) {
+      // If we add more, add in the conversions here
+      const spaces = [
+        RenderColorSpace.XYZ,
+        RenderColorSpace.xyY,
+        RenderColorSpace.sRGB,
+        RenderColorSpace.premultipliedSRGB,
+        RenderColorSpace.linearSRGB,
+        RenderColorSpace.premultipliedLinearSRGB,
+        RenderColorSpace.displayP3,
+        RenderColorSpace.premultipliedDisplayP3,
+        RenderColorSpace.linearDisplayP3,
+        RenderColorSpace.premultipliedLinearDisplayP3,
+        RenderColorSpace.oklab,
+        RenderColorSpace.premultipliedOklab,
+        RenderColorSpace.linearOklab,
+        RenderColorSpace.premultipliedLinearOklab
+      ];
+
+      assert( spaces.includes( fromSpace ) );
+      assert( spaces.includes( toSpace ) );
+    }
+
+    if ( fromSpace.name === toSpace.name ) {
+      if ( fromSpace.isLinear === toSpace.isLinear ) {
+        // Just a premultiply change!
+        return fromSpace.isPremultiplied ? RenderColor.unpremultiply( color ) : RenderColor.premultiply( color );
+      }
+      else {
+        // We're different in linearity!
+        if ( fromSpace.isPremultiplied ) {
+          color = RenderColor.unpremultiply( color );
+        }
+        if ( fromSpace.name === 'srgb' || fromSpace.name === 'display-p3' ) {
+          // sRGB transfer function
+          color = fromSpace.isLinear ? RenderColor.linearToSRGB( color ) : RenderColor.sRGBToLinear( color );
+        }
+        if ( toSpace.isPremultiplied ) {
+          color = RenderColor.premultiply( color );
+        }
+        return color;
+      }
+    }
+    else {
+      // essentially, we'll convert to linear sRGB and back
+
+      if ( fromSpace.isPremultiplied ) {
+        color = RenderColor.unpremultiply( color );
+      }
+
+      if ( fromSpace === RenderColorSpace.xyY ) {
+        color = color.y === 0 ? new Vector4( 0, 0, 0, color.w ) : new Vector4(
+          // TODO: separate out into a function
+          color.x * color.z / color.y,
+          color.z,
+          ( 1 - color.x - color.y ) * color.z / color.y,
+          color.w
+        );
+      }
+      if ( fromSpace === RenderColorSpace.xyY || fromSpace === RenderColorSpace.XYZ ) {
+        color = RenderColor.multiplyMatrixTimesColor( RenderColor.XYZTosRGBMatrix, color );
+      }
+      if (
+        fromSpace === RenderColorSpace.sRGB ||
+        fromSpace === RenderColorSpace.premultipliedSRGB ||
+        fromSpace === RenderColorSpace.displayP3 ||
+        fromSpace === RenderColorSpace.premultipliedDisplayP3
+      ) {
+        color = RenderColor.sRGBToLinear( color );
+      }
+      if ( fromSpace === RenderColorSpace.displayP3 || fromSpace === RenderColorSpace.premultipliedDisplayP3 ) {
+        color = RenderColor.linearDisplayP3ToLinear( color );
+      }
+      if ( fromSpace === RenderColorSpace.oklab || fromSpace === RenderColorSpace.premultipliedOklab ) {
+        color = RenderColor.oklabToLinear( color );
+      }
+
+      // Now reverse the process, but for the other color space
+      if ( toSpace === RenderColorSpace.oklab || toSpace === RenderColorSpace.premultipliedOklab ) {
+        color = RenderColor.linearToOklab( color );
+      }
+      if ( toSpace === RenderColorSpace.displayP3 || toSpace === RenderColorSpace.premultipliedDisplayP3 ) {
+        color = RenderColor.linearToLinearDisplayP3( color );
+      }
+      if (
+        toSpace === RenderColorSpace.sRGB ||
+        toSpace === RenderColorSpace.premultipliedSRGB ||
+        toSpace === RenderColorSpace.displayP3 ||
+        toSpace === RenderColorSpace.premultipliedDisplayP3
+      ) {
+        color = RenderColor.linearToSRGB( color );
+      }
+      if ( toSpace === RenderColorSpace.xyY || toSpace === RenderColorSpace.XYZ ) {
+        color = RenderColor.multiplyMatrixTimesColor( RenderColor.sRGBToXYZMatrix, color );
+      }
+      if ( toSpace === RenderColorSpace.xyY ) {
+        color = ( color.x + color.y + color.z === 0 ) ? new Vector4(
+          // TODO: white point change to the other functions, I think we have some of this duplicated.
+          // TODO: separate out into a function
+          // using white point for D65
+          sRGBWhiteChromaticity.x,
+          sRGBWhiteChromaticity.y,
+          0,
+          color.w
+        ) : new Vector4(
+          color.x / ( color.x + color.y + color.z ),
+          color.y / ( color.x + color.y + color.z ),
+          color.y,
+          color.w
+        );
+      }
+
+      if ( toSpace.isPremultiplied ) {
+        color = RenderColor.premultiply( color );
+      }
+
+      return color;
+    }
   }
 
   // ONLY remaps the r,g,b parts, not alpha

@@ -439,6 +439,7 @@ export { default as RenderExtend } from './display/raster/render-program/RenderE
 export { default as RenderProgramNeeds } from './display/raster/render-program/RenderProgramNeeds.js';
 export { default as RenderProgram } from './display/raster/render-program/RenderProgram.js';
 export { default as RenderUnary } from './display/raster/render-program/RenderUnary.js';
+export { default as RenderColorSpace } from './display/raster/render-program/RenderColorSpace.js';
 export { default as RenderColorSpaceConversion } from './display/raster/render-program/RenderColorSpaceConversion.js';
 export type { SerializedRenderColorSpaceConversion } from './display/raster/render-program/RenderColorSpaceConversion.js';
 export type { SerializedRenderProgram } from './display/raster/render-program/RenderProgram.js';
