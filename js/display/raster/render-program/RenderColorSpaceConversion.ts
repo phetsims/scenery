@@ -9,8 +9,12 @@
 import { ClippableFace, RenderColor, RenderColorSpace, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnary, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
+import Constructor from '../../../../../phet-core/js/types/Constructor.js';
 
 export default abstract class RenderColorSpaceConversion extends RenderUnary {
+
+  public inverse?: Constructor<RenderColorSpaceConversion>;
+
   protected constructor(
     program: RenderProgram,
     public readonly convert: ( color: Vector4 ) => Vector4
@@ -18,97 +22,27 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
     super( program );
   }
 
+  // TODO: add a helper on RenderProgram
   public static convert( renderProgram: RenderProgram, fromSpace: RenderColorSpace, toSpace: RenderColorSpace ): RenderProgram {
     if ( fromSpace === toSpace ) {
       return renderProgram;
     }
 
-    if ( assert ) {
-      // If we add more, add in the conversions here
-      // NOTE: not really worrying about XYZ or xyY
-      const spaces = [
-        RenderColorSpace.sRGB,
-        RenderColorSpace.premultipliedSRGB,
-        RenderColorSpace.linearSRGB,
-        RenderColorSpace.premultipliedLinearSRGB,
-        RenderColorSpace.displayP3,
-        RenderColorSpace.premultipliedDisplayP3,
-        RenderColorSpace.linearDisplayP3,
-        RenderColorSpace.premultipliedLinearDisplayP3,
-        RenderColorSpace.oklab,
-        RenderColorSpace.premultipliedOklab,
-        RenderColorSpace.linearOklab,
-        RenderColorSpace.premultipliedLinearOklab
-      ];
-
-      assert( spaces.includes( fromSpace ) );
-      assert( spaces.includes( toSpace ) );
+    if ( fromSpace.isPremultiplied ) {
+      renderProgram = new RenderUnpremultiply( renderProgram );
     }
-
-    if ( fromSpace.name === toSpace.name ) {
-      if ( fromSpace.isLinear === toSpace.isLinear ) {
-        // Just a premultiply change!
-        return fromSpace.isPremultiplied ? new RenderUnpremultiply( renderProgram ) : new RenderPremultiply( renderProgram );
-      }
-      else {
-        // We're different in linearity!
-        if ( fromSpace.isPremultiplied ) {
-          renderProgram = new RenderUnpremultiply( renderProgram );
-        }
-        if ( fromSpace.name === 'srgb' || fromSpace.name === 'display-p3' ) {
-          // sRGB transfer function
-          renderProgram = fromSpace.isLinear ? new RenderLinearSRGBToSRGB( renderProgram ) : new RenderSRGBToLinearSRGB( renderProgram );
-        }
-        if ( toSpace.isPremultiplied ) {
-          renderProgram = new RenderPremultiply( renderProgram );
-        }
-        return renderProgram;
-      }
+    if ( !fromSpace.isLinear ) {
+      renderProgram = fromSpace.toLinearRenderProgram!( renderProgram );
     }
-    else {
-      // essentially, we'll convert to linear sRGB and back
-
-      if ( fromSpace.isPremultiplied ) {
-        renderProgram = new RenderUnpremultiply( renderProgram );
-      }
-
-      if (
-        fromSpace === RenderColorSpace.sRGB ||
-        fromSpace === RenderColorSpace.premultipliedSRGB ||
-        fromSpace === RenderColorSpace.displayP3 ||
-        fromSpace === RenderColorSpace.premultipliedDisplayP3
-      ) {
-        renderProgram = new RenderSRGBToLinearSRGB( renderProgram );
-      }
-      if ( fromSpace === RenderColorSpace.displayP3 || fromSpace === RenderColorSpace.premultipliedDisplayP3 ) {
-        renderProgram = new RenderLinearDisplayP3ToLinearSRGB( renderProgram );
-      }
-      if ( fromSpace === RenderColorSpace.oklab || fromSpace === RenderColorSpace.premultipliedOklab ) {
-        renderProgram = new RenderOklabToLinearSRGB( renderProgram );
-      }
-
-      // Now reverse the process, but for the other color space
-      if ( toSpace === RenderColorSpace.oklab || toSpace === RenderColorSpace.premultipliedOklab ) {
-        renderProgram = new RenderLinearSRGBToOklab( renderProgram );
-      }
-      if ( toSpace === RenderColorSpace.displayP3 || toSpace === RenderColorSpace.premultipliedDisplayP3 ) {
-        renderProgram = new RenderLinearSRGBToLinearDisplayP3( renderProgram );
-      }
-      if (
-        toSpace === RenderColorSpace.sRGB ||
-        toSpace === RenderColorSpace.premultipliedSRGB ||
-        toSpace === RenderColorSpace.displayP3 ||
-        toSpace === RenderColorSpace.premultipliedDisplayP3
-      ) {
-        renderProgram = new RenderLinearSRGBToSRGB( renderProgram );
-      }
-
-      if ( toSpace.isPremultiplied ) {
-        renderProgram = new RenderPremultiply( renderProgram );
-      }
-
-      return renderProgram;
+    renderProgram = fromSpace.linearToLinearSRGBRenderProgram!( renderProgram );
+    renderProgram = toSpace.linearSRGBToLinearRenderProgram!( renderProgram );
+    if ( !toSpace.isLinear ) {
+      renderProgram = toSpace.fromLinearRenderProgram!( renderProgram );
     }
+    if ( toSpace.isPremultiplied ) {
+      renderProgram = new RenderPremultiply( renderProgram );
+    }
+    return renderProgram.simplified();
   }
 
   public override simplified(): RenderProgram {
@@ -120,6 +54,9 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
 
     if ( program instanceof RenderColor ) {
       return new RenderColor( this.convert( program.color ) );
+    }
+    else if ( this.inverse && program instanceof this.inverse ) {
+      return program.program;
     }
     else {
       return this.withChildren( [ program ] );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderProgram, scenery } from '../../../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderProgram, RenderSRGBToLinearSRGB, scenery } from '../../../imports.js';
 
 export default class RenderLinearSRGBToSRGB extends RenderColorSpaceConversion {
   public constructor(
@@ -24,5 +24,8 @@ export default class RenderLinearSRGBToSRGB extends RenderColorSpaceConversion {
     return new RenderLinearSRGBToSRGB( children[ 0 ] );
   }
 }
+
+RenderLinearSRGBToSRGB.prototype.inverse = RenderSRGBToLinearSRGB;
+RenderSRGBToLinearSRGB.prototype.inverse = RenderLinearSRGBToSRGB;
 
 scenery.register( 'RenderLinearSRGBToSRGB', RenderLinearSRGBToSRGB );

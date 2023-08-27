@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderProgram, scenery } from '../../../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderPremultiply, RenderProgram, scenery } from '../../../imports.js';
 
 export default class RenderUnpremultiply extends RenderColorSpaceConversion {
   public constructor(
@@ -24,5 +24,8 @@ export default class RenderUnpremultiply extends RenderColorSpaceConversion {
     return new RenderUnpremultiply( children[ 0 ] );
   }
 }
+
+RenderPremultiply.prototype.inverse = RenderUnpremultiply;
+RenderUnpremultiply.prototype.inverse = RenderPremultiply;
 
 scenery.register( 'RenderUnpremultiply', RenderUnpremultiply );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderProgram, scenery } from '../../../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderOklabToLinearSRGB, RenderProgram, scenery } from '../../../imports.js';
 
 export default class RenderLinearSRGBToOklab extends RenderColorSpaceConversion {
   public constructor(
@@ -24,5 +24,8 @@ export default class RenderLinearSRGBToOklab extends RenderColorSpaceConversion 
     return new RenderLinearSRGBToOklab( children[ 0 ] );
   }
 }
+
+RenderLinearSRGBToOklab.prototype.inverse = RenderOklabToLinearSRGB;
+RenderOklabToLinearSRGB.prototype.inverse = RenderLinearSRGBToOklab;
 
 scenery.register( 'RenderLinearSRGBToOklab', RenderLinearSRGBToOklab );

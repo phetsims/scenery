@@ -158,7 +158,7 @@ export default abstract class RenderProgram {
     return new RenderProgramNeeds( this.needsFace(), this.needsArea(), this.needsCentroid() );
   }
 
-  public toRecursiveString( indent: string ): string {
+  public toRecursiveString( indent = '' ): string {
     const extra = this.getExtraDebugString();
     let string = `${indent}${this.getName()}${extra ? ` (${extra})` : ''}`;
 

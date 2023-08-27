@@ -304,9 +304,7 @@ export default class RenderColor extends RenderProgram {
         RenderColorSpace.linearDisplayP3,
         RenderColorSpace.premultipliedLinearDisplayP3,
         RenderColorSpace.oklab,
-        RenderColorSpace.premultipliedOklab,
-        RenderColorSpace.linearOklab,
-        RenderColorSpace.premultipliedLinearOklab
+        RenderColorSpace.premultipliedOklab
       ];
 
       assert( spaces.includes( fromSpace ) );
@@ -564,6 +562,17 @@ export default class RenderColor extends RenderProgram {
   }
 
   public static xyYToXYZ( xyY: Vector3 ): Vector3 {
+    /**
+     * ( color.x + color.y + color.z === 0 ) ? new Vector4(
+          // TODO: white point change to the other functions, I think we have some of this duplicated.
+          // TODO: separate out into a function
+          // using white point for D65
+          sRGBWhiteChromaticity.x,
+          sRGBWhiteChromaticity.y,
+          0,
+          color.w
+        )
+     */
     return new Vector3(
       xyY.x * xyY.z / xyY.y,
       xyY.z,
@@ -573,6 +582,14 @@ export default class RenderColor extends RenderProgram {
 
   public static xyToXYZ( xy: Vector2 ): Vector3 {
     return RenderColor.xyYToXYZ( new Vector3( xy.x, xy.y, 1 ) );
+  }
+
+  public static xyzToLinear( xyz: Vector4 ): Vector4 {
+    return RenderColor.multiplyMatrixTimesColor( RenderColor.XYZTosRGBMatrix, xyz );
+  }
+
+  public static linearToXYZ( linear: Vector4 ): Vector4 {
+    return RenderColor.multiplyMatrixTimesColor( RenderColor.sRGBToXYZMatrix, linear );
   }
 
   public static getMatrixRGBToXYZ(
