@@ -285,69 +285,70 @@ export default class RenderColor extends RenderProgram {
            color.z >= 0 && color.z <= 1;
   }
 
-  public static gamutClipOklch( color: Vector4, toOklch: ( c: Vector4 ) => Vector4, fromOklch: ( c: Vector4 ) => Vector4 ): Vector4 {
-    const converted = fromOklch( color );
-    if ( RenderColor.isColorInRange( converted ) ) {
-      return color;
-    }
-    else {
-      return toOklch( new Vector4(
-        Math.max( 0, Math.min( 1, converted.x ) ),
-        Math.max( 0, Math.min( 1, converted.y ) ),
-        Math.max( 0, Math.min( 1, converted.z ) ),
-        converted.w
-      ) );
-    }
-  }
-
   /**
    * Relative colorimetric mapping. We could add more of a perceptual intent, but this is a good start.
+   *
+   * Modeled after https://drafts.csswg.org/css-color-4/#binsearch
    */
-  public static gamutMapColor( color: Vector4, toOklch: ( c: Vector4 ) => Vector4, fromOklch: ( c: Vector4 ) => Vector4 ): Vector4 {
+  public static gamutMapColor( color: Vector4, toOklab: ( c: Vector4 ) => Vector4, fromOklab: ( c: Vector4 ) => Vector4 ): Vector4 {
     if ( RenderColor.isColorInRange( color ) ) {
       return color;
     }
 
-    const oklch = toOklch( color );
-    if ( oklch.x <= 0 ) {
+    const oklab = toOklab( color ).copy(); // we'll mutate it
+    if ( oklab.x <= 0 ) {
       return new Vector4( 0, 0, 0, color.w );
     }
-    else if ( oklch.x >= 1 ) {
+    else if ( oklab.x >= 1 ) {
       return new Vector4( 1, 1, 1, color.w );
     }
 
+    const chroma = new Vector2( oklab.y, oklab.z );
+
     // Bisection of chroma
     let lowChroma = 0;
-    let highChroma = oklch.y; // chroma
-    let clipped = RenderColor.gamutClipOklch( oklch, toOklch, fromOklch );
+    let highChroma = 1;
+    let clipped: Vector4 | null = null;
+
     while ( highChroma - lowChroma > 1e-4 ) {
-      oklch.y = ( lowChroma + highChroma ) * 0.5;
-      clipped = RenderColor.gamutClipOklch( oklch, toOklch, fromOklch );
+      const testChroma = ( lowChroma + highChroma ) * 0.5;
+      oklab.y = chroma.x * testChroma;
+      oklab.z = chroma.y * testChroma;
+
+      const mapped = fromOklab( oklab );
+      const isInColorRange = RenderColor.isColorInRange( mapped );
+      clipped = isInColorRange ? mapped : new Vector4(
+        Math.max( 0, Math.min( 1, mapped.x ) ),
+        Math.max( 0, Math.min( 1, mapped.y ) ),
+        Math.max( 0, Math.min( 1, mapped.z ) ),
+        mapped.w
+      );
 
       // JND (just noticeable difference) of 0.02, per the spec at https://drafts.csswg.org/css-color/#css-gamut-mapping
-      if ( RenderColor.isColorInRange( clipped ) || ( clipped.distance( oklch ) <= 0.02 ) ) {
-        lowChroma = oklch.y;
+      if ( isInColorRange || ( toOklab( clipped ).distance( oklab ) <= 0.02 ) ) {
+        lowChroma = testChroma;
       }
       else {
-        highChroma = oklch.y;
+        highChroma = testChroma;
       }
     }
 
-    const potentialResult = fromOklch( oklch );
+    const potentialResult = fromOklab( oklab );
     if ( RenderColor.isColorInRange( potentialResult ) ) {
       return potentialResult;
     }
     else {
-      return clipped;
+      assert && assert( clipped );
+      return clipped!;
     }
   }
 
   public static gamutMapLinearSRGB( color: Vector4 ): Vector4 {
-    return RenderColor.gamutMapColor( color, RenderColor.linearToOklch, RenderColor.oklchToLinear );
+    return RenderColor.gamutMapColor( color, RenderColor.linearToOklab, RenderColor.oklabToLinear );
   }
 
   public static gamutMapLinearDisplayP3( color: Vector4 ): Vector4 {
-    return RenderColor.gamutMapColor( color, RenderColor.linearDisplayP3ToOklch, RenderColor.oklchToLinearDisplayP3 );
+    return RenderColor.gamutMapColor( color, RenderColor.linearDisplayP3ToOklab, RenderColor.oklabToLinearDisplayP3 );
   }
 
   public static gamutMapSRGB( color: Vector4 ): Vector4 {
@@ -369,7 +370,7 @@ export default class RenderColor extends RenderProgram {
   }
 
   /**
-   * OUTPUTS unpremultiplied sRGB
+   * OUTPUTS unpremultiplied sRGB, with a valid alpha value
    */
   public static gamutMapPremultipliedSRGB( color: Vector4 ): Vector4 {
     if ( color.w <= 1e-8 ) {
@@ -387,7 +388,7 @@ export default class RenderColor extends RenderProgram {
   }
 
   /**
-   * OUTPUTS unpremultiplied Display P3
+   * OUTPUTS unpremultiplied Display P3, with a valid alpha value
    */
   public static gamutMapPremultipliedDisplayP3( color: Vector4 ): Vector4 {
     if ( color.w <= 1e-8 ) {
