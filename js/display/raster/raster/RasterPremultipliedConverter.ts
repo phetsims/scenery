@@ -25,6 +25,8 @@ export default class RasterPremultipliedConverter implements RasterColorConverte
 
   public static readonly SRGB = new RasterPremultipliedConverter( RenderColor.gamutMapPremultipliedSRGB );
   public static readonly DISPLAY_P3 = new RasterPremultipliedConverter( RenderColor.gamutMapPremultipliedDisplayP3 );
+  public static readonly SRGB_SHOW_OUT_OF_GAMUT = new RasterPremultipliedConverter( RasterPremultipliedConverter.getOutOfGamutColor );
+  public static readonly DISPLAY_P3_SHOW_OUT_OF_GAMUT = new RasterPremultipliedConverter( RasterPremultipliedConverter.getOutOfGamutColor );
 
   // NOTE: DO NOT STORE THE VALUES OF THESE RESULTS, THEY ARE MUTATED. Create a copy if needed
   public clientToAccumulation( client: Vector4 ): Vector4 {
@@ -111,6 +113,15 @@ export default class RasterPremultipliedConverter implements RasterColorConverte
         return this.gamutMap( scratchVector.setXYZW( r * a, g * a, b * a, a ) ).timesScalar( 255 );
       }
     }
+  }
+
+  public static getOutOfGamutColor( color: Vector4 ): Vector4 {
+    const amount = Math.max( color.x - 1, 0 ) - Math.min( color.x, 0 ) +
+                   Math.max( color.y - 1, 0 ) - Math.min( color.y, 0 ) +
+                   Math.max( color.z - 1, 0 ) - Math.min( color.z, 0 ) +
+                   Math.max( color.w - 1, 0 ) - Math.min( color.w, 0 );
+    const scale = 0.25 + 0.5 * Math.min( amount, 1 );
+    return new Vector4( scale, scale, scale, 255 * color.w );
   }
 }
 

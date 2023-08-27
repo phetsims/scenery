@@ -8,6 +8,17 @@
 
 import { OutputRaster, RasterColorConverter, RasterPremultipliedConverter, Rasterize, scenery } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+
+export type CombinedRasterOptions = {
+  colorSpace: 'srgb' | 'display-p3';
+  showOutOfGamut: boolean;
+};
+
+const DEFAULT_OPTIONS = {
+  colorSpace: 'srgb',
+  showOutOfGamut: false
+} as const;
 
 // TODO: consider implementing a raster that JUST uses ImageData, and does NOT do linear (proper) blending
 export default class CombinedRaster implements OutputRaster {
@@ -21,23 +32,28 @@ export default class CombinedRaster implements OutputRaster {
   public constructor(
     public readonly width: number,
     public readonly height: number,
-    public readonly imageDataColorspace: 'srgb' | 'display-p3' = 'srgb'
+    providedOptions?: CombinedRasterOptions
   ) {
+
+    const options = optionize3<CombinedRasterOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+
+    const colorSpace = options.colorSpace;
+
     this.accumulationArray = new Float64Array( width * height * 4 );
 
-    this.colorConverter = imageDataColorspace === 'srgb' ?
-                          RasterPremultipliedConverter.SRGB :
-                          RasterPremultipliedConverter.DISPLAY_P3;
+    this.colorConverter = colorSpace === 'srgb' ?
+                          ( options.showOutOfGamut ? RasterPremultipliedConverter.SRGB_SHOW_OUT_OF_GAMUT : RasterPremultipliedConverter.SRGB ) :
+                          ( options.showOutOfGamut ? RasterPremultipliedConverter.DISPLAY_P3_SHOW_OUT_OF_GAMUT : RasterPremultipliedConverter.DISPLAY_P3 );
 
     // TODO: can we get 16 bits for display-p3?
     // TODO: can we get HDR support somehow?
 
     // NOTE: Firefox does not currently support display-p3
-    this.imageData = imageDataColorspace === 'srgb' ?
+    this.imageData = colorSpace === 'srgb' ?
                      new ImageData( this.width, this.height ) :
-                     new ImageData( this.width, this.height, { colorSpace: imageDataColorspace } );
+                     new ImageData( this.width, this.height, { colorSpace: colorSpace } );
 
-    assert && assert( imageDataColorspace === 'srgb' || this.imageData.colorSpace === imageDataColorspace,
+    assert && assert( colorSpace === 'srgb' || this.imageData.colorSpace === colorSpace,
       'Check with RenderColor.canvasSupportsDisplayP3() before using display-p3' );
   }
 

@@ -518,6 +518,7 @@ export { default as Snippet } from './display/raster/webgpu/Snippet.js';
 export type { default as RasterColorConverter } from './display/raster/raster/RasterColorConverter.js';
 export { default as RasterPremultipliedConverter } from './display/raster/raster/RasterPremultipliedConverter.js';
 export { default as CombinedRaster } from './display/raster/raster/CombinedRaster.js';
+export type { CombinedRasterOptions } from './display/raster/raster/CombinedRaster.js';
 export type { default as OutputRaster } from './display/raster/raster/OutputRaster.js';
 export { default as PolygonBilinear } from './display/raster/raster/PolygonBilinear.js';
 export { default as PolygonMitchellNetravali } from './display/raster/raster/PolygonMitchellNetravali.js';
