@@ -56,6 +56,12 @@ export default class VectorCanvas {
     this.renderableFaces = this.renderableFaces.flatMap( face => face.splitRadialGradients() );
   }
 
+  public copy(): VectorCanvas {
+    const canvas = new VectorCanvas( this.width, this.height, this.colorSpace, this.polygonFiltering );
+    canvas.renderableFaces = this.renderableFaces.slice();
+    return canvas;
+  }
+
   private colorToRenderProgram( color: Vector4 ): RenderProgram {
     return new RenderColor( color ).colorConverted( RenderColorSpace.sRGB, this.colorSpace === 'srgb' ? RenderColorSpace.premultipliedSRGB : RenderColorSpace.premultipliedDisplayP3 );
   }
