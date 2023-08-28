@@ -176,10 +176,10 @@ export default class ClipSimplifier {
     return points;
   }
 
-  public static simplifyPolygon( points: Vector2[], checkGeneralCollinearity = false ): Vector2[] {
+  public static simplifyPolygon( polygon: Vector2[], checkGeneralCollinearity = false ): Vector2[] {
     const simplifier = new ClipSimplifier( checkGeneralCollinearity );
-    for ( let i = 0; i < points.length; i++ ) {
-      simplifier.addPoint( points[ i ] );
+    for ( let i = 0; i < polygon.length; i++ ) {
+      simplifier.addPoint( polygon[ i ] );
     }
     return simplifier.finalize();
   }

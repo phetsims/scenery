@@ -497,6 +497,8 @@ export type { SerializedEdgedFace } from './display/raster/cag/EdgedFace.js';
 export { default as PolygonalFace } from './display/raster/cag/PolygonalFace.js';
 export type { SerializedPolygonalFace } from './display/raster/cag/PolygonalFace.js';
 
+export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.js';
+
 export { default as IntegerEdge } from './display/raster/cag/IntegerEdge.js';
 export { default as IntersectionPoint } from './display/raster/cag/IntersectionPoint.js';
 export { default as LineIntersector } from './display/raster/cag/LineIntersector.js';
@@ -507,7 +509,6 @@ export { default as RationalHalfEdge } from './display/raster/cag/RationalHalfEd
 export { default as RationalIntersection } from './display/raster/cag/RationalIntersection.js';
 export { default as WindingMap } from './display/raster/cag/WindingMap.js';
 
-export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.js';
 export { default as CohenSutherlandClipping } from './display/raster/clip/CohenSutherlandClipping.js';
 export { default as PolygonClipping } from './display/raster/clip/PolygonClipping.js';
 

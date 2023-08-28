@@ -6,9 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, EdgedFace, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClipSimplifier, EdgedFace, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+
+const traceSimplifier = new ClipSimplifier();
 
 export default class RationalFace {
   public readonly holes: RationalBoundary[] = [];
@@ -412,6 +415,163 @@ export default class RationalFace {
       }
     };
     recursiveWindingMap( unboundedFace );
+  }
+
+  /**
+   * Combines faces that have equivalent face data IFF they border each other (leaving separate programs with
+   * equivalent face data separate if they don't border). It will also remove edges that border between faces
+   * that we combine, and will connect edges to keep things polygonal!
+   */
+  public static traceCombineFaces<FaceData, OutputFace>(
+    faces: RationalFace[],
+    fromIntegerMatrix: Matrix3,
+    getFaceData: ( face: RationalFace ) => FaceData,
+    createOutputFace: ( face: PolygonalFace, faceData: FaceData, bounds: Bounds2 ) => OutputFace,
+    // null is for the unbounded face
+    isFaceDataCompatible: ( faceData1: FaceData, faceData2: FaceData | null ) => boolean
+  ): OutputFace[] {
+
+    // In summary, we'll find an edge between incompatible faces, and then we'll trace that edge (staying only on edges
+    // between incompatible faces) until we get back to the starting edge. Once we've done this, we have constructed one
+    // polygon.
+    //
+    // For this algorithm, we mark faces and edges as processed when we've already handled their contribution (or marked
+    // them to contribute).
+    //
+    // We'll naturally run into "compatible" faces as we trace the edges. Whenever we run into a new compatible face,
+    // (in isFaceCompatible), we'll add its edges to the pool of edges to trace for this OutputFace.
+    //
+    // When we trace edges, we'll always start with one between "incompatible" faces. If its nextEdge is between
+    // compatible faces, we can skip it (and use the winged edge data structure to try the "next" edge). Thus we'll
+    // skip visiting edges between compatible faces. IF they are all compatible, we'll end back up to our starting
+    // edge's reversed edge, and we'll essentially trace backward. If this happens, our simplifier will remove the
+    // evidence of this. So it should handle "degenerate" cases (e.g. same face on both sides, or a vertex with only
+    // one incident edge) just fine.
+
+    const outputFaces: OutputFace[] = [];
+
+    if ( assert ) {
+      // Ensure that things aren't marked as processed yet
+      for ( let i = 0; i < faces.length; i++ ) {
+        assert( !faces[ i ].processed );
+        assert( faces[ i ].getEdges().every( edge => !edge.processed ) );
+      }
+    }
+
+    // Compute face data up front
+    const dataMap = new Map<RationalFace, FaceData>();
+    for ( let i = 0; i < faces.length; i++ ) {
+      dataMap.set( faces[ i ], getFaceData( faces[ i ] ) );
+    }
+
+    for ( let i = 0; i < faces.length; i++ ) {
+      const startingFace = faces[ i ];
+
+      if ( !startingFace.processed ) {
+        startingFace.processed = true;
+
+        // A list of polygons we'll append into (for our OutputFace).
+        const polygons: Vector2[][] = [];
+
+        // A list of edges remaining to process. NOTE: some of these may be marked as "processed", we will just ignore
+        // those. Any time we run across a new compatible face, we'll dump its edges in here.
+        const edges: RationalHalfEdge[] = [
+          ...startingFace.getEdges() // defensive copy, could remove sometime
+        ];
+
+        // We'll need to pass bounds to the OutputFace constructor, we'll accumulate them here.
+        const bounds = startingFace.getBounds( fromIntegerMatrix ).copy(); // we'll mutate this
+
+        // All RenderPrograms should be equivalent, so we'll just use the first one
+        const faceData = dataMap.get( startingFace )!;
+        assert && assert( faceData );
+
+        // Cache whether faces or compatible or not
+        const compatibleFaces = new Set<RationalFace>();
+        const incompatibleFaces = new Set<RationalFace>();
+        compatibleFaces.add( startingFace );
+
+        // NOTE: side effects!
+        const isFaceCompatible = ( candidateFace: RationalFace ): boolean => {
+          if ( compatibleFaces.has( candidateFace ) ) {
+            return true;
+          }
+          else if ( incompatibleFaces.has( candidateFace ) ) {
+            return false;
+          }
+          else {
+            const candidateFaceData = dataMap.get( candidateFace ) || null;
+            // Not in either place, we need to test (also, the unbounded face won't have a RenderProgram)
+            if ( isFaceDataCompatible( faceData, candidateFaceData ) ) {
+              // ADD it to the current renderable face
+              assert && assert( !candidateFace.processed, 'We should have already found this' );
+              candidateFace.processed = true;
+              bounds.includeBounds( candidateFace.getBounds( fromIntegerMatrix ) );
+              edges.push( ...candidateFace.getEdges() );
+
+              compatibleFaces.add( candidateFace );
+              return true;
+            }
+            else {
+              incompatibleFaces.add( candidateFace );
+              return false;
+            }
+          }
+        };
+
+        // We'll have edges appended sometimes in isFaceCompatible() checks.
+        while ( edges.length ) {
+          const startingEdge = edges.pop()!;
+
+          // If the edge is processed OR both faces are compatible, we'll just skip it anyway. We don't want to start
+          // tracing on a loop that we will completely remove
+          if ( !startingEdge.processed && ( !isFaceCompatible( startingEdge.face! ) || !isFaceCompatible( startingEdge.reversed.face! ) ) ) {
+            // Start an edge trace!
+
+            // We'll use the simplifier to remove duplicate or walked-back points.
+            // TODO: check to see if removing arbitrary collinear points helps us a lot here. It might be good, but
+            // TODO: we don't want to introduce a lot of error. Probably is additional cost
+
+            // Add the first edge
+            let currentEdge = startingEdge;
+            traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
+            currentEdge.processed = true;
+
+            do {
+              // Walk edges
+              let nextEdge = currentEdge.nextEdge!;
+              assert && assert( nextEdge.face === currentEdge.face );
+
+              // BUT don't walk edges that are between compatible faces. Instead, wind around until we find either
+              // an incompatible face, OR we walk back our edge (the simplifier will take care of removing this)
+              while ( nextEdge !== currentEdge.reversed && isFaceCompatible( nextEdge.reversed.face! ) ) {
+                nextEdge = nextEdge.reversed.nextEdge!;
+              }
+
+              assert && assert( isFaceCompatible( nextEdge.face! ) || isFaceCompatible( nextEdge.reversed.face! ) );
+
+              // Add subsequent edges
+              currentEdge = nextEdge;
+              traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
+              currentEdge.processed = true;
+            } while ( currentEdge !== startingEdge );
+
+            const polygon = traceSimplifier.finalize();
+            if ( polygon.length >= 3 ) {
+              polygons.push( polygon );
+            }
+          }
+        }
+
+        outputFaces.push( createOutputFace(
+          new PolygonalFace( polygons ),
+          faceData,
+          bounds
+        ) );
+      }
+    }
+
+    return outputFaces;
   }
 }
 
