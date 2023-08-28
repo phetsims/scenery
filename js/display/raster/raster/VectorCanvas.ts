@@ -3,14 +3,18 @@
 /**
  * Similar to an DOM Canvas, but stores a vector representation of the relevant drawing commands.
  *
+ * TODO: We really would want to "cache" all of the commands at once, build up a "pending" RenderProgram, and then
+ * TODO: handle all the paths at once.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { CombinedRaster, CombinedRasterOptions, getPolygonFilterGridBounds, LinearEdge, PolygonalBoolean, PolygonalFace, PolygonClipping, PolygonFilterType, Rasterize, RenderableFace, RenderColor, RenderColorSpace, RenderPath, RenderProgram, RenderStack, scenery } from '../../../imports.js';
+import { CombinedRaster, CombinedRasterOptions, getPolygonFilterGridBounds, LinearEdge, PolygonalBoolean, PolygonalFace, PolygonClipping, PolygonFilterType, Rasterize, RenderableFace, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderStack, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export default class VectorCanvas {
 
@@ -25,14 +29,32 @@ export default class VectorCanvas {
     // TODO: proper options object?
     public readonly polygonFiltering: PolygonFilterType = PolygonFilterType.Box
   ) {
-    // TODO: COLOR SPACE!!!! (We need to know, so we can
-
     this.updateWidthHeight( width, height );
   }
 
   // Assumes sRGB? We'll do srgb-linear blending to mimic for now?
   public fillColor( renderPath: RenderPath, color: Vector4 ): void {
-    this.fillRenderProgram( renderPath, new RenderColor( color ).colorConverted( RenderColorSpace.sRGB, this.colorSpace === 'srgb' ? RenderColorSpace.premultipliedSRGB : RenderColorSpace.premultipliedDisplayP3 ) );
+    this.fillRenderProgram( renderPath, this.colorToRenderProgram( color ) );
+  }
+
+  public fillLinearGradient( renderPath: RenderPath, start: Vector2, end: Vector2, stops: { ratio: number; color: Vector4 }[], extend: RenderExtend, accuracy: RenderLinearGradientAccuracy = RenderLinearGradientAccuracy.SplitAccurate ): void {
+    this.fillRenderProgram( renderPath, new RenderLinearGradient(
+      Matrix3.IDENTITY, start, end, stops.map( stop => new RenderGradientStop( stop.ratio, this.colorToRenderProgram( stop.color ) ) ), extend, accuracy
+    ) );
+
+    this.renderableFaces = this.renderableFaces.flatMap( face => face.splitLinearGradients() );
+  }
+
+  public fillRadialGradient( renderPath: RenderPath, transform: Matrix3, start: Vector2, startRadius: number, end: Vector2, endRadius: number, stops: { ratio: number; color: Vector4 }[], extend: RenderExtend, accuracy: RenderRadialGradientAccuracy = RenderRadialGradientAccuracy.SplitAccurate ): void {
+    this.fillRenderProgram( renderPath, new RenderRadialGradient(
+      Matrix3.IDENTITY, start, startRadius, end, endRadius, stops.map( stop => new RenderGradientStop( stop.ratio, this.colorToRenderProgram( stop.color ) ) ), extend, accuracy
+    ) );
+
+    this.renderableFaces = this.renderableFaces.flatMap( face => face.splitRadialGradients() );
+  }
+
+  private colorToRenderProgram( color: Vector4 ): RenderProgram {
+    return new RenderColor( color ).colorConverted( RenderColorSpace.sRGB, this.colorSpace === 'srgb' ? RenderColorSpace.premultipliedSRGB : RenderColorSpace.premultipliedDisplayP3 );
   }
 
   private fillRenderProgram( renderPath: RenderPath, renderProgram: RenderProgram ): void {
@@ -49,7 +71,6 @@ export default class VectorCanvas {
         const existingRenderPath = new RenderPath( 'nonzero', renderableFace.face.toPolygonalFace().polygons );
         const overlaps = PolygonalBoolean.getOverlaps( existingRenderPath, renderPath );
 
-        // TODO: Should we check faces for area?
         if ( overlaps.intersection.length ) {
           if ( overlaps.aOnly.length ) {
             const aOnlyFace = new PolygonalFace( overlaps.aOnly );

@@ -1917,6 +1917,20 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
 
   window.vectorTest = function() {
     setTimeout( async function() {
+      // TODO: stop duplicating things like this
+      const piecewiseOptions = {
+        minLevels: 1,
+        maxLevels: 10,
+        // distanceEpsilon: 0.02,
+        distanceEpsilon: 0.0002,
+        curveEpsilon: 0.2
+      };
+      const shapeToPolygons = shape => shape.subpaths.map( subpath => {
+        return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
+          return line.start;
+        } );
+      } );
+
       const displaySize = 768;
 
       const outputSize = 768 * 2;
@@ -1927,6 +1941,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       const vectorCanvas = new phet.scenery.VectorCanvas( outputSize, outputSize, 'display-p3', phet.scenery.PolygonFilterType.Box );
 
       const p = ( x, y ) => phet.dot.v2( x * outputSize, y * outputSize );
+      const s = s => s * outputSize;
 
       vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
         [
@@ -1946,14 +1961,43 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
         ]
       ] ), phet.dot.v4( 1, 0, 0, 1 ) );
 
-      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+      vectorCanvas.fillLinearGradient( new phet.scenery.RenderPath( 'nonzero', [
         [
           p( 0.25, 0.25 ),
           p( 0.75, 0.30 ),
           p( 0.75, 0.75 ),
           p( 0.25, 0.75 )
         ]
-      ] ), phet.dot.v4( 0, 1, 0, 1 ) );
+      ] ), p( 0.1, 0 ), p( 0, 0.13 ), [
+        { ratio: 0, color: phet.dot.v4( 0.75, 0.75, 0.25, 1 ) },
+        { ratio: 0.5, color: phet.dot.v4( 0.25, 0.25, 0.25, 1 ) },
+        { ratio: 1, color: phet.dot.v4( 0.25, 0.75, 0.5, 1 ) }
+      ], phet.scenery.RenderExtend.Repeat );
+
+      // TODO: breaks when changing 0.8 to 0.6
+      vectorCanvas.fillRadialGradient( new phet.scenery.RenderPath( 'nonzero', [
+        [
+          p( 0.8, 0.8 ),
+          p( 0.8, 0.95 ),
+          p( 0.95, 0.95 ),
+          p( 0.95, 0.8 )
+        ]
+      // ] ), phet.dot.Matrix3.IDENTITY, p( 0.5, 0.5 ), s( 0 ), p( 0.5, 0.5 ), s( 0.1 ), [
+      ] ), phet.dot.Matrix3.IDENTITY, p( 0.8, 0.8 ), s( 0 ), p( 0.8, 0.8 ), s( 0.1 ), [
+        { ratio: 0, color: phet.dot.v4( 0.75, 0.75, 0.25, 1 ) },
+        { ratio: 0.5, color: phet.dot.v4( 0.25, 0.25, 0.25, 1 ) },
+        { ratio: 1, color: phet.dot.v4( 0.25, 0.75, 0.5, 1 ) }
+      ], phet.scenery.RenderExtend.Repeat );
+
+      // TODO: changing 0.85 to 0.88 causes a failure
+      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+        [
+          p( 0.6, 0.2 ),
+          p( 0.85, 0.2 ),
+          p( 0.85, 0.85 ),
+          p( 0.6, 0.85 )
+        ]
+      ] ), phet.dot.v4( 1, 0, 0.5, 1 ) );
 
       // Stroke the renderable face outlines!
       if ( SHOW_OUTLINES ) {
@@ -1965,20 +2009,6 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
           const strokedShape = shape.getStrokedShape( new phet.kite.LineStyles( {
             lineWidth: 2
           } ) );
-
-          // TODO: stop duplicating things like this
-          const piecewiseOptions = {
-            minLevels: 1,
-            maxLevels: 10,
-            // distanceEpsilon: 0.02,
-            distanceEpsilon: 0.0002,
-            curveEpsilon: 0.2
-          };
-          const shapeToPolygons = shape => shape.subpaths.map( subpath => {
-            return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
-              return line.start;
-            } );
-          } );
 
           const polygons = shapeToPolygons( strokedShape );
           vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', polygons ), phet.dot.v4( 0, 0, 0, 1 ) );
