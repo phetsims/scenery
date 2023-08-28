@@ -641,6 +641,16 @@ export default class Rasterize {
     context.putImageData( imageData, 0, 0 );
     return canvas;
   }
+
+  public static writeImageDataToCanvas( imageData: ImageData, canvas: HTMLCanvasElement, context: CanvasRenderingContext2D ): void {
+    if ( canvas.width !== imageData.width ) {
+      canvas.width = imageData.width;
+    }
+    if ( canvas.height !== imageData.height ) {
+      canvas.height = imageData.height;
+    }
+    context.putImageData( imageData, 0, 0 );
+  }
 }
 
 scenery.register( 'Rasterize', Rasterize );

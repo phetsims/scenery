@@ -154,6 +154,11 @@ export default class CombinedRaster implements OutputRaster {
           this.imageData.data[ index + 2 ] += b * 255;
           this.imageData.data[ index + 3 ] += a * 255;
         }
+
+        this.accumulationArray[ baseIndex ] = 0;
+        this.accumulationArray[ baseIndex + 1 ] = 0;
+        this.accumulationArray[ baseIndex + 2 ] = 0;
+        this.accumulationArray[ baseIndex + 3 ] = 0;
       }
       this.combined = true;
     }
@@ -163,6 +168,10 @@ export default class CombinedRaster implements OutputRaster {
 
   public toCanvas(): HTMLCanvasElement {
     return Rasterize.imageDataToCanvas( this.toImageData() );
+  }
+
+  public writeToCanvas( canvas: HTMLCanvasElement, context: CanvasRenderingContext2D ): void {
+    Rasterize.writeImageDataToCanvas( this.toImageData(), canvas, context );
   }
 }
 
