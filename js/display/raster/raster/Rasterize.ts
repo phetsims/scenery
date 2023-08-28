@@ -482,6 +482,9 @@ export default class Rasterize {
     assert && assert( bounds.isValid() && !bounds.isEmpty(), 'Rasterization bounds should be valid and non-empty' );
     assert && assert( Number.isInteger( bounds.left ) && Number.isInteger( bounds.top ) && Number.isInteger( bounds.right ) && Number.isInteger( bounds.bottom ) );
 
+    // Just simplify things off-the-bat, so we don't need as much computation
+    renderProgram = renderProgram.simplified();
+
     const options = optionize3<RasterizationOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     if ( assert ) {
