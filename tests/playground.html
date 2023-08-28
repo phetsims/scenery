@@ -1915,6 +1915,81 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
     } );
   };
 
+  window.vectorTest = function() {
+    setTimeout( async function() {
+      const displaySize = 768;
+
+      // const outputSize = 768 * 2;
+      const outputSize = 768 / 4;
+
+      const vectorCanvas = new phet.scenery.VectorCanvas( outputSize, outputSize, 'display-p3', phet.scenery.PolygonFilterType.Box );
+
+      const p = ( x, y ) => phet.dot.v2( x * outputSize, y * outputSize );
+
+      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+        [
+          p( 0.1, 0.1 ),
+          p( 0.5, 0.1 ),
+          p( 0.5, 0.5 ),
+          p( 0.1, 0.5 )
+        ]
+      ] ), phet.dot.v4( 1, 0, 0, 1 ) );
+
+      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+        [
+          p( 0.25, 0.25 ),
+          p( 0.75, 0.30 ),
+          p( 0.75, 0.75 ),
+          p( 0.25, 0.75 )
+        ]
+      ] ), phet.dot.v4( 0, 1, 0, 1 ) );
+
+      // Stroke the renderable face outlines!
+      // TODO: vectorCanvas.copy()
+      // TODO: vectorCanvas.writeToCanvas()
+      vectorCanvas.renderableFaces.slice().forEach( face => {
+        const shape = face.face.getShape();
+
+        const strokedShape = shape.getStrokedShape( new phet.kite.LineStyles( {
+          lineWidth: displaySize / outputSize
+        } ) );
+
+        // TODO: stop duplicating things like this
+        const piecewiseOptions = {
+          minLevels: 1,
+          maxLevels: 10,
+          // distanceEpsilon: 0.02,
+          distanceEpsilon: 0.0002,
+          curveEpsilon: 0.2
+        };
+        const shapeToPolygons = shape => shape.subpaths.map( subpath => {
+          return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
+            return line.start;
+          } );
+        } );
+
+        const polygons = shapeToPolygons( strokedShape );
+        vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', polygons ), phet.dot.v4( 0, 0, 0, 1 ) );
+      } );
+
+      const styleCanvas = canvas => {
+        canvas.style.width = `${displaySize}px`;
+        canvas.style.height = `${displaySize}px`;
+        canvas.style.imageRendering = 'pixelated';
+        canvas.style.position = 'absolute';
+        // if ( APPLY_OPACITY ) {
+        //   canvas.style.opacity = '0.4';
+        // }
+        canvas.style.top = '20px';
+        canvas.style.left = '20px ';
+      };
+
+      const canvas = vectorCanvas.getCanvas();
+      styleCanvas( canvas );
+      document.body.appendChild( canvas );
+    } );
+  };
+
   window.displayTest = function() {
     setTimeout( async function() {
       const rect = new phet.scenery.Rectangle( 0, 0, 50, 50, {

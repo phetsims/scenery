@@ -10,7 +10,6 @@ import { ClippableFace, RenderExtend, RenderGradientStop, RenderLinearBlend, Ren
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
-// TODO: naming, omg
 export default class RenderableFace {
   public constructor(
     public readonly face: ClippableFace,

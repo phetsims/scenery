@@ -7,6 +7,7 @@
  */
 
 import { scenery } from '../../../imports.js';
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 enum PolygonFilterType {
   Box = 0,
@@ -74,6 +75,18 @@ export const getPolygonFilterMaxExpand = ( filterType: PolygonFilterType ): numb
   else {
     throw new Error( `Unknown PolygonFilterType: ${filterType}` );
   }
+};
+
+export const getPolygonFilterGridBounds = ( bounds: Bounds2, filterType: PolygonFilterType ): Bounds2 => {
+  const filterAdditionalPixels = getPolygonFilterExtraPixels( filterType );
+  const filterGridOffset = getPolygonFilterGridOffset( filterType );
+
+  return new Bounds2(
+    bounds.minX + filterGridOffset,
+    bounds.minY + filterGridOffset,
+    bounds.maxX + filterGridOffset + filterAdditionalPixels,
+    bounds.maxY + filterGridOffset + filterAdditionalPixels
+  );
 };
 
 scenery.register( 'PolygonFilterType', PolygonFilterType );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridBounds, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -191,8 +191,8 @@ export default class Rasterize {
     x: number,
     y: number
   ): void {
-    if ( assert ) {
-      debugData!.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
+    if ( assert && debugData ) {
+      debugData.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
     }
 
     // TODO: potentially cache the centroid, if we have multiple overlapping gradients?
@@ -225,8 +225,8 @@ export default class Rasterize {
     maxX: number,
     maxY: number
   ): void {
-    if ( assert ) {
-      debugData!.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
+    if ( assert && debugData ) {
+      debugData.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
     }
 
     const constClientColor = context.constClientColor;
@@ -401,7 +401,7 @@ export default class Rasterize {
     }
   }
 
-  private static rasterizeAccumulate(
+  public static rasterizeAccumulate(
     outputRaster: OutputRaster,
     renderableFaces: RenderableFace[],
     bounds: Bounds2,
@@ -420,9 +420,9 @@ export default class Rasterize {
         pixels: [],
         areas: []
       } : null;
-      if ( assert ) {
-        debugData!.faceDebugData = debugData!.faceDebugData || [];
-        debugData!.faceDebugData.push( faceDebugData );
+      if ( assert && debugData ) {
+        debugData.faceDebugData = debugData.faceDebugData || [];
+        debugData.faceDebugData.push( faceDebugData );
       }
 
       // TODO: be really careful about the colorConverter... the copy() missing already hit me once.
@@ -502,35 +502,25 @@ export default class Rasterize {
     const filterAdditionalPixels = getPolygonFilterExtraPixels( polygonFiltering );
     const filterGridOffset = getPolygonFilterGridOffset( polygonFiltering );
 
-    const outputWidth = bounds.width;
-    const outputHeight = bounds.height;
-    const gridWidth = outputWidth + filterAdditionalPixels;
-    const gridHeight = outputHeight + filterAdditionalPixels;
-
     // in RenderProgram coordinate frame
-    const gridBounds = new Bounds2(
-      bounds.minX + filterGridOffset,
-      bounds.minY + filterGridOffset,
-      bounds.maxX + filterGridOffset + filterAdditionalPixels,
-      bounds.maxY + filterGridOffset + filterAdditionalPixels
-    );
+    const gridBounds = getPolygonFilterGridBounds( bounds, polygonFiltering );
 
     // Keep us at 20 bits of precision (after rounding)
-    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( gridWidth, gridHeight ) ) ) );
-    if ( assert ) { debugData!.scale = scale; }
+    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( gridBounds.width, gridBounds.height ) ) ) );
+    if ( assert && debugData ) { debugData.scale = scale; }
 
     // -( scale * ( bounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( bounds.maxX + filterGridOffset.x ) + translation.x
     const translation = new Vector2(
       -0.5 * scale * ( 2 * filterGridOffset + filterAdditionalPixels + bounds.minX + bounds.maxX ),
       -0.5 * scale * ( 2 * filterGridOffset + filterAdditionalPixels + bounds.minY + bounds.maxY )
     );
-    if ( assert ) { debugData!.translation = translation; }
+    if ( assert && debugData ) { debugData.translation = translation; }
 
     const toIntegerMatrix = Matrix3.affine( scale, 0, translation.x, 0, scale, translation.y );
-    if ( assert ) { debugData!.toIntegerMatrix = toIntegerMatrix; }
+    if ( assert && debugData ) { debugData.toIntegerMatrix = toIntegerMatrix; }
 
     const fromIntegerMatrix = toIntegerMatrix.inverted();
-    if ( assert ) { debugData!.fromIntegerMatrix = fromIntegerMatrix; }
+    if ( assert && debugData ) { debugData.fromIntegerMatrix = fromIntegerMatrix; }
 
     // Verify our math! Make sure we will be perfectly centered in our integer grid!
     assert && assert( Math.abs( ( scale * gridBounds.minX + translation.x ) + ( scale * gridBounds.maxX + translation.x ) ) < 1e-10 );
@@ -553,7 +543,7 @@ export default class Rasterize {
     paths.push( backgroundPath );
 
     const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, gridBounds, toIntegerMatrix );
-    if ( assert ) { debugData!.integerEdges = integerEdges; }
+    if ( assert && debugData ) { debugData.integerEdges = integerEdges; }
 
     // TODO: optional hilbert space-fill sort here?
 
@@ -575,15 +565,15 @@ export default class Rasterize {
     rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
 
     const filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
-    if ( assert ) { debugData!.filteredRationalHalfEdges = filteredRationalHalfEdges; }
+    if ( assert && debugData ) { debugData.filteredRationalHalfEdges = filteredRationalHalfEdges; }
 
     const innerBoundaries: RationalBoundary[] = [];
     const outerBoundaries: RationalBoundary[] = [];
     const faces: RationalFace[] = [];
-    if ( assert ) {
-      debugData!.innerBoundaries = innerBoundaries;
-      debugData!.outerBoundaries = outerBoundaries;
-      debugData!.faces = faces;
+    if ( assert && debugData ) {
+      debugData.innerBoundaries = innerBoundaries;
+      debugData.outerBoundaries = outerBoundaries;
+      debugData.faces = faces;
     }
     RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
 
@@ -596,8 +586,8 @@ export default class Rasterize {
 
     // For ease of use, an unbounded face (it is essentially fake)
     const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );
-    if ( assert ) {
-      debugData!.unboundedFace = unboundedFace;
+    if ( assert && debugData ) {
+      debugData.unboundedFace = unboundedFace;
     }
 
     RationalFace.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );

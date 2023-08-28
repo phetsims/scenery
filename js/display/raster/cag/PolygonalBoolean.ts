@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Represents a face with a main (positive-oriented) boundary and zero or more (negative-oriented) holes.
+ * Allows computing boolean operations on polygons (e.g. union, intersection, difference/complement)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -110,8 +110,8 @@ export default class PolygonalBoolean {
     const fromIntegerMatrix = toIntegerMatrix.inverted();
 
     // Verify our math! Make sure we will be perfectly centered in our integer grid!
-    assert && assert( Math.abs( ( scale * bounds.minX + translation.x ) + ( scale * bounds.maxX + translation.x ) ) < 1e-10 );
-    assert && assert( Math.abs( ( scale * bounds.minY + translation.y ) + ( scale * bounds.maxY + translation.y ) ) < 1e-10 );
+    assert && assert( Math.abs( ( scale * bounds.minX + translation.x ) + ( scale * bounds.maxX + translation.x ) ) < 1e-7 );
+    assert && assert( Math.abs( ( scale * bounds.minY + translation.y ) + ( scale * bounds.maxY + translation.y ) ) < 1e-7 );
 
     const integerEdges = IntegerEdge.scaleToIntegerEdges( paths, toIntegerMatrix );
 

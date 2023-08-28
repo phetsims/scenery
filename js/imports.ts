@@ -432,7 +432,7 @@ export { default as PointerOverlay } from './overlays/PointerOverlay.js';
 export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundOverlay.js';
 
 
-export { default as PolygonFilterType, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand } from './display/raster/render-program/PolygonFilterType.js';
+export { default as PolygonFilterType, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './display/raster/render-program/PolygonFilterType.js';
 export { default as RenderBlendType } from './display/raster/render-program/RenderBlendType.js';
 export { default as RenderComposeType } from './display/raster/render-program/RenderComposeType.js';
 export { default as RenderExtend } from './display/raster/render-program/RenderExtend.js';
@@ -524,9 +524,10 @@ export type { CombinedRasterOptions } from './display/raster/raster/CombinedRast
 export type { default as OutputRaster } from './display/raster/raster/OutputRaster.js';
 export { default as PolygonBilinear } from './display/raster/raster/PolygonBilinear.js';
 export { default as PolygonMitchellNetravali } from './display/raster/raster/PolygonMitchellNetravali.js';
+export { default as RenderableFace } from './display/raster/raster/RenderableFace.js';
 export { default as Rasterize } from './display/raster/raster/Rasterize.js';
 export type { RasterizationOptions } from './display/raster/raster/Rasterize.js';
-export { default as RenderableFace } from './display/raster/raster/RenderableFace.js';
+export { default as VectorCanvas } from './display/raster/raster/VectorCanvas.js';
 
 export { default as Instance } from './display/Instance.js';
 export type { default as TOverlay } from './overlays/TOverlay.js';
