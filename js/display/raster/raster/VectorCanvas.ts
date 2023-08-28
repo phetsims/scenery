@@ -172,14 +172,6 @@ export default class VectorCanvas {
       colorSpace: this.colorSpace
     }, options ) );
 
-    // TODO: OMG, get rid of this! Get proper typing with logs so this isn't needed
-    if ( assert ) {
-      // @ts-expect-error
-      window.debugData = {
-        areas: []
-      };
-    }
-
     Rasterize.rasterizeAccumulate(
       raster,
       this.renderableFaces,
@@ -187,7 +179,8 @@ export default class VectorCanvas {
       this.gridBounds,
       Vector2.ZERO,
       this.polygonFiltering,
-      1
+      1,
+      null
     );
 
     return raster.toImageData();

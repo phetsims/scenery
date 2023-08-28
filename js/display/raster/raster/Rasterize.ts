@@ -6,10 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
-import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
@@ -31,6 +30,8 @@ export type RasterizationOptions = {
 
   splitLinearGradients?: boolean;
   splitRadialGradients?: boolean;
+
+  log?: RasterLog | null;
 };
 
 const DEFAULT_OPTIONS = {
@@ -40,10 +41,9 @@ const DEFAULT_OPTIONS = {
   edgeIntersectionMethod: 'arrayBoundsTree',
   renderableFaceMethod: 'traced',
   splitLinearGradients: true,
-  splitRadialGradients: true
+  splitRadialGradients: true,
+  log: null
 } as const;
-
-let debugData: Record<string, IntentionalAny> | null = null;
 
 const scratchFullAreaVector = new Vector2( 0, 0 );
 
@@ -59,7 +59,8 @@ class RasterizationContext {
     public bounds: Bounds2,
     public polygonFiltering: PolygonFilterType,
     public polygonFilterWindowMultiplier: number,
-    public needs: RenderProgramNeeds
+    public needs: RenderProgramNeeds,
+    public log: RasterLog | null
   ) {}
 }
 
@@ -166,10 +167,6 @@ export default class Rasterize {
     x: number,
     y: number
   ): void {
-    if ( assert && debugData ) {
-      debugData.areas.push( new Bounds2( x, y, x + 1, y + 1 ) );
-    }
-
     // TODO: potentially cache the centroid, if we have multiple overlapping gradients?
     const color = context.constClientColor || context.renderProgram.evaluate(
       pixelFace,
@@ -200,10 +197,6 @@ export default class Rasterize {
     maxX: number,
     maxY: number
   ): void {
-    if ( assert && debugData ) {
-      debugData.areas.push( new Bounds2( minX, minY, maxX, maxY ) );
-    }
-
     const constClientColor = context.constClientColor;
 
     if ( constClientColor ) {
@@ -293,12 +286,14 @@ export default class Rasterize {
 
     if ( area > 1e-8 ) {
       if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
+        if ( context.log ) { context.log.fullAreas.push( new Bounds2( minX, minY, maxX, maxY ) ); }
         Rasterize.addFullArea(
           context,
           minX, minY, maxX, maxY
         );
       }
       else if ( xDiff === 1 && yDiff === 1 ) {
+        if ( context.log ) { context.log.partialAreas.push( new Bounds2( minX, minY, maxX, maxY ) ); }
         Rasterize.addPartialPixel(
           context,
           clippableFace, area, minX, minY
@@ -597,23 +592,13 @@ export default class Rasterize {
     contributionBounds: Bounds2,
     outputRasterOffset: Vector2,
     polygonFiltering: PolygonFilterType,
-    polygonFilterWindowMultiplier: number
+    polygonFilterWindowMultiplier: number,
+    log: RasterLog | null
   ): void {
     for ( let i = 0; i < renderableFaces.length; i++ ) {
       const renderableFace = renderableFaces[ i ];
-      const face = renderableFace.face;
       const renderProgram = renderableFace.renderProgram;
       const polygonalBounds = renderableFace.bounds;
-
-      const faceDebugData: IntentionalAny = assert ? {
-        face: face,
-        pixels: [],
-        areas: []
-      } : null;
-      if ( assert && debugData ) {
-        debugData.faceDebugData = debugData.faceDebugData || [];
-        debugData.faceDebugData.push( faceDebugData );
-      }
 
       // TODO: be really careful about the colorConverter... the copy() missing already hit me once.
       const constClientColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
@@ -628,7 +613,8 @@ export default class Rasterize {
         bounds,
         polygonFiltering,
         polygonFilterWindowMultiplier,
-        renderProgram.getNeeds()
+        renderProgram.getNeeds(),
+        log
       );
 
       if ( polygonFilterWindowMultiplier !== 1 ) {
@@ -642,10 +628,6 @@ export default class Rasterize {
         // We will clip off anything outside the "bounds", since if we're based on EdgedFace we don't want those "fake"
         // edges that might be outside.
         const clippableFace = renderableFace.face.getClipped( faceBounds );
-        if ( assert ) {
-          faceDebugData.clippableFace = renderableFace.face;
-          faceDebugData.clippedFace = clippableFace;
-        }
 
         Rasterize.binaryInternalRasterize(
           context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
@@ -683,15 +665,7 @@ export default class Rasterize {
 
     const options = optionize3<RasterizationOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
-    if ( assert ) {
-      debugData = {
-        areas: []
-      };
-
-      // NOTE: find a better way of doing this?
-      // @ts-expect-error
-      window.debugData = debugData;
-    }
+    const log = options.log;
 
     const polygonFiltering: PolygonFilterType = options.polygonFiltering;
     const polygonFilterWindowMultiplier = options.polygonFilterWindowMultiplier;
@@ -701,20 +675,20 @@ export default class Rasterize {
 
     // Keep us at 20 bits of precision (after rounding)
     const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( contributionBounds.width, contributionBounds.height ) ) ) );
-    if ( assert && debugData ) { debugData.scale = scale; }
+    if ( log ) { log.scale = scale; }
 
     // -( scale * ( bounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( bounds.maxX + filterGridOffset.x ) + translation.x
     const translation = new Vector2(
       -0.5 * scale * ( bounds.minX + bounds.maxX ),
       -0.5 * scale * ( bounds.minY + bounds.maxY )
     );
-    if ( assert && debugData ) { debugData.translation = translation; }
+    if ( log ) { log.translation = translation; }
 
     const toIntegerMatrix = Matrix3.affine( scale, 0, translation.x, 0, scale, translation.y );
-    if ( assert && debugData ) { debugData.toIntegerMatrix = toIntegerMatrix; }
+    if ( log ) { log.toIntegerMatrix = toIntegerMatrix; }
 
     const fromIntegerMatrix = toIntegerMatrix.inverted();
-    if ( assert && debugData ) { debugData.fromIntegerMatrix = fromIntegerMatrix; }
+    if ( log ) { log.fromIntegerMatrix = fromIntegerMatrix; }
 
     // Verify our math! Make sure we will be perfectly centered in our integer grid!
     assert && assert( Math.abs( ( scale * contributionBounds.minX + translation.x ) + ( scale * contributionBounds.maxX + translation.x ) ) < 1e-10 );
@@ -737,7 +711,7 @@ export default class Rasterize {
     paths.push( backgroundPath );
 
     const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, contributionBounds, toIntegerMatrix );
-    if ( assert && debugData ) { debugData.integerEdges = integerEdges; }
+    if ( log ) { log.integerEdges = integerEdges; }
 
     // TODO: optional hilbert space-fill sort here?
 
@@ -759,17 +733,18 @@ export default class Rasterize {
     rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
 
     let filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
-    if ( assert && debugData ) { debugData.filteredRationalHalfEdges = filteredRationalHalfEdges; }
+    if ( log ) { log.filteredRationalHalfEdges = filteredRationalHalfEdges; }
 
     const innerBoundaries: RationalBoundary[] = [];
     const outerBoundaries: RationalBoundary[] = [];
     const faces: RationalFace[] = [];
-    if ( assert && debugData ) {
-      debugData.innerBoundaries = innerBoundaries;
-      debugData.outerBoundaries = outerBoundaries;
-      debugData.faces = faces;
+    if ( log ) {
+      log.innerBoundaries = innerBoundaries;
+      log.outerBoundaries = outerBoundaries;
+      log.faces = faces;
     }
     filteredRationalHalfEdges = RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
+    if ( log ) { log.refilteredRationalHalfEdges = filteredRationalHalfEdges; }
 
     const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
       outerBoundaries,
@@ -780,13 +755,12 @@ export default class Rasterize {
 
     // For ease of use, an unbounded face (it is essentially fake)
     const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );
-    if ( assert && debugData ) {
-      debugData.unboundedFace = unboundedFace;
-    }
+    if ( log ) { log.unboundedFace = unboundedFace; }
 
     RationalFace.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
 
     const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
+    if ( log ) { log.renderedFaces = renderedFaces; }
 
     let renderableFaces: RenderableFace[];
     if ( options.renderableFaceMethod === 'polygonal' ) {
@@ -807,6 +781,7 @@ export default class Rasterize {
     else {
       throw new Error( 'unknown renderableFaceMethod' );
     }
+    if ( log ) { log.initialRenderableFaces = renderableFaces; }
 
     if ( options.splitLinearGradients ) {
       renderableFaces = renderableFaces.flatMap( face => face.splitLinearGradients() );
@@ -814,6 +789,7 @@ export default class Rasterize {
     if ( options.splitRadialGradients ) {
       renderableFaces = renderableFaces.flatMap( face => face.splitRadialGradients() );
     }
+    if ( log ) { log.renderableFaces = renderableFaces; }
 
     Rasterize.rasterizeAccumulate(
       outputRaster,
@@ -822,7 +798,8 @@ export default class Rasterize {
       contributionBounds,
       options.outputRasterOffset,
       polygonFiltering,
-      polygonFilterWindowMultiplier
+      polygonFilterWindowMultiplier,
+      log
     );
   }
 

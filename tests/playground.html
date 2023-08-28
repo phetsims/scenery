@@ -629,19 +629,18 @@ an UI and Display made for visual testing and debugging.
         // splitRadialGradients: false
       };
 
-      const APPLY_OPACITY = false;
+      const APPLY_OPACITY = true;
 
       const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
       const SHOW_HALF_EDGES = false;
       const SHOW_FACE_CONSISTENT_FILL = false;
       const SHOW_FACE_HUE_FILL = false;
-      const SHOW_BOUNDARY_DEBUG = false;
       const SHOW_BOUNDARIES = false;
       const SHOW_INCLUSION_DEBUG = false;
       const SHOW_SOLID_COLORS = false;
       const SHOW_FULL_AREAS = false;
-      const SHOW_RENDERABLE_FACES = false;
+      const SHOW_RENDERABLE_FACES = true;
       const SHOW_RENDERABLE_FACE_INDICES = false;
 
       const piecewiseOptions = {
@@ -904,6 +903,8 @@ an UI and Display made for visual testing and debugging.
 
       // const raster = new phet.scenery.AccumulatedRaster( outputSize, outputSize );
       // const raster = new phet.scenery.CombinedRaster( outputSize + 100, outputSize + 100 );
+      const rasterLog = new phet.scenery.RasterLog();
+      rasterizeOptions.log = rasterLog;
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize, rasterOptions );
       phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
 
@@ -924,20 +925,20 @@ an UI and Display made for visual testing and debugging.
       const fromRenderY = renderY => renderY * displaySize / outputSize;
       const fromRenderMatrix = phet.dot.Matrix3.scaling( displaySize / outputSize );
 
-      const internalFromIntegerMatrix = debugData.fromIntegerMatrix;
+      const internalFromIntegerMatrix = rasterLog.fromIntegerMatrix;
       const fromIntegerPoint = integerPoint => fromRenderPoint( internalFromIntegerMatrix.timesVector2( integerPoint ) );
       const fromIntegerX = integerX => fromRenderX( fromIntegerPoint( phet.dot.v2( integerX, 0 ) ).x );
       const fromIntegerY = integerY => fromRenderY( fromIntegerPoint( phet.dot.v2( 0, integerY ) ).y );
 
       if ( SHOW_INTEGER_EDGES ) {
-        debugData.integerEdges.forEach( integerEdge => {
+        rasterLog.integerEdges.forEach( integerEdge => {
           const p0 = fromIntegerPoint( phet.dot.v2( integerEdge.x0, integerEdge.y0 ) );
           const p1 = fromIntegerPoint( phet.dot.v2( integerEdge.x1, integerEdge.y1 ) );
           offsetNode.addChild( new phet.scenery.Line( p0, p1, { stroke: 'black', lineCap: 'round', lineJoin: 'round' } ) );
         } );
       }
       if ( SHOW_INTERSECTIONS ) {
-        debugData.integerEdges.forEach( integerEdge => {
+        rasterLog.integerEdges.forEach( integerEdge => {
           integerEdge.intersections.forEach( intersection => {
 
             const point = new phet.dot.Vector2(
@@ -952,7 +953,7 @@ an UI and Display made for visual testing and debugging.
         } );
       }
       if ( SHOW_HALF_EDGES ) {
-        debugData.filteredRationalHalfEdges.forEach( halfEdge => {
+        rasterLog.refilteredRationalHalfEdges.forEach( halfEdge => {
           const p0 = halfEdge.p0float;
           const p1 = halfEdge.p1float;
           const p2 = halfEdge.nextEdge.p1float;
@@ -1012,7 +1013,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       if ( SHOW_FACE_CONSISTENT_FILL ) {
-        debugData.faces.forEach( face => {
+        rasterLog.renderedFaces.forEach( face => {
           if ( WINDING_DEBUG_PATH && face.windingMap.getWindingNumber( WINDING_DEBUG_PATH ) === 0 ) {
             return;
           }
@@ -1023,9 +1024,8 @@ an UI and Display made for visual testing and debugging.
 
       // TODO: dedup?
       if ( SHOW_FACE_HUE_FILL ) {
-        debugData.faces.forEach( ( face, i ) => {
+        rasterLog.renderedFaces.forEach( ( face, i ) => {
 
-          // const color = phet.scenery.Color.hsla( i / debugData.boundaryDebugData.length * 360, 100, 50, 0.5 );
           const color = new phet.scenery.Color(
             Math.floor( 256 * Math.random() ),
             Math.floor( 256 * Math.random() ),
@@ -1034,38 +1034,6 @@ an UI and Display made for visual testing and debugging.
           );
 
           offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: color } ) );
-        } );
-      }
-
-      if ( SHOW_BOUNDARY_DEBUG ) {
-        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 0 ] ];
-        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 1 ] ];
-        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 2 ] ];
-        // debugData.boundaryDebugData = [ debugData.boundaryDebugData[ 3 ] ];
-        debugData.boundaryDebugData.forEach( ( data, i ) => {
-          const connectedFace = data.connectedFace;
-          const maxIntersectionEdge = data.maxIntersectionEdge;
-          const maxIntersectionIsVertex = data.maxIntersectionIsVertex;
-          const maxIntersectionX = data.maxIntersectionX;
-          const outerBoundary = data.outerBoundary;
-
-          if ( maxIntersectionEdge ) {
-            const minimalXRationalPoint = outerBoundary.minimalXRationalPoint;
-
-            const minimalPoint = fromIntegerPoint( new phet.dot.Vector2(
-              minimalXRationalPoint.x.toFloat(),
-              minimalXRationalPoint.y.toFloat()
-            ) );
-            const intersectionPoint = fromIntegerPoint( new phet.dot.Vector2(
-              maxIntersectionX.toFloat(),
-              minimalXRationalPoint.y.toFloat()
-            ) );
-
-            const color = phet.scenery.Color.hsla( i / debugData.boundaryDebugData.length * 360, 100, 50, 0.5 );
-
-            offsetNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( boundaryToPolygon( connectedFace.boundary ) ), { fill: 'rgba(0,50,0,0.5)' } ) );
-            offsetNode.addChild( new phet.scenery.Line( minimalPoint, intersectionPoint, { stroke: color, lineWidth: 2 } ) );
-          }
         } );
       }
 
@@ -1100,12 +1068,12 @@ an UI and Display made for visual testing and debugging.
             lineCap: 'round'
           } ) );
         };
-        debugData.innerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'blue' ) );
-        debugData.outerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'red' ) );
+        rasterLog.innerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'blue' ) );
+        rasterLog.outerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'red' ) );
       }
 
       if ( SHOW_INCLUSION_DEBUG ) {
-        debugData.faces.forEach( face => {
+        rasterLog.renderedFaces.forEach( face => {
           if ( face.inclusionSet.has( INCLUSION_DEBUG_PATH ) ) {
             offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: 'rgba(0,0,0,1)' } ) );
           }
@@ -1113,7 +1081,7 @@ an UI and Display made for visual testing and debugging.
       }
 
       if ( SHOW_SOLID_COLORS ) {
-        debugData.faces.forEach( face => {
+        rasterLog.renderedFaces.forEach( face => {
           if ( face.renderProgram instanceof phet.scenery.RenderColor ) {
             offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: phet.scenery.RenderColor.premultipliedSRGBToColor( face.renderProgram.color ) } ) );
           }
@@ -1121,7 +1089,7 @@ an UI and Display made for visual testing and debugging.
       }
 
       if ( SHOW_FULL_AREAS ) {
-        debugData.areas.forEach( bounds => {
+        rasterLog.fullAreas.forEach( bounds => {
           bounds = bounds.transformed( fromRenderMatrix );
           offsetNode.addChild( phet.scenery.Rectangle.bounds( bounds, {
             stroke: 'rgba(0,0,0,1)'
@@ -1130,11 +1098,11 @@ an UI and Display made for visual testing and debugging.
       }
 
       if ( SHOW_RENDERABLE_FACES ) {
-        debugData.faceDebugData.forEach( ( data, index ) => {
+        rasterLog.renderableFaces.forEach( ( data, index ) => {
           // if ( index !== 104 ) {
           //   return;
           // }
-          const shape = data.clippableFace.getShape().transformed( fromRenderMatrix );
+          const shape = data.face.getShape().transformed( fromRenderMatrix );
           offsetNode.addChild( new phet.scenery.Path( shape, {
             stroke: 'rgba(0,0,0,0.8)',
             lineJoin: 'round',
@@ -1145,8 +1113,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       if ( SHOW_RENDERABLE_FACE_INDICES ) {
-        debugData.faceDebugData.forEach( ( data, index ) => {
-          const centroid = fromRenderMatrix.timesVector2( data.clippableFace.getCentroid( data.clippableFace.getArea() ) );
+        rasterLog.renderableFaces.forEach( ( data, index ) => {
+          const centroid = fromRenderMatrix.timesVector2( data.face.getCentroid( data.face.getArea() ) );
           offsetNode.addChild( new phet.scenery.Text( index, {
             fill: 'black',
             center: centroid
@@ -1154,9 +1122,9 @@ an UI and Display made for visual testing and debugging.
         } );
       }
 
-      // offsetNode.addChild( new phet.scenery.Path( faceToShape( debugData.faces[ 3 ] ), { fill: 'rgba(255,0,0,1)' } ) );
-      // offsetNode.addChild( new phet.scenery.Path( faceToShape( debugData.faces[ 4 ] ), { fill: 'rgba(0,255,0,1)' } ) );
-      // offsetNode.addChild( new phet.scenery.Path( faceToShape( debugData.faces[ 5 ] ), { fill: 'rgba(0,0,255,1)' } ) );
+      // offsetNode.addChild( new phet.scenery.Path( faceToShape( rasterLog.renderedFaces[ 3 ] ), { fill: 'rgba(255,0,0,1)' } ) );
+      // offsetNode.addChild( new phet.scenery.Path( faceToShape( rasterLog.renderedFaces[ 4 ] ), { fill: 'rgba(0,255,0,1)' } ) );
+      // offsetNode.addChild( new phet.scenery.Path( faceToShape( rasterLog.renderedFaces[ 5 ] ), { fill: 'rgba(0,0,255,1)' } ) );
 
       if ( offsetNode.bounds.isValid() ) {
         display.backgroundColor = phet.scenery.Color.TRANSPARENT;
@@ -1165,7 +1133,7 @@ an UI and Display made for visual testing and debugging.
         display.updateDisplay();
       }
 
-      window.debugData = debugData;
+      window.rasterLog = rasterLog;
       window.renderProgram = program;
     } )
   };
