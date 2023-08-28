@@ -587,10 +587,12 @@ export default class Rasterize {
     }
     RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
 
-    const exteriorBoundary = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
+    const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
       outerBoundaries,
       faces
     );
+    assert && assert( exteriorBoundaries.length === 1, 'Should only have one external boundary, due to background' );
+    const exteriorBoundary = exteriorBoundaries[ 0 ];
 
     // For ease of use, an unbounded face (it is essentially fake)
     const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );

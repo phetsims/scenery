@@ -130,13 +130,13 @@ export default class PolygonalBoolean {
     const faces: RationalFace[] = [];
     RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
 
-    const exteriorBoundary = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
+    const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
       outerBoundaries,
       faces
     );
 
     // For ease of use, an unbounded face (it is essentially fake)
-    const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );
+    const unboundedFace = RationalFace.createUnboundedFace( ...exteriorBoundaries );
 
     RationalFace.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
 

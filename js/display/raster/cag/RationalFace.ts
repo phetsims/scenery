@@ -126,13 +126,14 @@ export default class RationalFace {
     }
   }
 
-  // Returns the fully exterior boundary (should be singular, since we added the exterior rectangle)
+  // Returns the fully exterior boundaries (should be singular in the rendering case, since we added the exterior,
+  // rectangle, HOWEVER can be multiples otherwise)
   // NOTE: mutates faces order
   public static computeFaceHolesWithOrderedWindingNumbers(
     outerBoundaries: RationalBoundary[],
     faces: RationalFace[]
-  ): RationalBoundary {
-    let exteriorBoundary: RationalBoundary | null = null;
+  ): RationalBoundary[] {
+    const exteriorBoundaries: RationalBoundary[] = [];
 
     // Sort faces by their exterior signed areas (when we find our point is included in the smallest face boundary,
     // we'll be able to exit without testing others).
@@ -185,13 +186,12 @@ export default class RationalFace {
 
       // We should only find one exterior boundary
       if ( !found ) {
-        assert && assert( !exteriorBoundary );
-        exteriorBoundary = outerBoundary;
+        exteriorBoundaries.push( outerBoundary );
       }
     }
 
-    assert && assert( exteriorBoundary );
-    return exteriorBoundary!;
+    assert && assert( exteriorBoundaries.length );
+    return exteriorBoundaries;
   }
 
   // Returns the fully exterior boundary (should be singular, since we added the exterior rectangle)
@@ -364,12 +364,21 @@ export default class RationalFace {
     return exteriorBoundary!;
   }
 
-  public static createUnboundedFace( exteriorBoundary: RationalBoundary ): RationalFace {
-    const unboundedFace = new RationalFace( exteriorBoundary );
+  public static createUnboundedFace( ...exteriorBoundaries: RationalBoundary[] ): RationalFace {
+    const unboundedFace = new RationalFace( new RationalBoundary() );
 
-    for ( let i = 0; i < exteriorBoundary.edges.length; i++ ) {
-      exteriorBoundary.edges[ i ].face = unboundedFace;
+    for ( let i = 0; i < exteriorBoundaries.length; i++ ) {
+      const boundary = exteriorBoundaries[ i ];
+
+      unboundedFace.holes.push( boundary );
+
+      for ( let j = 0; j < boundary.edges.length; j++ ) {
+        boundary.edges[ j ].face = unboundedFace;
+      }
     }
+
+    unboundedFace.holes.push( ...exteriorBoundaries );
+
     return unboundedFace;
   }
 
