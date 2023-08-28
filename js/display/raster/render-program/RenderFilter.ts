@@ -40,8 +40,11 @@ export default class RenderFilter extends RenderUnary {
     if ( program instanceof RenderColor ) {
       return new RenderColor( RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
     }
-    else {
+    else if ( program !== this.program ) {
       return new RenderFilter( program, this.colorMatrix, this.colorTranslation );
+    }
+    else {
+      return this;
     }
   }
 

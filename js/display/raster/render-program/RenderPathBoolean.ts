@@ -55,7 +55,12 @@ export default class RenderPathBoolean extends RenderProgram {
       return inside;
     }
 
-    return this.withChildren( [ inside, outside ] );
+    if ( inside !== this.inside || outside !== this.outside ) {
+      return this.withChildren( [ inside, outside ] );
+    }
+    else {
+      return this;
+    }
   }
 
   public override needsCentroid(): boolean {

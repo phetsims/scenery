@@ -133,7 +133,12 @@ export default class RenderBlendCompose extends RenderProgram {
       return new RenderColor( RenderBlendCompose.blendCompose( a.color, b.color, this.composeType, this.blendType ) );
     }
 
-    return new RenderBlendCompose( this.composeType, this.blendType, a, b );
+    if ( a !== this.a || b !== this.b ) {
+      return new RenderBlendCompose( this.composeType, this.blendType, a, b );
+    }
+    else {
+      return this;
+    }
   }
 
   public override isFullyTransparent(): boolean {

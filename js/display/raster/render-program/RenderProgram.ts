@@ -89,7 +89,20 @@ export default abstract class RenderProgram {
   }
 
   public simplified(): RenderProgram {
-    return this.withChildren( this.getChildren().map( child => child.simplified() ) );
+    let changed = false;
+    const children = this.getChildren().map( child => {
+      const simplified = child.simplified();
+      if ( simplified !== child ) {
+        changed = true;
+      }
+      return simplified;
+    } );
+    if ( changed ) {
+      return this.withChildren( children );
+    }
+    else {
+      return this;
+    }
   }
 
   // Premultiplied linear RGB, ignoring the path

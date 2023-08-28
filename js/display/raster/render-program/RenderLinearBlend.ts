@@ -97,7 +97,12 @@ export default class RenderLinearBlend extends RenderProgram {
       return zero;
     }
 
-    return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, zero, one );
+    if ( this.zero !== zero || this.one !== one ) {
+      return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, zero, one );
+    }
+    else {
+      return this;
+    }
   }
 
   public override evaluate(

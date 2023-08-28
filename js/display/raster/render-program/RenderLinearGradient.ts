@@ -108,7 +108,14 @@ export default class RenderLinearGradient extends RenderProgram {
       return RenderColor.TRANSPARENT;
     }
 
-    return new RenderLinearGradient( this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.accuracy );
+    const stopChanged = _.some( simplifiedColorStops, ( stop, i ) => stop.program !== this.stops[ i ].program );
+
+    if ( stopChanged ) {
+      return new RenderLinearGradient( this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.accuracy );
+    }
+    else {
+      return this;
+    }
   }
 
   private useInternalCentroid(): boolean {

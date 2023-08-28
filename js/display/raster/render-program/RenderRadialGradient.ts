@@ -112,7 +112,14 @@ export default class RenderRadialGradient extends RenderProgram {
       return RenderColor.TRANSPARENT;
     }
 
-    return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.accuracy );
+    const stopChanged = _.some( simplifiedColorStops, ( stop, i ) => stop.program !== this.stops[ i ].program );
+
+    if ( stopChanged ) {
+      return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, simplifiedColorStops, this.extend, this.accuracy );
+    }
+    else {
+      return this;
+    }
   }
 
   public override evaluate(

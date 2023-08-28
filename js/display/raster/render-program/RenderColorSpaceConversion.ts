@@ -58,8 +58,11 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
     else if ( this.inverse && program instanceof this.inverse ) {
       return program.program;
     }
-    else {
+    else if ( program !== this.program ) {
       return this.withChildren( [ program ] );
+    }
+    else {
+      return this;
     }
   }
 

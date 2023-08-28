@@ -50,12 +50,15 @@ export default class RenderAlpha extends RenderUnary {
       return program;
     }
 
-    // Now we're "inside" our path
     if ( program instanceof RenderColor ) {
       return new RenderColor( program.color.timesScalar( this.alpha ) );
     }
-    else {
+    
+    else if ( program !== this.program ) {
       return new RenderAlpha( program, this.alpha );
+    }
+    else {
+      return this;
     }
   }
 

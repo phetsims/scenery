@@ -100,7 +100,12 @@ export default class RenderRadialBlend extends RenderProgram {
       return zero;
     }
 
-    return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, zero, one );
+    if ( this.zero !== zero || this.one !== one ) {
+      return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, zero, one );
+    }
+    else {
+      return this;
+    }
   }
 
   public override evaluate(

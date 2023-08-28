@@ -59,8 +59,6 @@ export default class RenderStack extends RenderProgram {
     }
     children = collapsedChildren;
 
-    // TODO: Have RenderBlendCompose simplify to RenderStack if possible
-
     // Attempt to blend adjacent colors
     const blendedChildren: RenderProgram[] = [];
     for ( let i = 0; i < children.length; i++ ) {
@@ -82,8 +80,11 @@ export default class RenderStack extends RenderProgram {
     else if ( blendedChildren.length === 1 ) {
       return blendedChildren[ 0 ];
     }
-    else {
+    else if ( this.children.length !== blendedChildren.length || _.some( this.children, ( child, i ) => child !== blendedChildren[ i ] ) ) {
       return new RenderStack( blendedChildren );
+    }
+    else {
+      return this;
     }
   }
 
