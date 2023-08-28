@@ -564,7 +564,7 @@ export default class Rasterize {
 
     rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
 
-    const filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
+    let filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
     if ( assert && debugData ) { debugData.filteredRationalHalfEdges = filteredRationalHalfEdges; }
 
     const innerBoundaries: RationalBoundary[] = [];
@@ -575,7 +575,7 @@ export default class Rasterize {
       debugData.outerBoundaries = outerBoundaries;
       debugData.faces = faces;
     }
-    RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
+    filteredRationalHalfEdges = RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
 
     const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
       outerBoundaries,

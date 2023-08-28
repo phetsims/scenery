@@ -85,12 +85,15 @@ export default class RationalFace {
     this.renderProgram = renderProgram.withPathInclusion( renderPath => inclusionSet.has( renderPath ) ).simplified();
   }
 
+  // NOTE: Returns better-filtered rational half edges, with zero-area boundaries removed
   public static traceBoundaries(
     filteredRationalHalfEdges: RationalHalfEdge[],
     innerBoundaries: RationalBoundary[],
     outerBoundaries: RationalBoundary[],
     faces: RationalFace[]
-  ): void {
+  ): RationalHalfEdge[] {
+    const zeroAreaEdges: RationalHalfEdge[] = [];
+
     for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
       const firstEdge = filteredRationalHalfEdges[ i ];
       if ( !firstEdge.boundary ) {
@@ -122,8 +125,16 @@ export default class RationalFace {
             outerBoundaries.push( boundary );
           }
         }
+        else {
+          for ( let j = 0; j < boundary.edges.length; j++ ) {
+            zeroAreaEdges.push( boundary.edges[ j ] );
+          }
+        }
       }
     }
+
+    // TODO: a better way of filtering out zero-area boundaries beforehand?
+    return filteredRationalHalfEdges.filter( edge => !zeroAreaEdges.includes( edge ) );
   }
 
   // Returns the fully exterior boundaries (should be singular in the rendering case, since we added the exterior,

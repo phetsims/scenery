@@ -123,12 +123,12 @@ export default class PolygonalBoolean {
 
     rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
 
-    const filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
+    let filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
 
     const innerBoundaries: RationalBoundary[] = [];
     const outerBoundaries: RationalBoundary[] = [];
     const faces: RationalFace[] = [];
-    RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
+    filteredRationalHalfEdges = RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
 
     const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
       outerBoundaries,
