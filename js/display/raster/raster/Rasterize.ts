@@ -594,7 +594,7 @@ export default class Rasterize {
     outputRaster: OutputRaster,
     renderableFaces: RenderableFace[],
     bounds: Bounds2,
-    gridBounds: Bounds2,
+    contributionBounds: Bounds2,
     outputRasterOffset: Vector2,
     polygonFiltering: PolygonFilterType,
     polygonFilterWindowMultiplier: number
@@ -632,12 +632,12 @@ export default class Rasterize {
       );
 
       if ( polygonFilterWindowMultiplier !== 1 ) {
-        Rasterize.windowedFilterRasterize( context, renderableFace.face.getClipped( gridBounds ), polygonalBounds.intersection( gridBounds ) );
+        Rasterize.windowedFilterRasterize( context, renderableFace.face.getClipped( contributionBounds ), polygonalBounds.intersection( contributionBounds ) );
       }
       else {
         // For filtering, we'll want to round our faceBounds to the nearest (shifted) integer.
         const gridOffset = getPolygonFilterGridOffset( context.polygonFiltering );
-        const faceBounds = polygonalBounds.intersection( gridBounds ).shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
+        const faceBounds = polygonalBounds.intersection( contributionBounds ).shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
 
         // We will clip off anything outside the "bounds", since if we're based on EdgedFace we don't want those "fake"
         // edges that might be outside.
@@ -697,10 +697,10 @@ export default class Rasterize {
     const polygonFilterWindowMultiplier = options.polygonFilterWindowMultiplier;
 
     // in RenderProgram coordinate frame
-    const gridBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
+    const contributionBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
 
     // Keep us at 20 bits of precision (after rounding)
-    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( gridBounds.width, gridBounds.height ) ) ) );
+    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( contributionBounds.width, contributionBounds.height ) ) ) );
     if ( assert && debugData ) { debugData.scale = scale; }
 
     // -( scale * ( bounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( bounds.maxX + filterGridOffset.x ) + translation.x
@@ -717,8 +717,8 @@ export default class Rasterize {
     if ( assert && debugData ) { debugData.fromIntegerMatrix = fromIntegerMatrix; }
 
     // Verify our math! Make sure we will be perfectly centered in our integer grid!
-    assert && assert( Math.abs( ( scale * gridBounds.minX + translation.x ) + ( scale * gridBounds.maxX + translation.x ) ) < 1e-10 );
-    assert && assert( Math.abs( ( scale * gridBounds.minY + translation.y ) + ( scale * gridBounds.maxY + translation.y ) ) < 1e-10 );
+    assert && assert( Math.abs( ( scale * contributionBounds.minX + translation.x ) + ( scale * contributionBounds.maxX + translation.x ) ) < 1e-10 );
+    assert && assert( Math.abs( ( scale * contributionBounds.minY + translation.y ) + ( scale * contributionBounds.maxY + translation.y ) ) < 1e-10 );
 
     const paths: RenderPath[] = [];
     renderProgram.depthFirst( program => {
@@ -736,7 +736,7 @@ export default class Rasterize {
     ] );
     paths.push( backgroundPath );
 
-    const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, gridBounds, toIntegerMatrix );
+    const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, contributionBounds, toIntegerMatrix );
     if ( assert && debugData ) { debugData.integerEdges = integerEdges; }
 
     // TODO: optional hilbert space-fill sort here?
@@ -819,7 +819,7 @@ export default class Rasterize {
       outputRaster,
       renderableFaces,
       bounds,
-      gridBounds,
+      contributionBounds,
       options.outputRasterOffset,
       polygonFiltering,
       polygonFilterWindowMultiplier
