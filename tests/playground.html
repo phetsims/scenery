@@ -1892,18 +1892,15 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       const pathA = new phet.scenery.RenderPath( 'nonzero', polygonsA );
       const pathB = new phet.scenery.RenderPath( 'nonzero', polygonsB );
 
-      // TODO: trinary!
-      const intersectionPolygons = phet.scenery.PolygonalBoolean.intersection( pathA, pathB );
-      const aPolygons = phet.scenery.PolygonalBoolean.difference( pathA, pathB );
-      const bPolygons = phet.scenery.PolygonalBoolean.difference( pathB, pathA );
+      const overlaps = phet.scenery.PolygonalBoolean.getOverlaps( pathA, pathB );
 
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( intersectionPolygons ), {
+      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( overlaps.intersection ), {
         fill: 'rgba(0,0,0,0.5)'
       } ) );
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( aPolygons ), {
+      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( overlaps.aOnly ), {
         fill: 'rgba(255,0,0,0.5)'
       } ) );
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( bPolygons ), {
+      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( overlaps.bOnly ), {
         fill: 'rgba(0,255,0,0.5)'
       } ) );
       scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( polygonsA ), {

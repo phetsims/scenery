@@ -45,7 +45,43 @@ export default class PolygonalBoolean {
     ).flat();
   }
 
-  // TODO: A venn-style output, where it gives the set inclusion for each face
+  public static getOverlaps( pathA: RenderPath, pathB: RenderPath ): { intersection: Vector2[][]; aOnly: Vector2[][]; bOnly: Vector2[][] } {
+    const taggedPolygonsList = PolygonalBoolean.cag(
+      [ pathA, pathB ],
+      ( face: RationalFace ): 'intersection' | 'aOnly' | 'bOnly' | null => {
+        const set = face.getIncludedRenderPaths();
+
+        if ( set.has( pathA ) && set.has( pathB ) ) {
+          return 'intersection';
+        }
+        else if ( set.has( pathA ) ) {
+          return 'aOnly';
+        }
+        else if ( set.has( pathB ) ) {
+          return 'bOnly';
+        }
+        else {
+          return null;
+        }
+      },
+      ( face, faceData, bounds ) => ( { tag: faceData, polygons: face.polygons } ),
+      ( faceData1, faceData2 ) => faceData1 === faceData2
+    );
+
+    const result: { intersection: Vector2[][]; aOnly: Vector2[][]; bOnly: Vector2[][] } = {
+      intersection: [],
+      aOnly: [],
+      bOnly: []
+    };
+
+    taggedPolygonsList.forEach( taggedPolygon => {
+      if ( taggedPolygon.tag !== null ) {
+        result[ taggedPolygon.tag ].push( ...taggedPolygon.polygons );
+      }
+    } );
+
+    return result;
+  }
 
   // TODO: ideally handle the fully collinear simplification?
 
