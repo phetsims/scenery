@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { CombinedRaster, CombinedRasterOptions, getPolygonFilterGridBounds, PolygonalBoolean, PolygonalFace, PolygonClipping, PolygonFilterType, Rasterize, RenderableFace, RenderColor, RenderColorSpace, RenderPath, RenderStack, scenery } from '../../../imports.js';
+import { CombinedRaster, CombinedRasterOptions, getPolygonFilterGridBounds, LinearEdge, PolygonalBoolean, PolygonalFace, PolygonClipping, PolygonFilterType, Rasterize, RenderableFace, RenderColor, RenderColorSpace, RenderPath, RenderProgram, RenderStack, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -32,14 +32,15 @@ export default class VectorCanvas {
 
   // Assumes sRGB? We'll do srgb-linear blending to mimic for now?
   public fillColor( renderPath: RenderPath, color: Vector4 ): void {
+    this.fillRenderProgram( renderPath, new RenderColor( color ).colorConverted( RenderColorSpace.sRGB, this.colorSpace === 'srgb' ? RenderColorSpace.premultipliedSRGB : RenderColorSpace.premultipliedDisplayP3 ) );
+  }
 
+  private fillRenderProgram( renderPath: RenderPath, renderProgram: RenderProgram ): void {
     const bounds = renderPath.getBounds();
 
     renderPath = new RenderPath( renderPath.fillRule, renderPath.subpaths.map( subpath => PolygonClipping.boundsClipPolygon( subpath, this.bounds ) ) );
 
     const newRenderableFaces: RenderableFace[] = [];
-
-    const renderProgram = new RenderColor( color ).colorConverted( RenderColorSpace.sRGB, this.colorSpace === 'srgb' ? RenderColorSpace.premultipliedSRGB : RenderColorSpace.premultipliedDisplayP3 );
 
     for ( let i = 0; i < this.renderableFaces.length; i++ ) {
       const renderableFace = this.renderableFaces[ i ];
@@ -82,9 +83,39 @@ export default class VectorCanvas {
   private combineFaces(): void {
     // TODO: ONLY split linear/radial gradients AFTER we have combined faces!!!!
 
-    // TODO: something better than using LinearEdge.toPolygons, it is not high performance (we should trace edges,
-    // TODO: like traceCombineFaces).
-    // TODO: Use LinearEdge.toPolygons( LinearEdge.fromPolygons( polygons ) );
+    for ( let i = 0; i < this.renderableFaces.length; i++ ) {
+      const renderableFace = this.renderableFaces[ i ];
+      const renderProgram = renderableFace.renderProgram;
+
+      const compatibleFaces = [];
+      const compatibleIndices = [];
+
+      for ( let j = i + 1; j < this.renderableFaces.length; j++ ) {
+        const otherRenderableFace = this.renderableFaces[ j ];
+
+        if ( renderProgram.equals( otherRenderableFace.renderProgram ) ) {
+          compatibleFaces.push( otherRenderableFace );
+          compatibleIndices.push( j );
+        }
+      }
+
+      if ( compatibleFaces.length ) {
+        // TODO: something better than using LinearEdge.toPolygons, it is not high performance (we should trace edges,
+        // TODO: like traceCombineFaces).
+        const polygons = [ renderableFace, ...compatibleFaces ].map( renderableFace => renderableFace.face.toPolygonalFace().polygons ).flat();
+        const simplifiedPolygons = LinearEdge.toPolygons( LinearEdge.fromPolygons( polygons ) );
+        const newFace = new PolygonalFace( simplifiedPolygons );
+        this.renderableFaces[ i ] = new RenderableFace(
+          newFace,
+          renderProgram,
+          newFace.getBounds()
+        );
+
+        while ( compatibleIndices.length ) {
+          this.renderableFaces.splice( compatibleIndices.pop()!, 1 );
+        }
+      }
+    }
   }
 
   public updateWidthHeight( width: number, height: number ): void {

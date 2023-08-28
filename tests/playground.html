@@ -1922,9 +1922,20 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       const outputSize = 768 * 2;
       // const outputSize = 768 / 4;
 
+      const SHOW_OUTLINES = true;
+
       const vectorCanvas = new phet.scenery.VectorCanvas( outputSize, outputSize, 'display-p3', phet.scenery.PolygonFilterType.Box );
 
       const p = ( x, y ) => phet.dot.v2( x * outputSize, y * outputSize );
+
+      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+        [
+          p( 0, 0 ),
+          p( 1, 0 ),
+          p( 1, 1 ),
+          p( 0, 1 )
+        ]
+      ] ), phet.dot.v4( 0.9, 0.9, 0.9, 1 ) );
 
       vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
         [
@@ -1945,32 +1956,34 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       ] ), phet.dot.v4( 0, 1, 0, 1 ) );
 
       // Stroke the renderable face outlines!
-      // TODO: vectorCanvas.copy()
-      // TODO: vectorCanvas.writeToCanvas()
-      vectorCanvas.renderableFaces.slice().forEach( face => {
-        const shape = face.face.getShape();
+      if ( SHOW_OUTLINES ) {
+        // TODO: vectorCanvas.copy()
+        // TODO: vectorCanvas.writeToCanvas()
+        vectorCanvas.renderableFaces.slice().forEach( face => {
+          const shape = face.face.getShape();
 
-        const strokedShape = shape.getStrokedShape( new phet.kite.LineStyles( {
-          lineWidth: displaySize / outputSize
-        } ) );
+          const strokedShape = shape.getStrokedShape( new phet.kite.LineStyles( {
+            lineWidth: 2
+          } ) );
 
-        // TODO: stop duplicating things like this
-        const piecewiseOptions = {
-          minLevels: 1,
-          maxLevels: 10,
-          // distanceEpsilon: 0.02,
-          distanceEpsilon: 0.0002,
-          curveEpsilon: 0.2
-        };
-        const shapeToPolygons = shape => shape.subpaths.map( subpath => {
-          return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
-            return line.start;
+          // TODO: stop duplicating things like this
+          const piecewiseOptions = {
+            minLevels: 1,
+            maxLevels: 10,
+            // distanceEpsilon: 0.02,
+            distanceEpsilon: 0.0002,
+            curveEpsilon: 0.2
+          };
+          const shapeToPolygons = shape => shape.subpaths.map( subpath => {
+            return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
+              return line.start;
+            } );
           } );
-        } );
 
-        const polygons = shapeToPolygons( strokedShape );
-        vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', polygons ), phet.dot.v4( 0, 0, 0, 1 ) );
-      } );
+          const polygons = shapeToPolygons( strokedShape );
+          vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', polygons ), phet.dot.v4( 0, 0, 0, 1 ) );
+        } );
+      }
 
       const styleCanvas = canvas => {
         canvas.style.width = `${displaySize}px`;
