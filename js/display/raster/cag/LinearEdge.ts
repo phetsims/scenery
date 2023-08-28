@@ -203,6 +203,8 @@ export default class LinearEdge {
   /**
    * Returns a simplified version of the polygons as a kite Shape.
    *
+   * TODO: perhaps... move something like this to kite?
+   *
    * NOTE: This is a low-performance method, mainly intended for debugging display.
    */
   public static polygonsToShape( polygons: Vector2[][] ): Shape {

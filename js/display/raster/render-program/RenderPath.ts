@@ -9,6 +9,7 @@
 import { FillRule, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 let globalPathId = 0;
 
@@ -20,6 +21,20 @@ export default class RenderPath {
 
   public transformed( transform: Matrix3 ): RenderPath {
     return new RenderPath( this.fillRule, this.subpaths.map( subpath => subpath.map( point => transform.timesVector2( point ) ) ) );
+  }
+
+  public getBounds(): Bounds2 {
+    const bounds = Bounds2.NOTHING.copy();
+
+    for ( let i = 0; i < this.subpaths.length; i++ ) {
+      const subpath = this.subpaths[ i ];
+
+      for ( let j = 0; j < subpath.length; j++ ) {
+        bounds.addPoint( subpath[ j ] );
+      }
+    }
+
+    return bounds;
   }
 
   public serialize(): SerializedRenderPath {

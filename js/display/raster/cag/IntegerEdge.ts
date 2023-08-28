@@ -113,6 +113,32 @@ export default class IntegerEdge {
     }
     return integerEdges;
   }
+
+  /**
+   * Returns a list of integer edges (tagged with their respective RenderPaths) that are transformed to within the
+   * integer coordinates.
+   */
+  public static scaleToIntegerEdges( paths: RenderPath[], toIntegerMatrix: Matrix3 ): IntegerEdge[] {
+    const integerEdges: IntegerEdge[] = [];
+    for ( let i = 0; i < paths.length; i++ ) {
+      const path = paths[ i ];
+
+      for ( let j = 0; j < path.subpaths.length; j++ ) {
+        const subpath = path.subpaths[ j ];
+
+        for ( let k = 0; k < subpath.length; k++ ) {
+          // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
+          const p0 = subpath[ k ];
+          const p1 = subpath[ ( k + 1 ) % subpath.length ];
+          const edge = IntegerEdge.createTransformed( path, toIntegerMatrix, p0, p1 );
+          if ( edge !== null ) {
+            integerEdges.push( edge );
+          }
+        }
+      }
+    }
+    return integerEdges;
+  }
 }
 
 scenery.register( 'IntegerEdge', IntegerEdge );

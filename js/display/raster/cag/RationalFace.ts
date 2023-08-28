@@ -484,7 +484,6 @@ export default class RationalFace {
 
         // All RenderPrograms should be equivalent, so we'll just use the first one
         const faceData = dataMap.get( startingFace )!;
-        assert && assert( faceData );
 
         // Cache whether faces or compatible or not
         const compatibleFaces = new Set<RationalFace>();

@@ -9,12 +9,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClipSimplifier, EdgedFace, LinearEdge, PolygonalFace, RationalFace, RationalHalfEdge, RenderableFace, RenderProgram, scenery } from '../../../imports.js';
+import { EdgedFace, LinearEdge, PolygonalFace, RationalFace, RenderableFace, RenderProgram, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
-
-const traceSimplifier = new ClipSimplifier();
 
 class AccumulatingFace {
   public faces = new Set<RationalFace>();

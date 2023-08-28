@@ -508,6 +508,7 @@ export { default as RationalFace } from './display/raster/cag/RationalFace.js';
 export { default as RationalHalfEdge } from './display/raster/cag/RationalHalfEdge.js';
 export { default as RationalIntersection } from './display/raster/cag/RationalIntersection.js';
 export { default as WindingMap } from './display/raster/cag/WindingMap.js';
+export { default as PolygonalBoolean } from './display/raster/cag/PolygonalBoolean.js';
 
 export { default as CohenSutherlandClipping } from './display/raster/clip/CohenSutherlandClipping.js';
 export { default as PolygonClipping } from './display/raster/clip/PolygonClipping.js';
