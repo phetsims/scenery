@@ -155,7 +155,7 @@ export default class VectorCanvas {
     this.height = height;
 
     this.bounds = new Bounds2( 0, 0, width, height );
-    this.gridBounds = getPolygonFilterGridBounds( this.bounds, this.polygonFiltering );
+    this.gridBounds = getPolygonFilterGridBounds( this.bounds, this.polygonFiltering, 1 );
 
     this.renderableFaces.length = 0;
     this.renderableFaces.push( new RenderableFace(
@@ -186,7 +186,8 @@ export default class VectorCanvas {
       this.bounds,
       this.gridBounds,
       Vector2.ZERO,
-      this.polygonFiltering
+      this.polygonFiltering,
+      1
     );
 
     return raster.toImageData();

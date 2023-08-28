@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterExtraPixels, getPolygonFilterGridBounds, getPolygonFilterGridOffset, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
@@ -15,8 +15,15 @@ import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export type RasterizationOptions = {
+  // TODO: doc
   outputRasterOffset?: Vector2;
+
+  // TODO: doc
   polygonFiltering?: PolygonFilterType;
+
+  // We'll expand the filter window by this multiplier. If it is not 1, it will potentially drop performance
+  // significantly (we won't be able to grid-clip to do it efficiently, and it might cover significantly more area).
+  polygonFilterWindowMultiplier?: number;
 
   edgeIntersectionMethod?: 'quadratic' | 'boundsTree' | 'arrayBoundsTree';
 
@@ -29,6 +36,7 @@ export type RasterizationOptions = {
 const DEFAULT_OPTIONS = {
   outputRasterOffset: Vector2.ZERO,
   polygonFiltering: PolygonFilterType.Box,
+  polygonFilterWindowMultiplier: 1,
   edgeIntersectionMethod: 'arrayBoundsTree',
   renderableFaceMethod: 'traced',
   splitLinearGradients: true,
@@ -50,6 +58,7 @@ class RasterizationContext {
     public outputRasterOffset: Vector2,
     public bounds: Bounds2,
     public polygonFiltering: PolygonFilterType,
+    public polygonFilterWindowMultiplier: number,
     public needs: RenderProgramNeeds
   ) {}
 }
@@ -74,40 +83,6 @@ export default class Rasterize {
 
     return renderProgrammedFaces;
   }
-
-  // TODO: reconstitute this into an alternative non-binary setup! (filtering will be a bit more annoying?)
-  // private static fullRasterize(
-  //   outputRaster: OutputRaster,
-  //   renderProgram: RenderProgram,
-  //   clippableFace: ClippableFace,
-  //   constColor: Vector4 | null,
-  //   bounds: Bounds2, // TODO: check it's integral
-  //   translation: Vector2
-  // ): void {
-  //   const pixelBounds = Bounds2.NOTHING.copy();
-  //   const minX = bounds.minX;
-  //   const minY = bounds.minY;
-  //   const maxX = bounds.maxX;
-  //   const maxY = bounds.maxY;
-  //
-  //   for ( let y = minY; y < maxY; y++ ) {
-  //     pixelBounds.minY = y;
-  //     pixelBounds.maxY = y + 1;
-  //     for ( let x = minX; x < maxX; x++ ) {
-  //       pixelBounds.minX = x;
-  //       pixelBounds.maxX = x + 1;
-  //
-  //       const pixelFace = clippableFace.getClipped( pixelBounds );
-  //       const area = pixelFace.getArea();
-  //       if ( area > 1e-8 ) {
-  //         Rasterize.addPartialPixel(
-  //           outputRaster, renderProgram, constColor, translation,
-  //           pixelFace, area, x, y
-  //         );
-  //       }
-  //     }
-  //   }
-  // }
 
   private static addFilterPixel(
     context: RasterizationContext,
@@ -401,13 +376,134 @@ export default class Rasterize {
     }
   }
 
+  private static windowedFilterRasterize(
+    context: RasterizationContext,
+    clippableFace: ClippableFace,
+    faceBounds: Bounds2
+  ): void {
+    // USE getPolygonFilterGridBounds
+
+    const outputMinX = context.bounds.minX;
+    const outputMaxX = context.bounds.maxX;
+    const outputMinY = context.bounds.minY;
+    const outputMaxY = context.bounds.maxY;
+
+    const filterWidth = getPolygonFilterWidth( context.polygonFiltering ) * context.polygonFilterWindowMultiplier;
+    const filterArea = filterWidth * filterWidth;
+    const filterExtension = 0.5 * ( filterWidth - 1 );
+    const filterMin = -filterExtension;
+    const filterMax = 1 + filterExtension;
+    const descaleMatrix = Matrix3.scaling( 1 / context.polygonFilterWindowMultiplier );
+
+    const quadClip = ( face: ClippableFace, x: number, y: number ): {
+      minXMinYFace: ClippableFace;
+      minXMaxYFace: ClippableFace;
+      maxXMinYFace: ClippableFace;
+      maxXMaxYFace: ClippableFace;
+    } => {
+      const xClipped = face.getBinaryXClip( x, y );
+      const minXFace = xClipped.minFace;
+      const maxXFace = xClipped.maxFace;
+
+      const minXYClipped = minXFace.getBinaryYClip( y, x );
+      const maxXYClipped = maxXFace.getBinaryYClip( y, x );
+      return {
+        minXMinYFace: minXYClipped.minFace,
+        minXMaxYFace: minXYClipped.maxFace,
+        maxXMinYFace: maxXYClipped.minFace,
+        maxXMaxYFace: maxXYClipped.maxFace
+      };
+    };
+
+    for ( let y = outputMinY; y < outputMaxY; y++ ) {
+
+      const minY = y + filterMin;
+      const maxY = y + filterMax;
+
+      // If our filter window is outside of the face bounds, we can skip it entirely
+      if ( minY >= faceBounds.maxY || maxY <= faceBounds.minY ) {
+        continue;
+      }
+
+      for ( let x = outputMinX; x < outputMaxX; x++ ) {
+
+        const minX = x + filterMin;
+        const maxX = x + filterMax;
+
+        // If our filter window is outside of the face bounds, we can skip it entirely
+        if ( minX >= faceBounds.maxX || maxX <= faceBounds.minX ) {
+          continue;
+        }
+
+        const clippedFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, maxY ) );
+        const area = clippedFace.getArea();
+
+        if ( area > 1e-8 ) {
+          // TODO: NOTE: Not exact!!! We're just taking one sample per pixel. Won't blend gradients/images ideally
+          // TODO: (but it's a lot faster)
+          const color = context.constClientColor || context.renderProgram.evaluate(
+            clippedFace,
+            context.needs.needsArea ? area : NaN, // NaNs to hopefully hard-error
+            context.needs.needsCentroid ? clippedFace.getCentroid( area ) : nanVector,
+            minX, minY, maxX, maxY
+          );
+
+          let contribution = 0;
+          if ( context.polygonFiltering === PolygonFilterType.Box ) {
+            contribution = area / filterArea;
+          }
+          else {
+            // TODO: we don't have to transform the translation, could handle in the getBilinearFiltered() call etc.
+            // get the face with our "pixel" center at the origin, and scaled to the filter window
+            const unitFace = clippedFace.getTransformed( descaleMatrix.timesMatrix( Matrix3.translation( -( x + 0.5 ), -( y + 0.5 ) ) ) );
+
+            const quadClipped = quadClip( unitFace, 0, 0 );
+
+            if ( context.polygonFiltering === PolygonFilterType.Bilinear ) {
+              contribution = quadClipped.minXMinYFace.getBilinearFiltered( 0, 0, -1, -1 ) +
+                             quadClipped.minXMaxYFace.getBilinearFiltered( 0, 0, -1, 0 ) +
+                             quadClipped.maxXMinYFace.getBilinearFiltered( 0, 0, 0, -1 ) +
+                             quadClipped.maxXMaxYFace.getBilinearFiltered( 0, 0, 0, 0 );
+            }
+            else if ( context.polygonFiltering === PolygonFilterType.MitchellNetravali ) {
+              const minMinQuad = quadClip( quadClipped.minXMinYFace, -1, -1 );
+              const minMaxQuad = quadClip( quadClipped.minXMaxYFace, -1, 1 );
+              const maxMinQuad = quadClip( quadClipped.maxXMinYFace, 1, -1 );
+              const maxMaxQuad = quadClip( quadClipped.maxXMaxYFace, 1, 1 );
+
+              contribution = minMinQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, -2, -2 ) +
+                             minMinQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -2, -1 ) +
+                             minMinQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, -1, -2 ) +
+                             minMinQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -1, -1 ) +
+                             minMaxQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, -2, 0 ) +
+                             minMaxQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -2, 1 ) +
+                             minMaxQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, -1, 0 ) +
+                             minMaxQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -1, 1 ) +
+                             maxMinQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, 0, -2 ) +
+                             maxMinQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 0, -1 ) +
+                             maxMinQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, 1, -2 ) +
+                             maxMinQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 1, -1 ) +
+                             maxMaxQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, 0, 0 ) +
+                             maxMaxQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 0, 1 ) +
+                             maxMaxQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, 1, 0 ) +
+                             maxMaxQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 1, 1 );
+            }
+          }
+
+          context.outputRaster.addClientPartialPixel( color.timesScalar( contribution ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
+        }
+      }
+    }
+  }
+
   public static rasterizeAccumulate(
     outputRaster: OutputRaster,
     renderableFaces: RenderableFace[],
     bounds: Bounds2,
     gridBounds: Bounds2,
     outputRasterOffset: Vector2,
-    polygonFiltering: PolygonFilterType
+    polygonFiltering: PolygonFilterType,
+    polygonFilterWindowMultiplier: number
   ): void {
     for ( let i = 0; i < renderableFaces.length; i++ ) {
       const renderableFace = renderableFaces[ i ];
@@ -437,24 +533,30 @@ export default class Rasterize {
         outputRasterOffset,
         bounds,
         polygonFiltering,
+        polygonFilterWindowMultiplier,
         renderProgram.getNeeds()
       );
 
-      // For filtering, we'll want to round our faceBounds to the nearest (shifted) integer.
-      const gridOffset = getPolygonFilterGridOffset( context.polygonFiltering );
-      const faceBounds = polygonalBounds.intersection( gridBounds ).shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
-
-      // We will clip off anything outside the "bounds", since if we're based on EdgedFace we don't want those "fake"
-      // edges that might be outside.
-      const clippableFace = renderableFace.face.getClipped( faceBounds );
-      if ( assert ) {
-        faceDebugData.clippableFace = renderableFace.face;
-        faceDebugData.clippedFace = clippableFace;
+      if ( polygonFilterWindowMultiplier !== 1 ) {
+        Rasterize.windowedFilterRasterize( context, renderableFace.face.getClipped( gridBounds ), polygonalBounds.intersection( gridBounds ) );
       }
+      else {
+        // For filtering, we'll want to round our faceBounds to the nearest (shifted) integer.
+        const gridOffset = getPolygonFilterGridOffset( context.polygonFiltering );
+        const faceBounds = polygonalBounds.intersection( gridBounds ).shiftedXY( gridOffset, gridOffset ).roundedOut().shiftedXY( -gridOffset, -gridOffset );
 
-      Rasterize.binaryInternalRasterize(
-        context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
-      );
+        // We will clip off anything outside the "bounds", since if we're based on EdgedFace we don't want those "fake"
+        // edges that might be outside.
+        const clippableFace = renderableFace.face.getClipped( faceBounds );
+        if ( assert ) {
+          faceDebugData.clippableFace = renderableFace.face;
+          faceDebugData.clippedFace = clippableFace;
+        }
+
+        Rasterize.binaryInternalRasterize(
+          context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
+        );
+      }
     }
   }
 
@@ -498,12 +600,10 @@ export default class Rasterize {
     }
 
     const polygonFiltering: PolygonFilterType = options.polygonFiltering;
-
-    const filterAdditionalPixels = getPolygonFilterExtraPixels( polygonFiltering );
-    const filterGridOffset = getPolygonFilterGridOffset( polygonFiltering );
+    const polygonFilterWindowMultiplier = options.polygonFilterWindowMultiplier;
 
     // in RenderProgram coordinate frame
-    const gridBounds = getPolygonFilterGridBounds( bounds, polygonFiltering );
+    const gridBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
 
     // Keep us at 20 bits of precision (after rounding)
     const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( gridBounds.width, gridBounds.height ) ) ) );
@@ -511,8 +611,8 @@ export default class Rasterize {
 
     // -( scale * ( bounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( bounds.maxX + filterGridOffset.x ) + translation.x
     const translation = new Vector2(
-      -0.5 * scale * ( 2 * filterGridOffset + filterAdditionalPixels + bounds.minX + bounds.maxX ),
-      -0.5 * scale * ( 2 * filterGridOffset + filterAdditionalPixels + bounds.minY + bounds.maxY )
+      -0.5 * scale * ( bounds.minX + bounds.maxX ),
+      -0.5 * scale * ( bounds.minY + bounds.maxY )
     );
     if ( assert && debugData ) { debugData.translation = translation; }
 
@@ -627,7 +727,8 @@ export default class Rasterize {
       bounds,
       gridBounds,
       options.outputRasterOffset,
-      polygonFiltering
+      polygonFiltering,
+      polygonFilterWindowMultiplier
     );
   }
 

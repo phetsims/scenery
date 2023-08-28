@@ -17,6 +17,21 @@ enum PolygonFilterType {
 
 export default PolygonFilterType;
 
+export const getPolygonFilterWidth = ( filterType: PolygonFilterType ): number => {
+  if ( filterType === PolygonFilterType.Box ) {
+    return 1;
+  }
+  else if ( filterType === PolygonFilterType.Bilinear ) {
+    return 2;
+  }
+  else if ( filterType === PolygonFilterType.MitchellNetravali ) {
+    return 4;
+  }
+  else {
+    throw new Error( `Unknown PolygonFilterType: ${filterType}` );
+  }
+};
+
 export const getPolygonFilterExtraPixels = ( filterType: PolygonFilterType ): number => {
   if ( filterType === PolygonFilterType.Box ) {
     return 0;
@@ -77,16 +92,20 @@ export const getPolygonFilterMaxExpand = ( filterType: PolygonFilterType ): numb
   }
 };
 
-export const getPolygonFilterGridBounds = ( bounds: Bounds2, filterType: PolygonFilterType ): Bounds2 => {
-  const filterAdditionalPixels = getPolygonFilterExtraPixels( filterType );
-  const filterGridOffset = getPolygonFilterGridOffset( filterType );
+export const getPolygonFilterGridBounds = ( bounds: Bounds2, filterType: PolygonFilterType, filterMultiplier = 1 ): Bounds2 => {
 
-  return new Bounds2(
-    bounds.minX + filterGridOffset,
-    bounds.minY + filterGridOffset,
-    bounds.maxX + filterGridOffset + filterAdditionalPixels,
-    bounds.maxY + filterGridOffset + filterAdditionalPixels
-  );
+  const filterWidth = getPolygonFilterWidth( filterType ) * filterMultiplier;
+  const filterExtension = 0.5 * ( filterWidth - 1 );
+
+  if ( assert && filterMultiplier === 1 ) {
+    const filterAdditionalPixels = getPolygonFilterExtraPixels( filterType );
+    const filterGridOffset = getPolygonFilterGridOffset( filterType );
+
+    assert && assert( filterGridOffset === -filterExtension );
+    assert && assert( filterGridOffset + filterAdditionalPixels === filterExtension );
+  }
+
+  return bounds.dilated( filterExtension );
 };
 
 scenery.register( 'PolygonFilterType', PolygonFilterType );
