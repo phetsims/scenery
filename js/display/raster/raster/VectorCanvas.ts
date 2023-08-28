@@ -3,6 +3,9 @@
 /**
  * Similar to an DOM Canvas, but stores a vector representation of the relevant drawing commands.
  *
+ * TODO TODO: This should be done instead in the rational-half-edge space, so we get better exactness on the repeated
+ * TODO: CAG. What is causing the issues?
+ *
  * TODO: We really would want to "cache" all of the commands at once, build up a "pending" RenderProgram, and then
  * TODO: handle all the paths at once.
  *
