@@ -439,58 +439,152 @@ export default class Rasterize {
         const area = clippedFace.getArea();
 
         if ( area > 1e-8 ) {
-          // TODO: NOTE: Not exact!!! We're just taking one sample per pixel. Won't blend gradients/images ideally
-          // TODO: (but it's a lot faster)
-          const color = context.constClientColor || context.renderProgram.evaluate(
-            clippedFace,
-            context.needs.needsArea ? area : NaN, // NaNs to hopefully hard-error
-            context.needs.needsCentroid ? clippedFace.getCentroid( area ) : nanVector,
-            minX, minY, maxX, maxY
-          );
+          if ( context.constClientColor ) {
+            const color = context.constClientColor;
 
-          let contribution = 0;
-          if ( context.polygonFiltering === PolygonFilterType.Box ) {
-            contribution = area / filterArea;
+            let contribution = 0;
+            if ( context.polygonFiltering === PolygonFilterType.Box ) {
+              contribution = area / filterArea;
+            }
+            else {
+              // TODO: we don't have to transform the translation, could handle in the getBilinearFiltered() call etc.
+              // get the face with our "pixel" center at the origin, and scaled to the filter window
+              const unitFace = clippedFace.getTransformed( descaleMatrix.timesMatrix( Matrix3.translation( -( x + 0.5 ), -( y + 0.5 ) ) ) );
+
+              const quadClipped = quadClip( unitFace, 0, 0 );
+
+              if ( context.polygonFiltering === PolygonFilterType.Bilinear ) {
+                contribution = quadClipped.minXMinYFace.getBilinearFiltered( 0, 0, -1, -1 ) +
+                               quadClipped.minXMaxYFace.getBilinearFiltered( 0, 0, -1, 0 ) +
+                               quadClipped.maxXMinYFace.getBilinearFiltered( 0, 0, 0, -1 ) +
+                               quadClipped.maxXMaxYFace.getBilinearFiltered( 0, 0, 0, 0 );
+              }
+              else if ( context.polygonFiltering === PolygonFilterType.MitchellNetravali ) {
+                const minMinQuad = quadClip( quadClipped.minXMinYFace, -1, -1 );
+                const minMaxQuad = quadClip( quadClipped.minXMaxYFace, -1, 1 );
+                const maxMinQuad = quadClip( quadClipped.maxXMinYFace, 1, -1 );
+                const maxMaxQuad = quadClip( quadClipped.maxXMaxYFace, 1, 1 );
+
+                contribution = minMinQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, -2, -2 ) +
+                               minMinQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -2, -1 ) +
+                               minMinQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, -1, -2 ) +
+                               minMinQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -1, -1 ) +
+                               minMaxQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, -2, 0 ) +
+                               minMaxQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -2, 1 ) +
+                               minMaxQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, -1, 0 ) +
+                               minMaxQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -1, 1 ) +
+                               maxMinQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, 0, -2 ) +
+                               maxMinQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 0, -1 ) +
+                               maxMinQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, 1, -2 ) +
+                               maxMinQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 1, -1 ) +
+                               maxMaxQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, 0, 0 ) +
+                               maxMaxQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 0, 1 ) +
+                               maxMaxQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, 1, 0 ) +
+                               maxMaxQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 1, 1 );
+              }
+            }
+
+            context.outputRaster.addClientPartialPixel( color.timesScalar( contribution ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
           }
           else {
-            // TODO: we don't have to transform the translation, could handle in the getBilinearFiltered() call etc.
-            // get the face with our "pixel" center at the origin, and scaled to the filter window
-            const unitFace = clippedFace.getTransformed( descaleMatrix.timesMatrix( Matrix3.translation( -( x + 0.5 ), -( y + 0.5 ) ) ) );
+            const transformMatrix = descaleMatrix.timesMatrix( Matrix3.translation( -( x + 0.5 ), -( y + 0.5 ) ) );
+            const inverseMatrix = transformMatrix.inverted();
+            const unitFace = clippedFace.getTransformed( transformMatrix );
 
-            const quadClipped = quadClip( unitFace, 0, 0 );
+            const splitAndProcessFace = ( ux: number, uy: number, face: ClippableFace, getContribution: ( f: ClippableFace ) => number ) => {
+              const area = face.getArea();
 
-            if ( context.polygonFiltering === PolygonFilterType.Bilinear ) {
-              contribution = quadClipped.minXMinYFace.getBilinearFiltered( 0, 0, -1, -1 ) +
-                             quadClipped.minXMaxYFace.getBilinearFiltered( 0, 0, -1, 0 ) +
-                             quadClipped.maxXMinYFace.getBilinearFiltered( 0, 0, 0, -1 ) +
-                             quadClipped.maxXMaxYFace.getBilinearFiltered( 0, 0, 0, 0 );
+              // TODO: performance is killed here, hopefully we don't really need it
+              const minVector = inverseMatrix.timesVector2( new Vector2( ux, uy ) );
+              const maxVector = inverseMatrix.timesVector2( new Vector2( ux + 1, uy + 1 ) );
+
+              if ( area > 1e-8 ) {
+                // TODO: SPLIT THIS
+                const transformedArea = area * filterArea;
+                const transformedFace = face.getTransformed( inverseMatrix );
+                const transformedMinX = minVector.x;
+                const transformedMinY = minVector.y;
+                const transformedMaxX = maxVector.x;
+                const transformedMaxY = maxVector.y;
+
+                const binary = ( tFace: ClippableFace, tArea: number, tMinX: number, tMinY: number, tMaxX: number, tMaxY: number ) => {
+                  const averageX = 0.5 * ( tMinX + tMaxX );
+                  const averageY = 0.5 * ( tMinY + tMaxY );
+                  if ( tMaxX - tMinX > 1 ) {
+                    const { minFace, maxFace } = tFace.getBinaryXClip( averageX, averageY );
+                    const minArea = minFace.getArea();
+                    const maxArea = maxFace.getArea();
+
+                    if ( minArea > 1e-8 ) {
+                      binary( minFace, minArea, tMinX, tMinY, averageX, tMaxY );
+                    }
+                    if ( maxArea > 1e-8 ) {
+                      binary( maxFace, maxArea, averageX, tMinY, tMaxX, tMaxY );
+                    }
+                  }
+                  else if ( tMaxY - tMinY > 1 ) {
+                    const { minFace, maxFace } = tFace.getBinaryYClip( averageY, averageX );
+                    const minArea = minFace.getArea();
+                    const maxArea = maxFace.getArea();
+
+                    if ( minArea > 1e-8 ) {
+                      binary( minFace, minArea, tMinX, tMinY, tMaxX, averageY );
+                    }
+                    if ( maxArea > 1e-8 ) {
+                      binary( maxFace, maxArea, tMinX, averageY, tMaxX, tMaxY );
+                    }
+                  }
+                  else {
+                    const color = context.renderProgram.evaluate(
+                      tFace,
+                      context.needs.needsArea ? tArea : NaN, // NaNs to hopefully hard-error
+                      context.needs.needsCentroid ? tFace.getCentroid( tArea ) : nanVector,
+                      tMinX, tMinY, tMaxX, tMaxY
+                    );
+                    context.outputRaster.addClientPartialPixel( color.timesScalar( getContribution( tFace.getTransformed( transformMatrix ) ) ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
+                  }
+                };
+                binary( transformedFace, transformedArea, transformedMinX, transformedMinY, transformedMaxX, transformedMaxY );
+              }
+            };
+
+            if ( context.polygonFiltering === PolygonFilterType.Box ) {
+              splitAndProcessFace( -0.5, -0.5, unitFace, face => face.getArea() );
+            }
+            else if ( context.polygonFiltering === PolygonFilterType.Bilinear ) {
+              const quadClipped = quadClip( unitFace, 0, 0 );
+              splitAndProcessFace( -1, -1, quadClipped.minXMinYFace, f => f.getBilinearFiltered( 0, 0, -1, -1 ) );
+              splitAndProcessFace( -1, 0, quadClipped.minXMaxYFace, f => f.getBilinearFiltered( 0, 0, -1, 0 ) );
+              splitAndProcessFace( 0, -1, quadClipped.maxXMinYFace, f => f.getBilinearFiltered( 0, 0, 0, -1 ) );
+              splitAndProcessFace( 0, 0, quadClipped.maxXMaxYFace, f => f.getBilinearFiltered( 0, 0, 0, 0 ) );
             }
             else if ( context.polygonFiltering === PolygonFilterType.MitchellNetravali ) {
+              const quadClipped = quadClip( unitFace, 0, 0 );
+
               const minMinQuad = quadClip( quadClipped.minXMinYFace, -1, -1 );
               const minMaxQuad = quadClip( quadClipped.minXMaxYFace, -1, 1 );
               const maxMinQuad = quadClip( quadClipped.maxXMinYFace, 1, -1 );
               const maxMaxQuad = quadClip( quadClipped.maxXMaxYFace, 1, 1 );
 
-              contribution = minMinQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, -2, -2 ) +
-                             minMinQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -2, -1 ) +
-                             minMinQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, -1, -2 ) +
-                             minMinQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -1, -1 ) +
-                             minMaxQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, -2, 0 ) +
-                             minMaxQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -2, 1 ) +
-                             minMaxQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, -1, 0 ) +
-                             minMaxQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, -1, 1 ) +
-                             maxMinQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, 0, -2 ) +
-                             maxMinQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 0, -1 ) +
-                             maxMinQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, 1, -2 ) +
-                             maxMinQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 1, -1 ) +
-                             maxMaxQuad.minXMinYFace.getMitchellNetravaliFiltered( 0, 0, 0, 0 ) +
-                             maxMaxQuad.minXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 0, 1 ) +
-                             maxMaxQuad.maxXMinYFace.getMitchellNetravaliFiltered( 0, 0, 1, 0 ) +
-                             maxMaxQuad.maxXMaxYFace.getMitchellNetravaliFiltered( 0, 0, 1, 1 );
+              // TODO: can factor out constants?
+              splitAndProcessFace( -2, -2, minMinQuad.minXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -2, -2 ) );
+              splitAndProcessFace( -2, -1, minMinQuad.minXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -2, -1 ) );
+              splitAndProcessFace( -1, -2, minMinQuad.maxXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -1, -2 ) );
+              splitAndProcessFace( -1, -1, minMinQuad.maxXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -1, -1 ) );
+              splitAndProcessFace( -2, 0, minMaxQuad.minXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -2, 0 ) );
+              splitAndProcessFace( -2, 1, minMaxQuad.minXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -2, 1 ) );
+              splitAndProcessFace( -1, 0, minMaxQuad.maxXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -1, 0 ) );
+              splitAndProcessFace( -1, 1, minMaxQuad.maxXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, -1, 1 ) );
+              splitAndProcessFace( 0, -2, maxMinQuad.minXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 0, -2 ) );
+              splitAndProcessFace( 0, -1, maxMinQuad.minXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 0, -1 ) );
+              splitAndProcessFace( 1, -2, maxMinQuad.maxXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 1, -2 ) );
+              splitAndProcessFace( 1, -1, maxMinQuad.maxXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 1, -1 ) );
+              splitAndProcessFace( 0, 0, maxMaxQuad.minXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 0, 0 ) );
+              splitAndProcessFace( 0, 1, maxMaxQuad.minXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 0, 1 ) );
+              splitAndProcessFace( 1, 0, maxMaxQuad.maxXMinYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 1, 0 ) );
+              splitAndProcessFace( 1, 1, maxMaxQuad.maxXMaxYFace, f => f.getMitchellNetravaliFiltered( 0, 0, 1, 1 ) );
             }
           }
-
-          context.outputRaster.addClientPartialPixel( color.timesScalar( contribution ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
         }
       }
     }
