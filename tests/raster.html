@@ -65,6 +65,39 @@
     canvas.style.height = `${canvas.height / window.devicePixelRatio}px`;
   };
 
+  const getSceneryElement = ( node, width, height, background, renderer ) => {
+    const subdiv = document.createElement( 'div' );
+    const scene = new Node( { renderer: renderer } );
+    const display = new Display( scene, {
+      width: width,
+      height: height,
+      accessibility: true,
+      container: subdiv
+    } );
+
+    display.width = width;
+    display.height = height;
+    scene.addChild( node );
+    display.backgroundColor = background;
+    display.updateDisplay();
+    scene.removeChild( node );
+    return subdiv;
+  };
+
+  // composite Rasterize/CombinedRaster options
+  const getRasterizedElement = ( renderProgram, width, height, options ) => {
+    const program = renderProgram.transformed( Matrix3.scaling( window.devicePixelRatio ) );
+
+    const outputWidth = width * window.devicePixelRatio;
+    const outputHeight = height * window.devicePixelRatio;
+
+    const raster = new CombinedRaster( outputWidth, outputHeight, options );
+    Rasterize.rasterize( program, raster, new Bounds2( 0, 0, outputWidth, outputHeight ), options );
+    const canvas = Rasterize.imageDataToCanvas( raster.toImageData() );
+    sizeCanvas( canvas );
+    return canvas;
+  };
+
   const getRasterizedSiemensStar = ( type, pointCount ) => {
     const width = 128;
     const height = 128;
@@ -86,52 +119,27 @@
     }
 
     if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
-      const subdiv = document.createElement( 'div' );
-      const scene = new Node();
-      const display = new Display( scene, {
-        width: width,
-        height: height,
-        accessibility: true,
-        container: subdiv
-      } );
-
-      display.width = width;
-      display.height = height;
-      scene.addChild( new Path( Shape.polygon( polygon ), { fill: 'black', renderer: type } ) );
-      display.backgroundColor = 'white';
-      display.updateDisplay();
-      return subdiv;
+      return getSceneryElement(
+        new Path( Shape.polygon( polygon ), { fill: 'black', renderer: type } ),
+        width, height, 'white', type
+      );
     }
     else if ( type === 'box' || type === 'bilinear' || type === 'mitchellNetravali' ) {
-
       const filtering = {
         box: PolygonFilterType.Box,
         bilinear: PolygonFilterType.Bilinear,
         mitchellNetravali: PolygonFilterType.MitchellNetravali
       }[ type ];
 
-      const program = new RenderBlendCompose(
-        RenderComposeType.Over,
-        RenderBlendType.Normal,
-        new RenderPathBoolean(
-          new RenderPath( 'nonzero', [ polygon ] ),
-          new RenderColor( v4( 0, 0, 0, 1 ) ),
-          new RenderColor( v4( 0, 0, 0, 0 ) )
-        ),
-        new RenderColor( v4( 1, 1, 1, 1 ) )
-      ).transformed( Matrix3.scaling( window.devicePixelRatio ) );
+      const program = new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ polygon ] ),
+        RenderColor.from( 'black' ),
+        RenderColor.from( 'white' )
+      );
 
-      const outputWidth = width * window.devicePixelRatio;
-      const outputHeight = height * window.devicePixelRatio;
-
-      const raster = new CombinedRaster( outputWidth, outputHeight );
-      Rasterize.rasterize( program, raster, new Bounds2( 0, 0, outputWidth, outputHeight ), {
+      return getRasterizedElement( program, width, height, {
         polygonFiltering: filtering
       } );
-      const canvas = Rasterize.imageDataToCanvas( raster.toImageData() );
-      sizeCanvas( canvas );
-
-      return canvas;
     }
   };
 </script>
