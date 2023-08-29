@@ -160,7 +160,7 @@
     const height = 128;
 
     const center = v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
-    const radius = width * 0.49;
+    const radius = width * 0.45;
 
     const polygons = [];
     const colors = [];
@@ -184,9 +184,12 @@
     if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
       return getSceneryElement(
         new Node( {
-          children: polygons.map( ( poly, i ) => {
-            return new Path( Shape.polygon( poly ), { fill: new Color( colors[ i ].x * 255, colors[ i ].y * 255, colors[ i ].z * 255, 1 ) } );
-          } )
+          children: [
+            new Rectangle( 0, 64, 128, 64, { fill: 'black' } ),
+            ...polygons.map( ( poly, i ) => {
+              return new Path( Shape.polygon( poly ), { fill: new Color( colors[ i ].x * 255, colors[ i ].y * 255, colors[ i ].z * 255, 1 ) } );
+            } )
+          ]
         } ),
         width, height, 'white', type
       );
@@ -194,7 +197,16 @@
     else if ( type === 'default' ) {
       const program = new RenderStack(
         [
-          RenderColor.from( 'white' ),
+          new RenderPathBoolean(
+            new RenderPath( 'nonzero', [ [
+              v2( 0, 64 ),
+              v2( 128, 64 ),
+              v2( 128, 128 ),
+              v2( 0, 128 )
+            ] ] ),
+            RenderColor.from( 'black' ),
+            RenderColor.from( 'white' )
+          ),
           ...polygons.map( ( polygon, i ) => new RenderPathBoolean(
             new RenderPath( 'nonzero', [ polygon ] ),
             new RenderColor( colors[ i ] ),
