@@ -155,6 +155,58 @@
     } );
   };
 
+  const getRasterizedConflation = ( type, pointCount ) => {
+    const width = 128;
+    const height = 128;
+
+    const center = v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
+    const radius = width * 0.49;
+
+    const polygons = [];
+    const colors = [];
+    for ( let i = 0; i < pointCount; i++ ) {
+      const polygon = [];
+      const angle0 = i * 2 * Math.PI / pointCount;
+      const angle1 = ( i + 1 ) * 2 * Math.PI / pointCount;
+
+      const chroma = Vector2.createPolar( 0.1, angle0 );
+      colors.push( RenderColor.gamutMapSRGB( RenderColor.convert( v4( 0.5, chroma.x, chroma.y ), RenderColorSpace.oklab, RenderColorSpace.sRGB ) ) );
+
+      const p0 = v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
+      const p1 = v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
+
+      polygon.push( center );
+      polygon.push( p0 );
+      polygon.push( p1 );
+      polygons.push( polygon );
+    }
+
+    if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+      return getSceneryElement(
+        new Node( {
+          children: polygons.map( ( poly, i ) => {
+            return new Path( Shape.polygon( poly ), { fill: new Color( colors[ i ].x * 255, colors[ i ].y * 255, colors[ i ].z * 255, 1 ) } );
+          } )
+        } ),
+        width, height, 'white', type
+      );
+    }
+    else if ( type === 'default' ) {
+      const program = new RenderStack(
+        [
+          RenderColor.from( 'white' ),
+          ...polygons.map( ( polygon, i ) => new RenderPathBoolean(
+            new RenderPath( 'nonzero', [ polygon ] ),
+            new RenderColor( colors[ i ] ),
+            RenderColor.TRANSPARENT
+          ) )
+        ]
+      );
+
+      return getRasterizedElement( program, width, height );
+    }
+  };
+
   const getRasterizedSiemensStar = ( type, pointCount ) => {
     const width = 128;
     const height = 128;
@@ -228,6 +280,55 @@
 
   </div>
   <div class="span8">
+
+    <h2>Conflation</h2>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">default</td>
+        </tr>
+        <tr>
+          <td id="conflation-canvas"></td>
+          <td id="conflation-svg"></td>
+          <td id="conflation-vello"></td>
+          <td id="conflation-default"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'conflation-canvas' ).appendChild(
+          getRasterizedConflation( 'canvas', 100 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'conflation-svg' ).appendChild(
+          getRasterizedConflation( 'svg', 100 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        await DeviceContext.isVelloSupported();
+        document.getElementById( 'conflation-vello' ).appendChild(
+          getRasterizedConflation( 'vello', 100 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'conflation-default' ).appendChild(
+          getRasterizedConflation( 'default', 100 )
+        );
+      } );
+    </script>
 
     <h2>Filtered Polygons</h2>
 
