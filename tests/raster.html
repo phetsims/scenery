@@ -558,10 +558,14 @@
     </script>
     <script>
       setTimeout( async () => {
-        await DeviceContext.isVelloSupported();
-        document.getElementById( 'conflation-vello' ).appendChild(
-          getRasterizedConflation( 'vello', 100 )
-        );
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'conflation-vello' ).appendChild(
+            getRasterizedConflation( 'vello', 100 )
+          );
+        }
+        else {
+          document.getElementById( 'conflation-vello' ).innerHTML = 'Not supported';
+        }
       } );
     </script>
     <script>
@@ -659,10 +663,14 @@
     </script>
     <script>
       setTimeout( async () => {
-        await DeviceContext.isVelloSupported();
-        document.getElementById( 'gradient-aliasing-vello' ).appendChild(
-          getGradientAliasing( 'vello' )
-        );
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'gradient-aliasing-vello' ).appendChild(
+            getGradientAliasing( 'vello' )
+          );
+        }
+        else {
+          document.getElementById( 'gradient-aliasing-vello' ).innerHTML = 'Not supported';
+        }
       } );
     </script>
     <script>
@@ -722,10 +730,14 @@
     </script>
     <script>
       setTimeout( async () => {
-        await DeviceContext.isVelloSupported();
-        document.getElementById( 'gradient-precision-vello' ).appendChild(
-          getGradientPrecision( 'vello' )
-        );
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'gradient-precision-vello' ).appendChild(
+            getGradientPrecision( 'vello' )
+          );
+        }
+        else {
+          document.getElementById( 'gradient-precision-vello' ).innerHTML = 'Not supported';
+        }
       } );
     </script>
     <script>
@@ -828,10 +840,14 @@
     </script>
     <script>
       setTimeout( async () => {
-        await DeviceContext.isVelloSupported();
-        document.getElementById( 'siemens-star-vello' ).appendChild(
-          getRasterizedSiemensStar( 'vello', 200 )
-        );
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'siemens-star-vello' ).appendChild(
+            getRasterizedSiemensStar( 'vello', 200 )
+          );
+        }
+        else {
+          document.getElementById( 'siemens-star-vello' ).innerHTML = 'Not supported';
+        }
       } );
     </script>
     <script>
