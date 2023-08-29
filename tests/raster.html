@@ -170,7 +170,7 @@
       const angle1 = ( i + 1 ) * 2 * Math.PI / pointCount;
 
       const chroma = Vector2.createPolar( 0.1, angle0 );
-      colors.push( RenderColor.gamutMapSRGB( RenderColor.convert( v4( 0.5, chroma.x, chroma.y ), RenderColorSpace.oklab, RenderColorSpace.sRGB ) ) );
+      colors.push( RenderColor.gamutMapSRGB( RenderColor.convert( v4( 0.5, chroma.x, chroma.y, 1 ), RenderColorSpace.oklab, RenderColorSpace.sRGB ) ) );
 
       const p0 = v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
       const p1 = v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
