@@ -227,8 +227,90 @@
           v2( 0, 128 ),
           v2( 0, 64 )
         ] ), { fill: radial } )
-        // new Rectangle( 0, 0, 128, 64, { fill: linear } ),
-        // new Rectangle( 0, 64, 128, 64, { fill: radial } )
+      ]
+    } );
+
+    if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+      return getSceneryElement(
+        scene, width, height, 'white', type
+      );
+    }
+    else if ( type === 'box' || type === 'bilinear' || type === 'mitchellNetravali' ) {
+      const filtering = {
+        box: PolygonFilterType.Box,
+        bilinear: PolygonFilterType.Bilinear,
+        mitchellNetravali: PolygonFilterType.MitchellNetravali
+      }[ type ];
+      const program = RenderFromNode.addBackgroundColor( RenderFromNode.nodeToRenderProgram( scene ), Color.WHITE );
+
+      return getRasterizedElement( program, width, height, {
+        polygonFiltering: filtering
+      } );
+    }
+  };
+
+  const getGradientPrecision = ( type ) => {
+    const width = 128;
+    const height = 128;
+
+    // const left = -3000;
+    // const right = 3000;
+
+    const left = 0;
+    const right = 6000;
+
+    const ratioLeft = ( 0 - left ) / ( right - left );
+    const ratioRight = ( width - left ) / ( right - left );
+
+    const newRatio = ratio => ratioLeft + ratio * ( ratioRight - ratioLeft );
+
+    const addColorStops = gradient => {
+      gradient.addColorStop( 0, 'black' );
+
+      gradient.addColorStop( newRatio( 0 ), 'white' );
+      gradient.addColorStop( newRatio( 0.5 ), 'black' );
+      gradient.addColorStop( newRatio( 0.70 ), 'white' );
+      gradient.addColorStop( newRatio( 0.74 ), 'black' );
+      gradient.addColorStop( newRatio( 0.78 ), 'white' );
+      gradient.addColorStop( newRatio( 0.80 ), 'white' );
+      gradient.addColorStop( newRatio( 0.82 ), 'black' );
+      gradient.addColorStop( newRatio( 0.84 ), 'white' );
+      gradient.addColorStop( newRatio( 0.86 ), 'white' );
+      gradient.addColorStop( newRatio( 0.87 ), 'black' );
+      gradient.addColorStop( newRatio( 0.88 ), 'white' );
+      gradient.addColorStop( newRatio( 0.9 ), 'white' );
+      gradient.addColorStop( newRatio( 0.905 ), 'black' );
+      gradient.addColorStop( newRatio( 0.91 ), 'white' );
+      gradient.addColorStop( newRatio( 0.93 ), 'white' );
+      gradient.addColorStop( newRatio( 0.9325 ), 'black' );
+      gradient.addColorStop( newRatio( 0.935 ), 'white' );
+      gradient.addColorStop( newRatio( 0.95 ), 'white' );
+      gradient.addColorStop( newRatio( 0.951 ), 'black' );
+      gradient.addColorStop( newRatio( 0.952 ), 'white' );
+
+      gradient.addColorStop( 1, 'black' );
+    };
+
+    const linear = new LinearGradient( left, 0, right, 0 );
+    addColorStops( linear );
+
+    const radial = new RadialGradient( left, 64, 0, left, 64, right - left );
+    addColorStops( radial );
+
+    const scene = new Node( {
+      children: [
+        new Path( Shape.polygon( [
+          v2( 0, 0 ),
+          v2( 128, 0 ),
+          v2( 128, 64 ),
+          v2( 0, 64 )
+        ] ), { fill: linear } ),
+        new Path( Shape.polygon( [
+          v2( 0, 64 ),
+          v2( 128, 64 ),
+          v2( 128, 128 ),
+          v2( 0, 128 )
+        ] ), { fill: radial } )
       ]
     } );
 
@@ -506,6 +588,55 @@
       setTimeout( async () => {
         document.getElementById( 'gradient-aliasing-mitchell-netravali' ).appendChild(
           getGradientAliasing( 'mitchellNetravali' )
+        );
+      } );
+    </script>
+
+    <h2>Gradient Precision</h2>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">Proposed Method</td>
+        </tr>
+        <tr>
+          <td id="gradient-precision-canvas"></td>
+          <td id="gradient-precision-svg"></td>
+          <td id="gradient-precision-vello"></td>
+          <td id="gradient-precision-box"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-precision-canvas' ).appendChild(
+          getGradientPrecision( 'canvas' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-precision-svg' ).appendChild(
+          getGradientPrecision( 'svg' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        await DeviceContext.isVelloSupported();
+        document.getElementById( 'gradient-precision-vello' ).appendChild(
+          getGradientPrecision( 'vello' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-precision-box' ).appendChild(
+          getGradientPrecision( 'box' )
         );
       } );
     </script>
