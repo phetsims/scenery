@@ -20,6 +20,7 @@ type ClippableFace = {
   getDistanceRange( point: Vector2 ): Range;
   getArea(): number;
   getCentroid( area: number ): Vector2;
+  getCentroidPartial(): Vector2;
   getAverageDistance( point: Vector2, area: number ): number;
   getAverageDistanceTransformedToOrigin( transform: Matrix3, area: number ): number;
   getTransformed( transform: Matrix3 ): ClippableFace;

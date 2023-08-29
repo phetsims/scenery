@@ -573,8 +573,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      // const outputSize = 768 * 2;
-      const outputSize = 768 / 4;
+      const outputSize = 768 * 2;
+      // const outputSize = 768 / 4;
 
       // const colorSpace = 'srgb';
       const colorSpace = 'display-p3';
@@ -629,7 +629,7 @@ an UI and Display made for visual testing and debugging.
         // splitRadialGradients: false
       };
 
-      const APPLY_OPACITY = true;
+      const APPLY_OPACITY = false;
 
       const SHOW_INTEGER_EDGES = false;
       const SHOW_INTERSECTIONS = false;
@@ -640,7 +640,7 @@ an UI and Display made for visual testing and debugging.
       const SHOW_INCLUSION_DEBUG = false;
       const SHOW_SOLID_COLORS = false;
       const SHOW_FULL_AREAS = false;
-      const SHOW_RENDERABLE_FACES = true;
+      const SHOW_RENDERABLE_FACES = false;
       const SHOW_RENDERABLE_FACE_INDICES = false;
 
       const piecewiseOptions = {
@@ -868,6 +868,21 @@ an UI and Display made for visual testing and debugging.
       ).colorConverted( phet.scenery.RenderColorSpace.premultipliedOklab, clientColorSpace ) );
       const e = phet.scenery.RenderPathBoolean.fromInside( pathE, toPremulClient( 255, 255, 255, 1 ) );
       const f = phet.scenery.RenderPathBoolean.fromInside( pathF, toPremulClient( 0, 0, 0, 1 ) );
+
+      const baryA = phet.dot.v2( 0, 0 );
+      const baryB = phet.dot.v2( 5, 0 );
+      const baryC = phet.dot.v2( 0, 5 );
+      const bary = phet.scenery.RenderPathBoolean.fromInside(
+        new phet.scenery.RenderPath( 'nonzero', [ [ baryA, baryB, baryC ] ] ),
+        new phet.scenery.RenderBarycentricBlend(
+          baryA, baryB, baryC,
+          phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
+          toPremulClient( 'rgb(255,0,0)' ),
+          toPremulClient( 'rgb(0,255,0)' ),
+          toPremulClient( 'rgb(0,0,255)' )
+        )
+      );
+
       const back = toPremulClient( 128, 128, 128, 0.5 );
 
       const normalBlendArray = arr => {
@@ -879,7 +894,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a ] ).transformed(
+      const program = normalBlendArray( [ back, d, e, f, bc, a, bary ] ).transformed(
       // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );

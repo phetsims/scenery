@@ -98,7 +98,7 @@ export default class EdgedFace implements ClippableFace {
     return 0.5 * area;
   }
 
-  public getCentroid( area: number ): Vector2 {
+  public getCentroidPartial(): Vector2 {
     let x = 0;
     let y = 0;
 
@@ -114,10 +114,11 @@ export default class EdgedFace implements ClippableFace {
       y += ( p0.y + p1.y ) * base;
     }
 
-    return new Vector2(
-      x / area,
-      y / area
-    );
+    return new Vector2( x, y );
+  }
+
+  public getCentroid( area: number ): Vector2 {
+    return this.getCentroidPartial().timesScalar( 1 / area );
   }
 
   public getAverageDistance( point: Vector2, area: number ): number {
