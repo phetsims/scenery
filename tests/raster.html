@@ -283,13 +283,18 @@
 
     <h2>Conflation</h2>
 
+    <p>
+      Background colors can show up at joints between paths, due to blending with the background multiple times per pixel.
+      Ideally there will be no white lines showing through, and no whitening toward the center.
+    </p>
+
     <table class="table">
       <tbody>
         <tr>
           <td style="text-align: center;">Canvas</td>
           <td style="text-align: center;">SVG</td>
           <td style="text-align: center;">Vello</td>
-          <td style="text-align: center;">default</td>
+          <td style="text-align: center;">Proposed Method</td>
         </tr>
         <tr>
           <td id="conflation-canvas"></td>
@@ -381,7 +386,8 @@
     <h2>Siemens Stars</h2>
 
     <p>
-      Alternating radial bands of light/dark, to visualize aliasing.
+      Alternating radial bands of light/dark, to visualize aliasing. It should blur towards a consistent gray toward the
+      center (not showing extra patterns, OR showing a darker gray).
     </p>
 
     <table class="table">
@@ -390,9 +396,9 @@
           <td style="text-align: center;">Canvas</td>
           <td style="text-align: center;">SVG</td>
           <td style="text-align: center;">Vello</td>
-          <td style="text-align: center;">(default) Box filter</td>
-          <td style="text-align: center;">Bilinear (tent) filter</td>
-          <td style="text-align: center;">Mitchell-Netravali filter</td>
+          <td style="text-align: center;">Proposed Method (box)</td>
+          <td style="text-align: center;">Proposed Method (bilinear)</td>
+          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
         </tr>
         <tr>
           <td id="siemens-star-canvas"></td>
