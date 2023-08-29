@@ -60,6 +60,19 @@
     new Color( 252, 82, 127 )
   ];
 
+  const piecewiseOptions = {
+    minLevels: 1,
+    maxLevels: 10,
+    // distanceEpsilon: 0.02,
+    distanceEpsilon: 0.0002,
+    curveEpsilon: 0.2
+  };
+  const shapeToPolygons = shape => shape.subpaths.map( subpath => {
+    return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
+      return line.start;
+    } );
+  } );
+
   const sizeCanvas = canvas => {
     canvas.style.width = `${canvas.width / window.devicePixelRatio}px`;
     canvas.style.height = `${canvas.height / window.devicePixelRatio}px`;
@@ -96,6 +109,50 @@
     const canvas = Rasterize.imageDataToCanvas( raster.toImageData() );
     sizeCanvas( canvas );
     return canvas;
+  };
+
+  const getFiltered = ( filter, multiplier ) => {
+    const width = 150;
+    const height = 150;
+
+    const program = new RenderStack( [
+      new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          phet.dot.v2( 30, 30 ),
+          phet.dot.v2( 120, 30 ),
+          phet.dot.v2( 120, 120 ),
+          phet.dot.v2( 30, 120 )
+        ], [
+          phet.dot.v2( 35, 35 ),
+          phet.dot.v2( 45, 105 ),
+          phet.dot.v2( 90, 90 ),
+          phet.dot.v2( 105, 35 )
+        ] ] ),
+        RenderColor.from( 'black' ),
+        RenderColor.from( 'white' )
+      ),
+      new RenderPathBoolean(
+        new RenderPath( 'nonzero', [
+          ...shapeToPolygons( Shape.regularPolygon( 20, 5 ).transformed( Matrix3.translation( 100, 100 ) ) )
+        ] ),
+        RenderColor.from( 'red' ),
+        RenderColor.TRANSPARENT
+      ),
+      new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          phet.dot.v2( 50, 50 ),
+          phet.dot.v2( 45, 105 ),
+          phet.dot.v2( 90, 90 ),
+        ] ] ),
+        RenderColor.from( 'blue' ),
+        RenderColor.TRANSPARENT
+      )
+    ] );
+
+    return getRasterizedElement( program, width, height, {
+      polygonFiltering: filter,
+      polygonFilterWindowMultiplier: multiplier * window.devicePixelRatio
+    } );
   };
 
   const getRasterizedSiemensStar = ( type, pointCount ) => {
@@ -167,10 +224,58 @@
 </div>
 
 <div class="row-fluid">
-  <div class="span2" id="apiList">
+  <div class="span2">
 
   </div>
   <div class="span8">
+
+    <h2>Filtered Polygons</h2>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Reference (dirac delta)</td>
+          <td style="text-align: center;">Box</td>
+          <td style="text-align: center;">Bilinear</td>
+          <td style="text-align: center;">Mitchell-Netravali</td>
+        </tr>
+        <tr>
+          <td id="filter-reference"></td>
+          <td id="filter-box"></td>
+          <td id="filter-bilinear"></td>
+          <td id="filter-mitchell-netravali"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-reference' ).appendChild(
+          getFiltered( PolygonFilterType.Box, 1 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-box' ).appendChild(
+          getFiltered( PolygonFilterType.Box, 10 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-bilinear' ).appendChild(
+          getFiltered( PolygonFilterType.Bilinear, 10 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-mitchell-netravali' ).appendChild(
+          getFiltered( PolygonFilterType.MitchellNetravali, 10 )
+        );
+      } );
+    </script>
 
     <h2>Siemens Stars</h2>
 
@@ -200,14 +305,18 @@
     </table>
 
     <script>
-      document.getElementById( 'siemens-star-canvas' ).appendChild(
-        getRasterizedSiemensStar( 'canvas', 200 )
-      );
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-canvas' ).appendChild(
+          getRasterizedSiemensStar( 'canvas', 200 )
+        );
+      } );
     </script>
     <script>
-      document.getElementById( 'siemens-star-svg' ).appendChild(
-        getRasterizedSiemensStar( 'svg', 200 )
-      );
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-svg' ).appendChild(
+          getRasterizedSiemensStar( 'svg', 200 )
+        );
+      } );
     </script>
     <script>
       setTimeout( async () => {
@@ -215,22 +324,28 @@
         document.getElementById( 'siemens-star-vello' ).appendChild(
           getRasterizedSiemensStar( 'vello', 200 )
         );
-      }, 0 );
+      } );
     </script>
     <script>
-      document.getElementById( 'siemens-star-box' ).appendChild(
-        getRasterizedSiemensStar( 'box', 200 )
-      );
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-box' ).appendChild(
+          getRasterizedSiemensStar( 'box', 200 )
+        );
+      } );
     </script>
     <script>
-      document.getElementById( 'siemens-star-bilinear' ).appendChild(
-        getRasterizedSiemensStar( 'bilinear', 200 )
-      );
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-bilinear' ).appendChild(
+          getRasterizedSiemensStar( 'bilinear', 200 )
+        );
+      } );
     </script>
     <script>
-      document.getElementById( 'siemens-star-mitchell-netravali' ).appendChild(
-        getRasterizedSiemensStar( 'mitchellNetravali', 200 )
-      );
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-mitchell-netravali' ).appendChild(
+          getRasterizedSiemensStar( 'mitchellNetravali', 200 )
+        );
+      } );
     </script>
 
   </div>
