@@ -441,6 +441,53 @@
       } );
     }
   };
+
+  const getPerceptual = ( type ) => {
+    const width = 196;
+    const height = 256;
+
+    const clientSpace = RenderColorSpace.premultipliedSRGB;
+    const colorSpace = {
+      'srgb': RenderColorSpace.premultipliedSRGB,
+      'linear': RenderColorSpace.premultipliedLinearSRGB,
+      'display-p3': RenderColorSpace.premultipliedDisplayP3,
+      'oklab': RenderColorSpace.premultipliedOklab
+    }[ type ];
+
+    const getTwoStop = ( minY, maxY, color1, color2 ) => {
+      return new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          phet.dot.v2( 0, minY ),
+          phet.dot.v2( width, minY ),
+          phet.dot.v2( width, maxY ),
+          phet.dot.v2( 0, maxY )
+        ] ] ),
+        new RenderLinearGradient(
+          Matrix3.IDENTITY,
+          v2( 0, 0 ),
+          v2( width, 0 ),
+          [
+            new RenderGradientStop( 0, RenderColor.from( color1 ).colorConverted( clientSpace, colorSpace ) ),
+            new RenderGradientStop( 1, RenderColor.from( color2 ).colorConverted( clientSpace, colorSpace ) )
+          ],
+          RenderExtend.Pad,
+          RenderLinearGradientAccuracy.SplitAccurate
+        ).colorConverted( colorSpace, clientSpace ),
+        RenderColor.TRANSPARENT
+      );
+    };
+
+    const program = new RenderStack( [
+      RenderColor.from( 'black' ),
+      getTwoStop( 0, 64, 'blue', 'white' ),
+      getTwoStop( 64, 80, 'rgba(0,200,0,1)', 'white' ),
+      getTwoStop( 80, 96, 'red', 'white' ),
+      getTwoStop( 96, 160, 'rgba(0,200,0,1)', 'red' ),
+      getTwoStop( 160, 224, 'red', 'rgba(0,255,255,1)' ),
+      getTwoStop( 224, 256, 'rgba(0,255,0,1)', 'rgba(255,0,255,1)' ),
+    ] );
+    return getRasterizedElement( program, width, height );
+  };
 </script>
 
 <div class="navbar navbar-inverse navbar-static-top">
@@ -521,6 +568,54 @@
       setTimeout( async () => {
         document.getElementById( 'conflation-default' ).appendChild(
           getRasterizedConflation( 'default', 100 )
+        );
+      } );
+    </script>
+
+    <h2>Perceptual Gradients</h2>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Oklab</td>
+          <td style="text-align: center;">sRGB</td>
+          <td style="text-align: center;">Display P3</td>
+          <td style="text-align: center;">Linear sRGB</td>
+        </tr>
+        <tr>
+          <td id="perceptual-oklab"></td>
+          <td id="perceptual-srgb"></td>
+          <td id="perceptual-display-p3"></td>
+          <td id="perceptual-linear-srgb"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-oklab' ).appendChild(
+          getPerceptual( 'oklab' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-srgb' ).appendChild(
+          getPerceptual( 'srgb' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-display-p3' ).appendChild(
+          getPerceptual( 'display-p3' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-linear-srgb' ).appendChild(
+          getPerceptual( 'linear' )
         );
       } );
     </script>

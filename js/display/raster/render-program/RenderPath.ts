@@ -47,6 +47,17 @@ export default class RenderPath {
   public static deserialize( obj: SerializedRenderPath ): RenderPath {
     return new RenderPath( obj.fillRule, obj.subpaths.map( subpath => subpath.map( point => new Vector2( point.x, point.y ) ) ) );
   }
+
+  public static fromBounds( bounds: Bounds2 ): RenderPath {
+    return new RenderPath( 'nonzero', [
+      [
+        new Vector2( bounds.minX, bounds.minY ),
+        new Vector2( bounds.maxX, bounds.minY ),
+        new Vector2( bounds.maxX, bounds.maxY ),
+        new Vector2( bounds.minX, bounds.maxY )
+      ]
+    ] );
+  }
 }
 
 scenery.register( 'RenderPath', RenderPath );
