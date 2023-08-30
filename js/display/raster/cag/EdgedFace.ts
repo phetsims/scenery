@@ -19,7 +19,11 @@ const scratchVectorA = new Vector2( 0, 0 );
 const scratchVectorB = new Vector2( 0, 0 );
 
 export default class EdgedFace implements ClippableFace {
-  public constructor( public readonly edges: LinearEdge[] ) {}
+  public constructor( public readonly edges: LinearEdge[] ) {
+    // Check on validating edges, since our binary clips won't work well if things aren't matched up (can get extra
+    // edges).
+    assertSlow && this.validateStartEndMatches();
+  }
 
   public toPolygonalFace( epsilon = 1e-8 ): PolygonalFace {
     return new PolygonalFace( LinearEdge.toPolygons( this.edges, epsilon ) );
@@ -334,6 +338,35 @@ export default class EdgedFace implements ClippableFace {
     return {
       edges: this.edges.map( edge => edge.serialize() )
     };
+  }
+
+  public validateStartEndMatches(): void {
+    if ( assertSlow ) {
+      assertSlow( Math.abs( this.getZero() ) < 1e-5, 'Ensure we are effectively closed' );
+
+      // Ensure that each point's 'starts' and 'ends' matches precisely
+      type Entry = { point: Vector2; startCount: number; endCount: number };
+      const entries: Entry[] = [];
+      const getEntry = ( point: Vector2 ): Entry => {
+        for ( let i = 0; i < entries.length; i++ ) {
+          if ( entries[ i ].point.equals( point ) ) {
+            return entries[ i ];
+          }
+        }
+        const entry = { point: point, startCount: 0, endCount: 0 };
+        entries.push( entry );
+        return entry;
+      };
+      for ( let i = 0; i < this.edges.length; i++ ) {
+        const edge = this.edges[ i ];
+        getEntry( edge.startPoint ).startCount++;
+        getEntry( edge.endPoint ).endCount++;
+      }
+      for ( let i = 0; i < entries.length; i++ ) {
+        const entry = entries[ i ];
+        assertSlow( entry.startCount === entry.endCount, 'Ensure each point has matching start/end counts' );
+      }
+    }
   }
 
   public static deserialize( serialized: SerializedEdgedFace ): EdgedFace {
