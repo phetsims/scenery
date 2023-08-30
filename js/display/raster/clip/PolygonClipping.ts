@@ -843,7 +843,10 @@ export default class PolygonClipping {
     // "parts" directly to the inside/outside result arrays, but these wrapped circular projections will need to be
     // stored for later here.
     // Each "edge" in our input will have between 0 and 1 "internal" edges, and 0 and 2 "external" edges.
-    const insideCircularEdges: CircularEdge[] = [];
+    //
+    // NOTE: We also need to store the start/end points, so that we output exact start/end points (instead of numerically
+    // slightly-different points based on the radius/angles), for our later clipping stages to work nicely.
+    const insideCircularEdges: CircularEdgeWithPoints[] = [];
 
     // We'll also need to store "critical" angles for the future polygonalization of the circles. If we were outputting
     // true circular edges, we could just include `insideCircularEdges`, however we want to convert it to line segments
@@ -877,7 +880,7 @@ export default class PolygonClipping {
     };
 
     // Process a fully-outside-the-circle part of an edge
-    const processExternal = ( edge: LinearEdge ) => {
+    const processExternal = ( edge: LinearEdge, startInside: boolean, endInside: boolean ) => {
       outside.push( edge );
 
       const localStart = edge.startPoint.minus( center );
@@ -902,7 +905,33 @@ export default class PolygonClipping {
         angles.push( startAngle );
         angles.push( endAngle );
 
-        insideCircularEdges.push( new CircularEdge( startAngle, endAngle, !isClockwise ) );
+        insideCircularEdges.push( new CircularEdgeWithPoints(
+          startInside ? edge.startPoint : null,
+          endInside ? edge.endPoint : null,
+          startAngle,
+          endAngle,
+          !isClockwise
+        ) );
+      }
+      else {
+        // NOTE: We need to do our "fixing" of coordinate matching in this case. It's possible we may need to add
+        // a very small "infinitesimal" edge.
+        let projectedStart = Vector2.createPolar( radius, localStart.angle ).add( center );
+        let projectedEnd = Vector2.createPolar( radius, localEnd.angle ).add( center );
+
+        if ( startInside ) {
+          assert && assert( projectedStart.distanceSquared( edge.startPoint ) < 1e-8 );
+          projectedStart = edge.startPoint;
+        }
+        if ( endInside ) {
+          assert && assert( projectedEnd.distanceSquared( edge.endPoint ) < 1e-8 );
+          projectedEnd = edge.endPoint;
+        }
+
+        if ( !projectedStart.equals( projectedEnd ) ) {
+          inside.push( new LinearEdge( projectedStart, projectedEnd ) );
+          outside.push( new LinearEdge( projectedEnd, projectedStart ) );
+        }
       }
     };
 
@@ -960,7 +989,7 @@ export default class PolygonClipping {
       }
 
       if ( isFullyExternal ) {
-        processExternal( edge );
+        processExternal( edge, startInside, endInside );
         continue;
       }
 
@@ -976,17 +1005,17 @@ export default class PolygonClipping {
       const rootBPoint = rootBInSegment ? ( edge.startPoint.plus( deltaPoints.timesScalar( rootB ) ) ) : Vector2.ZERO; // ignore the zero, it's mainly for typing
 
       if ( rootAInSegment && rootBInSegment ) {
-        processExternal( new LinearEdge( edge.startPoint, rootAPoint ) );
+        processExternal( new LinearEdge( edge.startPoint, rootAPoint ), startInside, true );
         processInternal( new LinearEdge( rootAPoint, rootBPoint ) );
-        processExternal( new LinearEdge( rootBPoint, edge.endPoint ) );
+        processExternal( new LinearEdge( rootBPoint, edge.endPoint ), true, endInside );
       }
       else if ( rootAInSegment ) {
-        processExternal( new LinearEdge( edge.startPoint, rootAPoint ) );
+        processExternal( new LinearEdge( edge.startPoint, rootAPoint ), startInside, true );
         processInternal( new LinearEdge( rootAPoint, edge.endPoint ) );
       }
       else if ( rootBInSegment ) {
         processInternal( new LinearEdge( edge.startPoint, rootBPoint ) );
-        processExternal( new LinearEdge( rootBPoint, edge.endPoint ) );
+        processExternal( new LinearEdge( rootBPoint, edge.endPoint ), true, endInside );
       }
       else {
         assert && assert( false, 'Should not reach this point, due to the boolean constraints above' );
@@ -1015,12 +1044,6 @@ export default class PolygonClipping {
         const startAngle = subAngles[ j ];
         const endAngle = subAngles[ j + 1 ];
 
-        // Skip "negligible" angles
-        const absDiff = Math.abs( startAngle - endAngle );
-        if ( absDiff < 1e-9 || Math.abs( absDiff - Math.PI * 2 ) < 1e-9 ) {
-          continue;
-        }
-
         // Put our end angle in the dirSign direction from our startAngle (if we're counterclockwise and our angle increases,
         // our relativeEndAngle should be greater than our startAngle, and similarly if we're clockwise and our angle decreases,
         // our relativeEndAngle should be less than our startAngle)
@@ -1033,11 +1056,25 @@ export default class PolygonClipping {
           const startTheta = startAngle + angleDiff * ( k / numSegments );
           const endTheta = startAngle + angleDiff * ( ( k + 1 ) / numSegments );
 
-          const startPoint = Vector2.createPolar( radius, startTheta ).add( center );
-          const endPoint = Vector2.createPolar( radius, endTheta ).add( center );
+          let startPoint = Vector2.createPolar( radius, startTheta ).add( center );
+          let endPoint = Vector2.createPolar( radius, endTheta ).add( center );
 
-          inside.push( new LinearEdge( startPoint, endPoint ) );
-          outside.push( new LinearEdge( endPoint, startPoint ) );
+          if ( edge.startPoint && j === 0 && k === 0 ) {
+            // First "point" of a insideCircularEdge, let's replace with our actual start point for exact precision
+            assert && assert( startPoint.distanceSquared( edge.startPoint ) < 1e-8 );
+            startPoint = edge.startPoint;
+          }
+          if ( edge.endPoint && j === subAngles.length - 2 && k === numSegments - 1 ) {
+            // Last "point" of an insideCircularEdge, let's replace with our actual end point for exact precision
+            assert && assert( endPoint.distanceSquared( edge.endPoint ) < 1e-8 );
+            endPoint = edge.endPoint;
+          }
+
+          // We might have tiny angle/etc. distances, so we could come into edges that we need to strip
+          if ( !startPoint.equals( endPoint ) ) {
+            inside.push( new LinearEdge( startPoint, endPoint ) );
+            outside.push( new LinearEdge( endPoint, startPoint ) );
+          }
         }
       }
     }
@@ -1479,9 +1516,20 @@ export default class PolygonClipping {
   }
 }
 
-// Stores data for binaryCircularClipEdges
+// Stores data for binaryCircularClipPolygon
 class CircularEdge {
   public constructor(
+    public readonly startAngle: number,
+    public readonly endAngle: number,
+    public readonly counterClockwise: boolean
+  ) {}
+}
+
+// Stores data for binaryCircularClipEdges
+class CircularEdgeWithPoints {
+  public constructor(
+    public readonly startPoint: Vector2 | null,
+    public readonly endPoint: Vector2 | null,
     public readonly startAngle: number,
     public readonly endAngle: number,
     public readonly counterClockwise: boolean

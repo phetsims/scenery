@@ -310,17 +310,27 @@ export default class EdgedFace implements ClippableFace {
   }
 
   public getRounded( epsilon: number ): EdgedFace {
-    return new EdgedFace( this.edges.map( edge => new LinearEdge(
-      new Vector2(
+    const edges = [];
+
+    for ( let i = 0; i < this.edges.length; i++ ) {
+      const edge = this.edges[ i ];
+
+      const startPoint = new Vector2(
         Utils.roundSymmetric( edge.startPoint.x / epsilon ) * epsilon,
         Utils.roundSymmetric( edge.startPoint.y / epsilon ) * epsilon
-      ),
-      new Vector2(
+      );
+
+      const endPoint = new Vector2(
         Utils.roundSymmetric( edge.endPoint.x / epsilon ) * epsilon,
         Utils.roundSymmetric( edge.endPoint.y / epsilon ) * epsilon
-      ),
-      edge.containsFakeCorner
-    ) ) );
+      );
+
+      if ( !startPoint.equals( endPoint ) ) {
+        edges.push( new LinearEdge( startPoint, endPoint, edge.containsFakeCorner ) );
+      }
+    }
+
+    return new EdgedFace( edges );
   }
 
   public forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void {

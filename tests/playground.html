@@ -2675,6 +2675,22 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
   };
   // setTimeout( ellipseTest, 50 );
 
+  window.badCircularClipTest = function() {
+    setTimeout( async () => {
+      const face = phet.scenery.EdgedFace.deserialize( {"edges":[{"startPoint":{"x":10,"y":10},"endPoint":{"x":20,"y":6.666666666666666},"containsFakeCorner":false},{"startPoint":{"x":20,"y":6.666666666666666},"endPoint":{"x":20,"y":20},"containsFakeCorner":false},{"startPoint":{"x":20,"y":20},"endPoint":{"x":10,"y":10},"containsFakeCorner":false}]} );
+
+      face.getBinaryCircularClip( phet.dot.Vector2.ZERO, 15, 0.04908738521234052 );
+    } );
+  };
+
+  window.badCircularClipTest2 = function() {
+    setTimeout( async () => {
+      const face = phet.scenery.EdgedFace.deserialize( {"edges":[{"startPoint":{"x":5,"y":5},"endPoint":{"x":20,"y":5},"containsFakeCorner":false},{"startPoint":{"x":20,"y":5},"endPoint":{"x":20,"y":6.666666666666666},"containsFakeCorner":false},{"startPoint":{"x":20,"y":6.666666666666666},"endPoint":{"x":10,"y":10},"containsFakeCorner":false},{"startPoint":{"x":10,"y":10},"endPoint":{"x":20,"y":20},"containsFakeCorner":false},{"startPoint":{"x":20,"y":20},"endPoint":{"x":5,"y":15},"containsFakeCorner":false},{"startPoint":{"x":5,"y":15},"endPoint":{"x":5,"y":5},"containsFakeCorner":false}]} );
+
+      face.getBinaryCircularClip( phet.dot.v2( 10, 10 ), 1.6664999999999999, 0.04908738521234052 );
+    } );
+  };
+
   window.rectTest = function() {
     setTimeout( async function() {
       const rect = new phet.scenery.Rectangle( 0, 0, 50, 50, {
