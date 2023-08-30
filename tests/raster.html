@@ -488,6 +488,60 @@
     ] );
     return getRasterizedElement( program, width, height );
   };
+
+  const getGamut = ( renderType, displayType, blendType, showOutOfGamut = false ) => {
+    const sideLength = 200;
+    const triangleHeight = Math.sqrt( 3 ) / 2 * sideLength;
+
+    const padding = 3;
+
+    const width = sideLength + padding * 2;
+    const height = Math.ceil( triangleHeight ) + padding * 2;
+
+    const redPoint = v2( 0, triangleHeight ).plusScalar( padding );
+    const greenPoint = v2( sideLength, triangleHeight ).plusScalar( padding );
+    const bluePoint = v2( sideLength / 2, 0 ).plusScalar( padding );
+
+    const rawRedColor = v4( 1, 0, 0, 1 );
+    const rawGreenColor = v4( 0, 1, 0, 1 );
+    const rawBlueColor = v4( 0, 0, 1, 1 );
+
+    const sRGB = RenderColorSpace.premultipliedSRGB;
+    const displayP3 = RenderColorSpace.premultipliedDisplayP3;
+    const oklab = RenderColorSpace.premultipliedOklab;
+
+    const rawRedSRGBColor = RenderColor.convert( rawRedColor.copy(), sRGB, displayP3 );
+    const rawGreenSRGBColor = RenderColor.convert( rawGreenColor.copy(), sRGB, displayP3 );
+    const rawBlueSRGBColor = RenderColor.convert( rawBlueColor.copy(), sRGB, displayP3 );
+
+    const clientSpace = displayType === 'srgb' ? sRGB : displayP3;
+    const blendSpace = blendType === 'srgb' ? sRGB : ( blendType === 'display-p3' ? displayP3 : oklab );
+
+    const program = new RenderStack( [
+      new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          redPoint, greenPoint, bluePoint
+        ] ] ),
+        new RenderBarycentricBlend(
+          redPoint, greenPoint, bluePoint,
+          RenderBarycentricBlendAccuracy.Accurate,
+          new RenderColor( renderType === 'srgb' ? rawRedSRGBColor : rawRedColor ).colorConverted( displayP3, blendSpace ),
+          new RenderColor( renderType === 'srgb' ? rawGreenSRGBColor : rawGreenColor ).colorConverted( displayP3, blendSpace ),
+          new RenderColor( renderType === 'srgb' ? rawBlueSRGBColor : rawBlueColor ).colorConverted( displayP3, blendSpace )
+        ).colorConverted( blendSpace, clientSpace ),
+        RenderColor.TRANSPARENT
+      ),
+      new RenderPathBoolean(
+        new RenderPath( 'nonzero', shapeToPolygons( Shape.polygon( [ redPoint, greenPoint, bluePoint ] ).getStrokedShape( new LineStyles( { lineWidth: 0.5 }) ) ) ),
+        RenderColor.from( 'black' ).colorConverted( sRGB, clientSpace ),
+        RenderColor.TRANSPARENT
+      )
+    ] );
+    return getRasterizedElement( program, width, height, {
+      colorSpace: displayType,
+      showOutOfGamut: showOutOfGamut
+    } );
+  };
 </script>
 
 <div class="navbar navbar-inverse navbar-static-top">
@@ -517,6 +571,217 @@
 
   </div>
   <div class="span8">
+
+    <h2>Gamut and Color Spaces</h2>
+
+    <p>
+      There are two color spaces (sRGB and Display P3) currently supported by Canvas, and that can be currently displayed.
+      Other color spaces are supported internally (e.g. Oklab). Colors can be blended in any of these color spaces.
+      Oklab is the preferred "perceptual" color space to blend in (e.g. for gradients). Additionally, "linear" variants
+      of color spaces are supported, which effectively excludes the "transfer function", such that adding two colors
+      in a linear space will be the same as if two lights of that color were added together.
+    </p>
+
+    <p>
+      Colors from one color space may be outside the range (gamut) of another color space. In particular, this includes
+      blending BETWEEN color spaces (e.g. using Oklab to blend between to valid sRGB colors may result in something
+      outside the range of sRGB). In this case, gamut mapping is needed. This is currently done with a simple
+      relative colorimetric approach (which will only change out-of-gamut colors), similar to that used in the web
+      specifications.
+    </p>
+
+    <h3>sRGB</h3>
+
+    <p>
+      The following show a triangle with the three sRGB "primary" colors in each corner. Blending in sRGB will result in
+      fully in-gamut results, however blending in Oklab will result in out-of-gamut colors (middle example will have
+      mapped these to in-gamut colors).
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">sRGB triangle in sRGB</td>
+          <td style="text-align: center;">sRGB triangle (perceptual blend) in sRGB</td>
+          <td style="text-align: center;">sRGB triangle (perceptual blend) in sRGB (gray if out of gamut)</td>
+        </tr>
+        <tr>
+          <td id="gamut-srgb-srgb"></td>
+          <td id="gamut-srgb-srgb-perceptual"></td>
+          <td id="gamut-srgb-srgb-perceptual-gamut"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Display P3</h3>
+
+    <p>
+      Display P3 is a wider gamut color space than sRGB, and can show more saturated colors (particularly reds/yellows/greens).
+      The below displays are only supported on some browsers on some devices (tested on Chrome/Safari macOS).
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Display P3 triangle in Display P3</td>
+          <td style="text-align: center;">Display P3 triangle (perceptual blend) in Display P3</td>
+          <td style="text-align: center;">Display P3 triangle (perceptual blend) in Display P3 (gray if out of gamut)</td>
+        </tr>
+        <tr>
+          <td id="gamut-display-p3-display-p3"></td>
+          <td id="gamut-display-p3-display-p3-perceptual"></td>
+          <td id="gamut-display-p3-display-p3-perceptual-gamut"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Display P3 Mapped to sRGB</h3>
+
+    <p>
+      This gives a "best approximation of the above Display P3 triangle within sRGB", and shows how many colors are mapped.
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td></td>
+          <td style="text-align: center;">Display P3 triangle in sRGB (relative colorimetric gamut mapping)</td>
+          <td style="text-align: center;">Display P3 triangle in sRGB (gray if out of gamut)</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td id="gamut-display-p3-srgb"></td>
+          <td id="gamut-display-p3-srgb-gamut"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gamut-srgb-srgb' ).appendChild(
+          getGamut( 'srgb', 'srgb', 'srgb' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gamut-srgb-srgb-perceptual' ).appendChild(
+          getGamut( 'srgb', 'srgb', 'oklab' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gamut-srgb-srgb-perceptual-gamut' ).appendChild(
+          getGamut( 'srgb', 'srgb', 'oklab', true )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gamut-display-p3-srgb' ).appendChild(
+          getGamut( 'display-p3', 'srgb', 'display-p3' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gamut-display-p3-srgb-gamut' ).appendChild(
+          getGamut( 'display-p3', 'srgb', 'display-p3', true )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( window.matchMedia( '(color-gamut: p3)' ).matches ) {
+          document.getElementById( 'gamut-display-p3-display-p3' ).appendChild(
+            getGamut( 'display-p3', 'display-p3', 'display-p3' )
+          );
+        }
+        else {
+          document.getElementById( 'gamut-display-p3-display-p3' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( window.matchMedia( '(color-gamut: p3)' ).matches ) {
+          document.getElementById( 'gamut-display-p3-display-p3-perceptual' ).appendChild(
+            getGamut( 'display-p3', 'display-p3', 'oklab' )
+          );
+        }
+        else {
+          document.getElementById( 'gamut-display-p3-display-p3-perceptual' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( window.matchMedia( '(color-gamut: p3)' ).matches ) {
+          document.getElementById( 'gamut-display-p3-display-p3-perceptual-gamut' ).appendChild(
+            getGamut( 'display-p3', 'display-p3', 'oklab', true )
+          );
+        }
+        else {
+          document.getElementById( 'gamut-display-p3-display-p3-perceptual-gamut' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+
+    <h3>Blending in Color Spaces</h3>
+
+    <p>
+      Blending with different color spaces can result in different results. Oklab is the preferred perceptual space,
+      and has better hue consistency (the blue-white doesn't turn slightly purple). Blending in sRGB (or the similar wider-gamut
+      Display P3) darkens blends between opposing saturated colors. Blending in linear spaces can still have color
+      hue shifts, but will not darken blends between opposing saturated colors.
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Oklab</td>
+          <td style="text-align: center;">sRGB</td>
+          <td style="text-align: center;">Display P3</td>
+          <td style="text-align: center;">Linear sRGB</td>
+        </tr>
+        <tr>
+          <td id="perceptual-oklab"></td>
+          <td id="perceptual-srgb"></td>
+          <td id="perceptual-display-p3"></td>
+          <td id="perceptual-linear-srgb"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-oklab' ).appendChild(
+          getPerceptual( 'oklab' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-srgb' ).appendChild(
+          getPerceptual( 'srgb' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-display-p3' ).appendChild(
+          getPerceptual( 'display-p3' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'perceptual-linear-srgb' ).appendChild(
+          getPerceptual( 'linear' )
+        );
+      } );
+    </script>
 
     <h2>Conflation</h2>
 
@@ -572,54 +837,6 @@
       setTimeout( async () => {
         document.getElementById( 'conflation-default' ).appendChild(
           getRasterizedConflation( 'default', 100 )
-        );
-      } );
-    </script>
-
-    <h2>Perceptual Gradients</h2>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Oklab</td>
-          <td style="text-align: center;">sRGB</td>
-          <td style="text-align: center;">Display P3</td>
-          <td style="text-align: center;">Linear sRGB</td>
-        </tr>
-        <tr>
-          <td id="perceptual-oklab"></td>
-          <td id="perceptual-srgb"></td>
-          <td id="perceptual-display-p3"></td>
-          <td id="perceptual-linear-srgb"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'perceptual-oklab' ).appendChild(
-          getPerceptual( 'oklab' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'perceptual-srgb' ).appendChild(
-          getPerceptual( 'srgb' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'perceptual-display-p3' ).appendChild(
-          getPerceptual( 'display-p3' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'perceptual-linear-srgb' ).appendChild(
-          getPerceptual( 'linear' )
         );
       } );
     </script>
