@@ -498,6 +498,10 @@ export default class LinearEdge {
 
     return windingNumber;
   }
+
+  public toString(): string {
+    return `${this.startPoint.x},${this.startPoint.y} => ${this.endPoint.x},${this.endPoint.y}`;
+  }
 }
 
 scenery.register( 'LinearEdge', LinearEdge );

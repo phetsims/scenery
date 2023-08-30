@@ -121,6 +121,10 @@ export default class EdgedFace implements ClippableFace {
     return this.getCentroidPartial().timesScalar( 1 / area );
   }
 
+  public getZero(): number {
+    return _.sum( this.edges.map( e => e.getLineIntegralZero() ) );
+  }
+
   public getAverageDistance( point: Vector2, area: number ): number {
     let sum = 0;
 

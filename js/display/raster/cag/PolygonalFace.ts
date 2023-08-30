@@ -126,6 +126,11 @@ export default class PolygonalFace implements ClippableFace {
     return this.getCentroidPartial().timesScalar( 1 / area );
   }
 
+  public getZero(): number {
+    // We're polygonal, so by definition we are closed
+    return 0;
+  }
+
   public getAverageDistance( point: Vector2, area: number ): number {
     let sum = 0;
 

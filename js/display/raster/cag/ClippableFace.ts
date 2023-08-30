@@ -15,12 +15,14 @@ import { EdgedFace, PolygonalFace, SerializedEdgedFace, SerializedPolygonalFace 
 import { Shape } from '../../../../../kite/js/imports.js';
 
 type ClippableFace = {
+  // TODO: add full docs here
   getBounds(): Bounds2;
   getDotRange( normal: Vector2 ): Range;
   getDistanceRange( point: Vector2 ): Range;
   getArea(): number;
   getCentroid( area: number ): Vector2;
   getCentroidPartial(): Vector2;
+  getZero(): number;
   getAverageDistance( point: Vector2, area: number ): number;
   getAverageDistanceTransformedToOrigin( transform: Matrix3, area: number ): number;
   getTransformed( transform: Matrix3 ): ClippableFace;

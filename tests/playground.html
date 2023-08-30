@@ -413,20 +413,6 @@ an UI and Display made for visual testing and debugging.
     console.log( indentedLines.join( '\n' ) );
   };
 
-  window.badClipTest = function() {
-    setTimeout( async function() {
-      const xSplit = 17;
-      const averageY = 0.5;
-      const face = phet.scenery.EdgedFace.deserialize( {"edges":[{"startPoint":{"x":17,"y":0},"endPoint":{"x":18,"y":0},"containsFakeCorner":false},{"startPoint":{"x":18,"y":0},"endPoint":{"x":17,"y":0},"containsFakeCorner":false},{"startPoint":{"x":17.9783990854,"y":0.8815703748},"endPoint":{"x":18,"y":0},"containsFakeCorner":false},{"startPoint":{"x":18,"y":0},"endPoint":{"x":17,"y":0},"containsFakeCorner":false},{"startPoint":{"x":17,"y":1},"endPoint":{"x":17.969679561416466,"y":1},"containsFakeCorner":true},{"startPoint":{"x":17.969679561416466,"y":1},"endPoint":{"x":17.9783990854,"y":0.8815703748},"containsFakeCorner":false},{"startPoint":{"x":18,"y":0},"endPoint":{"x":18,"y":1},"containsFakeCorner":false},{"startPoint":{"x":18,"y":1},"endPoint":{"x":17,"y":1},"containsFakeCorner":true}]} );
-
-      const { minFace, maxFace } = face.getBinaryXClip( xSplit, averageY );
-
-      console.log( minFace.getArea() );
-
-      debugger;
-    } );
-  };
-
   window.badClipTest2 = function() {
     setTimeout( async function() {
       const xSplit = 56;
