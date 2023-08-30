@@ -333,7 +333,7 @@
     }
   };
 
-  const getRasterizedConflation = ( type, pointCount ) => {
+  const getConflation = ( type, pointCount ) => {
     const width = 128;
     const height = 128;
 
@@ -397,7 +397,7 @@
     }
   };
 
-  const getRasterizedSiemensStar = ( type, pointCount ) => {
+  const getSiemensStar = ( type, pointCount ) => {
     const width = 128;
     const height = 128;
 
@@ -542,6 +542,133 @@
       showOutOfGamut: showOutOfGamut
     } );
   };
+
+  const getGradientBlends = () => {
+    const width = 768;
+    const height = 256;
+
+    const sideLength = 100;
+    const triangleHeight = Math.sqrt( 3 ) / 2 * sideLength;
+
+    const hasDisplayP3 = window.matchMedia( '(color-gamut: p3)' ).matches;
+    const clientSpace = hasDisplayP3 ? RenderColorSpace.premultipliedDisplayP3 : RenderColorSpace.premultipliedSRGB;
+    const blendSpace = RenderColorSpace.premultipliedOklab;
+    const displayP3 = RenderColorSpace.premultipliedDisplayP3;
+
+    const colorTri = ( redPoint, greenPoint, bluePoint ) => {
+      return new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          redPoint, greenPoint, bluePoint
+        ] ] ),
+        new RenderBarycentricBlend(
+          redPoint, greenPoint, bluePoint,
+          RenderBarycentricBlendAccuracy.Accurate,
+          new RenderColor( v4( 1, 0, 0, 1 ) ).colorConverted( displayP3, blendSpace ),
+          new RenderColor( v4( 0, 1, 0, 1 ) ).colorConverted( displayP3, blendSpace ),
+          new RenderColor( v4( 0, 0, 1, 1 ) ).colorConverted( displayP3, blendSpace )
+        ),
+        RenderColor.TRANSPARENT
+      );
+    };
+
+    const wireTri = ( redPoint, greenPoint, bluePoint ) => {
+      const center = redPoint.plus( greenPoint ).plus( bluePoint ).timesScalar( 1 / 3 );
+      const ratio = 0.05;
+      return new RenderStack( [
+        new RenderPathBoolean(
+          new RenderPath( 'nonzero', [ [
+            redPoint, greenPoint, bluePoint
+          ] ] ),
+          new RenderColor( v4( 0, 0, 0, 1 ) ).colorConverted( displayP3, blendSpace ),
+          RenderColor.TRANSPARENT
+        ),
+        new RenderPathBoolean(
+          new RenderPath( 'nonzero', [ [
+            redPoint, greenPoint, bluePoint
+          ], [
+            redPoint.blend( center, ratio ), bluePoint.blend( center, ratio ), greenPoint.blend( center, ratio )
+          ] ] ),
+          new RenderColor( v4( 1, 1, 1, 1 ) ).colorConverted( displayP3, blendSpace ),
+          RenderColor.TRANSPARENT
+        )
+      ] );
+    };
+
+    const triMap = ( x, y, f ) => [
+      f(
+        v2( 0, 0 ),
+        v2( -0.5 * sideLength, triangleHeight ),
+        v2( 0.5 * sideLength, triangleHeight )
+      ),
+      f(
+        v2( 0, 0 ),
+        v2( sideLength, 0 ),
+        v2( 0.5 * sideLength, triangleHeight )
+      ),
+      f(
+        v2( 1.5 * sideLength, triangleHeight ),
+        v2( sideLength, 0 ),
+        v2( 0.5 * sideLength, triangleHeight )
+      ),
+      f(
+        v2( 1.5 * sideLength, triangleHeight ),
+        v2( sideLength, 0 ),
+        v2( 2 * sideLength, 0 )
+      ),
+      f(
+        v2( 1.5 * sideLength, triangleHeight ),
+        v2( 2.5 * sideLength, triangleHeight ),
+        v2( 2 * sideLength, 0 )
+      ),
+      f(
+        v2( 1.5 * sideLength, triangleHeight ),
+        v2( 2.5 * sideLength, triangleHeight ),
+        v2( 2 * sideLength, 0 )
+      ),
+      f(
+        v2( 3 * sideLength, 0 ),
+        v2( 2.5 * sideLength, triangleHeight ),
+        v2( 2 * sideLength, 0 )
+      )
+    ].map( tri => tri.transformed( Matrix3.translation( x, y ) ) );
+
+    const fullTriMap = ( f ) => [
+      ...triMap( 0, 0, f ),
+      ...triMap( 3 * sideLength, 0, f ),
+      ...triMap( 6 * sideLength, 0, f ),
+      ...triMap( -1.5 * sideLength, triangleHeight, f ),
+      ...triMap( 1.5 * sideLength, triangleHeight, f ),
+      ...triMap( 4.5 * sideLength, triangleHeight, f ),
+      ...triMap( 7.5 * sideLength, triangleHeight, f ),
+      ...triMap( 0, 2 * triangleHeight, f ),
+      ...triMap( 3 * sideLength, 2 * triangleHeight, f ),
+      ...triMap( 6 * sideLength, 2 * triangleHeight, f )
+    ];
+
+    const colorTris = () => fullTriMap( colorTri );
+    const wireTris = () => fullTriMap( wireTri );
+
+    const outerBlendSpace = RenderColorSpace.premultipliedDisplayP3;
+
+    const program = new RenderStack( [
+      RenderColor.from( 'black' ),
+      new RenderLinearGradient(
+        Matrix3.IDENTITY,
+        v2( 0, 0 ), v2( width, 0 ),
+        [
+          new RenderGradientStop( 0.2, new RenderStack( colorTris() ).colorConverted( blendSpace, outerBlendSpace ) ),
+          new RenderGradientStop( 0.8, new RenderStack( wireTris() ).colorConverted( blendSpace, outerBlendSpace ) ),
+        ],
+        RenderExtend.Pad,
+        RenderLinearGradientAccuracy.SplitAccurate
+      )
+      // ...colorTris(),
+      // // ...wireTris()
+    ] ).colorConverted( outerBlendSpace, clientSpace );
+    return getRasterizedElement( program, width, height, {
+      colorSpace: hasDisplayP3 ? 'display-p3' : 'srgb',
+    } );
+  };
 </script>
 
 <div class="navbar navbar-inverse navbar-static-top">
@@ -599,14 +726,14 @@
     <script>
       setTimeout( async () => {
         document.getElementById( 'conflation-canvas' ).appendChild(
-          getRasterizedConflation( 'canvas', 100 )
+          getConflation( 'canvas', 100 )
         );
       } );
     </script>
     <script>
       setTimeout( async () => {
         document.getElementById( 'conflation-svg' ).appendChild(
-          getRasterizedConflation( 'svg', 100 )
+          getConflation( 'svg', 100 )
         );
       } );
     </script>
@@ -614,7 +741,7 @@
       setTimeout( async () => {
         if ( await DeviceContext.isVelloSupported() ) {
           document.getElementById( 'conflation-vello' ).appendChild(
-            getRasterizedConflation( 'vello', 100 )
+            getConflation( 'vello', 100 )
           );
         }
         else {
@@ -625,7 +752,7 @@
     <script>
       setTimeout( async () => {
         document.getElementById( 'conflation-default' ).appendChild(
-          getRasterizedConflation( 'default', 100 )
+          getConflation( 'default', 100 )
         );
       } );
     </script>
@@ -833,14 +960,14 @@
     <script>
       setTimeout( async () => {
         document.getElementById( 'siemens-star-canvas' ).appendChild(
-          getRasterizedSiemensStar( 'canvas', 200 )
+          getSiemensStar( 'canvas', 200 )
         );
       } );
     </script>
     <script>
       setTimeout( async () => {
         document.getElementById( 'siemens-star-svg' ).appendChild(
-          getRasterizedSiemensStar( 'svg', 200 )
+          getSiemensStar( 'svg', 200 )
         );
       } );
     </script>
@@ -848,7 +975,7 @@
       setTimeout( async () => {
         if ( await DeviceContext.isVelloSupported() ) {
           document.getElementById( 'siemens-star-vello' ).appendChild(
-            getRasterizedSiemensStar( 'vello', 200 )
+            getSiemensStar( 'vello', 200 )
           );
         }
         else {
@@ -859,21 +986,21 @@
     <script>
       setTimeout( async () => {
         document.getElementById( 'siemens-star-box' ).appendChild(
-          getRasterizedSiemensStar( 'box', 200 )
+          getSiemensStar( 'box', 200 )
         );
       } );
     </script>
     <script>
       setTimeout( async () => {
         document.getElementById( 'siemens-star-bilinear' ).appendChild(
-          getRasterizedSiemensStar( 'bilinear', 200 )
+          getSiemensStar( 'bilinear', 200 )
         );
       } );
     </script>
     <script>
       setTimeout( async () => {
         document.getElementById( 'siemens-star-mitchell-netravali' ).appendChild(
-          getRasterizedSiemensStar( 'mitchellNetravali', 200 )
+          getSiemensStar( 'mitchellNetravali', 200 )
         );
       } );
     </script>
@@ -1085,6 +1212,17 @@
       setTimeout( async () => {
         document.getElementById( 'perceptual-linear-srgb' ).appendChild(
           getPerceptual( 'linear' )
+        );
+      } );
+    </script>
+
+    <h2>Gradient Blends between Content</h2>
+
+    <div id="gradient-blends"></div>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-blends' ).appendChild(
+          getGradientBlends()
         );
       } );
     </script>
