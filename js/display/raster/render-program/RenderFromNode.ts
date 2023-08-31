@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
+import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderUnpremultiply, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import RenderComposeType from './RenderComposeType.js';
 import RenderBlendType from './RenderBlendType.js';
@@ -318,7 +318,7 @@ export default class RenderFromNode {
     node.filters.forEach( filter => {
       if ( filter instanceof ColorMatrixFilter ) {
         // NOTE: Apply them no matter what, we'll rely on later simplified (because filters can take transparent to NOT)
-        result = new RenderFilter( result, filter.getMatrix(), filter.getTranslation() );
+        result = new RenderPremultiply( new RenderFilter( new RenderUnpremultiply( result ), filter.getMatrix(), filter.getTranslation() ) );
       }
     } );
 

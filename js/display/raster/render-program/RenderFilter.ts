@@ -3,6 +3,9 @@
 /**
  * RenderProgram for applying a color-matrix filter
  *
+ * NOTE: This operates on unpremultiplied colors. Presumably for most operations, you'll want to wrap it in
+ * the corresponding conversions.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -97,7 +100,8 @@ export default class RenderFilter extends RenderUnary {
   }
 
   public static applyFilter( color: Vector4, colorMatrix: Matrix4, colorTranslation: Vector4 ): Vector4 {
-    return RenderColor.premultiply( colorMatrix.timesVector4( RenderColor.unpremultiply( color ) ).plus( colorTranslation ) );
+    // TODO: GC friendly optimizations?
+    return colorMatrix.timesVector4( color ).plus( colorTranslation );
   }
 
   public override serialize(): SerializedRenderFilter {
