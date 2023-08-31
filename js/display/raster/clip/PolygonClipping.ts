@@ -1163,6 +1163,7 @@ export default class PolygonClipping {
     // If we have an outside start point, we'll need to store the edges until we are completely done with that input
     // polygon, then will connect them up!
     let hasOutsideStartPoint = false;
+    let hasInsidePoint = false;
     const outsideStartOutsideCandidateForwardEdges: LinearEdge[] = [];
     const outsideStartOutsideCandidateReversedEdges: CircularEdge[] = [];
 
@@ -1263,6 +1264,7 @@ export default class PolygonClipping {
 
         insideCandidateEdges.push( new CircularEdge( startAngle, endAngle, !isClockwise ) );
         if ( hasOutsideStartPoint ) {
+          // TODO: fish out this circular edge, we're using it for both
           outsideStartOutsideCandidateReversedEdges.push( new CircularEdge( endAngle, startAngle, isClockwise ) );
         }
         else {
@@ -1298,6 +1300,10 @@ export default class PolygonClipping {
         // If we're the first edge, set up our starting conditions
         if ( j === 0 ) {
           hasOutsideStartPoint = !startInside && !startOnCircle;
+          hasInsidePoint = startInside || endInside;
+        }
+        else {
+          hasInsidePoint = hasInsidePoint || startInside || endInside;
         }
 
         // If the endpoints are within the circle, the entire contents will be also (shortcut)
@@ -1398,24 +1404,41 @@ export default class PolygonClipping {
         outsideCandidateReversedEdges.reverse();
         outsideStartOutsideCandidateReversedEdges.reverse();
 
-        const candidatePolygon = [
-          ...outsideCandidateForwardEdges,
-          ...outsideStartOutsideCandidateForwardEdges,
-          ...outsideStartOutsideCandidateReversedEdges,
-          ...outsideCandidateReversedEdges
-        ];
-        outsideCandidatePolygons.push( candidatePolygon );
+        if ( hasInsidePoint ) {
+          const candidatePolygon = [
+            ...outsideCandidateForwardEdges,
+            ...outsideStartOutsideCandidateForwardEdges,
+            ...outsideStartOutsideCandidateReversedEdges,
+            ...outsideCandidateReversedEdges
+          ];
+          outsideCandidatePolygons.push( candidatePolygon );
 
-        // Ensure that all of our points must match up
-        if ( assertSlow ) {
-          for ( let i = 0; i < candidatePolygon.length; i++ ) {
-            const edge = candidatePolygon[ i ];
-            const nextEdge = candidatePolygon[ ( i + 1 ) % candidatePolygon.length ];
+          // Ensure that all of our points must match up
+          if ( assertSlow ) {
+            for ( let i = 0; i < candidatePolygon.length; i++ ) {
+              const edge = candidatePolygon[ i ];
+              const nextEdge = candidatePolygon[ ( i + 1 ) % candidatePolygon.length ];
 
-            const endPoint = edge instanceof LinearEdge ? edge.endPoint : Vector2.createPolar( radius, edge.endAngle ).add( center );
-            const startPoint = nextEdge instanceof LinearEdge ? nextEdge.startPoint : Vector2.createPolar( radius, nextEdge.startAngle ).add( center );
+              const endPoint = edge instanceof LinearEdge ? edge.endPoint : Vector2.createPolar( radius, edge.endAngle ).add( center );
+              const startPoint = nextEdge instanceof LinearEdge ? nextEdge.startPoint : Vector2.createPolar( radius, nextEdge.startAngle ).add( center );
 
-            assertSlow( endPoint.equalsEpsilon( startPoint, 1e-6 ) );
+              assertSlow( endPoint.equalsEpsilon( startPoint, 1e-6 ) );
+            }
+          }
+        }
+        else {
+          // If we're fully external, we'll need to create two paths
+          outsideCandidatePolygons.push( [
+            ...outsideStartOutsideCandidateForwardEdges
+          ] );
+          outsideCandidatePolygons.push( [
+            ...outsideStartOutsideCandidateReversedEdges
+          ] );
+
+          // Ensure match-ups
+          if ( assertSlow ) {
+            // Just check this for now
+            assertSlow( outsideStartOutsideCandidateForwardEdges[ 0 ].startPoint.equalsEpsilon( outsideStartOutsideCandidateForwardEdges[ outsideStartOutsideCandidateForwardEdges.length - 1 ].endPoint, 1e-6 ) );
           }
         }
 
