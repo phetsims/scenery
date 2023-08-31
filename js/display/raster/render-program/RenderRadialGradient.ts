@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
+import { ClippableFace, RenderableFace, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, scenery, SerializedRenderGradientStop } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -66,7 +66,7 @@ export default class RenderRadialGradient extends RenderProgram {
     } ), this.extend, this.accuracy );
   }
 
-  public isSplittable(): boolean {
+  public override isSplittable(): boolean {
     return this.accuracy === RenderRadialGradientAccuracy.SplitAccurate ||
            this.accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
            this.accuracy === RenderRadialGradientAccuracy.SplitPixelCenter;
@@ -136,6 +136,104 @@ export default class RenderRadialGradient extends RenderProgram {
     }
 
     return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.accuracy );
+  }
+
+  public override split( face: RenderableFace ): RenderableFace[] {
+    const localClippableFace = face.face.getTransformed( this.transform.inverted() );
+
+    const blendAccuracy = this.accuracy === RenderRadialGradientAccuracy.SplitAccurate ? RenderRadialBlendAccuracy.Accurate :
+                          this.accuracy === RenderRadialGradientAccuracy.SplitCentroid ? RenderRadialBlendAccuracy.Centroid :
+                          RenderRadialBlendAccuracy.PixelCenter;
+
+    const center = this.start;
+
+    const distanceRange = localClippableFace.getDistanceRangeToInside( center );
+
+    const isReversed = this.startRadius > this.endRadius;
+
+    const minRadius = isReversed ? this.endRadius : this.startRadius;
+    const maxRadius = isReversed ? this.startRadius : this.endRadius;
+    const stops = isReversed ? this.stops.map( stop => {
+      return new RenderGradientStop( 1 - stop.ratio, stop.program );
+    } ).reverse() : this.stops;
+
+    const deltaRadius = maxRadius - minRadius;
+    const offset = minRadius / deltaRadius;
+
+    const radiusToStop = ( radius: number ): number => {
+      return ( radius / deltaRadius ) - offset;
+    };
+    const stopToRadius = ( ratio: number ): number => {
+      return ( ratio + offset ) * deltaRadius;
+    };
+
+    const min = radiusToStop( distanceRange.min );
+    const max = radiusToStop( distanceRange.max );
+
+    const linearRanges = RenderLinearRange.getGradientLinearRanges( min, max, 0, this.extend, stops );
+
+    if ( linearRanges.length < 2 ) {
+      // TODO: We should be doing a replacement with a RenderRadialBlend here if possible!
+      return [ face ];
+    }
+    else {
+      const splitRadii = linearRanges.map( range => range.start ).slice( 1 ).map( stopToRadius );
+
+      // Compute clippedFaces
+      const clippedFaces: ClippableFace[] = [];
+      let remainingFace = localClippableFace;
+      for ( let i = 0; i < splitRadii.length; i++ ) {
+        const splitRadius = splitRadii[ i ];
+
+        // TODO: get maxAngleSplit based on magnitude!!!
+        const maxAngleSplit = Math.PI / 64;
+
+        const { insideFace, outsideFace } = remainingFace.getBinaryCircularClip( center, splitRadius, maxAngleSplit );
+
+        clippedFaces.push( insideFace );
+        remainingFace = outsideFace;
+      }
+      clippedFaces.push( remainingFace );
+
+      const blendTransform = this.transform.timesMatrix( Matrix3.translation( center.x, center.y ) );
+
+      const renderableFaces = linearRanges.map( ( range, i ) => {
+        const clippedFace = clippedFaces[ i ];
+
+        // NOTE: We need to slightly round things for later parts to work ok.
+        // There result in very slight differences between vertex end points without rounding, and that is relevant
+        // for the accurate clipping we do later.
+        const transformedClippedFace = clippedFace.getTransformed( this.transform ).getRounded( 1e-10 );
+
+        const replacer = ( renderProgram: RenderProgram ): RenderProgram | null => {
+          if ( renderProgram !== this ) {
+            return null;
+          }
+
+          if ( range.startProgram === range.endProgram ) {
+            return range.startProgram.replace( replacer );
+          }
+          else {
+            const startRadius = minRadius + range.start * deltaRadius;
+            const endRadius = minRadius + range.end * deltaRadius;
+
+            return new RenderRadialBlend(
+              blendTransform,
+              startRadius,
+              endRadius,
+              blendAccuracy,
+              range.startProgram.replace( replacer ),
+              range.endProgram.replace( replacer )
+            );
+          }
+        };
+
+        // TODO: propagate "fake" edge flags
+        return new RenderableFace( transformedClippedFace, face.renderProgram.replace( replacer ).simplified(), transformedClippedFace.getBounds() );
+      } ).filter( face => face.face.getArea() > 1e-8 );
+
+      return renderableFaces;
+    }
   }
 
   public override serialize(): SerializedRenderRadialGradient {

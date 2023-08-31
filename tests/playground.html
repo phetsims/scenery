@@ -604,8 +604,7 @@ an UI and Display made for visual testing and debugging.
         // renderableFaceMethod: 'simplifyingCombined',
         // renderableFaceMethod: 'traced',
 
-        // splitLinearGradients: false,
-        // splitRadialGradients: false
+        // splitPrograms: false,
       };
 
       const APPLY_OPACITY = false;
@@ -817,12 +816,14 @@ an UI and Display made for visual testing and debugging.
         new phet.dot.Vector2( 0, 0 ),
         5, [
           // NOTE: LEFT this gradient in sRGB because of the strong colors, perceptual interpolation might go out of gamut
-          new phet.scenery.RenderGradientStop( 0, toPremulClient( '#FBDD49' ) ),
-          new phet.scenery.RenderGradientStop( 0.2, toPremulClient( '#FF8103' ) ),
-          new phet.scenery.RenderGradientStop( 0.4, toPremulClient( '#FF1C6A' ) ),
+          new phet.scenery.RenderGradientStop( 0.2, toPremulClient( 'rgba(255,255,255,0.5)' ) ),
+          new phet.scenery.RenderGradientStop( 0.3, toPremulClient( '#FBDD49' ) ),
+          new phet.scenery.RenderGradientStop( 0.4, toPremulClient( '#FF8103' ) ),
+          new phet.scenery.RenderGradientStop( 0.5, toPremulClient( '#FF1C6A' ) ),
           new phet.scenery.RenderGradientStop( 0.6, toPremulClient( '#E200A3' ) ),
-          new phet.scenery.RenderGradientStop( 0.8, toPremulClient( '#9B04DB' ) ),
-          new phet.scenery.RenderGradientStop( 1, toPremulClient( '#6D1DC6' ) )
+          new phet.scenery.RenderGradientStop( 0.7, toPremulClient( '#9B04DB' ) ),
+          new phet.scenery.RenderGradientStop( 0.8, toPremulClient( 'rgba(109,29,198,0.5)' ) ),
+          new phet.scenery.RenderGradientStop( 0.9, toPremulClient( 'rgba(255,255,255,0)' ) )
         ],
         phet.scenery.RenderExtend.Repeat,
         radialGradientAccuracy

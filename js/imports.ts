@@ -468,6 +468,7 @@ export { default as RenderFilter } from './display/raster/render-program/RenderF
 export type { SerializedRenderFilter } from './display/raster/render-program/RenderFilter.js';
 export { default as RenderGradientStop } from './display/raster/render-program/RenderGradientStop.js';
 export type { SerializedRenderGradientStop } from './display/raster/render-program/RenderGradientStop.js';
+export { default as RenderLinearRange } from './display/raster/render-program/RenderLinearRange.js';
 export { default as RenderImage } from './display/raster/render-program/RenderImage.js';
 export type { SerializedRenderImage } from './display/raster/render-program/RenderImage.js';
 export type { default as RenderImageable, SerializedRenderImageable } from './display/raster/render-program/RenderImageable.js';

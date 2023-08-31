@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
+import { ClippableFace, RenderableFace, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -67,7 +67,7 @@ export default class RenderLinearGradient extends RenderProgram {
     } ), this.extend, this.accuracy );
   }
 
-  public isSplittable(): boolean {
+  public override isSplittable(): boolean {
     return this.accuracy === RenderLinearGradientAccuracy.SplitAccurate ||
            this.accuracy === RenderLinearGradientAccuracy.SplitPixelCenter;
   }
@@ -147,6 +147,81 @@ export default class RenderLinearGradient extends RenderProgram {
     const mappedT = RenderImage.extend( this.extend, t );
 
     return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.stops, mappedT );
+  }
+
+  public override split( face: RenderableFace ): RenderableFace[] {
+
+    const start = this.transform.timesVector2( this.start );
+    const end = this.transform.timesVector2( this.end );
+
+    const blendAccuracy = this.accuracy === RenderLinearGradientAccuracy.SplitAccurate ?
+                          RenderLinearBlendAccuracy.Accurate :
+                          RenderLinearBlendAccuracy.PixelCenter;
+
+    const delta = end.minus( start );
+    const normal = delta.timesScalar( 1 / delta.magnitudeSquared );
+    const offset = normal.dot( start );
+
+    // Should evaluate to 1 at the end
+    assert && assert( Math.abs( normal.dot( end ) - offset - 1 ) < 1e-8 );
+
+    const dotRange = face.face.getDotRange( normal );
+
+    // relative to gradient "origin"
+    const min = dotRange.min - offset;
+    const max = dotRange.max - offset;
+
+    const linearRanges = RenderLinearRange.getGradientLinearRanges( min, max, offset, this.extend, this.stops );
+
+    if ( linearRanges.length < 2 ) {
+      // TODO: We should be doing a replacement with a RenderLinearBlend here if possible!
+      return [ face ];
+    }
+    else {
+      const splitValues = linearRanges.map( range => range.start ).slice( 1 );
+      const clippedFaces = face.face.getStripeLineClip( normal, splitValues, 0 );
+
+      const renderableFaces = linearRanges.map( ( range, i ) => {
+        const clippedFace = clippedFaces[ i ];
+
+        const replacer = ( renderProgram: RenderProgram ): RenderProgram | null => {
+          if ( renderProgram !== this ) {
+            return null;
+          }
+
+          if ( range.startProgram === range.endProgram ) {
+            return range.startProgram.replace( replacer );
+          }
+          else {
+            // We need to rescale our normal for the linear blend, and then adjust our offset to point to the
+            // "start":
+            // From our original formulation:
+            //   normal.dot( startPoint ) = range.start
+            //   normal.dot( endPoint ) = range.end
+            // with a difference of (range.end - range.start). We want this to be zero, so we rescale our normal:
+            //   newNormal.dot( startPoint ) = range.start / ( range.end - range.start )
+            //   newNormal.dot( endPoint ) = range.end / ( range.end - range.start )
+            // And then we can adjust our offset such that:
+            //   newNormal.dot( startPoint ) - offset = 0
+            //   newNormal.dot( endPoint ) - offset = 1
+            const scaledNormal = normal.timesScalar( 1 / ( range.end - range.start ) );
+            const scaledOffset = range.start / ( range.end - range.start );
+
+            return new RenderLinearBlend(
+              scaledNormal,
+              scaledOffset,
+              blendAccuracy,
+              range.startProgram.replace( replacer ),
+              range.endProgram.replace( replacer )
+            );
+          }
+        };
+
+        return new RenderableFace( clippedFace, face.renderProgram.replace( replacer ).simplified(), clippedFace.getBounds() );
+      } ).filter( face => face.face.getArea() > 1e-8 );
+
+      return renderableFaces;
+    }
   }
 
   public override serialize(): SerializedRenderLinearGradient {

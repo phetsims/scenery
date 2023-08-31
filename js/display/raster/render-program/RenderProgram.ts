@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonalFace, RenderAlpha, RenderBarycentricBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderPathBoolean, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, scenery, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderPathBoolean, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../../../imports.js';
+import { ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBarycentricBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderPathBoolean, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, scenery, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderPathBoolean, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -138,12 +138,28 @@ export default abstract class RenderProgram {
     return this.withChildren( this.getChildren().map( child => child.transformed( transform ) ) );
   }
 
+  // TODO: add early exit!
   public depthFirst( callback: ( program: RenderProgram ) => void ): void {
     this.getChildren().forEach( child => child.depthFirst( callback ) );
     callback( this );
   }
 
+  public containsRenderProgram( renderProgram: RenderProgram ): boolean {
+    let result = false;
+
+    this.depthFirst( candidateRenderProgram => {
+      if ( candidateRenderProgram === renderProgram ) {
+        result = true;
+      }
+
+      // TODO: early exit!!!!
+    } );
+
+    return result;
+  }
+
   public replace( callback: ( program: RenderProgram ) => RenderProgram | null ): RenderProgram {
+    // TODO: preserve DAG!
     const replaced = callback( this );
     if ( replaced ) {
       return replaced;
@@ -165,6 +181,15 @@ export default abstract class RenderProgram {
     else {
       return this.withChildren( this.getChildren().map( child => child.withPathInclusion( pathTest ) ) );
     }
+  }
+
+  public isSplittable(): boolean {
+    return false;
+  }
+
+  public split( face: RenderableFace ): RenderableFace[] {
+    // TODO: should we handle the renderprogram splitting here?
+    throw new Error( 'unimplemented' );
   }
 
   public getNeeds(): RenderProgramNeeds {

@@ -45,7 +45,7 @@ export default class VectorCanvas {
       Matrix3.IDENTITY, start, end, stops.map( stop => new RenderGradientStop( stop.ratio, this.colorToRenderProgram( stop.color ) ) ), extend, accuracy
     ) );
 
-    this.renderableFaces = this.renderableFaces.flatMap( face => face.splitLinearGradients() );
+    this.renderableFaces = this.renderableFaces.flatMap( face => face.split() );
   }
 
   public fillRadialGradient( renderPath: RenderPath, transform: Matrix3, start: Vector2, startRadius: number, end: Vector2, endRadius: number, stops: { ratio: number; color: Vector4 }[], extend: RenderExtend, accuracy: RenderRadialGradientAccuracy = RenderRadialGradientAccuracy.SplitAccurate ): void {
@@ -53,7 +53,7 @@ export default class VectorCanvas {
       Matrix3.IDENTITY, start, startRadius, end, endRadius, stops.map( stop => new RenderGradientStop( stop.ratio, this.colorToRenderProgram( stop.color ) ) ), extend, accuracy
     ) );
 
-    this.renderableFaces = this.renderableFaces.flatMap( face => face.splitRadialGradients() );
+    this.renderableFaces = this.renderableFaces.flatMap( face => face.split() );
   }
 
   public copy(): VectorCanvas {

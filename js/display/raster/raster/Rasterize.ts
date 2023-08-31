@@ -28,8 +28,7 @@ export type RasterizationOptions = {
 
   renderableFaceMethod?: 'polygonal' | 'edged' | 'fullyCombined' | 'simplifyingCombined' | 'traced';
 
-  splitLinearGradients?: boolean;
-  splitRadialGradients?: boolean;
+  splitPrograms?: boolean;
 
   log?: RasterLog | null;
 };
@@ -40,8 +39,7 @@ const DEFAULT_OPTIONS = {
   polygonFilterWindowMultiplier: 1,
   edgeIntersectionMethod: 'arrayBoundsTree',
   renderableFaceMethod: 'traced',
-  splitLinearGradients: true,
-  splitRadialGradients: true,
+  splitPrograms: true,
   log: null
 } as const;
 
@@ -783,11 +781,8 @@ export default class Rasterize {
     }
     if ( log ) { log.initialRenderableFaces = renderableFaces; }
 
-    if ( options.splitLinearGradients ) {
-      renderableFaces = renderableFaces.flatMap( face => face.splitLinearGradients() );
-    }
-    if ( options.splitRadialGradients ) {
-      renderableFaces = renderableFaces.flatMap( face => face.splitRadialGradients() );
+    if ( options.splitPrograms ) {
+      renderableFaces = renderableFaces.flatMap( face => face.split() );
     }
     if ( log ) { log.renderableFaces = renderableFaces; }
 
