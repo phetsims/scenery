@@ -18,7 +18,8 @@ type ClippableFace = {
   // TODO: add full docs here
   getBounds(): Bounds2;
   getDotRange( normal: Vector2 ): Range;
-  getDistanceRange( point: Vector2 ): Range;
+  getDistanceRangeToEdges( point: Vector2 ): Range;
+  getDistanceRangeToInside( point: Vector2 ): Range;
   getArea(): number;
   getCentroid( area: number ): Vector2;
   getCentroidPartial(): Vector2;

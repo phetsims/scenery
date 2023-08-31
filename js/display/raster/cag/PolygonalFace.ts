@@ -60,7 +60,7 @@ export default class PolygonalFace implements ClippableFace {
     return new Range( min, max );
   }
 
-  public getDistanceRange( point: Vector2 ): Range {
+  public getDistanceRangeToEdges( point: Vector2 ): Range {
     let min = Number.POSITIVE_INFINITY;
     let max = 0;
 
@@ -81,6 +81,17 @@ export default class PolygonalFace implements ClippableFace {
     }
 
     return new Range( min, max );
+  }
+
+  public getDistanceRangeToInside( point: Vector2 ): Range {
+    const range = this.getDistanceRangeToEdges( point );
+
+    if ( this.containsPoint( point ) ) {
+      return new Range( 0, range.max );
+    }
+    else {
+      return range;
+    }
   }
 
   public getArea(): number {

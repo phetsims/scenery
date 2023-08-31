@@ -254,7 +254,7 @@ export default class RenderableFace {
 
         const center = radialGradient.start;
 
-        const distanceRange = localClippableFace.getDistanceRange( center );
+        const distanceRange = localClippableFace.getDistanceRangeToInside( center );
 
         const isReversed = radialGradient.startRadius > radialGradient.endRadius;
 
@@ -283,14 +283,13 @@ export default class RenderableFace {
           processedFaces.push( face );
         }
         else {
-          const splitValues = linearRanges.map( range => range.start ).slice( 1 );
+          const splitRadii = linearRanges.map( range => range.start ).slice( 1 );
 
           // Compute clippedFaces
           const clippedFaces: ClippableFace[] = [];
           let remainingFace = localClippableFace;
-          for ( let i = 0; i < splitValues.length; i++ ) {
-            const splitValue = splitValues[ i ];
-            const splitRadius = stopToRadius( splitValue );
+          for ( let i = 0; i < splitRadii.length; i++ ) {
+            const splitRadius = splitRadii[ i ];
 
             // TODO: get maxAngleSplit based on magnitude!!!
             const maxAngleSplit = Math.PI / 64;

@@ -378,7 +378,7 @@ export default class RenderFromNode {
       ) );
     }
 
-    const obj = program.serialize();
+    const obj = program.simplified().serialize();
     return pretty ? JSON.stringify( obj, null, 2 ) : JSON.stringify( obj );
   }
 }
