@@ -83,12 +83,13 @@ export default class RenderAlpha extends RenderUnary {
   public override serialize(): SerializedRenderAlpha {
     return {
       type: 'RenderAlpha',
-      program: this.program.serialize()
+      program: this.program.serialize(),
+      alpha: this.alpha
     };
   }
 
   public static override deserialize( obj: SerializedRenderAlpha ): RenderAlpha {
-    return new RenderAlpha( RenderProgram.deserialize( obj.program ), 1 );
+    return new RenderAlpha( RenderProgram.deserialize( obj.program ), obj.alpha );
   }
 }
 
@@ -97,4 +98,5 @@ scenery.register( 'RenderAlpha', RenderAlpha );
 export type SerializedRenderAlpha = {
   type: 'RenderAlpha';
   program: SerializedRenderProgram;
+  alpha: number;
 };
