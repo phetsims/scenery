@@ -393,8 +393,13 @@ export default class RationalFace {
     return unboundedFace;
   }
 
+  /**
+   * Computes winding maps for all of the faces
+   */
   public static computeWindingMaps( filteredRationalHalfEdges: RationalHalfEdge[], unboundedFace: RationalFace ): void {
-    // TODO: prevent the double-scan-through?
+
+    // TODO: how can we do this more efficiently? (prevent double scan, and can we avoid computing/visiting some edges?)
+    // Scan through the edges, and detect adjacent faces (storing the winding map difference between faces).
     for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
       const edge = filteredRationalHalfEdges[ i ];
 
@@ -410,31 +415,31 @@ export default class RationalFace {
     }
 
     unboundedFace.windingMap = new WindingMap(); // no windings, empty!
-    const recursiveWindingMap = ( solvedFace: RationalFace ) => {
-      // TODO: no recursion, could blow recursion limits
+
+    // Iterate through adjacent faces until we've reached everything (... everything should be adjacent, since our
+    // unbounded face connects every outer boundary).
+    const pendingFaces: RationalFace[] = [ unboundedFace ];
+    while ( pendingFaces.length ) {
+      const solvedFace = pendingFaces.pop()!;
+
       for ( const [ otherFace, windingMap ] of solvedFace.windingMapMap ) {
         const needsNewWindingMap = !otherFace.windingMap;
 
-        if ( needsNewWindingMap || assert ) {
+        if ( needsNewWindingMap ) {
           const newWindingMap = new WindingMap();
           const existingMap = solvedFace.windingMap!;
           const deltaMap = windingMap;
 
+          // New winding map is a combination of our existing map and the delta map (based on the edge)
           newWindingMap.addWindingMap( existingMap );
           newWindingMap.addWindingMap( deltaMap );
 
-          if ( assert ) {
-            // TODO: object for the winding map?
-          }
           otherFace.windingMap = newWindingMap;
 
-          if ( needsNewWindingMap ) {
-            recursiveWindingMap( otherFace );
-          }
+          pendingFaces.push( otherFace );
         }
       }
-    };
-    recursiveWindingMap( unboundedFace );
+    }
   }
 
   /**
