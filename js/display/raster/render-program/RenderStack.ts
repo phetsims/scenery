@@ -63,9 +63,9 @@ export default class RenderStack extends RenderProgram {
     const blendedChildren: RenderProgram[] = [];
     for ( let i = 0; i < children.length; i++ ) {
       const child = children[ i ];
-      const lastChild = children[ children.length - 1 ];
+      const lastChild = children[ i - 1 ];
 
-      if ( i > 1 && child instanceof RenderColor && lastChild instanceof RenderColor ) {
+      if ( i > 0 && child instanceof RenderColor && lastChild instanceof RenderColor ) {
         blendedChildren.pop();
         blendedChildren.push( new RenderColor( RenderStack.combine( child.color, lastChild.color ) ) );
       }
