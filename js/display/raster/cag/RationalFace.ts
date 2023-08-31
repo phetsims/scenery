@@ -394,6 +394,7 @@ export default class RationalFace {
   }
 
   public static computeWindingMaps( filteredRationalHalfEdges: RationalHalfEdge[], unboundedFace: RationalFace ): void {
+    // TODO: prevent the double-scan-through?
     for ( let i = 0; i < filteredRationalHalfEdges.length; i++ ) {
       const edge = filteredRationalHalfEdges[ i ];
 
@@ -403,9 +404,8 @@ export default class RationalFace {
       assert && assert( face );
       assert && assert( otherFace );
 
-      // TODO: possibly reverse this, check to see which winding map is correct
       if ( !face.windingMapMap.has( otherFace ) ) {
-        face.windingMapMap.set( otherFace, edge.windingMap );
+        face.windingMapMap.set( otherFace, edge.reversed.windingMap );
       }
     }
 
