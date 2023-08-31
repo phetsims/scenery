@@ -454,8 +454,8 @@ an UI and Display made for visual testing and debugging.
           phet.scenery.RenderBlendType.Normal,
           new phet.scenery.RenderPathBoolean(
             new phet.scenery.RenderPath( 'nonzero', [ polygon ] ),
-            phet.dot.v4( 0, 0, 0, 1 ),
-            phet.dot.v4( 0, 0, 0, 0 )
+            new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
+            new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 0, 0 ) )
           ),
           new phet.scenery.RenderColor( phet.dot.v4( 1, 1, 1, 1 ) )
         ).transformed( phet.dot.Matrix3.scaling( window.devicePixelRatio ) );
