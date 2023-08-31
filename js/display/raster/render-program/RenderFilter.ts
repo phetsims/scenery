@@ -38,7 +38,7 @@ export default class RenderFilter extends RenderUnary {
     const program = this.program.simplified();
 
     if ( program instanceof RenderColor ) {
-      return new RenderColor( RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ).plus( this.colorTranslation ) ) );
+      return new RenderColor( RenderFilter.applyFilter( program.color, this.colorMatrix, this.colorTranslation ) );
     }
     else if ( program !== this.program ) {
       return new RenderFilter( program, this.colorMatrix, this.colorTranslation );
@@ -93,7 +93,11 @@ export default class RenderFilter extends RenderUnary {
   ): Vector4 {
     const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
 
-    return RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( source ) ).plus( this.colorTranslation ) );
+    return RenderFilter.applyFilter( source, this.colorMatrix, this.colorTranslation );
+  }
+
+  public static applyFilter( color: Vector4, colorMatrix: Matrix4, colorTranslation: Vector4 ): Vector4 {
+    return RenderColor.premultiply( colorMatrix.timesVector4( RenderColor.unpremultiply( color ) ).plus( colorTranslation ) );
   }
 
   public override serialize(): SerializedRenderFilter {
