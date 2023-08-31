@@ -63,7 +63,7 @@ export default class RenderStack extends RenderProgram {
     const blendedChildren: RenderProgram[] = [];
     for ( let i = 0; i < children.length; i++ ) {
       const child = children[ i ];
-      const lastChild = children[ i - 1 ];
+      const lastChild = blendedChildren[ blendedChildren.length - 1 ];
 
       if ( i > 0 && child instanceof RenderColor && lastChild instanceof RenderColor ) {
         blendedChildren.pop();
@@ -73,15 +73,16 @@ export default class RenderStack extends RenderProgram {
         blendedChildren.push( child );
       }
     }
+    children = blendedChildren;
 
-    if ( blendedChildren.length === 0 ) {
+    if ( children.length === 0 ) {
       return RenderColor.TRANSPARENT;
     }
-    else if ( blendedChildren.length === 1 ) {
-      return blendedChildren[ 0 ];
+    else if ( children.length === 1 ) {
+      return children[ 0 ];
     }
-    else if ( this.children.length !== blendedChildren.length || _.some( this.children, ( child, i ) => child !== blendedChildren[ i ] ) ) {
-      return new RenderStack( blendedChildren );
+    else if ( this.children.length !== children.length || _.some( this.children, ( child, i ) => child !== children[ i ] ) ) {
+      return new RenderStack( children );
     }
     else {
       return this;
