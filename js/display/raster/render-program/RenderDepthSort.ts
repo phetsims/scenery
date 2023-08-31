@@ -60,6 +60,11 @@ export default class RenderDepthSort extends RenderProgram {
     return _.every( this.items, item => item.program.isFullyTransparent() );
   }
 
+  // NOTE: If we have this (unsplit), we'll want the centroid
+  public override needsCentroid(): boolean {
+    return true;
+  }
+
   public override evaluate(
     face: ClippableFace | null,
     area: number,
@@ -69,25 +74,27 @@ export default class RenderDepthSort extends RenderProgram {
     maxX: number,
     maxY: number
   ): Vector4 {
-    // TODO: use centroid to determine depth sorting
-    throw new Error( 'unimplemented' );
 
-    // const color = Vector4.ZERO.copy(); // we will mutate it
-    //
-    // for ( let i = 0; i < this.children.length; i++ ) {
-    //   const blendColor = this.children[ i ].evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    //   const backgroundAlpha = 1 - blendColor.w;
-    //
-    //   // Assume premultiplied
-    //   color.setXYZW(
-    //     blendColor.x + backgroundAlpha * color.x,
-    //     blendColor.y + backgroundAlpha * color.y,
-    //     blendColor.z + backgroundAlpha * color.z,
-    //     blendColor.w + backgroundAlpha * color.w
-    //   );
-    // }
-    //
-    // return color;
+    // Negative, so that our highest-depth things are first
+    const sortedItems = _.sortBy( this.items, item => -item.getDepth( centroid.x, centroid.y ) );
+
+    const color = Vector4.ZERO.copy(); // we will mutate it
+
+    // Blend like normal!
+    for ( let i = 0; i < sortedItems.length; i++ ) {
+      const blendColor = sortedItems[ i ].program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      const backgroundAlpha = 1 - blendColor.w;
+
+      // Assume premultiplied
+      color.setXYZW(
+        blendColor.x + backgroundAlpha * color.x,
+        blendColor.y + backgroundAlpha * color.y,
+        blendColor.z + backgroundAlpha * color.z,
+        blendColor.w + backgroundAlpha * color.w
+      );
+    }
+
+    return color;
   }
 
   public override serialize(): SerializedRenderDepthSort {
