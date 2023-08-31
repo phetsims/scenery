@@ -463,6 +463,7 @@ export { default as RenderBlendCompose } from './display/raster/render-program/R
 export type { SerializedRenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export { default as RenderStack } from './display/raster/render-program/RenderStack.js';
 export type { SerializedRenderStack } from './display/raster/render-program/RenderStack.js';
+export { default as RenderPlanar } from './display/raster/render-program/RenderPlanar.js';
 export { default as RenderDepthSort } from './display/raster/render-program/RenderDepthSort.js';
 export { default as RenderFilter } from './display/raster/render-program/RenderFilter.js';
 export type { SerializedRenderFilter } from './display/raster/render-program/RenderFilter.js';

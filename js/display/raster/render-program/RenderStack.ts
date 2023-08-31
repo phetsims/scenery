@@ -93,6 +93,10 @@ export default class RenderStack extends RenderProgram {
     return _.some( this.children, child => child.isFullyOpaque() );
   }
 
+  public override isFullyTransparent(): boolean {
+    return _.every( this.children, child => child.isFullyTransparent() );
+  }
+
   public static combine( a: Vector4, b: Vector4 ): Vector4 {
     const backgroundAlpha = 1 - a.w;
 
