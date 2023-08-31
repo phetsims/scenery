@@ -11,6 +11,7 @@ import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
 export default class RenderDepthSort extends RenderProgram {
 
@@ -33,6 +34,10 @@ export default class RenderDepthSort extends RenderProgram {
     return new RenderDepthSort( children.map( ( child, i ) => {
       return new RenderPlanar( child, this.items[ i ].pointA, this.items[ i ].pointB, this.items[ i ].pointC );
     } ) );
+  }
+
+  public override transformed( transform: Matrix3 ): RenderProgram {
+    return new RenderDepthSort( this.items.map( item => item.transformed( transform ) ) );
   }
 
   public override simplified(): RenderProgram {

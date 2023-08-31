@@ -863,6 +863,31 @@ an UI and Display made for visual testing and debugging.
         )
       );
 
+      const depth = phet.scenery.RenderPathBoolean.fromInside(
+        new phet.scenery.RenderPath( 'nonzero', [
+          [
+            new phet.dot.Vector2( 54, 10 ),
+            new phet.dot.Vector2( 54, 20 ),
+            new phet.dot.Vector2( 64, 20 ),
+            new phet.dot.Vector2( 64, 10 )
+          ]
+        ] ),
+        new phet.scenery.RenderDepthSort( [
+          new phet.scenery.RenderPlanar(
+            toPremulClient( 'red' ),
+            phet.dot.v3( 54, 10, 8 ),
+            phet.dot.v3( 54, 20, 7 ),
+            phet.dot.v3( 64, 20, 9 )
+          ),
+          new phet.scenery.RenderPlanar(
+            toPremulClient( 'blue' ),
+            phet.dot.v3( 54, 10, 9 ),
+            phet.dot.v3( 54, 20, 9 ),
+            phet.dot.v3( 64, 20, 7 )
+          )
+        ] )
+      );
+
       const back = toPremulClient( 128, 128, 128, 0.5 );
 
       const normalBlendArray = arr => {
@@ -874,7 +899,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a, bary ] ).transformed(
+      const program = normalBlendArray( [ back, d, e, f, bc, a, bary, depth ] ).transformed(
       // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );
