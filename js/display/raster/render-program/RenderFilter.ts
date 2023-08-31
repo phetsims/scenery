@@ -38,7 +38,7 @@ export default class RenderFilter extends RenderUnary {
     const program = this.program.simplified();
 
     if ( program instanceof RenderColor ) {
-      return new RenderColor( RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ) ) );
+      return new RenderColor( RenderColor.premultiply( this.colorMatrix.timesVector4( RenderColor.unpremultiply( program.color ) ).plus( this.colorTranslation ) ) );
     }
     else if ( program !== this.program ) {
       return new RenderFilter( program, this.colorMatrix, this.colorTranslation );
