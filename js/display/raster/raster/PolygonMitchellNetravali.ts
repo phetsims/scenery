@@ -160,6 +160,8 @@ export default class PolygonMitchellNetravali {
     for ( let i = 0; i < polygons.length; i++ ) {
       const polygon = polygons[ i ];
 
+      if ( !polygon.length ) { continue; }
+
       const lastPoint = polygon[ polygon.length - 1 ];
       let lastX = Math.abs( lastPoint.x - pointX );
       let lastY = Math.abs( lastPoint.y - pointY );

@@ -226,12 +226,19 @@ export default class RenderFromNode {
         addResult( renderPathPaintToRenderProgram( renderPath, paint, matrix ) );
       };
 
-      if ( node.hasFill() ) {
-        const shape = node.getShape();
-        shape && addShape( shape, node.getFill() );
-      }
-      if ( node.hasStroke() ) {
-        addShape( node.getStrokedShape(), node.getStroke() );
+      if ( node.hasShape() ) {
+        if ( node.hasFill() ) {
+          const shape = node.getShape();
+          shape && addShape( shape, node.getFill() );
+        }
+        if ( node.hasStroke() ) {
+          let shape = node.getShape()!;
+          if ( node.lineDash.length ) {
+            shape = shape.getDashedShape( node.lineDash, node.lineDashOffset );
+          }
+          shape = shape.getStrokedShape( node._lineDrawingStyles );
+          addShape( shape, node.getStroke() );
+        }
       }
     }
     else if ( node instanceof Text ) {
@@ -267,6 +274,9 @@ export default class RenderFromNode {
 
         if ( node.hasStroke() ) {
           const renderPath = shapesToRenderPath( glyphShapes.map( shape => {
+            if ( node.lineDash.length ) {
+              shape = shape.getDashedShape( node.lineDash, node.lineDashOffset );
+            }
             return shape.getStrokedShape( node._lineDrawingStyles );
           } ) );
           addResult( renderPathPaintToRenderProgram( renderPath, node.getStroke(), matrix ) );
