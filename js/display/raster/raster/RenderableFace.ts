@@ -277,13 +277,13 @@ export default class RenderableFace {
         const min = radiusToStop( distanceRange.min );
         const max = radiusToStop( distanceRange.max );
 
-        const linearRanges = RenderableFace.getGradientLinearRanges( min, max, offset, radialGradient.extend, stops );
+        const linearRanges = RenderableFace.getGradientLinearRanges( min, max, 0, radialGradient.extend, stops );
 
         if ( linearRanges.length < 2 ) {
           processedFaces.push( face );
         }
         else {
-          const splitRadii = linearRanges.map( range => range.start ).slice( 1 );
+          const splitRadii = linearRanges.map( range => range.start ).slice( 1 ).map( stopToRadius );
 
           // Compute clippedFaces
           const clippedFaces: ClippableFace[] = [];
