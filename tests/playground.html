@@ -483,12 +483,39 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.programTest = function( program ) {
+    setTimeout( async function() {
+      const displaySize = 768;
+      const outputSize = 768 * 2;
+      // const outputSize = 768 / 4;
+      const scale = 15;
+
+      program = program.transformed( phet.dot.Matrix3.scaling( scale ) );
+      const styleCanvas = canvas => {
+        canvas.style.width = `${displaySize}px`;
+        canvas.style.height = `${displaySize}px`;
+        canvas.style.imageRendering = 'pixelated';
+        canvas.style.position = 'absolute';
+        // canvas.style.opacity = '0.4';
+        canvas.style.top = '20px';
+        canvas.style.left = '20px ';
+      };
+
+      const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
+      phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
+      const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
+
+      styleCanvas( canvas );
+      document.body.appendChild( canvas );
+    } );
+  };
+
   window.serialTest = function( serialized ) {
     setTimeout( async function() {
       const displaySize = 768;
       const outputSize = 768 * 2;
       // const outputSize = 768 / 4;
-      const scale = 5;
+      const scale = 15;
 
       const program = phet.scenery.RenderProgram.deserialize( serialized ).transformed( phet.dot.Matrix3.scaling( scale ) );
       const styleCanvas = canvas => {
