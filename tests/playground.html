@@ -902,7 +902,7 @@ an UI and Display made for visual testing and debugging.
         const bottomY = center.y - halfSize.y;
 
         const tri = ( renderProgram, p0, p1, p2 ) => new phet.scenery.RenderPlanar(
-          phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'nonzero', [ [
+          phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'positive', [ [
             p0.toVector2(), p1.toVector2(), p2.toVector2()
           ] ] ), renderProgram ),
           p0, p1, p2
@@ -942,17 +942,17 @@ an UI and Display made for visual testing and debugging.
           ),
           ...face(
             toPremulClient( 'blue' ),
-            project( phet.dot.v3( leftX, topY, frontZ ) ),
-            project( phet.dot.v3( rightX, topY, frontZ ) ),
+            project( phet.dot.v3( leftX, topY, backZ ) ),
             project( phet.dot.v3( rightX, topY, backZ ) ),
-            project( phet.dot.v3( leftX, topY, backZ ) )
+            project( phet.dot.v3( rightX, topY, frontZ ) ),
+            project( phet.dot.v3( leftX, topY, frontZ ) )
           ),
           ...face(
             toPremulClient( 'yellow' ),
-            project( phet.dot.v3( leftX, bottomY, frontZ ) ),
-            project( phet.dot.v3( leftX, bottomY, backZ ) ),
+            project( phet.dot.v3( rightX, bottomY, frontZ ) ),
             project( phet.dot.v3( rightX, bottomY, backZ ) ),
-            project( phet.dot.v3( rightX, bottomY, frontZ ) )
+            project( phet.dot.v3( leftX, bottomY, backZ ) ),
+            project( phet.dot.v3( leftX, bottomY, frontZ ) )
           )
         ];
       };
