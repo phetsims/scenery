@@ -73,6 +73,9 @@ export default class RenderPlanar {
       const normal = direction.perpendicular;
       const value = position.dot( normal );
       const fakeCornerPerpendicular = face instanceof EdgedFace ? face.getBounds().center.dot( direction ) : 0; // TODO: how to best handle this?
+
+      // TODO: we COULD check to see if our line actually goes through the bounding box of the face. If not, we can just
+      // TODO: determine which side of the line we're on, and skip the clip!
       const { minFace, maxFace } = face.getBinaryLineClip( normal, value, fakeCornerPerpendicular );
 
       const somePointInMin = normal.timesScalar( value - 5 );
