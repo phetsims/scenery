@@ -552,8 +552,8 @@ an UI and Display made for visual testing and debugging.
       }
 
       const displaySize = 768;
-      // const outputSize = 768 * 2;
-      const outputSize = 768 / 4;
+      const outputSize = 768 * 2;
+      // const outputSize = 768 / 4;
 
       // const colorSpace = 'srgb';
       const colorSpace = 'display-p3';
@@ -888,6 +888,81 @@ an UI and Display made for visual testing and debugging.
         ] )
       );
 
+      const projectionMatrix = phet.scenery.RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+      const project = p => {
+        const clip = projectionMatrix.timesVector4( phet.dot.v4( p.x, p.y, p.z, 1 ) );
+        return phet.dot.v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+      };
+      const createBox = ( center, halfSize ) => {
+        const frontZ = center.z - halfSize.z;
+        const backZ = center.z + halfSize.z;
+        const leftX = center.x - halfSize.x;
+        const rightX = center.x + halfSize.x;
+        const topY = center.y + halfSize.y;
+        const bottomY = center.y - halfSize.y;
+
+        const tri = ( renderProgram, p0, p1, p2 ) => new phet.scenery.RenderPlanar(
+          phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'nonzero', [ [
+            p0.toVector2(), p1.toVector2(), p2.toVector2()
+          ] ] ), renderProgram ),
+          p0, p1, p2
+        );
+
+        const face = ( renderProgram, p0, p1, p2, p3 ) => [ tri( renderProgram, p0, p1, p2 ), tri( renderProgram, p0, p2, p3 ) ];
+
+        // TODO: figure out if we need to reverse the windings!!!
+        return [
+          ...face(
+            toPremulClient( 'white' ),
+            project( phet.dot.v3( leftX, topY, frontZ ) ),
+            project( phet.dot.v3( rightX, topY, frontZ ) ),
+            project( phet.dot.v3( rightX, bottomY, frontZ ) ),
+            project( phet.dot.v3( leftX, bottomY, frontZ ) )
+          ),
+          ...face(
+            toPremulClient( 'black' ),
+            project( phet.dot.v3( leftX, topY, backZ ) ),
+            project( phet.dot.v3( leftX, bottomY, backZ ) ),
+            project( phet.dot.v3( rightX, bottomY, backZ ) ),
+            project( phet.dot.v3( rightX, topY, backZ ) )
+          ),
+          ...face(
+            toPremulClient( 'red' ),
+            project( phet.dot.v3( leftX, topY, frontZ ) ),
+            project( phet.dot.v3( leftX, bottomY, frontZ ) ),
+            project( phet.dot.v3( leftX, bottomY, backZ ) ),
+            project( phet.dot.v3( leftX, topY, backZ ) )
+          ),
+          ...face(
+            toPremulClient( 'green' ),
+            project( phet.dot.v3( rightX, topY, frontZ ) ),
+            project( phet.dot.v3( rightX, topY, backZ ) ),
+            project( phet.dot.v3( rightX, bottomY, backZ ) ),
+            project( phet.dot.v3( rightX, bottomY, frontZ ) )
+          ),
+          ...face(
+            toPremulClient( 'blue' ),
+            project( phet.dot.v3( leftX, topY, frontZ ) ),
+            project( phet.dot.v3( rightX, topY, frontZ ) ),
+            project( phet.dot.v3( rightX, topY, backZ ) ),
+            project( phet.dot.v3( leftX, topY, backZ ) )
+          ),
+          ...face(
+            toPremulClient( 'yellow' ),
+            project( phet.dot.v3( leftX, bottomY, frontZ ) ),
+            project( phet.dot.v3( leftX, bottomY, backZ ) ),
+            project( phet.dot.v3( rightX, bottomY, backZ ) ),
+            project( phet.dot.v3( rightX, bottomY, frontZ ) )
+          )
+        ];
+      };
+      const boxDepth = new phet.scenery.RenderDepthSort( [
+        ...createBox( phet.dot.v3( 3, 2, 15 ), phet.dot.v3( 1, 1, 5 ) ),
+        ...createBox( phet.dot.v3( 0, 3, 15 ), phet.dot.v3( 6, 1, 1 ) ),
+        ...createBox( phet.dot.v3( -3, 0, 15 ), phet.dot.v3( 1, 5, 3 ) ),
+        ...createBox( phet.dot.v3( 0, -3, 15 ), phet.dot.v3( 5, 0.3, 5 ) ),
+      ] ).transformed( phet.dot.Matrix3.scaling( 25 ) ).transformed( phet.dot.Matrix3.translation( 35, 16 ) );
+
       const back = toPremulClient( 128, 128, 128, 0.5 );
 
       const normalBlendArray = arr => {
@@ -899,7 +974,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a, bary, depth ] ).transformed(
+      const program = normalBlendArray( [ back, d, e, f, bc, a, bary, depth, boxDepth ] ).transformed(
       // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );

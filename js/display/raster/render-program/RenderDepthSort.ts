@@ -141,10 +141,12 @@ export default class RenderDepthSort extends RenderProgram {
     const potentialItems: RenderPlanar[] = [];
     for ( let i = 0; i < this.items.length; i++ ) {
       const item = this.items[ i ];
-      if ( depthRanges[ i ].min < maxOpaqueDepth ) {
+      if ( depthRanges[ i ].min <= maxOpaqueDepth ) {
         potentialItems.push( item );
       }
     }
+
+    assert && assert( potentialItems.length );
 
     // Every partial will have the total order between items given by its array.
     let partials = [ new SortedPartial( face.face, [ potentialItems[ 0 ] ] ) ];
