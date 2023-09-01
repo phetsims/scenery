@@ -484,6 +484,7 @@ export type { SerializedRenderRadialBlend } from './display/raster/render-progra
 export { default as RenderRadialGradient, RenderRadialGradientAccuracy } from './display/raster/render-program/RenderRadialGradient.js';
 export type { SerializedRenderRadialGradient } from './display/raster/render-program/RenderRadialGradient.js';
 export { default as RenderResampleType } from './display/raster/render-program/RenderResampleType.js';
+export { isWindingIncluded } from './display/raster/render-program/FillRule.js';
 export type { default as FillRule } from './display/raster/render-program/FillRule.js';
 export { default as RenderFromNode } from './display/raster/render-program/RenderFromNode.js';
 

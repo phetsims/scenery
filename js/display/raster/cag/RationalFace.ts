@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClipSimplifier, EdgedFace, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, scenery, WindingMap } from '../../../imports.js';
+import { BigRational, ClipSimplifier, EdgedFace, isWindingIncluded, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, scenery, WindingMap } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -69,8 +69,8 @@ export default class RationalFace {
 
     for ( const renderPath of this.windingMap!.map.keys() ) {
       const windingNumber = this.windingMap!.getWindingNumber( renderPath );
-      const included = renderPath.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 !== 0;
-      if ( included ) {
+
+      if ( isWindingIncluded( windingNumber, renderPath.fillRule ) ) {
         inclusionSet.add( renderPath );
       }
     }

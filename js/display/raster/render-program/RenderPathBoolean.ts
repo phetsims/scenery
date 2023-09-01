@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, LinearEdge, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, isWindingIncluded, LinearEdge, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -79,7 +79,7 @@ export default class RenderPathBoolean extends RenderProgram {
   ): Vector4 {
     // TODO: ACTUALLY, we should clip the face with our path....
     const windingNumber = LinearEdge.getWindingNumberPolygons( this.path.subpaths, centroid );
-    const included = this.path.fillRule === 'nonzero' ? windingNumber !== 0 : windingNumber % 2 === 1;
+    const included = isWindingIncluded( windingNumber, this.path.fillRule );
 
     return ( included ? this.inside : this.outside ).evaluate( face, area, centroid, minX, minY, maxX, maxY );
   }
