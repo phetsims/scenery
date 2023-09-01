@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderPlanar, RenderProgram, SerializedRenderProgram, scenery } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderPlanar, RenderProgram, RenderableFace, SerializedRenderProgram, scenery, RenderStack } from '../../../imports.js';
+import Range from '../../../../../dot/js/Range.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -43,6 +44,7 @@ export default class RenderDepthSort extends RenderProgram {
   public override simplified(): RenderProgram {
     const items = this.items.map( item => item.withProgram( item.program.simplified() ) ).filter( item => !item.program.isFullyTransparent() );
 
+    // TODO: If all of our items are the same, we can simplify?
     if ( items.length === 0 ) {
       return RenderColor.TRANSPARENT;
     }
@@ -102,6 +104,115 @@ export default class RenderDepthSort extends RenderProgram {
     return color;
   }
 
+  public override isSplittable(): boolean {
+    return true;
+  }
+
+  /**
+   * The heavy lifting of figuring out what combinations of "orders" of items are possible (front-to-back), and
+   * splitting into each possible non-zero-area combination.
+   */
+  public override split( face: RenderableFace ): RenderableFace[] {
+    // TODO: add high-level documentation
+
+    // TODO: .... actually, is there a faster algorithm for this? They are half planes, it's not like we have a combinatorial explosion?
+    // TODO: I might be wrong
+
+    // PROBABLY should have been simplified before now, potentially remove the assertion later?
+    assert && assert( this.items.length >= 2, 'Should have been simplified before now' );
+    if ( this.items.length < 2 ) {
+      return [ face ];
+    }
+
+    let maxOpaqueDepth = Infinity;
+
+    // Fill in depth ranges, and get a max opaque depth
+    const depthRanges: Range[] = [];
+    for ( let i = 0; i < this.items.length; i++ ) {
+      const item = this.items[ i ];
+      const depthRange = item.getDepthRange( face.face );
+      depthRanges.push( depthRange );
+      if ( item.program.isFullyOpaque() ) {
+        maxOpaqueDepth = Math.min( maxOpaqueDepth, depthRange.max );
+      }
+    }
+
+    // Only grab items that are not fully behind our max opaque depth
+    const potentialItems: RenderPlanar[] = [];
+    for ( let i = 0; i < this.items.length; i++ ) {
+      const item = this.items[ i ];
+      if ( depthRanges[ i ].min < maxOpaqueDepth ) {
+        potentialItems.push( item );
+      }
+    }
+
+    // Every partial will have the total order between items given by its array.
+    let partials = [ new SortedPartial( face.face, [ potentialItems[ 0 ] ] ) ];
+
+    assert && assert( face.face.getArea() >= 1e-8, 'Kind of assumed in this function' );
+
+    // We'll slowly add in more items while splitting.
+    for ( let i = 1; i < potentialItems.length; i++ ) {
+      const potentialItem = potentialItems[ i ];
+
+      // For each partial, we'll want to examine all of the places we could insert the new item. For instance, if we
+      // have 3 items in our partial right now, there will be 4 places to put our new item (before the first, between
+      // others, or after the last)
+      const newPartials: SortedPartial[] = [];
+      for ( let j = 0; j < partials.length; j++ ) {
+        const partial = partials[ j ];
+
+        // We'll be stripping parts of the face away at a time, so we'll need to keep track of what's left
+        let remainingFace = partial.face;
+        for ( let k = 0; k < partial.items.length; k++ ) {
+          const existingItem = partial.items[ k ];
+
+          // Partition it based on what is in front of the existing item
+          const { ourFaceFront, otherFaceFront } = potentialItem.getDepthSplit( existingItem, remainingFace );
+
+          // If the "behind" section is non-empty, we'll need to add it to our partials
+          if ( otherFaceFront && otherFaceFront.getArea() > 1e-8 ) {
+            newPartials.push( new SortedPartial( otherFaceFront, [
+              ...partial.items.slice( 0, k ),
+              potentialItem,
+              ...partial.items.slice( k )
+            ] ) );
+          }
+
+          if ( ourFaceFront && ourFaceFront.getArea() > 1e-8 ) {
+            remainingFace = ourFaceFront;
+
+            // If we're the last item, add the rest at the end (front).
+            if ( k === partial.items.length - 1 ) {
+              newPartials.push( new SortedPartial( remainingFace, [
+                ...partial.items,
+                potentialItem
+              ] ) );
+            }
+          }
+          else {
+            break;
+          }
+        }
+      }
+
+      partials = newPartials;
+    }
+
+    return partials.map( partial => {
+      const replacer = ( renderProgram: RenderProgram ): RenderProgram | null => {
+        if ( renderProgram !== this ) {
+          return null;
+        }
+        else {
+          return new RenderStack( partial.items.map( item => item.program ) );
+        }
+      };
+
+      return new RenderableFace( partial.face, face.renderProgram.replace( replacer ).simplified(), partial.face.getBounds() );
+    } );
+  }
+
   public override serialize(): SerializedRenderDepthSort {
     return {
       type: 'RenderDepthSort',
@@ -144,6 +255,13 @@ export default class RenderDepthSort extends RenderProgram {
 }
 
 scenery.register( 'RenderDepthSort', RenderDepthSort );
+
+class SortedPartial {
+  public constructor(
+    public readonly face: ClippableFace,
+    public readonly items: RenderPlanar[] // ordered by decreasing depth (similar to eventual order in RenderStack)
+  ) {}
+}
 
 export type SerializedRenderDepthSort = {
   type: 'RenderDepthSort';

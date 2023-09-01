@@ -7,11 +7,13 @@
  */
 
 import { ClippableFace, EdgedFace, RenderProgram, scenery } from '../../../imports.js';
+import Range from '../../../../../dot/js/Range.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Plane3 from '../../../../../dot/js/Plane3.js';
 
+// TODO: better name
 export default class RenderPlanar {
 
   public readonly plane: Plane3;
@@ -34,6 +36,32 @@ export default class RenderPlanar {
     // p.x * normal.x + p.y * normal.y + z * normal.z = distance
     // z = (distance - p.x * normal.x - p.y * normal.y) / normal.z
     return ( this.plane.distance - x * this.plane.normal.x - y * this.plane.normal.y ) / this.plane.normal.z;
+  }
+
+  /**
+   * Returns the range of potential depth values included in the face.
+   */
+  public getDepthRange( face: ClippableFace ): Range {
+    const normal2 = this.plane.normal.toVector2();
+
+    // If our normal x,y is zero, then we are parallel to the z axis, and we can't get a depth range
+    if ( normal2.magnitude < 1e-10 ) {
+      const depth = this.getDepth( 0, 0 );
+      return new Range( depth, depth );
+    }
+
+    // Our normal will point along the gradient for depth. We'll be able to probe the depth values at both extremes
+    normal2.normalize();
+    const dotRange = face.getDotRange( normal2 );
+
+    const minPoint = normal2.timesScalar( dotRange.min );
+    const maxPoint = normal2.timesScalar( dotRange.max );
+
+    // NOTE: These are depths AT each range of points, need to find out which is larger and which is smaller
+    const minDepth = this.getDepth( minPoint.x, minPoint.y );
+    const maxDepth = this.getDepth( maxPoint.x, maxPoint.y );
+
+    return new Range( Math.min( minDepth, maxDepth ), Math.max( minDepth, maxDepth ) );
   }
 
   public getDepthSplit( planar: RenderPlanar, face: ClippableFace ): { ourFaceFront: ClippableFace | null; otherFaceFront: ClippableFace | null } {
