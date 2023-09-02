@@ -904,7 +904,7 @@ an UI and Display made for visual testing and debugging.
 
       const dl = 15;
       const projectionMatrix = phet.scenery.RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
-      const rotationMatrix = phet.dot.Matrix3.rotationY( 0 ).timesMatrix( phet.dot.Matrix3.rotationX( 0 ) );
+      const rotationMatrix = phet.dot.Matrix3.rotationY( -0.4 ).timesMatrix( phet.dot.Matrix3.rotationX( -0.4 ) );
       // const rotationMatrix = phet.dot.Matrix3.rotationY( -0.6 );
       const project = ( p ) => {
 
@@ -913,6 +913,56 @@ an UI and Display made for visual testing and debugging.
 
         const clip = projectionMatrix.timesVector4( phet.dot.v4( p.x, p.y, p.z, 1 ) );
         return phet.dot.v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+      };
+      const createSphere = ( center, radius, thetaDivisions, phiDivisions ) => {
+        const planars = [];
+
+        for ( let i = 0; i < thetaDivisions; i++ ) {
+          const theta0 = i / thetaDivisions * 2 * Math.PI;
+          const theta1 = ( i + 1 ) / thetaDivisions * 2 * Math.PI;
+
+          for ( let j = 0; j < phiDivisions; j++ ) {
+            const phi0 = j / phiDivisions * Math.PI;
+            const phi1 = ( j + 1 ) / phiDivisions * Math.PI;
+
+            const p00 = phet.dot.v3(
+              center.x + radius * Math.sin( phi0 ) * Math.cos( theta0 ),
+              center.y + radius * Math.sin( phi0 ) * Math.sin( theta0 ),
+              center.z + radius * Math.cos( phi0 )
+            );
+            const p01 = phet.dot.v3(
+              center.x + radius * Math.sin( phi0 ) * Math.cos( theta1 ),
+              center.y + radius * Math.sin( phi0 ) * Math.sin( theta1 ),
+              center.z + radius * Math.cos( phi0 )
+            );
+            const p10 = phet.dot.v3(
+              center.x + radius * Math.sin( phi1 ) * Math.cos( theta0 ),
+              center.y + radius * Math.sin( phi1 ) * Math.sin( theta0 ),
+              center.z + radius * Math.cos( phi1 )
+            );
+            const p11 = phet.dot.v3(
+              center.x + radius * Math.sin( phi1 ) * Math.cos( theta1 ),
+              center.y + radius * Math.sin( phi1 ) * Math.sin( theta1 ),
+              center.z + radius * Math.cos( phi1 )
+            );
+
+            const tri = ( renderProgram, p0, p1, p2 ) => new phet.scenery.RenderPlanar(
+              phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'positive', [ [
+                p0.toVector2(), p1.toVector2(), p2.toVector2()
+              ] ] ), renderProgram ),
+              p0, p1, p2
+            );
+
+            if ( !p00.equalsEpsilon( p01, 1e-6 ) && !p00.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p10, 1e-6 ) ) {
+              planars.push( tri( toPremulClient( 'rgba(0,0,0,1)' ), project( p00 ), project( p10 ), project( p01 ) ) );
+            }
+            if ( !p01.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p11, 1e-6 ) && !p10.equalsEpsilon( p11, 1e-6 ) ) {
+              planars.push( tri( toPremulClient( 'rgba(128,128,128,1)' ), project( p01 ), project( p10 ), project( p11 ) ) );
+            }
+          }
+        }
+
+        return planars;
       };
       const createBox = ( center, halfSize ) => {
         const frontZ = center.z - halfSize.z;
@@ -982,6 +1032,8 @@ an UI and Display made for visual testing and debugging.
         ...createBox( phet.dot.v3( 0, 3, dl ), phet.dot.v3( 6, 1, 1 ) ),
         ...createBox( phet.dot.v3( -3, 0, dl ), phet.dot.v3( 1, 5, 3 ) ),
         ...createBox( phet.dot.v3( 0, -3, dl ), phet.dot.v3( 5, 0.3, 5 ) ),
+        ...createSphere( phet.dot.v3( 0, 0, dl ), 4, 20, 20 ),
+        ...createSphere( phet.dot.v3( 2, -1, dl - 3 ), 3, 15, 15 )
       ] ).transformed( phet.dot.Matrix3.scaling( 25 ) ).transformed( phet.dot.Matrix3.translation( 35, 16 ) );
 
       const back = toPremulClient( 128, 128, 128, 0.5 );

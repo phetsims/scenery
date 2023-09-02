@@ -124,6 +124,10 @@ export default class RenderDepthSort extends RenderProgram {
       return [ face ];
     }
 
+    if ( face.face.getArea() < 1e-8 ) {
+      return [];
+    }
+
     let maxOpaqueDepth = Infinity;
 
     // Fill in depth ranges, and get a max opaque depth
@@ -150,8 +154,6 @@ export default class RenderDepthSort extends RenderProgram {
 
     // Every partial will have the total order between items given by its array.
     let partials = [ new SortedPartial( face.face, [ potentialItems[ 0 ] ] ) ];
-
-    assert && assert( face.face.getArea() >= 1e-8, 'Kind of assumed in this function' );
 
     // We'll slowly add in more items while splitting.
     for ( let i = 1; i < potentialItems.length; i++ ) {
