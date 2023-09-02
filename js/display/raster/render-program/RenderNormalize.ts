@@ -60,6 +60,8 @@ export default class RenderNormalize extends RenderUnary {
       return Vector4.ZERO;
     }
     else {
+      assert && assert( source.normalized().isFinite() );
+
       return source.normalized();
     }
   }

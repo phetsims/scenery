@@ -904,7 +904,9 @@ an UI and Display made for visual testing and debugging.
 
       const dl = 15;
       const projectionMatrix = phet.scenery.RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
-      const rotationMatrix = phet.dot.Matrix3.rotationY( -0.4 ).timesMatrix( phet.dot.Matrix3.rotationX( -0.4 ) );
+      // const rotationMatrix = phet.dot.Matrix3.rotationY( -0.4 ).timesMatrix( phet.dot.Matrix3.rotationX( -0.4 ) );
+      // const rotationMatrix = phet.dot.Matrix3.rotationY( Math.PI ).timesMatrix( phet.dot.Matrix3.rotationX( 0 ) );
+      const rotationMatrix = phet.dot.Matrix3.rotationY( 0 ).timesMatrix( phet.dot.Matrix3.rotationX( 0 ) );
       // const rotationMatrix = phet.dot.Matrix3.rotationY( -0.6 );
       const project = ( p ) => {
 
@@ -926,38 +928,61 @@ an UI and Display made for visual testing and debugging.
             const phi1 = ( j + 1 ) / phiDivisions * Math.PI;
 
             const p00 = phet.dot.v3(
-              center.x + radius * Math.sin( phi0 ) * Math.cos( theta0 ),
-              center.y + radius * Math.sin( phi0 ) * Math.sin( theta0 ),
-              center.z + radius * Math.cos( phi0 )
+              Math.sin( phi0 ) * Math.cos( theta0 ),
+              Math.sin( phi0 ) * Math.sin( theta0 ),
+              Math.cos( phi0 )
             );
             const p01 = phet.dot.v3(
-              center.x + radius * Math.sin( phi0 ) * Math.cos( theta1 ),
-              center.y + radius * Math.sin( phi0 ) * Math.sin( theta1 ),
-              center.z + radius * Math.cos( phi0 )
+              Math.sin( phi0 ) * Math.cos( theta1 ),
+              Math.sin( phi0 ) * Math.sin( theta1 ),
+              Math.cos( phi0 )
             );
             const p10 = phet.dot.v3(
-              center.x + radius * Math.sin( phi1 ) * Math.cos( theta0 ),
-              center.y + radius * Math.sin( phi1 ) * Math.sin( theta0 ),
-              center.z + radius * Math.cos( phi1 )
+              Math.sin( phi1 ) * Math.cos( theta0 ),
+              Math.sin( phi1 ) * Math.sin( theta0 ),
+              Math.cos( phi1 )
             );
             const p11 = phet.dot.v3(
-              center.x + radius * Math.sin( phi1 ) * Math.cos( theta1 ),
-              center.y + radius * Math.sin( phi1 ) * Math.sin( theta1 ),
-              center.z + radius * Math.cos( phi1 )
+              Math.sin( phi1 ) * Math.cos( theta1 ),
+              Math.sin( phi1 ) * Math.sin( theta1 ),
+              Math.cos( phi1 )
             );
 
-            const tri = ( renderProgram, p0, p1, p2 ) => new phet.scenery.RenderPlanar(
-              phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'positive', [ [
-                p0.toVector2(), p1.toVector2(), p2.toVector2()
-              ] ] ), renderProgram ),
-              p0, p1, p2
-            );
+            const tri = ( renderProgram, p0, p1, p2 ) => {
+
+              const point0 = center.plus( p0.timesScalar( radius ) );
+              const point1 = center.plus( p1.timesScalar( radius ) );
+              const point2 = center.plus( p2.timesScalar( radius ) );
+
+              const projected0 = project( point0 );
+              const projected1 = project( point1 );
+              const projected2 = project( point2 );
+
+              const normalProgram = new phet.scenery.RenderNormalize( new phet.scenery.RenderBarycentricPerspectiveBlend(
+                projected0, projected1, projected2,
+                phet.scenery.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+                new phet.scenery.RenderColor( p0.toVector4() ),
+                new phet.scenery.RenderColor( p1.toVector4() ),
+                new phet.scenery.RenderColor( p2.toVector4() ),
+              ) );
+
+              // const normalProgram = new phet.scenery.RenderColor( p0.toVector4().plus( p1.toVector4() ).plus( p2.toVector4() ).timesScalar( 1 / 3 ) );
+
+              const diffuseProgram = new phet.scenery.RenderNormalDebug( normalProgram );
+
+              return new phet.scenery.RenderPlanar(
+                phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'positive', [ [
+                  projected0.toVector2(), projected1.toVector2(), projected2.toVector2()
+                ] ] ), diffuseProgram ),
+                projected0, projected1, projected2
+              );
+            };
 
             if ( !p00.equalsEpsilon( p01, 1e-6 ) && !p00.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p10, 1e-6 ) ) {
-              planars.push( tri( toPremulClient( 'rgba(0,0,0,1)' ), project( p00 ), project( p10 ), project( p01 ) ) );
+              planars.push( tri( toPremulClient( 'rgba(0,0,0,1)' ), p00, p10, p01 ) );
             }
             if ( !p01.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p11, 1e-6 ) && !p10.equalsEpsilon( p11, 1e-6 ) ) {
-              planars.push( tri( toPremulClient( 'rgba(128,128,128,1)' ), project( p01 ), project( p10 ), project( p11 ) ) );
+              planars.push( tri( toPremulClient( 'rgba(128,128,128,1)' ), p01, p10, p11 ) );
             }
           }
         }
