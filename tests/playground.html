@@ -863,6 +863,20 @@ an UI and Display made for visual testing and debugging.
         )
       );
 
+      const baryPerspA = phet.dot.v3( 0, 5, 4 );
+      const baryPerspB = phet.dot.v3( 5, 5, 1 );
+      const baryPerspC = phet.dot.v3( 0, 10, 1 );
+      const baryPersp = phet.scenery.RenderPathBoolean.fromInside(
+        new phet.scenery.RenderPath( 'nonzero', [ [ baryPerspA.toVector2(), baryPerspB.toVector2(), baryPerspC.toVector2() ] ] ),
+        new phet.scenery.RenderBarycentricPerspectiveBlend(
+          baryPerspA, baryPerspB, baryPerspC,
+          phet.scenery.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+          toPremulClient( 'rgb(255,0,0)' ),
+          toPremulClient( 'rgb(0,255,0)' ),
+          toPremulClient( 'rgb(0,0,255)' )
+        )
+      );
+
       const depth = phet.scenery.RenderPathBoolean.fromInside(
         new phet.scenery.RenderPath( 'nonzero', [
           [
@@ -888,8 +902,15 @@ an UI and Display made for visual testing and debugging.
         ] )
       );
 
+      const dl = 15;
       const projectionMatrix = phet.scenery.RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
-      const project = p => {
+      const rotationMatrix = phet.dot.Matrix3.rotationY( 0 ).timesMatrix( phet.dot.Matrix3.rotationX( 0 ) );
+      // const rotationMatrix = phet.dot.Matrix3.rotationY( -0.6 );
+      const project = ( p ) => {
+
+        // a rotation, for testing
+        p = rotationMatrix.timesVector3( p.minus( phet.dot.v3( 0, 0, dl ) ) ).plus( phet.dot.v3( 0, 0, dl ) );
+
         const clip = projectionMatrix.timesVector4( phet.dot.v4( p.x, p.y, p.z, 1 ) );
         return phet.dot.v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
       };
@@ -913,42 +934,42 @@ an UI and Display made for visual testing and debugging.
         // TODO: figure out if we need to reverse the windings!!!
         return [
           ...face(
-            toPremulClient( 'white' ),
+            toPremulClient( 'rgba(255,255,255,1)' ),
             project( phet.dot.v3( leftX, topY, frontZ ) ),
             project( phet.dot.v3( rightX, topY, frontZ ) ),
             project( phet.dot.v3( rightX, bottomY, frontZ ) ),
             project( phet.dot.v3( leftX, bottomY, frontZ ) )
           ),
           ...face(
-            toPremulClient( 'black' ),
+            toPremulClient( 'rgba(0,0,0,1)' ),
             project( phet.dot.v3( leftX, topY, backZ ) ),
             project( phet.dot.v3( leftX, bottomY, backZ ) ),
             project( phet.dot.v3( rightX, bottomY, backZ ) ),
             project( phet.dot.v3( rightX, topY, backZ ) )
           ),
           ...face(
-            toPremulClient( 'red' ),
+            toPremulClient( 'rgba(255,0,0,1)' ),
             project( phet.dot.v3( leftX, topY, frontZ ) ),
             project( phet.dot.v3( leftX, bottomY, frontZ ) ),
             project( phet.dot.v3( leftX, bottomY, backZ ) ),
             project( phet.dot.v3( leftX, topY, backZ ) )
           ),
           ...face(
-            toPremulClient( 'green' ),
+            toPremulClient( 'rgba(0,200,0,1)' ),
             project( phet.dot.v3( rightX, topY, frontZ ) ),
             project( phet.dot.v3( rightX, topY, backZ ) ),
             project( phet.dot.v3( rightX, bottomY, backZ ) ),
             project( phet.dot.v3( rightX, bottomY, frontZ ) )
           ),
           ...face(
-            toPremulClient( 'blue' ),
+            toPremulClient( 'rgba(0,0,255,1)' ),
             project( phet.dot.v3( leftX, topY, backZ ) ),
             project( phet.dot.v3( rightX, topY, backZ ) ),
             project( phet.dot.v3( rightX, topY, frontZ ) ),
             project( phet.dot.v3( leftX, topY, frontZ ) )
           ),
           ...face(
-            toPremulClient( 'yellow' ),
+            toPremulClient( 'rgba(255,255,0,1)' ),
             project( phet.dot.v3( rightX, bottomY, frontZ ) ),
             project( phet.dot.v3( rightX, bottomY, backZ ) ),
             project( phet.dot.v3( leftX, bottomY, backZ ) ),
@@ -957,10 +978,10 @@ an UI and Display made for visual testing and debugging.
         ];
       };
       const boxDepth = new phet.scenery.RenderDepthSort( [
-        ...createBox( phet.dot.v3( 3, 2, 15 ), phet.dot.v3( 1, 1, 5 ) ),
-        ...createBox( phet.dot.v3( 0, 3, 15 ), phet.dot.v3( 6, 1, 1 ) ),
-        ...createBox( phet.dot.v3( -3, 0, 15 ), phet.dot.v3( 1, 5, 3 ) ),
-        ...createBox( phet.dot.v3( 0, -3, 15 ), phet.dot.v3( 5, 0.3, 5 ) ),
+        ...createBox( phet.dot.v3( 3, 2, dl ), phet.dot.v3( 1, 1, 5 ) ),
+        ...createBox( phet.dot.v3( 0, 3, dl ), phet.dot.v3( 6, 1, 1 ) ),
+        ...createBox( phet.dot.v3( -3, 0, dl ), phet.dot.v3( 1, 5, 3 ) ),
+        ...createBox( phet.dot.v3( 0, -3, dl ), phet.dot.v3( 5, 0.3, 5 ) ),
       ] ).transformed( phet.dot.Matrix3.scaling( 25 ) ).transformed( phet.dot.Matrix3.translation( 35, 16 ) );
 
       const back = toPremulClient( 128, 128, 128, 0.5 );
@@ -974,7 +995,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a, bary, depth, boxDepth ] ).transformed(
+      const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth, boxDepth ] ).transformed(
       // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );

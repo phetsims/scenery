@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBarycentricBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderPathBoolean, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, scenery, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderPathBoolean, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../../../imports.js';
+import { ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBarycentricBlend, RenderBarycentricPerspectiveBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderDepthSort, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderPath, RenderPathBoolean, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, scenery, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBarycentricPerspectiveBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderDepthSort, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderPathBoolean, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -227,6 +227,9 @@ export default abstract class RenderProgram {
     else if ( obj.type === 'RenderAlpha' ) {
       return RenderAlpha.deserialize( obj as SerializedRenderAlpha );
     }
+    else if ( obj.type === 'RenderDepthSort' ) {
+      return RenderDepthSort.deserialize( obj as SerializedRenderDepthSort );
+    }
     else if ( obj.type === 'RenderBlendCompose' ) {
       return RenderBlendCompose.deserialize( obj as SerializedRenderBlendCompose );
     }
@@ -244,6 +247,9 @@ export default abstract class RenderProgram {
     }
     else if ( obj.type === 'RenderBarycentricBlend' ) {
       return RenderBarycentricBlend.deserialize( obj as SerializedRenderBarycentricBlend );
+    }
+    else if ( obj.type === 'RenderBarycentricPerspectiveBlend' ) {
+      return RenderBarycentricPerspectiveBlend.deserialize( obj as SerializedRenderBarycentricPerspectiveBlend );
     }
     else if ( obj.type === 'RenderLinearGradient' ) {
       return RenderLinearGradient.deserialize( obj as SerializedRenderLinearGradient );

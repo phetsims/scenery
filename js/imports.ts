@@ -465,6 +465,7 @@ export { default as RenderStack } from './display/raster/render-program/RenderSt
 export type { SerializedRenderStack } from './display/raster/render-program/RenderStack.js';
 export { default as RenderPlanar } from './display/raster/render-program/RenderPlanar.js';
 export { default as RenderDepthSort } from './display/raster/render-program/RenderDepthSort.js';
+export type { SerializedRenderDepthSort } from './display/raster/render-program/RenderDepthSort.js';
 export { default as RenderFilter } from './display/raster/render-program/RenderFilter.js';
 export type { SerializedRenderFilter } from './display/raster/render-program/RenderFilter.js';
 export { default as RenderGradientStop } from './display/raster/render-program/RenderGradientStop.js';
@@ -477,6 +478,8 @@ export { default as RenderLinearBlend, RenderLinearBlendAccuracy } from './displ
 export type { SerializedRenderLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
 export { default as RenderBarycentricBlend, RenderBarycentricBlendAccuracy } from './display/raster/render-program/RenderBarycentricBlend.js';
 export type { SerializedRenderBarycentricBlend } from './display/raster/render-program/RenderBarycentricBlend.js';
+export { default as RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy } from './display/raster/render-program/RenderBarycentricPerspectiveBlend.js';
+export type { SerializedRenderBarycentricPerspectiveBlend } from './display/raster/render-program/RenderBarycentricPerspectiveBlend.js';
 export { default as RenderLinearGradient, RenderLinearGradientAccuracy } from './display/raster/render-program/RenderLinearGradient.js';
 export type { SerializedRenderLinearGradient } from './display/raster/render-program/RenderLinearGradient.js';
 export { default as RenderRadialBlend, RenderRadialBlendAccuracy } from './display/raster/render-program/RenderRadialBlend.js';
