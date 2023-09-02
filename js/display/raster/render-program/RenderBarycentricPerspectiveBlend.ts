@@ -1,9 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * RenderProgram for a triangular barycentric blend.
- *
- * NOTE: Does not apply perspective correction, is purely a 2d blend.
+ * RenderProgram for a triangular barycentric blend. Applies perspective correction.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

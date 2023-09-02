@@ -53,7 +53,6 @@ export default class RenderAlpha extends RenderUnary {
     if ( program instanceof RenderColor ) {
       return new RenderColor( program.color.timesScalar( this.alpha ) );
     }
-    
     else if ( program !== this.program ) {
       return new RenderAlpha( program, this.alpha );
     }

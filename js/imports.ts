@@ -451,6 +451,8 @@ export { default as RenderPathBoolean } from './display/raster/render-program/Re
 export type { SerializedRenderPathBoolean } from './display/raster/render-program/RenderPathBoolean.js';
 export { default as RenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export type { SerializedRenderAlpha } from './display/raster/render-program/RenderAlpha.js';
+export { default as RenderNormalize } from './display/raster/render-program/RenderNormalize.js';
+export type { SerializedRenderNormalize } from './display/raster/render-program/RenderNormalize.js';
 export { default as RenderPremultiply } from './display/raster/render-program/RenderPremultiply.js';
 export { default as RenderUnpremultiply } from './display/raster/render-program/RenderUnpremultiply.js';
 export { default as RenderSRGBToLinearSRGB } from './display/raster/render-program/RenderSRGBToLinearSRGB.js';
