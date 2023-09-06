@@ -433,6 +433,7 @@ export { default as SafariWorkaroundOverlay } from './overlays/SafariWorkaroundO
 
 
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './display/raster/render-program/PolygonFilterType.js';
+export { default as Mesh } from './display/raster/render-program/Mesh.js';
 export { default as RenderBlendType } from './display/raster/render-program/RenderBlendType.js';
 export { default as RenderComposeType } from './display/raster/render-program/RenderComposeType.js';
 export { default as RenderExtend } from './display/raster/render-program/RenderExtend.js';
