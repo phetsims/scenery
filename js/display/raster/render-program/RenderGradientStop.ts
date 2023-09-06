@@ -48,6 +48,14 @@ export default class RenderGradientStop {
     }
   }
 
+  public withProgram( program: RenderProgram ): RenderGradientStop {
+    if ( program === this.program ) {
+      return this;
+    }
+
+    return new RenderGradientStop( this.ratio, program );
+  }
+
   public serialize(): SerializedRenderGradientStop {
     return {
       ratio: this.ratio,

@@ -88,15 +88,16 @@ export default class RenderBlendCompose extends RenderProgram {
            this.blendType === other.blendType;
   }
 
-  public override simplified(): RenderProgram {
-    // If we are normal blending and source-over, we can simplify to a RenderStack, and simplify that!
-    if ( this.blendType === RenderBlendType.Normal && this.composeType === RenderComposeType.Over ) {
-      return new RenderStack( [ this.b, this.a ] ).simplified();
-    }
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
 
     // a OP b
-    const a = this.a.simplified();
-    const b = this.b.simplified();
+    const a = children[ 0 ];
+    const b = children[ 1 ];
+
+    // If we are normal blending and source-over, we can simplify to a RenderStack, and simplify that!
+    if ( this.blendType === RenderBlendType.Normal && this.composeType === RenderComposeType.Over ) {
+      return new RenderStack( [ b, a ] ).simplified();
+    }
 
     const aTransparent = a.isFullyTransparent;
     const aOpaque = a.isFullyOpaque;
@@ -181,12 +182,8 @@ export default class RenderBlendCompose extends RenderProgram {
     if ( a instanceof RenderColor && b instanceof RenderColor ) {
       return new RenderColor( RenderBlendCompose.blendCompose( a.color, b.color, this.composeType, this.blendType ) );
     }
-
-    if ( a !== this.a || b !== this.b ) {
-      return new RenderBlendCompose( this.composeType, this.blendType, a, b );
-    }
     else {
-      return this;
+      return null;
     }
   }
 

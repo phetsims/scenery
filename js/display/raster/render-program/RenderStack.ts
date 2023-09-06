@@ -34,8 +34,8 @@ export default class RenderStack extends RenderProgram {
     return new RenderStack( children );
   }
 
-  public override simplified(): RenderProgram {
-    let children = this.children.map( child => child.simplified() ).filter( child => !child.isFullyTransparent );
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    children = children.filter( child => !child.isFullyTransparent );
 
     // If there is an opaque child, nothing below it matters (drop everything before it)
     for ( let i = children.length - 1; i >= 0; i-- ) {
@@ -85,7 +85,7 @@ export default class RenderStack extends RenderProgram {
       return new RenderStack( children );
     }
     else {
-      return this;
+      return null;
     }
   }
 

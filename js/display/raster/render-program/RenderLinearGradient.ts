@@ -100,20 +100,16 @@ export default class RenderLinearGradient extends RenderProgram {
       _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
   }
 
-  public override simplified(): RenderProgram {
-    const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplified() ) );
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    const simplifiedColorStops = this.stops.map( ( stop, i ) => stop.withProgram( children[ i ] ) );
+
+    // TODO: compaction of triplicate stops
 
     if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent ) ) {
       return RenderColor.TRANSPARENT;
     }
-
-    const stopChanged = _.some( simplifiedColorStops, ( stop, i ) => stop.program !== this.stops[ i ].program );
-
-    if ( stopChanged ) {
-      return new RenderLinearGradient( this.transform, this.start, this.end, simplifiedColorStops, this.extend, this.accuracy );
-    }
     else {
-      return this;
+      return null;
     }
   }
 

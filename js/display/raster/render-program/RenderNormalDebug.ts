@@ -34,25 +34,21 @@ export default class RenderNormalDebug extends RenderProgram {
     return true;
   }
 
-  public override simplified(): RenderProgram {
-    const normalProgram = this.normalProgram.simplified();
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    const normalProgram = children[ 0 ];
 
     if ( normalProgram.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
-
-    if ( normalProgram instanceof RenderColor ) {
-      return new RenderColor( this.getDiffuse( normalProgram.color ) );
-    }
-    else if ( normalProgram !== this.normalProgram ) {
-      return new RenderNormalDebug( normalProgram );
+    else if ( normalProgram instanceof RenderColor ) {
+      return new RenderColor( this.getNormalDebug( normalProgram.color ) );
     }
     else {
-      return this;
+      return null;
     }
   }
 
-  public getDiffuse( normal: Vector4 ): Vector4 {
+  public getNormalDebug( normal: Vector4 ): Vector4 {
     assert && assert( normal.isFinite() );
 
     return new Vector4(
@@ -74,7 +70,7 @@ export default class RenderNormalDebug extends RenderProgram {
   ): Vector4 {
     const normal = this.normalProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
 
-    return this.getDiffuse( normal );
+    return this.getNormalDebug( normal );
   }
 
   public override serialize(): SerializedRenderNormalDebug {

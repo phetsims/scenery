@@ -66,10 +66,6 @@ export default class RenderColor extends RenderProgram {
     return this.color.equals( other.color );
   }
 
-  public override simplified(): RenderProgram {
-    return this;
-  }
-
   public override evaluate(
     face: ClippableFace | null,
     area: number,

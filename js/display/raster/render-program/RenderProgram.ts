@@ -67,20 +67,37 @@ export default abstract class RenderProgram {
   public abstract getName(): string;
 
   public simplified(): RenderProgram {
-    let changed = false;
-    const children = this.children.map( child => {
-      const simplified = child.simplified();
-      if ( simplified !== child ) {
-        changed = true;
-      }
-      return simplified;
-    } );
-    if ( changed ) {
-      return this.withChildren( children );
-    }
-    else {
+    if ( this.isSimplified ) {
       return this;
     }
+
+    let hasSimplifiedChild = false;
+    const children: RenderProgram[] = [];
+    for ( let i = 0; i < this.children.length; i++ ) {
+      const child = this.children[ i ];
+      const simplifiedChild = child.simplified();
+      children.push( simplifiedChild );
+      hasSimplifiedChild = hasSimplifiedChild || simplifiedChild !== child;
+    }
+
+    const potentialSimplified = this.getSimplified( children );
+    if ( potentialSimplified ) {
+      potentialSimplified.isSimplified = true; // convenience flag, so subtypes don't have to set it
+      return potentialSimplified;
+    }
+    else if ( hasSimplifiedChild ) {
+      const result = this.withChildren( children );
+      result.isSimplified = true;
+      return result;
+    }
+    else {
+      this.isSimplified = true;
+      return this;
+    }
+  }
+
+  protected getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    return null;
   }
 
   // Premultiplied linear RGB, ignoring the path
@@ -264,6 +281,10 @@ export default abstract class RenderProgram {
 
   public static closureIsFullyOpaque( renderProgram: RenderProgram ): boolean {
     return renderProgram.isFullyOpaque;
+  }
+
+  public static closureSimplified( renderProgram: RenderProgram ): RenderProgram {
+    return renderProgram.simplified();
   }
 }
 

@@ -30,21 +30,17 @@ export default class RenderNormalize extends RenderProgram {
     return new RenderNormalize( children[ 0 ] );
   }
 
-  public override simplified(): RenderProgram {
-    const program = this.program.simplified();
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    const program = children[ 0 ];
 
     if ( program.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
-
-    if ( program instanceof RenderColor ) {
+    else if ( program instanceof RenderColor ) {
       return new RenderColor( program.color.magnitude > 0 ? program.color.normalized() : Vector4.ZERO );
     }
-    else if ( program !== this.program ) {
-      return new RenderNormalize( program );
-    }
     else {
-      return this;
+      return null;
     }
   }
 

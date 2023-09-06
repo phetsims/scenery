@@ -35,21 +35,17 @@ export default class RenderDiffuse extends RenderProgram {
     return true;
   }
 
-  public override simplified(): RenderProgram {
-    const normalProgram = this.normalProgram.simplified();
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    const normalProgram = children[ 0 ];
 
     if ( normalProgram.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
-
-    if ( normalProgram instanceof RenderColor ) {
+    else if ( normalProgram instanceof RenderColor ) {
       return new RenderColor( this.getDiffuse( normalProgram.color ) );
     }
-    else if ( normalProgram !== this.normalProgram ) {
-      return new RenderDiffuse( normalProgram );
-    }
     else {
-      return this;
+      return null;
     }
   }
 

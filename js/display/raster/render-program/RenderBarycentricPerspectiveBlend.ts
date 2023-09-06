@@ -82,24 +82,20 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
            this.accuracy === other.accuracy;
   }
 
-  public override simplified(): RenderProgram {
-    const a = this.a.simplified();
-    const b = this.b.simplified();
-    const c = this.c.simplified();
+  // TODO: extract code for the barycentric blends? duplicated
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    const a = children[ 0 ];
+    const b = children[ 1 ];
+    const c = children[ 2 ];
 
     if ( a.isFullyTransparent && b.isFullyTransparent && c.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
-
-    if ( a.equals( b ) && a.equals( c ) ) {
+    else if ( a.equals( b ) && a.equals( c ) ) {
       return a;
     }
-
-    if ( this.a !== a || this.b !== b || this.c !== c ) {
-      return new RenderBarycentricPerspectiveBlend( this.pointA, this.pointB, this.pointC, this.accuracy, a, b, c );
-    }
     else {
-      return this;
+      return null;
     }
   }
 

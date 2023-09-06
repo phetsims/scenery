@@ -35,25 +35,20 @@ export default class RenderAlpha extends RenderProgram {
     return this.alpha === other.alpha;
   }
 
-  public override simplified(): RenderProgram {
-    const program = this.program.simplified();
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    const program = children[ 0 ];
 
     if ( program.isFullyTransparent || this.alpha === 0 ) {
       return RenderColor.TRANSPARENT;
     }
-
-    if ( this.alpha === 1 ) {
+    else if ( this.alpha === 1 ) {
       return program;
     }
-
-    if ( program instanceof RenderColor ) {
+    else if ( program instanceof RenderColor ) {
       return new RenderColor( program.color.timesScalar( this.alpha ) );
     }
-    else if ( program !== this.program ) {
-      return new RenderAlpha( program, this.alpha );
-    }
     else {
-      return this;
+      return null;
     }
   }
 

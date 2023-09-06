@@ -73,10 +73,6 @@ export default class RenderImage extends RenderProgram {
       this.resampleType === other.resampleType;
   }
 
-  public override simplified(): RenderProgram {
-    return this;
-  }
-
   public override evaluate(
     face: ClippableFace | null,
     area: number,

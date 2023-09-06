@@ -113,6 +113,10 @@ export default class RenderPlanar {
   }
 
   public withProgram( program: RenderProgram ): RenderPlanar {
+    if ( program === this.program ) {
+      return this;
+    }
+
     return new RenderPlanar( program, this.pointA, this.pointB, this.pointC );
   }
 }

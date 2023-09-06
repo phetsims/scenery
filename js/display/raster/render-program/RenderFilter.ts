@@ -64,17 +64,18 @@ export default class RenderFilter extends RenderProgram {
            this.colorTranslation.equals( other.colorTranslation );
   }
 
-  public override simplified(): RenderProgram {
-    const program = this.program.simplified();
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    const program = children[ 0 ];
+
+    // TODO: concatenated filters! Matrix multiplication
+    // TODO: concatenated RenderAlpha + RenderFilter, RenderFilter + RenderAlpha (matrix multiplication)
+    // TODO: matrix could be turned into RenderAlpha or a no-op!
 
     if ( program instanceof RenderColor ) {
       return new RenderColor( RenderFilter.applyFilter( program.color, this.colorMatrix, this.colorTranslation ) );
     }
-    else if ( program !== this.program ) {
-      return new RenderFilter( program, this.colorMatrix, this.colorTranslation );
-    }
     else {
-      return this;
+      return null;
     }
   }
 

@@ -48,21 +48,41 @@ export default class RenderDepthSort extends RenderProgram {
     return new RenderDepthSort( this.items.map( item => item.transformed( transform ) ) );
   }
 
-  public override simplified(): RenderProgram {
-    const items = this.items.map( item => item.withProgram( item.program.simplified() ) ).filter( item => !item.program.isFullyTransparent );
+  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+    let hadFullyTransparent = false;
+    for ( let i = 0; i < children.length; i++ ) {
+      const child = children[ i ];
+      if ( child.isFullyTransparent ) {
+        hadFullyTransparent = true;
+        break;
+      }
+    }
 
-    // TODO: If all of our items are the same, we can simplify?
-    if ( items.length === 0 ) {
-      return RenderColor.TRANSPARENT;
+    if ( hadFullyTransparent ) {
+      const items: RenderPlanar[] = [];
+      for ( let i = 0; i < children.length; i++ ) {
+        const child = children[ i ];
+
+        if ( !child.isFullyTransparent ) {
+          items.push( this.items[ i ].withProgram( children[ i ] ) );
+        }
+      }
+
+      if ( items.length === 0 ) {
+        return RenderColor.TRANSPARENT;
+      }
+      else if ( items.length === 1 ) {
+        return items[ 0 ].program;
+      }
+      else {
+        return new RenderDepthSort( items );
+      }
     }
-    else if ( items.length === 1 ) {
-      return items[ 0 ].program;
-    }
-    else if ( this.items.length !== items.length || _.some( this.items, ( item, i ) => item.program !== items[ i ].program ) ) {
-      return new RenderDepthSort( items );
+    else if ( children.length < 2 ) {
+      return children.length === 1 ? children[ 0 ] : RenderColor.TRANSPARENT;
     }
     else {
-      return this;
+      return null;
     }
   }
 
