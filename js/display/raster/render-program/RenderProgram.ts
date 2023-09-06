@@ -12,11 +12,49 @@ import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default abstract class RenderProgram {
-  /**
-   * Should return all of the "child" RenderPrograms that this RenderProgram is composed of (the ones it uses to compute
-   * a result color).
-   */
-  public abstract getChildren(): RenderProgram[];
+
+  public readonly children: RenderProgram[];
+
+  // Whether it is fully simplified (so simplification steps can be skipped)
+  public isSimplified = false;
+
+  // Whether it is fully transparent (so we can skip rendering it)
+  public readonly isFullyTransparent: boolean;
+
+  // Whether it is fully opaque (so we could potentially skip rendering other things)
+  public readonly isFullyOpaque: boolean;
+
+  // Whether this subtree wants a computed face for its evaluation (If not, can give bogus values for evaluate)
+  public readonly needsFace: boolean;
+
+  // Whether this subtree wants a computed area for its evaluation (If not, can give bogus values for evaluate)
+  public readonly needsArea: boolean;
+
+  // Whether this subtree wants a computed centroid for its evaluation (If not, can give bogus values for evaluate)
+  public readonly needsCentroid: boolean;
+
+  public constructor(
+    children: RenderProgram[],
+    isFullyTransparent: boolean,
+    isFullyOpaque: boolean,
+    needsFace = false,
+    needsArea = false,
+    needsCentroid = false
+  ) {
+    this.children = children;
+    this.isFullyTransparent = isFullyTransparent;
+    this.isFullyOpaque = isFullyOpaque;
+
+    for ( let i = 0; i < children.length; i++ ) {
+      needsFace = needsFace || children[ i ].needsFace;
+      needsArea = needsArea || children[ i ].needsArea;
+      needsCentroid = needsCentroid || children[ i ].needsCentroid;
+    }
+
+    this.needsFace = needsFace;
+    this.needsArea = needsArea;
+    this.needsCentroid = needsCentroid;
+  }
 
   /**
    * Should return an otherwise-identical version of the RenderProgram with the given children.
@@ -28,69 +66,9 @@ export default abstract class RenderProgram {
    */
   public abstract getName(): string;
 
-  /**
-   * Whether this RenderProgram will return an evaluation (regardless of the position) with an empty alpha value (0).
-   * If this is true, we can potentially simplified parts of the RenderProgram tree.
-   *
-   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
-   */
-  public isFullyTransparent(): boolean {
-    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
-
-    return _.every( this.getChildren(), child => child.isFullyTransparent() );
-  }
-
-  /**
-   * Whether this RenderProgram will return an evaluation (regardless of the position) with full alpha value (1).
-   * If this is true, we can potentially simplified parts of the RenderProgram tree.
-   *
-   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
-   */
-  public isFullyOpaque(): boolean {
-    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
-
-    return _.every( this.getChildren(), child => child.isFullyOpaque() );
-  }
-
-  /**
-   * Whether this RenderProgram will want a computed face for its evaluation
-   * If it's not needed, we can give bogus info to the program.
-   *
-   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
-   */
-  public needsFace(): boolean {
-    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
-
-    return _.some( this.getChildren(), child => child.needsFace() );
-  }
-
-  /**
-   * Whether this RenderProgram will want a computed area for its evaluation
-   * If it's not needed, we can give bogus info to the program.
-   *
-   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
-   */
-  public needsArea(): boolean {
-    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
-
-    return _.some( this.getChildren(), child => child.needsArea() );
-  }
-
-  /**
-   * Whether this RenderProgram will want a computed centroid for its evaluation
-   * If it's not needed, we can give bogus info to the program.
-   *
-   * NOTE: Default implementation, should be overridden by subclasses that have more specific needs
-   */
-  public needsCentroid(): boolean {
-    assert && assert( this.getChildren().length > 0, 'Required implementation for leaves' );
-
-    return _.some( this.getChildren(), child => child.needsCentroid() );
-  }
-
   public simplified(): RenderProgram {
     let changed = false;
-    const children = this.getChildren().map( child => {
+    const children = this.children.map( child => {
       const simplified = child.simplified();
       if ( simplified !== child ) {
         changed = true;
@@ -119,8 +97,8 @@ export default abstract class RenderProgram {
   public equals( other: RenderProgram ): boolean {
     return this === other || (
       this.getName() === other.getName() &&
-      this.getChildren().length === other.getChildren().length &&
-      _.every( this.getChildren(), ( child, i ) => child.equals( other.getChildren()[ i ] ) ) &&
+      this.children.length === other.children.length &&
+      _.every( this.children, ( child, i ) => child.equals( other.children[ i ] ) ) &&
       this.equalsTyped( other as this ) // If they have the same name, should be the same type(!)
     );
   }
@@ -135,12 +113,12 @@ export default abstract class RenderProgram {
    * NOTE: Default implementation, should be overridden by subclasses that have positioning information embedded inside
    */
   public transformed( transform: Matrix3 ): RenderProgram {
-    return this.withChildren( this.getChildren().map( child => child.transformed( transform ) ) );
+    return this.withChildren( this.children.map( child => child.transformed( transform ) ) );
   }
 
   // TODO: add early exit!
   public depthFirst( callback: ( program: RenderProgram ) => void ): void {
-    this.getChildren().forEach( child => child.depthFirst( callback ) );
+    this.children.forEach( child => child.depthFirst( callback ) );
     callback( this );
   }
 
@@ -165,7 +143,7 @@ export default abstract class RenderProgram {
       return replaced;
     }
     else {
-      return this.withChildren( this.getChildren().map( child => child.replace( callback ) ) );
+      return this.withChildren( this.children.map( child => child.replace( callback ) ) );
     }
   }
 
@@ -179,7 +157,7 @@ export default abstract class RenderProgram {
       }
     }
     else {
-      return this.withChildren( this.getChildren().map( child => child.withPathInclusion( pathTest ) ) );
+      return this.withChildren( this.children.map( child => child.withPathInclusion( pathTest ) ) );
     }
   }
 
@@ -193,7 +171,7 @@ export default abstract class RenderProgram {
   }
 
   public getNeeds(): RenderProgramNeeds {
-    return new RenderProgramNeeds( this.needsFace(), this.needsArea(), this.needsCentroid() );
+    return new RenderProgramNeeds( this.needsFace, this.needsArea, this.needsCentroid );
   }
 
   public colorConverted( fromSpace: RenderColorSpace, toSpace: RenderColorSpace ): RenderProgram {
@@ -204,7 +182,7 @@ export default abstract class RenderProgram {
     const extra = this.getExtraDebugString();
     let string = `${indent}${this.getName()}${extra ? ` (${extra})` : ''}`;
 
-    this.getChildren().forEach( child => {
+    this.children.forEach( child => {
       string += '\n' + child.toRecursiveString( indent + '  ' );
     } );
 
@@ -278,6 +256,14 @@ export default abstract class RenderProgram {
 
   public static ensureFace( face: ClippableFace | null, minX: number, minY: number, maxX: number, maxY: number ): ClippableFace {
     return face || PolygonalFace.fromBoundsValues( minX, minY, maxX, maxY );
+  }
+
+  public static closureIsFullyTransparent( renderProgram: RenderProgram ): boolean {
+    return renderProgram.isFullyTransparent;
+  }
+
+  public static closureIsFullyOpaque( renderProgram: RenderProgram ): boolean {
+    return renderProgram.isFullyOpaque;
   }
 }
 

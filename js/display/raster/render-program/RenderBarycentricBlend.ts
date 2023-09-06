@@ -38,15 +38,18 @@ export default class RenderBarycentricBlend extends RenderProgram {
     assert && assert( !pointB.equals( pointC ) );
     assert && assert( !pointC.equals( pointA ) );
 
-    super();
+    super(
+      [ a, b, c ],
+      a.isFullyTransparent && b.isFullyTransparent && c.isFullyTransparent,
+      a.isFullyOpaque && b.isFullyOpaque && c.isFullyOpaque,
+      false,
+      false,
+      accuracy === RenderBarycentricBlendAccuracy.Accurate
+    );
   }
 
   public override getName(): string {
     return 'RenderBarycentricBlend';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.a, this.b, this.c ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderBarycentricBlend {
@@ -73,16 +76,12 @@ export default class RenderBarycentricBlend extends RenderProgram {
            this.accuracy === other.accuracy;
   }
 
-  public override needsCentroid(): boolean {
-    return this.accuracy === RenderBarycentricBlendAccuracy.Accurate || super.needsCentroid();
-  }
-
   public override simplified(): RenderProgram {
     const a = this.a.simplified();
     const b = this.b.simplified();
     const c = this.c.simplified();
 
-    if ( a.isFullyTransparent() && b.isFullyTransparent() && c.isFullyTransparent() ) {
+    if ( a.isFullyTransparent && b.isFullyTransparent && c.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 

@@ -44,17 +44,20 @@ export default class RenderRadialBlend extends RenderProgram {
     assert && assert( isFinite( radius1 ) && radius1 >= 0 );
     assert && assert( radius0 !== radius1 );
 
-    super();
+    super(
+      [ zero, one ],
+      zero.isFullyTransparent && one.isFullyTransparent,
+      zero.isFullyOpaque && one.isFullyOpaque,
+      false,
+      accuracy === RenderRadialBlendAccuracy.Accurate,
+      accuracy === RenderRadialBlendAccuracy.Centroid
+    );
 
     this.inverseTransform = transform.inverted();
   }
 
   public override getName(): string {
     return 'RenderRadialBlend';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.zero, this.one ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderRadialBlend {
@@ -80,19 +83,11 @@ export default class RenderRadialBlend extends RenderProgram {
            this.accuracy === other.accuracy;
   }
 
-  public override needsArea(): boolean {
-    return this.accuracy === RenderRadialBlendAccuracy.Accurate || super.needsArea();
-  }
-
-  public override needsCentroid(): boolean {
-    return this.accuracy === RenderRadialBlendAccuracy.Centroid || super.needsCentroid();
-  }
-
   public override simplified(): RenderProgram {
     const zero = this.zero.simplified();
     const one = this.one.simplified();
 
-    if ( zero.isFullyTransparent() && one.isFullyTransparent() ) {
+    if ( zero.isFullyTransparent && one.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 

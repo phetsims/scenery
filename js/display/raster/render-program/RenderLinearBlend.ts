@@ -31,15 +31,18 @@ export default class RenderLinearBlend extends RenderProgram {
     assert && assert( scaledNormal.isFinite() && scaledNormal.magnitude > 0 );
     assert && assert( isFinite( offset ) );
 
-    super();
+    super(
+      [ zero, one ],
+      zero.isFullyTransparent && one.isFullyTransparent,
+      zero.isFullyOpaque && one.isFullyOpaque,
+      false,
+      false,
+      accuracy === RenderLinearBlendAccuracy.Accurate
+    );
   }
 
   public override getName(): string {
     return 'RenderLinearBlend';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.zero, this.one ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderLinearBlend {
@@ -81,15 +84,11 @@ export default class RenderLinearBlend extends RenderProgram {
            this.accuracy === other.accuracy;
   }
 
-  public override needsCentroid(): boolean {
-    return this.accuracy === RenderLinearBlendAccuracy.Accurate || super.needsCentroid();
-  }
-
   public override simplified(): RenderProgram {
     const zero = this.zero.simplified();
     const one = this.one.simplified();
 
-    if ( zero.isFullyTransparent() && one.isFullyTransparent() ) {
+    if ( zero.isFullyTransparent && one.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 

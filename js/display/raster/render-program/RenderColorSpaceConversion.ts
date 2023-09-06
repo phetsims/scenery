@@ -1,25 +1,29 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * RenderProgram to convert sRGB => linear sRGB
+ * RenderProgram to convert between color spaces. Should not change whether something is transparent or opaque
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderColorSpace, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnary, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderColorSpace, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Constructor from '../../../../../phet-core/js/types/Constructor.js';
 
-export default abstract class RenderColorSpaceConversion extends RenderUnary {
+export default abstract class RenderColorSpaceConversion extends RenderProgram {
 
   public inverse?: Constructor<RenderColorSpaceConversion>;
 
   protected constructor(
-    program: RenderProgram,
+    public readonly program: RenderProgram,
     public readonly convert: ( color: Vector4 ) => Vector4
   ) {
-    super( program );
+    super(
+      [ program ],
+      program.isFullyTransparent,
+      program.isFullyOpaque
+    );
   }
 
   // TODO: add a helper on RenderProgram
@@ -48,7 +52,7 @@ export default abstract class RenderColorSpaceConversion extends RenderUnary {
   public override simplified(): RenderProgram {
     const program = this.program.simplified();
 
-    if ( program.isFullyTransparent() ) {
+    if ( program.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 

@@ -18,15 +18,64 @@ export default class RenderBlendCompose extends RenderProgram {
     public readonly a: RenderProgram,
     public readonly b: RenderProgram
   ) {
-    super();
+    let isFullyTransparent = false;
+    let isFullyOpaque = false;
+
+    const aTransparent = a.isFullyTransparent;
+    const aOpaque = a.isFullyOpaque;
+    const bTransparent = b.isFullyTransparent;
+    const bOpaque = b.isFullyOpaque;
+
+    if ( aTransparent && bTransparent ) {
+      isFullyTransparent = true;
+      isFullyOpaque = false;
+    }
+    else {
+      // over: fa: 1,   fb: 1-a   fa*a: a      fb*b: b(1-a) sum: a + b(1-a)
+      // in:   fa: b,   fb: 0     fa*a: ab     fb*b: 0      sum: ab
+      // out:  fa: 1-b, fb: 0     fa*a: a(1-b) fb*b: 0      sum: a(1-b)
+      // atop: fa: b,   fb: 1-a   fa*a: ab     fb*b: b(1-a) sum: b
+      // xor:  fa: 1-b, fb: 1-a   fa*a: a(1-b) fb*b: b(1-a) sum: a(1-b) + b(1-a)
+      // plus: fa: 1,   fb: 1     fa*a: a      fb*b: b      sum: a + b
+      switch( composeType ) {
+        case RenderComposeType.Over:
+          isFullyOpaque = aOpaque || bOpaque;
+          break;
+        case RenderComposeType.In:
+          isFullyTransparent = aTransparent || bTransparent;
+          isFullyOpaque = aOpaque && bOpaque;
+          break;
+        case RenderComposeType.Out:
+          isFullyTransparent = aTransparent || bOpaque;
+          isFullyOpaque = aOpaque && bTransparent;
+          break;
+        case RenderComposeType.Atop:
+          isFullyTransparent = bTransparent;
+          isFullyOpaque = bOpaque;
+          break;
+        case RenderComposeType.Xor:
+          isFullyTransparent = aOpaque && bOpaque;
+          isFullyOpaque = ( aOpaque && bTransparent ) || ( aTransparent && bOpaque );
+          break;
+        case RenderComposeType.Plus:
+          isFullyOpaque = aOpaque && bOpaque;
+          break;
+        case RenderComposeType.PlusLighter:
+          isFullyOpaque = aOpaque && bOpaque;
+          break;
+        default:
+      }
+    }
+
+    super(
+      [ a, b ],
+      isFullyTransparent,
+      isFullyOpaque
+    );
   }
 
   public override getName(): string {
     return 'RenderBlendCompose';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.a, this.b ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderBlendCompose {
@@ -49,10 +98,10 @@ export default class RenderBlendCompose extends RenderProgram {
     const a = this.a.simplified();
     const b = this.b.simplified();
 
-    const aTransparent = a.isFullyTransparent();
-    const aOpaque = a.isFullyOpaque();
-    const bTransparent = b.isFullyTransparent();
-    const bOpaque = b.isFullyOpaque();
+    const aTransparent = a.isFullyTransparent;
+    const aOpaque = a.isFullyOpaque;
+    const bTransparent = b.isFullyTransparent;
+    const bOpaque = b.isFullyOpaque;
 
     if ( aTransparent && bTransparent ) {
       return RenderColor.TRANSPARENT;
@@ -138,72 +187,6 @@ export default class RenderBlendCompose extends RenderProgram {
     }
     else {
       return this;
-    }
-  }
-
-  public override isFullyTransparent(): boolean {
-    const aTransparent = this.a.isFullyTransparent();
-    const aOpaque = this.a.isFullyOpaque();
-    const bTransparent = this.b.isFullyTransparent();
-    const bOpaque = this.b.isFullyOpaque();
-
-    if ( aTransparent && bTransparent ) {
-      return true;
-    }
-
-    // over: fa: 1,   fb: 1-a   fa*a: a      fb*b: b(1-a) sum: a + b(1-a)
-    // in:   fa: b,   fb: 0     fa*a: ab     fb*b: 0      sum: ab
-    // out:  fa: 1-b, fb: 0     fa*a: a(1-b) fb*b: 0      sum: a(1-b)
-    // atop: fa: b,   fb: 1-a   fa*a: ab     fb*b: b(1-a) sum: b
-    // xor:  fa: 1-b, fb: 1-a   fa*a: a(1-b) fb*b: b(1-a) sum: a(1-b) + b(1-a)
-    // plus: fa: 1,   fb: 1     fa*a: a      fb*b: b      sum: a + b
-    switch( this.composeType ) {
-      case RenderComposeType.In:
-        return aTransparent || bTransparent;
-      case RenderComposeType.Out:
-        return aTransparent || bOpaque;
-      case RenderComposeType.Atop:
-        return bTransparent;
-      case RenderComposeType.Xor:
-        return aOpaque && bOpaque;
-      default:
-        return false;
-    }
-  }
-
-  public override isFullyOpaque(): boolean {
-    const aTransparent = this.a.isFullyTransparent();
-    const aOpaque = this.a.isFullyOpaque();
-    const bTransparent = this.b.isFullyTransparent();
-    const bOpaque = this.b.isFullyOpaque();
-
-    if ( aTransparent && bTransparent ) {
-      return false;
-    }
-
-    // over: fa: 1,   fb: 1-a   fa*a: a      fb*b: b(1-a) sum: a + b(1-a)
-    // in:   fa: b,   fb: 0     fa*a: ab     fb*b: 0      sum: ab
-    // out:  fa: 1-b, fb: 0     fa*a: a(1-b) fb*b: 0      sum: a(1-b)
-    // atop: fa: b,   fb: 1-a   fa*a: ab     fb*b: b(1-a) sum: b
-    // xor:  fa: 1-b, fb: 1-a   fa*a: a(1-b) fb*b: b(1-a) sum: a(1-b) + b(1-a)
-    // plus: fa: 1,   fb: 1     fa*a: a      fb*b: b      sum: a + b
-    switch( this.composeType ) {
-      case RenderComposeType.Over:
-        return aOpaque || bOpaque;
-      case RenderComposeType.In:
-        return aOpaque && bOpaque;
-      case RenderComposeType.Out:
-        return aOpaque && bTransparent;
-      case RenderComposeType.Atop:
-        return bOpaque;
-      case RenderComposeType.Xor:
-        return ( aOpaque && bTransparent ) || ( aTransparent && bOpaque );
-      case RenderComposeType.Plus:
-        return aOpaque && bOpaque;
-      case RenderComposeType.PlusLighter:
-        return aOpaque && bOpaque;
-      default:
-        return false;
     }
   }
 

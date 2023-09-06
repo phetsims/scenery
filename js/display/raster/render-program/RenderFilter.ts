@@ -9,18 +9,45 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, RenderUnary, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
-export default class RenderFilter extends RenderUnary {
+export default class RenderFilter extends RenderProgram {
   public constructor(
-    program: RenderProgram,
+    public readonly program: RenderProgram,
     public readonly colorMatrix: Matrix4,
     public readonly colorTranslation: Vector4
   ) {
-    super( program );
+    const alphaBasedOnColor = colorMatrix.m30() !== 0 || colorMatrix.m31() !== 0 || colorMatrix.m32() !== 0;
+
+    let isFullyTransparent;
+    let isFullyOpaque;
+
+    // If we modify alpha based on color value, we can't make guarantees
+    if ( alphaBasedOnColor ) {
+      isFullyTransparent = false;
+      isFullyOpaque = false;
+    }
+    else if ( program.isFullyTransparent ) {
+      isFullyTransparent = colorTranslation.w === 0;
+      isFullyOpaque = colorTranslation.w === 1;
+    }
+    else if ( program.isFullyOpaque ) {
+      isFullyTransparent = colorMatrix.m33() + colorTranslation.w === 0;
+      isFullyOpaque = colorMatrix.m33() + colorTranslation.w === 1;
+    }
+    else {
+      isFullyTransparent = colorMatrix.m33() === 0 && colorTranslation.w === 0;
+      isFullyOpaque = colorMatrix.m33() === 0 && colorTranslation.w === 1;
+    }
+
+    super(
+      [ program ],
+      isFullyTransparent,
+      isFullyOpaque
+    );
   }
 
   public override getName(): string {
@@ -48,40 +75,6 @@ export default class RenderFilter extends RenderUnary {
     }
     else {
       return this;
-    }
-  }
-
-  public override isFullyTransparent(): boolean {
-    // If we modify alpha based on color value, we can't make guarantees
-    if ( this.colorMatrix.m30() !== 0 || this.colorMatrix.m31() !== 0 || this.colorMatrix.m32() !== 0 ) {
-      return false;
-    }
-
-    if ( this.program.isFullyTransparent() ) {
-      return this.colorTranslation.w === 0;
-    }
-    else if ( this.program.isFullyOpaque() ) {
-      return this.colorMatrix.m33() + this.colorTranslation.w === 0;
-    }
-    else {
-      return this.colorMatrix.m33() === 0 && this.colorTranslation.w === 0;
-    }
-  }
-
-  public override isFullyOpaque(): boolean {
-    // If we modify alpha based on color value, we can't make guarantees
-    if ( this.colorMatrix.m30() !== 0 || this.colorMatrix.m31() !== 0 || this.colorMatrix.m32() !== 0 ) {
-      return false;
-    }
-
-    if ( this.program.isFullyOpaque() ) {
-      return this.colorMatrix.m33() + this.colorTranslation.w === 1;
-    }
-    else if ( this.program.isFullyTransparent() ) {
-      return this.colorTranslation.w === 1;
-    }
-    else {
-      return this.colorMatrix.m33() === 0 && this.colorTranslation.w === 1;
     }
   }
 

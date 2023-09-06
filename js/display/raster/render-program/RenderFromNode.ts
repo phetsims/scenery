@@ -201,8 +201,8 @@ export default class RenderFromNode {
     let result: RenderProgram = RenderColor.TRANSPARENT;
 
     const addResult = ( renderProgram: RenderProgram ) => {
-      if ( !renderProgram.isFullyTransparent() ) {
-        if ( result.isFullyTransparent() ) {
+      if ( !renderProgram.isFullyTransparent ) {
+        if ( result.isFullyTransparent ) {
           result = renderProgram;
         }
         else {
@@ -322,11 +322,11 @@ export default class RenderFromNode {
       }
     } );
 
-    if ( node.effectiveOpacity !== 1 && !result.isFullyTransparent() ) {
+    if ( node.effectiveOpacity !== 1 && !result.isFullyTransparent ) {
       result = new RenderAlpha( result, node.effectiveOpacity );
     }
 
-    if ( node.clipArea && !result.isFullyTransparent() ) {
+    if ( node.clipArea && !result.isFullyTransparent ) {
       result = new RenderBlendCompose( RenderComposeType.In, RenderBlendType.Normal, result, new RenderPathBoolean(
         shapeToRenderPath( node.clipArea ),
         new RenderColor( new Vector4( 1, 1, 1, 1 ) ),

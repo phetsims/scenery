@@ -26,11 +26,20 @@ const dciP3RedChromaticity = new Vector2( 0.68, 0.32 );
 const dciP3GreenChromaticity = new Vector2( 0.265, 0.69 );
 const dciP3BlueChromaticity = new Vector2( 0.15, 0.06 );
 
+const emptyChildren: RenderProgram[] = [];
+
 export default class RenderColor extends RenderProgram {
   public constructor(
     public color: Vector4
   ) {
-    super();
+    super(
+      emptyChildren,
+      color.w === 0,
+      color.w === 1,
+      false, false, false
+    );
+
+    this.isSimplified = true;
   }
 
   public static from( ...args: ConstructorParameters<ConstructorOf<Color>> ): RenderColor {
@@ -48,10 +57,6 @@ export default class RenderColor extends RenderProgram {
     return 'RenderColor';
   }
 
-  public override getChildren(): RenderProgram[] {
-    return [];
-  }
-
   public override withChildren( children: RenderProgram[] ): RenderColor {
     assert && assert( children.length === 0 );
     return this;
@@ -59,26 +64,6 @@ export default class RenderColor extends RenderProgram {
 
   protected override equalsTyped( other: this ): boolean {
     return this.color.equals( other.color );
-  }
-
-  public override isFullyTransparent(): boolean {
-    return this.color.w === 0;
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.color.w === 1;
-  }
-
-  public override needsFace(): boolean {
-    return false;
-  }
-
-  public override needsArea(): boolean {
-    return false;
-  }
-
-  public override needsCentroid(): boolean {
-    return false;
   }
 
   public override simplified(): RenderProgram {

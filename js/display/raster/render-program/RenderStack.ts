@@ -16,17 +16,17 @@ export default class RenderStack extends RenderProgram {
    * @param children - Ordered from back to front, like Scenery's Node.children
    */
   public constructor(
-    public readonly children: RenderProgram[]
+    children: RenderProgram[]
   ) {
-    super();
+    super(
+      children,
+      _.every( children, RenderProgram.closureIsFullyTransparent ),
+      _.some( children, RenderProgram.closureIsFullyOpaque )
+    );
   }
 
   public override getName(): string {
     return 'RenderStack';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return this.children;
   }
 
   public override withChildren( children: RenderProgram[] ): RenderStack {
@@ -35,12 +35,12 @@ export default class RenderStack extends RenderProgram {
   }
 
   public override simplified(): RenderProgram {
-    let children = this.children.map( child => child.simplified() ).filter( child => !child.isFullyTransparent() );
+    let children = this.children.map( child => child.simplified() ).filter( child => !child.isFullyTransparent );
 
     // If there is an opaque child, nothing below it matters (drop everything before it)
     for ( let i = children.length - 1; i >= 0; i-- ) {
       const child = children[ i ];
-      if ( child.isFullyOpaque() ) {
+      if ( child.isFullyOpaque ) {
         children = children.slice( i );
         break;
       }
@@ -87,14 +87,6 @@ export default class RenderStack extends RenderProgram {
     else {
       return this;
     }
-  }
-
-  public override isFullyOpaque(): boolean {
-    return _.some( this.children, child => child.isFullyOpaque() );
-  }
-
-  public override isFullyTransparent(): boolean {
-    return _.every( this.children, child => child.isFullyTransparent() );
   }
 
   public static combine( a: Vector4, b: Vector4 ): Vector4 {

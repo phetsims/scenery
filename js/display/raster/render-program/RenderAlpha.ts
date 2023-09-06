@@ -6,16 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, RenderUnary, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
-export default class RenderAlpha extends RenderUnary {
+export default class RenderAlpha extends RenderProgram {
   public constructor(
-    program: RenderProgram,
+    public readonly program: RenderProgram,
     public readonly alpha: number
   ) {
-    super( program );
+    super(
+      [ program ],
+      alpha === 0 || program.isFullyTransparent,
+      alpha === 1 && program.isFullyOpaque
+    );
   }
 
   public override getName(): string {
@@ -31,18 +35,10 @@ export default class RenderAlpha extends RenderUnary {
     return this.alpha === other.alpha;
   }
 
-  public override isFullyTransparent(): boolean {
-    return this.alpha === 0 || super.isFullyTransparent();
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.alpha === 1 && super.isFullyOpaque();
-  }
-
   public override simplified(): RenderProgram {
     const program = this.program.simplified();
 
-    if ( program.isFullyTransparent() || this.alpha === 0 ) {
+    if ( program.isFullyTransparent || this.alpha === 0 ) {
       return RenderColor.TRANSPARENT;
     }
 

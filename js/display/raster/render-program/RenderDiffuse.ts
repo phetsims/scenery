@@ -15,15 +15,15 @@ export default class RenderDiffuse extends RenderProgram {
     // TODO: add positionProgram, because not all lights are directional
     public readonly normalProgram: RenderProgram
   ) {
-    super();
+    super(
+      [ normalProgram ],
+      false,
+      false
+    );
   }
 
   public override getName(): string {
     return 'RenderDiffuse';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.normalProgram ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderDiffuse {
@@ -38,7 +38,7 @@ export default class RenderDiffuse extends RenderProgram {
   public override simplified(): RenderProgram {
     const normalProgram = this.normalProgram.simplified();
 
-    if ( normalProgram.isFullyTransparent() ) {
+    if ( normalProgram.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 
@@ -82,7 +82,7 @@ export default class RenderDiffuse extends RenderProgram {
   public override serialize(): SerializedRenderDiffuse {
     return {
       type: 'RenderDiffuse',
-      normalProgram: this.normalProgram.serialize(),
+      normalProgram: this.normalProgram.serialize()
     };
   }
 

@@ -6,15 +6,19 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, RenderUnary, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
-export default class RenderNormalize extends RenderUnary {
+export default class RenderNormalize extends RenderProgram {
   public constructor(
-    program: RenderProgram
+    public readonly program: RenderProgram
   ) {
-    super( program );
+    super(
+      [ program ],
+      program.isFullyTransparent,
+      program.isFullyOpaque
+    );
   }
 
   public override getName(): string {
@@ -29,7 +33,7 @@ export default class RenderNormalize extends RenderUnary {
   public override simplified(): RenderProgram {
     const program = this.program.simplified();
 
-    if ( program.isFullyTransparent() ) {
+    if ( program.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 

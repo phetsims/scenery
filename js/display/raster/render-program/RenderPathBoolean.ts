@@ -18,15 +18,18 @@ export default class RenderPathBoolean extends RenderProgram {
     public readonly inside: RenderProgram,
     public readonly outside: RenderProgram
   ) {
-    super();
+    super(
+      [ inside, outside ],
+      inside.isFullyTransparent && outside.isFullyTransparent,
+      inside.isFullyOpaque && outside.isFullyOpaque,
+      false,
+      false,
+      true // We'll use the centroid as the point for determining whether we are on the interior of our path
+    );
   }
 
   public override getName(): string {
     return 'RenderPathBoolean';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.inside, this.outside ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderPathBoolean {
@@ -47,7 +50,7 @@ export default class RenderPathBoolean extends RenderProgram {
     const inside = this.inside.simplified();
     const outside = this.outside.simplified();
 
-    if ( inside.isFullyTransparent() && outside.isFullyTransparent() ) {
+    if ( inside.isFullyTransparent && outside.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 
@@ -61,11 +64,6 @@ export default class RenderPathBoolean extends RenderProgram {
     else {
       return this;
     }
-  }
-
-  public override needsCentroid(): boolean {
-    // We'll use the centroid as the point for determining whether we are on the interior of our path
-    return true;
   }
 
   public override evaluate(

@@ -14,15 +14,15 @@ export default class RenderNormalDebug extends RenderProgram {
   public constructor(
     public readonly normalProgram: RenderProgram
   ) {
-    super();
+    super(
+      [ normalProgram ],
+      false,
+      false
+    );
   }
 
   public override getName(): string {
     return 'RenderNormalDebug';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.normalProgram ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderNormalDebug {
@@ -37,7 +37,7 @@ export default class RenderNormalDebug extends RenderProgram {
   public override simplified(): RenderProgram {
     const normalProgram = this.normalProgram.simplified();
 
-    if ( normalProgram.isFullyTransparent() ) {
+    if ( normalProgram.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 
@@ -80,7 +80,7 @@ export default class RenderNormalDebug extends RenderProgram {
   public override serialize(): SerializedRenderNormalDebug {
     return {
       type: 'RenderNormalDebug',
-      normalProgram: this.normalProgram.serialize(),
+      normalProgram: this.normalProgram.serialize()
     };
   }
 

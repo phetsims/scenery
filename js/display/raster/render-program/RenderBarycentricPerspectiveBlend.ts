@@ -40,15 +40,18 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
     assert && assert( !pointC.toVector2().equals( pointA.toVector2() ) );
     assert && assert( pointA.z > 0 && pointB.z > 0 && pointC.z > 0, 'All points must be in front of the camera' );
 
-    super();
+    super(
+      [ a, b, c ],
+      a.isFullyTransparent && b.isFullyTransparent && c.isFullyTransparent,
+      a.isFullyOpaque && b.isFullyOpaque && c.isFullyOpaque,
+      false,
+      false,
+      accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid
+    );
   }
 
   public override getName(): string {
     return 'RenderBarycentricPerspectiveBlend';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [ this.a, this.b, this.c ];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderBarycentricPerspectiveBlend {
@@ -79,16 +82,12 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
            this.accuracy === other.accuracy;
   }
 
-  public override needsCentroid(): boolean {
-    return this.accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid || super.needsCentroid();
-  }
-
   public override simplified(): RenderProgram {
     const a = this.a.simplified();
     const b = this.b.simplified();
     const c = this.c.simplified();
 
-    if ( a.isFullyTransparent() && b.isFullyTransparent() && c.isFullyTransparent() ) {
+    if ( a.isFullyTransparent && b.isFullyTransparent && c.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
 

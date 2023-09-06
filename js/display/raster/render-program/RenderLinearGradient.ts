@@ -22,6 +22,8 @@ scenery.register( 'RenderLinearGradientAccuracy', RenderLinearGradientAccuracy )
 
 const scratchLinearGradientVector0 = new Vector2( 0, 0 );
 
+const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
+
 export default class RenderLinearGradient extends RenderProgram {
 
   public readonly inverseTransform: Matrix3;
@@ -45,7 +47,16 @@ export default class RenderLinearGradient extends RenderProgram {
       return stops[ i ].ratio <= stops[ i + 1 ].ratio;
     } ), 'RenderLinearGradient stops not monotonically increasing' );
 
-    super();
+    const children = stops.map( toProgram );
+
+    super(
+      children,
+      _.every( children, RenderProgram.closureIsFullyTransparent ),
+      _.every( children, RenderProgram.closureIsFullyOpaque ),
+      false,
+      false,
+      accuracy === RenderLinearGradientAccuracy.UnsplitCentroid || accuracy === RenderLinearGradientAccuracy.SplitAccurate
+    );
 
     this.inverseTransform = transform.inverted();
     this.isIdentity = transform.isIdentity();
@@ -54,10 +65,6 @@ export default class RenderLinearGradient extends RenderProgram {
 
   public override getName(): string {
     return 'RenderLinearGradient';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return this.stops.map( stop => stop.program );
   }
 
   public override withChildren( children: RenderProgram[] ): RenderLinearGradient {
@@ -93,18 +100,10 @@ export default class RenderLinearGradient extends RenderProgram {
       _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
   }
 
-  public override needsCentroid(): boolean {
-    if ( this.useInternalCentroid() ) {
-      return true;
-    }
-
-    return super.needsCentroid();
-  }
-
   public override simplified(): RenderProgram {
     const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplified() ) );
 
-    if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
+    if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent ) ) {
       return RenderColor.TRANSPARENT;
     }
 

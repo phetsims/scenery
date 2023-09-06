@@ -14,20 +14,27 @@ import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 
+const toProgram = ( item: RenderPlanar ): RenderProgram => item.program;
+
 export default class RenderDepthSort extends RenderProgram {
 
   public constructor(
     public readonly items: RenderPlanar[]
   ) {
-    super();
+    const children = items.map( toProgram );
+
+    super(
+      children,
+      _.every( children, RenderProgram.closureIsFullyTransparent ),
+      _.some( children, RenderProgram.closureIsFullyOpaque ),
+      false,
+      false,
+      true // NOTE: If we have this (unsplit), we'll want the centroid
+    );
   }
 
   public override getName(): string {
     return 'RenderDepthSort';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return this.items.map( item => item.program );
   }
 
   public override withChildren( children: RenderProgram[] ): RenderDepthSort {
@@ -42,7 +49,7 @@ export default class RenderDepthSort extends RenderProgram {
   }
 
   public override simplified(): RenderProgram {
-    const items = this.items.map( item => item.withProgram( item.program.simplified() ) ).filter( item => !item.program.isFullyTransparent() );
+    const items = this.items.map( item => item.withProgram( item.program.simplified() ) ).filter( item => !item.program.isFullyTransparent );
 
     // TODO: If all of our items are the same, we can simplify?
     if ( items.length === 0 ) {
@@ -57,19 +64,6 @@ export default class RenderDepthSort extends RenderProgram {
     else {
       return this;
     }
-  }
-
-  public override isFullyOpaque(): boolean {
-    return _.some( this.items, item => item.program.isFullyOpaque() );
-  }
-
-  public override isFullyTransparent(): boolean {
-    return _.every( this.items, item => item.program.isFullyTransparent() );
-  }
-
-  // NOTE: If we have this (unsplit), we'll want the centroid
-  public override needsCentroid(): boolean {
-    return true;
   }
 
   public override evaluate(
@@ -136,7 +130,7 @@ export default class RenderDepthSort extends RenderProgram {
       const item = this.items[ i ];
       const depthRange = item.getDepthRange( face.face );
       depthRanges.push( depthRange );
-      if ( item.program.isFullyOpaque() ) {
+      if ( item.program.isFullyOpaque ) {
         maxOpaqueDepth = Math.min( maxOpaqueDepth, depthRange.max );
       }
     }

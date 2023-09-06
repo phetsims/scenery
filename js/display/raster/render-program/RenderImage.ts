@@ -12,6 +12,8 @@ import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Utils from '../../../../../dot/js/Utils.js';
 
+const emptyChildren: RenderProgram[] = [];
+
 export default class RenderImage extends RenderProgram {
 
   public readonly inverseTransform: Matrix3;
@@ -26,7 +28,25 @@ export default class RenderImage extends RenderProgram {
     public readonly extendY: RenderExtend,
     public readonly resampleType: RenderResampleType
   ) {
-    super();
+    const needsFace = resampleType === RenderResampleType.AnalyticBox ||
+      resampleType === RenderResampleType.AnalyticBilinear ||
+      resampleType === RenderResampleType.AnalyticMitchellNetravali;
+
+    // TODO: Consider NOT getting centroid for some filtering, as a performance boost
+    const needsCentroid = resampleType === RenderResampleType.NearestNeighbor ||
+      resampleType === RenderResampleType.Bilinear ||
+      resampleType === RenderResampleType.MitchellNetravali;
+
+    super(
+      emptyChildren,
+      false,
+      image.isFullyOpaque,
+      needsFace,
+      false,
+      needsCentroid
+    );
+
+    this.isSimplified = true;
 
     this.inverseTransform = transform.inverted();
     this.inverseTransformWithHalfOffset = Matrix3.translation( -0.5, -0.5 ).timesMatrix( this.inverseTransform );
@@ -34,10 +54,6 @@ export default class RenderImage extends RenderProgram {
 
   public override getName(): string {
     return 'RenderImage';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return [];
   }
 
   public override withChildren( children: RenderProgram[] ): RenderImage {
@@ -55,31 +71,6 @@ export default class RenderImage extends RenderProgram {
       this.extendX === other.extendX &&
       this.extendY === other.extendY &&
       this.resampleType === other.resampleType;
-  }
-
-  public override isFullyTransparent(): boolean {
-    return false;
-  }
-
-  public override isFullyOpaque(): boolean {
-    return this.image.isFullyOpaque;
-  }
-
-  public override needsFace(): boolean {
-    return this.resampleType === RenderResampleType.AnalyticBox ||
-           this.resampleType === RenderResampleType.AnalyticBilinear ||
-           this.resampleType === RenderResampleType.AnalyticMitchellNetravali;
-  }
-
-  public override needsArea(): boolean {
-    return false;
-  }
-
-  public override needsCentroid(): boolean {
-    // TODO: Consider NOT getting centroid for some filtering, as a performance boost
-    return this.resampleType === RenderResampleType.NearestNeighbor ||
-           this.resampleType === RenderResampleType.Bilinear ||
-           this.resampleType === RenderResampleType.MitchellNetravali;
   }
 
   public override simplified(): RenderProgram {

@@ -24,6 +24,8 @@ scenery.register( 'RenderRadialGradientAccuracy', RenderRadialGradientAccuracy )
 
 const scratchVectorA = new Vector2( 0, 0 );
 
+const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
+
 export default class RenderRadialGradient extends RenderProgram {
 
   private logic: RadialGradientLogic | null = null;
@@ -48,15 +50,20 @@ export default class RenderRadialGradient extends RenderProgram {
       return stops[ i ].ratio <= stops[ i + 1 ].ratio;
     } ), 'RenderLinearGradient stops not monotonically increasing' );
 
-    super();
+    const children = stops.map( toProgram );
+
+    super(
+      children,
+      _.every( children, RenderProgram.closureIsFullyTransparent ),
+      _.every( children, RenderProgram.closureIsFullyOpaque ),
+      false,
+      false,
+      accuracy === RenderRadialGradientAccuracy.UnsplitCentroid || accuracy === RenderRadialGradientAccuracy.SplitCentroid || accuracy === RenderRadialGradientAccuracy.SplitAccurate
+    );
   }
 
   public override getName(): string {
     return 'RenderRadialGradient';
-  }
-
-  public override getChildren(): RenderProgram[] {
-    return this.stops.map( stop => stop.program );
   }
 
   public override withChildren( children: RenderProgram[] ): RenderRadialGradient {
@@ -97,18 +104,10 @@ export default class RenderRadialGradient extends RenderProgram {
       _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
   }
 
-  public override needsCentroid(): boolean {
-    if ( this.accuracy === RenderRadialGradientAccuracy.UnsplitCentroid || this.accuracy === RenderRadialGradientAccuracy.SplitCentroid || this.accuracy === RenderRadialGradientAccuracy.SplitAccurate ) {
-      return true;
-    }
-
-    return super.needsCentroid();
-  }
-
   public override simplified(): RenderProgram {
     const simplifiedColorStops = this.stops.map( stop => new RenderGradientStop( stop.ratio, stop.program.simplified() ) );
 
-    if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent() ) ) {
+    if ( simplifiedColorStops.every( stop => stop.program.isFullyTransparent ) ) {
       return RenderColor.TRANSPARENT;
     }
 
