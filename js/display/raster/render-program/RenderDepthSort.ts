@@ -185,6 +185,10 @@ export default class RenderDepthSort extends RenderProgram {
         for ( let k = 0; k < partial.items.length; k++ ) {
           const existingItem = partial.items[ k ];
 
+          // TODO: We should use the above computed depthRanges to see if we can skip an actual split here.
+          // TODO: Some items will be 100% in front of other items based on the ranges, and we can avoid the heavy
+          // TODO: computation.
+
           // Partition it based on what is in front of the existing item
           const { ourFaceFront, otherFaceFront } = potentialItem.getDepthSplit( existingItem, remainingFace );
 
