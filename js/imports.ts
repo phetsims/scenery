@@ -442,12 +442,12 @@ export type { SerializedRenderColorSpaceConversion } from './display/raster/rend
 export type { SerializedRenderProgram } from './display/raster/render-program/RenderProgram.js';
 export { default as RenderPath } from './display/raster/render-program/RenderPath.js';
 export type { SerializedRenderPath } from './display/raster/render-program/RenderPath.js';
+export { default as RenderPathBoolean } from './display/raster/render-program/RenderPathBoolean.js';
+export type { SerializedRenderPathBoolean } from './display/raster/render-program/RenderPathBoolean.js';
 export { default as RenderColor } from './display/raster/render-program/RenderColor.js';
 export type { SerializedRenderColor } from './display/raster/render-program/RenderColor.js';
 export { default as RenderColorSpace } from './display/raster/render-program/RenderColorSpace.js';
 export { default as RenderColorSpaceConversion } from './display/raster/render-program/RenderColorSpaceConversion.js';
-export { default as RenderPathBoolean } from './display/raster/render-program/RenderPathBoolean.js';
-export type { SerializedRenderPathBoolean } from './display/raster/render-program/RenderPathBoolean.js';
 export { default as RenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export type { SerializedRenderAlpha } from './display/raster/render-program/RenderAlpha.js';
 export { default as RenderNormalize } from './display/raster/render-program/RenderNormalize.js';
@@ -494,6 +494,8 @@ export type { SerializedRenderRadialGradient } from './display/raster/render-pro
 export { default as RenderResampleType } from './display/raster/render-program/RenderResampleType.js';
 export { isWindingIncluded } from './display/raster/render-program/FillRule.js';
 export type { default as FillRule } from './display/raster/render-program/FillRule.js';
+export { default as RenderTrail } from './display/raster/render-program/RenderTrail.js';
+export { default as RenderPathReplacer } from './display/raster/render-program/RenderPathReplacer.js';
 export { default as RenderFromNode } from './display/raster/render-program/RenderFromNode.js';
 
 export { default as LinearEdge } from './display/raster/cag/LinearEdge.js';

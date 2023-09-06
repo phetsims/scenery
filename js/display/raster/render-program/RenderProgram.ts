@@ -33,6 +33,9 @@ export default abstract class RenderProgram {
   // Whether this subtree wants a computed centroid for its evaluation (If not, can give bogus values for evaluate)
   public readonly needsCentroid: boolean;
 
+  // Whether this subtree contains a RenderPathBoolean
+  public readonly hasPathBoolean: boolean;
+
   public constructor(
     children: RenderProgram[],
     isFullyTransparent: boolean,
@@ -45,15 +48,21 @@ export default abstract class RenderProgram {
     this.isFullyTransparent = isFullyTransparent;
     this.isFullyOpaque = isFullyOpaque;
 
+    let hasPathBoolean = this instanceof RenderPathBoolean;
+
     for ( let i = 0; i < children.length; i++ ) {
-      needsFace = needsFace || children[ i ].needsFace;
-      needsArea = needsArea || children[ i ].needsArea;
-      needsCentroid = needsCentroid || children[ i ].needsCentroid;
+      const child = children[ i ];
+
+      needsFace = needsFace || child.needsFace;
+      needsArea = needsArea || child.needsArea;
+      needsCentroid = needsCentroid || child.needsCentroid;
+      hasPathBoolean = hasPathBoolean || child.hasPathBoolean;
     }
 
     this.needsFace = needsFace;
     this.needsArea = needsArea;
     this.needsCentroid = needsCentroid;
+    this.hasPathBoolean = hasPathBoolean;
   }
 
   /**

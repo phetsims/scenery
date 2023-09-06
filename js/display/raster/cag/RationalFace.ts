@@ -78,13 +78,6 @@ export default class RationalFace {
     return inclusionSet;
   }
 
-  public postWindingRenderProgram( renderProgram: RenderProgram ): void {
-    const inclusionSet = this.getIncludedRenderPaths();
-
-    // TODO: for extracting a non-render-program based setup, can we create a new class here?
-    this.renderProgram = renderProgram.withPathInclusion( renderPath => inclusionSet.has( renderPath ) ).simplified();
-  }
-
   // NOTE: Returns better-filtered rational half edges, with zero-area boundaries removed
   public static traceBoundaries(
     filteredRationalHalfEdges: RationalHalfEdge[],

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -67,10 +67,20 @@ export default class Rasterize {
   private static getRenderProgrammedFaces( renderProgram: RenderProgram, faces: RationalFace[] ): RationalFace[] {
     const renderProgrammedFaces: RationalFace[] = [];
 
+    const replacer = new RenderPathReplacer( renderProgram.simplified() );
+
     for ( let i = 0; i < faces.length; i++ ) {
       const face = faces[ i ];
 
-      face.postWindingRenderProgram( renderProgram );
+      face.renderProgram = replacer.replace( face.getIncludedRenderPaths() );
+
+      if ( assertSlow ) {
+        const inclusionSet = face.getIncludedRenderPaths();
+
+        const checkProgram = renderProgram.withPathInclusion( renderPath => inclusionSet.has( renderPath ) ).simplified();
+
+        assertSlow( face.renderProgram.equals( checkProgram ), 'Replacer/simplifier error' );
+      }
 
       // Drop faces that will be fully transparent
       const isFullyTransparent = face.renderProgram instanceof RenderColor && face.renderProgram.color.w <= 1e-8;
