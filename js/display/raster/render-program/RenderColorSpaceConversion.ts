@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderColorSpace, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderColorSpace, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Constructor from '../../../../../phet-core/js/types/Constructor.js';
@@ -60,6 +60,10 @@ export default abstract class RenderColorSpaceConversion extends RenderProgram {
     }
     else if ( this.inverse && program instanceof this.inverse ) {
       return program.program;
+    }
+    // Move our path-booleans "up" to the top level (so we can combine other things AND improve path-boolean replacement performance)
+    else if ( program instanceof RenderPathBoolean && program.isOneSided() ) {
+      return program.withOneSide( this.withChildren( [ program.getOneSide() ] ) ).simplified();
     }
     else {
       return null;

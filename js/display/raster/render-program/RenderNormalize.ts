@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { ClippableFace, RenderColor, RenderPathBoolean, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
@@ -38,6 +38,10 @@ export default class RenderNormalize extends RenderProgram {
     }
     else if ( program instanceof RenderColor ) {
       return new RenderColor( program.color.magnitude > 0 ? program.color.normalized() : Vector4.ZERO );
+    }
+    // Move our path-booleans "up" to the top level (so we can combine other things AND improve path-boolean replacement performance)
+    else if ( program instanceof RenderPathBoolean && program.isOneSided() ) {
+      return program.withOneSide( this.withChildren( [ program.getOneSide() ] ) ).simplified();
     }
     else {
       return null;

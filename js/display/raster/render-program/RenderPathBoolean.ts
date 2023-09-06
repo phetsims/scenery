@@ -45,9 +45,29 @@ export default class RenderPathBoolean extends RenderProgram {
     return this.path === other.path;
   }
 
+  public isOneSided(): boolean {
+    return this.outside.isFullyTransparent || this.inside.isFullyTransparent;
+  }
+
+  public getOneSide(): RenderProgram {
+    assert && assert( this.isOneSided() );
+
+    return this.outside.isFullyTransparent ? this.inside : this.outside;
+  }
+
+  public withOneSide( program: RenderProgram ): RenderProgram {
+    assert && assert( this.isOneSided() );
+
+    return this.outside.isFullyTransparent ?
+           new RenderPathBoolean( this.path, program, this.outside ) :
+           new RenderPathBoolean( this.path, this.inside, program );
+  }
+
   public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const inside = children[ 0 ];
     const outside = children[ 1 ];
+
+    // TODO: a check to see if the RenderPath is effectively empty?
 
     if ( inside.isFullyTransparent && outside.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
