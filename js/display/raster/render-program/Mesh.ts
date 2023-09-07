@@ -86,10 +86,10 @@ export default class Mesh {
             if ( vertexIndex < 0 ) {
               vertexIndex = getCurrentMesh().vertices.length + vertexIndex + 1;
             }
-            line.vertexIndices.push( vertexIndex );
+            line.vertexIndices.push( vertexIndex - 1 );
 
             line.uvIndices.push(
-              vertexBits.length > 1 && vertexBits[ 1 ] ? parseInt( vertexBits[ 1 ], 10 ) : 0
+              vertexBits.length > 1 && vertexBits[ 1 ] ? parseInt( vertexBits[ 1 ], 10 ) - 1 : vertexIndex - 1
             );
           }
           getCurrentMesh().lines.push( line );
@@ -110,13 +110,13 @@ export default class Mesh {
             if ( vertexIndex < 0 ) {
               vertexIndex = getCurrentMesh().vertices.length + vertexIndex + 1;
             }
-            face.vertexIndices.push( vertexIndex );
+            face.vertexIndices.push( vertexIndex - 1 );
 
             face.uvIndices.push(
-              vertexBits.length > 1 && vertexBits[ 1 ] ? parseInt( vertexBits[ 1 ], 10 ) : 0
+              vertexBits.length > 1 && vertexBits[ 1 ] ? parseInt( vertexBits[ 1 ], 10 ) - 1 : vertexIndex - 1
             );
             face.normalIndices.push(
-              vertexBits.length > 2 ? parseInt( vertexBits[ 2 ], 10 ) : 0
+              vertexBits.length > 2 ? parseInt( vertexBits[ 2 ], 10 ) - 1 : vertexIndex - 1
             );
           }
 
