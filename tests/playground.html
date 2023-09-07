@@ -1071,12 +1071,14 @@ an UI and Display made for visual testing and debugging.
             new phet.scenery.RenderColor( normals[ 1 ].toVector4() ),
             new phet.scenery.RenderColor( normals[ 2 ].toVector4() ),
           ) );
+          // const normalProgram = new phet.scenery.RenderColor( normals[ 1 ].minus( normals[ 0 ] ).cross( normals[ 2 ].minus( normals[ 0 ] ) ).normalized().toVector4() );
+          // const normalProgram = new phet.scenery.RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4() );
 
           const diffuseProgram = new phet.scenery.RenderNormalDebug( normalProgram );
           // const diffuseProgram = new phet.scenery.RenderColor( phet.dot.v4( Math.random(), Math.random(), Math.random(), 1 ) );
 
           return new phet.scenery.RenderPlanar(
-            phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'positive', [ [
+            phet.scenery.RenderPathBoolean.fromInside( new phet.scenery.RenderPath( 'nonzero', [ [
               projectedVertices[ 0 ].toVector2(), projectedVertices[ 1 ].toVector2(), projectedVertices[ 2 ].toVector2()
             ] ] ), diffuseProgram ),
             projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ]

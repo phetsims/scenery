@@ -76,14 +76,32 @@ export default class RenderPlanar {
 
       // TODO: we COULD check to see if our line actually goes through the bounding box of the face. If not, we can just
       // TODO: determine which side of the line we're on, and skip the clip!
+      // TODO: ON THE OTHER HAND this is somewhat equivalent to the depth-range filtering we should be doing, so perhaps
+      // TODO: do that instead and keep this simple
       const { minFace, maxFace } = face.getBinaryLineClip( normal, value, fakeCornerPerpendicular );
 
       const somePointInMin = normal.timesScalar( value - 5 );
+      // const somePointInMin = minFace.getCentroid( minFace.getArea() );
       const areWeMinFront = this.getDepth( somePointInMin.x, somePointInMin.y ) < planar.getDepth( somePointInMin.x, somePointInMin.y );
 
+      const ourFaceFront = areWeMinFront ? minFace : maxFace;
+      const otherFaceFront = areWeMinFront ? maxFace : minFace;
+
+      // TODO: Our centroid code is slightly inaccurate here, due to numerical precision issues
+      // if ( assertSlow ) {
+      //   if ( ourFaceFront.getArea() > 1e-8 ) {
+      //     const centroid = ourFaceFront.getCentroid( ourFaceFront.getArea() );
+      //     assertSlow( this.getDepth( centroid.x, centroid.y ) <= planar.getDepth( centroid.x, centroid.y ) + 0.0001 );
+      //   }
+      //   if ( otherFaceFront.getArea() > 1e-8 ) {
+      //     const centroid = otherFaceFront.getCentroid( otherFaceFront.getArea() );
+      //     assertSlow( this.getDepth( centroid.x, centroid.y ) >= planar.getDepth( centroid.x, centroid.y ) - 0.0001 );
+      //   }
+      // }
+
       return {
-        ourFaceFront: areWeMinFront ? minFace : maxFace,
-        otherFaceFront: areWeMinFront ? maxFace : minFace
+        ourFaceFront: ourFaceFront,
+        otherFaceFront: otherFaceFront
       };
     }
     else {
