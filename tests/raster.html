@@ -672,7 +672,6 @@
     } );
   };
 
-
   const getTeapot = ( shadeType, normalType ) => {
     const width = 200;
     const height = 200;
@@ -761,6 +760,73 @@
     }
 
     return getRasterizedElement( program, width, height );
+  };
+
+  const getCheckerboard = ( type ) => {
+    const width = 128;
+    const height = width / 2;
+
+    const dl = 10;
+
+    const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+    const rotationMatrix = Matrix3.rotationY( 0.1 ).timesMatrix( Matrix3.rotationX( 0 ) );
+    const project = ( p ) => {
+
+      // a rotation, for testing
+      p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
+
+      const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
+      return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+    };
+
+    const polygons = [];
+
+    const matrix = Matrix3.scaling( height ).timesMatrix( Matrix3.translation( 1, 0, 0 ) );
+
+    const xSpan = 40;
+    const y = -5;
+    const zMax = 100;
+
+    for ( let x = -xSpan; x < xSpan; x++ ) {
+      for ( let z = 5; z < zMax; z++ ) {
+        if ( ( x + z ) % 2 === 0 ) {
+          continue;
+        }
+        const p0 = matrix.timesVector2( project( v3( x, y, z ) ).toVector2() );
+        const p1 = matrix.timesVector2( project( v3( x + 1, y, z ) ).toVector2() );
+        const p2 = matrix.timesVector2( project( v3( x + 1, y, z + 1 ) ).toVector2() );
+        const p3 = matrix.timesVector2( project( v3( x, y, z + 1 ) ).toVector2() );
+
+        polygons.push( [ p0, p1, p2, p3 ] );
+      }
+    }
+
+    if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+      return getSceneryElement(
+        new Node( {
+          renderer: type,
+          children: polygons.map( polygon => new Path( Shape.polygon( polygon ), { fill: 'black' } ) )
+        } ),
+        width, height, 'white', type
+      );
+    }
+    else {
+      const program = new RenderStack( [
+        new RenderPathBoolean(
+          new RenderPath( 'nonzero', polygons ),
+          RenderColor.from( 'black' ),
+          RenderColor.from( 'white' )
+        )
+      ] );
+
+      return getRasterizedElement( program, width, height, {
+        polygonFiltering: {
+          box: PolygonFilterType.Box,
+          bilinear: PolygonFilterType.Bilinear,
+          mitchellNetravali: PolygonFilterType.MitchellNetravali
+        }[ type ]
+      } );
+    }
   };
 
 </script>
@@ -1071,7 +1137,82 @@
       } );
     </script>
 
-    <h2>Siemens Stars</h2>
+    <h2>Polygonal Aliasing</h2>
+
+    <p>Sometimes, high-frequency patterns can create lower-frequency (aliased) patterns in the result.</p>
+
+    <h3>Checkerboards</h3>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">Proposed Method (box)</td>
+          <td style="text-align: center;">Proposed Method (bilinear)</td>
+          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
+        </tr>
+        <tr>
+          <td id="checkerboard-canvas"></td>
+          <td id="checkerboard-svg"></td>
+          <td id="checkerboard-vello"></td>
+          <td id="checkerboard-box"></td>
+          <td id="checkerboard-bilinear"></td>
+          <td id="checkerboard-mitchell-netravali"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-canvas' ).appendChild(
+          getCheckerboard( 'canvas' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-svg' ).appendChild(
+          getCheckerboard( 'svg' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'checkerboard-vello' ).appendChild(
+            getCheckerboard( 'vello' )
+          );
+        }
+        else {
+          document.getElementById( 'checkerboard-vello' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-box' ).appendChild(
+          getCheckerboard( 'box' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-bilinear' ).appendChild(
+          getCheckerboard( 'bilinear' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-mitchell-netravali' ).appendChild(
+          getCheckerboard( 'mitchellNetravali' )
+        );
+      } );
+    </script>
+
+    <h3>Siemens Stars</h3>
 
     <p>
       Alternating radial bands of light/dark, to visualize aliasing. It should blur towards a consistent gray toward the
