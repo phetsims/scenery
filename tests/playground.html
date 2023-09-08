@@ -1085,7 +1085,9 @@ an UI and Display made for visual testing and debugging.
             new phet.scenery.RenderColor( normals[ 1 ].toVector4Zero() ),
             new phet.scenery.RenderColor( normals[ 2 ].toVector4Zero() ),
           ) );
-          // const normalProgram = new phet.scenery.RenderColor( normals[ 1 ].minus( normals[ 0 ] ).cross( normals[ 2 ].minus( normals[ 0 ] ) ).normalized().toVector4() );
+
+          // const positionProgram = new phet.scenery.RenderColor( transformedVertices[ 0 ].plus( transformedVertices[ 1 ] ).plus( transformedVertices[ 2 ] ).timesScalar( 1 / 3 ).toVector4() );
+          // const normalProgram = new phet.scenery.RenderColor( vertices[ 1 ].minus( vertices[ 0 ] ).normalized().cross( vertices[ 2 ].minus( vertices[ 0 ] ).normalized() ).normalized().toVector4Zero() );
           // const normalProgram = new phet.scenery.RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4() );
 
           // const diffuseProgram = new phet.scenery.RenderNormalDebug( normalProgram );
