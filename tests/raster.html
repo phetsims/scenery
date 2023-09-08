@@ -793,54 +793,6 @@
   </div>
   <div class="span8">
 
-    <h2>3D Capabilities</h2>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Colors</td>
-          <td style="text-align: center;">Flat Normals</td>
-          <td style="text-align: center;">Interpolated Normals</td>
-          <td style="text-align: center;">Phong</td>
-        </tr>
-        <tr>
-          <td id="teapot-random"></td>
-          <td id="teapot-flat"></td>
-          <td id="teapot-normals"></td>
-          <td id="teapot-phong"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-random' ).appendChild(
-          getTeapot( 'random', 'flat' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-flat' ).appendChild(
-          getTeapot( 'normals', 'flat' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-normals' ).appendChild(
-          getTeapot( 'normals', 'interpolated' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-phong' ).appendChild(
-          getTeapot( 'phong', 'interpolated' )
-        );
-      } );
-    </script>
-
     <h2>Conflation</h2>
 
     <p>
@@ -895,6 +847,54 @@
       setTimeout( async () => {
         document.getElementById( 'conflation-default' ).appendChild(
           getConflation( 'default', 100 )
+        );
+      } );
+    </script>
+
+    <h2>3D Capabilities</h2>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Colors</td>
+          <td style="text-align: center;">Flat Normals</td>
+          <td style="text-align: center;">Interpolated Normals</td>
+          <td style="text-align: center;">Phong</td>
+        </tr>
+        <tr>
+          <td id="teapot-random"></td>
+          <td id="teapot-flat"></td>
+          <td id="teapot-normals"></td>
+          <td id="teapot-phong"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-random' ).appendChild(
+          getTeapot( 'random', 'flat' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-flat' ).appendChild(
+          getTeapot( 'normals', 'flat' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-normals' ).appendChild(
+          getTeapot( 'normals', 'interpolated' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-phong' ).appendChild(
+          getTeapot( 'phong', 'interpolated' )
         );
       } );
     </script>
