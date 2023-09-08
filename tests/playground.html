@@ -1086,7 +1086,9 @@ an UI and Display made for visual testing and debugging.
         } ).filter( _.identity );
       };
       const boxDepth = new phet.scenery.RenderDepthSort( [
-        ...createTriangularMesh( phet.scenery.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, 0, 150 ) )
+        ...createTriangularMesh( phet.scenery.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, 0, 150 ) ),
+        ...createTriangularMesh( phet.scenery.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, -10, 150 ) ),
+        ...createTriangularMesh( phet.scenery.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, 10, 150 ) ),
         // ...createBox( phet.dot.v3( 3, 2, dl ), phet.dot.v3( 1, 1, 5 ) ),
         // ...createBox( phet.dot.v3( 0, 3, dl ), phet.dot.v3( 6, 1, 1 ) ),
         // ...createBox( phet.dot.v3( -3, 0, dl ), phet.dot.v3( 1, 5, 3 ) ),

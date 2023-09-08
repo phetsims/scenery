@@ -506,6 +506,7 @@ export { default as BigIntVector2 } from './display/raster/cag/BigIntVector2.js'
 export { default as BigRational } from './display/raster/cag/BigRational.js';
 export { default as BigRationalVector2 } from './display/raster/cag/BigRationalVector2.js';
 export { default as BoundsIntersectionFilter } from './display/raster/cag/BoundsIntersectionFilter.js';
+export { default as HilbertMapping, Hilbert2 } from './display/raster/cag/HilbertMapping.js';
 
 export { serializeClippableFace, deserializeClippableFace } from './display/raster/cag/ClippableFace.js';
 export type { default as ClippableFace } from './display/raster/cag/ClippableFace.js';

@@ -972,7 +972,9 @@ export default class PolygonClipping {
         isFullyExternal = true;
       }
       else {
-        assert && assert( roots.length === 2 );
+        if ( roots.length === 1 ) {
+          roots.push( roots[ 0 ] );
+        }
         assert && assert( roots[ 0 ] <= roots[ 1 ], 'Easier for us to assume root ordering' );
         const rootA = roots[ 0 ];
         const rootB = roots[ 1 ];
@@ -1337,7 +1339,9 @@ export default class PolygonClipping {
           isFullyExternal = true;
         }
         else {
-          assert && assert( roots.length === 2 );
+          if ( roots.length === 1 ) {
+            roots.push( roots[ 0 ] );
+          }
           assert && assert( roots[ 0 ] <= roots[ 1 ], 'Easier for us to assume root ordering' );
           const rootA = roots[ 0 ];
           const rootB = roots[ 1 ];
