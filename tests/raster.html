@@ -727,9 +727,9 @@
 
         let renderProgram;
         if ( shadeType === 'phong' ) {
-          const ambientColorProgram = new RenderColor( v4( 0.1, 0.1, 0.1, 1 ) );
-          const diffuseColorProgram = new RenderColor( v4( 1, 0.1, 0.0, 1 ) );
-          const specularColorProgram = new RenderColor( v4( 0.5, 0.5, 0.5, 1 ) );;
+          const ambientColorProgram = new RenderColor( v4( 0, 0, 0, 1 ) );
+          const diffuseColorProgram = new RenderColor( v4( 1, 0.05, 0, 1 ) );
+          const specularColorProgram = new RenderColor( v4( 0.5, 0.5, 0.5, 1 ) );
           renderProgram = new RenderPhong( 50, ambientColorProgram, diffuseColorProgram, specularColorProgram, positionProgram, normalProgram, [
             new RenderLight(
               new RenderColor( v4( -2.0, 3.5, -2.0, 0 ).normalized() ),
@@ -753,9 +753,12 @@
       } ).filter( _.identity );
     };
 
-    const program = new RenderDepthSort( [
+    let program = new RenderDepthSort( [
       ...createTriangularMesh( Mesh.loadOBJ( teapotOBJ )[ 0 ], Matrix4.translation( 0, 0, 150 ) ),
     ] ).transformed( phet.dot.Matrix3.scaling( 170 * width / 256 ) ).transformed( phet.dot.Matrix3.translation( width / 2, height / 2 ) );
+    if ( shadeType === 'phong' ) {
+      program = new RenderLinearSRGBToSRGB( program );
+    }
 
     return getRasterizedElement( program, width, height );
   };
