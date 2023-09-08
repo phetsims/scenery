@@ -219,6 +219,10 @@ export default abstract class RenderProgram {
     return '';
   }
 
+  public print(): void {
+    console.log( this.toRecursiveString() );
+  }
+
   public abstract serialize(): SerializedRenderProgram;
 
   public static deserialize( obj: SerializedRenderProgram ): RenderProgram {

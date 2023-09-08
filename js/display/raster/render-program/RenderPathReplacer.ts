@@ -27,7 +27,7 @@ export default class RenderPathReplacer {
     this.initialRecurse( program, [] );
   }
 
-  public replace( includedPaths: Iterable<RenderPath> ): RenderProgram {
+  public replace( includedPaths: Set<RenderPath> ): RenderProgram {
     if ( !this.program.hasPathBoolean ) {
       return this.program;
     }
@@ -44,19 +44,20 @@ export default class RenderPathReplacer {
       scaffold.add( trails[ i ].indices, 0 );
     }
 
-    return this.replaceRecurse( this.program, scaffold ).simplified();
+    return this.replaceRecurse( this.program, includedPaths, scaffold ).simplified();
   }
 
-  private replaceRecurse( program: RenderProgram, scaffold: RenderScaffold | null ): RenderProgram {
+  private replaceRecurse( program: RenderProgram, includedPaths: Set<RenderPath>, scaffold: RenderScaffold | null ): RenderProgram {
     if ( !program.hasPathBoolean ) {
       return program;
     }
 
     if ( program instanceof RenderPathBoolean ) {
-      const included = scaffold && scaffold.isIncluded;
+      const included = scaffold ? scaffold.isIncluded : includedPaths.has( program.path );
 
       return this.replaceRecurse(
         included ? program.inside : program.outside,
+        includedPaths,
         scaffold ? scaffold.getAtIndex( included ? 0 : 1 ) : null
       );
     }
@@ -84,7 +85,7 @@ export default class RenderPathReplacer {
           pathIndexIndex--;
         }
 
-        const child = this.replaceRecurse( program.children[ index ], scaffold ? scaffold.getAtIndex( index ) : null );
+        const child = this.replaceRecurse( program.children[ index ], includedPaths, scaffold ? scaffold.getAtIndex( index ) : null );
 
         if ( isStack ) {
           reversedChildren.push( child );
@@ -107,7 +108,7 @@ export default class RenderPathReplacer {
     }
     else {
       return program.withChildren( program.children.map( ( child, i ) => {
-        return this.replaceRecurse( child, scaffold ? scaffold.getAtIndex( i ) : null );
+        return this.replaceRecurse( child, includedPaths, scaffold ? scaffold.getAtIndex( i ) : null );
       } ) );
     }
   }
