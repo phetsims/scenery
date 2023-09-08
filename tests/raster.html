@@ -716,12 +716,11 @@
             RenderBarycentricPerspectiveBlendAccuracy.Centroid,
             new RenderColor( normals[ 0 ].toVector4Zero() ),
             new RenderColor( normals[ 1 ].toVector4Zero() ),
-            new RenderColor( normals[ 2 ].toVector4Zero() ),
+            new RenderColor( normals[ 2 ].toVector4Zero() )
           ) );
         }
         else if ( normalType === 'flat' ) {
-          // normalProgram = new RenderColor( vertices[ 1 ].minus( vertices[ 0 ] ).normalized().cross( vertices[ 2 ].minus( vertices[ 0 ] ).normalized() ).normalized().toVector4Zero() );
-          normalProgram = new RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4() );
+          normalProgram = new RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4Zero() );
         }
 
         // const positionProgram = new RenderColor( transformedVertices[ 0 ].plus( transformedVertices[ 1 ] ).plus( transformedVertices[ 2 ] ).timesScalar( 1 / 3 ).toVector4() );
