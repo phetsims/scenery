@@ -9,6 +9,7 @@
 import { scenery } from '../../../imports.js';
 
 enum RenderResampleType {
+  // TODO: maybe... sort these?
   NearestNeighbor = 0,
   AnalyticMitchellNetravali = 1,
   Bilinear = 2,
