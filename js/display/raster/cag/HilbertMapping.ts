@@ -137,7 +137,10 @@ export class Hilbert2 {
   public constructor(
     public x: number,
     public y: number
-  ) {}
+  ) {
+    assert && assert( Math.abs( x ) <= 1 );
+    assert && assert( Math.abs( y ) <= 1 );
+  }
 
   public set( x: number, y: number ): this {
     this.x = x;
@@ -196,7 +199,11 @@ export class Hilbert3 {
     public x: number,
     public y: number,
     public z: number
-  ) {}
+  ) {
+    assert && assert( Math.abs( x ) <= 1 );
+    assert && assert( Math.abs( y ) <= 1 );
+    assert && assert( Math.abs( z ) <= 1 );
+  }
 
   public set( x: number, y: number, z: number ): this {
     this.x = x;
@@ -270,7 +277,12 @@ export class Hilbert4 {
     public y: number,
     public z: number,
     public w: number
-  ) {}
+  ) {
+    assert && assert( Math.abs( x ) <= 1 );
+    assert && assert( Math.abs( y ) <= 1 );
+    assert && assert( Math.abs( z ) <= 1 );
+    assert && assert( Math.abs( w ) <= 1 );
+  }
 
   public set( x: number, y: number, z: number, w: number ): this {
     this.x = x;
@@ -362,7 +374,13 @@ export class Hilbert5 {
     public z: number,
     public w: number,
     public v: number
-  ) {}
+  ) {
+    assert && assert( Math.abs( x ) <= 1 );
+    assert && assert( Math.abs( y ) <= 1 );
+    assert && assert( Math.abs( z ) <= 1 );
+    assert && assert( Math.abs( w ) <= 1 );
+    assert && assert( Math.abs( v ) <= 1 );
+  }
 
   public set( x: number, y: number, z: number, w: number, v: number ): this {
     this.x = x;
@@ -480,7 +498,14 @@ export class Hilbert6 {
     public w: number,
     public v: number,
     public u: number
-  ) {}
+  ) {
+    assert && assert( Math.abs( x ) <= 1 );
+    assert && assert( Math.abs( y ) <= 1 );
+    assert && assert( Math.abs( z ) <= 1 );
+    assert && assert( Math.abs( w ) <= 1 );
+    assert && assert( Math.abs( v ) <= 1 );
+    assert && assert( Math.abs( u ) <= 1 );
+  }
 
   public set( x: number, y: number, z: number, w: number, v: number, u: number ): this {
     this.x = x;

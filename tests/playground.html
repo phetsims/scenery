@@ -594,6 +594,13 @@ an UI and Display made for visual testing and debugging.
         // polygonFilterWindowMultiplier: 11,
         // polygonFilterWindowMultiplier: 25,
 
+        // edgeIntersectionSortMethod: 'none',
+        // edgeIntersectionSortMethod: 'center-min-max',
+        // edgeIntersectionSortMethod: 'center-size',
+        // edgeIntersectionSortMethod: 'random',
+        // edgeIntersectionSortMethod: 'min-max',
+        // edgeIntersectionSortMethod: 'min-max-size',
+
         // edgeIntersectionMethod: 'quadratic',
         // edgeIntersectionMethod: 'boundsTree',
         // edgeIntersectionMethod: 'arrayBoundsTree',
@@ -1108,6 +1115,8 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
+      // const program = normalBlendArray( [ boxDepth ] ).transformed(
+      // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth ] ).transformed(
       const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth, boxDepth ] ).transformed(
       // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -24,6 +24,8 @@ export type RasterizationOptions = {
   // significantly (we won't be able to grid-clip to do it efficiently, and it might cover significantly more area).
   polygonFilterWindowMultiplier?: number;
 
+  edgeIntersectionSortMethod?: 'none' | 'center-size' | 'min-max' | 'min-max-size' | 'center-min-max' | 'random';
+
   edgeIntersectionMethod?: 'quadratic' | 'boundsTree' | 'arrayBoundsTree';
 
   renderableFaceMethod?: 'polygonal' | 'edged' | 'fullyCombined' | 'simplifyingCombined' | 'traced';
@@ -37,6 +39,7 @@ const DEFAULT_OPTIONS = {
   outputRasterOffset: Vector2.ZERO,
   polygonFiltering: PolygonFilterType.Box,
   polygonFilterWindowMultiplier: 1,
+  edgeIntersectionSortMethod: 'none',
   edgeIntersectionMethod: 'arrayBoundsTree',
   renderableFaceMethod: 'traced',
   splitPrograms: true,
@@ -682,7 +685,8 @@ export default class Rasterize {
     const contributionBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
 
     // Keep us at 20 bits of precision (after rounding)
-    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( Math.max( contributionBounds.width, contributionBounds.height ) ) ) );
+    const maxSize = Math.max( contributionBounds.width, contributionBounds.height );
+    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( maxSize ) ) );
     if ( log ) { log.scale = scale; }
 
     // -( scale * ( bounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( bounds.maxX + filterGridOffset.x ) + translation.x
@@ -722,6 +726,82 @@ export default class Rasterize {
     if ( log ) { log.integerEdges = integerEdges; }
 
     // TODO: optional hilbert space-fill sort here?
+
+    if ( options.edgeIntersectionSortMethod === 'center-size' ) {
+      const centerScale = 1 / ( scale * maxSize );
+      integerEdges.sort( ( a, b ) => {
+        return HilbertMapping.getHilbert4Compare(
+          0.5 * ( a.x0 + a.x1 ) * centerScale,
+          0.5 * ( a.y0 + a.y1 ) * centerScale,
+          0.2 + 0.01 * ( a.x1 - a.x0 ) * centerScale,
+          0.2 + 0.01 * ( a.y1 - a.y0 ) * centerScale,
+          0.5 * ( b.x0 + b.x1 ) * centerScale,
+          0.5 * ( b.y0 + b.y1 ) * centerScale,
+          0.2 + 0.01 * ( b.x1 - b.x0 ) * centerScale,
+          0.2 + 0.01 * ( b.y1 - b.y0 ) * centerScale
+        );
+      } );
+    }
+    else if ( options.edgeIntersectionSortMethod === 'min-max' ) {
+      const centerScale = 1 / ( scale * maxSize );
+      integerEdges.sort( ( a, b ) => {
+        return HilbertMapping.getHilbert4Compare(
+          a.bounds.minX * centerScale,
+          a.bounds.minY * centerScale,
+          a.bounds.maxX * centerScale,
+          a.bounds.maxY * centerScale,
+          b.bounds.minX * centerScale,
+          b.bounds.minY * centerScale,
+          b.bounds.maxX * centerScale,
+          b.bounds.maxY * centerScale
+        );
+      } );
+    }
+    else if ( options.edgeIntersectionSortMethod === 'min-max-size' ) {
+      const centerScale = 1 / ( scale * maxSize );
+      integerEdges.sort( ( a, b ) => {
+        return HilbertMapping.getHilbert6Compare(
+          a.bounds.minX * centerScale,
+          a.bounds.minY * centerScale,
+          a.bounds.maxX * centerScale,
+          a.bounds.maxY * centerScale,
+          0.2 + 0.01 * ( a.x1 - a.x0 ) * centerScale,
+          0.2 + 0.01 * ( a.y1 - a.y0 ) * centerScale,
+          b.bounds.minX * centerScale,
+          b.bounds.minY * centerScale,
+          b.bounds.maxX * centerScale,
+          b.bounds.maxY * centerScale,
+          0.2 + 0.01 * ( b.x1 - b.x0 ) * centerScale,
+          0.2 + 0.01 * ( b.y1 - b.y0 ) * centerScale
+        );
+      } );
+    }
+    else if ( options.edgeIntersectionSortMethod === 'center-min-max' ) {
+      const centerScale = 1 / ( scale * maxSize );
+      integerEdges.sort( ( a, b ) => {
+        return HilbertMapping.getHilbert6Compare(
+          0.5 * ( a.x0 + a.x1 ) * centerScale,
+          0.5 * ( a.y0 + a.y1 ) * centerScale,
+          a.bounds.minX * centerScale,
+          a.bounds.minY * centerScale,
+          a.bounds.maxX * centerScale,
+          a.bounds.maxY * centerScale,
+          0.5 * ( b.x0 + b.x1 ) * centerScale,
+          0.5 * ( b.y0 + b.y1 ) * centerScale,
+          b.bounds.minX * centerScale,
+          b.bounds.minY * centerScale,
+          b.bounds.maxX * centerScale,
+          b.bounds.maxY * centerScale
+        );
+      } );
+    }
+    else if ( options.edgeIntersectionSortMethod === 'random' ) {
+      // NOTE: This is NOT designed for performance (it's for testing)
+      // eslint-disable-next-line bad-sim-text
+      const shuffled = _.shuffle( integerEdges );
+      integerEdges.length = 0;
+      integerEdges.push( ...shuffled );
+    }
 
     if ( options.edgeIntersectionMethod === 'quadratic' ) {
       LineIntersector.edgeIntersectionQuadratic( integerEdges, log );
