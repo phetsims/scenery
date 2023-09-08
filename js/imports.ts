@@ -468,10 +468,11 @@ export type { SerializedRenderStack } from './display/raster/render-program/Rend
 export { default as RenderPlanar } from './display/raster/render-program/RenderPlanar.js';
 export { default as RenderDepthSort } from './display/raster/render-program/RenderDepthSort.js';
 export type { SerializedRenderDepthSort } from './display/raster/render-program/RenderDepthSort.js';
+export { default as RenderLight } from './display/raster/render-program/RenderLight.js';
 export { default as RenderNormalDebug } from './display/raster/render-program/RenderNormalDebug.js';
 export type { SerializedRenderNormalDebug } from './display/raster/render-program/RenderNormalDebug.js';
-export { default as RenderDiffuse } from './display/raster/render-program/RenderDiffuse.js';
-export type { SerializedRenderDiffuse } from './display/raster/render-program/RenderDiffuse.js';
+export { default as RenderPhong } from './display/raster/render-program/RenderPhong.js';
+export type { SerializedRenderPhong } from './display/raster/render-program/RenderPhong.js';
 export { default as RenderFilter } from './display/raster/render-program/RenderFilter.js';
 export type { SerializedRenderFilter } from './display/raster/render-program/RenderFilter.js';
 export { default as RenderGradientStop } from './display/raster/render-program/RenderGradientStop.js';

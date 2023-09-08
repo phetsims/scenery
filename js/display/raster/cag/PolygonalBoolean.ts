@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath, scenery } from '../../../imports.js';
+import { IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -20,7 +20,8 @@ export default class PolygonalBoolean {
       paths,
       face => face.getIncludedRenderPaths().size > 0,
       ( face, faceData, bounds ) => faceData ? face.polygons : [],
-      ( faceData1, faceData2 ) => faceData1 === faceData2
+      ( faceData1, faceData2 ) => faceData1 === faceData2,
+      null
     ).flat();
   }
 
@@ -29,7 +30,8 @@ export default class PolygonalBoolean {
       paths,
       face => face.getIncludedRenderPaths().size === paths.length,
       ( face, faceData, bounds ) => faceData ? face.polygons : [],
-      ( faceData1, faceData2 ) => faceData1 === faceData2
+      ( faceData1, faceData2 ) => faceData1 === faceData2,
+      null
     ).flat();
   }
 
@@ -41,7 +43,8 @@ export default class PolygonalBoolean {
         return set.has( pathA ) && !set.has( pathB );
       },
       ( face, faceData, bounds ) => faceData ? face.polygons : [],
-      ( faceData1, faceData2 ) => faceData1 === faceData2
+      ( faceData1, faceData2 ) => faceData1 === faceData2,
+      null
     ).flat();
   }
 
@@ -65,7 +68,8 @@ export default class PolygonalBoolean {
         }
       },
       ( face, faceData, bounds ) => ( { tag: faceData, polygons: face.polygons } ),
-      ( faceData1, faceData2 ) => faceData1 === faceData2
+      ( faceData1, faceData2 ) => faceData1 === faceData2,
+      null
     );
 
     const result: { intersection: Vector2[][]; aOnly: Vector2[][]; bOnly: Vector2[][] } = {
@@ -90,7 +94,8 @@ export default class PolygonalBoolean {
     getFaceData: ( face: RationalFace ) => FaceData,
     createOutputFace: ( face: PolygonalFace, faceData: FaceData, bounds: Bounds2 ) => OutputFace,
     // null is for the unbounded face
-    isFaceDataCompatible: ( faceData1: FaceData, faceData2: FaceData | null ) => boolean
+    isFaceDataCompatible: ( faceData1: FaceData, faceData2: FaceData | null ) => boolean,
+    log: RasterLog | null
   ): OutputFace[] {
 
     const bounds = Bounds2.NOTHING.copy();
@@ -117,7 +122,7 @@ export default class PolygonalBoolean {
 
     // TODO: optional hilbert space-fill sort here?
 
-    defaultLineIntersector( integerEdges );
+    defaultLineIntersector( integerEdges, log );
 
     const rationalHalfEdges = LineSplitter.splitIntegerEdges( integerEdges );
 

@@ -1071,17 +1071,39 @@ an UI and Display made for visual testing and debugging.
             return null;
           }
 
+          const positionProgram = new phet.scenery.RenderBarycentricPerspectiveBlend(
+            projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
+            phet.scenery.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+            new phet.scenery.RenderColor( transformedVertices[ 0 ].toVector4Zero() ),
+            new phet.scenery.RenderColor( transformedVertices[ 1 ].toVector4Zero() ),
+            new phet.scenery.RenderColor( transformedVertices[ 2 ].toVector4Zero() ),
+          );
           const normalProgram = new phet.scenery.RenderNormalize( new phet.scenery.RenderBarycentricPerspectiveBlend(
             projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
             phet.scenery.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-            new phet.scenery.RenderColor( normals[ 0 ].toVector4() ),
-            new phet.scenery.RenderColor( normals[ 1 ].toVector4() ),
-            new phet.scenery.RenderColor( normals[ 2 ].toVector4() ),
+            new phet.scenery.RenderColor( normals[ 0 ].toVector4Zero() ),
+            new phet.scenery.RenderColor( normals[ 1 ].toVector4Zero() ),
+            new phet.scenery.RenderColor( normals[ 2 ].toVector4Zero() ),
           ) );
           // const normalProgram = new phet.scenery.RenderColor( normals[ 1 ].minus( normals[ 0 ] ).cross( normals[ 2 ].minus( normals[ 0 ] ) ).normalized().toVector4() );
           // const normalProgram = new phet.scenery.RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4() );
 
-          const diffuseProgram = new phet.scenery.RenderNormalDebug( normalProgram );
+          // const diffuseProgram = new phet.scenery.RenderNormalDebug( normalProgram );
+          // const diffuseProgram = new phet.scenery.RenderDiffuse( normalProgram, [
+          //   new phet.scenery.RenderLight(
+          //     new phet.scenery.RenderColor( phet.dot.v4( -1.0, 0.5, -2.0, 0 ).normalized() ),
+          //     toPremulClient( 'white' )
+          //   )
+          // ] );
+          const ambientColorProgram = toPremulClient( '#111111' );
+          const diffuseColorProgram = toPremulClient( '#dd3300' );
+          const specularColorProgram = toPremulClient( '#666' );
+          const diffuseProgram = new phet.scenery.RenderPhong( 50, ambientColorProgram, diffuseColorProgram, specularColorProgram, positionProgram, normalProgram, [
+            new phet.scenery.RenderLight(
+              new phet.scenery.RenderColor( phet.dot.v4( -2.0, 3.5, -2.0, 0 ).normalized() ),
+              toPremulClient( 'white' )
+            )
+          ] );
           // const diffuseProgram = new phet.scenery.RenderColor( phet.dot.v4( Math.random(), Math.random(), Math.random(), 1 ) );
 
           return new phet.scenery.RenderPlanar(
