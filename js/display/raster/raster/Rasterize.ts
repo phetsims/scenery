@@ -725,75 +725,18 @@ export default class Rasterize {
     const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, contributionBounds, toIntegerMatrix );
     if ( log ) { log.integerEdges = integerEdges; }
 
-    // TODO: optional hilbert space-fill sort here?
-
+    // NOTE: Can also be 'none', we'll no-op
     if ( options.edgeIntersectionSortMethod === 'center-size' ) {
-      const centerScale = 1 / ( scale * maxSize );
-      integerEdges.sort( ( a, b ) => {
-        return HilbertMapping.getHilbert4Compare(
-          0.5 * ( a.x0 + a.x1 ) * centerScale,
-          0.5 * ( a.y0 + a.y1 ) * centerScale,
-          0.2 + 0.01 * ( a.x1 - a.x0 ) * centerScale,
-          0.2 + 0.01 * ( a.y1 - a.y0 ) * centerScale,
-          0.5 * ( b.x0 + b.x1 ) * centerScale,
-          0.5 * ( b.y0 + b.y1 ) * centerScale,
-          0.2 + 0.01 * ( b.x1 - b.x0 ) * centerScale,
-          0.2 + 0.01 * ( b.y1 - b.y0 ) * centerScale
-        );
-      } );
+      HilbertMapping.sortCenterSize( integerEdges, 1 / ( scale * maxSize ) );
     }
     else if ( options.edgeIntersectionSortMethod === 'min-max' ) {
-      const centerScale = 1 / ( scale * maxSize );
-      integerEdges.sort( ( a, b ) => {
-        return HilbertMapping.getHilbert4Compare(
-          a.bounds.minX * centerScale,
-          a.bounds.minY * centerScale,
-          a.bounds.maxX * centerScale,
-          a.bounds.maxY * centerScale,
-          b.bounds.minX * centerScale,
-          b.bounds.minY * centerScale,
-          b.bounds.maxX * centerScale,
-          b.bounds.maxY * centerScale
-        );
-      } );
+      HilbertMapping.sortMinMax( integerEdges, 1 / ( scale * maxSize ) );
     }
     else if ( options.edgeIntersectionSortMethod === 'min-max-size' ) {
-      const centerScale = 1 / ( scale * maxSize );
-      integerEdges.sort( ( a, b ) => {
-        return HilbertMapping.getHilbert6Compare(
-          a.bounds.minX * centerScale,
-          a.bounds.minY * centerScale,
-          a.bounds.maxX * centerScale,
-          a.bounds.maxY * centerScale,
-          0.2 + 0.01 * ( a.x1 - a.x0 ) * centerScale,
-          0.2 + 0.01 * ( a.y1 - a.y0 ) * centerScale,
-          b.bounds.minX * centerScale,
-          b.bounds.minY * centerScale,
-          b.bounds.maxX * centerScale,
-          b.bounds.maxY * centerScale,
-          0.2 + 0.01 * ( b.x1 - b.x0 ) * centerScale,
-          0.2 + 0.01 * ( b.y1 - b.y0 ) * centerScale
-        );
-      } );
+      HilbertMapping.sortMinMaxSize( integerEdges, 1 / ( scale * maxSize ) );
     }
     else if ( options.edgeIntersectionSortMethod === 'center-min-max' ) {
-      const centerScale = 1 / ( scale * maxSize );
-      integerEdges.sort( ( a, b ) => {
-        return HilbertMapping.getHilbert6Compare(
-          0.5 * ( a.x0 + a.x1 ) * centerScale,
-          0.5 * ( a.y0 + a.y1 ) * centerScale,
-          a.bounds.minX * centerScale,
-          a.bounds.minY * centerScale,
-          a.bounds.maxX * centerScale,
-          a.bounds.maxY * centerScale,
-          0.5 * ( b.x0 + b.x1 ) * centerScale,
-          0.5 * ( b.y0 + b.y1 ) * centerScale,
-          b.bounds.minX * centerScale,
-          b.bounds.minY * centerScale,
-          b.bounds.maxX * centerScale,
-          b.bounds.maxY * centerScale
-        );
-      } );
+      HilbertMapping.sortCenterMinMax( integerEdges, 1 / ( scale * maxSize ) );
     }
     else if ( options.edgeIntersectionSortMethod === 'random' ) {
       // NOTE: This is NOT designed for performance (it's for testing)

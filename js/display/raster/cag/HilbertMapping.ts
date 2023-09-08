@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../../../imports.js';
+import { IntegerEdge, scenery } from '../../../imports.js';
 
 type P2 = 'x' | '-x' | 'y' | '-y';
 type P3 = 'x' | '-x' | 'y' | '-y' | 'z' | '-z';
@@ -16,6 +16,75 @@ type P6 = 'x' | '-x' | 'y' | '-y' | 'z' | '-z' | 'w' | '-w' | 'v' | '-v' | 'u' |
 type Hilbert = Hilbert2 | Hilbert3 | Hilbert4 | Hilbert5 | Hilbert6;
 
 export default class HilbertMapping {
+
+  public static sortCenterSize( integerEdges: IntegerEdge[], scale: number ): void {
+    integerEdges.sort( ( a, b ) => {
+      return HilbertMapping.getHilbert4Compare(
+        0.5 * ( a.x0 + a.x1 ) * scale,
+        0.5 * ( a.y0 + a.y1 ) * scale,
+        0.2 + 0.01 * ( a.x1 - a.x0 ) * scale,
+        0.2 + 0.01 * ( a.y1 - a.y0 ) * scale,
+        0.5 * ( b.x0 + b.x1 ) * scale,
+        0.5 * ( b.y0 + b.y1 ) * scale,
+        0.2 + 0.01 * ( b.x1 - b.x0 ) * scale,
+        0.2 + 0.01 * ( b.y1 - b.y0 ) * scale
+      );
+    } );
+  }
+
+  public static sortMinMax( integerEdges: IntegerEdge[], scale: number ): void {
+    integerEdges.sort( ( a, b ) => {
+      return HilbertMapping.getHilbert4Compare(
+        a.bounds.minX * scale,
+        a.bounds.minY * scale,
+        a.bounds.maxX * scale,
+        a.bounds.maxY * scale,
+        b.bounds.minX * scale,
+        b.bounds.minY * scale,
+        b.bounds.maxX * scale,
+        b.bounds.maxY * scale
+      );
+    } );
+  }
+
+  public static sortMinMaxSize( integerEdges: IntegerEdge[], scale: number ): void {
+    integerEdges.sort( ( a, b ) => {
+      return HilbertMapping.getHilbert6Compare(
+        a.bounds.minX * scale,
+        a.bounds.minY * scale,
+        a.bounds.maxX * scale,
+        a.bounds.maxY * scale,
+        0.2 + 0.01 * ( a.x1 - a.x0 ) * scale,
+        0.2 + 0.01 * ( a.y1 - a.y0 ) * scale,
+        b.bounds.minX * scale,
+        b.bounds.minY * scale,
+        b.bounds.maxX * scale,
+        b.bounds.maxY * scale,
+        0.2 + 0.01 * ( b.x1 - b.x0 ) * scale,
+        0.2 + 0.01 * ( b.y1 - b.y0 ) * scale
+      );
+    } );
+  }
+
+  public static sortCenterMinMax( integerEdges: IntegerEdge[], scale: number ): void {
+    integerEdges.sort( ( a, b ) => {
+      return HilbertMapping.getHilbert6Compare(
+        0.5 * ( a.x0 + a.x1 ) * scale,
+        0.5 * ( a.y0 + a.y1 ) * scale,
+        a.bounds.minX * scale,
+        a.bounds.minY * scale,
+        a.bounds.maxX * scale,
+        a.bounds.maxY * scale,
+        0.5 * ( b.x0 + b.x1 ) * scale,
+        0.5 * ( b.y0 + b.y1 ) * scale,
+        b.bounds.minX * scale,
+        b.bounds.minY * scale,
+        b.bounds.maxX * scale,
+        b.bounds.maxY * scale
+      );
+    } );
+  }
+
   public static binaryToGray( n: number ): number {
     return n ^ ( n >> 1 );
   }
