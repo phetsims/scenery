@@ -1221,12 +1221,24 @@
         <tr>
           <td></td>
           <td style="text-align: center;">Display P3 triangle in sRGB (relative colorimetric gamut mapping)</td>
-          <td style="text-align: center;">Display P3 triangle in sRGB (gray if out of gamut)</td>
+          <td style="text-align: center;">Display P3 triangle (perceptual blend) in sRGB (relative colorimetric gamut mapping)</td>
         </tr>
         <tr>
           <td></td>
           <td id="gamut-display-p3-srgb"></td>
+          <td id="gamut-display-p3-srgb-perceptual"></td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td></td>
+          <td style="text-align: center;">Display P3 triangle in sRGB (gray if out of gamut)</td>
+          <td style="text-align: center;">Display P3 triangle (perceptual blend) in sRGB (gray if out of gamut)</td>
+        </tr>
+        <tr>
+          <td></td>
           <td id="gamut-display-p3-srgb-gamut"></td>
+          <td id="gamut-display-p3-srgb-perceptual-gamut"></td>
         </tr>
       </tbody>
     </table>
@@ -1261,8 +1273,22 @@
     </script>
     <script>
       setTimeout( async () => {
+        document.getElementById( 'gamut-display-p3-srgb-perceptual' ).appendChild(
+          getGamut( 'display-p3', 'srgb', 'oklab' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
         document.getElementById( 'gamut-display-p3-srgb-gamut' ).appendChild(
           getGamut( 'display-p3', 'srgb', 'display-p3', true )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gamut-display-p3-srgb-perceptual-gamut' ).appendChild(
+          getGamut( 'display-p3', 'srgb', 'oklab', true )
         );
       } );
     </script>
