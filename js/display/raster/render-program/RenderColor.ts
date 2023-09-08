@@ -34,7 +34,7 @@ export default class RenderColor extends RenderProgram {
   ) {
     super(
       emptyChildren,
-      color.w === 0,
+      color.x === 0 && color.y === 0 && color.z === 0 && color.w === 0,
       color.w === 1,
       false, false, false
     );
