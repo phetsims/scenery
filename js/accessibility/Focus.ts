@@ -13,6 +13,10 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import { Display, scenery, Trail } from '../imports.js';
 
+type FocusStateType = {
+  focusedPhetioElement: string[];
+};
+
 class Focus {
 
   // The trail to the focused Node.
@@ -21,7 +25,7 @@ class Focus {
   // The Display containing the Trail to the focused Node.
   public readonly display: Display;
 
-  public static readonly FocusIO = new IOType( 'FocusIO', {
+  public static readonly FocusIO = new IOType<Focus, FocusStateType>( 'FocusIO', {
     valueType: Focus,
     documentation: 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
                    'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +

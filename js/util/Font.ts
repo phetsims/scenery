@@ -417,7 +417,7 @@ type FontState = Required<SelfOptions>;
 
 scenery.register( 'Font', Font );
 
-Font.FontIO = new IOType( 'FontIO', {
+Font.FontIO = new IOType<Font, FontState>( 'FontIO', {
   valueType: Font,
   documentation: 'Font handling for text drawing. Options:' +
                  '<ul>' +
