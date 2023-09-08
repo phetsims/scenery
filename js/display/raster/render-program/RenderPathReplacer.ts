@@ -53,7 +53,9 @@ export default class RenderPathReplacer {
     }
 
     if ( program instanceof RenderPathBoolean ) {
-      const included = scaffold ? scaffold.isIncluded : includedPaths.has( program.path );
+      // TODO: should we have "isIncluded" as part of the scaffold?
+      // const included = scaffold ? scaffold.isIncluded : includedPaths.has( program.path );
+      const included = includedPaths.has( program.path );
 
       return this.replaceRecurse(
         included ? program.inside : program.outside,
