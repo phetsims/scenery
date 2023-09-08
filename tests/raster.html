@@ -27,6 +27,8 @@
   <link rel="stylesheet" href="../../sherpa/lib/highlightjs-11.5.1-a11y-light.min.css">
   <script src="../../sherpa/lib/highlightjs-11.5.1.min.js"></script>
 
+  <script src="./teapotObj.js"></script>
+
   <style>
 
   </style>
@@ -669,6 +671,96 @@
       colorSpace: hasDisplayP3 ? 'display-p3' : 'srgb',
     } );
   };
+
+
+  const getTeapot = ( shadeType, normalType ) => {
+    const width = 256;
+    const height = 256;
+
+    const dl = 150;
+    const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+    const rotationMatrix = Matrix3.rotationY( 0 ).timesMatrix( Matrix3.rotationX( -0.5 ) );
+    const project = ( p ) => {
+
+      // a rotation, for testing
+      p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
+
+      const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
+      return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+    };
+
+    const createTriangularMesh = ( mesh, matrix4 ) => {
+      return mesh.faces.map( face => {
+        const vertices = face.vertexIndices.map( i => mesh.vertices[ i ] ).reverse();
+        const normals = face.normalIndices.map( i => mesh.normals[ i ] ).reverse();
+
+        const transformedVertices = vertices.map( v => matrix4.timesVector3( v ) );
+        const projectedVertices = transformedVertices.map( project );
+
+        if ( projectedVertices[ 0 ].equals( projectedVertices[ 1 ] ) || projectedVertices[ 0 ].equals( projectedVertices[ 2 ] ) || projectedVertices[ 1 ].equals( projectedVertices[ 2 ] ) ) {
+          return null;
+        }
+
+        const positionProgram = new RenderBarycentricPerspectiveBlend(
+          projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
+          RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+          new RenderColor( transformedVertices[ 0 ].toVector4Zero() ),
+          new RenderColor( transformedVertices[ 1 ].toVector4Zero() ),
+          new RenderColor( transformedVertices[ 2 ].toVector4Zero() ),
+        );
+
+        let normalProgram;
+        if ( normalType === 'interpolated' ) {
+          normalProgram = new RenderNormalize( new RenderBarycentricPerspectiveBlend(
+            projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
+            RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+            new RenderColor( normals[ 0 ].toVector4Zero() ),
+            new RenderColor( normals[ 1 ].toVector4Zero() ),
+            new RenderColor( normals[ 2 ].toVector4Zero() ),
+          ) );
+        }
+        else if ( normalType === 'flat' ) {
+          // normalProgram = new RenderColor( vertices[ 1 ].minus( vertices[ 0 ] ).normalized().cross( vertices[ 2 ].minus( vertices[ 0 ] ).normalized() ).normalized().toVector4Zero() );
+          normalProgram = new RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4() );
+        }
+
+        // const positionProgram = new RenderColor( transformedVertices[ 0 ].plus( transformedVertices[ 1 ] ).plus( transformedVertices[ 2 ] ).timesScalar( 1 / 3 ).toVector4() );
+
+        let renderProgram;
+        if ( shadeType === 'phong' ) {
+          const ambientColorProgram = new RenderColor( v4( 0.1, 0.1, 0.1, 1 ) );
+          const diffuseColorProgram = new RenderColor( v4( 1, 0.1, 0.0, 1 ) );
+          const specularColorProgram = new RenderColor( v4( 0.5, 0.5, 0.5, 1 ) );;
+          renderProgram = new RenderPhong( 50, ambientColorProgram, diffuseColorProgram, specularColorProgram, positionProgram, normalProgram, [
+            new RenderLight(
+              new RenderColor( v4( -2.0, 3.5, -2.0, 0 ).normalized() ),
+              new RenderColor( v4( 1, 1, 1, 1 ) )
+            )
+          ] );
+        }
+        else if ( shadeType === 'normals' ) {
+          renderProgram = new RenderNormalDebug( normalProgram );
+        }
+        else if ( shadeType === 'random' ) {
+          renderProgram = new RenderColor( v4( Math.random(), Math.random(), Math.random(), 1 ) );
+        }
+
+        return new RenderPlanar(
+          RenderPathBoolean.fromInside( new RenderPath( 'nonzero', [ [
+            projectedVertices[ 0 ].toVector2(), projectedVertices[ 1 ].toVector2(), projectedVertices[ 2 ].toVector2()
+          ] ] ), renderProgram ),
+          projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ]
+        );
+      } ).filter( _.identity );
+    };
+
+    const program = new RenderDepthSort( [
+      ...createTriangularMesh( Mesh.loadOBJ( teapotOBJ )[ 0 ], Matrix4.translation( 0, 0, 150 ) ),
+    ] ).transformed( phet.dot.Matrix3.scaling( 170 * width / 256 ) ).transformed( phet.dot.Matrix3.translation( width / 2, height / 2 ) );
+
+    return getRasterizedElement( program, width, height );
+  };
+
 </script>
 
 <div class="navbar navbar-inverse navbar-static-top">
@@ -698,6 +790,54 @@
 
   </div>
   <div class="span8">
+
+    <h2>3D Capabilities</h2>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Colors</td>
+          <td style="text-align: center;">Flat Normals</td>
+          <td style="text-align: center;">Interpolated Normals</td>
+          <td style="text-align: center;">Phong</td>
+        </tr>
+        <tr>
+          <td id="teapot-random"></td>
+          <td id="teapot-flat"></td>
+          <td id="teapot-normals"></td>
+          <td id="teapot-phong"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-random' ).appendChild(
+          getTeapot( 'random', 'flat' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-flat' ).appendChild(
+          getTeapot( 'normals', 'flat' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-normals' ).appendChild(
+          getTeapot( 'normals', 'interpolated' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-phong' ).appendChild(
+          getTeapot( 'phong', 'interpolated' )
+        );
+      } );
+    </script>
 
     <h2>Conflation</h2>
 
