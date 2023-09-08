@@ -7,17 +7,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RationalIntersection, scenery } from '../../../imports.js';
+import { BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RasterLog, RationalIntersection, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 export default class LineIntersector {
-  public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge ): void {
+  public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge, log: RasterLog | null ): void {
     const intersectionPoints = IntersectionPoint.intersectLineSegments(
       new BigIntVector2( BigInt( edgeA.x0 ), BigInt( edgeA.y0 ) ),
       new BigIntVector2( BigInt( edgeA.x1 ), BigInt( edgeA.y1 ) ),
       new BigIntVector2( BigInt( edgeB.x0 ), BigInt( edgeB.y0 ) ),
       new BigIntVector2( BigInt( edgeB.x1 ), BigInt( edgeB.y1 ) )
     );
+
+    if ( log ) {
+      log.integerIntersectionCount += intersectionPoints.length;
+      log.integerIntersectionComputationCount++;
+    }
 
     for ( let i = 0; i < intersectionPoints.length; i++ ) {
       const intersectionPoint = intersectionPoints[ i ];
@@ -37,11 +42,11 @@ export default class LineIntersector {
     }
   }
 
-  public static edgeIntersectionBoundsTree( integerEdges: IntegerEdge[] ): void {
-    BoundsTreeNode.fromIntegerEdges( integerEdges ).selfIntersect();
+  public static edgeIntersectionBoundsTree( integerEdges: IntegerEdge[], log: RasterLog | null ): void {
+    BoundsTreeNode.fromIntegerEdges( integerEdges ).selfIntersect( log );
   }
 
-  public static edgeIntersectionArrayBoundsTree( integerEdges: IntegerEdge[] ): void {
+  public static edgeIntersectionArrayBoundsTree( integerEdges: IntegerEdge[], log: RasterLog | null ): void {
     // Probably more micro-efficient ways, but this is a proof-of-concept
 
     // TODO: probably just implement a struct-based approach, so it's a bit easier?
@@ -118,8 +123,9 @@ export default class LineIntersector {
           const edgeA = integerEdges[ baseIndex ];
           const edgeB = integerEdges[ nextIndex ];
 
+          log && log.integerIntersectionOverlapCheckCount++;
           if ( edgeA.hasBoundsIntersectionWith( edgeB ) ) {
-            LineIntersector.processIntegerEdgeIntersection( edgeA, edgeB );
+            LineIntersector.processIntegerEdgeIntersection( edgeA, edgeB, log );
           }
         }
       }
@@ -144,6 +150,7 @@ export default class LineIntersector {
       const someIsHorizontal = hasHorizontalLevel[ indexA ] || hasHorizontalLevel[ indexB ];
       const someIsVertical = hasVerticalLevel[ indexA ] || hasVerticalLevel[ indexB ];
 
+      log && log.integerIntersectionOverlapCheckCount++;
       if ( IntegerEdge.hasBoundsIntersection( boundsA, boundsB, someIsVertical, someIsHorizontal ) ) {
         const baseIndexA = 2 * indexA;
         const baseIndexB = 2 * indexB;
@@ -163,17 +170,20 @@ export default class LineIntersector {
           const edgeB1 = hasB1 ? integerEdges[ nextIndexB ] : null;
 
           // TODO: optimization-wise, could collapse some conditionals
+          if ( log ) {
+            log.integerIntersectionOverlapCheckCount += 1 + ( hasA1 ? 1 : 0 ) + ( hasB1 ? 1 : 0 ) + ( hasA1 && hasB1 ? 1 : 0 );
+          }
           if ( edgeA0.hasBoundsIntersectionWith( edgeB0 ) ) {
-            LineIntersector.processIntegerEdgeIntersection( edgeA0, edgeB0 );
+            LineIntersector.processIntegerEdgeIntersection( edgeA0, edgeB0, log );
           }
           if ( edgeA1 && edgeA1.hasBoundsIntersectionWith( edgeB0 ) ) {
-            LineIntersector.processIntegerEdgeIntersection( edgeA1, edgeB0 );
+            LineIntersector.processIntegerEdgeIntersection( edgeA1, edgeB0, log );
           }
           if ( edgeB1 && edgeA0.hasBoundsIntersectionWith( edgeB1 ) ) {
-            LineIntersector.processIntegerEdgeIntersection( edgeA0, edgeB1 );
+            LineIntersector.processIntegerEdgeIntersection( edgeA0, edgeB1, log );
           }
           if ( edgeA1 && edgeB1 && edgeA1.hasBoundsIntersectionWith( edgeB1 ) ) {
-            LineIntersector.processIntegerEdgeIntersection( edgeA1, edgeB1 );
+            LineIntersector.processIntegerEdgeIntersection( edgeA1, edgeB1, log );
           }
         }
         else {
@@ -195,7 +205,7 @@ export default class LineIntersector {
     handleSelfIntersection( boundsTree.length - 1, 0 );
   }
 
-  public static edgeIntersectionQuadratic( integerEdges: IntegerEdge[] ): void {
+  public static edgeIntersectionQuadratic( integerEdges: IntegerEdge[], log: RasterLog | null ): void {
     // Compute intersections
     // TODO: improve on the quadratic!!!!
     // similar to BoundsIntersectionFilter.quadraticIntersect( integerBounds, integerEdges, ( edgeA, edgeB ) => {
@@ -211,8 +221,9 @@ export default class LineIntersector {
         const someXEqual = xAEqual || edgeB.x0 === edgeB.x1;
         const someYEqual = yAEqual || edgeB.y0 === edgeB.y1;
 
+        log && log.integerIntersectionOverlapCheckCount++;
         if ( IntegerEdge.hasBoundsIntersection( boundsA, boundsB, someXEqual, someYEqual ) ) {
-          LineIntersector.processIntegerEdgeIntersection( edgeA, edgeB );
+          LineIntersector.processIntegerEdgeIntersection( edgeA, edgeB, log );
         }
       }
     }
@@ -222,8 +233,8 @@ export default class LineIntersector {
 abstract class BoundsTreeNode {
   protected constructor( public readonly bounds: Bounds2, public readonly hasHorizontal: boolean, public readonly hasVertical: boolean ) {}
 
-  public abstract selfIntersect(): void;
-  public abstract crossIntersect( other: BoundsTreeNode ): void;
+  public abstract selfIntersect( log: RasterLog | null ): void;
+  public abstract crossIntersect( other: BoundsTreeNode, log: RasterLog | null ): void;
 
   public static fromIntegerEdges( integerEdges: IntegerEdge[] ): BoundsTreeNode {
     if ( integerEdges.length === 0 ) {
@@ -261,14 +272,14 @@ class BoundsTreeLeaf extends BoundsTreeNode {
     // NOTHING
   }
 
-  public override crossIntersect( other: BoundsTreeNode ): void {
+  public override crossIntersect( other: BoundsTreeNode, log: RasterLog | null ): void {
     if ( IntegerEdge.hasBoundsIntersection( this.bounds, other.bounds, this.hasVertical, this.hasHorizontal ) ) {
       if ( other instanceof BoundsTreeLeaf ) {
-        LineIntersector.processIntegerEdgeIntersection( this.edge, other.edge );
+        LineIntersector.processIntegerEdgeIntersection( this.edge, other.edge, log );
       }
       else if ( other instanceof BoundsTreeBinary ) {
-        this.crossIntersect( other.left );
-        this.crossIntersect( other.right );
+        this.crossIntersect( other.left, log );
+        this.crossIntersect( other.right, log );
       }
     }
   }
@@ -282,23 +293,23 @@ class BoundsTreeBinary extends BoundsTreeNode {
     super( left.bounds.union( right.bounds ), left.hasHorizontal || right.hasHorizontal, left.hasVertical || right.hasVertical );
   }
 
-  public override selfIntersect(): void {
-    this.left.selfIntersect();
-    this.right.selfIntersect();
-    this.left.crossIntersect( this.right );
+  public override selfIntersect( log: RasterLog | null ): void {
+    this.left.selfIntersect( log );
+    this.right.selfIntersect( log );
+    this.left.crossIntersect( this.right, log );
   }
 
-  public override crossIntersect( other: BoundsTreeNode ): void {
+  public override crossIntersect( other: BoundsTreeNode, log: RasterLog | null ): void {
     if ( IntegerEdge.hasBoundsIntersection( this.bounds, other.bounds, this.hasVertical, this.hasHorizontal ) ) {
       if ( other instanceof BoundsTreeLeaf ) {
-        this.left.crossIntersect( other );
-        this.right.crossIntersect( other );
+        this.left.crossIntersect( other, log );
+        this.right.crossIntersect( other, log );
       }
       else if ( other instanceof BoundsTreeBinary ) {
-        this.left.crossIntersect( other.left );
-        this.left.crossIntersect( other.right );
-        this.right.crossIntersect( other.left );
-        this.right.crossIntersect( other.right );
+        this.left.crossIntersect( other.left, log );
+        this.left.crossIntersect( other.right, log );
+        this.right.crossIntersect( other.left, log );
+        this.right.crossIntersect( other.right, log );
       }
     }
   }

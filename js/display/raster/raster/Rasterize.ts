@@ -724,13 +724,13 @@ export default class Rasterize {
     // TODO: optional hilbert space-fill sort here?
 
     if ( options.edgeIntersectionMethod === 'quadratic' ) {
-      LineIntersector.edgeIntersectionQuadratic( integerEdges );
+      LineIntersector.edgeIntersectionQuadratic( integerEdges, log );
     }
     else if ( options.edgeIntersectionMethod === 'boundsTree' ) {
-      LineIntersector.edgeIntersectionBoundsTree( integerEdges );
+      LineIntersector.edgeIntersectionBoundsTree( integerEdges, log );
     }
     else if ( options.edgeIntersectionMethod === 'arrayBoundsTree' ) {
-      LineIntersector.edgeIntersectionArrayBoundsTree( integerEdges );
+      LineIntersector.edgeIntersectionArrayBoundsTree( integerEdges, log );
     }
     else {
       throw new Error( `unknown edgeIntersectionMethod: ${options.edgeIntersectionMethod}` );
