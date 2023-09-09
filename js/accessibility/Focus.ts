@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * A scenery-internal type for tracking what currently has focus in Display. If a focused Node is shared between
