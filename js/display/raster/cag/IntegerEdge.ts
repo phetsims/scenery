@@ -95,13 +95,17 @@ export default class IntegerEdge {
       for ( let j = 0; j < path.subpaths.length; j++ ) {
         const subpath = path.subpaths[ j ];
 
-        let goesOutsideBounds = false;
+        // TODO: Move bounds-related things up to the top level, so we can share them across tiles
+        const subpathBounds = Bounds2.NOTHING.copy();
         for ( let k = 0; k < subpath.length; k++ ) {
-          if ( !bounds.containsPoint( subpath[ k ] ) ) {
-            goesOutsideBounds = true;
-            break;
-          }
+          subpathBounds.addPoint( subpath[ k ] );
         }
+
+        if ( !bounds.intersectsBounds( subpathBounds ) ) {
+          continue;
+        }
+
+        const goesOutsideBounds = !bounds.containsBounds( subpathBounds );
 
         // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
         // If a path is fully outside of the clip region, we won't create integer edges out of it.

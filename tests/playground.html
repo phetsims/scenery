@@ -1168,7 +1168,29 @@ an UI and Display made for visual testing and debugging.
       const rasterLog = new phet.scenery.RasterLog();
       rasterizeOptions.log = rasterLog;
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize, rasterOptions );
-      phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
+      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
+
+      // const tileSize = outputSize;
+      // const tileSize = 32;
+      // const tileSize = 768;
+      // const tileSize = 512;
+      const tileSize = 256;
+      // const tileSize = 128;
+
+      const start = Date.now();
+      for ( let i = 0; i < outputSize; i += tileSize ) {
+        for ( let j = 0; j < outputSize; j += tileSize ) {
+          phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( i, j, Math.min( i + tileSize, outputSize ), Math.min( j + tileSize, outputSize ) ), rasterizeOptions );
+        }
+      }
+      console.log( Date.now() - start );
+
+      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, 256, 256 ), rasterizeOptions );
+      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 256, 0, 512, 256 ), rasterizeOptions );
+      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 512, 0, 768, 256 ), rasterizeOptions );
+      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 768, 0, 1024, 256 ), rasterizeOptions );
+      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 1024, 0, 1280, 256 ), rasterizeOptions );
+      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 1280, 0, 1536, 256 ), rasterizeOptions );
 
       const debugCanvas = raster.toCanvas();
       styleCanvas( debugCanvas );
