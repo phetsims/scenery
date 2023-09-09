@@ -866,6 +866,43 @@
     }
   };
 
+  const testLargeImage = document.createElement( 'img' );
+  testLargeImage.src = './downscale.png';
+
+  const testLargelinearPremultipliedTestImageData = [];
+  let testLargeImageablePremultiplied;
+  ( async () => {
+    await testLargeImage.decode();
+
+    const canvas = document.createElement( 'canvas' );
+    canvas.width = testLargeImage.width;
+    canvas.height = testLargeImage.height;
+    const context = canvas.getContext( '2d' );
+    context.drawImage( testLargeImage, 0, 0 );
+    const imageData = context.getImageData( 0, 0, testLargeImage.width, testLargeImage.height );
+
+    for ( let i = 0; i < imageData.data.length / 4; i++ ) {
+      const baseIndex = i * 4;
+      const r = imageData.data[ baseIndex ] / 255;
+      const g = imageData.data[ baseIndex + 1 ] / 255;
+      const b = imageData.data[ baseIndex + 2 ] / 255;
+      const a = imageData.data[ baseIndex + 3 ] / 255;
+      const srgb = new Vector4( r, g, b, a );
+      const linear = RenderColor.sRGBToLinear( srgb );
+      const premultiplied = RenderColor.premultiply( linear );
+      testLargelinearPremultipliedTestImageData.push( premultiplied );
+    }
+
+    testLargeImageablePremultiplied = {
+      width: imageData.width,
+      height: imageData.height,
+      isFullyOpaque: true,
+      evaluate: ( x, y ) => {
+        return testLargelinearPremultipliedTestImageData[ y * imageData.width + x ];
+      }
+    };
+  } )();
+
   const getUpscaling = ( type ) => {
     const width = 128;
     const height = 128;
@@ -889,6 +926,53 @@
         RenderExtend.Pad,
         type
       ) );
+      return getRasterizedElement( program, width, height );
+    }
+  };
+
+  const getDownscaling = async ( type ) => {
+    await testLargeImage.decode();
+
+    const width = 128;
+    const height = 128;
+
+    const matrix0 = Matrix3.translation( 0, 0 ).timesMatrix( Matrix3.rotationZ( 0.1 ) ).timesMatrix( Matrix3.scaling( 0.1 ) );
+    const matrix1 = Matrix3.translation( 80, 100 ).timesMatrix( Matrix3.rotationZ( -0.4 ) ).timesMatrix( Matrix3.scaling( 0.04 ) );
+
+    if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+      return getSceneryElement(
+        new Node( {
+          children: [
+            new Image( testLargeImage, {
+              renderer: type,
+              matrix: matrix0
+            } ),
+            new Image( testLargeImage, {
+              renderer: type,
+              matrix: matrix1
+            } )
+          ]
+        } ),
+        width, height, 'white', type
+      );
+    }
+    else {
+      const program = new RenderStack( [
+        RenderPathBoolean.fromInside( RenderPath.fromBounds( new Bounds2( 0, 0, 1000, 1000 ) ).transformed( matrix0 ), new RenderLinearSRGBToSRGB( new RenderImage(
+          matrix0,
+          testLargeImageablePremultiplied,
+          RenderExtend.Pad,
+          RenderExtend.Pad,
+          type
+        ) ) ),
+        RenderPathBoolean.fromInside( RenderPath.fromBounds( new Bounds2( 0, 0, 1000, 1000 ) ).transformed( matrix1 ), new RenderLinearSRGBToSRGB( new RenderImage(
+          matrix1,
+          testLargeImageablePremultiplied,
+          RenderExtend.Pad,
+          RenderExtend.Pad,
+          type
+        ) ) ),
+      ] );
       return getRasterizedElement( program, width, height );
     }
   };
@@ -924,6 +1008,10 @@
   <div class="span8">
 
     <h2>Image Resampling</h2>
+
+    <h3>
+      Upscaling
+    </h3>
 
     <table class="table">
       <tbody>
@@ -1030,6 +1118,120 @@
           getUpscaling( RenderResampleType.AnalyticMitchellNetravali )
         );
       } );
+    </script>
+
+    <h3>Downscaling</h3>
+
+    <p>
+      It is recommended to see the <a href="./downscale.png">image</a> at full (1:1) size, to see how the below methods
+      scale the image down.
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">Nearest Neighbor</td>
+          <td style="text-align: center;">Analytic Box</td>
+        </tr>
+        <tr>
+          <td id="downscaling-canvas"></td>
+          <td id="downscaling-svg"></td>
+          <td id="downscaling-vello"></td>
+          <td id="downscaling-nearest-neighbor"></td>
+          <td id="downscaling-analytic-box"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Bilinear</td>
+          <td style="text-align: center;">Mitchell-Netravali</td>
+          <td style="text-align: center;">Analytic Bilinear</td>
+          <td style="text-align: center;">Analytic Mitchell-Netravali</td>
+        </tr>
+        <tr>
+          <td id="downscaling-bilinear"></td>
+          <td id="downscaling-mitchell-netravali"></td>
+          <td id="downscaling-analytic-bilinear"></td>
+          <td id="downscaling-analytic-mitchell-netravali"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'downscaling-canvas' ).appendChild(
+          await getDownscaling( 'canvas' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        await testSmallImageImage.decode();
+
+        document.getElementById( 'downscaling-svg' ).appendChild(
+          await getDownscaling( 'svg' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'downscaling-vello' ).appendChild(
+            await getDownscaling( 'vello' )
+          );
+        }
+        else {
+          document.getElementById( 'downscaling-vello' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'downscaling-nearest-neighbor' ).appendChild(
+          await getDownscaling( RenderResampleType.NearestNeighbor )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'downscaling-bilinear' ).appendChild(
+          await getDownscaling( RenderResampleType.Bilinear )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'downscaling-mitchell-netravali' ).appendChild(
+          await getDownscaling( RenderResampleType.MitchellNetravali )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'downscaling-analytic-box' ).appendChild(
+          await getDownscaling( RenderResampleType.AnalyticBox )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'downscaling-analytic-bilinear' ).appendChild(
+          await getDownscaling( RenderResampleType.AnalyticBilinear )
+        );
+      }, 20000 );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'downscaling-analytic-mitchell-netravali' ).appendChild(
+          await getDownscaling( RenderResampleType.AnalyticMitchellNetravali )
+        );
+      }, 30000 );
     </script>
 
     <h2>Conflation</h2>
