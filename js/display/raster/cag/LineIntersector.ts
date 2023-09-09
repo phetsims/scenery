@@ -12,6 +12,21 @@ import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 export default class LineIntersector {
   public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge, log: RasterLog | null ): void {
+    // Some checks that should help out with performance, particularly for mesh-like cases where we have either
+    // repeated segments, or repeated opposite segments (with the second one being more likely in those cases).
+    if (
+      // Check for exactly-overlapping edges
+      ( edgeA.x0 === edgeB.x0 && edgeA.y0 === edgeB.y0 && edgeA.x1 === edgeB.x1 && edgeA.y1 === edgeB.y1 ) ||
+
+      // Check for exactly-opposite-overlapping edges
+      ( edgeA.x0 === edgeB.x1 && edgeA.y0 === edgeB.y1 && edgeA.x1 === edgeB.x0 && edgeA.y1 === edgeB.y0 )
+    ) {
+      return;
+    }
+
+    // NOTE: NOT checking for "single endpoint equal, can we rule out other things", since bounding-box checks should
+    // NOTE: rule most of those out.
+
     const intersectionPoints = IntersectionPoint.intersectLineSegments(
       new BigIntVector2( BigInt( edgeA.x0 ), BigInt( edgeA.y0 ) ),
       new BigIntVector2( BigInt( edgeA.x1 ), BigInt( edgeA.y1 ) ),
