@@ -36,6 +36,9 @@ export default abstract class RenderProgram {
   // Whether this subtree contains a RenderPathBoolean
   public readonly hasPathBoolean: boolean;
 
+  // Global flag for controlling whether simplification happens. Useful for debugging.
+  public static simplify = true;
+
   public constructor(
     children: RenderProgram[],
     isFullyTransparent: boolean,
@@ -76,7 +79,13 @@ export default abstract class RenderProgram {
   public abstract getName(): string;
 
   public simplified(): RenderProgram {
+
     if ( this.isSimplified ) {
+      return this;
+    }
+
+    if ( !RenderProgram.simplify ) {
+      this.isSimplified = true;
       return this;
     }
 
