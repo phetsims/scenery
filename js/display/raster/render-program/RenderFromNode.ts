@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderUnpremultiply, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
+import { Color, ColorMatrixFilter, CombinedRaster, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Rasterize, RenderAlpha, RenderBlendCompose, RenderColor, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderStack, RenderUnpremultiply, scenery, Sprites, TColor, Text, TPaint } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import RenderComposeType from './RenderComposeType.js';
 import RenderBlendType from './RenderBlendType.js';
@@ -198,22 +198,12 @@ const colorFromTColor = ( paint: TColor ): Vector4 => {
 
 export default class RenderFromNode {
   public static nodeToRenderProgram( node: Node, matrix: Matrix3 = Matrix3.IDENTITY ): RenderProgram {
-    let result: RenderProgram = RenderColor.TRANSPARENT;
-
-    const addResult = ( renderProgram: RenderProgram ) => {
-      if ( !renderProgram.isFullyTransparent ) {
-        if ( result.isFullyTransparent ) {
-          result = renderProgram;
-        }
-        else {
-          result = combine( renderProgram, result );
-        }
-      }
-    };
 
     if ( !node.visible ) {
-      return result;
+      return RenderColor.TRANSPARENT;
     }
+
+    const stackPrograms = [];
 
     if ( node.matrix ) {
       matrix = matrix.timesMatrix( node.matrix );
@@ -223,7 +213,7 @@ export default class RenderFromNode {
       const addShape = ( shape: Shape, paint: TPaint ) => {
         const renderPath = shapeToRenderPath( shape.transformed( matrix ) );
 
-        addResult( renderPathPaintToRenderProgram( renderPath, paint, matrix ) );
+        stackPrograms.push( renderPathPaintToRenderProgram( renderPath, paint, matrix ) );
       };
 
       if ( node.hasShape() ) {
@@ -269,7 +259,7 @@ export default class RenderFromNode {
 
         if ( node.hasFill() ) {
           const renderPath = shapesToRenderPath( glyphShapes );
-          addResult( renderPathPaintToRenderProgram( renderPath, node.getFill(), matrix ) );
+          stackPrograms.push( renderPathPaintToRenderProgram( renderPath, node.getFill(), matrix ) );
         }
 
         if ( node.hasStroke() ) {
@@ -279,7 +269,7 @@ export default class RenderFromNode {
             }
             return shape.getStrokedShape( node._lineDrawingStyles );
           } ) );
-          addResult( renderPathPaintToRenderProgram( renderPath, node.getStroke(), matrix ) );
+          stackPrograms.push( renderPathPaintToRenderProgram( renderPath, node.getStroke(), matrix ) );
         }
       }
       else {
@@ -304,15 +294,16 @@ export default class RenderFromNode {
           resampleType
         ) );
 
-        addResult( node.imageOpacity === 1 ? renderImage : new RenderAlpha( renderImage, node.imageOpacity ) );
+        stackPrograms.push( node.imageOpacity === 1 ? renderImage : new RenderAlpha( renderImage, node.imageOpacity ) );
       }
     }
 
     // Children
-    // TODO: try to balance binary trees?
     node.children.forEach( child => {
-      addResult( RenderFromNode.nodeToRenderProgram( child, matrix ) );
+      stackPrograms.push( RenderFromNode.nodeToRenderProgram( child, matrix ) );
     } );
+
+    let result: RenderProgram = new RenderStack( stackPrograms ).simplified();
 
     // Filters are applied before
     node.filters.forEach( filter => {
@@ -334,7 +325,7 @@ export default class RenderFromNode {
       ) );
     }
 
-    return result;
+    return result.simplified();
   }
 
   public static addBackgroundColor( renderProgram: RenderProgram, color: Color ): RenderProgram {
