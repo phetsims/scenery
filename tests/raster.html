@@ -1007,6 +1007,344 @@
   </div>
   <div class="span8">
 
+    <h2>Conflation</h2>
+
+    <p>
+      Background colors can show up at joints between paths, due to blending with the background multiple times per pixel.
+      Ideally there will be no white lines showing through, and no whitening toward the center.
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">Proposed Method</td>
+        </tr>
+        <tr>
+          <td id="conflation-canvas"></td>
+          <td id="conflation-svg"></td>
+          <td id="conflation-vello"></td>
+          <td id="conflation-default"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'conflation-canvas' ).appendChild(
+          getConflation( 'canvas', 100 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'conflation-svg' ).appendChild(
+          getConflation( 'svg', 100 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'conflation-vello' ).appendChild(
+            getConflation( 'vello', 100 )
+          );
+        }
+        else {
+          document.getElementById( 'conflation-vello' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'conflation-default' ).appendChild(
+          getConflation( 'default', 100 )
+        );
+      } );
+    </script>
+
+    <h2>3D Graphics</h2>
+
+    <p>
+      It's possible to put 3D graphics through the pipeline, with analytic depth-buffer-like intersection and
+      perspective correction.
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Colors</td>
+          <td style="text-align: center;">Flat Normals</td>
+          <td style="text-align: center;">Interpolated Normals</td>
+          <td style="text-align: center;">Phong</td>
+        </tr>
+        <tr>
+          <td id="teapot-random"></td>
+          <td id="teapot-flat"></td>
+          <td id="teapot-normals"></td>
+          <td id="teapot-phong"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-random' ).appendChild(
+          getTeapot( 'random', 'flat' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-flat' ).appendChild(
+          getTeapot( 'normals', 'flat' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-normals' ).appendChild(
+          getTeapot( 'normals', 'interpolated' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'teapot-phong' ).appendChild(
+          getTeapot( 'phong', 'interpolated' )
+        );
+      } );
+    </script>
+
+    <h2>Anti-Aliasing</h2>
+
+    <p>Sometimes, high-frequency patterns can create lower-frequency (aliased) patterns in the result.</p>
+
+    <h3>Checkerboards</h3>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">Proposed Method (box)</td>
+          <td style="text-align: center;">Proposed Method (bilinear)</td>
+          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
+        </tr>
+        <tr>
+          <td id="checkerboard-canvas"></td>
+          <td id="checkerboard-svg"></td>
+          <td id="checkerboard-vello"></td>
+          <td id="checkerboard-box"></td>
+          <td id="checkerboard-bilinear"></td>
+          <td id="checkerboard-mitchell-netravali"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-canvas' ).appendChild(
+          getCheckerboard( 'canvas' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-svg' ).appendChild(
+          getCheckerboard( 'svg' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'checkerboard-vello' ).appendChild(
+            getCheckerboard( 'vello' )
+          );
+        }
+        else {
+          document.getElementById( 'checkerboard-vello' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-box' ).appendChild(
+          getCheckerboard( 'box' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-bilinear' ).appendChild(
+          getCheckerboard( 'bilinear' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'checkerboard-mitchell-netravali' ).appendChild(
+          getCheckerboard( 'mitchellNetravali' )
+        );
+      } );
+    </script>
+
+    <h3>Siemens Stars</h3>
+
+    <p>
+      Alternating radial bands of light/dark, to visualize aliasing. It should blur towards a consistent gray toward the
+      center (not showing extra patterns, OR showing a darker gray).
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">Proposed Method (box)</td>
+          <td style="text-align: center;">Proposed Method (bilinear)</td>
+          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
+        </tr>
+        <tr>
+          <td id="siemens-star-canvas"></td>
+          <td id="siemens-star-svg"></td>
+          <td id="siemens-star-vello"></td>
+          <td id="siemens-star-box"></td>
+          <td id="siemens-star-bilinear"></td>
+          <td id="siemens-star-mitchell-netravali"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-canvas' ).appendChild(
+          getSiemensStar( 'canvas', 200 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-svg' ).appendChild(
+          getSiemensStar( 'svg', 200 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'siemens-star-vello' ).appendChild(
+            getSiemensStar( 'vello', 200 )
+          );
+        }
+        else {
+          document.getElementById( 'siemens-star-vello' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-box' ).appendChild(
+          getSiemensStar( 'box', 200 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-bilinear' ).appendChild(
+          getSiemensStar( 'bilinear', 200 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'siemens-star-mitchell-netravali' ).appendChild(
+          getSiemensStar( 'mitchellNetravali', 200 )
+        );
+      } );
+    </script>
+
+    <h3>Gradients</h3>
+
+    <p>
+      When color-stops are close together, they can create aliasing patterns if not compensated for. This can happen
+      when zoomed out on items with gradients.
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Canvas</td>
+          <td style="text-align: center;">SVG</td>
+          <td style="text-align: center;">Vello</td>
+          <td style="text-align: center;">Proposed Method (box)</td>
+          <td style="text-align: center;">Proposed Method (bilinear)</td>
+          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
+        </tr>
+        <tr>
+          <td id="gradient-aliasing-canvas"></td>
+          <td id="gradient-aliasing-svg"></td>
+          <td id="gradient-aliasing-vello"></td>
+          <td id="gradient-aliasing-box"></td>
+          <td id="gradient-aliasing-bilinear"></td>
+          <td id="gradient-aliasing-mitchell-netravali"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-aliasing-canvas' ).appendChild(
+          getGradientAliasing( 'canvas' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-aliasing-svg' ).appendChild(
+          getGradientAliasing( 'svg' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        if ( await DeviceContext.isVelloSupported() ) {
+          document.getElementById( 'gradient-aliasing-vello' ).appendChild(
+            getGradientAliasing( 'vello' )
+          );
+        }
+        else {
+          document.getElementById( 'gradient-aliasing-vello' ).innerHTML = 'Not supported';
+        }
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-aliasing-box' ).appendChild(
+          getGradientAliasing( 'box' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-aliasing-bilinear' ).appendChild(
+          getGradientAliasing( 'bilinear' )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'gradient-aliasing-mitchell-netravali' ).appendChild(
+          getGradientAliasing( 'mitchellNetravali' )
+        );
+      } );
+    </script>
+
     <h2>Image Resampling</h2>
 
     <h3>
@@ -1234,184 +1572,12 @@
       }, 30000 );
     </script>
 
-    <h2>Conflation</h2>
+    <h2>Gradient Precision</h2>
 
     <p>
-      Background colors can show up at joints between paths, due to blending with the background multiple times per pixel.
-      Ideally there will be no white lines showing through, and no whitening toward the center.
+      Checks how gradient quality is affected by zooming into a small region of a gradient (where there is a very small
+      difference between color stops).
     </p>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Canvas</td>
-          <td style="text-align: center;">SVG</td>
-          <td style="text-align: center;">Vello</td>
-          <td style="text-align: center;">Proposed Method</td>
-        </tr>
-        <tr>
-          <td id="conflation-canvas"></td>
-          <td id="conflation-svg"></td>
-          <td id="conflation-vello"></td>
-          <td id="conflation-default"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'conflation-canvas' ).appendChild(
-          getConflation( 'canvas', 100 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'conflation-svg' ).appendChild(
-          getConflation( 'svg', 100 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        if ( await DeviceContext.isVelloSupported() ) {
-          document.getElementById( 'conflation-vello' ).appendChild(
-            getConflation( 'vello', 100 )
-          );
-        }
-        else {
-          document.getElementById( 'conflation-vello' ).innerHTML = 'Not supported';
-        }
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'conflation-default' ).appendChild(
-          getConflation( 'default', 100 )
-        );
-      } );
-    </script>
-
-    <h2>3D Capabilities</h2>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Colors</td>
-          <td style="text-align: center;">Flat Normals</td>
-          <td style="text-align: center;">Interpolated Normals</td>
-          <td style="text-align: center;">Phong</td>
-        </tr>
-        <tr>
-          <td id="teapot-random"></td>
-          <td id="teapot-flat"></td>
-          <td id="teapot-normals"></td>
-          <td id="teapot-phong"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-random' ).appendChild(
-          getTeapot( 'random', 'flat' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-flat' ).appendChild(
-          getTeapot( 'normals', 'flat' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-normals' ).appendChild(
-          getTeapot( 'normals', 'interpolated' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'teapot-phong' ).appendChild(
-          getTeapot( 'phong', 'interpolated' )
-        );
-      } );
-    </script>
-
-    <h2>Gradient Aliasing</h2>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Canvas</td>
-          <td style="text-align: center;">SVG</td>
-          <td style="text-align: center;">Vello</td>
-          <td style="text-align: center;">Proposed Method (box)</td>
-          <td style="text-align: center;">Proposed Method (bilinear)</td>
-          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
-        </tr>
-        <tr>
-          <td id="gradient-aliasing-canvas"></td>
-          <td id="gradient-aliasing-svg"></td>
-          <td id="gradient-aliasing-vello"></td>
-          <td id="gradient-aliasing-box"></td>
-          <td id="gradient-aliasing-bilinear"></td>
-          <td id="gradient-aliasing-mitchell-netravali"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'gradient-aliasing-canvas' ).appendChild(
-          getGradientAliasing( 'canvas' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'gradient-aliasing-svg' ).appendChild(
-          getGradientAliasing( 'svg' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        if ( await DeviceContext.isVelloSupported() ) {
-          document.getElementById( 'gradient-aliasing-vello' ).appendChild(
-            getGradientAliasing( 'vello' )
-          );
-        }
-        else {
-          document.getElementById( 'gradient-aliasing-vello' ).innerHTML = 'Not supported';
-        }
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'gradient-aliasing-box' ).appendChild(
-          getGradientAliasing( 'box' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'gradient-aliasing-bilinear' ).appendChild(
-          getGradientAliasing( 'bilinear' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'gradient-aliasing-mitchell-netravali' ).appendChild(
-          getGradientAliasing( 'mitchellNetravali' )
-        );
-      } );
-    </script>
-
-    <h2>Gradient Precision</h2>
 
     <table class="table">
       <tbody>
@@ -1460,205 +1626,6 @@
       setTimeout( async () => {
         document.getElementById( 'gradient-precision-box' ).appendChild(
           getGradientPrecision( 'box' )
-        );
-      } );
-    </script>
-
-    <h2>Filtered Polygons</h2>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Reference (dirac delta)</td>
-          <td style="text-align: center;">Box</td>
-          <td style="text-align: center;">Bilinear</td>
-          <td style="text-align: center;">Mitchell-Netravali</td>
-        </tr>
-        <tr>
-          <td id="filter-reference"></td>
-          <td id="filter-box"></td>
-          <td id="filter-bilinear"></td>
-          <td id="filter-mitchell-netravali"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'filter-reference' ).appendChild(
-          getFiltered( PolygonFilterType.Box, 1 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'filter-box' ).appendChild(
-          getFiltered( PolygonFilterType.Box, 10 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'filter-bilinear' ).appendChild(
-          getFiltered( PolygonFilterType.Bilinear, 10 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'filter-mitchell-netravali' ).appendChild(
-          getFiltered( PolygonFilterType.MitchellNetravali, 10 )
-        );
-      } );
-    </script>
-
-    <h2>Polygonal Aliasing</h2>
-
-    <p>Sometimes, high-frequency patterns can create lower-frequency (aliased) patterns in the result.</p>
-
-    <h3>Checkerboards</h3>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Canvas</td>
-          <td style="text-align: center;">SVG</td>
-          <td style="text-align: center;">Vello</td>
-          <td style="text-align: center;">Proposed Method (box)</td>
-          <td style="text-align: center;">Proposed Method (bilinear)</td>
-          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
-        </tr>
-        <tr>
-          <td id="checkerboard-canvas"></td>
-          <td id="checkerboard-svg"></td>
-          <td id="checkerboard-vello"></td>
-          <td id="checkerboard-box"></td>
-          <td id="checkerboard-bilinear"></td>
-          <td id="checkerboard-mitchell-netravali"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'checkerboard-canvas' ).appendChild(
-          getCheckerboard( 'canvas' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'checkerboard-svg' ).appendChild(
-          getCheckerboard( 'svg' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        if ( await DeviceContext.isVelloSupported() ) {
-          document.getElementById( 'checkerboard-vello' ).appendChild(
-            getCheckerboard( 'vello' )
-          );
-        }
-        else {
-          document.getElementById( 'checkerboard-vello' ).innerHTML = 'Not supported';
-        }
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'checkerboard-box' ).appendChild(
-          getCheckerboard( 'box' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'checkerboard-bilinear' ).appendChild(
-          getCheckerboard( 'bilinear' )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'checkerboard-mitchell-netravali' ).appendChild(
-          getCheckerboard( 'mitchellNetravali' )
-        );
-      } );
-    </script>
-
-    <h3>Siemens Stars</h3>
-
-    <p>
-      Alternating radial bands of light/dark, to visualize aliasing. It should blur towards a consistent gray toward the
-      center (not showing extra patterns, OR showing a darker gray).
-    </p>
-
-    <table class="table">
-      <tbody>
-        <tr>
-          <td style="text-align: center;">Canvas</td>
-          <td style="text-align: center;">SVG</td>
-          <td style="text-align: center;">Vello</td>
-          <td style="text-align: center;">Proposed Method (box)</td>
-          <td style="text-align: center;">Proposed Method (bilinear)</td>
-          <td style="text-align: center;">Proposed Method (Mitchell-Netravali)</td>
-        </tr>
-        <tr>
-          <td id="siemens-star-canvas"></td>
-          <td id="siemens-star-svg"></td>
-          <td id="siemens-star-vello"></td>
-          <td id="siemens-star-box"></td>
-          <td id="siemens-star-bilinear"></td>
-          <td id="siemens-star-mitchell-netravali"></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'siemens-star-canvas' ).appendChild(
-          getSiemensStar( 'canvas', 200 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'siemens-star-svg' ).appendChild(
-          getSiemensStar( 'svg', 200 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        if ( await DeviceContext.isVelloSupported() ) {
-          document.getElementById( 'siemens-star-vello' ).appendChild(
-            getSiemensStar( 'vello', 200 )
-          );
-        }
-        else {
-          document.getElementById( 'siemens-star-vello' ).innerHTML = 'Not supported';
-        }
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'siemens-star-box' ).appendChild(
-          getSiemensStar( 'box', 200 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'siemens-star-bilinear' ).appendChild(
-          getSiemensStar( 'bilinear', 200 )
-        );
-      } );
-    </script>
-    <script>
-      setTimeout( async () => {
-        document.getElementById( 'siemens-star-mitchell-netravali' ).appendChild(
-          getSiemensStar( 'mitchellNetravali', 200 )
         );
       } );
     </script>
@@ -1896,6 +1863,58 @@
       setTimeout( async () => {
         document.getElementById( 'perceptual-linear-srgb' ).appendChild(
           getPerceptual( 'linear' )
+        );
+      } );
+    </script>
+
+    <h2>Filtered Polygons</h2>
+
+    <p>
+      The proposed method is able to analytically solve the exact filtered (blurred) results of arbitrary polygons.
+    </p>
+
+    <table class="table">
+      <tbody>
+        <tr>
+          <td style="text-align: center;">Reference (dirac delta)</td>
+          <td style="text-align: center;">Box</td>
+          <td style="text-align: center;">Bilinear</td>
+          <td style="text-align: center;">Mitchell-Netravali</td>
+        </tr>
+        <tr>
+          <td id="filter-reference"></td>
+          <td id="filter-box"></td>
+          <td id="filter-bilinear"></td>
+          <td id="filter-mitchell-netravali"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-reference' ).appendChild(
+          getFiltered( PolygonFilterType.Box, 1 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-box' ).appendChild(
+          getFiltered( PolygonFilterType.Box, 10 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-bilinear' ).appendChild(
+          getFiltered( PolygonFilterType.Bilinear, 10 )
+        );
+      } );
+    </script>
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'filter-mitchell-netravali' ).appendChild(
+          getFiltered( PolygonFilterType.MitchellNetravali, 10 )
         );
       } );
     </script>
