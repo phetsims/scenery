@@ -977,6 +977,123 @@
     }
   };
 
+  const getTransparentSpheres = () => {
+    const width = 128;
+    const height = 128;
+
+    const dl = 60;
+    const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+    const rotationMatrix = Matrix3.rotationY( 0 ).timesMatrix( Matrix3.rotationX( -0.5 ) );
+    const project = ( p ) => {
+
+      // a rotation, for testing
+      p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
+
+      const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
+      return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+    };
+    const createSphere = ( center, radius, thetaDivisions, phiDivisions, alpha, diffuseColor ) => {
+      const planars = [];
+
+      for ( let i = 0; i < thetaDivisions; i++ ) {
+        const theta0 = i / thetaDivisions * 2 * Math.PI;
+        const theta1 = ( i + 1 ) / thetaDivisions * 2 * Math.PI;
+
+        for ( let j = 0; j < phiDivisions; j++ ) {
+          const phi0 = j / phiDivisions * Math.PI;
+          const phi1 = ( j + 1 ) / phiDivisions * Math.PI;
+
+          const p00 = v3(
+            Math.sin( phi0 ) * Math.cos( theta0 ),
+            Math.sin( phi0 ) * Math.sin( theta0 ),
+            Math.cos( phi0 )
+          );
+          const p01 = v3(
+            Math.sin( phi0 ) * Math.cos( theta1 ),
+            Math.sin( phi0 ) * Math.sin( theta1 ),
+            Math.cos( phi0 )
+          );
+          const p10 = v3(
+            Math.sin( phi1 ) * Math.cos( theta0 ),
+            Math.sin( phi1 ) * Math.sin( theta0 ),
+            Math.cos( phi1 )
+          );
+          const p11 = v3(
+            Math.sin( phi1 ) * Math.cos( theta1 ),
+            Math.sin( phi1 ) * Math.sin( theta1 ),
+            Math.cos( phi1 )
+          );
+
+          const tri = ( p0, p1, p2 ) => {
+
+            const point0 = center.plus( p0.timesScalar( radius ) );
+            const point1 = center.plus( p1.timesScalar( radius ) );
+            const point2 = center.plus( p2.timesScalar( radius ) );
+
+            const projected0 = project( point0 );
+            const projected1 = project( point1 );
+            const projected2 = project( point2 );
+
+            const positionProgram = new RenderBarycentricPerspectiveBlend(
+              projected0, projected1, projected2,
+              RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+              new RenderColor( point0.toVector4Zero() ),
+              new RenderColor( point1.toVector4Zero() ),
+              new RenderColor( point2.toVector4Zero() ),
+            );
+            const normalProgram = new RenderNormalize( new RenderBarycentricPerspectiveBlend(
+              projected0, projected1, projected2,
+              RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+              new RenderColor( p0.toVector4() ),
+              new RenderColor( p1.toVector4() ),
+              new RenderColor( p2.toVector4() ),
+            ) );
+
+            const ambientColorProgram = new RenderColor( v4( 0, 0, 0, alpha ) );
+            const diffuseColorProgram = new RenderColor( v4( diffuseColor.x, diffuseColor.y, diffuseColor.z, 0.01 ) );
+            const specularColorProgram = new RenderColor( v4( 0.5, 0.5, 0.5, 0.01 ) );
+            const program = new RenderPhong( 50, ambientColorProgram, diffuseColorProgram, specularColorProgram, positionProgram, normalProgram, [
+              new RenderLight(
+                new RenderColor( v4( -2.0, 3.5, -2.0, 0 ).normalized() ),
+                new RenderColor( v4( 1, 1, 1, 1 ) )
+              )
+            ] );
+            // const program = new RenderNormalDebug( normalProgram );
+
+            return new RenderPlanar(
+              RenderPathBoolean.fromInside( new RenderPath( 'nonzero', [ [
+                projected0.toVector2(), projected1.toVector2(), projected2.toVector2()
+              ] ] ), program ),
+              projected0, projected1, projected2
+            );
+          };
+
+          if ( !p00.equalsEpsilon( p01, 1e-6 ) && !p00.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p10, 1e-6 ) ) {
+            planars.push( tri( p00, p10, p01 ) );
+          }
+          if ( !p01.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p11, 1e-6 ) && !p10.equalsEpsilon( p11, 1e-6 ) ) {
+            planars.push( tri( p01, p10, p11 ) );
+          }
+        }
+      }
+
+      return planars;
+    };
+
+    const thetas = 16;
+    const phis = 16;
+
+    let program = new RenderLinearSRGBToSRGB( new RenderDepthSort( [
+      ...createSphere( phet.dot.v3( 0, 0, dl ), 4, thetas, phis, 0.6, v3( 1, 0.05, 0 ) ),
+      ...createSphere( phet.dot.v3( 2, 2, dl ), 4, thetas, phis, 1, v3( 0, 0.05, 1 ) ),
+      ...createSphere( phet.dot.v3( 0, 4, dl ), 4, thetas, phis, 0.8, v3( 0, 1, 0.05 ) ),
+      ...createSphere( phet.dot.v3( 4, 4, dl ), 4, thetas, phis, 0.4, v3( 0.8, 0.8, 0.8 ) ),
+      // ...createSphere( phet.dot.v3( 2, 6, dl ), 3, thetas, phis, 0.4, v3( 1, 0.05, 1 ) ),
+    ] ) ).transformed( Matrix3.scaling( 4 * width ) ).transformed( Matrix3.translation( width / 2 - width / 8, height / 2 + height / 8 ) );
+
+    return getRasterizedElement( program, width, height );
+  };
+
 </script>
 
 <div class="navbar navbar-inverse navbar-static-top">
@@ -1117,6 +1234,25 @@
         );
       } );
     </script>
+
+    <p>
+      Transparency support (and intersecting transparent/opaque objects) is free, since it sorts the fragments
+      back-to-front and uses the normal 2d rasterization.
+    </p>
+
+    <div id="transparent-spheres"></div>
+
+    <script>
+      setTimeout( async () => {
+        document.getElementById( 'transparent-spheres' ).appendChild(
+          getTransparentSpheres()
+        );
+      } );
+    </script>
+
+    <p>
+      NOTE: Still somewhat experimental
+    </p>
 
     <h2>Anti-Aliasing</h2>
 
