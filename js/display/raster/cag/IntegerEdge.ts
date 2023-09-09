@@ -88,17 +88,25 @@ export default class IntegerEdge {
    *
    * Since we also need to apply the to-integer-coordinate-frame conversion at the same time, this step is included.
    */
-  public static clipScaleToIntegerEdges( paths: RenderPath[], bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
+  public static clipScaleToIntegerEdges( paths: Iterable<RenderPath>, bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
     const integerEdges: IntegerEdge[] = [];
-    for ( let i = 0; i < paths.length; i++ ) {
-      const path = paths[ i ];
 
+    for ( const path of paths ) {
       for ( let j = 0; j < path.subpaths.length; j++ ) {
         const subpath = path.subpaths[ j ];
 
+        let goesOutsideBounds = false;
+        for ( let k = 0; k < subpath.length; k++ ) {
+          if ( !bounds.containsPoint( subpath[ k ] ) ) {
+            goesOutsideBounds = true;
+            break;
+          }
+        }
+
         // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
         // If a path is fully outside of the clip region, we won't create integer edges out of it.
-        const clippedSubpath = PolygonClipping.boundsClipPolygon( subpath, bounds );
+        // TODO: Optimize our allocations or other parts so that we don't always create a ton of new vectors here
+        const clippedSubpath = goesOutsideBounds ? PolygonClipping.boundsClipPolygon( subpath, bounds ) : subpath;
 
         for ( let k = 0; k < clippedSubpath.length; k++ ) {
           // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
@@ -111,6 +119,7 @@ export default class IntegerEdge {
         }
       }
     }
+
     return integerEdges;
   }
 

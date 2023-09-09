@@ -717,10 +717,10 @@ export default class Rasterize {
     assert && assert( Math.abs( ( scale * contributionBounds.minX + translation.x ) + ( scale * contributionBounds.maxX + translation.x ) ) < 1e-10 );
     assert && assert( Math.abs( ( scale * contributionBounds.minY + translation.y ) + ( scale * contributionBounds.maxY + translation.y ) ) < 1e-10 );
 
-    const paths: RenderPath[] = [];
+    const paths = new Set<RenderPath>();
     renderProgram.depthFirst( program => {
       if ( program instanceof RenderPathBoolean ) {
-        paths.push( program.path );
+        paths.add( program.path );
       }
     } );
     const backgroundPath = new RenderPath( 'nonzero', [
@@ -731,7 +731,7 @@ export default class Rasterize {
         bounds.leftBottom
       ]
     ] );
-    paths.push( backgroundPath );
+    paths.add( backgroundPath );
 
     markStart( 'clip-integer' );
     const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, contributionBounds, toIntegerMatrix );
