@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { BoundedSubpath, ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -719,6 +719,7 @@ export default class Rasterize {
 
     const paths = new Set<RenderPath>();
     renderProgram.depthFirst( program => {
+      // TODO: we can filter based on hasPathBoolean, so we can skip subtrees
       if ( program instanceof RenderPathBoolean ) {
         paths.add( program.path );
       }
@@ -733,8 +734,12 @@ export default class Rasterize {
     ] );
     paths.add( backgroundPath );
 
+    markStart( 'path-bounds' );
+    const boundedSubpaths = BoundedSubpath.fromPathSet( paths );
+    markEnd( 'path-bounds' );
+
     markStart( 'clip-integer' );
-    const integerEdges = IntegerEdge.clipScaleToIntegerEdges( paths, contributionBounds, toIntegerMatrix );
+    const integerEdges = IntegerEdge.clipScaleToIntegerEdges( boundedSubpaths, contributionBounds, toIntegerMatrix );
     markEnd( 'clip-integer' );
     if ( log ) { log.integerEdges = integerEdges; }
 

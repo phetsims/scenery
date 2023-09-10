@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { PolygonClipping, RationalIntersection, RenderPath, scenery } from '../../../imports.js';
+import { BoundedSubpath, PolygonClipping, RationalIntersection, RenderPath, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Utils from '../../../../../dot/js/Utils.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -88,38 +88,31 @@ export default class IntegerEdge {
    *
    * Since we also need to apply the to-integer-coordinate-frame conversion at the same time, this step is included.
    */
-  public static clipScaleToIntegerEdges( paths: Iterable<RenderPath>, bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
+  public static clipScaleToIntegerEdges( boundedSubpaths: BoundedSubpath[], bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
     const integerEdges: IntegerEdge[] = [];
 
-    for ( const path of paths ) {
-      for ( let j = 0; j < path.subpaths.length; j++ ) {
-        const subpath = path.subpaths[ j ];
+    for ( let i = 0; i < boundedSubpaths.length; i++ ) {
+      const boundedSubpath = boundedSubpaths[ i ];
+      const subpath = boundedSubpath.subpath;
 
-        // TODO: Move bounds-related things up to the top level, so we can share them across tiles
-        const subpathBounds = Bounds2.NOTHING.copy();
-        for ( let k = 0; k < subpath.length; k++ ) {
-          subpathBounds.addPoint( subpath[ k ] );
-        }
+      if ( !bounds.intersectsBounds( boundedSubpath.bounds ) ) {
+        continue;
+      }
 
-        if ( !bounds.intersectsBounds( subpathBounds ) ) {
-          continue;
-        }
+      const goesOutsideBounds = !bounds.containsBounds( boundedSubpath.bounds );
 
-        const goesOutsideBounds = !bounds.containsBounds( subpathBounds );
+      // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
+      // If a path is fully outside of the clip region, we won't create integer edges out of it.
+      // TODO: Optimize our allocations or other parts so that we don't always create a ton of new vectors here
+      const clippedSubpath = goesOutsideBounds ? PolygonClipping.boundsClipPolygon( subpath, bounds ) : subpath;
 
-        // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
-        // If a path is fully outside of the clip region, we won't create integer edges out of it.
-        // TODO: Optimize our allocations or other parts so that we don't always create a ton of new vectors here
-        const clippedSubpath = goesOutsideBounds ? PolygonClipping.boundsClipPolygon( subpath, bounds ) : subpath;
-
-        for ( let k = 0; k < clippedSubpath.length; k++ ) {
-          // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
-          const p0 = clippedSubpath[ k ];
-          const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
-          const edge = IntegerEdge.createTransformed( path, toIntegerMatrix, p0, p1 );
-          if ( edge !== null ) {
-            integerEdges.push( edge );
-          }
+      for ( let k = 0; k < clippedSubpath.length; k++ ) {
+        // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
+        const p0 = clippedSubpath[ k ];
+        const p1 = clippedSubpath[ ( k + 1 ) % clippedSubpath.length ];
+        const edge = IntegerEdge.createTransformed( boundedSubpath.path, toIntegerMatrix, p0, p1 );
+        if ( edge !== null ) {
+          integerEdges.push( edge );
         }
       }
     }

@@ -515,6 +515,7 @@ export { default as EdgedFace } from './display/raster/cag/EdgedFace.js';
 export type { SerializedEdgedFace } from './display/raster/cag/EdgedFace.js';
 export { default as PolygonalFace } from './display/raster/cag/PolygonalFace.js';
 export type { SerializedPolygonalFace } from './display/raster/cag/PolygonalFace.js';
+export { default as BoundedSubpath } from './display/raster/cag/BoundedSubpath.js';
 
 export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.js';
 
