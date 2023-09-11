@@ -600,6 +600,12 @@ export default class PolygonClipping {
     // TODO: We would want to future-proof and pass (x0,y0,x1,y1,p0?,p1?) for GC-friendliness?
     // TODO: Could have "linear edge accumulators" (with the bound methods) similar to the ClipSimplifier bound methods.
   ): void {
+    assert && assert( isFinite( minX ) && Number.isInteger( minX ) );
+    assert && assert( isFinite( minY ) && Number.isInteger( minY ) );
+    assert && assert( isFinite( maxX ) && Number.isInteger( maxX ) );
+    assert && assert( isFinite( maxY ) && Number.isInteger( maxY ) );
+    assert && assert( isFinite( stepX ) && Number.isInteger( stepX ) );
+    assert && assert( isFinite( stepY ) && Number.isInteger( stepY ) );
 
     // TODO: in the caller, assert total area is the same!
 
@@ -608,7 +614,6 @@ export default class PolygonClipping {
     const height = maxY - minY;
     const stepWidth = width / stepX;
     const stepHeight = height / stepY;
-    // TODO: should we assert that we're dealing with integers?
     assert && assert( stepWidth % 1 === 0 && stepWidth > 0 );
     assert && assert( stepHeight % 1 === 0 && stepHeight > 0 );
     assert && assert( stepWidth * stepHeight === simplifiers.length );
@@ -641,28 +646,27 @@ export default class PolygonClipping {
       const isHorizontal = startPoint.y === endPoint.y;
       const isVertical = startPoint.x === endPoint.x;
 
-      // const lineMinX = Math.min( startPoint.x, endPoint.x );
-      // const lineMinY = Math.min( startPoint.y, endPoint.y );
-      // const lineMaxX = Math.max( startPoint.x, endPoint.x );
-      // const lineMaxY = Math.max( startPoint.y, endPoint.y );
-
       // In "step" coordinates, in the ranges [0,stepWidth], [0,stepHeight]
       const rawStartStepX = toStepX( startPoint.x );
       const rawStartStepY = toStepY( startPoint.y );
       const rawEndStepX = toStepX( endPoint.x );
       const rawEndStepY = toStepY( endPoint.y );
 
-      // TODO: get mins/maxes for in-between?
-      const roundedMinStepX = Utils.roundSymmetric( Math.min( rawStartStepX, rawEndStepX ) );
-      const roundedMinStepY = Utils.roundSymmetric( Math.min( rawStartStepY, rawEndStepY ) );
-      const roundedMaxStepX = Utils.roundSymmetric( Math.max( rawStartStepX, rawEndStepX ) );
-      const roundedMaxStepY = Utils.roundSymmetric( Math.max( rawStartStepY, rawEndStepY ) );
+      const minRawStartStepX = Math.min( rawStartStepX, rawEndStepX );
+      const minRawStartStepY = Math.min( rawStartStepY, rawEndStepY );
+      const maxRawStartStepX = Math.max( rawStartStepX, rawEndStepX );
+      const maxRawStartStepY = Math.max( rawStartStepY, rawEndStepY );
+
+      const roundedMinStepX = Utils.roundSymmetric( minRawStartStepX );
+      const roundedMinStepY = Utils.roundSymmetric( minRawStartStepY );
+      const roundedMaxStepX = Utils.roundSymmetric( maxRawStartStepX );
+      const roundedMaxStepY = Utils.roundSymmetric( maxRawStartStepY );
 
       // Integral "step" coordinates
-      const minStepX = Math.floor( Math.min( rawStartStepX, rawEndStepX ) );
-      const minStepY = Math.floor( Math.min( rawStartStepY, rawEndStepY ) );
-      const maxStepX = Math.ceil( Math.max( rawStartStepX, rawEndStepX ) );
-      const maxStepY = Math.ceil( Math.max( rawStartStepY, rawEndStepY ) );
+      const minStepX = Math.floor( minRawStartStepX );
+      const minStepY = Math.floor( minRawStartStepY );
+      const maxStepX = Math.ceil( maxRawStartStepX );
+      const maxStepY = Math.ceil( maxRawStartStepY );
 
       const lineStepWidth = maxStepX - minStepX;
       const lineStepHeight = maxStepY - minStepY;
@@ -725,8 +729,6 @@ export default class PolygonClipping {
       //   │corner│ half │intern│intern│ half │corner│corner│
       //   └──────┴──────┴──────┴──────┴──────┴──────┴──────┘minY
 
-      // TODO: assertions that we're outputting points INSIDE each range to each simplifier
-
       // Handle "internal" cases (the step rectangle that overlaps the line)
       if ( lineStepWidth === 1 && lineStepHeight === 1 ) {
         // If we only take up one cell, we can do a much more optimized form (AND in the future hopefully the clip
@@ -767,14 +769,11 @@ export default class PolygonClipping {
 
             const minXYIntercept = isFirstX ? ( startXLess ? startPoint.y : endPoint.y ) : yIntercepts[ ix - minStepX - 1 ];
             const maxXYIntercept = isLastX ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix - minStepX ];
-
             const minYIntercept = Math.min( minXYIntercept, maxXYIntercept );
-            // const maxYIntercept = Math.max( minXYIntercept, maxXYIntercept );
 
             const isLessThanMinX = cellMaxX <= minXIntercept;
             const isGreaterThanMaxX = cellMinX >= maxXIntercept;
             const isLessThanMinY = cellMaxY <= minYIntercept;
-            // const isGreaterThanMaxY = cellMinY >= maxYIntercept;
 
             // If this condition is true, the line does NOT pass through this cell. We just have to handle the corners.
             if ( isLessThanMinX || isGreaterThanMaxX ) {
@@ -842,13 +841,10 @@ export default class PolygonClipping {
                 endY = startXLess ? maxXY : minXY;
               }
 
-              // const startX = startXLess ? minYX : maxYX;
-              // const startY = isVertical ? ( startYLess ? Math.min( minXY, maxXY ) : Math.max( minXY, maxXY ) ) : ( startYLess ? minXY : maxXY );
-              // const endX = startXLess ? maxYX : minYX;
-              // const endY = startYLess ? maxXY : minXY;
-
               // Ensure we have the correct direction (and our logic is correct)
-              assert && assert( new Vector2( endX - startX, endY - startY ).normalized().equalsEpsilon( endPoint.minus( startPoint ).normalized(), 1e-8 ) );
+              assert && assert(
+                new Vector2( endX - startX, endY - startY ).normalized()
+                  .equalsEpsilon( endPoint.minus( startPoint ).normalized(), 1e-8 ) );
 
               const needsStartCorner = startX !== startPoint.x || startY !== startPoint.y;
               const needsEndCorner = endX !== endPoint.x || endY !== endPoint.y;

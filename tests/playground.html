@@ -506,13 +506,12 @@ an UI and Display made for visual testing and debugging.
 
         const simplifiers = [];
         for ( let i = 0; i < stepWidth * stepHeight; i++ ) {
-          simplifiers.push( new phet.scenery.ClipSimplifier() );
+          // TODO: should we be checking this in general?
+          simplifiers.push( new phet.scenery.ClipSimplifier( true ) );
         }
 
         // TODO: use the edge-based one
         phet.scenery.PolygonClipping.gridClipPolygon( polygon, 0, 0, width, height, stepX, stepY, simplifiers );
-
-        // TODO: finalize, once we're doing fuller testing
 
         const container = new phet.scenery.Node( {
           matrix: matrix
@@ -521,7 +520,7 @@ an UI and Display made for visual testing and debugging.
         if ( COLOR ) {
           for ( let iy = 0; iy < stepHeight; iy++ ) {
             for ( let ix = 0; ix < stepWidth; ix++ ) {
-              const simplifier = simplifiers[ iy * stepWidth + ix ];
+              const points = simplifiers[ iy * stepWidth + ix ].finalize();
 
               const bounds = new phet.dot.Bounds2(
                 ix * stepX,
@@ -543,14 +542,14 @@ an UI and Display made for visual testing and debugging.
                 const color3 = new phet.scenery.Color( 0, 255, 0, 1 );
                 const colors = [ color0, color1, color2, color3 ];
                 const halfColor = color1.blend( color2, 0.5 );
-                if ( simplifier.points.length <= 2 ) {
+                if ( points.length <= 2 ) {
                   return gradient
                     .addColorStop( 0, color0 )
                     .addColorStop( 0.33, color1 )
                     .addColorStop( 0.66, color2 )
                     .addColorStop( 1, color3 )
                 }
-                else if ( simplifier.points.length === 3 ) {
+                else if ( points.length === 3 ) {
                   if ( i === 0 ) {
                     return gradient
                       .addColorStop( 0, colors[ 0 ] )
@@ -564,16 +563,16 @@ an UI and Display made for visual testing and debugging.
                       .addColorStop( 1, colors[ 3 ] )
                   }
                 }
-                else if ( simplifier.points.length === 4 ) {
+                else if ( points.length === 4 ) {
                   return gradient
                     .addColorStop( 0, colors[ i ] )
                     .addColorStop( 1, colors[ i + 1 ] )
                 }
               };
 
-              for ( let i = 1; i < simplifier.points.length; i++ ) {
-                const startPoint = simplifier.points[ i - 1 ];
-                const endPoint = simplifier.points[ i ];
+              for ( let i = 1; i < points.length; i++ ) {
+                const startPoint = points[ i - 1 ];
+                const endPoint = points[ i ];
                 container.addChild( new phet.scenery.Line( inset( startPoint ), inset( endPoint ), {
                   stroke: withColorStops( new phet.scenery.LinearGradient( startPoint.x, startPoint.y, endPoint.x, endPoint.y ), i - 1 ),
                   lineWidth: 0.2
@@ -587,7 +586,7 @@ an UI and Display made for visual testing and debugging.
           const lineShape = new phet.kite.Shape();
           for ( let iy = 0; iy < stepHeight; iy++ ) {
             for ( let ix = 0; ix < stepWidth; ix++ ) {
-              const simplifier = simplifiers[ iy * stepWidth + ix ];
+              const points = simplifiers[ iy * stepWidth + ix ].finalize();
 
               const bounds = new phet.dot.Bounds2(
                 ix * stepX,
@@ -605,8 +604,8 @@ an UI and Display made for visual testing and debugging.
                 return point.minus( bounds.center ).timesScalar( 0.90 ).plus( bounds.center );
               };
 
-              for ( let i = 0; i < simplifier.points.length; i++ ) {
-                const point = inset( simplifier.points[ i ] );
+              for ( let i = 0; i < points.length; i++ ) {
+                const point = inset( points[ i ] );
 
                 if ( i === 0 ) {
                   lineShape.moveToPoint( point );
