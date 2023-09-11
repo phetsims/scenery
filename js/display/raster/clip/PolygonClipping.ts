@@ -777,17 +777,37 @@ export default class PolygonClipping {
 
             // If this condition is true, the line does NOT pass through this cell. We just have to handle the corners.
             if ( isLessThanMinX || isGreaterThanMaxX ) {
-              // TODO: simplify logic
-              const hasHorizontal = ( isFirstX || isLastX ) ? ix >= roundedMinStepX && ( ix + 1 ) <= roundedMaxStepX : true;
-              const hasVertical = ( isFirstY || isLastY ) ? iy >= roundedMinStepY && ( iy + 1 ) <= roundedMaxStepY : true;
+              // Since we are just handling corners, we can potentially have a horizontal edge and/or a vertical edge.
+              // (NOTE: none, both, or one of these can be true).
+
+              const isOnEndX = isFirstX || isLastX;
+              const isOnEndY = isFirstY || isLastY;
+
+              // If we're fully "internal", we'll have the spanning edge. If not, we'll need to check to see how we
+              // compare to the center of the cell (remember, we are picking the closest corners to the start and end
+              // of the line, so for us to have an edge here, the start/end have to be closer to different corners.
+              // We've stored the rounded step coordinates, so we can just check against those.
+              const hasHorizontal = isOnEndX ? ix >= roundedMinStepX && ( ix + 1 ) <= roundedMaxStepX : true;
+              const hasVertical = isOnEndY ? iy >= roundedMinStepY && ( iy + 1 ) <= roundedMaxStepY : true;
 
               if ( hasHorizontal && hasVertical ) {
+                // NOTE: This logic is based on examining the 8 cases we can have of "directed line segments that
+                // pass by our cell without going through it". Basically, since we are guaranteed that both of the
+                // x-intercepts are to the right OR left of the cell (in the same direction), and similarly for the
+                // y-intercepts, that gives us 4 cases. For each of those, the line could be moving from one end to the
+                // other (resulting in 8 cases).
+
+                // If we have both, we will have a shared corner
                 const cornerX = isLessThanMinX ? cellMaxX : cellMinX;
                 const cornerY = isLessThanMinY ? cellMaxY : cellMinY;
+
+                // There will also be two other points, one horizontally and one vertically offset from the corner
                 const otherX = isLessThanMinX ? cellMinX : cellMaxX;
                 const otherY = isLessThanMinY ? cellMinY : cellMaxY;
+
+                // Compute whether we need to add the horizontal or vertical first.
                 const xFirst = isLessThanMinX ? startXLess : !startXLess;
-                // TODO: is the four ternary expressions better here?
+
                 simplifier.add( xFirst ? otherX : cornerX, xFirst ? cornerY : otherY );
                 simplifier.add( cornerX, cornerY );
                 simplifier.add( xFirst ? cornerX : otherX, xFirst ? otherY : cornerY );
