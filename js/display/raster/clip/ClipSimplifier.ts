@@ -33,6 +33,9 @@ export default class ClipSimplifier {
     this.add( p.x, p.y );
   }
 
+  // We mutate points, so for the interest of safety, we'll end up copying the points.
+  // TODO: For performance (CPU), it would make sense to instead pass in (x,y,?:point) so we could use immutable points
+  // TODO: Only create points when needed - This would allow much better pass-through
   public add( x: number, y: number ): void {
     if ( this.points.length >= 1 ) {
 

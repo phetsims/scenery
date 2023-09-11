@@ -6,7 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import Vector2 from '../../../../../dot/js/Vector2.js';
-import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import { ClipSimplifier, LinearEdge, PolygonalFace, scenery } from '../../../imports.js';
 import Utils from '../../../../../dot/js/Utils.js';
 
@@ -17,6 +16,8 @@ const scratchEndPoint = new Vector2( 0, 0 );
 const simplifier = new ClipSimplifier();
 const minSimplifier = new ClipSimplifier();
 const maxSimplifier = new ClipSimplifier();
+const xIntercepts: number[] = [];
+const yIntercepts: number[] = [];
 
 export default class PolygonClipping {
 
@@ -570,6 +571,313 @@ export default class PolygonClipping {
     }
 
     return simplifiers.map( simplifier => simplifier.finalize() );
+  }
+
+  /**
+   * Clips a polygon to a grid.
+   *
+   * @param polygon
+   * @param minX
+   * @param minY
+   * @param maxX
+   * @param maxY
+   * @param stepX
+   * @param stepY
+   * @param simplifiers - Will append into this, for performance. Won't finalize them. Should be indexed by ( y * stepWidth + x )
+   */
+  public static gridClipPolygon(
+    polygon: Vector2[],
+    minX: number, minY: number, maxX: number, maxY: number,
+    stepX: number, stepY: number,
+    simplifiers: ClipSimplifier[]
+    // TODO: potentially use callbacks?
+
+    // TODO TODO: Ideally simplify logic for polygonal and edged, since we are effectively writing the "edge" code here?
+    // TODO: is that performance loss worth it?
+  ): void {
+    // TODO: can we have the caller pass in things like this? In the edge case, we'd want to do the same
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const stepWidth = width / stepX;
+    const stepHeight = height / stepY;
+    // TODO: should we assert that we're dealing with integers?
+    assert && assert( stepWidth % 1 === 0 && stepWidth > 0 );
+    assert && assert( stepHeight % 1 === 0 && stepHeight > 0 );
+    assert && assert( stepWidth * stepHeight === simplifiers.length );
+
+    if ( stepWidth === 1 && stepHeight === 1 ) {
+      for ( let i = 0; i < polygon.length; i++ ) {
+        simplifiers[ 0 ].addPoint( polygon[ i ] );
+      }
+      return;
+    }
+
+    // TODO: optimize this
+    for ( let i = 0; i < polygon.length; i++ ) {
+      const startPoint = polygon[ i ];
+      const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+      assert && assert( startPoint.x >= minX && startPoint.x <= maxX && startPoint.y >= minY && startPoint.y <= maxY );
+      assert && assert( endPoint.x >= minX && endPoint.x <= maxX && endPoint.y >= minY && endPoint.y <= maxY );
+
+      const startXLess = startPoint.x < endPoint.x;
+      const startYLess = startPoint.y < endPoint.y;
+
+      // const lineMinX = Math.min( startPoint.x, endPoint.x );
+      // const lineMinY = Math.min( startPoint.y, endPoint.y );
+      // const lineMaxX = Math.max( startPoint.x, endPoint.x );
+      // const lineMaxY = Math.max( startPoint.y, endPoint.y );
+
+      // In "step" coordinates, in the ranges [0,stepWidth], [0,stepHeight]
+      const rawStartStepX = ( startPoint.x - minX ) / stepX;
+      const rawStartStepY = ( startPoint.y - minY ) / stepY;
+      const rawEndStepX = ( endPoint.x - minX ) / stepX;
+      const rawEndStepY = ( endPoint.y - minY ) / stepY;
+
+      const rawMinStepX = Math.min( rawStartStepX, rawEndStepX );
+      const rawMinStepY = Math.min( rawStartStepY, rawEndStepY );
+      const rawMaxStepX = Math.max( rawStartStepX, rawEndStepX );
+      const rawMaxStepY = Math.max( rawStartStepY, rawEndStepY );
+
+      // Integral "step" coordinates
+      const startStepX = Math.floor( rawStartStepX );
+      const startStepY = Math.floor( rawStartStepY );
+      const endStepX = Math.ceil( rawEndStepX );
+      const endStepY = Math.ceil( rawEndStepY );
+
+      const minStepX = Math.min( startStepX, endStepX );
+      const minStepY = Math.min( startStepY, endStepY );
+      const maxStepX = Math.max( startStepX, endStepX );
+      const maxStepY = Math.max( startStepY, endStepY );
+
+      const lineStepWidth = maxStepX - minStepX;
+      const lineStepHeight = maxStepY - minStepY;
+
+      if ( lineStepWidth > 1 ) {
+        const firstY = startPoint.y + ( endPoint.y - startPoint.y ) * ( minStepX + stepX - startPoint.x ) / ( endPoint.x - startPoint.x );
+        yIntercepts.push( firstY );
+
+        if ( lineStepWidth > 2 ) {
+          const slopeIncrement = stepX * ( endPoint.y - startPoint.y ) / ( endPoint.x - startPoint.x );
+          let y = firstY;
+          for ( let j = minStepX + 2; j < maxStepX; j++ ) {
+            y += slopeIncrement;
+            yIntercepts.push( y );
+          }
+        }
+      }
+      if ( lineStepHeight > 1 ) {
+        const firstX = startPoint.x + ( endPoint.x - startPoint.x ) * ( minStepY + stepY - startPoint.y ) / ( endPoint.y - startPoint.y );
+        xIntercepts.push( firstX );
+
+        if ( lineStepHeight > 2 ) {
+          const slopeIncrement = stepY * ( endPoint.x - startPoint.x ) / ( endPoint.y - startPoint.y );
+          let x = firstX;
+          for ( let j = minStepY + 2; j < maxStepY; j++ ) {
+            x += slopeIncrement;
+            xIntercepts.push( x );
+          }
+        }
+      }
+
+      // xxxx is the line segment (edge)
+      // | and - notes the "clipped along cell bounds" sections
+      //
+      // minX  minStepX                   maxStepX        maxX
+      //   ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┐maxY
+      //   │      │  x   │  x   │  x   │  x   │      │      │
+      //   │  no  │ past │intern│intern│ not  │  no  │  no  │
+      //   │effect│ half │      │      │ past │effect│effect│
+      //   │corner│------│------│------│ half │corner│corner│
+      //   ├──────┼──────┼──────┼──────┴──────┼──────┼──────┤maxStepY
+      //   │  y  |│     |│     |│     |xx     │| y   │| y   │
+      //   │ past|│     |│     |│    xx│|     │|past │|past │
+      //   │ half|│     |│     |│  xx  │|     │|half │|half │
+      //   │     |│------│------│xx    │|     │|     │|     │
+      //   ├──────┼──────┼─────xx──────┼──────┼──────┼──────┤
+      //   │  y  |│     |│   xx │------│|     │| y   │| y   │
+      //   │inter|│     |│ xx   │|     │|     │|ntern│|ntern│
+      //   │     |│      xx     │|     │|     │|     │|     │
+      //   │     |│----xx│|     │|     │|     │|     │|     │
+      //   ├──────┼──xx──┼──────┼──────┼──────┼──────┼──────┤
+      //   │  y   │xx----│------│------│      │  y   │  y   │
+      //   │ not  x      │      │      │      │ not  │ not  │
+      //   │ past │      │      │      │      │ past │ past │
+      //   │ half │      │      │      │      │ half │ half │
+      //   ├──────┼──────┼──────┼──────┼──────┼──────┼──────┤minStepY
+      //   │      │------│------│------│  x   │      │      │
+      //   │  no  │  x   │      │      │ not  │  no  │  no  │
+      //   │effect│ past │  x   │  x   │ past │effect│effect│
+      //   │corner│ half │intern│intern│ half │corner│corner│
+      //   └──────┴──────┴──────┴──────┴──────┴──────┴──────┘minY
+
+      const roundedMinStepX = Utils.roundSymmetric( rawMinStepX );
+      const roundedMinStepY = Utils.roundSymmetric( rawMinStepY );
+      const roundedMaxStepX = Utils.roundSymmetric( rawMaxStepX );
+      const roundedMaxStepY = Utils.roundSymmetric( rawMaxStepY );
+
+      // TODO: assertions that we're outputting points INSIDE each range to each simplifier
+
+      // Handle "internal" cases (the step rectangle that overlaps the line)
+      if ( lineStepWidth === 1 && lineStepHeight === 1 ) {
+        // If we only take up one cell, we can do a much more optimized form (AND in the future hopefully the clip
+        // simplifier will be able to pass through vertices without GC
+
+        simplifier.addPoint( startPoint );
+        simplifier.addPoint( endPoint );
+      }
+      else {
+        // Do the "internal" grid
+        for ( let iy = minStepY; iy < maxStepY; iy++ ) {
+          // TODO: this could be optimized
+          const cellMinY = minY + iy * stepY;
+          const cellMaxY = minY + ( iy + 1 ) * stepY;
+          const cellCenterY = ( cellMinY + cellMaxY ) / 2;
+
+          const isFirstY = iy === minStepY;
+          const isLastY = iy === maxStepY - 1;
+
+          // The x intercepts for the minimal-y and maximal-y sides of the cell (or if we're on the first or last y cell, the endpoint)
+          const minYXIntercept = isFirstY ? ( startYLess ? startPoint.x : endPoint.x ) : xIntercepts[ iy - 1 ];
+          const maxYXIntercept = isLastY ? ( startYLess ? endPoint.x : startPoint.x ) : xIntercepts[ iy ];
+
+          // Our range of intercepts (so we can quickly check in the inner iteration)
+          const minXIntercept = Math.min( minYXIntercept, maxYXIntercept );
+          const maxXIntercept = Math.max( minYXIntercept, maxYXIntercept );
+
+          for ( let ix = minStepX; ix < maxStepX; ix++ ) {
+            const simplifier = simplifiers[ iy * stepWidth + ix ];
+
+            const cellMinX = minX + ix * stepX;
+            const cellMaxX = minX + ( ix + 1 ) * stepX;
+            const cellCenterX = ( cellMinX + cellMaxX ) / 2;
+
+            const isFirstX = ix === minStepX;
+            const isLastX = ix === maxStepX - 1;
+
+            const minXYIntercept = isFirstX ? ( startXLess ? startPoint.y : endPoint.y ) : yIntercepts[ ix - 1 ];
+            const maxXYIntercept = isLastX ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix ];
+
+            const minYIntercept = Math.min( minXYIntercept, maxXYIntercept );
+            // const maxYIntercept = Math.max( minXYIntercept, maxXYIntercept );
+
+            const isLessThanMinX = cellMaxX <= minXIntercept;
+            const isGreaterThanMaxX = cellMinX >= maxXIntercept;
+            const isLessThanMinY = cellMaxY <= minYIntercept;
+            // const isGreaterThanMaxY = cellMinY >= maxYIntercept;
+
+            // If this condition is true, the line does NOT pass through this cell. We just have to handle the corners.
+            if ( isLessThanMinX || isGreaterThanMaxX ) {
+              // TODO: simplify logic
+              const hasHorizontal = ( isFirstX || isLastX ) ? ix >= roundedMinStepX && ( ix + 1 ) <= roundedMaxStepX : true;
+              const hasVertical = ( isFirstY || isLastY ) ? iy >= roundedMinStepY && ( iy + 1 ) <= roundedMaxStepY : true;
+
+              if ( hasHorizontal && hasVertical ) {
+                const cornerX = isLessThanMinX ? cellMaxX : cellMinX;
+                const cornerY = isLessThanMinY ? cellMaxY : cellMinY;
+                const otherX = isLessThanMinX ? cellMinX : cellMaxX;
+                const otherY = isLessThanMinY ? cellMinY : cellMaxY;
+                const xFirst = isLessThanMinX ? startXLess : !startXLess;
+                // TODO: is the four ternary expressions better here?
+                simplifier.add( xFirst ? otherX : cornerX, xFirst ? cornerY : otherX );
+                simplifier.add( cornerX, cornerY );
+                simplifier.add( xFirst ? cornerX : otherX, xFirst ? otherY : cornerY );
+              }
+              else if ( hasHorizontal ) {
+                const y = isLessThanMinY ? cellMaxY : cellMinY;
+                simplifier.add( startXLess ? cellMinX : cellMaxX, y );
+                simplifier.add( startXLess ? cellMaxX : cellMinX, y );
+              }
+              else if ( hasVertical ) {
+                const x = isLessThanMinX ? cellMaxX : cellMinX;
+                simplifier.add( x, startYLess ? cellMinY : cellMaxY );
+                simplifier.add( x, startYLess ? cellMaxY : cellMinY );
+              }
+            }
+            else {
+              // We go through the cell! Additionally due to previous filtering, we are pretty much guaranteed to touch
+              // a cell side.
+
+              const minYX = Utils.clamp( minYXIntercept, cellMinX, cellMaxX );
+              const maxYX = Utils.clamp( maxYXIntercept, cellMinX, cellMaxX );
+              const minXY = Utils.clamp( minXYIntercept, cellMinY, cellMaxY );
+              const maxXY = Utils.clamp( maxXYIntercept, cellMinY, cellMaxY );
+
+              const startX = startXLess ? minYX : maxYX;
+              const startY = startYLess ? minXY : maxXY;
+              const endX = startXLess ? maxYX : minYX;
+              const endY = startYLess ? maxXY : minXY;
+
+              // Ensure we have the correct direction (and our logic is correct)
+              assert && assert( new Vector2( endX - startX, endY - startY ).normalized().equalsEpsilon( endPoint.minus( startPoint ).normalized(), 1e-8 ) );
+
+              const needsStartCorner = startX !== startPoint.x || startY !== startPoint.y;
+              const needsEndCorner = endX !== endPoint.x || endY !== endPoint.y;
+
+              if ( needsStartCorner ) {
+                simplifier.add(
+                  startPoint.x < cellCenterX ? cellMinX : cellMaxX,
+                  startPoint.y < cellCenterY ? cellMinY : cellMaxY
+                );
+              }
+              simplifier.add( startX, startY );
+              simplifier.add( endX, endY );
+              if ( needsEndCorner ) {
+                simplifier.add(
+                  endPoint.x < cellCenterX ? cellMinX : cellMaxX,
+                  endPoint.y < cellCenterY ? cellMinY : cellMaxY
+                );
+              }
+            }
+          }
+        }
+      }
+
+      // x internal, y external
+      for ( let ix = roundedMinStepX; ix < roundedMaxStepX; ix++ ) {
+        const x0 = minX + ix * stepX;
+        const x1 = minX + ( ix + 1 ) * stepX;
+
+        // min-y side
+        for ( let iy = 0; iy < minStepY; iy++ ) {
+          const simplifier = simplifiers[ iy * stepWidth + ix ];
+          const y = ( iy + 1 ) * stepY + minY;
+          simplifier.add( startXLess ? x0 : x1, y );
+          simplifier.add( startXLess ? x1 : x0, y );
+        }
+        // max-y side
+        for ( let iy = maxStepY; iy < stepHeight; iy++ ) {
+          const simplifier = simplifiers[ iy * stepWidth + ix ];
+          const y = iy * stepY + minY;
+          simplifier.add( startXLess ? x0 : x1, y );
+          simplifier.add( startXLess ? x1 : x0, y );
+        }
+      }
+
+      // y internal, x external
+      for ( let iy = roundedMinStepY; iy < roundedMaxStepY; iy++ ) {
+        const y0 = minY + iy * stepY;
+        const y1 = minY + ( iy + 1 ) * stepY;
+
+        // min-x side
+        for ( let ix = 0; ix < minStepX; ix++ ) {
+          const simplifier = simplifiers[ iy * stepWidth + ix ];
+          const x = ( ix + 1 ) * stepX + minX;
+          simplifier.add( x, startYLess ? y0 : y1 );
+          simplifier.add( x, startYLess ? y1 : y0 );
+        }
+        // max-x side
+        for ( let ix = maxStepX; ix < stepWidth; ix++ ) {
+          const simplifier = simplifiers[ iy * stepWidth + ix ];
+          const x = ix * stepX + minX;
+          simplifier.add( x, startYLess ? y0 : y1 );
+          simplifier.add( x, startYLess ? y1 : y0 );
+        }
+      }
+
+      xIntercepts.length = 0;
+      yIntercepts.length = 0;
+    }
   }
 
   public static boundsClipEdge(
