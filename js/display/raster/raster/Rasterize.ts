@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundedSubpath, ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { BoundedSubpath, ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -16,6 +16,8 @@ import Matrix3 from '../../../../../dot/js/Matrix3.js';
 export type RasterizationOptions = {
   // TODO: doc
   outputRasterOffset?: Vector2;
+
+  tileSize?: number;
 
   // TODO: doc
   polygonFiltering?: PolygonFilterType;
@@ -38,6 +40,7 @@ export type RasterizationOptions = {
 
 const DEFAULT_OPTIONS = {
   outputRasterOffset: Vector2.ZERO,
+  tileSize: Number.POSITIVE_INFINITY,
   polygonFiltering: PolygonFilterType.Box,
   polygonFilterWindowMultiplier: 1,
   edgeIntersectionSortMethod: 'center-min-max',
@@ -648,7 +651,12 @@ export default class Rasterize {
     }
   }
 
-  public static rasterize( renderProgram: RenderProgram, outputRaster: OutputRaster, bounds: Bounds2, providedOptions?: RasterizationOptions ): void {
+  public static rasterize(
+    renderProgram: RenderProgram,
+    outputRaster: OutputRaster,
+    bounds: Bounds2,
+    providedOptions?: RasterizationOptions
+  ): void {
 
     // Coordinate frames:
     //
@@ -692,31 +700,6 @@ export default class Rasterize {
     const polygonFiltering: PolygonFilterType = options.polygonFiltering;
     const polygonFilterWindowMultiplier = options.polygonFilterWindowMultiplier;
 
-    // in RenderProgram coordinate frame
-    const contributionBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
-
-    // Keep us at 20 bits of precision (after rounding)
-    const maxSize = Math.max( contributionBounds.width, contributionBounds.height );
-    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( maxSize ) ) );
-    if ( log ) { log.scale = scale; }
-
-    // -( scale * ( bounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( bounds.maxX + filterGridOffset.x ) + translation.x
-    const translation = new Vector2(
-      -0.5 * scale * ( bounds.minX + bounds.maxX ),
-      -0.5 * scale * ( bounds.minY + bounds.maxY )
-    );
-    if ( log ) { log.translation = translation; }
-
-    const toIntegerMatrix = Matrix3.affine( scale, 0, translation.x, 0, scale, translation.y );
-    if ( log ) { log.toIntegerMatrix = toIntegerMatrix; }
-
-    const fromIntegerMatrix = toIntegerMatrix.inverted();
-    if ( log ) { log.fromIntegerMatrix = fromIntegerMatrix; }
-
-    // Verify our math! Make sure we will be perfectly centered in our integer grid!
-    assert && assert( Math.abs( ( scale * contributionBounds.minX + translation.x ) + ( scale * contributionBounds.maxX + translation.x ) ) < 1e-10 );
-    assert && assert( Math.abs( ( scale * contributionBounds.minY + translation.y ) + ( scale * contributionBounds.maxY + translation.y ) ) < 1e-10 );
-
     const paths = new Set<RenderPath>();
     renderProgram.depthFirst( program => {
       // TODO: we can filter based on hasPathBoolean, so we can skip subtrees
@@ -734,135 +717,184 @@ export default class Rasterize {
     ] );
     paths.add( backgroundPath );
 
+    // The potentially filter-expanded bounds of content that could potentially affect pixels within our `bounds`,
+    // in the RenderProgram coordinate frame.
+    const contributionBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
+
     markStart( 'path-bounds' );
     const boundedSubpaths = BoundedSubpath.fromPathSet( paths );
     markEnd( 'path-bounds' );
 
-    markStart( 'clip-integer' );
-    const integerEdges = IntegerEdge.clipScaleToIntegerEdges( boundedSubpaths, contributionBounds, toIntegerMatrix );
-    markEnd( 'clip-integer' );
-    if ( log ) { log.integerEdges = integerEdges; }
+    // Keep us at 20 bits of precision (after rounding)
+    const tileSize = options.tileSize;
+    const maxSize = Math.min( tileSize, Math.max( contributionBounds.width, contributionBounds.height ) );
+    const scale = Math.pow( 2, 20 - Math.ceil( Math.log2( maxSize ) ) );
+    if ( log ) { log.scale = scale; }
 
-    markStart( 'integer-sort' );
-    // NOTE: Can also be 'none', we'll no-op
-    if ( options.edgeIntersectionSortMethod === 'center-size' ) {
-      HilbertMapping.sortCenterSize( integerEdges, 1 / ( scale * maxSize ) );
-    }
-    else if ( options.edgeIntersectionSortMethod === 'min-max' ) {
-      HilbertMapping.sortMinMax( integerEdges, 1 / ( scale * maxSize ) );
-    }
-    else if ( options.edgeIntersectionSortMethod === 'min-max-size' ) {
-      HilbertMapping.sortMinMaxSize( integerEdges, 1 / ( scale * maxSize ) );
-    }
-    else if ( options.edgeIntersectionSortMethod === 'center-min-max' ) {
-      HilbertMapping.sortCenterMinMax( integerEdges, 1 / ( scale * maxSize ) );
-    }
-    else if ( options.edgeIntersectionSortMethod === 'random' ) {
-      // NOTE: This is NOT designed for performance (it's for testing)
-      // eslint-disable-next-line bad-sim-text
-      const shuffled = _.shuffle( integerEdges );
-      integerEdges.length = 0;
-      integerEdges.push( ...shuffled );
-    }
-    markEnd( 'integer-sort' );
+    const combinedRenderableFaces: RenderableFace[] = [];
+    for ( let y = contributionBounds.minY; y < contributionBounds.maxY; y += tileSize ) {
+      for ( let x = contributionBounds.minX; x < contributionBounds.maxX; x += tileSize ) {
+        const tileLog = log ? new RasterTileLog() : null;
+        if ( log && tileLog ) { log.tileLogs.push( tileLog ); }
 
-    markStart( 'integer-intersect' );
-    if ( options.edgeIntersectionMethod === 'quadratic' ) {
-      LineIntersector.edgeIntersectionQuadratic( integerEdges, log );
-    }
-    else if ( options.edgeIntersectionMethod === 'boundsTree' ) {
-      LineIntersector.edgeIntersectionBoundsTree( integerEdges, log );
-    }
-    else if ( options.edgeIntersectionMethod === 'arrayBoundsTree' ) {
-      LineIntersector.edgeIntersectionArrayBoundsTree( integerEdges, log );
-    }
-    else {
-      throw new Error( `unknown edgeIntersectionMethod: ${options.edgeIntersectionMethod}` );
-    }
-    markEnd( 'integer-intersect' );
+        // A slice of our contributionBounds
+        const tileBounds = new Bounds2(
+          x,
+          y,
+          Math.min( x + tileSize, contributionBounds.maxX ),
+          Math.min( y + tileSize, contributionBounds.maxY )
+        );
 
-    markStart( 'integer-split' );
-    const rationalHalfEdges = LineSplitter.splitIntegerEdges( integerEdges );
-    markEnd( 'integer-split' );
+        // -( scale * ( tileBounds.minX + filterGridOffset.x ) + translation.x ) = scale * ( tileBounds.maxX + filterGridOffset.x ) + translation.x
+        const translation = new Vector2(
+          -0.5 * scale * ( tileBounds.minX + tileBounds.maxX ),
+          -0.5 * scale * ( tileBounds.minY + tileBounds.maxY )
+        );
+        if ( tileLog ) { tileLog.translation = translation; }
 
-    markStart( 'edge-sort' );
-    rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
-    markEnd( 'edge-sort' );
+        const toIntegerMatrix = Matrix3.affine( scale, 0, translation.x, 0, scale, translation.y );
+        if ( tileLog ) { tileLog.toIntegerMatrix = toIntegerMatrix; }
 
-    markStart( 'filter-connect' );
-    let filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
-    markEnd( 'filter-connect' );
-    if ( log ) { log.filteredRationalHalfEdges = filteredRationalHalfEdges; }
+        const fromIntegerMatrix = toIntegerMatrix.inverted();
+        if ( tileLog ) { tileLog.fromIntegerMatrix = fromIntegerMatrix; }
 
-    const innerBoundaries: RationalBoundary[] = [];
-    const outerBoundaries: RationalBoundary[] = [];
-    const faces: RationalFace[] = [];
-    if ( log ) {
-      log.innerBoundaries = innerBoundaries;
-      log.outerBoundaries = outerBoundaries;
-      log.faces = faces;
+        // Verify our math! Make sure we will be perfectly centered in our integer grid!
+        assert && assert( Math.abs( ( scale * tileBounds.minX + translation.x ) + ( scale * tileBounds.maxX + translation.x ) ) < 1e-10 );
+        assert && assert( Math.abs( ( scale * tileBounds.minY + translation.y ) + ( scale * tileBounds.maxY + translation.y ) ) < 1e-10 );
+
+        markStart( 'clip-integer' );
+        const integerEdges = IntegerEdge.clipScaleToIntegerEdges( boundedSubpaths, tileBounds, toIntegerMatrix );
+        markEnd( 'clip-integer' );
+        if ( tileLog ) { tileLog.integerEdges = integerEdges; }
+
+        markStart( 'integer-sort' );
+        // NOTE: Can also be 'none', we'll no-op
+        if ( options.edgeIntersectionSortMethod === 'center-size' ) {
+          HilbertMapping.sortCenterSize( integerEdges, 1 / ( scale * maxSize ) );
+        }
+        else if ( options.edgeIntersectionSortMethod === 'min-max' ) {
+          HilbertMapping.sortMinMax( integerEdges, 1 / ( scale * maxSize ) );
+        }
+        else if ( options.edgeIntersectionSortMethod === 'min-max-size' ) {
+          HilbertMapping.sortMinMaxSize( integerEdges, 1 / ( scale * maxSize ) );
+        }
+        else if ( options.edgeIntersectionSortMethod === 'center-min-max' ) {
+          HilbertMapping.sortCenterMinMax( integerEdges, 1 / ( scale * maxSize ) );
+        }
+        else if ( options.edgeIntersectionSortMethod === 'random' ) {
+          // NOTE: This is NOT designed for performance (it's for testing)
+          // eslint-disable-next-line bad-sim-text
+          const shuffled = _.shuffle( integerEdges );
+          integerEdges.length = 0;
+          integerEdges.push( ...shuffled );
+        }
+        markEnd( 'integer-sort' );
+
+        markStart( 'integer-intersect' );
+        if ( options.edgeIntersectionMethod === 'quadratic' ) {
+          LineIntersector.edgeIntersectionQuadratic( integerEdges, tileLog );
+        }
+        else if ( options.edgeIntersectionMethod === 'boundsTree' ) {
+          LineIntersector.edgeIntersectionBoundsTree( integerEdges, tileLog );
+        }
+        else if ( options.edgeIntersectionMethod === 'arrayBoundsTree' ) {
+          LineIntersector.edgeIntersectionArrayBoundsTree( integerEdges, tileLog );
+        }
+        else {
+          throw new Error( `unknown edgeIntersectionMethod: ${options.edgeIntersectionMethod}` );
+        }
+        markEnd( 'integer-intersect' );
+
+        markStart( 'integer-split' );
+        const rationalHalfEdges = LineSplitter.splitIntegerEdges( integerEdges );
+        markEnd( 'integer-split' );
+
+        markStart( 'edge-sort' );
+        rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
+        markEnd( 'edge-sort' );
+
+        markStart( 'filter-connect' );
+        let filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
+        markEnd( 'filter-connect' );
+        if ( tileLog ) { tileLog.filteredRationalHalfEdges = filteredRationalHalfEdges; }
+
+        const innerBoundaries: RationalBoundary[] = [];
+        const outerBoundaries: RationalBoundary[] = [];
+        const faces: RationalFace[] = [];
+        if ( tileLog ) {
+          tileLog.innerBoundaries = innerBoundaries;
+          tileLog.outerBoundaries = outerBoundaries;
+          tileLog.faces = faces;
+        }
+        markStart( 'trace-boundaries' );
+        filteredRationalHalfEdges = RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
+        markEnd( 'trace-boundaries' );
+        if ( tileLog ) { tileLog.refilteredRationalHalfEdges = filteredRationalHalfEdges; }
+
+        markStart( 'face-holes' );
+        const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
+          outerBoundaries,
+          faces
+        );
+        markEnd( 'face-holes' );
+        assert && assert( exteriorBoundaries.length === 1, 'Should only have one external boundary, due to background' );
+        const exteriorBoundary = exteriorBoundaries[ 0 ];
+
+        // For ease of use, an unbounded face (it is essentially fake)
+        const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );
+        if ( tileLog ) { tileLog.unboundedFace = unboundedFace; }
+
+        markStart( 'winding-maps' );
+        RationalFace.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
+        markEnd( 'winding-maps' );
+
+        markStart( 'render-programs' );
+        const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
+        if ( tileLog ) { tileLog.renderedFaces = renderedFaces; }
+        markEnd( 'render-programs' );
+
+        markStart( 'renderable-faces' );
+        let renderableFaces: RenderableFace[];
+        if ( options.renderableFaceMethod === 'polygonal' ) {
+          renderableFaces = FaceConversion.toPolygonalRenderableFaces( renderedFaces, fromIntegerMatrix );
+        }
+        else if ( options.renderableFaceMethod === 'edged' ) {
+          renderableFaces = FaceConversion.toEdgedRenderableFaces( renderedFaces, fromIntegerMatrix );
+        }
+        else if ( options.renderableFaceMethod === 'fullyCombined' ) {
+          renderableFaces = FaceConversion.toFullyCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
+        }
+        else if ( options.renderableFaceMethod === 'simplifyingCombined' ) {
+          renderableFaces = FaceConversion.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
+        }
+        else if ( options.renderableFaceMethod === 'traced' ) {
+          renderableFaces = FaceConversion.toTracedRenderableFaces( renderedFaces, fromIntegerMatrix );
+        }
+        else {
+          throw new Error( 'unknown renderableFaceMethod' );
+        }
+        markEnd( 'renderable-faces' );
+        if ( tileLog ) { tileLog.initialRenderableFaces = renderableFaces; }
+
+        if ( options.splitPrograms ) {
+          markStart( 'split-programs' );
+          renderableFaces = renderableFaces.flatMap( face => face.split() );
+          markEnd( 'split-programs' );
+        }
+        if ( tileLog ) { tileLog.renderableFaces = renderableFaces; }
+
+        // TODO: If we had a RenderDepthSort, do a face combination here?
+
+        combinedRenderableFaces.push( ...renderableFaces );
+      }
     }
-    markStart( 'trace-boundaries' );
-    filteredRationalHalfEdges = RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
-    markEnd( 'trace-boundaries' );
-    if ( log ) { log.refilteredRationalHalfEdges = filteredRationalHalfEdges; }
 
-    markStart( 'face-holes' );
-    const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
-      outerBoundaries,
-      faces
-    );
-    markEnd( 'face-holes' );
-    assert && assert( exteriorBoundaries.length === 1, 'Should only have one external boundary, due to background' );
-    const exteriorBoundary = exteriorBoundaries[ 0 ];
-
-    // For ease of use, an unbounded face (it is essentially fake)
-    const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );
-    if ( log ) { log.unboundedFace = unboundedFace; }
-
-    markStart( 'winding-maps' );
-    RationalFace.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
-    markEnd( 'winding-maps' );
-
-    markStart( 'render-programs' );
-    const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
-    if ( log ) { log.renderedFaces = renderedFaces; }
-    markEnd( 'render-programs' );
-
-    markStart( 'renderable-faces' );
-    let renderableFaces: RenderableFace[];
-    if ( options.renderableFaceMethod === 'polygonal' ) {
-      renderableFaces = FaceConversion.toPolygonalRenderableFaces( renderedFaces, fromIntegerMatrix );
-    }
-    else if ( options.renderableFaceMethod === 'edged' ) {
-      renderableFaces = FaceConversion.toEdgedRenderableFaces( renderedFaces, fromIntegerMatrix );
-    }
-    else if ( options.renderableFaceMethod === 'fullyCombined' ) {
-      renderableFaces = FaceConversion.toFullyCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
-    }
-    else if ( options.renderableFaceMethod === 'simplifyingCombined' ) {
-      renderableFaces = FaceConversion.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
-    }
-    else if ( options.renderableFaceMethod === 'traced' ) {
-      renderableFaces = FaceConversion.toTracedRenderableFaces( renderedFaces, fromIntegerMatrix );
-    }
-    else {
-      throw new Error( 'unknown renderableFaceMethod' );
-    }
-    markEnd( 'renderable-faces' );
-    if ( log ) { log.initialRenderableFaces = renderableFaces; }
-
-    if ( options.splitPrograms ) {
-      markStart( 'split-programs' );
-      renderableFaces = renderableFaces.flatMap( face => face.split() );
-      markEnd( 'split-programs' );
-    }
-    if ( log ) { log.renderableFaces = renderableFaces; }
+    if ( log ) { log.renderableFaces = combinedRenderableFaces; }
 
     markStart( 'rasterize-accumulate' );
     Rasterize.rasterizeAccumulate(
       outputRaster,
-      renderableFaces,
+      combinedRenderableFaces,
       bounds,
       contributionBounds,
       options.outputRasterOffset,

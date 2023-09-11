@@ -7,11 +7,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RasterLog, RationalIntersection, scenery } from '../../../imports.js';
+import { BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RasterTileLog, RationalIntersection, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 export default class LineIntersector {
-  public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge, log: RasterLog | null ): void {
+  public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge, log: RasterTileLog | null ): void {
     // Some checks that should help out with performance, particularly for mesh-like cases where we have either
     // repeated segments, or repeated opposite segments (with the second one being more likely in those cases).
     if (
@@ -57,11 +57,11 @@ export default class LineIntersector {
     }
   }
 
-  public static edgeIntersectionBoundsTree( integerEdges: IntegerEdge[], log: RasterLog | null ): void {
+  public static edgeIntersectionBoundsTree( integerEdges: IntegerEdge[], log: RasterTileLog | null ): void {
     BoundsTreeNode.fromIntegerEdges( integerEdges ).selfIntersect( log );
   }
 
-  public static edgeIntersectionArrayBoundsTree( integerEdges: IntegerEdge[], log: RasterLog | null ): void {
+  public static edgeIntersectionArrayBoundsTree( integerEdges: IntegerEdge[], log: RasterTileLog | null ): void {
     // Probably more micro-efficient ways, but this is a proof-of-concept
 
     // TODO: probably just implement a struct-based approach, so it's a bit easier?
@@ -220,7 +220,7 @@ export default class LineIntersector {
     handleSelfIntersection( boundsTree.length - 1, 0 );
   }
 
-  public static edgeIntersectionQuadratic( integerEdges: IntegerEdge[], log: RasterLog | null ): void {
+  public static edgeIntersectionQuadratic( integerEdges: IntegerEdge[], log: RasterTileLog | null ): void {
     // Compute intersections
     // TODO: improve on the quadratic!!!!
     // similar to BoundsIntersectionFilter.quadraticIntersect( integerBounds, integerEdges, ( edgeA, edgeB ) => {
@@ -248,8 +248,8 @@ export default class LineIntersector {
 abstract class BoundsTreeNode {
   protected constructor( public readonly bounds: Bounds2, public readonly hasHorizontal: boolean, public readonly hasVertical: boolean ) {}
 
-  public abstract selfIntersect( log: RasterLog | null ): void;
-  public abstract crossIntersect( other: BoundsTreeNode, log: RasterLog | null ): void;
+  public abstract selfIntersect( log: RasterTileLog | null ): void;
+  public abstract crossIntersect( other: BoundsTreeNode, log: RasterTileLog | null ): void;
 
   public static fromIntegerEdges( integerEdges: IntegerEdge[] ): BoundsTreeNode {
     if ( integerEdges.length === 0 ) {
@@ -287,7 +287,7 @@ class BoundsTreeLeaf extends BoundsTreeNode {
     // NOTHING
   }
 
-  public override crossIntersect( other: BoundsTreeNode, log: RasterLog | null ): void {
+  public override crossIntersect( other: BoundsTreeNode, log: RasterTileLog | null ): void {
     if ( IntegerEdge.hasBoundsIntersection( this.bounds, other.bounds, this.hasVertical, this.hasHorizontal ) ) {
       if ( other instanceof BoundsTreeLeaf ) {
         LineIntersector.processIntegerEdgeIntersection( this.edge, other.edge, log );
@@ -308,13 +308,13 @@ class BoundsTreeBinary extends BoundsTreeNode {
     super( left.bounds.union( right.bounds ), left.hasHorizontal || right.hasHorizontal, left.hasVertical || right.hasVertical );
   }
 
-  public override selfIntersect( log: RasterLog | null ): void {
+  public override selfIntersect( log: RasterTileLog | null ): void {
     this.left.selfIntersect( log );
     this.right.selfIntersect( log );
     this.left.crossIntersect( this.right, log );
   }
 
-  public override crossIntersect( other: BoundsTreeNode, log: RasterLog | null ): void {
+  public override crossIntersect( other: BoundsTreeNode, log: RasterTileLog | null ): void {
     if ( IntegerEdge.hasBoundsIntersection( this.bounds, other.bounds, this.hasVertical, this.hasHorizontal ) ) {
       if ( other instanceof BoundsTreeLeaf ) {
         this.left.crossIntersect( other, log );

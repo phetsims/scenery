@@ -585,6 +585,8 @@ an UI and Display made for visual testing and debugging.
       // const linearGradientAccuracy = phet.scenery.RenderLinearGradientAccuracy.UnsplitPixelCenter;
 
       const rasterizeOptions = {
+        tileSize: 256,
+
         // polygonFiltering: phet.scenery.PolygonFilterType.Box,
         // polygonFiltering: phet.scenery.PolygonFilterType.Bilinear,
         // polygonFiltering: phet.scenery.PolygonFilterType.MitchellNetravali,
@@ -622,7 +624,6 @@ an UI and Display made for visual testing and debugging.
       const SHOW_FACE_CONSISTENT_FILL = false;
       const SHOW_FACE_HUE_FILL = false;
       const SHOW_BOUNDARIES = false;
-      const SHOW_INCLUSION_DEBUG = false;
       const SHOW_SOLID_COLORS = false;
       const SHOW_FULL_AREAS = false;
       const SHOW_RENDERABLE_FACES = false;
@@ -1140,6 +1141,7 @@ an UI and Display made for visual testing and debugging.
 
       const bc = new phet.scenery.RenderBlendCompose( 3, 0, b, c );
       const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth, boxDepth ] ).transformed(
+      // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth ] ).transformed(
       // const program = normalBlendArray( [ boxDepth ] ).transformed(
       // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth ] ).transformed(
       // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
@@ -1168,29 +1170,10 @@ an UI and Display made for visual testing and debugging.
       const rasterLog = new phet.scenery.RasterLog();
       rasterizeOptions.log = rasterLog;
       const raster = new phet.scenery.CombinedRaster( outputSize, outputSize, rasterOptions );
-      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
-
-      // const tileSize = outputSize;
-      // const tileSize = 32;
-      // const tileSize = 768;
-      // const tileSize = 512;
-      const tileSize = 256;
-      // const tileSize = 128;
 
       const start = Date.now();
-      for ( let i = 0; i < outputSize; i += tileSize ) {
-        for ( let j = 0; j < outputSize; j += tileSize ) {
-          phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( i, j, Math.min( i + tileSize, outputSize ), Math.min( j + tileSize, outputSize ) ), rasterizeOptions );
-        }
-      }
+      phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
       console.log( Date.now() - start );
-
-      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, 256, 256 ), rasterizeOptions );
-      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 256, 0, 512, 256 ), rasterizeOptions );
-      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 512, 0, 768, 256 ), rasterizeOptions );
-      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 768, 0, 1024, 256 ), rasterizeOptions );
-      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 1024, 0, 1280, 256 ), rasterizeOptions );
-      // phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 1280, 0, 1536, 256 ), rasterizeOptions );
 
       const debugCanvas = raster.toCanvas();
       styleCanvas( debugCanvas );
@@ -1205,84 +1188,85 @@ an UI and Display made for visual testing and debugging.
       const INCLUSION_DEBUG_PATH = null;
 
       const fromRenderPoint = renderPoint => renderPoint.timesScalar( displaySize / outputSize );
-      const fromRenderX = renderX => renderX * displaySize / outputSize;
-      const fromRenderY = renderY => renderY * displaySize / outputSize;
       const fromRenderMatrix = phet.dot.Matrix3.scaling( displaySize / outputSize );
 
-      const internalFromIntegerMatrix = rasterLog.fromIntegerMatrix;
-      const fromIntegerPoint = integerPoint => fromRenderPoint( internalFromIntegerMatrix.timesVector2( integerPoint ) );
-      const fromIntegerX = integerX => fromRenderX( fromIntegerPoint( phet.dot.v2( integerX, 0 ) ).x );
-      const fromIntegerY = integerY => fromRenderY( fromIntegerPoint( phet.dot.v2( 0, integerY ) ).y );
+      const fromIntegerPoint = ( tileLog, integerPoint ) => fromRenderPoint( tileLog.fromIntegerMatrix.timesVector2( integerPoint ) );
 
       if ( SHOW_INTEGER_EDGES ) {
-        rasterLog.integerEdges.forEach( integerEdge => {
-          const p0 = fromIntegerPoint( phet.dot.v2( integerEdge.x0, integerEdge.y0 ) );
-          const p1 = fromIntegerPoint( phet.dot.v2( integerEdge.x1, integerEdge.y1 ) );
-          offsetNode.addChild( new phet.scenery.Line( p0, p1, { stroke: 'black', lineCap: 'round', lineJoin: 'round' } ) );
+        rasterLog.tileLogs.forEach( tileLog => {
+          tileLog.integerEdges.forEach( integerEdge => {
+            const p0 = fromIntegerPoint( tileLog, phet.dot.v2( integerEdge.x0, integerEdge.y0 ) );
+            const p1 = fromIntegerPoint( tileLog, phet.dot.v2( integerEdge.x1, integerEdge.y1 ) );
+            offsetNode.addChild( new phet.scenery.Line( p0, p1, { stroke: 'black', lineCap: 'round', lineJoin: 'round' } ) );
+          } );
         } );
       }
       if ( SHOW_INTERSECTIONS ) {
-        rasterLog.integerEdges.forEach( integerEdge => {
-          integerEdge.intersections.forEach( intersection => {
+        rasterLog.tileLogs.forEach( tileLog => {
+          tileLog.integerEdges.forEach( integerEdge => {
+            integerEdge.intersections.forEach( intersection => {
 
-            const point = new phet.dot.Vector2(
-              intersection.point.x.toFloat(),
-              intersection.point.y.toFloat()
-            );
-            offsetNode.addChild( new phet.scenery.Circle( 2, {
-              fill: 'black',
-              translation: fromIntegerPoint( point )
-            } ) );
+              const point = new phet.dot.Vector2(
+                intersection.point.x.toFloat(),
+                intersection.point.y.toFloat()
+              );
+              offsetNode.addChild( new phet.scenery.Circle( 2, {
+                fill: 'black',
+                translation: fromIntegerPoint( tileLog, point )
+              } ) );
+            } );
           } );
         } );
       }
       if ( SHOW_HALF_EDGES ) {
-        rasterLog.refilteredRationalHalfEdges.forEach( halfEdge => {
-          const p0 = halfEdge.p0float;
-          const p1 = halfEdge.p1float;
-          const p2 = halfEdge.nextEdge.p1float;
-          const mid1 = p0.average( p1 );
-          const mid2 = p1.average( p2 );
+        rasterLog.tileLogs.forEach( tileLog => {
+          tileLog.refilteredRationalHalfEdges.forEach( halfEdge => {
+            const p0 = halfEdge.p0float;
+            const p1 = halfEdge.p1float;
+            const p2 = halfEdge.nextEdge.p1float;
+            const mid1 = p0.average( p1 );
+            const mid2 = p1.average( p2 );
 
-          const nextEdge = halfEdge.nextEdge;
+            const nextEdge = halfEdge.nextEdge;
 
-          offsetNode.addChild( new phet.scenery.Line(
-            fromIntegerPoint( mid1 ),
-            fromIntegerPoint( p1 ),
-            { stroke: 'rgba(0,0,0,0.5)' } ) );
+            offsetNode.addChild( new phet.scenery.Line(
+              fromIntegerPoint( tileLog, mid1 ),
+              fromIntegerPoint( tileLog, p1 ),
+              { stroke: 'rgba(0,0,0,0.5)' } ) );
 
-          const offset1 = p1.minus( p0 ).normalized().perpendicular.negate().timesScalar( 2 );
-          const offset2 = p2.minus( p1 ).normalized().perpendicular.negate().timesScalar( 2 );
+            const offset1 = p1.minus( p0 ).normalized().perpendicular.negate().timesScalar( 2 );
+            const offset2 = p2.minus( p1 ).normalized().perpendicular.negate().timesScalar( 2 );
 
-          const q0 = fromIntegerPoint( mid1 ).plus( offset1 );
-          let q1 = fromIntegerPoint( p1 ).plus( offset1 );
-          let r0 = fromIntegerPoint( p1 ).plus( offset2 );
-          const r1 = fromIntegerPoint( mid2 ).plus( offset2 );
+            const q0 = fromIntegerPoint( tileLog, mid1 ).plus( offset1 );
+            let q1 = fromIntegerPoint( tileLog, p1 ).plus( offset1 );
+            let r0 = fromIntegerPoint( tileLog, p1 ).plus( offset2 );
+            const r1 = fromIntegerPoint( tileLog, mid2 ).plus( offset2 );
 
-          const intersection = phet.dot.Utils.lineLineIntersection( q0, q1, r0, r1 );
-          if ( intersection !== null ) {
-            q1 = intersection;
-            r0 = intersection;
-          }
+            const intersection = phet.dot.Utils.lineLineIntersection( q0, q1, r0, r1 );
+            if ( intersection !== null ) {
+              q1 = intersection;
+              r0 = intersection;
+            }
 
-          offsetNode.addChild( new phet.scenery.Line( q0, q1, { stroke: 'rgba(255,0,0,0.5)' } ) );
-          offsetNode.addChild( new phet.scenery.Line( r0, r1, { stroke: 'rgba(0,0,255,0.5)' } ) );
+            offsetNode.addChild( new phet.scenery.Line( q0, q1, { stroke: 'rgba(255,0,0,0.5)' } ) );
+            offsetNode.addChild( new phet.scenery.Line( r0, r1, { stroke: 'rgba(0,0,255,0.5)' } ) );
+          } );
         } );
       }
 
-      const boundaryToPolygon = boundary => {
-        return boundary.edges.map( halfEdge => fromIntegerPoint( halfEdge.p0float ) );
+      const boundaryToPolygon = ( tileLog, boundary ) => {
+        return boundary.edges.map( halfEdge => fromIntegerPoint( tileLog, halfEdge.p0float ) );
       };
 
-      const faceToShape = face => {
+      const faceToShape = ( tileLog, face ) => {
         const shape = new phet.kite.Shape();
 
         const boundary = face.boundary;
         const holes = face.holes;
 
         const polygons = [
-          boundaryToPolygon( boundary ),
-          ...holes.map( boundaryToPolygon )
+          boundaryToPolygon( tileLog, boundary ),
+          ...holes.map( hole => boundaryToPolygon( tileLog, hole ) )
         ];
 
         polygons.forEach( polygon => {
@@ -1297,33 +1281,37 @@ an UI and Display made for visual testing and debugging.
       };
 
       if ( SHOW_FACE_CONSISTENT_FILL ) {
-        rasterLog.renderedFaces.forEach( face => {
-          if ( WINDING_DEBUG_PATH && face.windingMap.getWindingNumber( WINDING_DEBUG_PATH ) === 0 ) {
-            return;
-          }
+        rasterLog.tileLogs.forEach( tileLog => {
+          tileLog.renderedFaces.forEach( face => {
+            if ( WINDING_DEBUG_PATH && face.windingMap.getWindingNumber( WINDING_DEBUG_PATH ) === 0 ) {
+              return;
+            }
 
-          offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: 'rgba(255,0,0,0.5)' } ) );
+            offsetNode.addChild( new phet.scenery.Path( faceToShape( tileLog, face ), { fill: 'rgba(255,0,0,0.5)' } ) );
+          } );
         } );
       }
 
       // TODO: dedup?
       if ( SHOW_FACE_HUE_FILL ) {
-        rasterLog.renderedFaces.forEach( ( face, i ) => {
+        rasterLog.tileLogs.forEach( tileLog => {
+          tileLog.renderedFaces.forEach( ( face, i ) => {
 
-          const color = new phet.scenery.Color(
-            Math.floor( 256 * Math.random() ),
-            Math.floor( 256 * Math.random() ),
-            Math.floor( 256 * Math.random() ),
-            1
-          );
+            const color = new phet.scenery.Color(
+              Math.floor( 256 * Math.random() ),
+              Math.floor( 256 * Math.random() ),
+              Math.floor( 256 * Math.random() ),
+              1
+            );
 
-          offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: color } ) );
+            offsetNode.addChild( new phet.scenery.Path( faceToShape( tileLog, face ), { fill: color } ) );
+          } );
         } );
       }
 
       if ( SHOW_BOUNDARIES ) {
-        const showBoundary = ( boundary, offsetMagnitude, stroke ) => {
-          const polygon = boundaryToPolygon( boundary );
+        const showBoundary = ( tileLog, boundary, offsetMagnitude, stroke ) => {
+          const polygon = boundaryToPolygon( tileLog, boundary );
           const offsetPolygon = polygon.map( ( point, index ) => {
             const p0 = polygon[ ( ( index - 1 ) + polygon.length ) % polygon.length ];
             const p1 = point;
@@ -1352,22 +1340,16 @@ an UI and Display made for visual testing and debugging.
             lineCap: 'round'
           } ) );
         };
-        rasterLog.innerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'blue' ) );
-        rasterLog.outerBoundaries.forEach( boundary => showBoundary( boundary, 1, 'red' ) );
-      }
-
-      if ( SHOW_INCLUSION_DEBUG ) {
-        rasterLog.renderedFaces.forEach( face => {
-          if ( face.inclusionSet.has( INCLUSION_DEBUG_PATH ) ) {
-            offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: 'rgba(0,0,0,1)' } ) );
-          }
+        rasterLog.tileLogs.forEach( tileLog => {
+          tileLog.innerBoundaries.forEach( boundary => showBoundary( tileLog, boundary, 1, 'blue' ) );
+          tileLog.outerBoundaries.forEach( boundary => showBoundary( tileLog, boundary, 1, 'red' ) );
         } );
       }
 
       if ( SHOW_SOLID_COLORS ) {
-        rasterLog.renderedFaces.forEach( face => {
+        rasterLog.renderableFaces.forEach( face => {
           if ( face.renderProgram instanceof phet.scenery.RenderColor ) {
-            offsetNode.addChild( new phet.scenery.Path( faceToShape( face ), { fill: phet.scenery.RenderColor.premultipliedSRGBToColor( face.renderProgram.color ) } ) );
+            offsetNode.addChild( new phet.scenery.Path( face.face.getShape().transformed( fromRenderMatrix ), { fill: phet.scenery.RenderColor.premultipliedSRGBToColor( face.renderProgram.color ) } ) );
           }
         } );
       }

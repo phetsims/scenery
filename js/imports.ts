@@ -548,7 +548,7 @@ export { default as RenderableFace } from './display/raster/raster/RenderableFac
 export { default as Rasterize } from './display/raster/raster/Rasterize.js';
 export type { RasterizationOptions } from './display/raster/raster/Rasterize.js';
 export { default as VectorCanvas } from './display/raster/raster/VectorCanvas.js';
-export { default as RasterLog } from './display/raster/raster/RasterLog.js';
+export { default as RasterLog, RasterTileLog } from './display/raster/raster/RasterLog.js';
 
 export { default as Instance } from './display/Instance.js';
 export type { default as TOverlay } from './overlays/TOverlay.js';
