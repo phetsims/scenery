@@ -583,7 +583,7 @@ export default class PolygonClipping {
    * @param maxY
    * @param stepX
    * @param stepY
-   * @param simplifiers - Will append into this, for performance. Won't finalize them. Should be indexed by ( y * stepWidth + x )
+   * @param simplifiers - Will append into these, for performance. Won't finalize them. Should be indexed by ( y * stepWidth + x )
    */
   public static gridClipPolygon(
     polygon: Vector2[],
@@ -610,10 +610,8 @@ export default class PolygonClipping {
     // TODO: in the caller, assert total area is the same!
 
     // TODO: can we have the caller pass in things like this? In the edge case, we'd want to do the same
-    const width = maxX - minX;
-    const height = maxY - minY;
-    const stepWidth = width / stepX;
-    const stepHeight = height / stepY;
+    const stepWidth = ( maxX - minX ) / stepX;
+    const stepHeight = ( maxY - minY ) / stepY;
     assert && assert( stepWidth % 1 === 0 && stepWidth > 0 );
     assert && assert( stepHeight % 1 === 0 && stepHeight > 0 );
     assert && assert( stepWidth * stepHeight === simplifiers.length );
@@ -863,6 +861,7 @@ export default class PolygonClipping {
 
               // Ensure we have the correct direction (and our logic is correct)
               assert && assert(
+                ( Math.abs( endX - startX ) < 1e-8 && Math.abs( endY - startY ) < 1e-8 ) ||
                 new Vector2( endX - startX, endY - startY ).normalized()
                   .equalsEpsilon( endPoint.minus( startPoint ).normalized(), 1e-8 ) );
 
