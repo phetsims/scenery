@@ -594,7 +594,15 @@ export default class PolygonClipping {
 
     // TODO TODO: Ideally simplify logic for polygonal and edged, since we are effectively writing the "edge" code here?
     // TODO: is that performance loss worth it?
+
+    // TODO: That would mean taking startPoint/endPoint, and an array of callbacks that take (x0,y0,x1,y1).
+    // TODO: HEY, what if each simplifier gets its own bound methods? We could just pass the bound methods here
+    // TODO: We would want to future-proof and pass (x0,y0,x1,y1,p0?,p1?) for GC-friendliness?
+    // TODO: Could have "linear edge accumulators" (with the bound methods) similar to the ClipSimplifier bound methods.
   ): void {
+
+    // TODO: in the caller, assert total area is the same!
+
     // TODO: can we have the caller pass in things like this? In the edge case, we'd want to do the same
     const width = maxX - minX;
     const height = maxY - minY;
@@ -612,11 +620,19 @@ export default class PolygonClipping {
       return;
     }
 
+    // TODO: get rid of these functions (inline)
+    const toStepX = ( x: number ) => ( x - minX ) / stepX;
+    const toStepY = ( y: number ) => ( y - minY ) / stepY;
+    const fromStepX = ( x: number ) => x * stepX + minX;
+    const fromStepY = ( y: number ) => y * stepY + minY;
+
     // TODO: optimize this
     for ( let i = 0; i < polygon.length; i++ ) {
       const startPoint = polygon[ i ];
       const endPoint = polygon[ ( i + 1 ) % polygon.length ];
 
+      assert && assert( startPoint.isFinite() );
+      assert && assert( endPoint.isFinite() );
       assert && assert( startPoint.x >= minX && startPoint.x <= maxX && startPoint.y >= minY && startPoint.y <= maxY );
       assert && assert( endPoint.x >= minX && endPoint.x <= maxX && endPoint.y >= minY && endPoint.y <= maxY );
 
@@ -629,10 +645,10 @@ export default class PolygonClipping {
       // const lineMaxY = Math.max( startPoint.y, endPoint.y );
 
       // In "step" coordinates, in the ranges [0,stepWidth], [0,stepHeight]
-      const rawStartStepX = ( startPoint.x - minX ) / stepX;
-      const rawStartStepY = ( startPoint.y - minY ) / stepY;
-      const rawEndStepX = ( endPoint.x - minX ) / stepX;
-      const rawEndStepY = ( endPoint.y - minY ) / stepY;
+      const rawStartStepX = toStepX( startPoint.x );
+      const rawStartStepY = toStepY( startPoint.y );
+      const rawEndStepX = toStepX( endPoint.x );
+      const rawEndStepY = toStepY( endPoint.y );
 
       const rawMinStepX = Math.min( rawStartStepX, rawEndStepX );
       const rawMinStepY = Math.min( rawStartStepY, rawEndStepY );
@@ -654,7 +670,7 @@ export default class PolygonClipping {
       const lineStepHeight = maxStepY - minStepY;
 
       if ( lineStepWidth > 1 ) {
-        const firstY = startPoint.y + ( endPoint.y - startPoint.y ) * ( minStepX + stepX - startPoint.x ) / ( endPoint.x - startPoint.x );
+        const firstY = startPoint.y + ( endPoint.y - startPoint.y ) * ( fromStepX( minStepX + 1 ) - startPoint.x ) / ( endPoint.x - startPoint.x );
         yIntercepts.push( firstY );
 
         if ( lineStepWidth > 2 ) {
@@ -667,7 +683,7 @@ export default class PolygonClipping {
         }
       }
       if ( lineStepHeight > 1 ) {
-        const firstX = startPoint.x + ( endPoint.x - startPoint.x ) * ( minStepY + stepY - startPoint.y ) / ( endPoint.y - startPoint.y );
+        const firstX = startPoint.x + ( endPoint.x - startPoint.x ) * ( fromStepY( minStepY + 1 ) - startPoint.y ) / ( endPoint.y - startPoint.y );
         xIntercepts.push( firstX );
 
         if ( lineStepHeight > 2 ) {
@@ -730,8 +746,8 @@ export default class PolygonClipping {
         // Do the "internal" grid
         for ( let iy = minStepY; iy < maxStepY; iy++ ) {
           // TODO: this could be optimized
-          const cellMinY = minY + iy * stepY;
-          const cellMaxY = minY + ( iy + 1 ) * stepY;
+          const cellMinY = fromStepY( iy );
+          const cellMaxY = fromStepY( iy + 1 );
           const cellCenterY = ( cellMinY + cellMaxY ) / 2;
 
           const isFirstY = iy === minStepY;
@@ -748,8 +764,8 @@ export default class PolygonClipping {
           for ( let ix = minStepX; ix < maxStepX; ix++ ) {
             const simplifier = simplifiers[ iy * stepWidth + ix ];
 
-            const cellMinX = minX + ix * stepX;
-            const cellMaxX = minX + ( ix + 1 ) * stepX;
+            const cellMinX = fromStepX( ix );
+            const cellMaxX = fromStepX( ix + 1 );
             const cellCenterX = ( cellMinX + cellMaxX ) / 2;
 
             const isFirstX = ix === minStepX;
@@ -835,20 +851,20 @@ export default class PolygonClipping {
 
       // x internal, y external
       for ( let ix = roundedMinStepX; ix < roundedMaxStepX; ix++ ) {
-        const x0 = minX + ix * stepX;
-        const x1 = minX + ( ix + 1 ) * stepX;
+        const x0 = fromStepX( ix );
+        const x1 = fromStepX( ix + 1 );
 
         // min-y side
         for ( let iy = 0; iy < minStepY; iy++ ) {
           const simplifier = simplifiers[ iy * stepWidth + ix ];
-          const y = ( iy + 1 ) * stepY + minY;
+          const y = fromStepY( iy + 1 );
           simplifier.add( startXLess ? x0 : x1, y );
           simplifier.add( startXLess ? x1 : x0, y );
         }
         // max-y side
         for ( let iy = maxStepY; iy < stepHeight; iy++ ) {
           const simplifier = simplifiers[ iy * stepWidth + ix ];
-          const y = iy * stepY + minY;
+          const y = fromStepY( iy );
           simplifier.add( startXLess ? x0 : x1, y );
           simplifier.add( startXLess ? x1 : x0, y );
         }
@@ -856,20 +872,20 @@ export default class PolygonClipping {
 
       // y internal, x external
       for ( let iy = roundedMinStepY; iy < roundedMaxStepY; iy++ ) {
-        const y0 = minY + iy * stepY;
-        const y1 = minY + ( iy + 1 ) * stepY;
+        const y0 = fromStepY( iy );
+        const y1 = fromStepY( iy + 1 );
 
         // min-x side
         for ( let ix = 0; ix < minStepX; ix++ ) {
           const simplifier = simplifiers[ iy * stepWidth + ix ];
-          const x = ( ix + 1 ) * stepX + minX;
+          const x = fromStepX( ix + 1 );
           simplifier.add( x, startYLess ? y0 : y1 );
           simplifier.add( x, startYLess ? y1 : y0 );
         }
         // max-x side
         for ( let ix = maxStepX; ix < stepWidth; ix++ ) {
           const simplifier = simplifiers[ iy * stepWidth + ix ];
-          const x = ix * stepX + minX;
+          const x = fromStepX( ix );
           simplifier.add( x, startYLess ? y0 : y1 );
           simplifier.add( x, startYLess ? y1 : y0 );
         }

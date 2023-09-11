@@ -483,6 +483,53 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.initialGridClipTest = function() {
+    setTimeout( async function() {
+      const polygon = [
+        phet.dot.v2( 15, 15 ),
+        phet.dot.v2( 85, 85 )
+      ];
+
+      const stepX = 10;
+      const stepY = 10;
+      const width = 100;
+      const height = 100;
+
+      const stepWidth = width / stepX;
+      const stepHeight = height / stepY;
+
+      const simplifiers = [];
+      for ( let i = 0; i < stepWidth * stepHeight; i++ ) {
+        simplifiers.push( new phet.scenery.ClipSimplifier() );
+      }
+
+      phet.scenery.PolygonClipping.gridClipPolygon( polygon, 0, 0, width, height, stepX, stepY, simplifiers );
+
+      // TODO: finalize, once we're doing fuller testing
+
+      const container = new phet.scenery.Node( {
+        scale: 5
+      } );
+      scene.addChild( container );
+      for ( let iy = 0; iy < stepHeight; iy++ ) {
+        for ( let ix = 0; ix < stepWidth; ix++ ) {
+          const simplifier = simplifiers[ iy * stepWidth + ix ];
+
+          const bounds = new phet.dot.Bounds2(
+            ix * stepX,
+            iy * stepY,
+            ( ix + 1 ) * stepX,
+            ( iy + 1 ) * stepY
+          );
+
+          container.addChild( phet.scenery.Rectangle.bounds( bounds, { stroke: 'black' } ) );
+        }
+      }
+
+      display.updateDisplay();
+    } );
+  };
+
   window.programTest = function( program ) {
     setTimeout( async function() {
       const displaySize = 768;
