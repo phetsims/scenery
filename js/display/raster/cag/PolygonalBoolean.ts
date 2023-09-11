@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath, scenery } from '../../../imports.js';
+import { IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -95,7 +95,7 @@ export default class PolygonalBoolean {
     createOutputFace: ( face: PolygonalFace, faceData: FaceData, bounds: Bounds2 ) => OutputFace,
     // null is for the unbounded face
     isFaceDataCompatible: ( faceData1: FaceData, faceData2: FaceData | null ) => boolean,
-    log: RasterLog | null
+    log: RasterTileLog | null
   ): OutputFace[] {
 
     const bounds = Bounds2.NOTHING.copy();

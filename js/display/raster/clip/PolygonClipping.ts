@@ -638,6 +638,8 @@ export default class PolygonClipping {
 
       const startXLess = startPoint.x < endPoint.x;
       const startYLess = startPoint.y < endPoint.y;
+      const isHorizontal = startPoint.y === endPoint.y;
+      const isVertical = startPoint.x === endPoint.x;
 
       // const lineMinX = Math.min( startPoint.x, endPoint.x );
       // const lineMinY = Math.min( startPoint.y, endPoint.y );
@@ -650,21 +652,17 @@ export default class PolygonClipping {
       const rawEndStepX = toStepX( endPoint.x );
       const rawEndStepY = toStepY( endPoint.y );
 
-      const rawMinStepX = Math.min( rawStartStepX, rawEndStepX );
-      const rawMinStepY = Math.min( rawStartStepY, rawEndStepY );
-      const rawMaxStepX = Math.max( rawStartStepX, rawEndStepX );
-      const rawMaxStepY = Math.max( rawStartStepY, rawEndStepY );
+      // TODO: get mins/maxes for in-between?
+      const roundedMinStepX = Utils.roundSymmetric( Math.min( rawStartStepX, rawEndStepX ) );
+      const roundedMinStepY = Utils.roundSymmetric( Math.min( rawStartStepY, rawEndStepY ) );
+      const roundedMaxStepX = Utils.roundSymmetric( Math.max( rawStartStepX, rawEndStepX ) );
+      const roundedMaxStepY = Utils.roundSymmetric( Math.max( rawStartStepY, rawEndStepY ) );
 
       // Integral "step" coordinates
-      const startStepX = Math.floor( rawStartStepX );
-      const startStepY = Math.floor( rawStartStepY );
-      const endStepX = Math.ceil( rawEndStepX );
-      const endStepY = Math.ceil( rawEndStepY );
-
-      const minStepX = Math.min( startStepX, endStepX );
-      const minStepY = Math.min( startStepY, endStepY );
-      const maxStepX = Math.max( startStepX, endStepX );
-      const maxStepY = Math.max( startStepY, endStepY );
+      const minStepX = Math.floor( Math.min( rawStartStepX, rawEndStepX ) );
+      const minStepY = Math.floor( Math.min( rawStartStepY, rawEndStepY ) );
+      const maxStepX = Math.ceil( Math.max( rawStartStepX, rawEndStepX ) );
+      const maxStepY = Math.ceil( Math.max( rawStartStepY, rawEndStepY ) );
 
       const lineStepWidth = maxStepX - minStepX;
       const lineStepHeight = maxStepY - minStepY;
@@ -727,11 +725,6 @@ export default class PolygonClipping {
       //   │corner│ half │intern│intern│ half │corner│corner│
       //   └──────┴──────┴──────┴──────┴──────┴──────┴──────┘minY
 
-      const roundedMinStepX = Utils.roundSymmetric( rawMinStepX );
-      const roundedMinStepY = Utils.roundSymmetric( rawMinStepY );
-      const roundedMaxStepX = Utils.roundSymmetric( rawMaxStepX );
-      const roundedMaxStepY = Utils.roundSymmetric( rawMaxStepY );
-
       // TODO: assertions that we're outputting points INSIDE each range to each simplifier
 
       // Handle "internal" cases (the step rectangle that overlaps the line)
@@ -739,6 +732,7 @@ export default class PolygonClipping {
         // If we only take up one cell, we can do a much more optimized form (AND in the future hopefully the clip
         // simplifier will be able to pass through vertices without GC
 
+        const simplifier = simplifiers[ minStepY * stepWidth + minStepX ];
         simplifier.addPoint( startPoint );
         simplifier.addPoint( endPoint );
       }
@@ -754,8 +748,8 @@ export default class PolygonClipping {
           const isLastY = iy === maxStepY - 1;
 
           // The x intercepts for the minimal-y and maximal-y sides of the cell (or if we're on the first or last y cell, the endpoint)
-          const minYXIntercept = isFirstY ? ( startYLess ? startPoint.x : endPoint.x ) : xIntercepts[ iy - 1 ];
-          const maxYXIntercept = isLastY ? ( startYLess ? endPoint.x : startPoint.x ) : xIntercepts[ iy ];
+          const minYXIntercept = isFirstY ? ( startYLess ? startPoint.x : endPoint.x ) : xIntercepts[ iy - minStepY - 1 ];
+          const maxYXIntercept = isLastY ? ( startYLess ? endPoint.x : startPoint.x ) : xIntercepts[ iy - minStepY ];
 
           // Our range of intercepts (so we can quickly check in the inner iteration)
           const minXIntercept = Math.min( minYXIntercept, maxYXIntercept );
@@ -771,8 +765,8 @@ export default class PolygonClipping {
             const isFirstX = ix === minStepX;
             const isLastX = ix === maxStepX - 1;
 
-            const minXYIntercept = isFirstX ? ( startXLess ? startPoint.y : endPoint.y ) : yIntercepts[ ix - 1 ];
-            const maxXYIntercept = isLastX ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix ];
+            const minXYIntercept = isFirstX ? ( startXLess ? startPoint.y : endPoint.y ) : yIntercepts[ ix - minStepX - 1 ];
+            const maxXYIntercept = isLastX ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix - minStepX ];
 
             const minYIntercept = Math.min( minXYIntercept, maxXYIntercept );
             // const maxYIntercept = Math.max( minXYIntercept, maxXYIntercept );
@@ -795,7 +789,7 @@ export default class PolygonClipping {
                 const otherY = isLessThanMinY ? cellMinY : cellMaxY;
                 const xFirst = isLessThanMinX ? startXLess : !startXLess;
                 // TODO: is the four ternary expressions better here?
-                simplifier.add( xFirst ? otherX : cornerX, xFirst ? cornerY : otherX );
+                simplifier.add( xFirst ? otherX : cornerX, xFirst ? cornerY : otherY );
                 simplifier.add( cornerX, cornerY );
                 simplifier.add( xFirst ? cornerX : otherX, xFirst ? otherY : cornerY );
               }
@@ -819,10 +813,39 @@ export default class PolygonClipping {
               const minXY = Utils.clamp( minXYIntercept, cellMinY, cellMaxY );
               const maxXY = Utils.clamp( maxXYIntercept, cellMinY, cellMaxY );
 
-              const startX = startXLess ? minYX : maxYX;
-              const startY = startYLess ? minXY : maxXY;
-              const endX = startXLess ? maxYX : minYX;
-              const endY = startYLess ? maxXY : minXY;
+              let startX;
+              let startY;
+              let endX;
+              let endY;
+
+              if ( isHorizontal ) {
+                const minX = Math.min( minYX, maxYX );
+                const maxX = Math.max( minYX, maxYX );
+
+                startX = startXLess ? minX : maxX;
+                endX = startXLess ? maxX : minX;
+              }
+              else {
+                startX = startYLess ? minYX : maxYX;
+                endX = startYLess ? maxYX : minYX;
+              }
+
+              if ( isVertical ) {
+                const minY = Math.min( minXY, maxXY );
+                const maxY = Math.max( minXY, maxXY );
+
+                startY = startYLess ? minY : maxY;
+                endY = startYLess ? maxY : minY;
+              }
+              else {
+                startY = startXLess ? minXY : maxXY;
+                endY = startXLess ? maxXY : minXY;
+              }
+
+              // const startX = startXLess ? minYX : maxYX;
+              // const startY = isVertical ? ( startYLess ? Math.min( minXY, maxXY ) : Math.max( minXY, maxXY ) ) : ( startYLess ? minXY : maxXY );
+              // const endX = startXLess ? maxYX : minYX;
+              // const endY = startYLess ? maxXY : minXY;
 
               // Ensure we have the correct direction (and our logic is correct)
               assert && assert( new Vector2( endX - startX, endY - startY ).normalized().equalsEpsilon( endPoint.minus( startPoint ).normalized(), 1e-8 ) );

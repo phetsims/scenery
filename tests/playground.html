@@ -485,48 +485,164 @@ an UI and Display made for visual testing and debugging.
 
   window.initialGridClipTest = function() {
     setTimeout( async function() {
-      const polygon = [
-        phet.dot.v2( 15, 15 ),
-        phet.dot.v2( 85, 85 )
-      ];
+      display.initializeEvents();
+      toggleUpdates();
 
-      const stepX = 10;
-      const stepY = 10;
-      const width = 100;
-      const height = 100;
+      const COLOR = false;
 
-      const stepWidth = width / stepX;
-      const stepHeight = height / stepY;
+      // TODO: to get this to work, in main loop, put if ( i > 0 ) { break; }
+      // TODO: we should get this working with the edge version once that's up and running
 
-      const simplifiers = [];
-      for ( let i = 0; i < stepWidth * stepHeight; i++ ) {
-        simplifiers.push( new phet.scenery.ClipSimplifier() );
-      }
+      const matrix = phet.dot.Matrix3.translation( 10, 10 ).timesMatrix( phet.dot.Matrix3.scaling( 5 ) );
 
-      phet.scenery.PolygonClipping.gridClipPolygon( polygon, 0, 0, width, height, stepX, stepY, simplifiers );
+      const polygonToNode = polygon => {
+        const stepX = 10;
+        const stepY = 10;
+        const width = 100;
+        const height = 100;
 
-      // TODO: finalize, once we're doing fuller testing
+        const stepWidth = width / stepX;
+        const stepHeight = height / stepY;
 
-      const container = new phet.scenery.Node( {
-        scale: 5
-      } );
-      scene.addChild( container );
-      for ( let iy = 0; iy < stepHeight; iy++ ) {
-        for ( let ix = 0; ix < stepWidth; ix++ ) {
-          const simplifier = simplifiers[ iy * stepWidth + ix ];
-
-          const bounds = new phet.dot.Bounds2(
-            ix * stepX,
-            iy * stepY,
-            ( ix + 1 ) * stepX,
-            ( iy + 1 ) * stepY
-          );
-
-          container.addChild( phet.scenery.Rectangle.bounds( bounds, { stroke: 'black' } ) );
+        const simplifiers = [];
+        for ( let i = 0; i < stepWidth * stepHeight; i++ ) {
+          simplifiers.push( new phet.scenery.ClipSimplifier() );
         }
-      }
 
-      display.updateDisplay();
+        // TODO: use the edge-based one
+        phet.scenery.PolygonClipping.gridClipPolygon( polygon, 0, 0, width, height, stepX, stepY, simplifiers );
+
+        // TODO: finalize, once we're doing fuller testing
+
+        const container = new phet.scenery.Node( {
+          matrix: matrix
+        } );
+
+        if ( COLOR ) {
+          for ( let iy = 0; iy < stepHeight; iy++ ) {
+            for ( let ix = 0; ix < stepWidth; ix++ ) {
+              const simplifier = simplifiers[ iy * stepWidth + ix ];
+
+              const bounds = new phet.dot.Bounds2(
+                ix * stepX,
+                iy * stepY,
+                ( ix + 1 ) * stepX,
+                ( iy + 1 ) * stepY
+              );
+
+              container.addChild( phet.scenery.Rectangle.bounds( bounds, { stroke: '#ddd', lineWidth: 0.2 } ) );
+
+              const inset = point => {
+                return point.minus( bounds.center ).timesScalar( 0.90 ).plus( bounds.center );
+              };
+
+              const withColorStops = ( gradient, i ) => {
+                const color0 = new phet.scenery.Color( 255, 0, 0, 1 );
+                const color1 = new phet.scenery.Color( 128, 0, 255, 1 );
+                const color2 = new phet.scenery.Color( 0, 255, 255, 1 );
+                const color3 = new phet.scenery.Color( 0, 255, 0, 1 );
+                const colors = [ color0, color1, color2, color3 ];
+                const halfColor = color1.blend( color2, 0.5 );
+                if ( simplifier.points.length <= 2 ) {
+                  return gradient
+                    .addColorStop( 0, color0 )
+                    .addColorStop( 0.33, color1 )
+                    .addColorStop( 0.66, color2 )
+                    .addColorStop( 1, color3 )
+                }
+                else if ( simplifier.points.length === 3 ) {
+                  if ( i === 0 ) {
+                    return gradient
+                      .addColorStop( 0, colors[ 0 ] )
+                      .addColorStop( 0.66, colors[ 1 ] )
+                      .addColorStop( 1, halfColor )
+                  }
+                  else {
+                    return gradient
+                      .addColorStop( 0, halfColor )
+                      .addColorStop( 0.33, colors[ 2 ] )
+                      .addColorStop( 1, colors[ 3 ] )
+                  }
+                }
+                else if ( simplifier.points.length === 4 ) {
+                  return gradient
+                    .addColorStop( 0, colors[ i ] )
+                    .addColorStop( 1, colors[ i + 1 ] )
+                }
+              };
+
+              for ( let i = 1; i < simplifier.points.length; i++ ) {
+                const startPoint = simplifier.points[ i - 1 ];
+                const endPoint = simplifier.points[ i ];
+                container.addChild( new phet.scenery.Line( inset( startPoint ), inset( endPoint ), {
+                  stroke: withColorStops( new phet.scenery.LinearGradient( startPoint.x, startPoint.y, endPoint.x, endPoint.y ), i - 1 ),
+                  lineWidth: 0.2
+                } ) );
+              }
+            }
+          }
+        }
+        else {
+          const boundsShape = new phet.kite.Shape();
+          const lineShape = new phet.kite.Shape();
+          for ( let iy = 0; iy < stepHeight; iy++ ) {
+            for ( let ix = 0; ix < stepWidth; ix++ ) {
+              const simplifier = simplifiers[ iy * stepWidth + ix ];
+
+              const bounds = new phet.dot.Bounds2(
+                ix * stepX,
+                iy * stepY,
+                ( ix + 1 ) * stepX,
+                ( iy + 1 ) * stepY
+              );
+              boundsShape.moveTo( bounds.minX, bounds.minY );
+              boundsShape.lineTo( bounds.maxX, bounds.minY );
+              boundsShape.lineTo( bounds.maxX, bounds.maxY );
+              boundsShape.lineTo( bounds.minX, bounds.maxY );
+              boundsShape.close();
+
+              const inset = point => {
+                return point.minus( bounds.center ).timesScalar( 0.90 ).plus( bounds.center );
+              };
+
+              for ( let i = 0; i < simplifier.points.length; i++ ) {
+                const point = inset( simplifier.points[ i ] );
+
+                if ( i === 0 ) {
+                  lineShape.moveToPoint( point );
+                }
+                else {
+                  lineShape.lineToPoint( point );
+                }
+              }
+            }
+          }
+          container.addChild( new phet.scenery.Path( boundsShape, { stroke: '#ddd', lineWidth: 0.2 } ) );
+          container.addChild( new phet.scenery.Path( lineShape, { stroke: '#000', lineWidth: 0.2 } ) );
+        }
+
+        return container;
+      };
+
+      display.addInputListener( {
+        move: event => {
+          const point = matrix.inverted().timesVector2( event.pointer.point );
+          const polygon = [
+            phet.dot.v2( 48, 48 ),
+            phet.dot.v2( phet.dot.Utils.clamp( point.x, 0, 100 ), phet.dot.Utils.clamp( point.y, 0, 100 ) )
+          ];
+          scene.children = [ polygonToNode( polygon ) ];
+        }
+      } );
+
+      const polygon = [
+        phet.dot.v2( 12, 56 ),
+        phet.dot.v2( 29, 17 ),
+      ];
+      scene.children = [ polygonToNode( polygon ) ];
+
+      display.width = 1024;
+      display.height = 1024;
     } );
   };
 
