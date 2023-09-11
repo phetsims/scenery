@@ -328,8 +328,8 @@ export default class Rasterize {
           const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, averageY );
 
           if ( assertSlow ) {
-            const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, xSplit, maxY ) );
-            const oldMaxFace = clippableFace.getClipped( new Bounds2( xSplit, minY, maxX, maxY ) );
+            const oldMinFace = clippableFace.getClipped( minX, minY, xSplit, maxY );
+            const oldMaxFace = clippableFace.getClipped( xSplit, minY, maxX, maxY );
 
             if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
               assertSlow( false, 'binary X clip issue' );
@@ -358,8 +358,8 @@ export default class Rasterize {
           const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, averageX );
 
           if ( assertSlow ) {
-            const oldMinFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, ySplit ) );
-            const oldMaxFace = clippableFace.getClipped( new Bounds2( minX, ySplit, maxX, maxY ) );
+            const oldMinFace = clippableFace.getClipped( minX, minY, maxX, ySplit );
+            const oldMaxFace = clippableFace.getClipped( minX, ySplit, maxX, maxY );
 
             if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
               assertSlow( false, 'binary Y clip issue' );
@@ -445,7 +445,7 @@ export default class Rasterize {
           continue;
         }
 
-        const clippedFace = clippableFace.getClipped( new Bounds2( minX, minY, maxX, maxY ) );
+        const clippedFace = clippableFace.getClipped( minX, minY, maxX, maxY );
         const area = clippedFace.getArea();
 
         if ( area > 1e-8 ) {
@@ -633,7 +633,10 @@ export default class Rasterize {
       );
 
       if ( polygonFilterWindowMultiplier !== 1 ) {
-        Rasterize.windowedFilterRasterize( context, renderableFace.face.getClipped( contributionBounds ), polygonalBounds.intersection( contributionBounds ) );
+        const clipped = renderableFace.face.getClipped(
+          contributionBounds.minX, contributionBounds.minY, contributionBounds.maxX, contributionBounds.maxY
+        );
+        Rasterize.windowedFilterRasterize( context, clipped, polygonalBounds.intersection( contributionBounds ) );
       }
       else {
         // For filtering, we'll want to round our faceBounds to the nearest (shifted) integer.
@@ -642,7 +645,9 @@ export default class Rasterize {
 
         // We will clip off anything outside the "bounds", since if we're based on EdgedFace we don't want those "fake"
         // edges that might be outside.
-        const clippableFace = renderableFace.face.getClipped( faceBounds );
+        const clippableFace = renderableFace.face.getClipped(
+          faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
+        );
 
         Rasterize.binaryInternalRasterize(
           context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY

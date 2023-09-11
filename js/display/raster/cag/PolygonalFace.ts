@@ -183,8 +183,21 @@ export default class PolygonalFace implements ClippableFace {
     return sum / ( area * transform.getSignedScale() );
   }
 
-  public getClipped( bounds: Bounds2 ): PolygonalFace {
-    return new PolygonalFace( this.polygons.map( polygon => PolygonClipping.boundsClipPolygon( polygon, bounds ) ) );
+  public getClipped( minX: number, minY: number, maxX: number, maxY: number ): PolygonalFace {
+    const centerX = ( minX + maxX ) / 2;
+    const centerY = ( minY + maxY ) / 2;
+
+    const polygons: Vector2[][] = [];
+
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+      const clippedPolygon = PolygonClipping.boundsClipPolygon( polygon, minX, minY, maxX, maxY, centerX, centerY );
+      if ( clippedPolygon.length ) {
+        polygons.push( clippedPolygon );
+      }
+    }
+
+    return new PolygonalFace( polygons );
   }
 
   public getBinaryXClip( x: number, fakeCornerY: number ): { minFace: PolygonalFace; maxFace: PolygonalFace } {

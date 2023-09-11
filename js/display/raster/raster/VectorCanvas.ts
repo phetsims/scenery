@@ -69,7 +69,10 @@ export default class VectorCanvas {
   private fillRenderProgram( renderPath: RenderPath, renderProgram: RenderProgram ): void {
     const bounds = renderPath.getBounds();
 
-    renderPath = new RenderPath( renderPath.fillRule, renderPath.subpaths.map( subpath => PolygonClipping.boundsClipPolygon( subpath, this.bounds ) ) );
+    renderPath = new RenderPath( renderPath.fillRule, renderPath.subpaths.map( subpath => PolygonClipping.boundsClipPolygon(
+      subpath,
+      this.bounds.minX, this.bounds.minY, this.bounds.maxX, this.bounds.maxY, this.bounds.centerX, this.bounds.centerY
+    ) ) );
 
     const newRenderableFaces: RenderableFace[] = [];
 

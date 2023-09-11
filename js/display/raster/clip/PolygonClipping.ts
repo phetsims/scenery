@@ -573,19 +573,16 @@ export default class PolygonClipping {
   }
 
   public static boundsClipEdge(
-    startPoint: Vector2,
-    endPoint: Vector2,
-    bounds: Bounds2,
+    startPoint: Vector2, endPoint: Vector2,
+    // Properties of the bounds
+    minX: number, minY: number, maxX: number, maxY: number, centerX: number, centerY: number,
     result: LinearEdge[] = [] // Will append into this (for performance)
   ): LinearEdge[] {
-
-    const centerX = bounds.centerX;
-    const centerY = bounds.centerY;
 
     const clippedStartPoint = scratchStartPoint.set( startPoint );
     const clippedEndPoint = scratchEndPoint.set( endPoint );
 
-    const clipped = PolygonClipping.matthesDrakopoulosClip( clippedStartPoint, clippedEndPoint, bounds );
+    const clipped = PolygonClipping.matthesDrakopoulosClip( clippedStartPoint, clippedEndPoint, minX, minY, maxX, maxY );
 
     let startXLess;
     let startYLess;
@@ -601,16 +598,16 @@ export default class PolygonClipping {
       startXLess = startPoint.x < centerX;
       startYLess = startPoint.y < centerY;
       startCorner = new Vector2(
-        startXLess ? bounds.minX : bounds.maxX,
-        startYLess ? bounds.minY : bounds.maxY
+        startXLess ? minX : maxX,
+        startYLess ? minY : maxY
       );
     }
     if ( needsEndCorner ) {
       endXLess = endPoint.x < centerX;
       endYLess = endPoint.y < centerY;
       endCorner = new Vector2(
-        endXLess ? bounds.minX : bounds.maxX,
-        endYLess ? bounds.minY : bounds.maxY
+        endXLess ? minX : maxX,
+        endYLess ? minY : maxY
       );
     }
 
@@ -647,8 +644,8 @@ export default class PolygonClipping {
         const yGreater = y > centerY;
 
         const middlePoint = new Vector2(
-          startSame === yGreater ? bounds.minX : bounds.maxX,
-          yGreater ? bounds.maxY : bounds.minY
+          startSame === yGreater ? minX : maxX,
+          yGreater ? maxY : minY
         );
 
         result.push( new LinearEdge( startCorner!, middlePoint ) );
@@ -663,10 +660,11 @@ export default class PolygonClipping {
   }
 
   // TODO: This is a homebrew algorithm that for now generates a bunch of extra points, but is hopefully pretty simple
-  public static boundsClipPolygon( polygon: Vector2[], bounds: Bounds2 ): Vector2[] {
-
-    const centerX = bounds.centerX;
-    const centerY = bounds.centerY;
+  public static boundsClipPolygon(
+    polygon: Vector2[],
+    // Properties of the bounds
+    minX: number, minY: number, maxX: number, maxY: number, centerX: number, centerY: number
+  ): Vector2[] {
 
     // TODO: optimize this
     for ( let i = 0; i < polygon.length; i++ ) {
@@ -676,7 +674,7 @@ export default class PolygonClipping {
       const clippedStartPoint = scratchStartPoint.set( startPoint );
       const clippedEndPoint = scratchEndPoint.set( endPoint );
 
-      const clipped = PolygonClipping.matthesDrakopoulosClip( clippedStartPoint, clippedEndPoint, bounds );
+      const clipped = PolygonClipping.matthesDrakopoulosClip( clippedStartPoint, clippedEndPoint, minX, minY, maxX, maxY );
 
       let startXLess;
       let startYLess;
@@ -697,8 +695,8 @@ export default class PolygonClipping {
 
       if ( needsStartCorner ) {
         simplifier.add(
-          startXLess ? bounds.minX : bounds.maxX,
-          startYLess ? bounds.minY : bounds.maxY
+          startXLess ? minX : maxX,
+          startYLess ? minY : maxY
         );
       }
       if ( clipped ) {
@@ -715,15 +713,15 @@ export default class PolygonClipping {
           const startSame = startXLess === startYLess;
           const yGreater = y > centerY;
           simplifier.add(
-            startSame === yGreater ? bounds.minX : bounds.maxX,
-            yGreater ? bounds.maxY : bounds.minY
+            startSame === yGreater ? minX : maxX,
+            yGreater ? maxY : minY
           );
         }
       }
       if ( needsEndCorner ) {
         simplifier.add(
-          endXLess ? bounds.minX : bounds.maxX,
-          endYLess ? bounds.minY : bounds.maxY
+          endXLess ? minX : maxX,
+          endYLess ? minY : maxY
         );
       }
     }
@@ -735,62 +733,65 @@ export default class PolygonClipping {
    * From "Another Simple but Faster Method for 2D Line Clipping" (2019)
    * by Dimitrios Matthes and Vasileios Drakopoulos
    */
-  private static matthesDrakopoulosClip( p0: Vector2, p1: Vector2, bounds: Bounds2 ): boolean {
-    const x1 = p0.x;
-    const y1 = p0.y;
-    const x2 = p1.x;
-    const y2 = p1.y;
-    // TODO: a version without requiring a Bounds2?
-    const minX = bounds.minX;
-    const minY = bounds.minY;
-    const maxX = bounds.maxX;
-    const maxY = bounds.maxY;
+  private static matthesDrakopoulosClip(
+    p0: Vector2, p1: Vector2,
+    minX: number, minY: number, maxX: number, maxY: number
+  ): boolean {
+    const x0 = p0.x;
+    const y0 = p0.y;
+    const x1 = p1.x;
+    const y1 = p1.y;
 
-    if ( !( x1 < minX && x2 < minX ) && !( x1 > maxX && x2 > maxX ) ) {
-      if ( !( y1 < minY && y2 < minY ) && !( y1 > maxY && y2 > maxY ) ) {
-        // TODO: consider NOT computing these if we don't need them? We probably won't use both?
-        const ma = ( y2 - y1 ) / ( x2 - x1 );
-        const mb = ( x2 - x1 ) / ( y2 - y1 );
+    if (
+      !( x0 < minX && x1 < minX ) &&
+      !( x0 > maxX && x1 > maxX ) &&
+      !( y0 < minY && y1 < minY ) &&
+      !( y0 > maxY && y1 > maxY )
+    ) {
+      // TODO: consider NOT computing these if we don't need them? We probably won't use both?
+      const ma = ( y1 - y0 ) / ( x1 - x0 );
+      const mb = ( x1 - x0 ) / ( y1 - y0 );
 
-        // TODO: on GPU, consider if we should extract out partial subexpressions below
+      // TODO: on GPU, consider if we should extract out partial subexpressions below
 
-        // Unrolled (duplicated essentially)
-        if ( p0.x < minX ) {
-          p0.x = minX;
-          p0.y = ma * ( minX - x1 ) + y1;
-        }
-        else if ( p0.x > maxX ) {
-          p0.x = maxX;
-          p0.y = ma * ( maxX - x1 ) + y1;
-        }
-        if ( p0.y < minY ) {
-          p0.y = minY;
-          p0.x = mb * ( minY - y1 ) + x1;
-        }
-        else if ( p0.y > maxY ) {
-          p0.y = maxY;
-          p0.x = mb * ( maxY - y1 ) + x1;
-        }
-        // Second unrolled form
-        if ( p1.x < minX ) {
-          p1.x = minX;
-          p1.y = ma * ( minX - x1 ) + y1;
-        }
-        else if ( p1.x > maxX ) {
-          p1.x = maxX;
-          p1.y = ma * ( maxX - x1 ) + y1;
-        }
-        if ( p1.y < minY ) {
-          p1.y = minY;
-          p1.x = mb * ( minY - y1 ) + x1;
-        }
-        else if ( p1.y > maxY ) {
-          p1.y = maxY;
-          p1.x = mb * ( maxY - y1 ) + x1;
-        }
-        if ( !( p0.x < minX && p1.x < minX ) && !( p0.x > maxX && p1.x > maxX ) ) {
-          return true;
-        }
+      // Unrolled (duplicated essentially)
+      if ( p0.x < minX ) {
+        p0.x = minX;
+        p0.y = ma * ( minX - x0 ) + y0;
+      }
+      else if ( p0.x > maxX ) {
+        p0.x = maxX;
+        p0.y = ma * ( maxX - x0 ) + y0;
+      }
+      if ( p0.y < minY ) {
+        p0.y = minY;
+        p0.x = mb * ( minY - y0 ) + x0;
+      }
+      else if ( p0.y > maxY ) {
+        p0.y = maxY;
+        p0.x = mb * ( maxY - y0 ) + x0;
+      }
+
+      // Second unrolled form
+      if ( p1.x < minX ) {
+        p1.x = minX;
+        p1.y = ma * ( minX - x0 ) + y0;
+      }
+      else if ( p1.x > maxX ) {
+        p1.x = maxX;
+        p1.y = ma * ( maxX - x0 ) + y0;
+      }
+      if ( p1.y < minY ) {
+        p1.y = minY;
+        p1.x = mb * ( minY - y0 ) + x0;
+      }
+      else if ( p1.y > maxY ) {
+        p1.y = maxY;
+        p1.x = mb * ( maxY - y0 ) + x0;
+      }
+
+      if ( !( p0.x < minX && p1.x < minX ) && !( p0.x > maxX && p1.x > maxX ) ) {
+        return true;
       }
     }
 

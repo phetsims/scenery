@@ -28,7 +28,7 @@ type ClippableFace = {
   getAverageDistanceTransformedToOrigin( transform: Matrix3, area: number ): number;
   getTransformed( transform: Matrix3 ): ClippableFace;
   getRounded( epsilon: number ): ClippableFace; // rounds [-epsilon/2, epsilon/2] to 0, etc.
-  getClipped( bounds: Bounds2 ): ClippableFace;
+  getClipped( minX: number, minY: number, maxX: number, maxY: number ): ClippableFace;
   getBinaryXClip( x: number, fakeCornerY: number ): { minFace: ClippableFace; maxFace: ClippableFace };
   getBinaryYClip( y: number, fakeCornerX: number ): { minFace: ClippableFace; maxFace: ClippableFace };
   getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: ClippableFace; maxFace: ClippableFace };

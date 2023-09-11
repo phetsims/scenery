@@ -248,7 +248,10 @@ export default class PolygonMitchellNetravali {
   private static evaluateWith( polygon: Vector2[], evaluator: Case, transpose: boolean, bounds: Bounds2 ): number {
     let sum = 0;
 
-    const clippedPolygon = PolygonClipping.boundsClipPolygon( polygon, bounds );
+    const clippedPolygon = PolygonClipping.boundsClipPolygon(
+      polygon,
+      bounds.minX, bounds.minY, bounds.maxX, bounds.maxY, bounds.centerX, bounds.centerY
+    );
 
     for ( let i = 0; i < clippedPolygon.length; i++ ) {
       const p0 = clippedPolygon[ i % clippedPolygon.length ];

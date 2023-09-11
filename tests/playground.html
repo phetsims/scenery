@@ -1460,13 +1460,10 @@ an UI and Display made for visual testing and debugging.
       const examplePoint = phet.dot.v2( 4.5, 5.5 );
       const exampleBounds = new phet.dot.Bounds2( examplePoint.x, examplePoint.y, examplePoint.x + 1, examplePoint.y + 1 );
 
-      /*
-          const clippedPolygon = PolygonClipping.boundsClipPolygon( polygon, bounds );
-    // const clippedPolygon = PolygonClipping.sillyClipPolygon( polygon, bounds );
-    // const clippedPolygon = phet.kite.Shape.polygon( polygon ).shapeIntersection( phet.kite.Shape.bounds( bounds ) )?.subpaths[ 0 ]?.points || [];
-       */
-
-      const exampleClip = phet.scenery.PolygonClipping.boundsClipPolygon( polygon, exampleBounds );
+      const exampleClip = phet.scenery.PolygonClipping.boundsClipPolygon(
+        polygon,
+        exampleBounds.minX, exampleBounds.minY, exampleBounds.maxX, exampleBounds.maxY, exampleBounds.centerX, exampleBounds.centerY
+      );
 
       console.log( exampleClip );
 
@@ -2046,7 +2043,10 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       scene.addChild( container );
 
       const addBounds = bounds => {
-        const outPolygon = phet.scenery.PolygonClipping.boundsClipPolygon( inPolygon, bounds );
+        const outPolygon = phet.scenery.PolygonClipping.boundsClipPolygon(
+          inPolygon,
+          bounds.minX, bounds.minY, bounds.maxX, bounds.maxY, bounds.centerX, bounds.centerY
+        );
 
         container.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( bounds ), {
           stroke: 'black',

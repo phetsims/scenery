@@ -91,6 +91,13 @@ export default class IntegerEdge {
   public static clipScaleToIntegerEdges( boundedSubpaths: BoundedSubpath[], bounds: Bounds2, toIntegerMatrix: Matrix3 ): IntegerEdge[] {
     const integerEdges: IntegerEdge[] = [];
 
+    const minX = bounds.minX;
+    const minY = bounds.minY;
+    const maxX = bounds.maxX;
+    const maxY = bounds.maxY;
+    const centerX = bounds.centerX;
+    const centerY = bounds.centerY;
+
     for ( let i = 0; i < boundedSubpaths.length; i++ ) {
       const boundedSubpath = boundedSubpaths[ i ];
       const subpath = boundedSubpath.subpath;
@@ -104,7 +111,7 @@ export default class IntegerEdge {
       // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
       // If a path is fully outside of the clip region, we won't create integer edges out of it.
       // TODO: Optimize our allocations or other parts so that we don't always create a ton of new vectors here
-      const clippedSubpath = goesOutsideBounds ? PolygonClipping.boundsClipPolygon( subpath, bounds ) : subpath;
+      const clippedSubpath = goesOutsideBounds ? PolygonClipping.boundsClipPolygon( subpath, minX, minY, maxX, maxY, centerX, centerY ) : subpath;
 
       for ( let k = 0; k < clippedSubpath.length; k++ ) {
         // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration

@@ -176,12 +176,19 @@ export default class EdgedFace implements ClippableFace {
     return sum / ( area * transform.getSignedScale() );
   }
 
-  public getClipped( bounds: Bounds2 ): EdgedFace {
+  public getClipped( minX: number, minY: number, maxX: number, maxY: number ): EdgedFace {
     const edges: LinearEdge[] = [];
+
+    const centerX = ( minX + maxX ) / 2;
+    const centerY = ( minY + maxY ) / 2;
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
-      PolygonClipping.boundsClipEdge( edge.startPoint, edge.endPoint, bounds, edges );
+      PolygonClipping.boundsClipEdge(
+        edge.startPoint, edge.endPoint,
+        minX, minY, maxX, maxY, centerX, centerY,
+        edges
+      );
     }
 
     return new EdgedFace( edges );
