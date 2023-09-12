@@ -1315,8 +1315,13 @@ export default class PolygonClipping {
 
             const needsStartCorner = !clipped || !startPoint.equals( clippedStartPoint );
             const needsEndCorner = !clipped || !endPoint.equals( clippedEndPoint );
-            let startCorner: Vector2;
-            let endCorner: Vector2;
+
+            // NaNs so TypeScript doesn't complain about unassigned. If it kills performance, presumably can just add
+            // ts-expect-errors
+            let startCornerX = NaN;
+            let startCornerY = NaN;
+            let endCornerX = NaN;
+            let endCornerY = NaN;
 
             const existingStartPoint = needsStartCorner ? null : startPoint;
             const existingEndPoint = needsEndCorner ? null : endPoint;
@@ -1327,60 +1332,45 @@ export default class PolygonClipping {
             if ( needsStartCorner ) {
               cellStartXLess = startPoint.x < cellCenterX;
               cellStartYLess = startPoint.y < cellCenterY;
-              // TODO: allocation reduction
-              startCorner = new Vector2(
-                cellStartXLess ? cellMinX : cellMaxX,
-                cellStartYLess ? cellMinY : cellMaxY
-              );
+              startCornerX = cellStartXLess ? cellMinX : cellMaxX;
+              startCornerY = cellStartYLess ? cellMinY : cellMaxY;
             }
             if ( needsEndCorner ) {
               cellEndXLess = endPoint.x < cellCenterX;
               cellEndYLess = endPoint.y < cellCenterY;
-              // TODO: allocation reduction
-              endCorner = new Vector2(
-                cellEndXLess ? cellMinX : cellMaxX,
-                cellEndYLess ? cellMinY : cellMaxY
-              );
+              endCornerX = cellEndXLess ? cellMinX : cellMaxX;
+              endCornerY = cellEndYLess ? cellMinY : cellMaxY;
             }
 
             if ( clipped ) {
-              const resultStartPoint = clippedStartPoint.copy();
-              const resultEndPoint = clippedEndPoint.copy();
-
-              if ( needsStartCorner && !startCorner!.equals( resultStartPoint ) ) {
-                assert && assert( startCorner! );
-
+              if ( needsStartCorner && ( startCornerX !== clippedStartPoint.x || startCornerY !== clippedStartPoint.y ) ) {
                 callback(
                   ix, iy,
-                  startCorner!.x, startCorner!.y,
-                  resultStartPoint.x, resultStartPoint.y,
+                  startCornerX, startCornerY,
+                  clippedStartPoint.x, clippedStartPoint.y,
                   null, existingStartPoint
                 );
               }
 
-              if ( !resultStartPoint.equals( resultEndPoint ) ) {
+              if ( !clippedStartPoint.equals( clippedEndPoint ) ) {
                 callback(
                   ix, iy,
-                  resultStartPoint.x, resultStartPoint.y,
-                  resultEndPoint.x, resultEndPoint.y,
+                  clippedStartPoint.x, clippedStartPoint.y,
+                  clippedEndPoint.x, clippedEndPoint.y,
                   existingStartPoint, existingEndPoint
                 );
               }
 
-              if ( needsEndCorner && !endCorner!.equals( resultEndPoint ) ) {
-                assert && assert( endCorner! );
-
+              if ( needsEndCorner && ( endCornerX !== clippedEndPoint.x || endCornerY !== clippedEndPoint.y ) ) {
                 callback(
                   ix, iy,
-                  resultEndPoint.x, resultEndPoint.y,
-                  endCorner!.x, endCorner!.y,
+                  clippedEndPoint.x, clippedEndPoint.y,
+                  endCornerX, endCornerY,
                   existingEndPoint, null
                 );
               }
             }
             else {
-              assert && assert( startCorner! && endCorner! );
-
               if ( cellStartXLess !== cellEndXLess && cellStartYLess !== cellEndYLess ) {
                 // we crossed from one corner to the opposite, but didn't hit. figure out which corner we passed
                 // we're diagonal, so solving for y=cellCenterY should give us the info we need
@@ -1397,22 +1387,22 @@ export default class PolygonClipping {
 
                 callback(
                   ix, iy,
-                  startCorner!.x, startCorner!.y,
+                  startCornerX, startCornerY,
                   middlePoint.x, middlePoint.y,
                   null, null
                 );
                 callback(
                   ix, iy,
                   middlePoint.x, middlePoint.y,
-                  endCorner!.x, endCorner!.y,
+                  endCornerX, endCornerY,
                   null, null
                 );
               }
-              else if ( !startCorner!.equals( endCorner! ) ) {
+              else if ( startCornerX !== endCornerX || startCornerY !== endCornerY ) {
                 callback(
                   ix, iy,
-                  startCorner!.x, startCorner!.y,
-                  endCorner!.x, endCorner!.y,
+                  startCornerX, startCornerY,
+                  endCornerX, endCornerY,
                   null, null
                 );
               }
