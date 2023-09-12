@@ -330,8 +330,8 @@ export default class PolygonalFace implements ClippableFace {
       const polygon = this.polygons[ i ];
 
       for ( let j = 0; j < polygon.length; j++ ) {
-        const startPoint = polygon[ i ];
-        const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+        const startPoint = polygon[ j ];
+        const endPoint = polygon[ ( j + 1 ) % polygon.length ];
 
         PolygonClipping.gridClipIterate(
           startPoint, endPoint,

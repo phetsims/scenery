@@ -685,11 +685,17 @@ an UI and Display made for visual testing and debugging.
         fill: 'rgba(255,0,0,0.5)'
       } ) );
 
+      const getInsetTransform = bounds => {
+        return phet.dot.Matrix3.translation( bounds.center.x, bounds.center.y ).timesMatrix( phet.dot.Matrix3.scaling( 0.90 ).timesMatrix( phet.dot.Matrix3.translation( -bounds.center.x, -bounds.center.y ) ) );
+      };
       const inset = ( bounds, point ) => {
         return point.minus( bounds.center ).timesScalar( 0.90 ).plus( bounds.center );
       };
 
       const showLine = ( cellX, cellY, startX, startY, endX, endY ) => {
+        // if ( cellX === Math.ceil( width / 2 ) && cellY === Math.ceil( height / 2 ) ) {
+        //   console.log( cellX, cellY, startX, startY, endX, endY );
+        // }
         const bounds = new phet.dot.Bounds2( minX + cellX, minY + cellY, minX + cellX + 1, minY + cellY + 1 );
         const startPoint = inset( bounds, phet.dot.v2( startX, startY ) );
         const endPoint = inset( bounds, phet.dot.v2( endX, endY ) );
@@ -709,10 +715,10 @@ an UI and Display made for visual testing and debugging.
           () => {}
         );
       };
-      // showLineBetween( 0, 0 );
-      // showLineBetween( 0, 1 );
+      showLineBetween( 0, 0 );
+      showLineBetween( 0, 1 );
       showLineBetween( 0, 2 );
-      // showLineBetween( 0, 3 );
+      showLineBetween( 0, 3 );
 
       // face.gridClipIterate(
       //   minX, minY, maxX, maxY,
@@ -720,6 +726,40 @@ an UI and Display made for visual testing and debugging.
       //   showLine,
       //   () => {}
       // );
+
+      const accumulators = [];
+      for ( let i = 0; i < size; i++ ) {
+        accumulators.push( face.getAccumulator() );
+      }
+      const accumulateFaces = ( cellX, cellY, startX, startY, endX, endY ) => {
+        // if ( cellX === 12 && cellY === 10 ) {
+        // if ( cellX === Math.ceil( width / 2 ) && cellY === Math.ceil( height / 2 ) ) {
+        //   console.log( cellX, cellY, startX, startY, endX, endY );
+        // }
+        accumulators[ cellY * width + cellX ].addEdge( startX, startY, endX, endY );
+      };
+      face.gridClipIterate(
+        minX, minY, maxX, maxY,
+        1, 1, width, height,
+        accumulateFaces,
+        () => {
+          console.log( 'markNewPolygon' );
+          accumulators.forEach( accumulator => accumulator.markNewPolygon() );
+        }
+      );
+      const faces = accumulators.map( accumulator => accumulator.finalizeFace() );
+
+      for ( let iy = 0; iy < height; iy++ ) {
+        for ( let ix = 0; ix < width; ix++ ) {
+          const face = faces[ iy * width + ix ];
+          if ( face && face.getArea() > 1e-8 ) {
+            const bounds = new phet.dot.Bounds2( minX + ix, minY + iy, minX + ix + 1, minY + iy + 1 );
+            container.addChild( new phet.scenery.Path( face.getShape().transformed( getInsetTransform( bounds ) ), {
+              fill: 'rgba(0,0,255,0.5)'
+            } ) );
+          }
+        }
+      }
 
       display.width = 1024;
       display.height = 1024;
