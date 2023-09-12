@@ -673,6 +673,19 @@ export default class PolygonClipping {
         let y = firstY;
         for ( let j = minStepX + 2; j < maxStepX; j++ ) {
           y += slopeIncrement;
+
+          // NOTE: We'll any intercept that matches a start/end point to match up exactly (we're working around
+          // floating point error here)
+          const x = fromStepX( j );
+          if ( x === startPoint.x ) {
+            assert && assert( Math.abs( y - startPoint.y ) < 1e-7 );
+            y = startPoint.y;
+          }
+          if ( x === endPoint.x ) {
+            assert && assert( Math.abs( y - endPoint.y ) < 1e-7 );
+            y = endPoint.y;
+          }
+
           assert && assert( isFinite( y ) );
           yIntercepts.push( y );
         }
@@ -688,6 +701,19 @@ export default class PolygonClipping {
         let x = firstX;
         for ( let j = minStepY + 2; j < maxStepY; j++ ) {
           x += slopeIncrement;
+
+          // NOTE: We'll any intercept that matches a start/end point to match up exactly (we're working around
+          // floating point error here)
+          const y = fromStepY( j );
+          if ( y === startPoint.y ) {
+            assert && assert( Math.abs( x - startPoint.x ) < 1e-7 );
+            x = startPoint.x;
+          }
+          if ( y === endPoint.y ) {
+            assert && assert( Math.abs( x - endPoint.x ) < 1e-7 );
+            x = endPoint.x;
+          }
+
           assert && assert( isFinite( x ) );
           xIntercepts.push( x );
         }

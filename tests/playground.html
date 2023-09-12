@@ -652,11 +652,11 @@ an UI and Display made for visual testing and debugging.
 
   window.badGridClipTest = function() {
     setTimeout( async () => {
-      const face = phet.scenery.PolygonalFace.deserialize( {"polygons":[[{"x":122,"y":24.750000000000004},{"x":122,"y":31},{"x":120,"y":31},{"x":120,"y":22.500000000000007}]]} );
-      const minX = 107;
-      const minY = 22;
-      const maxX = 122;
-      const maxY = 31;
+      const face = phet.scenery.PolygonalFace.deserialize( {"polygons":[[{"x":250.22222222222229,"y":256.00000000000006},{"x":235.72865757050002,"y":256},{"x":243.55033407941545,"y":248.49412583934236}]]} );
+      const minX = 235;
+      const minY = 248;
+      const maxX = 251;
+      const maxY = 257;
 
       const width = maxX - minX;
       const height = maxY - minY;
@@ -693,9 +693,9 @@ an UI and Display made for visual testing and debugging.
       };
 
       const showLine = ( cellX, cellY, startX, startY, endX, endY ) => {
-        if ( cellX === 12 && cellY === 0 ) {
-          console.log( startX, startY, endX, endY );
+        if ( cellX === 0 && cellY === 7 ) {
           debugger;
+          console.log( startX, startY, endX, endY );
         }
         // if ( cellX === Math.ceil( width / 2 ) && cellY === Math.ceil( height / 2 ) ) {
         //   console.log( cellX, cellY, startX, startY, endX, endY );
@@ -719,10 +719,11 @@ an UI and Display made for visual testing and debugging.
           () => {}
         );
       };
-      showLineBetween( 0, 0 );
+      // showLineBetween( 0, 0 );
       showLineBetween( 0, 1 );
-      showLineBetween( 0, 2 );
-      showLineBetween( 0, 3 );
+      // showLineBetween( 0, 2 );
+
+      // showLineBetween( 0, 3 );
 
       const accumulators = [];
       for ( let i = 0; i < size; i++ ) {
@@ -742,17 +743,17 @@ an UI and Display made for visual testing and debugging.
       );
       const faces = accumulators.map( accumulator => accumulator.finalizeFace() );
 
-      for ( let iy = 0; iy < height; iy++ ) {
-        for ( let ix = 0; ix < width; ix++ ) {
-          const face = faces[ iy * width + ix ];
-          if ( face && Math.abs( face.getArea() ) > 1e-8 ) {
-            const bounds = new phet.dot.Bounds2( minX + ix, minY + iy, minX + ix + 1, minY + iy + 1 );
-            container.addChild( new phet.scenery.Path( face.getShape().transformed( getInsetTransform( bounds ) ), {
-              fill: face.getArea() > 0 ? 'rgba(0,0,255,0.5)' : 'rgba(0,255,0,0.5)'
-            } ) );
-          }
-        }
-      }
+      // for ( let iy = 0; iy < height; iy++ ) {
+      //   for ( let ix = 0; ix < width; ix++ ) {
+      //     const face = faces[ iy * width + ix ];
+      //     if ( face && Math.abs( face.getArea() ) > 1e-8 ) {
+      //       const bounds = new phet.dot.Bounds2( minX + ix, minY + iy, minX + ix + 1, minY + iy + 1 );
+      //       container.addChild( new phet.scenery.Path( face.getShape().transformed( getInsetTransform( bounds ) ), {
+      //         fill: face.getArea() > 0 ? 'rgba(0,0,255,0.5)' : 'rgba(0,255,0,0.5)'
+      //       } ) );
+      //     }
+      //   }
+      // }
 
       display.width = 1024;
       display.height = 1024;
