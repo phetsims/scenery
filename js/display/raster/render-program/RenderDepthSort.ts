@@ -6,10 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderPlanar, RenderProgram, RenderableFace, SerializedRenderProgram, scenery, RenderStack } from '../../../imports.js';
+import { ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderPlanar, RenderProgram, RenderStack, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Range from '../../../../../dot/js/Range.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
@@ -86,24 +85,17 @@ export default class RenderDepthSort extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    assert && assert( context.hasCentroid() );
 
     // Negative, so that our highest-depth things are first
-    const sortedItems = _.sortBy( this.items, item => -item.getDepth( centroid.x, centroid.y ) );
+    const sortedItems = _.sortBy( this.items, item => -item.getDepth( context.centroid.x, context.centroid.y ) );
 
     const color = Vector4.ZERO.copy(); // we will mutate it
 
     // Blend like normal!
     for ( let i = 0; i < sortedItems.length; i++ ) {
-      const blendColor = sortedItems[ i ].program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      const blendColor = sortedItems[ i ].program.evaluate( context );
       const backgroundAlpha = 1 - blendColor.w;
 
       // Assume premultiplied

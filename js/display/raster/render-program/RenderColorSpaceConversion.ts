@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderColorSpace, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { RenderColor, RenderColorSpace, RenderEvaluationContext, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Constructor from '../../../../../phet-core/js/types/Constructor.js';
 
@@ -70,16 +69,8 @@ export default abstract class RenderColorSpaceConversion extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
-    const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    const source = this.program.evaluate( context );
 
     return this.convert( source );
   }

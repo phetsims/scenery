@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, LinearEdge, PolygonalFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { LinearEdge, RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -98,28 +98,22 @@ export default class RenderRadialBlend extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
     // TODO: flag to control whether this gets set? TODO: Flag to just use centroid
     let averageDistance;
     if ( this.accuracy === RenderRadialBlendAccuracy.Accurate ) {
-      if ( face ) {
-        averageDistance = face.getAverageDistanceTransformedToOrigin( this.inverseTransform, area );
+      assert && assert( context.hasArea() );
+
+      if ( context.face ) {
+        averageDistance = context.face.getAverageDistanceTransformedToOrigin( this.inverseTransform, context.area );
       }
       else {
         // NOTE: Do the equivalent of the above, but without creating a face and a ton of garbage
 
-        const p0 = this.inverseTransform.multiplyVector2( scratchVectorA.setXY( minX, minY ) );
-        const p1 = this.inverseTransform.multiplyVector2( scratchVectorB.setXY( maxX, minY ) );
-        const p2 = this.inverseTransform.multiplyVector2( scratchVectorC.setXY( maxX, maxY ) );
-        const p3 = this.inverseTransform.multiplyVector2( scratchVectorD.setXY( minX, maxY ) );
+        const p0 = this.inverseTransform.multiplyVector2( scratchVectorA.setXY( context.minX, context.minY ) );
+        const p1 = this.inverseTransform.multiplyVector2( scratchVectorB.setXY( context.maxX, context.minY ) );
+        const p2 = this.inverseTransform.multiplyVector2( scratchVectorC.setXY( context.maxX, context.maxY ) );
+        const p3 = this.inverseTransform.multiplyVector2( scratchVectorD.setXY( context.minX, context.maxY ) );
 
         // Needs CCW orientation
         averageDistance = (
@@ -127,26 +121,21 @@ export default class RenderRadialBlend extends RenderProgram {
                             LinearEdge.evaluateLineIntegralDistance( p1.x, p1.y, p2.x, p2.y ) +
                             LinearEdge.evaluateLineIntegralDistance( p2.x, p2.y, p3.x, p3.y ) +
                             LinearEdge.evaluateLineIntegralDistance( p3.x, p3.y, p0.x, p0.y )
-                          ) / ( area * this.inverseTransform.getSignedScale() );
+                          ) / ( context.area * this.inverseTransform.getSignedScale() );
 
-        assert && assert( averageDistance === new PolygonalFace( [
-          [
-            new Vector2( minX, minY ),
-            new Vector2( maxX, minY ),
-            new Vector2( maxX, maxY ),
-            new Vector2( minX, maxY )
-          ]
-        ] ).getAverageDistanceTransformedToOrigin( this.inverseTransform, area ) );
+        assert && assert( averageDistance === context.getFace().getAverageDistanceTransformedToOrigin( this.inverseTransform, context.area ) );
       }
     }
     else if ( this.accuracy === RenderRadialBlendAccuracy.Centroid ) {
-      const localPoint = scratchRadialBlendVector.set( centroid );
+      assert && assert( context.hasCentroid() );
+
+      const localPoint = scratchRadialBlendVector.set( context.centroid );
       this.inverseTransform.multiplyVector2( localPoint );
 
       averageDistance = localPoint.magnitude;
     }
     else if ( this.accuracy === RenderRadialBlendAccuracy.PixelCenter ) {
-      const localPoint = scratchRadialBlendVector.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+      const localPoint = context.writeBoundsCentroid( scratchRadialBlendVector );
       this.inverseTransform.multiplyVector2( localPoint );
 
       averageDistance = localPoint.magnitude;
@@ -167,15 +156,15 @@ export default class RenderRadialBlend extends RenderProgram {
     assert && assert( isFinite( t ) );
 
     if ( t <= 0 ) {
-      return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return this.zero.evaluate( context );
     }
     else if ( t >= 1 ) {
-      return this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return this.one.evaluate( context );
     }
     else {
       return RenderColor.ratioBlend(
-        this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
-        this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
+        this.zero.evaluate( context ),
+        this.one.evaluate( context ),
         t
       );
     }

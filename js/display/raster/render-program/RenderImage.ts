@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonMitchellNetravali, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable } from '../../../imports.js';
+import { ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, scenery, SerializedRenderImageable } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -73,19 +73,11 @@ export default class RenderImage extends RenderProgram {
       this.resampleType === other.resampleType;
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
     // TODO: analytic box! Bilinear! Bicubic! (can we mipmap for those?)
     switch( this.resampleType ) {
       case RenderResampleType.NearestNeighbor: {
-        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
+        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( context.centroid );
         const roundedX = Utils.roundSymmetric( localPoint.x );
         const roundedY = Utils.roundSymmetric( localPoint.y );
         const x = RenderImage.extendInteger( roundedX, this.image.width, this.extendX );
@@ -94,7 +86,7 @@ export default class RenderImage extends RenderProgram {
         return this.image.evaluate( x, y );
       }
       case RenderResampleType.Bilinear: {
-        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
+        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( context.centroid );
 
         const floorX = Math.floor( localPoint.x );
         const floorY = Math.floor( localPoint.y );
@@ -120,7 +112,7 @@ export default class RenderImage extends RenderProgram {
         return ab.timesScalar( 1 - fractionX ).plus( cd.timesScalar( fractionX ) );
       }
       case RenderResampleType.MitchellNetravali: {
-        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( centroid );
+        const localPoint = this.inverseTransformWithHalfOffset.timesVector2( context.centroid );
 
         const floorX = Math.floor( localPoint.x );
         const floorY = Math.floor( localPoint.y );
@@ -176,8 +168,7 @@ export default class RenderImage extends RenderProgram {
       }
       case RenderResampleType.AnalyticBox: {
         return RenderImage.evaluateAnalyticFilter(
-          this, face,
-          minX, minY, maxX, maxY,
+          this, context,
           this.inverseTransform,
           0, 1, -1,
           ( face: ClippableFace, x: number, y: number, px: number, py: number, area: number ) => {
@@ -188,8 +179,7 @@ export default class RenderImage extends RenderProgram {
       }
       case RenderResampleType.AnalyticBilinear: {
         return RenderImage.evaluateAnalyticFilter(
-          this, face,
-          minX, minY, maxX, maxY,
+          this, context,
           this.inverseTransformWithHalfOffset,
           1, 1, 0,
           ( face: ClippableFace, x: number, y: number, px: number, py: number, area: number ) => {
@@ -200,8 +190,7 @@ export default class RenderImage extends RenderProgram {
       }
       case RenderResampleType.AnalyticMitchellNetravali: {
         return RenderImage.evaluateAnalyticFilter(
-          this, face,
-          minX, minY, maxX, maxY,
+          this, context,
           this.inverseTransformWithHalfOffset,
           2, 2, 0,
           ( face: ClippableFace, x: number, y: number, px: number, py: number, area: number ) => {
@@ -256,11 +245,7 @@ export default class RenderImage extends RenderProgram {
    */
   public static evaluateAnalyticFilter(
     renderImage: RenderImage,
-    face: ClippableFace | null,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number,
+    context: RenderEvaluationContext,
     inverseTransform: Matrix3,
     minExpand: number,
     maxExpand: number,
@@ -280,7 +265,8 @@ export default class RenderImage extends RenderProgram {
 
     // If we don't have a face (i.e. we are taking up the full bounds specified by minX/minY/maxX/maxY), we'll
     // construct a face that covers the entire bounds.
-    face = RenderProgram.ensureFace( face, minX, minY, maxX, maxY );
+    // TODO: Move this to RenderEvaluationContext
+    const face = context.getFace();
 
     // We'll mutate and return this
     const color = Vector4.ZERO.copy();
@@ -300,13 +286,13 @@ export default class RenderImage extends RenderProgram {
     const verticalCount = verticalSplitValues.length + 1;
 
     // TODO: GRID clip, OR even more optimized stripe clips? (or wait... do we not burn much by stripe clipping unused regions?)
-    const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, ( minX + maxX ) / 2 ) : [ localFace ];
+    const rows = verticalSplitValues.length ? localFace.getStripeLineClip( Vector2.Y_UNIT, verticalSplitValues, context.getCenterX() ) : [ localFace ];
 
     assertSlow && assertSlow( Math.abs( localFace.getArea() - _.sum( rows.map( f => f.getArea() ) ) ) < 1e-6 );
 
     const areas: number[][] = [];
     const pixelFaces = rows.map( face => {
-      const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, ( minY + maxY ) / 2 ) : [ face ];
+      const row = horizontalSplitValues.length ? face.getStripeLineClip( Vector2.X_UNIT, horizontalSplitValues, context.getCenterY() ) : [ face ];
 
       assertSlow && assertSlow( Math.abs( face.getArea() - _.sum( row.map( f => f.getArea() ) ) ) < 1e-6 );
 

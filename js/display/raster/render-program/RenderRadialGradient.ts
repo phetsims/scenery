@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderableFace, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, scenery, SerializedRenderGradientStop } from '../../../imports.js';
+import { ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, scenery, SerializedRenderGradientStop } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -117,20 +117,12 @@ export default class RenderRadialGradient extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
     if ( this.logic === null ) {
       this.logic = new RadialGradientLogic( this );
     }
 
-    return this.logic.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.accuracy );
+    return this.logic.evaluate( context, this.accuracy );
   }
 
   public override split( face: RenderableFace ): RenderableFace[] {
@@ -370,13 +362,7 @@ class RadialGradientLogic {
   }
 
   public evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number,
+    context: RenderEvaluationContext,
     accuracy: RenderRadialGradientAccuracy
   ): Vector4 {
     const focal_x = this.focal_x;
@@ -398,7 +384,7 @@ class RadialGradientLogic {
       accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ||
       accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
       accuracy === RenderRadialGradientAccuracy.SplitAccurate
-    ) ? centroid : scratchVectorA.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+    ) ? context.centroid : context.writeBoundsCentroid( scratchVectorA );
 
     // Pixel-specifics
     const local_xy = this.xform.timesVector2( point );
@@ -431,11 +417,11 @@ class RadialGradientLogic {
         t = 1 - t;
       }
 
-      return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.radialGradient.stops, t );
+      return RenderGradientStop.evaluate( context, this.radialGradient.stops, t );
     }
     else {
       // Invalid is a checkerboard red/yellow
-      return ( Utils.roundSymmetric( centroid.x ) + Utils.roundSymmetric( centroid.y ) ) % 2 === 0 ? new Vector4( 1, 0, 0, 1 ) : new Vector4( 1, 1, 0, 1 );
+      return ( Utils.roundSymmetric( context.centroid.x ) + Utils.roundSymmetric( context.centroid.y ) ) % 2 === 0 ? new Vector4( 1, 0, 0, 1 ) : new Vector4( 1, 1, 0, 1 );
     }
   }
 }

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -18,6 +18,8 @@ export enum RenderBarycentricPerspectiveBlendAccuracy {
   Centroid = 0,
   PixelCenter = 1
 }
+
+const scratchCentroid = new Vector2( 0, 0 );
 
 scenery.register( 'RenderBarycentricPerspectiveBlendAccuracy', RenderBarycentricPerspectiveBlendAccuracy );
 
@@ -99,17 +101,9 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
 
-    const point = this.accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid ? centroid : new Vector2( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+    const point = this.accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
     const pA = this.pointA;
     const pB = this.pointB;
     const pC = this.pointC;
@@ -122,9 +116,9 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
     const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
     const lambdaC = 1 - lambdaA - lambdaB;
 
-    const aColor = this.a.evaluate( face, area, centroid, minX, minY, maxX, maxY ).timesScalar( 1 / pA.z );
-    const bColor = this.b.evaluate( face, area, centroid, minX, minY, maxX, maxY ).timesScalar( 1 / pB.z );
-    const cColor = this.c.evaluate( face, area, centroid, minX, minY, maxX, maxY ).timesScalar( 1 / pC.z );
+    const aColor = this.a.evaluate( context ).timesScalar( 1 / pA.z );
+    const bColor = this.b.evaluate( context ).timesScalar( 1 / pB.z );
+    const cColor = this.c.evaluate( context ).timesScalar( 1 / pC.z );
     const z = 1 / ( lambdaA / pA.z + lambdaB / pB.z + lambdaC / pC.z );
 
     assert && assert( aColor.isFinite(), `Color A must be finite: ${aColor}` );

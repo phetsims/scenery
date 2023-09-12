@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, isWindingIncluded, LinearEdge, RenderColor, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { isWindingIncluded, LinearEdge, RenderColor, RenderEvaluationContext, RenderPath, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import { SerializedRenderPath } from './RenderPath.js';
@@ -80,20 +79,14 @@ export default class RenderPathBoolean extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    assert && assert( context.hasCentroid() );
+
     // TODO: ACTUALLY, we should clip the face with our path....
-    const windingNumber = LinearEdge.getWindingNumberPolygons( this.path.subpaths, centroid );
+    const windingNumber = LinearEdge.getWindingNumberPolygons( this.path.subpaths, context.centroid );
     const included = isWindingIncluded( windingNumber, this.path.fillRule );
 
-    return ( included ? this.inside : this.outside ).evaluate( face, area, centroid, minX, minY, maxX, maxY );
+    return ( included ? this.inside : this.outside ).evaluate( context );
   }
 
   protected override getExtraDebugString(): string {

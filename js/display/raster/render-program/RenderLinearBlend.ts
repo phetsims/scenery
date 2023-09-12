@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -99,31 +99,27 @@ export default class RenderLinearBlend extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    if ( assert && this.accuracy === RenderLinearBlendAccuracy.Accurate ) {
+      assert( context.hasCentroid() );
+    }
+
     const dot = this.accuracy === RenderLinearBlendAccuracy.Accurate ?
-                this.scaledNormal.dot( centroid ) :
-                this.scaledNormal.x * ( minX + maxX ) / 2 + this.scaledNormal.y * ( minY + maxY ) / 2;
+                this.scaledNormal.dot( context.centroid ) :
+                this.scaledNormal.x * context.getCenterX() + this.scaledNormal.y * context.getCenterY();
 
     const t = dot - this.offset;
 
     if ( t <= 0 ) {
-      return this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return this.zero.evaluate( context );
     }
     else if ( t >= 1 ) {
-      return this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return this.one.evaluate( context );
     }
     else {
       return RenderColor.ratioBlend(
-        this.zero.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
-        this.one.evaluate( face, area, centroid, minX, minY, maxX, maxY ),
+        this.zero.evaluate( context ),
+        this.one.evaluate( context ),
         t
       );
     }

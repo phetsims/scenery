@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBarycentricBlend, RenderBarycentricPerspectiveBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderDepthSort, RenderFilter, RenderImage, RenderLinearBlend, RenderLinearGradient, RenderNormalDebug, RenderNormalize, RenderPath, RenderPathBoolean, RenderPhong, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, scenery, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBarycentricPerspectiveBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderDepthSort, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderNormalDebug, SerializedRenderNormalize, SerializedRenderPathBoolean, SerializedRenderPhong, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBarycentricBlend, RenderBarycentricPerspectiveBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderDepthSort, RenderEvaluationContext, RenderFilter, RenderImage, RenderInstruction, RenderLinearBlend, RenderLinearGradient, RenderNormalDebug, RenderNormalize, RenderPath, RenderPathBoolean, RenderPhong, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, scenery, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBarycentricPerspectiveBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderDepthSort, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderNormalDebug, SerializedRenderNormalize, SerializedRenderPathBoolean, SerializedRenderPhong, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../../../imports.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
@@ -118,16 +117,12 @@ export default abstract class RenderProgram {
     return null;
   }
 
+  public getInstructions(): RenderInstruction[] {
+    throw new Error( 'unimplemented' ); // TODO: make abstract
+  }
+
   // Premultiplied linear RGB, ignoring the path
-  public abstract evaluate(
-    face: ClippableFace | null, // if null AND we have a need set for a face, it is fully covered
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4;
+  public abstract evaluate( context: RenderEvaluationContext ): Vector4;
 
   public equals( other: RenderProgram ): boolean {
     return this === other || (
@@ -293,6 +288,8 @@ export default abstract class RenderProgram {
     throw new Error( `Unrecognized RenderProgram type: ${obj.type}` );
   }
 
+  // TODO: Prefer RenderEvaluationContext.getFace()
+  // @deprecated
   public static ensureFace( face: ClippableFace | null, minX: number, minY: number, maxX: number, maxY: number ): ClippableFace {
     return face || PolygonalFace.fromBoundsValues( minX, minY, maxX, maxY );
   }

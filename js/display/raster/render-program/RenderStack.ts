@@ -7,8 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default class RenderStack extends RenderProgram {
@@ -100,21 +99,13 @@ export default class RenderStack extends RenderProgram {
     );
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
     // non-stack-based (so no shortcut, but stable memory and simple). Could do in the reverse direction
 
     const color = Vector4.ZERO.copy(); // we will mutate it
 
     for ( let i = 0; i < this.children.length; i++ ) {
-      const blendColor = this.children[ i ].evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      const blendColor = this.children[ i ].evaluate( context );
       const backgroundAlpha = 1 - blendColor.w;
 
       // Assume premultiplied

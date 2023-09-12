@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -17,6 +17,8 @@ export enum RenderBarycentricBlendAccuracy {
   Accurate = 0,
   PixelCenter = 1
 }
+
+const scratchCentroid = new Vector2( 0, 0 );
 
 scenery.register( 'RenderBarycentricBlendAccuracy', RenderBarycentricBlendAccuracy );
 
@@ -92,20 +94,41 @@ export default class RenderBarycentricBlend extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
 
-    const point = this.accuracy === RenderBarycentricBlendAccuracy.Accurate ? centroid : new Vector2( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
-    const pA = this.pointA;
-    const pB = this.pointB;
-    const pC = this.pointC;
+    const aColor = this.a.evaluate( context );
+    const bColor = this.b.evaluate( context );
+    const cColor = this.c.evaluate( context );
+
+    const vector = new Vector4( 0, 0, 0, 0 );
+    RenderBarycentricBlend.applyProgram(
+      vector, context, this.pointA, this.pointB, this.pointC, this.accuracy, aColor, bColor, cColor
+    );
+    return vector;
+  }
+
+  // TODO: Separation of data and evaluation context
+  public static applyProgram(
+    vector: Vector4,
+    context: RenderEvaluationContext,
+    pointA: Vector2,
+    pointB: Vector2,
+    pointC: Vector2,
+    accuracy: RenderBarycentricBlendAccuracy,
+    aColor: Vector4,
+    bColor: Vector4,
+    cColor: Vector4
+  ): void {
+    if ( assert ) {
+      if ( accuracy === RenderBarycentricBlendAccuracy.Accurate ) {
+        assert( context.hasCentroid() );
+      }
+    }
+
+    const point = accuracy === RenderBarycentricBlendAccuracy.Accurate ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
+    const pA = pointA;
+    const pB = pointB;
+    const pC = pointC;
 
     // TODO: can precompute things like this!!!
     // TODO: factor out common things!
@@ -115,17 +138,18 @@ export default class RenderBarycentricBlend extends RenderProgram {
     const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
     const lambdaC = 1 - lambdaA - lambdaB;
 
-    const aColor = this.a.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    const bColor = this.b.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    const cColor = this.c.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-
-    return new Vector4(
+    vector.setXYZW(
       aColor.x * lambdaA + bColor.x * lambdaB + cColor.x * lambdaC,
       aColor.y * lambdaA + bColor.y * lambdaB + cColor.y * lambdaC,
       aColor.z * lambdaA + bColor.z * lambdaB + cColor.z * lambdaC,
       aColor.w * lambdaA + bColor.w * lambdaB + cColor.w * lambdaC
     );
   }
+
+  // TODO:!!!!
+  // public override getInstructions(): RenderInstruction[] {
+  //   return [ new RenderInstructionPush( this.color ) ];
+  // }
 
   public override serialize(): SerializedRenderBarycentricBlend {
     return {

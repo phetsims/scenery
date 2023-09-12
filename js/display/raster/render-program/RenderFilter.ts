@@ -9,8 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderPathBoolean, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
@@ -83,16 +82,8 @@ export default class RenderFilter extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
-    const source = this.program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    const source = this.program.evaluate( context );
 
     return RenderFilter.applyFilter( source, this.colorMatrix, this.colorTranslation );
   }

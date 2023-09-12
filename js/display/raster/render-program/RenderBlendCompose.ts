@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderBlendType, RenderColor, RenderComposeType, RenderProgram, RenderStack, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderProgram, RenderStack, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 
@@ -187,17 +186,9 @@ export default class RenderBlendCompose extends RenderProgram {
     }
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
-    const a = this.a.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    const b = this.b.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    const a = this.a.evaluate( context );
+    const b = this.b.evaluate( context );
 
     return RenderBlendCompose.blendCompose( a, b, this.composeType, this.blendType );
   }

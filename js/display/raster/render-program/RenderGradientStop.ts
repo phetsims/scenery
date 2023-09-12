@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default class RenderGradientStop {
@@ -16,13 +15,7 @@ export default class RenderGradientStop {
   }
 
   public static evaluate(
-    face: ClippableFace | null, // if null, it is fully covered
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number,
+    context: RenderEvaluationContext,
     stops: RenderGradientStop[],
     t: number
   ): Vector4 {
@@ -31,18 +24,18 @@ export default class RenderGradientStop {
       i++;
     }
     if ( i === -1 ) {
-      return stops[ 0 ].program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return stops[ 0 ].program.evaluate( context );
     }
     else if ( i === stops.length - 1 ) {
-      return stops[ i ].program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return stops[ i ].program.evaluate( context );
     }
     else {
       const before = stops[ i ];
       const after = stops[ i + 1 ];
       const ratio = ( t - before.ratio ) / ( after.ratio - before.ratio );
 
-      const beforeColor = before.program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-      const afterColor = after.program.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      const beforeColor = before.program.evaluate( context );
+      const afterColor = after.program.evaluate( context );
 
       return RenderColor.ratioBlend( beforeColor, afterColor, ratio );
     }

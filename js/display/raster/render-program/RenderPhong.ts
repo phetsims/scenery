@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderColor, RenderLight, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { RenderColor, RenderEvaluationContext, RenderLight, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default class RenderPhong extends RenderProgram {
@@ -141,27 +140,19 @@ export default class RenderPhong extends RenderProgram {
     return result;
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
-    const ambientColor = this.ambientColorProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    const diffuseColor = this.diffuseColorProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    const specularColor = this.specularColorProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    const position = this.positionProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
-    const normal = this.normalProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    const ambientColor = this.ambientColorProgram.evaluate( context );
+    const diffuseColor = this.diffuseColorProgram.evaluate( context );
+    const specularColor = this.specularColorProgram.evaluate( context );
+    const position = this.positionProgram.evaluate( context );
+    const normal = this.normalProgram.evaluate( context );
 
     // TODO: optimize?
     const lightDirections = _.range( 0, this.lights.length ).map( i => {
-      return this.lights[ i ].directionProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return this.lights[ i ].directionProgram.evaluate( context );
     } );
     const lightColors = _.range( 0, this.lights.length ).map( i => {
-      return this.lights[ i ].colorProgram.evaluate( face, area, centroid, minX, minY, maxX, maxY );
+      return this.lights[ i ].colorProgram.evaluate( context );
     } );
 
     return this.getPhong(

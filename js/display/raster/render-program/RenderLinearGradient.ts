@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderableFace, RenderColor, RenderExtend, RenderGradientStop, RenderImage, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
+import { RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, scenery, SerializedRenderGradientStop } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -117,18 +117,12 @@ export default class RenderLinearGradient extends RenderProgram {
     return this.accuracy === RenderLinearGradientAccuracy.UnsplitCentroid || this.accuracy === RenderLinearGradientAccuracy.SplitAccurate;
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    assert && this.useInternalCentroid() && assert( context.hasCentroid() );
+
     const point = this.useInternalCentroid() ?
-                  scratchLinearGradientVector0.set( centroid ) :
-                  scratchLinearGradientVector0.setXY( ( minX + maxX ) / 2, ( minY + maxY ) / 2 );
+                  scratchLinearGradientVector0.set( context.centroid ) :
+                  context.writeBoundsCentroid( scratchLinearGradientVector0 );
 
     const localPoint = point;
     if ( !this.isIdentity ) {
@@ -141,7 +135,7 @@ export default class RenderLinearGradient extends RenderProgram {
     const t = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
     const mappedT = RenderImage.extend( this.extend, t );
 
-    return RenderGradientStop.evaluate( face, area, centroid, minX, minY, maxX, maxY, this.stops, mappedT );
+    return RenderGradientStop.evaluate( context, this.stops, mappedT );
   }
 
   public override split( face: RenderableFace ): RenderableFace[] {

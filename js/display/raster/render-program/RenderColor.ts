@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, Color, RenderColorSpace, RenderProgram, scenery } from '../../../imports.js';
+import { Color, RenderColorSpace, RenderEvaluationContext, RenderInstruction, RenderInstructionPush, RenderProgram, scenery } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
@@ -66,16 +66,16 @@ export default class RenderColor extends RenderProgram {
     return this.color.equals( other.color );
   }
 
-  public override evaluate(
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
-  ): Vector4 {
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
     return this.color;
+  }
+
+  public static applyProgram( vector: Vector4, color: Vector4 ): void {
+    vector.set( color );
+  }
+
+  public override getInstructions(): RenderInstruction[] {
+    return [ new RenderInstructionPush( this.color ) ];
   }
 
   protected override getExtraDebugString(): string {
