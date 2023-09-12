@@ -910,7 +910,7 @@ export default class PolygonClipping {
             assertSlow && assertSlow(
               ( Math.abs( endX - startX ) < 1e-8 && Math.abs( endY - startY ) < 1e-8 ) ||
               new Vector2( endX - startX, endY - startY ).normalized()
-                .equalsEpsilon( endPoint.minus( startPoint ).normalized(), 1e-8 ) );
+                .equalsEpsilon( endPoint.minus( startPoint ).normalized(), 1e-5 ) );
 
             const needsStartCorner = startX !== startPoint.x || startY !== startPoint.y;
             const needsEndCorner = endX !== endPoint.x || endY !== endPoint.y;

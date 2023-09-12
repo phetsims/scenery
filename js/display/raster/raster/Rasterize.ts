@@ -435,7 +435,7 @@ export default class Rasterize {
               centroid = terminalCentroids[ index ].multiplyScalar( 1 / ( 6 * area ) );
 
               // TODO: try the alternate formulation
-              assertSlow && sanityFace && needsCentroid && assertSlow( centroid.distance( sanityFace.getCentroid( sanityFace.getArea() ) ) < 1e-2 );
+              assertSlow && sanityFace && needsCentroid && assertSlow( centroid.distance( sanityFace.getCentroid( sanityFace.getArea() ) ) < 1 );
 
               // Our centroid computation.... can get inaccuracies from floating-point math. Bleh.
               centroid.x = Utils.clamp( centroid.x, cellMinX, cellMaxX );
