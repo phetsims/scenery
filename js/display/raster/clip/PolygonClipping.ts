@@ -672,8 +672,10 @@ export default class PolygonClipping {
     const lineStepWidth = maxStepX - minStepX;
     const lineStepHeight = maxStepY - minStepY;
 
-    if ( lineStepWidth > 1 ) {
+    // We'll ignore intercepts of the specific direction when horizontal/vertical. These will be skipped later.
+    if ( lineStepWidth > 1 && !isVertical ) {
       const firstY = startPoint.y + ( endPoint.y - startPoint.y ) * ( fromStepX( minStepX + 1 ) - startPoint.x ) / ( endPoint.x - startPoint.x );
+      assert && assert( isFinite( firstY ) );
       yIntercepts.push( firstY );
 
       if ( lineStepWidth > 2 ) {
@@ -681,12 +683,14 @@ export default class PolygonClipping {
         let y = firstY;
         for ( let j = minStepX + 2; j < maxStepX; j++ ) {
           y += slopeIncrement;
+          assert && assert( isFinite( y ) );
           yIntercepts.push( y );
         }
       }
     }
-    if ( lineStepHeight > 1 ) {
+    if ( lineStepHeight > 1 && !isHorizontal ) {
       const firstX = startPoint.x + ( endPoint.x - startPoint.x ) * ( fromStepY( minStepY + 1 ) - startPoint.y ) / ( endPoint.y - startPoint.y );
+      assert && assert( isFinite( firstX ) );
       xIntercepts.push( firstX );
 
       if ( lineStepHeight > 2 ) {
@@ -694,6 +698,7 @@ export default class PolygonClipping {
         let x = firstX;
         for ( let j = minStepY + 2; j < maxStepY; j++ ) {
           x += slopeIncrement;
+          assert && assert( isFinite( x ) );
           xIntercepts.push( x );
         }
       }
@@ -754,8 +759,8 @@ export default class PolygonClipping {
         const isLastY = iy === maxStepY - 1;
 
         // The x intercepts for the minimal-y and maximal-y sides of the cell (or if we're on the first or last y cell, the endpoint)
-        const minYXIntercept = isFirstY ? ( startYLess ? startPoint.x : endPoint.x ) : xIntercepts[ iy - minStepY - 1 ];
-        const maxYXIntercept = isLastY ? ( startYLess ? endPoint.x : startPoint.x ) : xIntercepts[ iy - minStepY ];
+        const minYXIntercept = isFirstY || isHorizontal ? ( startYLess ? startPoint.x : endPoint.x ) : xIntercepts[ iy - minStepY - 1 ];
+        const maxYXIntercept = isLastY || isHorizontal ? ( startYLess ? endPoint.x : startPoint.x ) : xIntercepts[ iy - minStepY ];
 
         // Our range of intercepts (so we can quickly check in the inner iteration)
         const minXIntercept = Math.min( minYXIntercept, maxYXIntercept );
@@ -769,8 +774,8 @@ export default class PolygonClipping {
           const isFirstX = ix === minStepX;
           const isLastX = ix === maxStepX - 1;
 
-          const minXYIntercept = isFirstX ? ( startXLess ? startPoint.y : endPoint.y ) : yIntercepts[ ix - minStepX - 1 ];
-          const maxXYIntercept = isLastX ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix - minStepX ];
+          const minXYIntercept = isFirstX || isVertical ? ( startXLess ? startPoint.y : endPoint.y ) : yIntercepts[ ix - minStepX - 1 ];
+          const maxXYIntercept = isLastX || isVertical ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix - minStepX ];
           const minYIntercept = Math.min( minXYIntercept, maxXYIntercept );
 
           // NOTE: If we have horizontal/vertical lines, we'll need to change our logic slightly here
