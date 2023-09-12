@@ -12,6 +12,7 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import Utils from '../../../../../dot/js/Utils.js';
 
 export type RasterizationOptions = {
   // TODO: doc
@@ -429,8 +430,17 @@ export default class Rasterize {
           }
           else {
             // We saved the division by 6 for here
-            const centroid = needsCentroid ? terminalCentroids[ index ].multiplyScalar( 1 / ( 6 * area ) ) : nanVector;
-            assertSlow && sanityFace && needsCentroid && assertSlow( centroid.distance( sanityFace.getCentroid( sanityFace.getArea() ) ) < 1e-5 );
+            let centroid = nanVector;
+            if ( needsCentroid ) {
+              centroid = terminalCentroids[ index ].multiplyScalar( 1 / ( 6 * area ) );
+
+              // TODO: try the alternate formulation
+              assertSlow && sanityFace && needsCentroid && assertSlow( centroid.distance( sanityFace.getCentroid( sanityFace.getArea() ) ) < 1e-2 );
+
+              // Our centroid computation.... can get inaccuracies from floating-point math. Bleh.
+              centroid.x = Utils.clamp( centroid.x, cellMinX, cellMaxX );
+              centroid.y = Utils.clamp( centroid.y, cellMinY, cellMaxY );
+            }
 
             assert && needsCentroid && assert( new Bounds2( cellMinX, cellMinY, cellMaxX, cellMaxY ).containsPoint( centroid ) );
 

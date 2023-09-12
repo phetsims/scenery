@@ -652,22 +652,12 @@ export default class PolygonClipping {
     const roundedMaxStepX = Utils.roundSymmetric( maxRawStartStepX );
     const roundedMaxStepY = Utils.roundSymmetric( maxRawStartStepY );
 
-    // Integral "step" coordinates
-    let minStepX = Math.floor( minRawStartStepX );
-    let minStepY = Math.floor( minRawStartStepY );
-    let maxStepX = Math.ceil( maxRawStartStepX );
-    let maxStepY = Math.ceil( maxRawStartStepY );
-
-    // Handle axis-aligned lines that are EXACTLY on a grid clip line (we'll just expand the "internal" region in
-    // each direction, but clipped against our outer size)
-    if ( isHorizontal && minStepY === maxStepY ) {
-      minStepY = Math.max( 0, minStepY - 1 );
-      maxStepY = Math.min( stepHeight, maxStepY + 1 );
-    }
-    if ( isVertical && minStepX === maxStepX ) {
-      minStepX = Math.max( 0, minStepX - 1 );
-      maxStepX = Math.min( stepWidth, maxStepX + 1 );
-    }
+    // Integral "step" coordinates - with slight perturbation to expand our region to cover points/lines that lie
+    // exactly on our grid lines (but not outside of our bounds)
+    const minStepX = Math.max( 0, Math.floor( minRawStartStepX - 1e-10 ) );
+    const minStepY = Math.max( 0, Math.floor( minRawStartStepY - 1e-10 ) );
+    const maxStepX = Math.min( stepWidth, Math.ceil( maxRawStartStepX + 1e-10 ) );
+    const maxStepY = Math.min( stepHeight, Math.ceil( maxRawStartStepY + 1e-10 ) );
 
     const lineStepWidth = maxStepX - minStepX;
     const lineStepHeight = maxStepY - minStepY;
