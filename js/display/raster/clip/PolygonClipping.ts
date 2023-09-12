@@ -653,10 +653,21 @@ export default class PolygonClipping {
     const roundedMaxStepY = Utils.roundSymmetric( maxRawStartStepY );
 
     // Integral "step" coordinates
-    const minStepX = Math.floor( minRawStartStepX );
-    const minStepY = Math.floor( minRawStartStepY );
-    const maxStepX = Math.ceil( maxRawStartStepX );
-    const maxStepY = Math.ceil( maxRawStartStepY );
+    let minStepX = Math.floor( minRawStartStepX );
+    let minStepY = Math.floor( minRawStartStepY );
+    let maxStepX = Math.ceil( maxRawStartStepX );
+    let maxStepY = Math.ceil( maxRawStartStepY );
+
+    // Handle axis-aligned lines that are EXACTLY on a grid clip line (we'll just expand the "internal" region in
+    // each direction, but clipped against our outer size)
+    if ( isHorizontal && minStepY === maxStepY ) {
+      minStepY = Math.max( 0, minStepY - 1 );
+      maxStepY = Math.min( stepHeight, maxStepY + 1 );
+    }
+    if ( isVertical && minStepX === maxStepX ) {
+      minStepX = Math.max( 0, minStepX - 1 );
+      maxStepX = Math.min( stepWidth, maxStepX + 1 );
+    }
 
     const lineStepWidth = maxStepX - minStepX;
     const lineStepHeight = maxStepY - minStepY;
@@ -762,9 +773,10 @@ export default class PolygonClipping {
           const maxXYIntercept = isLastX ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix - minStepX ];
           const minYIntercept = Math.min( minXYIntercept, maxXYIntercept );
 
-          const isLessThanMinX = cellMaxX <= minXIntercept;
-          const isGreaterThanMaxX = cellMinX >= maxXIntercept;
-          const isLessThanMinY = cellMaxY <= minYIntercept;
+          // NOTE: If we have horizontal/vertical lines, we'll need to change our logic slightly here
+          const isLessThanMinX = isVertical ? cellMaxX < minXIntercept : cellMaxX <= minXIntercept;
+          const isGreaterThanMaxX = isVertical ? cellMinX > maxXIntercept : cellMinX >= maxXIntercept;
+          const isLessThanMinY = isHorizontal ? cellMaxY < minYIntercept : cellMaxY <= minYIntercept;
 
           // If this condition is true, the line does NOT pass through this cell. We just have to handle the corners.
           if ( isLessThanMinX || isGreaterThanMaxX ) {
