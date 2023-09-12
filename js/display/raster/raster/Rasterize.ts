@@ -353,6 +353,34 @@ export default class Rasterize {
     let counter = 0;
     let lastFinalizeCounter = 0;
 
+    // // TODO: THIS PROVES THAT NOTHING WAS WRONG WITH THE CLIPPING ALGORITHM
+    // // TODO: THE BROKEN THING IS SOMEWHERE IN THIS SURROUNDING CODE
+    // // TODO: REMOVE THIS HACKERY!
+    // for ( let iy = 0; iy < height; iy++ ) {
+    //   for ( let ix = 0; ix < width; ix++ ) {
+    //     const index = iy * width + ix;
+    //
+    //     const cellMinX = minX + ix;
+    //     const cellMaxX = cellMinX + 1;
+    //     const cellMinY = minY + iy;
+    //     const cellMaxY = cellMinY + 1;
+    //
+    //     const face = clippableFace.getClipped( cellMinX, cellMinY, cellMaxX, cellMaxY );
+    //     const area = face.getArea();
+    //
+    //     terminalAreas[ index ] = 2 * area;
+    //
+    //     if ( needsCentroid ) {
+    //       const partial = face.getCentroidPartial();
+    //       terminalCentroids[ index ].setXY( 6 * partial.x, 6 * partial.y );
+    //     }
+    //     if ( needsFace ) {
+    //       // @ts-expect-error
+    //       terminalFaceAccumulators[ index ] = { finalizeFace: () => face };
+    //     }
+    //   }
+    // }
+
     clippableFace.gridClipIterate(
       minX, minY, maxX, maxY,
       1, 1, width, height,
