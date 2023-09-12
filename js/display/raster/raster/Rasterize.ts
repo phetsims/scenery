@@ -325,27 +325,33 @@ export default class Rasterize {
     for ( let i = 0; i < size; i++ ) {
       if ( i < terminalAreas.length ) {
         terminalAreas[ i ] = 0;
-
-        if ( needsCentroid ) {
-          terminalCentroids[ i ].setXY( 0, 0 );
-        }
-        if ( needsFace ) {
-          // If we end up with full/zero area, we won't actually bother finishing up things down below, so we'll want to
-          // check this here.
-          terminalFaceAccumulators[ i ].reset();
-          terminalFinalizeCounters[ i ] = -1;
-        }
       }
       else {
         terminalAreas.push( 0 );
+      }
 
-        if ( needsCentroid ) {
-          terminalCentroids.push( new Vector2( 0, 0 ) );
+      if ( needsCentroid && i < terminalCentroids.length ) {
+        terminalCentroids[ i ].setXY( 0, 0 );
+      }
+      else {
+        terminalCentroids.push( new Vector2( 0, 0 ) );
+      }
+
+      if ( needsFace ) {
+        if ( i < terminalFinalizeCounters.length ) {
+          terminalFinalizeCounters[ i ] = -1;
         }
-        if ( needsFace ) {
+        else {
+          terminalFinalizeCounters.push( -1 );
+        }
+        if ( i < terminalFaceAccumulators.length ) {
+          // If we end up with full/zero area, we won't actually bother finishing up things down below, so we'll want to
+          // check this here.
+          terminalFaceAccumulators[ i ].reset();
+        }
+        else {
           // TODO: make sure we get a non-full-collinear polygonal accumulator for fast performance?
           terminalFaceAccumulators.push( clippableFace.getAccumulator() );
-          terminalFinalizeCounters.push( -1 );
         }
       }
     }
@@ -538,14 +544,14 @@ export default class Rasterize {
         minX, minY
       );
     }
-    // else if ( xDiff <= 16 && yDiff <= 16 ) {
-    //   Rasterize.terminalGridRasterize(
-    //     context,
-    //     clippableFace,
-    //     area,
-    //     minX, minY, maxX, maxY
-    //   );
-    // }
+    else if ( xDiff <= 16 && yDiff <= 16 ) {
+      Rasterize.terminalGridRasterize(
+        context,
+        clippableFace,
+        area,
+        minX, minY, maxX, maxY
+      );
+    }
     else {
       const averageX = ( minX + maxX ) / 2;
       const averageY = ( minY + maxY ) / 2;

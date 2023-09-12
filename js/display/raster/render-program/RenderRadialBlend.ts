@@ -48,7 +48,7 @@ export default class RenderRadialBlend extends RenderProgram {
       [ zero, one ],
       zero.isFullyTransparent && one.isFullyTransparent,
       zero.isFullyOpaque && one.isFullyOpaque,
-      false,
+      accuracy === RenderRadialBlendAccuracy.Accurate,
       accuracy === RenderRadialBlendAccuracy.Accurate,
       accuracy === RenderRadialBlendAccuracy.Centroid
     );
