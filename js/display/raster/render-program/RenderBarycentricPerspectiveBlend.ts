@@ -127,8 +127,13 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
     const cColor = this.c.evaluate( face, area, centroid, minX, minY, maxX, maxY ).timesScalar( 1 / pC.z );
     const z = 1 / ( lambdaA / pA.z + lambdaB / pB.z + lambdaC / pC.z );
 
-    assert && assert( aColor.isFinite() && bColor.isFinite() && cColor.isFinite() && z > 0, 'All colors must be finite and z must be positive' );
-    assert && assert( isFinite( lambdaA ) && isFinite( lambdaB ) && isFinite( lambdaC ), 'Lambdas must be finite' );
+    assert && assert( aColor.isFinite(), `Color A must be finite: ${aColor}` );
+    assert && assert( bColor.isFinite(), `Color B must be finite: ${bColor}` );
+    assert && assert( cColor.isFinite(), `Color C must be finite: ${cColor}` );
+    assert && assert( z > 0, 'z must be positive' );
+    assert && assert( isFinite( lambdaA ), 'Lambda A must be finite' );
+    assert && assert( isFinite( lambdaB ), 'Lambda B must be finite' );
+    assert && assert( isFinite( lambdaC ), 'Lambda C must be finite' );
 
     return new Vector4(
       aColor.x * lambdaA + bColor.x * lambdaB + cColor.x * lambdaC,

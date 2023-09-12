@@ -411,8 +411,12 @@ export default class Rasterize {
         const cellMinX = minX + ix;
         const cellMaxX = cellMinX + 1;
 
+        const sanityFace = assertSlow ? clippableFace.getClipped( cellMinX, cellMinY, cellMaxX, cellMaxY ) : null;
+
         // We saved the division by 2 for here
         const doubleArea = terminalAreas[ index ];
+        assertSlow && sanityFace && assertSlow( Math.abs( 0.5 * doubleArea - sanityFace.getArea() ) < 1e-6 );
+
         if ( doubleArea > 2e-8 ) {
           const area = 0.5 * doubleArea;
 
@@ -425,9 +429,13 @@ export default class Rasterize {
           }
           else {
             // We saved the division by 6 for here
-            const centroid = needsCentroid ? nanVector : terminalCentroids[ index ].multiplyScalar( 1 / ( 6 * area ) );
+            const centroid = needsCentroid ? terminalCentroids[ index ].multiplyScalar( 1 / ( 6 * area ) ) : nanVector;
+            assertSlow && sanityFace && needsCentroid && assertSlow( centroid.distance( sanityFace.getCentroid( sanityFace.getArea() ) ) < 1e-5 );
+
+            assert && needsCentroid && assert( new Bounds2( cellMinX, cellMinY, cellMaxX, cellMaxY ).containsPoint( centroid ) );
 
             const face = needsFace ? terminalFaceAccumulators[ index ].finalizeFace() : null;
+            assertSlow && sanityFace && needsFace && face && assertSlow( Math.abs( face.getArea() - sanityFace.getArea() ) < 1e-5 );
 
             if ( context.log ) { context.log.partialAreas.push( new Bounds2( cellMinX, cellMinY, cellMaxX, cellMaxY ) ); }
 
@@ -492,6 +500,14 @@ export default class Rasterize {
         minX, minY
       );
     }
+    // else if ( xDiff <= 16 && yDiff <= 16 ) {
+    //   Rasterize.terminalGridRasterize(
+    //     context,
+    //     clippableFace,
+    //     area,
+    //     minX, minY, maxX, maxY
+    //   );
+    // }
     else {
       const averageX = ( minX + maxX ) / 2;
       const averageY = ( minY + maxY ) / 2;

@@ -650,6 +650,83 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.badGridClipTest = function() {
+    setTimeout( async () => {
+      const face = phet.scenery.PolygonalFace.deserialize( {"polygons":[[{"x":246.0731598529,"y":246.0731598529},{"x":240,"y":240},{"x":256,"y":234.6667480469},{"x":256,"y":235.72865757050002}]]} );
+      const minX = 240;
+      const minY = 234;
+      const maxX = 256;
+      const maxY = 247;
+
+      const width = maxX - minX;
+      const height = maxY - minY;
+      const size = width * height;
+
+      const container = new phet.scenery.Node( {
+        matrix: phet.dot.Matrix3.translation( 400, 400 ).timesMatrix( phet.dot.Matrix3.scaling( 40 ).timesMatrix( phet.dot.Matrix3.translation( -( minX + maxX ) / 2, -( minY + maxY ) / 2 ) ) )
+      } );
+      scene.addChild( container );
+
+      const gridShape = new phet.kite.Shape();
+      for ( let x = minX; x <= maxX; x++ ) {
+        gridShape.moveTo( x, minY );
+        gridShape.lineTo( x, maxY );
+      }
+      for ( let y = minY; y <= maxY; y++ ) {
+        gridShape.moveTo( minX, y );
+        gridShape.lineTo( maxX, y );
+      }
+      container.addChild( new phet.scenery.Path( gridShape, {
+        stroke: 'gray',
+        lineWidth: 0.02
+      } ) );
+
+      container.addChild( new phet.scenery.Path( face.getShape(), {
+        fill: 'rgba(255,0,0,0.5)'
+      } ) );
+
+      const inset = ( bounds, point ) => {
+        return point.minus( bounds.center ).timesScalar( 0.90 ).plus( bounds.center );
+      };
+
+      const showLine = ( cellX, cellY, startX, startY, endX, endY ) => {
+        const bounds = new phet.dot.Bounds2( minX + cellX, minY + cellY, minX + cellX + 1, minY + cellY + 1 );
+        const startPoint = inset( bounds, phet.dot.v2( startX, startY ) );
+        const endPoint = inset( bounds, phet.dot.v2( endX, endY ) );
+        container.addChild( new phet.scenery.Line( startPoint, endPoint, {
+          stroke: 'black',
+          lineWidth: 0.03
+        } ) );
+      };
+
+      const showLineBetween = ( polygonIndex, index ) => {
+        debugger;
+        phet.scenery.PolygonClipping.gridClipIterate(
+          face.polygons[ polygonIndex ][ index ], face.polygons[ polygonIndex ][ ( index + 1 ) % face.polygons[ polygonIndex ].length ],
+          minX, minY, maxX, maxY,
+          1, 1, width, height,
+          showLine,
+          () => {}
+        );
+      };
+      // showLineBetween( 0, 0 );
+      // showLineBetween( 0, 1 );
+      showLineBetween( 0, 2 );
+      // showLineBetween( 0, 3 );
+
+      // face.gridClipIterate(
+      //   minX, minY, maxX, maxY,
+      //   1, 1, width, height,
+      //   showLine,
+      //   () => {}
+      // );
+
+      display.width = 1024;
+      display.height = 1024;
+      display.updateDisplay();
+    } );
+  };
+
   window.gridClipTest = function() {
     setTimeout( async function() {
       display.initializeEvents();
