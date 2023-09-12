@@ -120,7 +120,7 @@ export default abstract class RenderProgram {
 
   // Premultiplied linear RGB, ignoring the path
   public abstract evaluate(
-    face: ClippableFace | null, // if null, it is fully covered
+    face: ClippableFace | null, // if null AND we have a need set for a face, it is fully covered
     area: number,
     centroid: Vector2,
     minX: number,

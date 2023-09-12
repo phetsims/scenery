@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, EdgedFace, GridClipCallback, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, scenery } from '../../../imports.js';
+import { ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedFace, GridClipCallback, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -388,6 +388,14 @@ export default class PolygonalFace implements ClippableFace {
     }
   }
 
+  public getScratchAccumulator(): ClippableFaceAccumulator {
+    return scratchAccumulator;
+  }
+
+  public getAccumulator(): ClippableFaceAccumulator {
+    return new PolygonalFaceAccumulator();
+  }
+
   public toString(): string {
     return this.polygons.map( polygon => polygon.map( p => `${p.x},${p.y}` ).join( ' ' ) ).join( '\n' );
   }
@@ -417,6 +425,43 @@ export default class PolygonalFace implements ClippableFace {
 }
 
 scenery.register( 'PolygonalFace', PolygonalFace );
+
+export class PolygonalFaceAccumulator implements ClippableFaceAccumulator {
+
+  private polygons: Vector2[][] = [];
+  // TODO: try out the default of full collinear. Might hurt some performance, but might be a performance win if we are
+  // TODO: creating lots of extra points
+  private simplifier = new ClipSimplifier();
+
+  public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
+    startPoint ? this.simplifier.addPoint( startPoint ) : this.simplifier.add( startX, startY );
+  }
+
+  public markNewPolygon(): void {
+    this.simplifier.finalizeInto( this.polygons );
+  }
+
+  // Will reset it to the initial state also
+  public finalizeFace(): PolygonalFace | null {
+    if ( !this.simplifier.hasPoints() && this.polygons.length === 0 ) {
+      return null;
+    }
+
+    this.simplifier.finalizeInto( this.polygons );
+
+    const polygons = this.polygons;
+    this.polygons = [];
+    return polygons.length ? new PolygonalFace( polygons ) : null;
+  }
+
+  // Will reset without creating a face
+  public reset(): void {
+    this.polygons.length = 0;
+    this.simplifier.reset();
+  }
+}
+
+const scratchAccumulator = new PolygonalFaceAccumulator();
 
 export type SerializedPolygonalFace = {
   polygons: { x: number; y: number }[][];

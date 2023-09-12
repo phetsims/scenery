@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, GridClipCallback, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, scenery, SerializedLinearEdge } from '../../../imports.js';
+import { ClippableFace, ClippableFaceAccumulator, GridClipCallback, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, scenery, SerializedLinearEdge } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -380,6 +380,14 @@ export default class EdgedFace implements ClippableFace {
     }
   }
 
+  public getScratchAccumulator(): ClippableFaceAccumulator {
+    return scratchAccumulator;
+  }
+
+  public getAccumulator(): ClippableFaceAccumulator {
+    return new EdgedFaceAccumulator();
+  }
+
   public toString(): string {
     return this.edges.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' );
   }
@@ -443,6 +451,40 @@ export default class EdgedFace implements ClippableFace {
 }
 
 scenery.register( 'EdgedFace', EdgedFace );
+
+export class EdgedFaceAccumulator implements ClippableFaceAccumulator {
+
+  private edges: LinearEdge[] = [];
+
+  public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
+    this.edges.push( new LinearEdge(
+      startPoint || new Vector2( startX, startY ),
+      endPoint || new Vector2( endX, endY )
+    ) );
+  }
+
+  public markNewPolygon(): void {
+    // no-op, since we're storing unsorted edges!
+  }
+
+  // Will reset it to the initial state also
+  public finalizeFace(): EdgedFace | null {
+    if ( this.edges.length === 0 ) {
+      return null;
+    }
+
+    const edges = this.edges;
+    this.edges = [];
+    return new EdgedFace( edges );
+  }
+
+  // Will reset without creating a face
+  public reset(): void {
+    this.edges.length = 0;
+  }
+}
+
+const scratchAccumulator = new EdgedFaceAccumulator();
 
 export type SerializedEdgedFace = {
   edges: SerializedLinearEdge[];

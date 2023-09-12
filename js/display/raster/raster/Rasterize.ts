@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundedSubpath, ClippableFace, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
+import { BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -53,6 +53,14 @@ const DEFAULT_OPTIONS = {
 const scratchFullAreaVector = new Vector2( 0, 0 );
 
 const nanVector = new Vector2( NaN, NaN );
+
+const terminalAreas: number[] = [];
+const terminalCentroids: Vector2[] = [];
+const terminalFinalizeCounters: number[] = [];
+let terminalFaceAccumulators: ClippableFaceAccumulator[] = [];
+
+const terminalEdgedFaceAccumulators: EdgedFaceAccumulator[] = [];
+const terminalPolygonalFaceAccumulators: PolygonalFaceAccumulator[] = [];
 
 class RasterizationContext {
   public constructor(
@@ -153,7 +161,6 @@ export default class Rasterize {
           assert && assert( pixelFace );
 
           if ( assertSlow ) {
-            // TODO: implement these for polygonal faces
             const edges = pixelFace!.toEdgedFace().edges;
 
             assertSlow( edges.every( edge => {
@@ -174,29 +181,29 @@ export default class Rasterize {
     }
   }
 
-  // TODO: inline eventually
   private static addPartialPixel(
     context: RasterizationContext,
-    pixelFace: ClippableFace,
+    pixelFace: ClippableFace | null,
     area: number,
+    centroid: Vector2,
     x: number,
     y: number
   ): void {
-    // TODO: potentially cache the centroid, if we have multiple overlapping gradients?
+    assert && assert( isFinite( area ) );
+
     const color = context.constClientColor || context.renderProgram.evaluate(
       pixelFace,
-      context.needs.needsArea ? area : NaN, // NaNs to hopefully hard-error
-      context.needs.needsCentroid ? pixelFace.getCentroid( area ) : nanVector,
-      x,
-      y,
-      x + 1,
-      y + 1
+      context.needs.needsArea ? area : NaN,
+      centroid,
+      x, y, x + 1, y + 1
     );
 
     if ( context.polygonFiltering === PolygonFilterType.Box ) {
       context.outputRaster.addClientPartialPixel( color.timesScalar( area ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
     }
     else {
+      assert && assert( pixelFace );
+
       Rasterize.addFilterPixel(
         context,
         pixelFace, area, x, y, color
@@ -204,7 +211,6 @@ export default class Rasterize {
     }
   }
 
-  // TODO: inline eventually
   private static addFullArea(
     context: RasterizationContext,
     minX: number,
@@ -277,7 +283,7 @@ export default class Rasterize {
     }
   }
 
-  private static binaryInternalRasterize(
+  private static terminalGridRasterize(
     context: RasterizationContext,
     clippableFace: ClippableFace,
     area: number,
@@ -287,98 +293,151 @@ export default class Rasterize {
     maxY: number
   ): void {
 
-    // TODO: more advanced handling
-
-    const xDiff = maxX - minX;
-    const yDiff = maxY - minY;
-
-    assert && assert( xDiff >= 1 && yDiff >= 1 );
-    assert && assert( Number.isInteger( xDiff ) && Number.isInteger( yDiff ) );
+    assert && assert( isFinite( minX ) && isFinite( minY ) && isFinite( maxX ) && isFinite( maxY ) );
+    assert && assert( minX < maxX && minY < maxY );
     assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minX ) : minX - Math.floor( minX ) === 0.5 );
     assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minY ) : minY - Math.floor( minY ) === 0.5 );
     assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxX ) : maxX - Math.floor( maxX ) === 0.5 );
     assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxY ) : maxY - Math.floor( maxY ) === 0.5 );
 
-    if ( area > 1e-8 ) {
-      if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
-        if ( context.log ) { context.log.fullAreas.push( new Bounds2( minX, minY, maxX, maxY ) ); }
-        Rasterize.addFullArea(
-          context,
-          minX, minY, maxX, maxY
-        );
-      }
-      else if ( xDiff === 1 && yDiff === 1 ) {
-        if ( context.log ) { context.log.partialAreas.push( new Bounds2( minX, minY, maxX, maxY ) ); }
-        Rasterize.addPartialPixel(
-          context,
-          clippableFace, area, minX, minY
-        );
+    if ( area < 1e-8 ) {
+      return;
+    }
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const size = width * height;
+
+    assert && assert( width >= 1 && height >= 1 );
+    assert && assert( Number.isInteger( width ) && Number.isInteger( height ) );
+
+    const needsCentroid = context.needs.needsCentroid;
+    const needsFace = context.needs.needsFace || context.polygonFiltering !== PolygonFilterType.Box;
+
+    // NOTE NOTE: We just aliased an array to one that has a more specific type (of which they don't overlap)
+    // This will work, because if our face is polygonal, it will give us a polygonal accumulator below (and similar
+    // for edged).
+    const isPolygonal = clippableFace instanceof PolygonalFace;
+    terminalFaceAccumulators = isPolygonal ? terminalPolygonalFaceAccumulators : terminalEdgedFaceAccumulators;
+
+    // Reset/initialize the data we'll need
+    for ( let i = 0; i < size; i++ ) {
+      if ( i < terminalAreas.length ) {
+        terminalAreas[ i ] = 0;
+
+        if ( needsCentroid ) {
+          terminalCentroids[ i ].setXY( 0, 0 );
+        }
+        if ( needsFace ) {
+          // If we end up with full/zero area, we won't actually bother finishing up things down below, so we'll want to
+          // check this here.
+          terminalFaceAccumulators[ i ].reset();
+          terminalFinalizeCounters[ i ] = -1;
+        }
       }
       else {
-        const averageX = ( minX + maxX ) / 2;
-        const averageY = ( minY + maxY ) / 2;
+        terminalAreas.push( 0 );
 
-        if ( xDiff > yDiff ) {
-          const xSplit = minX + Math.floor( 0.5 * xDiff );
-
-          assert && assert( xSplit !== minX && xSplit !== maxX );
-
-          // TODO: If this is the LAST level of clipping, can we perhaps skip the actual face output (and only get
-          // TODO: area output)?
-          const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, averageY );
-
-          if ( assertSlow ) {
-            const oldMinFace = clippableFace.getClipped( minX, minY, xSplit, maxY );
-            const oldMaxFace = clippableFace.getClipped( xSplit, minY, maxX, maxY );
-
-            if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-              assertSlow( false, 'binary X clip issue' );
-            }
-          }
-
-          const minArea = minFace.getArea();
-          const maxArea = maxFace.getArea();
-
-          if ( minArea > 1e-8 ) {
-            Rasterize.binaryInternalRasterize(
-              context,
-              minFace, minArea, minX, minY, xSplit, maxY
-            );
-          }
-          if ( maxArea > 1e-8 ) {
-            Rasterize.binaryInternalRasterize(
-              context,
-              maxFace, maxArea, xSplit, minY, maxX, maxY
-            );
-          }
+        if ( needsCentroid ) {
+          terminalCentroids.push( new Vector2( 0, 0 ) );
         }
-        else {
-          const ySplit = minY + Math.floor( 0.5 * yDiff );
+        if ( needsFace ) {
+          // TODO: make sure we get a non-full-collinear polygonal accumulator for fast performance?
+          terminalFaceAccumulators.push( clippableFace.getAccumulator() );
+          terminalFinalizeCounters.push( -1 );
+        }
+      }
+    }
 
-          const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, averageX );
+    let counter = 0;
+    let lastFinalizeCounter = 0;
 
-          if ( assertSlow ) {
-            const oldMinFace = clippableFace.getClipped( minX, minY, maxX, ySplit );
-            const oldMaxFace = clippableFace.getClipped( minX, ySplit, maxX, maxY );
+    clippableFace.gridClipIterate(
+      minX, minY, maxX, maxY,
+      1, 1, width, height,
+      (
+        cellX: number,
+        cellY: number,
+        startX: number,
+        startY: number,
+        endX: number,
+        endY: number,
+        startPoint: Vector2 | null,
+        endPoint: Vector2 | null
+      ) => {
+        const index = cellY * width + cellX;
 
-            if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
-              assertSlow( false, 'binary Y clip issue' );
-            }
+        // Shoelace, but we'll handle the division by 2 later
+        terminalAreas[ index ] += ( endX + startX ) * ( endY - startY );
+
+        if ( needsCentroid ) {
+          const base = ( startX * endY - endX * startY );
+          terminalCentroids[ index ].addXY(
+            ( startX + endX ) * base,
+            ( startY + endY ) * base
+          );
+        }
+
+        if ( needsFace ) {
+          const faceAccumulator = terminalFaceAccumulators[ index ];
+
+          // If we've run into a completed polygon since we put in our last point, accumulate the result
+          if ( terminalFinalizeCounters[ index ] < lastFinalizeCounter ) {
+            faceAccumulator.markNewPolygon();
           }
 
-          const minArea = minFace.getArea();
-          const maxArea = maxFace.getArea();
+          // Record the point, so we'll wait for the next finalize
+          terminalFinalizeCounters[ index ] = counter++;
 
-          if ( minArea > 1e-8 ) {
-            Rasterize.binaryInternalRasterize(
+          // We'll loop around, so we only record the start point for efficiency.
+          // The swap between two potential simplifier methods is to potentially avoid GC churn in the future,
+          // (we'll want to avoid allocating vectors where possible).
+          faceAccumulator.addEdge( startX, startY, endX, endY, startPoint, endPoint );
+        }
+      },
+      () => {
+        lastFinalizeCounter = counter++;
+      }
+    );
+
+    for ( let iy = 0; iy < height; iy++ ) {
+      const partialIndex = iy * width;
+      const cellMinY = minY + iy;
+      const cellMaxY = cellMinY + 1;
+
+      for ( let ix = 0; ix < width; ix++ ) {
+        const index = partialIndex + ix;
+
+        const cellMinX = minX + ix;
+        const cellMaxX = cellMinX + 1;
+
+        // We saved the division by 2 for here
+        const doubleArea = terminalAreas[ index ];
+        if ( doubleArea > 2e-8 ) {
+          const area = 0.5 * doubleArea;
+
+          if ( area >= 1 - 1e-8 ) {
+            if ( context.log ) { context.log.fullAreas.push( new Bounds2( cellMinX, cellMinY, cellMaxX, cellMaxY ) ); }
+            Rasterize.addFullArea(
               context,
-              minFace, minArea, minX, minY, maxX, ySplit
+              cellMinX, cellMinY, cellMaxX, cellMaxY
             );
           }
-          if ( maxArea > 1e-8 ) {
-            Rasterize.binaryInternalRasterize(
+          else {
+            // We saved the division by 6 for here
+            const centroid = needsCentroid ? nanVector : terminalCentroids[ index ].multiplyScalar( 1 / ( 6 * area ) );
+
+            const face = needsFace ? terminalFaceAccumulators[ index ].finalizeFace() : null;
+
+            if ( context.log ) { context.log.partialAreas.push( new Bounds2( cellMinX, cellMinY, cellMaxX, cellMaxY ) ); }
+
+            // NOTE: NaNs are used to hopefully hard-error if things are used that are listed as not used
+            Rasterize.addPartialPixel(
               context,
-              maxFace, maxArea, minX, ySplit, maxX, maxY
+              face,
+              area,
+              centroid,
+              cellMinX, cellMinY
             );
           }
         }
@@ -386,13 +445,136 @@ export default class Rasterize {
     }
   }
 
+  private static binaryRasterize(
+    context: RasterizationContext,
+    clippableFace: ClippableFace,
+    area: number,
+    minX: number,
+    minY: number,
+    maxX: number,
+    maxY: number
+  ): void {
+
+    assert && assert( isFinite( minX ) && isFinite( minY ) && isFinite( maxX ) && isFinite( maxY ) );
+    assert && assert( minX < maxX && minY < maxY );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minX ) : minX - Math.floor( minX ) === 0.5 );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( minY ) : minY - Math.floor( minY ) === 0.5 );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxX ) : maxX - Math.floor( maxX ) === 0.5 );
+    assert && assert( context.polygonFiltering === PolygonFilterType.Box ? Number.isInteger( maxY ) : maxY - Math.floor( maxY ) === 0.5 );
+
+    // If the area is negligible, skip
+    if ( area < 1e-8 ) {
+      return;
+    }
+
+    const xDiff = maxX - minX;
+    const yDiff = maxY - minY;
+
+    assert && assert( xDiff >= 1 && yDiff >= 1 );
+    assert && assert( Number.isInteger( xDiff ) && Number.isInteger( yDiff ) );
+
+    if ( area >= ( maxX - minX ) * ( maxY - minY ) - 1e-8 ) {
+      if ( context.log ) { context.log.fullAreas.push( new Bounds2( minX, minY, maxX, maxY ) ); }
+      Rasterize.addFullArea(
+        context,
+        minX, minY, maxX, maxY
+      );
+    }
+    else if ( xDiff === 1 && yDiff === 1 ) {
+      if ( context.log ) { context.log.partialAreas.push( new Bounds2( minX, minY, maxX, maxY ) ); }
+
+      // NOTE: NaNs are used to hopefully hard-error if things are used that are listed as not used
+      Rasterize.addPartialPixel(
+        context,
+        clippableFace,
+        area,
+        context.needs.needsCentroid ? clippableFace.getCentroid( area ) : nanVector,
+        minX, minY
+      );
+    }
+    else {
+      const averageX = ( minX + maxX ) / 2;
+      const averageY = ( minY + maxY ) / 2;
+
+      if ( xDiff > yDiff ) {
+        const xSplit = minX + Math.floor( 0.5 * xDiff );
+
+        assert && assert( xSplit !== minX && xSplit !== maxX );
+
+        // TODO: If this is the LAST level of clipping, can we perhaps skip the actual face output (and only get
+        // TODO: area output)?
+        const { minFace, maxFace } = clippableFace.getBinaryXClip( xSplit, averageY );
+
+        if ( assertSlow ) {
+          const oldMinFace = clippableFace.getClipped( minX, minY, xSplit, maxY );
+          const oldMaxFace = clippableFace.getClipped( xSplit, minY, maxX, maxY );
+
+          if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
+            assertSlow( false, 'binary X clip issue' );
+          }
+        }
+
+        const minArea = minFace.getArea();
+        const maxArea = maxFace.getArea();
+
+        if ( minArea > 1e-8 ) {
+          Rasterize.binaryRasterize(
+            context,
+            minFace, minArea, minX, minY, xSplit, maxY
+          );
+        }
+        if ( maxArea > 1e-8 ) {
+          Rasterize.binaryRasterize(
+            context,
+            maxFace, maxArea, xSplit, minY, maxX, maxY
+          );
+        }
+      }
+      else {
+        const ySplit = minY + Math.floor( 0.5 * yDiff );
+
+        const { minFace, maxFace } = clippableFace.getBinaryYClip( ySplit, averageX );
+
+        if ( assertSlow ) {
+          const oldMinFace = clippableFace.getClipped( minX, minY, maxX, ySplit );
+          const oldMaxFace = clippableFace.getClipped( minX, ySplit, maxX, maxY );
+
+          if ( Math.abs( minFace.getArea() - oldMinFace.getArea() ) > 1e-8 || Math.abs( maxFace.getArea() - oldMaxFace.getArea() ) > 1e-8 ) {
+            assertSlow( false, 'binary Y clip issue' );
+          }
+        }
+
+        const minArea = minFace.getArea();
+        const maxArea = maxFace.getArea();
+
+        if ( minArea > 1e-8 ) {
+          Rasterize.binaryRasterize(
+            context,
+            minFace, minArea, minX, minY, maxX, ySplit
+          );
+        }
+        if ( maxArea > 1e-8 ) {
+          Rasterize.binaryRasterize(
+            context,
+            maxFace, maxArea, minX, ySplit, maxX, maxY
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * This exists to handle polygon filtering when the filter multiplier is not 1. This means that our general approach
+   * of "split everything into an even grid" might not work, so we'll take a more robust solution.
+   *
+   * NOTE: Instead of using this, of the filter multiplier is integral, we could probably do other grid clipping
+   * magic to avoid this.
+   */
   private static windowedFilterRasterize(
     context: RasterizationContext,
     clippableFace: ClippableFace,
     faceBounds: Bounds2
   ): void {
-    // USE getPolygonFilterGridBounds
-
     const outputMinX = context.bounds.minX;
     const outputMaxX = context.bounds.maxX;
     const outputMinY = context.bounds.minY;
@@ -649,7 +831,7 @@ export default class Rasterize {
           faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
         );
 
-        Rasterize.binaryInternalRasterize(
+        Rasterize.binaryRasterize(
           context, clippableFace, clippableFace.getArea(), faceBounds.minX, faceBounds.minY, faceBounds.maxX, faceBounds.maxY
         );
       }

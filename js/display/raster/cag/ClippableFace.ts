@@ -57,6 +57,8 @@ type ClippableFace = {
   containsPoint( point: Vector2 ): boolean;
   toPolygonalFace( epsilon?: number ): PolygonalFace;
   toEdgedFace(): EdgedFace;
+  getScratchAccumulator(): ClippableFaceAccumulator;
+  getAccumulator(): ClippableFaceAccumulator;
   getShape( epsilon?: number ): Shape; // NOTE: this is only for debugging, performance won't be great
   forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void;
   toString(): string;
@@ -64,6 +66,17 @@ type ClippableFace = {
 };
 
 export default ClippableFace;
+
+export type ClippableFaceAccumulator = {
+  addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void;
+  markNewPolygon(): void;
+
+  // Will reset it to the initial state also
+  finalizeFace(): ClippableFace | null;
+
+  // Will reset without creating a face
+  reset(): void;
+};
 
 export type SerializedClippableFace = {
   type: 'PolygonalFace';

@@ -89,11 +89,21 @@ export default class ClipSimplifier {
     this.points.push( new Vector2( x, y ) );
   }
 
+  public hasPoints(): boolean {
+    return this.points.length > 0;
+  }
+
   /**
    * Treats the entire list of points so far as a closed polygon, completes simplification (between the start/end),
    * returns the simplified points, AND resets the state for the next time
    */
   public finalize(): Vector2[] {
+    // Early bail for this case
+    // TODO: can we avoid creating an array here?
+    if ( this.points.length === 0 ) {
+      return [];
+    }
+
     // TODO: add more comprehensive testing for this! Tested a simple example
 
     // TODO: is this complexity worth porting to WGSL?
@@ -177,6 +187,19 @@ export default class ClipSimplifier {
     const points = this.points;
     this.points = [];
     return points;
+  }
+
+  public finalizeInto( polygons: Vector2[][] ): void {
+    if ( this.hasPoints() ) {
+      const polygon = this.finalize();
+      if ( polygon.length > 0 ) {
+        polygons.push( polygon );
+      }
+    }
+  }
+
+  public reset(): void {
+    this.points.length = 0;
   }
 
   public static simplifyPolygon( polygon: Vector2[], checkGeneralCollinearity = false ): Vector2[] {

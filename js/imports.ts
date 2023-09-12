@@ -509,15 +509,15 @@ export { default as BigRationalVector2 } from './display/raster/cag/BigRationalV
 export { default as BoundsIntersectionFilter } from './display/raster/cag/BoundsIntersectionFilter.js';
 export { default as HilbertMapping, Hilbert2 } from './display/raster/cag/HilbertMapping.js';
 
+export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.js';
+
 export { serializeClippableFace, deserializeClippableFace } from './display/raster/cag/ClippableFace.js';
-export type { default as ClippableFace } from './display/raster/cag/ClippableFace.js';
-export { default as EdgedFace } from './display/raster/cag/EdgedFace.js';
+export type { default as ClippableFace, ClippableFaceAccumulator } from './display/raster/cag/ClippableFace.js';
+export { default as EdgedFace, EdgedFaceAccumulator } from './display/raster/cag/EdgedFace.js';
 export type { SerializedEdgedFace } from './display/raster/cag/EdgedFace.js';
-export { default as PolygonalFace } from './display/raster/cag/PolygonalFace.js';
+export { default as PolygonalFace, PolygonalFaceAccumulator } from './display/raster/cag/PolygonalFace.js';
 export type { SerializedPolygonalFace } from './display/raster/cag/PolygonalFace.js';
 export { default as BoundedSubpath } from './display/raster/cag/BoundedSubpath.js';
-
-export { default as ClipSimplifier } from './display/raster/clip/ClipSimplifier.js';
 
 export { default as IntegerEdge } from './display/raster/cag/IntegerEdge.js';
 export { default as IntersectionPoint } from './display/raster/cag/IntersectionPoint.js';
