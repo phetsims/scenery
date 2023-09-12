@@ -11,7 +11,7 @@ import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
-import { EdgedFace, PolygonalFace, SerializedEdgedFace, SerializedPolygonalFace } from '../../../imports.js';
+import { EdgedFace, GridClipCallback, PolygonalFace, PolygonCompleteCallback, SerializedEdgedFace, SerializedPolygonalFace } from '../../../imports.js';
 import { Shape } from '../../../../../kite/js/imports.js';
 
 type ClippableFace = {
@@ -31,9 +31,27 @@ type ClippableFace = {
   getClipped( minX: number, minY: number, maxX: number, maxY: number ): ClippableFace;
   getBinaryXClip( x: number, fakeCornerY: number ): { minFace: ClippableFace; maxFace: ClippableFace };
   getBinaryYClip( y: number, fakeCornerX: number ): { minFace: ClippableFace; maxFace: ClippableFace };
-  getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: ClippableFace; maxFace: ClippableFace };
-  getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): ClippableFace[];
-  getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: ClippableFace; outsideFace: ClippableFace };
+  getBinaryLineClip(
+    normal: Vector2,
+    value: number,
+    fakeCornerPerpendicular: number
+  ): { minFace: ClippableFace; maxFace: ClippableFace };
+  getStripeLineClip(
+    normal: Vector2,
+    values: number[],
+    fakeCornerPerpendicular: number
+  ): ClippableFace[];
+  getBinaryCircularClip(
+    center: Vector2,
+    radius: number,
+    maxAngleSplit: number
+  ): { insideFace: ClippableFace; outsideFace: ClippableFace };
+  gridClipIterate(
+    minX: number, minY: number, maxX: number, maxY: number,
+    stepX: number, stepY: number, stepWidth: number, stepHeight: number,
+    callback: GridClipCallback,
+    polygonCompleteCallback: PolygonCompleteCallback
+  ): void;
   getBilinearFiltered( pointX: number, pointY: number, minX: number, minY: number ): number;
   getMitchellNetravaliFiltered( pointX: number, pointY: number, minX: number, minY: number ): number;
   containsPoint( point: Vector2 ): boolean;

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, EdgedFace, LinearEdge, PolygonBilinear, PolygonClipping, PolygonMitchellNetravali, scenery } from '../../../imports.js';
+import { ClippableFace, EdgedFace, GridClipCallback, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -318,6 +318,33 @@ export default class PolygonalFace implements ClippableFace {
       insideFace: new PolygonalFace( insidePolygons ),
       outsideFace: new PolygonalFace( outsidePolygons )
     };
+  }
+
+  public gridClipIterate(
+    minX: number, minY: number, maxX: number, maxY: number,
+    stepX: number, stepY: number, stepWidth: number, stepHeight: number,
+    callback: GridClipCallback,
+    polygonCompleteCallback: PolygonCompleteCallback
+  ): void {
+    for ( let i = 0; i < this.polygons.length; i++ ) {
+      const polygon = this.polygons[ i ];
+
+      for ( let j = 0; j < polygon.length; j++ ) {
+        const startPoint = polygon[ i ];
+        const endPoint = polygon[ ( i + 1 ) % polygon.length ];
+
+        PolygonClipping.gridClipIterate(
+          startPoint, endPoint,
+          minX, minY, maxX, maxY,
+          stepX, stepY, stepWidth, stepHeight,
+          callback
+        );
+      }
+
+      if ( polygon.length ) {
+        polygonCompleteCallback();
+      }
+    }
   }
 
   public getBilinearFiltered( pointX: number, pointY: number, minX: number, minY: number ): number {

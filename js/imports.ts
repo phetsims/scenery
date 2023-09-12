@@ -532,6 +532,7 @@ export { default as PolygonalBoolean } from './display/raster/cag/PolygonalBoole
 
 export { default as CohenSutherlandClipping } from './display/raster/clip/CohenSutherlandClipping.js';
 export { default as PolygonClipping } from './display/raster/clip/PolygonClipping.js';
+export type { GridClipCallback, PolygonCompleteCallback } from './display/raster/clip/PolygonClipping.js';
 
 export { default as FaceConversion } from './display/raster/cag/FaceConversion.js';
 

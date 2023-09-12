@@ -30,6 +30,8 @@ export type GridClipCallback = (
   endPoint: Vector2 | null
 ) => void;
 
+export type PolygonCompleteCallback = () => void;
+
 export default class PolygonClipping {
 
   // Returns if all done
