@@ -500,14 +500,14 @@ export default class Rasterize {
         minX, minY
       );
     }
-    // else if ( xDiff <= 16 && yDiff <= 16 ) {
-    //   Rasterize.terminalGridRasterize(
-    //     context,
-    //     clippableFace,
-    //     area,
-    //     minX, minY, maxX, maxY
-    //   );
-    // }
+    else if ( xDiff <= 16 && yDiff <= 16 ) {
+      Rasterize.terminalGridRasterize(
+        context,
+        clippableFace,
+        area,
+        minX, minY, maxX, maxY
+      );
+    }
     else {
       const averageX = ( minX + maxX ) / 2;
       const averageY = ( minY + maxY ) / 2;

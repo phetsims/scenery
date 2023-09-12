@@ -777,14 +777,18 @@ export default class PolygonClipping {
           const minXYIntercept = isFirstX || isVertical ? ( startXLess ? startPoint.y : endPoint.y ) : yIntercepts[ ix - minStepX - 1 ];
           const maxXYIntercept = isLastX || isVertical ? ( startXLess ? endPoint.y : startPoint.y ) : yIntercepts[ ix - minStepX ];
           const minYIntercept = Math.min( minXYIntercept, maxXYIntercept );
+          const maxYIntercept = Math.max( minXYIntercept, maxXYIntercept );
 
           // NOTE: If we have horizontal/vertical lines, we'll need to change our logic slightly here
           const isLessThanMinX = isVertical ? cellMaxX < minXIntercept : cellMaxX <= minXIntercept;
           const isGreaterThanMaxX = isVertical ? cellMinX > maxXIntercept : cellMinX >= maxXIntercept;
           const isLessThanMinY = isHorizontal ? cellMaxY < minYIntercept : cellMaxY <= minYIntercept;
+          const isGreaterThanMaxY = isHorizontal ? cellMinY > maxYIntercept : cellMinY >= maxYIntercept;
 
           // If this condition is true, the line does NOT pass through this cell. We just have to handle the corners.
-          if ( isLessThanMinX || isGreaterThanMaxX ) {
+          // NOTE: We're conditioning it on BOTH of these. Our intercept computations introduce floating point
+          // error, which can cause issues if only one of these is true (we'll get the precise bits wrong).
+          if ( ( isLessThanMinX || isGreaterThanMaxX ) && ( isLessThanMinY || isGreaterThanMaxY ) ) {
             // Since we are just handling corners, we can potentially have a horizontal edge and/or a vertical edge.
             // (NOTE: none, both, or one of these can be true).
 
