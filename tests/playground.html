@@ -652,11 +652,11 @@ an UI and Display made for visual testing and debugging.
 
   window.badGridClipTest = function() {
     setTimeout( async () => {
-      const face = phet.scenery.PolygonalFace.deserialize( {"polygons":[[{"x":718.4327424503695,"y":248.98828000944565},{"x":712.0175739323167,"y":253.51977067385627},{"x":711.7412339602556,"y":253.2088882052875}]]} );
-      const minX = 711;
-      const minY = 248;
-      const maxX = 719;
-      const maxY = 254;
+      const face = phet.scenery.PolygonalFace.deserialize( {"polygons":[[{"x":111.55555555555556,"y":448},{"x":120.00000000000003,"y":448},{"x":120.00000000000003,"y":457.50000000000006},{"x":123,"y":460.875}]]} );
+      const minX = 107;
+      const minY = 448;
+      const maxX = 123;
+      const maxY = 464;
 
       const width = maxX - minX;
       const height = maxY - minY;
@@ -693,8 +693,9 @@ an UI and Display made for visual testing and debugging.
       };
 
       const showLine = ( cellX, cellY, startX, startY, endX, endY ) => {
-        if ( cellX === 6 && cellY === 2 ) {
+        if ( cellX === 13 && cellY === 9 ) {
           console.log( startX, startY, endX, endY );
+          debugger;
         }
         // if ( cellX === Math.ceil( width / 2 ) && cellY === Math.ceil( height / 2 ) ) {
         //   console.log( cellX, cellY, startX, startY, endX, endY );
@@ -718,10 +719,9 @@ an UI and Display made for visual testing and debugging.
           () => {}
         );
       };
-      showLineBetween( 0, 0 );
-      showLineBetween( 0, 1 );
+      // showLineBetween( 0, 0 );
+      // showLineBetween( 0, 1 );
       showLineBetween( 0, 2 );
-
       // showLineBetween( 0, 3 );
 
       const accumulators = [];
