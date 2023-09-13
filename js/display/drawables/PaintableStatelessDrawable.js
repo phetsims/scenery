@@ -59,7 +59,7 @@ const PaintableStatelessDrawable = memoize( type => {
 
       this.markPaintDirty();
       this.fillObserver.setPrimary( this.instance.node._fill );
-      // TODO: look into having the fillObserver be notified of Node changes as our source
+      // TODO: look into having the fillObserver be notified of Node changes as our source https://github.com/phetsims/tasks/issues/1129
     }
 
     /**
@@ -70,7 +70,7 @@ const PaintableStatelessDrawable = memoize( type => {
 
       this.markPaintDirty();
       this.strokeObserver.setPrimary( this.instance.node._stroke );
-      // TODO: look into having the strokeObserver be notified of Node changes as our source
+      // TODO: look into having the strokeObserver be notified of Node changes as our source https://github.com/phetsims/tasks/issues/1129
     }
 
     /**

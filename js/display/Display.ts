@@ -307,7 +307,7 @@ export default class Display {
   public constructor( rootNode: Node, providedOptions?: DisplayOptions ) {
     assert && assert( rootNode, 'rootNode is a required parameter' );
 
-    //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
+    //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues) https://github.com/phetsims/tasks/issues/1129
 
     const options = optionize<DisplayOptions, StrictOmit<SelfOptions, 'container'>, ParentOptions>()( {
       // {number} - Initial display width
@@ -529,7 +529,7 @@ export default class Display {
     // check to see whether contents under pointers changed (and if so, send the enter/exit events) to
     // maintain consistent state
     if ( this._input ) {
-      // TODO: Should this be handled elsewhere?
+      // TODO: Should this be handled elsewhere? https://github.com/phetsims/tasks/issues/1129
       this._input.validatePointers();
     }
 
@@ -547,11 +547,11 @@ export default class Display {
 
     if ( assertSlow ) { this._rootNode._picker.audit(); }
 
-    // @ts-expect-error TODO Instance
+    // @ts-expect-error TODO Instance https://github.com/phetsims/tasks/issues/1129
     this._baseInstance = this._baseInstance || Instance.createFromPool( this, new Trail( this._rootNode ), true, false );
     this._baseInstance!.baseSyncTree();
     if ( firstRun ) {
-      // @ts-expect-error TODO instance
+      // @ts-expect-error TODO instance https://github.com/phetsims/tasks/issues/1129
       this.markTransformRootDirty( this._baseInstance!, this._baseInstance!.isTransformed ); // marks the transform root as dirty (since it is)
     }
 
@@ -621,7 +621,7 @@ export default class Display {
     }
 
     // repaint phase
-    //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
+    //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order! https://github.com/phetsims/tasks/issues/1129
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'repaint phase' );
     sceneryLog && sceneryLog.Display && sceneryLog.push();
     this._rootBackbone!.update();
@@ -657,7 +657,7 @@ export default class Display {
 
     this._frameId++;
 
-    // @ts-expect-error TODO scenery namespace
+    // @ts-expect-error TODO scenery namespace https://github.com/phetsims/tasks/issues/1129
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       const syncTreeMessage = `syncTree count: ${this.perfSyncTreeCount}`;
       if ( this.perfSyncTreeCount! > 500 ) {
@@ -711,7 +711,7 @@ export default class Display {
 
   private updateSize(): void {
     let sizeDirty = false;
-    //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children?
+    //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children? https://github.com/phetsims/tasks/issues/1129
     if ( this.size.width !== this._currentSize.width ) {
       sizeDirty = true;
       this._currentSize.width = this.size.width;
@@ -724,7 +724,7 @@ export default class Display {
     }
     if ( sizeDirty && !this._allowSceneOverflow ) {
       // to prevent overflow, we add a CSS clip
-      //TODO: 0px => 0?
+      //TODO: 0px => 0? https://github.com/phetsims/tasks/issues/1129
       this._domElement.style.clip = `rect(0px,${this.size.width}px,${this.size.height}px,0px)`;
     }
   }
@@ -1046,7 +1046,7 @@ export default class Display {
         return;
       }
 
-      //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
+      //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array https://github.com/phetsims/tasks/issues/1129
       const mouseTrail = this._rootNode.trailUnderPointer( this._input.mouse );
 
       if ( mouseTrail ) {
@@ -1147,14 +1147,14 @@ export default class Display {
 
     const context = canvas.getContext( '2d' )!;
 
-    //OHTWO TODO: allow actual background color directly, not having to check the style here!!!
+    //OHTWO TODO: allow actual background color directly, not having to check the style here!!! https://github.com/phetsims/tasks/issues/1129
     this._rootNode.renderToCanvas( canvas, context, () => {
       callback( canvas, context.getImageData( 0, 0, canvas.width, canvas.height ) );
     }, this.domElement.style.backgroundColor );
   }
 
   /**
-   * TODO: reduce code duplication for handling overlays
+   * TODO: reduce code duplication for handling overlays https://github.com/phetsims/tasks/issues/1129
    */
   public setPointerDisplayVisible( visibility: boolean ): void {
     const hasOverlay = !!this._pointerOverlay;
@@ -1173,7 +1173,7 @@ export default class Display {
   }
 
   /**
-   * TODO: reduce code duplication for handling overlays
+   * TODO: reduce code duplication for handling overlays https://github.com/phetsims/tasks/issues/1129
    */
   public setPointerAreaDisplayVisible( visibility: boolean ): void {
     const hasOverlay = !!this._pointerAreaOverlay;
@@ -1192,7 +1192,7 @@ export default class Display {
   }
 
   /**
-   * TODO: reduce code duplication for handling overlays
+   * TODO: reduce code duplication for handling overlays https://github.com/phetsims/tasks/issues/1129
    */
   public setHitAreaDisplayVisible( visibility: boolean ): void {
     const hasOverlay = !!this._hitAreaOverlay;
@@ -1211,7 +1211,7 @@ export default class Display {
   }
 
   /**
-   * TODO: reduce code duplication for handling overlays
+   * TODO: reduce code duplication for handling overlays https://github.com/phetsims/tasks/issues/1129
    */
   public setCanvasNodeBoundsVisible( visibility: boolean ): void {
     const hasOverlay = !!this._canvasAreaBoundsOverlay;
@@ -1230,7 +1230,7 @@ export default class Display {
   }
 
   /**
-   * TODO: reduce code duplication for handling overlays
+   * TODO: reduce code duplication for handling overlays https://github.com/phetsims/tasks/issues/1129
    */
   public setFittedBlockBoundsVisible( visibility: boolean ): void {
     const hasOverlay = !!this._fittedBlockBoundsOverlay;
@@ -1300,7 +1300,7 @@ export default class Display {
   public initializeEvents( options?: InputOptions ): void {
     assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
-    // TODO: refactor here
+    // TODO: refactor here https://github.com/phetsims/tasks/issues/1129
     const input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, options );
     this._input = input;
 
@@ -1406,7 +1406,7 @@ export default class Display {
             Utils.loseContext( gl );
           }
 
-          //TODO: pattern for this iteration
+          //TODO: pattern for this iteration https://github.com/phetsims/tasks/issues/1129
           for ( let drawable = block.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
             loseBackbone( drawable );
             if ( drawable === block.lastDrawable ) { break; }
@@ -1475,7 +1475,7 @@ export default class Display {
       return count;
     }
 
-    // @ts-expect-error TODO BackboneDrawable
+    // @ts-expect-error TODO BackboneDrawable https://github.com/phetsims/tasks/issues/1129
     result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone )}<br/>` ) : '';
 
     const drawableCountMap: Record<string, number> = {}; // {string} drawable constructor name => {number} count of seen
@@ -1501,7 +1501,7 @@ export default class Display {
         count++;
       }
       if ( instance.sharedCacheDrawable ) {
-        // @ts-expect-error TODO Instance
+        // @ts-expect-error TODO Instance https://github.com/phetsims/tasks/issues/1129
         countRetainedDrawable( instance.sharedCacheDrawable );
         count++;
       }
@@ -1522,7 +1522,7 @@ export default class Display {
         return '';
       }
 
-      // @ts-expect-error TODO display stuff
+      // @ts-expect-error TODO display stuff https://github.com/phetsims/tasks/issues/1129
       const hasBackbone = block.domDrawable && block.domDrawable.blocks;
 
       let div = `<div style="margin-left: ${depth * 20}px">`;
@@ -1536,9 +1536,9 @@ export default class Display {
 
       depth += 1;
       if ( hasBackbone ) {
-        // @ts-expect-error TODO display stuff
+        // @ts-expect-error TODO display stuff https://github.com/phetsims/tasks/issues/1129
         for ( let k = 0; k < block.domDrawable.blocks.length; k++ ) {
-          // @ts-expect-error TODO display stuff
+          // @ts-expect-error TODO display stuff https://github.com/phetsims/tasks/issues/1129
           div += blockSummary( block.domDrawable.blocks[ k ] );
         }
       }
@@ -1683,7 +1683,7 @@ export default class Display {
 
       instance.selfDrawable && addDrawable( 'self', instance.selfDrawable );
       instance.groupDrawable && addDrawable( 'group', instance.groupDrawable );
-      // @ts-expect-error TODO Instance
+      // @ts-expect-error TODO Instance https://github.com/phetsims/tasks/issues/1129
       instance.sharedCacheDrawable && addDrawable( 'sharedCache', instance.sharedCacheDrawable );
 
       div += '</div>';
@@ -1743,11 +1743,11 @@ export default class Display {
 
     if ( this._rootBackbone ) {
       result += '<div style="font-weight: bold;">Root Drawable Tree</div>';
-      // @ts-expect-error TODO BackboneDrawable
+      // @ts-expect-error TODO BackboneDrawable https://github.com/phetsims/tasks/issues/1129
       printDrawableSubtree( this._rootBackbone );
     }
 
-    //OHTWO TODO: add shared cache drawable trees
+    //OHTWO TODO: add shared cache drawable trees https://github.com/phetsims/tasks/issues/1129
 
     return result;
   }
@@ -1901,7 +1901,7 @@ export default class Display {
       }
     }
 
-    // @ts-expect-error TODO BackboneDrawable
+    // @ts-expect-error TODO BackboneDrawable https://github.com/phetsims/tasks/issues/1129
     scanForCanvases( this._rootBackbone! );
 
     // Create a new document, so that we can (1) serialize it to XHTML, and (2) manipulate it independently.
@@ -2033,7 +2033,7 @@ export default class Display {
   /**
    * Releases references.
    *
-   * TODO: this dispose function is not complete.
+   * TODO: this dispose function is not complete. https://github.com/phetsims/tasks/issues/1129
    */
   public dispose(): void {
     if ( assert ) {

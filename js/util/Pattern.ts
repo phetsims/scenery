@@ -3,7 +3,7 @@
 /**
  * A pattern that will deliver a fill or stroke that will repeat an image in both directions (x and y).
  *
- * TODO: future support for repeat-x, repeat-y or no-repeat (needs SVG support)
+ * TODO: future support for repeat-x, repeat-y or no-repeat (needs SVG support) https://github.com/phetsims/tasks/issues/1129
  * TODO: support scene or other various content (SVG is flexible, can backport to canvas)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -25,7 +25,7 @@ export default class Pattern extends Paint {
     this.image = image;
 
     // Use the global scratch canvas instead of creating a new Canvas
-    // @ts-expect-error TODO: scenery namespace
+    // @ts-expect-error TODO: scenery namespace https://github.com/phetsims/tasks/issues/1129
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
   }
 

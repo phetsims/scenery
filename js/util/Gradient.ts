@@ -28,7 +28,7 @@ export default abstract class Gradient extends Paint {
   private lastColorStopValues: string[];
 
   /**
-   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
+   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ] https://github.com/phetsims/tasks/issues/1129
    */
   public constructor() {
     super();
@@ -51,7 +51,7 @@ export default abstract class Gradient extends Paint {
    *
    * NOTE: Color stops should only be added before using the gradient as a fill/stroke. Adding stops afterwards
    *       will result in undefined behavior.
-   * TODO: Catch attempts to do the above.
+   * TODO: Catch attempts to do the above. https://github.com/phetsims/tasks/issues/1129
    *
    * @param ratio - Monotonically increasing value in the range of 0 to 1
    * @param color

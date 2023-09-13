@@ -7,7 +7,7 @@
  * - rendering order: the order that node selves would be rendered, matching the Trail implicit order
  * - nesting order:   the order in depth first with entering a node being "before" and exiting a node being "after"
  *
- * TODO: more seamless handling of the orders. or just exclusively use the nesting order
+ * TODO: more seamless handling of the orders. or just exclusively use the nesting order https://github.com/phetsims/tasks/issues/1129
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -104,7 +104,7 @@ export default class TrailPointer {
   /**
    * Like compareRender, but for the nested (depth-first) order
    *
-   * TODO: optimization?
+   * TODO: optimization? https://github.com/phetsims/tasks/issues/1129
    */
   public compareNested( other: TrailPointer ): number {
     assert && assert( other );
@@ -158,7 +158,7 @@ export default class TrailPointer {
   /**
    * Moves this pointer forwards one step in the nested order
    *
-   * TODO: refactor with "Side"-like handling
+   * TODO: refactor with "Side"-like handling https://github.com/phetsims/tasks/issues/1129
    */
   public nestedForwards(): this | null {
     assert && assert( this.isActive() );
@@ -288,7 +288,7 @@ export default class TrailPointer {
     assert && assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
     assert && assert( activeSelf.trail.rootNode() === activeOther.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
 
-    // sanity check TODO: remove later
+    // sanity check TODO: remove later https://github.com/phetsims/tasks/issues/1129
     activeSelf.trail.reindex();
     activeOther.trail.reindex();
 

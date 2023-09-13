@@ -9,7 +9,7 @@
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { DOMSelfDrawable, ImageStatefulDrawable, scenery, Utils } from '../../imports.js';
 
-// TODO: change this based on memory and performance characteristics of the platform
+// TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/tasks/issues/1129
 const keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
 class ImageDOMDrawable extends ImageStatefulDrawable( DOMSelfDrawable ) {
@@ -61,7 +61,7 @@ class ImageDOMDrawable extends ImageStatefulDrawable( DOMSelfDrawable ) {
     const img = this.domElement;
 
     if ( this.paintDirty && this.dirtyImage ) {
-      // TODO: allow other ways of showing a DOM image?
+      // TODO: allow other ways of showing a DOM image? https://github.com/phetsims/tasks/issues/1129
       img.src = node._image ? node._image.src : '//:0'; // NOTE: for img with no src (but with a string), see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
     }
 

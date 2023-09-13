@@ -305,7 +305,7 @@ class DebugContext {
     this._context.fillStyle = value;
   }
 
-  // TODO: create wrapper
+  // TODO: create wrapper https://github.com/phetsims/tasks/issues/1129
   /**
    * @public
    *
@@ -320,7 +320,7 @@ class DebugContext {
     return this._context.createLinearGradient( x0, y0, x1, y1 );
   }
 
-  // TODO: create wrapper
+  // TODO: create wrapper https://github.com/phetsims/tasks/issues/1129
   /**
    * @public
    *
@@ -337,7 +337,7 @@ class DebugContext {
     return this._context.createRadialGradient( x0, y0, r0, x1, y1, r1 );
   }
 
-  // TODO: create wrapper
+  // TODO: create wrapper https://github.com/phetsims/tasks/issues/1129
   /**
    * @public
    *

@@ -30,8 +30,7 @@
   "eslintConfig": {
     "extends": "../chipper/eslint/phet-library_eslintrc.js",
     "rules": {
-      "no-bitwise": "off",
-      "todo-should-have-issue": "off"
+      "no-bitwise": "off"
     },
     "globals": {
       "himalaya": "readonly",

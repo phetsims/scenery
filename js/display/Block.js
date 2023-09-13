@@ -69,7 +69,7 @@ class Block extends Drawable {
     this.previousBlock = null;
     this.nextBlock = null;
 
-    // TODO: are we potentially leaking drawable lists here?
+    // TODO: are we potentially leaking drawable lists here? https://github.com/phetsims/tasks/issues/1129
     if ( assertSlow ) {
       cleanArray( this.drawableList );
     }

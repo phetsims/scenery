@@ -31,7 +31,7 @@ class DOMBlock extends Block {
    * @returns {DOMBlock} - For chaining
    */
   initialize( display, domDrawable ) {
-    // TODO: is it bad to pass the acceleration flags along?
+    // TODO: is it bad to pass the acceleration flags along? https://github.com/phetsims/tasks/issues/1129
     super.initialize( display, domDrawable.renderer );
 
     this.domDrawable = domDrawable;

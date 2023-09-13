@@ -1466,7 +1466,7 @@ class Node extends ParallelDOM {
       // variables here.
     }
 
-    // TODO: layout here?
+    // TODO: layout here? https://github.com/phetsims/tasks/issues/1129
 
     if ( this._boundsDirty ) {
       wasDirtyBefore = true;
@@ -1509,7 +1509,7 @@ class Node extends ParallelDOM {
           this._parents[ i ].invalidateBounds();
         }
 
-        // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
+        // TODO: consider changing to parameter object (that may be a problem for the GC overhead) https://github.com/phetsims/tasks/issues/1129
         if ( !ourBounds.equalsEpsilon( oldBounds, notificationThreshold ) ) {
           this.boundsProperty.notifyListeners( oldBounds ); // RE-ENTRANT CALL HERE, it will validateBounds()
         }
@@ -1524,7 +1524,7 @@ class Node extends ParallelDOM {
     if ( this._childBoundsDirty || this._boundsDirty ) {
       sceneryLog && sceneryLog.bounds && sceneryLog.bounds( 'revalidation' );
 
-      // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error
+      // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error https://github.com/phetsims/tasks/issues/1129
       // instead of locking up
       this.validateBounds(); // RE-ENTRANT CALL HERE, it will validateBounds()
     }
@@ -1608,7 +1608,7 @@ class Node extends ParallelDOM {
   public validateWatchedBounds(): void {
     // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this
     // until they are all clean. Otherwise, side-effects could occur from bounds validations
-    // TODO: consider a way to prevent infinite loops here that occur due to bounds listeners triggering cycles
+    // TODO: consider a way to prevent infinite loops here that occur due to bounds listeners triggering cycles https://github.com/phetsims/tasks/issues/1129
     while ( this.watchedBoundsScan() ) {
       // do nothing
     }
@@ -1644,7 +1644,7 @@ class Node extends ParallelDOM {
    * Marks the bounds of this Node as invalid, so they are recomputed before being accessed again.
    */
   public invalidateBounds(): void {
-    // TODO: sometimes we won't need to invalidate local bounds! it's not too much of a hassle though?
+    // TODO: sometimes we won't need to invalidate local bounds! it's not too much of a hassle though? https://github.com/phetsims/tasks/issues/1129
     this._boundsDirty = true;
     this._localBoundsDirty = true;
 
@@ -2472,7 +2472,7 @@ class Node extends ParallelDOM {
   /**
    * Rotates the node's transform around a specific point (in the parent coordinate frame) by prepending the transform.
    *
-   * TODO: determine whether this should use the appendMatrix method
+   * TODO: determine whether this should use the appendMatrix method https://github.com/phetsims/tasks/issues/1129
    *
    * @param point - In the parent coordinate frame
    * @param angle - In radians
@@ -2788,7 +2788,7 @@ class Node extends ParallelDOM {
    * Callback function that should be called when our transform is changed.
    */
   private onTransformChange(): void {
-    // TODO: why is local bounds invalidation needed here?
+    // TODO: why is local bounds invalidation needed here? https://github.com/phetsims/tasks/issues/1129
     this.invalidateBounds();
 
     this._picker.onTransformChange();
@@ -4493,7 +4493,7 @@ class Node extends ParallelDOM {
    */
   public setCursor( cursor: string | null ): void {
 
-    // TODO: consider a mapping of types to set reasonable defaults
+    // TODO: consider a mapping of types to set reasonable defaults https://github.com/phetsims/tasks/issues/1129
 
     // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
     this._cursor = cursor === 'auto' ? null : cursor;
@@ -4548,7 +4548,7 @@ class Node extends ParallelDOM {
     assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a phet.kite.Shape, phet.dot.Bounds2, or null' );
 
     if ( this._mouseArea !== area ) {
-      this._mouseArea = area; // TODO: could change what is under the mouse, invalidate!
+      this._mouseArea = area; // TODO: could change what is under the mouse, invalidate! https://github.com/phetsims/tasks/issues/1129
 
       this._picker.onMouseAreaChange();
       if ( assertSlow ) { this._picker.audit(); }
@@ -4586,7 +4586,7 @@ class Node extends ParallelDOM {
     assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a phet.kite.Shape, phet.dot.Bounds2, or null' );
 
     if ( this._touchArea !== area ) {
-      this._touchArea = area; // TODO: could change what is under the touch, invalidate!
+      this._touchArea = area; // TODO: could change what is under the touch, invalidate! https://github.com/phetsims/tasks/issues/1129
 
       this._picker.onTouchAreaChange();
       if ( assertSlow ) { this._picker.audit(); }
@@ -5247,7 +5247,7 @@ class Node extends ParallelDOM {
     }
 
     // see http://en.wikipedia.org/wiki/Topological_sorting
-    // TODO: remove duplication with above handling?
+    // TODO: remove duplication with above handling? https://github.com/phetsims/tasks/issues/1129
     const edges: Record<string, Record<string, boolean>> = {};
     const s: Node[] = [];
     const l: Node[] = [];
@@ -6104,7 +6104,7 @@ class Node extends ParallelDOM {
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: Node = this; // eslint-disable-line consistent-this
-    // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
+    // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses) https://github.com/phetsims/tasks/issues/1129
 
     // we need to apply the transformations in the reverse order, so we temporarily store them
     const transforms = [];
@@ -6224,7 +6224,7 @@ class Node extends ParallelDOM {
    * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
    *
-   * TODO: Possible to be well-defined and have multiple instances of each.
+   * TODO: Possible to be well-defined and have multiple instances of each. https://github.com/phetsims/tasks/issues/1129
    */
   public boundsOf( node: Node ): Bounds2 {
     return this.globalToLocalBounds( node.getGlobalBounds() );
@@ -6236,7 +6236,7 @@ class Node extends ParallelDOM {
    * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
    *
-   * TODO: Possible to be well-defined and have multiple instances of each.
+   * TODO: Possible to be well-defined and have multiple instances of each. https://github.com/phetsims/tasks/issues/1129
    */
   public boundsTo( node: Node ): Bounds2 {
     return node.globalToLocalBounds( this.getGlobalBounds() );
@@ -6262,7 +6262,7 @@ class Node extends ParallelDOM {
 
     assert && assert( index >= 0, 'Invalid operation: trying to detach a non-referenced drawable' );
 
-    this._drawables.splice( index, 1 ); // TODO: replace with a remove() function
+    this._drawables.splice( index, 1 ); // TODO: replace with a remove() function https://github.com/phetsims/tasks/issues/1129
     return this;
   }
 

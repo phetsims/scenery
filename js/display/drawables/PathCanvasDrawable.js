@@ -27,7 +27,7 @@ class PathCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable 
     const context = wrapper.context;
 
     if ( node.hasShape() ) {
-      // TODO: fill/stroke delay optimizations?
+      // TODO: fill/stroke delay optimizations? https://github.com/phetsims/tasks/issues/1129
       context.beginPath();
       node._shape.writeToContext( context );
 

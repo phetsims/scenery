@@ -204,7 +204,7 @@ export default class PDOMDisplaysInfo {
 
     assert && assert( !this.canHavePDOMDisplays(), 'Should happen when we cannot store pdomDisplays' );
 
-    // TODO: is there a way to avoid a copy?
+    // TODO: is there a way to avoid a copy? https://github.com/phetsims/tasks/issues/1129
     this.removePDOMDisplays( this.pdomDisplays.slice() );
 
     assert && assert( this.pdomDisplays.length === 0, 'Should be empty after removing everything' );

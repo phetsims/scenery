@@ -73,7 +73,7 @@ export default class RichTextLink extends Voicing( RichTextCleanable( Node ) ) i
             // prevent default from pdom activation so we don't also open a new tab from native DOM input on a link
             event.domEvent!.preventDefault();
           }
-          // @ts-expect-error TODO TODO TODO this is a bug! How do we handle this?
+          // @ts-expect-error TODO TODO TODO this is a bug! How do we handle this? https://github.com/phetsims/tasks/issues/1129
           self._linkEventsHandled && event.handle();
           openPopup( href ); // open in a new window/tab
         },

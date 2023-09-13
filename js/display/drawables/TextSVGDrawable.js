@@ -10,7 +10,7 @@ import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { scenery, svgns, SVGSelfDrawable, TextStatefulDrawable, Utils } from '../../imports.js';
 
-// TODO: change this based on memory and performance characteristics of the platform
+// TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/tasks/issues/1129
 const keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
 // Some browsers (IE/Edge) can't handle our UTF-8 embedding marks AND SVG textLength/spacingAndGlyphs. We disable
@@ -40,7 +40,7 @@ class TextSVGDrawable extends TextStatefulDrawable( SVGSelfDrawable ) {
 
       text.appendChild( document.createTextNode( '' ) );
 
-      // TODO: flag adjustment for SVG qualities
+      // TODO: flag adjustment for SVG qualities https://github.com/phetsims/tasks/issues/1129
       text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       text.setAttribute( 'text-rendering', 'geometricPrecision' );
       text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );

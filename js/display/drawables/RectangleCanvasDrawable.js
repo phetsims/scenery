@@ -80,7 +80,7 @@ class RectangleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDraw
       }
     }
     else {
-      // TODO: how to handle fill/stroke delay optimizations here?
+      // TODO: how to handle fill/stroke delay optimizations here? https://github.com/phetsims/tasks/issues/1129
       if ( node.hasFill() ) {
         // If we need the fill pattern/gradient to have a different transformation, we can't use fillRect.
         // See https://github.com/phetsims/scenery/issues/543

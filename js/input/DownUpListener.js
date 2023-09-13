@@ -149,7 +149,7 @@ class DownUpListener extends PhetioObject {
     if ( this.options.upInside || this.options.upOutside ) {
       const trailUnderPointer = event.trail;
 
-      // TODO: consider changing this so that it just does a hit check and ignores anything in front?
+      // TODO: consider changing this so that it just does a hit check and ignores anything in front? https://github.com/phetsims/tasks/issues/1129
       const isInside = trailUnderPointer.isExtensionOf( this.downTrail, true ) && !this.interrupted;
 
       if ( isInside && this.options.upInside ) {

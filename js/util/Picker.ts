@@ -542,7 +542,7 @@ export default class Picker {
    */
   public onMouseAreaChange(): void {
     // Bounds can depend on the mouseArea, so we'll invalidate those.
-    // TODO: Consider bounds invalidation that only does the 'mouse' flags, since we don't need to invalidate touches.
+    // TODO: Consider bounds invalidation that only does the 'mouse' flags, since we don't need to invalidate touches. https://github.com/phetsims/tasks/issues/1129
     this.invalidate( true );
   }
 
@@ -551,7 +551,7 @@ export default class Picker {
    */
   public onTouchAreaChange(): void {
     // Bounds can depend on the touchArea, so we'll invalidate those.
-    // TODO: Consider bounds invalidation that only does the 'touch' flags, since we don't need to invalidate mice.
+    // TODO: Consider bounds invalidation that only does the 'touch' flags, since we don't need to invalidate mice. https://github.com/phetsims/tasks/issues/1129
     this.invalidate( true );
   }
 

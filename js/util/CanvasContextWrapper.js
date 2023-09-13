@@ -5,7 +5,7 @@
  * Wraps the context and contains a reference to the canvas, so that we can absorb unnecessary state changes,
  * and possibly combine certain fill operations.
  *
- * TODO: performance analysis, possibly axe this and use direct modification.
+ * TODO: performance analysis, possibly axe this and use direct modification. https://github.com/phetsims/tasks/issues/1129
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -57,7 +57,7 @@ class CanvasContextWrapper {
   setDimensions( width, height ) {
 
     //Don't guard against width and height, because we need to clear the canvas.
-    //TODO: Is it expensive to clear by setting both the width and the height?  Maybe we just need to set the width to clear it.
+    //TODO: Is it expensive to clear by setting both the width and the height?  Maybe we just need to set the width to clear it. https://github.com/phetsims/tasks/issues/1129
     this.canvas.width = width;
     this.canvas.height = height;
 

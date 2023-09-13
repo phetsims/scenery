@@ -68,7 +68,7 @@ export default abstract class Filter {
   public abstract applyCanvasFilter( wrapper: CanvasContextWrapper ): void;
 
   public isDOMCompatible(): boolean {
-    // TODO: We can browser-check on things like color matrix? But we want to disallow things that we can't guarantee we
+    // TODO: We can browser-check on things like color matrix? But we want to disallow things that we can't guarantee we https://github.com/phetsims/tasks/issues/1129
     // can support?
     return false;
   }

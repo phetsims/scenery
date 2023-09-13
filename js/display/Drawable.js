@@ -371,7 +371,7 @@ class Drawable {
     if ( !this.dirty ) {
       this.dirty = true;
 
-      // TODO: notify what we want to call repaint() later
+      // TODO: notify what we want to call repaint() later https://github.com/phetsims/tasks/issues/1129
       if ( this.parentDrawable ) {
         this.parentDrawable.markDirtyDrawable( this );
       }

@@ -81,7 +81,7 @@ const PaintableStatefulDrawable = memoize( type => {
      * @protected
      */
     cleanPaintableState() {
-      // TODO: is this being called when we need it to be called?
+      // TODO: is this being called when we need it to be called? https://github.com/phetsims/tasks/issues/1129
       this.dirtyFill = false;
 
       this.dirtyStroke = false;
@@ -113,7 +113,7 @@ const PaintableStatefulDrawable = memoize( type => {
       this.dirtyFill = true;
       this.markPaintDirty();
       this.fillObserver.setPrimary( this.instance.node._fill );
-      // TODO: look into having the fillObserver be notified of Node changes as our source
+      // TODO: look into having the fillObserver be notified of Node changes as our source https://github.com/phetsims/tasks/issues/1129
     }
 
     /**
@@ -126,7 +126,7 @@ const PaintableStatefulDrawable = memoize( type => {
       this.dirtyStroke = true;
       this.markPaintDirty();
       this.strokeObserver.setPrimary( this.instance.node._stroke );
-      // TODO: look into having the strokeObserver be notified of Node changes as our source
+      // TODO: look into having the strokeObserver be notified of Node changes as our source https://github.com/phetsims/tasks/issues/1129
     }
 
     /**

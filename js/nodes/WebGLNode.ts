@@ -159,7 +159,7 @@ export default abstract class WebGLNode extends Node {
     const width = wrapper.canvas.width;
     const height = wrapper.canvas.height;
 
-    // TODO: Can we reuse the same Canvas? That might save some context creations?
+    // TODO: Can we reuse the same Canvas? That might save some context creations? https://github.com/phetsims/tasks/issues/1129
     const scratchCanvas = document.createElement( 'canvas' );
     scratchCanvas.width = width;
     scratchCanvas.height = height;
@@ -198,7 +198,7 @@ export default abstract class WebGLNode extends Node {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
-    // @ts-expect-error TODO: pooling
+    // @ts-expect-error TODO: pooling https://github.com/phetsims/tasks/issues/1129
     return WebGLNodeDrawable.createFromPool( renderer, instance );
   }
 

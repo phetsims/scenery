@@ -169,7 +169,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      *   notes below.
      *   Additionally, note that if a URL is provided, accessing image.getImage() or image.image will result not in the
      *   original URL (currently), but with the automatically created HTMLImageElement.
-     *   TODO: return the original input
+     *   TODO: return the original input https://github.com/phetsims/tasks/issues/1129
      *
      * HTMLCanvasElement - It's possible to pass an HTML5 Canvas directly into the Image node. It will immediately be
      *   aware of the width/height (bounds) of the Canvas, but NOTE that the Image node will not listen to Canvas size
@@ -277,7 +277,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      *
      * NOTE: If a URL or mipmap data was provided, this currently doesn't return the original input to setImage(), but
      *       instead provides the mapped result (or first mipmap level's image).
-     *       TODO: return the original result instead.
+     *       TODO: return the original result instead. https://github.com/phetsims/tasks/issues/1129
      */
     public getImage(): HTMLImageElement | HTMLCanvasElement {
       assert && assert( this._image !== null );

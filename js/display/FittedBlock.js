@@ -64,7 +64,7 @@ class FittedBlock extends Block {
     // now we always add a listener to the display size to invalidate our fit
     this.display.sizeProperty.lazyLink( this.dirtyFitListener );
 
-    // TODO: add count of boundsless objects?
+    // TODO: add count of boundsless objects? https://github.com/phetsims/tasks/issues/1129
     return this;
   }
 
@@ -87,7 +87,7 @@ class FittedBlock extends Block {
       this.markDirtyFit();
 
       // Reset the oldFitBounds so that any updates that check bounds changes will update it.
-      // TODO: remove duplication here with updateFit()
+      // TODO: remove duplication here with updateFit() https://github.com/phetsims/tasks/issues/1129
       this.oldFitBounds.set( Bounds2.NOTHING );
 
       // If we switched to the common-ancestor fit, we need to compute the common-ancestor instance.
@@ -390,7 +390,7 @@ scenery.register( 'FittedBlock', FittedBlock );
 FittedBlock.FULL_DISPLAY = 1;
 FittedBlock.COMMON_ANCESTOR = 2;
 
-// TODO: enumeration these?
+// TODO: enumeration these? https://github.com/phetsims/tasks/issues/1129
 FittedBlock.fitString = {
   1: 'fullDisplay',
   2: 'commonAncestor'

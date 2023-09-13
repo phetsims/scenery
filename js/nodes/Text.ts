@@ -99,7 +99,7 @@ export default class Text extends Paintable( Node ) {
     this._stringProperty = new TinyForwardingProperty( '', true, this.onStringPropertyChange.bind( this ) );
     this._font = Font.DEFAULT;
     this._boundsMethod = 'hybrid';
-    this._isHTML = false; // TODO: clean this up
+    this._isHTML = false; // TODO: clean this up https://github.com/phetsims/tasks/issues/1129
     this._cachedRenderedText = null;
 
     const definedOptions = extendDefined( {
@@ -269,7 +269,7 @@ export default class Text extends Paintable( Node ) {
    * - 'accurate' - Recursively renders to a Canvas to accurately determine bounds. Slow, but works with all renderers.
    * - 'hybrid' - [default] Cache SVG height, and uses Canvas measureText for the width.
    *
-   * TODO: deprecate fast/fastCanvas options?
+   * TODO: deprecate fast/fastCanvas options? https://github.com/phetsims/tasks/issues/1129
    *
    * NOTE: Most of these are unfortunately not hard guarantees that content is all inside of the returned bounds.
    *       'accurate' should probably be the only one where that guarantee can be assumed. Things like cyrillic in
@@ -345,7 +345,7 @@ export default class Text extends Paintable( Node ) {
   private invalidateText(): void {
     this.invalidateSelf();
 
-    // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
+    // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame? https://github.com/phetsims/tasks/issues/1129
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       ( this._drawables[ i ] as unknown as TTextDrawable ).markDirtyBounds();
@@ -361,7 +361,7 @@ export default class Text extends Paintable( Node ) {
    * @returns - Whether the self bounds changed.
    */
   protected override updateSelfBounds(): boolean {
-    // TODO: don't create another Bounds2 object just for this!
+    // TODO: don't create another Bounds2 object just for this! https://github.com/phetsims/tasks/issues/1129
     let selfBounds;
 
     // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
@@ -421,7 +421,7 @@ export default class Text extends Paintable( Node ) {
    * @param matrix - The transformation matrix already applied to the context.
    */
   protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
-    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
+    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/tasks/issues/1129
     TextCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
@@ -527,7 +527,7 @@ export default class Text extends Paintable( Node ) {
    * information on the ordering of information.
    *
    * NOTE: If a Font object was provided to setFont(), this will not currently return it.
-   * TODO: Can we refactor so we can have access to (a) the Font object, and possibly (b) the initially provided value.
+   * TODO: Can we refactor so we can have access to (a) the Font object, and possibly (b) the initially provided value. https://github.com/phetsims/tasks/issues/1129
    */
   public getFont(): string {
     return this._font.getFont();

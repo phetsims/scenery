@@ -1,7 +1,7 @@
 // Copyright 2013-2022, University of Colorado Boulder
 
 /**
- * TODO docs
+ * TODO docs https://github.com/phetsims/tasks/issues/1129
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -29,13 +29,13 @@ class InlineCanvasCacheDrawable extends Drawable {
   initialize( renderer, instance ) {
     super.initialize( renderer );
 
-    // TODO: NOTE: may have to separate into separate drawables for separate group renderers
+    // TODO: NOTE: may have to separate into separate drawables for separate group renderers https://github.com/phetsims/tasks/issues/1129
 
     // @public {Instance}
     this.instance = instance; // will need this so we can get bounds for layer fitting
   }
 
-  // TODO: support Canvas/SVG/DOM
+  // TODO: support Canvas/SVG/DOM https://github.com/phetsims/tasks/issues/1129
 
   /**
    * @public
@@ -46,7 +46,7 @@ class InlineCanvasCacheDrawable extends Drawable {
    * @param {ChangeInterval} lastChangeInterval
    */
   stitch( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval ) {
-    //OHTWO TODO: called when we have a change in our drawables
+    //OHTWO TODO: called when we have a change in our drawables https://github.com/phetsims/tasks/issues/1129
   }
 }
 

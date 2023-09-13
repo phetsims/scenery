@@ -325,7 +325,7 @@ const BrowserEvents = {
    * @private
    *
    * @param {EventContext} eventContext
-   * @param {BatchedDOMEventType} batchType - TODO: turn to full enumeration?
+   * @param {BatchedDOMEventType} batchType - TODO: turn to full enumeration? https://github.com/phetsims/tasks/issues/1129
    * @param {string} inputCallbackName - e.g. 'mouseDown', will trigger Input.mouseDown
    * @param {boolean} triggerImmediate - Whether this will be force-executed now, causing all batched events to fire.
    *                                     Useful for events (like mouseup) that responding synchronously is

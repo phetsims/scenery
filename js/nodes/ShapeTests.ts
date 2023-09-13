@@ -33,7 +33,7 @@ function snapshot( scene: Node, width?: number, height?: number ): ImageData {
   return data;
 }
 
-// TODO: factor out
+// TODO: factor out https://github.com/phetsims/tasks/issues/1129
 function sceneEquals( assert: Assert, constructionA: ( node: Node ) => void, constructionB: ( node: Node ) => void,
                       message?: string, threshold?: number ): boolean {
 
@@ -52,11 +52,11 @@ function sceneEquals( assert: Assert, constructionA: ( node: Node ) => void, con
 
   const isEqual = snapshotEquals( assert, snapshot( sceneA ), snapshot( sceneB ), threshold, message );
 
-  // TODO: consider showing if tests fail
+  // TODO: consider showing if tests fail https://github.com/phetsims/tasks/issues/1129
   return isEqual;
 }
 
-// TODO: factor out
+// TODO: factor out https://github.com/phetsims/tasks/issues/1129
 function strokeEqualsFill( assert: Assert, shapeToStroke: Shape, shapeToFill: Shape,
                            strokeNodeSetup?: ( node: Path ) => void, message?: string ): void {
 

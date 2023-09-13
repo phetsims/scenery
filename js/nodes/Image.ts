@@ -178,7 +178,7 @@ export default class Image extends Imageable( Node ) {
    * @param matrix - The transformation matrix already applied to the context.
    */
   protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
-    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
+    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/tasks/issues/1129
     ImageCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
@@ -311,7 +311,7 @@ Image.ImageIO = new IOType( 'ImageIO', {
       implementation: function( base64Text: string ) {
         const im = new window.Image();
         im.src = base64Text;
-        // @ts-expect-error TODO: how would this even work?
+        // @ts-expect-error TODO: how would this even work? https://github.com/phetsims/tasks/issues/1129
         this.image = im;
       },
       documentation: 'Set the image from a base64 string',

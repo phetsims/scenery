@@ -36,7 +36,7 @@ import './util/MatrixBetweenPropertyTests.js';
 import './util/TrailTests.js';
 
 // add elements to the QUnit fixture for our Scenery-specific tests
-// TODO: is this necessary?
+// TODO: is this necessary? https://github.com/phetsims/tasks/issues/1129
 const $fixture = $( '#qunit-fixture' );
 $fixture.append( $( '<div>' ).attr( 'id', 'main' ).attr( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 1; width: 640px; height: 480px;' ) );
 $fixture.append( $( '<div>' ).attr( 'id', 'secondary' ).attr( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 0; width: 640px; height: 480px;' ) );
