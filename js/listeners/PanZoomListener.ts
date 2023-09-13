@@ -11,62 +11,67 @@
 import Property from '../../../axon/js/Property.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import merge from '../../../phet-core/js/merge.js';
 import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { MultiListener, scenery } from '../imports.js';
+import { MultiListener, MultiListenerOptions, MultiListenerPress, Node, scenery } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 // constants
 // Reusable Matrix3 instance to avoid creating lots of them
 const SCRATCH_MATRIX = new Matrix3();
 
+type SelfOptions = {
+
+  // these bounds should be fully filled with content at all times, in the global coordinate frame
+  panBounds?: Bounds2;
+
+  // Bounds for the target node that get transformed with this listener and fill panBounds,
+  // useful if the targetNode bounds do not accurately describe the targetNode (like if invisible content
+  // extends off screen). Defaults to targetNode bounds if null. Bounds in the global coordinate frame of the
+  // target Node.
+  targetBounds?: Bounds2 | null;
+
+  // Scale that accurately describes scale of the targetNode, but is different from the actual scale of the
+  // targetNode's transform. This scale is applied to translation Vectors for the TargetNode during panning. If
+  // targetNode children get scaled uniformly (such as in response to window resizing or native browser zoom), you
+  // likely want that scale to be applied during translation operations so that pan/zoom behaves
+  // the same regardless of window size or native browser zoom.
+  targetScale?: number;
+};
+export type PanZoomListenerOptions = SelfOptions & MultiListenerOptions;
+
 class PanZoomListener extends MultiListener {
 
+  private _panBounds: Bounds2;
+  private _targetBounds: Bounds2;
+  protected _targetScale: number;
+
+  // Only needed for PhET-iO instrumented. The pan bounds of the source so if the destination bounds are different due
+  // to a differently sized iframe or window, this can be used to determine a correction for the destination
+  // targetNode transform. This could be removed by work recommended in
+  protected sourceFramePanBoundsProperty: Property<Bounds2>;
+
   /**
-   * @param {Node} targetNode - The Node that should be transformed by this PanZoomListener.
-   * @param {Object} [options] - See the constructor body (below) for documented options.
+   * @param targetNode - The Node that should be transformed by this PanZoomListener.
+   * @param [providedOptions].
    */
-  constructor( targetNode, options ) {
+  public constructor( targetNode: Node, providedOptions: PanZoomListenerOptions ) {
 
-    options = merge( {
-
-      // {Bounds2} - these bounds should be fully filled with content at all times, in the global coordinate frame
+    const options = optionize<PanZoomListenerOptions, SelfOptions, PanZoomListenerOptions>()( {
       panBounds: Bounds2.NOTHING,
-
-      // {null|Bounds2} - Bounds for the target node that get transformed with this listener and fill panBounds,
-      // useful if the targetNode bounds do not accurately describe the targetNode (like if invisible content
-      // extends off screen). Defaults to targetNode bounds if null. Bounds in the global coordinate frame of the
-      // target Node.
       targetBounds: null,
-
-      // {number} - Scale that accurately describes scale of the targetNode, but is different from the actual
-      // scale of the targetNode's transform. This scale is applied to translation Vectors for the TargetNode during
-      // panning. If targetNode children get scaled uniformly (such as in response to window resizing or native
-      // browser zoom), you likely want that scale to be applied during translation operations so that pan/zoom behaves
-      // the same regardless of window size or native browser zoom.
       targetScale: 1,
 
-      // {boolean} - by default, the PanZoomListener does now allow rotation
-      allowRotation: false,
-
-      // {Tandem}
-      tandem: Tandem.OPTIONAL // Override supertype which requires a tandem
-    }, options );
+      // by default, the PanZoomListener does now allow rotation
+      allowRotation: false
+    }, providedOptions );
 
     super( targetNode, options );
 
-    // @private {Bounds2} - see options
     this._panBounds = options.panBounds;
     this._targetBounds = options.targetBounds || targetNode.globalBounds.copy();
-
-    // @protected {number}
     this._targetScale = options.targetScale;
-
-    // @protected {Property.<Bounds2>} - Only needed for PhET-iO instrumented. The pan bounds of the source
-    // so if the destination bounds are different due to a differently sized iframe or window,
-    // this can be used to determine a correction for the destination targetNode transform.
-    // This could be removed by work recommended in
 
     // When generating a PhET-iO API, the specific bounds of the window should be excluded from the initial state
     // so that the initial state part of the API doesn't depend on the window size.
@@ -98,10 +103,8 @@ class PanZoomListener extends MultiListener {
   /**
    * If the targetNode is larger than the panBounds specified, keep the panBounds completely filled with
    * targetNode content.
-   *
-   * @protected
    */
-  correctReposition() {
+  protected correctReposition(): void {
 
     // Save values of the current matrix, so that we only do certain work when the matrix actually changes
     SCRATCH_MATRIX.set( this._targetNode.matrix );
@@ -133,12 +136,8 @@ class PanZoomListener extends MultiListener {
   /**
    * If the transformed targetBounds are equal to the panBounds, there is no space for us to pan so do not change
    * the pointer cursor.
-   * @protected
-   * @override
-   *
-   * @param {Press} press
    */
-  addPress( press ) {
+  protected override addPress( press: MultiListenerPress ): void {
     super.addPress( press );
 
     // don't show the pressCursor if our bounds are limited by pan bounds, and we cannot pan anywhere
@@ -149,32 +148,24 @@ class PanZoomListener extends MultiListener {
 
   /**
    * Reposition but keep content within this._panBounds.
-   * @public
-   * @override
    */
-  reposition() {
+  protected override reposition(): void {
     super.reposition();
     this.correctReposition();
   }
 
   /**
    * Reset the transform on the targetNode and follow up by making sure that the content is still within panBounds.
-   * @public
-   * @override
    */
-  resetTransform() {
-    MultiListener.prototype.resetTransform.call( this );
+  public override resetTransform(): void {
+    super.resetTransform();
     this.correctReposition();
   }
 
   /**
    * Set the containing panBounds and then make sure that the targetBounds fully fill the new panBounds.
-   * @override
-   * @public
-   *
-   * @param {Bounds2} panBounds
    */
-  setPanBounds( panBounds ) {
+  public setPanBounds( panBounds: Bounds2 ): void {
     this._panBounds = panBounds;
 
     // When generating a PhET-iO API, the specific bounds of the window should be excluded from the initial state
@@ -189,11 +180,10 @@ class PanZoomListener extends MultiListener {
    * Set the targetBounds which should totally fill the panBounds at all times. Useful if the targetNode has bounds
    * which don't accurately describe the node. For instance, if an overlay plane is on top of the node and extends
    * beyond the dimensions of the visible node.
-   * @public
    *
-   * @param {Bounds2} targetBounds - in the global coordinate frame
+   * targetBounds - in the global coordinate frame
    */
-  setTargetBounds( targetBounds ) {
+  public setTargetBounds( targetBounds: Bounds2 ): void {
     this._targetBounds = targetBounds;
     this.correctReposition();
   }
@@ -202,20 +192,15 @@ class PanZoomListener extends MultiListener {
    * Set the representative scale of the target Node. If the targetBounds are different from the targetNode.bounds
    * it may be useful to correct changes to panning and zooming by a scale that is different from the
    * actual scale applied to the targetNode during panning.
-   * @public
-   * @param {number} scale
    */
-  setTargetScale( scale ) {
+  public setTargetScale( scale: number ): void {
     this._targetScale = scale;
   }
 
   /**
    * Get the targetBounds, in the global coordinate frame.
-   * @public
-   *
-   * @returns {Bounds2}
    */
-  getTargetBounds( targetBounds ) {
+  public getTargetBounds(): Bounds2 {
     return this._targetBounds;
   }
 }

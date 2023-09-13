@@ -27,7 +27,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import SingularValueDecomposition from '../../../dot/js/SingularValueDecomposition.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import { Intent, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
+import { Intent, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, MultiListenerPress } from '../imports.js';
 import PickRequired from '../../../phet-core/js/types/PickRequired.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import optionize from '../../../phet-core/js/optionize.js';
@@ -72,26 +72,26 @@ export type MultiListenerOptions = {
 class MultiListener implements TInputListener {
 
   // the Node that will be transformed by this listener
-  private readonly _targetNode: Node;
+  protected readonly _targetNode: Node;
 
   // see options
   private readonly _minScale: number;
   private readonly _maxScale: number;
   private readonly _mouseButton: number;
-  private readonly _pressCursor: string;
+  protected readonly _pressCursor: string;
   private readonly _allowScale: boolean;
   private readonly _allowRotation: boolean;
   private readonly _allowMultitouchInterruption: boolean;
   private readonly _allowMoveInterruption: boolean;
 
   // List of "active" Presses down from Pointer input which are actively changing the transformation of the target Node
-  private readonly _presses: Press[];
+  private readonly _presses: MultiListenerPress[];
 
   // List of "background" presses which are saved but not yet doing anything for the target Node transformation. If
   // the Pointer already has listeners, Presses are added to the background and wait to be converted to "active"
   // presses until we are allowed to interrupt the other listeners. Related to options "allowMoveInterrupt" and
   // "allowMultitouchInterrupt", where other Pointer listeners are interrupted in these cases.
-  private readonly _backgroundPresses: Press[];
+  private readonly _backgroundPresses: MultiListenerPress[];
 
   // {Property.<Matrix3>} - The matrix applied to the targetNode in response to various input for the MultiListener
   public readonly matrixProperty: Property<Matrix3>;
@@ -266,7 +266,7 @@ class MultiListener implements TInputListener {
   /**
    * Finds a Press by searching for the one with the provided Pointer.
    */
-  private findPress( pointer: Pointer ): Press | null {
+  private findPress( pointer: Pointer ): MultiListenerPress | null {
     for ( let i = 0; i < this._presses.length; i++ ) {
       if ( this._presses[ i ].pointer === pointer ) {
         return this._presses[ i ];
@@ -279,7 +279,7 @@ class MultiListener implements TInputListener {
    * Find a background Press by searching for one with the provided Pointer. A background Press is one created
    * when we receive an event while a Pointer is already attached.
    */
-  private findBackgroundPress( pointer: Pointer ): Press | null {
+  private findBackgroundPress( pointer: Pointer ): MultiListenerPress | null {
     for ( let i = 0; i < this._backgroundPresses.length; i++ ) {
       if ( this._backgroundPresses[ i ].pointer === pointer ) {
         return this._backgroundPresses[ i ];
@@ -293,7 +293,7 @@ class MultiListener implements TInputListener {
    * where we may try to add the same pointer twice (user opened context menu, using a mouse during fuzz testing), and
    * we want to avoid adding a press again in those cases.
    */
-  private hasPress( press: Press ): boolean {
+  private hasPress( press: MultiListenerPress ): boolean {
     return _.some( this._presses.concat( this._backgroundPresses ), existingPress => {
       return existingPress.pointer === press.pointer;
     } );
@@ -342,7 +342,7 @@ class MultiListener implements TInputListener {
     assert && assert( _.includes( pressTrail.nodes, this._targetNode ), 'targetNode must be in the Trail for Press' );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-    const press = new Press( event.pointer, pressTrail );
+    const press = new MultiListenerPress( event.pointer, pressTrail );
 
     if ( !this._allowMoveInterruption && !this._allowMultitouchInterruption ) {
 
@@ -367,7 +367,7 @@ class MultiListener implements TInputListener {
   /**
    * Add a Press to this listener when a new Pointer is down.
    */
-  protected addPress( press: Press ): void {
+  protected addPress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -387,7 +387,7 @@ class MultiListener implements TInputListener {
   /**
    * Reposition in response to movement of any Presses.
    */
-  private movePress( press: Press ): void {
+  private movePress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener movePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -399,7 +399,7 @@ class MultiListener implements TInputListener {
   /**
    * Remove a Press from this listener.
    */
-  protected removePress( press: Press ): void {
+  protected removePress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -418,7 +418,7 @@ class MultiListener implements TInputListener {
    * Add a background Press, a Press that we receive while a Pointer is already attached. Depending on background
    * Presses, we may interrupt the attached pointer to begin zoom operations.
    */
-  private addBackgroundPress( press: Press ): void {
+  private addBackgroundPress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -436,7 +436,7 @@ class MultiListener implements TInputListener {
   /**
    * Remove a background Press from this listener.
    */
-  private removeBackgroundPress( press: Press ): void {
+  private removeBackgroundPress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removeBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -691,45 +691,5 @@ class MultiListener implements TInputListener {
 }
 
 scenery.register( 'MultiListener', MultiListener );
-
-/**
- * A logical "press" for the MultiListener, capturing information when a Pointer goes down on the screen.
- */
-class Press {
-  public pointer: Pointer;
-  public trail: Trail;
-  public interrupted: boolean;
-
-  // down point for the new press, in the global coordinate frame
-  public readonly initialPoint: Vector2;
-
-  // point for the new press, in the local coordinate frame of the leaf Node of the Trail
-  public localPoint: Vector2 | null;
-
-  public constructor( pointer: Pointer, trail: Trail ) {
-    this.pointer = pointer;
-    this.trail = trail;
-    this.interrupted = false;
-
-    this.initialPoint = pointer.point;
-
-    this.localPoint = null;
-    this.recomputeLocalPoint();
-  }
-
-  /**
-   * Compute the local point for this Press, which is the local point for the leaf Node of this Press's Trail.
-   */
-  public recomputeLocalPoint(): void {
-    this.localPoint = this.trail.globalToLocalPoint( this.pointer.point );
-  }
-
-  /**
-   * The parent point of this press, relative to the leaf Node of this Press's Trail.
-   */
-  public get targetPoint(): Vector2 {
-    return this.trail.globalToParentPoint( this.pointer.point );
-  }
-}
 
 export default MultiListener;
