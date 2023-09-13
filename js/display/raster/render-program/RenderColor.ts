@@ -74,8 +74,8 @@ export default class RenderColor extends RenderProgram {
     vector.set( color );
   }
 
-  public override getInstructions(): RenderInstruction[] {
-    return [ new RenderInstructionPush( this.color ) ];
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    instructions.push( new RenderInstructionPush( this.color ) );
   }
 
   protected override getExtraDebugString(): string {

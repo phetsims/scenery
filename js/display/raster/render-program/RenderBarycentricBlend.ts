@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -24,6 +24,8 @@ scenery.register( 'RenderBarycentricBlendAccuracy', RenderBarycentricBlendAccura
 
 export default class RenderBarycentricBlend extends RenderProgram {
 
+  public readonly data: RenderBarycentricBlendData;
+
   public constructor(
     public readonly pointA: Vector2,
     public readonly pointB: Vector2,
@@ -31,7 +33,8 @@ export default class RenderBarycentricBlend extends RenderProgram {
     public readonly accuracy: RenderBarycentricBlendAccuracy,
     public readonly a: RenderProgram,
     public readonly b: RenderProgram,
-    public readonly c: RenderProgram
+    public readonly c: RenderProgram,
+    data?: RenderBarycentricBlendData
   ) {
     assert && assert( pointA.isFinite() );
     assert && assert( pointB.isFinite() );
@@ -48,6 +51,8 @@ export default class RenderBarycentricBlend extends RenderProgram {
       false,
       accuracy === RenderBarycentricBlendAccuracy.Accurate
     );
+
+    this.data = data || new RenderBarycentricBlendData( this.pointA, this.pointB, this.pointC, this.accuracy );
   }
 
   public override getName(): string {
@@ -56,7 +61,7 @@ export default class RenderBarycentricBlend extends RenderProgram {
 
   public override withChildren( children: RenderProgram[] ): RenderBarycentricBlend {
     assert && assert( children.length === 3 );
-    return new RenderBarycentricBlend( this.pointA, this.pointB, this.pointC, this.accuracy, children[ 0 ], children[ 1 ], children[ 2 ] );
+    return new RenderBarycentricBlend( this.pointA, this.pointB, this.pointC, this.accuracy, children[ 0 ], children[ 1 ], children[ 2 ], this.data );
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
@@ -102,7 +107,7 @@ export default class RenderBarycentricBlend extends RenderProgram {
 
     const vector = new Vector4( 0, 0, 0, 0 );
     RenderBarycentricBlend.applyProgram(
-      vector, context, this.pointA, this.pointB, this.pointC, this.accuracy, aColor, bColor, cColor
+      vector, context, this.data, aColor, bColor, cColor
     );
     return vector;
   }
@@ -111,24 +116,21 @@ export default class RenderBarycentricBlend extends RenderProgram {
   public static applyProgram(
     vector: Vector4,
     context: RenderEvaluationContext,
-    pointA: Vector2,
-    pointB: Vector2,
-    pointC: Vector2,
-    accuracy: RenderBarycentricBlendAccuracy,
+    data: RenderBarycentricBlendData,
     aColor: Vector4,
     bColor: Vector4,
     cColor: Vector4
   ): void {
     if ( assert ) {
-      if ( accuracy === RenderBarycentricBlendAccuracy.Accurate ) {
+      if ( data.accuracy === RenderBarycentricBlendAccuracy.Accurate ) {
         assert( context.hasCentroid() );
       }
     }
 
-    const point = accuracy === RenderBarycentricBlendAccuracy.Accurate ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
-    const pA = pointA;
-    const pB = pointB;
-    const pC = pointC;
+    const point = data.accuracy === RenderBarycentricBlendAccuracy.Accurate ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
+    const pA = data.pointA;
+    const pB = data.pointB;
+    const pC = data.pointC;
 
     // TODO: can precompute things like this!!!
     // TODO: factor out common things!
@@ -146,10 +148,12 @@ export default class RenderBarycentricBlend extends RenderProgram {
     );
   }
 
-  // TODO:!!!!
-  // public override getInstructions(): RenderInstruction[] {
-  //   return [ new RenderInstructionPush( this.color ) ];
-  // }
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    this.c.writeInstructions( instructions );
+    this.b.writeInstructions( instructions );
+    this.a.writeInstructions( instructions );
+    instructions.push( new RenderInstructionBarycentricBlend( this.data ) );
+  }
 
   public override serialize(): SerializedRenderBarycentricBlend {
     return {
@@ -178,6 +182,44 @@ export default class RenderBarycentricBlend extends RenderProgram {
 }
 
 scenery.register( 'RenderBarycentricBlend', RenderBarycentricBlend );
+
+export class RenderBarycentricBlendData {
+  // TODO: Update this so we store the better data
+  public constructor(
+    public readonly pointA: Vector2,
+    public readonly pointB: Vector2,
+    public readonly pointC: Vector2,
+    public readonly accuracy: RenderBarycentricBlendAccuracy
+  ) {}
+}
+
+const scratchAColor = new Vector4( 0, 0, 0, 0 );
+const scratchBColor = new Vector4( 0, 0, 0, 0 );
+const scratchCColor = new Vector4( 0, 0, 0, 0 );
+const scratchResult = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionBarycentricBlend extends RenderInstruction {
+  public constructor(
+    public readonly data: RenderBarycentricBlendData
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const aColor = stack.popInto( scratchAColor );
+    const bColor = stack.popInto( scratchBColor );
+    const cColor = stack.popInto( scratchCColor );
+
+    RenderBarycentricBlend.applyProgram(
+      scratchResult, context, this.data, aColor, bColor, cColor
+    );
+    stack.push( scratchResult );
+  }
+}
 
 export type SerializedRenderBarycentricBlend = {
   type: 'RenderBarycentricBlend';

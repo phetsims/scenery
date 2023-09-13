@@ -6,25 +6,36 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, scenery } from '../../../imports.js';
+import { RenderEvaluationContext, RenderExecutor, scenery } from '../../../imports.js';
 import RenderExecutionStack from './RenderExecutionStack.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
 
 export default abstract class RenderInstruction {
   public abstract execute(
     stack: RenderExecutionStack,
-    face: ClippableFace | null, // if null AND we have a need set for a face, it is fully covered
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
   ): void;
 }
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );
+
+let locationID = 0;
+
+export class RenderInstructionLocation extends RenderInstruction {
+  public id = locationID++;
+
+  // To be filled in before execution (if in JS)
+  public index = 0;
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    // TODO: remove from instruction streams, and add an error here?
+  }
+}
 
 export class RenderInstructionPush extends RenderInstruction {
   public constructor(
@@ -33,17 +44,22 @@ export class RenderInstructionPush extends RenderInstruction {
     super();
   }
 
-  public execute(
+  public override execute(
     stack: RenderExecutionStack,
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
   ): void {
     stack.push( this.vector );
+  }
+}
+
+export class RenderInstructionReturn extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    executor.return();
   }
 }
 
@@ -56,13 +72,8 @@ export class RenderInstructionMultiplyScalar extends RenderInstruction {
 
   public execute(
     stack: RenderExecutionStack,
-    face: ClippableFace | null,
-    area: number,
-    centroid: Vector2,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
   ): void {
     stack.readTop( scratchVector );
     scratchVector.multiplyScalar( this.factor );

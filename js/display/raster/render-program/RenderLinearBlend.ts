@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -21,12 +21,15 @@ scenery.register( 'RenderLinearBlendAccuracy', RenderLinearBlendAccuracy );
 
 export default class RenderLinearBlend extends RenderProgram {
 
+  public readonly data: RenderLinearBlendData;
+
   public constructor(
     public readonly scaledNormal: Vector2,
     public readonly offset: number,
     public readonly accuracy: RenderLinearBlendAccuracy,
     public readonly zero: RenderProgram,
-    public readonly one: RenderProgram
+    public readonly one: RenderProgram,
+    data?: RenderLinearBlendData
   ) {
     assert && assert( scaledNormal.isFinite() && scaledNormal.magnitude > 0 );
     assert && assert( isFinite( offset ) );
@@ -39,6 +42,8 @@ export default class RenderLinearBlend extends RenderProgram {
       false,
       accuracy === RenderLinearBlendAccuracy.Accurate
     );
+
+    this.data = data || new RenderLinearBlendData( this.scaledNormal, this.offset, this.accuracy );
   }
 
   public override getName(): string {
@@ -47,7 +52,7 @@ export default class RenderLinearBlend extends RenderProgram {
 
   public override withChildren( children: RenderProgram[] ): RenderLinearBlend {
     assert && assert( children.length === 2 );
-    return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, children[ 0 ], children[ 1 ] );
+    return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, children[ 0 ], children[ 1 ], this.data );
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
@@ -104,11 +109,7 @@ export default class RenderLinearBlend extends RenderProgram {
       assert( context.hasCentroid() );
     }
 
-    const dot = this.accuracy === RenderLinearBlendAccuracy.Accurate ?
-                this.scaledNormal.dot( context.centroid ) :
-                this.scaledNormal.x * context.getCenterX() + this.scaledNormal.y * context.getCenterY();
-
-    const t = dot - this.offset;
+    const t = this.data.computeLinearValue( context );
 
     if ( t <= 0 ) {
       return this.zero.evaluate( context );
@@ -123,6 +124,22 @@ export default class RenderLinearBlend extends RenderProgram {
         t
       );
     }
+  }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    const zeroLocation = new RenderInstructionLocation();
+    const oneLocation = new RenderInstructionLocation();
+    const blendLocation = new RenderInstructionLocation();
+
+    instructions.push( new RenderInstructionComputeLinearValue( this.data, zeroLocation, oneLocation, blendLocation ) );
+    instructions.push( zeroLocation );
+    this.zero.writeInstructions( instructions );
+    instructions.push( new RenderInstructionReturn() );
+    instructions.push( oneLocation );
+    this.one.writeInstructions( instructions );
+    instructions.push( new RenderInstructionReturn() );
+    instructions.push( blendLocation );
+    instructions.push( new RenderInstructionLinearBlend() );
   }
 
   public override serialize(): SerializedRenderLinearBlend {
@@ -148,6 +165,93 @@ export default class RenderLinearBlend extends RenderProgram {
 }
 
 scenery.register( 'RenderLinearBlend', RenderLinearBlend );
+
+// TODO: rename logic?
+export class RenderLinearBlendData {
+  public constructor(
+    public readonly scaledNormal: Vector2,
+    public readonly offset: number,
+    public readonly accuracy: RenderLinearBlendAccuracy
+  ) {}
+
+  public computeLinearValue(
+    context: RenderEvaluationContext
+  ): number {
+    const dot = this.accuracy === RenderLinearBlendAccuracy.Accurate ?
+                this.scaledNormal.dot( context.centroid ) :
+                this.scaledNormal.x * context.getCenterX() + this.scaledNormal.y * context.getCenterY();
+
+    return dot - this.offset;
+  }
+}
+
+export class RenderInstructionComputeLinearValue extends RenderInstruction {
+  public constructor(
+    public readonly data: RenderLinearBlendData,
+    public readonly zeroLocation: RenderInstructionLocation,
+    public readonly oneLocation: RenderInstructionLocation,
+    public readonly blendLocation: RenderInstructionLocation
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const t = this.data.computeLinearValue( context );
+    stack.pushNumber( t );
+
+    // Queue these up to be in "reverse" order
+    executor.jump( this.blendLocation );
+
+    const hasZero = t < 1;
+    const hasOne = t > 0;
+
+    if ( !hasZero || !hasOne ) {
+      stack.pushValues( 0, 0, 0, 0 );
+    }
+
+    if ( hasZero ) {
+      executor.call( this.zeroLocation );
+    }
+
+    if ( hasOne ) {
+      executor.call( this.oneLocation );
+    }
+  }
+}
+
+const scratchZero = new Vector4( 0, 0, 0, 0 );
+const scratchOne = new Vector4( 0, 0, 0, 0 );
+
+// Takes `t` value from vector.x. If t <= 0 or t >= 1, it will only return the "top" value
+export class RenderInstructionLinearBlend extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const zeroColor = stack.popInto( scratchZero );
+    const oneColor = stack.popInto( scratchOne );
+    const t = stack.popNumber();
+
+    if ( t <= 0 || t >= 1 ) {
+      stack.push( zeroColor ); // If we're out of this range, the "top" value will always be this
+    }
+    else {
+      const minusT = 1 - t;
+
+      stack.pushValues(
+        zeroColor.x * minusT + oneColor.x * t,
+        zeroColor.y * minusT + oneColor.y * t,
+        zeroColor.z * minusT + oneColor.z * t,
+        zeroColor.w * minusT + oneColor.w * t
+      );
+    }
+  }
+}
 
 export type SerializedRenderLinearBlend = {
   type: 'RenderLinearBlend';

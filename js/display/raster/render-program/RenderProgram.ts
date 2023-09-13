@@ -117,7 +117,7 @@ export default abstract class RenderProgram {
     return null;
   }
 
-  public getInstructions(): RenderInstruction[] {
+  public writeInstructions( instructions: RenderInstruction[] ): void {
     throw new Error( 'unimplemented' ); // TODO: make abstract
   }
 

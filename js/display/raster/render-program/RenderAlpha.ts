@@ -65,8 +65,9 @@ export default class RenderAlpha extends RenderProgram {
     vector.multiplyScalar( alpha );
   }
 
-  public override getInstructions(): RenderInstruction[] {
-    return [ new RenderInstructionMultiplyScalar( this.alpha ) ];
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    this.program.writeInstructions( instructions );
+    instructions.push( new RenderInstructionMultiplyScalar( this.alpha ) );
   }
 
   protected override getExtraDebugString(): string {
