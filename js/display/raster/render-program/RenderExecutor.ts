@@ -33,7 +33,6 @@ export default class RenderExecutor {
       }
     }
 
-    this.instructions = instructions;
     this.updateIndices();
   }
 

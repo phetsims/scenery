@@ -467,7 +467,7 @@ export { default as RenderLinearDisplayP3ToLinearSRGB } from './display/raster/r
 export { default as RenderLinearSRGBToLinearDisplayP3 } from './display/raster/render-program/RenderLinearSRGBToLinearDisplayP3.js';
 export { default as RenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
 export type { SerializedRenderBlendCompose } from './display/raster/render-program/RenderBlendCompose.js';
-export { default as RenderStack } from './display/raster/render-program/RenderStack.js';
+export { default as RenderStack, RenderInstructionOpaqueJump, RenderInstructionStackBlend } from './display/raster/render-program/RenderStack.js';
 export type { SerializedRenderStack } from './display/raster/render-program/RenderStack.js';
 export { default as RenderPlanar } from './display/raster/render-program/RenderPlanar.js';
 export { default as RenderDepthSort } from './display/raster/render-program/RenderDepthSort.js';

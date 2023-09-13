@@ -103,6 +103,16 @@ export default class RenderExecutionStack {
     return vector;
   }
 
+  public writeTopValues( x: number, y: number, z: number, w: number ): void {
+    const index = this.dataLength - 4;
+    assert && assert( index >= 0, 'Stack underflow' );
+
+    this.data[ index ] = x;
+    this.data[ index + 1 ] = y;
+    this.data[ index + 2 ] = z;
+    this.data[ index + 3 ] = w;
+  }
+
   public readTop( vector: Vector4 ): Vector4 {
     const index = this.dataLength - 4;
     assert && assert( index >= 0, 'Stack underflow' );

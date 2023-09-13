@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 
 export default class RenderStack extends RenderProgram {
@@ -131,6 +131,36 @@ export default class RenderStack extends RenderProgram {
     return color;
   }
 
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    if ( !this.children.length ) {
+      return;
+    }
+
+    // TODO: option to potentially write out things skipping the jump if it is simple? (so like... don't jump before RenderColors)
+
+    const endLocation = new RenderInstructionLocation();
+    const opaqueJump = new RenderInstructionOpaqueJump( endLocation ); // we'll have this listed multiple times
+    const blend = new RenderInstructionStackBlend(); // TODO: figure out how copies of instructions should work here
+
+    this.children[ this.children.length - 1 ].writeInstructions( instructions );
+
+    let hasJump = false;
+
+    for ( let i = this.children.length - 2; i >= 0; i-- ) {
+      if ( !RenderInstructionOpaqueJump.SKIP_RENDER_COLOR_JUMPS || !( this.children[ i ] instanceof RenderColor ) ) {
+        instructions.push( opaqueJump );
+        hasJump = true;
+      }
+
+      this.children[ i ].writeInstructions( instructions );
+      instructions.push( blend );
+    }
+
+    if ( hasJump ) {
+      instructions.push( endLocation );
+    }
+  }
+
   public override serialize(): SerializedRenderStack {
     return {
       type: 'RenderStack',
@@ -144,6 +174,53 @@ export default class RenderStack extends RenderProgram {
 }
 
 scenery.register( 'RenderStack', RenderStack );
+
+const scratchVector = new Vector4( 0, 0, 0, 0 );
+const scratchVector2 = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionOpaqueJump extends RenderInstruction {
+
+  public constructor(
+    public location: RenderInstructionLocation
+  ) {
+    super();
+  }
+
+  public static readonly SKIP_RENDER_COLOR_JUMPS = false;
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const color = stack.readTop( scratchVector );
+    if ( color.w === 1 ) {
+      executor.jump( this.location );
+    }
+  }
+}
+
+// Background on the top of the stack
+export class RenderInstructionStackBlend extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const background = stack.popInto( scratchVector );
+    const foreground = stack.readTop( scratchVector2 );
+
+    const backgroundAlpha = 1 - foreground.w;
+
+    // Assume premultiplied
+    stack.writeTopValues(
+      backgroundAlpha * background.x + foreground.x,
+      backgroundAlpha * background.y + foreground.y,
+      backgroundAlpha * background.z + foreground.z,
+      backgroundAlpha * background.w + foreground.w
+    );
+  }
+}
 
 export type SerializedRenderStack = {
   type: 'RenderStack';

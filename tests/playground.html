@@ -2662,35 +2662,41 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       //   new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
       //   new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) )
       // );
-      const program = new phet.scenery.RenderLinearBlend(
-        phet.dot.v2( 1, 0 ),
-        0.25,
-        phet.scenery.RenderLinearBlendAccuracy.Accurate,
-        new phet.scenery.RenderBarycentricBlend(
-          phet.dot.v2( 0, 0 ),
-          phet.dot.v2( 1, 1 ),
-          phet.dot.v2( 0, 1 ),
-          phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
-          new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 0 ) ),
-          new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 0 ) ),
-          new phet.scenery.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
-        ),
-        new phet.scenery.RenderBarycentricBlend(
-          phet.dot.v2( 0, 0 ),
-          phet.dot.v2( 1, 1 ),
-          phet.dot.v2( 0, 1 ),
-          phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
-          new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 1, 0 ) ),
-          new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
-          new phet.scenery.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
-        )
-      );
+      // const program = new phet.scenery.RenderLinearBlend(
+      //   phet.dot.v2( 1, 0 ),
+      //   0.25,
+      //   phet.scenery.RenderLinearBlendAccuracy.Accurate,
+      //   new phet.scenery.RenderBarycentricBlend(
+      //     phet.dot.v2( 0, 0 ),
+      //     phet.dot.v2( 1, 1 ),
+      //     phet.dot.v2( 0, 1 ),
+      //     phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
+      //     new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 0 ) ),
+      //     new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 0 ) ),
+      //     new phet.scenery.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
+      //   ),
+      //   new phet.scenery.RenderBarycentricBlend(
+      //     phet.dot.v2( 0, 0 ),
+      //     phet.dot.v2( 1, 1 ),
+      //     phet.dot.v2( 0, 1 ),
+      //     phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
+      //     new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 1, 0 ) ),
+      //     new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
+      //     new phet.scenery.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
+      //   )
+      // );
+      const program = new phet.scenery.RenderStack( [
+        new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ),
+        new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
+        new phet.scenery.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) ),
+      ] );
 
       const instructions = [];
       program.writeInstructions( instructions );
 
       const executor = new phet.scenery.RenderExecutor();
       executor.loadInstructions( instructions );
+      console.log( executor.instructions );
       const result = phet.dot.v4( 0, 0, 0, 0 );
       executor.execute( new phet.scenery.RenderEvaluationContext().set(
         null, 1, phet.dot.v2( 0.5, 0.5 ), 0, 0, 1, 1
