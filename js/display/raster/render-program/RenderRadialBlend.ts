@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { LinearEdge, RenderColor, RenderEvaluationContext, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
+import { LinearEdge, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, scenery, SerializedRenderProgram } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
@@ -29,7 +29,7 @@ scenery.register( 'RenderRadialBlendAccuracy', RenderRadialBlendAccuracy );
 
 export default class RenderRadialBlend extends RenderProgram {
 
-  private readonly inverseTransform: Matrix3;
+  public readonly logic: RenderRadialBlendLogic;
 
   public constructor(
     public readonly transform: Matrix3,
@@ -37,7 +37,8 @@ export default class RenderRadialBlend extends RenderProgram {
     public readonly radius1: number,
     public readonly accuracy: RenderRadialBlendAccuracy,
     public readonly zero: RenderProgram,
-    public readonly one: RenderProgram
+    public readonly one: RenderProgram,
+    logic?: RenderRadialBlendLogic
   ) {
     assert && assert( transform.isFinite() );
     assert && assert( isFinite( radius0 ) && radius0 >= 0 );
@@ -53,7 +54,7 @@ export default class RenderRadialBlend extends RenderProgram {
       accuracy === RenderRadialBlendAccuracy.Centroid
     );
 
-    this.inverseTransform = transform.inverted();
+    this.logic = logic || new RenderRadialBlendLogic( this.transform, this.radius0, this.radius1, this.accuracy );
   }
 
   public override getName(): string {
@@ -62,7 +63,7 @@ export default class RenderRadialBlend extends RenderProgram {
 
   public override withChildren( children: RenderProgram[] ): RenderRadialBlend {
     assert && assert( children.length === 2 );
-    return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, children[ 0 ], children[ 1 ] );
+    return new RenderRadialBlend( this.transform, this.radius0, this.radius1, this.accuracy, children[ 0 ], children[ 1 ], this.logic );
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
@@ -99,6 +100,89 @@ export default class RenderRadialBlend extends RenderProgram {
   }
 
   public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    const t = this.logic.computeLinearValue( context );
+
+    if ( t <= 0 ) {
+      return this.zero.evaluate( context );
+    }
+    else if ( t >= 1 ) {
+      return this.one.evaluate( context );
+    }
+    else {
+      return RenderColor.ratioBlend(
+        this.zero.evaluate( context ),
+        this.one.evaluate( context ),
+        t
+      );
+    }
+  }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    const zeroLocation = new RenderInstructionLocation();
+    const oneLocation = new RenderInstructionLocation();
+    const blendLocation = new RenderInstructionLocation();
+
+    instructions.push( new RenderInstructionComputeRadialValue( this.logic, zeroLocation, oneLocation, blendLocation ) );
+    instructions.push( zeroLocation );
+    this.zero.writeInstructions( instructions );
+    instructions.push( new RenderInstructionReturn() );
+    instructions.push( oneLocation );
+    this.one.writeInstructions( instructions );
+    instructions.push( new RenderInstructionReturn() );
+    instructions.push( blendLocation );
+    instructions.push( new RenderInstructionLinearBlend() );
+  }
+
+  public override serialize(): SerializedRenderRadialBlend {
+    return {
+      type: 'RenderRadialBlend',
+      transform: [
+        this.transform.m00(), this.transform.m01(), this.transform.m02(),
+        this.transform.m10(), this.transform.m11(), this.transform.m12(),
+        this.transform.m20(), this.transform.m21(), this.transform.m22()
+      ],
+      radius0: this.radius0,
+      radius1: this.radius1,
+      accuracy: this.accuracy,
+      zero: this.zero.serialize(),
+      one: this.one.serialize()
+    };
+  }
+
+  public static override deserialize( obj: SerializedRenderRadialBlend ): RenderRadialBlend {
+    return new RenderRadialBlend(
+      Matrix3.rowMajor(
+        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
+        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
+        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
+      ),
+      obj.radius0,
+      obj.radius1,
+      obj.accuracy,
+      RenderProgram.deserialize( obj.zero ),
+      RenderProgram.deserialize( obj.one )
+    );
+  }
+}
+
+scenery.register( 'RenderRadialBlend', RenderRadialBlend );
+
+export class RenderRadialBlendLogic {
+
+  public readonly inverseTransform: Matrix3;
+
+  public constructor(
+    public readonly transform: Matrix3,
+    public readonly radius0: number,
+    public readonly radius1: number,
+    public readonly accuracy: RenderRadialBlendAccuracy
+  ) {
+    this.inverseTransform = transform.inverted();
+  }
+
+  public computeLinearValue(
+    context: RenderEvaluationContext
+  ): number {
     // TODO: flag to control whether this gets set? TODO: Flag to just use centroid
     let averageDistance;
     if ( this.accuracy === RenderRadialBlendAccuracy.Accurate ) {
@@ -155,54 +239,47 @@ export default class RenderRadialBlend extends RenderProgram {
     const t = ( averageDistance - this.radius0 ) / ( this.radius1 - this.radius0 );
     assert && assert( isFinite( t ) );
 
-    if ( t <= 0 ) {
-      return this.zero.evaluate( context );
-    }
-    else if ( t >= 1 ) {
-      return this.one.evaluate( context );
-    }
-    else {
-      return RenderColor.ratioBlend(
-        this.zero.evaluate( context ),
-        this.one.evaluate( context ),
-        t
-      );
-    }
-  }
-
-  public override serialize(): SerializedRenderRadialBlend {
-    return {
-      type: 'RenderRadialBlend',
-      transform: [
-        this.transform.m00(), this.transform.m01(), this.transform.m02(),
-        this.transform.m10(), this.transform.m11(), this.transform.m12(),
-        this.transform.m20(), this.transform.m21(), this.transform.m22()
-      ],
-      radius0: this.radius0,
-      radius1: this.radius1,
-      accuracy: this.accuracy,
-      zero: this.zero.serialize(),
-      one: this.one.serialize()
-    };
-  }
-
-  public static override deserialize( obj: SerializedRenderRadialBlend ): RenderRadialBlend {
-    return new RenderRadialBlend(
-      Matrix3.rowMajor(
-        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
-        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
-        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
-      ),
-      obj.radius0,
-      obj.radius1,
-      obj.accuracy,
-      RenderProgram.deserialize( obj.zero ),
-      RenderProgram.deserialize( obj.one )
-    );
+    return t;
   }
 }
 
-scenery.register( 'RenderRadialBlend', RenderRadialBlend );
+export class RenderInstructionComputeRadialValue extends RenderInstruction {
+  public constructor(
+    public readonly logic: RenderRadialBlendLogic,
+    public readonly zeroLocation: RenderInstructionLocation,
+    public readonly oneLocation: RenderInstructionLocation,
+    public readonly blendLocation: RenderInstructionLocation
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const t = this.logic.computeLinearValue( context );
+    stack.pushNumber( t );
+
+    // Queue these up to be in "reverse" order
+    executor.jump( this.blendLocation );
+
+    const hasZero = t < 1;
+    const hasOne = t > 0;
+
+    if ( !hasZero || !hasOne ) {
+      stack.pushValues( 0, 0, 0, 0 );
+    }
+
+    if ( hasZero ) {
+      executor.call( this.zeroLocation );
+    }
+
+    if ( hasOne ) {
+      executor.call( this.oneLocation );
+    }
+  }
+}
 
 export type SerializedRenderRadialBlend = {
   type: 'RenderRadialBlend';

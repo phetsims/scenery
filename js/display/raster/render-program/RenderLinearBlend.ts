@@ -226,6 +226,7 @@ const scratchZero = new Vector4( 0, 0, 0, 0 );
 const scratchOne = new Vector4( 0, 0, 0, 0 );
 
 // Takes `t` value from vector.x. If t <= 0 or t >= 1, it will only return the "top" value
+// NOTE: This is used by things in radial blends too, since it is linear at that point
 export class RenderInstructionLinearBlend extends RenderInstruction {
   public override execute(
     stack: RenderExecutionStack,

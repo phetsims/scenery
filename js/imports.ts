@@ -493,7 +493,7 @@ export { default as RenderBarycentricPerspectiveBlend, RenderBarycentricPerspect
 export type { SerializedRenderBarycentricPerspectiveBlend } from './display/raster/render-program/RenderBarycentricPerspectiveBlend.js';
 export { default as RenderLinearGradient, RenderLinearGradientAccuracy } from './display/raster/render-program/RenderLinearGradient.js';
 export type { SerializedRenderLinearGradient } from './display/raster/render-program/RenderLinearGradient.js';
-export { default as RenderRadialBlend, RenderRadialBlendAccuracy } from './display/raster/render-program/RenderRadialBlend.js';
+export { default as RenderRadialBlend, RenderRadialBlendLogic, RenderRadialBlendAccuracy } from './display/raster/render-program/RenderRadialBlend.js';
 export type { SerializedRenderRadialBlend } from './display/raster/render-program/RenderRadialBlend.js';
 export { default as RenderRadialGradient, RenderRadialGradientAccuracy } from './display/raster/render-program/RenderRadialGradient.js';
 export type { SerializedRenderRadialGradient } from './display/raster/render-program/RenderRadialGradient.js';
