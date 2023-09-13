@@ -231,7 +231,7 @@ $`
 \iint_Px\,dx\,dy
 =\frac{1}{6}\sum_{i}(x_i + x_{i+1}) (x_i y_{i+1}-y_i x_{i+1})
 =\frac{1}{6}\sum_{i}(x_i^2 + x_i x_{i+1} + x_{i+1}^2) (y_{i+1} - y_i)
-=\frac{1}{6}\sum_{i}(x_i-x_{i+1})(y_i(2x_i+x_{i+1}) + y_{i+1}(x_i+2x_{i_1}))
+=\frac{1}{6}\sum_{i}(x_i-x_{i+1})(x_i(2y_i+y_{i+1}) + x_{i+1}(y_i+2y_{i_1}))
 `$
 
 $`
