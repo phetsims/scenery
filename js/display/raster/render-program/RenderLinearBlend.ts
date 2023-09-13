@@ -21,7 +21,7 @@ scenery.register( 'RenderLinearBlendAccuracy', RenderLinearBlendAccuracy );
 
 export default class RenderLinearBlend extends RenderProgram {
 
-  public readonly data: RenderLinearBlendData;
+  public readonly logic: RenderLinearBlendLogic;
 
   public constructor(
     public readonly scaledNormal: Vector2,
@@ -29,7 +29,7 @@ export default class RenderLinearBlend extends RenderProgram {
     public readonly accuracy: RenderLinearBlendAccuracy,
     public readonly zero: RenderProgram,
     public readonly one: RenderProgram,
-    data?: RenderLinearBlendData
+    logic?: RenderLinearBlendLogic
   ) {
     assert && assert( scaledNormal.isFinite() && scaledNormal.magnitude > 0 );
     assert && assert( isFinite( offset ) );
@@ -43,7 +43,7 @@ export default class RenderLinearBlend extends RenderProgram {
       accuracy === RenderLinearBlendAccuracy.Accurate
     );
 
-    this.data = data || new RenderLinearBlendData( this.scaledNormal, this.offset, this.accuracy );
+    this.logic = logic || new RenderLinearBlendLogic( this.scaledNormal, this.offset, this.accuracy );
   }
 
   public override getName(): string {
@@ -52,7 +52,7 @@ export default class RenderLinearBlend extends RenderProgram {
 
   public override withChildren( children: RenderProgram[] ): RenderLinearBlend {
     assert && assert( children.length === 2 );
-    return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, children[ 0 ], children[ 1 ], this.data );
+    return new RenderLinearBlend( this.scaledNormal, this.offset, this.accuracy, children[ 0 ], children[ 1 ], this.logic );
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
@@ -109,7 +109,7 @@ export default class RenderLinearBlend extends RenderProgram {
       assert( context.hasCentroid() );
     }
 
-    const t = this.data.computeLinearValue( context );
+    const t = this.logic.computeLinearValue( context );
 
     if ( t <= 0 ) {
       return this.zero.evaluate( context );
@@ -131,7 +131,7 @@ export default class RenderLinearBlend extends RenderProgram {
     const oneLocation = new RenderInstructionLocation();
     const blendLocation = new RenderInstructionLocation();
 
-    instructions.push( new RenderInstructionComputeLinearValue( this.data, zeroLocation, oneLocation, blendLocation ) );
+    instructions.push( new RenderInstructionComputeLinearValue( this.logic, zeroLocation, oneLocation, blendLocation ) );
     instructions.push( zeroLocation );
     this.zero.writeInstructions( instructions );
     instructions.push( new RenderInstructionReturn() );
@@ -166,8 +166,7 @@ export default class RenderLinearBlend extends RenderProgram {
 
 scenery.register( 'RenderLinearBlend', RenderLinearBlend );
 
-// TODO: rename logic?
-export class RenderLinearBlendData {
+export class RenderLinearBlendLogic {
   public constructor(
     public readonly scaledNormal: Vector2,
     public readonly offset: number,
@@ -187,7 +186,7 @@ export class RenderLinearBlendData {
 
 export class RenderInstructionComputeLinearValue extends RenderInstruction {
   public constructor(
-    public readonly data: RenderLinearBlendData,
+    public readonly logic: RenderLinearBlendLogic,
     public readonly zeroLocation: RenderInstructionLocation,
     public readonly oneLocation: RenderInstructionLocation,
     public readonly blendLocation: RenderInstructionLocation
@@ -200,7 +199,7 @@ export class RenderInstructionComputeLinearValue extends RenderInstruction {
     context: RenderEvaluationContext,
     executor: RenderExecutor
   ): void {
-    const t = this.data.computeLinearValue( context );
+    const t = this.logic.computeLinearValue( context );
     stack.pushNumber( t );
 
     // Queue these up to be in "reverse" order

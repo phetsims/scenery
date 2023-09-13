@@ -61,10 +61,6 @@ export default class RenderAlpha extends RenderProgram {
     return source.timesScalar( this.alpha );
   }
 
-  public static applyProgram( vector: Vector4, alpha: number ): void {
-    vector.multiplyScalar( alpha );
-  }
-
   public override writeInstructions( instructions: RenderInstruction[] ): void {
     this.program.writeInstructions( instructions );
     instructions.push( new RenderInstructionMultiplyScalar( this.alpha ) );

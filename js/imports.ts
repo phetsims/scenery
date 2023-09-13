@@ -485,9 +485,9 @@ export { default as RenderLinearRange } from './display/raster/render-program/Re
 export { default as RenderImage } from './display/raster/render-program/RenderImage.js';
 export type { SerializedRenderImage } from './display/raster/render-program/RenderImage.js';
 export type { default as RenderImageable, SerializedRenderImageable } from './display/raster/render-program/RenderImageable.js';
-export { default as RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearBlendData, RenderInstructionComputeLinearValue, RenderInstructionLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
+export { default as RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearBlendLogic, RenderInstructionComputeLinearValue, RenderInstructionLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
 export type { SerializedRenderLinearBlend } from './display/raster/render-program/RenderLinearBlend.js';
-export { default as RenderBarycentricBlend, RenderBarycentricBlendData, RenderInstructionBarycentricBlend, RenderBarycentricBlendAccuracy } from './display/raster/render-program/RenderBarycentricBlend.js';
+export { default as RenderBarycentricBlend, RenderBarycentricBlendLogic, RenderInstructionBarycentricBlend, RenderBarycentricBlendAccuracy } from './display/raster/render-program/RenderBarycentricBlend.js';
 export type { SerializedRenderBarycentricBlend } from './display/raster/render-program/RenderBarycentricBlend.js';
 export { default as RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy } from './display/raster/render-program/RenderBarycentricPerspectiveBlend.js';
 export type { SerializedRenderBarycentricPerspectiveBlend } from './display/raster/render-program/RenderBarycentricPerspectiveBlend.js';

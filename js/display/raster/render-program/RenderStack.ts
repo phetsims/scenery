@@ -100,20 +100,31 @@ export default class RenderStack extends RenderProgram {
   }
 
   public override evaluate( context: RenderEvaluationContext ): Vector4 {
-    // non-stack-based (so no shortcut, but stable memory and simple). Could do in the reverse direction
 
-    const color = Vector4.ZERO.copy(); // we will mutate it
+    const numChildren = this.children.length;
 
-    for ( let i = 0; i < this.children.length; i++ ) {
+    // Bail if we have zero children, since we'll do an initialization based on the last child
+    if ( numChildren === 0 ) {
+      return Vector4.ZERO;
+    }
+
+    // Initialize it with the "last" color, so we don't need to do any extra blending operations
+    const lastColor = this.children[ numChildren - 1 ].evaluate( context );
+    const color = lastColor.copy(); // we will mutate it, so we'll make a copy
+
+    // We'll abuse the associativity of this blending operation to START with the "top" content. Thus each iteration
+    // will add in the "background" color, bailing if we reach full opacity.
+    // NOTE: the extra for-command condition
+    for ( let i = this.children.length - 2; i >= 0 && color.w !== 1; i-- ) {
       const blendColor = this.children[ i ].evaluate( context );
-      const backgroundAlpha = 1 - blendColor.w;
+      const backgroundAlpha = 1 - color.w;
 
       // Assume premultiplied
       color.setXYZW(
-        blendColor.x + backgroundAlpha * color.x,
-        blendColor.y + backgroundAlpha * color.y,
-        blendColor.z + backgroundAlpha * color.z,
-        blendColor.w + backgroundAlpha * color.w
+        backgroundAlpha * blendColor.x + color.x,
+        backgroundAlpha * blendColor.y + color.y,
+        backgroundAlpha * blendColor.z + color.z,
+        backgroundAlpha * blendColor.w + color.w
       );
     }
 
