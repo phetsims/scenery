@@ -163,6 +163,8 @@ $`
 =\frac{1}{6}\sum_{i}(y_{i+1}-y_i)(x_i(2y_i+y_{i+1}) + x_{i+1}(y_i+2y_{i_1}))
 `$
 
+Both of these approaches are incredibly more stable than the first formula pair (about half a million times less error, with triangles centered in x,y in (0,1000), with sizes around 1/1000).
+
 ## Evaluation of Filtered Polygons
 
 Any polynomial-based (windowed or not) filter can be evaluated over a polygon with this approach.
