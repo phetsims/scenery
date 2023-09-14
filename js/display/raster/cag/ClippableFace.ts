@@ -11,8 +11,10 @@ import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
-import { EdgedFace, GridClipCallback, PolygonalFace, PolygonCompleteCallback, SerializedEdgedFace, SerializedPolygonalFace } from '../../../imports.js';
+import { EdgedClippedFace, EdgedFace, GridClipCallback, PolygonalFace, PolygonCompleteCallback, SerializedEdgedFace, SerializedPolygonalFace } from '../../../imports.js';
 import { Shape } from '../../../../../kite/js/imports.js';
+
+// TODO: assertions that all types of ClippableFace give the same results for the same methods
 
 type ClippableFace = {
   /**
@@ -183,6 +185,16 @@ type ClippableFace = {
    * Converts the face to an edged face.
    */
   toEdgedFace(): EdgedFace;
+
+  /**
+   * Converts the face to a edged-clipped face (inspecting the edges)
+   */
+  toEdgedClippedFace( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace;
+
+  /**
+   * Converts the face to a edged-clipped face (without inspecting the edges)
+   */
+  toEdgedClippedFaceWithoutCheck( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace;
 
   /**
    * Returns a singleton accumulator for this type of face.

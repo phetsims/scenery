@@ -522,6 +522,152 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.faceEquivalenceTest = function() {
+    setTimeout( async function() {
+      // TODO: check translations, and random triangles
+
+      const polygonalFace = new phet.scenery.PolygonalFace( [ [
+        phet.dot.v2( 0, 0 ),
+        phet.dot.v2( 1, 0 ),
+        phet.dot.v2( 0.3, 0.3 ),
+        phet.dot.v2( 0, 1 )
+      ], [
+        phet.dot.v2( 1, 0 ),
+        phet.dot.v2( 1, 1 ),
+        phet.dot.v2( 0, 1 ),
+        phet.dot.v2( 0.7, 0.7 )
+      ], [
+        phet.dot.v2( 0.432, 0.467 ),
+        phet.dot.v2( 0.567, 0.512 ),
+        phet.dot.v2( 0.529, 0.543 )
+      ] ] );
+      const edgedFace = polygonalFace.toEdgedFace();
+      const edgedClippedFace = polygonalFace.toEdgedClippedFace( 0, 0, 1, 1 );
+
+      const logAll = f => {
+        const polygonalValue = f( polygonalFace );
+        const edgedValue = f( edgedFace );
+        const edgedClippedValue = f( edgedClippedFace );
+
+        console.log( 'polygonal', polygonalValue );
+        console.log( 'edged', edgedValue );
+        console.log( 'edgedClipped', edgedClippedValue );
+
+        if ( typeof polygonalValue === 'number' ) {
+          if ( Math.abs( polygonalValue - edgedValue ) > 1e-5 ) {
+            console.log( 'polygonal vs edged', Math.abs( polygonalValue - edgedValue ) );
+          }
+          if ( Math.abs( polygonalValue - edgedClippedValue ) > 1e-5 ) {
+            console.log( 'polygonal vs edgedClipped', Math.abs( polygonalValue - edgedClippedValue ) );
+          }
+        }
+        else {
+          if ( !polygonalValue.equalsEpsilon( edgedValue, 1e-5 ) ) {
+            console.log( 'polygonal vs edged', 'BAD' );
+          }
+          if ( !polygonalValue.equalsEpsilon( edgedClippedValue, 1e-5 ) ) {
+            console.log( 'polygonal vs edgedClipped', 'BAD' );
+          }
+        }
+      };
+
+      console.log( 'getBounds' );
+      logAll( f => f.getBounds() );
+
+      console.log( 'getDotRange' );
+      logAll( f => f.getDotRange( phet.dot.v2( 0.32, 0.95 ).normalized() ) );
+
+      console.log( 'getDistanceRangeToEdges' );
+      logAll( f => f.getDistanceRangeToEdges( phet.dot.v2( 0.5, 0.5 ) ) );
+
+      console.log( 'getDistanceRangeToInside' );
+      logAll( f => f.getDistanceRangeToInside( phet.dot.v2( -0.5, 0.5 ) ) );
+
+      console.log( 'getArea' );
+      logAll( f => f.getArea() );
+
+      console.log( 'getCentroid' );
+      logAll( f => f.getCentroid( f.getArea() ) );
+
+      console.log( 'getCentroidPartial' );
+      logAll( f => f.getCentroidPartial() );
+
+      console.log( 'getZero' );
+      logAll( f => f.getZero() );
+
+      console.log( 'getAverageDistance' );
+      logAll( f => f.getAverageDistance( phet.dot.v2( 0.1, 0.2 ), f.getArea() ) );
+
+      console.log( 'getAverageDistanceTransformedToOrigin' );
+      logAll( f => f.getAverageDistanceTransformedToOrigin( phet.dot.Matrix3.rotation2( 0.2 ), f.getArea() ) );
+
+      console.log( 'getTransformed area' );
+      logAll( f => f.getTransformed( phet.dot.Matrix3.rotation2( 0.2 ) ).getArea() );
+
+      console.log( 'getRounded area' );
+      logAll( f => f.getRounded( 0.1 ).getArea() );
+
+      console.log( 'getClipped area' );
+      logAll( f => f.getClipped( 0.1, 0.1, 0.9, 0.9 ).getArea() );
+
+      console.log( 'getClipped getClipped area' );
+      logAll( f => f.getClipped( -0.5, 0.1, 0.9, 0.9 ).getClipped( -0.5, 0.2, 0.9, 0.8 ).getArea() );
+
+      console.log( 'getBinaryXClip area' );
+      logAll( f => phet.dot.v2(
+        f.getBinaryXClip( 0.4, 0.7 ).minFace.getArea(),
+        f.getBinaryXClip( 0.4, 0.7 ).maxFace.getArea()
+      ) );
+
+      console.log( 'getBinaryYClip area' );
+      logAll( f => phet.dot.v2(
+        f.getBinaryYClip( 0.4, 0.7 ).minFace.getArea(),
+        f.getBinaryYClip( 0.4, 0.7 ).maxFace.getArea()
+      ) );
+
+      console.log( 'getBinaryLineClip area' );
+      logAll( f => phet.dot.v2(
+        f.getBinaryLineClip( phet.dot.v2( 0.23, 0.94 ).normalized(), 0.4, 0.7 ).minFace.getArea(),
+        f.getBinaryLineClip( phet.dot.v2( 0.23, 0.94 ).normalized(), 0.4, 0.7 ).maxFace.getArea()
+      ) );
+
+      console.log( 'getStripeLineClip area' );
+      logAll( f => phet.dot.v4(
+        f.getStripeLineClip( phet.dot.v2( 0.23, 0.94 ).normalized(), [ 0.3, 0.5, 0.7 ], 0.7 )[ 0 ].getArea(),
+        f.getStripeLineClip( phet.dot.v2( 0.23, 0.94 ).normalized(), [ 0.3, 0.5, 0.7 ], 0.7 )[ 1 ].getArea(),
+        f.getStripeLineClip( phet.dot.v2( 0.23, 0.94 ).normalized(), [ 0.3, 0.5, 0.7 ], 0.7 )[ 2 ].getArea(),
+        f.getStripeLineClip( phet.dot.v2( 0.23, 0.94 ).normalized(), [ 0.3, 0.5, 0.7 ], 0.7 )[ 3 ].getArea()
+      ) );
+
+      // TODO: circular clip firing off assertion in edged case, investigate
+      // console.log( 'getBinaryCircularClip area' );
+      // logAll( f => phet.dot.v2(
+      //   f.getBinaryCircularClip( phet.dot.v2( 0.5, 0.5 ), 0.25, 0.1 ).insideFace.getArea(),
+      //   f.getBinaryCircularClip( phet.dot.v2( 0.5, 0.5 ), 0.25, 0.1 ).outsideFace.getArea()
+      // ) );
+
+      // console.log( 'gridClipIterate area' );
+      // TODO: gridClipIterate tests
+
+      console.log( 'getBilinearFiltered A' );
+      logAll( f => f.getBilinearFiltered( 0, 0, 0, 0 ) );
+
+      console.log( 'getBilinearFiltered B' );
+      logAll( f => f.getBilinearFiltered( 1, 1, 0, 0 ) );
+
+      console.log( 'getMitchellNetravaliFiltered A' );
+      logAll( f => f.getMitchellNetravaliFiltered( 0, 0, 0, 0 ) );
+
+      console.log( 'getMitchellNetravaliFiltered B' );
+      logAll( f => f.getMitchellNetravaliFiltered( 1, 1, 0, 0 ) );
+
+
+
+
+      debugger;
+    } );
+  };
+
   window.siemensTest = function( type, pointCount = 100 ) {
     setTimeout( async function() {
       const width = 800;

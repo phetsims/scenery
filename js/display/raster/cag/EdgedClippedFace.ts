@@ -68,10 +68,10 @@ export default class EdgedClippedFace implements ClippableFace {
     assert && assert( isFinite( maxYCount ) && Number.isInteger( maxYCount ) );
 
     assertSlow && assertSlow( edges.every( edge => {
-      return edge.startPoint.x >= minX && edge.startPoint.x <= maxX &&
-             edge.startPoint.y >= minY && edge.startPoint.y <= maxY &&
-             edge.endPoint.x >= minX && edge.endPoint.x <= maxX &&
-             edge.endPoint.y >= minY && edge.endPoint.y <= maxY;
+      return edge.startPoint.x >= minX - 1e-8 && edge.startPoint.x <= maxX + 1e-8 &&
+             edge.startPoint.y >= minY - 1e-8 && edge.startPoint.y <= maxY + 1e-8 &&
+             edge.endPoint.x >= minX - 1e-8 && edge.endPoint.x <= maxX + 1e-8 &&
+             edge.endPoint.y >= minY - 1e-8 && edge.endPoint.y <= maxY + 1e-8;
     } ) );
 
     this.clippedEdgedFace = new EdgedFace( edges, true );
@@ -100,8 +100,34 @@ export default class EdgedClippedFace implements ClippableFace {
     return new EdgedFace( this.getAllEdges() );
   }
 
+  /**
+   * Converts the face to a edged-clipped face (inspecting the edges)
+   */
+  public toEdgedClippedFace( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
+    if ( this.minX === minX && this.minY === minY && this.maxX === maxX && this.maxY === maxY ) {
+      return this;
+    }
+    else {
+      return EdgedClippedFace.fromEdges( this.getAllEdges(), minX, minY, maxX, maxY );
+    }
+  }
+
+  /**
+   * Converts the face to a edged-clipped face (without inspecting the edges)
+   */
+  public toEdgedClippedFaceWithoutCheck( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
+    if ( this.minX === minX && this.minY === minY && this.maxX === maxX && this.maxY === maxY ) {
+      return this;
+    }
+    else {
+      return EdgedClippedFace.fromEdgesWithoutCheck( this.getAllEdges(), minX, minY, maxX, maxY );
+    }
+  }
+
   public static fromEdges( edges: LinearEdge[], minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
+    // TODO: both of these clear some things, get rid of inefficiency?
     scratchAccumulator.reset();
+    scratchAccumulator.setAccumulationBounds( minX, minY, maxX, maxY );
     for ( let i = 0; i < edges.length; i++ ) {
       const edge = edges[ i ];
       scratchAccumulator.addEdge( edge.startPoint.x, edge.startPoint.y, edge.endPoint.x, edge.endPoint.y, edge.startPoint, edge.endPoint );
@@ -110,7 +136,7 @@ export default class EdgedClippedFace implements ClippableFace {
     return scratchAccumulator.finalizeEnsureFace( minX, minY, maxX, maxY );
   }
 
-  public static fromEdgesWithNoCheck( edges: LinearEdge[], minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
+  public static fromEdgesWithoutCheck( edges: LinearEdge[], minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
     return new EdgedClippedFace( edges, minX, minY, maxX, maxY, 0, 0, 0, 0 );
   }
 
@@ -525,8 +551,8 @@ export default class EdgedClippedFace implements ClippableFace {
       PolygonClipping.binaryLineClipEdge( startPoint, endPoint, normal, value, fakeCornerPerpendicular, minEdges, maxEdges );
     } );
 
-    assert && assert( minEdges.every( e => normal.dot( e.startPoint ) <= value && normal.dot( e.endPoint ) <= value ) );
-    assert && assert( maxEdges.every( e => normal.dot( e.startPoint ) >= value && normal.dot( e.endPoint ) >= value ) );
+    assert && assert( minEdges.every( e => normal.dot( e.startPoint ) <= value + 1e-8 && normal.dot( e.endPoint ) <= value + 1e-8 ) );
+    assert && assert( maxEdges.every( e => normal.dot( e.startPoint ) >= value - 1e-8 && normal.dot( e.endPoint ) >= value - 1e-8 ) );
 
     // TODO: a more optimized form here! The clipping could output counts instead of us having to check here
     // NOTE: We can't really refine the bounds here.
@@ -689,7 +715,7 @@ export default class EdgedClippedFace implements ClippableFace {
 
       const bounds = new Bounds2( this.minX, this.minY, this.maxX, this.maxY ).transform( transform );
 
-      return EdgedClippedFace.fromEdgesWithNoCheck( transformedEdges, bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
+      return EdgedClippedFace.fromEdgesWithoutCheck( transformedEdges, bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
     }
   }
 
@@ -717,7 +743,24 @@ export default class EdgedClippedFace implements ClippableFace {
       }
     }
 
-    return EdgedClippedFace.fromEdgesWithNoCheck(
+    // TODO: more code sharing?
+    this.forEachImplicitEdge( ( startPoint, endPoint ) => {
+      const roundedStartPoint = new Vector2(
+        Utils.roundSymmetric( startPoint.x / epsilon ) * epsilon,
+        Utils.roundSymmetric( startPoint.y / epsilon ) * epsilon
+      );
+
+      const roundedEndPoint = new Vector2(
+        Utils.roundSymmetric( endPoint.x / epsilon ) * epsilon,
+        Utils.roundSymmetric( endPoint.y / epsilon ) * epsilon
+      );
+
+      if ( !roundedStartPoint.equals( roundedEndPoint ) ) {
+        edges.push( new LinearEdge( roundedStartPoint, roundedEndPoint ) );
+      }
+    } );
+
+    return EdgedClippedFace.fromEdgesWithoutCheck(
       edges,
       Utils.roundSymmetric( this.minX / epsilon ) * epsilon,
       Utils.roundSymmetric( this.minY / epsilon ) * epsilon,
@@ -819,12 +862,12 @@ export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator {
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
     if (
       // If all points are on a corner
-      startX === this.minX || startX === this.maxX &&
-      startY === this.minY || startY === this.maxY &&
-      endX === this.minX || endX === this.maxX &&
-      endY === this.minY || endY === this.maxY &&
+      ( startX === this.minX || startX === this.maxX ) &&
+       ( startY === this.minY || startY === this.maxY ) &&
+       ( endX === this.minX || endX === this.maxX ) &&
+       ( endY === this.minY || endY === this.maxY ) &&
       // And we're not on opposite corners
-      startX === endX || startY === endY
+       ( startX === endX || startY === endY )
     ) {
       assert && assert( startX !== endX || startY !== endY, 'Points should not be identical' );
 

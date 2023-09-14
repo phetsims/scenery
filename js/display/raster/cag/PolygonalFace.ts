@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedFace, GridClipCallback, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, scenery } from '../../../imports.js';
+import { ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, scenery } from '../../../imports.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -33,6 +33,20 @@ export default class PolygonalFace implements ClippableFace {
    */
   public toPolygonalFace( epsilon?: number ): PolygonalFace {
     return this;
+  }
+
+  /**
+   * Converts the face to a edged-clipped face (inspecting the edges)
+   */
+  public toEdgedClippedFace( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
+    return EdgedClippedFace.fromEdges( LinearEdge.fromPolygons( this.polygons ), minX, minY, maxX, maxY );
+  }
+
+  /**
+   * Converts the face to a edged-clipped face (without inspecting the edges)
+   */
+  public toEdgedClippedFaceWithoutCheck( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
+    return EdgedClippedFace.fromEdgesWithoutCheck( LinearEdge.fromPolygons( this.polygons ), minX, minY, maxX, maxY );
   }
 
   /**
