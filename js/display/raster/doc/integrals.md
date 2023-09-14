@@ -105,7 +105,7 @@ area_P=\iint_P1\,dx\,dy=
 
 ## Centroids of Polygons
 
-** NOTE: see numerical stability notes below, this top way can be inaccurate with floating-point numbers ** 
+**NOTE: see numerical stability notes below, this top way can be inaccurate with floating-point numbers** 
 
 For $`x`$ and $`y`$, we have:
 
