@@ -22,7 +22,11 @@ type ClippableFace = {
   getDistanceRangeToInside( point: Vector2 ): Range;
   getArea(): number;
   getCentroid( area: number ): Vector2;
+
+  // Returns the partial for the centroid computation. These should be summed up, divided by 6, and divided by the area
+  // to give the full centroid
   getCentroidPartial(): Vector2;
+
   getZero(): number;
   getAverageDistance( point: Vector2, area: number ): number;
   getAverageDistanceTransformedToOrigin( transform: Matrix3, area: number ): number;

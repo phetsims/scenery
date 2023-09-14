@@ -380,10 +380,10 @@ export default class Rasterize {
         terminalAreas[ index ] += ( endX + startX ) * ( endY - startY );
 
         if ( needsCentroid ) {
-          const base = ( startX * endY - endX * startY );
+          const base = ( startX * ( 2 * startY + endY ) + endX * ( startY + 2 * endY ) );
           terminalCentroids[ index ].addXY(
-            ( startX + endX ) * base,
-            ( startY + endY ) * base
+            ( startX - endX ) * base,
+            ( endY - startY ) * base
           );
         }
 
@@ -442,7 +442,6 @@ export default class Rasterize {
             if ( needsCentroid ) {
               centroid = terminalCentroids[ index ].multiplyScalar( 1 / ( 6 * area ) );
 
-              // TODO: try the alternate formulation
               assertSlow && sanityFace && needsCentroid && assertSlow( centroid.distance( sanityFace.getCentroid( sanityFace.getArea() ) ) < 1 );
 
               // Our centroid computation.... can get inaccuracies from floating-point math. Bleh.

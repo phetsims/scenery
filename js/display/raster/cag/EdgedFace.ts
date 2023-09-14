@@ -113,6 +113,10 @@ export default class EdgedFace implements ClippableFace {
     return 0.5 * area;
   }
 
+  /**
+   * Returns the partial for the centroid computation. These should be summed up, divided by 6, and divided by the area
+   * to give the full centroid
+   */
   public getCentroidPartial(): Vector2 {
     let x = 0;
     let y = 0;
@@ -123,17 +127,17 @@ export default class EdgedFace implements ClippableFace {
       const p0 = edge.startPoint;
       const p1 = edge.endPoint;
 
-      // evaluateCentroidPartial
-      const base = ( 1 / 6 ) * ( p0.x * p1.y - p1.x * p0.y );
-      x += ( p0.x + p1.x ) * base;
-      y += ( p0.y + p1.y ) * base;
+      // Partial centroid evaluation. NOTE: using the compound version here, for performance/stability tradeoffs
+      const base = ( p0.x * ( 2 * p0.y + p1.y ) + p1.x * ( p0.y + 2 * p1.y ) );
+      x += ( p0.x - p1.x ) * base;
+      y += ( p1.y - p0.y ) * base;
     }
 
     return new Vector2( x, y );
   }
 
   public getCentroid( area: number ): Vector2 {
-    return this.getCentroidPartial().timesScalar( 1 / area );
+    return this.getCentroidPartial().timesScalar( 1 / ( 6 * area ) );
   }
 
   public getZero(): number {

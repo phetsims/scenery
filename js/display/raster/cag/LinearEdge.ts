@@ -241,11 +241,11 @@ export default class LinearEdge {
    * polygon.
    */
   public static evaluateLineIntegralPartialCentroid( p0x: number, p0y: number, p1x: number, p1y: number ): Vector2 {
-    const base = ( 1 / 6 ) * ( p0x * p1y - p1x * p0y );
+    const base = ( p0x * ( 2 * p0y + p1y ) + p1x * ( p0y + 2 * p1y ) ) / 6;
 
     return new Vector2(
-      ( p0x + p1x ) * base,
-      ( p0y + p1y ) * base
+      ( p0x - p1x ) * base,
+      ( p1y - p0y ) * base
     );
   }
 
@@ -289,31 +289,11 @@ export default class LinearEdge {
     );
   }
 
-  public static evaluateCancelledX( p0x: number, p0y: number, p1x: number, p1y: number ): number {
-    return ( 1 / 6 ) * ( p0x + p1x ) * ( p0x * p1y - p1x * p0y );
-  }
-
-  public static evaluateCancelledY( p0x: number, p0y: number, p1x: number, p1y: number ): number {
-    return ( 1 / 6 ) * ( p0y + p1y ) * ( p0x * p1y - p1x * p0y );
-  }
-
   /**
    * If you take the sum of these for a closed polygon, it should be the area of the polygon.
    */
   public getLineIntegralArea(): number {
     return LinearEdge.evaluateLineIntegralShoelaceArea(
-      this.startPoint.x, this.startPoint.y, this.endPoint.x, this.endPoint.y
-    );
-  }
-
-  public getLineIntegralPartialCentroid(): Vector2 {
-    return LinearEdge.evaluateLineIntegralPartialCentroid(
-      this.startPoint.x, this.startPoint.y, this.endPoint.x, this.endPoint.y
-    );
-  }
-
-  public getLineIntegralDistance(): number {
-    return LinearEdge.evaluateLineIntegralDistance(
       this.startPoint.x, this.startPoint.y, this.endPoint.x, this.endPoint.y
     );
   }
@@ -363,22 +343,22 @@ export default class LinearEdge {
     let x = 0;
     let y = 0;
 
-    // TODO: micro-optimize if used?
+    // TODO: micro-optimize if used a lot
     for ( let i = 0; i < polygon.length; i++ ) {
       const p0 = polygon[ i % polygon.length ];
       const p1 = polygon[ ( i + 1 ) % polygon.length ];
 
-      // evaluateCentroidPartial
-      const base = ( 1 / 6 ) * ( p0.x * p1.y - p1.x * p0.y );
-      x += ( p0.x + p1.x ) * base;
-      y += ( p0.y + p1.y ) * base;
+      // Partial centroid evaluation. NOTE: using the compound version here, for performance/stability tradeoffs
+      const base = ( p0.x * ( 2 * p0.y + p1.y ) + p1.x * ( p0.y + 2 * p1.y ) );
+      x += ( p0.x - p1.x ) * base;
+      y += ( p1.y - p0.y ) * base;
     }
 
-    const area = LinearEdge.getPolygonArea( polygon );
+    const sixArea = 6 * LinearEdge.getPolygonArea( polygon );
 
     return new Vector2(
-      x / area,
-      y / area
+      x / sixArea,
+      y / sixArea
     );
   }
 
