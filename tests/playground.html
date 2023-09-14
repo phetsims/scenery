@@ -413,6 +413,74 @@ an UI and Display made for visual testing and debugging.
     console.log( indentedLines.join( '\n' ) );
   };
 
+  window.centroidTest = function() {
+    setTimeout( async function() {
+
+      const triEvaluate = ( f, p0, p1, p2 ) =>
+        f( p0.x, p0.y, p1.x, p1.y ) +
+        f( p1.x, p1.y, p2.x, p2.y ) +
+        f( p2.x, p2.y, p0.x, p0.y );
+
+      const areaFunc = ( f ) => {
+        return ( p0, p1, p2 ) => {
+          return 0.5 * triEvaluate( f, p0, p1, p2 );
+        };
+      };
+
+      const centroidFunc = ( xf, yf ) => {
+        return ( p0, p1, p2, area ) => {
+          return phet.dot.v2(
+            triEvaluate( xf, p0, p1, p2 ),
+            triEvaluate( yf, p0, p1, p2 )
+          ).timesScalar( 1 / ( area * 6 ) );
+        }
+      };
+
+      const getArea = ( p0, p1, p2 ) => 0.5 * ( p0.x * ( p1.y - p2.y ) + p1.x * ( p2.y - p0.y ) + p2.x * ( p0.y - p1.y ) );
+
+      const getCentroid = ( p0, p1, p2 ) => phet.dot.v2(
+        ( p0.x + p1.x + p2.x ) / 3,
+        ( p0.y + p1.y + p2.y ) / 3
+      );
+
+      const getShoelaceArea = areaFunc( ( p0x, p0y, p1x, p1y ) => ( p1x + p0x ) * ( p1y - p0y ) );
+
+      const getSimpleCentroid = centroidFunc(
+        ( p0x, p0y, p1x, p1y ) => ( p0x * p1y - p1x * p0y ) * ( p0x + p1x ),
+        ( p0x, p0y, p1x, p1y ) => ( p0x * p1y - p1x * p0y ) * ( p0y + p1y )
+      );
+      const getSquaresCentroid = centroidFunc(
+        ( p0x, p0y, p1x, p1y ) => ( p0x * p0x + p0x * p1x + p1x * p1x ) * ( p1y - p0y ),
+        ( p0x, p0y, p1x, p1y ) => ( p0y * p0y + p0y * p1y + p1y * p1y ) * ( p0x - p1x )
+      );
+      const getCompoundCentroid = centroidFunc(
+        ( p0x, p0y, p1x, p1y ) => ( p0x - p1x ) * ( p0x * ( 2 * p0y + p1y ) + p1x * ( p0y + 2 * p1y ) ),
+        ( p0x, p0y, p1x, p1y ) => ( p1y - p0y ) * ( p0x * ( 2 * p0y + p1y ) + p1x * ( p0y + 2 * p1y ) )
+      );
+
+      const p0 = phet.dot.v2( 1000.0917092255039, 311.37365132374134 );
+      const p1 = phet.dot.v2( 1000.09375, 311.373046875 );
+      const p2 = phet.dot.v2( 1000.0916040879482, 311.3737382320225 );
+
+      const area = getArea( p0, p1, p2 );
+      const centroid = getCentroid( p0, p1, p2 );
+
+      const shoelaceArea = getShoelaceArea( p0, p1, p2 );
+      console.log( `shoelace area diff: ${shoelaceArea - area}` );
+
+      const simpleCentroid = getSimpleCentroid( p0, p1, p2, shoelaceArea );
+      console.log( `simple centroid diff: ${simpleCentroid.minus( centroid )}` );
+
+      const squaresCentroid = getSquaresCentroid( p0, p1, p2, shoelaceArea );
+      console.log( `squares centroid diff: ${squaresCentroid.minus( centroid )}` );
+
+      const compoundCentroid = getCompoundCentroid( p0, p1, p2, shoelaceArea );
+      console.log( `compound centroid diff: ${compoundCentroid.minus( centroid )}` );
+
+      debugger;
+    } );
+  };
+
   window.siemensTest = function( type, pointCount = 100 ) {
     setTimeout( async function() {
       const width = 800;

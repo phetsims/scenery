@@ -237,7 +237,7 @@ $`
 $`
 \iint_Py\,dx\,dy
 =\frac{1}{6}\sum_{i}(y_i + y_{i+1}) (x_i y_{i+1} - y_i x_{i+1})
-=\frac{1}{6}\sum_{i}(y_i^2 + y_i y_{i+1} + y_{i+1}^2) (x_{i+1} - x_i)
+=\frac{1}{6}\sum_{i}(y_i^2 + y_i y_{i+1} + y_{i+1}^2) (x_i - x_{i+1})
 =\frac{1}{6}\sum_{i}(y_{i+1}-y_i)(x_i(2y_i+y_{i+1}) + x_{i+1}(y_i+2y_{i_1}))
 `$
 
