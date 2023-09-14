@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A ClippableFace from a set of line segment edges. Should still represent multiple closed loops, but it is not
+ * A ClippableFace based on a set of line segment edges. Should still represent multiple closed loops, but it is not
  * explicit.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -19,10 +19,10 @@ const scratchVectorA = new Vector2( 0, 0 );
 const scratchVectorB = new Vector2( 0, 0 );
 
 export default class EdgedFace implements ClippableFace {
-  public constructor( public readonly edges: LinearEdge[] ) {
+  public constructor( public readonly edges: LinearEdge[], skipValidation = false ) {
     // Check on validating edges, since our binary clips won't work well if things aren't matched up (can get extra
     // edges).
-    assertSlow && this.validateStartEndMatches();
+    assertSlow && !skipValidation && LinearEdge.validateStartEndMatches( edges );
   }
 
   /**
@@ -98,6 +98,7 @@ export default class EdgedFace implements ClippableFace {
     let min = Number.POSITIVE_INFINITY;
     let max = 0;
 
+    // TODO: Use LinearEdge.addDistanceRange if the function-call overhead isn't too much
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
 
@@ -140,6 +141,7 @@ export default class EdgedFace implements ClippableFace {
       const p1 = edge.endPoint;
 
       // Shoelace formula for the area
+      // NOTE NOTE NOTE: Don't change this without changing EdgedClippedFace's getArea()!
       area += ( p1.x + p0.x ) * ( p1.y - p0.y );
     }
 
@@ -161,6 +163,7 @@ export default class EdgedFace implements ClippableFace {
       const p1 = edge.endPoint;
 
       // Partial centroid evaluation. NOTE: using the compound version here, for performance/stability tradeoffs
+      // NOTE NOTE NOTE: Don't change this without changing EdgedClippedFace's getCentroidPartial()!
       const base = ( p0.x * ( 2 * p0.y + p1.y ) + p1.x * ( p0.y + 2 * p1.y ) );
       x += ( p0.x - p1.x ) * base;
       y += ( p1.y - p0.y ) * base;
@@ -524,35 +527,6 @@ export default class EdgedFace implements ClippableFace {
     };
   }
 
-  public validateStartEndMatches(): void {
-    if ( assertSlow ) {
-      assertSlow( Math.abs( this.getZero() ) < 1e-5, 'Ensure we are effectively closed' );
-
-      // Ensure that each point's 'starts' and 'ends' matches precisely
-      type Entry = { point: Vector2; startCount: number; endCount: number };
-      const entries: Entry[] = [];
-      const getEntry = ( point: Vector2 ): Entry => {
-        for ( let i = 0; i < entries.length; i++ ) {
-          if ( entries[ i ].point.equals( point ) ) {
-            return entries[ i ];
-          }
-        }
-        const entry = { point: point, startCount: 0, endCount: 0 };
-        entries.push( entry );
-        return entry;
-      };
-      for ( let i = 0; i < this.edges.length; i++ ) {
-        const edge = this.edges[ i ];
-        getEntry( edge.startPoint ).startCount++;
-        getEntry( edge.endPoint ).endCount++;
-      }
-      for ( let i = 0; i < entries.length; i++ ) {
-        const entry = entries[ i ];
-        assertSlow( entry.startCount === entry.endCount, 'Ensure each point has matching start/end counts' );
-      }
-    }
-  }
-
   public static deserialize( serialized: SerializedEdgedFace ): EdgedFace {
     return new EdgedFace( serialized.edges.map( edge => LinearEdge.deserialize( edge ) ) );
   }
@@ -583,6 +557,8 @@ export class EdgedFaceAccumulator implements ClippableFaceAccumulator {
   private edges: LinearEdge[] = [];
 
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
+    assert && assert( startX !== endX || startY !== endY, 'Points should not be identical' );
+
     this.edges.push( new LinearEdge(
       startPoint || new Vector2( startX, startY ),
       endPoint || new Vector2( endX, endY )
@@ -591,6 +567,10 @@ export class EdgedFaceAccumulator implements ClippableFaceAccumulator {
 
   public markNewPolygon(): void {
     // no-op, since we're storing unsorted edges!
+  }
+
+  public setAccumulationBounds( minX: number, minY: number, maxX: number, maxY: number ): void {
+    // no-op, since we don't use bounds
   }
 
   // Will reset it to the initial state also

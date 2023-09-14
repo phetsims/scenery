@@ -353,7 +353,13 @@ export default class Rasterize {
         }
         else {
           // TODO: make sure we get a non-full-collinear polygonal accumulator for fast performance?
-          terminalFaceAccumulators.push( clippableFace.getAccumulator() );
+          const ix = i % width;
+          const iy = Math.floor( i / width );
+          const x = minX + ix;
+          const y = minY + iy;
+          const accumulator = clippableFace.getAccumulator();
+          terminalFaceAccumulators.push( accumulator );
+          accumulator.setAccumulationBounds( x, y, x + 1, y + 1 );
         }
       }
     }

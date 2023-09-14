@@ -519,6 +519,8 @@ export { serializeClippableFace, deserializeClippableFace } from './display/rast
 export type { default as ClippableFace, ClippableFaceAccumulator } from './display/raster/cag/ClippableFace.js';
 export { default as EdgedFace, EdgedFaceAccumulator } from './display/raster/cag/EdgedFace.js';
 export type { SerializedEdgedFace } from './display/raster/cag/EdgedFace.js';
+export { default as EdgedClippedFace, EdgedClippedFaceAccumulator } from './display/raster/cag/EdgedClippedFace.js';
+export type { SerializedEdgedClippedFace } from './display/raster/cag/EdgedClippedFace.js';
 export { default as PolygonalFace, PolygonalFaceAccumulator } from './display/raster/cag/PolygonalFace.js';
 export type { SerializedPolygonalFace } from './display/raster/cag/PolygonalFace.js';
 export { default as BoundedSubpath } from './display/raster/cag/BoundedSubpath.js';

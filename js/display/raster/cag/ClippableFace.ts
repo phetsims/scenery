@@ -227,6 +227,8 @@ export type ClippableFaceAccumulator = {
   addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void;
   markNewPolygon(): void;
 
+  setAccumulationBounds( minX: number, minY: number, maxX: number, maxY: number ): void;
+
   // Will reset it to the initial state also
   finalizeFace(): ClippableFace | null;
 

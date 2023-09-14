@@ -7,6 +7,7 @@
  */
 
 import { ClipSimplifier, scenery } from '../../../imports.js';
+import Range from '../../../../../dot/js/Range.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import { Line, Shape } from '../../../../../kite/js/imports.js';
 import Utils from '../../../../../dot/js/Utils.js';
@@ -477,6 +478,49 @@ export default class LinearEdge {
     }
 
     return windingNumber;
+  }
+
+  /**
+   * Given an edge defined by startPoint/endPoint, compute the range of distances from the given point to the edge, and
+   * add it to the range.
+   */
+  public static addDistanceRange( startPoint: Vector2, endPoint: Vector2, point: Vector2, range: Range ): void {
+    const p0x = startPoint.x - point.x;
+    const p0y = startPoint.y - point.y;
+    const p1x = endPoint.x - point.x;
+    const p1y = endPoint.y - point.y;
+
+    range.min = Math.min( range.min, LinearEdge.evaluateClosestDistanceToOrigin( p0x, p0y, p1x, p1y ) );
+    range.max = Math.max( range.max, Math.sqrt( p0x * p0x + p0y * p0y ), Math.sqrt( p1x * p1x + p1y * p1y ) );
+  }
+
+  public static validateStartEndMatches( edges: LinearEdge[] ): void {
+    if ( assertSlow ) {
+      assertSlow( Math.abs( _.sum( edges.map( e => e.getLineIntegralZero() ) ) ) < 1e-5, 'Ensure we are effectively closed' );
+
+      // Ensure that each point's 'starts' and 'ends' matches precisely
+      type Entry = { point: Vector2; startCount: number; endCount: number };
+      const entries: Entry[] = [];
+      const getEntry = ( point: Vector2 ): Entry => {
+        for ( let i = 0; i < entries.length; i++ ) {
+          if ( entries[ i ].point.equals( point ) ) {
+            return entries[ i ];
+          }
+        }
+        const entry = { point: point, startCount: 0, endCount: 0 };
+        entries.push( entry );
+        return entry;
+      };
+      for ( let i = 0; i < edges.length; i++ ) {
+        const edge = edges[ i ];
+        getEntry( edge.startPoint ).startCount++;
+        getEntry( edge.endPoint ).endCount++;
+      }
+      for ( let i = 0; i < entries.length; i++ ) {
+        const entry = entries[ i ];
+        assertSlow( entry.startCount === entry.endCount, 'Ensure each point has matching start/end counts' );
+      }
+    }
   }
 
   public toString(): string {

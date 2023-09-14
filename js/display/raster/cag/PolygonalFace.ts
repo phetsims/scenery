@@ -87,6 +87,7 @@ export default class PolygonalFace implements ClippableFace {
     let min = Number.POSITIVE_INFINITY;
     let max = 0;
 
+    // TODO: Use LinearEdge.addDistanceRange if the function-call overhead isn't too much
     for ( let i = 0; i < this.polygons.length; i++ ) {
       const polygon = this.polygons[ i ];
       for ( let j = 0; j < polygon.length; j++ ) {
@@ -554,11 +555,17 @@ export class PolygonalFaceAccumulator implements ClippableFaceAccumulator {
   private simplifier = new ClipSimplifier();
 
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
+    assert && assert( startX !== endX || startY !== endY, 'Points should not be identical' );
+
     startPoint ? this.simplifier.addPoint( startPoint ) : this.simplifier.add( startX, startY );
   }
 
   public markNewPolygon(): void {
     this.simplifier.finalizeInto( this.polygons );
+  }
+
+  public setAccumulationBounds( minX: number, minY: number, maxX: number, maxY: number ): void {
+    // no-op, since we don't use bounds
   }
 
   // Will reset it to the initial state also
