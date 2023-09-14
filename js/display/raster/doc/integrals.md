@@ -165,6 +165,8 @@ $`
 
 Both of these approaches are incredibly more stable than the first formula pair (about half a million times less error, with triangles centered in x,y in (0,1000), with sizes around 1/1000).
 
+For example, with p0={x: 716.1014074033982, y: 879.8148178803798}, p1={x: 716.1017435139888, y: 879.8150887077004}, p2={x: 716.1021422611582, y: 879.8154096593055}. The top method gives {x: 238.700559480381, y: 293.2716129164566} (! distance of more than 700 from the real centroid), whereas the error (distance) for the other methods are less than 1e-3 
+
 ## Evaluation of Filtered Polygons
 
 Any polynomial-based (windowed or not) filter can be evaluated over a polygon with this approach.

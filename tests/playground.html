@@ -500,6 +500,11 @@ an UI and Display made for visual testing and debugging.
         simpleCentroidError += centroid.distance( getSimpleCentroid( p0, p1, p2, area ) );
         squaresCentroidError += centroid.distance( getSquaresCentroid( p0, p1, p2, area ) );
         compoundCentroidError += centroid.distance( getCompoundCentroid( p0, p1, p2, area ) );
+
+        if ( centroid.distance( getSimpleCentroid( p0, p1, p2, area ) ) > 500 ) {
+          console.log( centroid.distance( getSimpleCentroid( p0, p1, p2, area ) ) );
+          debugger;
+        }
       }
       shoelaceAreaError /= N;
       simpleAreaError /= N;
