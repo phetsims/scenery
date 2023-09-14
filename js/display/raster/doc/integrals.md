@@ -105,6 +105,8 @@ area_P=\iint_P1\,dx\,dy=
 
 ## Centroids of Polygons
 
+** NOTE: see numerical stability notes below, this top way can be inaccurate with floating-point numbers ** 
+
 For $`x`$ and $`y`$, we have:
 
 $`
@@ -132,6 +134,34 @@ centroid_y=
 `$
 
 This is particularly useful, since if we have any linear function over $`(x,y)`$ (say, a linear gradient between two colors), the average color in the polygon would be the value of that function at the centroid!
+
+### Numerical Stability (addendum)
+
+The above formulas seem to magnify floating-point error significantly. It's highly recommended that either of the following methods be used for computation:
+
+For the highest precision (but for which there is not as much shared computation between the $`x`$ and $`y`$ formulas), we can use the following:
+
+$`
+\iint_Px\,dx\,dy
+=\frac{1}{6}\sum_{i}(x_i^2 + x_i x_{i+1} + x_{i+1}^2) (y_{i+1} - y_i)
+`$
+
+$`
+\iint_Py\,dx\,dy
+=\frac{1}{6}\sum_{i}(y_i^2 + y_i y_{i+1} + y_{i+1}^2) (x_i - x_{i+1})
+`$
+
+For higher performance (but with about 30% more numerical error), one with more shared computation can be used:
+
+$`
+\iint_Px\,dx\,dy
+=\frac{1}{6}\sum_{i}(x_i-x_{i+1})(x_i(2y_i+y_{i+1}) + x_{i+1}(y_i+2y_{i_1}))
+`$
+
+$`
+\iint_Py\,dx\,dy
+=\frac{1}{6}\sum_{i}(y_{i+1}-y_i)(x_i(2y_i+y_{i+1}) + x_{i+1}(y_i+2y_{i_1}))
+`$
 
 ## Evaluation of Filtered Polygons
 
