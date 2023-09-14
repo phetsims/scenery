@@ -89,6 +89,12 @@ export default class RenderBlendCompose extends RenderProgram {
 
   public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
 
+    // TODO: We can actually "simplify" RenderPathBooleans past this for a few non-over cases.
+    // TODO: For our path-boolean replacement, we'll want to shift RenderPathBooleans from a child to a parent when
+    // TODO: possible.
+    // TODO: For in/out/atop, we'll potentially be able to detect a path-boolean of a child (background/foreground)
+    // TODO: that can be moved to be a parent (since the entire displayed content would be inside that anyway).
+
     // a OP b
     const a = children[ 0 ];
     const b = children[ 1 ];
