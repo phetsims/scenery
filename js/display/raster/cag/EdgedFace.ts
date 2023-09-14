@@ -25,18 +25,34 @@ export default class EdgedFace implements ClippableFace {
     assertSlow && this.validateStartEndMatches();
   }
 
+  /**
+   * Converts the face to a polygonal face. Epsilon is used to determine whether start/end points match.
+   *
+   * NOTE: This is likely a low-performance method, and should only be used for debugging.
+   */
   public toPolygonalFace( epsilon = 1e-8 ): PolygonalFace {
     return new PolygonalFace( LinearEdge.toPolygons( this.edges, epsilon ) );
   }
 
+  /**
+   * Converts the face to an edged face.
+   */
   public toEdgedFace(): EdgedFace {
     return this;
   }
 
+  /**
+   * Returns a Shape for the face.
+   *
+   * NOTE: This is likely a low-performance method, and should only be used for debugging.
+   */
   public getShape( epsilon = 1e-8 ): Shape {
     return this.toPolygonalFace( epsilon ).getShape();
   }
 
+  /**
+   * Returns the bounds of the face (ignoring any "fake" edges, if the type supports them)
+   */
   public getBounds(): Bounds2 {
     const result = Bounds2.NOTHING.copy();
     for ( let i = 0; i < this.edges.length; i++ ) {
@@ -50,6 +66,10 @@ export default class EdgedFace implements ClippableFace {
     return result;
   }
 
+  /**
+   * Returns the range of values for the dot product of the given normal with any point contained within the face
+   * (for polygons, this is the same as the range of values for the dot product of the normal with any vertex).
+   */
   public getDotRange( normal: Vector2 ): Range {
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
@@ -69,6 +89,11 @@ export default class EdgedFace implements ClippableFace {
     return new Range( min, max );
   }
 
+  /**
+   * Returns the range of distances from the given point to every point along the edges of the face.
+   * For instance, if the face was the unit cube, the range would be 1/2 to sqrt(2), for distances to the middles of
+   * the edges and the corners respectively.
+   */
   public getDistanceRangeToEdges( point: Vector2 ): Range {
     let min = Number.POSITIVE_INFINITY;
     let max = 0;
@@ -88,6 +113,10 @@ export default class EdgedFace implements ClippableFace {
     return new Range( min, max );
   }
 
+  /**
+   * Returns the range of distances from the given point to every point inside the face. The upper bound should be
+   * the same as getDistanceRangeToEdges, however the lower bound may be 0 if the point is inside the face.
+   */
   public getDistanceRangeToInside( point: Vector2 ): Range {
     const range = this.getDistanceRangeToEdges( point );
 
@@ -99,6 +128,9 @@ export default class EdgedFace implements ClippableFace {
     }
   }
 
+  /**
+   * Returns the signed area of the face (positive if the vertices are in counter-clockwise order, negative if clockwise)
+   */
   public getArea(): number {
     let area = 0;
     for ( let i = 0; i < this.edges.length; i++ ) {
@@ -106,7 +138,8 @@ export default class EdgedFace implements ClippableFace {
 
       const p0 = edge.startPoint;
       const p1 = edge.endPoint;
-      // PolygonIntegrals.evaluateShoelaceArea( p0.x, p0.y, p1.x, p1.y );
+
+      // Shoelace formula for the area
       area += ( p1.x + p0.x ) * ( p1.y - p0.y );
     }
 
@@ -136,14 +169,27 @@ export default class EdgedFace implements ClippableFace {
     return new Vector2( x, y );
   }
 
+  /**
+   * Returns the centroid of the face (area is required for the typical integral required to evaluate)
+   */
   public getCentroid( area: number ): Vector2 {
     return this.getCentroidPartial().timesScalar( 1 / ( 6 * area ) );
   }
 
+  /**
+   * Returns the evaluation of an integral that will be zero if the boundaries of the face are correctly closed.
+   * It is designed so that if there is a "gap" and we have open boundaries, the result will likely be non-zero.
+   *
+   * NOTE: This is only used for debugging, so performance is not a concern.
+   */
   public getZero(): number {
     return _.sum( this.edges.map( e => e.getLineIntegralZero() ) );
   }
 
+  /**
+   * Returns the average distance from the given point to every point inside the face. The integral evaluation requires
+   * the area (similarly to the centroid computation).
+   */
   public getAverageDistance( point: Vector2, area: number ): number {
     let sum = 0;
 
@@ -164,6 +210,9 @@ export default class EdgedFace implements ClippableFace {
     return sum / area;
   }
 
+  /**
+   * Returns the average distance from the origin to every point inside the face transformed by the given matrix.
+   */
   public getAverageDistanceTransformedToOrigin( transform: Matrix3, area: number ): number {
     let sum = 0;
 
@@ -180,6 +229,9 @@ export default class EdgedFace implements ClippableFace {
     return sum / ( area * transform.getSignedScale() );
   }
 
+  /**
+   * Returns a copy of the face that is clipped to be within the given axis-aligned bounding box.
+   */
   public getClipped( minX: number, minY: number, maxX: number, maxY: number ): EdgedFace {
     const edges: LinearEdge[] = [];
 
@@ -198,6 +250,12 @@ export default class EdgedFace implements ClippableFace {
     return new EdgedFace( edges );
   }
 
+  /**
+   * Returns two copies of the face, one that is clipped to be to the left of the given x value, and one that is
+   * clipped to be to the right of the given x value.
+   *
+   * The fakeCornerY is used to determine the "fake" corner that is used for unsorted-edge clipping.
+   */
   public getBinaryXClip( x: number, fakeCornerY: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
     const minEdges: LinearEdge[] = [];
     const maxEdges: LinearEdge[] = [];
@@ -217,6 +275,12 @@ export default class EdgedFace implements ClippableFace {
     };
   }
 
+  /**
+   * Returns two copies of the face, one that is clipped to y values less than the given y value, and one that is
+   * clipped to values greater than the given y value.
+   *
+   * The fakeCornerX is used to determine the "fake" corner that is used for unsorted-edge clipping.
+   */
   public getBinaryYClip( y: number, fakeCornerX: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
     const minEdges: LinearEdge[] = [];
     const maxEdges: LinearEdge[] = [];
@@ -236,6 +300,12 @@ export default class EdgedFace implements ClippableFace {
     };
   }
 
+  /**
+   * Returns two copies of the face, one that is clipped to contain points where dot( normal, point ) < value,
+   * and one that is clipped to contain points where dot( normal, point ) > value.
+   *
+   * The fake corner perpendicular is used to determine the "fake" corner that is used for unsorted-edge clipping
+   */
   public getBinaryLineClip( normal: Vector2, value: number, fakeCornerPerpendicular: number ): { minFace: EdgedFace; maxFace: EdgedFace } {
     const minEdges: LinearEdge[] = [];
     const maxEdges: LinearEdge[] = [];
@@ -255,6 +325,11 @@ export default class EdgedFace implements ClippableFace {
     };
   }
 
+  /**
+   * Returns an array of faces, clipped similarly to getBinaryLineClip, but with more than one (parallel) split line at
+   * a time. The first face will be the one with dot( normal, point ) < values[0], the second one with
+   * values[ 0 ] < dot( normal, point ) < values[1], etc.
+   */
   public getStripeLineClip( normal: Vector2, values: number[], fakeCornerPerpendicular: number ): EdgedFace[] {
     if ( values.length === 0 ) {
       return [ this ];
@@ -285,6 +360,13 @@ export default class EdgedFace implements ClippableFace {
     return edgesCollection.map( edges => new EdgedFace( edges ) );
   }
 
+  /**
+   * Returns two copies of the face, one that is clipped to contain points inside the circle defined by the given
+   * center and radius, and one that is clipped to contain points outside the circle.
+   *
+   * NOTE: maxAngleSplit is used to determine the polygonal approximation of the circle. The returned result will not
+   * have a chord with an angle greater than maxAngleSplit.
+   */
   public getBinaryCircularClip( center: Vector2, radius: number, maxAngleSplit: number ): { insideFace: EdgedFace; outsideFace: EdgedFace } {
     const insideEdges: LinearEdge[] = [];
     const outsideEdges: LinearEdge[] = [];
@@ -297,6 +379,11 @@ export default class EdgedFace implements ClippableFace {
     };
   }
 
+  /**
+   * Given an integral bounding box and step sizes (which define the grid), this will clip the face to each cell in the
+   * grid, calling the callback for each cell's contributing edges (in order, if we are a PolygonalFace).
+   * polygonCompleteCallback will be called whenever a polygon is completed (if we are a polygonal type of face).
+   */
   public gridClipIterate(
     minX: number, minY: number, maxX: number, maxY: number,
     stepX: number, stepY: number, stepWidth: number, stepHeight: number,
@@ -319,18 +406,32 @@ export default class EdgedFace implements ClippableFace {
     }
   }
 
+  /**
+   * Returns the evaluation of the bilinear (tent) filter integrals for the given point, ASSUMING that the face
+   * is clipped to the transformed unit square of x: [minX,minX+1], y: [minY,minY+1].
+   */
   public getBilinearFiltered( pointX: number, pointY: number, minX: number, minY: number ): number {
     return PolygonBilinear.evaluateLinearEdges( this.edges, pointX, pointY, minX, minY );
   }
 
+  /**
+   * Returns the evaluation of the Mitchell-Netravali (1/3,1/3) filter integrals for the given point, ASSUMING that the
+   * face is clipped to the transformed unit square of x: [minX,minX+1], y: [minY,minY+1].
+   */
   public getMitchellNetravaliFiltered( pointX: number, pointY: number, minX: number, minY: number ): number {
     return PolygonMitchellNetravali.evaluateLinearEdges( this.edges, pointX, pointY, minX, minY );
   }
 
+  /**
+   * Returns whether the face contains the given point.
+   */
   public containsPoint( point: Vector2 ): boolean {
     return LinearEdge.getWindingNumberEdges( this.edges, point ) !== 0;
   }
 
+  /**
+   * Returns an affine-transformed version of the face.
+   */
   public getTransformed( transform: Matrix3 ): EdgedFace {
     if ( transform.isIdentity() ) {
       return this;
@@ -353,6 +454,9 @@ export default class EdgedFace implements ClippableFace {
     }
   }
 
+  /**
+   * Returns a rounded version of the face, where [-epsilon/2, epsilon/2] rounds to 0, etc.
+   */
   public getRounded( epsilon: number ): EdgedFace {
     const edges = [];
 
@@ -377,6 +481,9 @@ export default class EdgedFace implements ClippableFace {
     return new EdgedFace( edges );
   }
 
+  /**
+   * Calls the callback with points for each edge in the face.
+   */
   public forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void {
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
@@ -384,18 +491,33 @@ export default class EdgedFace implements ClippableFace {
     }
   }
 
+  /**
+   * Returns a singleton accumulator for this type of face.
+   */
   public getScratchAccumulator(): ClippableFaceAccumulator {
     return scratchAccumulator;
   }
 
+  /**
+   * Returns a new accumulator for this type of face.
+   */
   public getAccumulator(): ClippableFaceAccumulator {
     return new EdgedFaceAccumulator();
   }
 
+  /**
+   * Returns a debugging string.
+   */
   public toString(): string {
     return this.edges.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' );
   }
 
+  /**
+   * Returns a serialized version of the face, that should be able to be deserialized into the same type of face.
+   * See {FaceType}.deserialize.
+   *
+   * NOTE: If you don't know what type of face this is, use serializeClippableFace instead.
+   */
   public serialize(): SerializedEdgedFace {
     return {
       edges: this.edges.map( edge => edge.serialize() )
