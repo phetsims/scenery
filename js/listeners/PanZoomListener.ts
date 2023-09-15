@@ -43,8 +43,8 @@ export type PanZoomListenerOptions = SelfOptions & MultiListenerOptions;
 
 class PanZoomListener extends MultiListener {
 
-  private _panBounds: Bounds2;
-  private _targetBounds: Bounds2;
+  protected _panBounds: Bounds2;
+  protected _targetBounds: Bounds2;
   protected _targetScale: number;
 
   // Only needed for PhET-iO instrumented. The pan bounds of the source so if the destination bounds are different due

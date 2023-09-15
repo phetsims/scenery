@@ -75,8 +75,8 @@ class MultiListener implements TInputListener {
   protected readonly _targetNode: Node;
 
   // see options
-  private readonly _minScale: number;
-  private readonly _maxScale: number;
+  protected readonly _minScale: number;
+  protected readonly _maxScale: number;
   private readonly _mouseButton: number;
   protected readonly _pressCursor: string;
   private readonly _allowScale: boolean;
@@ -85,7 +85,7 @@ class MultiListener implements TInputListener {
   private readonly _allowMoveInterruption: boolean;
 
   // List of "active" Presses down from Pointer input which are actively changing the transformation of the target Node
-  private readonly _presses: MultiListenerPress[];
+  protected readonly _presses: MultiListenerPress[];
 
   // List of "background" presses which are saved but not yet doing anything for the target Node transformation. If
   // the Pointer already has listeners, Presses are added to the background and wait to be converted to "active"
@@ -387,7 +387,7 @@ class MultiListener implements TInputListener {
   /**
    * Reposition in response to movement of any Presses.
    */
-  private movePress( press: MultiListenerPress ): void {
+  protected movePress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener movePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

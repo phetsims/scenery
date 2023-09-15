@@ -231,6 +231,7 @@ export { default as MultiListenerPress } from './listeners/MultiListenerPress.js
 export { default as MultiListener } from './listeners/MultiListener.js';
 export type { MultiListenerOptions } from './listeners/MultiListener.js';
 export { default as PanZoomListener } from './listeners/PanZoomListener.js';
+export type { PanZoomListenerOptions } from './listeners/PanZoomListener.js';
 export { default as AnimatedPanZoomListener } from './listeners/AnimatedPanZoomListener.js';
 export { default as animatedPanZoomSingleton } from './listeners/animatedPanZoomSingleton.js';
 export { default as HandleDownListener } from './listeners/HandleDownListener.js';

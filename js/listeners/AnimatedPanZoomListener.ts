@@ -12,13 +12,12 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
-import Tandem from '../../../tandem/js/Tandem.js';
-import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, Node, PanZoomListener, PDOMPointer, PDOMUtils, PressListener, scenery } from '../imports.js';
+import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -35,83 +34,101 @@ const scratchScaleTargetVector = new Vector2( 0, 0 );
 const scratchVelocityVector = new Vector2( 0, 0 );
 const scratchBounds = new Bounds2( 0, 0, 0, 0 );
 
+// Type for a GestureEvent - experimental and Safari specific Event, not available in default typing so it is manually
+// defined here. See https://developer.mozilla.org/en-US/docs/Web/API/GestureEvent
+type GestureEvent = {
+  scale: number;
+  pageX: number;
+  pageY: number;
+} & Event;
+
 class AnimatedPanZoomListener extends PanZoomListener {
 
+  // This point is the center of the transformedPanBounds (see PanZoomListener) in
+  // the parent coordinate frame of the targetNode. This is the current center of the transformedPanBounds, and
+  // during animation we will move this point closer to the destinationPosition.
+  private sourcePosition: Vector2 | null;
+
+  // The destination for translation, we will reposition the targetNode until the
+  // sourcePosition matches this point. This is in the parent coordinate frame of the targetNode.
+  private destinationPosition: Vector2 | null;
+
+  // The current scale of the targetNode. During animation we will scale the targetNode until this matches the destinationScale.
+  private sourceScale: number;
+
+  // The desired scale for the targetNode, the node is repositioned until sourceScale matches destinationScale.
+  private destinationScale: number;
+
+  // The point at which a scale gesture was initiated. This is usually the mouse point in
+  // the global coordinate frame when a wheel or trackpad zoom gesture is initiated. The targetNode will appear to
+  // be zoomed into this point. This is in the global coordinate frame.
+  private scaleGestureTargetPosition: Vector2 | null;
+
+  // Scale changes in discrete amounts for certain types of input, and in these cases this array defines the discrete
+  // scales possible
+  private discreteScales: number[];
+
+  // If defined, indicates that a middle mouse button is down to pan in the direction of cursor movement.
+  private middlePress: MiddlePress | null;
+
+  // These bounds define behavior of panning during interaction with another listener that declares its intent for
+  // dragging. If the pointer is out of these bounds and its intent is for dragging, we will try to reposition so
+  // that the dragged object remains visible
+  private _dragBounds: Bounds2 | null;
+
+  // The panBounds in the local coordinate frame of the targetNode. Generally, these are the bounds of the targetNode
+  // that you can see within the panBounds.
+  private _transformedPanBounds: Bounds2;
+
+  // whether or not the Pointer went down within the drag bounds - if it went down out of drag bounds
+  // then user likely trying to pull an object back into view so we prevent panning during drag
+  private _draggingInDragBounds: boolean;
+
+  // A collection of listeners Pointers with attached listeners that are down. Used
+  // primarily to determine if the attached listener defines any unique behavior that should happen during a drag,
+  // such as panning to keep custom Bounds in view. See TInputListener.createPanTargetBounds.
+  private _attachedPointers: Pointer[];
+
+  // Certain calculations can only be done once available pan bounds are finite.
+  private boundsFinite: boolean;
+
+  // Action wrapping work to be done when a gesture starts on a macOS trackpad (specific to that platform!). Wrapped
+  // in an action so that state is captured for PhET-iO
+  private gestureStartAction: PhetioAction<GestureEvent[]>;
+  private gestureChangeAction: PhetioAction<GestureEvent[]>;
+
+  // scale represented at the start of the gesture, as reported by the GestureEvent, used to calculate how much
+  // to scale the target Node
+  private trackpadGestureStartScale = 1;
+
+  private readonly disposeAnimatedPanZoomListener: () => void;
+
   /**
-   * @param {Node} targetNode - Node to be transformed by this listener
-   * @param {Object} [options]
+   * targetNode - Node to be transformed by this listener
+   * {Object} [providedOptions]
    */
-  constructor( targetNode, options ) {
+  public constructor( targetNode: Node, providedOptions: PanZoomListenerOptions ) {
+    super( targetNode, providedOptions );
 
-    // While this is still JavaScript, this relatively useless assertion lets us import Node for other TypeScript
-    assert && assert( targetNode instanceof Node );
-
-    options = merge( {
-      tandem: Tandem.REQUIRED
-    }, options );
-
-    super( targetNode, options );
-
-    // @private {null|Vector2} - This point is the center of the transformedPanBounds (see PanZoomListener) in
-    // the parent coordinate frame of the targetNode. This is the current center of the transformedPanBounds, and
-    // during animation we will move this point closer to the destinationPosition.
     this.sourcePosition = null;
-
-    // @private {null|Vector2} - The destination for translation, we will reposition the targetNode until the
-    // sourcePosition matches this point. This is in the parent coordinate frame of the targetNode.
     this.destinationPosition = null;
-
-    // @private {number} - The current scale of the targetNode. During animation we will scale the targetNode until
-    // this matches the destinationScale.
     this.sourceScale = this.getCurrentScale();
-
-    // @private {number} - The desired scale for the targetNode, the node is repositioned until sourceScale matches
-    // destinationScale.
     this.destinationScale = this.getCurrentScale();
-
-    // @private {null|Vector2} - The point at which a scale gesture was initiated. This is usually the mouse point in
-    // the global coordinate frame when a wheel or trackpad zoom gesture is initiated. The targetNode will appear to
-    // be zoomed into this point. This is in the global coordinate frame.
     this.scaleGestureTargetPosition = null;
-
-    // @private {Array.<number>} - scale changes in discrete amounts for certain types of input, and in these
-    // cases this array defines the discrete scales possible
     this.discreteScales = calculateDiscreteScales( this._minScale, this._maxScale );
-
-    // @private {MiddlePress|null} - If defined, indicates that a middle mouse button is down to pan in the direction
-    // of cursor movement.
     this.middlePress = null;
-
-    // @private {Bounds2|null} - these bounds define behavior of panning during interaction with another listener
-    // that declares its intent for dragging. If the pointer is out of these bounds and its intent is for dragging,
-    // we will try to reposition so that the dragged object remains visible
     this._dragBounds = null;
-
-    // @private {Bounds2} - The panBounds in the local coordinate frame of the targetNode. Generally, these are the
-    // bounds of the targetNode that you can see within the panBounds.
     this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
-
-    // @private - whether or not the Pointer went down within the drag bounds - if it went down out of drag bounds
-    // then user likely trying to pull an object back into view so we prevent panning during drag
     this._draggingInDragBounds = false;
-
-    // @private {TInputListener[]} - A collection of listeners Pointers with attached listeners that are down. Used
-    // primarily to determine if the attached listener defines any unique behavior that should happen during a drag,
-    // such as panning to keep custom Bounds in view. See TInputListener.createPanTargetBounds.
     this._attachedPointers = [];
-
-    // @private {boolean} - Certain calculations can only be done once available pan bounds are finite.
     this.boundsFinite = false;
 
     // listeners that will be bound to `this` if we are on a (non-touchscreen) safari platform, referenced for
     // removal on dispose
-    let boundGestureStartListener = null;
-    let boundGestureChangeListener = null;
+    let boundGestureStartListener: null | ( ( event: GestureEvent ) => void ) = null;
+    let boundGestureChangeListener: null | ( ( event: GestureEvent ) => void ) = null;
 
-    // @private {Action} - Action wrapping work to be done when a gesture starts on a macOS trackpad (specific
-    // to that platform!). Wrapped in an action so that state is captured for PhET-iO
     this.gestureStartAction = new PhetioAction( domEvent => {
-      assert && assert( domEvent instanceof window.Event );
       assert && assert( domEvent.pageX, 'pageX required on DOMEvent' );
       assert && assert( domEvent.pageY, 'pageY required on DOMEvent' );
       assert && assert( domEvent.scale, 'scale required on DOMEvent' );
@@ -123,16 +140,14 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.scaleGestureTargetPosition = new Vector2( domEvent.pageX, domEvent.pageY );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'gestureStartAction' ),
+      tandem: providedOptions.tandem.createTandem( 'gestureStartAction' ),
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioEventType: EventType.USER,
       phetioDocumentation: 'Action that executes whenever a gesture starts on a trackpad in macOS Safari.'
     } );
 
-    // @private {Action} - Action wrapping work to be done when gesture changes on a macOS trackpad (specfic to that
-    // platform!). Wrapped in an action so state is captured for PhET-iO
+
     this.gestureChangeAction = new PhetioAction( domEvent => {
-      assert && assert( domEvent instanceof window.Event );
       assert && assert( domEvent.scale, 'scale required on DOMEvent' );
 
       // prevent Safari from changing position or scale natively
@@ -142,7 +157,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.setDestinationScale( newScale );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'gestureChangeAction' ),
+      tandem: providedOptions.tandem.createTandem( 'gestureChangeAction' ),
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioEventType: EventType.USER,
       phetioDocumentation: 'Action that executes whenever a gesture changes on a trackpad in macOS Safari.'
@@ -153,14 +168,18 @@ class AnimatedPanZoomListener extends PanZoomListener {
       boundGestureStartListener = this.handleGestureStartEvent.bind( this );
       boundGestureChangeListener = this.handleGestureChangeEvent.bind( this );
 
-      // @private {number} - the scale of the targetNode at the start of the gesture, used to calculate
-      // how scale to apply from 'gesturechange' event
+      // the scale of the targetNode at the start of the gesture, used to calculate how scale to apply from
+      // 'gesturechange' event
       this.trackpadGestureStartScale = this.getCurrentScale();
 
       // WARNING: These events are non-standard, but this is the only way to detect and prevent native trackpad
       // input on macOS Safari. For Apple documentation about these events, see
       // https://developer.apple.com/documentation/webkitjs/gestureevent
+
+      // @ts-expect-error - Event type for this Safari specific event isn't available yet
       window.addEventListener( 'gesturestart', boundGestureStartListener );
+
+      // @ts-expect-error - Event type for this Safari specific event isn't available yet
       window.addEventListener( 'gesturechange', boundGestureChangeListener );
     }
 
@@ -168,7 +187,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // to be attached so we have free reign over the keyboard
     globalKeyStateTracker.keydownEmitter.addListener( this.windowKeydown.bind( this ) );
 
-    const displayFocusListener = focus => {
+    const displayFocusListener = ( focus: Focus | null ) => {
       if ( focus && this.getCurrentScale() > 1 ) {
         this.keepTrailInView( focus.trail );
       }
@@ -190,9 +209,12 @@ class AnimatedPanZoomListener extends PanZoomListener {
       phetioDependencies: [ this.matrixProperty ]
     } );
 
-    // @private - called by dispose
     this.disposeAnimatedPanZoomListener = () => {
+
+      // @ts-expect-error - Event type for this Safari specific event isn't available yet
       boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );
+
+      // @ts-expect-error - Event type for this Safari specific event isn't available yet
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
 
       FocusManager.pdomFocusProperty.unlink( displayFocusListener );
@@ -201,11 +223,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Step the listener, supporting any animation as the target node is transformed to target position and scale.
-   * @public
-   *
-   * @param {number} dt
    */
-  step( dt ) {
+  public step( dt: number ): void {
     if ( this.middlePress ) {
       this.handleMiddlePress( dt );
     }
@@ -238,13 +257,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Attach a MiddlePress for drag panning, if detected.
-   * @public
-   * @override
-   *
-   * @param {SceneryEvent} event
    */
-  down( event ) {
-    PanZoomListener.prototype.down.call( this, event );
+  public override down( event: SceneryEvent ): void {
+    super.down( event );
 
     // If the Pointer signifies the input is intended for dragging save a reference to the trail so we can support
     // keeping the event target in view during the drag operation.
@@ -265,7 +280,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     }
 
     // begin middle press panning if we aren't already in that state
-    if ( event.pointer.type === 'mouse' && event.pointer.middleDown && !this.middlePress ) {
+    if ( event.pointer.type === 'mouse' && event.pointer instanceof Mouse && event.pointer.middleDown && !this.middlePress ) {
       this.middlePress = new MiddlePress( event.pointer, event.trail );
       event.pointer.cursor = MOVE_CURSOR;
     }
@@ -276,9 +291,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * If in a state where we are panning from a middle mouse press, exit that state.
-   * @private
    */
-  cancelMiddlePress() {
+  private cancelMiddlePress(): void {
     if ( this.middlePress ) {
       this.middlePress.pointer.cursor = null;
       this.middlePress = null;
@@ -289,14 +303,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Listener for the attached pointer on move. Only move if a middle press is not currently down.
-   * @protected
-   * @override
-   *
-   * @param {SceneryEvent} event
    */
-  movePress( event ) {
+  protected override movePress( press: MultiListenerPress ): void {
     if ( !this.middlePress ) {
-      PanZoomListener.prototype.movePress.call( this, event );
+      super.movePress( press );
     }
   }
 
@@ -304,11 +314,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Part of the Scenery listener API. Supports repositioning while dragging a more descendant level
    * Node under this listener. If the node and pointer are out of the dragBounds, we reposition to keep the Node
    * visible within dragBounds.
-   * @public (scenery-internal)
    *
-   * @param {SceneryEvent} event
+   * (scenery-internal)
    */
-  move( event ) {
+  public move( event: SceneryEvent ): void {
 
     // No need to do this work if we are zoomed out.
     if ( this._attachedPointers.length > 0 && this.getCurrentScale() > 1 ) {
@@ -330,7 +339,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
         }
       }
       else {
-        this._draggingInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+        if ( this._dragBounds ) {
+          this._draggingInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+        }
       }
     }
   }
@@ -338,11 +349,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Gets the Bounds2 in the global coordinate frame that we are going to try to keep in view during a drag
    * operation.
-   * @private
-   *
-   * @returns {Bounds2|null}
    */
-  getGlobalBoundsToViewDuringDrag() {
+  private getGlobalBoundsToViewDuringDrag(): Bounds2 | null {
     let globalBoundsToView = null;
 
     if ( this._attachedPointers.length > 0 ) {
@@ -351,7 +359,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
       // get the target Bounds for the drag event.
 
       // Only use the first one so that unique dragging behaviors don't "fight" if multiple pointers are down.
-      const activeListener = this._attachedPointers[ 0 ].attachedListener;
+      const activeListener = this._attachedPointers[ 0 ].attachedListener!;
+      assert && assert( activeListener, 'The attached Pointer is expected to have an attached listener.' );
 
       if ( activeListener.createPanTargetBounds ) {
 
@@ -377,7 +386,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
           // https://github.com/phetsims/scenery/issues/1361 and
           // https://github.com/phetsims/scenery/issues/1356#issuecomment-1039678678
           if ( target.instances.length === 1 ) {
-            globalBoundsToView = target.instances[ 0 ].trail.parentToGlobalBounds( target.visibleBounds );
+            const trail = target.instances[ 0 ].trail!;
+            assert && assert( trail, 'The target should be in one scene graph and have an instance with a trail.' );
+            globalBoundsToView = trail.parentToGlobalBounds( target.visibleBounds );
           }
         }
       }
@@ -389,19 +400,17 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * During a drag of another Node that is a descendant of this listener's targetNode, reposition if the
    * node is out of dragBounds so that the Node is always within panBounds.
-   * @private
    */
-  repositionDuringDrag() {
+  private repositionDuringDrag(): void {
     const globalBounds = this.getGlobalBoundsToViewDuringDrag();
     globalBounds && this.keepBoundsInView( globalBounds, this._attachedPointers.some( pointer => pointer instanceof PDOMPointer ) );
   }
 
   /**
    * Stop panning during drag by clearing variables that are set to indicate and provide information for this work.
-   * @param {SceneryEvent} [event] - if not provided all are panning is cancelled and we assume interruption
-   * @private
+   * @param [event] - if not provided all are panning is cancelled and we assume interruption
    */
-  cancelPanningDuringDrag( event ) {
+  private cancelPanningDuringDrag( event?: SceneryEvent ): void {
 
     if ( event ) {
 
@@ -423,21 +432,18 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Scenery listener API. Cancel any drag and pan behavior for the Pointer on the event.
-   * @public (scenery-internal)
    *
-   * @param {SceneryEvent} event
+   * (scenery-internal)
    */
-  up( event ) {
+  public up( event: SceneryEvent ): void {
     this.cancelPanningDuringDrag( event );
   }
 
   /**
    * Input listener for the 'wheel' event, part of the Scenery Input API.
-   * @public (scenery-internal)
-   *
-   * @param {SceneryEvent} event
+   * (scenery-internal)
    */
-  wheel( event ) {
+  public wheel( event: SceneryEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener wheel' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -456,11 +462,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Events rather than SceneryEvents. When we handle Events from within the PDOM we need the Pointer to
    * determine if attached. But from outside of the PDOM we know that there is no focus in the document and therfore
    * the PDOMPointer is not attached.
-   * @private
-   *
-   * @param {Event} domEvent
    */
-  windowKeydown( domEvent ) {
+  private windowKeydown( domEvent: Event ): void {
 
     // on any keyboard reposition interrupt the middle press panning
     this.cancelMiddlePress();
@@ -483,12 +486,12 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * For the Scenery listener API, handle a keydown event. This SceneryEvent will have been dispatched from
    * Input.dispatchEvent and so the Event target must be within the PDOM. In this case, we may
    * need to prevent translation if the PDOMPointer is attached.
-   * @public (scenery-internal)
    *
-   * @param {SceneryEvent} event
+   * (scenery-internal)
    */
-  keydown( event ) {
-    const domEvent = event.domEvent;
+  public keydown( event: SceneryEvent ): void {
+    const domEvent = event.domEvent!;
+    assert && assert( domEvent instanceof KeyboardEvent, 'keydown event must be a KeyboardEvent' ); // eslint-disable-line no-simple-type-checking-assertions
 
     // on any keyboard reposition interrupt the middle press panning
     this.cancelMiddlePress();
@@ -528,11 +531,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Handle zoom commands from a keyboard.
-   * @private
-   *
-   * @param {Event} domEvent
    */
-  handleZoomCommands( domEvent ) {
+  public handleZoomCommands( domEvent: Event ): void {
 
     // handle zoom - Safari doesn't receive the keyup event when the meta key is pressed so we cannot use
     // the keyStateTracker to determine if zoom keys are down
@@ -564,38 +564,33 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * This is just for macOS Safari. Responds to trackpad input. Prevents default browser behavior and sets values
-   * required for for repositioning as user operates the track pad.
-   * @private
-   *
-   * @param {Event} domEvent
+   * required for repositioning as user operates the track pad.
    */
-  handleGestureStartEvent( domEvent ) {
+  private handleGestureStartEvent( domEvent: GestureEvent ): void {
     this.gestureStartAction.execute( domEvent );
   }
 
   /**
    * This is just for macOS Safari. Responds to trackpad input. Prevends default browser behavior and
    * sets destination scale as user pinches on the trackpad.
-   * @private
-   *
-   * @param {Event} domEvent
    */
-  handleGestureChangeEvent( domEvent ) {
+  private handleGestureChangeEvent( domEvent: GestureEvent ): void {
     this.gestureChangeAction.execute( domEvent );
   }
 
   /**
    * Handle the down MiddlePress during animation. If we have a middle press we need to update position target.
-   * @private
-   *
-   * @param {number} dt
    */
-  handleMiddlePress( dt ) {
-    assert && assert( this.middlePress, 'MiddlePress must be defined to handle' );
+  private handleMiddlePress( dt: number ): void {
+    const middlePress = this.middlePress!;
+    assert && assert( middlePress, 'MiddlePress must be defined to handle' );
+
+    const sourcePosition = this.sourcePosition!;
+    assert && assert( sourcePosition, 'sourcePosition must be defined to handle middle press, be sure to call initializePositions' );
 
     if ( dt > 0 ) {
-      const currentPoint = this.middlePress.pointer.point;
-      const globalDelta = currentPoint.minus( this.middlePress.initialPoint );
+      const currentPoint = middlePress.pointer.point;
+      const globalDelta = currentPoint.minus( middlePress.initialPoint );
 
       // magnitude alone is too fast, reduce by a bit
       const reducedMagnitude = globalDelta.magnitude / 100;
@@ -604,7 +599,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
         // set the delta vector in global coordinates, limited by a maximum view coords/second velocity, corrected
         // for any representative target scale
         globalDelta.setMagnitude( Math.min( reducedMagnitude / dt, MAX_SCROLL_VELOCITY * this._targetScale ) );
-        this.setDestinationPosition( this.sourcePosition.plus( globalDelta ) );
+        this.setDestinationPosition( sourcePosition.plus( globalDelta ) );
       }
     }
   }
@@ -614,12 +609,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * in or out of a particular point on the target node. This actually modifies the matrix of the target node. To
    * accomplish zooming into a particular point, we compute a matrix that would transform the target node from
    * the target point, then apply scale, then translate the target back to the target point.
-   * @public
    *
-   * @param {Vector2} globalPoint - point to zoom in on, in the global coordinate frame
-   * @param {number} scaleDelta
+   * @param globalPoint - point to zoom in on, in the global coordinate frame
+   * @param scaleDelta
    */
-  translateScaleToTarget( globalPoint, scaleDelta ) {
+  private translateScaleToTarget( globalPoint: Vector2, scaleDelta: number ): void {
     const pointInLocalFrame = this._targetNode.globalToLocalPoint( globalPoint );
     const pointInParentFrame = this._targetNode.globalToParentPoint( globalPoint );
 
@@ -640,12 +634,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Sets the translation and scale to a target point. Like translateScaleToTarget, but instead of taking a scaleDelta
    * it takes the final scale to be used for the target Nodes matrix.
-   * @private
    *
-   * @param {Vector2} globalPoint - point to translate to in the global coordinate frame
-   * @param {number} scale - final scale for the transformation matrix
+   * @param globalPoint - point to translate to in the global coordinate frame
+   * @param scale - final scale for the transformation matrix
    */
-  setTranslationScaleToTarget( globalPoint, scale ) {
+  private setTranslationScaleToTarget( globalPoint: Vector2, scale: number ): void {
     const pointInLocalFrame = this._targetNode.globalToLocalPoint( globalPoint );
     const pointInParentFrame = this._targetNode.globalToParentPoint( globalPoint );
 
@@ -665,11 +658,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Translate the target node in a direction specified by deltaVector.
-   * @public
-   *
-   * @param {Vector2} deltaVector
    */
-  translateDelta( deltaVector ) {
+  private translateDelta( deltaVector: Vector2 ): void {
     const targetPoint = this._targetNode.globalToParentPoint( this._panBounds.center );
     const sourcePoint = targetPoint.plus( deltaVector );
     this.translateToTarget( sourcePoint, targetPoint );
@@ -678,12 +668,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Translate the targetNode from a local point to a target point. Both points should be in the global coordinate
    * frame.
-   * @public
-   *
-   * @param {Vector} initialPoint - in global coordinate frame, source position
-   * @param {Vector2} targetPoint - in global coordinate frame, target position
+   * @param initialPoint - in global coordinate frame, source position
+   * @param targetPoint - in global coordinate frame, target position
    */
-  translateToTarget( initialPoint, targetPoint ) {
+  public translateToTarget( initialPoint: Vector2, targetPoint: Vector2 ): void {
 
     const singleInitialPoint = this._targetNode.globalToParentPoint( initialPoint );
     const singleTargetPoint = this._targetNode.globalToParentPoint( targetPoint );
@@ -695,13 +683,13 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Repositions the target node in response to keyboard input.
-   * @private
-   *
-   * @param   {KeyPress} keyPress
    */
-  repositionFromKeys( keyPress ) {
+  private repositionFromKeys( keyPress: KeyPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener reposition from key press' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+    const sourcePosition = this.sourcePosition!;
+    assert && assert( sourcePosition, 'sourcePosition must be defined to handle key press, be sure to call initializePositions' );
 
     const newScale = keyPress.scale;
     const currentScale = this.getCurrentScale();
@@ -714,7 +702,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     else if ( !keyPress.translationVector.equals( Vector2.ZERO ) ) {
 
       // key press initiated some translation
-      this.setDestinationPosition( this.sourcePosition.plus( keyPress.translationVector ) );
+      this.setDestinationPosition( sourcePosition.plus( keyPress.translationVector ) );
     }
 
     this.correctReposition();
@@ -726,17 +714,19 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Repositions the target node in response to wheel input. Wheel input can come from a mouse, trackpad, or
    * other. Aspects of the event are slightly different for each input source and this function tries to normalize
    * these differences.
-   * @private
-   *
-   * @param   {Wheel} wheel
-   * @param   {SceneryEvent} event
    */
-  repositionFromWheel( wheel, event ) {
+  private repositionFromWheel( wheel: Wheel, event: SceneryEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener reposition from wheel' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    // prevent any native browser zoom and don't allow browser go go 'back' or 'forward' a page
-    event.domEvent.preventDefault();
+    const domEvent = event.domEvent!;
+    assert && assert( domEvent instanceof WheelEvent, 'wheel event must be a WheelEvent' ); // eslint-disable-line no-simple-type-checking-assertions
+
+    const sourcePosition = this.sourcePosition!;
+    assert && assert( sourcePosition, 'sourcePosition must be defined to handle wheel, be sure to call initializePositions' );
+
+    // prevent any native browser zoom and don't allow browser to go 'back' or 'forward' a page with certain gestures
+    domEvent.preventDefault();
 
     if ( wheel.isCtrlKeyDown ) {
       const nextScale = this.limitScale( this.getCurrentScale() + wheel.scaleDelta );
@@ -746,7 +736,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     else {
 
       // wheel does not indicate zoom, must be translation
-      this.setDestinationPosition( this.sourcePosition.plus( wheel.translationVector ) );
+      this.setDestinationPosition( sourcePosition.plus( wheel.translationVector ) );
     }
 
     this.correctReposition();
@@ -758,9 +748,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Upon any kind of reposition, update the source position and scale for the next update in animateToTargets.
    *
    * Note: This assumes that any kind of repositioning of the target node will eventually call correctReposition.
-   * @protected
    */
-  correctReposition() {
+  protected override correctReposition(): void {
     super.correctReposition();
 
     if ( this._panBounds.isFinite() ) {
@@ -776,25 +765,16 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * When a new press begins, stop any in progress animation.
-   * @override
-   * @protected
-   *
-   * @param {MultiListener.Press} press
    */
-  addPress( press ) {
+  protected override addPress( press: MultiListenerPress ): void {
     super.addPress( press );
     this.stopInProgressAnimation();
   }
 
   /**
    * When presses are removed, reset animation destinations.
-   * @override
-   * @protected
-   *
-   * @param {MultiListener.Press} press
-   * @returns {}
    */
-  removePress( press ) {
+  protected override removePress( press: MultiListenerPress ): void {
     super.removePress( press );
 
     // restore the cursor if we have a middle press as we are in a state where moving the mouse will pan
@@ -809,9 +789,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Interrupt the listener. Cancels any active input and clears references upon interaction end.
-   * @public
    */
-  interrupt() {
+  public override interrupt(): void {
     this.cancelPanningDuringDrag();
 
     this.cancelMiddlePress();
@@ -820,20 +799,15 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * "Cancel" the listener, when input stops abnormally. Part of the scenery Input API.
-   * @public
    */
-  cancel() {
+  public cancel(): void {
     this.interrupt();
   }
 
   /**
    * Returns true if the Intent of the Pointer indicates that it will be used for dragging of some kind.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @returns {boolean}
    */
-  hasDragIntent( pointer ) {
+  private hasDragIntent( pointer: Pointer ): boolean {
     return pointer.hasIntent( Intent.KEYBOARD_DRAG ) ||
            pointer.hasIntent( Intent.DRAG );
   }
@@ -841,11 +815,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Pan to a provided Node, attempting to place the node in the center of the transformedPanBounds. It may not end
    * up exactly in the center since we have to make sure panBounds are completely filled with targetNode content.
-   * @public
-   *
-   * @param {Node} node
    */
-  panToNode( node ) {
+  public panToNode( node: Node ): void {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
     this.keepBoundsInView( node.globalBounds, true );
   }
@@ -857,14 +828,15 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * If we are not using panToCenter and the globalBounds is larger than the screen size this function does nothing.
    * It doesn't make sense to try to keep the provided bounds entirely in view if they are larger than the availalable
    * view space.
-   * @private
    *
-   * @param {Bounds2} globalBounds - in global coordinate frame
-   * @param {boolean} panToCenter - if true, we will pan to the center of the provided bounds, otherwise we will pan
+   * @param globalBounds - in global coordinate frame
+   * @param panToCenter - if true, we will pan to the center of the provided bounds, otherwise we will pan
    *                                until all edges are on screen
    */
-  keepBoundsInView( globalBounds, panToCenter = false ) {
+  private keepBoundsInView( globalBounds: Bounds2, panToCenter = false ): void {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
+    const sourcePosition = this.sourcePosition!;
+    assert && assert( sourcePosition, 'sourcePosition must be defined to handle keepBoundsInView, be sure to call initializePositions' );
 
     const boundsInTargetFrame = this._targetNode.globalToLocalBounds( globalBounds );
     const translationDelta = new Vector2( 0, 0 );
@@ -908,15 +880,13 @@ class AnimatedPanZoomListener extends PanZoomListener {
       translationDelta.x = -distanceToLeftEdge;
     }
 
-    this.setDestinationPosition( this.sourcePosition.plus( translationDelta ) );
+    this.setDestinationPosition( sourcePosition.plus( translationDelta ) );
   }
 
   /**
    * Keep a trail in view by panning to it if it has bounds that are outside of the global panBounds.
-   * @private
-   * @param {Trail} trail
    */
-  keepTrailInView( trail ) {
+  private keepTrailInView( trail: Trail ): void {
     if ( this._panBounds.isFinite() && trail.lastNode().bounds.isFinite() ) {
       const globalBounds = trail.localToGlobalBounds( trail.lastNode().localBounds );
       if ( !this._panBounds.containsBounds( globalBounds ) ) {
@@ -926,17 +896,22 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
-   * @private
-   * @param {number} dt - in seconds
+   * @param dt - in seconds
    */
-  animateToTargets( dt ) {
+  private animateToTargets( dt: number ): void {
     assert && assert( this.boundsFinite, 'initializePositions must be called at least once before animating' );
-    assert && assert( this.sourcePosition.isFinite(), 'How can the source position not be a finite Vector2?' );
-    assert && assert( this.destinationPosition.isFinite(), 'How can the destination position not be a finite Vector2?' );
+
+    const sourcePosition = this.sourcePosition!;
+    assert && assert( sourcePosition, 'sourcePosition must be defined to animate, be sure to all initializePositions' );
+    assert && assert( sourcePosition.isFinite(), 'How can the source position not be a finite Vector2?' );
+
+    const destinationPosition = this.destinationPosition!;
+    assert && assert( destinationPosition, 'destinationPosition must be defined to animate, be sure to all initializePositions' );
+    assert && assert( destinationPosition.isFinite(), 'How can the destination position not be a finite Vector2?' );
 
     // only animate to targets if within this precision so that we don't animate forever, since animation speed
     // is dependent on the difference betwen source and destination positions
-    const positionDirty = !this.destinationPosition.equalsEpsilon( this.sourcePosition, 0.1 );
+    const positionDirty = !destinationPosition.equalsEpsilon( sourcePosition, 0.1 );
     const scaleDirty = !Utils.equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
 
     // Only a MiddlePress can support animation while down
@@ -944,7 +919,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       if ( positionDirty ) {
 
         // animate to the position, effectively panning over time without any scaling
-        const translationDifference = this.destinationPosition.minus( this.sourcePosition );
+        const translationDifference = destinationPosition.minus( sourcePosition );
 
         let translationDirection = translationDifference;
         if ( translationDifference.magnitude !== 0 ) {
@@ -977,28 +952,27 @@ class AnimatedPanZoomListener extends PanZoomListener {
         if ( Math.abs( scaleDelta ) > Math.abs( scaleDifference ) ) {
           scaleDelta = scaleDifference;
         }
-        this.translateScaleToTarget( this.scaleGestureTargetPosition, scaleDelta );
+        this.translateScaleToTarget( this.scaleGestureTargetPosition!, scaleDelta );
 
         // after applying the scale, the source position has changed, update destination to match
-        this.setDestinationPosition( this.sourcePosition );
+        this.setDestinationPosition( sourcePosition );
       }
       else if ( this.destinationScale !== this.sourceScale ) {
+        assert && assert( this.scaleGestureTargetPosition, 'there must be a scale target point' );
 
         // not far enough to animate but close enough that we can set destination equal to source to avoid further
         // animation steps
-        this.setTranslationScaleToTarget( this.scaleGestureTargetPosition, this.destinationScale );
-        this.setDestinationPosition( this.sourcePosition );
+        this.setTranslationScaleToTarget( this.scaleGestureTargetPosition!, this.destinationScale );
+        this.setDestinationPosition( sourcePosition );
       }
     }
   }
 
   /**
    * Stop any in-progress transformations of the target node by setting destinations to sources immediately.
-   *
-   * @private
    */
-  stopInProgressAnimation() {
-    if ( this.boundsFinite ) {
+  private stopInProgressAnimation(): void {
+    if ( this.boundsFinite && this.sourcePosition ) {
       this.setDestinationScale( this.sourceScale );
       this.setDestinationPosition( this.sourcePosition );
     }
@@ -1007,10 +981,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Sets the source and destination positions. Necessary because target or pan bounds may not be defined
    * upon construction. This can set those up when they are defined.
-   *
-   * @private
    */
-  initializePositions() {
+  private initializePositions(): void {
     this.boundsFinite = this._transformedPanBounds.isFinite();
 
     if ( this.boundsFinite ) {
@@ -1025,12 +997,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
-   * @public
-   * @override
-   *
-   * @param {Bounds2} bounds
+   * Set the containing panBounds and then make sure that the targetBounds fully fill the new panBounds. Updates
+   * bounds that trigger panning during a drag operation.
    */
-  setPanBounds( bounds ) {
+  public override setPanBounds( bounds: Bounds2 ): void {
     super.setPanBounds( bounds );
     this.initializePositions();
 
@@ -1041,12 +1011,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Upon setting target bounds, re-set source and destination positions.
-   * @public
-   * @override
-   *
-   * @param {Bounds2} targetBounds
    */
-  setTargetBounds( targetBounds ) {
+  public override setTargetBounds( targetBounds: Bounds2 ): void {
     super.setTargetBounds( targetBounds );
     this.initializePositions();
   }
@@ -1054,20 +1020,20 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Set the destination position. In animation, we will try move the targetNode until sourcePosition matches
    * this point. Destination is in the local coordinate frame of the target node.
-   * @private
-   *
-   * @param {Vector2} destination
    */
-  setDestinationPosition( destination ) {
+  private setDestinationPosition( destination: Vector2 ): void {
     assert && assert( this.boundsFinite, 'bounds must be finite before setting destination positions' );
     assert && assert( destination.isFinite(), 'provided destination position is not defined' );
 
+    const sourcePosition = this.sourcePosition!;
+    assert && assert( sourcePosition, 'sourcePosition must be defined to set destination position, be sure to call initializePositions' );
+
     // limit destination position to be within the available bounds pan bounds
     scratchBounds.setMinMax(
-      this.sourcePosition.x - this._transformedPanBounds.left - this._panBounds.left,
-      this.sourcePosition.y - this._transformedPanBounds.top - this._panBounds.top,
-      this.sourcePosition.x + this._panBounds.right - this._transformedPanBounds.right,
-      this.sourcePosition.y + this._panBounds.bottom - this._transformedPanBounds.bottom
+      sourcePosition.x - this._transformedPanBounds.left - this._panBounds.left,
+      sourcePosition.y - this._transformedPanBounds.top - this._panBounds.top,
+      sourcePosition.x + this._panBounds.right - this._transformedPanBounds.right,
+      sourcePosition.y + this._panBounds.bottom - this._transformedPanBounds.bottom
     );
 
     this.destinationPosition = scratchBounds.closestPointTo( destination );
@@ -1076,11 +1042,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Set the destination scale for the target node. In animation, target node will be repositioned until source
    * scale matches destination scale.
-   * @private
-   *
-   * @param {number} scale
    */
-  setDestinationScale( scale ) {
+  private setDestinationScale( scale: number ): void {
     this.destinationScale = this.limitScale( scale );
   }
 
@@ -1088,12 +1051,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Calculate the translation speed to animate from our sourcePosition to our targetPosition. Speed goes to zero
    * as the translationDistance gets smaller for smooth animation as we reach our destination position. This returns
    * a speed in the coordinate frame of the parent of this listener's target Node.
-   * @private
-   *
-   * @param {number} translationDistance
-   * @returns {number}
    */
-  getTranslationSpeed( translationDistance ) {
+  private getTranslationSpeed( translationDistance: number ): number {
     assert && assert( translationDistance >= 0, 'distance for getTranslationSpeed should be a non-negative number' );
 
     // The larger the scale, that faster we want to translate because the distances between source and destination
@@ -1120,10 +1079,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Reset all transformations on the target node, and reset destination targets to source values to prevent any
    * in progress animation.
-   * @public
-   * @override
    */
-  resetTransform() {
+  public override resetTransform(): void {
     super.resetTransform();
     this.stopInProgressAnimation();
   }
@@ -1131,16 +1088,15 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Get the next discrete scale from the current scale. Will be one of the scales along the discreteScales list
    * and limited by the min and max scales assigned to this MultiPanZoomListener.
-   * @private
    *
-   * @param {boolean} zoomIn - direction of zoom change, positive if zooming in
-   * @returns {number} number
+   * @param zoomIn - direction of zoom change, positive if zooming in
+   * @returns number
    */
-  getNextDiscreteScale( zoomIn ) {
+  private getNextDiscreteScale( zoomIn: boolean ): number {
 
     const currentScale = this.getCurrentScale();
 
-    let nearestIndex;
+    let nearestIndex: number | null = null;
     let distanceToCurrentScale = Number.POSITIVE_INFINITY;
     for ( let i = 0; i < this.discreteScales.length; i++ ) {
       const distance = Math.abs( this.discreteScales[ i ] - currentScale );
@@ -1150,47 +1106,55 @@ class AnimatedPanZoomListener extends PanZoomListener {
       }
     }
 
+    nearestIndex = nearestIndex!;
+    assert && assert( nearestIndex !== null, 'nearestIndex should have been found' );
     let nextIndex = zoomIn ? nearestIndex + 1 : nearestIndex - 1;
     nextIndex = Utils.clamp( nextIndex, 0, this.discreteScales.length - 1 );
     return this.discreteScales[ nextIndex ];
   }
 
-  /**
-   * @public
-   */
-  dispose() {
+  public dispose(): void {
     this.disposeAnimatedPanZoomListener();
   }
 }
+
+type KeyPressOptions = {
+
+  // magnitude for translation vector for the target node as long as arrow keys are held down
+  translationMagnitude?: number;
+};
 
 /**
  * A type that contains the information needed to respond to keyboard input.
  */
 class KeyPress {
 
+  // The translation delta vector that should be applied to the target node in response to the key presses
+  public readonly translationVector: Vector2;
+
+  // The scale that should be applied to the target node in response to the key press
+  public readonly scale: number;
+
   /**
-   * @param {KeyStateTracker} keyStateTracker
-   * @param {KeyStateTracker} scale
-   * @param {number} targetScale - scale describing the targetNode, see PanZoomListener._targetScale
-   * @param {Object} [options]
-   * @returns {KeyStateTracker}
+   * @param keyStateTracker
+   * @param scale
+   * @param targetScale - scale describing the targetNode, see PanZoomListener._targetScale
+   * @param [providedOptions]
    */
-  constructor( keyStateTracker, scale, targetScale, options ) {
+  public constructor( keyStateTracker: KeyStateTracker, scale: number, targetScale: number, providedOptions?: KeyPressOptions ) {
 
-    options = merge( {
-
-      // magnitude for translation vector for the target node as long as arrow keys are held down
+    const options = optionize<KeyPressOptions>()( {
       translationMagnitude: 80
-    }, options );
+    }, providedOptions );
 
     // determine resulting translation
     let xDirection = 0;
-    xDirection += keyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW );
-    xDirection -= keyStateTracker.isKeyDown( KeyboardUtils.KEY_LEFT_ARROW );
+    xDirection += keyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW ) ? 1 : 0;
+    xDirection -= keyStateTracker.isKeyDown( KeyboardUtils.KEY_LEFT_ARROW ) ? 1 : 0;
 
     let yDirection = 0;
-    yDirection += keyStateTracker.isKeyDown( KeyboardUtils.KEY_DOWN_ARROW );
-    yDirection -= keyStateTracker.isKeyDown( KeyboardUtils.KEY_UP_ARROW );
+    yDirection += keyStateTracker.isKeyDown( KeyboardUtils.KEY_DOWN_ARROW ) ? 1 : 0;
+    yDirection -= keyStateTracker.isKeyDown( KeyboardUtils.KEY_UP_ARROW ) ? 1 : 0;
 
     // don't set magnitude if zero vector (as vector will become ill-defined)
     scratchTranslationVector.setXY( xDirection, yDirection );
@@ -1199,11 +1163,7 @@ class KeyPress {
       scratchTranslationVector.setMagnitude( translationMagnitude );
     }
 
-    // @public (read-only) - The translation delta vector that should be applied to the target node in response
-    // to the key presses
     this.translationVector = scratchTranslationVector;
-
-    // @public (read-only) {number} - determine resulting scale and scale point
     this.scale = scale;
   }
 
@@ -1215,10 +1175,9 @@ class KeyPress {
    *
    * This function could be expensive, so we only call it if we know that the key press is a "scale" gesture.
    *
-   * @public
-   * @returns {Vector2} - a scratch Vector2 instance with the target postion
+   * @returns a scratch Vector2 instance with the target position
    */
-  computeScaleTargetFromKeyPress() {
+  public computeScaleTargetFromKeyPress(): Vector2 {
 
     // default cause, scale target will be origin of the screen
     scratchScaleTargetVector.setXY( 0, 0 );
@@ -1227,7 +1186,7 @@ class KeyPress {
     // virtual cursor and has an invisible focus highlight
     const focus = FocusManager.pdomFocusProperty.value;
     if ( focus ) {
-      const focusTrail = FocusManager.pdomFocusProperty.value.trail;
+      const focusTrail = focus.trail;
       const focusedNode = focusTrail.lastNode();
       if ( focusedNode.bounds.isFinite() ) {
         scratchScaleTargetVector.set( focusTrail.parentToGlobalPoint( focusedNode.center ) );
@@ -1262,22 +1221,30 @@ class KeyPress {
  */
 class Wheel {
 
+  // is the ctrl key down during this wheel input? Cannot use KeyStateTracker because the
+  // ctrl key might be 'down' on this event without going through the keyboard. For example, with a trackpad
+  // the browser sets ctrlKey true with the zoom gesture.
+  public readonly isCtrlKeyDown: boolean;
+
+  // magnitude and direction of scale change from the wheel input
+  public readonly scaleDelta: number;
+
+  // the target of the wheel input in the global coordinate frame
+  public readonly targetPoint: Vector2;
+
+  // the translation vector for the target node in response to the wheel input
+  public readonly translationVector: Vector2;
+
   /**
-   * @param {SceneryEvent} event
-   * @param {number} targetScale - scale describing the targetNode, see PanZoomListener._targetScale
+   * @param event
+   * @param targetScale - scale describing the targetNode, see PanZoomListener._targetScale
    */
-  constructor( event, targetScale ) {
-    const domEvent = event.domEvent;
+  public constructor( event: SceneryEvent, targetScale: number ) {
+    const domEvent = event.domEvent as WheelEvent;
+    assert && assert( domEvent instanceof WheelEvent, 'SceneryEvent should have a DOMEvent from the wheel input' ); // eslint-disable-line no-simple-type-checking-assertions
 
-    // @public (read-only) - is the ctrl key down during this wheel input? Cannot use KeyStateTracker because the
-    // ctrl key might be 'down' on this event without going through the keyboard. For example, with a trackpad
-    // the browser sets ctrlKey true with the zoom gesture.
-    this.isCtrlKeyDown = event.domEvent.ctrlKey;
-
-    // @public (read-only) - magnitude and direction of scale change from the wheel input
+    this.isCtrlKeyDown = domEvent.ctrlKey;
     this.scaleDelta = domEvent.deltaY > 0 ? -0.5 : 0.5;
-
-    // @public (read-only) - the target of the wheel input in the global coordinate frame
     this.targetPoint = event.pointer.point;
 
     // the DOM Event specifies deltas that look appropriate and works well in different cases like
@@ -1293,7 +1260,6 @@ class Wheel {
       translationY = translationY * 25;
     }
 
-    // @public (read-only)
     this.translationVector = scratchTranslationVector.setXY( translationX * targetScale, translationY * targetScale );
   }
 }
@@ -1304,18 +1270,18 @@ class Wheel {
  */
 class MiddlePress {
 
-  /**
-   * @param {Mouse} pointer
-   * @param {Trail} trail
-   */
-  constructor( pointer, trail ) {
+  public readonly pointer: Mouse;
+  public readonly trail: Trail;
+
+  // point of press in the global coordinate frame
+  public readonly initialPoint: Vector2;
+
+  public constructor( pointer: Mouse, trail: Trail ) {
     assert && assert( pointer.type === 'mouse', 'incorrect pointer type' );
 
-    // @private
     this.pointer = pointer;
     this.trail = trail;
 
-    // point of press in the global coordinate frame
     this.initialPoint = pointer.point.copy();
   }
 }
@@ -1324,12 +1290,8 @@ class MiddlePress {
  * Helper function, calculates discrete scales between min and max scale limits. Creates increasing step sizes
  * so that you zoom in from high zoom reaches the max faster with fewer key presses. This is standard behavior for
  * browser zoom.
- *
- * @param {number} minScale
- * @param {number} maxScale
- * @returns {Array.<number>}
  */
-const calculateDiscreteScales = ( minScale, maxScale ) => {
+const calculateDiscreteScales = ( minScale: number, maxScale: number ): number[] => {
 
   assert && assert( minScale >= 1, 'min scales less than one are currently not supported' );
 
