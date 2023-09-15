@@ -56,7 +56,7 @@ export default class ShaderProgram {
    */
   public initialize( gl: WebGLRenderingContext ): void {
 
-    this.gl = gl; // TODO: create them with separate contexts https://github.com/phetsims/tasks/issues/1129
+    this.gl = gl; // TODO: create them with separate contexts https://github.com/phetsims/scenery/issues/1581
 
     this.used = false;
 

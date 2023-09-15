@@ -99,7 +99,7 @@ class PaintObserver {
    * (properties on a gradient).
    * @private
    *
-   * TODO: Note that this is called for gradient colors also https://github.com/phetsims/tasks/issues/1129
+   * TODO: Note that this is called for gradient colors also https://github.com/phetsims/scenery/issues/1581
    *
    * NOTE: If it's a Property, we'll also need to handle the secondary (part inside the Property).
    *
@@ -138,7 +138,7 @@ class PaintObserver {
    * Attempt to detach listeners from the paint's primary (the paint itself).
    * @private
    *
-   * TODO: Note that this is called for gradient colors also https://github.com/phetsims/tasks/issues/1129
+   * TODO: Note that this is called for gradient colors also https://github.com/phetsims/scenery/issues/1581
    *
    * NOTE: If it's a Property or Gradient, we'll also need to handle the secondaries (part(s) inside the Property(ies)).
    *

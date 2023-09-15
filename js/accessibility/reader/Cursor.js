@@ -76,7 +76,7 @@ class Cursor {
     // see https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
     // for a list of common navigation strategies
     //
-    // TODO: Use this.keyState object instead of referencing the event directly https://github.com/phetsims/tasks/issues/1129
+    // TODO: Use this.keyState object instead of referencing the event directly https://github.com/phetsims/scenery/issues/1581
     document.addEventListener( 'keydown', event => {
 
       // update the keystate object
@@ -86,7 +86,7 @@ class Cursor {
       let outputText;
 
       // check to see if shift key pressed
-      // TODO: we can optionally use the keyState object for this https://github.com/phetsims/tasks/issues/1129
+      // TODO: we can optionally use the keyState object for this https://github.com/phetsims/scenery/issues/1581
       const shiftKeyDown = event.shiftKey;
 
       // direction to navigate through the DOM - usually, holding shift indicates the user wants to travers
@@ -100,7 +100,7 @@ class Cursor {
       this.updateLiveElementList();
 
       // if the element has an 'application' like behavior, keyboard should be free for the application
-      // TODO: This may be insufficient if we need the 'arrow' keys to continue to work for an application role https://github.com/phetsims/tasks/issues/1129
+      // TODO: This may be insufficient if we need the 'arrow' keys to continue to work for an application role https://github.com/phetsims/scenery/issues/1581
       if ( this.activeElement && this.activeElement.getAttribute( 'role' ) === 'application' ) {
         return;
       }
@@ -203,7 +203,7 @@ class Cursor {
         this.outputUtteranceProperty.set( new Utterance( outputText, 'off' ) );
       }
 
-      // TODO: everything else in https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts https://github.com/phetsims/tasks/issues/1129
+      // TODO: everything else in https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts https://github.com/phetsims/scenery/issues/1581
 
     } );
 
@@ -343,11 +343,11 @@ class Cursor {
       return null;
     }
     if ( element.tagName === 'HEADER' ) {
-      // TODO: Headers should have some behavior https://github.com/phetsims/tasks/issues/1129
+      // TODO: Headers should have some behavior https://github.com/phetsims/scenery/issues/1581
       return null;
     }
     if ( element.tagName === 'SECTION' ) {
-      // TODO: What do you we do for sections? Read section + aria-labelledby? https://github.com/phetsims/tasks/issues/1129
+      // TODO: What do you we do for sections? Read section + aria-labelledby? https://github.com/phetsims/scenery/issues/1581
       return null;
     }
     if ( element.tagName === 'LABEL' ) {
@@ -438,7 +438,7 @@ class Cursor {
     // from the markup
     // Order of additions to textContent is important, and is designed to make sense
     // when textContent is read continuously
-    // TODO: support more markup! https://github.com/phetsims/tasks/issues/1129
+    // TODO: support more markup! https://github.com/phetsims/scenery/issues/1581
     if ( withApplicationContent ) {
 
       // insert a comma at the end of the content to enhance the output of the synth
@@ -464,7 +464,7 @@ class Cursor {
       }
 
       // search up through the ancestors to find if the element has 'application' or 'document' content
-      // TODO: Factor out into a searchUp type of function. https://github.com/phetsims/tasks/issues/1129
+      // TODO: Factor out into a searchUp type of function. https://github.com/phetsims/scenery/issues/1581
       childElement = element;
       let role;
       while ( childElement.parentElement ) {
@@ -479,7 +479,7 @@ class Cursor {
       // check to see if this element has an aria-role
       if ( element.getAttribute( 'role' ) ) {
         role = element.getAttribute( 'role' );
-        // TODO handle all the different roles! https://github.com/phetsims/tasks/issues/1129
+        // TODO handle all the different roles! https://github.com/phetsims/scenery/issues/1581
 
         // label if the role is a button
         if ( role === 'button' ) {
@@ -821,7 +821,7 @@ class Cursor {
    * @returns {string}
    */
   readNextPreviousFormElement( direction ) {
-    // TODO: support more form elements! https://github.com/phetsims/tasks/issues/1129
+    // TODO: support more form elements! https://github.com/phetsims/scenery/issues/1581
     const tagNames = [ 'INPUT', 'BUTTON' ];
     const ariaRoles = [ 'button' ];
     const roles = tagNames.concat( ariaRoles );
@@ -1001,7 +1001,7 @@ class Cursor {
   updateLiveElementList() {
 
     // remove all previous observers
-    // TODO: only update the observer list if necessary https://github.com/phetsims/tasks/issues/1129
+    // TODO: only update the observer list if necessary https://github.com/phetsims/scenery/issues/1581
     for ( let i = 0; i < this.observers.length; i++ ) {
       if ( this.observers[ i ] ) {
         this.observers[ i ].disconnect();
@@ -1056,7 +1056,7 @@ class Cursor {
    * utterance so that new text is added to the queue line by line.
    * @private
    *
-   * TODO: If the read is cancelled, the active element should be set appropriately. https://github.com/phetsims/tasks/issues/1129
+   * TODO: If the read is cancelled, the active element should be set appropriately. https://github.com/phetsims/scenery/issues/1581
    *
    * @returns {string}
    */
@@ -1082,13 +1082,13 @@ class Cursor {
    * form element, or has a role which adds it to the navigation order.
    * @private
    *
-   * TODO: Populate with the rest of the focusable elements. https://github.com/phetsims/tasks/issues/1129
+   * TODO: Populate with the rest of the focusable elements. https://github.com/phetsims/scenery/issues/1581
    * @param  {HTMLElement} domElement
    * @returns {boolean}
    */
   isFocusable( domElement ) {
     // list of attributes and tag names which should be in the navigation order
-    // TODO: more roles! https://github.com/phetsims/tasks/issues/1129
+    // TODO: more roles! https://github.com/phetsims/scenery/issues/1581
     const focusableRoles = [ 'tabindex', 'BUTTON', 'INPUT' ];
 
     let focusable = false;
@@ -1115,7 +1115,7 @@ class Utterance {
    * Type is simply a collection of text and a priority for aria-live that
    * lets the reader know whether to queue the next utterance or cancel it in the order.
    *
-   * TODO: This is where we could deviate from traditional screen reader behavior. For instance, instead of https://github.com/phetsims/tasks/issues/1129
+   * TODO: This is where we could deviate from traditional screen reader behavior. For instance, instead of https://github.com/phetsims/scenery/issues/1581
    * just liveRole, perhaps we should have a liveIndex that specifies order of the live update? We may also
    * need additional flags here for the reader.
    *

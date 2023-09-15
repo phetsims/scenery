@@ -365,7 +365,7 @@ export default class Line extends Path {
    * @param matrix - The transformation matrix already applied to the context.
    */
   protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
-    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/tasks/issues/1129
+    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/scenery/issues/1581
     LineCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 

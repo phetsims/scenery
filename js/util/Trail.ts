@@ -182,7 +182,7 @@ export default class Trail {
   }
 
   /**
-   * TODO: consider renaming to subtrailToExcluding and subtrailToIncluding? https://github.com/phetsims/tasks/issues/1129
+   * TODO: consider renaming to subtrailToExcluding and subtrailToIncluding? https://github.com/phetsims/scenery/issues/1581
    */
   public subtrailTo( node: Node, excludeNode = false ): Trail {
     return this.slice( 0, _.indexOf( this.nodes, node ) + ( excludeNode ? 0 : 1 ) );
@@ -199,7 +199,7 @@ export default class Trail {
    * @param endingIndex - Include nodes matrices up to this index (exclusive)
    */
   public getMatrixConcatenation( startingIndex: number, endingIndex: number ): Matrix3 {
-    // TODO: performance: can we cache this ever? would need the rootNode to not really change in between https://github.com/phetsims/tasks/issues/1129
+    // TODO: performance: can we cache this ever? would need the rootNode to not really change in between https://github.com/phetsims/scenery/issues/1581
     // this matrix will be modified in place, so always start fresh
     const matrix = Matrix3.identity();
 
@@ -373,7 +373,7 @@ export default class Trail {
       this.immutable = true;
     }
 
-    // TODO: consider setting mutators to null here instead of the function call check (for performance, and profile the differences) https://github.com/phetsims/tasks/issues/1129
+    // TODO: consider setting mutators to null here instead of the function call check (for performance, and profile the differences) https://github.com/phetsims/scenery/issues/1581
 
     return this; // allow chaining
   }
@@ -528,7 +528,7 @@ export default class Trail {
   }
 
   /**
-   * TODO: phase out in favor of get() https://github.com/phetsims/tasks/issues/1129
+   * TODO: phase out in favor of get() https://github.com/phetsims/scenery/issues/1581
    */
   public nodeFromTop( offset: number ): Node {
     return this.nodes[ this.length - 1 - offset ];
@@ -638,7 +638,7 @@ export default class Trail {
    * Calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
    */
   public eachTrailUnder( callback: TrailCallback ): void {
-    // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after https://github.com/phetsims/tasks/issues/1129
+    // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after https://github.com/phetsims/scenery/issues/1581
     new TrailPointer( this, true ).eachTrailBetween( new TrailPointer( this, false ), callback );
   }
 
@@ -691,7 +691,7 @@ export default class Trail {
   }
 
   public localToGlobalPoint( point: Vector2 ): Vector2 {
-    // TODO: performance: multiple timesVector2 calls up the chain is probably faster https://github.com/phetsims/tasks/issues/1129
+    // TODO: performance: multiple timesVector2 calls up the chain is probably faster https://github.com/phetsims/scenery/issues/1581
     return this.getMatrix().timesVector2( point );
   }
 
@@ -708,7 +708,7 @@ export default class Trail {
   }
 
   public parentToGlobalPoint( point: Vector2 ): Vector2 {
-    // TODO: performance: multiple timesVector2 calls up the chain is probably faster https://github.com/phetsims/tasks/issues/1129
+    // TODO: performance: multiple timesVector2 calls up the chain is probably faster https://github.com/phetsims/scenery/issues/1581
     return this.getParentMatrix().timesVector2( point );
   }
 

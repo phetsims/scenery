@@ -117,7 +117,7 @@ export default class PointerOverlay implements TOverlay {
     display._input!.pointerAddedEmitter.addListener( this.pointerAdded );
 
     //if there is already a mouse, add it here
-    // TODO: if there already other non-mouse touches, could be added here https://github.com/phetsims/tasks/issues/1129
+    // TODO: if there already other non-mouse touches, could be added here https://github.com/phetsims/scenery/issues/1581
     if ( display._input && display._input.mouse ) {
       this.pointerAdded( display._input.mouse );
     }

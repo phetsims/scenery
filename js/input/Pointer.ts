@@ -253,7 +253,7 @@ export default abstract class Pointer {
    * Sets whether this pointer is down/pressed, or up.
    *
    * NOTE: Naming convention is for legacy code, would usually have pointer.down
-   * TODO: improve name, .setDown( value ) with .down = https://github.com/phetsims/tasks/issues/1129
+   * TODO: improve name, .setDown( value ) with .down = https://github.com/phetsims/scenery/issues/1581
    */
   public set isDown( value: boolean ) {
     this.isDownProperty.value = value;
@@ -263,7 +263,7 @@ export default abstract class Pointer {
    * Returns whether this pointer is down/pressed, or up.
    *
    * NOTE: Naming convention is for legacy code, would usually have pointer.down
-   * TODO: improve name, .isDown() with .down https://github.com/phetsims/tasks/issues/1129
+   * TODO: improve name, .isDown() with .down https://github.com/phetsims/scenery/issues/1581
    */
   public get isDown(): boolean {
     return this.isDownProperty.value;

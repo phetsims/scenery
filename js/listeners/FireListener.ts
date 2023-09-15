@@ -75,7 +75,7 @@ export default class FireListener extends PressListener implements TInputListene
         phetioType: NullableIO( SceneryEvent.SceneryEventIO )
       } ]
     } );
-    // @ts-expect-error TODO Emitter https://github.com/phetsims/tasks/issues/1129
+    // @ts-expect-error TODO Emitter https://github.com/phetsims/scenery/issues/1581
     this.firedEmitter.addListener( options.fire );
 
     // Create a timer to handle the optional fire-on-hold feature.

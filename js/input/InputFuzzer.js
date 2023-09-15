@@ -147,7 +147,7 @@ class InputFuzzer {
         touches: rawTouches,
         targetTouches: [],
         changedTouches: rawTouches,
-        shiftKey: false // TODO: Do we need this? https://github.com/phetsims/tasks/issues/1129
+        shiftKey: false // TODO: Do we need this? https://github.com/phetsims/scenery/issues/1581
       } );
     }
     // Otherwise, use a CustomEvent and "fake" it.

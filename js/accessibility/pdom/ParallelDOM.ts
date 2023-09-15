@@ -1018,7 +1018,7 @@ export default class ParallelDOM extends PhetioObject {
     if ( tagName !== this._tagName ) {
       this._tagName = tagName;
 
-      // TODO: this could be setting PDOM content twice https://github.com/phetsims/tasks/issues/1129
+      // TODO: this could be setting PDOM content twice https://github.com/phetsims/scenery/issues/1581
       this.onPDOMContentChange();
     }
   }
@@ -1849,7 +1849,7 @@ export default class ParallelDOM extends PhetioObject {
 
     // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
     // pdom content needs to be recreated, they need to update their aria-describedby associations accordingly.
-    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/tasks/issues/1129
+    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/scenery/issues/1581
     for ( let i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
       const otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
       otherNode.updateAriaDescribedbyAssociationsInPeers();
@@ -1974,7 +1974,7 @@ export default class ParallelDOM extends PhetioObject {
 
     // if any other nodes are aria-activeDescendant this Node, update those associations too. Since this node's
     // pdom content needs to be recreated, they need to update their aria-activeDescendant associations accordingly.
-    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/tasks/issues/1129
+    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/scenery/issues/1581
     for ( let i = 0; i < this._nodesThatAreActiveDescendantToThisNode.length; i++ ) {
       const otherNode = this._nodesThatAreActiveDescendantToThisNode[ i ];
       otherNode.updateActiveDescendantAssociationsInPeers();
@@ -2144,7 +2144,7 @@ export default class ParallelDOM extends PhetioObject {
         // for efficiency
         nonOrderedChildren.unshift( placeholderIndex, 1 );
 
-        // @ts-expect-error - TODO: best way to type? https://github.com/phetsims/tasks/issues/1129
+        // @ts-expect-error - TODO: best way to type? https://github.com/phetsims/scenery/issues/1581
         Array.prototype.splice.apply( effectiveChildren, nonOrderedChildren );
       }
       // Otherwise, just add the normal things at the end

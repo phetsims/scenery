@@ -318,7 +318,7 @@ const PDOMTree = {
     for ( let i = 0; i < pdomTrails.length; i++ ) {
       const partialTrail = pdomTrails[ i ];
 
-      // TODO: does it optimize things to pass the partial trail in (so we scan less)? https://github.com/phetsims/tasks/issues/1129
+      // TODO: does it optimize things to pass the partial trail in (so we scan less)? https://github.com/phetsims/scenery/issues/1581
       partialTrail.pdomInstance.sortChildren();
     }
 

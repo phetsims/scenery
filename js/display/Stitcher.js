@@ -292,7 +292,7 @@ class Stitcher {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( `block for disposal: ${block.toString()}` );
     sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
-    //TODO: PERFORMANCE: does this cause reflows / style calculation https://github.com/phetsims/tasks/issues/1129
+    //TODO: PERFORMANCE: does this cause reflows / style calculation https://github.com/phetsims/scenery/issues/1581
     if ( block.domElement.parentNode === this.backbone.domElement ) {
       // guarded, since we may have a (new) child drawable add it before we can remove it
       this.backbone.domElement.removeChild( block.domElement );
@@ -341,7 +341,7 @@ class Stitcher {
     block.notifyInterval( firstDrawable, lastDrawable );
 
     // mark it dirty, since its drawables probably changed?
-    //OHTWO TODO: is this necessary? What is this doing? https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: is this necessary? What is this doing? https://github.com/phetsims/scenery/issues/1581
     this.backbone.markDirtyDrawable( block );
 
     if ( assertSlow ) {
@@ -398,7 +398,7 @@ class Stitcher {
         block.updateInterval();
 
         // mark it dirty, since its drawables probably changed?
-        //OHTWO TODO: is this necessary? What is this doing? https://github.com/phetsims/tasks/issues/1129
+        //OHTWO TODO: is this necessary? What is this doing? https://github.com/phetsims/scenery/issues/1581
         this.backbone.markDirtyDrawable( block );
 
         if ( assertSlow ) {
@@ -432,7 +432,7 @@ class Stitcher {
       block = CanvasBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
     }
     else if ( Renderer.isSVG( renderer ) ) {
-      //OHTWO TODO: handle filter root separately from the backbone instance? https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: handle filter root separately from the backbone instance? https://github.com/phetsims/scenery/issues/1581
       block = SVGBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
     }
     else if ( Renderer.isDOM( renderer ) ) {
@@ -451,7 +451,7 @@ class Stitcher {
 
     block.setBlockBackbone( backbone );
 
-    //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment? https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: minor speedup by appending only once its fragment is constructed? or use DocumentFragment? https://github.com/phetsims/scenery/issues/1581
     backbone.domElement.appendChild( block.domElement );
 
     // if backbone is a display root, hide all of its content from screen readers

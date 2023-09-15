@@ -2,7 +2,7 @@
 
 /**
  * ?fuzzBoard keyboard fuzzer
- * TODO: keep track of keyState so that we don't trigger a keydown of keyA before the previous keyA keyup event has been called. https://github.com/phetsims/tasks/issues/1129
+ * TODO: keep track of keyState so that we don't trigger a keydown of keyA before the previous keyA keyup event has been called. https://github.com/phetsims/scenery/issues/1581
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
@@ -103,7 +103,7 @@ class KeyboardFuzzer {
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger keydown/up: ${code}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
-    // TODO: screen readers normally take our keydown events, but may not here, is the discrepancy ok? https://github.com/phetsims/tasks/issues/1129
+    // TODO: screen readers normally take our keydown events, but may not here, is the discrepancy ok? https://github.com/phetsims/scenery/issues/1581
     this.triggerDOMEvent( KEY_DOWN, code );
 
     const randomTimeForKeypress = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
@@ -140,7 +140,7 @@ class KeyboardFuzzer {
    * A random event creator that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
    * related keyboard navigation and alternate input implementation.
    *
-   * TODO: NOTE: Right now this is a very experimental implementation. Tread wearily https://github.com/phetsims/tasks/issues/1129
+   * TODO: NOTE: Right now this is a very experimental implementation. Tread wearily https://github.com/phetsims/scenery/issues/1581
    * TODO: @param keyboardPressesPerFocusedItem {number} - basically would be the same as fuzzRate, but handling
    * TODO:     the keydown events for a focused item
    */
@@ -184,8 +184,8 @@ class KeyboardFuzzer {
         else {
           elementWithFocus && this.triggerRandomKeyDownUpEvents( elementWithFocus );
         }
-        // TODO: What about other types of events, not just keydown/keyup??!?! https://github.com/phetsims/tasks/issues/1129
-        // TODO: what about application role elements https://github.com/phetsims/tasks/issues/1129
+        // TODO: What about other types of events, not just keydown/keyup??!?! https://github.com/phetsims/scenery/issues/1581
+        // TODO: what about application role elements https://github.com/phetsims/scenery/issues/1581
 
         sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
       }

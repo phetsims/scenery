@@ -180,7 +180,7 @@ class BackboneDrawable extends Drawable {
     while ( this.blocks.length ) {
       const block = this.blocks.pop();
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( `${this.toString()} removing block: ${block.toString()}` );
-      //TODO: PERFORMANCE: does this cause reflows / style calculation https://github.com/phetsims/tasks/issues/1129
+      //TODO: PERFORMANCE: does this cause reflows / style calculation https://github.com/phetsims/scenery/issues/1581
       if ( block.domElement.parentNode === this.domElement ) {
         // guarded, since we may have a (new) child drawable add it before we can remove it
         this.domElement.removeChild( block.domElement );
@@ -322,7 +322,7 @@ class BackboneDrawable extends Drawable {
 
       // var clip = this.willApplyFilters ? this.getFilterClip() : '';
 
-      //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/ https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: CSS clip-path/mask support here. see http://www.html5rocks.com/en/tutorials/masking/adobe/ https://github.com/phetsims/scenery/issues/1581
       // this.domElement.style.clipPath = clip; // yikes! temporary, since we already threw something?
     }
 
@@ -356,7 +356,7 @@ class BackboneDrawable extends Drawable {
   getFilterClip() {
     const clip = '';
 
-    //OHTWO TODO: proper clipping support https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: proper clipping support https://github.com/phetsims/scenery/issues/1581
     // var len = this.watchedFilterNodes.length;
     // for ( var i = 0; i < len; i++ ) {
     //   if ( this.watchedFilterNodes[i].clipArea ) {

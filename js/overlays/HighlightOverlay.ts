@@ -580,7 +580,7 @@ export default class HighlightOverlay implements TOverlay {
    * Update focus highlight colors. This is a no-op if we are in 'node' mode, or if none of the highlight colors
    * have changed.
    *
-   * TODO: Support updating focus highlight strokes in 'node' mode as well? https://github.com/phetsims/tasks/issues/1129
+   * TODO: Support updating focus highlight strokes in 'node' mode as well? https://github.com/phetsims/scenery/issues/1581
    */
   private updateHighlightColors(): void {
 

@@ -201,7 +201,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   //////////////////////////////////////////////////////
 
   // test interrupt/cancel
-  // TODO: This test fails but that is working as expected. interrupt/cancel are only relevant for the https://github.com/phetsims/tasks/issues/1129
+  // TODO: This test fails but that is working as expected. interrupt/cancel are only relevant for the https://github.com/phetsims/scenery/issues/1581
   // listener for press and hold functionality. Interrupt/cancel cannot clear the keystate because the listener
   // does not own its KeyStateTracker, it is using the global one.
   // let pbFiredFromA = false;

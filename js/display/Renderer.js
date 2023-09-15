@@ -16,7 +16,7 @@ import { scenery } from '../imports.js';
 const Renderer = {};
 scenery.register( 'Renderer', Renderer );
 
-//OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix) https://github.com/phetsims/tasks/issues/1129
+//OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix) https://github.com/phetsims/scenery/issues/1581
 
 /*---------------------------------------------------------------------------*
  * Renderer bitmask flags
@@ -74,7 +74,7 @@ Renderer.fromName = function( name ) {
 };
 
 // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL flags
-//OHTWO TODO: use this instead of direct access to bitmaskRendererArea https://github.com/phetsims/tasks/issues/1129
+//OHTWO TODO: use this instead of direct access to bitmaskRendererArea https://github.com/phetsims/scenery/issues/1581
 Renderer.stripBitmask = function( bitmask ) {
   return bitmask & Renderer.bitmaskRendererArea;
 };

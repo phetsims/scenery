@@ -9,7 +9,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  *
- * TODO: When converting to TypeScript, please see ts-expect-error in SimDisplay https://github.com/phetsims/tasks/issues/1129
+ * TODO: When converting to TypeScript, please see ts-expect-error in SimDisplay https://github.com/phetsims/scenery/issues/1581
  */
 
 import extend from '../../phet-core/js/extend.js';
@@ -31,7 +31,7 @@ scenery.register( 'scratchContext', scratchContext );
 
 /*---------------------------------------------------------------------------*
  * Logging
- * TODO: Move this out of scenery.js if possible https://github.com/phetsims/tasks/issues/1129
+ * TODO: Move this out of scenery.js if possible https://github.com/phetsims/scenery/issues/1581
  *---------------------------------------------------------------------------*/
 
 // @private - Scenery internal log function to be used to log to scenery.logString (does not include color/css)
@@ -171,7 +171,7 @@ extend( scenery, {
     }
   },
 
-  // @public - Disables a specific log. TODO: handle stitch and perf composite loggers https://github.com/phetsims/tasks/issues/1129
+  // @public - Disables a specific log. TODO: handle stitch and perf composite loggers https://github.com/phetsims/scenery/issues/1581
   disableIndividualLog: function( name ) {
     if ( name ) {
       delete window.sceneryLog[ name ];

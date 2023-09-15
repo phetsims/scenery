@@ -13,7 +13,7 @@ const KeyboardZoomUtils = {
   /**
    * Returns true if the platform is most likely a Mac device. Pan/Zoom will use different modifier keys in this case.
    *
-   * TODO: Move to platform if generally useful? https://github.com/phetsims/tasks/issues/1129
+   * TODO: Move to platform if generally useful? https://github.com/phetsims/scenery/issues/1581
    */
   isPlatformMac: (): boolean => {
     return _.includes( window.navigator.platform, 'Mac' );

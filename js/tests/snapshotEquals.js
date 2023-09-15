@@ -19,7 +19,7 @@ function snapshotToCanvas( snapshot ) {
   return canvas;
 }
 
-// TODO: factor out https://github.com/phetsims/tasks/issues/1129
+// TODO: factor out https://github.com/phetsims/scenery/issues/1581
 // compares two pixel snapshots {ImageData} and uses the qunit's assert to verify they are the same
 function snapshotEquals( assert, a, b, threshold, message, extraDom ) {
 

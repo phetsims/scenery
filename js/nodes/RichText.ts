@@ -1590,7 +1590,7 @@ export default class RichText extends Node {
    * included in bold/italic exterior tags.
    */
   public static stringWithFont( str: string, font: Font ): string {
-    // TODO: ES6 string interpolation. https://github.com/phetsims/tasks/issues/1129
+    // TODO: ES6 string interpolation. https://github.com/phetsims/scenery/issues/1581
     return `${'<span style=\'' +
            'font-style: '}${font.style};` +
            `font-variant: ${font.variant};` +

@@ -45,7 +45,7 @@ class RectangleWebGLDrawable extends RectangleStatefulDrawable( WebGLSelfDrawabl
    * @param {WebGLBlock} webglBlock
    */
   onAddToBlock( webglBlock ) {
-    this.webglBlock = webglBlock; // TODO: do we need this reference? https://github.com/phetsims/tasks/issues/1129
+    this.webglBlock = webglBlock; // TODO: do we need this reference? https://github.com/phetsims/scenery/issues/1581
     this.markDirty();
   }
 

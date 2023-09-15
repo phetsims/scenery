@@ -57,7 +57,7 @@ const RectangleStatefulDrawable = memoize( type => {
      * @public
      */
     markDirtyRectangle() {
-      // TODO: consider bitmask instead? https://github.com/phetsims/tasks/issues/1129
+      // TODO: consider bitmask instead? https://github.com/phetsims/scenery/issues/1581
       this.dirtyX = true;
       this.dirtyY = true;
       this.dirtyWidth = true;

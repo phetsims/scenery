@@ -20,14 +20,14 @@ class PartialPDOMTrail {
     this.pdomInstance = pdomInstance;
     this.trail = trail;
 
-    // TODO: remove this, since it can be computed from the pdomInstance https://github.com/phetsims/tasks/issues/1129
+    // TODO: remove this, since it can be computed from the pdomInstance https://github.com/phetsims/scenery/issues/1581
     this.isRoot = isRoot;
 
     // @public {Trail} - a full Trail (rooted at our display) to our trail's final node.
     this.fullTrail = this.pdomInstance.trail.copy();
     // NOTE: Only if the parent instance is the root instance do we want to include our partial trail's root.
     // For other instances, this node in the trail will already be included
-    // TODO: add Trail.concat() https://github.com/phetsims/tasks/issues/1129
+    // TODO: add Trail.concat() https://github.com/phetsims/scenery/issues/1581
     for ( let j = ( this.isRoot ? 0 : 1 ); j < this.trail.length; j++ ) {
       this.fullTrail.addDescendant( this.trail.nodes[ j ] );
     }
