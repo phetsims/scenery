@@ -8,48 +8,35 @@
  * @author Jesse Greenberg
  */
 
-import { AnimatedPanZoomListener, scenery } from '../imports.js';
+import { AnimatedPanZoomListener, Node, PanZoomListenerOptions, scenery } from '../imports.js';
 
 class AnimatedPanZoomSingleton {
-  constructor() {
 
-    // @private {null|AnimatedPanZoomListener} - null until initialized
-    this._listener = null;
-  }
+  // A reference to the instance of the listener, null until initialized.
+  private _listener: AnimatedPanZoomListener | null = null;
 
-  /**
-   * @public
-   * @param {../nodes/Node} targetNode
-   * @param {Object} [options]
-   */
-  initialize( targetNode, options ) {
+  public initialize( targetNode: Node, options?: PanZoomListenerOptions ): void {
     this._listener = new AnimatedPanZoomListener( targetNode, options );
   }
 
-  /**
-   * @public
-   */
-  dispose() {
-    this._listener.dispose();
+  public dispose(): void {
+    assert && assert( this._listener, 'No listener, call initialize first.' );
+    this._listener!.dispose();
     this._listener = null;
   }
 
   /**
    * Returns the AnimatedPanZoomListener.
-   * @public
-   *
-   * @returns {null|AnimatedPanZoomListener}
    */
-  get listener() {
+  public get listener(): AnimatedPanZoomListener {
     assert && assert( this._listener, 'No listener, call initialize first.' );
-    return this._listener;
+    return this._listener!;
   }
 
   /**
-   * Returns whether or not the animatedPanZoomSingleton has been initialized.
-   * @returns {boolean}
+   * Returns true if the animatedPanZoomSingleton has been initialized.
    */
-  get initialized() {
+  public get initialized(): boolean {
     return !!this._listener;
   }
 }

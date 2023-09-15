@@ -17,7 +17,8 @@ import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -107,8 +108,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * targetNode - Node to be transformed by this listener
    * {Object} [providedOptions]
    */
-  public constructor( targetNode: Node, providedOptions: PanZoomListenerOptions ) {
-    super( targetNode, providedOptions );
+  public constructor( targetNode: Node, providedOptions?: PanZoomListenerOptions ) {
+    const options = optionize<PanZoomListenerOptions, EmptySelfOptions, PanZoomListenerOptions>()( {
+      tandem: Tandem.REQUIRED
+    }, providedOptions );
+    super( targetNode, options );
 
     this.sourcePosition = null;
     this.destinationPosition = null;
@@ -140,7 +144,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.scaleGestureTargetPosition = new Vector2( domEvent.pageX, domEvent.pageY );
     }, {
       phetioPlayback: true,
-      tandem: providedOptions.tandem.createTandem( 'gestureStartAction' ),
+      tandem: options.tandem.createTandem( 'gestureStartAction' ),
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioEventType: EventType.USER,
       phetioDocumentation: 'Action that executes whenever a gesture starts on a trackpad in macOS Safari.'
@@ -157,7 +161,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.setDestinationScale( newScale );
     }, {
       phetioPlayback: true,
-      tandem: providedOptions.tandem.createTandem( 'gestureChangeAction' ),
+      tandem: options.tandem.createTandem( 'gestureChangeAction' ),
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioEventType: EventType.USER,
       phetioDocumentation: 'Action that executes whenever a gesture changes on a trackpad in macOS Safari.'

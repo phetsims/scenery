@@ -27,10 +27,10 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import SingularValueDecomposition from '../../../dot/js/SingularValueDecomposition.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import { Intent, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, MultiListenerPress } from '../imports.js';
-import PickRequired from '../../../phet-core/js/types/PickRequired.js';
+import { Intent, Mouse, MultiListenerPress, Node, Pointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 
 // constants
 // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame
@@ -67,7 +67,7 @@ export type MultiListenerOptions = {
   // magnitude limits for scaling in both x and y
   minScale?: number;
   maxScale?: number;
-} & PickRequired<PhetioObjectOptions, 'tandem'>;
+} & Pick<PhetioObjectOptions, 'tandem'>;
 
 class MultiListener implements TInputListener {
 
@@ -114,7 +114,7 @@ class MultiListener implements TInputListener {
    * @param targetNode - The Node that should be transformed by this MultiListener.
    * @param [providedOptions]
    */
-  public constructor( targetNode: Node, providedOptions: MultiListenerOptions ) {
+  public constructor( targetNode: Node, providedOptions?: MultiListenerOptions ) {
     const options = optionize<MultiListenerOptions>()( {
       mouseButton: 0,
       pressCursor: 'pointer',
@@ -123,7 +123,8 @@ class MultiListener implements TInputListener {
       allowMultitouchInterruption: false,
       allowMoveInterruption: true,
       minScale: 1,
-      maxScale: 4
+      maxScale: 4,
+      tandem: Tandem.REQUIRED
     }, providedOptions );
 
     this._targetNode = targetNode;

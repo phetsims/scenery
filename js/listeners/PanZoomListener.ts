@@ -56,7 +56,7 @@ class PanZoomListener extends MultiListener {
    * @param targetNode - The Node that should be transformed by this PanZoomListener.
    * @param [providedOptions].
    */
-  public constructor( targetNode: Node, providedOptions: PanZoomListenerOptions ) {
+  public constructor( targetNode: Node, providedOptions?: PanZoomListenerOptions ) {
 
     const options = optionize<PanZoomListenerOptions, SelfOptions, PanZoomListenerOptions>()( {
       panBounds: Bounds2.NOTHING,
