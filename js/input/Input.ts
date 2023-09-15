@@ -443,7 +443,7 @@ export default class Input extends PhetioObject {
     this.mouseOverAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
       const mouse = this.ensureMouse( point );
       mouse.over( point );
-      // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
+      // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/tasks/issues/1129
     }, {
       phetioPlayback: true,
       tandem: options.tandem?.createTandem( 'mouseOverAction' ),
@@ -458,7 +458,7 @@ export default class Input extends PhetioObject {
     this.mouseOutAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
       const mouse = this.ensureMouse( point );
       mouse.out( point );
-      // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
+      // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/tasks/issues/1129
     }, {
       phetioPlayback: true,
       tandem: options.tandem?.createTandem( 'mouseOutAction' ),
@@ -477,7 +477,7 @@ export default class Input extends PhetioObject {
       mouse.wheel( event );
 
       // don't send mouse-wheel events if we don't yet have a mouse location!
-      // TODO: Can we set the mouse location based on the wheel event?
+      // TODO: Can we set the mouse location based on the wheel event? https://github.com/phetsims/tasks/issues/1129
       if ( mouse.point ) {
         const trail = this.rootNode.trailUnderPointer( mouse ) || new Trail( this.rootNode );
         this.dispatchEvent<WheelEvent>( trail, 'wheel', mouse, context, true );
@@ -969,7 +969,7 @@ export default class Input extends PhetioObject {
     if ( !this.assumeFullWindow ) {
       const domBounds = this.display.domElement.getBoundingClientRect();
 
-      // TODO: consider totally ignoring any with zero width/height, as we aren't attached to the display?
+      // TODO: consider totally ignoring any with zero width/height, as we aren't attached to the display? https://github.com/phetsims/tasks/issues/1129
       // For now, don't offset.
       if ( domBounds.width > 0 && domBounds.height > 0 ) {
         position.subtractXY( domBounds.left, domBounds.top );
@@ -978,7 +978,7 @@ export default class Input extends PhetioObject {
         // display), and attempt to compensate.
         // NOTE: We can't handle rotation here.
         if ( domBounds.width !== this.display.width || domBounds.height !== this.display.height ) {
-          // TODO: Have code verify the correctness here, and that it's not triggering all the time
+          // TODO: Have code verify the correctness here, and that it's not triggering all the time https://github.com/phetsims/tasks/issues/1129
           position.x *= this.display.width / domBounds.width;
           position.y *= this.display.height / domBounds.height;
         }
@@ -1497,32 +1497,32 @@ export default class Input extends PhetioObject {
    * Handles a pointerover event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerOver( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed?
-    // TODO: do we want to branch change on these types of events?
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
   }
 
   /**
    * Handles a pointerout event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerOut( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed?
-    // TODO: do we want to branch change on these types of events?
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
   }
 
   /**
    * Handles a pointerenter event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerEnter( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed?
-    // TODO: do we want to branch change on these types of events?
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
   }
 
   /**
    * Handles a pointerleave event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerLeave( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed?
-    // TODO: do we want to branch change on these types of events?
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
   }
 
   /**

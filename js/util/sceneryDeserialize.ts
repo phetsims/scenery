@@ -1,4 +1,4 @@
-// Copyright 2022, University of Colorado Boulder
+// Copyright 2022-2023, University of Colorado Boulder
 
 /**
  * Deserializes a generalized object
@@ -133,7 +133,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: Intentional
       ( node! ).initialHeight = setup.height;
     }
     else if ( value.type === 'CanvasNode' || value.type === 'WebGLNode' ) {
-      // TODO: Record Canvas/WebGL calls? (conditionals would be harder!)
+      // TODO: Record Canvas/WebGL calls? (conditionals would be harder!) https://github.com/phetsims/tasks/issues/1129
       node = new Node( {
         children: [
           new Image( setup.url, {

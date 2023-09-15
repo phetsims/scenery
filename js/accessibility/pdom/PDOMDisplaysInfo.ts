@@ -1,4 +1,4 @@
-// Copyright 2018-2022, University of Colorado Boulder
+// Copyright 2018-2023, University of Colorado Boulder
 
 /**
  * Per-node information required to track what PDOM Displays our Node is visible under. A PDOM display is a Display that
@@ -204,7 +204,7 @@ export default class PDOMDisplaysInfo {
 
     assert && assert( !this.canHavePDOMDisplays(), 'Should happen when we cannot store pdomDisplays' );
 
-    // TODO: is there a way to avoid a copy?
+    // TODO: is there a way to avoid a copy? https://github.com/phetsims/tasks/issues/1129
     this.removePDOMDisplays( this.pdomDisplays.slice() );
 
     assert && assert( this.pdomDisplays.length === 0, 'Should be empty after removing everything' );

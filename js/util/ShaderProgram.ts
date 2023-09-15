@@ -1,4 +1,4 @@
-// Copyright 2014-2022, University of Colorado Boulder
+// Copyright 2014-2023, University of Colorado Boulder
 
 /**
  * Abstraction over the shader program
@@ -56,7 +56,7 @@ export default class ShaderProgram {
    */
   public initialize( gl: WebGLRenderingContext ): void {
 
-    this.gl = gl; // TODO: create them with separate contexts
+    this.gl = gl; // TODO: create them with separate contexts https://github.com/phetsims/tasks/issues/1129
 
     this.used = false;
 

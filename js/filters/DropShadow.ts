@@ -1,11 +1,11 @@
-// Copyright 2020-2022, University of Colorado Boulder
+// Copyright 2020-2023, University of Colorado Boulder
 
 /**
  * DropShadow filter
  *
  * EXPERIMENTAL! DO not use in production code yet
  *
- * TODO: preventFit OR handle bounds increase (or both)
+ * TODO: preventFit OR handle bounds increase (or both) https://github.com/phetsims/tasks/issues/1129
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -35,7 +35,7 @@ export default class DropShadow extends Filter {
 
     super();
 
-    // TODO: consider linking to the ColorDef (if it's a Property), or indicating that we need an update
+    // TODO: consider linking to the ColorDef (if it's a Property), or indicating that we need an update https://github.com/phetsims/tasks/issues/1129
 
     this.offset = offset;
     this.blurRadius = blurRadius;

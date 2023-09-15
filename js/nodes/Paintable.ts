@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * Trait for Nodes that support a standard fill and/or stroke (e.g. Text, Path and Path subtypes).
@@ -234,7 +234,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
       if ( this._fillPickable !== pickable ) {
         this._fillPickable = pickable;
 
-        // TODO: better way of indicating that only the Node under pointers could have changed, but no paint change is needed?
+        // TODO: better way of indicating that only the Node under pointers could have changed, but no paint change is needed? https://github.com/phetsims/tasks/issues/1129
         this.invalidateFill();
       }
       return this;
@@ -259,7 +259,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
       if ( this._strokePickable !== pickable ) {
         this._strokePickable = pickable;
 
-        // TODO: better way of indicating that only the Node under pointers could have changed, but no paint change is needed?
+        // TODO: better way of indicating that only the Node under pointers could have changed, but no paint change is needed? https://github.com/phetsims/tasks/issues/1129
         this.invalidateStroke();
       }
       return this;
@@ -600,7 +600,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
     public beforeCanvasStroke( wrapper: CanvasContextWrapper ): void {
       const strokeValue = this.getStrokeValue();
 
-      // TODO: is there a better way of not calling so many things on each stroke?
+      // TODO: is there a better way of not calling so many things on each stroke? https://github.com/phetsims/tasks/issues/1129
       wrapper.setStrokeStyle( this._stroke );
       wrapper.setLineCap( this.getLineCap() );
       wrapper.setLineJoin( this.getLineJoin() );

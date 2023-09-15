@@ -186,6 +186,12 @@ export default class FocusManager {
       const uniqueId = document.activeElement!.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID )!;
       assert && assert( uniqueId, 'Event target must have a unique ID on its data' );
 
+      // TODO: But maybe actually we have some clearing to do here. https://github.com/phetsims/scenery/issues/1550
+      // Cases like a DOM() HTML element don't have a uniqueID, should they?
+      if ( !uniqueId ) {
+        return;
+      }
+
       // Look for the scenery target under the PDOM
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];

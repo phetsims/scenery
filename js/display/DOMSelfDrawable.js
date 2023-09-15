@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * DOM drawable for a single painted node.
@@ -7,7 +7,7 @@
  * - drawable.domElement {HTMLElement} - The primary DOM element that will get transformed and added.
  * - drawable.updateDOM() {function} - Called with no arguments in order to update the domElement's view.
  *
- * TODO: make abstract subtype methods for improved documentation
+ * TODO: make abstract subtype methods for improved documentation https://github.com/phetsims/tasks/issues/1129
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

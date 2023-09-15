@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * Creates an SVG pattern element for a given pattern.
@@ -31,7 +31,7 @@ export default class SVGPattern implements TPoolable {
       // so we don't depend on the bounds of the object being drawn with the pattern
       this.definition.setAttribute( 'patternUnits', 'userSpaceOnUse' );
 
-      //TODO: is this needed?
+      //TODO: is this needed? https://github.com/phetsims/tasks/issues/1129
       this.definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' );
     }
 

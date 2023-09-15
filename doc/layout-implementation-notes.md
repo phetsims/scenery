@@ -1,4 +1,5 @@
 ## Table Of Contents
+
 - [Flow Chart Legend](#Flow-Chart-Legend)
 - [FlowBox Hierarchy and Composition](#FlowBox-Hierarchy-and-Composition)
 - [GridBox Hierarchy & Composition](#GridBox-Hierarchy-and-Composition)
@@ -8,14 +9,15 @@
 - [LayoutLine Hierarchy](#LayoutLine-Hierarchy)
 - [ManualConstraint](#ManualConstraint)
 
-
 ## Flow Chart Legend:
+
 - Inheritance: _______
 - Mixin: _ _ _ _ _
 - Composition: _ _ {{VARIABLE}} _ >
 - Optional Composition: --{{VARIABLE}}*_>
 
 ## FlowBox Hierarchy and Composition
+
 ```mermaid
 flowchart TD
     LayoutCell --- MarginLayoutCell
@@ -36,6 +38,7 @@ flowchart TD
  ```
 
 ## GridBox Hierarchy & Composition
+
 ```mermaid
 flowchart TD
     LayoutCell --- MarginLayoutCell
@@ -55,12 +58,14 @@ flowchart TD
  ```
 
 ## Sizable Nodes Top Level Hierarchy
+
 ```mermaid
 flowchart TD
     Node --- WidthSizable & HeightSizable --- Sizable
 ```
 
 ## Separators Hierarchy
+
 ```mermaid
 flowchart TD
     HeightSizable -.- VSeparator
@@ -69,6 +74,7 @@ flowchart TD
 ```
 
 ## AlignBox Hierarchy and Composition
+
 ```mermaid
 flowchart TD
     Node --- WidthSizable & HeightSizable --- Sizeable --- AlignBox
@@ -77,6 +83,7 @@ flowchart TD
 ```
 
 ## LayoutLine Hierarchy
+
 ```mermaid
 flowchart TD
     LayoutLine --- FlowLine & GridLine
@@ -84,6 +91,7 @@ flowchart TD
 ```
 
 ## ManualConstraint
+
 ```mermaid
 flowchart TD
     LayoutConstraint --- ManualConstraint & RelaxedManualConstraint

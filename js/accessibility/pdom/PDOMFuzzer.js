@@ -1,4 +1,4 @@
-// Copyright 2018-2022, University of Colorado Boulder
+// Copyright 2018-2023, University of Colorado Boulder
 
 /**
  * Runs PDOM-tree-related scenery operations randomly (with assertions) to try to find any bugs.
@@ -95,7 +95,7 @@ class PDOMFuzzer {
 
       this.powerSet( arrayDifference( this.nodes, [ a ] ).concat( [ null ] ) ).forEach( subset => {
         Permutation.forEachPermutation( subset, order => {
-          // TODO: Make sure it's not the CURRENT order?
+          // TODO: Make sure it's not the CURRENT order? https://github.com/phetsims/tasks/issues/1129
           if ( this.isPDOMOrderChangeLegal( a, order ) ) {
             actions.push( {
               text: `#${a.id}.pdomOrder = ${PDOMTree.debugOrder( order )}`,

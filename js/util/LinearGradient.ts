@@ -17,7 +17,7 @@ export default class LinearGradient extends Gradient {
   public end: Vector2;
 
   /**
-   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
+   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ] https://github.com/phetsims/tasks/issues/1129
    *
    * @param x0 - X coordinate of the start point (ratio 0) in the local coordinate frame
    * @param y0 - Y coordinate of the start point (ratio 0) in the local coordinate frame
@@ -39,7 +39,7 @@ export default class LinearGradient extends Gradient {
    */
   public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
-    // @ts-expect-error TODO scenery namespace
+    // @ts-expect-error TODO scenery namespace https://github.com/phetsims/tasks/issues/1129
     return scenery.scratchContext.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
   }
 

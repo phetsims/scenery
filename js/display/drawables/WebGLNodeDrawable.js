@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * WebGL drawable for WebGLNode.
@@ -44,7 +44,7 @@ class WebGLNodeDrawable extends WebGLSelfDrawable {
    * @public
    */
   onWebGLContextChange() {
-    //TODO: Should a function be added for "disposeNonWebGL"?
+    //TODO: Should a function be added for "disposeNonWebGL"? https://github.com/phetsims/tasks/issues/1129
 
     // Create the new painter
     this.painter = this.createPainter();

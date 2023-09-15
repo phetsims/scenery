@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * Canvas drawable for CanvasNode. A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode.
@@ -35,7 +35,7 @@ class CanvasNodeDrawable extends CanvasSelfDrawable {
       context.save();
 
       // set back to Canvas default styles
-      // TODO: are these necessary, or can we drop them for performance?
+      // TODO: are these necessary, or can we drop them for performance? https://github.com/phetsims/tasks/issues/1129
       context.fillStyle = 'black';
       context.strokeStyle = 'black';
       context.lineWidth = 1;

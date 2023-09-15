@@ -1,7 +1,7 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
- * TODO docs
+ * TODO docs https://github.com/phetsims/tasks/issues/1129
  *   note paintCanvas() required, and other implementation-specific details
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>

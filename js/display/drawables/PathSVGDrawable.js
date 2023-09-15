@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * SVG drawable for Path nodes.
@@ -10,7 +10,7 @@ import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { PathStatefulDrawable, scenery, svgns, SVGSelfDrawable } from '../../imports.js';
 
-// TODO: change this based on memory and performance characteristics of the platform
+// TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/tasks/issues/1129
 const keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
 class PathSVGDrawable extends PathStatefulDrawable( SVGSelfDrawable ) {

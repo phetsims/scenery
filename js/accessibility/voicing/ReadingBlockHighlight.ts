@@ -1,4 +1,4 @@
-// Copyright 2021-2022, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * A focus highlight for the voicing prototype. Has a unique color to indicate that focus is not around something
@@ -10,15 +10,15 @@
  */
 
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { FocusHighlightFromNode, FocusHighlightFromNodeOptions, Node, scenery } from '../../imports.js';
+import { HighlightFromNode, HighlightFromNodeOptions, Node, scenery } from '../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
-type ReadingBlockHighlightOptions = SelfOptions & FocusHighlightFromNodeOptions;
+type ReadingBlockHighlightOptions = SelfOptions & HighlightFromNodeOptions;
 
-class ReadingBlockHighlight extends FocusHighlightFromNode {
+class ReadingBlockHighlight extends HighlightFromNode {
   public constructor( node: Node, providedOptions?: ReadingBlockHighlightOptions ) {
 
-    const options = optionize<ReadingBlockHighlightOptions, SelfOptions, FocusHighlightFromNodeOptions>()( {
+    const options = optionize<ReadingBlockHighlightOptions, SelfOptions, HighlightFromNodeOptions>()( {
       outerStroke: 'grey',
       innerStroke: 'black'
     }, providedOptions );

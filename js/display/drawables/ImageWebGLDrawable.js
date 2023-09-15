@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * WebGL drawable for Image nodes.
@@ -62,7 +62,7 @@ class ImageWebGLDrawable extends ImageStatefulDrawable( WebGLSelfDrawable ) {
    * @param {WebGLBlock} webGLBlock
    */
   onAddToBlock( webglBlock ) {
-    this.webglBlock = webglBlock; // TODO: do we need this reference?
+    this.webglBlock = webglBlock; // TODO: do we need this reference? https://github.com/phetsims/tasks/issues/1129
     this.markDirty();
 
     this.reserveSprite();
@@ -176,7 +176,7 @@ class ImageWebGLDrawable extends ImageStatefulDrawable( WebGLSelfDrawable ) {
 
       const uvBounds = this.sprite.uvBounds;
 
-      // TODO: consider reversal of minY and maxY usage here for vertical inverse
+      // TODO: consider reversal of minY and maxY usage here for vertical inverse https://github.com/phetsims/tasks/issues/1129
 
       // first triangle UVs
       this.vertexArray[ VERTEX_0_OFFSET + VERTEX_U_OFFSET ] = uvBounds.minX; // upper left U
@@ -228,7 +228,7 @@ class ImageWebGLDrawable extends ImageStatefulDrawable( WebGLSelfDrawable ) {
   }
 }
 
-// TODO: doc
+// TODO: doc https://github.com/phetsims/tasks/issues/1129
 ImageWebGLDrawable.prototype.webglRenderer = Renderer.webglTexturedTriangles;
 
 scenery.register( 'ImageWebGLDrawable', ImageWebGLDrawable );

@@ -27,89 +27,117 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import SingularValueDecomposition from '../../../dot/js/SingularValueDecomposition.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import merge from '../../../phet-core/js/merge.js';
-import Tandem from '../../../tandem/js/Tandem.js';
-import { Intent, Mouse, scenery } from '../imports.js';
+import { Intent, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, MultiListenerPress } from '../imports.js';
+import PickRequired from '../../../phet-core/js/types/PickRequired.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 // constants
 // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame
 const MOVE_INTERRUPT_MAGNITUDE = 25;
 
-class MultiListener {
+export type MultiListenerOptions = {
+
+  // {number} - Restricts input to the specified mouse button (but allows any touch). Only one mouse button is
+  // allowed at a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
+  // where typically:
+  //   0: Left mouse button
+  //   1: Middle mouse button (or wheel press)
+  //   2: Right mouse button
+  //   3+: other specific numbered buttons that are more rare
+  mouseButton?: number;
+
+  // {string} - Sets the Pointer cursor to this cursor when the listener is "pressed".
+  pressCursor?: string;
+
+  // {boolean} - If true, the listener will scale the targetNode from input
+  allowScale?: boolean;
+
+  // {boolean} - If true, the listener will rotate the targetNode from input
+  allowRotation?: boolean;
+
+  // {boolean} - if true, multitouch will interrupt any active pointer listeners and initiate translation
+  // and scale from multitouch gestures
+  allowMultitouchInterruption?: boolean;
+
+  // if true, a certain amount of movement in the global coordinate frame will interrupt any pointer listeners and
+  // initiate translation from the pointer, unless default behavior has been prevented by setting Intent on the Pointer.
+  allowMoveInterruption?: boolean;
+
+  // magnitude limits for scaling in both x and y
+  minScale?: number;
+  maxScale?: number;
+} & PickRequired<PhetioObjectOptions, 'tandem'>;
+
+class MultiListener implements TInputListener {
+
+  // the Node that will be transformed by this listener
+  protected readonly _targetNode: Node;
+
+  // see options
+  private readonly _minScale: number;
+  private readonly _maxScale: number;
+  private readonly _mouseButton: number;
+  protected readonly _pressCursor: string;
+  private readonly _allowScale: boolean;
+  private readonly _allowRotation: boolean;
+  private readonly _allowMultitouchInterruption: boolean;
+  private readonly _allowMoveInterruption: boolean;
+
+  // List of "active" Presses down from Pointer input which are actively changing the transformation of the target Node
+  private readonly _presses: MultiListenerPress[];
+
+  // List of "background" presses which are saved but not yet doing anything for the target Node transformation. If
+  // the Pointer already has listeners, Presses are added to the background and wait to be converted to "active"
+  // presses until we are allowed to interrupt the other listeners. Related to options "allowMoveInterrupt" and
+  // "allowMultitouchInterrupt", where other Pointer listeners are interrupted in these cases.
+  private readonly _backgroundPresses: MultiListenerPress[];
+
+  // {Property.<Matrix3>} - The matrix applied to the targetNode in response to various input for the MultiListener
+  public readonly matrixProperty: Property<Matrix3>;
+
+  // Whether the listener was interrupted, in which case we may need to prevent certain behavior. If the listener was
+  // interrupted, pointer listeners might still be called since input is dispatched to a defensive copy of the
+  // Pointer's listeners. But presses will have been cleared in this case so we won't try to do any work on them.
+  private _interrupted: boolean;
+
+  // attached to the Pointer when a Press is added
+  private _pressListener: TInputListener;
+
+  // attached to the Pointer when presses are added - waits for certain conditions to be met before converting
+  // background presses to active presses to enable multitouch listener behavior
+  private _backgroundListener: TInputListener;
 
   /**
    * @constructor
    *
-   * @param {Node} targetNode - The Node that should be transformed by this MultiListener.
-   * @param {Object} [options] - See the constructor body (below) for documented options.
+   * @param targetNode - The Node that should be transformed by this MultiListener.
+   * @param [providedOptions]
    */
-  constructor( targetNode, options ) {
-
-    options = merge( {
-
-      // {number} - Restricts input to the specified mouse button (but allows any touch). Only one mouse button is
-      // allowed at a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
-      // where typically:
-      //   0: Left mouse button
-      //   1: Middle mouse button (or wheel press)
-      //   2: Right mouse button
-      //   3+: other specific numbered buttons that are more rare
+  public constructor( targetNode: Node, providedOptions: MultiListenerOptions ) {
+    const options = optionize<MultiListenerOptions>()( {
       mouseButton: 0,
-
-      // {string} - Sets the Pointer cursor to this cursor when the listener is "pressed".
       pressCursor: 'pointer',
-
-      // {boolean} - If true, the listener will scale the targetNode from input
       allowScale: true,
-
-      // {boolean} - If true, the listener will rotate the targetNode from input
       allowRotation: true,
-
-      // {boolean} - if true, multitouch will interrupt any active pointer listeners and initiate translation
-      // and scale from multitouch gestures
       allowMultitouchInterruption: false,
-
-      // {private} - if true, a certain amount of movement in the global coordinate frame will interrupt any pointer
-      // listeners and initiate translation from the pointer, unless default behavior has been prevented by
-      // setting Intent on the Pointer.
       allowMoveInterruption: true,
-
-      // {number} - magnitude limits for scaling in both x and y
       minScale: 1,
-      maxScale: 4,
+      maxScale: 4
+    }, providedOptions );
 
-      // {Tandem}
-      tandem: Tandem.REQUIRED
-    }, options );
-
-    // @private {Node} - the Node that will be transformed by this listener
     this._targetNode = targetNode;
-
-    // @protected (read-only)
     this._minScale = options.minScale;
     this._maxScale = options.maxScale;
-
-    // @private - see options
     this._mouseButton = options.mouseButton;
     this._pressCursor = options.pressCursor;
     this._allowScale = options.allowScale;
     this._allowRotation = options.allowRotation;
     this._allowMultitouchInterruption = options.allowMultitouchInterruption;
     this._allowMoveInterruption = options.allowMoveInterruption;
-
-    // @private {Array.<Press>} - List of "active" Presses down from Pointer input which are actively changing
-    // the transformation of the target Node
     this._presses = [];
-
-    // @private {Array.<Press>} - List of "background" presses which are saved but not yet doing anything
-    // for the target Node transformation. If the Pointer already has listeners, Presses are added to
-    // the background and wait to be converted to "active" presses until we are allowed to interrupt
-    // the other listeners. Related to options "allowMoveInterrupt" and "allowMultitouchInterrupt", where
-    // other Pointer listeners are interrupted in these cases.
     this._backgroundPresses = [];
 
-    // @protected {Property.<Matrix3>} - The matrix applied to the targetNode in response to various
-    // input for the MultiListener
     this.matrixProperty = new Property( targetNode.matrix.copy(), {
       phetioValueType: Matrix3.Matrix3IO,
       tandem: options.tandem.createTandem( 'matrixProperty' ),
@@ -121,19 +149,16 @@ class MultiListener {
       this._targetNode.matrix = matrix;
     } );
 
-    // @private {boolean} - Whether the listener was interrupted, in which case we may need to prevent certain
-    // behavior. If the listener was interrupted, pointer listeners might still be called since input is dispatched to
-    // a defensive copy of the Pointer's listeners. But presses will have been cleared in this case so we won't try
-    // to do any work on them.
     this._interrupted = false;
 
-    // @private - attached to the Pointer when a Press is added
     this._pressListener = {
       move: event => {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer move' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        this.movePress( this.findPress( event.pointer ) );
+        const press = this.findPress( event.pointer )!;
+        assert && assert( press, 'Press should be found for move event' );
+        this.movePress( press );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
@@ -142,7 +167,9 @@ class MultiListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer up' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        this.removePress( this.findPress( event.pointer ) );
+        const press = this.findPress( event.pointer )!;
+        assert && assert( press, 'Press should be found for up event' );
+        this.removePress( press );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
@@ -151,7 +178,8 @@ class MultiListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer cancel' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        const press = this.findPress( event.pointer );
+        const press = this.findPress( event.pointer )!;
+        assert && assert( press, 'Press should be found for cancel event' );
         press.interrupted = true;
 
         this.removePress( press );
@@ -176,7 +204,9 @@ class MultiListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         if ( !this._interrupted ) {
-          this.removeBackgroundPress( this.findBackgroundPress( event.pointer ) );
+          const backgroundPress = this.findBackgroundPress( event.pointer )!;
+          assert && assert( backgroundPress, 'Background press should be found for up event' );
+          this.removeBackgroundPress( backgroundPress );
         }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -214,7 +244,9 @@ class MultiListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         if ( !this._interrupted ) {
-          this.removeBackgroundPress( this.findBackgroundPress( event.pointer ) );
+          const backgroundPress = this.findBackgroundPress( event.pointer )!;
+          assert && assert( backgroundPress, 'Background press should be found for cancel event' );
+          this.removeBackgroundPress( backgroundPress );
         }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -233,11 +265,8 @@ class MultiListener {
 
   /**
    * Finds a Press by searching for the one with the provided Pointer.
-   * @private
-   * @param {Pointer} pointer
-   * @returns {null|Press}
    */
-  findPress( pointer ) {
+  private findPress( pointer: Pointer ): MultiListenerPress | null {
     for ( let i = 0; i < this._presses.length; i++ ) {
       if ( this._presses[ i ].pointer === pointer ) {
         return this._presses[ i ];
@@ -249,12 +278,8 @@ class MultiListener {
   /**
    * Find a background Press by searching for one with the provided Pointer. A background Press is one created
    * when we receive an event while a Pointer is already attached.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @returns {null|Press}
    */
-  findBackgroundPress( pointer ) {
+  private findBackgroundPress( pointer: Pointer ): MultiListenerPress | null {
     for ( let i = 0; i < this._backgroundPresses.length; i++ ) {
       if ( this._backgroundPresses[ i ].pointer === pointer ) {
         return this._backgroundPresses[ i ];
@@ -267,12 +292,8 @@ class MultiListener {
    * Returns true if the press is already contained in one of this._backgroundPresses or this._presses. There are cases
    * where we may try to add the same pointer twice (user opened context menu, using a mouse during fuzz testing), and
    * we want to avoid adding a press again in those cases.
-   * @private
-   *
-   * @param {Press} press
-   * @returns {boolean}
    */
-  hasPress( press ) {
+  private hasPress( press: MultiListenerPress ): boolean {
     return _.some( this._presses.concat( this._backgroundPresses ), existingPress => {
       return existingPress.pointer === press.pointer;
     } );
@@ -282,12 +303,9 @@ class MultiListener {
    * Interrupt all listeners on the pointer, except for background listeners that
    * were added by this MultiListener. Useful when it is time for this listener to
    * "take over" and interrupt any other listeners on the pointer.
-   * @private
-   *
-   * @param {Pointer} pointer
    */
-  interruptOtherListeners( pointer ) {
-    const listeners = pointer._listeners.slice();
+  private interruptOtherListeners( pointer: Pointer ): void {
+    const listeners = pointer.getListeners();
     for ( let i = 0; i < listeners.length; i++ ) {
       const listener = listeners[ i ];
       if ( listener !== this._backgroundListener ) {
@@ -297,14 +315,12 @@ class MultiListener {
   }
 
   /**
-   * Part of the scenery event API.
-   * @public (scenery-internal)
-   * @param event
+   * Part of the scenery event API. (scenery-internal)
    */
-  down( event ) {
+  public down( event: SceneryEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener down' );
 
-    if ( event.pointer instanceof Mouse && event.domEvent.button !== this._mouseButton ) {
+    if ( event.pointer instanceof Mouse && event.domEvent instanceof MouseEvent && event.domEvent.button !== this._mouseButton ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener abort: wrong mouse button' );
       return;
     }
@@ -326,7 +342,7 @@ class MultiListener {
     assert && assert( _.includes( pressTrail.nodes, this._targetNode ), 'targetNode must be in the Trail for Press' );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-    const press = new Press( event.pointer, pressTrail );
+    const press = new MultiListenerPress( event.pointer, pressTrail );
 
     if ( !this._allowMoveInterruption && !this._allowMultitouchInterruption ) {
 
@@ -350,11 +366,8 @@ class MultiListener {
 
   /**
    * Add a Press to this listener when a new Pointer is down.
-   * @protected
-   *
-   * @param {Press} press
    */
-  addPress( press ) {
+  protected addPress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -373,10 +386,8 @@ class MultiListener {
 
   /**
    * Reposition in response to movement of any Presses.
-   * @private
-   * @param press
    */
-  movePress( press ) {
+  private movePress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener movePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -387,11 +398,8 @@ class MultiListener {
 
   /**
    * Remove a Press from this listener.
-   * @protected
-   *
-   * @param {Press} press
    */
-  removePress( press ) {
+  protected removePress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -409,11 +417,8 @@ class MultiListener {
   /**
    * Add a background Press, a Press that we receive while a Pointer is already attached. Depending on background
    * Presses, we may interrupt the attached pointer to begin zoom operations.
-   * @private
-   *
-   * @param {Press} press
    */
-  addBackgroundPress( press ) {
+  private addBackgroundPress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -430,11 +435,8 @@ class MultiListener {
 
   /**
    * Remove a background Press from this listener.
-   * @private
-   *
-   * @param press
    */
-  removeBackgroundPress( press ) {
+  private removeBackgroundPress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removeBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -447,9 +449,8 @@ class MultiListener {
 
   /**
    * Reposition the target Node (including all apsects of transformation) of this listener's target Node.
-   * @protected
    */
-  reposition() {
+  protected reposition(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener reposition' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -460,9 +461,8 @@ class MultiListener {
 
   /**
    * Recompute the local points of the Presses for this listener, relative to the target Node.
-   * @private
    */
-  recomputeLocals() {
+  protected recomputeLocals(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener recomputeLocals' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -475,9 +475,8 @@ class MultiListener {
 
   /**
    * Interrupt this listener.
-   * @public
    */
-  interrupt() {
+  public interrupt(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener interrupt' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -496,11 +495,8 @@ class MultiListener {
 
   /**
    * Compute the transformation matrix for the target Node based on Presses.
-   * @private
-   *
-   * @returns {Matrix3}
    */
-  computeMatrix() {
+  private computeMatrix(): Matrix3 {
     if ( this._presses.length === 0 ) {
       return this._targetNode.getMatrix();
     }
@@ -524,43 +520,42 @@ class MultiListener {
   /**
    * Compute a transformation matrix from a single press. Single press indicates translation (panning) for the
    * target Node.
-   * @private
-   *
-   * @returns {Matrix3}
    */
-  computeSinglePressMatrix() {
+  private computeSinglePressMatrix(): Matrix3 {
     const singleTargetPoint = this._presses[ 0 ].targetPoint;
-    const singleMappedPoint = this._targetNode.localToParentPoint( this._presses[ 0 ].localPoint );
+    const localPoint = this._presses[ 0 ].localPoint!;
+    assert && assert( localPoint, 'localPoint is not defined on the Press?' );
+
+    const singleMappedPoint = this._targetNode.localToParentPoint( localPoint );
     const delta = singleTargetPoint.minus( singleMappedPoint );
     return Matrix3.translationFromVector( delta ).timesMatrix( this._targetNode.getMatrix() );
   }
 
-  // @private
   /**
    * Compute a translation matrix from multiple presses. Usually multiple presses will have some scale or rotation
    * as well, but this is to be used if rotation and scale are not enabled for this listener.
-   * @public
-   *
-   * @returns {Matrix3}
    */
-  computeTranslationMatrix() {
+  public computeTranslationMatrix(): Matrix3 {
     // translation only. linear least-squares simplifies to sum of differences
     const sum = new Vector2( 0, 0 );
     for ( let i = 0; i < this._presses.length; i++ ) {
       sum.add( this._presses[ i ].targetPoint );
-      sum.subtract( this._presses[ i ].localPoint );
+
+      const localPoint = this._presses[ i ].localPoint!;
+      assert && assert( localPoint, 'localPoint is not defined on the Press?' );
+      sum.subtract( localPoint );
     }
     return Matrix3.translationFromVector( sum.dividedScalar( this._presses.length ) );
   }
 
   /**
    * A transformation matrix from multiple Presses that will translate and scale the target Node.
-   * @private
-   *
-   * @returns {Matrix3}
    */
-  computeTranslationScaleMatrix() {
-    const localPoints = this._presses.map( press => press.localPoint );
+  private computeTranslationScaleMatrix(): Matrix3 {
+    const localPoints = this._presses.map( press => {
+      assert && assert( press.localPoint, 'localPoint is not defined on the Press?' );
+      return press.localPoint!;
+    } );
     const targetPoints = this._presses.map( press => press.targetPoint );
 
     const localCentroid = new Vector2( 0, 0 );
@@ -594,12 +589,8 @@ class MultiListener {
 
   /**
    * Limit the provided scale by constraints of this MultiListener.
-   * @protected
-   *
-   * @param {number} scale
-   * @returns {number}
    */
-  limitScale( scale ) {
+  protected limitScale( scale: number ): number {
     let correctedScale = Math.max( scale, this._minScale );
     correctedScale = Math.min( correctedScale, this._maxScale );
     return correctedScale;
@@ -608,18 +599,15 @@ class MultiListener {
   /**
    * Compute a transformation matrix that will translate and scale the target Node from multiple presses. Should
    * be used when scaling is not enabled for this listener.
-   * @private
-   *
-   * @returns {Matrix3}
    */
-  computeTranslationRotationMatrix() {
+  private computeTranslationRotationMatrix(): Matrix3 {
     let i;
     const localMatrix = new Matrix( 2, this._presses.length );
     const targetMatrix = new Matrix( 2, this._presses.length );
     const localCentroid = new Vector2( 0, 0 );
     const targetCentroid = new Vector2( 0, 0 );
     for ( i = 0; i < this._presses.length; i++ ) {
-      const localPoint = this._presses[ i ].localPoint;
+      const localPoint = this._presses[ i ].localPoint!;
       const targetPoint = this._presses[ i ].targetPoint;
       localCentroid.add( localPoint );
       targetCentroid.add( targetPoint );
@@ -655,17 +643,14 @@ class MultiListener {
 
   /**
    * Compute a transformation matrix that will translate, scale, and rotate the target Node from multiple Presses.
-   * @private
-   *
-   * @returns {Matrix3}
    */
-  computeTranslationRotationScaleMatrix() {
+  private computeTranslationRotationScaleMatrix(): Matrix3 {
     let i;
     const localMatrix = new Matrix( this._presses.length * 2, 4 );
     for ( i = 0; i < this._presses.length; i++ ) {
       // [ x  y 1 0 ]
       // [ y -x 0 1 ]
-      const localPoint = this._presses[ i ].localPoint;
+      const localPoint = this._presses[ i ].localPoint!;
       localMatrix.set( 2 * i + 0, 0, localPoint.x );
       localMatrix.set( 2 * i + 0, 1, localPoint.y );
       localMatrix.set( 2 * i + 0, 2, 1 );
@@ -691,59 +676,20 @@ class MultiListener {
 
   /**
    * Get the current scale on the target Node, assumes that there is isometric scaling in both x and y.
-   *
-   * @public
-   * @returns {number}
    */
-  getCurrentScale() {
+  public getCurrentScale(): number {
     return this._targetNode.getScaleVector().x;
   }
 
   /**
    * Reset transform on the target Node.
-   *
-   * @public
    */
-  resetTransform() {
+  public resetTransform(): void {
     this._targetNode.resetTransform();
     this.matrixProperty.set( this._targetNode.matrix.copy() );
   }
 }
 
 scenery.register( 'MultiListener', MultiListener );
-
-/**
- * A logical "press" for the MultiListener, capturing information when a Pointer goes down on the screen.
- */
-class Press {
-  constructor( pointer, trail ) {
-    this.pointer = pointer;
-    this.trail = trail;
-    this.interrupted = false;
-
-    // @public (read-only) {Vector2} - down point for the new press, in the global coordinate frame
-    this.initialPoint = pointer.point;
-
-    this.localPoint = null;
-    this.recomputeLocalPoint();
-  }
-
-  /**
-   * Compute the local point for this Press, which is the local point for the leaf Node of this Press's Trail.
-   * @public
-   */
-  recomputeLocalPoint() {
-    this.localPoint = this.trail.globalToLocalPoint( this.pointer.point );
-  }
-
-  /**
-   * The parent point of this press, relative to the leaf Node of this Press's Trail.
-   * @public
-   * @returns {Vector2}
-   */
-  get targetPoint() {
-    return this.trail.globalToParentPoint( this.pointer.point );
-  }
-}
 
 export default MultiListener;

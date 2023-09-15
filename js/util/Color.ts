@@ -1,11 +1,11 @@
-// Copyright 2012-2022, University of Colorado Boulder
+// Copyright 2012-2023, University of Colorado Boulder
 
 /**
  * A color with RGBA values, assuming the sRGB color space is used.
  *
  * See http://www.w3.org/TR/css3-color/
  *
- * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
+ * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5! https://github.com/phetsims/tasks/issues/1129
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -386,7 +386,7 @@ export default class Color {
   /**
    * Sets this color using HSLA values.
    *
-   * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
+   * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5! https://github.com/phetsims/tasks/issues/1129
    *
    * @param hue - integer modulo 360
    * @param saturation - percentage

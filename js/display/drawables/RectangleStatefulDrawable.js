@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * A trait for drawables for Rectangle that need to store state about what the current display is currently showing,
@@ -57,7 +57,7 @@ const RectangleStatefulDrawable = memoize( type => {
      * @public
      */
     markDirtyRectangle() {
-      // TODO: consider bitmask instead?
+      // TODO: consider bitmask instead? https://github.com/phetsims/tasks/issues/1129
       this.dirtyX = true;
       this.dirtyY = true;
       this.dirtyWidth = true;

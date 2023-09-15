@@ -1,4 +1,4 @@
-// Copyright 2014-2022, University of Colorado Boulder
+// Copyright 2014-2023, University of Colorado Boulder
 
 /**
  * A specialized drawable for a layer of drawables with the same renderer (basically, it's a Canvas element, SVG
@@ -69,7 +69,7 @@ class Block extends Drawable {
     this.previousBlock = null;
     this.nextBlock = null;
 
-    // TODO: are we potentially leaking drawable lists here?
+    // TODO: are we potentially leaking drawable lists here? https://github.com/phetsims/tasks/issues/1129
     if ( assertSlow ) {
       cleanArray( this.drawableList );
     }

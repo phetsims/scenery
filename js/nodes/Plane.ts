@@ -5,7 +5,7 @@
  * Used for showing an overlay on the screen e.g., when a popup dialog is shown.
  * This can fade the background to focus on the dialog/popup as well as intercept mouse events for dismissing the dialog/popup.
  * Note: This is currently implemented using large numbers, it should be rewritten to work in any coordinate frame, possibly using phet.kite.Shape.plane()
- * TODO: Implement using infinite geometry
+ * TODO: Implement using infinite geometry https://github.com/phetsims/tasks/issues/1129
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */

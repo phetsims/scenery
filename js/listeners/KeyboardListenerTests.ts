@@ -52,8 +52,8 @@ QUnit.test( 'KeyboardListener Tests', assert => {
     }
   } );
 
-  // Test putting a key in keys that is not supported.
-  assert.throws( () => {
+  // Test putting a key in keys that is not supported (error only thrown with assertions enabled)
+  window.assert && assert.throws( () => {
     const bogusListener = new KeyboardListener( {
 
       // @ts-expect-error - Typescript should catch bad keys too
@@ -91,8 +91,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   const listenerWithOverlappingKeys = new KeyboardListener( {
     keys: [ 'p', 'ctrl+p' ],
 
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFired = true;
       }
@@ -124,8 +123,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   let pFiredFromB = false;
   const listenerPreventedByHandle = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed, listener ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromA = true;
       }
@@ -135,8 +133,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
   const handlingListener = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromB = true;
 
@@ -160,8 +157,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   // test abort
   const listenerPreventedByAbort = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromA = true;
       }
@@ -171,8 +167,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
   const abortingListener = new KeyboardListener( {
     keys: [ 'p' ],
-    callback: ( event, listener ) => {
-      const keysPressed = listener.keysPressed;
+    callback: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFiredFromB = true;
 
@@ -206,7 +201,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   //////////////////////////////////////////////////////
 
   // test interrupt/cancel
-  // TODO: This test fails but that is working as expected. interrupt/cancel are only relevant for the
+  // TODO: This test fails but that is working as expected. interrupt/cancel are only relevant for the https://github.com/phetsims/tasks/issues/1129
   // listener for press and hold functionality. Interrupt/cancel cannot clear the keystate because the listener
   // does not own its KeyStateTracker, it is using the global one.
   // let pbFiredFromA = false;

@@ -1,4 +1,4 @@
-// Copyright 2017-2021, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  *
@@ -19,7 +19,7 @@ function snapshotToCanvas( snapshot ) {
   return canvas;
 }
 
-// TODO: factor out
+// TODO: factor out https://github.com/phetsims/tasks/issues/1129
 // compares two pixel snapshots {ImageData} and uses the qunit's assert to verify they are the same
 function snapshotEquals( assert, a, b, threshold, message, extraDom ) {
 

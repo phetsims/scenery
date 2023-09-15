@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * DOM drawable for Rectangle nodes.
@@ -10,7 +10,7 @@ import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { DOMSelfDrawable, Features, RectangleStatefulDrawable, scenery, Utils } from '../../imports.js';
 
-// TODO: change this based on memory and performance characteristics of the platform
+// TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/tasks/issues/1129
 const keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
 // scratch matrix used in DOM rendering

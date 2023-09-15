@@ -74,7 +74,7 @@ export default class Circle extends Path {
    */
   public override getStrokeRendererBitmask(): number {
     let bitmask = super.getStrokeRendererBitmask();
-    // @ts-expect-error TODO isGradient/isPattern better handling
+    // @ts-expect-error TODO isGradient/isPattern better handling https://github.com/phetsims/tasks/issues/1129
     if ( this.hasStroke() && !this.getStroke()!.isGradient && !this.getStroke()!.isPattern && this.getLineWidth() <= this.getRadius() ) {
       bitmask |= Renderer.bitmaskDOM;
     }
@@ -117,7 +117,7 @@ export default class Circle extends Path {
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
   public override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
-    // TODO: handle intersection with somewhat-infinite bounds!
+    // TODO: handle intersection with somewhat-infinite bounds! https://github.com/phetsims/tasks/issues/1129
     let x = Math.abs( bounds.centerX );
     let y = Math.abs( bounds.centerY );
     const halfWidth = bounds.maxX - x;
@@ -147,7 +147,7 @@ export default class Circle extends Path {
    * @param matrix - The transformation matrix already applied to the context.
    */
   protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
-    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
+    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/tasks/issues/1129
     CircleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
@@ -158,7 +158,7 @@ export default class Circle extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
-    // @ts-expect-error TODO: pooling
+    // @ts-expect-error TODO: pooling https://github.com/phetsims/tasks/issues/1129
     return CircleDOMDrawable.createFromPool( renderer, instance );
   }
 
@@ -169,7 +169,7 @@ export default class Circle extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
-    // @ts-expect-error TODO: pooling
+    // @ts-expect-error TODO: pooling https://github.com/phetsims/tasks/issues/1129
     return CircleSVGDrawable.createFromPool( renderer, instance );
   }
 
@@ -180,7 +180,7 @@ export default class Circle extends Path {
    * @param instance - Instance object that will be associated with the drawable
    */
   public override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
-    // @ts-expect-error TODO: pooling
+    // @ts-expect-error TODO: pooling https://github.com/phetsims/tasks/issues/1129
     return CircleCanvasDrawable.createFromPool( renderer, instance );
   }
 

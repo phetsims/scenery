@@ -408,7 +408,7 @@ export default class Path extends Paintable( Node ) {
    * @param matrix - The transformation matrix already applied to the context.
    */
   protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
-    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
+    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/tasks/issues/1129
     PathCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
@@ -492,7 +492,7 @@ export default class Path extends Paintable( Node ) {
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
   public override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
-    // TODO: should a shape's stroke be included?
+    // TODO: should a shape's stroke be included? https://github.com/phetsims/tasks/issues/1129
     return this._shape ? this._shape.intersectsBounds( bounds ) : false;
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * An enumeration of different back-end technologies used for rendering. It also essentially represents the API that
@@ -16,7 +16,7 @@ import { scenery } from '../imports.js';
 const Renderer = {};
 scenery.register( 'Renderer', Renderer );
 
-//OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix)
+//OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix) https://github.com/phetsims/tasks/issues/1129
 
 /*---------------------------------------------------------------------------*
  * Renderer bitmask flags
@@ -79,7 +79,7 @@ Renderer.fromName = function( name ) {
 };
 
 // returns the part of the bitmask that should contain only Canvas/SVG/DOM/WebGL flags
-//OHTWO TODO: use this instead of direct access to bitmaskRendererArea
+//OHTWO TODO: use this instead of direct access to bitmaskRendererArea https://github.com/phetsims/tasks/issues/1129
 Renderer.stripBitmask = function( bitmask ) {
   return bitmask & Renderer.bitmaskRendererArea;
 };

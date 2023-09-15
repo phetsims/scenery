@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * The PointerOverlay shows pointer locations in the scene.  This is useful when recording a session for interviews or when a teacher is broadcasting
@@ -117,7 +117,7 @@ export default class PointerOverlay implements TOverlay {
     display._input!.pointerAddedEmitter.addListener( this.pointerAdded );
 
     //if there is already a mouse, add it here
-    // TODO: if there already other non-mouse touches, could be added here
+    // TODO: if there already other non-mouse touches, could be added here https://github.com/phetsims/tasks/issues/1129
     if ( display._input && display._input.mouse ) {
       this.pointerAdded( display._input.mouse );
     }

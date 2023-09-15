@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * A trait for drawables for Paintable nodes that does not store the fill/stroke state, as it just needs to track
@@ -59,7 +59,7 @@ const PaintableStatelessDrawable = memoize( type => {
 
       this.markPaintDirty();
       this.fillObserver.setPrimary( this.instance.node._fill );
-      // TODO: look into having the fillObserver be notified of Node changes as our source
+      // TODO: look into having the fillObserver be notified of Node changes as our source https://github.com/phetsims/tasks/issues/1129
     }
 
     /**
@@ -70,7 +70,7 @@ const PaintableStatelessDrawable = memoize( type => {
 
       this.markPaintDirty();
       this.strokeObserver.setPrimary( this.instance.node._stroke );
-      // TODO: look into having the strokeObserver be notified of Node changes as our source
+      // TODO: look into having the strokeObserver be notified of Node changes as our source https://github.com/phetsims/tasks/issues/1129
     }
 
     /**

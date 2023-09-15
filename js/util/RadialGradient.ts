@@ -34,7 +34,7 @@ export default class RadialGradient extends Gradient {
   public maxRadius: number;
 
   /**
-   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
+   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ] https://github.com/phetsims/tasks/issues/1129
    *
    * TODO: support Vector2s as p0 and p1
    *
@@ -88,7 +88,7 @@ export default class RadialGradient extends Gradient {
    */
   public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
-    // @ts-expect-error TODO scenery namespace
+    // @ts-expect-error TODO scenery namespace https://github.com/phetsims/tasks/issues/1129
     return scenery.scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
   }
 
@@ -109,7 +109,7 @@ export default class RadialGradient extends Gradient {
     const maxRadius = this.maxRadius;
     const minRadius = this.minRadius;
 
-    //TODO: replace with phet.dot.Utils.linear
+    //TODO: replace with phet.dot.Utils.linear https://github.com/phetsims/tasks/issues/1129
     // maps x linearly from [a0,b0] => [a1,b1]
     function linearMap( a0: number, b0: number, a1: number, b1: number, x: number ): number {
       return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );

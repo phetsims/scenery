@@ -58,7 +58,7 @@ export default class BatchedDOMEvent implements TPoolable {
     // process whether anything under the pointers changed before running additional input events
     input.validatePointers();
 
-    //OHTWO TODO: switch?
+    //OHTWO TODO: switch? https://github.com/phetsims/tasks/issues/1129
     if ( this.type === BatchedDOMEventType.POINTER_TYPE ) {
       const context = this.eventContext as EventContext<PointerEvent>;
       const pointerEvent = context.domEvent;

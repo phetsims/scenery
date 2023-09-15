@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * Canvas drawable for Path nodes.
@@ -27,7 +27,7 @@ class PathCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable 
     const context = wrapper.context;
 
     if ( node.hasShape() ) {
-      // TODO: fill/stroke delay optimizations?
+      // TODO: fill/stroke delay optimizations? https://github.com/phetsims/tasks/issues/1129
       context.beginPath();
       node._shape.writeToContext( context );
 

@@ -1,4 +1,4 @@
-// Copyright 2019-2022, University of Colorado Boulder
+// Copyright 2019-2023, University of Colorado Boulder
 
 /**
  * Utilities specific to the keyboard for handling zoom/pan control.
@@ -13,7 +13,7 @@ const KeyboardZoomUtils = {
   /**
    * Returns true if the platform is most likely a Mac device. Pan/Zoom will use different modifier keys in this case.
    *
-   * TODO: Move to platform if generally useful?
+   * TODO: Move to platform if generally useful? https://github.com/phetsims/tasks/issues/1129
    */
   isPlatformMac: (): boolean => {
     return _.includes( window.navigator.platform, 'Mac' );

@@ -1,4 +1,4 @@
-// Copyright 2014-2022, University of Colorado Boulder
+// Copyright 2014-2023, University of Colorado Boulder
 
 /**
  * DOM Drawable wrapper for another DOM Drawable. Used so that we can have our own independent siblings, generally as part
@@ -31,7 +31,7 @@ class DOMBlock extends Block {
    * @returns {DOMBlock} - For chaining
    */
   initialize( display, domDrawable ) {
-    // TODO: is it bad to pass the acceleration flags along?
+    // TODO: is it bad to pass the acceleration flags along? https://github.com/phetsims/tasks/issues/1129
     super.initialize( display, domDrawable.renderer );
 
     this.domDrawable = domDrawable;

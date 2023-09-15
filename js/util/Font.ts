@@ -281,7 +281,7 @@ export default class Font extends PhetioObject {
    * values in this object.
    */
   public copy( options?: FontOptions ): Font {
-    // TODO: get merge working in typescript
+    // TODO: get merge working in typescript https://github.com/phetsims/tasks/issues/1129
     return new Font( combineOptions<FontOptions>( {
       style: this._style,
       variant: this._variant,
@@ -417,7 +417,7 @@ type FontState = Required<SelfOptions>;
 
 scenery.register( 'Font', Font );
 
-Font.FontIO = new IOType( 'FontIO', {
+Font.FontIO = new IOType<Font, FontState>( 'FontIO', {
   valueType: Font,
   documentation: 'Font handling for text drawing. Options:' +
                  '<ul>' +

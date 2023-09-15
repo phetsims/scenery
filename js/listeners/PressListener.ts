@@ -557,9 +557,9 @@ export default class PressListener extends EnabledComponent implements TInputLis
       }
 
       // clear the clicking timer, specific to pdom input
-      // @ts-expect-error TODO: This looks buggy, will need to ignore for now
+      // @ts-expect-error TODO: This looks buggy, will need to ignore for now https://github.com/phetsims/tasks/issues/1129
       if ( stepTimer.hasListener( this._pdomClickingTimeoutListener ) ) {
-        // @ts-expect-error TODO: This looks buggy, will need to ignore for now
+        // @ts-expect-error TODO: This looks buggy, will need to ignore for now https://github.com/phetsims/tasks/issues/1129
         stepTimer.clearTimeout( this._pdomClickingTimeoutListener );
 
         // interrupt may be called after the PressListener has been disposed (for instance, internally by scenery
@@ -954,12 +954,12 @@ export default class PressListener extends EnabledComponent implements TInputLis
 
       // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
       // listener is no longer attached
-      // @ts-expect-error TODO: This looks buggy, will need to ignore for now
+      // @ts-expect-error TODO: This looks buggy, will need to ignore for now https://github.com/phetsims/tasks/issues/1129
       stepTimer.clearTimeout( this._pdomClickingTimeoutListener );
 
       // Now add the timeout back to start over, saving so that it can be removed later. Even when this listener was
       // interrupted from above logic, we still delay setting this to false to support visual "pressing" redraw.
-      // @ts-expect-error TODO: This looks buggy, will need to ignore for now
+      // @ts-expect-error TODO: This looks buggy, will need to ignore for now https://github.com/phetsims/tasks/issues/1129
       this._pdomClickingTimeoutListener = stepTimer.setTimeout( () => {
 
         // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and

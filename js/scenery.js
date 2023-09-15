@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * The main 'scenery' namespace object for the exported (built) API. Used internally in some places where there are
@@ -9,7 +9,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  *
- * TODO: When converting to TypeScript, please see ts-expect-error in SimDisplay
+ * TODO: When converting to TypeScript, please see ts-expect-error in SimDisplay https://github.com/phetsims/tasks/issues/1129
  */
 
 import extend from '../../phet-core/js/extend.js';
@@ -31,7 +31,7 @@ scenery.register( 'scratchContext', scratchContext );
 
 /*---------------------------------------------------------------------------*
  * Logging
- * TODO: Move this out of scenery.js if possible
+ * TODO: Move this out of scenery.js if possible https://github.com/phetsims/tasks/issues/1129
  *---------------------------------------------------------------------------*/
 
 // @private - Scenery internal log function to be used to log to scenery.logString (does not include color/css)
@@ -178,7 +178,7 @@ extend( scenery, {
     }
   },
 
-  // @public - Disables a specific log. TODO: handle stitch and perf composite loggers
+  // @public - Disables a specific log. TODO: handle stitch and perf composite loggers https://github.com/phetsims/tasks/issues/1129
   disableIndividualLog: function( name ) {
     if ( name ) {
       delete window.sceneryLog[ name ];

@@ -150,8 +150,8 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
       cells.forEach( cell => {
         if ( cell.size.get( orientation ) > 1 ) {
           assert && assert( cell.getEffectiveAlign( orientation ) !== LayoutAlign.ORIGIN, 'origin alignment cannot be specified for cells that span >1 width or height' );
-          // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise)
-          // TODO: also handle maxes
+          // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise) https://github.com/phetsims/tasks/issues/1129
+          // TODO: also handle maxes https://github.com/phetsims/tasks/issues/1129
           const lines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
           const currentMin = _.sum( lines.map( line => line.min ) );
           const neededMin = cell.getMinimumSize( orientation );

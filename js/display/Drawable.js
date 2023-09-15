@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * Something that can be displayed with a specific renderer.
@@ -371,7 +371,7 @@ class Drawable {
     if ( !this.dirty ) {
       this.dirty = true;
 
-      // TODO: notify what we want to call repaint() later
+      // TODO: notify what we want to call repaint() later https://github.com/phetsims/tasks/issues/1129
       if ( this.parentDrawable ) {
         this.parentDrawable.markDirtyDrawable( this );
       }

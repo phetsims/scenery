@@ -1,4 +1,4 @@
-// Copyright 2016-2022, University of Colorado Boulder
+// Copyright 2016-2023, University of Colorado Boulder
 
 /**
  * DOM drawable for Text nodes.
@@ -10,7 +10,7 @@ import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { DOMSelfDrawable, scenery, TextStatefulDrawable, Utils } from '../../imports.js';
 
-// TODO: change this based on memory and performance characteristics of the platform
+// TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/tasks/issues/1129
 const keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
 // scratch matrix used in DOM rendering
@@ -70,10 +70,10 @@ class TextDOMDrawable extends TextStatefulDrawable( DOMSelfDrawable ) {
       if ( this.dirtyStroke ) {
         div.style.color = node.getCSSFill();
       }
-      if ( this.dirtyBounds ) { // TODO: this condition is set on invalidateText, so it's almost always true?
+      if ( this.dirtyBounds ) { // TODO: this condition is set on invalidateText, so it's almost always true? https://github.com/phetsims/tasks/issues/1129
         div.style.width = `${node.getSelfBounds().width}px`;
         div.style.height = `${node.getSelfBounds().height}px`;
-        // TODO: do we require the jQuery versions here, or are they vestigial?
+        // TODO: do we require the jQuery versions here, or are they vestigial? https://github.com/phetsims/tasks/issues/1129
         // $div.width( node.getSelfBounds().width );
         // $div.height( node.getSelfBounds().height );
       }

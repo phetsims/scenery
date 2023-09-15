@@ -1,4 +1,4 @@
-// Copyright 2014-2022, University of Colorado Boulder
+// Copyright 2014-2023, University of Colorado Boulder
 
 /**
  * RelativeTransform is a component of an Instance. It is responsible for tracking changes to "relative" transforms, and
@@ -141,7 +141,7 @@ class RelativeTransform {
     this.relativeChildDirtyFrame = display ? display._frameId : 0;
 
     // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
-    //OHTWO TODO: should we rely on listeners removing themselves?
+    //OHTWO TODO: should we rely on listeners removing themselves? https://github.com/phetsims/tasks/issues/1129
     this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
 
     return this; // allow chaining
@@ -298,7 +298,7 @@ class RelativeTransform {
       // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
       // that we for-sure get future updates
       if ( !this.hasAncestorComputeNeed() ) {
-        // TODO: can we do better than this?
+        // TODO: can we do better than this? https://github.com/phetsims/tasks/issues/1129
         this.forceMarkTransformDirty();
       }
     }
@@ -313,7 +313,7 @@ class RelativeTransform {
   removeListener( listener ) {
     const before = this.hasAncestorListenerNeed();
 
-    // TODO: replace with a 'remove' function call
+    // TODO: replace with a 'remove' function call https://github.com/phetsims/tasks/issues/1129
     this.relativeTransformListeners.splice( _.indexOf( this.relativeTransformListeners, listener ), 1 );
     if ( before !== this.hasAncestorListenerNeed() ) {
       this.parent && this.parent.decrementTransformListenerChildren();
@@ -407,7 +407,7 @@ class RelativeTransform {
       // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
       // that we for-sure get future updates
       if ( !this.hasAncestorListenerNeed() ) {
-        // TODO: can we do better than this?
+        // TODO: can we do better than this? https://github.com/phetsims/tasks/issues/1129
         this.forceMarkTransformDirty();
       }
     }

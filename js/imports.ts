@@ -181,15 +181,16 @@ export { default as ReadingBlockUtterance } from './accessibility/voicing/Readin
 export type { ReadingBlockUtteranceOptions } from './accessibility/voicing/ReadingBlockUtterance.js';
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
 export { default as FocusManager } from './accessibility/FocusManager.js';
-export { default as FocusHighlightPath } from './accessibility/FocusHighlightPath.js';
-export { default as FocusHighlightFromNode } from './accessibility/FocusHighlightFromNode.js';
-export type { FocusHighlightFromNodeOptions } from './accessibility/FocusHighlightFromNode.js';
+export { default as HighlightPath } from './accessibility/HighlightPath.js';
+export type { HighlightPathOptions } from './accessibility/HighlightPath.js';
+export { default as HighlightFromNode } from './accessibility/HighlightFromNode.js';
+export type { HighlightFromNodeOptions } from './accessibility/HighlightFromNode.js';
 export { default as ReadingBlockHighlight } from './accessibility/voicing/ReadingBlockHighlight.js';
 export { default as ReadingBlock } from './accessibility/voicing/ReadingBlock.js';
 export type { ReadingBlockOptions } from './accessibility/voicing/ReadingBlock.js';
 export { default as KeyboardZoomUtils } from './accessibility/KeyboardZoomUtils.js';
 export { default as KeyboardFuzzer } from './accessibility/KeyboardFuzzer.js';
-export { default as GroupFocusHighlightFromNode } from './accessibility/GroupFocusHighlightFromNode.js';
+export { default as GroupHighlightFromNode } from './accessibility/GroupHighlightFromNode.js';
 export { default as ActivatedReadingBlockHighlight } from './accessibility/voicing/ActivatedReadingBlockHighlight.js';
 
 
@@ -227,7 +228,9 @@ export type { FireListenerOptions } from './listeners/FireListener.js';
 export { default as DragListener } from './listeners/DragListener.js';
 export type { DragListenerOptions, PressedDragListener } from './listeners/DragListener.js';
 
+export { default as MultiListenerPress } from './listeners/MultiListenerPress.js';
 export { default as MultiListener } from './listeners/MultiListener.js';
+export type { MultiListenerOptions } from './listeners/MultiListener.js';
 export { default as PanZoomListener } from './listeners/PanZoomListener.js';
 export { default as AnimatedPanZoomListener } from './listeners/AnimatedPanZoomListener.js';
 export { default as animatedPanZoomSingleton } from './listeners/animatedPanZoomSingleton.js';

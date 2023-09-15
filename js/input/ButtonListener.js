@@ -9,7 +9,7 @@
  * down: mouse over, pressed
  * out: mouse not over, pressed
  *
- * TODO: offscreen handling
+ * TODO: offscreen handling https://github.com/phetsims/tasks/issues/1129
  * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -49,7 +49,7 @@ class ButtonListener extends DownUpListener {
       phetioEventType: EventType.USER
     }, options );
 
-    // TODO: pass through options
+    // TODO: pass through options https://github.com/phetsims/tasks/issues/1129
     super( {
       tandem: options.tandem,
       phetioType: options.phetioType,

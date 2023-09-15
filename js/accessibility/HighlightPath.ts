@@ -53,15 +53,15 @@ type SelfOptions = {
   // interactive component is currently picked up and being manipulated by the user.
   dashed?: boolean;
 
-  // If specified, this FocusHighlightPath will reposition with transform changes along the unique trail to this source
+  // If specified, this HighlightPath will reposition with transform changes along the unique trail to this source
   // Node. Otherwise you will have to position this highlight node yourself.
   transformSourceNode?: Node | null;
 };
 
 // The stroke and linewidth of this path are set with outerLineWidth and outerStroke.
-export type FocusHighlightPathOptions = SelfOptions & StrictOmit<PathOptions, 'stroke' | 'lineWidth'>;
+export type HighlightPathOptions = SelfOptions & StrictOmit<PathOptions, 'stroke' | 'lineWidth'>;
 
-class FocusHighlightPath extends Path {
+class HighlightPath extends Path {
 
   // The highlight is composed of an "inner" and "outer" path to look nice. These hold each color.
   private _innerHighlightColor: TPaint;
@@ -95,9 +95,9 @@ class FocusHighlightPath extends Path {
    * @param [shape] - the shape for the focus highlight
    * @param [providedOptions]
    */
-  public constructor( shape: Shape | string | null, providedOptions?: FocusHighlightPathOptions ) {
+  public constructor( shape: Shape | string | null, providedOptions?: HighlightPathOptions ) {
 
-    const options = optionize<FocusHighlightPathOptions, SelfOptions, PathOptions>()( {
+    const options = optionize<HighlightPathOptions, SelfOptions, PathOptions>()( {
       outerStroke: OUTER_FOCUS_COLOR,
       innerStroke: INNER_FOCUS_COLOR,
       outerLineWidth: null,
@@ -189,7 +189,7 @@ class FocusHighlightPath extends Path {
     if ( this.outerLineWidth ) {
       return this.outerLineWidth;
     }
-    return FocusHighlightPath.getOuterLineWidthFromNode( node );
+    return HighlightPath.getOuterLineWidthFromNode( node );
   }
 
   /**
@@ -199,7 +199,7 @@ class FocusHighlightPath extends Path {
     if ( this.innerLineWidth ) {
       return this.innerLineWidth;
     }
-    return FocusHighlightPath.getInnerLineWidthFromNode( node );
+    return HighlightPath.getInnerLineWidthFromNode( node );
   }
 
   /**
@@ -236,7 +236,7 @@ class FocusHighlightPath extends Path {
   public get outerHighlightColor(): TPaint { return this.getOuterHighlightColor(); }
 
   /**
-   * Get the color of the outer highlight for this FocusHighlightPath
+   * Get the color of the outer highlight for this HighlightPath
    */
   public getOuterHighlightColor(): TPaint {
     return this._outerHighlightColor;
@@ -267,10 +267,10 @@ class FocusHighlightPath extends Path {
 
       // If the trail to the transformSourceNode is not unique, does not go through the focused Node, or has
       // multiple Trails that go through the focused Node it is impossible to determine the Trail to use for the
-      // highlight. Either avoid DAG for the transformSourceNode or use a FocusHighlightPath without
+      // highlight. Either avoid DAG for the transformSourceNode or use a HighlightPath without
       // transformSourceNode.
       assert && assert( extendedTrails.length === 1,
-        'No unique trail to highlight, either avoid DAG for transformSourceNode or don\'t use transformSourceNode with FocusHighlightPath'
+        'No unique trail to highlight, either avoid DAG for transformSourceNode or don\'t use transformSourceNode with HighlightPath'
       );
 
       uniqueTrail = extendedTrails[ 0 ];
@@ -285,14 +285,14 @@ class FocusHighlightPath extends Path {
    * Get the outer line width of a focus highlight based on the node's scale and rotation transform information.
    */
   public static getInnerLineWidthFromNode( node: Node ): number {
-    return INNER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
+    return INNER_LINE_WIDTH_BASE / HighlightPath.getWidthMagnitudeFromTransform( node );
   }
 
   /**
    * Get the outer line width of a node, based on its scale and rotation transformation.
    */
   public static getOuterLineWidthFromNode( node: Node ): number {
-    return OUTER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
+    return OUTER_LINE_WIDTH_BASE / HighlightPath.getWidthMagnitudeFromTransform( node );
   }
 
   /**
@@ -308,7 +308,7 @@ class FocusHighlightPath extends Path {
    * space between the edge of the component and the beginning (inside edge) of the focusHighlight
    */
   public static getDilationCoefficient( node: Node ): number {
-    const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
+    const widthOfFocusHighlight = HighlightPath.getOuterLineWidthFromNode( node );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
     // of the node being highlighted.
@@ -327,7 +327,7 @@ class FocusHighlightPath extends Path {
    * so this will always surround the normal focus highlight.
    */
   public static getGroupDilationCoefficient( node: Node ): number {
-    const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
+    const widthOfFocusHighlight = HighlightPath.getOuterLineWidthFromNode( node );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
     // of the node being highlighted.
@@ -341,6 +341,6 @@ class FocusHighlightPath extends Path {
   }
 }
 
-scenery.register( 'FocusHighlightPath', FocusHighlightPath );
+scenery.register( 'HighlightPath', HighlightPath );
 
-export default FocusHighlightPath;
+export default HighlightPath;

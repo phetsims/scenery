@@ -372,7 +372,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
           // this will either be the PressListener's targetNode or the default target of the SceneryEvent on press
           const target = attachedPressListener.getCurrentTarget();
 
-          // TODO: For now we cannot support DAG. We may be able to use PressListener.pressedTrail instead of
+          // TODO: For now we cannot support DAG. We may be able to use PressListener.pressedTrail instead of https://github.com/phetsims/tasks/issues/1129
           // getCurrentTarget, and then we would have a uniquely defined trail. See
           // https://github.com/phetsims/scenery/issues/1361 and
           // https://github.com/phetsims/scenery/issues/1356#issuecomment-1039678678

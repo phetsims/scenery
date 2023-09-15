@@ -1,4 +1,4 @@
-// Copyright 2019-2021, University of Colorado Boulder
+// Copyright 2019-2023, University of Colorado Boulder
 
 /**
  * Static CSS style for elements of the PDOM (siblings of PDOMPeer). Adds the styling directly to SceneryStyle,

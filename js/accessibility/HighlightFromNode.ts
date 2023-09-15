@@ -1,9 +1,9 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
- * A FocusHighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
+ * A HighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
  * the node. The focusHighlight will update as the Node's bounds changes. Handles transformations so that when the
- * source node is transformed, the FocusHighlightFromNode will
+ * source node is transformed, the HighlightFromNode will
  * updated be as well.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -15,8 +15,7 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { FocusHighlightPath, Node, scenery } from '../imports.js';
-import { FocusHighlightPathOptions } from './FocusHighlightPath.js';
+import { HighlightPath, HighlightPathOptions, Node, scenery } from '../imports.js';
 
 type SelfOptions = {
 
@@ -24,7 +23,7 @@ type SelfOptions = {
   useLocalBounds?: boolean;
 
   // default value is function of node transform (minus translation), but can be set explicitly.
-  // see FocusHighlightPath.getDilationCoefficient(). A number here refers to the amount in global coordinates to
+  // see HighlightPath.getDilationCoefficient(). A number here refers to the amount in global coordinates to
   // dilate the focus highlight.
   dilationCoefficient?: number | null;
 
@@ -33,9 +32,9 @@ type SelfOptions = {
 };
 
 // The transformSourceNode for this highlight will be the provided Node.
-export type FocusHighlightFromNodeOptions = SelfOptions & StrictOmit<FocusHighlightPathOptions, 'transformSourceNode'>;
+export type HighlightFromNodeOptions = SelfOptions & StrictOmit<HighlightPathOptions, 'transformSourceNode'>;
 
-class FocusHighlightFromNode extends FocusHighlightPath {
+class HighlightFromNode extends HighlightPath {
 
   // See options for documentation.
   private readonly useLocalBounds: boolean;
@@ -49,9 +48,9 @@ class FocusHighlightFromNode extends FocusHighlightPath {
   // Listener that sets the shape of this highlight when the Node bounds change. Referenced so it can be removed later.
   private boundsListener: null | ( ( bounds: Bounds2 ) => void ) = null;
 
-  public constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
+  public constructor( node: Node | null, providedOptions?: HighlightFromNodeOptions ) {
 
-    const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, FocusHighlightPathOptions>()( {
+    const options = optionize<HighlightFromNodeOptions, SelfOptions, HighlightPathOptions>()( {
       useLocalBounds: true,
       dilationCoefficient: null,
       useGroupDilation: false
@@ -73,7 +72,7 @@ class FocusHighlightFromNode extends FocusHighlightPath {
 
   /**
    * Update the focusHighlight shape on the path given the node passed in. Depending on options supplied to this
-   * FocusHighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
+   * HighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
    * that is dependent on whether or not this highlight is for group content or for the node itself. See
    * ParallelDOM.setGroupFocusHighlight() for more information on group highlights.
    */
@@ -99,8 +98,8 @@ class FocusHighlightFromNode extends FocusHighlightPath {
       // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
       // with options
       if ( this.dilationCoefficient === null ) {
-        dilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
-                                FocusHighlightPath.getDilationCoefficient( node ) );
+        dilationCoefficient = ( this.useGroupDilation ? HighlightPath.getGroupDilationCoefficient( node ) :
+                                HighlightPath.getDilationCoefficient( node ) );
       }
       const dilatedBounds = bounds.dilated( dilationCoefficient! );
 
@@ -122,6 +121,6 @@ class FocusHighlightFromNode extends FocusHighlightPath {
   }
 }
 
-scenery.register( 'FocusHighlightFromNode', FocusHighlightFromNode );
+scenery.register( 'HighlightFromNode', HighlightFromNode );
 
-export default FocusHighlightFromNode;
+export default HighlightFromNode;

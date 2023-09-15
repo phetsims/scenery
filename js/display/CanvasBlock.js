@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2013-2023, University of Colorado Boulder
 
 /**
  * Handles a visual Canvas layer of drawables.
@@ -48,7 +48,7 @@ class CanvasBlock extends FittedBlock {
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
     if ( !this.domElement ) {
-      //OHTWO TODO: support tiled Canvas handling (will need to wrap then in a div, or something)
+      //OHTWO TODO: support tiled Canvas handling (will need to wrap then in a div, or something) https://github.com/phetsims/tasks/issues/1129
       // @public {HTMLCanvasElement}
       this.canvas = document.createElement( 'canvas' );
       this.canvas.style.position = 'absolute';
@@ -71,7 +71,7 @@ class CanvasBlock extends FittedBlock {
       // unnecessary Canvas commands.
       this.wrapper = new CanvasContextWrapper( this.canvas, this.context );
 
-      // @public {DOMElement} - TODO: Doc this properly for {Block} as a whole
+      // @public {DOMElement} - TODO: Doc this properly for {Block} as a whole https://github.com/phetsims/tasks/issues/1129
       this.domElement = this.canvas;
 
       // {Array.<CanvasContextWrapper>} as multiple Canvases are needed to properly render opacity within the block.
@@ -104,16 +104,16 @@ class CanvasBlock extends FittedBlock {
 
     // @private {number} - store our backing scale so we don't have to look it up while fitting
     this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : Utils.backingScale( this.context );
-    // TODO: > You can use window.matchMedia() to check if the value of devicePixelRatio changes (which can happen,
-    // TODO: > for example, if the user drags the window to a display with a different pixel density).
-    // TODO: OH NO, we may need to figure out watching this?
+    // TODO: > You can use window.matchMedia() to check if the value of devicePixelRatio changes (which can happen, https://github.com/phetsims/tasks/issues/1129
+    // TODO: > for example, if the user drags the window to a display with a different pixel density). https://github.com/phetsims/tasks/issues/1129
+    // TODO: OH NO, we may need to figure out watching this? https://github.com/phetsims/tasks/issues/1129
 
     // @private {function}
     this.clipDirtyListener = this.clipDirtyListener || this.markDirty.bind( this );
     this.opacityDirtyListener = this.opacityDirtyListener || this.markDirty.bind( this );
 
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `initialized #${this.id}` );
-    // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
+    // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?) https://github.com/phetsims/tasks/issues/1129
   }
 
   /**
@@ -139,7 +139,7 @@ class CanvasBlock extends FittedBlock {
     const x = this.fitBounds.minX;
     const y = this.fitBounds.minY;
     this.canvasDrawOffset.setXY( -x, -y ); // subtract off so we have a tight fit
-    //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
+    //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS? https://github.com/phetsims/tasks/issues/1129
     Utils.setTransform( `matrix(1,0,0,1,${x},${y})`, this.canvas ); // reapply the translation as a CSS transform
     this.canvas.width = this.fitBounds.width * this.backingScale;
     this.canvas.height = this.fitBounds.height * this.backingScale;
@@ -179,8 +179,8 @@ class CanvasBlock extends FittedBlock {
     this.context.save();
     this.wrapper.resetStyles();
 
-    //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
-    //OHTWO TODO: why is "drawable !== null" check needed
+    //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern) https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: why is "drawable !== null" check needed https://github.com/phetsims/tasks/issues/1129
     this.currentDrawable = null; // we haven't rendered a drawable this frame yet
     for ( let drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
       this.renderDrawable( drawable );
@@ -239,7 +239,7 @@ class CanvasBlock extends FittedBlock {
         if ( node.hasClipArea() ) {
           context.beginPath();
           node.clipArea.writeToContext( context );
-          // TODO: add the ability to show clipping highlights inline?
+          // TODO: add the ability to show clipping highlights inline? https://github.com/phetsims/tasks/issues/1129
           // context.save();
           // context.strokeStyle = 'red';
           // context.lineWidth = 2;
@@ -413,7 +413,7 @@ class CanvasBlock extends FittedBlock {
    * For things like opacity/clipping, as part of this we walk up/down part of the instance tree for rendering each
    * drawable.
    *
-   * @param {CanvasSelfDrawable} - TODO: In the future, we'll need to support Canvas caches (this should be updated
+   * @param {CanvasSelfDrawable} - TODO: In the future, we'll need to support Canvas caches (this should be updated https://github.com/phetsims/tasks/issues/1129
    *                               with a proper generalized type)
    */
   renderDrawable( drawable ) {
@@ -448,7 +448,7 @@ class CanvasBlock extends FittedBlock {
     const matrix = drawable.instance.relativeTransform.matrix;
 
     // set the correct (relative to the transform root) transform up, instead of walking the hierarchy (for now)
-    //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck?
+    //OHTWO TODO: should we start premultiplying these matrices to remove this bottleneck? https://github.com/phetsims/tasks/issues/1129
     context.setTransform(
       this.backingScale,
       0,
@@ -503,7 +503,7 @@ class CanvasBlock extends FittedBlock {
       this.display.ensureNotPainting();
     }
 
-    // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
+    // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables) https://github.com/phetsims/tasks/issues/1129
     this.dirtyDrawables.push( drawable );
     this.markDirty();
   }
