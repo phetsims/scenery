@@ -819,10 +819,16 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Pan to a provided Node, attempting to place the node in the center of the transformedPanBounds. It may not end
    * up exactly in the center since we have to make sure panBounds are completely filled with targetNode content.
+   *
+   * You can conditionally not pan to the center by setting panToCenter to false. Sometimes shifting the screen so
+   * that the Node is at the center is too jarring.
+   *
+   * @param node - Node to pan to
+   * @param panToCenter - pan so that the Node is at the center of the screen?
    */
-  public panToNode( node: Node ): void {
+  public panToNode( node: Node, panToCenter = true ): void {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
-    this.keepBoundsInView( node.globalBounds, true );
+    this.keepBoundsInView( node.globalBounds, panToCenter );
   }
 
   /**
