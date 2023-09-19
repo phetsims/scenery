@@ -142,6 +142,7 @@ import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -229,6 +230,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'ariaDescribedbyAssociations',
   'activeDescendantAssociations',
 
+  'createPanTargetBounds',
+
   'positionInPDOM',
 
   'pdomTransformSourceNode'
@@ -282,6 +285,8 @@ export type ParallelDOMOptions = {
   ariaLabelledbyAssociations?: Association[]; // sets the list of aria-labelledby associations between from this node to others (including itself)
   ariaDescribedbyAssociations?: Association[]; // sets the list of aria-describedby associations between from this node to others (including itself)
   activeDescendantAssociations?: Association[]; // sets the list of aria-activedescendant associations between from this node to others (including itself)
+
+  createFocusPanTargetBounds?: ( () => Bounds2 ) | null; // A function that sets the global bounds for an AnimatedPanZoomListener to keep in view
 
   positionInPDOM?: boolean; // Sets whether the node's DOM elements are positioned in the viewport
 
@@ -503,6 +508,10 @@ export default class ParallelDOM extends PhetioObject {
   // pdomTransformSourceNode cannot use DAG.
   private _pdomTransformSourceNode: Node | null;
 
+  // If this is provided, the AnimatedPanZoomListener will attempt to keep this Node in view as long as it has
+  // focus
+  private _createFocusPanTargetBounds: ( () => Bounds2 ) | null;
+
   // Contains information about what pdom displays
   // this node is "visible" for, see PDOMDisplaysInfo.js for more information.
   // (scenery-internal)
@@ -593,6 +602,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomOrder = null;
     this._pdomParent = null;
     this._pdomTransformSourceNode = null;
+    this._createFocusPanTargetBounds = null;
     this._pdomDisplaysInfo = new PDOMDisplaysInfo( this as unknown as Node );
     this._pdomInstances = [];
     this._positionInPDOM = false;
@@ -2561,6 +2571,41 @@ export default class ParallelDOM extends PhetioObject {
    */
   public getPDOMTransformSourceNode(): Node | null {
     return this._pdomTransformSourceNode;
+  }
+
+  /**
+   * Sets a function on this Node that will be used by the animatedPanZoomSingleton. It will try to keep these global
+   * bounds visible in the viewport when this Node (or any ancestor) has a transformation change while actively
+   * focused. This the bounds of your focusable Node do not accurately surround conceptual interactive component.
+   *
+   * @param createFocusPanTargetBounds - returns bounds in the global coordinate frame
+   */
+  public setCreateFocusPanTargetBounds( createFocusPanTargetBounds: null | ( () => Bounds2 ) ): void {
+    this._createFocusPanTargetBounds = createFocusPanTargetBounds;
+  }
+
+
+  /**
+   * Returns the function for creating global bounds to keep in the viewport while the component has focus, see the
+   * setCreateFocusPanTargetBounds function for more information.
+   */
+  public getCreateFocusPanTargetBounds(): null | ( () => Bounds2 ) {
+    return this._createFocusPanTargetBounds;
+  }
+
+  /**
+   * See setCreateFocusPanTargetBounds for more information.
+   * @param createFocusPanTargetBounds
+   */
+  public set createFocusPanTargetBounds( createFocusPanTargetBounds: null | ( () => Bounds2 ) ) {
+    this.setCreateFocusPanTargetBounds( createFocusPanTargetBounds );
+  }
+
+  /**
+   * See getCreateFocusPanTargetBounds for more information.
+   */
+  public get createFocusPanTargetBounds(): null | ( () => Bounds2 ) {
+    return this.getCreateFocusPanTargetBounds();
   }
 
   /**

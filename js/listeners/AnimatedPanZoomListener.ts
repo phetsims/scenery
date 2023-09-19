@@ -16,7 +16,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
-import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail } from '../imports.js';
+import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 
@@ -101,6 +101,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
   // scale represented at the start of the gesture, as reported by the GestureEvent, used to calculate how much
   // to scale the target Node
   private trackpadGestureStartScale = 1;
+
+  // A TransformTracker that will watch for changes to the targetNode's global transformation matrix, used to keep
+  // the targetNode in view during animation.
+  private _transformTracker: TransformTracker | null = null;
 
   private readonly disposeAnimatedPanZoomListener: () => void;
 
@@ -191,11 +195,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // to be attached so we have free reign over the keyboard
     globalKeyStateTracker.keydownEmitter.addListener( this.windowKeydown.bind( this ) );
 
-    const displayFocusListener = ( focus: Focus | null ) => {
-      if ( focus && this.getCurrentScale() > 1 ) {
-        this.keepTrailInView( focus.trail );
-      }
-    };
+    // Make sure that the focused Node stays in view and automatically pan to keep it displayed when it is animated
+    // with a transformation change
+    const displayFocusListener = this.handleFocusChange.bind( this );
     FocusManager.pdomFocusProperty.link( displayFocusListener );
 
     // set source and destination positions and scales after setting from state
@@ -221,6 +223,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
       // @ts-expect-error - Event type for this Safari specific event isn't available yet
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
 
+      if ( this._transformTracker ) {
+        this._transformTracker.dispose();
+      }
       FocusManager.pdomFocusProperty.unlink( displayFocusListener );
     };
   }
@@ -518,18 +523,54 @@ class AnimatedPanZoomListener extends PanZoomListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
     }
+  }
 
-    if ( KeyboardUtils.isMovementKey( domEvent ) ) {
-      if ( keyboardDragIntent ) {
+  /**
+   * Handle a change of focus by immediately panning so that the focused Node is in view. Also sets up the
+   * TransformTracker which will automatically keep the target in the viewport as it is animates.
+   */
+  public handleFocusChange( focus: Focus | null ): void {
+    if ( this._transformTracker ) {
+      this._transformTracker.dispose();
+      this._transformTracker = null;
+    }
 
-        // Look for any attached pointers if we are dragging with a keyboard and add them to the list. When dragging
-        // stops the Pointer listener is detached and the pointer is removed from the list in `step()`.
-        if ( event.pointer.isAttached() ) {
-          if ( !this._attachedPointers.includes( event.pointer ) ) {
-            this._attachedPointers.push( event.pointer );
-          }
-        }
+    if ( focus ) {
+      const lastNode = focus.trail.lastNode();
+
+      let trailToTrack = focus.trail;
+      if ( focus.trail.containsNode( this._targetNode ) ) {
+
+        // Track transforms to the focused Node, but exclude the targetNode so that repositions during pan don't
+        // trigger another transform update.
+        const indexOfTarget = focus.trail.nodes.indexOf( this._targetNode );
+        const indexOfLeaf = focus.trail.nodes.length; // end of slice is not included
+        trailToTrack = focus.trail.slice( indexOfTarget, indexOfLeaf );
       }
+
+      this._transformTracker = new TransformTracker( trailToTrack );
+      this._transformTracker.addListener( () => {
+        if ( this.getCurrentScale() > 1 ) {
+
+          let globalBounds: Bounds2;
+          if ( lastNode.createFocusPanTargetBounds ) {
+
+            // This Node has a custom global bounds area that we need to keep in view
+            globalBounds = lastNode.createFocusPanTargetBounds();
+          }
+          else {
+
+            // by default, use the global bounds of the Node - note this is the full Trail to the focused Node,
+            // not the subtrail used by TransformTracker
+            globalBounds = focus.trail.localToGlobalBounds( focus.trail.lastNode().localBounds );
+          }
+
+          this.keepBoundsInView( globalBounds, true );
+        }
+      } );
+
+      // Pan to the focus trail right away if it is off-screen
+      this.keepTrailInView( focus.trail );
     }
   }
 
