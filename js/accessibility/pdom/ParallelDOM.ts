@@ -2576,7 +2576,8 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Sets a function on this Node that will be used by the animatedPanZoomSingleton. It will try to keep these global
    * bounds visible in the viewport when this Node (or any ancestor) has a transformation change while actively
-   * focused. This the bounds of your focusable Node do not accurately surround conceptual interactive component.
+   * focused. This is useful if the bounds of your focusable Node do not accurately surround the conceptual interactive
+   * component.
    *
    * @param createFocusPanTargetBounds - returns bounds in the global coordinate frame
    */
