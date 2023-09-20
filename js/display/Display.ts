@@ -906,6 +906,13 @@ export default class Display {
   }
 
   /**
+   * Returns true if the element is in the PDOM. That is only possible if the display is accessible.
+   */
+  public isElementUnderPDOM( element: HTMLElement ): boolean {
+    return this._accessible && this.pdomRootElement!.contains( element );
+  }
+
+  /**
    * Implements a workaround that prevents DOM focus from leaving the Display in FullScreen mode. There is
    * a bug in some browsers where DOM focus can be permanently lost if tabbing out of the FullScreen element,
    * see https://github.com/phetsims/scenery/issues/883.
