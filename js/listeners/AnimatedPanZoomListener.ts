@@ -105,7 +105,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   // True when the listener is actively panning or zooming to the destination position and scale. Updated in the
   // animation frame.
-  private readonly animatingProperty = new BooleanProperty( false );
+  public readonly animatingProperty = new BooleanProperty( false );
 
   // A TransformTracker that will watch for changes to the targetNode's global transformation matrix, used to keep
   // the targetNode in view during animation.
