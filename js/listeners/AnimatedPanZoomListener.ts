@@ -19,6 +19,7 @@ import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -101,6 +102,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
   // scale represented at the start of the gesture, as reported by the GestureEvent, used to calculate how much
   // to scale the target Node
   private trackpadGestureStartScale = 1;
+
+  // True when the listener is actively panning or zooming to the destination position and scale. Updated in the
+  // animation frame.
+  private readonly animatingProperty = new BooleanProperty( false );
 
   // A TransformTracker that will watch for changes to the targetNode's global transformation matrix, used to keep
   // the targetNode in view during animation.
@@ -222,6 +227,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
       // @ts-expect-error - Event type for this Safari specific event isn't available yet
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
+
+      this.animatingProperty.dispose();
 
       if ( this._transformTracker ) {
         this._transformTracker.dispose();
@@ -964,6 +971,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // is dependent on the difference betwen source and destination positions
     const positionDirty = !destinationPosition.equalsEpsilon( sourcePosition, 0.1 );
     const scaleDirty = !Utils.equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
+
+    this.animatingProperty.value = positionDirty || scaleDirty;
 
     // Only a MiddlePress can support animation while down
     if ( this._presses.length === 0 || this.middlePress !== null ) {
