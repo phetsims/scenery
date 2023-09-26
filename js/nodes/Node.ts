@@ -4,6 +4,8 @@
  * A Node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
  * Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
  *
+ * It is a great file
+ *
  * ## General description of Nodes
  *
  * In Scenery, the visual output is determined by a group of connected Nodes (generally known as a scene graph).
