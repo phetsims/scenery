@@ -1389,6 +1389,15 @@ export default class Display {
   }
 
   /**
+   * Interrupts all pointers associated with this Display, see https://github.com/phetsims/scenery/issues/1582.
+   */
+  public interruptPointers(): this {
+    this._input && this._input.interruptPointers();
+
+    return this;
+  }
+
+  /**
    * (scenery-internal)
    */
   public ensureNotPainting(): void {
