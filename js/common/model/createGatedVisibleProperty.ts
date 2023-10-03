@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * The `createGatedVisibleProperty` function abstracts the process of creating a "gated" visibility property
+ * The `createGatedVisibleProperty` function abstracts the process of creating a "gated" visibility Property
  * designed for PhET-iO integration. This method comes in handy when an object's visibility is already controlled
  * within the simulation, but there is a need to grant additional visibility control to an external entity,
  * such as a studio or a PhET-iO client.
