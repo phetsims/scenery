@@ -333,10 +333,16 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 
         // An exit event may come from a Node along the trail becoming invisible or unpickable. In that case unlock
         // focus and remove pointer listeners so that highlights can continue to update from new input.
-        if ( !event.trail.isPickable() ) {
+        const lockedPointerFocus = display.focusManager.lockedPointerFocusProperty.value;
+        if ( !event.trail.isPickable() &&
+             ( lockedPointerFocus === null ||
 
-          // unlock and remove pointer listeners
-          this._onPointerRelease( event );
+               // We do not want to remove the lockedPointerFocus if this event trail has nothing
+               // to do with the node that is receiving a locked focus.
+               event.trail.containsNode( lockedPointerFocus.trail.lastNode() ) ) ) {
+
+            // unlock and remove pointer listeners
+            this._onPointerRelease( event );
         }
       }
     }
