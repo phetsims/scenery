@@ -16,7 +16,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
-import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
+import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, FocusPanDirection, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
@@ -572,12 +572,12 @@ class AnimatedPanZoomListener extends PanZoomListener {
             globalBounds = focus.trail.localToGlobalBounds( focus.trail.lastNode().localBounds );
           }
 
-          this.keepBoundsInView( globalBounds, true );
+          this.keepBoundsInView( globalBounds, true, lastNode.focusPanDirection );
         }
       } );
 
       // Pan to the focus trail right away if it is off-screen
-      this.keepTrailInView( focus.trail );
+      this.keepTrailInView( focus.trail, lastNode.focusPanDirection );
     }
   }
 
@@ -872,11 +872,13 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * that the Node is at the center is too jarring.
    *
    * @param node - Node to pan to
-   * @param panToCenter - pan so that the Node is at the center of the screen?
+   * @param panToCenter - If true, listener will pan so that the Node is at the center of the screen. Otherwise, just
+   *                      until the Node is fully displayed in the viewport.
+   * @param panDirection - if provided, we will only pan in the direction specified, null for all directions
    */
-  public panToNode( node: Node, panToCenter = true ): void {
+  public panToNode( node: Node, panToCenter: boolean, panDirection?: FocusPanDirection | null ): void {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
-    this.keepBoundsInView( node.globalBounds, panToCenter );
+    this.keepBoundsInView( node.globalBounds, panToCenter, panDirection );
   }
 
   /**
@@ -890,8 +892,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param globalBounds - in global coordinate frame
    * @param panToCenter - if true, we will pan to the center of the provided bounds, otherwise we will pan
    *                                until all edges are on screen
+   * @param panDirection - if provided, we will only pan in the direction specified, null for all directions
    */
-  private keepBoundsInView( globalBounds: Bounds2, panToCenter = false ): void {
+  private keepBoundsInView( globalBounds: Bounds2, panToCenter: boolean, panDirection?: FocusPanDirection | null ): void {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
     const sourcePosition = this.sourcePosition!;
     assert && assert( sourcePosition, 'sourcePosition must be defined to handle keepBoundsInView, be sure to call initializePositions' );
@@ -925,17 +928,25 @@ class AnimatedPanZoomListener extends PanZoomListener {
       distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom;
     }
 
-    if ( distanceToBottomEdge < 0 ) {
-      translationDelta.y = -distanceToBottomEdge;
+    if ( panDirection !== 'vertical' ) {
+
+      // if not panning vertically, we are free to move in the horizontal dimension
+      if ( distanceToRightEdge < 0 ) {
+        translationDelta.x = -distanceToRightEdge;
+      }
+      if ( distanceToLeftEdge > 0 ) {
+        translationDelta.x = -distanceToLeftEdge;
+      }
     }
-    if ( distanceToTopEdge > 0 ) {
-      translationDelta.y = -distanceToTopEdge;
-    }
-    if ( distanceToRightEdge < 0 ) {
-      translationDelta.x = -distanceToRightEdge;
-    }
-    if ( distanceToLeftEdge > 0 ) {
-      translationDelta.x = -distanceToLeftEdge;
+    if ( panDirection !== 'horizontal' ) {
+
+      // if not panning horizontally, we are free to move in the vertical direction
+      if ( distanceToBottomEdge < 0 ) {
+        translationDelta.y = -distanceToBottomEdge;
+      }
+      if ( distanceToTopEdge > 0 ) {
+        translationDelta.y = -distanceToTopEdge;
+      }
     }
 
     this.setDestinationPosition( sourcePosition.plus( translationDelta ) );
@@ -944,11 +955,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Keep a trail in view by panning to it if it has bounds that are outside of the global panBounds.
    */
-  private keepTrailInView( trail: Trail ): void {
+  private keepTrailInView( trail: Trail, panDirection?: FocusPanDirection | null ): void {
     if ( this._panBounds.isFinite() && trail.lastNode().bounds.isFinite() ) {
       const globalBounds = trail.localToGlobalBounds( trail.lastNode().localBounds );
       if ( !this._panBounds.containsBounds( globalBounds ) ) {
-        this.keepBoundsInView( globalBounds, true );
+        this.keepBoundsInView( globalBounds, true, panDirection );
       }
     }
   }

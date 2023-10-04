@@ -152,6 +152,7 @@ const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
 export type PDOMValueType = string | TReadOnlyProperty<string>;
+export type FocusPanDirection = 'horizontal' | 'vertical';
 
 // see setPDOMHeadingBehavior for more details
 const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, heading: PDOMValueType ) => {
@@ -230,7 +231,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'ariaDescribedbyAssociations',
   'activeDescendantAssociations',
 
-  'createPanTargetBounds',
+  'createFocusPanTargetBounds',
+  'focusPanDirection',
 
   'positionInPDOM',
 
@@ -287,6 +289,7 @@ export type ParallelDOMOptions = {
   activeDescendantAssociations?: Association[]; // sets the list of aria-activedescendant associations between from this node to others (including itself)
 
   createFocusPanTargetBounds?: ( () => Bounds2 ) | null; // A function that sets the global bounds for an AnimatedPanZoomListener to keep in view
+  focusPanDirection?: FocusPanDirection | null; // A constraint on the direction of panning when this Node is focused
 
   positionInPDOM?: boolean; // Sets whether the node's DOM elements are positioned in the viewport
 
@@ -512,6 +515,10 @@ export default class ParallelDOM extends PhetioObject {
   // focus
   private _createFocusPanTargetBounds: ( () => Bounds2 ) | null;
 
+  // If provided, the AnimatedPanZoomListener will ONLY pan in the specified direction as long as this Node has
+  // focus.
+  private _focusPanDirection: FocusPanDirection | null;
+
   // Contains information about what pdom displays
   // this node is "visible" for, see PDOMDisplaysInfo.js for more information.
   // (scenery-internal)
@@ -603,6 +610,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomParent = null;
     this._pdomTransformSourceNode = null;
     this._createFocusPanTargetBounds = null;
+    this._focusPanDirection = null;
     this._pdomDisplaysInfo = new PDOMDisplaysInfo( this as unknown as Node );
     this._pdomInstances = [];
     this._positionInPDOM = false;
@@ -2607,6 +2615,39 @@ export default class ParallelDOM extends PhetioObject {
    */
   public get createFocusPanTargetBounds(): null | ( () => Bounds2 ) {
     return this.getCreateFocusPanTargetBounds();
+  }
+
+  /**
+   * Sets the direction that the global AnimatedPanZoomListener will pan while focus is on this Node. Pan will ONLY
+   * occur in this dimension. This is especially useful for panning to large Nodes where panning to the center of the
+   * Node would move other Nodes out of the viewport.
+   *
+   * Set to null for default behavior (panning in all directions).
+   */
+  public setFocusPanDirection( focusPanDirection: FocusPanDirection | null ): void {
+    this._focusPanDirection = focusPanDirection;
+  }
+
+  /**
+   * See setFocusPanDirection for more information.
+   */
+  public getFocusPanDirection(): FocusPanDirection | null {
+    return this._focusPanDirection;
+  }
+
+  /**
+   * See setFocusPanDirection for more information.
+   * @param focusPanDirection
+   */
+  public set focusPanDirection( focusPanDirection: FocusPanDirection ) {
+    this.setFocusPanDirection( focusPanDirection );
+  }
+
+  /**
+   * See getFocusPanDirection for more information.
+   */
+  public get focusPanDirection(): FocusPanDirection | null {
+    return this.getFocusPanDirection();
   }
 
   /**
