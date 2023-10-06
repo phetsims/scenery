@@ -363,6 +363,39 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
+   * This function returns the targetNode if there are attached pointers and an attachedPressListener during a drag event,
+   * otherwise the function returns null.
+   */
+  private getTargetNodeDuringDrag(): Node | null {
+
+    if ( this._attachedPointers.length > 0 ) {
+
+      // We have an attachedListener from a SceneryEvent Pointer, see if it has information we can use to
+      // get the target Bounds for the drag event.
+
+      // Only use the first one so that unique dragging behaviors don't "fight" if multiple pointers are down.
+      const activeListener = this._attachedPointers[ 0 ].attachedListener!;
+      assert && assert( activeListener, 'The attached Pointer is expected to have an attached listener.' );
+
+      if ( activeListener.listener instanceof PressListener ||
+           activeListener.listener instanceof KeyboardDragListener ) {
+        const attachedPressListener = activeListener.listener;
+
+        // The PressListener might not be pressed anymore but the Pointer is still down, in which case it
+        // has been interrupted or cancelled.
+        // NOTE: It is possible I need to cancelPanDuringDrag() if it is no longer pressed, but I don't
+        // want to clear the reference to the attachedListener, and I want to support resuming drag during touch-snag.
+        if ( attachedPressListener.isPressed ) {
+
+          // this will either be the PressListener's targetNode or the default target of the SceneryEvent on press
+          return attachedPressListener.getCurrentTarget();
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
    * Gets the Bounds2 in the global coordinate frame that we are going to try to keep in view during a drag
    * operation.
    */
@@ -419,7 +452,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   private repositionDuringDrag(): void {
     const globalBounds = this.getGlobalBoundsToViewDuringDrag();
-    globalBounds && this.keepBoundsInView( globalBounds, this._attachedPointers.some( pointer => pointer instanceof PDOMPointer ) );
+    const targetNode = this.getTargetNodeDuringDrag();
+    globalBounds && this.keepBoundsInView( globalBounds, this._attachedPointers.some( pointer => pointer instanceof PDOMPointer ), targetNode?.focusPanDirection );
   }
 
   /**
@@ -916,7 +950,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       distanceToTopEdge = this._transformedPanBounds.centerY - boundsInTargetFrame.centerY;
       distanceToBottomEdge = this._transformedPanBounds.centerY - boundsInTargetFrame.centerY;
     }
-    else if ( boundsInTargetFrame.width < this._transformedPanBounds.width && boundsInTargetFrame.height < this._transformedPanBounds.height ) {
+    else if ( ( panDirection === 'vertical' || boundsInTargetFrame.width < this._transformedPanBounds.width ) && ( panDirection === 'horizontal' || boundsInTargetFrame.height < this._transformedPanBounds.height ) ) {
 
       // If the provided bounds are wider than the available pan bounds we shouldn't try to shift it, it will awkwardly
       // try to slide the screen to one of the sides of the bounds. This operation only makes sense if the screen can
