@@ -41,10 +41,10 @@
 
   const mainScene = new phet.scenery.Scene( $( '#main' ) );
 
-  const y = 10;
+  let y = 10;
   const padding = 7;
   function addText( str ) {
-    const text = new phet.scenery.Text( str, { fontSize: 14, top: y } )
+    const text = new phet.scenery.Text( str, { fontSize: 14, top: y } );
     mainScene.addChild( text );
     y += padding + 10;
   }

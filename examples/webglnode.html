@@ -171,7 +171,7 @@
   } );
   scene.addChild( triangle );
 
-  display.updateOnRequestAnimationFrame( function( timeElapsed ) {
+  display.updateOnRequestAnimationFrame( timeElapsed => {
     triangle.rotate( timeElapsed );
   } );
 </script>

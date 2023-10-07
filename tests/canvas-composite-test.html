@@ -53,7 +53,7 @@
   const chunk = 2;
   for ( let i = 0; i < 512; i += chunk ) {
     for ( let j = 0; j < 512; j += chunk ) {
-      context.fillStyle = ( ( ( i + j ) / chunk ) % 2 === 0) ? '#000' : '#fff';
+      context.fillStyle = ( ( ( i + j ) / chunk ) % 2 === 0 ) ? '#000' : '#fff';
       context.fillRect( i, j, chunk, chunk );
     }
   }

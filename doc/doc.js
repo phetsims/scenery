@@ -27,7 +27,7 @@ window.getCodeSnippet = func => {
   js = lines.join( '\n' );
   code.innerHTML = js;
   pre.appendChild( code );
-  window.hljshighlightElement( code ); // eslint-disable-line no-undef
+  window.hljs.highlightElement( code );
   return pre;
 };
 
