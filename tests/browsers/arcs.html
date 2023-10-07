@@ -18,21 +18,21 @@
 
 <script type="text/javascript">
 
-  var context = document.getElementById( 'canvas' ).getContext( '2d' );
+  const context = document.getElementById( 'canvas' ).getContext( '2d' );
 
   function arcMap( anticlockwise ) {
-    for ( var start = -4; start <= 4; start += 0.5 ) {
-      var x = ( start + 4 ) * 100;
-      for ( var end = -4; end <= 4; end += 0.5 ) {
-        var y = ( end + 4 ) * 100;
+    for ( let start = -4; start <= 4; start += 0.5 ) {
+      const x = ( start + 4 ) * 100;
+      for ( let end = -4; end <= 4; end += 0.5 ) {
+        const y = ( end + 4 ) * 100;
 
         // draw and fill the actual path
         context.strokeStyle = '#000000';
         context.fillStyle = '#eeeeee';
         context.beginPath();
-        var startAngle = start * Math.PI;
-        var endAngle = end * Math.PI;
-        var extraMag = 13;
+        const startAngle = start * Math.PI;
+        const endAngle = end * Math.PI;
+        const extraMag = 13;
         context.moveTo( x + extraMag * Math.cos( startAngle ), y + extraMag * Math.sin( startAngle, 0 ) );
         context.arc( x, y, 20, startAngle, endAngle, anticlockwise );
         context.lineTo( x + extraMag * Math.cos( endAngle ), y + extraMag * Math.sin( endAngle, 0 ) );
@@ -69,7 +69,7 @@
           context.fillStyle = '#000000';
           context.font = '20px sans-serif';
           context.textBaseline = 'middle';
-          var label = end + '\u03c0';
+          const label = end + '\u03c0';
           context.fillText( label, -30 - context.measureText( label ).width, y );
         }
       }
@@ -77,7 +77,7 @@
       context.fillStyle = '#000000';
       context.font = '20px sans-serif';
       context.textBaseline = 'bottom';
-      var label = start + '\u03c0';
+      const label = start + '\u03c0';
       context.fillText( label, x - context.measureText( label ).width / 2, -30 );
     }
 

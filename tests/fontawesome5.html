@@ -38,8 +38,8 @@ Unlike all the other tests, this test runs in unbuilt mode, and uses ES6 modules
   import iconList from '../../chipper/dist/js/sherpa/js/fontawesome-5/iconList.js';
 
   // Create a scene graph over the block-level element. Everything inside is replaced
-  var scene = new Node();
-  var display = new Display( scene, {
+  const scene = new Node();
+  const display = new Display( scene, {
     container: document.getElementById( 'example-scene' )
   } );
 

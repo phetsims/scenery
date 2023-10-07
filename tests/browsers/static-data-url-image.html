@@ -12,10 +12,10 @@
 <body>
 <script type="text/javascript">
 
-  var dataURL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA1klEQVR4Xu3aQQ6EMAxD0XL/QzNIMOxAkbIyeRXLLhrXdfQjtjV8bcPrXwTggOEKeALDDfAegvtax5e/Dps/Ov31CRDgckBqUPzt23YAAUJjgAOui/MEul1ABsiATAWEoBA8FdAFdIEmDGmDmU3gZnkZIANkQG8iJASFYKYCWAALYAEwhAbhsHmAgQgaRINoEA0+0UzpBwk4nAmDZoJwGA7DYTgMh+EwHIbDcBgOw+EeDoey0H3sdgaMFSC98Mr5U2cdldpKewhQkunDmzjgw5dbKm28A34475JBLblQaQAAAABJRU5ErkJggg==";
+  const dataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA1klEQVR4Xu3aQQ6EMAxD0XL/QzNIMOxAkbIyeRXLLhrXdfQjtjV8bcPrXwTggOEKeALDDfAegvtax5e/Dps/Ov31CRDgckBqUPzt23YAAUJjgAOui/MEul1ABsiATAWEoBA8FdAFdIEmDGmDmU3gZnkZIANkQG8iJASFYKYCWAALYAEwhAbhsHmAgQgaRINoEA0+0UzpBwk4nAmDZoJwGA7DYTgMh+EwHIbDcBgOw+EeDoey0H3sdgaMFSC98Mr5U2cdldpKewhQkunDmzjgw5dbKm28A34475JBLblQaQAAAABJRU5ErkJggg==';
 
   function imageFromDataURL( dataURL, callback ) {
-    var img = document.createElement( 'img' );
+    const img = document.createElement( 'img' );
 
     img.onload = function() {
       callback( img );
@@ -25,21 +25,21 @@
   }
 
   function imageDataFromImage( image ) {
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = image.width;
     canvas.height = image.height;
-    var context = canvas.getContext( '2d' );
+    const context = canvas.getContext( '2d' );
     context.drawImage( image, 0, 0, image.width, image.height );
     return context.getImageData( 0, 0, image.width, image.height );
   }
 
   function imageDataFromDataURL( dataURL, callback ) {
-    imageFromDataURL( dataURL, function( image ) {
+    imageFromDataURL( dataURL, image => {
       callback( imageDataFromImage( image ) );
     } );
   }
 
-  imageDataFromDataURL( dataURL, function( data ) { console.log( data ); } );
+  imageDataFromDataURL( dataURL, data => { console.log( data ); } );
 
 </script>
 

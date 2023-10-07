@@ -130,10 +130,10 @@
 </svg>
 
 <script type="text/javascript">
-  var context = $( 'canvas' )[ 0 ].getContext( '2d' );
+  const context = $( 'canvas' )[ 0 ].getContext( '2d' );
 
   context.save();
-  var linearGradient = context.createLinearGradient( 0, 0, 100, 0 );
+  const linearGradient = context.createLinearGradient( 0, 0, 100, 0 );
   linearGradient.addColorStop( 0, 'rgb(255,255,0)' );
   linearGradient.addColorStop( 0.5, 'rgba(255,255,0,0)' );
   linearGradient.addColorStop( 1, 'rgb(255,0,0)' );
@@ -145,7 +145,7 @@
 
   function drawRadial( xOffset, x0, y0, r0, x1, y1, r1 ) {
     context.save();
-    var radialGradient = context.createRadialGradient( xOffset + x0, y0, r0, xOffset + x1, y1, r1 );
+    const radialGradient = context.createRadialGradient( xOffset + x0, y0, r0, xOffset + x1, y1, r1 );
     radialGradient.addColorStop( 0, 'rgb(255,255,0)' );
     radialGradient.addColorStop( 0.5, 'rgba(255,255,0,0)' );
     radialGradient.addColorStop( 1, 'rgb(255,0,0)' );

@@ -1137,7 +1137,7 @@
   </svg>
 </div>
 <script type="text/javascript">
-  var stats = new Stats();
+  const stats = new window.Stats();
   stats.setMode( 0 ); // 0: fps, 1: ms
 
   // Align top-left
@@ -1148,11 +1148,11 @@
 
   document.body.appendChild( stats.domElement );
 
-  var sim = document.getElementById( 'sim' );
+  const sim = document.getElementById( 'sim' );
 
-  var cursorTarget = sim;
+  const cursorTarget = sim;
 
-  var toggle = true;
+  const toggle = true;
 
   (function step() {
     requestAnimationFrame( step );

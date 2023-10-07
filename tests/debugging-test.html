@@ -56,14 +56,14 @@
 
 <script>
 
-  var $main = $( '#main' );
+  const $main = $( '#main' );
 
   // initialize our scene
   console.log( 'creating scene' );
-  var scene = new phet.scenery.Scene( $main );
+  const scene = new phet.scenery.Scene( $main );
 
   console.log( 'creating node' );
-  var node = new phet.scenery.Node();
+  const node = new phet.scenery.Node();
 
   console.log( 'attaching node' );
   scene.addChild( node );

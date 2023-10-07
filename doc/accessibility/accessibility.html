@@ -33,6 +33,7 @@
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../../dist/scenery.min.js"></script>
 
+  <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
 
   <script type="text/javascript">
     phet.scenery.Utils.polyfillRequestAnimationFrame();
@@ -721,7 +722,7 @@
 </footer>
 
 <script type="text/javascript">
-  SyntaxHighlighter.all();
+  window.SyntaxHighlighter.all();
 </script>
 </body>
 </html>

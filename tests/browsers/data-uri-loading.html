@@ -20,16 +20,16 @@
 
 <script type="text/javascript">
 
-  var im = document.getElementById( 'image' );
+  const im = document.getElementById( 'image' );
   document.body.appendChild( document.createTextNode( im.width + 'x' + im.height ) );
 
-  var im2 = document.getElementById( '../joist/images/phet-logo-loading.svg' );
+  const im2 = document.getElementById( '../joist/images/phet-logo-loading.svg' );
   document.body.appendChild( document.createTextNode( ' ' + im2.width + 'x' + im2.height ) );
 
-  var canvas = document.createElement( 'canvas' );
+  const canvas = document.createElement( 'canvas' );
   canvas.width = 512;
   canvas.height = 512;
-  var context = canvas.getContext( '2d' );
+  const context = canvas.getContext( '2d' );
 
   context.drawImage( im, 0, 0 );
   console.log( canvas.toDataURL() );

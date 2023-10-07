@@ -29,15 +29,15 @@
 <div id="hello-world-scene" style="width: 400px; height: 400px;"></div>
 <script type="text/javascript">
   // Create a Node as the root of our tree (it can contain children)
-  var scene = new phet.scenery.Node();
+  const scene = new phet.scenery.Node();
 
   // Create a display using this root node, using our existing div
-  var display = new phet.scenery.Display( scene, {
+  const display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'hello-world-scene' ),
     backgroundColor: '#eee'
   } );
 
-  var scratchFloatArray = new Float32Array( 9 );
+  const scratchFloatArray = new Float32Array( 9 );
 
   class TrianglePainter {
     /**
@@ -51,7 +51,7 @@
       this.node = node;
 
       // Simple example for custom shader
-      var vertexShaderSource = [
+      const vertexShaderSource = [
         // Position
         'attribute vec3 aPosition;',
         'attribute vec3 aColor;',
@@ -71,7 +71,7 @@
       ].join( '\n' );
 
       // Simple demo for custom shader
-      var fragmentShaderSource = [
+      const fragmentShaderSource = [
         'precision mediump float;',
         'varying vec3 vColor;',
 
@@ -88,7 +88,7 @@
 
       this.vertexBuffer = gl.createBuffer();
 
-      var points = node.shape.subpaths[ 0 ].points;
+      const points = node.shape.subpaths[ 0 ].points;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
         points[ 0 ].x, points[ 0 ].y, 0.2,
@@ -114,7 +114,7 @@
      * @returns {number}
      */
     paint( modelViewMatrix, projectionMatrix ) {
-      var gl = this.gl;
+      const gl = this.gl;
 
       this.shaderProgram.use();
 
@@ -165,7 +165,7 @@
     }
   }
 
-  var triangle = new TriangleNode( {
+  const triangle = new TriangleNode( {
     x: 200,
     y: 200
   } );

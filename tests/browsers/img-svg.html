@@ -39,8 +39,8 @@
 <script type="text/javascript">
 
   window.onload = function() {
-    var context = document.getElementById( 'canvas' ).getContext( '2d' );
-    var image = document.getElementById( 'svg-external-image' );
+    const context = document.getElementById( 'canvas' ).getContext( '2d' );
+    const image = document.getElementById( 'svg-external-image' );
     // var image = document.getElementById( 'svg-gradient-image' );
 
     context.drawImage( image, 0, 0 );
@@ -49,7 +49,6 @@
 
     // console.log( context.getImageData( 0, 0, 10, 10 ) );
   };
-
 
 </script>
 

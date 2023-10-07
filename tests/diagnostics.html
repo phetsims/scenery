@@ -66,8 +66,8 @@
   $( '#userAgent' ).text( window.navigator.userAgent );
   $( '#platform' ).text( window.navigator.platform );
 
-  var canvas = document.createElement( 'canvas' );
-  var context = canvas.getContext( '2d' );
+  const canvas = document.createElement( 'canvas' );
+  const context = canvas.getContext( '2d' );
 
   $( '#devicePixelRatio' ).text( window.devicePixelRatio );
   $( '#backingStorePixelRatio' ).text( phet.scenery.Utils.backingStorePixelRatio( context ) );

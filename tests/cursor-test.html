@@ -18,28 +18,28 @@
 <body>
 <canvas id="myCanvas" width="578" height="200"></canvas>
 <script>
-  window.requestAnimFrame = (function( callback ) {
+  window.requestAnimFrame = ( function( callback ) {
     return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
            function( callback ) {
              window.setTimeout( callback, 1000 / 60 );
            };
-  })();
+  } )();
 
   function animate() {
-    var canvas = document.getElementById( 'myCanvas' );
-    var context = canvas.getContext( '2d' );
+    const canvas = document.getElementById( 'myCanvas' );
+    const context = canvas.getContext( '2d' );
 
     // update
 
     // clear
     context.clearRect( 0, 0, canvas.width, canvas.height );
 
-    context.fillStyle = "#FF0000";
+    context.fillStyle = '#FF0000';
     context.fillRect( 20, 20, 150 + 100 * Math.sin( Date.now() / 1000 ), 100 );
     // draw stuff
 
     // request new frame
-    requestAnimFrame( function() {
+    window.requestAnimFrame( () => {
       animate();
     } );
   }

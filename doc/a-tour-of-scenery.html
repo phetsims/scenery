@@ -30,10 +30,11 @@
 
   <!-- MathJax config -->
   <script type="text/x-mathjax-config">
-  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 
   </script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <script type="text/javascript"
+          src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
   <script src="../dist/scenery.min.js"></script>
@@ -73,10 +74,13 @@
       <h1>A Tour of Scenery</h1>
     </div>
 
-    <p>Currently, this is written as if the user has experience with other scene graphs. Will include more information later.</p>
+    <p>Currently, this is written as if the user has experience with other scene graphs. Will include more information
+      later.</p>
 
     <ul class="text-warning">
-      <li>TODO: Syntax Highlighter seems to be having issues with JS single quotes. Find other solution or submit pull request for fix</li>
+      <li>TODO: Syntax Highlighter seems to be having issues with JS single quotes. Find other solution or submit pull
+        request for fix
+      </li>
     </ul>
 
     <h3>Hello World</h3>
@@ -84,12 +88,12 @@
     <div id="hello-world-scene" style="width: 400px; height: 100px;" class="exampleScene"></div>
 
     <script type="text/javascript">
-      $( window ).ready( function() {
+      $( window ).ready( () => {
         // Create a Node as the root of our tree (it can contain children)
-        var scene = new phet.scenery.Node();
+        const scene = new phet.scenery.Node();
 
         // Create a display using this root node, using our existing div
-        var display = new phet.scenery.Display( scene, {
+        const display = new phet.scenery.Display( scene, {
           container: document.getElementById( 'hello-world-scene' )
         } );
 
@@ -106,24 +110,26 @@
     </script>
 
     <p>
-      Include the Scenery script in the page after <a href="http://jquery.com/">jQuery</a> and <a href="http://lodash.com/">LoDash</a>, and create
+      Include the Scenery script in the page after <a href="http://jquery.com/">jQuery</a> and <a
+        href="http://lodash.com/">LoDash</a>, and create
       a block-level element (like a div) that has a width and height that won't change with its contents:
     </p>
 
-      <pre class="brush: html">
+    <pre class="brush: html">
 &lt;div id="hello-world-scene" style="width: 400px; height: 100px;"&gt;&lt;/div&gt;
       </pre>
 
     <p>
-      The following JS code will initialize a scene graph, add some centered text into the scene, and paint it into the div.
+      The following JS code will initialize a scene graph, add some centered text into the scene, and paint it into the
+      div.
     </p>
 
-      <pre class="brush: js">
+    <pre class="brush: js">
 // Create a Node as the root of our tree (it can contain children)
-var scene = new phet.scenery.Node();
+const scene = new phet.scenery.Node();
 
 // Create a display using this root node, using our existing div
-var display = new phet.scenery.Display( scene, {
+const display = new phet.scenery.Display( scene, {
   container: document.getElementById( 'hello-world-scene' )
 } );
 
@@ -152,9 +158,9 @@ display.updateDisplay();
     <div id="shapes-scene" style="width: 220px; height: 100px;" class="exampleScene"></div>
 
     <script type="text/javascript">
-      $( window ).ready( function() {
-        var scene = new phet.scenery.Node();
-        var display = new phet.scenery.Display( scene, {
+      $( window ).ready( () => {
+        const scene = new phet.scenery.Node();
+        const display = new phet.scenery.Display( scene, {
           container: document.getElementById( 'shapes-scene' )
         } );
 
@@ -172,7 +178,7 @@ display.updateDisplay();
         } ) );
 
         // Custom shapes can also be created
-        var customShape = new phet.kite.Shape();
+        const customShape = new phet.kite.Shape();
         customShape.moveTo( 0, 0 );
         customShape.lineTo( 40, 40 );
         customShape.quadraticCurveTo( 80, 0, 40, -40 );
@@ -192,7 +198,7 @@ display.updateDisplay();
       } );
     </script>
 
-      <pre class="brush: js">
+    <pre class="brush: js">
 // A rectangle at (10,10) with a width of 50 and height of 80
 scene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 10, 10, 50, 80 ),{
   fill: '#ff0000'
@@ -207,7 +213,7 @@ scene.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 8, 30 ),{
 } ) );
 
 // Custom shapes can also be created
-var customShape = new phet.kite.Shape();
+const customShape = new phet.kite.Shape();
 customShape.moveTo( 0, 0 );
 customShape.lineTo( 40, 40 );
 customShape.quadraticCurveTo( 80, 0, 40, -40 );
@@ -230,17 +236,17 @@ scene.addChild( new phet.scenery.Path( customShape,{
       Nodes can be created and modified currently in a few different ways:
     </p>
 
-      <pre class="brush: js">
+    <pre class="brush: js">
 // The following are all equivalent ways to create a node, listed in approximate order of increasing performance (if it is relevant).
 
-var someShape = ...; // a shape used for brevity in the following calls, otherwise setting the bottom of the node makes no sense
+const someShape = ...; // a shape used for brevity in the following calls, otherwise setting the bottom of the node makes no sense
 
 // Declarative pattern. NOTE: the parameters are executed in a specific order which is particularly important
 // for transformation and bounds-based parameters. Using translations like 'x' or 'bottom' do not change the
 // point around which rotation or scaling is done in the local coordinate frame, and bounds-based modifiers
 // like 'bottom' (which moves the bottom of the node's bounds to the specific y-value) are handled after other
 // modifiers have been run.
-var node1 = new phet.scenery.Path( someShape, {
+const node1 = new phet.scenery.Path( someShape, {
   fill: '#000000',
   rotation: Math.PI / 2,
   x: 10,
@@ -248,7 +254,7 @@ var node1 = new phet.scenery.Path( someShape, {
 } );
 
 // ES5-setter style, called internally by the declarative paramter object style above
-var node2 = new phet.scenery.Path();
+const node2 = new phet.scenery.Path();
 node2.shape = someShape;
 node2.fill = '#000000';
 node2.x = 10; // note the reordering, as this is precisely how the declarative style is executed
@@ -256,7 +262,7 @@ node2.rotation = Math.PI / 2;
 node2.bottom = 200;
 
 // Java-style setters, called internally from the ES5-setter style above
-var node3 = new phet.scenery.Path();
+const node3 = new phet.scenery.Path();
 node3.setShape( someShape );
 node3.setFill( '#000000' );
 node3.setX( 10 );
@@ -264,15 +270,17 @@ node3.setRotation( Math.PI / 2 );
 node3.setBottom( 200 );
 
 // Chained style, since setters return a this-reference.
-var node4 = new phet.scenery.Path().setShape( someShape ).setFill( '#000000' ).setX( 10 ).setRotation( Math.PI / 2 ).setBottom( 200 );
+const node4 = new phet.scenery.Path().setShape( someShape ).setFill( '#000000' ).setX( 10 ).setRotation( Math.PI / 2 ).setBottom( 200 );
 
 // Additionally, parameters can be accessed by two styles:
 node2.rotation === node3.getRotation();
       </pre>
 
     <p>
-      Similarly to Piccolo2d, nodes have their 'self' paint/bounds and the paint/bounds of their children, where the node's
-      self is rendered first (below), and then children are painted one-by-one on top. Additionally, it borrows Piccolo's
+      Similarly to Piccolo2d, nodes have their 'self' paint/bounds and the paint/bounds of their children, where the
+      node's
+      self is rendered first (below), and then children are painted one-by-one on top. Additionally, it borrows
+      Piccolo's
       coordinate frames where there are local, parent, and global coordinate frames. The example below will hopefully
       be illustrative.
     </p>
@@ -280,14 +288,14 @@ node2.rotation === node3.getRotation();
     <div id="self-and-children" style="width: 400px; height: 200px;" class="exampleScene"></div>
 
     <script type="text/javascript">
-      $( window ).ready( function() {
-        var scene = new phet.scenery.Node();
-        var display = new phet.scenery.Display( scene, {
+      $( window ).ready( () => {
+        const scene = new phet.scenery.Node();
+        const display = new phet.scenery.Display( scene, {
           container: document.getElementById( 'self-and-children' )
         } );
 
         // create a node that will have child nodes.
-        var container = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 300, 100 ), {
+        const container = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 300, 100 ), {
           // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
           fill: '#888888',
           x: 20, // this node and all of its children will be offset by (20,20)
@@ -303,7 +311,7 @@ node2.rotation === node3.getRotation();
         container.getSelfBounds(); // x between [0, 300], y between [0, 100]
 
         // add a green rectangle to the container, which will be above the gray background
-        var child1 = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 25, 25 ), { // a 25x25 rectangle
+        const child1 = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 25, 25 ), { // a 25x25 rectangle
           fill: '#00ff00',
           scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
           left: 10, // 10px to the right of our parent's left bound
@@ -321,7 +329,7 @@ node2.rotation === node3.getRotation();
         container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bound of 145 since it has an x offset of 20 plus its child's bottom of 125
 
         // and some text to the same container, which will be on top of both the background and green rectangle
-        var child2 = new phet.scenery.Text( 'On Top?', {
+        const child2 = new phet.scenery.Text( 'On Top?', {
           left: child1.centerX,
           centerY: child1.centerY,
           font: '20px sans-serif'
@@ -332,9 +340,9 @@ node2.rotation === node3.getRotation();
       } );
     </script>
 
-      <pre class="brush: js">
+    <pre class="brush: js">
 // create a node that will have child nodes.
-var container = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 300, 100 ), {
+const container = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 300, 100 ), {
   // we'll add a background shape (300x100 rectangle) that will render on this node (it will be rendered below any child nodes)
   fill: '#888888',
   x: 20, // this node and all of its children will be offset by (20,20)
@@ -350,7 +358,7 @@ container.getBounds(); // x between [20, 320], y between [20, 120]
 container.getSelfBounds(); // x between [0, 300], y between [0, 100]
 
 // add a green rectangle to the container, which will be above the gray background
-var child1 = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 25, 25 ), { // a 25x25 rectangle
+const child1 = new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 25, 25 ), { // a 25x25 rectangle
   fill: '#00ff00',
   scale: 2, // but scaled so it is effectively a 50x50 rectangle to its parents
   left: 10, // 10px to the right of our parent's left bound
@@ -368,7 +376,7 @@ child1.getSelfBounds(); // x between [0, 25], y between [0, 25] -- just bounds o
 container.getBounds(); // x between [20, 320], y between [20, 145] -- bottom bound of 145 since it has an x offset of 20 plus its child's bottom of 125
 
 // and some text to the same container, which will be on top of both the background and green rectangle
-var child2 = new phet.scenery.Text( 'On Top?', {
+const child2 = new phet.scenery.Text( 'On Top?', {
   left: child1.centerX,
   centerY: child1.centerY,
   font: '20px sans-serif'
@@ -379,20 +387,21 @@ container.addChild( child2 );
     <h3>Images</h3>
 
     <p>
-      For now, pass in a valid image and it will be rendered with its upper-left corner at 0,0 in the local coordinate frame.
+      For now, pass in a valid image and it will be rendered with its upper-left corner at 0,0 in the local coordinate
+      frame.
     </p>
 
     <div id="image-scene" style="width: 400px; height: 200px;" class="exampleScene"></div>
 
     <script type="text/javascript">
-      $( window ).ready( function() {
-        var scene = new phet.scenery.Node();
-        var display = new phet.scenery.Display( scene, {
+      $( window ).ready( () => {
+        const scene = new phet.scenery.Node();
+        const display = new phet.scenery.Display( scene, {
           container: document.getElementById( 'image-scene' )
         } );
 
-        // TODO: support different ways of handling the asynchronous load
-        var thumbnailImage = document.createElement( 'img' );
+        // TODO: support different ways of handling the asynchronous load https://github.com/phetsims/scenery/issues/1581
+        const thumbnailImage = document.createElement( 'img' );
         thumbnailImage.onload = function( e ) {
           scene.addChild( new phet.scenery.Image( thumbnailImage ) );
           scene.addChild( new phet.scenery.Image( thumbnailImage, {
@@ -407,9 +416,9 @@ container.addChild( child2 );
       } );
     </script>
 
-      <pre class="brush: js">
+    <pre class="brush: js">
 // TODO: support different ways of handling the asynchronous load
-var thumbnailImage = document.createElement( 'img' );
+const thumbnailImage = document.createElement( 'img' );
 thumbnailImage.onload = function( e ) {
   scene.addChild( new phet.scenery.Image( thumbnailImage ) );
   scene.addChild( new phet.scenery.Image( thumbnailImage, {
@@ -433,13 +442,13 @@ thumbnailImage.src = 'https://phet.colorado.edu/sims/energy-skate-park/energy-sk
     <div id="dom-simple" style="width: 400px; height: 200px;" class="exampleScene"></div>
 
     <script type="text/javascript">
-      $( window ).ready( function() {
-        var scene = new phet.scenery.Node();
-        var display = new phet.scenery.Display( scene, {
+      $( window ).ready( () => {
+        const scene = new phet.scenery.Node();
+        const display = new phet.scenery.Display( scene, {
           container: document.getElementById( 'dom-simple' )
         } );
 
-        var element = document.createElement( 'span' );
+        const element = document.createElement( 'span' );
         element.innerHTML = '<label style="display: inline;">Type in me:</label><input type="text">';
 
         scene.addChild( new phet.scenery.DOM( element, {
@@ -451,8 +460,8 @@ thumbnailImage.src = 'https://phet.colorado.edu/sims/energy-skate-park/energy-sk
       } );
     </script>
 
-      <pre class="brush: js">
-var element = document.createElement( 'form' );
+    <pre class="brush: js">
+const element = document.createElement( 'form' );
 element.innerHTML = '<label>Type in me:</label><input type="text">';
 
 scene.addChild( new phet.scenery.DOM( element, {
@@ -462,7 +471,8 @@ scene.addChild( new phet.scenery.DOM( element, {
       </pre>
 
     <p>
-      When added in the above manner, the DOM element will be lifted in front of any other non-lifted elements by default.
+      When added in the above manner, the DOM element will be lifted in front of any other non-lifted elements by
+      default.
       It is possible to have the DOM elements reside where they would normally be rendered.
     </p>
 
@@ -470,21 +480,23 @@ scene.addChild( new phet.scenery.DOM( element, {
     <h3>Animation</h3>
 
     <p>
-      It is recommended to use display.updateDisplay() inside of requestAnimationFrame(), since updateScene() attempts to only
-      re-paint content that is inside of changed areas. For simple usage, you can use updateOnRequestAnimationFrame() on the display.
+      It is recommended to use display.updateDisplay() inside of requestAnimationFrame(), since updateScene() attempts
+      to only
+      re-paint content that is inside of changed areas. For simple usage, you can use updateOnRequestAnimationFrame() on
+      the display.
     </p>
 
     <div id="animation-simple" style="width: 200px; height: 200px;" class="exampleScene"></div>
 
     <script type="text/javascript">
-      $( window ).ready( function() {
-        var scene = new phet.scenery.Node();
-        var display = new phet.scenery.Display( scene, {
+      $( window ).ready( () => {
+        const scene = new phet.scenery.Node();
+        const display = new phet.scenery.Display( scene, {
           container: document.getElementById( 'animation-simple' )
         } );
 
         // a hexagon to rotate
-        var node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 90 ), {
+        const node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 90 ), {
           fill: '#000000',
           centerX: 100,
           centerY: 100
@@ -496,20 +508,20 @@ scene.addChild( new phet.scenery.DOM( element, {
         scene.addChild( node );
 
         // given time elapsed in seconds
-        display.updateOnRequestAnimationFrame( function( timeElapsed ) {
+        display.updateOnRequestAnimationFrame( timeElapsed => {
           node.rotate( timeElapsed );
         } );
       } );
     </script>
 
-      <pre class="brush: js">
-var scene = new phet.scenery.Node();
-var display = new phet.scenery.Display( scene, {
+    <pre class="brush: js">
+const scene = new phet.scenery.Node();
+const display = new phet.scenery.Display( scene, {
   container: document.getElementById( 'animation-simple' )
 } );
 
 // a hexagon to rotate
-var node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 90 ), {
+const node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 90 ), {
   fill: '#000000',
   centerX: 100,
   centerY: 100
@@ -538,34 +550,45 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
     </p>
 
     <p>
-      An instance of phet.scenery.Input is created and hooked to an event source with functions like Scene.initializeEvents(). The Input object tracks the principal abstraction of a <strong>pointer</strong>. A
-      pointer represents either the mouse or a single touch as it is tracked across the screen. The mouse 'pointer' always exists, but
-      touch pointers are transient, created when an actual pointer is pressed on a touchscreen and detached when it is lifted (or
-      canceled). Input event listeners can be added to nodes, the scene, or actual pointers themselves. Attaching a listener to a pointer
-      allows tracking of that pointer's state, and when combined with behavioral flags can create advanced input handling systems.
-      Also to note: preventDefault (triggered on events by default) will prevent touch events from being re-fired as mouse events, so
+      An instance of phet.scenery.Input is created and hooked to an event source with functions like
+      Scene.initializeEvents(). The Input object tracks the principal abstraction of a <strong>pointer</strong>. A
+      pointer represents either the mouse or a single touch as it is tracked across the screen. The mouse 'pointer'
+      always exists, but
+      touch pointers are transient, created when an actual pointer is pressed on a touchscreen and detached when it is
+      lifted (or
+      canceled). Input event listeners can be added to nodes, the scene, or actual pointers themselves. Attaching a
+      listener to a pointer
+      allows tracking of that pointer's state, and when combined with behavioral flags can create advanced input
+      handling systems.
+      Also to note: preventDefault (triggered on events by default) will prevent touch events from being re-fired as
+      mouse events, so
       we only see them once.
     </p>
 
     <p>
-      Events can be handled by any input listener (return true from the callback) and it will not fire any subsequent input listeners for
-      that event. For a single touchmove event, individual pointers generate their own events, so each input event will have a single
+      Events can be handled by any input listener (return true from the callback) and it will not fire any subsequent
+      input listeners for
+      that event. For a single touchmove event, individual pointers generate their own events, so each input event will
+      have a single
       associated pointer. The order of listeners visited for each event is as follows:
     </p>
 
     <ol>
       <li>Listeners attached to the associated pointer</li>
-      <li>For move/up/down/cancel events, listeners for the node directly beneath the event, and subsequently for all parent (ancestor) nodes in order
+      <li>For move/up/down/cancel events, listeners for the node directly beneath the event, and subsequently for all
+        parent (ancestor) nodes in order
         up to the root node
       </li>
-      <li>For enter/exit events, listeners similar to move/up/down/cancel events, but only up to (and not including) the common parent before/after
+      <li>For enter/exit events, listeners similar to move/up/down/cancel events, but only up to (and not including) the
+        common parent before/after
         the action. TODO: better explanation
       </li>
       <li>Listeners attached to the scene</li>
     </ol>
 
     <p>
-      DOM interaction with the event system is still being worked on. Gesture listeners and full pointer-list access will be added.
+      DOM interaction with the event system is still being worked on. Gesture listeners and full pointer-list access
+      will be added.
     </p>
 
     <p>
@@ -577,21 +600,21 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
     <div id="input-mouseover" style="width: 400px; height: 400px;" class="exampleScene"></div>
 
     <script type="text/javascript">
-      $( window ).ready( function() {
-        var scene = new phet.scenery.Node();
-        var display = new phet.scenery.Display( scene, {
+      $( window ).ready( () => {
+        const scene = new phet.scenery.Node();
+        const display = new phet.scenery.Display( scene, {
           container: document.getElementById( 'input-mouseover' )
         } );
 
         // hook up event listeners just on this scene (not the whole document)
         display.initializeEvents();
 
-        var count = 0;
-        var colors = [ '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff' ];
-        var maxColor = colors.length - 1;
+        let count = 0;
+        const colors = [ '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#ffffff' ];
+        const maxColor = colors.length - 1;
 
-        var labelPrefix = 'Pointers in hexagon: ';
-        var label = new phet.scenery.Text( labelPrefix + count, {
+        const labelPrefix = 'Pointers in hexagon: ';
+        const label = new phet.scenery.Text( labelPrefix + count, {
           left: 20,
           top: 20,
           font: '20px sans-serif'
@@ -599,7 +622,7 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
         scene.addChild( label );
 
         // a big hexagon in the center. stroke not included in the hit region by default
-        var node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 150 ), {
+        const node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 150 ), {
           fill: colors[ count ],
           stroke: '#000000',
           centerX: 200,
@@ -662,21 +685,21 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
       } );
     </script>
 
-      <pre class="brush: js">
-var scene = new phet.scenery.Node();
-var display = new phet.scenery.Display( scene, {
+    <pre class="brush: js">
+const scene = new phet.scenery.Node();
+const display = new phet.scenery.Display( scene, {
   container: document.getElementById( 'input-mouseover' )
 } );
 
 // hook up event listeners just on this scene (not the whole document)
 display.initializeEvents();
 
-var count = 0;
-var colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
-var maxColor = colors.length - 1;
+const count = 0;
+const colors = [ '000000', 'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff', 'ffffff' ];
+const maxColor = colors.length - 1;
 
-var labelPrefix = 'Pointers in hexagon: ';
-var label = new phet.scenery.Text( labelPrefix + count, {
+const labelPrefix = 'Pointers in hexagon: ';
+const label = new phet.scenery.Text( labelPrefix + count, {
   left: 20,
   top: 20,
   font: '20px sans-serif'
@@ -684,7 +707,7 @@ var label = new phet.scenery.Text( labelPrefix + count, {
 scene.addChild( label );
 
 // a big hexagon in the center. stroke not included in the hit region by default
-var node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 150 ), {
+const node = new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 150 ), {
   fill: colors[count],
   stroke: '#000000',
   centerX: 200,
@@ -749,14 +772,17 @@ display.updateOnRequestAnimationFrame();
     <h4>Node Dragging with Swipe-across-to-start-drag</h4>
 
     <p>
-      Visit <a href="../examples/multi-touch.html">this standalone example</a>, and you can drag multiple hexagons with multiple pointers,
-      and sliding a pointer across a touch-screen (i.e not the mouse) will pick up the first hexagon it slides across, into a drag.
+      Visit <a href="../examples/multi-touch.html">this standalone example</a>, and you can drag multiple hexagons with
+      multiple pointers,
+      and sliding a pointer across a touch-screen (i.e not the mouse) will pick up the first hexagon it slides across,
+      into a drag.
     </p>
 
     <h2>Appendix (to be completed later)</h2>
 
     <p>
-      An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$, so we'll able to include the
+      An example of math with MathJax, verifying it doesn't trample dollar signs in pre tags: $f(\theta)^2$, so we'll
+      able to include the
       necessary discussions using matrix algebra, etc.
     </p>
   </div>
@@ -769,7 +795,7 @@ display.updateOnRequestAnimationFrame();
 </footer>
 
 <script type="text/javascript">
-  SyntaxHighlighter.all();
+  window.SyntaxHighlighter.all();
 </script>
 </body>
 </html>
