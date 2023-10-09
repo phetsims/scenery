@@ -16,7 +16,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
-import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, FocusPanDirection, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
+import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, LimitPanDirection, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
@@ -453,7 +453,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   private repositionDuringDrag(): void {
     const globalBounds = this.getGlobalBoundsToViewDuringDrag();
     const targetNode = this.getTargetNodeDuringDrag();
-    globalBounds && this.keepBoundsInView( globalBounds, this._attachedPointers.some( pointer => pointer instanceof PDOMPointer ), targetNode?.focusPanDirection );
+    globalBounds && this.keepBoundsInView( globalBounds, this._attachedPointers.some( pointer => pointer instanceof PDOMPointer ), targetNode?.limitPanDirection );
   }
 
   /**
@@ -606,12 +606,12 @@ class AnimatedPanZoomListener extends PanZoomListener {
             globalBounds = focus.trail.localToGlobalBounds( focus.trail.lastNode().localBounds );
           }
 
-          this.keepBoundsInView( globalBounds, true, lastNode.focusPanDirection );
+          this.keepBoundsInView( globalBounds, true, lastNode.limitPanDirection );
         }
       } );
 
       // Pan to the focus trail right away if it is off-screen
-      this.keepTrailInView( focus.trail, lastNode.focusPanDirection );
+      this.keepTrailInView( focus.trail, lastNode.limitPanDirection );
     }
   }
 
@@ -910,7 +910,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    *                      until the Node is fully displayed in the viewport.
    * @param panDirection - if provided, we will only pan in the direction specified, null for all directions
    */
-  public panToNode( node: Node, panToCenter: boolean, panDirection?: FocusPanDirection | null ): void {
+  public panToNode( node: Node, panToCenter: boolean, panDirection?: LimitPanDirection | null ): void {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
     this.keepBoundsInView( node.globalBounds, panToCenter, panDirection );
   }
@@ -928,7 +928,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    *                                until all edges are on screen
    * @param panDirection - if provided, we will only pan in the direction specified, null for all directions
    */
-  private keepBoundsInView( globalBounds: Bounds2, panToCenter: boolean, panDirection?: FocusPanDirection | null ): void {
+  private keepBoundsInView( globalBounds: Bounds2, panToCenter: boolean, panDirection?: LimitPanDirection | null ): void {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
     const sourcePosition = this.sourcePosition!;
     assert && assert( sourcePosition, 'sourcePosition must be defined to handle keepBoundsInView, be sure to call initializePositions' );
@@ -989,7 +989,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Keep a trail in view by panning to it if it has bounds that are outside of the global panBounds.
    */
-  private keepTrailInView( trail: Trail, panDirection?: FocusPanDirection | null ): void {
+  private keepTrailInView( trail: Trail, panDirection?: LimitPanDirection | null ): void {
     if ( this._panBounds.isFinite() && trail.lastNode().bounds.isFinite() ) {
       const globalBounds = trail.localToGlobalBounds( trail.lastNode().localBounds );
       if ( !this._panBounds.containsBounds( globalBounds ) ) {
