@@ -103,10 +103,10 @@
 <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
 
 <script type="text/javascript">
-  //docExample creates the display and initalizes the display events.
+  //docExample creates the display and initializes the display events.
   let scene;
 
-  function docExample( id, draw ) {
+  window.docExample = ( id, draw ) => {
     let $container = $( '#' + id );
     scene = new phet.scenery.Node();
     let display = new phet.scenery.Display( scene, {
@@ -130,7 +130,7 @@
   // which are mouse click events, and "keydown" and "keyup" events for the enter key, which are keyboard accessibility
   // click events. PressListener handles all four of these events such that mouse click and a11y click events have the
   // same callback functions, and do not need to be separately handled because both are handled in a single "press" event.
-  docExample( 'accessibility-scene', ( scene, display ) => {
+  window.docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
 
     // list of colorful buttons to be generated.

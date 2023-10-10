@@ -103,7 +103,7 @@
 <script type="text/javascript">
   let scene;
 
-  function docExample( id, draw ) {
+  window.docExample = ( id, draw ) => {
     'use strict';
     const $container = $( '#' + id );
     scene = new phet.scenery.Node();
@@ -122,7 +122,7 @@
 <script type="text/javascript">
   phet.scenery.Utils.polyfillRequestAnimationFrame();
 
-  docExample( 'accessibility-scene', ( scene, display ) => {
+  window.docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
 
     const squareDimension = 3 * display.height / 4;

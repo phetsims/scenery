@@ -38,7 +38,7 @@
   <script type="text/javascript">
     phet.scenery.Utils.polyfillRequestAnimationFrame();
 
-    function docExample( id, draw ) {
+    window.docExample = ( id, draw ) => {
 
       var $container = $( '#' + id );
       var scene = new phet.scenery.Node();
@@ -347,7 +347,7 @@
       to hear speech.</p>
     <div id="example-voicing" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
-      docExample( 'example-voicing', function( scene, display ) {
+      window.docExample( 'example-voicing', function( scene, display ) {
         /*START*/
 
         // create a class that is compsed with Voicing
@@ -408,7 +408,7 @@
     <div id="controlled-responses" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
     <script type="text/javascript">
 
-      docExample( 'controlled-responses', function( scene, display ) {
+      window.docExample( 'controlled-responses', function( scene, display ) {
         /*START*/
 
         // create a class that is compsed with Voicing

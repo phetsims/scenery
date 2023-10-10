@@ -43,7 +43,7 @@
   <script type="text/javascript">
     phet.scenery.Utils.polyfillRequestAnimationFrame();
 
-    function docExample( id, draw ) {
+    window.docExample = ( id, draw ) => {
       var $container = $( '#' + id );
       var scene = new phet.scenery.Node();
       var display = new phet.scenery.Display( scene, {
@@ -486,7 +486,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-children" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-children', function( scene ) {
+      window.docExample( 'example-children', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Node( {
           // an array of children can be specified, so no
@@ -582,7 +582,7 @@ window.assertions.disableAssertSlow();
     </ul>
     <div id="example-cursor" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-cursor', function( scene, display ) {
+      window.docExample( 'example-cursor', function( scene, display ) {
         /*START*/
         scene.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 25 ), {
           x: 64, y: 32,
@@ -657,7 +657,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-clipArea" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-clipArea', function( scene ) {
+      window.docExample( 'example-clipArea', function( scene ) {
         scene.renderer = 'svg';
         /*START*/
         scene.addChild( new phet.scenery.Circle( 28, {
@@ -729,7 +729,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-opacity" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-opacity', function( scene ) {
+      window.docExample( 'example-opacity', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
         var circle = phet.kite.Shape.circle( 0, 0, 30 );
@@ -1127,7 +1127,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-lineCap" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-lineCap', function( scene ) {
+      window.docExample( 'example-lineCap', function( scene ) {
         scene.addChild( new phet.scenery.Text( 'butt', {
           fontSize: 14,
           centerX: 256 / 6,
@@ -1192,7 +1192,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-lineJoin" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-lineJoin', function( scene ) {
+      window.docExample( 'example-lineJoin', function( scene ) {
         scene.addChild( new phet.scenery.Text( 'miter', {
           fontSize: 14,
           centerX: 256 / 6,
@@ -1257,7 +1257,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-lineDash" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-lineDash', function( scene ) {
+      window.docExample( 'example-lineDash', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Path( phet.kite.Shape.regularPolygon( 6, 25 ), {
           x: 32, y: 32,
@@ -1280,7 +1280,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-lineDashOffset" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-lineDashOffset', function( scene ) {
+      window.docExample( 'example-lineDashOffset', function( scene ) {
         scene.addChild( new phet.scenery.Path( new phet.kite.Shape().moveTo( 0, 16.5 )
             .lineTo( 128, 16.5 )
             .moveTo( 0, 32.5 )
@@ -1364,7 +1364,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-image" class="exampleScene" style="width: 130px; height: 85px;"></div>
     <script type="text/javascript">
-      docExample( 'example-image', function( scene, display ) {
+      window.docExample( 'example-image', function( scene, display ) {
         var url = 'https://phet.colorado.edu/sims/my-solar-system/my-solar-system-thumbnail.png';
         /*START*/
         scene.addChild( new phet.scenery.Image( url ) );
@@ -1414,7 +1414,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-text" class="exampleScene" style="width: 256px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-text', function( scene ) {
+      window.docExample( 'example-text', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Text( 'Some text', {
           font: '20px sans-serif',
@@ -1572,7 +1572,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-dom" class="exampleScene" style="width: 256px; height: 128px;"></div>
     <script type="text/javascript">
-      docExample( 'example-dom', function( scene ) {
+      window.docExample( 'example-dom', function( scene ) {
         /*START*/
         var element = document.createElement( 'span' );
         element.innerHTML = '<label style="display: inline;">Type in me: </label><input type="text">';
@@ -1615,7 +1615,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-linearGradient" class="exampleScene" style="width: 128px; height: 128px;"></div>
     <script type="text/javascript">
-      docExample( 'example-linearGradient', function( scene ) {
+      window.docExample( 'example-linearGradient', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 128, 128 ), {
 
@@ -1677,7 +1677,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-radialGradient" class="exampleScene" style="width: 128px; height: 128px;"></div>
     <script type="text/javascript">
-      docExample( 'example-radialGradient', function( scene ) {
+      window.docExample( 'example-radialGradient', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 128, 128 ), {
 
@@ -1740,7 +1740,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-pattern" class="exampleScene" style="width: 256px; height: 256px;"></div>
     <script type="text/javascript">
-      docExample( 'example-pattern', function( scene, display ) {
+      window.docExample( 'example-pattern', function( scene, display ) {
         var loadedImg = document.createElement( 'img' );
         loadedImg.addEventListener( 'load', function() {
           /*START*/
@@ -1786,7 +1786,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-rectangle" class="exampleScene" style="width: 128px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-rectangle', function( scene ) {
+      window.docExample( 'example-rectangle', function( scene ) {
         /*START*/
 // red rectangle
         scene.addChild( new phet.scenery.Rectangle( 10, 10, 44, 44, {
@@ -1874,7 +1874,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-circle" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-circle', function( scene ) {
+      window.docExample( 'example-circle', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Circle( 22, {
           x: 32, y: 32, fill: '#f00'
@@ -1909,7 +1909,7 @@ window.assertions.disableAssertSlow();
 
     <div id="example-line" class="exampleScene" style="width: 64px; height: 64px;"></div>
     <script type="text/javascript">
-      docExample( 'example-line', function( scene ) {
+      window.docExample( 'example-line', function( scene ) {
         /*START*/
         scene.addChild( new phet.scenery.Line( 8, 8, 56, 56, {
           stroke: 'red', lineWidth: 5, lineCap: 'round'

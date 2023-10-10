@@ -55,7 +55,7 @@
 </div>
 <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
 <script type="text/javascript">
-  function docExample( id, draw ) {
+  window.docExample = ( id, draw ) => {
     var $container = $( '#' + id );
     var scene = new phet.scenery.Node();
     var display = new phet.scenery.Display( scene, {
@@ -80,7 +80,7 @@
   phet.scenery.Utils.polyfillRequestAnimationFrame();
 
 
-  docExample( 'accessibility-scene', ( scene, display ) => {
+  window.docExample( 'accessibility-scene', ( scene, display ) => {
 
     // Add our text
     scene.addChild( new phet.scenery.Path( phet.kite.Shape.arc( 20, 20, 50, 0, 3 ),

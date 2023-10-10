@@ -38,7 +38,7 @@
   <script type="text/javascript">
     phet.scenery.Utils.polyfillRequestAnimationFrame();
 
-    function docExample( id, draw ) {
+    window.docExample = ( id, draw ) => {
       var $container = $( '#' + id );
       var scene = new phet.scenery.Node();
       var display = new phet.scenery.Display( scene, {
@@ -297,7 +297,7 @@
       To do this, use the <code>tagName</code> option:</p>
     <div id="example-accessibleTag" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
-      docExample( 'example-accessibleTag', function( scene, display ) {
+      window.docExample( 'example-accessibleTag', function( scene, display ) {
         /*START*/
         var pdomNode = new phet.scenery.Rectangle( 0, 0, 64, 64, {
           fill: 'blue',
@@ -352,7 +352,7 @@
 
     <div id="example-all-siblings" class="exampleScene" style="width: 96px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
-      docExample( 'example-all-siblings', function( scene, display ) {
+      window.docExample( 'example-all-siblings', function( scene, display ) {
         /*START*/
         var pdomNode = new phet.scenery.Node( {
 
@@ -419,7 +419,7 @@
     </p>
     <div id="example-accessible-graph" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
-      docExample( 'example-accessible-graph', function( scene, display ) {
+      window.docExample( 'example-accessible-graph', function( scene, display ) {
         /*START*/
         var dimension = 64;
 
@@ -468,7 +468,7 @@
     </p>
     <div id="example-lots-of-text" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
-      docExample( 'example-lots-of-text', function( scene, display ) {
+      window.docExample( 'example-lots-of-text', function( scene, display ) {
         /*START*/
         var pdomNode = new phet.scenery.Node( {
 
@@ -512,7 +512,7 @@
     <p></p>
     <div id="example-input-type" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
-      docExample( 'example-input-type', function( scene, display ) {
+      window.docExample( 'example-input-type', function( scene, display ) {
         /*START*/
         var pdomNode = new phet.scenery.Rectangle( 0, 0, 64, 64, {
           fill: 'blue',
