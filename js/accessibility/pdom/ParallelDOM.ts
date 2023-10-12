@@ -231,7 +231,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'ariaDescribedbyAssociations',
   'activeDescendantAssociations',
 
-  'createFocusPanTargetBounds',
+  'focusPanTargetBoundsProperty',
   'limitPanDirection',
 
   'positionInPDOM',
@@ -288,7 +288,7 @@ export type ParallelDOMOptions = {
   ariaDescribedbyAssociations?: Association[]; // sets the list of aria-describedby associations between from this node to others (including itself)
   activeDescendantAssociations?: Association[]; // sets the list of aria-activedescendant associations between from this node to others (including itself)
 
-  createFocusPanTargetBounds?: ( () => Bounds2 ) | null; // A function that sets the global bounds for an AnimatedPanZoomListener to keep in view
+  focusPanTargetBoundsProperty?: TReadOnlyProperty<Bounds2> | null; // A Property with bounds that describe the bounds of this Node that should remain displayed by the global AnimatedPanZoomListener
   limitPanDirection?: LimitPanDirection | null; // A constraint on the direction of panning when interacting with this Node.
 
   positionInPDOM?: boolean; // Sets whether the node's DOM elements are positioned in the viewport
@@ -513,7 +513,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // If this is provided, the AnimatedPanZoomListener will attempt to keep this Node in view as long as it has
   // focus
-  private _createFocusPanTargetBounds: ( () => Bounds2 ) | null;
+  private _focusPanTargetBoundsProperty: TReadOnlyProperty<Bounds2> | null;
 
   // If provided, the AnimatedPanZoomListener will ONLY pan in the specified direction
   private _limitPanDirection: LimitPanDirection | null;
@@ -608,7 +608,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomOrder = null;
     this._pdomParent = null;
     this._pdomTransformSourceNode = null;
-    this._createFocusPanTargetBounds = null;
+    this._focusPanTargetBoundsProperty = null;
     this._limitPanDirection = null;
     this._pdomDisplaysInfo = new PDOMDisplaysInfo( this as unknown as Node );
     this._pdomInstances = [];
@@ -2581,39 +2581,42 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * Sets a function on this Node that will be used by the animatedPanZoomSingleton. It will try to keep these global
-   * bounds visible in the viewport when this Node (or any ancestor) has a transformation change while actively
-   * focused. This is useful if the bounds of your focusable Node do not accurately surround the conceptual interactive
-   * component.
+   * Used by the animatedPanZoomSingleton. It will try to keep these bounds visible in the viewport when this Node
+   * (or any ancestor) has a transform change while focused. This is useful if the bounds of your focusable
+   * Node do not accurately surround the conceptual interactive component. If null, this Node's local bounds
+   * are used.
    *
-   * @param createFocusPanTargetBounds - returns bounds in the global coordinate frame
+   * At this time, the Property cannot be changed after it is set.
    */
-  public setCreateFocusPanTargetBounds( createFocusPanTargetBounds: null | ( () => Bounds2 ) ): void {
-    this._createFocusPanTargetBounds = createFocusPanTargetBounds;
-  }
+  public setFocusPanTargetBoundsProperty( boundsProperty: null | TReadOnlyProperty<Bounds2> ): void {
 
+    // We may call this more than once with mutate
+    if ( boundsProperty !== this._focusPanTargetBoundsProperty ) {
+      assert && assert( !this._focusPanTargetBoundsProperty, 'Cannot change focusPanTargetBoundsProperty after it is set.' );
+      this._focusPanTargetBoundsProperty = boundsProperty;
+    }
+  }
 
   /**
    * Returns the function for creating global bounds to keep in the viewport while the component has focus, see the
-   * setCreateFocusPanTargetBounds function for more information.
+   * setFocusPanTargetBoundsProperty function for more information.
    */
-  public getCreateFocusPanTargetBounds(): null | ( () => Bounds2 ) {
-    return this._createFocusPanTargetBounds;
+  public getFocusPanTargetBoundsProperty(): null | TReadOnlyProperty<Bounds2> {
+    return this._focusPanTargetBoundsProperty;
   }
 
   /**
-   * See setCreateFocusPanTargetBounds for more information.
-   * @param createFocusPanTargetBounds
+   * See setFocusPanTargetBoundsProperty for more information.
    */
-  public set createFocusPanTargetBounds( createFocusPanTargetBounds: null | ( () => Bounds2 ) ) {
-    this.setCreateFocusPanTargetBounds( createFocusPanTargetBounds );
+  public set focusPanTargetBoundsProperty( boundsProperty: null | TReadOnlyProperty<Bounds2> ) {
+    this.setFocusPanTargetBoundsProperty( boundsProperty );
   }
 
   /**
-   * See getCreateFocusPanTargetBounds for more information.
+   * See getFocusPanTargetBoundsProperty for more information.
    */
-  public get createFocusPanTargetBounds(): null | ( () => Bounds2 ) {
-    return this.getCreateFocusPanTargetBounds();
+  public get focusPanTargetBoundsProperty(): null | TReadOnlyProperty<Bounds2> {
+    return this.getFocusPanTargetBoundsProperty();
   }
 
   /**

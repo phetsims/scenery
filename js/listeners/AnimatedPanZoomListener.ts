@@ -16,10 +16,11 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
-import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, Mouse, MultiListenerPress, Node, LimitPanDirection, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
+import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, LimitPanDirection, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import { PropertyLinkListener } from '../../../axon/js/TReadOnlyProperty.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -110,6 +111,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
   // A TransformTracker that will watch for changes to the targetNode's global transformation matrix, used to keep
   // the targetNode in view during animation.
   private _transformTracker: TransformTracker | null = null;
+
+  // A listener on the focusPanTargetBoundsProperty of the focused Node that will keep those bounds displayed in
+  // the viewport.
+  private _focusBoundsListener: PropertyLinkListener<Bounds2> | null = null;
 
   private readonly disposeAnimatedPanZoomListener: () => void;
 
@@ -568,12 +573,23 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Handle a change of focus by immediately panning so that the focused Node is in view. Also sets up the
-   * TransformTracker which will automatically keep the target in the viewport as it is animates.
+   * TransformTracker which will automatically keep the target in the viewport as it is animates, and a listener
+   * on the focusPanTargetBoundsProperty (if provided) to handle Node other size or custom changes.
    */
-  public handleFocusChange( focus: Focus | null ): void {
+  public handleFocusChange( focus: Focus | null, previousFocus: Focus | null ): void {
+
+    // Remove listeners on the previous focus watching transform and bounds changes
     if ( this._transformTracker ) {
       this._transformTracker.dispose();
       this._transformTracker = null;
+    }
+    if ( previousFocus && previousFocus.trail.lastNode() && previousFocus.trail.lastNode().focusPanTargetBoundsProperty ) {
+      const previousBoundsProperty = previousFocus.trail.lastNode().focusPanTargetBoundsProperty!;
+      assert && assert( this._focusBoundsListener && previousBoundsProperty.hasListener( this._focusBoundsListener ),
+        'Focus bounds listener should be linked to the previous Node'
+      );
+      previousBoundsProperty.unlink( this._focusBoundsListener! );
+      this._focusBoundsListener = null;
     }
 
     if ( focus ) {
@@ -590,14 +606,16 @@ class AnimatedPanZoomListener extends PanZoomListener {
       }
 
       this._transformTracker = new TransformTracker( trailToTrack );
-      this._transformTracker.addListener( () => {
+
+      const focusMovementListener = () => {
         if ( this.getCurrentScale() > 1 ) {
 
           let globalBounds: Bounds2;
-          if ( lastNode.createFocusPanTargetBounds ) {
+          if ( lastNode.focusPanTargetBoundsProperty ) {
 
-            // This Node has a custom global bounds area that we need to keep in view
-            globalBounds = lastNode.createFocusPanTargetBounds();
+            // This Node has a custom bounds area that we need to keep in view
+            const localBounds = lastNode.focusPanTargetBoundsProperty.value;
+            globalBounds = focus.trail.localToGlobalBounds( localBounds );
           }
           else {
 
@@ -608,7 +626,16 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
           this.keepBoundsInView( globalBounds, true, lastNode.limitPanDirection );
         }
-      } );
+      };
+
+      // observe changes to the transform
+      this._transformTracker.addListener( focusMovementListener );
+
+      // observe changes on the client-provided local bounds
+      if ( lastNode.focusPanTargetBoundsProperty ) {
+        this._focusBoundsListener = focusMovementListener;
+        lastNode.focusPanTargetBoundsProperty.link( this._focusBoundsListener );
+      }
 
       // Pan to the focus trail right away if it is off-screen
       this.keepTrailInView( focus.trail, lastNode.limitPanDirection );
