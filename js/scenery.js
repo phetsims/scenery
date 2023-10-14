@@ -14,6 +14,7 @@
 
 import extend from '../../phet-core/js/extend.js';
 import Namespace from '../../phet-core/js/Namespace.js';
+import '../../alpenglow/js/main.js';
 
 // @public (scenery-internal)
 window.sceneryLog = null;
