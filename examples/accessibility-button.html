@@ -56,10 +56,10 @@
   <div id="accessibility-scene" class="exampleScene" style="width: 600px; height: 200px;"></div>
 </div>
 <script type="text/javascript">
-  function docExample( id, draw ) {
-    var $container = $( '#' + id );
-    var scene = new phet.scenery.Node();
-    var display = new phet.scenery.Display( scene, {
+  window.docExample = ( id, draw ) => {
+    const $container = $( '#' + id );
+    const scene = new phet.scenery.Node();
+    const display = new phet.scenery.Display( scene, {
       width: $container.width(),
       height: $container.height()
     } );
@@ -69,20 +69,19 @@
     draw( scene, display );
     display.updateDisplay();
 
-    var pdomHTMLBlock = display.pdomRootElement.outerHTML;
-    var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
-    var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
+    const pdomHTMLBlock = display.pdomRootElement.outerHTML;
+    const formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
+    const $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
 
     $container.after( $PDOMcode );
-  }
+  };
 </script>
 <script type="text/javascript">
-
 
   phet.scenery.Utils.polyfillRequestAnimationFrame();
 
 
-  docExample( 'accessibility-scene', ( scene, display ) => {
+  window.docExample( 'accessibility-scene', ( scene, display ) => {
 
     // Add our text
     const rectangle = new phet.scenery.Path( phet.kite.Shape.roundedRectangleWithRadii( 5, 5, 500, 100, {

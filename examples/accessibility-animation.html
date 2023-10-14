@@ -101,9 +101,10 @@
     </div>
   </div>
 </div>
+<!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
 
 <script type="text/javascript">
-  function docExample( id, draw ) {
+  window.docExample = ( id, draw ) => {
     // specify the dom element to which the display will be appended
     var $container = $( '#' + id );
     // create the scene and display
@@ -142,7 +143,7 @@
     return Math.floor( Math.random() * 255 )
   }
 
-  docExample( 'accessibility-scene', ( scene, display ) => {
+  window.docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
 
     class Hexagon extends phet.scenery.Node {

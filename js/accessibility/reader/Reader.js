@@ -34,7 +34,7 @@ class Reader {
     this.politeUtterances = [];
 
     // windows Chrome needs a temporary workaround to avoid skipping every other utterance
-    // TODO: Use platform.js and revisit once platforms fix their bugs https://github.com/phetsims/tasks/issues/1129
+    // TODO: Use platform.js and revisit once platforms fix their bugs https://github.com/phetsims/scenery/issues/1581
     const userAgent = navigator.userAgent;
     const osWindows = userAgent.match( /Windows/ );
     const platSafari = !!( userAgent.match( /Version\/[5-9]\./ ) && userAgent.match( /Safari\// ) && userAgent.match( /AppleWebKit/ ) );
@@ -69,7 +69,7 @@ class Reader {
         utterThis.voice = defaultVoice;
         utterThis.rate = 1.2;
 
-        // TODO: Implement behavior for the various live roles https://github.com/phetsims/tasks/issues/1129
+        // TODO: Implement behavior for the various live roles https://github.com/phetsims/scenery/issues/1581
         // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
         if ( outputUtterance.liveRole === 'assertive' ||
              outputUtterance.liveRole === 'off' ||
@@ -80,7 +80,7 @@ class Reader {
           this.speaking = true;
 
           // if assertive or off, cancel the current active utterance and begin speaking immediately
-          // TODO: This is how most screen readers work, but we will probably want different behavior https://github.com/phetsims/tasks/issues/1129
+          // TODO: This is how most screen readers work, but we will probably want different behavior https://github.com/phetsims/scenery/issues/1581
           // for sims so multiple assertive updates do not compete.
 
           // On Windows, the synth must be paused before cancelation and resumed after speaking,

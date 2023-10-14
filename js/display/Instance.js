@@ -289,7 +289,7 @@ class Instance {
    * using this method to prevent memory leaks.
    * @private
    *
-   * TODO: consider a pool of (or a single global) typed return object(s), since setting these values on the instance https://github.com/phetsims/tasks/issues/1129
+   * TODO: consider a pool of (or a single global) typed return object(s), since setting these values on the instance https://github.com/phetsims/scenery/issues/1581
    * generally means hitting the heap, and can slow us down.
    */
   cleanSyncTreeResults() {
@@ -421,24 +421,24 @@ class Instance {
     // if we are under a canvas cache, we will NEVER have a backbone
     // splits are accomplished just by having a backbone
     // NOTE: If changing, check RendererSummary.summaryBitmaskForNodeSelf
-    //OHTWO TODO: Update this to properly identify when backbones are necessary/and-or when we forward opacity/clipping https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: Update this to properly identify when backbones are necessary/and-or when we forward opacity/clipping https://github.com/phetsims/scenery/issues/1581
     if ( useBackbone ) {
       this.isBackbone = true;
       this.isVisibilityApplied = true;
       this.isTransformed = this.isDisplayRoot || !!node._cssTransform; // for now, only trigger CSS transform if we have the specific hint
-      //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock https://github.com/phetsims/scenery/issues/1581
       this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
     }
-    // TODO: node._canvasCache hint not defined, always undefined https://github.com/phetsims/tasks/issues/1129
+    // TODO: node._canvasCache hint not defined, always undefined https://github.com/phetsims/scenery/issues/1581
     else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || node._canvasCache ) ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
         `Node canvasCache provided, but not all node contents can be rendered with Canvas under ${
           this.node.constructor.name}` );
 
-      // TODO: node._singleCache hint not defined, always undefined https://github.com/phetsims/tasks/issues/1129
+      // TODO: node._singleCache hint not defined, always undefined https://github.com/phetsims/scenery/issues/1581
       if ( node._singleCache ) {
-        // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped https://github.com/phetsims/tasks/issues/1129
+        // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped https://github.com/phetsims/scenery/issues/1581
         if ( this.isSharedCanvasCacheRoot ) {
           this.isSharedCanvasCacheSelf = true;
 
@@ -446,7 +446,7 @@ class Instance {
         }
         else {
           // everything underneath needs to guarantee that its bounds are valid
-          //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach https://github.com/phetsims/tasks/issues/1129
+          //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach https://github.com/phetsims/scenery/issues/1581
           assert && assert( this.node._rendererSummary.areBoundsValid(),
             `Node singleCache provided, but not all node contents have valid bounds under ${
               this.node.constructor.name}` );
@@ -623,7 +623,7 @@ class Instance {
       this.attachNodeListeners();
     }
 
-    // TODO: pruning of shared caches https://github.com/phetsims/tasks/issues/1129
+    // TODO: pruning of shared caches https://github.com/phetsims/scenery/issues/1581
     if ( this.isSharedCanvasCachePlaceholder ) {
       this.sharedSyncTree();
     }
@@ -706,7 +706,7 @@ class Instance {
 
       const includeChildDrawables = childInstance.shouldIncludeInParentDrawables();
 
-      //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide https://github.com/phetsims/scenery/issues/1581
       // SVG trees, memory-wise)
       // here we strip out invisible drawable sections out of the drawable linked list
       if ( includeChildDrawables ) {
@@ -841,7 +841,7 @@ class Instance {
 
       // clean up the metadata on our child (can't be done in the child call, since we use these values like a
       // composite return value)
-      //OHTWO TODO: only do this on instances that were actually traversed https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: only do this on instances that were actually traversed https://github.com/phetsims/scenery/issues/1581
       childInstance.cleanSyncTreeResults();
 
       sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
@@ -906,7 +906,7 @@ class Instance {
       // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is
       // the mask for those flags. In English, "Is the current selfDrawable compatible with our selfRenderer (if any),
       // or do we need to create a selfDrawable?"
-      //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: For Canvas, we won't care about anything else for the drawable, but for DOM we care about the https://github.com/phetsims/scenery/issues/1581
       // force-acceleration flag! That's stripped out here.
       if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
         if ( this.selfDrawable ) {
@@ -1021,7 +1021,7 @@ class Instance {
         if ( groupChanged ) {
           this.groupDrawable = CanvasBlock.createFromPool( groupRenderer, this );
         }
-        //OHTWO TODO: restitch here??? implement it https://github.com/phetsims/tasks/issues/1129
+        //OHTWO TODO: restitch here??? implement it https://github.com/phetsims/scenery/issues/1581
       }
       // Update the fittable flag
       this.groupDrawable.setFittable( this.fittability.ancestorsFittable );
@@ -1044,14 +1044,14 @@ class Instance {
    * @private
    */
   sharedSyncTree() {
-    //OHTWO TODO: we are probably missing syncTree for shared trees properly with pruning. investigate!! https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: we are probably missing syncTree for shared trees properly with pruning. investigate!! https://github.com/phetsims/scenery/issues/1581
 
     this.ensureSharedCacheInitialized();
 
     const sharedCacheRenderer = this.sharedCacheRenderer;
 
     if ( !this.sharedCacheDrawable || this.sharedCacheDrawable.renderer !== sharedCacheRenderer ) {
-      //OHTWO TODO: mark everything as changed (big change interval) https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: mark everything as changed (big change interval) https://github.com/phetsims/scenery/issues/1581
 
       if ( this.sharedCacheDrawable ) {
         sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `replacing shared cache drawable ${this.sharedCacheDrawable.toString()}` );
@@ -1059,7 +1059,7 @@ class Instance {
         this.sharedCacheDrawable.markForDisposal( this.display );
       }
 
-      //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer https://github.com/phetsims/scenery/issues/1581
       // (update it if necessary)
       this.sharedCacheDrawable = new SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
       this.firstDrawable = this.sharedCacheDrawable;
@@ -1102,25 +1102,25 @@ class Instance {
     // we only need to initialize this shared cache reference once
     if ( !this.sharedCacheInstance ) {
       const instanceKey = this.node.getId();
-      // TODO: have this abstracted away in the Display? https://github.com/phetsims/tasks/issues/1129
+      // TODO: have this abstracted away in the Display? https://github.com/phetsims/scenery/issues/1581
       this.sharedCacheInstance = this.display._sharedCanvasInstances[ instanceKey ];
 
-      // TODO: increment reference counting? https://github.com/phetsims/tasks/issues/1129
+      // TODO: increment reference counting? https://github.com/phetsims/scenery/issues/1581
       if ( !this.sharedCacheInstance ) {
         this.sharedCacheInstance = Instance.createFromPool( this.display, new Trail( this.node ), false, true );
         this.sharedCacheInstance.syncTree();
         this.display._sharedCanvasInstances[ instanceKey ] = this.sharedCacheInstance;
-        // TODO: reference counting? https://github.com/phetsims/tasks/issues/1129
+        // TODO: reference counting? https://github.com/phetsims/scenery/issues/1581
 
-        // TODO: this.sharedCacheInstance.isTransformed? https://github.com/phetsims/tasks/issues/1129
+        // TODO: this.sharedCacheInstance.isTransformed? https://github.com/phetsims/scenery/issues/1581
 
-        //OHTWO TODO: is this necessary? https://github.com/phetsims/tasks/issues/1129
+        //OHTWO TODO: is this necessary? https://github.com/phetsims/scenery/issues/1581
         this.display.markTransformRootDirty( this.sharedCacheInstance, true );
       }
 
       this.sharedCacheInstance.externalReferenceCount++;
 
-      //OHTWO TODO: is this necessary? https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: is this necessary? https://github.com/phetsims/scenery/issues/1581
       if ( this.isTransformed ) {
         this.display.markTransformRootDirty( this, true );
       }
@@ -1141,7 +1141,7 @@ class Instance {
    * Finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
    * @private
    *
-   * TODO: check usage? https://github.com/phetsims/tasks/issues/1129
+   * TODO: check usage? https://github.com/phetsims/scenery/issues/1581
    *
    * @param {number} childIndex
    * @returns {Drawable|null}
@@ -1161,7 +1161,7 @@ class Instance {
    * Finds the closest drawable (not including the child instance at childIndex) using nextDrawable, or null
    * @private
    *
-   * TODO: check usage? https://github.com/phetsims/tasks/issues/1129
+   * TODO: check usage? https://github.com/phetsims/scenery/issues/1581
    *
    * @param {number} childIndex
    * @returns {Drawable|null}
@@ -1277,7 +1277,7 @@ class Instance {
       this.children[ index + 1 ].stitchChangeBefore = frameId;
     }
 
-    this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call https://github.com/phetsims/tasks/issues/1129
+    this.children.splice( index, 1 ); // TODO: replace with a 'remove' function call https://github.com/phetsims/scenery/issues/1581
     instance.parent = null;
     instance.oldParent = this;
 
@@ -1308,7 +1308,7 @@ class Instance {
    * @param {number} index
    */
   replaceInstanceWithIndex( childInstance, replacementInstance, index ) {
-    // TODO: optimization? hopefully it won't happen often, so we just do this for now https://github.com/phetsims/tasks/issues/1129
+    // TODO: optimization? hopefully it won't happen often, so we just do this for now https://github.com/phetsims/scenery/issues/1581
     this.removeInstanceWithIndex( childInstance, index );
     this.insertInstance( replacementInstance, index );
   }

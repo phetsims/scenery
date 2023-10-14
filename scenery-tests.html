@@ -7,7 +7,7 @@
   <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="phet-sim-level" content="development">
-  <link rel="stylesheet" href="../sherpa/lib/qunit-2.10.0.css">
+  <link rel="stylesheet" href="../sherpa/lib/qunit-2.20.0.css">
   <title>scenery</title>
 </head>
 
@@ -17,6 +17,7 @@
 <div id="qunit-fixture"></div><div id="display"></div>
 
 <script type="text/javascript">
+  /*eslint-disable quotes, quote-props*/
 
   window.phet = window.phet || {};
   window.phet.chipper = window.phet.chipper || {};
@@ -44,7 +45,6 @@
         "requiresJQuery": true,
         "finalizeJS": "scenery.Utils.polyfillRequestAnimationFrame();",
         "preload": [
-          "../sherpa/lib/himalaya-1.1.0.js",
           "../sherpa/lib/linebreak-1.1.0.js",
           "../sherpa/lib/flatqueue-1.2.1.js"
         ],
@@ -97,7 +97,6 @@
     '../sherpa/lib/jquery-2.1.0.js',
     '../sherpa/lib/lodash-4.17.4.js',
     '../sherpa/lib/FileSaver-b8054a2.js',
-    '../sherpa/lib/himalaya-1.1.0.js',
     '../sherpa/lib/linebreak-1.1.0.js',
     '../sherpa/lib/flatqueue-1.2.1.js',
     '../sherpa/lib/paper-js-0.12.17.js',
@@ -110,7 +109,7 @@
     '../sherpa/lib/TextEncoderLite-3c9f6f0.js',
     '../tandem/js/PhetioIDUtils.js',
     '../perennial-alias/js/common/SimVersion.js',
-    '../sherpa/lib/qunit-2.10.0.js',
+    '../sherpa/lib/qunit-2.20.0.js',
     '../chipper/js/sim-tests/qunit-connector.js'
   ];
 

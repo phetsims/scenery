@@ -183,22 +183,19 @@ export default class FocusManager {
     assert && assert( document.activeElement, 'Must be called from focusin, therefore active elemetn expected' );
 
     if ( focus ) {
-      const uniqueId = document.activeElement!.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID )!;
-      assert && assert( uniqueId, 'Event target must have a unique ID on its data' );
-
-      // TODO: But maybe actually we have some clearing to do here. https://github.com/phetsims/scenery/issues/1550
-      // Cases like a DOM() HTML element don't have a uniqueID, should they?
-      if ( !uniqueId ) {
-        return;
-      }
 
       // Look for the scenery target under the PDOM
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
 
-        // null if target is not under the PDOM
-        const trail = PDOMInstance.uniqueIdToTrail( display, uniqueId );
-        if ( trail ) {
+        const activeElement = document.activeElement as HTMLElement;
+        if ( display.isElementUnderPDOM( activeElement ) ) {
+          const uniqueId = activeElement.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID )!;
+          assert && assert( uniqueId, 'Event target must have a unique ID on its data if it is in the PDOM.' );
+
+          const trail = PDOMInstance.uniqueIdToTrail( display, uniqueId )!;
+          assert && assert( trail, 'We must have a trail since the target was under the PDOM.' );
+
           const visualTrail = PDOMInstance.guessVisualTrail( trail, display.rootNode );
           if ( visualTrail.lastNode().focusable ) {
             FocusManager.pdomFocus = new Focus( display, visualTrail );

@@ -7,7 +7,7 @@
   <title>JS cache poisoning with detection for if it was already loaded</title>
 
   <script type="text/javascript">
-    var script = document.createElement( 'script' );
+    const script = document.createElement( 'script' );
     script.type = 'text/javascript';
     script.async = true;
     script.charset = 'utf-16';
@@ -20,7 +20,7 @@
       }
     };
     script.src = 'http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js';
-    var other = document.getElementsByTagName( 'script' )[ 0 ];
+    const other = document.getElementsByTagName( 'script' )[ 0 ];
     other.parentNode.insertBefore( script, other );
   </script>
 </head>

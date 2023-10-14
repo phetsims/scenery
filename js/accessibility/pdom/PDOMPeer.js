@@ -133,7 +133,7 @@ class PDOMPeer {
     // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
     // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver.
     //
-    // TODO: Should we be watching "model" changes from ParallelDOM.js instead of using MutationObserver? https://github.com/phetsims/tasks/issues/1129
+    // TODO: Should we be watching "model" changes from ParallelDOM.js instead of using MutationObserver? https://github.com/phetsims/scenery/issues/1581
     // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
     // memory intensive because we don't need an instance of MutationObserver on every PDOMInstance.
     this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this ) );
@@ -198,7 +198,7 @@ class PDOMPeer {
     }
 
     // create the base DOM element representing this accessible instance
-    // TODO: why not just options.focusable? https://github.com/phetsims/tasks/issues/1129
+    // TODO: why not just options.focusable? https://github.com/phetsims/scenery/issues/1581
     this._primarySibling = createElement( options.tagName, this.node.focusable, {
       namespace: options.pdomNamespace
     } );
@@ -1190,7 +1190,7 @@ Poolable.mixInto( PDOMPeer, {
 
 /**
  * Create a sibling element for the PDOMPeer.
- * TODO: this should be inlined with the PDOMUtils method https://github.com/phetsims/tasks/issues/1129
+ * TODO: this should be inlined with the PDOMUtils method https://github.com/phetsims/scenery/issues/1581
  * @param {string} tagName
  * @param {boolean} focusable
  * @param {Object} [options] - passed along to PDOMUtils.createElement

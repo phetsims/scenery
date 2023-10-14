@@ -28,10 +28,10 @@
 <div id="hello-world-scene" style="width: 400px; height: 100px;"></div>
 <script type="text/javascript">
   // Create a Node as the root of our tree (it can contain children)
-  var scene = new phet.scenery.Node();
+  const scene = new phet.scenery.Node();
 
   // Create a display using this root node, using our existing div
-  var display = new phet.scenery.Display( scene, {
+  const display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'hello-world-scene' )
   } );
 

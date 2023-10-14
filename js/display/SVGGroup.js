@@ -37,7 +37,7 @@ class SVGGroup {
    * @param {SVGGroup|null} parent
    */
   initialize( block, instance, parent ) {
-    //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups https://github.com/phetsims/scenery/issues/1581
 
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `initializing ${this.toString()}` );
 
@@ -106,7 +106,7 @@ class SVGGroup {
     if ( this.willApplyFilters ) {
       this.node.filterChangeEmitter.addListener( this.filterChangeListener );
     }
-    //OHTWO TODO: remove clip workaround https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: remove clip workaround https://github.com/phetsims/scenery/issues/1581
     this.node.clipAreaProperty.lazyLink( this.clipDirtyListener );
 
     // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
@@ -284,7 +284,7 @@ class SVGGroup {
       svgGroup.style.display = this.node.isVisible() ? '' : 'none';
     }
 
-    // TODO: Check if we can leave opacity separate. If it gets applied "after" then we can have them separate https://github.com/phetsims/tasks/issues/1129
+    // TODO: Check if we can leave opacity separate. If it gets applied "after" then we can have them separate https://github.com/phetsims/scenery/issues/1581
     if ( this.filterDirty ) {
       this.filterDirty = false;
 
@@ -359,7 +359,7 @@ class SVGGroup {
 
       sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `clip update: ${this.toString()}` );
 
-      //OHTWO TODO: remove clip workaround (use this.willApplyFilters) https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: remove clip workaround (use this.willApplyFilters) https://github.com/phetsims/scenery/issues/1581
       if ( this.node.clipArea ) {
         if ( !this.clipDefinition ) {
           const clipId = `clip${this.node.getId()}`;
@@ -367,7 +367,7 @@ class SVGGroup {
           this.clipDefinition = document.createElementNS( svgns, 'clipPath' );
           this.clipDefinition.setAttribute( 'id', clipId );
           this.clipDefinition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
-          this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet) https://github.com/phetsims/tasks/issues/1129
+          this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet) https://github.com/phetsims/scenery/issues/1581
 
           this.clipPath = document.createElementNS( svgns, 'path' );
           this.clipDefinition.appendChild( this.clipPath );
@@ -379,9 +379,9 @@ class SVGGroup {
       }
       else if ( this.clipDefinition ) {
         svgGroup.removeAttribute( 'clip-path' );
-        this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet) https://github.com/phetsims/tasks/issues/1129
+        this.block.defs.removeChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet) https://github.com/phetsims/scenery/issues/1581
 
-        // TODO: consider pooling these? https://github.com/phetsims/tasks/issues/1129
+        // TODO: consider pooling these? https://github.com/phetsims/scenery/issues/1581
         this.clipDefinition = null;
         this.clipPath = null;
       }
@@ -463,7 +463,7 @@ class SVGGroup {
     if ( this.willApplyFilters ) {
       this.node.filterChangeEmitter.removeListener( this.filterChangeListener );
     }
-    //OHTWO TODO: remove clip workaround https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: remove clip workaround https://github.com/phetsims/scenery/issues/1581
     this.node.clipAreaProperty.unlink( this.clipDirtyListener );
 
     this.node.childrenChangedEmitter.removeListener( this.orderDirtyListener );
@@ -538,7 +538,7 @@ class SVGGroup {
    * @returns {SVGGroup}
    */
   static ensureGroupsToInstance( block, instance ) {
-    // TODO: assertions here https://github.com/phetsims/tasks/issues/1129
+    // TODO: assertions here https://github.com/phetsims/scenery/issues/1581
 
     let group = instance.lookupSVGGroup( block );
 

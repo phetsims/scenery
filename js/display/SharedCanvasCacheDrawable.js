@@ -1,7 +1,7 @@
 // Copyright 2013-2023, University of Colorado Boulder
 
 /**
- * TODO docs https://github.com/phetsims/tasks/issues/1129
+ * TODO docs https://github.com/phetsims/scenery/issues/1581
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -33,7 +33,7 @@ class SharedCanvasCacheDrawable extends Drawable {
   initialize( trail, renderer, instance, sharedInstance ) {
     super.initialize( renderer );
 
-    // TODO: NOTE: may have to separate into separate drawables for separate group renderers https://github.com/phetsims/tasks/issues/1129
+    // TODO: NOTE: may have to separate into separate drawables for separate group renderers https://github.com/phetsims/scenery/issues/1581
 
     this.instance = instance; // will need this so we can get bounds for layer fitting
     this.sharedInstance = sharedInstance;

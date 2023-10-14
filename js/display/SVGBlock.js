@@ -16,7 +16,7 @@ class SVGBlock extends FittedBlock {
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js
-   * @param {Instance} transformRootInstance - TODO: Documentation https://github.com/phetsims/tasks/issues/1129
+   * @param {Instance} transformRootInstance - TODO: Documentation https://github.com/phetsims/scenery/issues/1581
    * @param {Instance} filterRootInstance - TODO: Documentation
    */
   constructor( display, renderer, transformRootInstance, filterRootInstance ) {
@@ -30,7 +30,7 @@ class SVGBlock extends FittedBlock {
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js
-   * @param {Instance} transformRootInstance - TODO: Documentation https://github.com/phetsims/tasks/issues/1129
+   * @param {Instance} transformRootInstance - TODO: Documentation https://github.com/phetsims/scenery/issues/1581
    * @param {Instance} filterRootInstance - TODO: Documentation
    * @returns {FittedBlock}
    */
@@ -69,7 +69,7 @@ class SVGBlock extends FittedBlock {
       // pdom - make sure the element is not focusable (it is focusable by default in IE11 full screen mode)
       this.svg.setAttribute( 'focusable', false );
 
-      //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss https://github.com/phetsims/tasks/issues/1129
+      //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss https://github.com/phetsims/scenery/issues/1581
       // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
       this.svg.style[ 'pointer-events' ] = 'none';
 
@@ -95,7 +95,7 @@ class SVGBlock extends FittedBlock {
     this.rootGroup = SVGGroup.createFromPool( this, instanceClosestToRoot, null );
     this.baseTransformGroup.appendChild( this.rootGroup.svgGroup );
 
-    // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?) https://github.com/phetsims/tasks/issues/1129
+    // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?) https://github.com/phetsims/scenery/issues/1581
 
     sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `initialized #${this.id}` );
 
@@ -250,8 +250,8 @@ class SVGBlock extends FittedBlock {
 
     sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `update #${this.id}` );
 
-    //OHTWO TODO: call here! https://github.com/phetsims/tasks/issues/1129
-    // TODO: What does the above TODO mean? https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: call here! https://github.com/phetsims/scenery/issues/1581
+    // TODO: What does the above TODO mean? https://github.com/phetsims/scenery/issues/1581
     while ( this.dirtyGroups.length ) {
       const group = this.dirtyGroups.pop();
 
@@ -267,7 +267,7 @@ class SVGBlock extends FittedBlock {
       const drawable = this.dirtyDrawables.pop();
 
       // if this drawable has been disposed or moved to another block, don't mess with it
-      // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check? https://github.com/phetsims/tasks/issues/1129
+      // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check? https://github.com/phetsims/scenery/issues/1581
       if ( drawable.parentDrawable === this ) {
         drawable.update();
       }

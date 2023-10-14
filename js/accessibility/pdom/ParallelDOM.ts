@@ -142,6 +142,7 @@ import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -151,6 +152,7 @@ const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
 export type PDOMValueType = string | TReadOnlyProperty<string>;
+export type LimitPanDirection = 'horizontal' | 'vertical';
 
 // see setPDOMHeadingBehavior for more details
 const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, heading: PDOMValueType ) => {
@@ -229,6 +231,9 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'ariaDescribedbyAssociations',
   'activeDescendantAssociations',
 
+  'focusPanTargetBoundsProperty',
+  'limitPanDirection',
+
   'positionInPDOM',
 
   'pdomTransformSourceNode'
@@ -282,6 +287,9 @@ export type ParallelDOMOptions = {
   ariaLabelledbyAssociations?: Association[]; // sets the list of aria-labelledby associations between from this node to others (including itself)
   ariaDescribedbyAssociations?: Association[]; // sets the list of aria-describedby associations between from this node to others (including itself)
   activeDescendantAssociations?: Association[]; // sets the list of aria-activedescendant associations between from this node to others (including itself)
+
+  focusPanTargetBoundsProperty?: TReadOnlyProperty<Bounds2> | null; // A Property with bounds that describe the bounds of this Node that should remain displayed by the global AnimatedPanZoomListener
+  limitPanDirection?: LimitPanDirection | null; // A constraint on the direction of panning when interacting with this Node.
 
   positionInPDOM?: boolean; // Sets whether the node's DOM elements are positioned in the viewport
 
@@ -503,6 +511,13 @@ export default class ParallelDOM extends PhetioObject {
   // pdomTransformSourceNode cannot use DAG.
   private _pdomTransformSourceNode: Node | null;
 
+  // If this is provided, the AnimatedPanZoomListener will attempt to keep this Node in view as long as it has
+  // focus
+  private _focusPanTargetBoundsProperty: TReadOnlyProperty<Bounds2> | null;
+
+  // If provided, the AnimatedPanZoomListener will ONLY pan in the specified direction
+  private _limitPanDirection: LimitPanDirection | null;
+
   // Contains information about what pdom displays
   // this node is "visible" for, see PDOMDisplaysInfo.js for more information.
   // (scenery-internal)
@@ -593,6 +608,8 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomOrder = null;
     this._pdomParent = null;
     this._pdomTransformSourceNode = null;
+    this._focusPanTargetBoundsProperty = null;
+    this._limitPanDirection = null;
     this._pdomDisplaysInfo = new PDOMDisplaysInfo( this as unknown as Node );
     this._pdomInstances = [];
     this._positionInPDOM = false;
@@ -1018,7 +1035,7 @@ export default class ParallelDOM extends PhetioObject {
     if ( tagName !== this._tagName ) {
       this._tagName = tagName;
 
-      // TODO: this could be setting PDOM content twice https://github.com/phetsims/tasks/issues/1129
+      // TODO: this could be setting PDOM content twice https://github.com/phetsims/scenery/issues/1581
       this.onPDOMContentChange();
     }
   }
@@ -1849,7 +1866,7 @@ export default class ParallelDOM extends PhetioObject {
 
     // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
     // pdom content needs to be recreated, they need to update their aria-describedby associations accordingly.
-    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/tasks/issues/1129
+    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/scenery/issues/1581
     for ( let i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
       const otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
       otherNode.updateAriaDescribedbyAssociationsInPeers();
@@ -1974,7 +1991,7 @@ export default class ParallelDOM extends PhetioObject {
 
     // if any other nodes are aria-activeDescendant this Node, update those associations too. Since this node's
     // pdom content needs to be recreated, they need to update their aria-activeDescendant associations accordingly.
-    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/tasks/issues/1129
+    // TODO: only use unique elements of the array (_.unique) https://github.com/phetsims/scenery/issues/1581
     for ( let i = 0; i < this._nodesThatAreActiveDescendantToThisNode.length; i++ ) {
       const otherNode = this._nodesThatAreActiveDescendantToThisNode[ i ];
       otherNode.updateActiveDescendantAssociationsInPeers();
@@ -2144,7 +2161,7 @@ export default class ParallelDOM extends PhetioObject {
         // for efficiency
         nonOrderedChildren.unshift( placeholderIndex, 1 );
 
-        // @ts-expect-error - TODO: best way to type? https://github.com/phetsims/tasks/issues/1129
+        // @ts-expect-error - TODO: best way to type? https://github.com/phetsims/scenery/issues/1581
         Array.prototype.splice.apply( effectiveChildren, nonOrderedChildren );
       }
       // Otherwise, just add the normal things at the end
@@ -2561,6 +2578,78 @@ export default class ParallelDOM extends PhetioObject {
    */
   public getPDOMTransformSourceNode(): Node | null {
     return this._pdomTransformSourceNode;
+  }
+
+  /**
+   * Used by the animatedPanZoomSingleton. It will try to keep these bounds visible in the viewport when this Node
+   * (or any ancestor) has a transform change while focused. This is useful if the bounds of your focusable
+   * Node do not accurately surround the conceptual interactive component. If null, this Node's local bounds
+   * are used.
+   *
+   * At this time, the Property cannot be changed after it is set.
+   */
+  public setFocusPanTargetBoundsProperty( boundsProperty: null | TReadOnlyProperty<Bounds2> ): void {
+
+    // We may call this more than once with mutate
+    if ( boundsProperty !== this._focusPanTargetBoundsProperty ) {
+      assert && assert( !this._focusPanTargetBoundsProperty, 'Cannot change focusPanTargetBoundsProperty after it is set.' );
+      this._focusPanTargetBoundsProperty = boundsProperty;
+    }
+  }
+
+  /**
+   * Returns the function for creating global bounds to keep in the viewport while the component has focus, see the
+   * setFocusPanTargetBoundsProperty function for more information.
+   */
+  public getFocusPanTargetBoundsProperty(): null | TReadOnlyProperty<Bounds2> {
+    return this._focusPanTargetBoundsProperty;
+  }
+
+  /**
+   * See setFocusPanTargetBoundsProperty for more information.
+   */
+  public set focusPanTargetBoundsProperty( boundsProperty: null | TReadOnlyProperty<Bounds2> ) {
+    this.setFocusPanTargetBoundsProperty( boundsProperty );
+  }
+
+  /**
+   * See getFocusPanTargetBoundsProperty for more information.
+   */
+  public get focusPanTargetBoundsProperty(): null | TReadOnlyProperty<Bounds2> {
+    return this.getFocusPanTargetBoundsProperty();
+  }
+
+  /**
+   * Sets the direction that the global AnimatedPanZoomListener will pan while interacting with this Node. Pan will ONLY
+   * occur in this dimension. This is especially useful for panning to large Nodes where panning to the center of the
+   * Node would move other Nodes out of the viewport.
+   *
+   * Set to null for default behavior (panning in all directions).
+   */
+  public setLimitPanDirection( limitPanDirection: LimitPanDirection | null ): void {
+    this._limitPanDirection = limitPanDirection;
+  }
+
+  /**
+   * See setLimitPanDirection for more information.
+   */
+  public getLimitPanDirection(): LimitPanDirection | null {
+    return this._limitPanDirection;
+  }
+
+  /**
+   * See setLimitPanDirection for more information.
+   * @param limitPanDirection
+   */
+  public set limitPanDirection( limitPanDirection: LimitPanDirection ) {
+    this.setLimitPanDirection( limitPanDirection );
+  }
+
+  /**
+   * See getLimitPanDirection for more information.
+   */
+  public get limitPanDirection(): LimitPanDirection | null {
+    return this.getLimitPanDirection();
   }
 
   /**

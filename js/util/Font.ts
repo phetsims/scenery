@@ -281,7 +281,7 @@ export default class Font extends PhetioObject {
    * values in this object.
    */
   public copy( options?: FontOptions ): Font {
-    // TODO: get merge working in typescript https://github.com/phetsims/tasks/issues/1129
+    // TODO: get merge working in typescript https://github.com/phetsims/scenery/issues/1581
     return new Font( combineOptions<FontOptions>( {
       style: this._style,
       variant: this._variant,

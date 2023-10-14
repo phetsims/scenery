@@ -24,7 +24,6 @@ an UI and Display made for visual testing and debugging.
 
   <script src="../../assert/js/assert.js"></script>
   <script src="../../tandem/js/PhetioIDUtils.js"></script>
-  <script src="../../sherpa/lib/himalaya-1.1.0.js"></script>
   <script src="../../sherpa/lib/linebreak-1.1.0.js"></script>
   <script src="../../sherpa/lib/flatqueue-1.2.1.js"></script>
   <script src="../../sherpa/lib/paper-js-0.12.17.js"></script>
@@ -98,7 +97,8 @@ an UI and Display made for visual testing and debugging.
 </div>
 
 <script type="module">
-  import '../../chipper/dist/js/scenery/js/main.js'; // eslint-disable-line bad-sim-text
+  /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
+  import '../../chipper/dist/js/scenery/js/main.js';
   import '../../chipper/dist/js/phet-core/js/main.js';
   import '../../chipper/dist/js/axon/js/main.js';
   import '../../chipper/dist/js/dot/js/main.js';

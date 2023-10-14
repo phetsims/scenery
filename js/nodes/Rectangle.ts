@@ -260,7 +260,7 @@ export default class Rectangle extends SuperType {
       bitmask |= Renderer.bitmaskDOM;
     }
 
-    // TODO: why check here, if we also check in the 'stroke' portion? https://github.com/phetsims/tasks/issues/1129
+    // TODO: why check here, if we also check in the 'stroke' portion? https://github.com/phetsims/scenery/issues/1581
     if ( !this.hasStroke() && !this.isRounded() ) {
       bitmask |= Renderer.bitmaskWebGL;
     }
@@ -738,7 +738,7 @@ export default class Rectangle extends SuperType {
    * @param matrix - The transformation matrix already applied to the context.
    */
   protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
-    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/tasks/issues/1129
+    //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily. https://github.com/phetsims/scenery/issues/1581
     RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 

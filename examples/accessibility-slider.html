@@ -100,11 +100,12 @@
     </div>
   </div>
 </div>
+<!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
 
 <script type="text/javascript">
   let scene;
 
-  function docExample( id, draw ) {
+  window.docExample = ( id, draw ) => {
     'use strict';
     const $container = $( '#' + id );
     scene = new phet.scenery.Node();
@@ -130,7 +131,7 @@
    */
 
   phet.scenery.Utils.polyfillRequestAnimationFrame();
-  docExample( 'accessibility-scene', ( scene, display ) => {
+  window.docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
 
     // number of tick marks on track

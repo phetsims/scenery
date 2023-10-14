@@ -9,7 +9,7 @@
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { ImageStatefulDrawable, scenery, svgns, SVGSelfDrawable, xlinkns } from '../../imports.js';
 
-// TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/tasks/issues/1129
+// TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/scenery/issues/1581
 const keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
 class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {

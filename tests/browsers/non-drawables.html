@@ -17,11 +17,10 @@
 <canvas id="canvas" width="768" height="848"></canvas>
 
 <script type="text/javascript">
+  const context = document.getElementById( 'canvas' ).getContext( '2d' );
 
-  var context = document.getElementById( 'canvas' ).getContext( '2d' );
-
-  var zeroColor = '#000000';
-  var offZeroColor = 'rgba(0,255,255,0.5)';
+  const zeroColor = '#000000';
+  const offZeroColor = 'rgba(0,255,255,0.5)';
 
   // shared settings
   context.lineWidth = 100;

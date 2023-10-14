@@ -63,7 +63,7 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
    * @param context - The original DOM EventContext that caused this SceneryEvent to fire.
    */
   public constructor( trail: Trail, type: string, pointer: Pointer, context: EventContext<DOMEvent> ) {
-    // TODO: add domEvent type assertion -- will browsers support this? https://github.com/phetsims/tasks/issues/1129
+    // TODO: add domEvent type assertion -- will browsers support this? https://github.com/phetsims/scenery/issues/1581
 
     this.handled = false;
     this.aborted = false;
@@ -76,7 +76,7 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
     this.currentTarget = null;
     this.target = trail.lastNode();
 
-    // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?) https://github.com/phetsims/tasks/issues/1129
+    // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?) https://github.com/phetsims/scenery/issues/1581
     this.isPrimary = !( pointer instanceof Mouse ) || !this.domEvent || ( this.domEvent as unknown as MouseEvent ).button === 0;
 
     // Store the last-used non-null DOM event for future use if required.

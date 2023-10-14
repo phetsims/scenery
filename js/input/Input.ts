@@ -443,7 +443,7 @@ export default class Input extends PhetioObject {
     this.mouseOverAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
       const mouse = this.ensureMouse( point );
       mouse.over( point );
-      // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/tasks/issues/1129
+      // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/scenery/issues/1581
     }, {
       phetioPlayback: true,
       tandem: options.tandem?.createTandem( 'mouseOverAction' ),
@@ -458,7 +458,7 @@ export default class Input extends PhetioObject {
     this.mouseOutAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
       const mouse = this.ensureMouse( point );
       mouse.out( point );
-      // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/tasks/issues/1129
+      // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/scenery/issues/1581
     }, {
       phetioPlayback: true,
       tandem: options.tandem?.createTandem( 'mouseOutAction' ),
@@ -477,7 +477,7 @@ export default class Input extends PhetioObject {
       mouse.wheel( event );
 
       // don't send mouse-wheel events if we don't yet have a mouse location!
-      // TODO: Can we set the mouse location based on the wheel event? https://github.com/phetsims/tasks/issues/1129
+      // TODO: Can we set the mouse location based on the wheel event? https://github.com/phetsims/scenery/issues/1581
       if ( mouse.point ) {
         const trail = this.rootNode.trailUnderPointer( mouse ) || new Trail( this.rootNode );
         this.dispatchEvent<WheelEvent>( trail, 'wheel', mouse, context, true );
@@ -969,7 +969,7 @@ export default class Input extends PhetioObject {
     if ( !this.assumeFullWindow ) {
       const domBounds = this.display.domElement.getBoundingClientRect();
 
-      // TODO: consider totally ignoring any with zero width/height, as we aren't attached to the display? https://github.com/phetsims/tasks/issues/1129
+      // TODO: consider totally ignoring any with zero width/height, as we aren't attached to the display? https://github.com/phetsims/scenery/issues/1581
       // For now, don't offset.
       if ( domBounds.width > 0 && domBounds.height > 0 ) {
         position.subtractXY( domBounds.left, domBounds.top );
@@ -978,7 +978,7 @@ export default class Input extends PhetioObject {
         // display), and attempt to compensate.
         // NOTE: We can't handle rotation here.
         if ( domBounds.width !== this.display.width || domBounds.height !== this.display.height ) {
-          // TODO: Have code verify the correctness here, and that it's not triggering all the time https://github.com/phetsims/tasks/issues/1129
+          // TODO: Have code verify the correctness here, and that it's not triggering all the time https://github.com/phetsims/scenery/issues/1581
           position.x *= this.display.width / domBounds.width;
           position.y *= this.display.height / domBounds.height;
         }
@@ -1152,7 +1152,7 @@ export default class Input extends PhetioObject {
   public getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
     const relatedTargetElement = domEvent.relatedTarget;
 
-    if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement as HTMLElement ) ) {
+    if ( relatedTargetElement && this.display.isElementUnderPDOM( relatedTargetElement as HTMLElement ) ) {
 
       const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
       assert && assert( relatedTarget instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
@@ -1183,7 +1183,7 @@ export default class Input extends PhetioObject {
     else {
       const target = ( domEvent.target as unknown as Element );
       assert && assert( target instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
-      if ( target && this.isTargetUnderPDOM( target as HTMLElement ) ) {
+      if ( target && this.display.isElementUnderPDOM( target as HTMLElement ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
         assert && assert( trailIndices, 'should not be null' );
         return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
@@ -1497,32 +1497,32 @@ export default class Input extends PhetioObject {
    * Handles a pointerover event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerOver( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
-    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/scenery/issues/1581
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/scenery/issues/1581
   }
 
   /**
    * Handles a pointerout event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerOut( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
-    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/scenery/issues/1581
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/scenery/issues/1581
   }
 
   /**
    * Handles a pointerenter event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerEnter( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
-    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/scenery/issues/1581
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/scenery/issues/1581
   }
 
   /**
    * Handles a pointerleave event, forwarding it to the proper logical event. (scenery-internal)
    */
   public pointerLeave( id: number, type: string, point: Vector2, context: EventContext<PointerEvent> ): void {
-    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/tasks/issues/1129
-    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/tasks/issues/1129
+    // TODO: accumulate mouse/touch info in the object if needed? https://github.com/phetsims/scenery/issues/1581
+    // TODO: do we want to branch change on these types of events? https://github.com/phetsims/scenery/issues/1581
   }
 
   /**
@@ -1636,7 +1636,7 @@ export default class Input extends PhetioObject {
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.isTargetUnderPDOM( context.domEvent.target as HTMLElement ) ) {
+    if ( this.display.isElementUnderPDOM( context.domEvent.target as HTMLElement ) ) {
       return;
     }
 
@@ -1665,7 +1665,7 @@ export default class Input extends PhetioObject {
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.isTargetUnderPDOM( context.domEvent.target as HTMLElement ) ) {
+    if ( this.display.isElementUnderPDOM( context.domEvent.target as HTMLElement ) ) {
       return;
     }
 
@@ -1941,13 +1941,6 @@ export default class Input extends PhetioObject {
         return;
       }
     }
-  }
-
-  /**
-   * Returns true if the Display is accessible and the element is a descendant of the Display PDOM.
-   */
-  private isTargetUnderPDOM( element: HTMLElement ): boolean {
-    return this.display._accessible && this.display.pdomRootElement!.contains( element );
   }
 
   /**

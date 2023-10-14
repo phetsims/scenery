@@ -8,7 +8,7 @@
  * Note that the WebGL texture part is not required to be run - the Canvas-only part can be used functionally without
  * any WebGL dependencies.
  *
- * TODO: How to use custom mipmap levels? https://github.com/phetsims/tasks/issues/1129
+ * TODO: How to use custom mipmap levels? https://github.com/phetsims/scenery/issues/1581
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid (PhET Interactive Simulations)
@@ -73,7 +73,7 @@ export default class SpriteSheet {
     // Will be set later, once we have a context
     this.texture = null;
 
-    // TODO: potentially support larger texture sizes based on reported capabilities (could cause fewer draw calls?) https://github.com/phetsims/tasks/issues/1129
+    // TODO: potentially support larger texture sizes based on reported capabilities (could cause fewer draw calls?) https://github.com/phetsims/scenery/issues/1581
     this.bounds = new Bounds2( 0, 0, MAX_DIMENSION.width, MAX_DIMENSION.height );
     assert && assert( this.bounds.minX === 0 && this.bounds.minY === 0, 'Assumed constraint later on for transforms' );
 

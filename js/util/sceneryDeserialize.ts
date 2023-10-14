@@ -133,7 +133,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: Intentional
       ( node! ).initialHeight = setup.height;
     }
     else if ( value.type === 'CanvasNode' || value.type === 'WebGLNode' ) {
-      // TODO: Record Canvas/WebGL calls? (conditionals would be harder!) https://github.com/phetsims/tasks/issues/1129
+      // TODO: Record Canvas/WebGL calls? (conditionals would be harder!) https://github.com/phetsims/scenery/issues/1581
       node = new Node( {
         children: [
           new Image( setup.url, {

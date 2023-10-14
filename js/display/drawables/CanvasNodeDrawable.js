@@ -35,7 +35,7 @@ class CanvasNodeDrawable extends CanvasSelfDrawable {
       context.save();
 
       // set back to Canvas default styles
-      // TODO: are these necessary, or can we drop them for performance? https://github.com/phetsims/tasks/issues/1129
+      // TODO: are these necessary, or can we drop them for performance? https://github.com/phetsims/scenery/issues/1581
       context.fillStyle = 'black';
       context.strokeStyle = 'black';
       context.lineWidth = 1;

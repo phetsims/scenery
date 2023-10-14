@@ -31,7 +31,7 @@ export default class SVGPattern implements TPoolable {
       // so we don't depend on the bounds of the object being drawn with the pattern
       this.definition.setAttribute( 'patternUnits', 'userSpaceOnUse' );
 
-      //TODO: is this needed? https://github.com/phetsims/tasks/issues/1129
+      //TODO: is this needed? https://github.com/phetsims/scenery/issues/1581
       this.definition.setAttribute( 'patternContentUnits', 'userSpaceOnUse' );
     }
 

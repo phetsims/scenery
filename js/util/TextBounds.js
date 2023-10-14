@@ -270,7 +270,7 @@ const TextBounds = {
    * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font, given a DOM element
    * @public
    *
-   * TODO: Can we use this? What are the differences? https://github.com/phetsims/tasks/issues/1129
+   * TODO: Can we use this? What are the differences? https://github.com/phetsims/scenery/issues/1581
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
    *
@@ -281,7 +281,7 @@ const TextBounds = {
   approximateImprovedDOMBounds( font, element ) {
     assert && assert( font instanceof Font, 'Font required' );
 
-    // TODO: reuse this div? https://github.com/phetsims/tasks/issues/1129
+    // TODO: reuse this div? https://github.com/phetsims/scenery/issues/1581
     const div = document.createElement( 'div' );
     div.style.display = 'inline-block';
     div.style.font = font.toCSS();

@@ -52,8 +52,8 @@
 <script>
 
   // initialize our scene
-  var scene = new phet.scenery.Node();
-  var display = new phet.scenery.Display( scene, {
+  const scene = new phet.scenery.Node();
+  const display = new phet.scenery.Display( scene, {
     container: document.getElementById( 'main' )
   } );
   display.initializeEvents(); // sets up listeners on the document with preventDefault(), and forwards those events to our scene
@@ -68,15 +68,15 @@
   } ) );
 
   function createRectangle( x, y ) {
-    var rect = new phet.scenery.Rectangle( x, y, 50, 50 );
+    const rect = new phet.scenery.Rectangle( x, y, 50, 50 );
 
     // store a 3-dimensional offset on each rectangle
     rect.wheelOffset = new phet.dot.Vector3( 0, 0, 0 );
 
     function updateFill() {
       // pay attention only to the vertical scroll offset
-      var isPositive = rect.wheelOffset.y > 0;
-      var value = Math.ceil( Math.abs( Math.atan( rect.wheelOffset.y / 50 ) / ( Math.PI / 2 ) * 255 ) );
+      const isPositive = rect.wheelOffset.y > 0;
+      const value = Math.ceil( Math.abs( Math.atan( rect.wheelOffset.y / 50 ) / ( Math.PI / 2 ) * 255 ) );
       rect.fill = 'rgb(' + ( isPositive ? 0 : value ) + ',0,' + ( isPositive ? value : 0 ) + ')';
     }
     updateFill();
@@ -92,8 +92,8 @@
     } );
   }
 
-  for ( var i = 20; i < 520; i += 51 ) {
-    for ( var j = 50; j < 550; j += 51 ) {
+  for ( let i = 20; i < 520; i += 51 ) {
+    for ( let j = 50; j < 550; j += 51 ) {
       createRectangle( i, j );
     }
   }

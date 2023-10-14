@@ -1,7 +1,7 @@
 // Copyright 2013-2023, University of Colorado Boulder
 
 /**
- * TODO docs https://github.com/phetsims/tasks/issues/1129
+ * TODO docs https://github.com/phetsims/scenery/issues/1581
  *   note paintCanvas() required, and other implementation-specific details
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>

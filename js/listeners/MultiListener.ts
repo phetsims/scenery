@@ -27,10 +27,10 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import SingularValueDecomposition from '../../../dot/js/SingularValueDecomposition.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import { Intent, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, MultiListenerPress } from '../imports.js';
-import PickRequired from '../../../phet-core/js/types/PickRequired.js';
+import { Intent, Mouse, MultiListenerPress, Node, Pointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 
 // constants
 // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame
@@ -67,7 +67,7 @@ export type MultiListenerOptions = {
   // magnitude limits for scaling in both x and y
   minScale?: number;
   maxScale?: number;
-} & PickRequired<PhetioObjectOptions, 'tandem'>;
+} & Pick<PhetioObjectOptions, 'tandem'>;
 
 class MultiListener implements TInputListener {
 
@@ -75,8 +75,8 @@ class MultiListener implements TInputListener {
   protected readonly _targetNode: Node;
 
   // see options
-  private readonly _minScale: number;
-  private readonly _maxScale: number;
+  protected readonly _minScale: number;
+  protected readonly _maxScale: number;
   private readonly _mouseButton: number;
   protected readonly _pressCursor: string;
   private readonly _allowScale: boolean;
@@ -85,7 +85,7 @@ class MultiListener implements TInputListener {
   private readonly _allowMoveInterruption: boolean;
 
   // List of "active" Presses down from Pointer input which are actively changing the transformation of the target Node
-  private readonly _presses: MultiListenerPress[];
+  protected readonly _presses: MultiListenerPress[];
 
   // List of "background" presses which are saved but not yet doing anything for the target Node transformation. If
   // the Pointer already has listeners, Presses are added to the background and wait to be converted to "active"
@@ -114,7 +114,7 @@ class MultiListener implements TInputListener {
    * @param targetNode - The Node that should be transformed by this MultiListener.
    * @param [providedOptions]
    */
-  public constructor( targetNode: Node, providedOptions: MultiListenerOptions ) {
+  public constructor( targetNode: Node, providedOptions?: MultiListenerOptions ) {
     const options = optionize<MultiListenerOptions>()( {
       mouseButton: 0,
       pressCursor: 'pointer',
@@ -123,7 +123,8 @@ class MultiListener implements TInputListener {
       allowMultitouchInterruption: false,
       allowMoveInterruption: true,
       minScale: 1,
-      maxScale: 4
+      maxScale: 4,
+      tandem: Tandem.REQUIRED
     }, providedOptions );
 
     this._targetNode = targetNode;
@@ -387,7 +388,7 @@ class MultiListener implements TInputListener {
   /**
    * Reposition in response to movement of any Presses.
    */
-  private movePress( press: MultiListenerPress ): void {
+  protected movePress( press: MultiListenerPress ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener movePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

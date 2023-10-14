@@ -84,7 +84,7 @@ export { default as Saturate } from './filters/Saturate.js';
 export { default as Sepia } from './filters/Sepia.js';
 
 export { default as ParallelDOM, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
-export type { ParallelDOMOptions, PDOMValueType, PDOMBehaviorFunction } from './accessibility/pdom/ParallelDOM.js';
+export type { ParallelDOMOptions, PDOMValueType, LimitPanDirection, PDOMBehaviorFunction } from './accessibility/pdom/ParallelDOM.js';
 export { default as Node, REQUIRES_BOUNDS_OPTION_KEYS } from './nodes/Node.js';
 export type { NodeOptions, NodeBoundsBasedTranslationOptions, NodeTranslationOptions, NodeTransformOptions, RendererType } from './nodes/Node.js';
 export { default as Picker } from './util/Picker.js';
@@ -232,6 +232,7 @@ export { default as MultiListenerPress } from './listeners/MultiListenerPress.js
 export { default as MultiListener } from './listeners/MultiListener.js';
 export type { MultiListenerOptions } from './listeners/MultiListener.js';
 export { default as PanZoomListener } from './listeners/PanZoomListener.js';
+export type { PanZoomListenerOptions } from './listeners/PanZoomListener.js';
 export { default as AnimatedPanZoomListener } from './listeners/AnimatedPanZoomListener.js';
 export { default as animatedPanZoomSingleton } from './listeners/animatedPanZoomSingleton.js';
 export { default as HandleDownListener } from './listeners/HandleDownListener.js';

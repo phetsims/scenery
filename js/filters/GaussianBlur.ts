@@ -5,7 +5,7 @@
  *
  * EXPERIMENTAL! DO not use in production code yet
  *
- * TODO: preventFit OR handle bounds increase (or both) https://github.com/phetsims/tasks/issues/1129
+ * TODO: preventFit OR handle bounds increase (or both) https://github.com/phetsims/scenery/issues/1581
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

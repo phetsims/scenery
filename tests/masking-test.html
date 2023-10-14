@@ -56,12 +56,12 @@
 <canvas width="1000" height="100"></canvas>
 
 <script type="text/javascript">
-  var context = $( 'canvas' )[ 0 ].getContext( '2d' );
+  const context = $( 'canvas' )[ 0 ].getContext( '2d' );
 
-  var scratchCanvas = document.createElement( 'canvas' );
+  const scratchCanvas = document.createElement( 'canvas' );
   scratchCanvas.width = 1000;
   scratchCanvas.height = 100;
-  var scratchContext = scratchCanvas.getContext( '2d' );
+  const scratchContext = scratchCanvas.getContext( '2d' );
 
   scratchContext.beginPath();
   scratchContext.arc( 50, 50, 40, 0, Math.PI * 2, false );
@@ -73,7 +73,7 @@
   scratchContext.fillStyle = '#00f';
   scratchContext.fill();
 
-  var grad = scratchContext.createLinearGradient( 10, 0, 130, 0 );
+  const grad = scratchContext.createLinearGradient( 10, 0, 130, 0 );
   grad.addColorStop( 0, 'rgba(255,255,255,0)' );
   grad.addColorStop( 1, 'rgba(255,255,255,1)' );
   scratchContext.fillStyle = grad;

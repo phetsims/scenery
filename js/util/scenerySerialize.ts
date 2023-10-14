@@ -235,7 +235,7 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
 
     if ( Text && node instanceof Text ) {
       serialization.type = 'Text';
-      // TODO: defaults for Text? https://github.com/phetsims/tasks/issues/1129
+      // TODO: defaults for Text? https://github.com/phetsims/scenery/issues/1581
       if ( node.boundsMethod !== 'hybrid' ) {
         options.boundsMethod = node.boundsMethod;
       }

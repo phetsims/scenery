@@ -1,4 +1,4 @@
-// Copyright 2017-2022, University of Colorado Boulder
+// Copyright 2017-2023, University of Colorado Boulder
 
 /**
  * Handles creation of an SVG stop element, and handles keeping it updated based on property/color changes.
@@ -29,7 +29,13 @@ class SVGGradientStop implements TPoolable {
   private propertyListener!: () => void;
   private colorListener!: () => void;
 
+  // As a workaround for Property deferment issues, we'll keep track of the last Color that we added a listener to, so
+  // that we can clean up things Property EVEN when we don't get correct Property change notifications.
+  private lastColor!: Color | null;
+
   public constructor( svgGradient: ActiveSVGGradient, ratio: number, color: TColor ) {
+    this.lastColor = null;
+
     this.initialize( svgGradient, ratio, color );
   }
 
@@ -60,6 +66,7 @@ class SVGGradientStop implements TPoolable {
       if ( color.value instanceof Color ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
         color.value.changeEmitter.addListener( this.colorListener );
+        this.lastColor = color.value;
       }
     }
     else if ( color instanceof Color ) {
@@ -79,13 +86,16 @@ class SVGGradientStop implements TPoolable {
     assert && assert( this.isActiveSVGGradientStop() );
     const activeSelf = this as ActiveSVGGradientStop;
 
-    if ( oldValue instanceof Color ) {
+    if ( this.lastColor !== null ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
-      oldValue.changeEmitter.removeListener( this.colorListener );
+      this.lastColor.changeEmitter.removeListener( this.colorListener );
+      this.lastColor = null;
     }
+
     if ( newValue instanceof Color ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       newValue.changeEmitter.addListener( this.colorListener );
+      this.lastColor = newValue;
     }
 
     this.markDirty();
@@ -164,14 +174,16 @@ class SVGGradientStop implements TPoolable {
 
     const color = this.color;
 
+    if ( this.lastColor ) {
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
+      this.lastColor.changeEmitter.removeListener( this.colorListener );
+      this.lastColor = null;
+    }
+
     if ( color instanceof ReadOnlyProperty ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Property listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       if ( color.hasListener( this.propertyListener ) ) {
         color.unlink( this.propertyListener );
-      }
-      if ( color.value instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
-        color.value.changeEmitter.removeListener( this.colorListener );
       }
     }
     else if ( color instanceof Color ) {

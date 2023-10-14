@@ -48,13 +48,13 @@ class WebGLBlock extends FittedBlock {
     // with svg and canvas again.
     super.initialize( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
 
-    // TODO: Uhh, is this not used? https://github.com/phetsims/tasks/issues/1129
+    // TODO: Uhh, is this not used? https://github.com/phetsims/scenery/issues/1581
     this.filterRootInstance = filterRootInstance;
 
     // {boolean} - Whether we pass this flag to the WebGL Context. It will store the contents displayed on the screen,
     // so that canvas.toDataURL() will work. It also requires clearing the context manually ever frame. Both incur
     // performance costs, so it should be false by default.
-    // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately? https://github.com/phetsims/tasks/issues/1129
+    // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately? https://github.com/phetsims/scenery/issues/1581
     this.preserveDrawingBuffer = display._preserveDrawingBuffer;
 
     // list of {Drawable}s that need to be updated before we update
@@ -217,7 +217,7 @@ class WebGLBlock extends FittedBlock {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `Delaying rebuilding of Canvas #${this.id}` );
     const self = this;
 
-    // TODO: Can we move this to before the update() step? Could happen same-frame in that case. https://github.com/phetsims/tasks/issues/1129
+    // TODO: Can we move this to before the update() step? Could happen same-frame in that case. https://github.com/phetsims/scenery/issues/1581
     // NOTE: We don't want to rely on a common timer, so we're using the built-in form on purpose.
     window.setTimeout( function() { // eslint-disable-line bad-sim-text
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `Executing delayed rebuilding #${this.id}` );
@@ -386,7 +386,7 @@ class WebGLBlock extends FittedBlock {
     // be drawn, and we'll have to manually clear the Canvas if we are not preserving the drawing buffer.
     let cumulativeDrawCount = 0;
     // Iterate through all of our drawables (linked list)
-    //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern) https://github.com/phetsims/tasks/issues/1129
+    //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern) https://github.com/phetsims/scenery/issues/1581
     for ( let drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
       // ignore invisible drawables
       if ( drawable.visible ) {
@@ -446,7 +446,7 @@ class WebGLBlock extends FittedBlock {
   dispose() {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `dispose #${this.id}` );
 
-    // TODO: many things to dispose!? https://github.com/phetsims/tasks/issues/1129
+    // TODO: many things to dispose!? https://github.com/phetsims/scenery/issues/1581
 
     // clear references
     cleanArray( this.dirtyDrawables );
@@ -465,7 +465,7 @@ class WebGLBlock extends FittedBlock {
     assert && assert( drawable );
     assert && assert( !drawable.isDisposed );
 
-    // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables) https://github.com/phetsims/tasks/issues/1129
+    // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables) https://github.com/phetsims/scenery/issues/1581
     this.dirtyDrawables.push( drawable );
     this.markDirty();
   }
@@ -522,7 +522,7 @@ class WebGLBlock extends FittedBlock {
   addSpriteSheetImage( image, width, height ) {
     let sprite = null;
     const numSpriteSheets = this.spriteSheets.length;
-    // TODO: check for SpriteSheet containment first? https://github.com/phetsims/tasks/issues/1129
+    // TODO: check for SpriteSheet containment first? https://github.com/phetsims/scenery/issues/1581
     for ( let i = 0; i < numSpriteSheets; i++ ) {
       const spriteSheet = this.spriteSheets[ i ];
       sprite = spriteSheet.addImage( image, width, height );
@@ -536,7 +536,7 @@ class WebGLBlock extends FittedBlock {
       newSpriteSheet.initializeContext( this.gl );
       this.spriteSheets.push( newSpriteSheet );
       if ( !sprite ) {
-        // TODO: renderer flags should change for very large images https://github.com/phetsims/tasks/issues/1129
+        // TODO: renderer flags should change for very large images https://github.com/phetsims/scenery/issues/1581
         throw new Error( 'Attempt to load image that is too large for sprite sheets' );
       }
     }

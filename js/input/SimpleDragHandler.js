@@ -190,7 +190,7 @@ class SimpleDragHandler extends PhetioObject {
 
       if ( this.options.drag ) {
 
-        // TODO: add the position in to the listener https://github.com/phetsims/tasks/issues/1129
+        // TODO: add the position in to the listener https://github.com/phetsims/scenery/issues/1581
         const saveCurrentTarget = event.currentTarget;
         event.currentTarget = this.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
         this.options.drag.call( null, event, this.trail ); // new position (old position?) delta

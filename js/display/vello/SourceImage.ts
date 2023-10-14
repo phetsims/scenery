@@ -19,7 +19,7 @@ export default class SourceImage {
   public constructor(
     public readonly width: number,
     public readonly height: number,
-    public readonly source: GPUImageCopyExternalImageSource
+    public readonly source: Exclude<GPUImageCopyExternalImageSource, ImageData>
   ) {
     assert && assert( isFinite( width ) && width >= 0 );
     assert && assert( isFinite( height ) && height >= 0 );

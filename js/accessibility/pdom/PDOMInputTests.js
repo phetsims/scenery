@@ -61,7 +61,7 @@ const dispatchEvent = ( domElement, event ) => {
 };
 
 // create a fake DOM event and delegate to an HTMLElement
-// TODO: Can this replace the dispatchEvent function above? EXTRA_TODO use KeyboardFuzzer.triggerDOMEvent as a guide to rewrite this. https://github.com/phetsims/tasks/issues/1129
+// TODO: Can this replace the dispatchEvent function above? EXTRA_TODO use KeyboardFuzzer.triggerDOMEvent as a guide to rewrite this. https://github.com/phetsims/scenery/issues/1581
 const triggerDOMEvent = ( event, element, key, options ) => {
 
   options = merge( {
@@ -495,7 +495,7 @@ QUnit.test( 'click extra', assert => {
   a1.addInputListener( listener );
   a1.dispose();
 
-  // TODO: Since converting to use Node.inputListeners, we can't assume this anymore https://github.com/phetsims/tasks/issues/1129
+  // TODO: Since converting to use Node.inputListeners, we can't assume this anymore https://github.com/phetsims/scenery/issues/1581
   // assert.ok( a1.hasInputListener( listener ) === false, 'disposal removed accessible input listeners' );
 
   afterTest( display );

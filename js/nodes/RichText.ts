@@ -71,6 +71,11 @@ import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObje
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
+import '../../../sherpa/lib/himalaya-1.1.0.js';
+
+// @ts-expect-error - Since himalaya isn't in tsconfig
+const himalayaVar = himalaya;
+assert && assert( himalayaVar, 'himalaya dependency needed for RichText.' );
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -471,16 +476,14 @@ export default class RichText extends Node {
 
     // Start appending all top-level elements
     try {
-      // @ts-expect-error - Since himalaya isn't in tsconfig
-      rootElements = himalaya.parse( mappedText );
+      rootElements = himalayaVar.parse( mappedText );
     }
     catch( e ) {
       // If we error out, don't kill the sim. Instead, replace the string with something that looks obviously like an
       // error. See https://github.com/phetsims/chipper/issues/1361 (we don't want translations to error out our
       // build process).
 
-      // @ts-expect-error - Since himalaya isn't in tsconfig
-      rootElements = himalaya.parse( 'INVALID TRANSLATION' );
+      rootElements = himalayaVar.parse( 'INVALID TRANSLATION' );
     }
 
     // Clear out link items, as we'll need to reconstruct them later
@@ -1590,7 +1593,7 @@ export default class RichText extends Node {
    * included in bold/italic exterior tags.
    */
   public static stringWithFont( str: string, font: Font ): string {
-    // TODO: ES6 string interpolation. https://github.com/phetsims/tasks/issues/1129
+    // TODO: ES6 string interpolation. https://github.com/phetsims/scenery/issues/1581
     return `${'<span style=\'' +
            'font-style: '}${font.style};` +
            `font-variant: ${font.variant};` +

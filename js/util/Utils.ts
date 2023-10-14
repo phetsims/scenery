@@ -18,7 +18,7 @@ function p( x: number, y: number ): Vector2 {
   return new Vector2( x, y );
 }
 
-// TODO: remove flag and tests after we're done https://github.com/phetsims/tasks/issues/1129
+// TODO: remove flag and tests after we're done https://github.com/phetsims/scenery/issues/1581
 const debugChromeBoundsScanning = false;
 
 // detect properly prefixed transform and transformOrigin properties
@@ -34,7 +34,7 @@ let _extensionlessWebGLSupport: boolean | undefined; // lazily computed
 
 const Utils = {
   /*---------------------------------------------------------------------------*
-   * Transformation Utilities (TODO: separate file) https://github.com/phetsims/tasks/issues/1129
+   * Transformation Utilities (TODO: separate file) https://github.com/phetsims/scenery/issues/1581
    *---------------------------------------------------------------------------*/
 
   /**
@@ -142,12 +142,12 @@ const Utils = {
    * store pixel ratio that is non-1, we'll be blurring out things during that operation, which would be unacceptable.
    */
   supportsImageDataCanvasFilter(): boolean {
-    // @ts-expect-error TODO: scenery and typing https://github.com/phetsims/tasks/issues/1129
+    // @ts-expect-error TODO: scenery and typing https://github.com/phetsims/scenery/issues/1581
     return Utils.backingStorePixelRatio( scenery.scratchContext ) === 1;
   },
 
   /*---------------------------------------------------------------------------*
-   * Text bounds utilities (TODO: separate file) https://github.com/phetsims/tasks/issues/1129
+   * Text bounds utilities (TODO: separate file) https://github.com/phetsims/scenery/issues/1581
    *---------------------------------------------------------------------------*/
 
   /**
@@ -178,7 +178,7 @@ const Utils = {
 
     // based on pixel boundaries. for minBounds, the inner edge of the dirty pixel. for maxBounds, the outer edge of the adjacent non-dirty pixel
     // results in a spread of 2 for the identity transform (or any translated form)
-    const extraSpread = resolution / 16; // is Chrome antialiasing really like this? dear god... TODO!!! https://github.com/phetsims/tasks/issues/1129
+    const extraSpread = resolution / 16; // is Chrome antialiasing really like this? dear god... TODO!!! https://github.com/phetsims/scenery/issues/1581
     return {
       minBounds: new Bounds2(
         ( minX < 1 || minX >= resolution - 1 ) ? Number.POSITIVE_INFINITY : transform.inversePosition2( p( minX + 1 + extraSpread, 0 ) ).x,
@@ -225,7 +225,7 @@ const Utils = {
       } );
     }
 
-    // TODO: Don't use Transform3 unless it is necessary https://github.com/phetsims/tasks/issues/1129
+    // TODO: Don't use Transform3 unless it is necessary https://github.com/phetsims/scenery/issues/1581
     function scan( transform: Transform3 ): { minBounds: Bounds2; maxBounds: Bounds2 } {
       // save/restore, in case the render tries to do any funny stuff like clipping, etc.
       context.save();
@@ -249,7 +249,7 @@ const Utils = {
         } );
       }
 
-      // TODO: remove after debug https://github.com/phetsims/tasks/issues/1129
+      // TODO: remove after debug https://github.com/phetsims/scenery/issues/1581
       if ( debugChromeBoundsScanning ) {
         snapshotToCanvas( data );
       }
@@ -402,7 +402,7 @@ const Utils = {
   },
 
   /*---------------------------------------------------------------------------*
-   * WebGL utilities (TODO: separate file) https://github.com/phetsims/tasks/issues/1129
+   * WebGL utilities (TODO: separate file) https://github.com/phetsims/scenery/issues/1581
    *---------------------------------------------------------------------------*/
 
   /**

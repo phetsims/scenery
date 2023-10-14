@@ -33,7 +33,7 @@ export default abstract class Paint {
    * Sets how this paint (pattern/gradient) is transformed, compared with the local coordinate frame of where it is
    *
    * NOTE: This should only be used before the pattern/gradient is ever displayed.
-   * TODO: Catch if this is violated? https://github.com/phetsims/tasks/issues/1129
+   * TODO: Catch if this is violated? https://github.com/phetsims/scenery/issues/1581
    *
    * NOTE: The scale should be symmetric if it will be used as a stroke. It is difficult to set a different x and y scale
    * for canvas at the same time.
@@ -60,7 +60,7 @@ export default abstract class Paint {
   public isPaint!: boolean;
 }
 
-// TODO: can we remove this in favor of type checks? https://github.com/phetsims/tasks/issues/1129
+// TODO: can we remove this in favor of type checks? https://github.com/phetsims/scenery/issues/1581
 Paint.prototype.isPaint = true;
 
 scenery.register( 'Paint', Paint );
