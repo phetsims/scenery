@@ -93,7 +93,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     if ( node.hasFill() || node.hasStroke() ) {
 
-      // TODO: font fallbacks!
+      // TODO: font fallbacks! https://github.com/phetsims/scenery/issues/1584
       const font = ( node._font.weight === 'bold' ? ArialBoldFont : ArialFont );
 
       let useSwash = window.phet?.chipper?.queryParameters?.swashText;
@@ -108,25 +108,25 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         shapedText = font.shapeText( node.renderedText, true );
 
         // If we don't have all of the glyphs we'll need to render, fall back to the non-swash version
-        // TODO: don't create closures like this
+        // TODO: don't create closures like this https://github.com/phetsims/scenery/issues/1584
         if ( !shapedText || shapedText.some( glyph => badIDs.includes( glyph.id ) ) ) {
           useSwash = false;
         }
       }
 
       if ( !useSwash ) {
-        // TODO: pooling, but figure out if we need to wait for the device.queue.onSubmittedWorkDone()
+        // TODO: pooling, but figure out if we need to wait for the device.queue.onSubmittedWorkDone() https://github.com/phetsims/scenery/issues/1584
 
         const selfBounds = node.selfBoundsProperty._value;
         if ( selfBounds.isValid() && selfBounds.hasNonzeroArea() ) {
-          // TODO: only use accurate bounds?!!!
+          // TODO: only use accurate bounds?!!! https://github.com/phetsims/scenery/issues/1584
           // NOTE: getting value directly, so we don't set off any bounds validation during rendering
-          // TODO: is 5px enough? too much?
+          // TODO: is 5px enough? too much? https://github.com/phetsims/scenery/issues/1584
           const bounds = node.selfBoundsProperty._value.transformed( matrix ).dilate( 5 ).roundOut();
 
-          // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture
-          // TODO: Check... Ohm's Law?
-          // TODO: NOTE: If a block resizes, WOULD we be marked as dirty? If not, we'd have to listen to it
+          // TODO: clip this to the block's Canvas, so HUGE text won't create a huge texture https://github.com/phetsims/scenery/issues/1584
+          // TODO: Check... Ohm's Law? https://github.com/phetsims/scenery/issues/1584
+          // TODO: NOTE: If a block resizes, WOULD we be marked as dirty? If not, we'd have to listen to it https://github.com/phetsims/scenery/issues/1584
 
           textRenderingCanvas.width = bounds.width;
           textRenderingCanvas.height = bounds.height;
@@ -142,7 +142,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
           const context = canvas.getContext( '2d' );
           context.drawImage( textRenderingCanvas, 0, 0 );
 
-          // TODO: faster function, don't create an object?
+          // TODO: faster function, don't create an object? https://github.com/phetsims/scenery/issues/1584
           this.encoding.encodeMatrix( Matrix3.translation( bounds.minX, bounds.minY ) );
           this.encoding.encodeLineWidth( -1 );
           this.encoding.encodeRect( 0, 0, canvas.width, canvas.height );
@@ -175,8 +175,8 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
 
     const swashTextColor = window.phet?.chipper?.queryParameters?.swashTextColor;
 
-    // TODO: support this for text, so we can QUICKLY get the bounds of text
-    // TODO: support these inside Font!!!
+    // TODO: support this for text, so we can QUICKLY get the bounds of text https://github.com/phetsims/scenery/issues/1584
+    // TODO: support these inside Font!!! https://github.com/phetsims/scenery/issues/1584
 
     let x = 0;
     shapedText.forEach( glyph => {
@@ -206,7 +206,7 @@ class TextVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
     let encoding = cache.get( shape );
     if ( !encoding ) {
       encoding = new PhetEncoding();
-      encoding.encodeShape( shape, isFill, false, 1 ); // TODO: tolerance
+      encoding.encodeShape( shape, isFill, false, 1 ); // TODO: tolerance https://github.com/phetsims/scenery/issues/1584
       cache.set( shape, encoding );
     }
 

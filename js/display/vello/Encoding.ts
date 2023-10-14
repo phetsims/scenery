@@ -528,7 +528,7 @@ export class Layout {
 
 export class SceneBufferSizes {
 
-  // TODO: perhaps pooling objects like these?
+  // TODO: perhaps pooling objects like these? https://github.com/phetsims/scenery/issues/1584
   public readonly pathTagPadded: number;
   public readonly bufferSize: number;
 
@@ -604,7 +604,7 @@ export class ConfigUniform {
 
 export class DispatchSizes {
 
-  // TODO: pooling
+  // TODO: pooling https://github.com/phetsims/scenery/issues/1584
   public useLargePathScan: boolean;
   public path_reduce: DispatchSize;
   public path_reduce2: DispatchSize;
@@ -685,7 +685,7 @@ export class BufferSize {
 }
 
 export class BufferSizes {
-  // TODO: this is a GREAT place to view documentation, go to each thing!
+  // TODO: this is a GREAT place to view documentation, go to each thing! https://github.com/phetsims/scenery/issues/1584
   // // Known size buffers
   // pub path_reduced: BufferSize<PathMonoid>,
   // pub path_reduced2: BufferSize<PathMonoid>,
@@ -731,7 +731,7 @@ export class BufferSizes {
   // The following buffer sizes have been hand picked to accommodate the vello test scenes as
   // well as paris-30k. These should instead get derived from the scene layout using
   // reasonable heuristics.
-  // TODO: derive from scene layout
+  // TODO: derive from scene layout https://github.com/phetsims/scenery/issues/1584
   public readonly bin_data: BufferSize;
   public readonly tiles: BufferSize;
   public readonly segments: BufferSize;
@@ -768,7 +768,7 @@ export class BufferSizes {
     // The following buffer sizes have been hand picked to accommodate the vello test scenes as
     // well as paris-30k. These should instead get derived from the scene layout using
     // reasonable heuristics.
-    // TODO: derive from scene layout
+    // TODO: derive from scene layout https://github.com/phetsims/scenery/issues/1584
     this.bin_data = new BufferSize( ( 1 << 18 ) >>> 0, 4 );
     this.tiles = new BufferSize( ( 1 << 21 ) >>> 0, TILE_BYTES );
     this.segments = new BufferSize( ( 1 << 21 ) >>> 0, PATH_SEGMENT_BYTES );
@@ -1003,7 +1003,7 @@ export default class Encoding {
   // Clears the encoding.
   public reset( isFragment: boolean ): void {
     // Clears the rustEncoding too, reinitalizing it
-    // TODO: don't require hardcoding TRUE for isFragment? Almost all of them will be fragments
+    // TODO: don't require hardcoding TRUE for isFragment? Almost all of them will be fragments https://github.com/phetsims/scenery/issues/1584
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding = `let mut encoding${this.id}: Encoding = Encoding::new();\n` );
     sceneryLog && sceneryLog.Encoding && this.rustLock === 0 && ( this.rustEncoding += `encoding${this.id}.reset(true);\n` );
     this.transforms.length = 0;
@@ -1026,7 +1026,7 @@ export default class Encoding {
     }
   }
 
-  // TODO: pool the encodings!
+  // TODO: pool the encodings! https://github.com/phetsims/scenery/issues/1584
   public dispose(): void {
     while ( this.patches.length ) {
       this.patches.pop()!.freeToPool();
@@ -1290,7 +1290,7 @@ export default class Encoding {
   }
 
   // zero: => false, one => color, many => true (icky)
-  // TODO: better return values!
+  // TODO: better return values! https://github.com/phetsims/scenery/issues/1584
   private addRamp( colorStops: VelloColorStop[], alpha: number, extend: Extend ): null | true | ColorRGBA32 {
     const offset = this.drawDataBuf.byteLength;
     const stopsStart = this.colorStops.length;
@@ -1380,7 +1380,7 @@ export default class Encoding {
         u8array = new Uint8Array( image.buffer );
       }
       else {
-        // TODO: Can we avoid this extra copy for a Canvas?
+        // TODO: Can we avoid this extra copy for a Canvas? https://github.com/phetsims/scenery/issues/1584
         const canvas = document.createElement( 'canvas' );
         canvas.width = image.width;
         canvas.height = image.height;
@@ -1459,7 +1459,7 @@ export default class Encoding {
     }
   }
 
-  // TODO: make this workaround not needed
+  // TODO: make this workaround not needed https://github.com/phetsims/scenery/issues/1584
   public finalizeScene(): void {
     this.encodePath( true );
     this.moveTo( 0, 0 );
@@ -1486,7 +1486,7 @@ export default class Encoding {
   public encodeShape( shape: Shape, isFill: boolean, insertPathMarker: boolean, tolerance: number ): number {
     this.encodePath( isFill );
 
-    // TODO: better code that isn't tons of forEach's that will kill our GC and add jank
+    // TODO: better code that isn't tons of forEach's that will kill our GC and add jank https://github.com/phetsims/scenery/issues/1584
     shape.subpaths.forEach( subpath => {
       if ( subpath.isDrawable() ) {
         const startPoint = subpath.getFirstSegment().start;
@@ -1510,14 +1510,14 @@ export default class Encoding {
             const scaled_err = maxRadius / tolerance;
             const n_err = Math.max( Math.pow( 1.1163 * scaled_err, 1 / 6 ), 3.999999 );
 
-            // TODO: hacked with *4 for now, figure out how to better do this
+            // TODO: hacked with *4 for now, figure out how to better do this https://github.com/phetsims/scenery/issues/1584
             const n = Math.ceil( n_err * Math.abs( segment.getAngleDifference() ) * ( 1.0 / ( 2.0 * Math.PI ) ) ) * 4;
 
             // For now, evenly subdivide
             const segments = n > 1 ? segment.subdivisions( _.range( 1, n ).map( t => t / n ) ) : [ segment ];
 
             // Create cubics approximations for each segment
-            // TODO: performance optimize?
+            // TODO: performance optimize? https://github.com/phetsims/scenery/issues/1584
             segments.forEach( subSegment => {
               const start = subSegment.start;
               const middle = subSegment.positionAt( 0.5 );
@@ -1581,7 +1581,7 @@ export default class Encoding {
     // Path tag stream
     layout.pathTagBase = sizeToWords( dataBuf.byteLength );
     dataBuf.pushByteBuffer( this.pathTagsBuf );
-    // TODO: what if we... just error if there are open clips? Why are we padding the streams to make this work?
+    // TODO: what if we... just error if there are open clips? Why are we padding the streams to make this work? https://github.com/phetsims/scenery/issues/1584
     for ( let i = 0; i < this.numOpenClips; i++ ) {
       dataBuf.pushU8( PathTag.PATH );
     }
@@ -1616,7 +1616,7 @@ export default class Encoding {
         else {
           assert && assert( patch.atlasSubImage );
           bytes = u32ToBytes( ( patch.atlasSubImage!.x << 16 ) >>> 0 | patch.atlasSubImage!.y );
-          // TODO: assume the image fit (if not, we'll need to do something else)
+          // TODO: assume the image fit (if not, we'll need to do something else) https://github.com/phetsims/scenery/issues/1584
         }
 
         // Patch data directly into our full output
@@ -1625,7 +1625,7 @@ export default class Encoding {
     }
 
     // Transform stream
-    // TODO: Float32Array instead of Affine?
+    // TODO: Float32Array instead of Affine? https://github.com/phetsims/scenery/issues/1584
     layout.transformBase = sizeToWords( dataBuf.byteLength );
     for ( let i = 0; i < this.transforms.length; i++ ) {
       const transform = this.transforms[ i ];

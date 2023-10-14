@@ -28,7 +28,7 @@ export default class Ramps {
   public constructor( public readonly device: GPUDevice ) {
 
     // NOTE: we can increase the size in the future
-    // TODO: test the increase in size, and other ramp characteristics
+    // TODO: test the increase in size, and other ramp characteristics https://github.com/phetsims/scenery/issues/1584
     this.arrayBuffer = new ArrayBuffer( NUM_RAMP_SAMPLES * STARTING_RAMPS * 4 );
     this.arrayView = new DataView( this.arrayBuffer );
     this.width = NUM_RAMP_SAMPLES;
@@ -164,7 +164,7 @@ export default class Ramps {
 scenery.register( 'Ramps', Ramps );
 
 class RampEntry {
-  // TODO: make poolable?
+  // TODO: make poolable? https://github.com/phetsims/scenery/issues/1584
   public constructor(
     public readonly colorStops: VelloColorStop[],
     public readonly index: number,

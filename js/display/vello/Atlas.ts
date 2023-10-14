@@ -38,9 +38,9 @@ export default class Atlas {
   private unused: AtlasSubImage[] = [];
 
   public constructor( public device: GPUDevice ) {
-    // TODO: Do we have "repeat" on images also? Think repeating patterns!
+    // TODO: Do we have "repeat" on images also? Think repeating patterns! https://github.com/phetsims/scenery/issues/1584
 
-    // TODO: atlas size (1) when no images?
+    // TODO: atlas size (1) when no images? https://github.com/phetsims/scenery/issues/1584
     this.width = ATLAS_INITIAL_SIZE;
     this.height = ATLAS_INITIAL_SIZE;
 
@@ -52,7 +52,7 @@ export default class Atlas {
 
   public updatePatches( patches: VelloImagePatch[] ): void {
 
-    // TODO: actually could we accomplish this with a generation?
+    // TODO: actually could we accomplish this with a generation? https://github.com/phetsims/scenery/issues/1584
     this.unused.push( ...this.used );
     this.used.length = 0;
 
@@ -72,9 +72,9 @@ export default class Atlas {
     }
   }
 
-  // TODO: Add some "unique" identifier on BufferImage so we can check if it's actually representing the same image
-  // TODO: would it kill performance to hash the image data? If we're changing the image every frame, that would
-  // TODO: be very excessive.
+  // TODO: Add some "unique" identifier on BufferImage so we can check if it's actually representing the same image https://github.com/phetsims/scenery/issues/1584
+  // TODO: would it kill performance to hash the image data? If we're changing the image every frame, that would https://github.com/phetsims/scenery/issues/1584
+  // TODO: be very excessive. https://github.com/phetsims/scenery/issues/1584
   private getAtlasSubImage( image: EncodableImage ): AtlasSubImage | null {
 
     // Try a "used" one first (e.g. multiple in the same scene)
@@ -160,7 +160,7 @@ export default class Atlas {
   private replaceTexture(): void {
     this.texture && this.texture.destroy();
 
-    // TODO: Check this on Windows!
+    // TODO: Check this on Windows! https://github.com/phetsims/scenery/issues/1584
     const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
 
     this.texture = this.device.createTexture( {
@@ -182,15 +182,15 @@ export default class Atlas {
 
   public updateTexture(): void {
     while ( this.dirtyAtlasSubImages.length ) {
-      // TODO: copy in gutter! (so it's not fuzzy)
+      // TODO: copy in gutter! (so it's not fuzzy) https://github.com/phetsims/scenery/issues/1584
 
       const atlasSubImage = this.dirtyAtlasSubImages.pop()!;
       const image = atlasSubImage.image;
 
-      // TODO: note premultiplied. Why we don't want to use BufferImages from canvas data
+      // TODO: note premultiplied. Why we don't want to use BufferImages from canvas data https://github.com/phetsims/scenery/issues/1584
       if ( image instanceof BufferImage ) {
-        // TODO: we have the ability to do this in a single call, would that be better ever for performance? Maybe a single
-        // TODO: call if we have to update a bunch of sections at once?
+        // TODO: we have the ability to do this in a single call, would that be better ever for performance? Maybe a single https://github.com/phetsims/scenery/issues/1584
+        // TODO: call if we have to update a bunch of sections at once? https://github.com/phetsims/scenery/issues/1584
         this.device.queue.writeTexture( {
           texture: this.texture!,
           origin: {
@@ -283,7 +283,7 @@ export default class Atlas {
 
 scenery.register( 'Atlas', Atlas );
 
-// TODO: pool these?
+// TODO: pool these? https://github.com/phetsims/scenery/issues/1584
 export class AtlasSubImage {
   public constructor(
     public readonly image: EncodableImage,

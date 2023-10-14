@@ -1,9 +1,9 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * An affine matrix - TODO: just replace this with typed arrays
+ * An affine matrix - TODO: just replace this with typed arrays https://github.com/phetsims/scenery/issues/1584
  *
- * TODO: pooling?
+ * TODO: pooling? https://github.com/phetsims/scenery/issues/1584
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -17,7 +17,7 @@ export default class Affine {
   ) {}
 
   public times( affine: Affine ): Affine {
-    // TODO: Affine (and this method) are a hot spot IF we are doing client-side matrix stuff
+    // TODO: Affine (and this method) are a hot spot IF we are doing client-side matrix stuff https://github.com/phetsims/scenery/issues/1584
     const a00 = this.a00 * affine.a00 + this.a01 * affine.a10;
     const a01 = this.a00 * affine.a01 + this.a01 * affine.a11;
     const a02 = this.a00 * affine.a02 + this.a01 * affine.a12 + this.a02;

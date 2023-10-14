@@ -77,7 +77,7 @@ class Instance {
     // @public {boolean}
     this.isWebGLSupported = display.isWebGLAllowed() && Utils.isWebGLSupported;
 
-    // TODO: add display.isVelloAllowed()?
+    // TODO: add display.isVelloAllowed()? https://github.com/phetsims/scenery/issues/1584
     // NOTE: We rely on DeviceContext's checks to be finished before calling here
     this.isVelloSupported = DeviceContext.isVelloSupportedSync();
 

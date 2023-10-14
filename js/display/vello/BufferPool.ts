@@ -5,8 +5,8 @@ import { scenery } from '../../imports.js';
 /**
  * A pool of GPU buffers that can be reused.
  *
- * TODO: can we reuse some buffers AFTER we ensure the synchronization is clear?
- * TODO: // device.queue.onSubmittedWorkDone().then( () => {} ); and clear?
+ * TODO: can we reuse some buffers AFTER we ensure the synchronization is clear? https://github.com/phetsims/scenery/issues/1584
+ * TODO: // device.queue.onSubmittedWorkDone().then( () => {} ); and clear? https://github.com/phetsims/scenery/issues/1584
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -81,7 +81,7 @@ export default class BufferPool {
 scenery.register( 'BufferPool', BufferPool );
 
 class BufferEntry {
-  // TODO: pool these
+  // TODO: pool these https://github.com/phetsims/scenery/issues/1584
   public constructor(
     public readonly buffer: GPUBuffer,
     public readonly size: number,

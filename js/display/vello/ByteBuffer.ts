@@ -19,7 +19,7 @@ export default class ByteBuffer {
   public constructor( initialSize = 512 ) {
     this._byteLength = 0;
 
-    // TODO: resizable buffers once supported by Firefox, use maxByteLength (no copying!!!)
+    // TODO: resizable buffers once supported by Firefox, use maxByteLength (no copying!!!) https://github.com/phetsims/scenery/issues/1584
     this._arrayBuffer = new ArrayBuffer( initialSize );
     this._f32Array = new Float32Array( this._arrayBuffer );
     this._u32Array = new Uint32Array( this._arrayBuffer );
@@ -53,7 +53,7 @@ export default class ByteBuffer {
   }
 
   public pushByteBuffer( byteBuffer: ByteBuffer ): void {
-    // TODO: this is a hot spot, optimize
+    // TODO: this is a hot spot, optimize https://github.com/phetsims/scenery/issues/1584
     this.ensureSpaceFor( byteBuffer._byteLength );
 
     this._u8Array.set( byteBuffer._u8Array.slice( 0, byteBuffer._byteLength ), this._byteLength );
@@ -122,7 +122,7 @@ export default class ByteBuffer {
 
   // NOTE: this MAY truncate
   public resize( byteLength = 0 ): void {
-    // TODO: This is a hot-spot!
+    // TODO: This is a hot-spot! https://github.com/phetsims/scenery/issues/1584
     byteLength = byteLength || this._arrayBuffer.byteLength * 2;
     byteLength = Math.ceil( byteLength / 4 ) * 4; // Round up to nearest 4 (for alignment)
     // Double the size of the _arrayBuffer by default, copying memory

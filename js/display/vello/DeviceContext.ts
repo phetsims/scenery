@@ -40,10 +40,10 @@ export default class DeviceContext {
                                   ? 'bgra8unorm'
                                   : 'rgba8unorm';
 
-    // TODO: handle context losses, reconstruct with the device
-    // TODO: get setup to manually trigger context losses
-    // TODO: If the GPU is unavailable, we will return ALREADY LOST contexts. We should try an immediate request for a
-    // TODO: device once, to see if we get a context back (transient loss), otherwise disable it for a while
+    // TODO: handle context losses, reconstruct with the device https://github.com/phetsims/scenery/issues/1584
+    // TODO: get setup to manually trigger context losses https://github.com/phetsims/scenery/issues/1584
+    // TODO: If the GPU is unavailable, we will return ALREADY LOST contexts. We should try an immediate request for a https://github.com/phetsims/scenery/issues/1584
+    // TODO: device once, to see if we get a context back (transient loss), otherwise disable it for a while https://github.com/phetsims/scenery/issues/1584
     device.lost.then( info => {
       console.error( `WebGPU device was lost: ${info.message}` );
 
@@ -53,7 +53,7 @@ export default class DeviceContext {
 
       // 'reason' will be 'destroyed' if we intentionally destroy the device.
       if ( info.reason !== 'destroyed' ) {
-        // TODO: handle destruction
+        // TODO: handle destruction https://github.com/phetsims/scenery/issues/1584
       }
     } ).catch( err => {
       throw new Error( err );
@@ -292,15 +292,15 @@ export default class DeviceContext {
 
     const binHeaderBuffer = bufferPool.getBuffer( bufferSizes.bin_headers.getSizeInBytes(), 'binHeader buffer' );
 
-    // TODO: wgpu might not have this implemented? Do I need a manual clear?
-    // TODO: actually, we're not reusing the buffer, so it might be zero'ed out? Check spec
-    // TODO: See if this clearBuffer is insufficient (implied by engine.rs docs)
+    // TODO: wgpu might not have this implemented? Do I need a manual clear? https://github.com/phetsims/scenery/issues/1584
+    // TODO: actually, we're not reusing the buffer, so it might be zero'ed out? Check spec https://github.com/phetsims/scenery/issues/1584
+    // TODO: See if this clearBuffer is insufficient (implied by engine.rs docs) https://github.com/phetsims/scenery/issues/1584
     if ( encoder.clearBuffer ) {
       // NOTE: Firefox nightly didn't have clearBuffer, so we're feature-detecting it
       encoder.clearBuffer( bumpBuffer, 0 );
     }
     else {
-      // TODO: can we avoid this, and just fresh-create the buffer every time?
+      // TODO: can we avoid this, and just fresh-create the buffer every time? https://github.com/phetsims/scenery/issues/1584
       device.queue.writeBuffer( bumpBuffer, 0, new Uint8Array( bumpBuffer.size ) );
     }
 
@@ -337,7 +337,7 @@ export default class DeviceContext {
       configBuffer, sceneBuffer, drawMonoidBuffer, binHeaderBuffer, infoBinDataBuffer, pathBuffer, tileBuffer, bumpBuffer, ptclBuffer
     ] );
 
-    // TODO: Check frees on all buffers. Note the config buffer (manually destroy that, or can we reuse it?)
+    // TODO: Check frees on all buffers. Note the config buffer (manually destroy that, or can we reuse it?) https://github.com/phetsims/scenery/issues/1584
     bufferPool.freeBuffer( sceneBuffer );
     bufferPool.freeBuffer( drawMonoidBuffer );
     bufferPool.freeBuffer( binHeaderBuffer );
@@ -348,7 +348,7 @@ export default class DeviceContext {
     this.ramps.updateTexture();
     this.atlas.updateTexture();
 
-    // TODO: TS change so this is always defined
+    // TODO: TS change so this is always defined https://github.com/phetsims/scenery/issues/1584
     const rampTextureView = this.ramps.textureView!;
     assert && assert( rampTextureView );
 
@@ -380,7 +380,7 @@ export default class DeviceContext {
 
         atlasPainter( context );
 
-        // TODO: This is getting cut off at a certain amount of pixels?
+        // TODO: This is getting cut off at a certain amount of pixels? https://github.com/phetsims/scenery/issues/1584
         console.log( canvas.toDataURL() );
       } );
     }
@@ -446,7 +446,7 @@ export default class DeviceContext {
       } );
     }
 
-    // for now TODO: can we reuse? Likely get some from reusing these
+    // for now TODO: can we reuse? Likely get some from reusing these https://github.com/phetsims/scenery/issues/1584
     configBuffer.destroy();
     fineOutputTexture && fineOutputTexture.destroy();
 

@@ -10,7 +10,7 @@ import { scenery } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class BufferImage {
-  // TODO: perhaps reorder parameters
+  // TODO: perhaps reorder parameters https://github.com/phetsims/scenery/issues/1584
   // NOTE: IMPORTANT! If using this, make sure the buffer has premultiplied values. Canvas.getImageData() is NOT
   // premultiplied. Use SourceImage with Canvases
   public constructor(

@@ -52,8 +52,8 @@ class ImageVelloDrawable extends ImageStatefulDrawable( VelloSelfDrawable ) {
       return false;
     }
 
-    // TODO: only re-encode the image when IT changes, not when the transform changes!!!
-    // TODO: This is fairly important for performance it seems
+    // TODO: only re-encode the image when IT changes, not when the transform changes!!! https://github.com/phetsims/scenery/issues/1584
+    // TODO: This is fairly important for performance it seems https://github.com/phetsims/scenery/issues/1584
 
     this.encoding.reset( true );
 

@@ -48,7 +48,7 @@ class VelloBlock extends FittedBlock {
     // Since we saw some jitter on iPad, see #318 and generally expect WebGPU layers to span the entire display
     // In the future, it would be good to understand what was causing the problem and make webgl consistent
     // with svg and canvas again.
-    // TODO: Don't have it be a "Fitted" block then
+    // TODO: Don't have it be a "Fitted" block then https://github.com/phetsims/scenery/issues/1584
     super.initialize( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
 
     this.filterRootInstance = filterRootInstance;
@@ -56,7 +56,7 @@ class VelloBlock extends FittedBlock {
     // // {boolean} - Whether we pass this flag to the WebGL Context. It will store the contents displayed on the screen,
     // // so that canvas.toDataURL() will work. It also requires clearing the context manually ever frame. Both incur
     // // performance costs, so it should be false by default.
-    // // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately?
+    // // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately? https://github.com/phetsims/scenery/issues/1584
     // this.preserveDrawingBuffer = display._preserveDrawingBuffer;
 
     // list of {Drawable}s that need to be updated before we update
@@ -89,7 +89,7 @@ class VelloBlock extends FittedBlock {
 
       this.domElement = this.canvas;
 
-      // TODO: handle context restoration/loss
+      // TODO: handle context restoration/loss https://github.com/phetsims/scenery/issues/1584
       this.deviceContext = DeviceContext.getSync();
       this.canvasContext = this.deviceContext.getCanvasContext( this.canvas );
     }
@@ -148,14 +148,14 @@ class VelloBlock extends FittedBlock {
     }
 
     // update the fit BEFORE drawing, since it may change our offset
-    // TODO: make not fittable
+    // TODO: make not fittable https://github.com/phetsims/scenery/issues/1584
     this.updateFit();
 
     const encoding = this.encoding;
     encoding.reset( false );
 
     // Iterate through all of our drawables (linked list)
-    //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
+    //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern) https://github.com/phetsims/scenery/issues/1584
     this.currentDrawable = null; // we haven't rendered a drawable this frame yet
     for ( let drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
       // ignore invisible drawables
@@ -199,7 +199,7 @@ class VelloBlock extends FittedBlock {
   }
 
   /**
-   * TODO: code share with Canvas, somehow perhaps?
+   * TODO: code share with Canvas, somehow perhaps? https://github.com/phetsims/scenery/issues/1584
    * Walk down towards the root, popping any clip/opacity effects that were needed.
    * @private
    *
@@ -253,7 +253,7 @@ class VelloBlock extends FittedBlock {
 
   /**
    * Walk up towards the next leaf, pushing any clip/opacity effects that are needed.
-   * TODO: code share with Canvas?
+   * TODO: code share with Canvas? https://github.com/phetsims/scenery/issues/1584
    * @private
    *
    * @param {PhetEncoding} encoding
@@ -325,16 +325,16 @@ class VelloBlock extends FittedBlock {
         encoding.encodeLineWidth( -1 );
 
         if ( clipArea ) {
-          // TODO: consolidate tolerance somewhere. Adaptively set this up? ACTUALLY we should really avoid
-          // TODO: re-encoding the clips like this every frame, right?
+          // TODO: consolidate tolerance somewhere. Adaptively set this up? ACTUALLY we should really avoid https://github.com/phetsims/scenery/issues/1584
+          // TODO: re-encoding the clips like this every frame, right? https://github.com/phetsims/scenery/issues/1584
           encoding.encodeShape( clipArea, true, true, 0.01 );
         }
         else {
           encoding.encodeRect( 0, 0, this.canvas.width, this.canvas.height );
         }
 
-        // TODO: filters we can do with this
-        // TODO: ensure NOT Mix.Clip when alpha < 1 (but we can gain performance if alpha is 1?)
+        // TODO: filters we can do with this https://github.com/phetsims/scenery/issues/1584
+        // TODO: ensure NOT Mix.Clip when alpha < 1 (but we can gain performance if alpha is 1?) https://github.com/phetsims/scenery/issues/1584
         encoding.encodeBeginClip( Mix.Normal, Compose.SrcOver, filterMatrix );
       }
     }
@@ -347,7 +347,7 @@ class VelloBlock extends FittedBlock {
   dispose() {
     sceneryLog && sceneryLog.VelloBlock && sceneryLog.VelloBlock( `dispose #${this.id}` );
 
-    // TODO: many things to dispose!?
+    // TODO: many things to dispose!? https://github.com/phetsims/scenery/issues/1584
 
     // clear references
     cleanArray( this.dirtyDrawables );
@@ -366,7 +366,7 @@ class VelloBlock extends FittedBlock {
     assert && assert( drawable );
     assert && assert( !drawable.isDisposed );
 
-    // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
+    // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables) https://github.com/phetsims/scenery/issues/1584
     this.dirtyDrawables.push( drawable );
     this.markDirty();
   }

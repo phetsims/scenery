@@ -84,16 +84,16 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
       return false;
     }
 
-    // TODO: consider caching the encoded shape, and only re-encoding if the shape changes. We should be able to
-    // TODO: append out-of-order?
-    // TODO: If we cache the encoded shape, IF THE SHAPE CHANGES EVERY FRAME then are we getting performance loss?
-    // TODO: performance gain would only happen if it was MOVING but SELF-STATIC. Fully static won't call this update.
+    // TODO: consider caching the encoded shape, and only re-encoding if the shape changes. We should be able to https://github.com/phetsims/scenery/issues/1584
+    // TODO: append out-of-order? https://github.com/phetsims/scenery/issues/1584
+    // TODO: If we cache the encoded shape, IF THE SHAPE CHANGES EVERY FRAME then are we getting performance loss? https://github.com/phetsims/scenery/issues/1584
+    // TODO: performance gain would only happen if it was MOVING but SELF-STATIC. Fully static won't call this update. https://github.com/phetsims/scenery/issues/1584
 
     this.encoding.reset( true );
 
     const node = this.node;
 
-    // TODO: can we have this included in the computation?
+    // TODO: can we have this included in the computation? https://github.com/phetsims/scenery/issues/1584
     const matrix = scalingMatrix.timesMatrix( this.instance.relativeTransform.matrix );
 
     if ( node.shape ) {
@@ -109,8 +109,8 @@ class PathVelloDrawable extends PathStatefulDrawable( VelloSelfDrawable ) {
         this.encoding.encodeMatrix( matrix );
         let shape = node.shape;
         if ( node.lineDash.length ) {
-          // TODO: cache dashed shapes? OR AT LEAST DO NOT UPDATE THE IMAGE ENCODNG IF IT IS THE SAME
-          // TODO: See SVG example
+          // TODO: cache dashed shapes? OR AT LEAST DO NOT UPDATE THE IMAGE ENCODNG IF IT IS THE SAME https://github.com/phetsims/scenery/issues/1584
+          // TODO: See SVG example https://github.com/phetsims/scenery/issues/1584
           shape = node.shape.getDashedShape( node.lineDash, node.lineDashOffset );
         }
         this.encoding.encodeLineWidth( node.lineWidth );

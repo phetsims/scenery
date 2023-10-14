@@ -320,14 +320,14 @@ export default class Text extends Paintable( Node ) {
       bitmask |= Renderer.bitmaskCanvas;
     }
     if ( !this._isHTML ) {
-      // TODO: Do we still do _isHTML at all?!? Let's get rid of that
+      // TODO: Do we still do _isHTML at all?!? Let's get rid of that https://github.com/phetsims/scenery/issues/1584
       bitmask |= Renderer.bitmaskSVG;
     }
 
     // fill and stroke will determine whether we have DOM text support
     bitmask |= Renderer.bitmaskDOM;
 
-    // TODO: make this very conditional
+    // TODO: make this very conditional https://github.com/phetsims/scenery/issues/1584
     bitmask |= Renderer.bitmaskVello;
 
     return bitmask;

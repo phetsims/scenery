@@ -84,7 +84,7 @@ Renderer.stripBitmask = function( bitmask ) {
   return bitmask & Renderer.bitmaskRendererArea;
 };
 
-// TODO: presumably we can find a better way of handling this?
+// TODO: presumably we can find a better way of handling this? https://github.com/phetsims/scenery/issues/1584
 Renderer.createOrderBitmask = function( firstRenderer, secondRenderer, thirdRenderer, fourthRenderer, fifthRenderer ) {
   firstRenderer = firstRenderer || 0;
   secondRenderer = secondRenderer || 0;

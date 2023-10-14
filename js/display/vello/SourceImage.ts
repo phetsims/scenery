@@ -15,7 +15,7 @@ import { scenery } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class SourceImage {
-  // TODO: perhaps reorder parameters
+  // TODO: perhaps reorder parameters https://github.com/phetsims/scenery/issues/1584
   public constructor(
     public readonly width: number,
     public readonly height: number,

@@ -327,7 +327,7 @@ class RendererSummary {
     return false; // sanity check
   }
 
-  // TODO: reduce code duplication
+  // TODO: reduce code duplication https://github.com/phetsims/scenery/issues/1584
   /**
    * Given a bitmask representing a list of ordered preferred renderers, we check to see if all of our nodes can be
    * displayed in a single Vello block, AND that given the preferred renderers, that it will actually happen in our
