@@ -289,6 +289,8 @@ export default class Input extends PhetioObject {
   // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
   public currentlyFiringEvents: boolean;
 
+  public currentSceneryEvent: SceneryEvent | null = null;
+
   private batchedEvents: BatchedDOMEvent[];
 
   // In miliseconds, the DOMEvent timeStamp when we receive a logical up event.
@@ -835,10 +837,14 @@ export default class Input extends PhetioObject {
 
   /**
    * Interrupts any input actions that are currently taking place (should stop drags, etc.)
+   *
+   * If excludePointer is provided, it will NOT be interrupted along with the others
    */
-  public interruptPointers(): void {
+  public interruptPointers( excludePointer: Pointer | null = null ): void {
     _.each( this.pointers, pointer => {
-      pointer.interruptAll();
+      if ( pointer !== excludePointer ) {
+        pointer.interruptAll();
+      }
     } );
   }
 
@@ -1841,6 +1847,8 @@ export default class Input extends PhetioObject {
     // NOTE: event is not immutable, as its currentTarget changes
     const inputEvent = new SceneryEvent<DOMEvent>( trail, type, pointer, context );
 
+    this.currentSceneryEvent = inputEvent;
+
     // first run through the pointer's listeners to see if one of them will handle the event
     this.dispatchToListeners<DOMEvent>( pointer, pointer.getListeners(), type, inputEvent );
 
@@ -1855,6 +1863,8 @@ export default class Input extends PhetioObject {
     if ( Display.inputListeners.length ) {
       this.dispatchToListeners<DOMEvent>( pointer, Display.inputListeners.slice(), type, inputEvent );
     }
+
+    this.currentSceneryEvent = null;
 
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
   }
