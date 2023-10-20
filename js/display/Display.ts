@@ -51,7 +51,6 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
-import TEmitter from '../../../axon/js/TEmitter.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
@@ -66,7 +65,8 @@ import platform from '../../../phet-core/js/platform.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PaintDef, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, PointerAreaOverlay, PointerOverlay, Renderer, SafariWorkaroundOverlay, scenery, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, VelloBlock, WebGLBlock } from '../imports.js';
+import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PaintDef, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, Pointer, PointerAreaOverlay, PointerOverlay, Renderer, SafariWorkaroundOverlay, scenery, SceneryEvent, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, VelloBlock, WebGLBlock } from '../imports.js';
+import TEmitter from '../../../axon/js/TEmitter.js';
 
 type SelfOptions = {
   // Initial (or override) display width
@@ -1395,6 +1395,25 @@ export default class Display {
 
     return this;
   }
+
+  /**
+   * Interrupts all pointers associated with this Display that are NOT currently having events executed.
+   * see https://github.com/phetsims/scenery/issues/1582.
+   *
+   * If excludePointer is provided and is non-null, it's used as the "current" pointer that should be excluded from
+   * interruption.
+   */
+  public interruptOtherPointers( excludePointer: Pointer | null = null ): this {
+    this._input && this._input.interruptPointers(
+      ( excludePointer || this._input.currentSceneryEvent?.pointer ) || null
+    );
+
+    return this;
+  }
+
+  public static readonly INTERRUPT_OTHER_POINTERS = ( event: SceneryEvent ): void => {
+    phet?.joist?.display?.interruptOtherPointers( event?.pointer );
+  };
 
   /**
    * (scenery-internal)
