@@ -1125,7 +1125,7 @@ export default class Input extends PhetioObject {
     const inputEvent = new SceneryEvent<DOMEvent>( new Trail(), eventType, pointer, context );
 
     const recursiveGlobalDispatch = ( node: Node ) => {
-      if ( !node.isDisposed && node.isVisible() && node.isInputEnabled() ) {
+      if ( !node.isDisposed && node.isVisible() && node.isInputEnabled() && node.isPDOMVisible() ) {
         // Reverse iteration follows the z-order from "visually in front" to "visually in back" like normal dipatch
         for ( let i = node._children.length - 1; i >= 0; i-- ) {
           recursiveGlobalDispatch( node._children[ i ] );
