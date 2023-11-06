@@ -45,7 +45,7 @@ const focusHighlight = new Rectangle( 0, 0, 10, 10 );
 
 let canRunTests = true;
 
-QUnit.module( 'ParallelDOMTests', {
+QUnit.module( 'ParallelDOM', {
   beforeEach: () => {
 
     // A test can only be run when the document has focus because tests require focus/blur events. Browsers

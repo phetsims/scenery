@@ -8,7 +8,7 @@
 
 import PDOMUtils from './PDOMUtils.js';
 
-QUnit.module( 'AccessibilityUtilsTests' );
+QUnit.module( 'AccessibilityUtils' );
 
 // tests
 QUnit.test( 'insertElements', assert => {

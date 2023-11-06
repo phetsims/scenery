@@ -16,7 +16,7 @@ import PDOMPeer from './PDOMPeer.js';
 // constants
 const PIXEL_PADDING = 3;
 
-QUnit.module( 'PDOMSiblingTests' );
+QUnit.module( 'PDOMSibling' );
 
 /**
  * Gets the bounds of the DOMElement in the viewport in global coordinates.
