@@ -308,7 +308,7 @@ const PDOMUtils = {
 
   /**
    * If the textContent has any tags that are not formatting tags, return false. Only checking for
-   * tags that are not in the whitelist FORMATTING_TAGS. If there are no tags at all, return false.
+   * tags that are not in the allowed FORMATTING_TAGS. If there are no tags at all, return false.
    * @public
    *
    * @param {string} textContent
