@@ -65,13 +65,14 @@ import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Range from '../../../dot/js/Range.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { allowLinksProperty, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint } from '../imports.js';
+import { allowLinksProperty, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint, WidthSizable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 import '../../../sherpa/lib/himalaya-1.1.0.js';
+import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 
 // @ts-expect-error - Since himalaya isn't in tsconfig
 const himalayaVar = himalaya;
@@ -231,7 +232,7 @@ type SelfOptions = {
   leading?: number;
 
   // Sets width of text before creating a new line
-  lineWrap?: number | null;
+  lineWrap?: number | 'stretch' | null;
 
   // Sets forwarding of the stringProperty, see setStringProperty() for more documentation
   stringProperty?: TReadOnlyProperty<string> | null;
@@ -285,7 +286,7 @@ const FONT_STYLE_MAP = {
 const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP ) as ( keyof typeof FONT_STYLE_MAP )[];
 const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
-export default class RichText extends Node {
+export default class RichText extends WidthSizable( Node ) {
 
   // The string to display. We'll initialize this by mutating.
   private readonly _stringProperty: TinyForwardingProperty<string>;
@@ -324,7 +325,7 @@ export default class RichText extends Node {
   private _replaceNewlines = false;
   private _align: RichTextAlign = 'left';
   private _leading = 0;
-  private _lineWrap: number | null = null;
+  private _lineWrap: RequiredOption<SelfOptions, 'lineWrap'> = null;
 
   // We need to consolidate links (that could be split across multiple lines) under one "link" node, so we track created
   // link fragments here so they can get pieced together later.
@@ -336,6 +337,12 @@ export default class RichText extends Node {
 
   // Normal layout container of lines (separate, so we can clear it easily)
   private lineContainer: Node;
+
+  // For lineWrap:stretch, we'll need to compute a new minimum width for the RichText, so these control
+  // (a) whether we're computing this (it does a lot of unnecessary work otherwise if we don't need it), and (b)
+  // the actual minimumWidth that we'll have.
+  private needPendingMinimumWidth = false;
+  private pendingMinimumWidth = 0;
 
   // Text and RichText currently use the same tandem name for their stringProperty.
   public static readonly STRING_PROPERTY_TANDEM_NAME = Text.STRING_PROPERTY_TANDEM_NAME;
@@ -369,6 +376,8 @@ export default class RichText extends Node {
     // Initialize to an empty state, so we are immediately valid (since now we need to create an empty leaf even if we
     // have empty text).
     this.rebuildRichText();
+
+    this.localPreferredWidthProperty.lazyLink( () => this.rebuildRichText() );
 
     this.mutate( options );
   }
@@ -451,6 +460,16 @@ export default class RichText extends Node {
     assert && cleanArray( usedLinks );
     assert && cleanArray( usedNodes );
 
+    const hasDynamicWidth = this._lineWrap === 'stretch';
+
+    this.widthSizable = hasDynamicWidth;
+
+    this.pendingMinimumWidth = 0;
+    this.needPendingMinimumWidth = hasDynamicWidth;
+
+    // NOTE: can't use hasDynamicWidth here, since TypeScript isn't inferring it yet
+    const effectiveLineWrap = this._lineWrap === 'stretch' ? this.localPreferredWidth : this._lineWrap;
+
     this.freeChildrenToPool();
 
     // Bail early, particularly if we are being constructed.
@@ -489,7 +508,7 @@ export default class RichText extends Node {
     // Clear out link items, as we'll need to reconstruct them later
     this._linkItems.length = 0;
 
-    const widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
+    const widthAvailable = effectiveLineWrap === null ? Number.POSITIVE_INFINITY : effectiveLineWrap;
     const isRootLTR = true;
 
     let currentLine = RichTextElement.pool.create( isRootLTR );
@@ -503,7 +522,7 @@ export default class RichText extends Node {
       const currentLineWidth = currentLine.bounds.isValid() ? currentLine.width : 0;
 
       // Add the element in
-      const lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, isRootLTR, widthAvailable - currentLineWidth );
+      const lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, isRootLTR, widthAvailable - currentLineWidth, 1 );
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `lineBreakState: ${lineBreakState}` );
 
       // If there was a line break (we'll need to swap to a new line node)
@@ -595,6 +614,9 @@ export default class RichText extends Node {
       }
     }
 
+    // NOTE: If this is failing or causing infinite loops in the future, refactor RichText to use a LayoutConstraint.
+    this.localMinimumWidth = hasDynamicWidth ? this.pendingMinimumWidth : this.localBounds.width;
+
     sceneryLog && sceneryLog.RichText && sceneryLog.pop();
   }
 
@@ -676,7 +698,15 @@ export default class RichText extends Node {
    * @param widthAvailable - How much width we have available before forcing a line break (for lineWrap)
    * @returns - Whether a line break was reached
    */
-  private appendElement( containerNode: RichTextElement, element: HimalayaNode, font: Font | string, fill: TPaint, isLTR: boolean, widthAvailable: number ): string {
+  private appendElement(
+    containerNode: RichTextElement,
+    element: HimalayaNode,
+    font: Font | string,
+    fill: TPaint,
+    isLTR: boolean,
+    widthAvailable: number,
+    appliedScale: number
+  ): string {
     let lineBreakState = LineBreakState.NONE;
 
     // The main Node for the element that we are adding
@@ -694,6 +724,16 @@ export default class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
       node = RichTextLeaf.pool.create( element.content, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
+
+      if ( this.needPendingMinimumWidth ) {
+        this.pendingMinimumWidth = Math.max( this.pendingMinimumWidth, Math.max( ...getLineBreakRanges( element.content ).map( range => {
+          const string = element.content.slice( range.min, range.max );
+          const temporaryNode = RichTextLeaf.pool.create( string, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
+          const localMininumWidth = temporaryNode.width * appliedScale;
+          temporaryNode.dispose();
+          return localMininumWidth;
+        } ) ) );
+      }
 
       // Handle wrapping if required. Container spacing cuts into our available width
       if ( !node.fitsIn( widthAvailableWithSpacing, this._hasAddedLeafToLine, isLTR ) ) {
@@ -921,7 +961,7 @@ export default class RichText extends Node {
           const widthBefore = node.bounds.isValid() ? node.width : 0;
 
           const childElement = element.children[ 0 ];
-          lineBreakState = this.appendElement( node as RichTextElement, childElement, font, fill, isLTR, widthAvailable / scale );
+          lineBreakState = this.appendElement( node as RichTextElement, childElement, font, fill, isLTR, widthAvailable / scale, appliedScale * scale );
 
           // for COMPLETE or NONE, we'll want to remove the childElement from the tree (we fully processed it)
           if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
@@ -1556,8 +1596,8 @@ export default class RichText extends Node {
    *
    * @param lineWrap - If it's a number, it should be greater than 0.
    */
-  public setLineWrap( lineWrap: number | null ): this {
-    assert && assert( lineWrap === null || ( isFinite( lineWrap ) && lineWrap > 0 ) );
+  public setLineWrap( lineWrap: RequiredOption<SelfOptions, 'lineWrap'> ): this {
+    assert && assert( lineWrap === null || lineWrap === 'stretch' || ( isFinite( lineWrap ) && lineWrap > 0 ) );
 
     if ( this._lineWrap !== lineWrap ) {
       this._lineWrap = lineWrap;
@@ -1566,14 +1606,14 @@ export default class RichText extends Node {
     return this;
   }
 
-  public set lineWrap( value: number | null ) { this.setLineWrap( value ); }
+  public set lineWrap( value: RequiredOption<SelfOptions, 'lineWrap'> ) { this.setLineWrap( value ); }
 
-  public get lineWrap(): number | null { return this.getLineWrap(); }
+  public get lineWrap(): RequiredOption<SelfOptions, 'lineWrap'> { return this.getLineWrap(); }
 
   /**
    * Returns the line wrap width.
    */
-  public getLineWrap(): number | null {
+  public getLineWrap(): RequiredOption<SelfOptions, 'lineWrap'> {
     return this._lineWrap;
   }
 
