@@ -231,7 +231,9 @@ type SelfOptions = {
   // Sets the spacing between lines if there are multiple lines
   leading?: number;
 
-  // Sets width of text before creating a new line
+  // Sets width of text before creating a new line.
+  // When set to 'stretch' controls whether its WidthSizable. In this case it will use the preferred width
+  // to determine the line wrap.
   lineWrap?: number | 'stretch' | null;
 
   // Sets forwarding of the stringProperty, see setStringProperty() for more documentation
