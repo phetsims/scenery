@@ -1544,13 +1544,13 @@ export default class ParallelDOM extends PhetioObject {
   public setAriaValueText( ariaValueText: PDOMValueType | null ): void {
     if ( this._ariaValueText !== ariaValueText ) {
       if ( isTReadOnlyProperty( this._ariaValueText ) && !this._ariaValueText.isDisposed ) {
-        this._ariaValueText.unlink( this._onAriaLabelChangeListener );
+        this._ariaValueText.unlink( this._onAriaValueTextChangeListener );
       }
 
       this._ariaValueText = ariaValueText;
 
       if ( isTReadOnlyProperty( ariaValueText ) ) {
-        ariaValueText.lazyLink( this._onAriaLabelChangeListener );
+        ariaValueText.lazyLink( this._onAriaValueTextChangeListener );
       }
 
       this.onAriaValueTextChange();
@@ -2485,7 +2485,7 @@ export default class ParallelDOM extends PhetioObject {
 
       for ( let j = 0; j < this._pdomInstances.length; j++ ) {
         const peer = this._pdomInstances[ j ].peer!;
-        peer.setAttributeToElement( attribute, value, options );
+        peer.setAttributeToElement( attribute, rawValue, options );
       }
     };
 
