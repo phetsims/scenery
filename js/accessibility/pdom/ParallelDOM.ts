@@ -298,6 +298,7 @@ export type ParallelDOMOptions = {
 type PDOMAttribute = {
   attribute: string;
   value: PDOMValueType | boolean | number;
+  listener: ( ( rawValue: string | boolean | number ) => void ) | null;
   options: SetPDOMAttributeOptions;
 };
 
@@ -695,6 +696,9 @@ export default class ParallelDOM extends PhetioObject {
     this.setAriaLabelledbyAssociations( [] );
     this.setAriaDescribedbyAssociations( [] );
     this.setActiveDescendantAssociations( [] );
+
+    // PDOM attributes can potentially have listeners, so we will clear those out.
+    this.removePDOMAttributes();
 
     this._innerContentProperty.dispose();
   }
@@ -2439,13 +2443,9 @@ export default class ParallelDOM extends PhetioObject {
    * @param [providedOptions]
    */
   public setPDOMAttribute( attribute: string, value: PDOMValueType | boolean | number, providedOptions?: SetPDOMAttributeOptions ): void {
-    if ( !( typeof value === 'boolean' || typeof value === 'number' ) ) {
-      value = unwrapProperty( value )!;
-    }
 
     assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
-    assert && typeof value === 'string' && validate( value, Validation.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
 
     const options = optionize<SetPDOMAttributeOptions>()( {
 
@@ -2480,16 +2480,32 @@ export default class ParallelDOM extends PhetioObject {
       }
     }
 
+    let listener: ( ( rawValue: string | boolean | number ) => void ) | null = ( rawValue: string | boolean | number ) => {
+      assert && typeof rawValue === 'string' && validate( rawValue, Validation.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
+
+      for ( let j = 0; j < this._pdomInstances.length; j++ ) {
+        const peer = this._pdomInstances[ j ].peer!;
+        peer.setAttributeToElement( attribute, value, options );
+      }
+    };
+
+    if ( isTReadOnlyProperty( value ) ) {
+      // should run it once initially
+      value.link( listener );
+    }
+    else {
+      // run it once and toss it, so we don't need to store the reference or unlink it later
+      listener( value );
+      listener = null;
+    }
+
     this._pdomAttributes.push( {
       attribute: attribute,
       value: value,
+      listener: listener,
       options: options
     } );
 
-    for ( let j = 0; j < this._pdomInstances.length; j++ ) {
-      const peer = this._pdomInstances[ j ].peer!;
-      peer.setAttributeToElement( attribute, value, options );
-    }
   }
 
   /**
@@ -2519,6 +2535,12 @@ export default class ParallelDOM extends PhetioObject {
       if ( this._pdomAttributes[ i ].attribute === attribute &&
            this._pdomAttributes[ i ].options.namespace === options.namespace &&
            this._pdomAttributes[ i ].options.elementName === options.elementName ) {
+
+        const oldAttribute = this._pdomAttributes[ i ];
+        if ( oldAttribute.listener && isTReadOnlyProperty( oldAttribute.value ) && !oldAttribute.value.isDisposed ) {
+          oldAttribute.value.unlink( oldAttribute.listener );
+        }
+
         this._pdomAttributes.splice( i, 1 );
         attributeRemoved = true;
       }
