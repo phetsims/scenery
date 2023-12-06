@@ -413,7 +413,7 @@ export default class ParallelDOM extends PhetioObject {
   private _innerContentProperty: TinyForwardingProperty<string | null>;
 
   // The description content for this node's DOM element.
-  private _descriptionContent: string | null;
+  private _descriptionContent: PDOMValueType | null = null;
 
   // If provided, it will create the primary DOM element with the specified namespace.
   // This may be needed, for example, with MathML/SVG/etc.
@@ -574,6 +574,7 @@ export default class ParallelDOM extends PhetioObject {
   protected _onAriaLabelChangeListener: () => void;
   protected _onAriaValueTextChangeListener: () => void;
   protected _onLabelContentChangeListener: () => void;
+  protected _onDescriptionContentChangeListener: () => void;
 
   protected constructor( options?: PhetioObjectOptions ) {
 
@@ -584,6 +585,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onAriaLabelChangeListener = this.onAriaLabelChange.bind( this );
     this._onAriaValueTextChangeListener = this.onAriaValueTextChange.bind( this );
     this._onLabelContentChangeListener = this.invalidatePeerLabelSiblingContent.bind( this );
+    this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
 
     this._tagName = null;
     this._containerTagName = null;
@@ -599,7 +601,6 @@ export default class ParallelDOM extends PhetioObject {
     this._innerContentProperty = new TinyForwardingProperty<string | null>( null, false );
     this._innerContentProperty.lazyLink( this.onInnerContentPropertyChange.bind( this ) );
 
-    this._descriptionContent = null;
     this._pdomNamespace = null;
     this._ariaRole = null;
     this._containerAriaRole = null;
@@ -676,6 +677,10 @@ export default class ParallelDOM extends PhetioObject {
 
     if ( isTReadOnlyProperty( this._labelContent ) && !this._labelContent.isDisposed ) {
       this._labelContent.unlink( this._onLabelContentChangeListener );
+    }
+
+    if ( isTReadOnlyProperty( this._descriptionContent ) && !this._descriptionContent.isDisposed ) {
+      this._descriptionContent.unlink( this._onDescriptionContentChangeListener );
     }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
@@ -1386,27 +1391,38 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
+  private invalidatePeerDescriptionSiblingContent(): void {
+    const descriptionContent = this.descriptionContent;
+
+    // if there is no description element, assume that a paragraph element should be used
+    if ( !this._descriptionTagName ) {
+      this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
+    }
+
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.setDescriptionSiblingContent( descriptionContent );
+    }
+  }
+
   /**
    * Set the description content for this Node's primary sibling. The description sibling tag name must support
    * innerHTML and textContent. If a description element does not exist yet, a default
    * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
    */
-  public setDescriptionContent( providedDescriptionContent: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const descriptionContent = unwrapProperty( providedDescriptionContent );
+  public setDescriptionContent( descriptionContent: PDOMValueType | null ): void {
+    if ( descriptionContent !== this._descriptionContent ) {
+      if ( isTReadOnlyProperty( this._descriptionContent ) && !this._descriptionContent.isDisposed ) {
+        this._descriptionContent.unlink( this._onDescriptionContentChangeListener );
+      }
 
-    if ( this._descriptionContent !== descriptionContent ) {
       this._descriptionContent = descriptionContent;
 
-      // if there is no description element, assume that a paragraph element should be used
-      if ( !this._descriptionTagName ) {
-        this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
+      if ( isTReadOnlyProperty( descriptionContent ) ) {
+        descriptionContent.lazyLink( this._onDescriptionContentChangeListener );
       }
 
-      for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-        const peer = this._pdomInstances[ i ].peer!;
-        peer.setDescriptionSiblingContent( this._descriptionContent );
-      }
+      this.invalidatePeerDescriptionSiblingContent();
     }
   }
 
@@ -1418,7 +1434,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the content for this Node's description sibling DOM Element.
    */
   public getDescriptionContent(): string | null {
-    return this._descriptionContent;
+    return unwrapProperty( this._descriptionContent );
   }
 
   /**
@@ -1504,7 +1520,7 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   private onAriaValueTextChange(): void {
-    const ariaValueText = unwrapProperty( this._ariaValueText );
+    const ariaValueText = this.ariaValueText;
 
     if ( ariaValueText === null ) {
       if ( this._hasAppliedAriaLabel ) {
@@ -1586,7 +1602,7 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   private onAriaLabelChange(): void {
-    const ariaLabel = unwrapProperty( this._ariaLabel );
+    const ariaLabel = this.ariaLabel;
 
     if ( ariaLabel === null ) {
       if ( this._hasAppliedAriaLabel ) {
