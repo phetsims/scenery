@@ -406,7 +406,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // The label content for this node's DOM element.  There are multiple ways that a label
   // can be associated with a node's dom element, see setLabelContent() for more documentation
-  private _labelContent: string | null;
+  private _labelContent: PDOMValueType | null = null;
 
   // The inner label content for this node's primary sibling. Set as inner HTML
   // or text content of the actual DOM element. If this is used, the node should not have children.
@@ -421,7 +421,8 @@ export default class ParallelDOM extends PhetioObject {
 
   // If provided, "aria-label" will be added as an inline attribute on the node's DOM
   // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
-  private _ariaLabel: string | null;
+  private _ariaLabel: PDOMValueType | null = null;
+  private _hasAppliedAriaLabel = false;
 
   // The ARIA role for this Node's primary sibling, added as an HTML attribute.  For a complete
   // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
@@ -436,7 +437,8 @@ export default class ParallelDOM extends PhetioObject {
 
   // If provided, "aria-valuetext" will be added as an inline attribute on the Node's
   // primary sibling and set to this value. Setting back to null will clear this attribute in the view.
-  private _ariaValueText: string | null;
+  private _ariaValueText: PDOMValueType | null = null;
+  private _hasAppliedAriaValueText = false;
 
   // Keep track of what this Node is aria-labelledby via "associationObjects"
   // see addAriaLabelledbyAssociation for why we support more than one association.
@@ -569,6 +571,9 @@ export default class ParallelDOM extends PhetioObject {
 
   protected _onPDOMContentChangeListener: () => void;
   protected _onInputValueChangeListener: () => void;
+  protected _onAriaLabelChangeListener: () => void;
+  protected _onAriaValueTextChangeListener: () => void;
+  protected _onLabelContentChangeListener: () => void;
 
   protected constructor( options?: PhetioObjectOptions ) {
 
@@ -576,6 +581,9 @@ export default class ParallelDOM extends PhetioObject {
 
     this._onPDOMContentChangeListener = this.onPDOMContentChange.bind( this );
     this._onInputValueChangeListener = this.invalidatePeerInputValue.bind( this );
+    this._onAriaLabelChangeListener = this.onAriaLabelChange.bind( this );
+    this._onAriaValueTextChangeListener = this.onAriaValueTextChange.bind( this );
+    this._onLabelContentChangeListener = this.invalidatePeerLabelSiblingContent.bind( this );
 
     this._tagName = null;
     this._containerTagName = null;
@@ -587,17 +595,14 @@ export default class ParallelDOM extends PhetioObject {
     this._appendDescription = false;
     this._pdomAttributes = [];
     this._pdomClasses = [];
-    this._labelContent = null;
 
     this._innerContentProperty = new TinyForwardingProperty<string | null>( null, false );
     this._innerContentProperty.lazyLink( this.onInnerContentPropertyChange.bind( this ) );
 
     this._descriptionContent = null;
     this._pdomNamespace = null;
-    this._ariaLabel = null;
     this._ariaRole = null;
     this._containerAriaRole = null;
-    this._ariaValueText = null;
     this._ariaLabelledbyAssociations = [];
     this._nodesThatAreAriaLabelledbyThisNode = [];
     this._ariaDescribedbyAssociations = [];
@@ -659,6 +664,18 @@ export default class ParallelDOM extends PhetioObject {
     if ( isTReadOnlyProperty( this._inputValue ) && !this._inputValue.isDisposed ) {
       this._inputValue.unlink( this._onPDOMContentChangeListener );
       this._inputValue = null;
+    }
+
+    if ( isTReadOnlyProperty( this._ariaLabel ) && !this._ariaLabel.isDisposed ) {
+      this._ariaLabel.unlink( this._onAriaLabelChangeListener );
+    }
+
+    if ( isTReadOnlyProperty( this._ariaValueText ) && !this._ariaValueText.isDisposed ) {
+      this._ariaValueText.unlink( this._onAriaValueTextChangeListener );
+    }
+
+    if ( isTReadOnlyProperty( this._labelContent ) && !this._labelContent.isDisposed ) {
+      this._labelContent.unlink( this._onLabelContentChangeListener );
     }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
@@ -1291,6 +1308,20 @@ export default class ParallelDOM extends PhetioObject {
     return this._containerTagName;
   }
 
+  private invalidatePeerLabelSiblingContent(): void {
+    const labelContent = this.labelContent;
+
+    // if trying to set labelContent, make sure that there is a labelTagName default
+    if ( !this._labelTagName ) {
+      this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
+    }
+
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.setLabelSiblingContent( labelContent );
+    }
+  }
+
   /**
    * Set the content of the label sibling for the this node.  The label sibling will default to the value of
    * DEFAULT_LABEL_TAG_NAME if no `labelTagName` is provided. If the label sibling is a `LABEL` html element,
@@ -1301,22 +1332,19 @@ export default class ParallelDOM extends PhetioObject {
    *
    * Passing a null label value will not clear the whole label sibling, just the inner content of the DOM Element.
    */
-  public setLabelContent( providedLabel: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const label = unwrapProperty( providedLabel );
-
-    if ( this._labelContent !== label ) {
-      this._labelContent = label;
-
-      // if trying to set labelContent, make sure that there is a labelTagName default
-      if ( !this._labelTagName ) {
-        this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
+  public setLabelContent( labelContent: PDOMValueType | null ): void {
+    if ( labelContent !== this._labelContent ) {
+      if ( isTReadOnlyProperty( this._labelContent ) && !this._labelContent.isDisposed ) {
+        this._labelContent.unlink( this._onLabelContentChangeListener );
       }
 
-      for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-        const peer = this._pdomInstances[ i ].peer!;
-        peer.setLabelSiblingContent( this._labelContent );
+      this._labelContent = labelContent;
+
+      if ( isTReadOnlyProperty( labelContent ) ) {
+        labelContent.lazyLink( this._onLabelContentChangeListener );
       }
+
+      this.invalidatePeerLabelSiblingContent();
     }
   }
 
@@ -1328,7 +1356,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the content for this Node's label sibling DOM element.
    */
   public getLabelContent(): string | null {
-    return this._labelContent;
+    return unwrapProperty( this._labelContent );
   }
 
   /**
@@ -1475,23 +1503,38 @@ export default class ParallelDOM extends PhetioObject {
     return this._containerAriaRole;
   }
 
+  private onAriaValueTextChange(): void {
+    const ariaValueText = unwrapProperty( this._ariaValueText );
+
+    if ( ariaValueText === null ) {
+      if ( this._hasAppliedAriaLabel ) {
+        this.removePDOMAttribute( 'aria-valuetext' );
+        this._hasAppliedAriaLabel = false;
+      }
+    }
+    else {
+      this.setPDOMAttribute( 'aria-valuetext', ariaValueText );
+      this._hasAppliedAriaLabel = true;
+    }
+  }
+
   /**
    * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
    * clear this attribute.
    */
-  public setAriaValueText( providedAriaValueText: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const ariaValueText = unwrapProperty( providedAriaValueText );
-
+  public setAriaValueText( ariaValueText: PDOMValueType | null ): void {
     if ( this._ariaValueText !== ariaValueText ) {
+      if ( isTReadOnlyProperty( this._ariaValueText ) && !this._ariaValueText.isDisposed ) {
+        this._ariaValueText.unlink( this._onAriaLabelChangeListener );
+      }
+
       this._ariaValueText = ariaValueText;
 
-      if ( ariaValueText === null ) {
-        this.removePDOMAttribute( 'aria-valuetext' );
+      if ( isTReadOnlyProperty( ariaValueText ) ) {
+        ariaValueText.lazyLink( this._onAriaLabelChangeListener );
       }
-      else {
-        this.setPDOMAttribute( 'aria-valuetext', ariaValueText );
-      }
+
+      this.onAriaLabelChange();
     }
   }
 
@@ -1504,7 +1547,7 @@ export default class ParallelDOM extends PhetioObject {
    * has not been set on the primary sibling.
    */
   public getAriaValueText(): string | null {
-    return this._ariaValueText;
+    return unwrapProperty( this._ariaValueText );
   }
 
   /**
@@ -1542,26 +1585,41 @@ export default class ParallelDOM extends PhetioObject {
     return this._pdomNamespace;
   }
 
+  private onAriaLabelChange(): void {
+    const ariaLabel = unwrapProperty( this._ariaLabel );
+
+    if ( ariaLabel === null ) {
+      if ( this._hasAppliedAriaLabel ) {
+        this.removePDOMAttribute( 'aria-label' );
+        this._hasAppliedAriaLabel = false;
+      }
+    }
+    else {
+      this.setPDOMAttribute( 'aria-label', ariaLabel );
+      this._hasAppliedAriaLabel = true;
+    }
+  }
+
   /**
    * Sets the 'aria-label' attribute for labelling the Node's primary sibling. By using the
    * 'aria-label' attribute, the label will be read on focus, but can not be found with the
    * virtual cursor. This is one way to set a DOM Element's Accessible Name.
    *
-   * @param providedAriaLabel - the text for the aria label attribute
+   * @param ariaLabel - the text for the aria label attribute
    */
-  public setAriaLabel( providedAriaLabel: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const ariaLabel = unwrapProperty( providedAriaLabel );
-
+  public setAriaLabel( ariaLabel: PDOMValueType | null ): void {
     if ( this._ariaLabel !== ariaLabel ) {
+      if ( isTReadOnlyProperty( this._ariaLabel ) && !this._ariaLabel.isDisposed ) {
+        this._ariaLabel.unlink( this._onAriaLabelChangeListener );
+      }
+
       this._ariaLabel = ariaLabel;
 
-      if ( ariaLabel === null ) {
-        this.removePDOMAttribute( 'aria-label' );
+      if ( isTReadOnlyProperty( ariaLabel ) ) {
+        ariaLabel.lazyLink( this._onAriaLabelChangeListener );
       }
-      else {
-        this.setPDOMAttribute( 'aria-label', ariaLabel );
-      }
+
+      this.onAriaLabelChange();
     }
   }
 
@@ -1573,7 +1631,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the value of the aria-label attribute for this Node's primary sibling.
    */
   public getAriaLabel(): string | null {
-    return this._ariaLabel;
+    return unwrapProperty( this._ariaLabel );
   }
 
   /**
