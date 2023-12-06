@@ -138,7 +138,6 @@ import Tandem from '../../../../tandem/js/Tandem.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
-import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
@@ -377,7 +376,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // The value of the input, only relevant if the tag name is of type "INPUT". Is a
   // string because the `value` attribute is a DOMString. null value indicates no value.
-  private _inputValue: string | number | null;
+  private _inputValue: PDOMValueType | number | null = null;
 
   // Whether the pdom input is considered 'checked', only useful for inputs of
   // type 'radio' and 'checkbox'
@@ -569,19 +568,20 @@ export default class ParallelDOM extends PhetioObject {
   protected pdomBoundInputEnabledListener: ( enabled: boolean ) => void;
 
   protected _onPDOMContentChangeListener: () => void;
+  protected _onInputValueChangeListener: () => void;
 
   protected constructor( options?: PhetioObjectOptions ) {
 
     super( options );
 
     this._onPDOMContentChangeListener = this.onPDOMContentChange.bind( this );
+    this._onInputValueChangeListener = this.invalidatePeerInputValue.bind( this );
 
     this._tagName = null;
     this._containerTagName = null;
     this._labelTagName = null;
     this._descriptionTagName = null;
     this._inputType = null;
-    this._inputValue = null;
     this._pdomChecked = false;
     this._appendLabel = false;
     this._appendDescription = false;
@@ -644,6 +644,21 @@ export default class ParallelDOM extends PhetioObject {
     if ( isTReadOnlyProperty( this._accessibleName ) && !this._accessibleName.isDisposed ) {
       this._accessibleName.unlink( this._onPDOMContentChangeListener );
       this._accessibleName = null;
+    }
+
+    if ( isTReadOnlyProperty( this._helpText ) && !this._helpText.isDisposed ) {
+      this._helpText.unlink( this._onPDOMContentChangeListener );
+      this._helpText = null;
+    }
+
+    if ( isTReadOnlyProperty( this._pdomHeading ) && !this._pdomHeading.isDisposed ) {
+      this._pdomHeading.unlink( this._onPDOMContentChangeListener );
+      this._pdomHeading = null;
+    }
+
+    if ( isTReadOnlyProperty( this._inputValue ) && !this._inputValue.isDisposed ) {
+      this._inputValue.unlink( this._onPDOMContentChangeListener );
+      this._inputValue = null;
     }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
@@ -2252,28 +2267,32 @@ export default class ParallelDOM extends PhetioObject {
 
   public get pdomDisplayed(): boolean { return this.isPDOMDisplayed(); }
 
+  private invalidatePeerInputValue(): void {
+    for ( let i = 0; i < this.pdomInstances.length; i++ ) {
+      const peer = this.pdomInstances[ i ].peer!;
+      peer.onInputValueChange();
+    }
+  }
+
   /**
    * Set the value of an input element.  Element must be a form element to support the value attribute. The input
    * value is converted to string since input values are generally string for HTML.
    */
-  public setInputValue( value: PDOMValueType | number | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    if ( value instanceof ReadOnlyProperty || value instanceof TinyProperty ) {
-      value = value.value;
-    }
-    assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
+  public setInputValue( inputValue: PDOMValueType | number | null ): void {
     assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
 
-    // type cast
-    value = `${value}`;
-
-    if ( value !== this._inputValue ) {
-      this._inputValue = value;
-
-      for ( let i = 0; i < this.pdomInstances.length; i++ ) {
-        const peer = this.pdomInstances[ i ].peer!;
-        peer.onInputValueChange();
+    if ( inputValue !== this._inputValue ) {
+      if ( isTReadOnlyProperty( this._inputValue ) && !this._inputValue.isDisposed ) {
+        this._inputValue.unlink( this._onPDOMContentChangeListener );
       }
+
+      this._inputValue = inputValue;
+
+      if ( isTReadOnlyProperty( inputValue ) ) {
+        inputValue.lazyLink( this._onPDOMContentChangeListener );
+      }
+
+      this.invalidatePeerInputValue();
     }
   }
 
@@ -2284,8 +2303,15 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Get the value of the element. Element must be a form element to support the value attribute.
    */
-  public getInputValue(): string | number | null {
-    return this._inputValue;
+  public getInputValue(): string | null {
+    let value: string | number | null;
+    if ( isTReadOnlyProperty( this._inputValue ) ) {
+      value = this._inputValue.value;
+    }
+    else {
+      value = this._inputValue;
+    }
+    return value === null ? null : '' + value;
   }
 
   /**
