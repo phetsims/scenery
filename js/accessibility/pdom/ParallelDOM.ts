@@ -1534,7 +1534,7 @@ export default class ParallelDOM extends PhetioObject {
         ariaValueText.lazyLink( this._onAriaLabelChangeListener );
       }
 
-      this.onAriaLabelChange();
+      this.onAriaValueTextChange();
     }
   }
 
