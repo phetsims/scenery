@@ -136,7 +136,7 @@ import { Highlight } from '../../overlays/HighlightOverlay.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
-import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
@@ -538,19 +538,19 @@ export default class ParallelDOM extends PhetioObject {
   // HIGHER LEVEL API INITIALIZATION
 
   // Sets the "Accessible Name" of the Node, as defined by the Browser's ParallelDOM Tree
-  private _accessibleName: string | null;
+  private _accessibleName: PDOMValueType | null = null;
 
   // Function that returns the options needed to set the appropriate accessible name for the Node
   private _accessibleNameBehavior: PDOMBehaviorFunction;
 
   // Sets the help text of the Node, this most often corresponds to description text.
-  private _helpText: string | null;
+  private _helpText: PDOMValueType | null = null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
   private _helpTextBehavior: PDOMBehaviorFunction;
 
   // Sets the help text of the Node, this most often corresponds to label sibling text.
-  private _pdomHeading: string | null;
+  private _pdomHeading: PDOMValueType | null = null;
 
   // TODO: implement headingLevel override, see https://github.com/phetsims/scenery/issues/855
   // The number that corresponds to the heading tag the node will get if using the pdomHeading API,.
@@ -568,9 +568,13 @@ export default class ParallelDOM extends PhetioObject {
   // PDOM specific enabled listener
   protected pdomBoundInputEnabledListener: ( enabled: boolean ) => void;
 
+  protected _onPDOMContentChangeListener: () => void;
+
   protected constructor( options?: PhetioObjectOptions ) {
 
     super( options );
+
+    this._onPDOMContentChangeListener = this.onPDOMContentChange.bind( this );
 
     this._tagName = null;
     this._containerTagName = null;
@@ -617,11 +621,8 @@ export default class ParallelDOM extends PhetioObject {
 
     // HIGHER LEVEL API INITIALIZATION
 
-    this._accessibleName = null;
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
-    this._helpText = null;
     this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
-    this._pdomHeading = null;
     this._headingLevel = null;
     this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
     this.focusHighlightChangedEmitter = new TinyEmitter();
@@ -639,6 +640,11 @@ export default class ParallelDOM extends PhetioObject {
    * (scenery-internal)
    */
   protected disposeParallelDOM(): void {
+
+    if ( isTReadOnlyProperty( this._accessibleName ) && !this._accessibleName.isDisposed ) {
+      this._accessibleName.unlink( this._onPDOMContentChangeListener );
+      this._accessibleName = null;
+    }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
 
@@ -742,7 +748,7 @@ export default class ParallelDOM extends PhetioObject {
       // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
       // but this will catch most cases since often things that get added to the focus order have the application
       // role for custom input. Note that accessibleName will not be checked that it specifically changes innerContent, it is up to the dev to do this.
-      this.ariaRole === 'application' && assert( this._innerContentProperty.value || this._accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
+      this.ariaRole === 'application' && assert( this._innerContentProperty.value || this.accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
     }
 
     for ( let i = 0; i < ( this as unknown as Node ).children.length; i++ ) {
@@ -765,12 +771,17 @@ export default class ParallelDOM extends PhetioObject {
    *
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public setAccessibleName( providedAccessibleName: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const accessibleName = unwrapProperty( providedAccessibleName );
+  public setAccessibleName( accessibleName: PDOMValueType | null ): void {
+    if ( accessibleName !== this._accessibleName ) {
+      if ( isTReadOnlyProperty( this._accessibleName ) && !this._accessibleName.isDisposed ) {
+        this._accessibleName.unlink( this._onPDOMContentChangeListener );
+      }
 
-    if ( this._accessibleName !== accessibleName ) {
       this._accessibleName = accessibleName;
+
+      if ( isTReadOnlyProperty( accessibleName ) ) {
+        accessibleName.lazyLink( this._onPDOMContentChangeListener );
+      }
 
       this.onPDOMContentChange();
     }
@@ -786,7 +797,12 @@ export default class ParallelDOM extends PhetioObject {
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public getAccessibleName(): string | null {
-    return this._accessibleName;
+    if ( isTReadOnlyProperty( this._accessibleName ) ) {
+      return this._accessibleName.value;
+    }
+    else {
+      return this._accessibleName;
+    }
   }
 
   /**
@@ -852,12 +868,17 @@ export default class ParallelDOM extends PhetioObject {
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public setPDOMHeading( providedPdomHeading: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const pdomHeading = unwrapProperty( providedPdomHeading );
+  public setPDOMHeading( pdomHeading: PDOMValueType | null ): void {
+    if ( pdomHeading !== this._pdomHeading ) {
+      if ( isTReadOnlyProperty( this._pdomHeading ) && !this._pdomHeading.isDisposed ) {
+        this._pdomHeading.unlink( this._onPDOMContentChangeListener );
+      }
 
-    if ( this._pdomHeading !== pdomHeading ) {
       this._pdomHeading = pdomHeading;
+
+      if ( isTReadOnlyProperty( pdomHeading ) ) {
+        pdomHeading.lazyLink( this._onPDOMContentChangeListener );
+      }
 
       this.onPDOMContentChange();
     }
@@ -874,7 +895,12 @@ export default class ParallelDOM extends PhetioObject {
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public getPDOMHeading(): string | null {
-    return this._pdomHeading;
+    if ( isTReadOnlyProperty( this._pdomHeading ) ) {
+      return this._pdomHeading.value;
+    }
+    else {
+      return this._pdomHeading;
+    }
   }
 
   /**
@@ -935,14 +961,14 @@ export default class ParallelDOM extends PhetioObject {
     // Either ^ which may break during construction, or V (below)
     //  base case to heading level 1
     if ( !this._pdomParent ) {
-      if ( this._pdomHeading ) {
+      if ( this.pdomHeading ) {
         this._headingLevel = 1;
         return 1;
       }
       return 0; // so that the first node with a heading is headingLevel 1
     }
 
-    if ( this._pdomHeading ) {
+    if ( this.pdomHeading ) {
       const level = this._pdomParent.computeHeadingLevel() + 1;
       this._headingLevel = level;
       return level;
@@ -959,13 +985,17 @@ export default class ParallelDOM extends PhetioObject {
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public setHelpText( providedHelpText: PDOMValueType | null ): void {
-    // If it's a Property, we'll just grab the initial value. See https://github.com/phetsims/scenery/issues/1442
-    const helpText = unwrapProperty( providedHelpText );
-
-    if ( this._helpText !== helpText ) {
+  public setHelpText( helpText: PDOMValueType | null ): void {
+    if ( helpText !== this._helpText ) {
+      if ( isTReadOnlyProperty( this._helpText ) && !this._helpText.isDisposed ) {
+        this._helpText.unlink( this._onPDOMContentChangeListener );
+      }
 
       this._helpText = helpText;
+
+      if ( isTReadOnlyProperty( helpText ) ) {
+        helpText.lazyLink( this._onPDOMContentChangeListener );
+      }
 
       this.onPDOMContentChange();
     }
@@ -982,7 +1012,12 @@ export default class ParallelDOM extends PhetioObject {
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public getHelpText(): string | null {
-    return this._helpText;
+    if ( isTReadOnlyProperty( this._helpText ) ) {
+      return this._helpText.value;
+    }
+    else {
+      return this._helpText;
+    }
   }
 
   /**
@@ -2885,7 +2920,7 @@ export default class ParallelDOM extends PhetioObject {
     PDOMTree.pdomContentChange( this as unknown as Node );
 
     // recompute the heading level for this node if it is using the pdomHeading API.
-    this._pdomHeading && this.computeHeadingLevel();
+    this.pdomHeading && this.computeHeadingLevel();
 
     ( this as unknown as Node ).rendererSummaryRefreshEmitter.emit();
   }
