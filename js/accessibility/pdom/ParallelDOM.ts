@@ -298,7 +298,6 @@ export type ParallelDOMOptions = {
 type PDOMAttribute = {
   attribute: string;
   value: PDOMValueType | boolean | number;
-  namespace: string | null;
   options: SetPDOMAttributeOptions;
 };
 
@@ -2485,7 +2484,7 @@ export default class ParallelDOM extends PhetioObject {
       attribute: attribute,
       value: value,
       options: options
-    } as PDOMAttribute );
+    } );
 
     for ( let j = 0; j < this._pdomInstances.length; j++ ) {
       const peer = this._pdomInstances[ j ].peer!;
