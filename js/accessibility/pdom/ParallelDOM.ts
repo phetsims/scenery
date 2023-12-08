@@ -138,7 +138,6 @@ import Tandem from '../../../../tandem/js/Tandem.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
-import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
@@ -410,7 +409,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // The inner label content for this node's primary sibling. Set as inner HTML
   // or text content of the actual DOM element. If this is used, the node should not have children.
-  private _innerContentProperty: TinyForwardingProperty<string | null>;
+  private _innerContent: PDOMValueType | null = null;
 
   // The description content for this node's DOM element.
   private _descriptionContent: PDOMValueType | null = null;
@@ -575,6 +574,7 @@ export default class ParallelDOM extends PhetioObject {
   protected _onAriaValueTextChangeListener: () => void;
   protected _onLabelContentChangeListener: () => void;
   protected _onDescriptionContentChangeListener: () => void;
+  protected _onInnerContentChangeListener: () => void;
 
   protected constructor( options?: PhetioObjectOptions ) {
 
@@ -586,6 +586,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onAriaValueTextChangeListener = this.onAriaValueTextChange.bind( this );
     this._onLabelContentChangeListener = this.invalidatePeerLabelSiblingContent.bind( this );
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
+    this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
 
     this._tagName = null;
     this._containerTagName = null;
@@ -597,9 +598,6 @@ export default class ParallelDOM extends PhetioObject {
     this._appendDescription = false;
     this._pdomAttributes = [];
     this._pdomClasses = [];
-
-    this._innerContentProperty = new TinyForwardingProperty<string | null>( null, false );
-    this._innerContentProperty.lazyLink( this.onInnerContentPropertyChange.bind( this ) );
 
     this._pdomNamespace = null;
     this._ariaRole = null;
@@ -675,6 +673,10 @@ export default class ParallelDOM extends PhetioObject {
       this._ariaValueText.unlink( this._onAriaValueTextChangeListener );
     }
 
+    if ( isTReadOnlyProperty( this._innerContent ) && !this._innerContent.isDisposed ) {
+      this._innerContent.unlink( this._onInnerContentChangeListener );
+    }
+
     if ( isTReadOnlyProperty( this._labelContent ) && !this._labelContent.isDisposed ) {
       this._labelContent.unlink( this._onLabelContentChangeListener );
     }
@@ -699,8 +701,6 @@ export default class ParallelDOM extends PhetioObject {
 
     // PDOM attributes can potentially have listeners, so we will clear those out.
     this.removePDOMAttributes();
-
-    this._innerContentProperty.dispose();
   }
 
   private pdomInputEnabledListener( enabled: boolean ): void {
@@ -788,7 +788,7 @@ export default class ParallelDOM extends PhetioObject {
       // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
       // but this will catch most cases since often things that get added to the focus order have the application
       // role for custom input. Note that accessibleName will not be checked that it specifically changes innerContent, it is up to the dev to do this.
-      this.ariaRole === 'application' && assert( this._innerContentProperty.value || this.accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
+      this.ariaRole === 'application' && assert( this.innerContent || this.accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
     }
 
     for ( let i = 0; i < ( this as unknown as Node ).children.length; i++ ) {
@@ -1367,13 +1367,34 @@ export default class ParallelDOM extends PhetioObject {
     return unwrapProperty( this._labelContent );
   }
 
+  private onInnerContentPropertyChange(): void {
+    const value = this.innerContent;
+
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.setPrimarySiblingContent( value );
+    }
+  }
+
   /**
    * Set the inner content for the primary sibling of the PDOMPeers of this Node. Will be set as textContent
    * unless content is html which uses exclusively formatting tags. A node with inner content cannot
    * have accessible descendants because this content will override the HTML of descendants of this node.
    */
-  public setInnerContent( providedContent: PDOMValueType | null ): void {
-    this._innerContentProperty.setValueOrTargetProperty( this, null, providedContent );
+  public setInnerContent( innerContent: PDOMValueType | null ): void {
+    if ( innerContent !== this._innerContent ) {
+      if ( isTReadOnlyProperty( this._innerContent ) && !this._innerContent.isDisposed ) {
+        this._innerContent.unlink( this._onInnerContentChangeListener );
+      }
+
+      this._innerContent = innerContent;
+
+      if ( isTReadOnlyProperty( innerContent ) ) {
+        innerContent.lazyLink( this._onInnerContentChangeListener );
+      }
+
+      this.onInnerContentPropertyChange();
+    }
   }
 
   public set innerContent( content: PDOMValueType | null ) { this.setInnerContent( content ); }
@@ -1384,14 +1405,7 @@ export default class ParallelDOM extends PhetioObject {
    * Get the inner content, the string that is the innerHTML or innerText for the Node's primary sibling.
    */
   public getInnerContent(): string | null {
-    return this._innerContentProperty.value;
-  }
-
-  private onInnerContentPropertyChange( value: string | null ): void {
-    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      const peer = this._pdomInstances[ i ].peer!;
-      peer.setPrimarySiblingContent( value );
-    }
+    return unwrapProperty( this._innerContent );
   }
 
   private invalidatePeerDescriptionSiblingContent(): void {
