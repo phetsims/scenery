@@ -93,7 +93,7 @@ type SelfOptions<Listener extends DragListener> = {
   // frame (applying any provided transforms as needed). Typically, DURING a drag this Property should not be
   // modified externally (as the next drag event will probably undo the change), but it's completely fine to modify
   // this Property at any other time.
-  positionProperty?: TProperty<Vector2> | null;
+  positionProperty?: Pick<TProperty<Vector2>, 'value'> | null;
 
   // Called as start( event: {SceneryEvent}, listener: {DragListener} ) when the drag is started.
   // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
