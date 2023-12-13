@@ -128,7 +128,7 @@ type SelfOptions = {
 
   // If provided, it will be synchronized with the drag position in the model frame, applying provided transforms as
   // needed. Most useful when used with transform option
-  positionProperty?: TProperty<Vector2> | null;
+  positionProperty?: Pick<TProperty<Vector2>, 'value'> | null;
 
   // If provided, this will be the conversion between the view and model coordinate frames. Usually most useful when
   // paired with the positionProperty.
@@ -184,7 +184,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   private _mapPosition: MapPosition | null;
   private _transform: Transform3 | TReadOnlyProperty<Transform3> | null;
   private _keyboardDragDirection: KeyboardDragDirection;
-  private _positionProperty: TProperty<Vector2> | null;
+  private _positionProperty: Pick<TProperty<Vector2>, 'value'> | null;
   private _dragVelocity: number;
   private _shiftDragVelocity: number;
   private _dragDelta: number;
@@ -824,13 +824,13 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
         // synchronize with model position
         if ( this._positionProperty ) {
-          let newPosition = this._positionProperty.get().plus( vectorDelta );
+          let newPosition = this._positionProperty.value.plus( vectorDelta );
 
           newPosition = this.mapModelPoint( newPosition );
 
           // update the position if it is different
-          if ( !newPosition.equals( this._positionProperty.get() ) ) {
-            this._positionProperty.set( newPosition );
+          if ( !newPosition.equals( this._positionProperty.value ) ) {
+            this._positionProperty.value = newPosition;
           }
         }
 
