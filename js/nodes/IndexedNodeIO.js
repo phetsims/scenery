@@ -101,7 +101,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       documentation: 'Deprecated, see "unlinkIndex".',
-      implementation: function( this: Node, index ) {
+      implementation: function( index ) {
         const method = map[ index ];
         assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
         this.parents[ 0 ].childrenChangedEmitter.removeListener( method );
