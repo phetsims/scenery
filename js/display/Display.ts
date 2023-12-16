@@ -487,6 +487,7 @@ export default class Display {
 
       // set `user-select: none` on the aria-live container to prevent iOS text selection issue, see
       // https://github.com/phetsims/scenery/issues/1006
+      // @ts-expect-error
       ariaLiveContainer.style[ Features.userSelect ] = 'none';
 
       // Prevent focus from being lost in FullScreen mode, listener on the globalKeyStateTracker

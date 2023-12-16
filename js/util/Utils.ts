@@ -42,6 +42,7 @@ const Utils = {
    * that we don't want to set while animating.
    */
   prepareForTransform( element: HTMLElement | SVGElement ): void {
+    // @ts-expect-error
     element.style[ transformOriginProperty ] = 'top left';
   },
 
@@ -51,6 +52,7 @@ const Utils = {
    */
   applyPreparedTransform( matrix: Matrix3, element: HTMLElement | SVGElement ): void {
     // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
+    // @ts-expect-error
     element.style[ transformProperty ] = matrix.getCSSTransform();
   },
 
@@ -59,6 +61,7 @@ const Utils = {
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
    */
   setTransform( transformString: string, element: HTMLElement | SVGElement ): void {
+    // @ts-expect-error
     element.style[ transformProperty ] = transformString;
   },
 
@@ -66,6 +69,7 @@ const Utils = {
    * Removes a CSS transform from a DOM element.
    */
   unsetTransform( element: HTMLElement | SVGElement ): void {
+    // @ts-expect-error
     element.style[ transformProperty ] = '';
   },
 
