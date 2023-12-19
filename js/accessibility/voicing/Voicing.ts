@@ -648,7 +648,8 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
    * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
    *       cases that may apply.
    */
-  VoicingClass.prototype._mutatorKeys = VOICING_OPTION_KEYS.concat( VoicingClass.prototype._mutatorKeys );
+  VoicingClass.prototype._mutatorKeys = VOICING_OPTION_KEYS.concat( Type.prototype._mutatorKeys );
+
   assert && assert( VoicingClass.prototype._mutatorKeys.length === _.uniq( VoicingClass.prototype._mutatorKeys ).length, 'duplicate mutator keys in Voicing' );
 
   return VoicingClass;

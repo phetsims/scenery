@@ -45,31 +45,31 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     // A reference to the Pointer so that we can add and remove listeners from it when necessary.
     // Since this is on the trait, only one pointer can have a listener for this Node that uses InteractiveHighlighting
     // at one time.
-    private _pointer: null | Pointer;
+    private _pointer: null | Pointer = null;
 
     // A map that collects all of the Displays that this InteractiveHighlighting Node is
     // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
     // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
     // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
     // (with updateDisplay) since Instances are added asynchronously.
-    protected displays: Record<string, Display>;
+    protected displays: Record<string, Display> = {};
 
     // The highlight that will surround this Node when it is activated and a Pointer is currently over it. When
     // null, the focus highlight will be used (as defined in ParallelDOM.js).
-    private _interactiveHighlight: Highlight;
+    private _interactiveHighlight: Highlight = null;
 
     // If true, the highlight will be layerable in the scene graph instead of drawn
     // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
     // in the location you want in the scene graph. The interactiveHighlight will become visible when
     // this.interactiveHighlightActivated is true.
-    private _interactiveHighlightLayerable: boolean;
+    private _interactiveHighlightLayerable = false;
 
     // If true, the highlight will be displayed on activation input. If false, it will not and we can remove listeners
     // that would do this work.
-    private _interactiveHighlightEnabled: boolean;
+    private _interactiveHighlightEnabled = true;
 
     // Emits an event when the interactive highlight changes for this Node
-    public interactiveHighlightChangedEmitter: TEmitter;
+    public interactiveHighlightChangedEmitter: TEmitter = new TinyEmitter();
 
     // When new instances of this Node are created, adds an entry to the map of Displays.
     private readonly _changedInstanceListener: ( instance: Instance, added: boolean ) => void;
@@ -93,13 +93,6 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         exit: this._onPointerExited.bind( this ),
         down: this._onPointerDown.bind( this )
       };
-
-      this._pointer = null;
-      this.displays = {};
-      this._interactiveHighlight = null;
-      this._interactiveHighlightLayerable = false;
-      this._interactiveHighlightEnabled = true;
-      this.interactiveHighlightChangedEmitter = new TinyEmitter();
 
       this._changedInstanceListener = this.onChangedInstance.bind( this );
       this.changedInstanceEmitter.addListener( this._changedInstanceListener );
@@ -493,7 +486,8 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
    * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
    *       cases that may apply.
    */
-  InteractiveHighlightingClass.prototype._mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( InteractiveHighlightingClass.prototype._mutatorKeys );
+  InteractiveHighlightingClass.prototype._mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( Type.prototype._mutatorKeys );
+
   assert && assert( InteractiveHighlightingClass.prototype._mutatorKeys.length ===
                     _.uniq( InteractiveHighlightingClass.prototype._mutatorKeys ).length,
     'duplicate mutator keys in InteractiveHighlighting' );
