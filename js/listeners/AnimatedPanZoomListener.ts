@@ -983,10 +983,21 @@ class AnimatedPanZoomListener extends PanZoomListener {
       // try to slide the screen to one of the sides of the bounds. This operation only makes sense if the screen can
       // totally contain the object being dragged.
 
-      distanceToLeftEdge = this._transformedPanBounds.left - boundsInTargetFrame.left;
-      distanceToRightEdge = this._transformedPanBounds.right - boundsInTargetFrame.right;
-      distanceToTopEdge = this._transformedPanBounds.top - boundsInTargetFrame.top;
-      distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom;
+      // A bit of padding helps to pan the screen further so that you can keep dragging even if the cursor/object
+      // is right at the edge of the screen. It also looks a little nicer by keeping the object well in view.
+      // Increase this value to add more motion when dragging near the edge of the screen. But too much of this
+      // will make the screen feel like it is "sliding" around too much.
+      // See https://github.com/phetsims/number-line-operations/issues/108
+      const paddingDelta = 150; // global coordinate frame, scaled below
+
+      // scale the padding delta by our matrix so that it is appropriate for our zoom level - smaller when zoomed way in
+      const matrixScale = this.getCurrentScale();
+      const paddingDeltaScaled = paddingDelta / matrixScale;
+
+      distanceToLeftEdge = this._transformedPanBounds.left - boundsInTargetFrame.left + paddingDeltaScaled;
+      distanceToRightEdge = this._transformedPanBounds.right - boundsInTargetFrame.right - paddingDeltaScaled;
+      distanceToTopEdge = this._transformedPanBounds.top - boundsInTargetFrame.top + paddingDeltaScaled;
+      distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom - paddingDeltaScaled;
     }
 
     if ( panDirection !== 'vertical' ) {
