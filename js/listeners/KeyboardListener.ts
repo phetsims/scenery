@@ -38,6 +38,12 @@
  * By default the callback will fire when the last key is pressed down. See additional options for firing on key
  * up or other press and hold behavior.
  *
+ * **Potential Pitfall!**
+ * The callback is only called if exactly the keys in a group are pressed. If you need to listen to a modifier key,
+ * you must include it in the keys array. For example if you add a listener for 'tab', you must ALSO include
+ * 'shift+tab' in the array to observe 'shift+tab' presses. If you provide 'tab' alone, the callback will not fire
+ * if 'shift' is also pressed.
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
