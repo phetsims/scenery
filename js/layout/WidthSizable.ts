@@ -355,8 +355,8 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
   } );
 
   // If we're extending into a Node type, include option keys
-  if ( type.prototype._mutatorKeys ) {
-    const existingKeys = type.prototype._mutatorKeys;
+  if ( WidthSizableTrait.prototype._mutatorKeys ) {
+    const existingKeys = WidthSizableTrait.prototype._mutatorKeys;
     const newKeys = WIDTH_SIZABLE_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
     WidthSizableTrait.prototype._mutatorKeys = [

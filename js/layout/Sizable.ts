@@ -342,8 +342,8 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
   } );
 
   // If we're extending into a Node type, include option keys
-  if ( SuperExtendedType.prototype._mutatorKeys ) {
-    const existingKeys = SuperExtendedType.prototype._mutatorKeys;
+  if ( SizableTrait.prototype._mutatorKeys ) {
+    const existingKeys = SizableTrait.prototype._mutatorKeys;
     const newKeys = SIZABLE_SELF_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
     SizableTrait.prototype._mutatorKeys = [

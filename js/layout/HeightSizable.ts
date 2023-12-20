@@ -353,8 +353,8 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
   } );
 
   // If we're extending into a Node type, include option keys
-  if ( type.prototype._mutatorKeys ) {
-    const existingKeys = type.prototype._mutatorKeys;
+  if ( HeightSizableTrait.prototype._mutatorKeys ) {
+    const existingKeys = HeightSizableTrait.prototype._mutatorKeys;
     const newKeys = HEIGHT_SIZABLE_OPTION_KEYS;
     const indexOfBoundsBasedOptions = existingKeys.indexOf( REQUIRES_BOUNDS_OPTION_KEYS[ 0 ] );
     HeightSizableTrait.prototype._mutatorKeys = [
