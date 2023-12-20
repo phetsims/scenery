@@ -44,6 +44,15 @@ function moveBackward( node: Node ): void {
   node._parents.forEach( parent => moveChild( parent as IndexedNodeIOObserver, node, -1 ) );
 }
 
+// factored out for use with the deprecated method name too
+function unlinkIndex( this: Node, index: number ): void {
+  const method = map[ index ];
+  assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
+  this.parents[ 0 ].childrenChangedEmitter.removeListener( method );
+  delete map[ index ];
+}
+
+
 /**
  * Moves the specified child by +1/-1 indices, without going past the beginning or end.
  */
@@ -126,23 +135,13 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       documentation: 'Unlink a listener that has been added using linkIndex, by its numerical ID (like setTimeout/clearTimeout)',
-      implementation: function( this: Node, index ) {
-        const method = map[ index ];
-        assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
-        this.parents[ 0 ].childrenChangedEmitter.removeListener( method );
-        delete map[ index ];
-      }
+      implementation: unlinkIndex
     },
     clearLinkIndex: {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       documentation: 'Deprecated, see "unlinkIndex".',
-      implementation: function( this: Node, index ) {
-        const method = map[ index ];
-        assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
-        this.parents[ 0 ].childrenChangedEmitter.removeListener( method );
-        delete map[ index ];
-      }
+      implementation: unlinkIndex
     },
     moveForward: {
       returnType: VoidIO,
