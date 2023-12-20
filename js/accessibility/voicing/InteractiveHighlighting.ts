@@ -486,7 +486,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
    * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
    *       cases that may apply.
    */
-  InteractiveHighlightingClass.prototype._mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( Type.prototype._mutatorKeys );
+  InteractiveHighlightingClass.prototype._mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( InteractiveHighlightingClass.prototype._mutatorKeys );
 
   assert && assert( InteractiveHighlightingClass.prototype._mutatorKeys.length ===
                     _.uniq( InteractiveHighlightingClass.prototype._mutatorKeys ).length,
