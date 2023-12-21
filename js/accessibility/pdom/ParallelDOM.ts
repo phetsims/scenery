@@ -479,7 +479,7 @@ export default class ParallelDOM extends PhetioObject {
   private _focusHighlight: Shape | Node | 'invisible' | null;
 
   // A flag that allows prevents focus highlight from being displayed in the HighlightOverlay.
-  // If true, the focus highlight for this node will be layerable in the scene graph.  Client is responsible
+  // If true, the focus highlight for this node will be layerable in the scene graph.  PhetioClient is responsible
   // for placement of the focus highlight in the scene graph.
   private _focusHighlightLayerable: boolean;
 
