@@ -22,6 +22,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import { Node, scenery } from '../imports.js';
+import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 
 export type IndexedNodeIOParent = {
   onIndexedNodeIOChildMoved: ( node: Node ) => void;
@@ -141,7 +142,10 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       documentation: 'Deprecated, see "unlinkIndex".',
-      implementation: unlinkIndex
+      implementation: function( this: Node, index: number ): void {
+        assert && deprecationWarning( 'clearLinkIndex is deprecated, use unlinkIndex instead.', true );
+        unlinkIndex.call( this, index );
+      }
     },
     moveForward: {
       returnType: VoidIO,
