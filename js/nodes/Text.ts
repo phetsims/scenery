@@ -102,7 +102,7 @@ export default class Text extends Paintable( Node ) {
     this._isHTML = false; // TODO: clean this up https://github.com/phetsims/scenery/issues/1581
     this._cachedRenderedText = null;
 
-    const definedOptions = extendDefined( {
+    const definedOptions = extendDefined<TextOptions>( {
       fill: '#000000', // Default to black filled string
 
       // phet-io

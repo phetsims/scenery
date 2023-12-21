@@ -16,7 +16,7 @@ const DOM_OPTION_KEYS = [
 ];
 
 type SelfOptions = {
-  element?: HTMLElement;
+  element?: Element;
   preventTransform?: boolean;
 };
 
@@ -74,7 +74,7 @@ export default class DOM extends Node {
     this._preventTransform = false;
 
     // Have mutate() call setElement() in the proper order
-    options = extendDefined( {
+    options = extendDefined<DOMOptions>( {
       element: element
     }, options );
 

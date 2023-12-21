@@ -12,7 +12,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, TLineDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, TLineDrawable } from '../imports.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position
@@ -66,7 +66,7 @@ export default class Line extends Path {
         assert && assert( x2 === undefined || Object.getPrototypeOf( x2 ) === Object.prototype,
           'Extra prototype on Node options object is a code smell' );
 
-        options = extendDefined( {
+        options = extendDefined<LineOptions>( {
           // First Vector2 is under the x1 name
           x1: x1.x,
           y1: x1.y,
@@ -75,7 +75,7 @@ export default class Line extends Path {
           y2: ( y1 as Vector2 ).y,
 
           strokePickable: true
-        }, x2 ); // Options object (if available) is under the x2 name
+        }, x2 as LineOptions ); // Options object (if available) is under the x2 name
       }
       else {
         // assumes Line( { ... } ), init to zero for now
@@ -99,10 +99,10 @@ export default class Line extends Path {
       assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
-      options = extendDefined( {
+      options = extendDefined<LineOptions>( {
         x1: x1,
-        y1: y1,
-        x2: x2,
+        y1: y1 as number,
+        x2: x2 as number,
         y2: y2,
         strokePickable: true
       }, options );
