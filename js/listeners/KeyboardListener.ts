@@ -49,7 +49,7 @@
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { EnglishStringToCodeMap, FocusManager, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { EnglishKey, EnglishStringToCodeMap, FocusManager, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 
 // NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
@@ -551,6 +551,29 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     } );
 
     return keyGroups;
+  }
+
+  /**
+   * Returns the first EnglishStringToCodeMap that corresponds to the provided event.code. Null if no match is found.
+   * Useful when matching an english string used by KeyboardListener to the event code from a
+   * SceneryEvent.domEvent.code.
+   *
+   * For example:
+   *
+   *   KeyboardUtils.eventCodeToEnglishString( 'KeyA' ) === 'a'
+   *   KeyboardUtils.eventCodeToEnglishString( 'Numpad0' ) === '0'
+   *   KeyboardUtils.eventCodeToEnglishString( 'Digit0' ) === '0'
+   *
+   * NOTE: This cannot be in KeyboardUtils because it would create a circular dependency.
+   */
+  public static eventCodeToEnglishString( eventCode: string ): EnglishKey | null {
+    for ( const key in EnglishStringToCodeMap ) {
+      if ( EnglishStringToCodeMap.hasOwnProperty( key ) &&
+           ( EnglishStringToCodeMap[ key as EnglishKey ] ).includes( eventCode ) ) {
+        return key as EnglishKey;
+      }
+    }
+    return null;
   }
 }
 
