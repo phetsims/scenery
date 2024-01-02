@@ -495,7 +495,7 @@ export default class Path extends Paintable( Node ) {
     }
 
     const bounds = this.computeShapeBounds();
-    return bounds.x * bounds.y === 0; // at least one of them was zero, so the bounding box has no area
+    return ( bounds.width * bounds.height ) === 0; // at least one of them was zero, so the bounding box has no area
   }
 
   /**
