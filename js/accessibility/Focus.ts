@@ -27,7 +27,7 @@ class Focus {
 
   public static readonly FocusIO = new IOType<Focus, FocusStateType>( 'FocusIO', {
     valueType: Focus,
-    documentation: 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
+    documentation: 'A PhET-iO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
                    'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO Elements, ' +
                    'from parent-most to child-most corresponding to the PhET-iO Element that was instrumented.',
     toStateObject: ( focus: Focus ) => {

@@ -1727,5 +1727,5 @@ scenery.register( 'RichText', RichText );
 RichText.RichTextIO = new IOType( 'RichTextIO', {
   valueType: RichText,
   supertype: Node.NodeIO,
-  documentation: 'The tandem IO Type for the scenery RichText node'
+  documentation: 'The PhET-iO Type for the scenery RichText node'
 } );
