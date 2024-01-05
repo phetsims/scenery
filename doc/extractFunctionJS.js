@@ -1,5 +1,9 @@
 // Copyright 2022, University of Colorado Boulder
 
+/**
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+
 window.extractFunctionJS = func => {
   const functionString = func.toString();
   let js = functionString.match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ];

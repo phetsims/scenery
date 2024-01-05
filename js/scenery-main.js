@@ -1,5 +1,9 @@
 // Copyright 2016-2023, University of Colorado Boulder
 
+/**
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+
 import '../../axon/js/main.js';
 import '../../dot/js/main.js';
 import '../../kite/js/main.js';

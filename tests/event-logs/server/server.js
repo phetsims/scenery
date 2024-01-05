@@ -1,9 +1,13 @@
 // Copyright 2016, University of Colorado Boulder
 
-// WARNING: running this on a server is a MAJOR security risk, since it could allow arbitrary file reads/writes to a remote attacker.
-// Only run this sporadically, and when behind a NAT router or firewall where it will never be touched.
+/**
+ * WARNING: running this on a server is a MAJOR security risk, since it could allow arbitrary file reads/writes to a remote attacker.
+ * Only run this sporadically, and when behind a NAT router or firewall where it will never be touched.
 
-// This is intended to allow reads/writes to the recorded sim data area (../data), depending on whether it is a GET or POST request
+ * This is intended to allow reads/writes to the recorded sim data area (../data), depending on whether it is a GET or POST request
+ *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
 
 /* eslint-env node */
 
@@ -14,7 +18,7 @@ const ip = 'localhost'; // hardcoded for now, maybe 'localhost' will work?
 const port = 8083;
 
 http.createServer( ( req, res ) => {
-  
+
 
   // see http://nodejs.org/api/http.html#http_request_method for docs
 

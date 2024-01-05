@@ -2,6 +2,9 @@
 
 /**
  * A logical "press" for the MultiListener, capturing information when a Pointer goes down on the screen.
+ *
+ * @author Jesse Greenberg (PhET Interactive Simulations)
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { Pointer, scenery, Trail } from '../imports.js';

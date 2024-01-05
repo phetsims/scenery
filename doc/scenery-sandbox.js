@@ -12,6 +12,8 @@
  * <script src="../../sherpa/lib/codemirror-5.52.2.javascript.min.js"></script>
  *
  * AND the scenery-sandbox.css
+ *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 ( () => {

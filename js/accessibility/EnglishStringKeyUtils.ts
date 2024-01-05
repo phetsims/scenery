@@ -5,6 +5,8 @@
  * EnglishStringToCodeMap.ts.
  *
  * This is a separate file from EnglishStringToCodeMap.ts and KeyboardUtils.ts to avoid circular dependencies.
+ *
+ * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
 import { EnglishKey } from './EnglishStringToCodeMap.js';

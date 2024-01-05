@@ -1,5 +1,9 @@
 // Copyright 2022, University of Colorado Boulder
 
+/**
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+
 window.getCodeSnippet = func => {
   const pre = document.createElement( 'pre' );
   const code = document.createElement( 'code' );
