@@ -6435,11 +6435,8 @@ class Node extends ParallelDOM {
 
   /**
    * Returns a debugging string that is an attempted serialization of this node's sub-tree.
-   *
-   * @param spaces - Whitespace to add
-   * @param [includeChildren]
    */
-  public override toString( spaces: string, includeChildren?: boolean ): string {
+  public override toString(): string {
     return `${this.constructor.name}#${this.id}`;
   }
 
