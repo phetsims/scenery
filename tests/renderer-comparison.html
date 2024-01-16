@@ -16,6 +16,7 @@
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
   <script src="../../sherpa/lib/linebreak-1.1.0.js"></script>
   <script src="../../sherpa/lib/he-1.1.1.js"></script>
+  <script src="../../sherpa/lib/seedrandom-2.4.2.js"></script>
   <script src="../../query-string-machine/js/QueryStringMachine.js"></script>
   <script src="../../chipper/js/initialize-globals.js"></script>
 
@@ -109,11 +110,12 @@
 
 <script type="module">
   /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
-  import scenery from '../js/main.js';
-  import phetCore from '../../phet-core/js/main.js';
-  import dot from '../../dot/js/main.js';
-  import kite from '../../kite/js/main.js';
-  import ShaderProgram from '../js/util/ShaderProgram.js';
+
+  import scenery from '../../chipper/dist/js/scenery/js/main.js';
+  import phetCore from '../../chipper/dist/js/phet-core/js/main.js';
+  import dot from '../../chipper/dist/js/dot/js/main.js';
+  import kite from '../../chipper/dist/js/kite/js/main.js';
+  import ShaderProgram from '../../chipper/dist/js/scenery/js/util/ShaderProgram.js';
 
   var scratchFloatArray = new Float32Array( 9 );
 
