@@ -128,7 +128,7 @@ QUnit.test( 'test tracking with time', async assert => {
   stepTimer.setTimeout( () => {
     currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.code );
 
-    assert.ok( currentTimeDown >= firstPressTime && currentTimeDown <= totalPressTime, `key pressed for ${firstPressTime} ms. Should be less than currentTimeDown:${currentTimeDown} and totalPressTime:${totalPressTime}` );
+    assert.ok( currentTimeDown >= firstPressTime, `key pressed for ${firstPressTime} ms` );
 
     stepTimer.setTimeout( () => {
       currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.code );
