@@ -574,7 +574,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       }
     }
 
-    this.canDrag() && this.dragStartAction.execute( event );
+    this.canDrag( event ) && this.dragStartAction.execute( event );
   }
 
   /**
@@ -716,8 +716,12 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   /**
    * Returns true if a drag can begin from input with this listener.
    */
-  private canDrag(): boolean {
-    return this.enabledProperty.value;
+  private canDrag( event: SceneryEvent ): boolean {
+
+    // must be enabled and must not be attached to a listener (other than this._pointerListener - (canDrag
+    // is used every new key press)
+    const attachedListener = event.pointer.attachedListener;
+    return this.enabledProperty.value && ( !attachedListener || attachedListener === this._pointerListener );
   }
 
   /**
