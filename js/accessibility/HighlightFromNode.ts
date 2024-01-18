@@ -84,12 +84,14 @@ class HighlightFromNode extends HighlightPath {
       this.observedBoundsProperty.unlink( this.boundsListener! );
     }
 
-    this.observedBoundsProperty = this.useLocalBounds ? node.localBoundsProperty : node.boundsProperty;
-
-    this.boundsListener = bounds => {
+    // The HighlightOverlay updates highlight positioning with a TransformTracker so the local bounds accurately
+    // describe the highlight shape. NOTE: This does not update with changes to visible bounds - scenery
+    // does not have support for that at this time (requires a visibleBoundsProperty).
+    this.observedBoundsProperty = node.localBoundsProperty;
+    this.boundsListener = localBounds => {
 
       // Ignore setting the shape if we don't yet have finite bounds.
-      if ( !bounds.isFinite() ) {
+      if ( !localBounds.isFinite() ) {
         return;
       }
 
@@ -101,11 +103,13 @@ class HighlightFromNode extends HighlightPath {
         dilationCoefficient = ( this.useGroupDilation ? HighlightPath.getGroupDilationCoefficient( node ) :
                                 HighlightPath.getDilationCoefficient( node ) );
       }
-      const dilatedBounds = bounds.dilated( dilationCoefficient! );
+
+      const visibleBounds = this.useLocalBounds ? node.getVisibleLocalBounds() : node.getVisibleBounds();
+      const dilatedVisibleBounds = visibleBounds.dilated( dilationCoefficient! );
 
       // Update the line width of the focus highlight based on the transform of the node
       this.updateLineWidthFromNode( node );
-      this.setShape( Shape.bounds( dilatedBounds ) );
+      this.setShape( Shape.bounds( dilatedVisibleBounds ) );
     };
     this.observedBoundsProperty.link( this.boundsListener );
   }
