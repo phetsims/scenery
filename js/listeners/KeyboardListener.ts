@@ -77,7 +77,7 @@ export type OneKeyStroke = `${AllowedKeys}` |
 // - 'both': Callbacks fire on both press and release of keys.
 type ListenerFireTrigger = 'up' | 'down' | 'both';
 
-type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
+export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
   // The keys that need to be pressed to fire the callback. In a form like `[ 'shift+t', 'alt+shift+r' ]`. See top
   // level documentation for more information and an example of providing keys.
