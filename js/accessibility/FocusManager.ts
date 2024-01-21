@@ -51,8 +51,8 @@ export default class FocusManager {
   // A Property whose value is either null or a Focus with Trail and Display equal
   // to the pointerFocusProperty. When this Property has a value, the HighlightOverlay will wait to update the
   // highlight for the pointerFocusProperty. This is useful when the pointer has begun to interact with a Node
-  // that uses InteractiveHighlighting, but the mouse has moved out of it or over another during interaction. Thehighlight
-  // should remain on the Node receiving interaction and wait to update until interaction completes.
+  // that uses InteractiveHighlighting, but the mouse has moved out of it or over another during interaction. The
+  // highlight should remain on the Node receiving interaction and wait to update until interaction completes.
   public readonly lockedPointerFocusProperty: TProperty<Focus | null>;
 
   // Controls whether or not highlights related to PDOM focus are visible.
