@@ -543,10 +543,13 @@ class PDOMPeer {
 
     const element = options.element || this.getElementByName( options.elementName );
 
+    // For dynamic strings, we may need to retreive the actual value
+    const rawAttributeValue = PDOMUtils.unwrapProperty( attributeValue );
+
     // remove directional formatting that may surround strings if they are translatable
-    let attributeValueWithoutMarks = attributeValue;
-    if ( typeof attributeValue === 'string' ) {
-      attributeValueWithoutMarks = stripEmbeddingMarks( attributeValue );
+    let attributeValueWithoutMarks = rawAttributeValue;
+    if ( typeof rawAttributeValue === 'string' ) {
+      attributeValueWithoutMarks = stripEmbeddingMarks( rawAttributeValue );
     }
 
     if ( attribute === DISABLED_ATTRIBUTE_NAME && !this.display.interactive ) {

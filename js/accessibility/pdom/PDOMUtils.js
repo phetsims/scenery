@@ -10,6 +10,7 @@
  * @author Jesse Greenberg
  */
 
+import { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import merge from '../../../../phet-core/js/merge.js';
@@ -304,6 +305,18 @@ const PDOMUtils = {
     }
 
     return focusableElements[ random.nextInt( focusableElements.length ) ];
+  },
+
+  /**
+   * ParallelDOM trait values may be in a Property to support dynamic locales. This function
+   * returns the Property value in that case. The value may be a string, boolean, or number -
+   * all of which are valid values for native HTML attributes.
+   *
+   * @param {string | boolean | number | TReadOnlyProperty<string|boolean|number>} valueOrProperty
+   * @returns {string|boolean|number}
+   */
+  unwrapProperty( valueOrProperty ) {
+    return isTReadOnlyProperty( valueOrProperty ) ? valueOrProperty.value : valueOrProperty;
   },
 
   /**
