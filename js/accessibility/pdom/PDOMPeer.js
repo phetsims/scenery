@@ -543,7 +543,7 @@ class PDOMPeer {
 
     const element = options.element || this.getElementByName( options.elementName );
 
-    // For dynamic strings, we may need to retreive the actual value
+    // For dynamic strings, we may need to retrieve the actual value.
     const rawAttributeValue = PDOMUtils.unwrapProperty( attributeValue );
 
     // remove directional formatting that may surround strings if they are translatable
