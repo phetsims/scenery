@@ -2003,6 +2003,12 @@ class Node extends ParallelDOM {
       bounds.includeBounds( this._children[ i ].getVisibleBounds() );
     }
 
+    // apply clipping to the bounds if we have a clip area (all done in the local coordinate frame)
+    const clipArea = this.clipArea;
+    if ( clipArea ) {
+      bounds.constrainBounds( clipArea.bounds );
+    }
+
     assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
     return bounds;
   }
