@@ -291,7 +291,9 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
 
-        if ( display.focusManager.pointerFocusProperty.value === null || !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
+        if ( display.focusManager.pointerFocusProperty.value === null ||
+             !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
+
           const newFocus = new Focus( display, event.trail );
           display.focusManager.pointerFocusProperty.set( newFocus );
           if ( display.focusManager.lockedPointerFocusProperty.value === null && event.pointer.attachedListener ) {
@@ -437,8 +439,10 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
      * Save the Pointer and add a listener to it to remove highlights when a pointer is released/cancelled.
      */
     private savePointer( eventPointer: Pointer ): void {
-      assert && assert( this._pointer === null,
-        'It should be impossible to already have a Pointer before locking from touchSnag' );
+      assert && assert(
+        this._pointer === null,
+        'It should be impossible to already have a Pointer before locking from touchSnag'
+      );
 
       this._pointer = eventPointer;
       this._pointer.addInputListener( this._pointerListener );
