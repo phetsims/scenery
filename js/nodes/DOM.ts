@@ -52,13 +52,13 @@ export default class DOM extends Node {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
-    assert && assert( element instanceof window.Element || element.jquery, 'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' ); // eslint-disable-line no-simple-type-checking-assertions
+    assert && assert( element instanceof window.Element || element.jquery, 'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' );
 
     // unwrap from jQuery if that is passed in, for consistency
     if ( isJQueryElement( element ) ) {
       element = element[ 0 ];
 
-      assert && assert( element instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
+      assert && assert( element instanceof window.Element );
     }
 
     super();

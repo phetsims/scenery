@@ -2375,7 +2375,7 @@ class Node extends ParallelDOM {
       // translate( x, y, prependInstead )
       assert && assert( isFinite( x ), 'x should be a finite number' );
 
-      assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' ); // eslint-disable-line no-simple-type-checking-assertions
+      assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
 
       if ( Math.abs( x ) < 1e-12 && Math.abs( y as number ) < 1e-12 ) { return; } // bail out if both are zero
       if ( prependInstead ) {

@@ -1161,7 +1161,7 @@ export default class Input extends PhetioObject {
     if ( relatedTargetElement && this.display.isElementUnderPDOM( relatedTargetElement as HTMLElement ) ) {
 
       const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
-      assert && assert( relatedTarget instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
+      assert && assert( relatedTarget instanceof window.Element );
       const trailIndices = relatedTarget.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
       assert && assert( trailIndices, 'should not be null' );
 
@@ -1188,7 +1188,7 @@ export default class Input extends PhetioObject {
     }
     else {
       const target = ( domEvent.target as unknown as Element );
-      assert && assert( target instanceof window.Element ); // eslint-disable-line no-simple-type-checking-assertions
+      assert && assert( target instanceof window.Element );
       if ( target && this.display.isElementUnderPDOM( target as HTMLElement ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
         assert && assert( trailIndices, 'should not be null' );

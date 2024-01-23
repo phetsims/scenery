@@ -38,7 +38,7 @@ export default class SpriteImage extends Imageable( Object ) {
    * @param [providedOptions]
    */
   public constructor( image: ImageableImage, offset: Vector2, providedOptions?: SpriteImageOptions ) {
-    assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement ); // eslint-disable-line no-simple-type-checking-assertions
+    assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement );
 
     const options = optionize<SpriteImageOptions, SelfOptions, ImageableOptions>()( {
       hitTestPixels: false,
