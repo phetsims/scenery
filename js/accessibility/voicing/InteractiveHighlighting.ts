@@ -79,6 +79,10 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     // it is necessary.
     private readonly _interactiveHighlightingEnabledListener: ( enabled: boolean ) => void;
 
+    // A listener that is added to the FocusManager.lockedPointerFocusProperty to clear this._pointer and its listeners from
+    // this instance when the lockedPointerFocusProperty is set to null externally (not by InteractiveHighlighting).
+    private readonly _boundPointerFocusClearedListener: ( lockedPointerFocus: Focus | null ) => void;
+
     // Input listener that locks the HighlightOverlay so that there are no updates to the highlight
     // while the pointer is down over something that uses InteractiveHighlighting.
     private readonly _pointerListener: TInputListener;
@@ -98,6 +102,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       this.changedInstanceEmitter.addListener( this._changedInstanceListener );
 
       this._interactiveHighlightingEnabledListener = this._onInteractiveHighlightingEnabledChange.bind( this );
+      this._boundPointerFocusClearedListener = this.handleLockedPointerFocusCleared.bind( this );
 
       const boundPointerReleaseListener = this._onPointerRelease.bind( this );
       const boundPointerCancel = this._onPointerCancel.bind( this );
@@ -236,10 +241,19 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         this.removeInputListener( this._activationListener );
       }
 
+      if ( this._pointer ) {
+        this._pointer.removeInputListener( this._pointerListener );
+        this._pointer = null;
+      }
+
       // remove listeners on displays and remove Displays from the map
       const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
         const display = this.displays[ trailIds[ i ] ];
+
+        if ( display.focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ) ) {
+          display.focusManager.lockedPointerFocusProperty.unlink( this._boundPointerFocusClearedListener );
+        }
 
         display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
         delete this.displays[ trailIds[ i ] ];
@@ -412,6 +426,11 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
         display.focusManager.lockedPointerFocusProperty.value = null;
+
+        // Unlink the listener that was watching for the lockedPointerFocusProperty to be cleared externally
+        if ( display.focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ) ) {
+          display.focusManager.lockedPointerFocusProperty.unlink( this._boundPointerFocusClearedListener );
+        }
       }
 
       if ( this._pointer && this._pointer.listeners.includes( this._pointerListener ) ) {
@@ -466,10 +485,29 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 
         // A COPY of the focus is saved to the Property because we need the value of the Trail at this event.
         focusManager.lockedPointerFocusProperty.set( new Focus( newFocus.display, newFocus.trail.copy() ) );
+
+        // Attach a listener that will clear the pointer and its listener if the lockedPointerFocusProperty is cleared
+        // externally (not by InteractiveHighlighting).
+        assert && assert( !focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ),
+          'this listener still on the lockedPointerFocusProperty indicates a memory leak'
+        );
+        focusManager.lockedPointerFocusProperty.link( this._boundPointerFocusClearedListener );
+
         pointerLock = true;
       }
 
       return pointerLock;
+    }
+
+    /**
+     * FocusManager.lockedPointerFocusProperty does not belong to InteractiveHighlighting and be be cleared
+     * for any reason. If it is set to null while a pointer is down we need to release the Pointer and remove input
+     * listeners.
+     */
+    private handleLockedPointerFocusCleared( lockedPointerFocus: Focus | null ): void {
+      if ( lockedPointerFocus === null ) {
+        this._onPointerRelease();
+      }
     }
 
     /**
