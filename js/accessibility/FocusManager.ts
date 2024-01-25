@@ -73,6 +73,10 @@ export default class FocusManager {
   // the scene graph or its Trail becomes invisible this removes focus.
   private readonly readingBlockFocusController: FocusDisplayedController;
 
+  // When the lockedPointerFocusProperty's Node becomes invisible or is removed from the scene
+  // graph, the locked pointer focus is cleared.
+  private readonly lockedPointerFocusDisplayedController: FocusDisplayedController;
+
   // If the voicingManager starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
   // add listeners to clear it when the Node is removed or becomes invisible
   private readonly startSpeakingListener: SpeakingListener;
@@ -148,16 +152,21 @@ export default class FocusManager {
 
       // whenever focus is removed because the last Node of the Focus Trail is no
       // longer displayed, the highlight for Pointer Focus should no longer be locked
+      // NOTE: It is possible that the addition of the FocusDisplayedController for lockedPointerFocusProperty
+      // makes this unnecessary, but it is left in for now.
       onRemoveFocus: () => {
         this.lockedPointerFocusProperty.value = null;
       }
     } );
+
+    this.lockedPointerFocusDisplayedController = new FocusDisplayedController( this.lockedPointerFocusProperty );
   }
 
   public dispose(): void {
     this.readingBlockFocusController.dispose();
     this.pointerFocusDisplayedController.dispose();
     this.pointerHighlightsVisibleProperty.dispose();
+    this.lockedPointerFocusDisplayedController.dispose();
 
     // @ts-expect-error
     voicingManager.startSpeakingEmitter.removeListener( this.startSpeakingListener );

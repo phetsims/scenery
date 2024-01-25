@@ -551,6 +551,12 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         // this node;
         if ( display && instance.node!.instances.length === 0 ) {
 
+          // Pointer focus was locked due to interaction with this listener, but unlocked because of other
+          // scenery-internal listeners. But the Property still has this listener so it needs to be removed now.
+          if ( display.focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ) ) {
+            display.focusManager.lockedPointerFocusProperty.unlink( this._boundPointerFocusClearedListener );
+          }
+
           display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
         }
 
