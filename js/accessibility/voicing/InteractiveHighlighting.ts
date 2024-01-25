@@ -500,7 +500,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     }
 
     /**
-     * FocusManager.lockedPointerFocusProperty does not belong to InteractiveHighlighting and be be cleared
+     * FocusManager.lockedPointerFocusProperty does not belong to InteractiveHighlighting and can be cleared
      * for any reason. If it is set to null while a pointer is down we need to release the Pointer and remove input
      * listeners.
      */
