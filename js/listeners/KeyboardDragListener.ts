@@ -239,9 +239,9 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   // A reference to the Pointer during a drag operation so that we can add/remove the _pointerListener.
   private _pointer: PDOMPointer | null;
 
-  // Whether we are using a velocity implementation or delta implementation for dragging. See options
-  // dragDelta and dragSpeed for more information.
-  private readonly useDragVelocity: boolean;
+  // Whether we are using a speed implementation or delta implementation for dragging. See options
+  // dragSpeed and dragDelta for more information.
+  private readonly useDragSpeed: boolean;
 
   public constructor( providedOptions?: KeyboardDragListenerOptions ) {
 
@@ -307,9 +307,9 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
     // while holding the hotkey should result in a delay of this much. in ms
     this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval;
 
-    // for readability - since dragSpeed and dragDelta are mutually exclusive, a value for either one of these
-    // indicates dragging implementation should use velocity
-    this.useDragVelocity = options.dragSpeed > 0 || options.shiftDragSpeed > 0;
+    // Since dragSpeed and dragDelta are mutually-exclusive drag implementations, a value for either one of these
+    // options indicates we should use a speed implementation for dragging.
+    this.useDragSpeed = options.dragSpeed > 0 || options.shiftDragSpeed > 0;
 
     this.moveOnHoldDelayCounter = 0;
     this.moveOnHoldIntervalCounter = 0;
@@ -343,7 +343,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       }
 
       // initial movement on down should only be used for dragDelta implementation
-      if ( !this.useDragVelocity ) {
+      if ( !this.useDragSpeed ) {
 
         // move object on first down before a delay
         const positionDelta = this.shiftKeyDown() ? this._shiftDragDelta : this._dragDelta;
@@ -672,12 +672,12 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
       let positionDelta = 0;
 
-      if ( this.useDragVelocity ) {
+      if ( this.useDragSpeed ) {
 
         // calculate change in position from time step
-        const positionVelocitySeconds = this.shiftKeyDown() ? this._shiftDragSpeed : this._dragSpeed;
-        const positionVelocityMilliseconds = positionVelocitySeconds / 1000;
-        positionDelta = ms * positionVelocityMilliseconds;
+        const positionSpeedSeconds = this.shiftKeyDown() ? this._shiftDragSpeed : this._dragSpeed;
+        const positionSpeedMilliseconds = positionSpeedSeconds / 1000;
+        positionDelta = ms * positionSpeedMilliseconds;
       }
       else {
 
