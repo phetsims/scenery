@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2024, University of Colorado Boulder
 
 /**
  * A HighlightPath with the default styling for group highlights. Group highlights typically surround
