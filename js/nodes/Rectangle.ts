@@ -134,6 +134,11 @@ export default class Rectangle extends SuperType {
           assert && assert( y === undefined || Object.getPrototypeOf( y ) === Object.prototype,
             'Extra prototype on Node options object is a code smell' );
 
+          if ( assert && y ) {
+            assert( y.rectWidth === undefined, 'Should not specify rectWidth in multiple ways' );
+            assert( y.rectHeight === undefined, 'Should not specify rectHeight in multiple ways' );
+            assert( y.rectBounds === undefined, 'Should not specify rectBounds in multiple ways' );
+          }
           options = combineOptions<RectangleOptions>( options, {
             rectBounds: x
           }, y ); // Our options object would be at y
@@ -147,6 +152,14 @@ export default class Rectangle extends SuperType {
           assert && assert( height === undefined || Object.getPrototypeOf( height ) === Object.prototype,
             'Extra prototype on Node options object is a code smell' );
 
+          if ( assert && height ) {
+            assert( ( height as RectangleOptions ).rectWidth === undefined, 'Should not specify rectWidth in multiple ways' );
+            assert( ( height as RectangleOptions ).rectHeight === undefined, 'Should not specify rectHeight in multiple ways' );
+            assert( ( height as RectangleOptions ).rectBounds === undefined, 'Should not specify rectBounds in multiple ways' );
+            assert( ( height as RectangleOptions ).cornerXRadius === undefined, 'Should not specify cornerXRadius in multiple ways' );
+            assert( ( height as RectangleOptions ).cornerYRadius === undefined, 'Should not specify cornerYRadius in multiple ways' );
+            assert( ( height as RectangleOptions ).cornerRadius === undefined, 'Should not specify cornerRadius in multiple ways' );
+          }
           options = combineOptions<RectangleOptions>( options, {
             rectBounds: x,
             cornerXRadius: y, // ignore Intellij warning, our cornerXRadius is the second parameter
@@ -168,6 +181,13 @@ export default class Rectangle extends SuperType {
       assert && assert( cornerXRadius === undefined || Object.getPrototypeOf( cornerXRadius ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
+      if ( assert && cornerXRadius ) {
+        assert( ( cornerXRadius as RectangleOptions ).rectX === undefined, 'Should not specify rectX in multiple ways' );
+        assert( ( cornerXRadius as RectangleOptions ).rectY === undefined, 'Should not specify rectY in multiple ways' );
+        assert( ( cornerXRadius as RectangleOptions ).rectWidth === undefined, 'Should not specify rectWidth in multiple ways' );
+        assert( ( cornerXRadius as RectangleOptions ).rectHeight === undefined, 'Should not specify rectHeight in multiple ways' );
+        assert( ( cornerXRadius as RectangleOptions ).rectBounds === undefined, 'Should not specify rectBounds in multiple ways' );
+      }
       options = combineOptions<RectangleOptions>( options, {
         rectX: x,
         rectY: y as number,
@@ -184,6 +204,16 @@ export default class Rectangle extends SuperType {
       assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
+      if ( assert && providedOptions ) {
+        assert( providedOptions.rectX === undefined, 'Should not specify rectX in multiple ways' );
+        assert( providedOptions.rectY === undefined, 'Should not specify rectY in multiple ways' );
+        assert( providedOptions.rectWidth === undefined, 'Should not specify rectWidth in multiple ways' );
+        assert( providedOptions.rectHeight === undefined, 'Should not specify rectHeight in multiple ways' );
+        assert( providedOptions.rectBounds === undefined, 'Should not specify rectBounds in multiple ways' );
+        assert( providedOptions.cornerXRadius === undefined, 'Should not specify cornerXRadius in multiple ways' );
+        assert( providedOptions.cornerYRadius === undefined, 'Should not specify cornerYRadius in multiple ways' );
+        assert( providedOptions.cornerRadius === undefined, 'Should not specify cornerRadius in multiple ways' );
+      }
       options = combineOptions<RectangleOptions>( options, {
         rectX: x,
         rectY: y as number,
