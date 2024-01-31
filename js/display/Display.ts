@@ -86,6 +86,11 @@ type SelfOptions = {
   // Usually anything displayed outside our dom element is hidden with CSS overflow.
   allowSceneOverflow?: boolean;
 
+  // If false, this will disable layer fitting (like putting preventFit: true on Nodes, but for the entire Display).
+  // Layer fitting has caused some unsightly jittering (https://github.com/phetsims/scenery/issues/1289), so this
+  // allows it to be turned on in a case-by-case manner.
+  allowLayerFitting?: boolean;
+
   // What cursor is used when no other cursor is specified
   defaultCursor?: string;
 
@@ -199,6 +204,7 @@ export default class Display {
   // (scenery-internal)
   public _aggressiveContextRecreation: boolean;
   public _allowBackingScaleAntialiasing: boolean;
+  public _allowLayerFitting: boolean;
 
   private readonly _allowWebGL: boolean;
   private readonly _allowCSSHacks: boolean;
@@ -324,6 +330,8 @@ export default class Display {
       // {boolean} - Usually anything displayed outside of our dom element is hidden with CSS overflow
       allowSceneOverflow: false,
 
+      allowLayerFitting: false,
+
       // {string} - What cursor is used when no other cursor is specified
       defaultCursor: 'default',
 
@@ -430,6 +438,7 @@ export default class Display {
     this._passiveEvents = options.passiveEvents;
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
     this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
+    this._allowLayerFitting = options.allowLayerFitting;
     this._overlays = [];
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;

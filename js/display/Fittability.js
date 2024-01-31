@@ -91,7 +91,7 @@ class Fittability {
    * @returns {boolean}
    */
   isSelfFitSupported() {
-    return !this.node.isPreventFit();
+    return this.display._allowLayerFitting && !this.node.isPreventFit();
   }
 
   /**
