@@ -152,8 +152,8 @@ export default class FocusManager {
 
       // whenever focus is removed because the last Node of the Focus Trail is no
       // longer displayed, the highlight for Pointer Focus should no longer be locked
-      // NOTE: It is possible that the addition of the FocusDisplayedController for lockedPointerFocusProperty
-      // makes this unnecessary, but it is left in for now.
+      // TODO: https://github.com/phetsims/scenery/issues/1495, It is possible that the addition of the
+      //   FocusDisplayedController for lockedPointerFocusProperty makes this unnecessary. Test and remove if so.
       onRemoveFocus: () => {
         this.lockedPointerFocusProperty.value = null;
       }
