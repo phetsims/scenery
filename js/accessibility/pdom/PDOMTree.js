@@ -9,9 +9,6 @@
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import { BrowserEvents, FocusManager, Node, PartialPDOMTrail, PDOMInstance, scenery, Trail } from '../../imports.js';
 
-// Reference to the focused Node, so we can restore focus between big tree operations.
-let focusedNode = null;
-
 const PDOMTree = {
   /**
    * Called when a child node is added to a parent node (and the child is likely to have pdom content).
@@ -28,13 +25,13 @@ const PDOMTree = {
     assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.hasNoPDOM() );
 
-    PDOMTree.beforeOp();
+    const focusedNode = PDOMTree.beforeOp();
 
     if ( !child._pdomParent ) {
       PDOMTree.addTree( parent, child );
     }
 
-    PDOMTree.afterOp();
+    PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -54,13 +51,13 @@ const PDOMTree = {
     assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.hasNoPDOM() );
 
-    PDOMTree.beforeOp();
+    const focusedNode = PDOMTree.beforeOp();
 
     if ( !child._pdomParent ) {
       PDOMTree.removeTree( parent, child );
     }
 
-    PDOMTree.afterOp();
+    PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -78,11 +75,11 @@ const PDOMTree = {
     assert && assert( node instanceof Node );
     assert && assert( !node._rendererSummary.hasNoPDOM() );
 
-    PDOMTree.beforeOp();
+    const focusedNode = PDOMTree.beforeOp();
 
     PDOMTree.reorder( node );
 
-    PDOMTree.afterOp();
+    PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -101,7 +98,7 @@ const PDOMTree = {
 
     assert && assert( node instanceof Node );
 
-    PDOMTree.beforeOp();
+    const focusedNode = PDOMTree.beforeOp();
 
     const removedItems = []; // {Array.<Node|null>} - May contain the placeholder null
     const addedItems = []; // {Array.<Node|null>} - May contain the placeholder null
@@ -173,7 +170,7 @@ const PDOMTree = {
 
     PDOMTree.reorder( node, pdomTrails );
 
-    PDOMTree.afterOp();
+    PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -190,7 +187,7 @@ const PDOMTree = {
 
     assert && assert( node instanceof Node );
 
-    PDOMTree.beforeOp();
+    const focusedNode = PDOMTree.beforeOp();
 
     let i;
     const parents = node._pdomParent ? [ node._pdomParent ] : node._parents;
@@ -220,7 +217,7 @@ const PDOMTree = {
       }
     }
 
-    PDOMTree.afterOp();
+    PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
@@ -390,20 +387,20 @@ const PDOMTree = {
    * Prepares for a pdom-tree-changing operation (saving some state). During DOM operations we don't want Display
    * input to dispatch events as focus changes.
    * @private
+   * @returns {Node|null}
    */
   beforeOp() {
-    focusedNode = FocusManager.pdomFocusedNode;
     BrowserEvents.blockFocusCallbacks = true;
+    return FocusManager.pdomFocusedNode;
   },
 
   /**
    * Finalizes a pdom-tree-changing operation (restoring some state).
+   * @param {Node|null} focusedNode
    * @private
    */
-  afterOp() {
-    if ( focusedNode && focusedNode.focusable ) {
-      focusedNode.focus();
-    }
+  afterOp( focusedNode ) {
+    focusedNode && focusedNode.focusable && focusedNode.focus();
     BrowserEvents.blockFocusCallbacks = false;
   },
 
