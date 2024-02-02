@@ -1188,7 +1188,7 @@ export default class Input extends PhetioObject {
     }
     else {
       const target = ( domEvent.target as unknown as Element );
-      assert && assert( target instanceof window.Element );
+      assert && assert( target instanceof window.Element, 'target is not an Element', target );
       if ( target && this.display.isElementUnderPDOM( target as HTMLElement ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
         assert && assert( trailIndices, 'should not be null' );
