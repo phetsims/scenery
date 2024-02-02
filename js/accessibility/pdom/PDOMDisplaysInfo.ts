@@ -4,7 +4,7 @@
  * Per-node information required to track what PDOM Displays our Node is visible under. A PDOM display is a Display that
  * is marked true with the `accessibility` option, and thus creates and manages a ParallelDOM (see ParallelDOM and
  * general scenery accessibility doc for more details). Acts like a multimap
- * (duplicates allowed) to indicate how many times we appear in an pdom display.
+ * (duplicates allowed) to indicate how many times we appear in a pdom display.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

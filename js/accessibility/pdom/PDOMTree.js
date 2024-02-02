@@ -88,7 +88,7 @@ const PDOMTree = {
   },
 
   /**
-   * Called when a node has an pdomOrder change.
+   * Called when a node has a pdomOrder change.
    * @public
    *
    * @param {Node} node
@@ -118,17 +118,17 @@ const PDOMTree = {
     if ( assert ) {
       for ( i = 0; i < removedItems; i++ ) {
         assert( removedItems[ i ] === null || removedItems[ i ]._pdomParent === node,
-          'Node should have had an pdomOrder' );
+          'Node should have had a pdomOrder' );
       }
       for ( i = 0; i < addedItems; i++ ) {
         assert( addedItems[ i ] === null || addedItems[ i ]._pdomParent === null,
-          'Node is already specified in an pdomOrder' );
+          'Node is already specified in a pdomOrder' );
       }
     }
 
-    // NOTE: Performance could be improved in some cases if we can avoid rebuilding an pdom tree for DIRECT children
+    // NOTE: Performance could be improved in some cases if we can avoid rebuilding a pdom tree for DIRECT children
     // when changing whether they are present in the pdomOrder. Basically, if something is a child and NOT
-    // in an pdomOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
+    // in a pdomOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
     // would not strictly be necessary.
 
     const pdomTrails = PDOMTree.findPDOMTrails( node );
@@ -179,7 +179,7 @@ const PDOMTree = {
   },
 
   /**
-   * Called when a node has an pdomContent change.
+   * Called when a node has a pdomContent change.
    * @public
    *
    * @param {Node} node
@@ -241,7 +241,7 @@ const PDOMTree = {
   },
 
   /**
-   * Handles the conceptual addition of an pdom subtree.
+   * Handles the conceptual addition of a pdom subtree.
    * @private
    *
    * @param {Node} parent
@@ -277,7 +277,7 @@ const PDOMTree = {
   },
 
   /**
-   * Handles the conceptual removal of an pdom subtree.
+   * Handles the conceptual removal of a pdom subtree.
    * @private
    *
    * @param {Node} parent
@@ -303,7 +303,7 @@ const PDOMTree = {
   },
 
   /**
-   * Handles the conceptual sorting of an pdom subtree.
+   * Handles the conceptual sorting of a pdom subtree.
    * @private
    *
    * @param {Node} node

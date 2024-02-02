@@ -2158,7 +2158,7 @@ export default class ParallelDOM extends PhetioObject {
    * graph (via children) in order for PDOM order to apply. Thus `setPDOMOrder` cannot be used in exchange for
    * setting a node as a child.
    *
-   * In the general case, when an pdom order is specified, it's an array of nodes, with optionally one
+   * In the general case, when a pdom order is specified, it's an array of nodes, with optionally one
    * element being a placeholder for "the rest of the children", signified by null. This means that, for
    * accessibility, it will act as if the children for this node WERE the pdomOrder (potentially
    * supplemented with other children via the placeholder).
@@ -2189,13 +2189,13 @@ export default class ParallelDOM extends PhetioObject {
    * i.e. `[null]`.
    *
    * Some general constraints for the orders are:
-   * - Nodes must be attached to a Display (in a scene graph) to be shown in an pdom order.
+   * - Nodes must be attached to a Display (in a scene graph) to be shown in a pdom order.
    * - You can't specify a node in more than one pdomOrder, and you can't specify duplicates of a value
-   *   in an pdomOrder.
+   *   in a pdomOrder.
    * - You can't specify an ancestor of a node in that node's pdomOrder
    *   (e.g. this.pdomOrder = this.parents ).
    *
-   * Note that specifying something in an pdomOrder will effectively remove it from all of its parents for
+   * Note that specifying something in a pdomOrder will effectively remove it from all of its parents for
    * the pdom tree (so if you create `tmpNode.pdomOrder = [ a ]` then toss the tmpNode without
    * disposing it, `a` won't show up in the parallel DOM). If there is a need for that, disposing a Node
    * effectively removes its pdomOrder.
@@ -2243,7 +2243,7 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * Returns whether this node has an pdomOrder that is effectively different than the default.
+   * Returns whether this node has a pdomOrder that is effectively different than the default.
    *
    * NOTE: `null`, `[]` and `[null]` are all effectively the same thing, so this will return true for any of
    * those. Usage of `null` is recommended, as it doesn't create the extra object reference (but some code
@@ -2269,9 +2269,9 @@ export default class ParallelDOM extends PhetioObject {
    * excluded subtrees).
    *
    * If there is no pdomOrder specified, this is basically "all children that don't have pdom parents"
-   * (a Node has a "PDOM parent" if it is specified in an pdomOrder).
+   * (a Node has a "PDOM parent" if it is specified in a pdomOrder).
    *
-   * Otherwise (if it has an pdomOrder), it is the pdomOrder, with the above list of nodes placed
+   * Otherwise (if it has a pdomOrder), it is the pdomOrder, with the above list of nodes placed
    * in at the location of the placeholder. If there is no placeholder, it acts like a placeholder was the last
    * element of the pdomOrder (see setPDOMOrder for more documentation information).
    *
@@ -3020,7 +3020,7 @@ export default class ParallelDOM extends PhetioObject {
         } );
       } );
 
-      // Visit everything. If there is an pdomOrder, those trails were already visited, and will be excluded.
+      // Visit everything. If there is a pdomOrder, those trails were already visited, and will be excluded.
       const numChildren = node._children.length;
       for ( let i = 0; i < numChildren; i++ ) {
         const child = node._children[ i ];
@@ -3159,18 +3159,18 @@ export default class ParallelDOM extends PhetioObject {
   public get pdomInstances(): PDOMInstance[] { return this.getPDOMInstances(); }
 
   /**
-   * Adds an PDOMInstance reference to our array. (scenery-internal)
+   * Adds a PDOMInstance reference to our array. (scenery-internal)
    */
   public addPDOMInstance( pdomInstance: PDOMInstance ): void {
     this._pdomInstances.push( pdomInstance );
   }
 
   /**
-   * Removes an PDOMInstance reference from our array. (scenery-internal)
+   * Removes a PDOMInstance reference from our array. (scenery-internal)
    */
   public removePDOMInstance( pdomInstance: PDOMInstance ): void {
     const index = _.indexOf( this._pdomInstances, pdomInstance );
-    assert && assert( index !== -1, 'Cannot remove an PDOMInstance from a Node if it was not there' );
+    assert && assert( index !== -1, 'Cannot remove a PDOMInstance from a Node if it was not there' );
     this._pdomInstances.splice( index, 1 );
   }
 

@@ -106,7 +106,7 @@ class PDOMInstance {
   }
 
   /**
-   * Initializes an PDOMInstance, implements construction for pooling.
+   * Initializes a PDOMInstance, implements construction for pooling.
    *
    * @param parent - null if this PDOMInstance is root of PDOMInstance tree
    * @param display
@@ -301,7 +301,7 @@ class PDOMInstance {
   }
 
   /**
-   * Returns an PDOMInstance child (if one exists with the given Trail), or null otherwise.
+   * Returns a PDOMInstance child (if one exists with the given Trail), or null otherwise.
    */
   public findChildWithTrail( trail: Trail ): PDOMInstance | null {
     for ( let i = 0; i < this.children.length; i++ ) {
@@ -341,7 +341,7 @@ class PDOMInstance {
   }
 
   /**
-   * Checks to see whether our visibility needs an update based on an pdomDisplays change.
+   * Checks to see whether our visibility needs an update based on a pdomDisplays change.
    *
    * @param index - Index into the relativeNodes array (which node had the notification)
    */
@@ -521,7 +521,7 @@ class PDOMInstance {
       for ( let peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
         const peer = this.children[ peerIndex ].peer!;
 
-        // Iterate through all top level elements of an PDOMInstance's peer
+        // Iterate through all top level elements of a PDOMInstance's peer
         for ( let elementIndex = peer.topLevelElements!.length - 1; elementIndex >= 0; elementIndex-- ) {
           const element = peer.topLevelElements![ elementIndex ];
 
@@ -734,7 +734,7 @@ class PDOMInstance {
 
   /**
    * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to pdomOrder), this finds the best
-   * actual visual Trail to use, from the trail of an PDOMInstance to the root of a Display.
+   * actual visual Trail to use, from the trail of a PDOMInstance to the root of a Display.
    *
    * @param trail - trail of the PDOMInstance, which can containe "gaps"
    * @param rootNode - root of a Display

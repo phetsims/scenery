@@ -1,7 +1,7 @@
 // Copyright 2018-2023, University of Colorado Boulder
 
 /**
- * Represents a path up to an PDOMInstance.
+ * Represents a path up to a PDOMInstance.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
