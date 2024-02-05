@@ -79,6 +79,14 @@ export default class MarginLayoutCell extends LayoutCell {
 
     const preferredSize = ( stretch && this.isSizable( orientation ) ) ? lineSize : this.getMinimumSize( orientation );
 
+    if ( assert ) {
+      const maxSize = orientation === Orientation.HORIZONTAL ? this.node.maxWidth : this.node.maxHeight;
+      assert( !this.isSizable( orientation ) || maxSize === null || Math.abs( maxSize - preferredSize ) > -1e-9,
+        `Tried to set a preferred size ${preferredSize} larger than the specified max${orientation === Orientation.HORIZONTAL ? 'Width' : 'Height'} of ${maxSize}. ` +
+        'Ideally, try to avoid putting a maxWidth/maxHeight on a width/height-sizable Node (one that will resize to fit its preferred size) inside a layout container, ' +
+        'particularly one that will try to expand the Node past its maximum size.' );
+    }
+
     this.attemptPreferredSize( orientation, preferredSize );
 
     if ( align === LayoutAlign.ORIGIN ) {
