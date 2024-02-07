@@ -335,7 +335,7 @@
 
     <div id="HBox-example"></div>
     <script type="text/javascript">
-      createSandbox( 'HBox-example', ( scene, clock, display ) => {
+      createSandbox( 'HBox-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -358,7 +358,7 @@
 
     <div id="VBox-example"></div>
     <script type="text/javascript">
-      createSandbox( 'VBox-example', ( scene, clock, display ) => {
+      createSandbox( 'VBox-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new VBox( {
@@ -387,7 +387,7 @@
 
     <div id="orientation-example"></div>
     <script type="text/javascript">
-      createSandbox( 'orientation-example', ( scene, clock, display ) => {
+      createSandbox( 'orientation-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new FlowBox( {
@@ -411,7 +411,7 @@
 
     <div id="dynamic-example"></div>
     <script type="text/javascript">
-      createSandbox( 'dynamic-example', ( scene, clock, display ) => {
+      createSandbox( 'dynamic-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const circle = new Circle( 25, { fill: colors[ 6 ] } );
@@ -446,7 +446,7 @@
 
     <div id="locked-sizing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'locked-sizing-example', ( scene, clock, display ) => {
+      createSandbox( 'locked-sizing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const circle = new Circle( 25, { fill: colors[ 6 ] } );
@@ -477,7 +477,7 @@
 
     <div id="invis-example"></div>
     <script type="text/javascript">
-      createSandbox( 'invis-example', ( scene, clock, display ) => {
+      createSandbox( 'invis-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -498,7 +498,7 @@
 
     <div id="force-vis-example"></div>
     <script type="text/javascript">
-      createSandbox( 'force-vis-example', ( scene, clock, display ) => {
+      createSandbox( 'force-vis-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -527,7 +527,7 @@
 
     <div id="resizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'resizable-example', ( scene, clock, display ) => {
+      createSandbox( 'resizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -558,7 +558,7 @@
 
     <div id="grow-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grow-example', ( scene, clock, display ) => {
+      createSandbox( 'grow-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -596,7 +596,7 @@
 
     <div id="stretch-example"></div>
     <script type="text/javascript">
-      createSandbox( 'stretch-example', ( scene, clock, display ) => {
+      createSandbox( 'stretch-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -641,7 +641,7 @@
 
     <div id="maxContentWidth-example"></div>
     <script type="text/javascript">
-      createSandbox( 'maxContentWidth-example', ( scene, clock, display ) => {
+      createSandbox( 'maxContentWidth-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -671,7 +671,7 @@
 
     <div id="minContentWidth-example"></div>
     <script type="text/javascript">
-      createSandbox( 'minContentWidth-example', ( scene, clock, display ) => {
+      createSandbox( 'minContentWidth-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -701,7 +701,7 @@
 
     <div id="secondaryAxisContent-example"></div>
     <script type="text/javascript">
-      createSandbox( 'secondaryAxisContent-example', ( scene, clock, display ) => {
+      createSandbox( 'secondaryAxisContent-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -752,7 +752,7 @@
 
     <div id="dimension-example"></div>
     <script type="text/javascript">
-      createSandbox( 'dimension-example', ( scene, clock, display ) => {
+      createSandbox( 'dimension-example', ( scene, stepEmitter, display ) => {
 
         /*START*/
 
@@ -806,7 +806,7 @@
 
     <div id="justification-example"></div>
     <script type="text/javascript">
-      createSandbox( 'justification-example', ( scene, clock, display ) => {
+      createSandbox( 'justification-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           const createBoxes = label => [
             new Rectangle( 0, 0, 170, 30, {
@@ -867,7 +867,7 @@
 
     <div id="wrap-example"></div>
     <script type="text/javascript">
-      createSandbox( 'wrap-example', ( scene, clock, display ) => {
+      createSandbox( 'wrap-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -896,7 +896,7 @@
 
     <div id="align-example"></div>
     <script type="text/javascript">
-      createSandbox( 'align-example', ( scene, clock, display ) => {
+      createSandbox( 'align-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const boxes = [
@@ -944,7 +944,7 @@
 
     <div id="justifyLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'justifyLines-example', ( scene, clock, display ) => {
+      createSandbox( 'justifyLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const boxes = [
@@ -1004,7 +1004,7 @@
 
     <div id="spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'spacing-example', ( scene, clock, display ) => {
+      createSandbox( 'spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1030,7 +1030,7 @@
 
     <div id="lineSpacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'lineSpacing-example', ( scene, clock, display ) => {
+      createSandbox( 'lineSpacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1059,7 +1059,7 @@
 
     <div id="margin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'margin-example', ( scene, clock, display ) => {
+      createSandbox( 'margin-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1086,7 +1086,7 @@
 
     <div id="marginCell-example"></div>
     <script type="text/javascript">
-      createSandbox( 'marginCell-example', ( scene, clock, display ) => {
+      createSandbox( 'marginCell-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1116,7 +1116,7 @@
 
     <div id="alignCell-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignCell-example', ( scene, clock, display ) => {
+      createSandbox( 'alignCell-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1150,7 +1150,7 @@
 
     <div id="override-example"></div>
     <script type="text/javascript">
-      createSandbox( 'override-example', ( scene, clock, display ) => {
+      createSandbox( 'override-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1184,7 +1184,7 @@
     <div id="separators-example"></div>
     <script type="text/javascript">
 
-      createSandbox( 'separators-example', ( scene, clock, display ) => {
+      createSandbox( 'separators-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new HBox( {
@@ -1228,7 +1228,7 @@
 
     <div id="absolute-example"></div>
     <script type="text/javascript">
-      createSandbox( 'absolute-example', ( scene, clock, display ) => {
+      createSandbox( 'absolute-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1272,7 +1272,7 @@
 
     <div id="skip-example"></div>
     <script type="text/javascript">
-      createSandbox( 'skip-example', ( scene, clock, display ) => {
+      createSandbox( 'skip-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1303,7 +1303,7 @@
 
     <div id="rows-example"></div>
     <script type="text/javascript">
-      createSandbox( 'rows-example', ( scene, clock, display ) => {
+      createSandbox( 'rows-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1343,7 +1343,7 @@
 
     <div id="columns-example"></div>
     <script type="text/javascript">
-      createSandbox( 'columns-example', ( scene, clock, display ) => {
+      createSandbox( 'columns-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1385,7 +1385,7 @@
 
     <div id="autoColumns-example"></div>
     <script type="text/javascript">
-      createSandbox( 'autoColumns-example', ( scene, clock, display ) => {
+      createSandbox( 'autoColumns-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1402,7 +1402,7 @@
 
     <div id="autoRows-example"></div>
     <script type="text/javascript">
-      createSandbox( 'autoRows-example', ( scene, clock, display ) => {
+      createSandbox( 'autoRows-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1426,7 +1426,7 @@
 
     <div id="addLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'addLines-example', ( scene, clock, display ) => {
+      createSandbox( 'addLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox();
@@ -1454,7 +1454,7 @@
 
     <div id="insertLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'insertLines-example', ( scene, clock, display ) => {
+      createSandbox( 'insertLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox( { grow: 1 } );
@@ -1487,7 +1487,7 @@
 
     <div id="deleteLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'deleteLines-example', ( scene, clock, display ) => {
+      createSandbox( 'deleteLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox( {
@@ -1523,7 +1523,7 @@
 
     <div id="findCell-example"></div>
     <script type="text/javascript">
-      createSandbox( 'findCell-example', ( scene, clock, display ) => {
+      createSandbox( 'findCell-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const boxes = colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) );
@@ -1559,7 +1559,7 @@
 
     <div id="getLines-example"></div>
     <script type="text/javascript">
-      createSandbox( 'getLines-example', ( scene, clock, display ) => {
+      createSandbox( 'getLines-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new GridBox( {
@@ -1589,7 +1589,7 @@
 
     <div id="grow-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grow-grid-example', ( scene, clock, display ) => {
+      createSandbox( 'grow-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1632,7 +1632,7 @@
 
     <div id="grow-2-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grow-2-grid-example', ( scene, clock, display ) => {
+      createSandbox( 'grow-2-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1679,7 +1679,7 @@
 
     <div id="preferred-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'preferred-grid-example', ( scene, clock, display ) => {
+      createSandbox( 'preferred-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1731,7 +1731,7 @@
 
     <div id="gridResizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'gridResizable-example', ( scene, clock, display ) => {
+      createSandbox( 'gridResizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1781,7 +1781,7 @@
 
     <div id="align-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'align-grid-example', ( scene, clock, display ) => {
+      createSandbox( 'align-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1829,7 +1829,7 @@
 
     <div id="span-grid-example"></div>
     <script type="text/javascript">
-      createSandbox( 'span-grid-example', ( scene, clock, display ) => {
+      createSandbox( 'span-grid-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1889,7 +1889,7 @@
 
     <div id="grid-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grid-spacing-example', ( scene, clock, display ) => {
+      createSandbox( 'grid-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1927,7 +1927,7 @@
 
     <div id="grid-2-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grid-2-spacing-example', ( scene, clock, display ) => {
+      createSandbox( 'grid-2-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -1966,7 +1966,7 @@
 
     <div id="grid-3-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'grid-3-spacing-example', ( scene, clock, display ) => {
+      createSandbox( 'grid-3-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -2007,7 +2007,7 @@
 
     <div id="margin-1-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'margin-1-spacing-example', ( scene, clock, display ) => {
+      createSandbox( 'margin-1-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -2045,7 +2045,7 @@
 
     <div id="margin-2-spacing-example"></div>
     <script type="text/javascript">
-      createSandbox( 'margin-2-spacing-example', ( scene, clock, display ) => {
+      createSandbox( 'margin-2-spacing-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -2122,7 +2122,7 @@
 
     <div id="rectUnsizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'rectUnsizable-example', ( scene, clock, display ) => {
+      createSandbox( 'rectUnsizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           return new GridBox( {
@@ -2176,7 +2176,7 @@
 
     <div id="layoutOptionsMutate-example"></div>
     <script type="text/javascript">
-      createSandbox( 'layoutOptionsMutate-example', ( scene, clock, display ) => {
+      createSandbox( 'layoutOptionsMutate-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const box = new HBox( {
@@ -2210,7 +2210,7 @@
 
     <div id="defaultOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'defaultOrigin-example', ( scene, clock, display ) => {
+      createSandbox( 'defaultOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2236,7 +2236,7 @@
 
     <div id="flowOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'flowOrigin-example', ( scene, clock, display ) => {
+      createSandbox( 'flowOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2286,7 +2286,7 @@
 
     <div id="gridOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'gridOrigin-example', ( scene, clock, display ) => {
+      createSandbox( 'gridOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2315,7 +2315,7 @@
 
     <div id="layoutOrigin-example"></div>
     <script type="text/javascript">
-      createSandbox( 'layoutOrigin-example', ( scene, clock, display ) => {
+      createSandbox( 'layoutOrigin-example', ( scene, stepEmitter, display ) => {
         const originSize = 50;
         const originNode = new Path( new Shape().moveTo( -originSize, 0 ).lineTo( originSize, 0 ).moveTo( 0, originSize ).lineTo( 0, -originSize ), {
           stroke: 'rgba(0,0,0,0.5)'
@@ -2375,7 +2375,7 @@
 
     <div id="manualConstraint-example"></div>
     <script type="text/javascript">
-      createSandbox( 'manualConstraint-example', ( scene, clock, display ) => {
+      createSandbox( 'manualConstraint-example', ( scene, stepEmitter, display ) => {
 
         const box = ( () => {
           /*START*/
@@ -2437,7 +2437,7 @@
 
     <div id="flowConstraint-example"></div>
     <script type="text/javascript">
-      createSandbox( 'flowConstraint-example', ( scene, clock, display ) => {
+      createSandbox( 'flowConstraint-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
@@ -2498,7 +2498,7 @@
 
     <div id="gridConstraint-example"></div>
     <script type="text/javascript">
-      createSandbox( 'gridConstraint-example', ( scene, clock, display ) => {
+      createSandbox( 'gridConstraint-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
@@ -2561,7 +2561,7 @@
 
     <div id="simpleAlignBox-example"></div>
     <script type="text/javascript">
-      createSandbox( 'simpleAlignBox-example', ( scene, clock, display ) => {
+      createSandbox( 'simpleAlignBox-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2590,7 +2590,7 @@
 
     <div id="alignBoxAlign-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxAlign-example', ( scene, clock, display ) => {
+      createSandbox( 'alignBoxAlign-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2621,7 +2621,7 @@
 
     <div id="alignBoxMargins-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxMargins-example', ( scene, clock, display ) => {
+      createSandbox( 'alignBoxMargins-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2655,7 +2655,7 @@
 
     <div id="alignBoxOnlyMargins-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxOnlyMargins-example', ( scene, clock, display ) => {
+      createSandbox( 'alignBoxOnlyMargins-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2683,7 +2683,7 @@
 
     <div id="alignBoxPreferred-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxPreferred-example', ( scene, clock, display ) => {
+      createSandbox( 'alignBoxPreferred-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
@@ -2716,7 +2716,7 @@
 
     <div id="alignBoxSizable-example"></div>
     <script type="text/javascript">
-      createSandbox( 'alignBoxSizable-example', ( scene, clock, display ) => {
+      createSandbox( 'alignBoxSizable-example', ( scene, stepEmitter, display ) => {
         const box = ( () => {
           /*START*/
           const rect = new Rectangle( 0, 0, 50, 50, {
