@@ -335,7 +335,7 @@ export default class Display {
       // {string} - What cursor is used when no other cursor is specified
       defaultCursor: 'default',
 
-      // {ColorDef} - Intial background color
+      // {ColorDef} - Initial background color
       backgroundColor: null,
 
       // {boolean} - Whether WebGL will preserve the drawing buffer
