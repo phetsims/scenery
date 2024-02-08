@@ -605,9 +605,30 @@ const Utils = {
    */
   safariEmbeddingMarkWorkaround( str ) {
     if ( platform.safari ) {
-      // Add in zero-width spaces for Safari, so it doesn't have adjacent embedding marks ever (which seems to prevent
-      // things).
-      return str.split( '' ).join( '\u200B' );
+      // NOTE: I don't believe it's likely/possible a valid UTF-8 string will contain these code points adjacently,
+      // due to the property that you can start reading UTF-8 from any byte. So we're safe to split it and break it
+      // into UTF-16 code units, since we're not mucking with surrogate pairs.
+      const utf16CodeUnits = str.split( '' );
+      let result = '';
+
+      // NOTE: We're only inserting zero-width spaces between embedding marks, since prior to this our insertion between
+      // certain code points was causing issues with Safari (https://github.com/phetsims/website-meteor/issues/656)
+      let lastIsEmbeddingMark = false;
+      for ( let i = 0; i < utf16CodeUnits.length; i++ ) {
+        const next = utf16CodeUnits[ i ];
+        const nextIsEmbeddingMark = next === '\u202a' || next === '\u202b' || next === '\u202c';
+
+        // Add in zero-width spaces for Safari, so it doesn't have adjacent embedding marks ever (which seems to prevent
+        // things).
+        if ( lastIsEmbeddingMark && nextIsEmbeddingMark ) {
+          result += '\u200B';
+        }
+        result += next;
+
+        lastIsEmbeddingMark = nextIsEmbeddingMark;
+      }
+
+      return result;
     }
     else {
       return str;
