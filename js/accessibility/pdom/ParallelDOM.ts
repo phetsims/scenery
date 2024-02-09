@@ -2154,13 +2154,13 @@ export default class ParallelDOM extends PhetioObject {
    * Sets the PDOM/DOM order for this Node. This includes not only focused items, but elements that can be
    * placed in the Parallel DOM. If provided, it will override the focus order between children (and
    * optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
-   * (first children first, last children last), determined by the children array. A Node must be conected to a scene
-   * graph (via children) in order for PDOM order to apply. Thus `setPDOMOrder` cannot be used in exchange for
-   * setting a node as a child.
+   * (first children first, last children last), determined by the children array. A Node must be connected to a scene
+   * graph (via children) in order for pdomOrder to apply. Thus, `setPDOMOrder` cannot be used in exchange for
+   * setting a Node as a child.
    *
-   * In the general case, when a pdom order is specified, it's an array of nodes, with optionally one
+   * In the general case, when pdomOrder is specified, it's an array of Nodes, with optionally one
    * element being a placeholder for "the rest of the children", signified by null. This means that, for
-   * accessibility, it will act as if the children for this node WERE the pdomOrder (potentially
+   * accessibility, it will act as if the children for this Node WERE the pdomOrder (potentially
    * supplemented with other children via the placeholder).
    *
    * For example, if you have the tree:
