@@ -6579,8 +6579,7 @@ Node.NodeIO = new IOType( 'NodeIO', {
 
 const DEFAULT_PHET_IO_OBJECT_BASE_OPTIONS = { phetioType: Node.NodeIO, phetioState: PHET_IO_STATE_DEFAULT };
 
-// Note: We use interface extension, so we can't export Node at its declaration location
-
 // A base class for a node in the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
 // Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
+// Note: We use interface extension, so we can't export Node at its declaration location
 export default Node;
