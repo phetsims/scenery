@@ -250,12 +250,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
         const display = this.displays[ trailIds[ i ] ];
-
-        if ( display.focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ) ) {
-          display.focusManager.lockedPointerFocusProperty.unlink( this._boundPointerFocusClearedListener );
-        }
-
-        display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
+        this.onDisplayRemoved( display );
         delete this.displays[ trailIds[ i ] ];
       }
 
