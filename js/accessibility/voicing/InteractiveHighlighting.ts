@@ -414,6 +414,25 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       }
     }
 
+    private onDisplayAdded( display: Display ): void {
+
+      // Listener may already by on the display in cases of DAG, only add if this is the first instance of this Node
+      if ( !display.focusManager.pointerHighlightsVisibleProperty.hasListener( this._interactiveHighlightingEnabledListener ) ) {
+        display.focusManager.pointerHighlightsVisibleProperty.link( this._interactiveHighlightingEnabledListener );
+      }
+    }
+
+    private onDisplayRemoved( display: Display ): void {
+
+      // Pointer focus was locked due to interaction with this listener, but unlocked because of other
+      // scenery-internal listeners. But the Property still has this listener so it needs to be removed now.
+      if ( display.focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ) ) {
+        display.focusManager.lockedPointerFocusProperty.unlink( this._boundPointerFocusClearedListener );
+      }
+
+      display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
+    }
+
     /**
      * When a Pointer goes up after going down on this Node, signal to the Displays that the pointerFocusProperty no
      * longer needs to be locked.
@@ -537,10 +556,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       if ( added ) {
         this.displays[ instance.trail!.uniqueId ] = instance.display;
 
-        // Listener may already by on the display in cases of DAG, only add if this is the first instance of this Node
-        if ( !instance.display.focusManager.pointerHighlightsVisibleProperty.hasListener( this._interactiveHighlightingEnabledListener ) ) {
-          instance.display.focusManager.pointerHighlightsVisibleProperty.link( this._interactiveHighlightingEnabledListener );
-        }
+        this.onDisplayAdded( instance.display );
       }
       else {
         assert && assert( instance.node, 'should have a node' );
@@ -549,17 +565,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         // If the node was disposed, this display reference has already been cleaned up, but instances are updated
         // (disposed) on the next frame after the node was disposed. Only unlink if there are no more instances of
         // this node;
-        if ( display && instance.node!.instances.length === 0 ) {
-
-          // Pointer focus was locked due to interaction with this listener, but unlocked because of other
-          // scenery-internal listeners. But the Property still has this listener so it needs to be removed now.
-          if ( display.focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ) ) {
-            display.focusManager.lockedPointerFocusProperty.unlink( this._boundPointerFocusClearedListener );
-          }
-
-          display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
-        }
-
+        instance.node!.instances.length === 0 && this.onDisplayRemoved( display );
         delete this.displays[ instance.trail!.uniqueId ];
       }
     }
