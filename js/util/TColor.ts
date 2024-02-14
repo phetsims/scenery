@@ -10,6 +10,10 @@ import { Color } from '../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-type TColor = TReadOnlyProperty<Color | string | null> | TReadOnlyProperty<Color | string> | TReadOnlyProperty<Color> | TReadOnlyProperty<string> | Color | string | null;
+type TColor = TReadOnlyProperty<Color | string | null> |
+  TReadOnlyProperty<Color | string> |
+  TReadOnlyProperty<Color> |
+  TReadOnlyProperty<string> |
+  Color | string | null;
 
 export default TColor;
