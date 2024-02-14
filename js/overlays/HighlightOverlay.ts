@@ -187,7 +187,11 @@ export default class HighlightOverlay implements TOverlay {
       allowWebGL: display.isWebGLAllowed(),
       allowCSSHacks: false,
       accessibility: false,
-      interactive: false
+      interactive: false,
+
+      // Layer fitting solved a chrome bug where we could lose focus highlights when tabbing while zoomed in certain
+      // cases, see https://github.com/phetsims/scenery/issues/1605
+      allowLayerFitting: true
     } );
 
     this.domElement = this.focusDisplay.domElement;
