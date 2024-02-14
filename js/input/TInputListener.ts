@@ -1,7 +1,9 @@
 // Copyright 2021-2023, University of Colorado Boulder
 
 /**
- * The main type interface for input listeners
+ * The main type interface for input listeners.
+ *
+ * Refer to Input.ts for documentation on the event types.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
