@@ -259,7 +259,6 @@ export default class FocusManager {
 
   // Listener to update the "active" highlight state for an interactiveHighlightingNode
   private onPointerFocusChange( pointerFocus: Focus | null, oldFocus: Focus | null ): void {
-    // TODO: Is a type cast the best way to handle this? https://github.com/phetsims/scenery/issues/1602
     const focusNode = pointerFocus?.trail.lastNode() as InteractiveHighlightingNode;
     focusNode && focusNode.isInteractiveHighlighting && focusNode.handleHighlightActiveChange();
     const oldFocusNode = oldFocus?.trail.lastNode() as InteractiveHighlightingNode;
