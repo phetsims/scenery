@@ -34,6 +34,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Utterance from '../../../utterance-queue/js/Utterance.js';
 import { Display, Focus, FocusDisplayedController, Node, PDOMInstance, PDOMUtils, ReadingBlockUtterance, scenery, voicingManager } from '../imports.js';
+import { InteractiveHighlightingNode } from './voicing/InteractiveHighlighting.js';
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 
@@ -93,6 +94,7 @@ export default class FocusManager {
   private static globallyAttached = false;
 
   public constructor() {
+    // TODO: why aren't these disposed? https://github.com/phetsims/scenery/issues/1602
     this.pointerFocusProperty = new Property( null );
     this.readingBlockFocusProperty = new Property( null );
     this.lockedPointerFocusProperty = new Property( null );
@@ -160,6 +162,13 @@ export default class FocusManager {
     } );
 
     this.lockedPointerFocusDisplayedController = new FocusDisplayedController( this.lockedPointerFocusProperty );
+
+    [
+      this.pointerFocusProperty,
+      this.lockedPointerFocusProperty
+    ].forEach( property => {
+      property.link( this.onPointerFocusChange.bind( this ) );
+    } );
   }
 
   public dispose(): void {
@@ -246,6 +255,15 @@ export default class FocusManager {
         }
       }
     }
+  }
+
+  // Listener to update the "active" highlight state for an interactiveHighlightingNode
+  private onPointerFocusChange( pointerFocus: Focus | null, oldFocus: Focus | null ): void {
+    // TODO: Is a type cast the best way to handle this? https://github.com/phetsims/scenery/issues/1602
+    const focusNode = pointerFocus?.trail.lastNode() as InteractiveHighlightingNode;
+    focusNode && focusNode.isInteractiveHighlighting && focusNode.handleHighlightActiveChange();
+    const oldFocusNode = oldFocus?.trail.lastNode() as InteractiveHighlightingNode;
+    oldFocusNode && oldFocusNode.isInteractiveHighlighting && oldFocusNode.handleHighlightActiveChange();
   }
 
   /**

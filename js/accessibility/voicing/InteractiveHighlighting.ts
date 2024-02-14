@@ -13,6 +13,8 @@ import { DelayedMutate, Display, Focus, FocusManager, Instance, Node, Pointer, P
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import memoize from '../../../../phet-core/js/memoize.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import TinyProperty from '../../../../axon/js/TinyProperty.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -61,7 +63,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     // If true, the highlight will be layerable in the scene graph instead of drawn
     // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
     // in the location you want in the scene graph. The interactiveHighlight will become visible when
-    // this.interactiveHighlightActivated is true.
+    // this.isInteractiveHighlightActiveProperty is true.
     private _interactiveHighlightLayerable = false;
 
     // If true, the highlight will be displayed on activation input. If false, it will not and we can remove listeners
@@ -70,6 +72,10 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 
     // Emits an event when the interactive highlight changes for this Node
     public interactiveHighlightChangedEmitter: TEmitter = new TinyEmitter();
+
+    // This Property will be true when this node has highlights activated on it. See isInteractiveHighlightActivated().
+    public readonly isInteractiveHighlightActiveProperty: TReadOnlyProperty<boolean>;
+    private readonly _isInteractiveHighlightActiveProperty = new TinyProperty( false );
 
     // When new instances of this Node are created, adds an entry to the map of Displays.
     private readonly _changedInstanceListener: ( instance: Instance, added: boolean ) => void;
@@ -112,6 +118,8 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         cancel: boundPointerCancel,
         interrupt: boundPointerCancel
       };
+
+      this.isInteractiveHighlightActiveProperty = this._isInteractiveHighlightActiveProperty;
     }
 
     /**
@@ -216,22 +224,45 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     /**
      * Returns true if this Node is "activated" by a pointer, indicating that a Pointer is over it
      * and this Node mixes InteractiveHighlighting so an interactive highlight should surround it.
+     *
+     * This algorithm depends on the direct focus over the pointer, the "locked" focus (from an attached listener),
+     * and if pointer highlights are visible at all.
+     *
+     * If you come to desire this private function, instead you should use isInteractiveHighlightActiveProperty.
+     *
      */
-    public isInteractiveHighlightActivated(): boolean {
+    private isInteractiveHighlightActivated(): boolean {
       let activated = false;
 
       const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
-        const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.pointerFocusProperty.value;
-        if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
-          activated = true;
-          break;
+        const display = this.displays[ trailIds[ i ] ];
+
+        // Only if the interactive highlights feature is enabled can we be active
+        if ( display.focusManager.pointerHighlightsVisibleProperty.value ) {
+
+          const pointerFocus = display.focusManager.pointerFocusProperty.value;
+          const lockedPointerFocus = display.focusManager.lockedPointerFocusProperty.value;
+          if ( lockedPointerFocus ) {
+            if ( lockedPointerFocus?.trail.lastNode() === this ) {
+              activated = true;
+              break;
+            }
+          }
+          else if ( pointerFocus?.trail.lastNode() === this ) {
+            activated = true;
+            break;
+          }
         }
       }
       return activated;
     }
 
-    public get interactiveHighlightActivated(): boolean { return this.isInteractiveHighlightActivated(); }
+    public handleHighlightActiveChange(): void {
+
+      // The performance of this is OK - what we
+      this._isInteractiveHighlightActiveProperty.value = this.isInteractiveHighlightActivated();
+    }
 
     public override dispose(): void {
       this.changedInstanceEmitter.removeListener( this._changedInstanceListener );
@@ -261,7 +292,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
      * When the pointer goes 'over' a node (not including children), look for a group focus highlight to
      * activate. This is most useful for InteractiveHighlighting Nodes that act as a "group" container
      * for other nodes. When the pointer leaves a child, we get the 'exited' event on the child, immediately
-     * followed by an 'over' event on the parent. This keeps the group highlight remains visible without any flickering.
+     * followed by an 'over' event on the parent. This keeps the group highlight visible without any flickering.
      * The group parent must be composed with InteractiveHighlighting so that it has these event listeners.
      */
     private _onPointerOver( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
@@ -539,6 +570,9 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       else if ( !enabled && hasActivationListener ) {
         this.removeInputListener( this._activationListener );
       }
+
+      // If now displayed, then we should recompute if we are active or not.
+      this.handleHighlightActiveChange();
     }
 
     /**
