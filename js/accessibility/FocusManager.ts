@@ -94,7 +94,6 @@ export default class FocusManager {
   private static globallyAttached = false;
 
   public constructor() {
-    // TODO: why aren't these disposed? https://github.com/phetsims/scenery/issues/1602
     this.pointerFocusProperty = new Property( null );
     this.readingBlockFocusProperty = new Property( null );
     this.lockedPointerFocusProperty = new Property( null );
@@ -172,6 +171,12 @@ export default class FocusManager {
   }
 
   public dispose(): void {
+    this.pointerFocusProperty.dispose();
+    this.readingBlockFocusProperty.dispose();
+    this.lockedPointerFocusProperty.dispose();
+    this.pdomFocusHighlightsVisibleProperty.dispose();
+    this.interactiveHighlightsVisibleProperty.dispose();
+    this.readingBlockHighlightsVisibleProperty.dispose();
     this.readingBlockFocusController.dispose();
     this.pointerFocusDisplayedController.dispose();
     this.pointerHighlightsVisibleProperty.dispose();
