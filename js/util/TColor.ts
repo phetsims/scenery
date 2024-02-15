@@ -12,8 +12,11 @@ import { Color } from '../imports.js';
 
 type TColor = TReadOnlyProperty<Color | string | null> |
   TReadOnlyProperty<Color | string> |
+  TReadOnlyProperty<Color | null> |
+  TReadOnlyProperty<string | null> |
   TReadOnlyProperty<Color> |
   TReadOnlyProperty<string> |
+  TReadOnlyProperty<null> |
   Color | string | null;
 
 export default TColor;
