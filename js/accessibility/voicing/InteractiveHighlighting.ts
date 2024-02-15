@@ -581,21 +581,25 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
      */
     public onChangedInstance( instance: Instance, added: boolean ): void {
       assert && assert( instance.trail, 'should have a trail' );
+      assert && assert( instance.display, 'should have a display' );
+
+      const uniqueId = instance.trail!.uniqueId;
 
       if ( added ) {
-        this.displays[ instance.trail!.uniqueId ] = instance.display;
-
-        this.onDisplayAdded( instance.display );
+        const display = instance.display as Display;
+        this.displays[ uniqueId ] = display;
+        this.onDisplayAdded( display );
       }
       else {
         assert && assert( instance.node, 'should have a node' );
-        const display = this.displays[ instance.trail!.uniqueId ];
+        const display = this.displays[ uniqueId ];
+        assert && assert( display, `interactive highlighting does not have a Display for removed instance: ${uniqueId}` );
 
         // If the node was disposed, this display reference has already been cleaned up, but instances are updated
         // (disposed) on the next frame after the node was disposed. Only unlink if there are no more instances of
         // this node;
         instance.node!.instances.length === 0 && this.onDisplayRemoved( display );
-        delete this.displays[ instance.trail!.uniqueId ];
+        delete this.displays[ uniqueId ];
       }
     }
 
