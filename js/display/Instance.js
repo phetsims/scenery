@@ -26,6 +26,12 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import { BackboneDrawable, CanvasBlock, ChangeInterval, Drawable, Fittability, InlineCanvasCacheDrawable, RelativeTransform, Renderer, scenery, SharedCanvasCacheDrawable, Trail, Utils } from '../imports.js';
 
+// This fixes how Typescript recognizes the "Display" type, used this pattern in javascript files we can't convert to
+// TypeScript right now.
+/**
+ * @typedef {import('../imports').Display} Display
+ */
+
 let globalIdCounter = 1;
 
 // preferences top to bottom in general
@@ -37,6 +43,13 @@ const defaultPreferredRenderers = Renderer.createOrderBitmask(
 );
 
 class Instance {
+
+  /**
+   * @public
+   * @type {Display|null}
+   */
+  display = null;
+
   /**
    * @mixes Poolable
    *
