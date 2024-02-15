@@ -588,7 +588,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       const uniqueId = instance.trail!.uniqueId;
 
       if ( added ) {
-        const display = instance.display as Display;
+        const display = instance.display as Display; // eslint-disable-line @typescript-eslint/non-nullable-type-assertion-style
         this.displays[ uniqueId ] = display;
         this.onDisplayAdded( display );
       }
