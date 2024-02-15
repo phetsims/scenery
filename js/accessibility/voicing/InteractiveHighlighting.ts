@@ -260,7 +260,9 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 
     public handleHighlightActiveChange(): void {
 
-      // The performance of this is OK - what we
+      // The performance of this is OK at the time of this writing. It depends greatly on how often this function is
+      // called, since recalculation involves looping through all instances' displays, but since recalculation only
+      // occurs from FocusManager's Property updates (and not on every pointer operation), this is acceptable.
       this._isInteractiveHighlightActiveProperty.value = this.isInteractiveHighlightActivated();
     }
 
