@@ -14,7 +14,8 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
 import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { Color, TColor, scenery } from '../imports.js';
+import { Color, scenery, TColor } from '../imports.js';
+import { TinyProperty } from '../../../axon/js/imports.js';
 
 const ColorDef = {
   /**
@@ -24,7 +25,7 @@ const ColorDef = {
     return color === null ||
            typeof color === 'string' ||
            color instanceof Color ||
-           ( color instanceof ReadOnlyProperty && (
+           ( ( color instanceof ReadOnlyProperty || color instanceof TinyProperty ) && (
              color.value === null ||
              typeof color.value === 'string' ||
              color.value instanceof Color
