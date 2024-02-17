@@ -6,17 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import { LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin, LineStyles } from '../../../kite/js/imports.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import platform from '../../../phet-core/js/platform.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { CanvasContextWrapper, Color, Gradient, TPaint, TPaintableDrawable, LinearGradient, Node, Paint, PaintDef, Path, Pattern, RadialGradient, Renderer, scenery, Text } from '../imports.js';
+import { CanvasContextWrapper, Color, Gradient, LinearGradient, Node, Paint, PaintDef, Path, Pattern, RadialGradient, Renderer, scenery, Text, TPaint, TPaintableDrawable } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
 
 const isSafari5 = platform.safari5;
 
@@ -147,13 +147,13 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
     /**
      * Returns a property-unwrapped fill if applicable.
      */
-    public getFillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
+    public getFillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint {
       const fill = this.getFill();
 
-      return fill instanceof ReadOnlyProperty ? fill.get() : fill;
+      return isTReadOnlyProperty<string | Color | null>( fill ) ? fill.get() : fill;
     }
 
-    public get fillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getFillValue(); }
+    public get fillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint { return this.getFillValue(); }
 
     /**
      * Sets the stroke color for the Node.
@@ -219,13 +219,13 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
     /**
      * Returns a property-unwrapped stroke if applicable.
      */
-    public getStrokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern {
+    public getStrokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint {
       const stroke = this.getStroke();
 
-      return stroke instanceof ReadOnlyProperty ? stroke.get() : stroke;
+      return isTReadOnlyProperty<null | string | Color>( stroke ) ? stroke.get() : stroke;
     }
 
-    public get strokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern { return this.getStrokeValue(); }
+    public get strokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint { return this.getStrokeValue(); }
 
     /**
      * Sets whether the fill is marked as pickable.

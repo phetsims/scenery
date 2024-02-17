@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { TinyProperty } from '../../../axon/js/imports.js';
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
+import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
 import { Color, Gradient, Paint, scenery } from '../imports.js';
 
 const PaintDef = {
@@ -28,7 +27,7 @@ const PaintDef = {
            typeof paint === 'string' ||
            paint instanceof Color ||
            paint instanceof Paint ||
-           ( ( paint instanceof ReadOnlyProperty || paint instanceof TinyProperty ) && (
+           ( ( isTReadOnlyProperty( paint ) ) && (
              paint.value === null ||
              typeof paint.value === 'string' ||
              paint.value instanceof Color
@@ -50,7 +49,7 @@ const PaintDef = {
     if ( paint instanceof Color ) {
       return paint.copy();
     }
-    if ( paint instanceof ReadOnlyProperty ) {
+    if ( isTReadOnlyProperty( paint ) ) {
       return PaintDef.toColor( paint.value );
     }
     if ( paint instanceof Gradient ) {

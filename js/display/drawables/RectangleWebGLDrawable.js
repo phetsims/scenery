@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
+import { isTReadOnlyProperty } from '../../../../axon/js/imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { Color, RectangleStatefulDrawable, Renderer, scenery, WebGLSelfDrawable } from '../../imports.js';
@@ -85,7 +85,8 @@ class RectangleWebGLDrawable extends RectangleStatefulDrawable( WebGLSelfDrawabl
       this.includeVertices = this.node.hasFill();
 
       if ( this.includeVertices ) {
-        const fill = ( this.node.fill instanceof ReadOnlyProperty ) ? this.node.fill.value : this.node.fill;
+        const fill = ( isTReadOnlyProperty( this.node.fill ) ) ?
+                     this.node.fill.value : this.node.fill;
         const color = scratchColor.set( fill );
         const red = color.red / 255;
         const green = color.green / 255;

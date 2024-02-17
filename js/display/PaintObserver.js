@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
+import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
 import { Color, Gradient, scenery } from '../imports.js';
 
 class PaintObserver {
@@ -109,7 +109,7 @@ class PaintObserver {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachPrimary' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    if ( paint instanceof ReadOnlyProperty ) {
+    if ( isTReadOnlyProperty( paint ) ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Property listener' );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
       this.secondaryLazyLinkProperty( paint );
@@ -148,7 +148,7 @@ class PaintObserver {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachPrimary' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    if ( paint instanceof ReadOnlyProperty ) {
+    if ( isTReadOnlyProperty( paint ) ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Property listener' );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
       this.secondaryUnlinkProperty( paint );

@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
-import { ActiveSVGGradient, Color, TColor, scenery, svgns } from '../imports.js';
+import { ActiveSVGGradient, Color, scenery, svgns, TColor } from '../imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
 
 const scratchColor = new Color( 'transparent' );
 
@@ -60,7 +60,7 @@ class SVGGradientStop implements TPoolable {
     this.propertyListener = this.propertyListener || this.onPropertyChange.bind( this );
     this.colorListener = this.colorListener || this.markDirty.bind( this );
 
-    if ( color instanceof ReadOnlyProperty ) {
+    if ( isTReadOnlyProperty( color ) ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Property listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       color.lazyLink( this.propertyListener );
       if ( color.value instanceof Color ) {
@@ -130,7 +130,7 @@ class SVGGradientStop implements TPoolable {
     let color = this.color;
 
     // to {Color|string|null}
-    if ( color instanceof ReadOnlyProperty ) {
+    if ( isTReadOnlyProperty( color ) ) {
       color = color.value;
     }
 
@@ -144,7 +144,7 @@ class SVGGradientStop implements TPoolable {
       scratchColor.setCSS( color );
     }
     else {
-      scratchColor.set( color as Color );
+      scratchColor.set( color );
     }
 
     // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
@@ -180,7 +180,7 @@ class SVGGradientStop implements TPoolable {
       this.lastColor = null;
     }
 
-    if ( color instanceof ReadOnlyProperty ) {
+    if ( isTReadOnlyProperty( color ) ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Property listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       if ( color.hasListener( this.propertyListener ) ) {
         color.unlink( this.propertyListener );

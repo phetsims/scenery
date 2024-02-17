@@ -11,13 +11,13 @@
  */
 
 import TEmitter from '../../../axon/js/TEmitter.js';
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { TPaint, scenery } from '../imports.js';
+import { scenery, TPaint } from '../imports.js';
 import TColor from './TColor.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 
 // constants
 const clamp = Utils.clamp;
@@ -655,7 +655,7 @@ export default class Color {
     if ( typeof paint === 'string' ) {
       Color.checkPaintString( paint );
     }
-    else if ( ( paint instanceof ReadOnlyProperty ) && ( typeof paint.value === 'string' ) ) {
+    else if ( ( isTReadOnlyProperty( paint ) ) && ( typeof paint.value === 'string' ) ) {
       Color.checkPaintString( paint.value );
     }
   }

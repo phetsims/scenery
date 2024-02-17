@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
+import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
 import { scenery } from '../imports.js';
 
 class CanvasContextWrapper {
@@ -72,7 +72,7 @@ class CanvasContextWrapper {
    */
   setFillStyle( style ) {
     // turn {Property}s into their values when necessary
-    if ( style && style instanceof ReadOnlyProperty ) {
+    if ( style && isTReadOnlyProperty( style ) ) {
       style = style.value;
     }
 
@@ -96,7 +96,7 @@ class CanvasContextWrapper {
    */
   setStrokeStyle( style ) {
     // turn {Property}s into their values when necessary
-    if ( style && style instanceof ReadOnlyProperty ) {
+    if ( style && isTReadOnlyProperty( style ) ) {
       style = style.value;
     }
 

@@ -11,10 +11,10 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { ReadOnlyProperty, TinyProperty } from '../../../axon/js/imports.js';
 
 const scenerySerialize = ( value: unknown ): IntentionalAny => {
   if ( value instanceof Vector2 ) {
@@ -72,6 +72,12 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
   else if ( value instanceof ReadOnlyProperty ) {
     return {
       type: 'Property',
+      value: scenerySerialize( value.value )
+    };
+  }
+  else if ( value instanceof TinyProperty ) {
+    return {
+      type: 'TinyProperty',
       value: scenerySerialize( value.value )
     };
   }
