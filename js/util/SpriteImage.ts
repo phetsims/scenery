@@ -13,6 +13,8 @@ import { Shape } from '../../../kite/js/imports.js';
 import { Imageable, ImageableImage, ImageableOptions, scenery } from '../imports.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import PickRequired from '../../../phet-core/js/types/PickRequired.js';
 
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );
@@ -37,14 +39,21 @@ export default class SpriteImage extends Imageable( Object ) {
    * @param offset - A 2d offset from the upper-left of the image which is considered the "center".
    * @param [providedOptions]
    */
-  public constructor( image: ImageableImage, offset: Vector2, providedOptions?: SpriteImageOptions ) {
+  public constructor( image: ImageableImage | TReadOnlyProperty<ImageableImage>, offset: Vector2, providedOptions?: SpriteImageOptions ) {
     assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement );
 
-    const options = optionize<SpriteImageOptions, SelfOptions, ImageableOptions>()( {
+    const initImageableOptions = {
       hitTestPixels: false,
-      pickable: true,
-      image: image
-    }, providedOptions );
+      pickable: true
+    } as PickRequired<SpriteImageOptions, 'image' | 'imageProperty' | 'hitTestPixels' | 'pickable'>;
+    if ( isTReadOnlyProperty( image ) ) {
+      initImageableOptions.imageProperty = image;
+    }
+    else {
+      initImageableOptions.image = image;
+    }
+
+    const options = optionize<SpriteImageOptions, SelfOptions, ImageableOptions>()( initImageableOptions, providedOptions );
 
     super();
 
@@ -55,7 +64,12 @@ export default class SpriteImage extends Imageable( Object ) {
     this.imageData = null;
 
     // Initialize Imageable items (including the image itself)
-    this.setImage( image );
+    if ( isTReadOnlyProperty( image ) ) {
+      this.imageProperty = image;
+    }
+    else {
+      this.image = image;
+    }
 
     mutate( this, Object.keys( Imageable.DEFAULT_OPTIONS ), options );
   }

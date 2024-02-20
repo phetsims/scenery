@@ -13,6 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, TLineDrawable } from '../imports.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position
@@ -31,7 +32,7 @@ type SelfOptions = {
   x2?: number;
   y2?: number;
 };
-export type LineOptions = SelfOptions & StrictOmit<PathOptions, 'shape'>;
+export type LineOptions = SelfOptions & StrictOmit<PathOptions, 'shape' | 'shapeProperty'>;
 
 export default class Line extends Path {
 
@@ -482,6 +483,14 @@ export default class Line extends Path {
    */
   public override hasShape(): boolean {
     return true;
+  }
+
+  public override setShapeProperty( newTarget: TReadOnlyProperty<Shape | string | null> | null ): this {
+    if ( newTarget !== null ) {
+      throw new Error( 'Cannot set the shapeProperty of a Line to something non-null, it handles this itself' );
+    }
+
+    return this;
   }
 
   public override mutate( options?: LineOptions ): this {

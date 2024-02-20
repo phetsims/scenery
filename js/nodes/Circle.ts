@@ -13,6 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, CircleCanvasDrawable, CircleDOMDrawable, CircleSVGDrawable, DOMSelfDrawable, Features, TCircleDrawable, Instance, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, VoicingOptions } from '../imports.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 const CIRCLE_OPTION_KEYS = [
   'radius' // {number} - see setRadius() for more documentation
@@ -22,7 +23,7 @@ type SelfOptions = {
   radius?: number;
 };
 
-export type CircleOptions = SelfOptions & VoicingOptions & StrictOmit<PathOptions, 'shape'>;
+export type CircleOptions = SelfOptions & VoicingOptions & StrictOmit<PathOptions, 'shape' | 'shapeProperty'>;
 
 export default class Circle extends Path {
 
@@ -298,6 +299,14 @@ export default class Circle extends Path {
   public override hasShape(): boolean {
     // Always true for this Path subtype
     return true;
+  }
+
+  public override setShapeProperty( newTarget: TReadOnlyProperty<Shape | string | null> | null ): this {
+    if ( newTarget !== null ) {
+      throw new Error( 'Cannot set the shapeProperty of a Circle to something non-null, it handles this itself' );
+    }
+
+    return this;
   }
 
   public override mutate( options?: CircleOptions ): this {

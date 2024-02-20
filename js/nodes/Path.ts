@@ -12,10 +12,16 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, Instance, TPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import WithRequired from '../../../phet-core/js/types/WithRequired.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
+import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod',
-  'shape'
+  'shape',
+  'shapeProperty'
 ];
 
 const DEFAULT_OPTIONS = {
@@ -48,6 +54,11 @@ type SelfOptions = {
   shape?: Shape | string | null;
 
   /**
+   * Similar to `shape`, but allows setting the shape as a Property.
+   */
+  shapeProperty?: TReadOnlyProperty<Shape | string | null>;
+
+  /**
    * Sets the bounds method for the Path. This determines how our (self) bounds are computed, and can particularly
    * determine how expensive to compute our bounds are if we have a stroke.
    *
@@ -77,6 +88,9 @@ export default class Path extends Paintable( Node ) {
   // (scenery-internal)
   public _shape: Shape | null;
 
+  // For shapeProperty
+  private readonly _shapeProperty: TinyForwardingProperty<Shape | string | null>;
+
   // This stores a stroked copy of the Shape which is lazily computed. This can be required for computing bounds
   // of a Shape with a stroke.
   private _strokedShape: Shape | null;
@@ -103,7 +117,7 @@ export default class Path extends Paintable( Node ) {
    * @param [providedOptions] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  public constructor( shape: Shape | string | null, providedOptions?: PathOptions ) {
+  public constructor( shape: Shape | string | null | TReadOnlyProperty<Shape | string | null>, providedOptions?: PathOptions ) {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
@@ -111,12 +125,23 @@ export default class Path extends Paintable( Node ) {
       assert && assert( !shape || !providedOptions?.shape, 'Do not define shape twice. Check constructor and providedOptions.' );
     }
 
-    const options = optionize<PathOptions, SelfOptions, ParentOptions>()( {
-      shape: shape,
+    const initPathOptions: WithRequired<PathOptions, 'boundsMethod'> = {
       boundsMethod: DEFAULT_OPTIONS.boundsMethod
-    }, providedOptions );
+    };
+    if ( isTReadOnlyProperty( shape ) ) {
+      initPathOptions.shapeProperty = shape;
+    }
+    else {
+      initPathOptions.shape = shape;
+    }
+
+    // Strict omit because one WILL be defined
+    const options = optionize<PathOptions, StrictOmit<SelfOptions, 'shape' | 'shapeProperty'>, ParentOptions>()( initPathOptions, providedOptions );
 
     super();
+
+    // We'll initialize this by mutating.
+    this._shapeProperty = new TinyForwardingProperty<Shape | string | null>( null, false, this.onShapePropertyChange.bind( this ) );
 
     this._shape = DEFAULT_OPTIONS.shape;
     this._strokedShape = null;
@@ -130,6 +155,30 @@ export default class Path extends Paintable( Node ) {
   }
 
   public setShape( shape: Shape | string | null ): this {
+    assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
+      'A path\'s shape should either be null, a string, or a Shape' );
+
+    this._shapeProperty.value = shape;
+
+    return this;
+  }
+
+  public set shape( value: Shape | string | null ) { this.setShape( value ); }
+
+  public get shape(): Shape | null { return this.getShape(); }
+
+  /**
+   * Returns the shape that was set for this Path (or for subtypes like Line and Rectangle, will return an immutable
+   * Shape that is equivalent in appearance).
+   *
+   * It is best to generally assume modifications to the Shape returned is not supported. If there is no shape
+   * currently, null will be returned.
+   */
+  public getShape(): Shape | null {
+    return this._shape;
+  }
+
+  private onShapePropertyChange( shape: Shape | string | null ): void {
     assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
       'A path\'s shape should either be null, a string, or a Shape' );
 
@@ -151,22 +200,25 @@ export default class Path extends Paintable( Node ) {
         this.attachShapeListener();
       }
     }
-    return this;
   }
 
-  public set shape( value: Shape | string | null ) { this.setShape( value ); }
+  /**
+   * See documentation for Node.setVisibleProperty, except this is for the shape
+   */
+  public setShapeProperty( newTarget: TReadOnlyProperty<Shape | string | null> | null ): this {
+    return this._shapeProperty.setTargetProperty( this, null, newTarget as TProperty<Shape | string | null> );
+  }
 
-  public get shape(): Shape | null { return this.getShape(); }
+  public set shapeProperty( property: TReadOnlyProperty<Shape | string | null> | null ) { this.setShapeProperty( property ); }
+
+  public get shapeProperty(): TProperty<Shape | string | null> { return this.getShapeProperty(); }
 
   /**
-   * Returns the shape that was set for this Path (or for subtypes like Line and Rectangle, will return an immutable
-   * Shape that is equivalent in appearance).
-   *
-   * It is best to generally assume modifications to the Shape returned is not supported. If there is no shape
-   * currently, null will be returned.
+   * Like Node.getVisibleProperty(), but for the shape. Note this is not the same as the Property provided in
+   * setImageProperty. Thus is the nature of TinyForwardingProperty.
    */
-  public getShape(): Shape | null {
-    return this._shape;
+  public getShapeProperty(): TProperty<Shape | string | null> {
+    return this._shapeProperty;
   }
 
   /**
@@ -512,6 +564,8 @@ export default class Path extends Paintable( Node ) {
     if ( this._invalidShapeListenerAttached ) {
       this.detachShapeListener();
     }
+
+    this._shapeProperty.dispose();
 
     super.dispose();
   }

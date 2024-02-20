@@ -15,6 +15,9 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, svgns, xlinkns } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
+import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
@@ -63,6 +66,7 @@ export type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mip
 
 export type ImageableOptions = {
   image?: ImageableImage;
+  imageProperty?: TReadOnlyProperty<ImageableImage>;
   imageOpacity?: number;
   initialWidth?: number;
   initialHeight?: number;
@@ -78,6 +82,9 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
 
     // (scenery-internal) Internal stateful value, see setImage()
     public _image: HTMLImageElement | HTMLCanvasElement | null;
+
+    // For imageProperty
+    private readonly _imageProperty: TinyForwardingProperty<ImageableImage>;
 
     // Internal stateful value, see setInitialWidth() for documentation.
     private _initialWidth: number;
@@ -132,6 +139,9 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
 
       super( ...args );
 
+      // We'll initialize this by mutating.
+      this._imageProperty = new TinyForwardingProperty( null as unknown as ImageableImage, false, this.onImagePropertyChange.bind( this ) );
+
       this._image = null;
       this._initialWidth = DEFAULT_OPTIONS.initialWidth;
       this._initialHeight = DEFAULT_OPTIONS.initialHeight;
@@ -149,7 +159,6 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
       this._hitTestImageData = null;
       this.mipmapEmitter = new TinyEmitter();
     }
-
 
     /**
      * Sets the current image to be displayed by this Image node.
@@ -209,6 +218,31 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
     public setImage( image: ImageableImage ): this {
       assert && assert( image, 'image should be available' );
 
+      this._imageProperty.value = image;
+
+      return this;
+    }
+
+    public set image( value: ImageableImage ) { this.setImage( value ); }
+
+    public get image(): HTMLImageElement | HTMLCanvasElement { return this.getImage(); }
+
+    /**
+     * Returns the current image's representation as either a Canvas or img element.
+     *
+     * NOTE: If a URL or mipmap data was provided, this currently doesn't return the original input to setImage(), but
+     *       instead provides the mapped result (or first mipmap level's image).
+     *       TODO: return the original result instead. https://github.com/phetsims/scenery/issues/1581
+     */
+    public getImage(): HTMLImageElement | HTMLCanvasElement {
+      assert && assert( this._image !== null );
+
+      return this._image!;
+    }
+
+    private onImagePropertyChange( image: ImageableImage ): void {
+      assert && assert( image, 'image should be available' );
+
       // Generally, if a different value for image is provided, it has changed
       let hasImageChanged = this._image !== image;
 
@@ -265,24 +299,26 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
         // Try recomputing bounds (may give a 0x0 if we aren't yet loaded)
         this.invalidateImage();
       }
-      return this;
     }
 
-    public set image( value: ImageableImage ) { this.setImage( value ); }
+    /**
+     * See documentation for Node.setVisibleProperty, except this is for the image
+     */
+    public setImageProperty( newTarget: TReadOnlyProperty<ImageableImage> | null ): null {
+      // This is awkward, we are NOT guaranteed a Node.
+      return this._imageProperty.setTargetProperty( null, null, newTarget as TProperty<ImageableImage> );
+    }
 
-    public get image(): HTMLImageElement | HTMLCanvasElement { return this.getImage(); }
+    public set imageProperty( property: TReadOnlyProperty<ImageableImage> | null ) { this.setImageProperty( property ); }
+
+    public get imageProperty(): TProperty<ImageableImage> { return this.getImageProperty(); }
 
     /**
-     * Returns the current image's representation as either a Canvas or img element.
-     *
-     * NOTE: If a URL or mipmap data was provided, this currently doesn't return the original input to setImage(), but
-     *       instead provides the mapped result (or first mipmap level's image).
-     *       TODO: return the original result instead. https://github.com/phetsims/scenery/issues/1581
+     * Like Node.getVisibleProperty(), but for the image. Note this is not the same as the Property provided in
+     * setImageProperty. Thus is the nature of TinyForwardingProperty.
      */
-    public getImage(): HTMLImageElement | HTMLCanvasElement {
-      assert && assert( this._image !== null );
-
-      return this._image!;
+    public getImageProperty(): TProperty<ImageableImage> {
+      return this._imageProperty;
     }
 
     /**
@@ -882,6 +918,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
       if ( this._image && this._imageLoadListenerAttached ) {
         this._detachImageLoadListener();
       }
+
+      this._imageProperty.dispose();
 
       // @ts-expect-error
       super.dispose && super.dispose();

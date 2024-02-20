@@ -16,11 +16,13 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, TImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 
 
 // Image-specific options that can be passed in the constructor or mutate() call.
 const IMAGE_OPTION_KEYS = [
   'image', // {string|HTMLImageElement|HTMLCanvasElement|Array} - Changes the image displayed, see setImage() for documentation
+  'imageProperty', // {TReadOnlyProperty.<string|HTMLImageElement|HTMLCanvasElement|Array>|null} - Changes the image displayed, see setImageProperty() for documentation
   'imageOpacity', // {number} - Controls opacity of this image (and not children), see setImageOpacity() for documentation
   'imageBounds', // {Bounds2|null} - Controls the amount of the image that is hit-tested or considered "inside" the image, see setImageBounds()
   'initialWidth', // {number} - Width of an image not-yet loaded (for layout), see setInitialWidth() for documentation
@@ -45,12 +47,18 @@ export default class Image extends Imageable( Node ) {
   // If non-null, determines what is considered "inside" the image for containment and hit-testing.
   private _imageBounds: Bounds2 | null;
 
-  public constructor( image: ImageableImage, providedOptions?: ImageOptions ) {
+  public constructor( image: ImageableImage | TReadOnlyProperty<ImageableImage>, providedOptions?: ImageOptions ) {
+
+    const initImageOptions: ImageOptions = {};
+    if ( isTReadOnlyProperty( image ) ) {
+      initImageOptions.imageProperty = image;
+    }
+    else {
+      initImageOptions.image = image;
+    }
 
     // rely on the setImage call from the super constructor to do the setup
-    const options = optionize<ImageOptions, EmptySelfOptions, ParentOptions>()( {
-      image: image
-    }, providedOptions );
+    const options = optionize<ImageOptions, EmptySelfOptions, ParentOptions>()( initImageOptions, providedOptions );
 
     super();
 

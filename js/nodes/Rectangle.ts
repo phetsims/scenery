@@ -14,6 +14,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, TRectangleDrawable, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 const RECTANGLE_OPTION_KEYS = [
   'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
@@ -39,7 +40,7 @@ type SelfOptions = {
   cornerYRadius?: number;
 };
 type ParentOptions = SizableOptions & PathOptions;
-export type RectangleOptions = SelfOptions & StrictOmit<ParentOptions, 'shape'>;
+export type RectangleOptions = SelfOptions & StrictOmit<ParentOptions, 'shape' | 'shapeProperty'>;
 
 const SuperType = Sizable( Path );
 
@@ -854,6 +855,14 @@ export default class Rectangle extends SuperType {
    */
   public override hasShape(): boolean {
     return true;
+  }
+
+  public override setShapeProperty( newTarget: TReadOnlyProperty<Shape | string | null> | null ): this {
+    if ( newTarget !== null ) {
+      throw new Error( 'Cannot set the shapeProperty of a Rectangle to something non-null, it handles this itself' );
+    }
+
+    return this;
   }
 
   /**
