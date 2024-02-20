@@ -150,7 +150,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
     public getFillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint {
       const fill = this.getFill();
 
-      return isTReadOnlyProperty<string | Color | null>( fill ) ? fill.get() : fill;
+      return isTReadOnlyProperty( fill ) ? fill.get() : fill;
     }
 
     public get fillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint { return this.getFillValue(); }
@@ -222,7 +222,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperTyp
     public getStrokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint {
       const stroke = this.getStroke();
 
-      return isTReadOnlyProperty<null | string | Color>( stroke ) ? stroke.get() : stroke;
+      return isTReadOnlyProperty( stroke ) ? stroke.get() : stroke;
     }
 
     public get strokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint { return this.getStrokeValue(); }
