@@ -12,6 +12,7 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
+import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import { FocusManager, PDOMInstance, PDOMSiblingStyle, PDOMUtils, scenery } from '../../imports.js';
@@ -107,6 +108,13 @@ class PDOMPeer {
     // the siblings need to be repositioned in the next Display.updateDisplay()
     this.positionDirty = false;
 
+    // @private {boolean} - Flag that indicates that PDOM elements require a forced reflow next animation frame.
+    // This is needed to fix a Safari VoiceOver bug where the accessible name is read incorrectly after elements
+    // are hidden/displayed. The usual workaround to force a reflow (set the style.display to none, query the offset,
+    // set it back) only fixes the problem if the style.display attribute is set in the next animation frame.
+    // See https://github.com/phetsims/scenery/issues/1606.
+    this.forceReflowWorkaround = false;
+
     // @private {boolean} - indicates that this peer's pdomInstance has a descendant that is dirty. Used to
     // quickly find peers with positionDirty when we traverse the tree of PDOMInstances
     this.childPositionDirty = false;
@@ -136,10 +144,10 @@ class PDOMPeer {
     // TODO: Should we be watching "model" changes from ParallelDOM.js instead of using MutationObserver? https://github.com/phetsims/scenery/issues/1581
     // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
     // memory intensive because we don't need an instance of MutationObserver on every PDOMInstance.
-    this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this ) );
+    this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this, false ) );
 
     // @private {function} - must be removed on disposal
-    this.transformListener = this.transformListener || this.invalidateCSSPositioning.bind( this );
+    this.transformListener = this.transformListener || this.invalidateCSSPositioning.bind( this, false );
     this.pdomInstance.transformTracker.addListener( this.transformListener );
 
     // @private {*} - To support setting the Display.interactive=false (which sets disabled on all primarySiblings,
@@ -793,8 +801,11 @@ class PDOMPeer {
         }
       }
 
-      // invalidate CSS transforms because when 'hidden' the content will have no dimensions in the viewport
-      this.invalidateCSSPositioning();
+      // Invalidate CSS transforms because when 'hidden' the content will have no dimensions in the viewport. For
+      // a Safari VoiceOver bug, also force a reflow in the next animation frame to ensure that the accessible name is
+      // correct.
+      // TODO: Remove this when the bug is fixed. See https://github.com/phetsims/scenery/issues/1606
+      this.invalidateCSSPositioning( platform.safari );
     }
   }
 
@@ -984,11 +995,22 @@ class PDOMPeer {
    * Mark that the siblings of this PDOMPeer need to be updated in the next Display update. Possibly from a
    * change of accessible content or node transformation. Does nothing if already marked dirty.
    *
+   * @param [forceReflowWorkaround] - In addition to repositioning, force a reflow next animation frame? See
+   *                                  this.forceReflowWorkaround for more information.
    * @private
    */
-  invalidateCSSPositioning() {
+  invalidateCSSPositioning( forceReflowWorkaround = false ) {
     if ( !this.positionDirty ) {
       this.positionDirty = true;
+
+      if ( forceReflowWorkaround ) {
+        this.forceReflowWorkaround = true;
+
+        // style.display = 'none' is a reflow, so we can use that to force a reflow in the next animation frame
+        for ( let i = 0; i < this.topLevelElements.length; i++ ) {
+          this.topLevelElements[ i ].style.display = 'none';
+        }
+      }
 
       // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
       // the PDOMInstance tree
@@ -1091,7 +1113,17 @@ class PDOMPeer {
       }
     }
 
+    if ( this.forceReflowWorkaround ) {
+
+      // Force a reflow (recalculation of DOM layout) to fix the accessible name.
+      this.topLevelElements.forEach( element => {
+        element.style.display = ''; // force reflow request added display: none
+        element.style.offsetHeight; // query the offsetHeight after restoring display to force reflow
+      } );
+    }
+
     this.positionDirty = false;
+    this.forceReflowWorkaround = false;
   }
 
   /**
