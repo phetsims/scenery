@@ -117,7 +117,7 @@ export type Mipmap = {
 export type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap;
 
 // The output image type from parsing the input "ImageableImage", see onImagePropertyChange()
-type ParsedImage = HTMLImageElement | HTMLCanvasElement | null;
+type ParsedImage = HTMLImageElement | HTMLCanvasElement;
 
 export type ImageableOptions = {
   image?: ImageableImage;
@@ -136,7 +136,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
   return class ImageableMixin extends type {
 
     // (scenery-internal) Internal stateful value, see onImagePropertyChange()
-    public _image: ParsedImage;
+    public _image: ParsedImage | null;
 
     // For imageProperty
     private readonly _imageProperty: TinyForwardingProperty<ImageableImage>;
