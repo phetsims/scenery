@@ -10,7 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, TPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable, TPathDrawable } from '../imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import WithRequired from '../../../phet-core/js/types/WithRequired.js';
@@ -31,32 +31,43 @@ const DEFAULT_OPTIONS = {
 
 export type PathBoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
 
+/**
+ * The valid parameter types are:
+ * - Shape: (from Kite), normally used.
+ * - string: Uses the SVG Path format, see https://www.w3.org/TR/SVG/paths.html (the PATH part of <path d="PATH"/>).
+ *           This will immediately be converted to a Shape object when set, and getShape() or equivalents will return
+ *           the parsed Shape instance instead of the original string. See "ParsedShape"
+ * - null: Indicates that there is no Shape, and nothing is drawn. Usually used as a placeholder.
+ *
+ * NOTE: Be aware of the potential for memory leaks. If a Shape is not marked as immutable (with makeImmutable()),
+ *       Path will add a listener so that it is updated when the Shape itself changes. If there is a listener
+ *       added, keeping a reference to the Shape will also keep a reference to the Path object (and thus whatever
+ *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
+ *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
+ */
+type InputShape = Shape | string | null;
+
+/**
+ * See InputShape for details, but this type differs in that it only supports a Shape, and any "string" data will
+ * be parsed into a Shape instance.
+ */
+type ParsedShape = Shape | null;
+
+// Provide these as an option.
 type SelfOptions = {
+
   /**
    * This sets the shape of the Path, which determines the shape of its appearance. It should generally not be called
-   * on Path subtypes like Line, Rectangle, etc.
+   * on Path subtypes like Line, Rectangle, etc. See InputShape for details about what to provide for the shape.
    *
-   * NOTE: When you create a Path with a shape in the constructor, this function will be called.
-   *
-   * The valid parameter types are:
-   * - Shape: (from Kite), normally used.
-   * - string: Uses the SVG Path format, see https://www.w3.org/TR/SVG/paths.html (the PATH part of <path d="PATH"/>).
-   *           This will immediately be converted to a Shape object, and getShape() or equivalents will return the new
-   *           Shape object instead of the original string.
-   * - null: Indicates that there is no Shape, and nothing is drawn. Usually used as a placeholder.
-   *
-   * NOTE: Be aware of the potential for memory leaks. If a Shape is not marked as immutable (with makeImmutable()),
-   *       Path will add a listener so that it is updated when the Shape itself changes. If there is a listener
-   *       added, keeping a reference to the Shape will also keep a reference to the Path object (and thus whatever
-   *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
-   *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
+   * NOTE: When you create a Path with a shape in the constructor, this setter will be called (don't overload the option).
    */
-  shape?: Shape | string | null;
+  shape?: InputShape;
 
   /**
    * Similar to `shape`, but allows setting the shape as a Property.
    */
-  shapeProperty?: TReadOnlyProperty<Shape | string | null>;
+  shapeProperty?: TReadOnlyProperty<InputShape>;
 
   /**
    * Sets the bounds method for the Path. This determines how our (self) bounds are computed, and can particularly
@@ -86,14 +97,14 @@ export default class Path extends Paintable( Node ) {
   //       so it is best to not have to compute it on changes.
   // NOTE: Please use hasShape() to determine if we are actually drawing things, as it is subtype-safe.
   // (scenery-internal)
-  public _shape: Shape | null;
+  public _shape: ParsedShape;
 
   // For shapeProperty
-  private readonly _shapeProperty: TinyForwardingProperty<Shape | string | null>;
+  private readonly _shapeProperty: TinyForwardingProperty<InputShape>;
 
   // This stores a stroked copy of the Shape which is lazily computed. This can be required for computing bounds
   // of a Shape with a stroke.
-  private _strokedShape: Shape | null;
+  private _strokedShape: ParsedShape;
 
   // (scenery-internal)
   public _boundsMethod: PathBoundsMethod;
@@ -113,11 +124,11 @@ export default class Path extends Paintable( Node ) {
    * - shape: The actual Shape (or a string representing an SVG path, or null).
    * - boundsMethod: Determines how the bounds of a shape are determined.
    *
-   * @param shape - The initial Shape to display. See setShape() for more details and documentation.
+   * @param shape - The initial Shape to display. See onShapePropertyChange() for more details and documentation.
    * @param [providedOptions] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  public constructor( shape: Shape | string | null | TReadOnlyProperty<Shape | string | null>, providedOptions?: PathOptions ) {
+  public constructor( shape: InputShape | TReadOnlyProperty<InputShape>, providedOptions?: PathOptions ) {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
@@ -141,7 +152,7 @@ export default class Path extends Paintable( Node ) {
     super();
 
     // We'll initialize this by mutating.
-    this._shapeProperty = new TinyForwardingProperty<Shape | string | null>( null, false, this.onShapePropertyChange.bind( this ) );
+    this._shapeProperty = new TinyForwardingProperty<InputShape>( null, false, this.onShapePropertyChange.bind( this ) );
 
     this._shape = DEFAULT_OPTIONS.shape;
     this._strokedShape = null;
@@ -154,7 +165,7 @@ export default class Path extends Paintable( Node ) {
     this.mutate( options );
   }
 
-  public setShape( shape: Shape | string | null ): this {
+  public setShape( shape: InputShape ): this {
     assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
       'A path\'s shape should either be null, a string, or a Shape' );
 
@@ -163,9 +174,9 @@ export default class Path extends Paintable( Node ) {
     return this;
   }
 
-  public set shape( value: Shape | string | null ) { this.setShape( value ); }
+  public set shape( value: InputShape ) { this.setShape( value ); }
 
-  public get shape(): Shape | null { return this.getShape(); }
+  public get shape(): ParsedShape { return this.getShape(); }
 
   /**
    * Returns the shape that was set for this Path (or for subtypes like Line and Rectangle, will return an immutable
@@ -174,11 +185,12 @@ export default class Path extends Paintable( Node ) {
    * It is best to generally assume modifications to the Shape returned is not supported. If there is no shape
    * currently, null will be returned.
    */
-  public getShape(): Shape | null {
+  public getShape(): ParsedShape {
+    assert && assert( this.shapeProperty.value === this._shape );
     return this._shape;
   }
 
-  private onShapePropertyChange( shape: Shape | string | null ): void {
+  private onShapePropertyChange( shape: InputShape ): void {
     assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
       'A path\'s shape should either be null, a string, or a Shape' );
 
@@ -189,7 +201,7 @@ export default class Path extends Paintable( Node ) {
       }
 
       if ( typeof shape === 'string' ) {
-        // be content with setShape always invalidating the shape?
+        // be content with onShapePropertyChange always invalidating the shape?
         shape = new Shape( shape );
       }
       this._shape = shape;
@@ -205,19 +217,19 @@ export default class Path extends Paintable( Node ) {
   /**
    * See documentation for Node.setVisibleProperty, except this is for the shape
    */
-  public setShapeProperty( newTarget: TReadOnlyProperty<Shape | string | null> | null ): this {
-    return this._shapeProperty.setTargetProperty( this, null, newTarget as TProperty<Shape | string | null> );
+  public setShapeProperty( newTarget: TReadOnlyProperty<InputShape> | null ): this {
+    return this._shapeProperty.setTargetProperty( this, null, newTarget as TProperty<InputShape> );
   }
 
-  public set shapeProperty( property: TReadOnlyProperty<Shape | string | null> | null ) { this.setShapeProperty( property ); }
+  public set shapeProperty( property: TReadOnlyProperty<InputShape> | null ) { this.setShapeProperty( property ); }
 
-  public get shapeProperty(): TProperty<Shape | string | null> { return this.getShapeProperty(); }
+  public get shapeProperty(): TProperty<InputShape> { return this.getShapeProperty(); }
 
   /**
    * Like Node.getVisibleProperty(), but for the shape. Note this is not the same as the Property provided in
-   * setImageProperty. Thus is the nature of TinyForwardingProperty.
+   * setShapeProperty. Thus is the nature of TinyForwardingProperty.
    */
-  public getShapeProperty(): TProperty<Shape | string | null> {
+  public getShapeProperty(): TProperty<InputShape> {
     return this._shapeProperty;
   }
 

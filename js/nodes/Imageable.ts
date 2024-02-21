@@ -62,7 +62,62 @@ export type Mipmap = {
   updateCanvas?: () => void;
 }[];
 
+/**
+ * The available ways to specify an image as an input to Imageable. See onImagePropertyChange() for parsing logic.
+ * We support a few different 'image' types that can be passed in:
+ *
+ * HTMLImageElement - A normal HTML <img>. If it hasn't been fully loaded yet, Scenery will take care of adding a
+ *   listener that will update Scenery with its width/height (and load its data) when the image is fully loaded.
+ *   NOTE that if you just created the <img>, it probably isn't loaded yet, particularly in Safari. If the Image
+ *   node is constructed with an <img> that hasn't fully loaded, it will have a width and height of 0, which may
+ *   cause issues if you are using bounds for layout. Please see initialWidth/initialHeight notes below.
+ *
+ * URL - Provide a {string}, and Scenery will assume it is a URL. This can be a normal URL, or a data URI, both will
+ *   work. Please note that this has the same loading-order issues as using HTMLImageElement, but that it's almost
+ *   always guaranteed to not have a width/height when you create the Image node. Note that data URI support for
+ *   formats depends on the browser - only JPEG and PNG are supported broadly. Please see initialWidth/initialHeight
+ *   notes below.
+ *   Additionally, note that if a URL is provided, accessing image.getImage() or image.image will result not in the
+ *   original URL (currently), but with the automatically created HTMLImageElement.
+ *
+ * HTMLCanvasElement - It's possible to pass an HTML5 Canvas directly into the Image node. It will immediately be
+ *   aware of the width/height (bounds) of the Canvas, but NOTE that the Image node will not listen to Canvas size
+ *   changes. It is assumed that after you pass in a Canvas to an Image node that it will not be modified further.
+ *   Additionally, the Image node will only be rendered using Canvas or WebGL if a Canvas is used as input.
+ *
+ * Mipmap data structure - Image supports a mipmap data structure that provides rasterized mipmap levels. The 'top'
+ *   level (level 0) is the entire full-size image, and every other level is twice as small in every direction
+ *   (~1/4 the pixels), rounding dimensions up. This is useful for browsers that display the image badly if the
+ *   image is too large. Instead, Scenery will dynamically pick the most appropriate size of the image to use,
+ *   which improves the image appearance.
+ *   The passed in 'image' should be an Array of mipmap objects of the format:
+ *   {
+ *     img: {HTMLImageElement}, // preferably preloaded, but it isn't required
+ *     url: {string}, // URL (usually a data URL) for the image level
+ *     width: {number}, // width of the mipmap level, in pixels
+ *     height: {number} // height of the mipmap level, in pixels,
+ *     canvas: {HTMLCanvasElement} // Canvas element containing the image data for the img.
+ *     [updateCanvas]: {function} // If available, should be called before using the Canvas directly.
+ *   }
+ *   At least one level is required (level 0), and each mipmap level corresponds to the index in the array, e.g.:
+ *   [
+ *     level 0 (full size, e.g. 100x64)
+ *     level 1 (half size, e.g. 50x32)
+ *     level 2 (quarter size, e.g. 25x16)
+ *     level 3 (eighth size, e.g. 13x8 - note the rounding up)
+ *     ...
+ *     level N (single pixel, e.g. 1x1 - this is the smallest level permitted, and there should only be one)
+ *   ]
+ *   Additionally, note that (currently) image.getImage() will return the HTMLImageElement from the first level,
+ *   not the mipmap data.
+ *
+ *  Also note that if the underlying image (like Canvas data) has changed, it is recommended to call
+ *  invalidateImage() instead of changing the image reference (calling setImage() multiple times)
+ */
 export type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap;
+
+// The output image type from parsing the input "ImageableImage", see onImagePropertyChange()
+type ParsedImage = HTMLImageElement | HTMLCanvasElement | null;
 
 export type ImageableOptions = {
   image?: ImageableImage;
@@ -80,8 +135,8 @@ export type ImageableOptions = {
 const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
   return class ImageableMixin extends type {
 
-    // (scenery-internal) Internal stateful value, see setImage()
-    public _image: HTMLImageElement | HTMLCanvasElement | null;
+    // (scenery-internal) Internal stateful value, see onImagePropertyChange()
+    public _image: ParsedImage;
 
     // For imageProperty
     private readonly _imageProperty: TinyForwardingProperty<ImageableImage>;
@@ -161,59 +216,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
     }
 
     /**
-     * Sets the current image to be displayed by this Image node.
+     * Sets the current image to be displayed by this Image node. See ImageableImage for details on provided image value.
      *
-     * We support a few different 'image' types that can be passed in:
-     *
-     * HTMLImageElement - A normal HTML <img>. If it hasn't been fully loaded yet, Scenery will take care of adding a
-     *   listener that will update Scenery with its width/height (and load its data) when the image is fully loaded.
-     *   NOTE that if you just created the <img>, it probably isn't loaded yet, particularly in Safari. If the Image
-     *   node is constructed with an <img> that hasn't fully loaded, it will have a width and height of 0, which may
-     *   cause issues if you are using bounds for layout. Please see initialWidth/initialHeight notes below.
-     *
-     * URL - Provide a {string}, and Scenery will assume it is a URL. This can be a normal URL, or a data URI, both will
-     *   work. Please note that this has the same loading-order issues as using HTMLImageElement, but that it's almost
-     *   always guaranteed to not have a width/height when you create the Image node. Note that data URI support for
-     *   formats depends on the browser - only JPEG and PNG are supported broadly. Please see initialWidth/initialHeight
-     *   notes below.
-     *   Additionally, note that if a URL is provided, accessing image.getImage() or image.image will result not in the
-     *   original URL (currently), but with the automatically created HTMLImageElement.
-     *   TODO: return the original input https://github.com/phetsims/scenery/issues/1581
-     *
-     * HTMLCanvasElement - It's possible to pass an HTML5 Canvas directly into the Image node. It will immediately be
-     *   aware of the width/height (bounds) of the Canvas, but NOTE that the Image node will not listen to Canvas size
-     *   changes. It is assumed that after you pass in a Canvas to an Image node that it will not be modified further.
-     *   Additionally, the Image node will only be rendered using Canvas or WebGL if a Canvas is used as input.
-     *
-     * Mipmap data structure - Image supports a mipmap data structure that provides rasterized mipmap levels. The 'top'
-     *   level (level 0) is the entire full-size image, and every other level is twice as small in every direction
-     *   (~1/4 the pixels), rounding dimensions up. This is useful for browsers that display the image badly if the
-     *   image is too large. Instead, Scenery will dynamically pick the most appropriate size of the image to use,
-     *   which improves the image appearance.
-     *   The passed in 'image' should be an Array of mipmap objects of the format:
-     *   {
-     *     img: {HTMLImageElement}, // preferably preloaded, but it isn't required
-     *     url: {string}, // URL (usually a data URL) for the image level
-     *     width: {number}, // width of the mipmap level, in pixels
-     *     height: {number} // height of the mipmap level, in pixels,
-     *     canvas: {HTMLCanvasElement} // Canvas element containing the image data for the img.
-     *     [updateCanvas]: {function} // If available, should be called before using the Canvas directly.
-     *   }
-     *   At least one level is required (level 0), and each mipmap level corresponds to the index in the array, e.g.:
-     *   [
-     *     level 0 (full size, e.g. 100x64)
-     *     level 1 (half size, e.g. 50x32)
-     *     level 2 (quarter size, e.g. 25x16)
-     *     level 3 (eighth size, e.g. 13x8 - note the rounding up)
-     *     ...
-     *     level N (single pixel, e.g. 1x1 - this is the smallest level permitted, and there should only be one)
-     *   ]
-     *   Additionally, note that (currently) image.getImage() will return the HTMLImageElement from the first level,
-     *   not the mipmap data.
-     *   TODO: return the original input
-     *
-     *  Also note that if the underlying image (like Canvas data) has changed, it is recommended to call
-     *  invalidateImage() instead of changing the image reference (calling setImage() multiple times)
      */
     public setImage( image: ImageableImage ): this {
       assert && assert( image, 'image should be available' );
@@ -225,16 +229,16 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
 
     public set image( value: ImageableImage ) { this.setImage( value ); }
 
-    public get image(): HTMLImageElement | HTMLCanvasElement { return this.getImage(); }
+    public get image(): ParsedImage { return this.getImage(); }
 
     /**
      * Returns the current image's representation as either a Canvas or img element.
      *
      * NOTE: If a URL or mipmap data was provided, this currently doesn't return the original input to setImage(), but
-     *       instead provides the mapped result (or first mipmap level's image).
-     *       TODO: return the original result instead. https://github.com/phetsims/scenery/issues/1581
+     *       instead provides the mapped result (or first mipmap level's image). If you need the original, use
+     *       imageProperty instead.
      */
-    public getImage(): HTMLImageElement | HTMLCanvasElement {
+    public getImage(): ParsedImage {
       assert && assert( this._image !== null );
 
       return this._image!;
@@ -345,11 +349,11 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      *       function. This may trigger bounds changes, even if the previous and next image (and image dimensions)
      *       are the same.
      *
-     * @param image - See setImage()'s documentation
+     * @param image - See ImageableImage's type documentation
      * @param width - Initial width of the image. See setInitialWidth() for more documentation
      * @param height - Initial height of the image. See setInitialHeight() for more documentation
      */
-    public setImageWithSize( image: string | HTMLImageElement | HTMLCanvasElement | Mipmap, width: number, height: number ): this {
+    public setImageWithSize( image: ImageableImage, width: number, height: number ): this {
       // First, setImage(), as it will reset the initial width and height
       this.setImage( image );
 
@@ -934,7 +938,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
  * @param width - logical width of the image
  * @param height - logical height of the image
  */
-Imageable.getHitTestData = ( image: HTMLImageElement | HTMLCanvasElement, width: number, height: number ): ImageData | null => {
+Imageable.getHitTestData = ( image: Exclude<ParsedImage, null>, width: number, height: number ): ImageData | null => {
   // If the image isn't loaded yet, we don't want to try loading anything
   if ( !( ( 'naturalWidth' in image ? image.naturalWidth : 0 ) || image.width ) || !( ( 'naturalHeight' in image ? image.naturalHeight : 0 ) || image.height ) ) {
     return null;
