@@ -938,7 +938,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
  * @param width - logical width of the image
  * @param height - logical height of the image
  */
-Imageable.getHitTestData = ( image: Exclude<ParsedImage, null>, width: number, height: number ): ImageData | null => {
+Imageable.getHitTestData = ( image: ParsedImage, width: number, height: number ): ImageData | null => {
   // If the image isn't loaded yet, we don't want to try loading anything
   if ( !( ( 'naturalWidth' in image ? image.naturalWidth : 0 ) || image.width ) || !( ( 'naturalHeight' in image ? image.naturalHeight : 0 ) || image.height ) ) {
     return null;
