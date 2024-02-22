@@ -112,7 +112,7 @@ class PDOMPeer {
     // This is needed to fix a Safari VoiceOver bug where the accessible name is read incorrectly after elements
     // are hidden/displayed. The usual workaround to force a reflow (set the style.display to none, query the offset,
     // set it back) only fixes the problem if the style.display attribute is set in the next animation frame.
-    // See https://github.com/phetsims/scenery/issues/1606.
+    // See https://github.com/phetsims/a11y-research/issues/193.
     this.forceReflowWorkaround = false;
 
     // @private {boolean} - indicates that this peer's pdomInstance has a descendant that is dirty. Used to
@@ -804,7 +804,7 @@ class PDOMPeer {
       // Invalidate CSS transforms because when 'hidden' the content will have no dimensions in the viewport. For
       // a Safari VoiceOver bug, also force a reflow in the next animation frame to ensure that the accessible name is
       // correct.
-      // TODO: Remove this when the bug is fixed. See https://github.com/phetsims/scenery/issues/1606
+      // TODO: Remove this when the bug is fixed. See https://github.com/phetsims/a11y-research/issues/193
       this.invalidateCSSPositioning( platform.safari );
     }
   }
