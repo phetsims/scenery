@@ -3862,7 +3862,7 @@ class Node extends ParallelDOM {
    * to instrumentation call to this Node (where Tandem is provided).
    */
   public setVisibleProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
-    return this._visibleProperty.setTargetProperty( newTarget as TProperty<boolean>, this, VISIBLE_PROPERTY_TANDEM_NAME );
+    return this._visibleProperty.setTargetProperty( newTarget, this, VISIBLE_PROPERTY_TANDEM_NAME );
   }
 
   /**
@@ -4252,7 +4252,7 @@ class Node extends ParallelDOM {
    * to instrumentation call to this Node (where Tandem is provided).
    */
   public setEnabledProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
-    return this._enabledProperty.setTargetProperty( newTarget as TProperty<boolean>, this, ENABLED_PROPERTY_TANDEM_NAME );
+    return this._enabledProperty.setTargetProperty( newTarget, this, ENABLED_PROPERTY_TANDEM_NAME );
   }
 
   /**
@@ -4366,7 +4366,7 @@ class Node extends ParallelDOM {
    * to instrumentation call to this Node (where Tandem is provided).
    */
   public setInputEnabledProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
-    return this._inputEnabledProperty.setTargetProperty( newTarget as TProperty<boolean>, this, INPUT_ENABLED_PROPERTY_TANDEM_NAME );
+    return this._inputEnabledProperty.setTargetProperty( newTarget, this, INPUT_ENABLED_PROPERTY_TANDEM_NAME );
   }
 
   /**

@@ -138,7 +138,6 @@ import Tandem from '../../../../tandem/js/Tandem.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
-import TProperty from '../../../../axon/js/TProperty.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 
@@ -3129,7 +3128,7 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Handles linking and checking child PhET-iO Properties such as Node.visibleProperty and Node.enabledProperty.
    */
-  public updateLinkedElementForProperty<T>( tandemName: string, oldProperty?: TProperty<T> | null, newProperty?: TProperty<T> | null ): void {
+  public updateLinkedElementForProperty<T>( tandemName: string, oldProperty?: TReadOnlyProperty<T> | null, newProperty?: TReadOnlyProperty<T> | null ): void {
     assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
 
     // Only update linked elements if this Node is instrumented for PhET-iO
