@@ -395,7 +395,7 @@ export default class RichText extends WidthSizable( Node ) {
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
   public setStringProperty( newTarget: TProperty<string> | null ): this {
-    return this._stringProperty.setTargetProperty( this, RichText.STRING_PROPERTY_TANDEM_NAME, newTarget );
+    return this._stringProperty.setTargetProperty( newTarget, this, RichText.STRING_PROPERTY_TANDEM_NAME );
   }
 
   public set stringProperty( property: TProperty<string> | null ) { this.setStringProperty( property ); }

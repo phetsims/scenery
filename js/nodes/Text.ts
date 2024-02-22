@@ -201,7 +201,7 @@ export default class Text extends Paintable( Node ) {
    * See documentation for Node.setVisibleProperty, except this is for the text string.
    */
   public setStringProperty( newTarget: TReadOnlyProperty<string> | null ): this {
-    return this._stringProperty.setTargetProperty( this, Text.STRING_PROPERTY_TANDEM_NAME, newTarget as TProperty<string> );
+    return this._stringProperty.setTargetProperty( newTarget as TProperty<string>, this, Text.STRING_PROPERTY_TANDEM_NAME );
   }
 
   public set stringProperty( property: TReadOnlyProperty<string> | null ) { this.setStringProperty( property ); }

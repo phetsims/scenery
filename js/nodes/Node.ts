@@ -3862,7 +3862,7 @@ class Node extends ParallelDOM {
    * to instrumentation call to this Node (where Tandem is provided).
    */
   public setVisibleProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
-    return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget as TProperty<boolean> );
+    return this._visibleProperty.setTargetProperty( newTarget as TProperty<boolean>, this, VISIBLE_PROPERTY_TANDEM_NAME );
   }
 
   /**
@@ -4140,7 +4140,7 @@ class Node extends ParallelDOM {
    * PhET-iO Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
    */
   public setPickableProperty( newTarget: TReadOnlyProperty<boolean | null> | null ): this {
-    return this._pickableProperty.setTargetProperty( this, null, newTarget as TProperty<boolean | null> );
+    return this._pickableProperty.setTargetProperty( newTarget as TProperty<boolean | null>, this, null );
   }
 
   /**
@@ -4252,7 +4252,7 @@ class Node extends ParallelDOM {
    * to instrumentation call to this Node (where Tandem is provided).
    */
   public setEnabledProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
-    return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget as TProperty<boolean> );
+    return this._enabledProperty.setTargetProperty( newTarget as TProperty<boolean>, this, ENABLED_PROPERTY_TANDEM_NAME );
   }
 
   /**
@@ -4366,7 +4366,7 @@ class Node extends ParallelDOM {
    * to instrumentation call to this Node (where Tandem is provided).
    */
   public setInputEnabledProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
-    return this._inputEnabledProperty.setTargetProperty( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, newTarget as TProperty<boolean> );
+    return this._inputEnabledProperty.setTargetProperty( newTarget as TProperty<boolean>, this, INPUT_ENABLED_PROPERTY_TANDEM_NAME );
   }
 
   /**

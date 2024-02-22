@@ -217,7 +217,7 @@ export default class Path extends Paintable( Node ) {
    * See documentation for Node.setVisibleProperty, except this is for the shape
    */
   public setShapeProperty( newTarget: TReadOnlyProperty<InputShape> | null ): this {
-    return this._shapeProperty.setTargetProperty( this, null, newTarget as TProperty<InputShape> );
+    return this._shapeProperty.setTargetProperty( newTarget as TProperty<InputShape>, this, null );
   }
 
   public set shapeProperty( property: TReadOnlyProperty<InputShape> | null ) { this.setShapeProperty( property ); }

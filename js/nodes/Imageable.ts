@@ -310,7 +310,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
      */
     public setImageProperty( newTarget: TReadOnlyProperty<ImageableImage> | null ): null {
       // This is awkward, we are NOT guaranteed a Node.
-      return this._imageProperty.setTargetProperty( null, null, newTarget as TProperty<ImageableImage> );
+      return this._imageProperty.setTargetProperty( newTarget as TProperty<ImageableImage>, null, null );
     }
 
     public set imageProperty( property: TReadOnlyProperty<ImageableImage> | null ) { this.setImageProperty( property ); }
