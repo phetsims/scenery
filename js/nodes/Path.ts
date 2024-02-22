@@ -186,7 +186,6 @@ export default class Path extends Paintable( Node ) {
    * currently, null will be returned.
    */
   public getShape(): ParsedShape {
-    assert && assert( this.shapeProperty.value === this._shape );
     return this._shape;
   }
 
