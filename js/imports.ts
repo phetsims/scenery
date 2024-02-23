@@ -69,6 +69,8 @@ export { default as PaintDef } from './util/PaintDef.js';
 export type { default as TColor } from './util/TColor.js';
 export type { default as TPaint } from './util/TPaint.js';
 
+export { default as createGatedVisibleProperty } from './util/createGatedVisibleProperty.js';
+
 // Filters
 export { default as ColorMatrixFilter } from './filters/ColorMatrixFilter.js';
 export { default as Brightness } from './filters/Brightness.js';

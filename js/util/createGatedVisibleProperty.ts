@@ -19,7 +19,7 @@ import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import { scenery } from '../imports.js';
 
-export const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, selfVisiblePropertyOptions?: PhetioObjectOptions ): TReadOnlyProperty<boolean> => {
+const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, selfVisiblePropertyOptions?: PhetioObjectOptions ): TReadOnlyProperty<boolean> => {
   return DerivedProperty.and( [ visibleProperty, new BooleanProperty( true, combineOptions<PhetioObjectOptions>( {
     tandem: tandem.createTandem( 'selfVisibleProperty' ),
     phetioFeatured: true
@@ -28,5 +28,7 @@ export const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<b
     phetioValueType: BooleanIO
   } );
 };
+
+export default createGatedVisibleProperty;
 
 scenery.register( 'createGatedVisibleProperty', createGatedVisibleProperty );
