@@ -10,14 +10,14 @@
  *
  */
 
-import Tandem from '../../../../tandem/js/Tandem.js';
-import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
-import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
-import BooleanIO from '../../../../tandem/js/types/BooleanIO.js';
-import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
-import { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
-import { combineOptions } from '../../../../phet-core/js/optionize.js';
-import { scenery } from '../../imports.js';
+import Tandem from '../../../tandem/js/Tandem.js';
+import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import { combineOptions } from '../../../phet-core/js/optionize.js';
+import { scenery } from '../imports.js';
 
 export const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, selfVisiblePropertyOptions?: PhetioObjectOptions ): TReadOnlyProperty<boolean> => {
   return DerivedProperty.and( [ visibleProperty, new BooleanProperty( true, combineOptions<PhetioObjectOptions>( {
