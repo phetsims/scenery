@@ -198,7 +198,6 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
   // Tracks the state of the keyboard. JavaScript doesn't handle multiple key presses, so we track which keys are
   // currently down and update based on state of this collection of objects.
-  // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
   private keyState: PressedKeyTiming[];
 
   // A list of hotkeys, each of which has some behavior when each individual key of the hotkey is pressed in order.
