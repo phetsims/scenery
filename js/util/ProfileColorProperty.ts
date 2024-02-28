@@ -28,12 +28,6 @@ export default class ProfileColorProperty extends ColorProperty {
   // Treat as private
   public readonly name: string;
 
-  // Typically use this suffix, but see TANDEM_NAME_SUFFIXES for other possibilities.
-  public static override readonly TANDEM_NAME_SUFFIX = 'ColorProperty';
-
-  // See https://github.com/phetsims/scenery/issues/1512
-  public static readonly TANDEM_NAME_SUFFIXES = [ ProfileColorProperty.TANDEM_NAME_SUFFIX, 'FillProperty', 'StrokeProperty' ];
-
   /**
    * @param namespace - namespace that this color belongs to
    * @param colorName - name of the color, unique within namespace
@@ -46,10 +40,11 @@ export default class ProfileColorProperty extends ColorProperty {
 
       // So that notifications won't occur when we change from different objects representing the same color.
       // We should never be mutating the Color objects used for ProfileColorProperty.
-      valueComparisonStrategy: 'equalsFunction'
-    }, providedOptions );
+      valueComparisonStrategy: 'equalsFunction',
 
-    const tandem = options.tandem;
+      // See https://github.com/phetsims/scenery/issues/1512
+      tandemNameSuffix: [ 'ColorProperty', 'FillProperty', 'StrokeProperty' ]
+    }, providedOptions );
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
@@ -63,12 +58,6 @@ export default class ProfileColorProperty extends ColorProperty {
 
     // Fallback to default if a color was not supplied.
     super( Color.toColor( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ] ), options );
-
-    // See https://github.com/phetsims/scenery/issues/1512
-    assert && assert( !this.isPhetioInstrumented() ||
-                      _.find( ProfileColorProperty.TANDEM_NAME_SUFFIXES, suffix => tandem.name.endsWith( suffix ) ) ||
-                      tandem.name === 'colorProperty' || tandem.name === 'fillProperty' || tandem.name === 'strokeProperty',
-      `invalid tandem.name: ${tandem?.phetioID}` );
 
     this.colorProfileMap = colorProfileMap;
 
