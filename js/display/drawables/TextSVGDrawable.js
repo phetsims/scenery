@@ -22,6 +22,15 @@ const keepSVGTextElements = true; // whether we should pool SVG elements for the
 // See https://github.com/phetsims/scenery/issues/455 for more information.
 const useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
 
+// Safari seems to have many issues with text and repaint regions, resulting in artifacts showing up when not correctly
+// repainted (https://github.com/phetsims/qa/issues/1039#issuecomment-1949196606), and
+// cutting off some portions of the text (https://github.com/phetsims/scenery/issues/1610).
+// We have persistently created "transparent" rectangles to force repaints (requiring the client to do so), but this
+// seems to not work in many cases, and seems to be a usability issue to have to add workarounds.
+// If we place it in the same SVG group as the text, we'll get the same transform, but it seems to provide a consistent
+// workaround.
+const useTransparentSVGTextWorkaround = platform.safari;
+
 /**
  * A generated SVGSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
  * for each displayed instance of a Text node.
@@ -38,10 +47,28 @@ function TextSVGDrawable( renderer, instance ) {
   this.hasLength = false;
 
   if ( !this.svgElement ) {
-    // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
     const text = document.createElementNS( svgns, 'text' );
-    this.svgElement = text;
     text.appendChild( document.createTextNode( '' ) );
+
+    // @private {SVGTextElement}
+    this.text = text;
+
+    // If we're applying the workaround, we'll nest everything under a group element
+    if ( useTransparentSVGTextWorkaround ) {
+      const group = document.createElementNS( svgns, 'g' );
+      group.appendChild( text );
+
+      this.svgElement = group;
+
+      // "transparent" fill seems to trick Safari into repainting the region correctly.
+      this.workaroundRect = document.createElementNS( svgns, 'rect' );
+      this.workaroundRect.setAttribute( 'fill', 'transparent' );
+      group.appendChild( this.workaroundRect );
+    }
+    else {
+      // @protected {SVGTextElement|SVGGroup} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+      this.svgElement = text;
+    }
 
     // TODO: flag adjustment for SVG qualities
     text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
@@ -61,7 +88,7 @@ inherit( SVGSelfDrawable, TextSVGDrawable, {
    * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
    */
   updateSVGSelf: function() {
-    const text = this.svgElement;
+    const text = this.text;
 
     // set all of the font attributes, since we can't use the combined one
     if ( this.dirtyFont ) {
@@ -92,6 +119,19 @@ inherit( SVGSelfDrawable, TextSVGDrawable, {
         this.hasLength = false;
         text.removeAttribute( 'lengthAdjust' );
         text.removeAttribute( 'textLength' );
+      }
+
+      if ( useTransparentSVGTextWorkaround ) {
+        // Since text can get bigger/smaller, lets make the region larger than the "reported" bounds - this is needed
+        // for the usually-problematic locales that have glyphs that extend well past the normal browser-reported
+        // bounds. Since this is transparent, we can make it larger than the actual bounds.
+        const paddingRatio = 0.2;
+        const horizontalPadding = this.node.selfBounds.width * paddingRatio;
+        const verticalPadding = this.node.selfBounds.height * paddingRatio;
+        this.workaroundRect.setAttribute( 'x', this.node.selfBounds.minX - horizontalPadding );
+        this.workaroundRect.setAttribute( 'y', this.node.selfBounds.minY - verticalPadding );
+        this.workaroundRect.setAttribute( 'width', this.node.selfBounds.width + 2 * horizontalPadding );
+        this.workaroundRect.setAttribute( 'height', this.node.selfBounds.height + 2 * verticalPadding );
       }
     }
 
