@@ -734,6 +734,15 @@ define( function( require ) {
    * SVG rendering
    *----------------------------------------------------------------------------*/
 
+  // Safari seems to have many issues with text and repaint regions, resulting in artifacts showing up when not correctly
+  // repainted (https://github.com/phetsims/qa/issues/1039#issuecomment-1949196606), and
+  // cutting off some portions of the text (https://github.com/phetsims/scenery/issues/1610).
+  // We have persistently created "transparent" rectangles to force repaints (requiring the client to do so), but this
+  // seems to not work in many cases, and seems to be a usability issue to have to add workarounds.
+  // If we place it in the same SVG group as the text, we'll get the same transform, but it seems to provide a consistent
+  // workaround.
+  var useTransparentSVGTextWorkaround = platform.safari;
+
   Text.TextSVGDrawable = function TextSVGDrawable( renderer, instance ) {
     this.initialize( renderer, instance );
   };
@@ -742,9 +751,24 @@ define( function( require ) {
       this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
 
       if ( !this.svgElement ) {
-        // NOTE! reference SVG element at top of file copies createSVGElement!
-        var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
+        var text = document.createElementNS( scenery.svgns, 'text' );
         text.appendChild( document.createTextNode( '' ) );
+        this.text = text;
+
+        if ( useTransparentSVGTextWorkaround ) {
+          var group = document.createElementNS( scenery.svgns, 'g' );
+          group.appendChild( text );
+
+          this.svgElement = group;
+
+          // "transparent" fill seems to trick Safari into repainting the region correctly.
+          this.workaroundRect = document.createElementNS( scenery.svgns, 'rect' );
+          this.workaroundRect.setAttribute( 'fill', 'transparent' );
+          group.appendChild( this.workaroundRect );
+        }
+        else {
+          this.svgElement = text;
+        }
 
         // TODO: flag adjustment for SVG qualities
         text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
@@ -759,7 +783,7 @@ define( function( require ) {
     },
 
     updateSVGSelf: function() {
-      var text = this.svgElement;
+      var text = this.text;
 
       if ( this.dirtyDirection ) {
         text.setAttribute( 'direction', this.node._direction );
@@ -782,6 +806,19 @@ define( function( require ) {
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
       if ( this.dirtyBounds && useSVGTextLengthAdjustments && isFinite( this.node.selfBounds.width ) ) {
         text.setAttribute( 'textLength', this.node.selfBounds.width );
+
+        if ( useTransparentSVGTextWorkaround ) {
+          // Since text can get bigger/smaller, lets make the region larger than the "reported" bounds - this is needed
+          // for the usually-problematic locales that have glyphs that extend well past the normal browser-reported
+          // bounds. Since this is transparent, we can make it larger than the actual bounds.
+          var paddingRatio = 0.2;
+          var horizontalPadding = this.node.selfBounds.width * paddingRatio;
+          var verticalPadding = this.node.selfBounds.height * paddingRatio;
+          this.workaroundRect.setAttribute( 'x', this.node.selfBounds.minX - horizontalPadding );
+          this.workaroundRect.setAttribute( 'y', this.node.selfBounds.minY - verticalPadding );
+          this.workaroundRect.setAttribute( 'width', this.node.selfBounds.width + 2 * horizontalPadding );
+          this.workaroundRect.setAttribute( 'height', this.node.selfBounds.height + 2 * verticalPadding );
+        }
       }
 
       this.updateFillStrokeStyle( text );
