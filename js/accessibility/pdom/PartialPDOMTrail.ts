@@ -6,25 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../../imports.js';
+import { PDOMInstance, scenery, Trail } from '../../imports.js';
 
-class PartialPDOMTrail {
-  /**
-   * @param {PDOMInstance} pdomInstance
-   * @param {Trail} trail
-   * @param {boolean} isRoot
-   */
-  constructor( pdomInstance, trail, isRoot ) {
+export default class PartialPDOMTrail {
 
-    // @public
-    this.pdomInstance = pdomInstance;
-    this.trail = trail;
+  // a full Trail (rooted at our display) to our trail's final node.
+  public readonly fullTrail: Trail;
 
-    // TODO: remove this, since it can be computed from the pdomInstance https://github.com/phetsims/scenery/issues/1581
+  public constructor(
+    public readonly pdomInstance: PDOMInstance,
+    public readonly trail: Trail,
+    public readonly isRoot: boolean // TODO: remove this, since it can be computed from the pdomInstance https://github.com/phetsims/scenery/issues/1581
+  ) {
+
     this.isRoot = isRoot;
+    this.fullTrail = this.pdomInstance.trail!.copy();
 
-    // @public {Trail} - a full Trail (rooted at our display) to our trail's final node.
-    this.fullTrail = this.pdomInstance.trail.copy();
     // NOTE: Only if the parent instance is the root instance do we want to include our partial trail's root.
     // For other instances, this node in the trail will already be included
     // TODO: add Trail.concat() https://github.com/phetsims/scenery/issues/1581
@@ -35,4 +32,3 @@ class PartialPDOMTrail {
 }
 
 scenery.register( 'PartialPDOMTrail', PartialPDOMTrail );
-export default PartialPDOMTrail;
