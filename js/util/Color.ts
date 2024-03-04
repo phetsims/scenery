@@ -1054,11 +1054,11 @@ export type ColorState = {
   a: number;
 };
 
-Color.ColorIO = new IOType( 'ColorIO', {
+Color.ColorIO = new IOType<Color, ColorState>( 'ColorIO', {
   valueType: Color,
   documentation: 'A color, with rgba',
-  toStateObject: ( color: Color ) => color.toStateObject(),
-  fromStateObject: ( stateObject: { r: number; g: number; b: number; a: number } ) => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a ),
+  toStateObject: color => color.toStateObject(),
+  fromStateObject: stateObject => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a ),
   stateSchema: {
     r: NumberIO,
     g: NumberIO,
