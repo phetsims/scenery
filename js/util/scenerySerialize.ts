@@ -14,7 +14,8 @@ import { Shape } from '../../../kite/js/imports.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { ReadOnlyProperty, TinyProperty } from '../../../axon/js/imports.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 
 const scenerySerialize = ( value: unknown ): IntentionalAny => {
   if ( value instanceof Vector2 ) {

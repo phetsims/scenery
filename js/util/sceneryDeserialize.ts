@@ -14,7 +14,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { Circle, Color, DOM, Gradient, Image, Line, LinearGradient, Mipmap, Node, Paint, Path, Pattern, RadialGradient, Rectangle, scenery, Text } from '../imports.js';
-import { TinyProperty } from '../../../axon/js/imports.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 
 const sceneryDeserialize = ( value: { type: string; [ key: string ]: IntentionalAny } ): IntentionalAny => {
   const nodeTypes = [

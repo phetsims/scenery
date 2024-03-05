@@ -16,7 +16,7 @@ import { CanvasContextWrapper, Color, Gradient, LinearGradient, Node, Paint, Pai
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 
 const isSafari5 = platform.safari5;
 

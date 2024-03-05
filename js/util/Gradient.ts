@@ -8,7 +8,7 @@
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import { Color, Paint, scenery, TColor } from '../imports.js';
-import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 
 export type GradientStop = {
   ratio: number;

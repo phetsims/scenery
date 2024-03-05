@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import { scenery } from '../imports.js';
 
 class CanvasContextWrapper {

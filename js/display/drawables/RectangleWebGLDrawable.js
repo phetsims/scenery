@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { isTReadOnlyProperty } from '../../../../axon/js/imports.js';
+import { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { Color, RectangleStatefulDrawable, Renderer, scenery, WebGLSelfDrawable } from '../../imports.js';

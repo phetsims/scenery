@@ -14,7 +14,7 @@ import OrIO from '../../../tandem/js/types/OrIO.js';
 import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import { Color, scenery, TColor } from '../imports.js';
-import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 
 const ColorDef = {
   /**

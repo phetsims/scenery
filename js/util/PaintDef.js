@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import { Color, Gradient, Paint, scenery } from '../imports.js';
 
 const PaintDef = {

@@ -9,7 +9,7 @@
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 import { ActiveSVGGradient, Color, scenery, svgns, TColor } from '../imports.js';
-import { isTReadOnlyProperty } from '../../../axon/js/imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 
 const scratchColor = new Color( 'transparent' );
 
