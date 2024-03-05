@@ -13,6 +13,7 @@ import Poolable from '../../../phet-core/js/Poolable.js';
 import { scenery, svgns } from '../imports.js';
 
 let globalId = 1;
+let clipGlobalId = 1;
 
 class SVGGroup {
   /**
@@ -362,7 +363,10 @@ class SVGGroup {
       //OHTWO TODO: remove clip workaround (use this.willApplyFilters) https://github.com/phetsims/scenery/issues/1581
       if ( this.node.clipArea ) {
         if ( !this.clipDefinition ) {
-          const clipId = `clip${this.node.getId()}`;
+          // Use monotonically-increasing and unique clip IDs, see https://github.com/phetsims/faradays-electromagnetic-lab/issues/89
+          // There is no connection necessarily to the node, especially, since we can have different SVG representations
+          // of a node, AND we pool the SVGGroups.
+          const clipId = `clip${clipGlobalId++}`;
 
           this.clipDefinition = document.createElementNS( svgns, 'clipPath' );
           this.clipDefinition.setAttribute( 'id', clipId );
