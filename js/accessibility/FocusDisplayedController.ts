@@ -11,15 +11,7 @@
  */
 
 import TProperty from '../../../axon/js/TProperty.js';
-import optionize from '../../../phet-core/js/optionize.js';
 import { Focus, Instance, Node, scenery, TrailVisibilityTracker } from '../imports.js';
-
-type FocusDisplayedControllerOptions = {
-
-  // Extra work to do after the focusProperty is set to null because the focused Node is no longer displayed (it has
-  // become invisible or has been removed from the scene graph).
-  onRemoveFocus?: () => void;
-};
 
 class FocusDisplayedController {
 
@@ -31,7 +23,6 @@ class FocusDisplayedController {
 
   // When there is value, we will watch and update when there are changes to the displayed state of the Focus trail.
   private focusProperty: TProperty<Focus | null> | null;
-  private readonly onRemoveFocus: () => void;
 
   // Bound functions that are called when the displayed state of the Node changes.
   private readonly boundVisibilityListener: () => void;
@@ -40,15 +31,8 @@ class FocusDisplayedController {
   // Handles changes to focus, adding or removing listeners
   private readonly boundFocusListener: ( focus: Focus | null ) => void;
 
-  public constructor( focusProperty: TProperty<Focus | null>, providedOptions?: FocusDisplayedControllerOptions ) {
-
-    const options = optionize<FocusDisplayedControllerOptions>()( {
-      onRemoveFocus: _.noop
-    }, providedOptions );
-    assert && assert( typeof options.onRemoveFocus === 'function', 'invalid type for onRemoveFocus' );
-
+  public constructor( focusProperty: TProperty<Focus | null> ) {
     this.focusProperty = focusProperty;
-    this.onRemoveFocus = options.onRemoveFocus;
 
     this.boundVisibilityListener = this.handleTrailVisibilityChange.bind( this );
     this.boundInstancesChangedListener = this.handleInstancesChange.bind( this );
@@ -75,7 +59,6 @@ class FocusDisplayedController {
   private handleTrailVisibilityChange(): void {
     if ( this.visibilityTracker && !this.visibilityTracker.trailVisibleProperty.value ) {
       this.focusProperty!.value = null;
-      this.onRemoveFocus();
     }
   }
 
@@ -86,7 +69,6 @@ class FocusDisplayedController {
   private handleInstancesChange( instance: Instance ): void {
     if ( instance.node && instance.node.instances.length === 0 ) {
       this.focusProperty!.value = null;
-      this.onRemoveFocus();
     }
   }
 

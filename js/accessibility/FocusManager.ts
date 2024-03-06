@@ -148,18 +148,7 @@ export default class FocusManager {
     // The following section manages control of pointerFocusProperty - pointerFocusProperty is set with a Focus
     // by InteractiveHighlighting from listeners on Nodes that use that Trait. But it uses a FocusDisplayedController
     // to remove the focus at the right time.
-
-    this.pointerFocusDisplayedController = new FocusDisplayedController( this.pointerFocusProperty, {
-
-      // whenever focus is removed because the last Node of the Focus Trail is no
-      // longer displayed, the highlight for Pointer Focus should no longer be locked
-      // TODO: https://github.com/phetsims/scenery/issues/1495, It is possible that the addition of the
-      //   FocusDisplayedController for lockedPointerFocusProperty makes this unnecessary. Test and remove if so.
-      onRemoveFocus: () => {
-        this.lockedPointerFocusProperty.value = null;
-      }
-    } );
-
+    this.pointerFocusDisplayedController = new FocusDisplayedController( this.pointerFocusProperty );
     this.lockedPointerFocusDisplayedController = new FocusDisplayedController( this.lockedPointerFocusProperty );
 
     [
