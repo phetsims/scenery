@@ -9,7 +9,7 @@
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { DelayedMutate, Display, Focus, FocusManager, Instance, Node, Pointer, PressListener, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
+import { DelayedMutate, Display, Focus, FocusManager, Instance, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import memoize from '../../../../phet-core/js/memoize.js';
@@ -339,7 +339,8 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
           const newFocus = new Focus( display, event.trail );
           display.focusManager.pointerFocusProperty.set( newFocus );
           if ( display.focusManager.lockedPointerFocusProperty.value === null && event.pointer.attachedListener ) {
-            lockPointer = this.attemptHighlightLock( newFocus, display.focusManager, event.pointer );
+            this.lockHighlight( newFocus, display.focusManager );
+            lockPointer = true;
           }
         }
       }
@@ -372,14 +373,15 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
             display.focusManager.pointerFocusProperty.set( newFocus );
 
             if ( display.focusManager.lockedPointerFocusProperty.value === null && event.pointer.attachedListener ) {
-              lockPointer = this.attemptHighlightLock( newFocus, display.focusManager, event.pointer );
+              this.lockHighlight( newFocus, display.focusManager );
+              lockPointer = true;
             }
           }
         }
+      }
 
-        if ( lockPointer ) {
-          this.savePointer( event.pointer );
-        }
+      if ( lockPointer ) {
+        this.savePointer( event.pointer );
       }
     }
 
@@ -436,7 +438,8 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 
             // Set the lockedPointerFocusProperty with a copy of the Focus (as deep as possible) because we want
             // to keep a reference to the old Trail while pointerFocusProperty changes.
-            lockPointer = this.attemptHighlightLock( focus, display.focusManager, event.pointer );
+            this.lockHighlight( focus, display.focusManager );
+            lockPointer = true;
           }
         }
 
@@ -519,35 +522,24 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     }
 
     /**
-     * May set the lockedPointerFocusProperty for a FocusManager if the provided Pointer indicates that this should
-     * be done. The "locking" makes sure that the highlight remains active on the Node that is receiving interaction
-     * even when the pointer has move away from the Node (but presumably is still down somewhere else on the screen).
-     * Returns true when the lockedPointerFocusProperty is set to a new Focus so that use cases can do more work
-     * in this case.
+     * Sets the "locked" focus for Interactive Highlighting. The "locking" makes sure that the highlight remains
+     * active on the Node that is receiving interaction even when the pointer has move away from the Node
+     * (but presumably is still down somewhere else on the screen).
      */
-    private attemptHighlightLock( newFocus: Focus, focusManager: FocusManager, eventPointer: Pointer ): boolean {
-      let pointerLock = false;
+    private lockHighlight( newFocus: Focus, focusManager: FocusManager ): void {
 
-      // If the event Pointer is attached to a PressListener there is some activation input happening, so
-      // we should "lock" the highlight to this target until the pointer is released.
-      if ( eventPointer.attachedListener && eventPointer.attachedListener.listener instanceof PressListener ) {
-        assert && assert( this._pointer === null,
-          'It should be impossible to already have a Pointer before locking from touchSnag' );
+      assert && assert( this._pointer === null,
+        'It should be impossible to already have a Pointer before locking from touchSnag' );
 
-        // A COPY of the focus is saved to the Property because we need the value of the Trail at this event.
-        focusManager.lockedPointerFocusProperty.set( new Focus( newFocus.display, newFocus.trail.copy() ) );
+      // A COPY of the focus is saved to the Property because we need the value of the Trail at this event.
+      focusManager.lockedPointerFocusProperty.set( new Focus( newFocus.display, newFocus.trail.copy() ) );
 
-        // Attach a listener that will clear the pointer and its listener if the lockedPointerFocusProperty is cleared
-        // externally (not by InteractiveHighlighting).
-        assert && assert( !focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ),
-          'this listener still on the lockedPointerFocusProperty indicates a memory leak'
-        );
-        focusManager.lockedPointerFocusProperty.link( this._boundPointerFocusClearedListener );
-
-        pointerLock = true;
-      }
-
-      return pointerLock;
+      // Attach a listener that will clear the pointer and its listener if the lockedPointerFocusProperty is cleared
+      // externally (not by InteractiveHighlighting).
+      assert && assert( !focusManager.lockedPointerFocusProperty.hasListener( this._boundPointerFocusClearedListener ),
+        'this listener still on the lockedPointerFocusProperty indicates a memory leak'
+      );
+      focusManager.lockedPointerFocusProperty.link( this._boundPointerFocusClearedListener );
     }
 
     /**
