@@ -12,7 +12,7 @@
 import SpeechSynthesisAnnouncer, { SpeechSynthesisAnnouncerOptions, SpeechSynthesisInitializeOptions } from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
 import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import TEmitter from '../../../../axon/js/TEmitter.js';
+import { TReadOnlyEmitter } from '../../../../axon/js/TEmitter.js';
 
 type SelfOptions = EmptySelfOptions;
 type VoicingManagerOptions = SelfOptions & SpeechSynthesisAnnouncerOptions;
@@ -35,7 +35,7 @@ class VoicingManager extends SpeechSynthesisAnnouncer {
   /**
    * The initialization with some additional scenery-specific work for voicingManager.
    */
-  public override initialize( userGestureEmitter: TEmitter, options?: SpeechSynthesisInitializeOptions ): void {
+  public override initialize( userGestureEmitter: TReadOnlyEmitter, options?: SpeechSynthesisInitializeOptions ): void {
     super.initialize( userGestureEmitter, options );
 
     // The control key will stop the synth from speaking if there is an active utterance. This key was decided because
