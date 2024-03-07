@@ -51,6 +51,7 @@ import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { EnglishKey, EnglishStringToCodeMap, FocusManager, globalKeyStateTracker, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 
 // NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
 //       entries in a union type. If that limitation is not acceptable remove this typing. OR maybe TypeScript will
@@ -77,7 +78,7 @@ export type OneKeyStroke = `${AllowedKeys}` |
 // - 'both': Callbacks fire on both press and release of keys.
 type ListenerFireTrigger = 'up' | 'down' | 'both';
 
-export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
+type SelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
   // The keys that need to be pressed to fire the callback. In a form like `[ 'shift+t', 'alt+shift+r' ]`. See top
   // level documentation for more information and an example of providing keys.
@@ -129,6 +130,8 @@ export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[ ]> = {
   listenerFireTrigger?: ListenerFireTrigger;
 };
 
+export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[]> = SelfOptions<Keys> & EnabledComponentOptions;
+
 type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
 
   // All must be pressed fully before the key is pressed to activate the command.
@@ -144,7 +147,7 @@ type KeyGroup<Keys extends readonly OneKeyStroke[]> = {
   timer: CallbackTimer | null;
 };
 
-class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputListener {
+class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComponent implements TInputListener {
 
   // The function called when a KeyGroup is pressed (or just released). Provides the SceneryEvent that fired the input
   // listeners and this the keys that were pressed from the active KeyGroup. The event may be null when using
@@ -188,7 +191,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   private readonly _windowFocusListener: ( windowHasFocus: boolean ) => void;
 
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
-    const options = optionize<KeyboardListenerOptions<Keys>>()( {
+    const options = optionize<KeyboardListenerOptions<Keys>, SelfOptions<Keys>, EnabledComponentOptions>()( {
       callback: _.noop,
       cancel: _.noop,
       focus: _.noop,
@@ -202,6 +205,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       fireOnHoldDelay: 400,
       fireOnHoldInterval: 100
     }, providedOptions );
+
+    super( providedOptions );
 
     this._callback = options.callback;
     this._cancel = options.cancel;
@@ -230,6 +235,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
 
     this._windowFocusListener = this.handleWindowFocusChange.bind( this );
     FocusManager.windowHasFocusProperty.link( this._windowFocusListener );
+
+    // interrupt when the listener is disabled
+    this.enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
   }
 
   /**
@@ -243,6 +251,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * Responding to a keydown event, update active KeyGroups and potentially fire callbacks and start CallbackTimers.
    */
   private handleKeyDown( event: SceneryEvent<KeyboardEvent> ): void {
+    if ( !this.canPress() ) {
+      return;
+    }
+
     if ( this._listenerFireTrigger === 'down' || this._listenerFireTrigger === 'both' ) {
 
       // modifier keys can be pressed in any order but the last key in the group must be pressed last
@@ -278,6 +290,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
    * fires a KeyGroup callback if the key that was released has all other modifier keys down.
    */
   private handleKeyUp( event: SceneryEvent<KeyboardEvent> ): void {
+    if ( !this.canPress() ) {
+      return;
+    }
 
     if ( this._activeKeyGroups.length > 0 ) {
       this._activeKeyGroups.forEach( ( activeKeyGroup, index ) => {
@@ -380,6 +395,22 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
     else {
       return false;
     }
+  }
+
+  /**
+   * Returns whether a key press can be started for the listener.
+   *
+   * NOTE: Could take the event in the future if state of the event determines whether the listener can press.
+   */
+  private canPress(): boolean {
+    return this.enabledProperty.value;
+  }
+
+  /**
+   * Interrupt if the listener is disabled.
+   */
+  private onEnabledPropertyChange( enabled: boolean ): void {
+    !enabled && this.interrupt();
   }
 
   /**
@@ -487,7 +518,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
   /**
    * Dispose of this listener by disposing of any Callback timers. Then clear all KeyGroups.
    */
-  public dispose(): void {
+  public override dispose(): void {
+    super.dispose();
+
     this._keyGroups.forEach( activeKeyGroup => {
       activeKeyGroup.timer && activeKeyGroup.timer.dispose();
     } );
