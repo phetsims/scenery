@@ -68,6 +68,7 @@ import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, Pointer, PointerAreaOverlay, PointerOverlay, Renderer, scenery, SceneryEvent, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 
 type SelfOptions = {
   // Initial (or override) display width
@@ -93,6 +94,10 @@ type SelfOptions = {
 
   // What cursor is used when no other cursor is specified
   defaultCursor?: string;
+
+  // Forces SVG elements to be refreshed every frame, which can force repainting and detect (or potentially in some
+  // cases work around) SVG rendering browser bugs. See https://github.com/phetsims/scenery/issues/1507
+  forceSVGRefresh?: boolean;
 
   // Initial background color
   backgroundColor?: Color | string | null;
@@ -205,6 +210,7 @@ export default class Display {
   public _aggressiveContextRecreation: boolean;
   public _allowBackingScaleAntialiasing: boolean;
   public _allowLayerFitting: boolean;
+  public _forceSVGRefresh: boolean;
 
   private readonly _allowWebGL: boolean;
   private readonly _allowCSSHacks: boolean;
@@ -304,6 +310,9 @@ export default class Display {
   private perfDrawableOldIntervalCount?: number;
   private perfDrawableNewIntervalCount?: number;
 
+  // (scenery-internal)
+  public readonly frameEmitter = new TinyEmitter();
+
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
@@ -331,6 +340,8 @@ export default class Display {
       allowSceneOverflow: false,
 
       allowLayerFitting: false,
+
+      forceSVGRefresh: false,
 
       // {string} - What cursor is used when no other cursor is specified
       defaultCursor: 'default',
@@ -439,6 +450,7 @@ export default class Display {
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
     this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
     this._allowLayerFitting = options.allowLayerFitting;
+    this._forceSVGRefresh = options.forceSVGRefresh;
     this._overlays = [];
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;
@@ -701,6 +713,8 @@ export default class Display {
     }
 
     PDOMTree.auditPDOMDisplays( this.rootNode );
+
+    this.frameEmitter.emit();
 
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
   }

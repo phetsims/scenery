@@ -8,6 +8,7 @@
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import dotRandom from '../../../dot/js/dotRandom.js';
 import { CountMap, FittedBlock, scenery, SVGGroup, svgns, Utils } from '../imports.js';
 
 class SVGBlock extends FittedBlock {
@@ -82,6 +83,30 @@ class SVGBlock extends FittedBlock {
 
       this.domElement = this.svg;
     }
+
+    // Forces SVG elements to be refreshed every frame, which can force repainting and detect (or potentially in some
+    // cases work around) SVG rendering browser bugs. See https://github.com/phetsims/scenery/issues/1507
+    if ( this.display._forceSVGRefresh && !this.forceRefreshListener ) {
+
+      const workaroundGroup = document.createElementNS( svgns, 'g' );
+      this.svg.appendChild( workaroundGroup );
+
+      const workaroundRect = document.createElementNS( svgns, 'rect' );
+      workaroundRect.setAttribute( 'width', '0' );
+      workaroundRect.setAttribute( 'height', '0' );
+      workaroundRect.setAttribute( 'fill', 'none' );
+      workaroundGroup.appendChild( workaroundRect );
+
+      // @private {function} - Forces a color change on the 0x0 rect
+      this.forceRefreshListener = () => {
+        const red = dotRandom.nextIntBetween( 0, 255 );
+        const green = dotRandom.nextIntBetween( 0, 255 );
+        const blue = dotRandom.nextIntBetween( 0, 255 );
+        workaroundRect.setAttribute( 'fill', `rgba(${red},${green},${blue},0.02)` );
+      };
+    }
+
+    this.display._forceSVGRefresh && this.display.frameEmitter.addListener( this.forceRefreshListener );
 
     // reset what layer fitting can do
     Utils.prepareForTransform( this.svg ); // Apply CSS needed for future CSS transforms to work properly.
@@ -366,6 +391,8 @@ class SVGBlock extends FittedBlock {
     cleanArray( this.dirtyDrawables );
 
     this.paintCountMap.clear();
+
+    this.display._forceSVGRefresh && this.display.frameEmitter.removeListener( this.forceRefreshListener );
 
     this.baseTransformGroup.removeChild( this.rootGroup.svgGroup );
     this.rootGroup.dispose();
