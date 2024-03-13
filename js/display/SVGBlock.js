@@ -86,27 +86,26 @@ class SVGBlock extends FittedBlock {
 
     // Forces SVG elements to be refreshed every frame, which can force repainting and detect (or potentially in some
     // cases work around) SVG rendering browser bugs. See https://github.com/phetsims/scenery/issues/1507
-    if ( this.display._forceSVGRefresh && !this.forceRefreshListener ) {
+    // @private {function} - Forces a color change on the 0x0 rect
+    this.forceRefreshListener = () => {
+      // Lazily add this, so we're not incurring any performance penalties until we actually need it
+      if ( !this.workaroundRect ) {
+        const workaroundGroup = document.createElementNS( svgns, 'g' );
+        this.svg.appendChild( workaroundGroup );
 
-      const workaroundGroup = document.createElementNS( svgns, 'g' );
-      this.svg.appendChild( workaroundGroup );
+        this.workaroundRect = document.createElementNS( svgns, 'rect' );
+        this.workaroundRect.setAttribute( 'width', '0' );
+        this.workaroundRect.setAttribute( 'height', '0' );
+        this.workaroundRect.setAttribute( 'fill', 'none' );
+        workaroundGroup.appendChild( this.workaroundRect );
+      }
 
-      const workaroundRect = document.createElementNS( svgns, 'rect' );
-      workaroundRect.setAttribute( 'width', '0' );
-      workaroundRect.setAttribute( 'height', '0' );
-      workaroundRect.setAttribute( 'fill', 'none' );
-      workaroundGroup.appendChild( workaroundRect );
-
-      // @private {function} - Forces a color change on the 0x0 rect
-      this.forceRefreshListener = () => {
-        const red = dotRandom.nextIntBetween( 0, 255 );
-        const green = dotRandom.nextIntBetween( 0, 255 );
-        const blue = dotRandom.nextIntBetween( 0, 255 );
-        workaroundRect.setAttribute( 'fill', `rgba(${red},${green},${blue},0.02)` );
-      };
-    }
-
-    this.display._forceSVGRefresh && this.display.frameEmitter.addListener( this.forceRefreshListener );
+      const red = dotRandom.nextIntBetween( 0, 255 );
+      const green = dotRandom.nextIntBetween( 0, 255 );
+      const blue = dotRandom.nextIntBetween( 0, 255 );
+      this.workaroundRect.setAttribute( 'fill', `rgba(${red},${green},${blue},0.02)` );
+    };
+    this.display._refreshSVGEmitter.addListener( this.forceRefreshListener );
 
     // reset what layer fitting can do
     Utils.prepareForTransform( this.svg ); // Apply CSS needed for future CSS transforms to work properly.
@@ -392,7 +391,7 @@ class SVGBlock extends FittedBlock {
 
     this.paintCountMap.clear();
 
-    this.display._forceSVGRefresh && this.display.frameEmitter.removeListener( this.forceRefreshListener );
+    this.display._refreshSVGEmitter.removeListener( this.forceRefreshListener );
 
     this.baseTransformGroup.removeChild( this.rootGroup.svgGroup );
     this.rootGroup.dispose();

@@ -68,7 +68,6 @@ import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, Pointer, PointerAreaOverlay, PointerOverlay, Renderer, scenery, SceneryEvent, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
-import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 
 type SelfOptions = {
   // Initial (or override) display width
@@ -310,8 +309,12 @@ export default class Display {
   private perfDrawableOldIntervalCount?: number;
   private perfDrawableNewIntervalCount?: number;
 
-  // (scenery-internal)
-  public readonly frameEmitter = new TinyEmitter();
+  // (scenery-internal) When fired, forces an SVG refresh, to try to work around issues
+  // like https://github.com/phetsims/scenery/issues/1507
+  public readonly _refreshSVGEmitter = new Emitter();
+
+  // If true, we will refresh the SVG elements on the next frame
+  private _refreshSVGPending = false;
 
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
@@ -714,7 +717,11 @@ export default class Display {
 
     PDOMTree.auditPDOMDisplays( this.rootNode );
 
-    this.frameEmitter.emit();
+    if ( this._forceSVGRefresh || this._refreshSVGPending ) {
+      this._refreshSVGPending = false;
+
+      this.refreshSVG();
+    }
 
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
   }
@@ -2087,6 +2094,23 @@ export default class Display {
     }
 
     return ( instance && instance.trail ) ? instance.trail : null;
+  }
+
+  /**
+   * Forces SVG elements to have their visual contents refreshed, by changing state in a non-visually-apparent way.
+   * It should trick browsers into re-rendering the SVG elements.
+   *
+   * See https://github.com/phetsims/scenery/issues/1507
+   */
+  public refreshSVG(): void {
+    this._refreshSVGEmitter.emit();
+  }
+
+  /**
+   * Similar to refreshSVG (see docs above), but will do so on the next frame.
+   */
+  public refreshSVGOnNextFrame(): void {
+    this._refreshSVGPending = true;
   }
 
   /**
