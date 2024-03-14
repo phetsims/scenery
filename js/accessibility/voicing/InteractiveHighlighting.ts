@@ -105,6 +105,9 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       };
 
       this._changedInstanceListener = this.onChangedInstance.bind( this );
+
+      // This is potentially dangerous to listen to generally, but in this case it is safe because the state we change
+      // will only affect a separate display's state, not this one.
       this.changedInstanceEmitter.addListener( this._changedInstanceListener );
 
       this._interactiveHighlightingEnabledListener = this._onInteractiveHighlightingEnabledChange.bind( this );

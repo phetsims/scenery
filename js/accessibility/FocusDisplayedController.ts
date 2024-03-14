@@ -95,6 +95,9 @@ class FocusDisplayedController {
     this.visibilityTracker.addListener( this.boundVisibilityListener );
 
     this.node = focus.trail.lastNode();
+
+    // This is potentially dangerous to listen to generally, but in this case it is safe because the state we change
+    // will only affect a separate display's state, not this one.
     this.node.changedInstanceEmitter.addListener( this.boundInstancesChangedListener );
     this.node.disposeEmitter.addListener( this.boundNodeDisposedListener );
   }

@@ -641,7 +641,12 @@ class Node extends ParallelDOM {
   // Emitted to when we change filters (either opacity or generalized filters)
   public readonly filterChangeEmitter: TEmitter;
 
-  // Fired when an instance is changed (added/removed)
+  // Fired when an instance is changed (added/removed). CAREFUL!! This is potentially a very dangerous thing to listen
+  // to. Instances are updated in an asynchronous batch during `updateDisplay()`, and it is very important that display
+  // updates do not cause changes the scene graph. Thus, this emitter should NEVER trigger a Node's state to change.
+  // Currently, all usages of this cause into updates to the audio view, or updates to a separate display (used as an
+  // overlay). Please proceed with caution, and see https://github.com/phetsims/scenery/issues/1615 and
+  // https://github.com/phetsims/scenery/issues/1620 for details.
   public readonly changedInstanceEmitter: TEmitter<[ instance: Instance, added: boolean ]>;
 
   // Fired when layoutOptions changes

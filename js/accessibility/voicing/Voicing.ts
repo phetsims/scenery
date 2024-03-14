@@ -167,6 +167,9 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
       this._voicingCanSpeakCount = 0;
 
       this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
+
+      // This is potentially dangerous to listen to generally, but in this case it is safe because the state we change
+      // will only affect how we voice (part of the audio view), and not part of this display's scene graph.
       this.changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
 
       this._speakContentOnFocusListener = {
