@@ -1,4 +1,4 @@
-// Copyright 2021-2024, University of Colorado Boulder
+// Copyright 2021-2023, University of Colorado Boulder
 
 /**
  * Responsible for setting the provided focusProperty to null when the Focused node either
@@ -22,11 +22,12 @@ class FocusDisplayedController {
   private visibilityTracker: TrailVisibilityTracker | null = null;
 
   // When there is value, we will watch and update when there are changes to the displayed state of the Focus trail.
-  private focusProperty: TProperty<Focus | null> | null;
+  private focusProperty: TProperty<Focus | null>;
 
   // Bound functions that are called when the displayed state of the Node changes.
   private readonly boundVisibilityListener: () => void;
   private readonly boundInstancesChangedListener: ( instance: Instance ) => void;
+  private readonly boundNodeDisposedListener: () => void;
 
   // Handles changes to focus, adding or removing listeners
   private readonly boundFocusListener: ( focus: Focus | null ) => void;
@@ -36,6 +37,7 @@ class FocusDisplayedController {
 
     this.boundVisibilityListener = this.handleTrailVisibilityChange.bind( this );
     this.boundInstancesChangedListener = this.handleInstancesChange.bind( this );
+    this.boundNodeDisposedListener = this.handleNodeDisposed.bind( this );
 
     this.boundFocusListener = this.handleFocusChange.bind( this );
     this.focusProperty.link( this.boundFocusListener );
@@ -58,7 +60,7 @@ class FocusDisplayedController {
    */
   private handleTrailVisibilityChange(): void {
     if ( this.visibilityTracker && !this.visibilityTracker.trailVisibleProperty.value ) {
-      this.focusProperty!.value = null;
+      this.focusProperty.value = null;
     }
   }
 
@@ -68,8 +70,17 @@ class FocusDisplayedController {
    */
   private handleInstancesChange( instance: Instance ): void {
     if ( instance.node && instance.node.instances.length === 0 ) {
-      this.focusProperty!.value = null;
+      this.focusProperty.value = null;
     }
+  }
+
+  /**
+   * While this focus-clear is mostly covered by listening for instance changes, there is an intermediate state between
+   * when a Node is disposed, and when the Instance tree is updated to reflect that disposal (during updateDisplay()).
+   * This function handles that atypical case (pretty much impossible to get to in PhET sims except during fuzzing).
+   */
+  private handleNodeDisposed(): void {
+    this.focusProperty.value = null;
   }
 
   /**
@@ -85,6 +96,7 @@ class FocusDisplayedController {
 
     this.node = focus.trail.lastNode();
     this.node.changedInstanceEmitter.addListener( this.boundInstancesChangedListener );
+    this.node.disposeEmitter.addListener( this.boundNodeDisposedListener );
   }
 
   /**
@@ -99,6 +111,7 @@ class FocusDisplayedController {
     }
     if ( this.node ) {
       this.node.changedInstanceEmitter.removeListener( this.boundInstancesChangedListener );
+      this.node.disposeEmitter.removeListener( this.boundNodeDisposedListener );
       this.node = null;
     }
   }
@@ -107,11 +120,10 @@ class FocusDisplayedController {
 
     // this disposes the TrailVisibilityTracker and removes any listeners on the Node
     this.removeDisplayedListeners();
-    this.focusProperty!.unlink( this.boundFocusListener );
+    this.focusProperty.unlink( this.boundFocusListener );
 
     this.node = null;
     this.visibilityTracker = null;
-    this.focusProperty = null;
   }
 }
 
