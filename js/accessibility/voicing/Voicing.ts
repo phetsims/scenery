@@ -1,4 +1,4 @@
-// Copyright 2021-2023, University of Colorado Boulder
+// Copyright 2021-2024, University of Colorado Boulder
 
 /**
  * A trait for Node that supports the Voicing feature, under accessibility. Allows you to define responses for the Node
@@ -114,7 +114,8 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
     private _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
 
     // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
-    // voicingVisible.
+    // voicingVisible. This is private because its value depends on the state of the Instance tree. Listening to this
+    // to change the scene graph state can be incredibly dangerous and buggy, see https://github.com/phetsims/scenery/issues/1615
     private _voicingCanSpeakProperty!: TinyProperty<boolean>;
 
     // A counter that keeps track of visible and voicingVisible Instances of this Node.
@@ -166,6 +167,9 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
       this._voicingCanSpeakCount = 0;
 
       this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
+
+      // This is potentially dangerous to listen to generally, but in this case it is safe because the state we change
+      // will only affect how we voice (part of the audio view), and not part of this display's scene graph.
       this.changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
 
       this._speakContentOnFocusListener = {
@@ -489,16 +493,6 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
     }
 
     /**
-     * Get the Property indicating that this Voicing Node can speak. True when this Voicing Node and all of its
-     * ancestors are visible and voicingVisible.
-     */
-    public getVoicingCanSpeakProperty(): TinyProperty<boolean> {
-      return this._voicingCanSpeakProperty;
-    }
-
-    public get voicingCanSpeakProperty() { return this.getVoicingCanSpeakProperty(); }
-
-    /**
      * Called whenever this Node is focused.
      */
     public setVoicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ): void {
@@ -675,8 +669,11 @@ Voicing.alertUtterance = ( utterance: Utterance ) => {
  */
 Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
   const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
-  if ( !existingCanAnnounceProperties.includes( voicingNode.voicingCanSpeakProperty ) ) {
-    utterance.voicingCanAnnounceProperties = existingCanAnnounceProperties.concat( [ voicingNode.voicingCanSpeakProperty ] );
+
+  // @ts-expect-error Accessing a private member because this is meant to be "private to the file".
+  const voicingCanSpeakProperty = voicingNode._voicingCanSpeakProperty;
+  if ( !existingCanAnnounceProperties.includes( voicingCanSpeakProperty ) ) {
+    utterance.voicingCanAnnounceProperties = existingCanAnnounceProperties.concat( [ voicingCanSpeakProperty ] );
   }
 };
 
@@ -686,7 +683,10 @@ Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: Vo
  */
 Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
   const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
-  const index = existingCanAnnounceProperties.indexOf( voicingNode.voicingCanSpeakProperty );
+
+  // @ts-expect-error Accessing a private member because this is meant to be "private to the file".
+  const voicingCanSpeakProperty = voicingNode._voicingCanSpeakProperty;
+  const index = existingCanAnnounceProperties.indexOf( voicingCanSpeakProperty );
   assert && assert( index > -1, 'voicingNode.voicingCanSpeakProperty is not on the Utterance, was it not registered?' );
   utterance.voicingCanAnnounceProperties = existingCanAnnounceProperties.splice( index, 1 );
 };

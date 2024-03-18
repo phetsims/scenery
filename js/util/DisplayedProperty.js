@@ -1,14 +1,18 @@
-// Copyright 2018-2022, University of Colorado Boulder
+// Copyright 2018-2024, University of Colorado Boulder
 
 /**
- * A property that is true when the node appears on the given display.
+ * A property that is true when the node appears on the given display. Please exercise extreme care when using this
+ * class, as it comes with some finicky drawbacks:
  *
- * Note that a node can appear on a display even after it has been removed from the scene graph, if
- * Display.updateDisplay has not yet been called since it was removed. So generally this Property will only update
+ * 1. Note that a node can appear on a display even after it has been removed from the scene graph, if
+ * Display.updateDisplay() has not yet been called since it was removed. So generally this Property will only update
  * as a result of Display.updateDisplay() being called.
- *
- * Be careful to dispose of these, since it WILL result in a permanent memory leak otherwise (Instance objects are
- * pooled, and if the listener is not removed, it will stay around forever).
+ * 2. Given (1), this means that any listeners to this Property will fire during updateDisplay(), and not during normal
+ * stepping/event handling of the simulation. updateDisplay should NEVER cause the scene graph state to change, so
+ * listeners to this property should not cause changes to Node state, see https://github.com/phetsims/scenery/issues/1615
+ * for details.
+ * 3. Be careful to dispose of these, since it WILL result in a permanent memory leak otherwise. Instance objects are
+ * pooled, and if the listener is not removed, it will stay around forever.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

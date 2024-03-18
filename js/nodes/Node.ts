@@ -373,11 +373,42 @@ export type NodeOptions = {
 } & ParallelDOMOptions & NodeTransformOptions;
 
 type RasterizedOptions = {
+
+  // {number} - Controls the resolution of the image relative to the local view units. For example, if our Node is
+  // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
+  // resolution, provide resolution:2.
+  // Defaults to 1.0
   resolution?: number;
+
+  // {Bounds2|null} - If provided, it will control the x/y/width/height of the toCanvas call. See toCanvas for
+  // details on how this controls the rasterization. This is in the "parent" coordinate frame, similar to
+  // node.bounds.
+  // Defaults to null
   sourceBounds?: Bounds2 | null;
+
+  // {boolean} - If true, the localBounds of the result will be set in a way such that it will precisely match
+  // the visible bounds of the original Node (this). Note that antialiased content (with a much lower resolution)
+  // may somewhat spill outside these bounds if this is set to true. Usually this is fine and should be the
+  // recommended option. If sourceBounds are provided, they will restrict the used bounds (so it will just
+  // represent the bounds of the sliced part of the image).
+  // Defaults to true
   useTargetBounds?: boolean;
+
+  // {boolean} - If true, the created Image Node gets wrapped in an extra Node so that it can be transformed
+  // independently. If there is no need to transform the resulting node, wrap:false can be passed so that no extra
+  // Node is created.
+  // Defaults to true
   wrap?: boolean;
+
+  // {boolean} - If true, it will directly use the <canvas> element (only works with canvas/webgl renderers)
+  // instead of converting this into a form that can be used with any renderer. May have slightly better
+  // performance if svg/dom renderers do not need to be used.
+  // Defaults to false
   useCanvas?: boolean;
+
+  // To be passed to the Image node created from the rasterization. See below for options that will override
+  // what is passed in.
+  // Defaults to the empty object
   imageOptions?: ImageOptions;
 };
 
@@ -610,7 +641,12 @@ class Node extends ParallelDOM {
   // Emitted to when we change filters (either opacity or generalized filters)
   public readonly filterChangeEmitter: TEmitter;
 
-  // Fired when an instance is changed (added/removed)
+  // Fired when an instance is changed (added/removed). CAREFUL!! This is potentially a very dangerous thing to listen
+  // to. Instances are updated in an asynchronous batch during `updateDisplay()`, and it is very important that display
+  // updates do not cause changes the scene graph. Thus, this emitter should NEVER trigger a Node's state to change.
+  // Currently, all usages of this cause into updates to the audio view, or updates to a separate display (used as an
+  // overlay). Please proceed with caution, and see https://github.com/phetsims/scenery/issues/1615 and
+  // https://github.com/phetsims/scenery/issues/1620 for details.
   public readonly changedInstanceEmitter: TEmitter<[ instance: Instance, added: boolean ]>;
 
   // Fired when layoutOptions changes
@@ -5693,35 +5729,11 @@ class Node extends ParallelDOM {
    */
   public rasterized( providedOptions?: RasterizedOptions ): Node {
     const options = optionize<RasterizedOptions, RasterizedOptions>()( {
-      // {number} - Controls the resolution of the image relative to the local view units. For example, if our Node is
-      // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
-      // resolution, provide resolution:2.
       resolution: 1,
-
-      // {Bounds2|null} - If provided, it will control the x/y/width/height of the toCanvas call. See toCanvas for
-      // details on how this controls the rasterization. This is in the "parent" coordinate frame, similar to
-      // node.bounds.
       sourceBounds: null,
-
-      // {boolean} - If true, the localBounds of the result will be set in a way such that it will precisely match
-      // the visible bounds of the original Node (this). Note that antialiased content (with a much lower resolution)
-      // may somewhat spill outside these bounds if this is set to true. Usually this is fine and should be the
-      // recommended option. If sourceBounds are provided, they will restrict the used bounds (so it will just
-      // represent the bounds of the sliced part of the image).
       useTargetBounds: true,
-
-      // {boolean} - If true, the created Image Node gets wrapped in an extra Node so that it can be transformed
-      // independently. If there is no need to transform the resulting node, wrap:false can be passed so that no extra
-      // Node is created.
       wrap: true,
-
-      // {boolean} - If true, it will directly use the <canvas> element (only works with canvas/webgl renderers)
-      // instead of converting this into a form that can be used with any renderer. May have slightly better
-      // performance if svg/dom renderers do not need to be used.
       useCanvas: false,
-
-      // To be passed to the Image node created from the rasterization. See below for options that will override
-      // what is passed in.
       imageOptions: {}
     }, providedOptions );
 

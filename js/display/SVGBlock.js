@@ -1,4 +1,4 @@
-// Copyright 2013-2023, University of Colorado Boulder
+// Copyright 2013-2024, University of Colorado Boulder
 
 /**
  * Handles a visual SVG layer of drawables.
@@ -8,6 +8,7 @@
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import dotRandom from '../../../dot/js/dotRandom.js';
 import { CountMap, FittedBlock, scenery, SVGGroup, svgns, Utils } from '../imports.js';
 
 class SVGBlock extends FittedBlock {
@@ -82,6 +83,29 @@ class SVGBlock extends FittedBlock {
 
       this.domElement = this.svg;
     }
+
+    // Forces SVG elements to be refreshed every frame, which can force repainting and detect (or potentially in some
+    // cases work around) SVG rendering browser bugs. See https://github.com/phetsims/scenery/issues/1507
+    // @private {function} - Forces a color change on the 0x0 rect
+    this.forceRefreshListener = () => {
+      // Lazily add this, so we're not incurring any performance penalties until we actually need it
+      if ( !this.workaroundRect ) {
+        const workaroundGroup = document.createElementNS( svgns, 'g' );
+        this.svg.appendChild( workaroundGroup );
+
+        this.workaroundRect = document.createElementNS( svgns, 'rect' );
+        this.workaroundRect.setAttribute( 'width', '0' );
+        this.workaroundRect.setAttribute( 'height', '0' );
+        this.workaroundRect.setAttribute( 'fill', 'none' );
+        workaroundGroup.appendChild( this.workaroundRect );
+      }
+
+      const red = dotRandom.nextIntBetween( 0, 255 );
+      const green = dotRandom.nextIntBetween( 0, 255 );
+      const blue = dotRandom.nextIntBetween( 0, 255 );
+      this.workaroundRect.setAttribute( 'fill', `rgba(${red},${green},${blue},0.02)` );
+    };
+    this.display._refreshSVGEmitter.addListener( this.forceRefreshListener );
 
     // reset what layer fitting can do
     Utils.prepareForTransform( this.svg ); // Apply CSS needed for future CSS transforms to work properly.
@@ -366,6 +390,8 @@ class SVGBlock extends FittedBlock {
     cleanArray( this.dirtyDrawables );
 
     this.paintCountMap.clear();
+
+    this.display._refreshSVGEmitter.removeListener( this.forceRefreshListener );
 
     this.baseTransformGroup.removeChild( this.rootGroup.svgGroup );
     this.rootGroup.dispose();

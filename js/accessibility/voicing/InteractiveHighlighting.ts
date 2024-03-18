@@ -105,6 +105,9 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       };
 
       this._changedInstanceListener = this.onChangedInstance.bind( this );
+
+      // This is potentially dangerous to listen to generally, but in this case it is safe because the state we change
+      // will only affect a separate display's state, not this one.
       this.changedInstanceEmitter.addListener( this._changedInstanceListener );
 
       this._interactiveHighlightingEnabledListener = this._onInteractiveHighlightingEnabledChange.bind( this );
@@ -427,14 +430,11 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
           const focus = display.focusManager.pointerFocusProperty.value;
           const locked = !!display.focusManager.lockedPointerFocusProperty.value;
 
-          // Workaround for https://github.com/phetsims/density-buoyancy-common/issues/97. We should not try to
-          // highlight lock if the focus is disposed, but it won't be cleaned up until instances change upon next updateDisplay().
-          const focusIsNotDisposedWorkaround = !focus?.trail.lastNode().isDisposed;
-
           // Focus should generally be defined when pointer enters the Node, but it may be null in cases of
           // cancel or interrupt. Don't attempt to lock if the FocusManager already has a locked highlight (especially
           // important for gracefully handling multitouch).
-          if ( focus && !locked && focusIsNotDisposedWorkaround ) {
+          if ( focus && !locked ) {
+            assert && assert( !focus.trail.lastNode().isDisposed, 'Focus should not be set to a disposed Node' );
 
             // Set the lockedPointerFocusProperty with a copy of the Focus (as deep as possible) because we want
             // to keep a reference to the old Trail while pointerFocusProperty changes.

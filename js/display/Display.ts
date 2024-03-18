@@ -94,6 +94,10 @@ type SelfOptions = {
   // What cursor is used when no other cursor is specified
   defaultCursor?: string;
 
+  // Forces SVG elements to be refreshed every frame, which can force repainting and detect (or potentially in some
+  // cases work around) SVG rendering browser bugs. See https://github.com/phetsims/scenery/issues/1507
+  forceSVGRefresh?: boolean;
+
   // Initial background color
   backgroundColor?: Color | string | null;
 
@@ -205,6 +209,7 @@ export default class Display {
   public _aggressiveContextRecreation: boolean;
   public _allowBackingScaleAntialiasing: boolean;
   public _allowLayerFitting: boolean;
+  public _forceSVGRefresh: boolean;
 
   private readonly _allowWebGL: boolean;
   private readonly _allowCSSHacks: boolean;
@@ -304,6 +309,13 @@ export default class Display {
   private perfDrawableOldIntervalCount?: number;
   private perfDrawableNewIntervalCount?: number;
 
+  // (scenery-internal) When fired, forces an SVG refresh, to try to work around issues
+  // like https://github.com/phetsims/scenery/issues/1507
+  public readonly _refreshSVGEmitter = new Emitter();
+
+  // If true, we will refresh the SVG elements on the next frame
+  private _refreshSVGPending = false;
+
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
@@ -331,6 +343,8 @@ export default class Display {
       allowSceneOverflow: false,
 
       allowLayerFitting: false,
+
+      forceSVGRefresh: false,
 
       // {string} - What cursor is used when no other cursor is specified
       defaultCursor: 'default',
@@ -439,6 +453,7 @@ export default class Display {
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
     this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
     this._allowLayerFitting = options.allowLayerFitting;
+    this._forceSVGRefresh = options.forceSVGRefresh;
     this._overlays = [];
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;
@@ -701,6 +716,12 @@ export default class Display {
     }
 
     PDOMTree.auditPDOMDisplays( this.rootNode );
+
+    if ( this._forceSVGRefresh || this._refreshSVGPending ) {
+      this._refreshSVGPending = false;
+
+      this.refreshSVG();
+    }
 
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
   }
@@ -2073,6 +2094,23 @@ export default class Display {
     }
 
     return ( instance && instance.trail ) ? instance.trail : null;
+  }
+
+  /**
+   * Forces SVG elements to have their visual contents refreshed, by changing state in a non-visually-apparent way.
+   * It should trick browsers into re-rendering the SVG elements.
+   *
+   * See https://github.com/phetsims/scenery/issues/1507
+   */
+  public refreshSVG(): void {
+    this._refreshSVGEmitter.emit();
+  }
+
+  /**
+   * Similar to refreshSVG (see docs above), but will do so on the next frame.
+   */
+  public refreshSVGOnNextFrame(): void {
+    this._refreshSVGPending = true;
   }
 
   /**
