@@ -1010,9 +1010,10 @@ class PDOMPeer {
       if ( forceReflowWorkaround ) {
         this.forceReflowWorkaround = true;
 
-        // style.display = 'none' is a reflow, so we can use that to force a reflow in the next animation frame
+        // `transform=scale(1)` forces a reflow so we can set this and revert it in the next animation frame.
+        // Transform is used instead of `display='none'` because changing display impacts focus.
         for ( let i = 0; i < this.topLevelElements.length; i++ ) {
-          this.topLevelElements[ i ].style.display = 'none';
+          this.topLevelElements[ i ].style.transform = 'scale(1)';
         }
       }
 
@@ -1121,7 +1122,7 @@ class PDOMPeer {
 
       // Force a reflow (recalculation of DOM layout) to fix the accessible name.
       this.topLevelElements.forEach( element => {
-        element.style.display = ''; // force reflow request added display: none
+        element.style.transform = ''; // force reflow request by removing the transform added in the previous frame
         element.style.offsetHeight; // query the offsetHeight after restoring display to force reflow
       } );
     }
