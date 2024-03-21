@@ -238,8 +238,9 @@ class PDOMInstance {
     if ( assert && this.node ) {
       assert && assert( this.node instanceof Node );
 
-      // If you hit this when mutating both children and innerContent at the same time, it is an issue with scenery,
-      // remove once in a single step and the add the other in the next step.
+      // We do not support rendering children into a Node that has innerContent.
+      // If you hit this when mutating both children and innerContent at the same time, it is an issue with scenery.
+      // Remove one in a single step and them add then other in the next step.
       this.children.length > 0 && assert( !this.node.innerContent,
         `${this.children.length} child PDOMInstances present but this node has innerContent: ${this.node.innerContent}` );
     }
