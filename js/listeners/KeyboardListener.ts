@@ -611,9 +611,15 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
 
   /**
    * Look for overlapping keys in the provided listeners. This is used by Input.ts when it is time to respond to
-   * keyboard events. Input.ts provides all the KeyboardListeners that may respond to user input.
+   * keyboard events. Input.ts provides all of the KeyboardListeners that may respond to user input. Behavior
+   * of the listeners is then controlled by the listenerOverlapBehavior option.
    *
-   * This function behaves like this, with the following values for listenerOverlapBehavior:
+   * To decide which listenerOverlapBehavior to use, this logic is used:
+   * - If either listener has 'error' behavior, the 'error' behavior is used.
+   * - Else if either listener has 'allow' behavior, the 'allow' behavior is used.
+   * - Otherwise, use 'most_specific' behavior (would be on both listeners)
+   *
+   * Then, the function behaves like this depending on the listenerOverlapBehavior:
    * - 'most_specific': If a listener uses a subset of another listener's keys, the listener will be deferred and
    *    only the other listener will fire. If any two listeners use the exact same keys, an error will be thrown.
    * - 'error': If any two listeners use the same keys or if one listener uses a subset of another listener's keys,
@@ -625,15 +631,13 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
 
     // Collect KeyGroups with their listeners so can easily look up the listener when iterating through used keys.
     const naturalKeysWithListener = keyboardListeners.reduce( ( accumulator: KeyGroupWithListener[], listener: KeyboardListener<OneKeyStroke[]> ) => {
-      if ( listener.listenerOverlapBehavior !== 'allow' ) {
-        const keyGroups = listener._keyGroups;
-        keyGroups.forEach( keyGroup => {
-          accumulator.push( {
-            listener: listener,
-            keyGroup: keyGroup
-          } );
+      const keyGroups = listener._keyGroups;
+      keyGroups.forEach( keyGroup => {
+        accumulator.push( {
+          listener: listener,
+          keyGroup: keyGroup
         } );
-      }
+      } );
       return accumulator;
     }, [] );
 
@@ -654,14 +658,30 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
         // listener with less specific keys may be deferred based on the behavior.
         if ( KeyboardUtils.isArraySubset( shorterKeys, longerKeys ) ) {
           if ( longerObject.listener.areKeysDownForListener( longerObject.keyGroup ) ) {
-            const behavior = shorterObject.listener.listenerOverlapBehavior;
-            const shorterKeys = shorterObject.keyGroup.naturalKeys;
-            const longerKeys = longerObject.keyGroup.naturalKeys;
 
-            if ( behavior === 'error' ) {
-              assert && assert( false, `The keys ${shorterKeys} are a subset of the keys ${longerKeys}` );
+            const subsetBehavior = shorterObject.listener.listenerOverlapBehavior;
+            const supersetBehavior = longerObject.listener.listenerOverlapBehavior;
+
+            const eitherError = subsetBehavior === 'error' || supersetBehavior === 'error';
+            const eitherAllow = subsetBehavior === 'allow' || supersetBehavior === 'allow';
+
+            if ( eitherError ) {
+              assert && assert( false, `Overlap detected in KeyboardListeners. ${shorterKeys} key(s) are a subset of the ${longerKeys} key(s)` );
             }
-            else if ( behavior === 'most_specific' ) {
+            else if ( eitherAllow ) {
+
+              // 'allow' behavior, nothing to do
+            }
+            else {
+
+              // 'most_specific' behavior - if both listeners use the same keys, an error will be thrown. Otherwise,
+              // the listener with less specific keys will be deferred.
+              assert && assert(
+                shorterKeys.length !== longerKeys.length,
+                'Overlap detected in KeyboardListeners. The keys are the same. Use listenerOverlapBehavior: "allow" or change keys.'
+              );
+
+              // Both listeners have 'most_specific' behavior, defer the listener with less specific keys
               shorterObject.listener._deferred = true;
 
               const keyCode = event.code;
@@ -673,17 +693,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
                 deferredKeyboardListenersMap.set( keyCode, [ listener ] );
               }
             }
-            else {
-              // 'allow' behavior, nothing to do
-            }
           }
         }
       }
     }
-
-    const allNaturalKeys = naturalKeysWithListener.map( entry => entry.keyGroup.naturalKeys );
-    const duplicateKeys = KeyboardUtils.findArrayDuplicates( allNaturalKeys );
-    assert && assert( duplicateKeys.length === 0, `At least two KeyboardListeners are going to fire at the same time from the ${duplicateKeys.join( ', ' )} keys(s)` );
   }
 
   /**
