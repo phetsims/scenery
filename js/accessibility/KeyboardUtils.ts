@@ -305,6 +305,22 @@ const KeyboardUtils = {
     return MODIFIER_KEYS.includes( key );
   },
 
+  /**
+   * Returns an array of duplicate entries in the provided array.
+   */
+  findArrayDuplicates( array: string[] ): string[] {
+
+    // Create a set and then destructure to remove duplicates if any entries are found more than once.
+    return [ ...new Set( array.filter( ( item, index ) => array.indexOf( item ) !== index ) ) ];
+  },
+
+  /**
+   * Returns true if the subsetArray is a subset of the supersetArray.
+   */
+  isArraySubset( subsetArray: string[], supersetArray: string[] ): boolean {
+    return subsetArray.every( value => supersetArray.includes( value ) );
+  },
+
   ALL_KEYS: ALL_KEY_CODES
 };
 

@@ -172,7 +172,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventContext, EventContextIO, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, SupportedEventTypes, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
+import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventContext, EventContextIO, KeyboardListener, Mouse, Node, OneKeyStroke, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, SupportedEventTypes, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
@@ -794,9 +794,27 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, context.domEvent )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
+      const keyboardListeners: KeyboardListener<OneKeyStroke[]>[] = [];
+      this.recursiveScanForGlobalKeyboardListeners( this.rootNode, keyboardListeners );
+
+      // also add any listeners along the trail
+      const trail = this.getPDOMEventTrail( context.domEvent, 'keydown' );
+      if ( trail ) {
+        const nodes = trail.nodes;
+        nodes.forEach( node => {
+
+          // skip the global listeners, they will have been added by the above scan
+          const nodeKeyboardListeners = node.inputListeners.filter( listener => listener instanceof KeyboardListener && !listener.global );
+
+          // @ts-expect-error
+          keyboardListeners.push( ...nodeKeyboardListeners );
+        } );
+      }
+
+      KeyboardListener.inspectKeyboardListeners( keyboardListeners, context.domEvent );
+
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', context, true );
 
-      const trail = this.getPDOMEventTrail( context.domEvent, 'keydown' );
       trail && this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keydown', context, true );
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', context, false );
@@ -823,6 +841,8 @@ export default class Input extends PhetioObject {
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', context, false );
 
+      KeyboardListener.undeferKeyboardListeners( context.domEvent.code );
+
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
@@ -846,6 +866,25 @@ export default class Input extends PhetioObject {
         pointer.interruptAll();
       }
     } );
+  }
+
+  public recursiveScanForGlobalKeyboardListeners( node: Node, listeners: KeyboardListener<OneKeyStroke[]>[] ): KeyboardListener<OneKeyStroke[]>[] {
+
+    // The KeyboardListener will be assigned to a Node
+    if ( !node.isDisposed && node.isVisible() && node.isInputEnabled() && node.isPDOMVisible() ) {
+      // Reverse iteration follows the z-order from "visually in front" to "visually in back" like normal dipatch
+      for ( let i = node._children.length - 1; i >= 0; i-- ) {
+        this.recursiveScanForGlobalKeyboardListeners( node._children[ i ], listeners );
+      }
+
+      // if the node has a KeyboardListener that is global, add it to the list
+      const globalKeyboardListeners = node.inputListeners.filter( listener => listener instanceof KeyboardListener && listener.global );
+
+      // @ts-expect-error
+      listeners.push( ...globalKeyboardListeners );
+    }
+
+    return listeners;
   }
 
   /**
