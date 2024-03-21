@@ -794,23 +794,16 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, context.domEvent )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
+      // Look for all global KeyboardListeners that are on Nodes that can receive input events. We will inspect
+      // this list for overlapping keys.
       const keyboardListeners: KeyboardListener<OneKeyStroke[]>[] = [];
       this.recursiveScanForGlobalKeyboardListeners( this.rootNode, keyboardListeners );
 
-      // also add any listeners along the trail
+      // Also add any local KeyboardListeners along the trail.
       const trail = this.getPDOMEventTrail( context.domEvent, 'keydown' );
-      if ( trail ) {
-        const nodes = trail.nodes;
-        nodes.forEach( node => {
+      trail && this.scanTrailForKeyboardListeners( trail, keyboardListeners );
 
-          // skip the global listeners, they will have been added by the above scan
-          const nodeKeyboardListeners = node.inputListeners.filter( listener => listener instanceof KeyboardListener && !listener.global );
-
-          // @ts-expect-error
-          keyboardListeners.push( ...nodeKeyboardListeners );
-        } );
-      }
-
+      // Inspect listeners for overlapping keys.
       KeyboardListener.inspectKeyboardListeners( keyboardListeners, context.domEvent );
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', context, true );
@@ -868,21 +861,43 @@ export default class Input extends PhetioObject {
     } );
   }
 
-  public recursiveScanForGlobalKeyboardListeners( node: Node, listeners: KeyboardListener<OneKeyStroke[]>[] ): KeyboardListener<OneKeyStroke[]>[] {
+  /**
+   * Recursive walk through the scene graph, looking for any Nodes that can receive input events and have a global
+   * KeyboardListeners. If a listener is found, it is added to the list. The list is used to find overlapping keys
+   * in the KeyboardListeners that might fire.
+   */
+  private recursiveScanForGlobalKeyboardListeners( node: Node, listeners: KeyboardListener<OneKeyStroke[]>[] ): KeyboardListener<OneKeyStroke[]>[] {
+    if ( Input.canNodeReceivePDOMInput( node ) ) {
 
-    // The KeyboardListener will be assigned to a Node
-    if ( !node.isDisposed && node.isVisible() && node.isInputEnabled() && node.isPDOMVisible() ) {
       // Reverse iteration follows the z-order from "visually in front" to "visually in back" like normal dipatch
       for ( let i = node._children.length - 1; i >= 0; i-- ) {
         this.recursiveScanForGlobalKeyboardListeners( node._children[ i ], listeners );
       }
 
-      // if the node has a KeyboardListener that is global, add it to the list
       const globalKeyboardListeners = node.inputListeners.filter( listener => listener instanceof KeyboardListener && listener.global );
 
-      // @ts-expect-error
-      listeners.push( ...globalKeyboardListeners );
+      listeners.push( ...globalKeyboardListeners as KeyboardListener<OneKeyStroke[]>[] );
     }
+
+    return listeners;
+  }
+
+  /**
+   * Scans the trail for KeyboardListeners and adds them to the list. KeyboardListeners that may fire are collected
+   * to look for overlapping keys.
+   */
+  private scanTrailForKeyboardListeners( trail: Trail, listeners: KeyboardListener<OneKeyStroke[]>[] ): KeyboardListener<OneKeyStroke[]>[] {
+    const nodes = trail.nodes;
+    nodes.forEach( node => {
+      if ( Input.canNodeReceivePDOMInput( node ) ) {
+
+        // skip the global listeners, they will have been added by the above scan
+        const nodeKeyboardListeners = node.inputListeners.filter( listener => listener instanceof KeyboardListener && !listener.global );
+
+        // @ts-expect-error
+        listeners.push( ...nodeKeyboardListeners );
+      }
+    } );
 
     return listeners;
   }
@@ -1170,7 +1185,7 @@ export default class Input extends PhetioObject {
     const inputEvent = new SceneryEvent<DOMEvent>( new Trail(), eventType, pointer, context );
 
     const recursiveGlobalDispatch = ( node: Node ) => {
-      if ( !node.isDisposed && node.isVisible() && node.isInputEnabled() && node.isPDOMVisible() ) {
+      if ( Input.canNodeReceivePDOMInput( node ) ) {
         // Reverse iteration follows the z-order from "visually in front" to "visually in back" like normal dipatch
         for ( let i = node._children.length - 1; i >= 0; i-- ) {
           recursiveGlobalDispatch( node._children[ i ] );
@@ -1990,6 +2005,13 @@ export default class Input extends PhetioObject {
         return;
       }
     }
+  }
+
+  /**
+   * Conditions for the provided Node to receive input events.
+   */
+  private static canNodeReceivePDOMInput( node: Node ): boolean {
+    return !node.isDisposed && node.isVisible() && node.isInputEnabled() && node.isPDOMVisible();
   }
 
   /**
