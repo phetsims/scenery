@@ -242,26 +242,3 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   document.body.removeChild( display.domElement );
   display.dispose();
 } );
-
-//
-// QUnit.test( 'KeyboardListener Callback timing', assert => {
-//   const rootNode = new Node( { tagName: 'div' } );
-//   const display = new Display( rootNode );
-//   display.initializeEvents();
-//   document.body.appendChild( display.domElement );
-//
-//
-//   //
-//   // a -> callback timer
-//   //
-//   // wait
-//   // b -> callback timer
-//   //
-//   // release before b
-//   //
-//   // ensure a fires
-//
-//
-//   document.body.removeChild( display.domElement );
-//   display.dispose();
-// });
