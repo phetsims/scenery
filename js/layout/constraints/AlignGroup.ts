@@ -28,6 +28,7 @@ import { AlignBox, Node, scenery } from '../../imports.js';
 import { AlignBoxOptions } from '../nodes/AlignBox.js';
 import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 
 let globalId = 1;
 
@@ -137,7 +138,7 @@ export default class AlignGroup extends Disposable {
   /**
    * Creates an alignment box with the given content and options.
    */
-  public createBox( content: Node, options?: AlignBoxOptions ): AlignBox {
+  public createBox( content: Node, options?: StrictOmit<AlignBoxOptions, 'group'> ): AlignBox {
 
     // Setting the group should call our addAlignBox()
     return new AlignBox( content, combineOptions<AlignBoxOptions>( {
