@@ -7,7 +7,7 @@
  */
 
 import { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { Separator, SeparatorOptions, scenery, WidthSizable, WidthSizableOptions } from '../../imports.js';
+import { scenery, Separator, SeparatorOptions, WidthSizable, WidthSizableOptions } from '../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
 type ParentOptions = WidthSizableOptions & SeparatorOptions;

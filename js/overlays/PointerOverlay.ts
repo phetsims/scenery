@@ -11,7 +11,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Display, TOverlay, Node, PDOMPointer, Pointer, scenery, svgns, Utils } from '../imports.js';
+import { Display, Node, PDOMPointer, Pointer, scenery, svgns, TOverlay, Utils } from '../imports.js';
 
 export default class PointerOverlay implements TOverlay {
 

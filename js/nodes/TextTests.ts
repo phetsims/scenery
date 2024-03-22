@@ -48,4 +48,3 @@ QUnit.test( 'DerivedProperty stringProperty', assert => {
     text.string = 'hi';
   }, 'cannot set a derivedProperty' );
 } );
-

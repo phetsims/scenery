@@ -13,4 +13,3 @@ type TAttachableInputListener = {
   interrupt: () => void;
 } & TInputListener;
 export default TAttachableInputListener;
-

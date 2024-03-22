@@ -18,7 +18,7 @@
 
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import { HeightSizableNode, LayoutProxy, extendsHeightSizable, extendsWidthSizable, Node, scenery, SizableNode, WidthSizableNode } from '../../imports.js';
+import { extendsHeightSizable, extendsWidthSizable, HeightSizableNode, LayoutProxy, Node, scenery, SizableNode, WidthSizableNode } from '../../imports.js';
 
 export default abstract class LayoutConstraint {
 

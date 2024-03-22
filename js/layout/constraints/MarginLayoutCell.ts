@@ -13,7 +13,7 @@ import { Shape } from '../../../../kite/js/imports.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import { Font, TColor, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, Text } from '../../imports.js';
+import { Font, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, TColor, Text } from '../../imports.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export type MarginLayout = {

@@ -17,7 +17,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { TInputListener, Node, PressListener, PressListenerOptions, scenery, SceneryEvent } from '../imports.js';
+import { Node, PressListener, PressListenerOptions, scenery, SceneryEvent, TInputListener } from '../imports.js';
 
 type SelfOptions = {
   // Called as fire() when the button is fired.

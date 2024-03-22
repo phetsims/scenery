@@ -8,7 +8,7 @@
 
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { FlowBox, FlowBoxOptions, scenery, Node, VSeparator } from '../../imports.js';
+import { FlowBox, FlowBoxOptions, Node, scenery, VSeparator } from '../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
 export type VBoxOptions = StrictOmit<FlowBoxOptions, 'orientation'>;

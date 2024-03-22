@@ -78,4 +78,3 @@ QUnit.test( 'AncestorNodesProperty', assert => {
 
   ancestorNodesProperty.dispose();
 } );
-
