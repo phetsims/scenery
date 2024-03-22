@@ -70,7 +70,7 @@ export default class NewKeyboardDragListener extends KeyboardListener<OneKeyStro
       {
         keys: keys,
         listenerFireTrigger: 'both',
-        allowExtraModifierKeys: true,
+        excludedModifierKeys: [ 'shift' ],
         callback: ( event, keysPressed, listener ) => {
           if ( listener.keysDown ) {
             if ( keysPressed === 'shift' ) {

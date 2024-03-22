@@ -834,8 +834,6 @@ export default class Input extends PhetioObject {
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', context, false );
 
-      KeyboardListener.undeferKeyboardListeners( context.domEvent.code );
-
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
       phetioPlayback: true,
@@ -868,8 +866,6 @@ export default class Input extends PhetioObject {
    */
   private recursiveScanForGlobalKeyboardListeners( node: Node, listeners: KeyboardListener<OneKeyStroke[]>[] ): KeyboardListener<OneKeyStroke[]>[] {
     if ( Input.canNodeReceivePDOMInput( node ) ) {
-
-      // Reverse iteration follows the z-order from "visually in front" to "visually in back" like normal dipatch
       for ( let i = node._children.length - 1; i >= 0; i-- ) {
         this.recursiveScanForGlobalKeyboardListeners( node._children[ i ], listeners );
       }

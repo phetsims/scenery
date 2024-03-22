@@ -87,22 +87,19 @@ export type OneKeyStroke = `${AllowedKeys}` |
 type ListenerFireTrigger = 'up' | 'down' | 'both';
 
 // Controls how the listener behaves when another listener is found that will fire for the same keys.
-// - 'most_specific': The listener with the most specific keys will fire. If the keys are a subset of another listener,
-//   the listener will be deferred, and the callback will not fire. This is the default behavior.
-// - 'allow': The listener will fire even if another listener has more specific keys, or if another listener
-//   uses the exact same keys.
-// - 'error': The listener will throw an error if another listener has more specific keys, or if another listener
-type ListenerOverlapBehavior = 'most_specific' | 'allow' | 'error';
+// - 'error': The listener will throw an error if another listener uses the same keys. This is the default behavior.
+// - 'allow': All key overlaps with other listeners are allowed.
+type ListenerOverlapBehavior = 'allow' | 'error';
 
 type KeyGroupWithListener = {
   listener: KeyboardListener<OneKeyStroke[]>;
   keyGroup: KeyGroup<OneKeyStroke[]>;
 };
 
-// A global collection of all deferred KeyboardListeners. These are listeners that will not fire because another
-// listener has more specific keys. Listeners are added to this map if there is a detected overlap with another
-// listener on key down. When a key is released, the listener will be undeferred and removed from the map.
-const deferredKeyboardListenersMap = new Map<string, KeyboardListener<OneKeyStroke[]>[]>();
+// Static list of "Modifier key" codes for KeyboardListener. While any of these keys are pressed, only listeners
+// that use these keys (and only those keys) can fire. For example, if 'shift' is pressed, only listeners that use
+// 'shift' as a modifier key can fire. A copy is used to avoid modifying the original. This list may change!
+const modifierKeyCodes = [ ...KeyboardUtils.MODIFIER_KEY_CODES ];
 
 type SelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
@@ -155,9 +152,14 @@ type SelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // ListenerFireTrigger type documentation.
   listenerFireTrigger?: ListenerFireTrigger;
 
-  // Controls how the listener behaves when another listener is found that will fire for the same keys. See
-  // ListenerOverlapBehavior type documentation.
+  // Allow or error when there is another listener that can fire when there is an overlap in keys.
+  // Has no impact on listener behavior, this is just listener overlap assertions.
   listenerOverlapBehavior?: ListenerOverlapBehavior;
+
+  // If provided, the listener WILL fire even if these "Modifier" keys are pressed. This goes against the default
+  // behavior for modifier keys, but this is an escape hatch for special cases. For example, if you want a listener
+  // to still fire when 'shift' key when you have keys 'shift' and 't' in the keys array, you can provide 'shift'.
+  excludedModifierKeys?: ModifierKey[];
 };
 
 export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[]> = SelfOptions<Keys> & EnabledComponentOptions;
@@ -217,10 +219,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   private readonly _fireOnHoldInterval: number;
 
   public readonly listenerOverlapBehavior: ListenerOverlapBehavior;
-
-  // (scenery-internal) - Scenery has found that another KeyboardListener will fire for the same keys. It will
-  // defer this listener if the other key has more specific keys.
-  public _deferred = false;
+  private readonly excludedModifierCodes: string[];
 
   // see options documentation
   public readonly global: boolean;
@@ -243,7 +242,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
       fireOnHold: false,
       fireOnHoldDelay: 400,
       fireOnHoldInterval: 100,
-      listenerOverlapBehavior: 'most_specific'
+      listenerOverlapBehavior: 'error',
+      excludedModifierKeys: []
     }, providedOptions );
 
     super( providedOptions );
@@ -258,6 +258,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this._fireOnHoldDelay = options.fireOnHoldDelay;
     this._fireOnHoldInterval = options.fireOnHoldInterval;
     this.listenerOverlapBehavior = options.listenerOverlapBehavior;
+    this.excludedModifierCodes = options.excludedModifierKeys.map( key => EnglishStringToCodeMap[ key ]! ).flat();
 
     this._activeKeyGroups = [];
 
@@ -285,9 +286,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    * Mostly required to fire with CallbackTimer since the callback cannot take arguments.
    */
   public fireCallback( event: SceneryEvent<KeyboardEvent> | null, keyGroup: KeyGroup<Keys> ): void {
-    if ( !this._deferred ) {
-      this._callback( event, keyGroup.naturalKeys, this );
-    }
+    this._callback( event, keyGroup.naturalKeys, this );
   }
 
   /**
@@ -406,7 +405,20 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     // The final key of the group is down if any of them are pressed
     const finalDownKey = keyGroup.keys.find( key => globalKeyStateTracker.isKeyDown( key ) );
 
-    return areModifierKeysDown && !!finalDownKey;
+    if ( areModifierKeysDown && !!finalDownKey ) {
+
+      // All keys are down.
+      const allKeys = [ ...downModifierKeys, finalDownKey ];
+
+      // Remove any excluded keys for this listener from the global list of modifier keys assigned to KeyboardListener.
+      const modifierCodesForThisListener = modifierKeyCodes.filter( key => !this.excludedModifierCodes.includes( key ) );
+
+      // If there are any extra modifier keys down, the listener will not fire
+      return globalKeyStateTracker.areKeysDownWithoutExtraModifiers( allKeys, modifierCodesForThisListener );
+    }
+    else {
+      return false;
+    }
   }
 
   /**
@@ -415,8 +427,19 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   private areModifierKeysDownForListener( keyGroup: KeyGroup<Keys> ): boolean {
     const downModifierKeys = this.getDownModifierKeys( keyGroup );
 
-    // modifier keys are down if one key from each inner array is down
-    return downModifierKeys.length === keyGroup.modifierKeys.length;
+    const modifierKeysDown = downModifierKeys.length === keyGroup.modifierKeys.length;
+
+    if ( modifierKeysDown ) {
+
+      // Remove any excluded keys for this listener from the global list of modifier keys assigned to KeyboardListener.
+      const modifierCodesForThisListener = modifierKeyCodes.filter( key => !this.excludedModifierCodes.includes( key ) );
+
+      // If there are any extra modifier keys down, the listener will not fire
+      return globalKeyStateTracker.areKeysDownWithoutExtraModifiers( downModifierKeys, modifierCodesForThisListener );
+    }
+    else {
+      return false;
+    }
   }
 
   /**
@@ -611,21 +634,15 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
 
   /**
    * Look for overlapping keys in the provided listeners. This is used by Input.ts when it is time to respond to
-   * keyboard events. Input.ts provides all of the KeyboardListeners that may respond to user input. Behavior
-   * of the listeners is then controlled by the listenerOverlapBehavior option.
+   * keyboard events. Input.ts provides all of the KeyboardListeners that may respond to user input. This function
+   * looks for overlapping keys and throws an error if there are any. Overlap behavior is decided by this logic:
    *
-   * To decide which listenerOverlapBehavior to use, this logic is used:
-   * - If either listener has 'error' behavior, the 'error' behavior is used.
-   * - Else if either listener has 'allow' behavior, the 'allow' behavior is used.
-   * - Otherwise, use 'most_specific' behavior (would be on both listeners)
+   * If both listeners have the 'error' behavior, the 'error' behavior is used.
+   * Otherwise, 'allow' behavior is used because one of the listeners is opting to allow the overlap.
    *
    * Then, the function behaves like this depending on the listenerOverlapBehavior:
-   * - 'most_specific': If a listener uses a subset of another listener's keys, the listener will be deferred and
-   *    only the other listener will fire. If any two listeners use the exact same keys, an error will be thrown.
-   * - 'error': If any two listeners use the same keys or if one listener uses a subset of another listener's keys,
-   *   an error will be thrown.
-   * - 'allow': All listeners will fire, even if they use the same keys or if one listener uses a subset of another
-   *   listener's keys.
+   * - 'error': If any two listeners use the same keys, an error will be thrown.
+   * - 'allow': All key overlaps are allowed.
    */
   public static inspectKeyboardListeners( keyboardListeners: KeyboardListener<OneKeyStroke[]>[], event: KeyboardEvent ): void {
 
@@ -647,71 +664,38 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
         const objectA = naturalKeysWithListener[ i ];
         const objectB = naturalKeysWithListener[ j ];
 
-        // Convert keys from "readable" string to an array so that we can easily compare them.
-        const aSplitKeys = objectA.keyGroup.naturalKeys.split( '+' );
-        const bSplitKeys = objectB.keyGroup.naturalKeys.split( '+' );
+        const aBehavior = objectA.listener.listenerOverlapBehavior;
+        const bBehavior = objectB.listener.listenerOverlapBehavior;
+        const bothError = aBehavior === 'error' && bBehavior === 'error';
 
-        const [ shorterObject, longerObject ] = aSplitKeys.length < bSplitKeys.length ? [ objectA, objectB ] : [ objectB, objectA ];
-        const [ shorterKeys, longerKeys ] = aSplitKeys.length < bSplitKeys.length ? [ aSplitKeys, bSplitKeys ] : [ bSplitKeys, aSplitKeys ];
-
-        // If the shorter keys are a subset of the longer keys, there is an overlap that we need to handle. The
-        // listener with less specific keys may be deferred based on the behavior.
-        if ( KeyboardUtils.isArraySubset( shorterKeys, longerKeys ) ) {
-          if ( longerObject.listener.areKeysDownForListener( longerObject.keyGroup ) ) {
-
-            const subsetBehavior = shorterObject.listener.listenerOverlapBehavior;
-            const supersetBehavior = longerObject.listener.listenerOverlapBehavior;
-
-            const eitherError = subsetBehavior === 'error' || supersetBehavior === 'error';
-            const eitherAllow = subsetBehavior === 'allow' || supersetBehavior === 'allow';
-
-            if ( eitherError ) {
-              assert && assert( false, `Overlap detected in KeyboardListeners. ${shorterKeys} key(s) are a subset of the ${longerKeys} key(s)` );
-            }
-            else if ( eitherAllow ) {
-
-              // 'allow' behavior, nothing to do
-            }
-            else {
-
-              // 'most_specific' behavior - if both listeners use the same keys, an error will be thrown. Otherwise,
-              // the listener with less specific keys will be deferred.
-              assert && assert(
-                shorterKeys.length !== longerKeys.length,
-                'Overlap detected in KeyboardListeners. The keys are the same. Use listenerOverlapBehavior: "allow" or change keys.'
-              );
-
-              // Both listeners have 'most_specific' behavior, defer the listener with less specific keys
-              shorterObject.listener._deferred = true;
-
-              const keyCode = event.code;
-              const listener = shorterObject.listener;
-              if ( deferredKeyboardListenersMap.has( keyCode ) ) {
-                deferredKeyboardListenersMap.get( keyCode )!.push( listener );
-              }
-              else {
-                deferredKeyboardListenersMap.set( keyCode, [ listener ] );
-              }
-            }
-          }
+        if ( bothError ) {
+          assert && assert(
+            objectA.keyGroup.naturalKeys !== objectB.keyGroup.naturalKeys,
+            `Overlap detected in KeyboardListeners for key(s): ${objectA.keyGroup.naturalKeys}. The keys are the same. Use listenerOverlapBehavior: "allow" or change keys.`
+          );
         }
       }
     }
   }
 
   /**
-   * Undefer all listeners that are deferred for the provided keyCode. This should be called when a key is released.
+   * TODO: Documentation. https://github.com/phetsims/scenery/issues/1570
    */
-  public static undeferKeyboardListeners( keyCode: string ): void {
-    if ( deferredKeyboardListenersMap.has( keyCode ) ) {
-      deferredKeyboardListenersMap.get( keyCode )!.forEach( listener => { listener._deferred = false; } );
-      deferredKeyboardListenersMap.delete( keyCode );
-    }
+  public static addModifierKey( key: ModifierKey ): void {
+    const codes = EnglishStringToCodeMap[ key ];
+    modifierKeyCodes.push( ...codes );
+  }
 
-    // Check the map when all keys have been released - if all keys are released and there are deferred listeners.
-    assert && !globalKeyStateTracker.keysAreDown() && assert( deferredKeyboardListenersMap.size === 0,
-      'There are deferred listeners but no keys are down! There is a bug or memory leak.'
-    );
+  /**
+   * TODO: Documentation. https://github.com/phetsims/scenery/issues/1570
+   */
+  public static removeModifierKey( key: ModifierKey ): void {
+    const codes = EnglishStringToCodeMap[ key ];
+    modifierKeyCodes.slice().forEach( ( code, index ) => {
+      if ( codes.includes( code ) ) {
+        modifierKeyCodes.splice( index, 1 );
+      }
+    } );
   }
 
   /**

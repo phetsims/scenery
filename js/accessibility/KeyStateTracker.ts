@@ -341,12 +341,15 @@ class KeyStateTracker {
    * fire.
    *
    * @param keyList - List of KeyboardEvent.code strings for keys you are interested in.
+   * @param [modifierKeys] - List of 'modifier' keys. You may have a different set of keys you want to consider modifiers,
+   *                       so you can provide your own list with this argument.
    */
-  public areKeysDownWithoutExtraModifiers( keyList: string[] ): boolean {
+  public areKeysDownWithoutExtraModifiers( keyList: string[], modifierKeys?: string[] ): boolean {
+    modifierKeys = modifierKeys || KeyboardUtils.MODIFIER_KEY_CODES;
 
     // If any modifier keys are down that are not in the keyList, return false
-    for ( let i = 0; i < KeyboardUtils.MODIFIER_KEY_CODES.length; i++ ) {
-      const modifierKey = KeyboardUtils.MODIFIER_KEY_CODES[ i ];
+    for ( let i = 0; i < modifierKeys.length; i++ ) {
+      const modifierKey = modifierKeys[ i ];
       if ( this.isKeyDown( modifierKey ) && !keyList.includes( modifierKey ) ) {
         return false;
       }
