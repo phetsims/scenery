@@ -1,4 +1,4 @@
-// Copyright 2022, University of Colorado Boulder
+// Copyright 2022-2024, University of Colorado Boulder
 
 /**
  * A listener for common button usage, providing the fire() method/callback and helpful properties. NOTE that it doesn't

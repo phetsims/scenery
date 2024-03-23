@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * A Property that, if there is a unique path from one Node to another (A => root => B, or A => B, or B => A), will

@@ -1,4 +1,4 @@
-// Copyright 2017-2023, University of Colorado Boulder
+// Copyright 2017-2024, University of Colorado Boulder
 
 /**
  * Controller that creates and keeps an SVG linear gradient up-to-date with a Scenery LinearGradient

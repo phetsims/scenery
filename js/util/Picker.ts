@@ -1,4 +1,4 @@
-// Copyright 2016-2023, University of Colorado Boulder
+// Copyright 2016-2024, University of Colorado Boulder
 
 /**
  * Sub-component of a Node that handles pickability and hit testing.
