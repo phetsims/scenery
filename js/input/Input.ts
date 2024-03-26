@@ -874,9 +874,12 @@ export default class Input extends PhetioObject {
         this.recursiveScanForGlobalKeyboardListeners( node._children[ i ], listeners );
       }
 
-      const globalKeyboardListeners = node.inputListeners.filter( listener => listener instanceof KeyboardListener && listener.global );
-
-      listeners.push( ...globalKeyboardListeners as KeyboardListener<OneKeyStroke[]>[] );
+      const nodeListeners = node.inputListeners;
+      for ( let i = 0; i < nodeListeners.length; i++ ) {
+        if ( nodeListeners[ i ] instanceof KeyboardListener && ( nodeListeners[ i ] as KeyboardListener<OneKeyStroke[]> ).global ) {
+          listeners.push( nodeListeners[ i ] as KeyboardListener<OneKeyStroke[]> );
+        }
+      }
     }
 
     return listeners;
