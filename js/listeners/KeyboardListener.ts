@@ -91,11 +91,6 @@ type ListenerFireTrigger = 'up' | 'down' | 'both';
 // - 'allow': All key overlaps with other listeners are allowed.
 type ListenerOverlapBehavior = 'allow' | 'error';
 
-type KeyGroupWithListener = {
-  listener: KeyboardListener<OneKeyStroke[]>;
-  keyGroup: KeyGroup<OneKeyStroke[]>;
-};
-
 // Static list of "Modifier key" codes for KeyboardListener. While any of these keys are pressed, only listeners
 // that use these keys (and only those keys) can fire. For example, if 'shift' is pressed, only listeners that use
 // 'shift' as a modifier key can fire. A copy is used to avoid modifying the original. This list may change!
