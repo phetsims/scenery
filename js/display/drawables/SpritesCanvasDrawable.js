@@ -29,6 +29,12 @@ class SpritesCanvasDrawable extends CanvasSelfDrawable {
     const baseMipmapScale = Imageable.getApproximateMatrixScale( matrix ) * ( window.devicePixelRatio || 1 );
 
     const numInstances = node._spriteInstances.length;
+
+    if ( assert && numInstances > 0 ) {
+      assert( node.canvasBounds.isValid(),
+        'Sprites canvasBounds should be set and have non-negative area if it renders sprites' );
+    }
+
     for ( let i = 0; i < numInstances; i++ ) {
       const spriteInstance = node._spriteInstances[ i ];
       const spriteImage = spriteInstance.sprite.imageProperty.value;

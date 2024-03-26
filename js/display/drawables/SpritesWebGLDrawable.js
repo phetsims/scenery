@@ -191,6 +191,9 @@ class SpritesWebGLDrawable extends WebGLSelfDrawable {
       return 0;
     }
 
+    assert && assert( this.node.canvasBounds.isValid(),
+      'Sprites canvasBounds should be set and have non-negative area if it renders sprites' );
+
     this.spriteSheet.updateTexture();
 
     this.shaderProgram.use();
