@@ -644,7 +644,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    * - 'error': If any two listeners use the same keys, an error will be thrown.
    * - 'allow': All key overlaps are allowed.
    */
-  public static inspectKeyboardListeners( keyboardListeners: KeyboardListener<OneKeyStroke[]>[], event: KeyboardEvent ): void {
+  public static inspectKeyboardListeners( keyboardListeners: KeyboardListener<OneKeyStroke[]>[] ): void {
 
     // Collect KeyGroups with their listeners so can easily look up the listener when iterating through used keys.
     const naturalKeysWithListener = keyboardListeners.reduce( ( accumulator: KeyGroupWithListener[], listener: KeyboardListener<OneKeyStroke[]> ) => {

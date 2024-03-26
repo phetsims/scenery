@@ -794,17 +794,21 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, context.domEvent )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      // Look for all global KeyboardListeners that are on Nodes that can receive input events. We will inspect
-      // this list for overlapping keys.
-      const keyboardListeners: KeyboardListener<OneKeyStroke[]>[] = [];
-      this.recursiveScanForGlobalKeyboardListeners( this.rootNode, keyboardListeners );
-
-      // Also add any local KeyboardListeners along the trail.
       const trail = this.getPDOMEventTrail( context.domEvent, 'keydown' );
-      trail && this.scanTrailForKeyboardListeners( trail, keyboardListeners );
 
-      // Inspect listeners for overlapping keys.
-      KeyboardListener.inspectKeyboardListeners( keyboardListeners, context.domEvent );
+      if ( assert ) {
+
+        // Look for all global KeyboardListeners that are on Nodes that can receive input events. We will inspect
+        // this list for overlapping keys.
+        const keyboardListeners: KeyboardListener<OneKeyStroke[]>[] = [];
+        this.recursiveScanForGlobalKeyboardListeners( this.rootNode, keyboardListeners );
+
+        // Also add any local KeyboardListeners along the trail.
+        trail && this.scanTrailForKeyboardListeners( trail, keyboardListeners );
+
+        // Inspect listeners for overlapping keys.
+        KeyboardListener.inspectKeyboardListeners( keyboardListeners );
+      }
 
       this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', context, true );
 
