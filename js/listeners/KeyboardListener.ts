@@ -663,7 +663,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
 
           // Already using this keyGroup. Notify if there is an overlap and both listeners have the 'error' behavior.
           const entry = keyGroupMap.get( keyString )!;
-          console.log( listener.listenerOverlapBehavior );
           if ( listener.listenerOverlapBehavior === 'error' && entry.listener.listenerOverlapBehavior === 'error' ) {
             assert && assert( false,
               `Overlap detected in KeyboardListeners for key(s): ${keyGroup.naturalKeys}. The keys are the same. Use listenerOverlapBehavior: "allow" or change keys.`
