@@ -800,7 +800,7 @@ export default class Input extends PhetioObject {
 
         // Look for all global KeyboardListeners that are on Nodes that can receive input events. We will inspect
         // this list for overlapping keys.
-        const keyboardListeners: KeyboardListener<OneKeyStroke[]>[] = [];
+        const keyboardListeners = new Set<KeyboardListener<OneKeyStroke[]>>();
         this.recursiveScanForGlobalKeyboardListeners( this.rootNode, keyboardListeners );
 
         // Also add any local KeyboardListeners along the trail.
@@ -867,8 +867,11 @@ export default class Input extends PhetioObject {
    * Recursive walk through the scene graph, looking for any Nodes that can receive input events and have a global
    * KeyboardListeners. If a listener is found, it is added to the list. The list is used to find overlapping keys
    * in the KeyboardListeners that might fire.
+   *
+   * @param node - The node to start the search from
+   * @param listeners - The list of KeyboardListeners that have been found - a Set so list has unique values.
    */
-  private recursiveScanForGlobalKeyboardListeners( node: Node, listeners: KeyboardListener<OneKeyStroke[]>[] ): KeyboardListener<OneKeyStroke[]>[] {
+  private recursiveScanForGlobalKeyboardListeners( node: Node, listeners: Set<KeyboardListener<OneKeyStroke[]>> ): Set<KeyboardListener<OneKeyStroke[]>> {
     if ( Input.canNodeReceivePDOMInput( node ) ) {
       for ( let i = node._children.length - 1; i >= 0; i-- ) {
         this.recursiveScanForGlobalKeyboardListeners( node._children[ i ], listeners );
@@ -877,7 +880,7 @@ export default class Input extends PhetioObject {
       const nodeListeners = node.inputListeners;
       for ( let i = 0; i < nodeListeners.length; i++ ) {
         if ( nodeListeners[ i ] instanceof KeyboardListener && ( nodeListeners[ i ] as KeyboardListener<OneKeyStroke[]> ).global ) {
-          listeners.push( nodeListeners[ i ] as KeyboardListener<OneKeyStroke[]> );
+          listeners.add( nodeListeners[ i ] as KeyboardListener<OneKeyStroke[]> );
         }
       }
     }
@@ -888,17 +891,21 @@ export default class Input extends PhetioObject {
   /**
    * Scans the trail for KeyboardListeners and adds them to the list. KeyboardListeners that may fire are collected
    * to look for overlapping keys.
+   * @param trail - The trail to scan
+   * @param listeners - The list of KeyboardListeners that have been found - a Set so list has unique values.
    */
-  private scanTrailForKeyboardListeners( trail: Trail, listeners: KeyboardListener<OneKeyStroke[]>[] ): KeyboardListener<OneKeyStroke[]>[] {
+  private scanTrailForKeyboardListeners( trail: Trail, listeners: Set<KeyboardListener<OneKeyStroke[]>> ): Set<KeyboardListener<OneKeyStroke[]>> {
     const nodes = trail.nodes;
     nodes.forEach( node => {
       if ( Input.canNodeReceivePDOMInput( node ) ) {
+        const nodeListeners = node.inputListeners;
+        for ( let i = 0; i < nodeListeners.length; i++ ) {
 
-        // skip the global listeners, they will have been added by the above scan
-        const nodeKeyboardListeners = node.inputListeners.filter( listener => listener instanceof KeyboardListener && !listener.global );
-
-        // @ts-expect-error
-        listeners.push( ...nodeKeyboardListeners );
+          // skip the global listeners, they will have been added by the above scan
+          if ( nodeListeners[ i ] instanceof KeyboardListener && !( nodeListeners[ i ] as KeyboardListener<OneKeyStroke[]> ).global ) {
+            listeners.add( nodeListeners[ i ] as KeyboardListener<OneKeyStroke[]> );
+          }
+        }
       }
     } );
 

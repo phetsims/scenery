@@ -643,36 +643,37 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    * Then, the function behaves like this depending on the listenerOverlapBehavior:
    * - 'error': If any two listeners use the same keys, an error will be thrown.
    * - 'allow': All key overlaps are allowed.
+   *
+   * NOTE: This function is called every keydown event (frequently in Input.ts). It needs to be fast and memory
+   * efficient. It should only be called when assertions are enabled.
    */
-  public static inspectKeyboardListeners( keyboardListeners: KeyboardListener<OneKeyStroke[]>[] ): void {
+  public static inspectKeyboardListeners( keyboardListeners: Set<KeyboardListener<OneKeyStroke[]>> ): void {
 
-    // Collect KeyGroups with their listeners so can easily look up the listener when iterating through used keys.
-    const naturalKeysWithListener = keyboardListeners.reduce( ( accumulator: KeyGroupWithListener[], listener: KeyboardListener<OneKeyStroke[]> ) => {
-      const keyGroups = listener._keyGroups;
-      keyGroups.forEach( keyGroup => {
-        accumulator.push( {
-          listener: listener,
-          keyGroup: keyGroup
-        } );
-      } );
-      return accumulator;
-    }, [] );
+    // Initialize a Map to keep track of keyGroups and their associated listeners. A string from the keygroup
+    // will be used as a key to keep track of used keys. Using a Map reduces the need for nested loops and it is
+    // more efficient for lookups.
+    const keyGroupMap = new Map<string, { listener: KeyboardListener<OneKeyStroke[]>; keyGroups: KeyGroup<OneKeyStroke[]>[] }>();
 
-    // Compares each listener with every other, only visiting each pair once
-    for ( let i = 0; i < naturalKeysWithListener.length; i++ ) {
-      for ( let j = i + 1; j < naturalKeysWithListener.length; j++ ) {
-        const objectA = naturalKeysWithListener[ i ];
-        const objectB = naturalKeysWithListener[ j ];
+    for ( const listener of keyboardListeners ) {
+      for ( const keyGroup of listener._keyGroups ) {
 
-        const aBehavior = objectA.listener.listenerOverlapBehavior;
-        const bBehavior = objectB.listener.listenerOverlapBehavior;
-        const bothError = aBehavior === 'error' && bBehavior === 'error';
+        // Convert the keys array to a string for a consistent, comparable format.
+        const keyString = JSON.stringify( keyGroup.naturalKeys );
+        if ( !keyGroupMap.has( keyString ) ) {
 
-        if ( bothError ) {
-          assert && assert(
-            objectA.keyGroup.naturalKeys !== objectB.keyGroup.naturalKeys,
-            `Overlap detected in KeyboardListeners for key(s): ${objectA.keyGroup.naturalKeys}. The keys are the same. Use listenerOverlapBehavior: "allow" or change keys.`
-          );
+          // If this keyGroup has not been encountered before, create a new entry for the map.
+          keyGroupMap.set( keyString, { listener: listener, keyGroups: [ keyGroup ] } );
+        }
+        else {
+
+          // Already using this keyGroup. Notify if there is an overlap and both listeners have the 'error' behavior.
+          const entry = keyGroupMap.get( keyString )!;
+          console.log( listener.listenerOverlapBehavior );
+          if ( listener.listenerOverlapBehavior === 'error' && entry.listener.listenerOverlapBehavior === 'error' ) {
+            assert && assert( false,
+              `Overlap detected in KeyboardListeners for key(s): ${keyGroup.naturalKeys}. The keys are the same. Use listenerOverlapBehavior: "allow" or change keys.`
+            );
+          }
         }
       }
     }
