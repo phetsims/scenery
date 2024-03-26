@@ -130,8 +130,9 @@ class SpritesWebGLDrawable extends WebGLSelfDrawable {
 
       'void main() {',
       '  vec4 color = texture2D( uTexture, vTextureCoord, -0.7 );', // mipmap LOD bias of -0.7 (for now)
-      '  color.a *= vAlpha;',
-      '  gl_FragColor = color;', // don't premultiply alpha (we are loading the textures as premultiplied already)
+      // our input and output is premultiplied alpha, so we need to multiply the color by the alpha
+      '  color *= vAlpha;',
+      '  gl_FragColor = color;',
       '}'
     ].join( '\n' ), {
       attributes: [ 'aVertex', 'aTextureCoord', 'aAlpha' ],
