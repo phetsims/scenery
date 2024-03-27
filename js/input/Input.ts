@@ -876,9 +876,12 @@ export default class Input extends PhetioObject {
     // Additionally, IE had some issues with skipping prevent default, see
     // https://github.com/phetsims/scenery/issues/464 for mouse handling.
     // WE WILL NOT preventDefault() on keyboard or alternative input events here
-    if ( !( this.passiveEvents === true ) &&
-         ( callback !== this.mouseDown || platform.edge ) &&
-         batchType !== BatchedDOMEventType.ALT_TYPE ) {
+    if (
+      !( this.passiveEvents === true ) &&
+      ( callback !== this.mouseDown || platform.edge ) &&
+      batchType !== BatchedDOMEventType.ALT_TYPE &&
+      !context.hasNoPreventDefault()
+    ) {
       // We cannot prevent a passive event, so don't try
       context.domEvent.preventDefault();
     }

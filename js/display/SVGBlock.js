@@ -63,16 +63,13 @@ class SVGBlock extends FittedBlock {
 
       // main SVG element
       this.svg = document.createElementNS( svgns, 'svg' );
+      this.svg.style.pointerEvents = 'none';
       this.svg.style.position = 'absolute';
       this.svg.style.left = '0';
       this.svg.style.top = '0';
 
       // pdom - make sure the element is not focusable (it is focusable by default in IE11 full screen mode)
       this.svg.setAttribute( 'focusable', false );
-
-      //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss https://github.com/phetsims/scenery/issues/1581
-      // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
-      this.svg.style[ 'pointer-events' ] = 'none';
 
       // @public {SVGDefsElement} - the <defs> block that we will be stuffing gradients and patterns into
       this.defs = document.createElementNS( svgns, 'defs' );

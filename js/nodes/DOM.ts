@@ -11,13 +11,20 @@ import extendDefined from '../../../phet-core/js/extendDefined.js';
 import { DOMDrawable, DOMSelfDrawable, Instance, Node, NodeOptions, Renderer, scenery } from '../imports.js';
 
 const DOM_OPTION_KEYS = [
-  'element', // {HTMLElement} - Sets the element, see setElement() for more documentation
-  'preventTransform' // {boolean} - Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
+  'element',
+  'preventTransform',
+  'allowInput'
 ];
 
 type SelfOptions = {
+  // Sets the element, see setElement() for more documentation
   element?: Element;
+
+  // Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
   preventTransform?: boolean;
+
+  // Whether we allow input to be received by the DOM element
+  allowInput?: boolean;
 };
 
 export type DOMOptions = SelfOptions & NodeOptions;
@@ -43,6 +50,9 @@ export default class DOM extends Node {
   // Flag that when true won't let Scenery apply a transform directly (the client will take care of that).
   private _preventTransform: boolean;
 
+  // Whether we allow input to be received by the DOM element
+  private _allowInput: boolean;
+
   /**
    * @param element - The HTML element, or a jQuery selector result.
    * @param [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
@@ -64,14 +74,17 @@ export default class DOM extends Node {
     super();
 
     this._container = document.createElement( 'div' );
+    this._container.style.position = 'absolute';
+    this._container.style.left = '0';
+    this._container.style.top = '0';
+    this._allowInput = false;
 
     this._$container = $( this._container );
-    this._$container.css( 'position', 'absolute' );
-    this._$container.css( 'left', 0 );
-    this._$container.css( 'top', 0 );
 
     this.invalidateDOMLock = false;
     this._preventTransform = false;
+
+    this.invalidateAllowInput( this._allowInput );
 
     // Have mutate() call setElement() in the proper order
     options = extendDefined<DOMOptions>( {
@@ -221,6 +234,29 @@ export default class DOM extends Node {
   public isTransformPrevented(): boolean {
     return this._preventTransform;
   }
+
+  /**
+   * Sets whether input is allowed for the DOM element. If false, we will disable input events with pointerEvents and
+   * the usual preventDefault(). If true, we'll set a flag internally so that we don't preventDefault() on input events.
+   */
+  public setAllowInput( allowInput: boolean ): void {
+    if ( this._allowInput !== allowInput ) {
+      this._allowInput = allowInput;
+
+      this.invalidateAllowInput( allowInput );
+    }
+  }
+
+  public isInputAllowed(): boolean { return this._allowInput; }
+
+  private invalidateAllowInput( allowInput: boolean ): void {
+    this._container.dataset.noPreventDefault = allowInput ? 'true' : 'false';
+    this._container.style.pointerEvents = allowInput ? 'auto' : 'none';
+  }
+
+  public set allowInput( value: boolean ) { this.setAllowInput( value ); }
+
+  public get allowInput(): boolean { return this.isInputAllowed(); }
 
   public override mutate( options?: DOMOptions ): this {
     return super.mutate( options );

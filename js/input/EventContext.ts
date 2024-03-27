@@ -25,6 +25,30 @@ export default class EventContext<out DOMEvent extends Event = Event> {
   public static createSynthetic(): EventContext {
     return new EventContext( new window.Event( 'synthetic' ) );
   }
+
+  /**
+   * DOM (Scenery) nodes set dataset.noPreventDefault on their container if they don't want preventDefault to be called.
+   * We search up the tree to detect this.
+   */
+  public hasNoPreventDefault(): boolean {
+    const target = this.domEvent?.target;
+
+
+    if ( target instanceof Element ) {
+      let element: Node | null = target;
+
+      while ( element ) {
+        // For DOM nodes, we can check for a data attribute
+        if ( element instanceof HTMLElement && element.dataset?.noPreventDefault === 'true' ) {
+          return true;
+        }
+
+        element = element.parentNode;
+      }
+    }
+
+    return false;
+  }
 }
 
 export const EventContextIO = new IOType( 'EventContextIO', {
