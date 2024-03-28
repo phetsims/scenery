@@ -11,8 +11,6 @@
  *    nodes in the trail)
  *
  * Manages key press state using EnglishKey from globalKeyStateTracker.
- * TODO: We need to gracefully handle when the user presses BOTH keys that correspond to an EnglishKey, e.g. https://github.com/phetsims/scenery/issues/1621
- * TODO: left-ctrl and right-ctrl, then releases one (it should still count ctrl as pressed).
  *
  * The "available" hotkeys are the union of the above two sources.
  *
@@ -35,7 +33,7 @@ import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 
-const hotkeySetComparator = ( a: Set<Hotkey>, b: Set<Hotkey> ) => {
+const setComparator = <Key>( a: Set<Key>, b: Set<Key> ) => {
   return a.size === b.size && [ ...a ].every( element => b.has( element ) );
 };
 
@@ -47,6 +45,7 @@ class HotkeyManager {
   // Enabled hotkeys that are either global, or under the current focus trail
   private readonly enabledHotkeysProperty: TProperty<Set<Hotkey>> = new TinyProperty( new Set<Hotkey>() );
 
+  // TODO: We don't need this as a Property, see https://github.com/phetsims/scenery/issues/1621
   private readonly englishKeysDownProperty: TProperty<Set<EnglishKey>> = new TinyProperty( new Set<EnglishKey>() );
 
   // The current set of modifier keys (pressed or not) based on current enabled hotkeys
@@ -84,7 +83,7 @@ class HotkeyManager {
       return hotkeys;
     }, {
       // We want to not over-notify, so we compare the sets directly
-      valueComparisonStrategy: hotkeySetComparator
+      valueComparisonStrategy: setComparator
     } );
 
     // Update enabledHotkeysProperty when availableHotkeysProperty (or any enabledProperty) changes
@@ -147,29 +146,28 @@ class HotkeyManager {
       }
 
       // Re-check all hotkeys (since modifier keys might have changed, OR we need to validate that there are no conflicts).
-      this.updateHotkeyStatus();
+      this.updateHotkeyStatus( null );
     } );
 
-    // Track keydowns
-    globalKeyStateTracker.keydownEmitter.addListener( keyboardEvent => {
-      const keyCode = KeyboardUtils.getEventCode( keyboardEvent );
+    // Track key state changes
+    globalKeyStateTracker.keyDownStateChangedEmitter.addListener( ( keyboardEvent: KeyboardEvent | null ) => {
+      const oldEnglishKeysDown = this.englishKeysDownProperty.value;
+      const newEnglishKeysDown = globalKeyStateTracker.getEnglishKeysDown();
+      const englishKeysChanged = !setComparator( oldEnglishKeysDown, newEnglishKeysDown );
 
-      if ( keyCode !== null ) {
-        const englishKey = eventCodeToEnglishString( keyCode );
-        if ( englishKey ) {
-          this.onKeyDown( englishKey, keyboardEvent );
-        }
+      if ( englishKeysChanged ) {
+        this.englishKeysDownProperty.value = newEnglishKeysDown;
+
+        this.updateHotkeyStatus( keyboardEvent );
       }
-    } );
+      else {
+        // No keys changed, got the browser/OS "fire on hold". See what hotkeys have the browser fire-on-hold behavior.
 
-    // Track keyups
-    globalKeyStateTracker.keyupEmitter.addListener( keyboardEvent => {
-      const keyCode = KeyboardUtils.getEventCode( keyboardEvent );
-
-      if ( keyCode !== null ) {
-        const englishKey = eventCodeToEnglishString( keyCode );
-        if ( englishKey ) {
-          this.onKeyUp( englishKey, keyboardEvent );
+        // Handle re-entrancy (if something changes the state of activeHotkeys)
+        for ( const hotkey of [ ...this.activeHotkeys ] ) {
+          if ( hotkey.fireOnHold && hotkey.fireOnHoldTiming === 'browser' ) {
+            hotkey.fire( keyboardEvent );
+          }
         }
       }
     } );
@@ -218,16 +216,21 @@ class HotkeyManager {
    * Re-check all hotkey active/pressed states (since modifier keys might have changed, OR we need to validate that
    * there are no conflicts).
    */
-  private updateHotkeyStatus(): void {
+  private updateHotkeyStatus( keyboardEvent: KeyboardEvent | null ): void {
+    // For fireOnDown on/off cases, we only want to fire the hotkeys when we have a keyboard event specifying hotkey's
+    // main `key`.
+    const pressedOrReleasedKeyCode = KeyboardUtils.getEventCode( keyboardEvent );
+    const pressedOrReleasedEnglishKey = pressedOrReleasedKeyCode ? eventCodeToEnglishString( pressedOrReleasedKeyCode ) : null;
+
     for ( const hotkey of this.enabledHotkeysProperty.value ) {
       const shouldBeActive = this.getHotkeysForMainKey( hotkey.key ).includes( hotkey );
       const isActive = this.activeHotkeys.has( hotkey );
 
       if ( shouldBeActive && !isActive ) {
-        this.addActiveHotkey( hotkey, null, false );
+        this.addActiveHotkey( hotkey, null, hotkey.key === pressedOrReleasedEnglishKey );
       }
       else if ( !shouldBeActive && isActive ) {
-        this.removeActiveHotkey( hotkey, null, false );
+        this.removeActiveHotkey( hotkey, null, hotkey.key === pressedOrReleasedEnglishKey );
       }
     }
   }
@@ -257,43 +260,6 @@ class HotkeyManager {
 
     hotkey.isPressedProperty.value = false;
     this.activeHotkeys.delete( hotkey );
-  }
-
-  private onKeyDown( englishKey: EnglishKey, keyboardEvent: KeyboardEvent ): void {
-    if ( this.englishKeysDownProperty.value.has( englishKey ) ) {
-      // Still pressed, got the browser/OS "fire on hold". See what hotkeys have the browser fire-on-hold behavior.
-
-      // Handle re-entrancy (if something changes the state of activeHotkeys)
-      for ( const hotkey of [ ...this.activeHotkeys ] ) {
-        if ( hotkey.fireOnHold && hotkey.fireOnHoldTiming === 'browser' ) {
-          hotkey.fire( keyboardEvent );
-        }
-      }
-    }
-    else {
-      // Freshly pressed, was not pressed before. See if there is a hotkey to fire.
-
-      this.englishKeysDownProperty.value = new Set( [ ...this.englishKeysDownProperty.value, englishKey ] );
-
-      const hotkeys = this.getHotkeysForMainKey( englishKey );
-      for ( const hotkey of hotkeys ) {
-        this.addActiveHotkey( hotkey, keyboardEvent, true );
-      }
-    }
-
-    this.updateHotkeyStatus();
-  }
-
-  private onKeyUp( englishKey: EnglishKey, keyboardEvent: KeyboardEvent ): void {
-
-    const hotkeys = this.getHotkeysForMainKey( englishKey );
-    for ( const hotkey of hotkeys ) {
-      this.removeActiveHotkey( hotkey, keyboardEvent, true );
-    }
-
-    this.englishKeysDownProperty.value = new Set( [ ...this.englishKeysDownProperty.value ].filter( key => key !== englishKey ) );
-
-    this.updateHotkeyStatus();
   }
 }
 scenery.register( 'HotkeyManager', HotkeyManager );
