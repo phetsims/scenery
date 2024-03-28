@@ -40,7 +40,8 @@ type SelfOptions = {
   // key behavior for this key.
   ignoredModifierKeys?: EnglishKey[];
 
-  // Called as fire() when the hotkey is tired
+  // Called as fire() when the hotkey is fired (see fireOnDown/fireOnHold for when that happens).
+  // The event will be null if the hotkey was fired due to fire-on-hold.
   fire?: ( event: KeyboardEvent | null ) => void;
 
   // If true, the hotkey will fire when the hotkey is initially pressed.
@@ -128,7 +129,6 @@ export default class Hotkey extends EnabledComponent {
     // Create a timer to handle the optional fire-on-hold feature.
     if ( this.fireOnHold && this.fireOnHoldTiming === 'custom' ) {
       this.fireOnHoldTimer = new CallbackTimer( {
-        // TODO: Consider passing the _original_ event here? https://github.com/phetsims/scenery/issues/1621
         callback: this.fire.bind( this, null ), // Pass null for fire-on-hold events
         delay: options.fireOnHoldCustomDelay,
         interval: options.fireOnHoldCustomInterval
