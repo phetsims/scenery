@@ -59,7 +59,9 @@ type SelfOptions = {
   // Fire continuously at this interval (milliseconds)
   fireOnHoldCustomInterval?: number;
 
-  // TODO: consider attach:false https://github.com/phetsims/scenery/issues/1621
+  // For each main `key`, the hotkey system will only allow one hotkey with allowOverlap:false to be active at any time.
+  // This is provided to allow multiple hotkeys with the same keys to fire. Default is false.
+  allowOverlap?: boolean;
 };
 
 export type HotkeyOptions = SelfOptions & EnabledComponentOptions;
@@ -74,6 +76,7 @@ export default class Hotkey extends EnabledComponent {
   public readonly fireOnDown: boolean;
   public readonly fireOnHold: boolean;
   public readonly fireOnHoldTiming: HotkeyFireOnHoldTiming;
+  public readonly allowOverlap: boolean;
 
   // A Property that tracks whether the hotkey is currently pressed.
   // Will be true if it meets the following conditions:
@@ -106,7 +109,8 @@ export default class Hotkey extends EnabledComponent {
       fireOnHold: false,
       fireOnHoldTiming: 'browser',
       fireOnHoldCustomDelay: 400,
-      fireOnHoldCustomInterval: 100
+      fireOnHoldCustomInterval: 100,
+      allowOverlap: false
     }, providedOptions );
 
     super( options );
@@ -119,6 +123,7 @@ export default class Hotkey extends EnabledComponent {
     this.fireOnDown = options.fireOnDown;
     this.fireOnHold = options.fireOnHold;
     this.fireOnHoldTiming = options.fireOnHoldTiming;
+    this.allowOverlap = options.allowOverlap;
 
     // Create a timer to handle the optional fire-on-hold feature.
     if ( this.fireOnHold && this.fireOnHoldTiming === 'custom' ) {

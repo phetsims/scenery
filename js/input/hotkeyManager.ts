@@ -184,12 +184,12 @@ class HotkeyManager {
    * 2. All modifier keys in the hotkey's modifierKeys pressed
    * 3. All modifier keys not in the hotkey's modifierKeys (but in the other hotkeys above) not pressed
    */
-  private getHotkeyForMainKey( mainKey: EnglishKey ): Hotkey | null {
+  private getHotkeysForMainKey( mainKey: EnglishKey ): Hotkey[] {
     const englishKeysDown = this.englishKeysDownProperty.value;
 
     // If the main key isn't down, there's no way it could be active
     if ( !englishKeysDown.has( mainKey ) ) {
-      return null;
+      return [];
     }
 
     const compatibleKeys = [ ...this.enabledHotkeysProperty.value ].filter( hotkey => {
@@ -205,9 +205,13 @@ class HotkeyManager {
       } );
     } );
 
-    assert && assert( compatibleKeys.length < 2, `Key conflict detected: ${compatibleKeys.map( hotkey => hotkey.getHotkeyString() )}` );
+    if ( assert ) {
+      const conflictingKeys = compatibleKeys.filter( hotkey => !hotkey.allowOverlap );
 
-    return compatibleKeys[ 0 ] ?? null;
+      assert && assert( conflictingKeys.length < 2, `Key conflict detected: ${conflictingKeys.map( hotkey => hotkey.getHotkeyString() )}` );
+    }
+
+    return compatibleKeys;
   }
 
   /**
@@ -216,7 +220,7 @@ class HotkeyManager {
    */
   private updateHotkeyStatus(): void {
     for ( const hotkey of this.enabledHotkeysProperty.value ) {
-      const shouldBeActive = this.getHotkeyForMainKey( hotkey.key ) === hotkey;
+      const shouldBeActive = this.getHotkeysForMainKey( hotkey.key ).includes( hotkey );
       const isActive = this.activeHotkeys.has( hotkey );
 
       if ( shouldBeActive && !isActive ) {
@@ -271,8 +275,8 @@ class HotkeyManager {
 
       this.englishKeysDownProperty.value = new Set( [ ...this.englishKeysDownProperty.value, englishKey ] );
 
-      const hotkey = this.getHotkeyForMainKey( englishKey );
-      if ( hotkey ) {
+      const hotkeys = this.getHotkeysForMainKey( englishKey );
+      for ( const hotkey of hotkeys ) {
         this.addActiveHotkey( hotkey, keyboardEvent, true );
       }
     }
@@ -282,8 +286,8 @@ class HotkeyManager {
 
   private onKeyUp( englishKey: EnglishKey, keyboardEvent: KeyboardEvent ): void {
 
-    const hotkey = this.getHotkeyForMainKey( englishKey );
-    if ( hotkey ) {
+    const hotkeys = this.getHotkeysForMainKey( englishKey );
+    for ( const hotkey of hotkeys ) {
       this.removeActiveHotkey( hotkey, keyboardEvent, true );
     }
 
