@@ -34,6 +34,11 @@ type SelfOptions = {
   //    activated when this hotkey is present.
   //
   // Note that the release of a modifier key may "activate" the hotkey for "fire-on-hold", but not for "fire-on-down".
+  //
+  // NOTE: This is a generalization of the normal concept of "modifier key" (https://en.wikipedia.org/wiki/Modifier_key).
+  // It is a PhET-specific concept that allows other non-modifier keys to be used as modifiers.
+  // The standard modifier keys (ctrl/alt/meta/shift) are automatically handled by the hotkey system, but this can
+  // expand the set of modifier keys that can be used.
   modifierKeys?: EnglishKey[];
 
   // A set of modifier keys that can be down and the hotkey will still fire. Essentially ignoring the modifier
