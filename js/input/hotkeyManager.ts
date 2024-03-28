@@ -28,8 +28,7 @@
  */
 
 import { EnglishKey, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, scenery } from '../imports.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/DerivedProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 
@@ -40,7 +39,7 @@ const setComparator = <Key>( a: Set<Key>, b: Set<Key> ) => {
 class HotkeyManager {
 
   // All hotkeys that are either globally or under the current focus trail
-  private readonly availableHotkeysProperty: TReadOnlyProperty<Set<Hotkey>>;
+  private readonly availableHotkeysProperty: UnknownDerivedProperty<Set<Hotkey>>;
 
   // Enabled hotkeys that are either global, or under the current focus trail
   private readonly enabledHotkeysProperty: TProperty<Set<Hotkey>> = new TinyProperty( new Set<Hotkey>() );
@@ -67,8 +66,7 @@ class HotkeyManager {
       // If we have focus, include the hotkeys from the focus trail
       if ( focus ) {
         for ( const node of focus.trail.nodes ) {
-          // TODO: we might need to listen to things, if this is our list? https://github.com/phetsims/scenery/issues/1621
-          if ( node.isDisposed || !node.isVisible() || !node.isInputEnabled() || !node.isPDOMVisible() ) {
+          if ( !node.isInputEnabled() ) {
             break;
           }
 
@@ -84,6 +82,24 @@ class HotkeyManager {
     }, {
       // We want to not over-notify, so we compare the sets directly
       valueComparisonStrategy: setComparator
+    } ) as UnknownDerivedProperty<Set<Hotkey>>;
+
+    // If any of the nodes in the focus trail change inputEnabled, we need to recompute availableHotkeysProperty
+    const onInputEnabledChanged = () => {
+      this.availableHotkeysProperty.recomputeDerivation();
+    };
+    FocusManager.pdomFocusProperty.link( ( focus, oldFocus ) => {
+      if ( oldFocus ) {
+        oldFocus.trail.nodes.forEach( node => {
+          node.inputEnabledProperty.unlink( onInputEnabledChanged );
+        } );
+      }
+
+      if ( focus ) {
+        focus.trail.nodes.forEach( node => {
+          node.inputEnabledProperty.lazyLink( onInputEnabledChanged );
+        } );
+      }
     } );
 
     // Update enabledHotkeysProperty when availableHotkeysProperty (or any enabledProperty) changes
