@@ -36,7 +36,9 @@ type SelfOptions = {
   // Note that the release of a modifier key may "activate" the hotkey for "fire-on-hold", but not for "fire-on-down".
   modifierKeys?: EnglishKey[];
 
-  // TODO: consider the ability to "not" match modifier keys? https://github.com/phetsims/scenery/issues/1621
+  // A set of modifier keys that can be down and the hotkey will still fire. Essentially ignoring the modifier
+  // key behavior for this key.
+  ignoredModifierKeys?: EnglishKey[];
 
   // Called as fire() when the hotkey is tired
   fire?: ( event: KeyboardEvent | null ) => void;
@@ -67,6 +69,7 @@ export default class Hotkey extends EnabledComponent {
   // Straight from options
   public readonly key: EnglishKey;
   public readonly modifierKeys: EnglishKey[];
+  public readonly ignoredModifierKeys: EnglishKey[];
   public readonly fire: ( event: KeyboardEvent | null ) => void;
   public readonly fireOnDown: boolean;
   public readonly fireOnHold: boolean;
@@ -97,6 +100,7 @@ export default class Hotkey extends EnabledComponent {
 
     const options = optionize<HotkeyOptions, SelfOptions, EnabledComponentOptions>()( {
       modifierKeys: [],
+      ignoredModifierKeys: [],
       fire: _.noop,
       fireOnDown: true,
       fireOnHold: false,
@@ -110,6 +114,7 @@ export default class Hotkey extends EnabledComponent {
     // Store public things
     this.key = options.key;
     this.modifierKeys = options.modifierKeys;
+    this.ignoredModifierKeys = options.ignoredModifierKeys;
     this.fire = options.fire;
     this.fireOnDown = options.fireOnDown;
     this.fireOnHold = options.fireOnHold;

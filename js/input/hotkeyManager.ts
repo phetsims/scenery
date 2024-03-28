@@ -200,7 +200,8 @@ class HotkeyManager {
 
       // See whether the modifier keys match
       return this.modifierKeys.every( modifierKey => {
-        return englishKeysDown.has( modifierKey ) === hotkey.modifierKeys.includes( modifierKey );
+        return englishKeysDown.has( modifierKey ) === hotkey.modifierKeys.includes( modifierKey ) ||
+               hotkey.ignoredModifierKeys.includes( modifierKey );
       } );
     } );
 
