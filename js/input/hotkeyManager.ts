@@ -189,6 +189,7 @@ class HotkeyManager {
     }
 
     const compatibleKeys = [ ...this.enabledHotkeysProperty.value ].filter( hotkey => {
+
       // Filter out hotkeys that don't have the main key
       if ( hotkey.key !== mainKey ) {
         return false;
@@ -196,7 +197,7 @@ class HotkeyManager {
 
       // See whether the modifier keys match
       return this.modifierKeys.every( modifierKey => {
-        return this.englishKeysDown.has( modifierKey ) === hotkey.modifierKeys.includes( modifierKey ) ||
+        return this.englishKeysDown.has( modifierKey ) === hotkey.keys.includes( modifierKey ) ||
                hotkey.ignoredModifierKeys.includes( modifierKey );
       } );
     } );
@@ -215,6 +216,7 @@ class HotkeyManager {
    * there are no conflicts).
    */
   private updateHotkeyStatus( keyboardEvent: KeyboardEvent | null ): void {
+
     // For fireOnDown on/off cases, we only want to fire the hotkeys when we have a keyboard event specifying hotkey's
     // main `key`.
     const pressedOrReleasedKeyCode = KeyboardUtils.getEventCode( keyboardEvent );

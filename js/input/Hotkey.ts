@@ -79,6 +79,9 @@ export default class Hotkey extends EnabledComponent {
   public readonly fireOnHoldTiming: HotkeyFireOnHoldTiming;
   public readonly allowOverlap: boolean;
 
+  // All keys that are part of this hotkey (key + modifierKeys)
+  public readonly keys: EnglishKey[];
+
   // A Property that tracks whether the hotkey is currently pressed.
   // Will be true if it meets the following conditions:
   //
@@ -125,6 +128,8 @@ export default class Hotkey extends EnabledComponent {
     this.fireOnHold = options.fireOnHold;
     this.fireOnHoldTiming = options.fireOnHoldTiming;
     this.allowOverlap = options.allowOverlap;
+
+    this.keys = _.uniq( [ this.key, ...this.modifierKeys ] );
 
     // Create a timer to handle the optional fire-on-hold feature.
     if ( this.fireOnHold && this.fireOnHoldTiming === 'custom' ) {
