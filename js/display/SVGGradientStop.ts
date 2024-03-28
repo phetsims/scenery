@@ -30,7 +30,7 @@ class SVGGradientStop implements TPoolable {
   private colorListener!: () => void;
 
   // As a workaround for Property deferment issues, we'll keep track of the last Color that we added a listener to, so
-  // that we can clean up things Property EVEN when we don't get correct Property change notifications.
+  // that we can clean up things Property EVEN when we don't get correct Property change notifications. TODO: remove in https://github.com/phetsims/scenery/issues/1624
   private lastColor!: Color | null;
 
   public constructor( svgGradient: ActiveSVGGradient, ratio: number, color: TColor ) {
