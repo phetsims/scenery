@@ -45,8 +45,8 @@ class HotkeyManager {
   // Enabled hotkeys that are either global, or under the current focus trail
   private readonly enabledHotkeysProperty: TProperty<Set<Hotkey>> = new TinyProperty( new Set<Hotkey>() );
 
-  // TODO: We don't need this as a Property, see https://github.com/phetsims/scenery/issues/1621
-  private readonly englishKeysDownProperty: TProperty<Set<EnglishKey>> = new TinyProperty( new Set<EnglishKey>() );
+  // The set of EnglishKeys that are currently pressed.
+  private englishKeysDown: Set<EnglishKey> = new Set<EnglishKey>();
 
   // The current set of modifier keys (pressed or not) based on current enabled hotkeys
   // TODO: Should we actually only have a set of modifier keys PER main key? https://github.com/phetsims/scenery/issues/1621
@@ -151,12 +151,11 @@ class HotkeyManager {
 
     // Track key state changes
     globalKeyStateTracker.keyDownStateChangedEmitter.addListener( ( keyboardEvent: KeyboardEvent | null ) => {
-      const oldEnglishKeysDown = this.englishKeysDownProperty.value;
-      const newEnglishKeysDown = globalKeyStateTracker.getEnglishKeysDown();
-      const englishKeysChanged = !setComparator( oldEnglishKeysDown, newEnglishKeysDown );
+      const englishKeysDown = globalKeyStateTracker.getEnglishKeysDown();
+      const englishKeysChanged = !setComparator( this.englishKeysDown, englishKeysDown );
 
       if ( englishKeysChanged ) {
-        this.englishKeysDownProperty.value = newEnglishKeysDown;
+        this.englishKeysDown = englishKeysDown;
 
         this.updateHotkeyStatus( keyboardEvent );
       }
@@ -183,10 +182,9 @@ class HotkeyManager {
    * 3. All modifier keys not in the hotkey's modifierKeys (but in the other hotkeys above) not pressed
    */
   private getHotkeysForMainKey( mainKey: EnglishKey ): Hotkey[] {
-    const englishKeysDown = this.englishKeysDownProperty.value;
 
     // If the main key isn't down, there's no way it could be active
-    if ( !englishKeysDown.has( mainKey ) ) {
+    if ( !this.englishKeysDown.has( mainKey ) ) {
       return [];
     }
 
@@ -198,7 +196,7 @@ class HotkeyManager {
 
       // See whether the modifier keys match
       return this.modifierKeys.every( modifierKey => {
-        return englishKeysDown.has( modifierKey ) === hotkey.modifierKeys.includes( modifierKey ) ||
+        return this.englishKeysDown.has( modifierKey ) === hotkey.modifierKeys.includes( modifierKey ) ||
                hotkey.ignoredModifierKeys.includes( modifierKey );
       } );
     } );
