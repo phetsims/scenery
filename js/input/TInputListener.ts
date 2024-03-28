@@ -10,7 +10,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { SceneryEvent } from '../imports.js';
+import { Hotkey, SceneryEvent } from '../imports.js';
 
 export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
 
@@ -30,6 +30,9 @@ type TInputListener = {
   // While dragging, the AnimatedPanZoomListener will try to keep these bounds in view. Intended to be
   // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
   createPanTargetBounds?: ( () => Bounds2 ) | null;
+
+  // Hotkeys that will be available whenever a node with this listener is in a focused trail.
+  hotkeys?: Hotkey[];
 
   ////////////////////////////////////////////////
   //////////////////////////////////////////////

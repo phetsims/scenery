@@ -14,7 +14,7 @@ import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import EventType from '../../../tandem/js/EventType.js';
-import { EventIO, KeyboardUtils, scenery } from '../imports.js';
+import { EnglishKey, EnglishStringToCodeMap, EventIO, KeyboardUtils, scenery } from '../imports.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
@@ -262,6 +262,13 @@ class KeyStateTracker {
     }
 
     return this.keyState[ key ].keyDown;
+  }
+
+  /**
+   * Returns true if the key with the KeyboardEvent.code is currently down.
+   */
+  public isEnglishKeyDown( key: EnglishKey ): boolean {
+    return this.isAnyKeyInListDown( EnglishStringToCodeMap[ key ] );
   }
 
   /**

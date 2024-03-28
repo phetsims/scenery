@@ -1001,13 +1001,6 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   }
 
   /**
-   * See setHotkeys() for more information.
-   */
-  public set hotkeys( hotkeys: Hotkey[] ) {
-    this.setHotkeys( hotkeys );
-  }
-
-  /**
    * Clear all hotkeys from this KeyboardDragListener.
    */
   public removeAllHotkeys(): void {

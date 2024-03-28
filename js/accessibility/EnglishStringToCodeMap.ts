@@ -74,10 +74,36 @@ const EnglishStringToCodeMap = {
   arrowDown: [ KeyboardUtils.KEY_DOWN_ARROW ],
 
   // modifier keys
-  ctrl: [ KeyboardUtils.KEY_CONTROL_LEFT, KeyboardUtils.KEY_CONTROL_RIGHT ],
-  alt: [ KeyboardUtils.KEY_ALT_LEFT, KeyboardUtils.KEY_ALT_RIGHT ],
-  shift: [ KeyboardUtils.KEY_SHIFT_LEFT, KeyboardUtils.KEY_SHIFT_RIGHT ]
+  ctrl: KeyboardUtils.CONTROL_KEYS,
+  alt: KeyboardUtils.ALT_KEYS,
+  shift: KeyboardUtils.SHIFT_KEYS,
+  meta: KeyboardUtils.META_KEYS
 };
 
 scenery.register( 'EnglishStringToCodeMap', EnglishStringToCodeMap );
 export default EnglishStringToCodeMap;
+
+export const metaEnglishKeys: EnglishKey[] = [ 'ctrl', 'alt', 'shift', 'meta' ];
+
+/**
+ * Returns the first EnglishStringToCodeMap that corresponds to the provided event.code. Null if no match is found.
+ * Useful when matching an english string used by KeyboardListener to the event code from a
+ * SceneryEvent.domEvent.code.
+ *
+ * For example:
+ *
+ *   KeyboardUtils.eventCodeToEnglishString( 'KeyA' ) === 'a'
+ *   KeyboardUtils.eventCodeToEnglishString( 'Numpad0' ) === '0'
+ *   KeyboardUtils.eventCodeToEnglishString( 'Digit0' ) === '0'
+ *
+ * NOTE: This cannot be in KeyboardUtils because it would create a circular dependency.
+ */
+export const eventCodeToEnglishString = ( eventCode: string ): EnglishKey | null => {
+  for ( const key in EnglishStringToCodeMap ) {
+    if ( EnglishStringToCodeMap.hasOwnProperty( key ) &&
+         ( EnglishStringToCodeMap[ key as EnglishKey ] ).includes( eventCode ) ) {
+      return key as EnglishKey;
+    }
+  }
+  return null;
+};
