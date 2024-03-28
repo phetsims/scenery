@@ -56,7 +56,7 @@ export default class MatrixBetweenProperty extends TinyProperty<Matrix3 | null> 
     this.toCoordinateFrame = options.toCoordinateFrame;
 
     // Identical matrices shouldn't trigger notifications
-    this.useDeepEquality = true;
+    this.valueComparisonStrategy = 'equalsFunction';
 
     this.fromAncestorsProperty = new AncestorNodesProperty( from );
     this.toAncestorsProperty = new AncestorNodesProperty( to );
