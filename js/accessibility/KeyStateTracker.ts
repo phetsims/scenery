@@ -53,6 +53,7 @@ class KeyStateTracker {
   // Listeners potentially attached to the document to update the state of this KeyStateTracker, see attachToWindow()
   private documentKeyupListener: null | ( ( event: KeyboardEvent ) => void ) = null;
   private documentKeydownListener: null | ( ( event: KeyboardEvent ) => void ) = null;
+  private documentBlurListener: null | ( ( event: FocusEvent ) => void ) = null;
 
   // If the KeyStateTracker is enabled. If disabled, keyState is cleared and listeners noop.
   private _enabled = true;
@@ -446,11 +447,22 @@ class KeyStateTracker {
       this.keyupUpdate( event );
     };
 
+    this.documentBlurListener = event => {
+
+      // As recommended for similar situations online, we clear our key state when we get a window blur, since we
+      // will not be able to track any key state changes during this time (and users will likely release any keys
+      // that are pressed).
+      // If shift/alt/ctrl are pressed when we regain focus, we will hopefully get a keyboard event and update their state
+      // with correctModifierKeys().
+      this.clearState();
+    };
+
     const addListenersToDocument = () => {
 
       // attach with useCapture so that the keyStateTracker is updated before the events dispatch within Scenery
       window.addEventListener( 'keyup', this.documentKeyupListener!, { capture: true } );
       window.addEventListener( 'keydown', this.documentKeydownListener!, { capture: true } );
+      window.addEventListener( 'blur', this.documentBlurListener!, { capture: true } );
       this.attachedToDocument = true;
     };
 
@@ -495,12 +507,15 @@ class KeyStateTracker {
     assert && assert( this.attachedToDocument, 'KeyStateTracker is not attached to window.' );
     assert && assert( this.documentKeyupListener, 'keyup listener was not created or attached to window' );
     assert && assert( this.documentKeydownListener, 'keydown listener was not created or attached to window.' );
+    assert && assert( this.documentBlurListener, 'blur listener was not created or attached to window.' );
 
     window.removeEventListener( 'keyup', this.documentKeyupListener! );
     window.removeEventListener( 'keydown', this.documentKeydownListener! );
+    window.removeEventListener( 'blur', this.documentBlurListener! );
 
     this.documentKeyupListener = null;
     this.documentKeydownListener = null;
+    this.documentBlurListener = null;
 
     this.attachedToDocument = false;
   }
