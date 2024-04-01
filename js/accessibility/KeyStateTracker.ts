@@ -95,6 +95,9 @@ class KeyStateTracker {
         if ( assert && !KeyboardUtils.isControlKey( domEvent ) ) {
           assert( domEvent.ctrlKey === this.ctrlKeyDown, 'ctrl key inconsistency between event and keyState.' );
         }
+        if ( assert && !KeyboardUtils.isMetaKey( domEvent ) ) {
+          assert( domEvent.metaKey === this.metaKeyDown, 'meta key inconsistency between event and keyState.' );
+        }
 
         // if the key is already down, don't do anything else (we don't want to create a new keyState object
         // for a key that is already being tracked and down)
@@ -215,6 +218,13 @@ class KeyStateTracker {
         timeDown: 0 // in ms
       };
     }
+    if ( domEvent.metaKey && !KeyboardUtils.isMetaKey( domEvent ) && !this.metaKeyDown ) {
+      changed = changed || !this.keyState[ KeyboardUtils.KEY_META_LEFT ];
+      this.keyState[ KeyboardUtils.KEY_META_LEFT ] = {
+        key: key,
+        timeDown: 0 // in ms
+      };
+    }
 
     // delete modifier keys if we think they are down
     if ( !domEvent.shiftKey && this.shiftKeyDown ) {
@@ -231,6 +241,10 @@ class KeyStateTracker {
       changed = changed || !!this.keyState[ KeyboardUtils.KEY_CONTROL_LEFT ] || !!this.keyState[ KeyboardUtils.KEY_CONTROL_RIGHT ];
       delete this.keyState[ KeyboardUtils.KEY_CONTROL_LEFT ];
       delete this.keyState[ KeyboardUtils.KEY_CONTROL_RIGHT ];
+    }
+    if ( !domEvent.metaKey && this.metaKeyDown ) {
+      changed = changed || KeyboardUtils.META_KEYS.some( key => !!this.keyState[ key ] );
+      KeyboardUtils.META_KEYS.forEach( key => { delete this.keyState[ key ]; } );
     }
 
     if ( changed ) {
@@ -430,6 +444,13 @@ class KeyStateTracker {
    */
   public get ctrlKeyDown(): boolean {
     return this.isAnyKeyInListDown( KeyboardUtils.CONTROL_KEYS );
+  }
+
+  /**
+   * Returns true if one of the meta keys is currently down.
+   */
+  public get metaKeyDown(): boolean {
+    return this.isAnyKeyInListDown( KeyboardUtils.META_KEYS );
   }
 
   /**
