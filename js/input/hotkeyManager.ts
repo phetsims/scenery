@@ -1,9 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * IMPORTANT: EXPERIMENTAL!
- * TODO DO NOT USE IN SIMULATIONS, SEE https://github.com/phetsims/scenery/issues/1621 FIRST
- *
  * Manages hotkeys based on two sources:
  *
  * 1. Global hotkeys (from globalHotkeyRegistry)

@@ -1,9 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * IMPORTANT: EXPERIMENTAL!
- * TODO DO NOT USE IN SIMULATIONS, SEE https://github.com/phetsims/scenery/issues/1621 FIRST
- *
  * Stores a record of all global hotkeys (Hotkey instances that should be available regardless of focus).
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)

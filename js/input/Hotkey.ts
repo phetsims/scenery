@@ -1,9 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * IMPORTANT: EXPERIMENTAL!
- * TODO DO NOT USE IN SIMULATIONS, SEE https://github.com/phetsims/scenery/issues/1621 FIRST
- *
  * Represents a single hotkey (keyboard shortcut) that can be either:
  *
  * 1. Added to globalHotkeyRegistry (to be available regardless of keyboard focus)
