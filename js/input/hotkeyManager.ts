@@ -48,8 +48,8 @@ class HotkeyManager {
   private englishKeysDown: Set<EnglishKey> = new Set<EnglishKey>();
 
   // The current set of modifier keys (pressed or not) based on current enabled hotkeys
-  // TODO: Should we actually only have a set of modifier keys PER main key? https://github.com/phetsims/scenery/issues/1621
-  // TODO: e.g. should "b+x" (b being pressed) prevent "y"? https://github.com/phetsims/scenery/issues/1621
+  // NOTE: Pressed modifier keys will prevent any other Hotkeys from becoming active. For example if you have a hotkey
+  // with 'b+x', pressing 'b' will prevent any other hotkeys from becoming active.
   private modifierKeys: EnglishKey[] = [];
 
   // Hotkeys that are actively pressed
@@ -278,6 +278,7 @@ class HotkeyManager {
     this.activeHotkeys.delete( hotkey );
   }
 }
+
 scenery.register( 'HotkeyManager', HotkeyManager );
 
 const hotkeyManager = new HotkeyManager();

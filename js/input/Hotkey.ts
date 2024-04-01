@@ -39,6 +39,8 @@ type SelfOptions = {
   // It is a PhET-specific concept that allows other non-modifier keys to be used as modifiers.
   // The standard modifier keys (ctrl/alt/meta/shift) are automatically handled by the hotkey system, but this can
   // expand the set of modifier keys that can be used.
+  // When a modifier key is added, pressing it will prevent any other Hotkeys from becoming active. This is how the
+  // typical modifier keys behave and so that is kept consistent for PhET-specific modifier keys.
   modifierKeys?: EnglishKey[];
 
   // A set of modifier keys that can be down and the hotkey will still fire. Essentially ignoring the modifier
