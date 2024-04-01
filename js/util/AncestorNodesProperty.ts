@@ -31,6 +31,7 @@ export default class AncestorNodesProperty extends TinyProperty<Set<Node>> {
     this.update();
   }
 
+  // TODO: use valueComparisonStrategy instead? https://github.com/phetsims/axon/issues/428
   public override areValuesEqual( a: Set<Node>, b: Set<Node> ): boolean {
     // Don't fire notifications if it hasn't changed.
     return a.size === b.size && _.every( [ ...a ], node => b.has( node ) );
