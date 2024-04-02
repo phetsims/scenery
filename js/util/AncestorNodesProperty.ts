@@ -10,6 +10,12 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import { Node, scenery } from '../imports.js';
 
+const valueComparisonStrategy = ( a: Set<Node>, b: Set<Node> ): boolean => {
+
+  // Don't fire notifications if it hasn't changed.
+  return a.size === b.size && _.every( [ ...a ], node => b.has( node ) );
+};
+
 export default class AncestorNodesProperty extends TinyProperty<Set<Node>> {
 
   // A set of nodes where we are listening to whether their parents change
@@ -22,6 +28,7 @@ export default class AncestorNodesProperty extends TinyProperty<Set<Node>> {
 
   public constructor( public readonly node: Node ) {
     super( new Set() );
+    this.valueComparisonStrategy = valueComparisonStrategy;
 
     this._nodeUpdateListener = this.update.bind( this );
 
@@ -29,12 +36,6 @@ export default class AncestorNodesProperty extends TinyProperty<Set<Node>> {
     this.addNodeListener( node );
 
     this.update();
-  }
-
-  // TODO: use valueComparisonStrategy instead? https://github.com/phetsims/axon/issues/428
-  public override areValuesEqual( a: Set<Node>, b: Set<Node> ): boolean {
-    // Don't fire notifications if it hasn't changed.
-    return a.size === b.size && _.every( [ ...a ], node => b.has( node ) );
   }
 
   private update(): void {

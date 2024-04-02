@@ -21,6 +21,8 @@ QUnit.test( 'AncestorNodesProperty', assert => {
 
   const ancestorNodesProperty = new AncestorNodesProperty( a );
 
+  assert.ok( ancestorNodesProperty.valueComparisonStrategy !== 'reference', 'uses custom comparison' );
+
   const checkAncestors = ( nodes: Node[], message: string ) => {
     assert.ok( ancestorNodesProperty.value.size === nodes.length, message );
 
