@@ -609,16 +609,16 @@ class Node extends ParallelDOM {
   // This is fired only once for any single operation that may change the children of a Node.
   // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
   // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
-  public readonly childrenChangedEmitter: TEmitter;
+  public readonly childrenChangedEmitter: TEmitter = new TinyEmitter();
 
   // For every single added child Node, emits with {Node} Node, {number} indexOfChild
-  public readonly childInsertedEmitter: TEmitter<[ node: Node, indexOfChild: number ]>;
+  public readonly childInsertedEmitter: TEmitter<[ node: Node, indexOfChild: number ]> = new TinyEmitter();
 
   // For every single removed child Node, emits with {Node} Node, {number} indexOfChild
-  public readonly childRemovedEmitter: TEmitter<[ node: Node, indexOfChild: number ]>;
+  public readonly childRemovedEmitter: TEmitter<[ node: Node, indexOfChild: number ]> = new TinyEmitter();
 
   // Provides a given range that may be affected by the reordering
-  public readonly childrenReorderedEmitter: TEmitter<[ minChangedIndex: number, maxChangedIndex: number ]>;
+  public readonly childrenReorderedEmitter: TEmitter<[ minChangedIndex: number, maxChangedIndex: number ]> = new TinyEmitter();
 
   // Fired whenever a parent is added
   public readonly parentAddedEmitter: TEmitter<[ node: Node ]> = new TinyEmitter();
@@ -628,18 +628,18 @@ class Node extends ParallelDOM {
 
   // Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
   // change to a Node's translation/rotation/scale/etc. will trigger this event.
-  public readonly transformEmitter: TEmitter;
+  public readonly transformEmitter: TEmitter = new TinyEmitter();
 
   // Should be emitted when we need to check full metadata updates directly on Instances,
   // to see if we need to change drawable types, etc.
-  public readonly instanceRefreshEmitter: TEmitter;
+  public readonly instanceRefreshEmitter: TEmitter = new TinyEmitter();
 
   // Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
   // things that could affect descendants)
-  public readonly rendererSummaryRefreshEmitter: TEmitter;
+  public readonly rendererSummaryRefreshEmitter: TEmitter = new TinyEmitter();
 
   // Emitted to when we change filters (either opacity or generalized filters)
-  public readonly filterChangeEmitter: TEmitter;
+  public readonly filterChangeEmitter: TEmitter = new TinyEmitter();
 
   // Fired when an instance is changed (added/removed). CAREFUL!! This is potentially a very dangerous thing to listen
   // to. Instances are updated in an asynchronous batch during `updateDisplay()`, and it is very important that display
@@ -647,10 +647,14 @@ class Node extends ParallelDOM {
   // Currently, all usages of this cause into updates to the audio view, or updates to a separate display (used as an
   // overlay). Please proceed with caution, and see https://github.com/phetsims/scenery/issues/1615 and
   // https://github.com/phetsims/scenery/issues/1620 for details.
-  public readonly changedInstanceEmitter: TEmitter<[ instance: Instance, added: boolean ]>;
+  public readonly changedInstanceEmitter: TEmitter<[ instance: Instance, added: boolean ]> = new TinyEmitter();
+
+  // Fired whenever this node is added as a root to a Display OR when it is removed as a root from a Display (i.e.
+  // the Display is disposed).
+  public readonly rootedDisplayChangedEmitter: TEmitter<[ display: Display ]> = new TinyEmitter();
 
   // Fired when layoutOptions changes
-  public readonly layoutOptionsChangedEmitter: TEmitter;
+  public readonly layoutOptionsChangedEmitter: TEmitter = new TinyEmitter();
 
   // A bitmask which specifies which renderers this Node (and only this Node, not its subtree) supports.
   // (scenery-internal)
@@ -835,17 +839,6 @@ class Node extends ParallelDOM {
     }
 
     this._filters = [];
-
-    this.childrenChangedEmitter = new TinyEmitter();
-    this.childInsertedEmitter = new TinyEmitter();
-    this.childRemovedEmitter = new TinyEmitter();
-    this.childrenReorderedEmitter = new TinyEmitter();
-    this.transformEmitter = new TinyEmitter();
-    this.instanceRefreshEmitter = new TinyEmitter();
-    this.rendererSummaryRefreshEmitter = new TinyEmitter();
-    this.filterChangeEmitter = new TinyEmitter();
-    this.changedInstanceEmitter = new TinyEmitter();
-    this.layoutOptionsChangedEmitter = new TinyEmitter();
 
     this._rendererBitmask = Renderer.bitmaskNodeDefault;
     this._rendererSummary = new RendererSummary( this );
@@ -5960,6 +5953,8 @@ class Node extends ParallelDOM {
 
     // Defined in ParallelDOM.js
     this._pdomDisplaysInfo.onAddedRootedDisplay( display );
+
+    this.rootedDisplayChangedEmitter.emit( display );
   }
 
   /**
@@ -5972,6 +5967,8 @@ class Node extends ParallelDOM {
 
     // Defined in ParallelDOM.js
     this._pdomDisplaysInfo.onRemovedRootedDisplay( display );
+
+    this.rootedDisplayChangedEmitter.emit( display );
   }
 
   private getRecursiveConnectedDisplays( displays: Display[] ): Display[] {
@@ -6341,6 +6338,9 @@ class Node extends ParallelDOM {
     }
     if ( assert && options.hasOwnProperty( 'visible' ) && options.hasOwnProperty( 'visibleProperty' ) ) {
       assert && assert( options.visibleProperty!.value === options.visible, 'If both visible and visibleProperty are provided, then values should match' );
+    }
+    if ( assert && options.hasOwnProperty( 'pdomVisible' ) && options.hasOwnProperty( 'pdomVisibleProperty' ) ) {
+      assert && assert( options.pdomVisibleProperty!.value === options.pdomVisible, 'If both pdomVisible and pdomVisibleProperty are provided, then values should match' );
     }
     if ( assert && options.hasOwnProperty( 'pickable' ) && options.hasOwnProperty( 'pickableProperty' ) ) {
       assert && assert( options.pickableProperty!.value === options.pickable, 'If both pickable and pickableProperty are provided, then values should match' );

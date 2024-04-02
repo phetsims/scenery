@@ -136,6 +136,7 @@ const PDOMTree = {
       if ( removedItemToRemove ) {
         PDOMTree.removeTree( node, removedItemToRemove, pdomTrails );
         removedItemToRemove._pdomParent = null;
+        removedItemToRemove.pdomParentChangedEmitter.emit();
       }
     }
 
@@ -148,6 +149,7 @@ const PDOMTree = {
           PDOMTree.removeTree( removedParents[ j ], addedItemToRemove );
         }
         addedItemToRemove._pdomParent = node;
+        addedItemToRemove.pdomParentChangedEmitter.emit();
       }
     }
 
