@@ -1,0 +1,24 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Safari Clip Path Test</title>
+</head>
+<body>
+
+<!-- Reproduction for https://github.com/phetsims/graphing-quadratics/issues/206 -->
+
+<svg width="931" height="823">
+  <defs>
+    <clipPath id="clip" clipPathUnits="userSpaceOnUse">
+      <path d="M 80 595 L 610 595 L 610 65 L 80 65 L 80 595 Z "></path>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip)">
+    <path d="M 80 -2320 Q 345 2980 610 -2320  M0 0" style="fill: none; stroke: red; stroke-width: 10;"></path>
+  </g>
+</svg>
+
+</body>
+</html>
