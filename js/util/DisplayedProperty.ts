@@ -1,4 +1,4 @@
-// Copyright 2018-2024, University of Colorado Boulder
+// Copyright 2024, University of Colorado Boulder
 
 /**
  * A property that is true when the node appears on the given display. See DisplayedTrailsProperty for additional options

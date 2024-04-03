@@ -1,4 +1,4 @@
-// Copyright 2022-2024, University of Colorado Boulder
+// Copyright 2024, University of Colorado Boulder
 
 /**
  * A Property that will contain a list of Trails where the root of the trail is a root Node of a Display, and the leaf
