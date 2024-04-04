@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
+import { EmptySelfOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { Line, LineOptions, scenery } from '../../imports.js';
 
@@ -23,7 +23,7 @@ export const DEFAULT_SEPARATOR_LAYOUT_OPTIONS = {
 
 export default class Separator extends Line {
   public constructor( providedOptions?: SeparatorOptions ) {
-    super( optionize<SeparatorOptions, SelfOptions, LineOptions>()( {
+    super( optionize3<SeparatorOptions, SelfOptions, LineOptions>()( {}, {
       layoutOptions: DEFAULT_SEPARATOR_LAYOUT_OPTIONS,
 
       // dark gray
