@@ -13,8 +13,6 @@ import { PathStatefulDrawable, scenery, svgns, SVGSelfDrawable } from '../../imp
 // TODO: change this based on memory and performance characteristics of the platform https://github.com/phetsims/scenery/issues/1581
 const keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
-const useSafariQuadraticWorkaround = platform.safari;
-
 class PathSVGDrawable extends PathStatefulDrawable( SVGSelfDrawable ) {
   /**
    * @public
@@ -42,7 +40,7 @@ class PathSVGDrawable extends PathStatefulDrawable( SVGSelfDrawable ) {
 
     const path = this.svgElement;
     if ( this.dirtyShape ) {
-      let svgPath = this.node.hasShape() ? ( useSafariQuadraticWorkaround ? this.node._shape.getSVGPathWithSafariWorkaround() : this.node._shape.getSVGPath() ) : '';
+      let svgPath = this.node.hasShape() ? this.node._shape.getSVGPath() : '';
 
       // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
       // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing
