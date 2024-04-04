@@ -29,17 +29,22 @@ import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/Derive
 import TProperty from '../../../axon/js/TProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 
+const arrayComparator = <Key>( a: Key[], b: Key[] ): boolean => {
+  return a.length === b.length && a.every( ( element, index ) => element === b[ index ] );
+};
+
 const setComparator = <Key>( a: Set<Key>, b: Set<Key> ) => {
   return a.size === b.size && [ ...a ].every( element => b.has( element ) );
 };
 
 class HotkeyManager {
 
-  // All hotkeys that are either globally or under the current focus trail
-  private readonly availableHotkeysProperty: UnknownDerivedProperty<Set<Hotkey>>;
+  // All hotkeys that are either globally or under the current focus trail. They are ordered, so that the first
+  // "identical key-shortcut" hotkey with override will be the one that is active.
+  private readonly availableHotkeysProperty: UnknownDerivedProperty<Hotkey[]>;
 
   // Enabled hotkeys that are either global, or under the current focus trail
-  private readonly enabledHotkeysProperty: TProperty<Set<Hotkey>> = new TinyProperty( new Set<Hotkey>() );
+  private readonly enabledHotkeysProperty: TProperty<Hotkey[]> = new TinyProperty( [] );
 
   // The set of EnglishKeys that are currently pressed.
   private englishKeysDown: Set<EnglishKey> = new Set<EnglishKey>();
@@ -57,29 +62,31 @@ class HotkeyManager {
       globalHotkeyRegistry.hotkeysProperty,
       FocusManager.pdomFocusProperty
     ], ( globalHotkeys, focus ) => {
-      // Always include global hotkeys. Use a set since we might have duplicates.
-      const hotkeys = new Set<Hotkey>( globalHotkeys );
+      const hotkeys: Hotkey[] = [];
 
       // If we have focus, include the hotkeys from the focus trail
       if ( focus ) {
-        for ( const node of focus.trail.nodes ) {
+        for ( const node of focus.trail.nodes.slice().reverse() ) {
           if ( !node.isInputEnabled() ) {
             break;
           }
 
           node.inputListeners.forEach( listener => {
             listener.hotkeys?.forEach( hotkey => {
-              hotkeys.add( hotkey );
+              hotkeys.push( hotkey );
             } );
           } );
         }
       }
 
-      return hotkeys;
+      // Always include global hotkeys. Use a set since we might have duplicates.
+      hotkeys.push( ...globalHotkeys );
+
+      return _.uniq( hotkeys );
     }, {
       // We want to not over-notify, so we compare the sets directly
-      valueComparisonStrategy: setComparator
-    } ) as UnknownDerivedProperty<Set<Hotkey>>;
+      valueComparisonStrategy: arrayComparator
+    } ) as UnknownDerivedProperty<Hotkey[]>;
 
     // If any of the nodes in the focus trail change inputEnabled, we need to recompute availableHotkeysProperty
     const onInputEnabledChanged = () => {
@@ -101,7 +108,29 @@ class HotkeyManager {
 
     // Update enabledHotkeysProperty when availableHotkeysProperty (or any enabledProperty) changes
     const rebuildHotkeys = () => {
-      this.enabledHotkeysProperty.value = new Set( [ ...this.availableHotkeysProperty.value ].filter( hotkey => hotkey.enabledProperty.value ) );
+      const overriddenHotkeyStrings = new Set<string>();
+      const enabledHotkeys: Hotkey[] = [];
+
+      for ( const hotkey of this.availableHotkeysProperty.value ) {
+        if ( hotkey.enabledProperty.value ) {
+          // Each hotkey will have a canonical way to represent it, so we can check for duplicates when overridden.
+          // Catch shift+ctrl+c and ctrl+shift+c as the same hotkey.
+          const hotkeyCanonicalString = [
+            ...hotkey.modifierKeys.slice().sort(),
+            hotkey.key
+          ].join( '+' );
+
+          if ( !overriddenHotkeyStrings.has( hotkeyCanonicalString ) ) {
+            enabledHotkeys.push( hotkey );
+
+            if ( hotkey.override ) {
+              overriddenHotkeyStrings.add( hotkeyCanonicalString );
+            }
+          }
+        }
+      }
+
+      this.enabledHotkeysProperty.value = enabledHotkeys;
     };
     // Because we can't add duplicate listeners, we create extra closures to have a unique handle for each hotkey
     const hotkeyRebuildListenerMap = new Map<Hotkey, () => void>(); // eslint-disable-line no-spaced-func
@@ -112,7 +141,7 @@ class HotkeyManager {
       // Any old hotkeys and aren't in new hotkeys should be unlinked
       if ( oldHotkeys ) {
         for ( const hotkey of oldHotkeys ) {
-          if ( !newHotkeys.has( hotkey ) ) {
+          if ( !newHotkeys.includes( hotkey ) ) {
             const listener = hotkeyRebuildListenerMap.get( hotkey )!;
             hotkeyRebuildListenerMap.delete( hotkey );
             assert && assert( listener );
@@ -125,7 +154,7 @@ class HotkeyManager {
 
       // Any new hotkeys that aren't in old hotkeys should be linked
       for ( const hotkey of newHotkeys ) {
-        if ( !oldHotkeys || !oldHotkeys.has( hotkey ) ) {
+        if ( !oldHotkeys || !oldHotkeys.includes( hotkey ) ) {
           // Unfortunate. Perhaps in the future we could have an abstraction that makes a "count" of how many times we
           // are "listening" to a Property.
           const listener = () => rebuildHotkeys();
@@ -152,7 +181,7 @@ class HotkeyManager {
       // Remove any hotkeys that are no longer available or enabled
       if ( oldHotkeys ) {
         for ( const hotkey of oldHotkeys ) {
-          if ( !newHotkeys.has( hotkey ) && this.activeHotkeys.has( hotkey ) ) {
+          if ( !newHotkeys.includes( hotkey ) && this.activeHotkeys.has( hotkey ) ) {
             this.removeActiveHotkey( hotkey, null, false );
           }
         }

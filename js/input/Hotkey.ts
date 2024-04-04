@@ -67,6 +67,10 @@ type SelfOptions = {
   // For each main `key`, the hotkey system will only allow one hotkey with allowOverlap:false to be active at any time.
   // This is provided to allow multiple hotkeys with the same keys to fire. Default is false.
   allowOverlap?: boolean;
+
+  // If true, any overlapping hotkeys (either added to an ancestor's inputListener or later in the local/global order)
+  // will be ignored.
+  override?: boolean;
 };
 
 export type HotkeyOptions = SelfOptions & EnabledComponentOptions;
@@ -82,6 +86,7 @@ export default class Hotkey extends EnabledComponent {
   public readonly fireOnHold: boolean;
   public readonly fireOnHoldTiming: HotkeyFireOnHoldTiming;
   public readonly allowOverlap: boolean;
+  public readonly override: boolean;
 
   // All keys that are part of this hotkey (key + modifierKeys)
   public readonly keys: EnglishKey[];
@@ -118,7 +123,8 @@ export default class Hotkey extends EnabledComponent {
       fireOnHoldTiming: 'browser',
       fireOnHoldCustomDelay: 400,
       fireOnHoldCustomInterval: 100,
-      allowOverlap: false
+      allowOverlap: false,
+      override: false
     }, providedOptions );
 
     super( options );
@@ -132,6 +138,7 @@ export default class Hotkey extends EnabledComponent {
     this.fireOnHold = options.fireOnHold;
     this.fireOnHoldTiming = options.fireOnHoldTiming;
     this.allowOverlap = options.allowOverlap;
+    this.override = options.override;
 
     this.keys = _.uniq( [ this.key, ...this.modifierKeys ] );
 
