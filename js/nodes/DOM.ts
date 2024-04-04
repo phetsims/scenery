@@ -250,7 +250,7 @@ export default class DOM extends Node {
   public isInputAllowed(): boolean { return this._allowInput; }
 
   private invalidateAllowInput( allowInput: boolean ): void {
-    this._container.dataset.noPreventDefault = allowInput ? 'true' : 'false';
+    this._container.dataset.sceneryAllowInput = allowInput ? 'true' : 'false';
     this._container.style.pointerEvents = allowInput ? 'auto' : 'none';
   }
 

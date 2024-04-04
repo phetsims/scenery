@@ -27,10 +27,10 @@ export default class EventContext<out DOMEvent extends Event = Event> {
   }
 
   /**
-   * DOM (Scenery) nodes set dataset.noPreventDefault on their container if they don't want preventDefault to be called.
-   * We search up the tree to detect this.
+   * DOM (Scenery) nodes set dataset.sceneryAllowInput on their container if they don't want preventDefault to be called,
+   * or other effects that block input (e.g. setPointerCapture). We search up the tree to detect this.
    */
-  public hasNoPreventDefault(): boolean {
+  public allowsDOMInput(): boolean {
     const target = this.domEvent?.target;
 
 
@@ -39,7 +39,7 @@ export default class EventContext<out DOMEvent extends Event = Event> {
 
       while ( element ) {
         // For DOM nodes, we can check for a data attribute
-        if ( element instanceof HTMLElement && element.dataset?.noPreventDefault === 'true' ) {
+        if ( element instanceof HTMLElement && element.dataset?.sceneryAllowInput === 'true' ) {
           return true;
         }
 
