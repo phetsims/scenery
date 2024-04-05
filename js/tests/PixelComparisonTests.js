@@ -247,8 +247,6 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  /* eslint-enable */
-
   multipleRendererTest( 'Invisible node with rectangles (paths) above and below',
     ( scene, display ) => {
       display.width = 32;

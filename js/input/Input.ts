@@ -250,7 +250,7 @@ const EVENT_KEY_VALUES_AS_ELEMENTS: SerializedPropertiesForDeserialization[] = [
 
 // A list of events that should still fire, even when the Node is not pickable
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
-const TARGET_SUBSTITUTE_KEY = 'targetSubstitute' as const;
+const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
 type TargetSubstitudeAugmentedEvent = Event & {
   [ TARGET_SUBSTITUTE_KEY ]?: Element;
 };
@@ -1186,7 +1186,7 @@ export default class Input extends PhetioObject {
 
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
     if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
-      const trailIndices = domEvent[ TARGET_SUBSTITUTE_KEY ]!.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
+      const trailIndices = domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
       return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
     }
     else {

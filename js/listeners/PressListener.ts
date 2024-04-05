@@ -655,7 +655,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
 
       // a listener other than this one is attached to the pointer so it should not be considered over
       for ( let i = 0; i < this.overPointers.length; i++ ) {
-        if ( this.overPointers.get( i )!.isAttached() ) {
+        if ( this.overPointers.get( i ).isAttached() ) {
           pointerAttachedToOther = true;
           break;
         }

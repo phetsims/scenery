@@ -1792,7 +1792,7 @@ QUnit.test( 'accessibleName option', assert => {
   a.addChild( b );
   const bElement = getPrimarySiblingElementByNode( b );
   const bParent = getPrimarySiblingElementByNode( b ).parentElement!;
-  const bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ]!;
+  const bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
   assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
   assert.ok( bLabelSibling.getAttribute( 'for' )!.includes( bElement.id ), 'accessibleName sets label\'s "for" attribute' );
 

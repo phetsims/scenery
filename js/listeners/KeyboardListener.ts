@@ -521,14 +521,14 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> implements TInputLi
       assert && assert( groupKeys.length > 0, 'no keys provided?' );
 
       const naturalKey = groupKeys.slice( -1 )[ 0 ] as AllowedKeys;
-      const keys = EnglishStringToCodeMap[ naturalKey ]!;
+      const keys = EnglishStringToCodeMap[ naturalKey ];
       assert && assert( keys, `Codes were not found, do you need to add it to EnglishStringToCodeMap? ${naturalKey}` );
 
       let modifierKeys: string[][] = [];
       if ( groupKeys.length > 1 ) {
         const naturalModifierKeys = groupKeys.slice( 0, groupKeys.length - 1 ) as ModifierKey[];
         modifierKeys = naturalModifierKeys.map( naturalModifierKey => {
-          const modifierKeys = EnglishStringToCodeMap[ naturalModifierKey ]!;
+          const modifierKeys = EnglishStringToCodeMap[ naturalModifierKey ];
           assert && assert( modifierKeys, `Key not found, do you need to add it to EnglishStringToCodeMap? ${naturalModifierKey}` );
           return modifierKeys;
         } );
