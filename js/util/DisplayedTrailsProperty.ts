@@ -4,6 +4,13 @@
  * A Property that will contain a list of Trails where the root of the trail is a root Node of a Display, and the leaf
  * node is the provided Node.
  *
+ * // REVIEW: This is a very complicated component and deserves a bit more doc. Some ideas about what to explain:
+ * // REVIEW:   1. That this is synchronously updated and doesn't listen to instances.
+ * // REVIEW:   2.
+ * // REVIEW:   2.
+ * // REVIEW:   2.
+ *
+ * // REVIEW: can you describe this a bit more. Do you mean any Node in a trail? What about if the provided Node is disposed?
  * NOTE: If a Node is disposed, it will be removed from the trails.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -19,12 +26,20 @@ export type DisplayedTrailsPropertyOptions = {
   // If provided, we will only report trails that are rooted for the specific Display provided.
   display?: DisplayPredicate;
 
-  // If true, we will follow the pdomParent if it is available (if our child node is specified in a pdomOrder of another
+  // If true, we will additionally follow the pdomParent if it is available (if our child node is specified in a pdomOrder of another
   // node, we will follow that order).
   // This essentially tracks the following:
   //
+  // REVIEW: Rename option to followPDOMOrder? Only matches of `[a-z]Pdom[A-Z]` are from this issue.
+  //
+  // REVIEW: I'd actually add [a-z]?Pdom[A-Z] to bad-sim-text if you're alright with that. Close to https://github.com/phetsims/chipper/blob/f56c273970f22f857bc8f5bd0148f256534a702f/eslint/rules/bad-sim-text.js#L35-L36
+  //
+  // REVIEW: Aren't these boolean values opposite? followPDOMOrder:true should respect pdomOrder. Also, it isn't clear
+  //         from the doc how you ask for "all trails, visual or PDOM". Is that part of the featureset? I believe
+  //         that likely we would always force visible as a base feature, and only add on visibility, but this should
+  //         be explained. As easy as the doc update above I just did: "we will _additionally_ follow the pdomParent"
   // - followPdomOrder: true = visual trails (just children)
-  // - followPdomORder: false = pdom trails (respecting pdomOrder)
+  // - followPdomOrder: false = pdom trails (respecting pdomOrder)
   followPdomOrder?: boolean;
 
   // If true, we will only report trails where every node is visible: true.
@@ -39,12 +54,16 @@ export type DisplayedTrailsPropertyOptions = {
   // If true, we will only report trails where every node is inputEnabled: true.
   requireInputEnabled?: boolean;
 
+  // REVIEW: Instead of following the same feature above, can we just use `pickable:false` to help us prune. I agree
+  //           it may not be worth while to listen to the combo of pickable+inputListenerLength. Can you describe what benefit
+  //           we may get by adding in Pickable listening?
   // NOTE: Could think about adding pickability here in the future. The complication is that it doesn't measure our hit
   // testing precisely, because of pickable:null (default) and the potential existence of input listeners.
 };
 
 export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
 
+  // REVIEW: How about a rename like "targetNode", no strong preference if you don't want to.
   public readonly node: Node;
   public readonly listenedNodeSet: Set<Node> = new Set<Node>();
   private readonly _trailUpdateListener: () => void;
@@ -114,6 +133,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     ( function recurse() {
       const root = trail.rootNode();
 
+      // REVIEW: How is this enough? Don't we want to add a listener to the disposeEmitter? Not here when creating the trail, but later when adding listeners?
       // If a Node is disposed, we won't add listeners to it, so we abort slightly earlier.
       if ( root.isDisposed ) {
         return;
@@ -133,6 +153,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
 
       const displays = root.getRootedDisplays();
 
+      // REVIEW: initialize to false?
       let displayMatches: boolean;
 
       if ( display === null ) {
@@ -150,6 +171,9 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
         trails.push( trail.copy() );
       }
 
+      // REVIEW: I'm officially confused about this feature. What is the value of "either or", why not be able to
+      // support both visual and PDOM in the same Property? If this is indeed best, please be sure to explain where
+      // the option is defined.
       const parents = followPdomOrder && root.pdomParent ? [ root.pdomParent ] : root.parents;
 
       parents.forEach( parent => {
