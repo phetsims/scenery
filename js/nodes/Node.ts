@@ -645,8 +645,8 @@ class Node extends ParallelDOM {
   // to. Instances are updated in an asynchronous batch during `updateDisplay()`, and it is very important that display
   // updates do not cause changes the scene graph. Thus, this emitter should NEVER trigger a Node's state to change.
   // Currently, all usages of this cause into updates to the audio view, or updates to a separate display (used as an
-  // overlay). Please proceed with caution, and see https://github.com/phetsims/scenery/issues/1615 and
-  // https://github.com/phetsims/scenery/issues/1620 for details.
+  // overlay). Please proceed with caution. Most likely you prefer to use the synchronous support of DisplayedTrailsProperty,
+  // see https://github.com/phetsims/scenery/issues/1615 and https://github.com/phetsims/scenery/issues/1620 for details.
   public readonly changedInstanceEmitter: TEmitter<[ instance: Instance, added: boolean ]> = new TinyEmitter();
 
   // Fired whenever this node is added as a root to a Display OR when it is removed as a root from a Display (i.e.

@@ -65,10 +65,14 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
 
   // REVIEW: How about a rename like "targetNode", no strong preference if you don't want to.
   public readonly node: Node;
+
+  // REVIEW: Please add doc why we only need to listen to a Node once, even if it is in multiple trails?
   public readonly listenedNodeSet: Set<Node> = new Set<Node>();
   private readonly _trailUpdateListener: () => void;
 
   // Recorded options
+  // REVIEW: Please rename this and the option to something less confusing. Perhaps `displaySupport`, or
+  // `whichDisplay`, or something that sounds like it could be a predicate.
   private readonly display: DisplayPredicate;
   private readonly followPdomOrder: boolean;
   private readonly requireVisible: boolean;
@@ -123,7 +127,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     const trails: Trail[] = [];
 
     // Nodes that were touched in the scan (we should listen to changes to ANY of these to see if there is a connection
-    // or disconnection. This could potentially cause our Property to change
+    // or disconnection). This could potentially cause our Property to change
     const nodeSet = new Set<Node>();
 
     // Modified in-place during the search
@@ -133,7 +137,6 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     ( function recurse() {
       const root = trail.rootNode();
 
-      // REVIEW: How is this enough? Don't we want to add a listener to the disposeEmitter? Not here when creating the trail, but later when adding listeners?
       // If a Node is disposed, we won't add listeners to it, so we abort slightly earlier.
       if ( root.isDisposed ) {
         return;
@@ -141,6 +144,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
 
       nodeSet.add( root );
 
+      // REVIEW: Please say why we need listeners on this Node. Also please confirm (via doc) that adding
       // If we fail other conditions, we won't add a trail OR recurse, but we will STILL have listeners added to the Node.
       if (
         ( requireVisible && !root.visible ) ||
@@ -183,6 +187,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       } );
     } )();
 
+    // REVIEW: Webstorm flagged the next 29 lines as duplicated with TrailsBetweenProperty. Let's factor that our or fix that somehow.
     // Add in new needed listeners
     nodeSet.forEach( node => {
       if ( !this.listenedNodeSet.has( node ) ) {
@@ -199,6 +204,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
 
     // Guard in a way that deepEquality on the Property wouldn't (because of the Array wrapper)
     // NOTE: Duplicated with TrailsBetweenProperty, likely can be factored out.
+    // REVIEW: ^^^^ +1, yes please factor out.
     const currentTrails = this.value;
     let trailsEqual = currentTrails.length === trails.length;
     if ( trailsEqual ) {
@@ -210,11 +216,14 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       }
     }
 
+    // REVIEW: Can this be improved upon by utilizing a custom valueComparisonStrategy? I don't see that being much
+    // less performant given that you are doing all the above work on each call to update().
     if ( !trailsEqual ) {
       this.value = trails;
     }
   }
 
+  // REVIEW: Rename to either `addNodeListeners`, or something more general like `listenToNode()`.
   private addNodeListener( node: Node ): void {
     this.listenedNodeSet.add( node );
 
@@ -265,6 +274,8 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     }
   }
 
+  // REVIEW: I always forget why you don't need to also clear your reference to the provided Node. Do you?
+  // REVIEW: Also maybe assert here that your provided node is in this listened to Node set?
   public override dispose(): void {
     this.listenedNodeSet.forEach( node => this.removeNodeListener( node ) );
 
