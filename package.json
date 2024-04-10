@@ -31,6 +31,10 @@
     "rules": {
       "no-bitwise": "off"
     },
+    "ignorePatterns": [
+      "js/display/swash/pkg",
+      "js/display/guillotiere/pkg"
+    ],
     "globals": {
       "himalaya": "readonly",
       "LineBreaker": "readonly",
