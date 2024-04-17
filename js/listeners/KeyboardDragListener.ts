@@ -152,7 +152,7 @@ type SelfOptions = {
   drag?: ( ( vectorDelta: Vector2 ) => void ) | null;
 
   // Called when keyboard dragging ends.
-  end?: ( ( event?: SceneryEvent ) => void ) | null;
+  end?: ( ( event: SceneryEvent | null, listener: KeyboardDragListener ) => void ) | null;
 
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
   moveOnHoldDelay?: number;
@@ -179,7 +179,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
   // See options for documentation
   private _start: ( ( event: SceneryEvent ) => void ) | null;
   private _drag: ( ( vectorDelta: Vector2, listener: KeyboardDragListener ) => void ) | null;
-  private _end: ( ( event?: SceneryEvent ) => void ) | null;
+  private _end: ( ( event: SceneryEvent | null, listener: KeyboardDragListener ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private _mapPosition: MapPosition | null;
   private _transform: Transform3 | TReadOnlyProperty<Transform3> | null;
@@ -227,6 +227,9 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
 
   // @deprecated - Use the drag option instead.
   public dragEmitter: TEmitter;
+
+  //(read-only) - Whether the last drag was interrupted. Will be valid until the next drag start.
+  public interrupted = false;
 
   // Implements disposal
   private readonly _disposeKeyboardDragListener: () => void;
@@ -319,6 +322,8 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
       const key = KeyboardUtils.getEventCode( event.domEvent );
       assert && assert( key, 'How can we have a null key for KeyboardDragListener?' );
 
+      this.interrupted = false;
+
       // If there are no movement keys down, attach a listener to the Pointer that will tell the AnimatedPanZoomListener
       // to keep this Node in view
       if ( !this.movementKeysDown && KeyboardUtils.isMovementKey( event.domEvent ) ) {
@@ -378,7 +383,7 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
         this.isPressedProperty.value = false;
       }
 
-      this._end && this._end( event );
+      this._end && this._end( event, this );
     }, {
       parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
       tandem: options.tandem.createTandem( 'dragEndAction' ),
@@ -1034,13 +1039,15 @@ class KeyboardDragListener extends EnabledComponent implements TInputListener {
     this.resetPressAndHold();
 
     if ( this._pointer ) {
+      this.interrupted = true; // We weren't interrupted unless we had a pointer dragging us.
+
       assert && assert( this._pointer.listeners.includes( this._pointerListener ),
         'A reference to the Pointer means it should have the pointerListener' );
       this._pointer.removeInputListener( this._pointerListener );
       this._pointer = null;
       this.isPressedProperty.value = false;
 
-      this._end && this._end();
+      this._end && this._end( null, this );
     }
   }
 
