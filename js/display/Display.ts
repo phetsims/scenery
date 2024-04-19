@@ -939,7 +939,7 @@ export default class Display {
   /**
    * Returns true if the element is in the PDOM. That is only possible if the display is accessible.
    */
-  public isElementUnderPDOM( element: HTMLElement ): boolean {
+  public isElementUnderPDOM( element: Element ): boolean {
     return this._accessible && this.pdomRootElement!.contains( element );
   }
 
