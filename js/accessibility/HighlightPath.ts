@@ -12,10 +12,10 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { Color, TPaint, Node, Path, PathOptions, scenery, Trail } from '../imports.js';
+import { animatedPanZoomSingleton, Color, Node, Path, PathOptions, scenery, TPaint, Trail } from '../imports.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 
 // constants
 // default inner and outer strokes for the focus highlight
@@ -91,6 +91,10 @@ class HighlightPath extends Path {
   public static readonly GROUP_OUTER_LINE_WIDTH = GROUP_OUTER_LINE_WIDTH;
   public static readonly GROUP_INNER_LINE_WIDTH = GROUP_INNER_LINE_WIDTH;
 
+  // A scalar describing the layout scale of your application. Highlight line widths are corrected
+  // by the layout scale so that they have the same sizes relative to the size of the application.
+  public static layoutScale = 1;
+
   /**
    * @param [shape] - the shape for the focus highlight
    * @param [providedOptions]
@@ -129,8 +133,6 @@ class HighlightPath extends Path {
 
     this.innerHighlightPath = new Path( shape, innerHighlightOptions );
     this.addChild( this.innerHighlightPath );
-
-    this.updateLineWidth();
 
     if ( options.dashed ) {
       this.makeDashed( true );
@@ -172,34 +174,39 @@ class HighlightPath extends Path {
    * Update the line width of both Paths based on transform of this Path, or another Node passed in (usually the
    * node that is being highlighted). Can be overridden by the options
    * passed in the constructor.
-   *
-   * @param [node] - if provided, adjust the line width based on the transform of the node argument
    */
-  public updateLineWidth( node?: Node ): void {
-    node = node || this; // update based on node passed in or on self.
-    this.lineWidth = this.getOuterLineWidth( node );
-    this.innerHighlightPath.lineWidth = this.getInnerLineWidth( node );
+  public updateLineWidth( matrix: Matrix3 ): void {
+    this.lineWidth = this.getOuterLineWidth( matrix );
+    this.innerHighlightPath.lineWidth = this.getInnerLineWidth( matrix );
     this.highlightChangedEmitter.emit();
   }
 
   /**
-   * Given a node, return the lineWidth of this focus highlight.
+   * Given a transformation matrix, return the lineWidth of this focus highlight (unless a custom
+   * lineWidth was specified in the options).
+   *
+   * Note - this takes a matrix3 instead of a Node because that is already computed by the highlight
+   * overlay and we can avoid the extra computation of the Node's local-to-global matrix.
    */
-  public getOuterLineWidth( node: Node ): number {
+  public getOuterLineWidth( matrix: Matrix3 ): number {
     if ( this.outerLineWidth ) {
       return this.outerLineWidth;
     }
-    return HighlightPath.getOuterLineWidthFromNode( node );
+    return HighlightPath.getOuterLineWidthFromMatrix( matrix );
   }
 
   /**
-   * Given a node, return the lineWidth of this focus highlight.
+   * Given a transformation matrix, return the lineWidth of this focus highlight (unless a custom
+   * lineWidth was specified in the options).
+   *
+   * Note - this takes a matrix3 instead of a Node because that is already computed by the highlight
+   * overlay and we can avoid the extra computation of the Node's local-to-global matrix.
    */
-  public getInnerLineWidth( node: Node ): number {
+  public getInnerLineWidth( matrix: Matrix3 ): number {
     if ( this.innerLineWidth ) {
       return this.innerLineWidth;
     }
-    return HighlightPath.getInnerLineWidthFromNode( node );
+    return HighlightPath.getInnerLineWidthFromMatrix( matrix );
   }
 
   /**
@@ -282,24 +289,29 @@ class HighlightPath extends Path {
 
 
   /**
-   * Get the outer line width of a focus highlight based on the node's scale and rotation transform information.
+   * Get the inner line width for a transformation matrix (presumably from the Node being highlighted).
    */
-  public static getInnerLineWidthFromNode( node: Node ): number {
-    return INNER_LINE_WIDTH_BASE / HighlightPath.getWidthMagnitudeFromTransform( node );
+  private static getInnerLineWidthFromMatrix( matrix: Matrix3 ): number {
+    return INNER_LINE_WIDTH_BASE / HighlightPath.localToGlobalScaleFromMatrix( matrix );
   }
 
   /**
-   * Get the outer line width of a node, based on its scale and rotation transformation.
+   * Get the outer line width for a transformation matrix (presumably from the Node being highlighted).
    */
-  public static getOuterLineWidthFromNode( node: Node ): number {
-    return OUTER_LINE_WIDTH_BASE / HighlightPath.getWidthMagnitudeFromTransform( node );
+  private static getOuterLineWidthFromMatrix( matrix: Matrix3 ): number {
+    return OUTER_LINE_WIDTH_BASE / HighlightPath.localToGlobalScaleFromMatrix( matrix );
   }
 
   /**
-   * Get a scalar width based on the node's transform excluding position.
+   * Get a scalar width to use for the focus highlight based on the global transformation matrix
+   * (presumably from the Node being highlighted). This helps make sure that the highlight
+   * line width remains consistent even when the Node has some scale applied to it.
    */
-  private static getWidthMagnitudeFromTransform( node: Node ): number {
-    return node.transform.transformDelta2( Vector2.X_UNIT ).magnitude;
+  private static localToGlobalScaleFromMatrix( matrix: Matrix3 ): number {
+
+    // The scale value in X of the matrix, without the Vector2 instance from getScaleVector.
+    // The scale vector is assumed to be isometric, so we only need to consider the x component.
+    return Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() );
   }
 
   /**
@@ -307,8 +319,8 @@ class HighlightPath extends Path {
    * The highlight is based on a Node's bounds, so it should be scaled out a certain amount so that there is white
    * space between the edge of the component and the beginning (inside edge) of the focusHighlight
    */
-  public static getDilationCoefficient( node: Node ): number {
-    const widthOfFocusHighlight = HighlightPath.getOuterLineWidthFromNode( node );
+  public static getDilationCoefficient( matrix: Matrix3 ): number {
+    const widthOfFocusHighlight = HighlightPath.getOuterLineWidthFromMatrix( matrix );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
     // of the node being highlighted.
@@ -322,12 +334,36 @@ class HighlightPath extends Path {
   }
 
   /**
+   * Returns the highlight dilation coefficient when there is no transformation.
+   */
+  public static getDefaultDilationCoefficient(): number {
+    return HighlightPath.getDilationCoefficient( Matrix3.IDENTITY );
+  }
+
+  /**
+   * Returns the highlight dilation coefficient for a group focus highlight, which is a bit
+   * larger than the typical dilation coefficient.
+   */
+  public static getDefaultGroupDilationCoefficient(): number {
+    return HighlightPath.getGroupDilationCoefficient( Matrix3.IDENTITY );
+  }
+
+  /**
+   * The default highlight line width. The outer line width is wider and can be used as a value for layout. This is the
+   * value of the line width without any transformation. The actual value in the global coordinate frame may change
+   * based on the pan/zoom of the screen.
+   */
+  public static getDefaultHighlightLineWidth(): number {
+    return OUTER_LINE_WIDTH_BASE;
+  }
+
+  /**
    * Get the dilation coefficient for a group focus highlight, which extends even further beyond node bounds
    * than a regular focus highlight. The group focus highlight goes around a node whenever its descendant has focus,
    * so this will always surround the normal focus highlight.
    */
-  public static getGroupDilationCoefficient( node: Node ): number {
-    const widthOfFocusHighlight = HighlightPath.getOuterLineWidthFromNode( node );
+  public static getGroupDilationCoefficient( matrix: Matrix3 ): number {
+    const widthOfFocusHighlight = HighlightPath.getOuterLineWidthFromMatrix( matrix );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
     // of the node being highlighted.
@@ -338,6 +374,35 @@ class HighlightPath extends Path {
     const whiteSpaceScalar = 1.4;
 
     return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
+  }
+
+  /**
+   * Returns a matrix representing the inverse of the pan/zoom transform, so that the highlight can be drawn in the
+   * global coordinate frame. Do not modify this matrix.
+   */
+  private static getPanZoomCorrectingMatrix(): Matrix3 {
+    if ( animatedPanZoomSingleton.initialized ) {
+      return animatedPanZoomSingleton.listener.matrixProperty.value.inverted();
+    }
+    else {
+      return Matrix3.IDENTITY;
+    }
+  }
+
+  /**
+   * Returns a matrix that corrects for the layout scale of the application, so that the highlight can be drawn in the
+   * global coordinate frame. Do not modify this matrix.
+   */
+  private static getLayoutCorrectingMatrix(): Matrix3 {
+    return Matrix3.scaling( 1 / HighlightPath.layoutScale, 1 / HighlightPath.layoutScale );
+  }
+
+  /**
+   * Returns a final matrix to use to scale a highlight so that it is in a consistent size relative to the
+   * application layout bounds.
+   */
+  public static getCorrectiveScalingMatrix(): Matrix3 {
+    return HighlightPath.getPanZoomCorrectingMatrix().timesMatrix( HighlightPath.getLayoutCorrectingMatrix() );
   }
 }
 

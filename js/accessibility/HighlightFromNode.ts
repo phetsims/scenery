@@ -97,31 +97,27 @@ class HighlightFromNode extends HighlightPath {
 
       let dilationCoefficient = this.dilationCoefficient;
 
+
+      // Get the matrix that will transform the node's local bounds to global coordinates.
+      // Then apply a pan/zoom correction so that the highlight looks appropriately
+      // sized from pan/zoom transformation but other transformations are not applied.
+      const matrix = node.getLocalToGlobalMatrix()
+        .timesMatrix( HighlightPath.getCorrectiveScalingMatrix() );
+
       // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
       // with options
       if ( this.dilationCoefficient === null ) {
-        dilationCoefficient = ( this.useGroupDilation ? HighlightPath.getGroupDilationCoefficient( node ) :
-                                HighlightPath.getDilationCoefficient( node ) );
+        dilationCoefficient = ( this.useGroupDilation ? HighlightPath.getGroupDilationCoefficient( matrix ) :
+                                HighlightPath.getDilationCoefficient( matrix ) );
       }
 
       const visibleBounds = this.useLocalBounds ? node.getVisibleLocalBounds() : node.getVisibleBounds();
       const dilatedVisibleBounds = visibleBounds.dilated( dilationCoefficient! );
 
       // Update the line width of the focus highlight based on the transform of the node
-      this.updateLineWidthFromNode( node );
       this.setShape( Shape.bounds( dilatedVisibleBounds ) );
     };
     this.observedBoundsProperty.link( this.boundsListener );
-  }
-
-  /**
-   * Update the line width of both inner and outer highlights based on transform of the Node.
-   */
-  private updateLineWidthFromNode( node: Node ): void {
-
-    // Note that lineWidths provided by options can override width determined from Node transform.
-    this.lineWidth = this.getOuterLineWidth( node );
-    this.innerHighlightPath.lineWidth = this.getInnerLineWidth( node );
   }
 }
 

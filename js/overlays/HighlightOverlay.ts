@@ -644,17 +644,36 @@ export default class HighlightOverlay implements TOverlay {
    * Called from HighlightOverlay after transforming the highlight. Only called when the transform changes.
    */
   private afterTransform(): void {
+
+    // This matrix makes sure that the line width of the highlight remains appropriately sized, even when the Node
+    // (and therefore its highlight) may be scaled. However, we DO want to scale up the highlight line width when
+    // the scene is zoomed in from the global pan/zoom listener, so we include that inverted matrix.
+    assert && assert( this.transformTracker, 'Must have an active transformTracker to adjust from transformation.' );
+    const lineWidthScalingMatrix = this.transformTracker!.getMatrix().timesMatrix( HighlightPath.getCorrectiveScalingMatrix() );
+
     if ( this.mode === 'shape' ) {
-      this.shapeFocusHighlightPath.updateLineWidth();
+      this.shapeFocusHighlightPath.updateLineWidth( lineWidthScalingMatrix );
     }
     else if ( this.mode === 'bounds' ) {
-      this.boundsFocusHighlightPath.updateLineWidth();
+      this.boundsFocusHighlightPath.updateLineWidth( lineWidthScalingMatrix );
     }
     else if ( this.mode === 'node' && this.activeHighlight instanceof HighlightPath && this.activeHighlight.updateLineWidth ) {
+      this.activeHighlight.updateLineWidth( lineWidthScalingMatrix );
+    }
 
-      // Update the transform based on the transform of the node that the focusHighlight is highlighting.
-      assert && assert( this.node, 'Need an active Node to update line width' );
-      this.activeHighlight.updateLineWidth( this.node! );
+    // If the group highlight is active, we need to correct the line widths for that highlight.
+    if ( this.groupHighlightNode ) {
+      if ( this.groupMode === 'bounds' ) {
+        this.groupFocusHighlightPath.updateLineWidth( lineWidthScalingMatrix );
+      }
+      else if ( this.groupMode === 'node' && this.groupHighlightNode instanceof HighlightPath && this.groupHighlightNode.updateLineWidth ) {
+        this.groupHighlightNode.updateLineWidth( lineWidthScalingMatrix );
+      }
+    }
+
+    // If the ReadingBlock highlight is active, we need to correct the line widths for that highlight.
+    if ( this.readingBlockTrail ) {
+      this.readingBlockHighlightPath.updateLineWidth( lineWidthScalingMatrix );
     }
   }
 
