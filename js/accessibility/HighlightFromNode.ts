@@ -119,6 +119,18 @@ class HighlightFromNode extends HighlightPath {
     };
     this.observedBoundsProperty.link( this.boundsListener );
   }
+
+  /**
+   * Remove the listener from the observedBoundsProperty (which belongs to a provided Node).
+   */
+  public override dispose(): void {
+    if ( this.observedBoundsProperty ) {
+      assert && assert( this.boundsListener, 'should be a listener if there is a previous focusHighlightNode' );
+      this.observedBoundsProperty.unlink( this.boundsListener! );
+    }
+
+    super.dispose();
+  }
 }
 
 scenery.register( 'HighlightFromNode', HighlightFromNode );
