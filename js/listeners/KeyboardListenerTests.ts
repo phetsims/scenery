@@ -8,7 +8,7 @@
  * @author Agustín Vallejo (PhET Interactive Simulations)
  */
 
-import { Display, globalKeyStateTracker, KeyboardListener, KeyboardUtils, Node, SceneryEvent } from '../imports.js';
+import { Display, globalKeyStateTracker, KeyboardListener, KeyboardUtils, Node } from '../imports.js';
 
 QUnit.module( 'KeyboardListener', {
   before() {
@@ -46,7 +46,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   let callbackFired = false;
   const listener = new KeyboardListener( {
     keys: [ 'enter' ],
-    callback: () => {
+    fire: () => {
       assert.ok( !callbackFired, 'callback cannot be fired' );
       callbackFired = true;
     }
@@ -58,7 +58,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
       // @ts-expect-error - Typescript should catch bad keys too
       keys: [ 'badKey' ],
-      callback: () => {
+      fire: () => {
 
         // just testing the typing, no work to do here
       }
@@ -91,7 +91,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   const listenerWithOverlappingKeys = new KeyboardListener( {
     keys: [ 'p', 'ctrl+p' ],
 
-    callback: ( event, keysPressed ) => {
+    fire: ( event, keysPressed ) => {
       if ( keysPressed === 'p' ) {
         pFired = true;
       }
@@ -107,97 +107,6 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   triggerKeydownEvent( domElementA, KeyboardUtils.KEY_P, true );
   assert.ok( !pFired, 'p should not fire because control key is down' );
   assert.ok( ctrlPFired, 'ctrl P should have fired' );
-  //////////////////////////////////////////////////////
-
-
-  //////////////////////////////////////////////////////
-  // test handle/abort
-  a.removeInputListener( listenerWithOverlappingKeys );
-  const b = new Node( { tagName: 'div' } );
-  a.addChild( b );
-
-  const domElementB = b.pdomInstances[ 0 ].peer!.primarySibling!;
-
-  // test handled - event should no longer bubble, b listener should handle and a listener should not fire
-  let pFiredFromA = false;
-  let pFiredFromB = false;
-  const listenerPreventedByHandle = new KeyboardListener( {
-    keys: [ 'p' ],
-    callback: ( event, keysPressed, listener ) => {
-      if ( keysPressed === 'p' ) {
-        pFiredFromA = true;
-      }
-    }
-  } );
-  a.addInputListener( listenerPreventedByHandle );
-
-  const handlingListener = new KeyboardListener( {
-    keys: [ 'p' ],
-    callback: ( event, keysPressed ) => {
-      if ( keysPressed === 'p' ) {
-        pFiredFromB = true;
-
-        assert.ok( !!event, 'An event should be provided to the callback in this case.' );
-        event!.handle();
-      }
-    }
-  } );
-  b.addInputListener( handlingListener );
-
-  triggerKeydownEvent( domElementB, KeyboardUtils.KEY_P );
-  assert.ok( !pFiredFromA, 'A should not have received the event because of event handling' );
-  assert.ok( pFiredFromB, 'B received the event and handled it (stopping bubbling)' );
-  triggerKeyupEvent( domElementB, KeyboardUtils.KEY_P );
-
-  a.removeInputListener( listenerPreventedByHandle );
-  b.removeInputListener( handlingListener );
-  pFiredFromA = false;
-  pFiredFromB = false;
-
-  // test abort
-  const listenerPreventedByAbort = new KeyboardListener( {
-    keys: [ 'p' ],
-    callback: ( event, keysPressed ) => {
-      if ( keysPressed === 'p' ) {
-        pFiredFromA = true;
-      }
-    }
-  } );
-  a.addInputListener( listenerPreventedByAbort );
-
-  const abortingListener = new KeyboardListener( {
-    keys: [ 'p' ],
-    callback: ( event, keysPressed ) => {
-      if ( keysPressed === 'p' ) {
-        pFiredFromB = true;
-
-        assert.ok( !!event, 'An event should be provided to the callback in this case.' );
-        event!.abort();
-      }
-    }
-  } );
-  b.addInputListener( abortingListener );
-
-  let pFiredFromExtraListener = false;
-  const otherListenerPreventedByAbort = {
-    keydown: ( event: SceneryEvent<KeyboardEvent> ) => {
-      pFiredFromExtraListener = true;
-    }
-  };
-  b.addInputListener( otherListenerPreventedByAbort );
-
-  triggerKeydownEvent( domElementB, KeyboardUtils.KEY_P );
-  assert.ok( !pFiredFromA, 'A should not have received the event because of abort' );
-  assert.ok( pFiredFromB, 'B received the event and handled it (stopping bubbling)' );
-  assert.ok( !pFiredFromExtraListener, 'Other listener on B did not fire because of abort (stopping all listeners)' );
-  triggerKeyupEvent( domElementB, KeyboardUtils.KEY_P );
-
-  a.removeInputListener( listenerPreventedByAbort );
-  b.removeInputListener( abortingListener );
-  b.removeInputListener( otherListenerPreventedByAbort );
-  pFiredFromA = false;
-  pFiredFromB = false;
-
   //////////////////////////////////////////////////////
 
   // test interrupt/cancel

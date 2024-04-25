@@ -109,11 +109,6 @@
  * - keyup :  Triggered for all keys when released. When a screen reader is active, this event will be omitted
  *            role="button" is activated.
  *            See https://www.w3.org/TR/DOM-Level-3-Events/#keyup
- * - globalkeydown: Triggered for all keys pressed, regardless of whether the Node has focus. It just needs to be
- *                  visible, inputEnabled, and all of its ancestors visible and inputEnabled.
- * - globalkeyup:   Triggered for all keys released, regardless of whether the Node has focus. It just needs to be
- *                  visible, inputEnabled, and all of its ancestors visible and inputEnabled.
- *
  *
  * *** Event Dispatch
  *
@@ -794,12 +789,8 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, context.domEvent )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', context, true );
-
       const trail = this.getPDOMEventTrail( context.domEvent, 'keydown' );
       trail && this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keydown', context, true );
-
-      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeydown', context, false );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
@@ -816,12 +807,8 @@ export default class Input extends PhetioObject {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyup(${Input.debugText( null, context.domEvent )});` );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', context, true );
-
       const trail = this.getPDOMEventTrail( context.domEvent, 'keydown' );
       trail && this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keyup', context, true );
-
-      this.dispatchGlobalEvent<KeyboardEvent>( 'globalkeyup', context, false );
 
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }, {
@@ -1125,30 +1112,6 @@ export default class Input extends PhetioObject {
       assert && assert( this.pdomPointer );
       this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer!, context, bubbles );
     }
-  }
-
-  private dispatchGlobalEvent<DOMEvent extends Event>( eventType: SupportedEventTypes, context: EventContext<DOMEvent>, capture: boolean ): void {
-    this.ensurePDOMPointer();
-    assert && assert( this.pdomPointer );
-    const pointer = this.pdomPointer!;
-    const inputEvent = new SceneryEvent<DOMEvent>( new Trail(), eventType, pointer, context );
-
-    const recursiveGlobalDispatch = ( node: Node ) => {
-      if ( !node.isDisposed && node.isVisible() && node.isInputEnabled() && node.isPDOMVisible() ) {
-        // Reverse iteration follows the z-order from "visually in front" to "visually in back" like normal dipatch
-        for ( let i = node._children.length - 1; i >= 0; i-- ) {
-          recursiveGlobalDispatch( node._children[ i ] );
-        }
-
-        if ( !inputEvent.aborted && !inputEvent.handled ) {
-          // Notification of ourself AFTER our children results in the depth-first scan.
-          inputEvent.currentTarget = node;
-          this.dispatchToListeners<DOMEvent>( pointer, node._inputListeners, eventType, inputEvent, capture );
-        }
-      }
-    };
-
-    recursiveGlobalDispatch( this.rootNode );
   }
 
   /**
@@ -1878,10 +1841,8 @@ export default class Input extends PhetioObject {
    * @param listeners - Should be a defensive array copy already.
    * @param type
    * @param inputEvent
-   * @param capture - If true, this dispatch is in the capture sequence (like DOM's addEventListener useCapture).
-   *                  Listeners will only be called if the listener also indicates it is for the capture sequence.
    */
-  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: TInputListener[], type: SupportedEventTypes, inputEvent: SceneryEvent<DOMEvent>, capture: boolean | null = null ): void {
+  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: TInputListener[], type: SupportedEventTypes, inputEvent: SceneryEvent<DOMEvent> ): void {
 
     if ( inputEvent.handled ) {
       return;
@@ -1892,24 +1853,22 @@ export default class Input extends PhetioObject {
     for ( let i = 0; i < listeners.length; i++ ) {
       const listener = listeners[ i ];
 
-      if ( capture === null || capture === !!listener.capture ) {
-        if ( !inputEvent.aborted && listener[ specificType ] ) {
-          sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( specificType );
-          sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
+      if ( !inputEvent.aborted && listener[ specificType as keyof TInputListener ] ) {
+        sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( specificType );
+        sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-          ( listener[ specificType ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
+        ( listener[ specificType as keyof TInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
-          sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
-        }
+        sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
+      }
 
-        if ( !inputEvent.aborted && listener[ type ] ) {
-          sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( type );
-          sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
+      if ( !inputEvent.aborted && listener[ type as keyof TInputListener ] ) {
+        sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( type );
+        sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-          ( listener[ type ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
+        ( listener[ type as keyof TInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
-          sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
-        }
+        sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
       }
     }
   }

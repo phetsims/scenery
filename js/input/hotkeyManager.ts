@@ -265,14 +265,21 @@ class HotkeyManager {
     const pressedOrReleasedEnglishKey = pressedOrReleasedKeyCode ? eventCodeToEnglishString( pressedOrReleasedKeyCode ) : null;
 
     for ( const hotkey of this.enabledHotkeysProperty.value ) {
-      const shouldBeActive = this.getHotkeysForMainKey( hotkey.key ).includes( hotkey );
+
+      // A hotkey should be  active if its main key is pressed. If it was interrupted, it can only become
+      // active again if there was an actual key press event from the user. If a Hotkey is interrupted during
+      // a press, it should remain inactive and interrupted until the NEXT press.
+      const keyPressed = this.getHotkeysForMainKey( hotkey.key ).includes( hotkey );
+      const notInterrupted = !hotkey.interrupted || ( keyboardEvent && keyboardEvent.type === 'keydown' );
+      const shouldBeActive = keyPressed && notInterrupted;
+
       const isActive = this.activeHotkeys.has( hotkey );
 
       if ( shouldBeActive && !isActive ) {
-        this.addActiveHotkey( hotkey, null, hotkey.key === pressedOrReleasedEnglishKey );
+        this.addActiveHotkey( hotkey, keyboardEvent, hotkey.key === pressedOrReleasedEnglishKey );
       }
       else if ( !shouldBeActive && isActive ) {
-        this.removeActiveHotkey( hotkey, null, hotkey.key === pressedOrReleasedEnglishKey );
+        this.removeActiveHotkey( hotkey, keyboardEvent, hotkey.key === pressedOrReleasedEnglishKey );
       }
     }
   }
@@ -282,26 +289,32 @@ class HotkeyManager {
    */
   private addActiveHotkey( hotkey: Hotkey, keyboardEvent: KeyboardEvent | null, triggeredFromPress: boolean ): void {
     this.activeHotkeys.add( hotkey );
-    hotkey.isPressedProperty.value = true;
-    hotkey.interrupted = false;
 
-    if ( triggeredFromPress && hotkey.fireOnDown ) {
-      hotkey.fire( keyboardEvent );
-    }
+    const shouldFire = triggeredFromPress && hotkey.fireOnDown;
+    hotkey.onPress( keyboardEvent, shouldFire );
   }
 
   /**
-   * Hotkey made inactive/released
+   * Hotkey made inactive/released.
    */
   private removeActiveHotkey( hotkey: Hotkey, keyboardEvent: KeyboardEvent | null, triggeredFromRelease: boolean ): void {
-    hotkey.interrupted = !triggeredFromRelease;
 
-    if ( triggeredFromRelease && !hotkey.fireOnDown ) {
-      hotkey.fire( keyboardEvent );
-    }
-
-    hotkey.isPressedProperty.value = false;
+    // Remove from activeHotkeys before Hotkey.onRelease so that we do not try to remove it again if there is
+    // re-entrancy. This is possible if the release listener moves focus or interrupts a Hotkey.
     this.activeHotkeys.delete( hotkey );
+
+    const shouldFire = triggeredFromRelease && !hotkey.fireOnDown;
+    const interrupted = !triggeredFromRelease;
+    hotkey.onRelease( keyboardEvent, interrupted, shouldFire );
+  }
+
+  /**
+   * Called by Hotkey, removes the Hotkey from the active set when it is interrupted. The Hotkey cannot be active
+   * again in this manager until there is an actual key press event from the user.
+   */
+  public interruptHotkey( hotkey: Hotkey ): void {
+    assert && assert( hotkey.isPressedProperty.value, 'hotkey must be pressed to be interrupted' );
+    this.removeActiveHotkey( hotkey, null, false );
   }
 }
 

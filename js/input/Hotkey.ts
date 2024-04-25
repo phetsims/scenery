@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EnglishKey, scenery } from '../imports.js';
+import { EnglishKey, hotkeyManager, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import TProperty from '../../../axon/js/TProperty.js';
@@ -48,6 +48,16 @@ type SelfOptions = {
   // The event will be null if the hotkey was fired due to fire-on-hold.
   fire?: ( event: KeyboardEvent | null ) => void;
 
+  // Called as press() when the hotkey is pressed. Note that the Hotkey may be pressed before firing depending
+  // on fireOnDown. And press is not called with fire-on-hold. The event may be null if there is a press due to
+  // the hotkey becoming active due to change in state without a key press.
+  press?: ( event: KeyboardEvent | null ) => void;
+
+  // Called as release() when the Hotkey is released. Note that the Hotkey may release without calling fire() depending
+  // on fireOnDown. Event may be null in cases of interrupt or if the hotkey is released due to change in state without
+  // a key release.
+  release?: ( event: KeyboardEvent | null ) => void;
+
   // If true, the hotkey will fire when the hotkey is initially pressed.
   // If false, the hotkey will fire when the hotkey is finally released.
   fireOnDown?: boolean;
@@ -82,6 +92,8 @@ export default class Hotkey extends EnabledComponent {
   public readonly modifierKeys: EnglishKey[];
   public readonly ignoredModifierKeys: EnglishKey[];
   public readonly fire: ( event: KeyboardEvent | null ) => void;
+  public readonly press: ( event: KeyboardEvent | null ) => void;
+  public readonly release: ( event: KeyboardEvent | null ) => void;
   public readonly fireOnDown: boolean;
   public readonly fireOnHold: boolean;
   public readonly fireOnHoldTiming: HotkeyFireOnHoldTiming;
@@ -118,6 +130,8 @@ export default class Hotkey extends EnabledComponent {
       modifierKeys: [],
       ignoredModifierKeys: [],
       fire: _.noop,
+      press: _.noop,
+      release: _.noop,
       fireOnDown: true,
       fireOnHold: false,
       fireOnHoldTiming: 'browser',
@@ -134,6 +148,8 @@ export default class Hotkey extends EnabledComponent {
     this.modifierKeys = options.modifierKeys;
     this.ignoredModifierKeys = options.ignoredModifierKeys;
     this.fire = options.fire;
+    this.press = options.press;
+    this.release = options.release;
     this.fireOnDown = options.fireOnDown;
     this.fireOnHold = options.fireOnHold;
     this.fireOnHoldTiming = options.fireOnHoldTiming;
@@ -159,6 +175,53 @@ export default class Hotkey extends EnabledComponent {
           this.fireOnHoldTimer!.start();
         }
       } );
+    }
+  }
+
+  /**
+   * On "press" of a Hotkey. All keys are pressed while the Hotkey is active. May also fire depending on
+   * events. See hotkeyManager.
+   *
+   * (scenery-internal)
+   */
+  public onPress( event: KeyboardEvent | null, shouldFire: boolean ): void {
+
+    // clear the flag on every press (set before notifying the isPressedProperty)
+    this.interrupted = false;
+
+    this.isPressedProperty.value = true;
+
+    // press after setting up state
+    this.press( event );
+
+    if ( shouldFire ) {
+      this.fire( event );
+    }
+  }
+
+  /**
+   * On "release" of a Hotkey. All keys are released while the Hotkey is inactive. May also fire depending on
+   * events. See hotkeyManager.
+   */
+  public onRelease( event: KeyboardEvent | null, interrupted: boolean, shouldFire: boolean ): void {
+    this.interrupted = interrupted;
+
+    this.isPressedProperty.value = false;
+
+    this.release( event );
+
+    if ( shouldFire ) {
+      this.fire( event );
+    }
+  }
+
+  /**
+   * Manually interrupt this hotkey, releasing it and setting a flag so that it will not fire until the next time
+   * keys are pressed.
+   */
+  public interrupt(): void {
+    if ( this.isPressedProperty.value ) {
+      hotkeyManager.interruptHotkey( this );
     }
   }
 

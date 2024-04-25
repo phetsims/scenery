@@ -18,11 +18,6 @@ type TInputListener = {
   interrupt?: () => void;
   cursor?: string | null;
 
-  // Only applies to globalkeydown/globalkeyup. When true, this listener is fired during the 'capture'
-  // phase. Listeners are fired BEFORE the dispatch through the scene graph. (very similar to DOM addEventListener's
-  // useCapture).
-  capture?: boolean;
-
   listener?: unknown;
 
   // Function that returns the Bounds2 for AnimatedPanZoomListener to keep in view during drag input.
@@ -100,6 +95,6 @@ type TInputListener = {
 };
 
 // Exclude all but the actual browser events
-export type SupportedEventTypes = keyof StrictOmit<TInputListener, 'interrupt' | 'cursor' | 'capture' | 'listener' | 'createPanTargetBounds'>;
+export type SupportedEventTypes = keyof StrictOmit<TInputListener, 'interrupt' | 'cursor' | 'listener' | 'createPanTargetBounds'>;
 
 export default TInputListener;
