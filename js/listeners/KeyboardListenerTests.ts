@@ -66,12 +66,15 @@ QUnit.test( 'KeyboardListener Tests', assert => {
     bogusListener.dispose();
   }, Error, 'Constructor should catch providing bad keys at runtime' );
 
-  const a = new Node( { tagName: 'div' } );
+  const a = new Node( { tagName: 'div', focusable: true } );
   rootNode.addChild( a );
   a.addInputListener( listener );
 
   const domElementA = a.pdomInstances[ 0 ].peer!.primarySibling!;
   assert.ok( domElementA, 'pdom element needed' );
+
+  // Hotkey uses the focused Trail to determine if it should fire, so we need to focus the element
+  a.focus();
 
   triggerKeydownEvent( domElementA, KeyboardUtils.KEY_TAB );
   assert.ok( !callbackFired, 'should not fire on tab' );
@@ -103,7 +106,15 @@ QUnit.test( 'KeyboardListener Tests', assert => {
       }
     }
   } );
+
   a.addInputListener( listenerWithOverlappingKeys );
+
+  // TODO: https://github.com/phetsims/scenery/issues/1570, This is a workaround for a problem with hotkeyManager
+  //   where it doesn't update the availableHotkeys when new input listeners are added. We can manually update by
+  //   triggering focus changes.
+  a.blur();
+  a.focus();
+
   triggerKeydownEvent( domElementA, KeyboardUtils.KEY_P, true );
   assert.ok( !pFired, 'p should not fire because control key is down' );
   assert.ok( ctrlPFired, 'ctrl P should have fired' );

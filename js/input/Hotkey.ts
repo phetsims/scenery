@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EnglishKey, hotkeyManager, scenery } from '../imports.js';
+import { EnglishKey, EnglishStringToCodeMap, hotkeyManager, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import TProperty from '../../../axon/js/TProperty.js';
@@ -157,6 +157,11 @@ export default class Hotkey extends EnabledComponent {
     this.override = options.override;
 
     this.keys = _.uniq( [ this.key, ...this.modifierKeys ] );
+
+    // Make sure that every key has an entry in the EnglishStringToCodeMap
+    for ( const key of this.keys ) {
+      assert && assert( EnglishStringToCodeMap[ key ], `No codes for this key exists, do you need to add it to EnglishStringToCodeMap?: ${key}` );
+    }
 
     // Create a timer to handle the optional fire-on-hold feature.
     if ( this.fireOnHold && this.fireOnHoldTiming === 'custom' ) {
