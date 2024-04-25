@@ -350,7 +350,7 @@ export default class HighlightOverlay implements TOverlay {
     else {
       this.mode = 'bounds';
 
-      this.boundsFocusHighlightPath.setShapeFromNode( this.node );
+      this.boundsFocusHighlightPath.setShapeFromNode( this.node, this.trail );
 
       this.boundsFocusHighlightPath.visible = true;
       this.node.localBoundsProperty.lazyLink( this.boundsListener );
@@ -441,7 +441,7 @@ export default class HighlightOverlay implements TOverlay {
     else {
 
       // bounds mode
-      this.readingBlockHighlightPath.setShapeFromNode( this.activeReadingBlockNode );
+      this.readingBlockHighlightPath.setShapeFromNode( this.activeReadingBlockNode, this.readingBlockTrail );
       this.readingBlockHighlightPath.visible = true;
     }
 
@@ -561,7 +561,8 @@ export default class HighlightOverlay implements TOverlay {
         if ( typeof highlight === 'boolean' ) {
 
           // add a bounding rectangle around the node that uses group highlights
-          this.groupFocusHighlightPath.setShapeFromNode( node );
+          this.groupFocusHighlightPath.setShapeFromNode( node, trailToParent );
+
           this.groupFocusHighlightPath.visible = true;
 
           this.groupHighlightNode = this.groupFocusHighlightPath;
@@ -697,7 +698,8 @@ export default class HighlightOverlay implements TOverlay {
    */
   private onBoundsChange(): void {
     assert && assert( this.node, 'Must have an active node when bounds are changing' );
-    this.boundsFocusHighlightPath.setShapeFromNode( this.node! );
+    assert && assert( this.trail, 'Must have an active trail when updating default bounds highlight' );
+    this.boundsFocusHighlightPath.setShapeFromNode( this.node!, this.trail! );
   }
 
   /**

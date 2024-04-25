@@ -15,7 +15,7 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { HighlightPath, HighlightPathOptions, Node, scenery } from '../imports.js';
+import { HighlightPath, HighlightPathOptions, Node, scenery, Trail } from '../imports.js';
 
 type SelfOptions = {
 
@@ -69,14 +69,17 @@ class HighlightFromNode extends HighlightPath {
     }
   }
 
-
   /**
    * Update the focusHighlight shape on the path given the node passed in. Depending on options supplied to this
    * HighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
    * that is dependent on whether or not this highlight is for group content or for the node itself. See
    * ParallelDOM.setGroupFocusHighlight() for more information on group highlights.
+   *
+   * node - The Node with a highlight to surround.
+   * [trail] - A Trail to use to describe the Node in the global coordinate frame.
+   *           Provided by the HighlightOverlay, to support DAG.
    */
-  public setShapeFromNode( node: Node ): void {
+  public setShapeFromNode( node: Node, trail?: Trail ): void {
 
     // cleanup the previous listener
     if ( this.observedBoundsProperty ) {
@@ -97,11 +100,12 @@ class HighlightFromNode extends HighlightPath {
 
       let dilationCoefficient = this.dilationCoefficient;
 
-
       // Get the matrix that will transform the node's local bounds to global coordinates.
       // Then apply a pan/zoom correction so that the highlight looks appropriately
       // sized from pan/zoom transformation but other transformations are not applied.
-      const matrix = node.getLocalToGlobalMatrix()
+      assert && assert( trail || node.getTrails().length < 2, 'HighlightFromNode requires a unique Trail if using DAG.' );
+      const trailToUse = trail || node.getUniqueTrail();
+      const matrix = trailToUse.getMatrix()
         .timesMatrix( HighlightPath.getCorrectiveScalingMatrix() );
 
       // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
