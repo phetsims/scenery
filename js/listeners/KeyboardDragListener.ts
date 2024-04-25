@@ -152,6 +152,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   // Fires to conduct the start and end of a drag, added for PhET-iO interoperability
   private dragStartAction: PhetioAction<[ SceneryEvent ]>;
   private dragEndAction: PhetioAction;
+  private dragAction: PhetioAction;
 
   // KeyboardDragListener is implemented with KeyboardListener and therefore Hotkey. Hotkeys use 'global' DOM events
   // instead of SceneryEvent dispatch. In order to start the drag with a SceneryEvent, this listener waits
@@ -232,18 +233,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
 
     super( superOptions );
 
-    // Emits an event every drag
-    // TODO: Delete this if it is OK to change the phet-io APIs, see https://github.com/phetsims/scenery/issues/1570
-    // @deprecated - Use the drag option instead
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const dragEmitter = new Emitter( {
-      tandem: options.tandem.createTandem( 'dragEmitter' ),
-      phetioHighFrequency: true,
-      phetioDocumentation: 'Emits whenever a keyboard drag occurs.',
-      phetioReadOnly: options.phetioReadOnly,
-      phetioEventType: EventType.USER
-    } );
-
     // pressedKeysProperty comes from KeyboardListener, and it is used to determine the state of the movement keys.
     // This approach gives more control over the positionProperty in the callbackTimer than using the KeyboardListener
     // callback.
@@ -282,6 +271,39 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
       tandem: options.tandem.createTandem( 'dragStartAction' ),
       phetioDocumentation: 'Emits whenever a keyboard drag starts.',
+      phetioReadOnly: options.phetioReadOnly,
+      phetioEventType: EventType.USER
+    } );
+
+    // The drag action only executes when there is actual movement (vectorDelta is non-zero). For example, it does
+    // NOT execute if conflicting keys are pressed (e.g. left and right arrow keys at the same time). Note that this
+    // is expected to be executed from the CallbackTimer. So there will be problems if this can be executed from
+    // PhET-iO clients.
+    this.dragAction = new PhetioAction( () => {
+      assert && assert( this.isPressedProperty.value, 'The listener should not be dragging if not pressed' );
+
+      // synchronize with model position
+      if ( this._positionProperty ) {
+        let newPosition = this._positionProperty.value.plus( this.vectorDelta );
+        newPosition = this.mapModelPoint( newPosition );
+
+        // update the position if it is different
+        if ( !newPosition.equals( this._positionProperty.value ) ) {
+          this._positionProperty.value = newPosition;
+        }
+      }
+
+      // the optional drag function at the end of any movement
+      if ( this._drag ) {
+        assert && assert( this._pointer, 'the pointer must be assigned at the start of a drag action' );
+        const syntheticEvent = this.createSyntheticEvent( this._pointer! );
+        this._drag( syntheticEvent, this );
+      }
+    }, {
+      parameters: [],
+      tandem: options.tandem.createTandem( 'dragAction' ),
+      phetioDocumentation: 'Emits every time there is some input from a keyboard drag.',
+      phetioHighFrequency: true,
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: EventType.USER
     } );
@@ -361,25 +383,8 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
             vectorDelta = transform.inverseDelta2( vectorDelta );
           }
 
-          // synchronize with model position
-          if ( this._positionProperty ) {
-            let newPosition = this._positionProperty.value.plus( vectorDelta );
-            newPosition = this.mapModelPoint( newPosition );
-
-            // update the position if it is different
-            if ( !newPosition.equals( this._positionProperty.value ) ) {
-              this._positionProperty.value = newPosition;
-            }
-          }
-        }
-
-        // the optional drag function at the end of any movement
-        if ( this._drag ) {
           this.vectorDelta = vectorDelta;
-
-          assert && assert( this._pointer, 'the pointer must be assigned at the start of a drag action' );
-          const syntheticEvent = this.createSyntheticEvent( this._pointer! );
-          this._drag( syntheticEvent, this );
+          this.dragAction.execute();
         }
       }
     } );
