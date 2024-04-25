@@ -16,7 +16,7 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { KeyboardListener, KeyboardListenerOptions, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -27,13 +27,14 @@ import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import platform from '../../../phet-core/js/platform.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import Emitter from '../../../axon/js/Emitter.js';
 
-const allKeys = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown', 'w', 'a', 's', 'd', 'shift' ] as const;
-const leftRightKeys = [ 'arrowLeft', 'arrowRight', 'a', 'd', 'shift' ] as const;
-const upDownKeys = [ 'arrowUp', 'arrowDown', 'w', 's', 'shift' ] as const;
+// 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
+// the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
+const allKeys = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown', 'w', 'a', 's', 'd' ] as const;
+const leftRightKeys = [ 'arrowLeft', 'arrowRight', 'a', 'd' ] as const;
+const upDownKeys = [ 'arrowUp', 'arrowDown', 'w', 's' ] as const;
 
 type KeyboardDragListenerKeyStroke = typeof allKeys | typeof leftRightKeys | typeof upDownKeys;
 
@@ -147,7 +148,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   private rightKeyDownProperty = new TinyProperty<boolean>( false );
   private upKeyDownProperty = new TinyProperty<boolean>( false );
   private downKeyDownProperty = new TinyProperty<boolean>( false );
-  private shiftKeyDownProperty = new TinyProperty<boolean>( false );
 
   // Fires to conduct the start and end of a drag, added for PhET-iO interoperability
   private dragStartAction: PhetioAction<[ SceneryEvent ]>;
@@ -179,9 +179,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   // The vector delta that is used to move the object during a drag operation. Assigned to the listener so that
   // it is usable in the drag callback.
   public vectorDelta: Vector2 = new Vector2( 0, 0 );
-
-  // True when any movement key is pressed (arrow or WASD keys), false otherwise.
-  private readonly movementKeyPressedProperty: TReadOnlyProperty<boolean>;
 
   // The callback timer that is used to move the object during a drag operation to support animated motion and
   // motion every moveOnHoldInterval.
@@ -227,6 +224,9 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
 
     const superOptions = optionize<KeyboardDragListenerOptions, EmptySelfOptions, KeyboardListenerOptions<KeyboardDragListenerKeyStroke>>()( {
       keys: keys,
+
+      // We still want to start drag operations when the shift modifier key is pressed, even though it is not
+      // listed in keys.
       ignoredModifierKeys: [ 'shift' ]
     }, options );
 
@@ -248,7 +248,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     // This approach gives more control over the positionProperty in the callbackTimer than using the KeyboardListener
     // callback.
     this.pressedKeysProperty.link( pressedKeys => {
-      this.shiftKeyDownProperty.value = pressedKeys.includes( 'shift' );
       this.leftKeyDownProperty.value = pressedKeys.includes( 'arrowLeft' ) || pressedKeys.includes( 'a' );
       this.rightKeyDownProperty.value = pressedKeys.includes( 'arrowRight' ) || pressedKeys.includes( 'd' );
       this.upKeyDownProperty.value = pressedKeys.includes( 'arrowUp' ) || pressedKeys.includes( 'w' );
@@ -325,15 +324,17 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
         let deltaX = 0;
         let deltaY = 0;
 
+        const shiftKeyDown = globalKeyStateTracker.shiftKeyDown;
+
         let delta: number;
         if ( this.useDragSpeed ) {
 
           // We know that CallbackTimer is going to fire at the interval so we can use that to get the dt.
           const dt = interval / 1000; // the interval in seconds
-          delta = dt * ( this.shiftKeyDownProperty.value ? options.shiftDragSpeed : options.dragSpeed );
+          delta = dt * ( shiftKeyDown ? options.shiftDragSpeed : options.dragSpeed );
         }
         else {
-          delta = this.shiftKeyDownProperty.value ? options.shiftDragDelta : options.dragDelta;
+          delta = shiftKeyDown ? options.shiftDragDelta : options.dragDelta;
         }
 
         if ( this.leftKeyDownProperty.value ) {
@@ -383,18 +384,9 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       }
     } );
 
-    // When the drag keys are down, start the callback timer. When they are up, stop the callback timer. A custom
-    // Property instead of this.isPressedProperty because we don't want to start/end drag from the shift key.
-    this.movementKeyPressedProperty = DerivedProperty.or( [
-      this.leftKeyDownProperty,
-      this.rightKeyDownProperty,
-      this.upKeyDownProperty,
-      this.downKeyDownProperty
-    ] );
-
     // When any of the movement keys first go down, start the drag operation on the next keydown event (so that
     // the SceneryEvent is available).
-    this.movementKeyPressedProperty.lazyLink( dragKeysDown => {
+    this.isPressedProperty.lazyLink( dragKeysDown => {
       if ( dragKeysDown ) {
         this.startNextKeyboardEvent = true;
       }
@@ -426,7 +418,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     }
 
     this._disposeKeyboardDragListener = () => {
-      this.movementKeyPressedProperty.dispose();
 
       this.leftKeyDownProperty.dispose();
       this.rightKeyDownProperty.dispose();
@@ -505,13 +496,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   public set shiftDragDelta( shiftDragDelta: number ) { this._shiftDragDelta = shiftDragDelta; }
 
   /**
-   * Returns true if this listener is currently pressed such that it is moving the target Node.
-   */
-  public get isPressed(): boolean {
-    return this.movementKeyPressedProperty.value;
-  }
-
-  /**
    * Are keys pressed that would move the target Node to the left?
    */
   public movingLeft(): boolean {
@@ -543,7 +527,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
    * Get the current target Node of the drag.
    */
   public getCurrentTarget(): Node {
-    assert && assert( this.isPressed, 'We have no currentTarget if we are not pressed' );
+    assert && assert( this.isPressedProperty.value, 'We have no currentTarget if we are not pressed' );
     assert && assert( this._pointer && this._pointer.trail, 'Must have a Pointer with an active trail if we are pressed' );
     return this._pointer!.trail!.lastNode();
   }

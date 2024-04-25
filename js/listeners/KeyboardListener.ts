@@ -222,6 +222,13 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   }
 
   /**
+   * Whether this listener is currently activated with a press.
+   */
+  public get isPressed(): boolean {
+    return this.isPressedProperty.value;
+  }
+
+  /**
    * Fired when the enabledProperty changes
    */
   private onEnabledPropertyChange( enabled: boolean ): void {
