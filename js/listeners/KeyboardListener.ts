@@ -6,8 +6,8 @@
  *
  * - Each entry in the array represents a combination of keys that must be pressed to fire a callback.
  * - '+' separates each key in a single combination.
- * - The keys leading up to the last key in the group are considered "modifier" keys. The last key in the group needs
- *   to be pressed while the modifier keys are down.
+ * - The keys leading up to the last key in the combination are considered "modifier" keys. The last key in the
+ *   combination needs to be pressed while the modifier keys are down to fire the callback.
  * - The order modifier keys are pressed does not matter for firing the callback.
  *
  * In the above example "shift+t" OR "alt+shift+r" will fire the callback when pressed.
@@ -36,7 +36,7 @@
  * } ) );
  *
  * By default, the fire callback will fire when the last key is pressed down. See additional options for firing on key
- * up or other press and hold behavior.
+ * release or other press and hold behavior.
  *
  * **Important Modifier Key Behavior**
  * Modifier keys prevent other key combinations from firing their behavior if they are pressed down.
