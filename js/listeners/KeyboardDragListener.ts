@@ -28,7 +28,6 @@ import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import platform from '../../../phet-core/js/platform.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
-import Emitter from '../../../axon/js/Emitter.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
