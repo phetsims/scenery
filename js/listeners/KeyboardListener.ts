@@ -401,6 +401,21 @@ class GlobalKeyboardListener extends KeyboardListener<OneKeyStroke[]> {
       globalHotkeyRegistry.add( hotkey );
     } );
   }
+
+  /**
+   * Dispose Properties and remove all Hotkeys from the global registry.
+   */
+  public override dispose(): void {
+
+    // Remove all global keys from the registry.
+    this.hotkeys.forEach( hotkey => {
+      globalHotkeyRegistry.remove( hotkey );
+    } );
+
+    this.globallyEnabledProperty.dispose();
+    this.displayedTrailsProperty.dispose();
+    super.dispose();
+  }
 }
 
 scenery.register( 'KeyboardListener', KeyboardListener );
