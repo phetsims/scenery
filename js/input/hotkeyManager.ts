@@ -19,7 +19,6 @@
  * The set of enabled hotkeys determines the set of modifier keys that are considered "active" (in addition to
  * ctrl/alt/meta/shift, which are always included).
  *
- *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

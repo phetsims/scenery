@@ -6,6 +6,28 @@
  * 1. Added to globalHotkeyRegistry (to be available regardless of keyboard focus)
  * 2. Added to a node's inputListeners (to be available only when that node is part of the focused trail)
  *
+ * For example:
+ *
+ *    globalHotkeyRegistry.add( new Hotkey( {
+ *      key: 'y',
+ *      fire: () => console.log( 'fire: y' )
+ *    } ) );
+ *
+ *    myNode.addInputListener( {
+ *      hotkeys: [
+ *        new Hotkey( {
+ *          key: 'x',
+ *          fire: () => console.log( 'fire: x' )
+ *        } )
+ *      ]
+ *    } );
+ *
+ * Also supports modifier keys that must be pressed in addition to the Key. See options for a description of how
+ * they behave.
+ *
+ * Hotkeys are managed by hotkeyManager, which determines which hotkeys are active based on the globalHotkeyRegistry
+ * and what Node has focus. See that class for information about how hotkeys work.
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -20,8 +42,8 @@ import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 export type HotkeyFireOnHoldTiming = 'browser' | 'custom';
 
 type SelfOptions = {
-  // The key that should be pressed to trigger the hotkey (in fireOnDown:true mode) or released to trigger the hotkey (in
-  // fireOnDown:false mode).
+  // The key that should be pressed to trigger the hotkey (in fireOnDown:true mode) or released to trigger the hotkey
+  // (in fireOnDown:false mode).
   key: EnglishKey;
 
   // A set of modifier keys that:
