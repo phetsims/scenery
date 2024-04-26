@@ -1,8 +1,37 @@
 // Copyright 2019-2024, University of Colorado Boulder
 
 /**
- * A general type for keyboard dragging. Objects can be dragged in one or two dimensions with the arrow keys and with
- * the WASD keys. Add this to a Node with addInputListener to enable keyboard dragging.
+ * An input listener for keyboard-based drag interactions, allowing objects to be moved using the arrow keys or
+ * the W, A, S, D keys.
+ *
+ * Key features:
+ * - Supports both discrete (step-based) and continuous (speed-based) dragging modes.
+ * - Allows restricting movement to specific axes (e.g., horizontal or vertical only) or allowing free 2D movement.
+ * - Configurable drag speed and drag delta values, with separate configurations when the shift key is held for
+ *   finer control.
+ * - Optionally synchronizes with a 'positionProperty' to allow for model-view coordination with custom transformations
+ *   if needed.
+ * - Provides hooks for start, drag (movement), and end phases of a drag interaction through callback options.
+ * - Includes support for drag bounds, restricting the draggable area within specified model coordinates.
+ * - Utilizes a CallbackTimer for smooth, timed updates during drag operations, especially useful in continuous drag
+ *   mode.
+ *
+ * Usage:
+ * Attach an instance of KeyboardDragListener to a Node via the `addInputListener` method.
+ *
+ * Example:
+ *
+ *   const myNode = new Node();
+ *   const dragListener = new KeyboardDragListener( {
+ *     dragDelta: 2,
+ *     shiftDragDelta: 2,
+ *     start: (event, listener) => { console.log('Drag started'); },
+ *     drag: (event, listener) => { console.log('Dragging'); },
+ *     end: (event, listener) => { console.log('Drag ended'); },
+ *     positionProperty: myNode.positionProperty,
+ *     transform: myNode.getTransform()
+ *   } );
+ *   myNode.addInputListener(dragListener);
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Michael Barlow
