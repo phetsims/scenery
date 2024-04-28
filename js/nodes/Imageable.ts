@@ -18,6 +18,7 @@ import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
+import TMixin from '../../../phet-core/js/types/TMixin.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
@@ -132,8 +133,8 @@ export type ImageableOptions = {
   hitTestPixels?: boolean;
 };
 
-const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
-  return class ImageableMixin extends type {
+const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
+  return class ImageableMixin extends type implements TImageable {
 
     // (scenery-internal) Internal stateful value, see onImagePropertyChange()
     public _image: ParsedImage | null;
@@ -162,8 +163,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
     // (scenery-internal) Internal stateful value, see setMipmapMaxLevel() for documentation
     public _mipmapMaxLevel: number;
 
-    // Internal stateful value, see setHitTestPixels() for documentation
-    protected _hitTestPixels: boolean;
+    // Internal stateful value, see setHitTestPixels() for documentation. Made public for the mixin, please treat as protected.
+    public _hitTestPixels: boolean;
 
     // Array of Canvases for each level, constructed internally so that Canvas-based drawables (Canvas, WebGL) can quickly draw mipmaps.
     private _mipmapCanvases: HTMLCanvasElement[];
@@ -181,8 +182,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => { // esl
     // Whether our _imageLoadListener has been attached as a listener to the current image.
     private _imageLoadListenerAttached: boolean;
 
-    // Used for pixel hit testing.
-    protected _hitTestImageData: ImageData | null;
+    // Used for pixel hit testing. Made public for the mixin, please treat as protected.
+    public _hitTestImageData: ImageData | null;
 
     // Emits when mipmaps are (re)generated
     public mipmapEmitter: TEmitter;
@@ -1105,5 +1106,42 @@ Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT = 0.5;
 // {Object} - Initial values for most Node mutator options
 Imageable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
+export type TImageable = {
+  _hitTestImageData: ImageData | null; // please treat as protected
+  _hitTestPixels: boolean; // please treat as protected
+  _image: ParsedImage | null;
+  _imageOpacity: number;
+  _mipmap: boolean;
+  _mipmapData: Mipmap | null;
+
+  get image(): ParsedImage;
+  set image( image: ImageableImage );
+
+  get imageProperty(): TProperty<ImageableImage>;
+  set imageProperty( property: TReadOnlyProperty<ImageableImage> | null );
+
+  getImage(): ParsedImage;
+  getImageHeight(): number;
+  getImageWidth(): number;
+  hitTestPixels: boolean;
+  imageHeight: number;
+  imageOpacity: number;
+  imageWidth: number;
+  initialHeight: number;
+  initialWidth: number;
+  invalidateImage(): void;
+  invalidateMipmaps(): void;
+
+  setImage( image: ImageableImage ): void;
+  setImageOpacity( imageOpacity: number ): void;
+};
+
 scenery.register( 'Imageable', Imageable );
-export default Imageable;
+export default Imageable as TMixin<object, TImageable> & {
+
+  // static interface
+  testHitTestData( imageData: ImageData, width: number, height: number, point: Vector2 ): boolean;
+  hitTestDataToShape( imageData: ImageData, width: number, height: number ): Shape;
+  DEFAULT_OPTIONS: ImageableOptions;
+  getHitTestData( image: ParsedImage, width: number, height: number ): ImageData | null;
+};
