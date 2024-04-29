@@ -475,6 +475,8 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
           this.cleanVoicingUtterance();
         }
 
+        // TODO: Fix the type for VoicingNode, see https://github.com/phetsims/tasks/issues/1132
+        // @ts-expect-error
         Voicing.registerUtteranceToVoicingNode( utterance, this );
         this._voicingUtterance = utterance;
       }
@@ -626,6 +628,9 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
         this._voicingUtterance.dispose();
       }
       else if ( this._voicingUtterance && !this._voicingUtterance.isDisposed ) {
+
+        // TODO: Fix the type for VoicingNode, see https://github.com/phetsims/tasks/issues/1132
+        // @ts-expect-error
         Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, this );
       }
     }

@@ -32,12 +32,36 @@ type SelfOptions = {
 
 export type InteractiveHighlightingOptions = SelfOptions;
 
-const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ) => {
+export type TInteractiveHighlighting = {
+
+  // @mixin-protected - made public for use in the mixin only
+  displays: Record<string, Display>;
+
+  interactiveHighlightChangedEmitter: TEmitter;
+  readonly isInteractiveHighlightActiveProperty: TReadOnlyProperty<boolean>;
+  readonly isInteractiveHighlighting: boolean;
+  setInteractiveHighlight( interactiveHighlight: Highlight ): void;
+  interactiveHighlight: Highlight;
+  getInteractiveHighlight(): Highlight;
+  setInteractiveHighlightLayerable( interactiveHighlightLayerable: boolean ): void;
+  interactiveHighlightLayerable: boolean;
+  getInteractiveHighlightLayerable(): boolean;
+  setInteractiveHighlightEnabled( enabled: boolean ): void;
+  getInteractiveHighlightEnabled(): boolean;
+  interactiveHighlightEnabled: boolean;
+  handleHighlightActiveChange(): void;
+  onChangedInstance( instance: Instance, added: boolean ): void;
+
+  // @mixin-protected - made public for use in the mixin only
+  getDescendantsUseHighlighting( trail: Trail ): boolean;
+};
+
+const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TInteractiveHighlighting> => {
 
   // @ts-expect-error
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
 
-  const InteractiveHighlightingClass = DelayedMutate( 'InteractiveHighlightingClass', INTERACTIVE_HIGHLIGHTING_OPTIONS, class InteractiveHighlightingClass extends Type {
+  const InteractiveHighlightingClass = DelayedMutate( 'InteractiveHighlightingClass', INTERACTIVE_HIGHLIGHTING_OPTIONS, class InteractiveHighlightingClass extends Type implements TInteractiveHighlighting {
 
     // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
     // because we do not want this to fire from bubbling. The highlight should be around this Node when it receives
@@ -54,7 +78,8 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
     // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
     // (with updateDisplay) since Instances are added asynchronously.
-    protected displays: Record<string, Display> = {};
+    // @mixin-protected - made public for use in the mixin only
+    public displays: Record<string, Display> = {};
 
     // The highlight that will surround this Node when it is activated and a Pointer is currently over it. When
     // null, the focus highlight will be used (as defined in ParallelDOM.js).
@@ -605,8 +630,9 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
      * Returns true if any nodes from this Node to the leaf of the Trail use Voicing features in some way. In
      * general, we do not want to activate voicing features in this case because the leaf-most Nodes in the Trail
      * should be activated instead.
+     * @mixin-protected - made public for use in the mixin only
      */
-    protected getDescendantsUseHighlighting( trail: Trail ): boolean {
+    public getDescendantsUseHighlighting( trail: Trail ): boolean {
       const indexOfSelf = trail.nodes.indexOf( this );
 
       // all the way to length, end not included in slice - and if start value is greater than index range
@@ -647,9 +673,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
   return InteractiveHighlightingClass;
 } );
 
-// Provides a way to determine if a Node is composed with InteractiveHighlighting by type
-const wrapper = () => InteractiveHighlighting( Node );
-export type InteractiveHighlightingNode = InstanceType<ReturnType<typeof wrapper>>;
+export type InteractiveHighlightingNode = Node & TInteractiveHighlighting;
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
 export default InteractiveHighlighting;
