@@ -18,7 +18,7 @@ import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import TMixin from '../../../phet-core/js/types/TMixin.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
@@ -51,8 +51,6 @@ const getScratchContext = () => {
   }
   return scratchContext;
 };
-
-type Constructor<T = object> = new ( ...args: IntentionalAny[] ) => T;
 
 export type Mipmap = {
   width: number;
@@ -133,7 +131,131 @@ export type ImageableOptions = {
   hitTestPixels?: boolean;
 };
 
-const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
+// TODO: Allow interfaces for use of correct "this"? https://github.com/phetsims/tasks/issues/1132
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export interface TImageable {
+  _image: ParsedImage | null;
+  _imageOpacity: number;
+  _mipmap: boolean;
+  _mipmapBias: number;
+  _mipmapInitialLevel: number;
+  _mipmapMaxLevel: number;
+  _hitTestPixels: boolean;
+  _mipmapData: Mipmap | null;
+  _hitTestImageData: ImageData | null;
+  mipmapEmitter: TEmitter;
+  isDisposed?: boolean;
+
+  setImage( image: ImageableImage ): this;
+
+  set image( value: ImageableImage );
+
+  get image(): ParsedImage;
+
+  getImage(): ParsedImage;
+
+  setImageProperty( newTarget: TReadOnlyProperty<ImageableImage> | null ): null;
+
+  set imageProperty( property: TReadOnlyProperty<ImageableImage> | null );
+
+  get imageProperty(): TProperty<ImageableImage>;
+
+  getImageProperty(): TProperty<ImageableImage>;
+
+  invalidateImage(): void;
+
+  setImageWithSize( image: ImageableImage, width: number, height: number ): this;
+
+  setImageOpacity( imageOpacity: number ): void;
+
+  set imageOpacity( value: number );
+
+  get imageOpacity(): number;
+
+  getImageOpacity(): number;
+
+  setInitialWidth( width: number ): this;
+
+  set initialWidth( value: number );
+
+  get initialWidth(): number;
+
+  getInitialWidth(): number;
+
+  setInitialHeight( height: number ): this;
+
+  set initialHeight( value: number );
+
+  get initialHeight(): number;
+
+  getInitialHeight(): number;
+
+  setMipmap( mipmap: boolean ): this;
+
+  set mipmap( value: boolean );
+
+  get mipmap(): boolean;
+
+  isMipmap(): boolean;
+
+  setMipmapBias( bias: number ): this;
+
+  set mipmapBias( value: number );
+
+  get mipmapBias(): number;
+
+  getMipmapBias(): number;
+
+  setMipmapInitialLevel( level: number ): this;
+
+  set mipmapInitialLevel( value: number );
+
+  get mipmapInitialLevel(): number;
+
+  getMipmapInitialLevel(): number;
+
+  setMipmapMaxLevel( level: number ): this;
+
+  set mipmapMaxLevel( value: number );
+
+  get mipmapMaxLevel(): number;
+
+  getMipmapMaxLevel(): number;
+
+// @mixin-protected - made public for use in the mixin only
+  setHitTestPixels( hitTestPixels: boolean ): this;
+
+// @mixin-protected - made public for use in the mixin only
+  set hitTestPixels( value: boolean );
+
+  get hitTestPixels(): boolean;
+
+  getHitTestPixels(): boolean;
+
+  invalidateMipmaps(): void;
+
+  getMipmapLevel( matrix: Matrix3, additionalBias?: number ): number;
+
+  getMipmapLevelFromScale( scale: number, additionalBias?: number ): number;
+
+  getMipmapCanvas( level: number ): HTMLCanvasElement;
+
+  getMipmapURL( level: number ): string;
+
+  hasMipmaps(): boolean;
+
+  getImageWidth(): number;
+
+  get imageWidth(): number;
+
+  getImageHeight(): number;
+
+  get imageHeight(): number;
+
+  getImageURL(): string;
+}
+
+const Imageable = <SuperType extends Constructor>( type: SuperType ): SuperType & Constructor<TImageable> => {
   return class ImageableMixin extends type implements TImageable {
 
     // (scenery-internal) Internal stateful value, see onImagePropertyChange()
@@ -163,7 +285,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     // (scenery-internal) Internal stateful value, see setMipmapMaxLevel() for documentation
     public _mipmapMaxLevel: number;
 
-    // Internal stateful value, see setHitTestPixels() for documentation. Made public for the mixin, please treat as protected.
+    // Internal stateful value, see setHitTestPixels() for documentation.
+    // @mixin-protected - made public for use in the mixin only
     public _hitTestPixels: boolean;
 
     // Array of Canvases for each level, constructed internally so that Canvas-based drawables (Canvas, WebGL) can quickly draw mipmaps.
@@ -182,7 +305,8 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     // Whether our _imageLoadListener has been attached as a listener to the current image.
     private _imageLoadListenerAttached: boolean;
 
-    // Used for pixel hit testing. Made public for the mixin, please treat as protected.
+    // Used for pixel hit testing.
+    // @mixin-protected - made public for use in the mixin only
     public _hitTestImageData: ImageData | null;
 
     // Emits when mipmaps are (re)generated
@@ -1106,42 +1230,5 @@ Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT = 0.5;
 // {Object} - Initial values for most Node mutator options
 Imageable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
-export type TImageable = {
-  _hitTestImageData: ImageData | null; // please treat as protected
-  _hitTestPixels: boolean; // please treat as protected
-  _image: ParsedImage | null;
-  _imageOpacity: number;
-  _mipmap: boolean;
-  _mipmapData: Mipmap | null;
-
-  get image(): ParsedImage;
-  set image( image: ImageableImage );
-
-  get imageProperty(): TProperty<ImageableImage>;
-  set imageProperty( property: TReadOnlyProperty<ImageableImage> | null );
-
-  getImage(): ParsedImage;
-  getImageHeight(): number;
-  getImageWidth(): number;
-  hitTestPixels: boolean;
-  imageHeight: number;
-  imageOpacity: number;
-  imageWidth: number;
-  initialHeight: number;
-  initialWidth: number;
-  invalidateImage(): void;
-  invalidateMipmaps(): void;
-
-  setImage( image: ImageableImage ): void;
-  setImageOpacity( imageOpacity: number ): void;
-};
-
 scenery.register( 'Imageable', Imageable );
-export default Imageable as TMixin<object, TImageable> & {
-
-  // static interface
-  testHitTestData( imageData: ImageData, width: number, height: number, point: Vector2 ): boolean;
-  hitTestDataToShape( imageData: ImageData, width: number, height: number ): Shape;
-  DEFAULT_OPTIONS: ImageableOptions;
-  getHitTestData( image: ParsedImage, width: number, height: number ): ImageData | null;
-};
+export default Imageable;
