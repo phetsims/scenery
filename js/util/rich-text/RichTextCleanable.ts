@@ -10,11 +10,17 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import { Node, scenery } from '../../imports.js';
+import { TPoolable } from '../../../../phet-core/js/Pool.js';
 
-const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
+type TRichTextCleanable = {
+  readonly isCleanable: boolean;
+  clean(): void;
+};
+
+const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperType ): SuperType & Constructor<TRichTextCleanable> => {
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
 
-  return class RichTextCleanableMixin extends type {
+  return class RichTextCleanableMixin extends type implements TRichTextCleanable {
     public get isCleanable(): boolean {
       return true;
     }
@@ -41,7 +47,7 @@ const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperT
     }
   };
 } );
-export type RichTextCleanableNode = Node & { clean: () => void; isCleanable: boolean; freeToPool: () => void };
+export type RichTextCleanableNode = Node & TPoolable & TRichTextCleanable;
 
 scenery.register( 'RichTextCleanable', RichTextCleanable );
 
