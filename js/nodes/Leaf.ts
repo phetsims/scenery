@@ -10,9 +10,8 @@ import { Node, scenery } from '../imports.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
-import TMixin from '../../../phet-core/js/types/TMixin.js';
 
-const Leaf = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
+const Leaf = memoize( <SuperType extends Constructor<Node>>( type: SuperType ): SuperType => {
 
   return class LeafMixin extends type {
     public constructor( ...args: IntentionalAny[] ) {
@@ -31,4 +30,4 @@ const Leaf = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) =
 
 scenery.register( 'Leaf', Leaf );
 
-export default Leaf as TMixin<Node>;
+export default Leaf;
