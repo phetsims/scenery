@@ -35,6 +35,7 @@ import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
+import { TInteractiveHighlighting } from './InteractiveHighlighting.js';
 
 // Helps enforce that the utterance is defined.
 function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {
@@ -98,17 +99,106 @@ export type SpeakingOptions = {
   utterance?: SelfOptions['voicingUtterance'];
 } & SpeakableResolvedOptions;
 
-const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+// TODO: Allow interfaces for use of correct "this"? https://github.com/phetsims/tasks/issues/1132
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export interface TVoicing extends TInteractiveHighlighting {
+  _voicingResponsePacket: ResponsePacket;
+
+  // @mixin-protected - made public for use in the mixin only
+  _voicingUtterance: Utterance | null;
+
+  // @mixin-private - private to this file, but public needed for the interface
+  _voicingCanSpeakProperty: TinyProperty<boolean>;
+
+  initialize( ...args: IntentionalAny[] ): this;
+
+  voicingSpeakFullResponse( providedOptions?: SpeakingOptions ): void;
+
+  voicingSpeakResponse( providedOptions?: SpeakingOptions ): void;
+
+  voicingSpeakNameResponse( providedOptions?: SpeakingOptions ): void;
+
+  voicingSpeakObjectResponse( providedOptions?: SpeakingOptions ): void;
+
+  voicingSpeakContextResponse( providedOptions?: SpeakingOptions ): void;
+
+  voicingSpeakHintResponse( providedOptions?: SpeakingOptions ): void;
+
+  // @mixin-protected - made public for use in the mixin only
+  collectResponse( providedOptions?: SpeakingOptions ): TAlertable;
+
+  speakContent( content: TAlertable ): void;
+
+  setVoicingNameResponse( response: VoicingResponse ): void;
+
+  voicingNameResponse: ResolvedResponse;
+
+  getVoicingNameResponse(): ResolvedResponse;
+
+  setVoicingObjectResponse( response: VoicingResponse ): void;
+
+  voicingObjectResponse: ResolvedResponse;
+
+  getVoicingObjectResponse(): ResolvedResponse;
+
+  setVoicingContextResponse( response: VoicingResponse ): void;
+
+  voicingContextResponse: ResolvedResponse;
+
+  getVoicingContextResponse(): ResolvedResponse;
+
+  setVoicingHintResponse( response: VoicingResponse ): void;
+
+  voicingHintResponse: ResolvedResponse;
+
+  getVoicingHintResponse(): ResolvedResponse;
+
+  setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ): void;
+
+  voicingIgnoreVoicingManagerProperties: boolean;
+
+  getVoicingIgnoreVoicingManagerProperties(): boolean;
+
+  setVoicingResponsePatternCollection( patterns: ResponsePatternCollection ): void;
+
+  voicingResponsePatternCollection: ResponsePatternCollection;
+
+  getVoicingResponsePatternCollection(): ResponsePatternCollection;
+
+  setVoicingUtterance( utterance: Utterance ): void;
+
+  voicingUtterance: Utterance;
+
+  getVoicingUtterance(): Utterance;
+
+  setVoicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ): void;
+
+  voicingFocusListener: SceneryListenerFunction<FocusEvent> | null;
+
+  getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null;
+
+  defaultFocusListener(): void;
+
+  get isVoicing(): boolean;
+
+  clean(): void;
+
+  // @mixin-protected - made public for use in the mixin only
+  cleanVoicingUtterance(): void;
+}
+
+const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TVoicing> => {
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  const VoicingClass = DelayedMutate( 'Voicing', VOICING_OPTION_KEYS, class VoicingClass extends InteractiveHighlighting( Type ) {
+  const VoicingClass = DelayedMutate( 'Voicing', VOICING_OPTION_KEYS, class VoicingClass extends InteractiveHighlighting( Type ) implements TVoicing {
 
     // ResponsePacket that holds all the supported responses to be Voiced
-    protected _voicingResponsePacket!: ResponsePacket;
+    public _voicingResponsePacket!: ResponsePacket;
 
     // The utterance that all responses are spoken through.
-    protected _voicingUtterance: Utterance | null;
+    // @mixin-protected - made public for use in the mixin only
+    public _voicingUtterance: Utterance | null;
 
     // Called when this node is focused.
     private _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
@@ -116,7 +206,8 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
     // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
     // voicingVisible. This is private because its value depends on the state of the Instance tree. Listening to this
     // to change the scene graph state can be incredibly dangerous and buggy, see https://github.com/phetsims/scenery/issues/1615
-    private _voicingCanSpeakProperty!: TinyProperty<boolean>;
+    // @mixin-private - private to this file, but public needed for the interface
+    public _voicingCanSpeakProperty!: TinyProperty<boolean>;
 
     // A counter that keeps track of visible and voicingVisible Instances of this Node.
     // As long as this value is greater than zero, this Node can speak. See onInstanceVisibilityChange
@@ -311,8 +402,9 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
     /**
      * Combine all types of response into a single alertable, potentially depending on the current state of
      * responseCollector Properties (filtering what kind of responses to present in the resolved response).
+     * @mixin-protected - made public for use in the mixin only
      */
-    protected collectResponse( providedOptions?: SpeakingOptions ): TAlertable {
+    public collectResponse( providedOptions?: SpeakingOptions ): TAlertable {
       const options = combineOptions<SpeakingOptions>( {
         ignoreProperties: this._voicingResponsePacket.ignoreProperties,
         responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
@@ -332,7 +424,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
      * Use the provided function to create content to speak in response to input. The content is then added to the
      * back of the voicing UtteranceQueue.
      */
-    protected speakContent( content: TAlertable ): void {
+    public speakContent( content: TAlertable ): void {
 
       const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !this.isInsidePhetioArchetype();
 
@@ -475,8 +567,6 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
           this.cleanVoicingUtterance();
         }
 
-        // TODO: Fix the type for VoicingNode, see https://github.com/phetsims/tasks/issues/1132
-        // @ts-expect-error
         Voicing.registerUtteranceToVoicingNode( utterance, this );
         this._voicingUtterance = utterance;
       }
@@ -621,16 +711,14 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ) => { //
 
     /**
      * Clean this._voicingUtterance, disposing if we own it or unregistering it if we do not.
+     * @mixin-protected - made public for use in the mixin only
      */
-    protected cleanVoicingUtterance(): void {
+    public cleanVoicingUtterance(): void {
       assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
       if ( this._voicingUtterance instanceof OwnedVoicingUtterance ) {
         this._voicingUtterance.dispose();
       }
       else if ( this._voicingUtterance && !this._voicingUtterance.isDisposed ) {
-
-        // TODO: Fix the type for VoicingNode, see https://github.com/phetsims/tasks/issues/1132
-        // @ts-expect-error
         Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, this );
       }
     }
@@ -672,10 +760,9 @@ Voicing.alertUtterance = ( utterance: Utterance ) => {
  * if the voicingNode is globally visible and voicingVisible in the display.
  * @static
  */
-Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
+Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: TVoicing ) => {
   const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
 
-  // @ts-expect-error Accessing a private member because this is meant to be "private to the file".
   const voicingCanSpeakProperty = voicingNode._voicingCanSpeakProperty;
   if ( !existingCanAnnounceProperties.includes( voicingCanSpeakProperty ) ) {
     utterance.voicingCanAnnounceProperties = existingCanAnnounceProperties.concat( [ voicingCanSpeakProperty ] );
@@ -689,7 +776,6 @@ Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: Vo
 Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
   const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
 
-  // @ts-expect-error Accessing a private member because this is meant to be "private to the file".
   const voicingCanSpeakProperty = voicingNode._voicingCanSpeakProperty;
   const index = existingCanAnnounceProperties.indexOf( voicingCanSpeakProperty );
   assert && assert( index > -1, 'voicingNode.voicingCanSpeakProperty is not on the Utterance, was it not registered?' );
@@ -731,9 +817,7 @@ Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
   utterance.voicingCanAnnounceProperties = withoutBothProperties;
 };
 
-// Export a type that lets you check if your Node is composed with Voicing.
-const wrapper = () => Voicing( Node );
-export type VoicingNode = InstanceType<ReturnType<typeof wrapper>>;
+export type VoicingNode = Node & TVoicing;
 
 scenery.register( 'Voicing', Voicing );
 export default Voicing;

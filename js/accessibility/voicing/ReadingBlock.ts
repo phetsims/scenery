@@ -30,6 +30,7 @@ import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/j
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import memoize from '../../../../phet-core/js/memoize.js';
+import { TVoicing } from './Voicing.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -78,9 +79,33 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
 } );
 
-const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ) => {
+export type TReadingBlock = {
+  readingBlockActiveHighlightChangedEmitter: TEmitter;
+  get isReadingBlock(): boolean;
+  setReadingBlockTagName( tagName: string | null ): void;
+  readingBlockTagName: string | null;
+  getReadingBlockTagName(): string | null;
+  setReadingBlockNameResponse( content: VoicingResponse ): void;
+  set readingBlockNameResponse( content: VoicingResponse );
+  get readingBlockNameResponse(): ResolvedResponse;
+  getReadingBlockNameResponse(): ResolvedResponse;
+  setReadingBlockHintResponse( content: VoicingResponse ): void;
+  set readingBlockHintResponse( content: VoicingResponse );
+  get readingBlockHintResponse(): ResolvedResponse;
+  getReadingBlockHintResponse(): ResolvedResponse;
+  setReadingBlockResponsePatternCollection( patterns: ResponsePatternCollection ): void;
+  readingBlockResponsePatternCollection: ResponsePatternCollection;
+  getReadingBlockResponsePatternCollection(): ResponsePatternCollection;
+  setReadingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ): void;
+  readingBlockActiveHighlight: Highlight;
+  getReadingBlockActiveHighlight(): Highlight;
+  isReadingBlockActivated(): boolean;
+  get readingBlockActivated(): boolean;
+} & TVoicing;
 
-  const ReadingBlockClass = DelayedMutate( 'ReadingBlock', READING_BLOCK_OPTION_KEYS, class ReadingBlockClass extends Voicing( Type ) {
+const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TReadingBlock> => {
+
+  const ReadingBlockClass = DelayedMutate( 'ReadingBlock', READING_BLOCK_OPTION_KEYS, class ReadingBlockClass extends Voicing( Type ) implements TReadingBlock {
 
     // The tagName used for the ReadingBlock when "Voicing" is enabled, default
     // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
@@ -382,8 +407,9 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
 
     /**
      * If we created and own the voicingUtterance we can fully dispose of it.
+     * @mixin-protected - made public for use in the mixin only
      */
-    protected override cleanVoicingUtterance(): void {
+    public override cleanVoicingUtterance(): void {
       if ( this._voicingUtterance instanceof OwnedReadingBlockUtterance ) {
         this._voicingUtterance.dispose();
       }
@@ -423,8 +449,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
 } );
 
 // Export a type that lets you check if your Node is composed with ReadingBlock
-const wrapper = () => ReadingBlock( Node );
-export type ReadingBlockNode = InstanceType<ReturnType<typeof wrapper>>;
+export type ReadingBlockNode = Node & TReadingBlock;
 
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;
