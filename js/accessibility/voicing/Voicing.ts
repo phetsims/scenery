@@ -191,542 +191,543 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  const VoicingClass = DelayedMutate( 'Voicing', VOICING_OPTION_KEYS, class VoicingClass extends InteractiveHighlighting( Type ) implements TVoicing {
+  const VoicingClass = DelayedMutate( 'Voicing', VOICING_OPTION_KEYS,
+    class VoicingClass extends InteractiveHighlighting( Type ) implements TVoicing {
 
-    // ResponsePacket that holds all the supported responses to be Voiced
-    public _voicingResponsePacket!: ResponsePacket;
+      // ResponsePacket that holds all the supported responses to be Voiced
+      public _voicingResponsePacket!: ResponsePacket;
 
-    // The utterance that all responses are spoken through.
-    // @mixin-protected - made public for use in the mixin only
-    public _voicingUtterance: Utterance | null;
+      // The utterance that all responses are spoken through.
+      // @mixin-protected - made public for use in the mixin only
+      public _voicingUtterance: Utterance | null;
 
-    // Called when this node is focused.
-    private _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
+      // Called when this node is focused.
+      private _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
 
-    // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
-    // voicingVisible. This is private because its value depends on the state of the Instance tree. Listening to this
-    // to change the scene graph state can be incredibly dangerous and buggy, see https://github.com/phetsims/scenery/issues/1615
-    // @mixin-private - private to this file, but public needed for the interface
-    public _voicingCanSpeakProperty!: TinyProperty<boolean>;
+      // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
+      // voicingVisible. This is private because its value depends on the state of the Instance tree. Listening to this
+      // to change the scene graph state can be incredibly dangerous and buggy, see https://github.com/phetsims/scenery/issues/1615
+      // @mixin-private - private to this file, but public needed for the interface
+      public _voicingCanSpeakProperty!: TinyProperty<boolean>;
 
-    // A counter that keeps track of visible and voicingVisible Instances of this Node.
-    // As long as this value is greater than zero, this Node can speak. See onInstanceVisibilityChange
-    // and onInstanceVoicingVisibilityChange for more implementation details.
-    private _voicingCanSpeakCount!: number;
+      // A counter that keeps track of visible and voicingVisible Instances of this Node.
+      // As long as this value is greater than zero, this Node can speak. See onInstanceVisibilityChange
+      // and onInstanceVoicingVisibilityChange for more implementation details.
+      private _voicingCanSpeakCount!: number;
 
-    // Called when `canVoiceEmitter` emits for an Instance.
-    private readonly _boundInstanceCanVoiceChangeListener: ( canSpeak: boolean ) => void;
+      // Called when `canVoiceEmitter` emits for an Instance.
+      private readonly _boundInstanceCanVoiceChangeListener: ( canSpeak: boolean ) => void;
 
-    // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
-    // canSpeakProperty.
-    private _boundInstancesChangedListener!: ( instance: Instance, added: boolean ) => void;
+      // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
+      // canSpeakProperty.
+      private _boundInstancesChangedListener!: ( instance: Instance, added: boolean ) => void;
 
-    // Input listener that speaks content on focus. This is the only input listener added
-    // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
-    // response, and interaction hint.
-    private _speakContentOnFocusListener!: { focus: SceneryListenerFunction<FocusEvent> };
+      // Input listener that speaks content on focus. This is the only input listener added
+      // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
+      // response, and interaction hint.
+      private _speakContentOnFocusListener!: { focus: SceneryListenerFunction<FocusEvent> };
 
-    public constructor( ...args: IntentionalAny[] ) {
-      super( ...args );
+      public constructor( ...args: IntentionalAny[] ) {
+        super( ...args );
 
-      // Bind the listeners on construction to be added to observables on initialize and removed on clean/dispose.
-      // Instances are updated asynchronously in updateDisplay. The bind creates a new function and we need the
-      // reference to persist through the completion of initialize and disposal.
-      this._boundInstanceCanVoiceChangeListener = this.onInstanceCanVoiceChange.bind( this );
+        // Bind the listeners on construction to be added to observables on initialize and removed on clean/dispose.
+        // Instances are updated asynchronously in updateDisplay. The bind creates a new function and we need the
+        // reference to persist through the completion of initialize and disposal.
+        this._boundInstanceCanVoiceChangeListener = this.onInstanceCanVoiceChange.bind( this );
 
-      this._voicingUtterance = null;
+        this._voicingUtterance = null;
 
-      // We only want to call this method, not any subtype implementation
-      VoicingClass.prototype.initialize.call( this );
-    }
+        // We only want to call this method, not any subtype implementation
+        VoicingClass.prototype.initialize.call( this );
+      }
 
-    // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
-    // ...args: IntentionalAny[] because things like RichTextLink need to provide arguments to initialize, and TS complains
-    // otherwise
-    public initialize( ...args: IntentionalAny[] ): this {
+      // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
+      // ...args: IntentionalAny[] because things like RichTextLink need to provide arguments to initialize, and TS complains
+      // otherwise
+      public initialize( ...args: IntentionalAny[] ): this {
 
-      // @ts-expect-error
-      super.initialize && super.initialize( args );
+        // @ts-expect-error
+        super.initialize && super.initialize( args );
 
-      this._voicingCanSpeakProperty = new TinyProperty<boolean>( true );
-      this._voicingResponsePacket = new ResponsePacket();
-      this._voicingFocusListener = this.defaultFocusListener;
+        this._voicingCanSpeakProperty = new TinyProperty<boolean>( true );
+        this._voicingResponsePacket = new ResponsePacket();
+        this._voicingFocusListener = this.defaultFocusListener;
 
-      // Sets the default voicingUtterance and makes this.canSpeakProperty a dependency on its ability to announce.
-      this.setVoicingUtterance( new OwnedVoicingUtterance() );
+        // Sets the default voicingUtterance and makes this.canSpeakProperty a dependency on its ability to announce.
+        this.setVoicingUtterance( new OwnedVoicingUtterance() );
 
-      this._voicingCanSpeakCount = 0;
+        this._voicingCanSpeakCount = 0;
 
-      this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
+        this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
 
-      // This is potentially dangerous to listen to generally, but in this case it is safe because the state we change
-      // will only affect how we voice (part of the audio view), and not part of this display's scene graph.
-      this.changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
+        // This is potentially dangerous to listen to generally, but in this case it is safe because the state we change
+        // will only affect how we voice (part of the audio view), and not part of this display's scene graph.
+        this.changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
 
-      this._speakContentOnFocusListener = {
-        focus: event => {
-          this._voicingFocusListener && this._voicingFocusListener( event );
+        this._speakContentOnFocusListener = {
+          focus: event => {
+            this._voicingFocusListener && this._voicingFocusListener( event );
+          }
+        };
+        this.addInputListener( this._speakContentOnFocusListener );
+
+        return this;
+      }
+
+      /**
+       * Speak all responses assigned to this Node. Options allow you to override a responses for this particular
+       * speech request. Each response is only spoken if the associated Property of responseCollector is true. If
+       * all are Properties are false, nothing will be spoken.
+       */
+      public voicingSpeakFullResponse( providedOptions?: SpeakingOptions ): void {
+
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
+        const options = combineOptions<SpeakingOptions>( {}, providedOptions );
+
+        // Lazily formulate strings only as needed
+        if ( !options.hasOwnProperty( 'nameResponse' ) ) {
+          options.nameResponse = this._voicingResponsePacket.nameResponse;
         }
-      };
-      this.addInputListener( this._speakContentOnFocusListener );
+        if ( !options.hasOwnProperty( 'objectResponse' ) ) {
+          options.objectResponse = this._voicingResponsePacket.objectResponse;
+        }
+        if ( !options.hasOwnProperty( 'contextResponse' ) ) {
+          options.contextResponse = this._voicingResponsePacket.contextResponse;
+        }
+        if ( !options.hasOwnProperty( 'hintResponse' ) ) {
+          options.hintResponse = this._voicingResponsePacket.hintResponse;
+        }
 
-      return this;
-    }
-
-    /**
-     * Speak all responses assigned to this Node. Options allow you to override a responses for this particular
-     * speech request. Each response is only spoken if the associated Property of responseCollector is true. If
-     * all are Properties are false, nothing will be spoken.
-     */
-    public voicingSpeakFullResponse( providedOptions?: SpeakingOptions ): void {
-
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = combineOptions<SpeakingOptions>( {}, providedOptions );
-
-      // Lazily formulate strings only as needed
-      if ( !options.hasOwnProperty( 'nameResponse' ) ) {
-        options.nameResponse = this._voicingResponsePacket.nameResponse;
-      }
-      if ( !options.hasOwnProperty( 'objectResponse' ) ) {
-        options.objectResponse = this._voicingResponsePacket.objectResponse;
-      }
-      if ( !options.hasOwnProperty( 'contextResponse' ) ) {
-        options.contextResponse = this._voicingResponsePacket.contextResponse;
-      }
-      if ( !options.hasOwnProperty( 'hintResponse' ) ) {
-        options.hintResponse = this._voicingResponsePacket.hintResponse;
+        this.collectAndSpeakResponse( options );
       }
 
-      this.collectAndSpeakResponse( options );
-    }
+      /**
+       * Speak ONLY the provided responses that you pass in with options. This will NOT speak the name, object,
+       * context, or hint responses assigned to this node by default. But it allows for clarity at usages so it is
+       * clear that you are only requesting certain responses. If you want to speak all of the responses assigned
+       * to this Node, use voicingSpeakFullResponse().
+       *
+       * Each response will only be spoken if the Properties of responseCollector are true. If all of those are false,
+       * nothing will be spoken.
+       */
+      public voicingSpeakResponse( providedOptions?: SpeakingOptions ): void {
 
-    /**
-     * Speak ONLY the provided responses that you pass in with options. This will NOT speak the name, object,
-     * context, or hint responses assigned to this node by default. But it allows for clarity at usages so it is
-     * clear that you are only requesting certain responses. If you want to speak all of the responses assigned
-     * to this Node, use voicingSpeakFullResponse().
-     *
-     * Each response will only be spoken if the Properties of responseCollector are true. If all of those are false,
-     * nothing will be spoken.
-     */
-    public voicingSpeakResponse( providedOptions?: SpeakingOptions ): void {
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
+        const options = combineOptions<SpeakingOptions>( {
+          nameResponse: null,
+          objectResponse: null,
+          contextResponse: null,
+          hintResponse: null
+        }, providedOptions );
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = combineOptions<SpeakingOptions>( {
-        nameResponse: null,
-        objectResponse: null,
-        contextResponse: null,
-        hintResponse: null
-      }, providedOptions );
-
-      this.collectAndSpeakResponse( options );
-    }
-
-    /**
-     * By default, speak the name response. But accepts all other responses through options. Respects responseCollector
-     * Properties, so the name response may not be spoken if responseCollector.nameResponseEnabledProperty is false.
-     */
-    public voicingSpeakNameResponse( providedOptions?: SpeakingOptions ): void {
-
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = combineOptions<SpeakingOptions>( {}, providedOptions );
-
-      // Lazily formulate strings only as needed
-      if ( !options.hasOwnProperty( 'nameResponse' ) ) {
-        options.nameResponse = this._voicingResponsePacket.nameResponse;
+        this.collectAndSpeakResponse( options );
       }
 
-      this.collectAndSpeakResponse( options );
-    }
+      /**
+       * By default, speak the name response. But accepts all other responses through options. Respects responseCollector
+       * Properties, so the name response may not be spoken if responseCollector.nameResponseEnabledProperty is false.
+       */
+      public voicingSpeakNameResponse( providedOptions?: SpeakingOptions ): void {
 
-    /**
-     * By default, speak the object response. But accepts all other responses through options. Respects responseCollector
-     * Properties, so the object response may not be spoken if responseCollector.objectResponseEnabledProperty is false.
-     */
-    public voicingSpeakObjectResponse( providedOptions?: SpeakingOptions ): void {
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
+        const options = combineOptions<SpeakingOptions>( {}, providedOptions );
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = combineOptions<SpeakingOptions>( {}, providedOptions );
+        // Lazily formulate strings only as needed
+        if ( !options.hasOwnProperty( 'nameResponse' ) ) {
+          options.nameResponse = this._voicingResponsePacket.nameResponse;
+        }
 
-      // Lazily formulate strings only as needed
-      if ( !options.hasOwnProperty( 'objectResponse' ) ) {
-        options.objectResponse = this._voicingResponsePacket.objectResponse;
+        this.collectAndSpeakResponse( options );
       }
 
-      this.collectAndSpeakResponse( options );
-    }
+      /**
+       * By default, speak the object response. But accepts all other responses through options. Respects responseCollector
+       * Properties, so the object response may not be spoken if responseCollector.objectResponseEnabledProperty is false.
+       */
+      public voicingSpeakObjectResponse( providedOptions?: SpeakingOptions ): void {
 
-    /**
-     * By default, speak the context response. But accepts all other responses through options. Respects
-     * responseCollector Properties, so the context response may not be spoken if
-     * responseCollector.contextResponseEnabledProperty is false.
-     */
-    public voicingSpeakContextResponse( providedOptions?: SpeakingOptions ): void {
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
+        const options = combineOptions<SpeakingOptions>( {}, providedOptions );
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = combineOptions<SpeakingOptions>( {}, providedOptions );
+        // Lazily formulate strings only as needed
+        if ( !options.hasOwnProperty( 'objectResponse' ) ) {
+          options.objectResponse = this._voicingResponsePacket.objectResponse;
+        }
 
-      // Lazily formulate strings only as needed
-      if ( !options.hasOwnProperty( 'contextResponse' ) ) {
-        options.contextResponse = this._voicingResponsePacket.contextResponse;
+        this.collectAndSpeakResponse( options );
       }
 
-      this.collectAndSpeakResponse( options );
-    }
+      /**
+       * By default, speak the context response. But accepts all other responses through options. Respects
+       * responseCollector Properties, so the context response may not be spoken if
+       * responseCollector.contextResponseEnabledProperty is false.
+       */
+      public voicingSpeakContextResponse( providedOptions?: SpeakingOptions ): void {
 
-    /**
-     * By default, speak the hint response. But accepts all other responses through options. Respects
-     * responseCollector Properties, so the hint response may not be spoken if
-     * responseCollector.hintResponseEnabledProperty is false.
-     */
-    public voicingSpeakHintResponse( providedOptions?: SpeakingOptions ): void {
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
+        const options = combineOptions<SpeakingOptions>( {}, providedOptions );
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = combineOptions<SpeakingOptions>( {}, providedOptions );
+        // Lazily formulate strings only as needed
+        if ( !options.hasOwnProperty( 'contextResponse' ) ) {
+          options.contextResponse = this._voicingResponsePacket.contextResponse;
+        }
 
-      // Lazily formulate strings only as needed
-      if ( !options.hasOwnProperty( 'hintResponse' ) ) {
-        options.hintResponse = this._voicingResponsePacket.hintResponse;
+        this.collectAndSpeakResponse( options );
       }
 
-      this.collectAndSpeakResponse( options );
-    }
+      /**
+       * By default, speak the hint response. But accepts all other responses through options. Respects
+       * responseCollector Properties, so the hint response may not be spoken if
+       * responseCollector.hintResponseEnabledProperty is false.
+       */
+      public voicingSpeakHintResponse( providedOptions?: SpeakingOptions ): void {
 
-    /**
-     * Collect responses with the responseCollector and speak the output with an UtteranceQueue.
-     */
-    private collectAndSpeakResponse( providedOptions?: SpeakingOptions ): void {
-      this.speakContent( this.collectResponse( providedOptions ) );
-    }
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
+        const options = combineOptions<SpeakingOptions>( {}, providedOptions );
 
-    /**
-     * Combine all types of response into a single alertable, potentially depending on the current state of
-     * responseCollector Properties (filtering what kind of responses to present in the resolved response).
-     * @mixin-protected - made public for use in the mixin only
-     */
-    public collectResponse( providedOptions?: SpeakingOptions ): TAlertable {
-      const options = combineOptions<SpeakingOptions>( {
-        ignoreProperties: this._voicingResponsePacket.ignoreProperties,
-        responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
-        utterance: this.voicingUtterance
-      }, providedOptions );
+        // Lazily formulate strings only as needed
+        if ( !options.hasOwnProperty( 'hintResponse' ) ) {
+          options.hintResponse = this._voicingResponsePacket.hintResponse;
+        }
 
-      let response: TAlertable = responseCollector.collectResponses( options );
-
-      if ( options.utterance ) {
-        options.utterance.alert = response;
-        response = options.utterance;
+        this.collectAndSpeakResponse( options );
       }
-      return response;
-    }
 
-    /**
-     * Use the provided function to create content to speak in response to input. The content is then added to the
-     * back of the voicing UtteranceQueue.
-     */
-    public speakContent( content: TAlertable ): void {
-
-      const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !this.isInsidePhetioArchetype();
-
-      // don't send to utteranceQueue if response is empty
-      // don't send to utteranceQueue for PhET-iO dynamic element archetypes, https://github.com/phetsims/joist/issues/817
-      if ( content && notPhetioArchetype ) {
-        voicingUtteranceQueue.addToBack( content ); // eslint-disable-line bad-sim-text
+      /**
+       * Collect responses with the responseCollector and speak the output with an UtteranceQueue.
+       */
+      private collectAndSpeakResponse( providedOptions?: SpeakingOptions ): void {
+        this.speakContent( this.collectResponse( providedOptions ) );
       }
-    }
 
-    /**
-     * Sets the voicingNameResponse for this Node. This is usually the label of the element and is spoken
-     * when the object receives input. When requesting speech, this will only be spoken if
-     * responseCollector.nameResponsesEnabledProperty is set to true.
-     */
-    public setVoicingNameResponse( response: VoicingResponse ): void {
-      this._voicingResponsePacket.nameResponse = response;
-    }
+      /**
+       * Combine all types of response into a single alertable, potentially depending on the current state of
+       * responseCollector Properties (filtering what kind of responses to present in the resolved response).
+       * @mixin-protected - made public for use in the mixin only
+       */
+      public collectResponse( providedOptions?: SpeakingOptions ): TAlertable {
+        const options = combineOptions<SpeakingOptions>( {
+          ignoreProperties: this._voicingResponsePacket.ignoreProperties,
+          responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
+          utterance: this.voicingUtterance
+        }, providedOptions );
 
-    public set voicingNameResponse( response: VoicingResponse ) { this.setVoicingNameResponse( response ); }
+        let response: TAlertable = responseCollector.collectResponses( options );
 
-    public get voicingNameResponse(): ResolvedResponse { return this.getVoicingNameResponse(); }
+        if ( options.utterance ) {
+          options.utterance.alert = response;
+          response = options.utterance;
+        }
+        return response;
+      }
 
-    /**
-     * Get the voicingNameResponse for this Node.
-     */
-    public getVoicingNameResponse(): ResolvedResponse {
-      return this._voicingResponsePacket.nameResponse;
-    }
+      /**
+       * Use the provided function to create content to speak in response to input. The content is then added to the
+       * back of the voicing UtteranceQueue.
+       */
+      public speakContent( content: TAlertable ): void {
 
-    /**
-     * Set the object response for this Node. This is usually the state information associated with this Node, such
-     * as its current input value. When requesting speech, this will only be heard when
-     * responseCollector.objectResponsesEnabledProperty is set to true.
-     */
-    public setVoicingObjectResponse( response: VoicingResponse ): void {
-      this._voicingResponsePacket.objectResponse = response;
-    }
+        const notPhetioArchetype = !Tandem.PHET_IO_ENABLED || !this.isInsidePhetioArchetype();
 
-    public set voicingObjectResponse( response: VoicingResponse ) { this.setVoicingObjectResponse( response ); }
+        // don't send to utteranceQueue if response is empty
+        // don't send to utteranceQueue for PhET-iO dynamic element archetypes, https://github.com/phetsims/joist/issues/817
+        if ( content && notPhetioArchetype ) {
+          voicingUtteranceQueue.addToBack( content ); // eslint-disable-line bad-sim-text
+        }
+      }
 
-    public get voicingObjectResponse(): ResolvedResponse { return this.getVoicingObjectResponse(); }
+      /**
+       * Sets the voicingNameResponse for this Node. This is usually the label of the element and is spoken
+       * when the object receives input. When requesting speech, this will only be spoken if
+       * responseCollector.nameResponsesEnabledProperty is set to true.
+       */
+      public setVoicingNameResponse( response: VoicingResponse ): void {
+        this._voicingResponsePacket.nameResponse = response;
+      }
 
-    /**
-     * Gets the object response for this Node.
-     */
-    public getVoicingObjectResponse(): ResolvedResponse {
-      return this._voicingResponsePacket.objectResponse;
-    }
+      public set voicingNameResponse( response: VoicingResponse ) { this.setVoicingNameResponse( response ); }
 
-    /**
-     * Set the context response for this Node. This is usually the content that describes what has happened in
-     * the surrounding application in response to interaction with this Node. When requesting speech, this will
-     * only be heard if responseCollector.contextResponsesEnabledProperty is set to true.
-     */
-    public setVoicingContextResponse( response: VoicingResponse ): void {
-      this._voicingResponsePacket.contextResponse = response;
-    }
+      public get voicingNameResponse(): ResolvedResponse { return this.getVoicingNameResponse(); }
 
-    public set voicingContextResponse( response: VoicingResponse ) { this.setVoicingContextResponse( response ); }
+      /**
+       * Get the voicingNameResponse for this Node.
+       */
+      public getVoicingNameResponse(): ResolvedResponse {
+        return this._voicingResponsePacket.nameResponse;
+      }
 
-    public get voicingContextResponse(): ResolvedResponse { return this.getVoicingContextResponse(); }
+      /**
+       * Set the object response for this Node. This is usually the state information associated with this Node, such
+       * as its current input value. When requesting speech, this will only be heard when
+       * responseCollector.objectResponsesEnabledProperty is set to true.
+       */
+      public setVoicingObjectResponse( response: VoicingResponse ): void {
+        this._voicingResponsePacket.objectResponse = response;
+      }
 
-    /**
-     * Gets the context response for this Node.
-     */
-    public getVoicingContextResponse(): ResolvedResponse {
-      return this._voicingResponsePacket.contextResponse;
-    }
+      public set voicingObjectResponse( response: VoicingResponse ) { this.setVoicingObjectResponse( response ); }
 
-    /**
-     * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
-     * When requesting speech, this will only be spoken when responseCollector.hintResponsesEnabledProperty is set to
-     * true.
-     */
-    public setVoicingHintResponse( response: VoicingResponse ): void {
-      this._voicingResponsePacket.hintResponse = response;
-    }
+      public get voicingObjectResponse(): ResolvedResponse { return this.getVoicingObjectResponse(); }
 
-    public set voicingHintResponse( response: VoicingResponse ) { this.setVoicingHintResponse( response ); }
+      /**
+       * Gets the object response for this Node.
+       */
+      public getVoicingObjectResponse(): ResolvedResponse {
+        return this._voicingResponsePacket.objectResponse;
+      }
 
-    public get voicingHintResponse(): ResolvedResponse { return this.getVoicingHintResponse(); }
+      /**
+       * Set the context response for this Node. This is usually the content that describes what has happened in
+       * the surrounding application in response to interaction with this Node. When requesting speech, this will
+       * only be heard if responseCollector.contextResponsesEnabledProperty is set to true.
+       */
+      public setVoicingContextResponse( response: VoicingResponse ): void {
+        this._voicingResponsePacket.contextResponse = response;
+      }
 
-    /**
-     * Gets the hint response for this Node.
-     */
-    public getVoicingHintResponse(): ResolvedResponse {
-      return this._voicingResponsePacket.hintResponse;
-    }
+      public set voicingContextResponse( response: VoicingResponse ) { this.setVoicingContextResponse( response ); }
 
-    /**
-     * Set whether or not all responses for this Node will ignore the Properties of responseCollector. If false,
-     * all responses will be spoken regardless of responseCollector Properties, which are generally set in user
-     * preferences.
-     */
-    public setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ): void {
-      this._voicingResponsePacket.ignoreProperties = ignoreProperties;
-    }
+      public get voicingContextResponse(): ResolvedResponse { return this.getVoicingContextResponse(); }
 
-    public set voicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); }
+      /**
+       * Gets the context response for this Node.
+       */
+      public getVoicingContextResponse(): ResolvedResponse {
+        return this._voicingResponsePacket.contextResponse;
+      }
 
-    public get voicingIgnoreVoicingManagerProperties(): boolean { return this.getVoicingIgnoreVoicingManagerProperties(); }
+      /**
+       * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
+       * When requesting speech, this will only be spoken when responseCollector.hintResponsesEnabledProperty is set to
+       * true.
+       */
+      public setVoicingHintResponse( response: VoicingResponse ): void {
+        this._voicingResponsePacket.hintResponse = response;
+      }
 
-    /**
-     * Get whether or not responses are ignoring responseCollector Properties.
-     */
-    public getVoicingIgnoreVoicingManagerProperties(): boolean {
-      return this._voicingResponsePacket.ignoreProperties;
-    }
+      public set voicingHintResponse( response: VoicingResponse ) { this.setVoicingHintResponse( response ); }
 
-    /**
-     * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
-     * additional content for each combination of response. See ResponsePatternCollection.js if you wish to use
-     * a collection of string patterns that are not the default.
-     */
-    public setVoicingResponsePatternCollection( patterns: ResponsePatternCollection ): void {
+      public get voicingHintResponse(): ResolvedResponse { return this.getVoicingHintResponse(); }
 
-      this._voicingResponsePacket.responsePatternCollection = patterns;
-    }
+      /**
+       * Gets the hint response for this Node.
+       */
+      public getVoicingHintResponse(): ResolvedResponse {
+        return this._voicingResponsePacket.hintResponse;
+      }
 
-    public set voicingResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setVoicingResponsePatternCollection( patterns ); }
+      /**
+       * Set whether or not all responses for this Node will ignore the Properties of responseCollector. If false,
+       * all responses will be spoken regardless of responseCollector Properties, which are generally set in user
+       * preferences.
+       */
+      public setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ): void {
+        this._voicingResponsePacket.ignoreProperties = ignoreProperties;
+      }
 
-    public get voicingResponsePatternCollection(): ResponsePatternCollection { return this.getVoicingResponsePatternCollection(); }
+      public set voicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); }
 
-    /**
-     * Get the ResponsePatternCollection object that this Voicing Node is using to collect responses.
-     */
-    public getVoicingResponsePatternCollection(): ResponsePatternCollection {
-      return this._voicingResponsePacket.responsePatternCollection;
-    }
+      public get voicingIgnoreVoicingManagerProperties(): boolean { return this.getVoicingIgnoreVoicingManagerProperties(); }
 
-    /**
-     * Sets the utterance through which voicing associated with this Node will be spoken. By default on initialize,
-     * one will be created, but a custom one can optionally be provided.
-     */
-    public setVoicingUtterance( utterance: Utterance ): void {
-      if ( this._voicingUtterance !== utterance ) {
+      /**
+       * Get whether or not responses are ignoring responseCollector Properties.
+       */
+      public getVoicingIgnoreVoicingManagerProperties(): boolean {
+        return this._voicingResponsePacket.ignoreProperties;
+      }
+
+      /**
+       * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
+       * additional content for each combination of response. See ResponsePatternCollection.js if you wish to use
+       * a collection of string patterns that are not the default.
+       */
+      public setVoicingResponsePatternCollection( patterns: ResponsePatternCollection ): void {
+
+        this._voicingResponsePacket.responsePatternCollection = patterns;
+      }
+
+      public set voicingResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setVoicingResponsePatternCollection( patterns ); }
+
+      public get voicingResponsePatternCollection(): ResponsePatternCollection { return this.getVoicingResponsePatternCollection(); }
+
+      /**
+       * Get the ResponsePatternCollection object that this Voicing Node is using to collect responses.
+       */
+      public getVoicingResponsePatternCollection(): ResponsePatternCollection {
+        return this._voicingResponsePacket.responsePatternCollection;
+      }
+
+      /**
+       * Sets the utterance through which voicing associated with this Node will be spoken. By default on initialize,
+       * one will be created, but a custom one can optionally be provided.
+       */
+      public setVoicingUtterance( utterance: Utterance ): void {
+        if ( this._voicingUtterance !== utterance ) {
+
+          if ( this._voicingUtterance ) {
+            this.cleanVoicingUtterance();
+          }
+
+          Voicing.registerUtteranceToVoicingNode( utterance, this );
+          this._voicingUtterance = utterance;
+        }
+      }
+
+      public set voicingUtterance( utterance: Utterance ) { this.setVoicingUtterance( utterance ); }
+
+      public get voicingUtterance(): Utterance { return this.getVoicingUtterance(); }
+
+      /**
+       * Gets the utterance through which voicing associated with this Node will be spoken.
+       */
+      public getVoicingUtterance(): Utterance {
+        assertUtterance( this._voicingUtterance );
+        return this._voicingUtterance;
+      }
+
+      /**
+       * Called whenever this Node is focused.
+       */
+      public setVoicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ): void {
+        this._voicingFocusListener = focusListener;
+      }
+
+      public set voicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ) { this.setVoicingFocusListener( focusListener ); }
+
+      public get voicingFocusListener(): SceneryListenerFunction<FocusEvent> | null { return this.getVoicingFocusListener(); }
+
+      /**
+       * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
+       */
+      public getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null {
+        return this._voicingFocusListener;
+      }
+
+      /**
+       * The default focus listener attached to this Node during initialization.
+       */
+      public defaultFocusListener(): void {
+        this.voicingSpeakFullResponse( {
+          contextResponse: null
+        } );
+      }
+
+      /**
+       * Whether a Node composes Voicing.
+       */
+      public get isVoicing(): boolean {
+        return true;
+      }
+
+      /**
+       * Detaches references that ensure this components of this Trait are eligible for garbage collection.
+       */
+      public override dispose(): void {
+        this.removeInputListener( this._speakContentOnFocusListener );
+        this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
         if ( this._voicingUtterance ) {
           this.cleanVoicingUtterance();
+          this._voicingUtterance = null;
         }
 
-        Voicing.registerUtteranceToVoicingNode( utterance, this );
-        this._voicingUtterance = utterance;
-      }
-    }
-
-    public set voicingUtterance( utterance: Utterance ) { this.setVoicingUtterance( utterance ); }
-
-    public get voicingUtterance(): Utterance { return this.getVoicingUtterance(); }
-
-    /**
-     * Gets the utterance through which voicing associated with this Node will be spoken.
-     */
-    public getVoicingUtterance(): Utterance {
-      assertUtterance( this._voicingUtterance );
-      return this._voicingUtterance;
-    }
-
-    /**
-     * Called whenever this Node is focused.
-     */
-    public setVoicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ): void {
-      this._voicingFocusListener = focusListener;
-    }
-
-    public set voicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ) { this.setVoicingFocusListener( focusListener ); }
-
-    public get voicingFocusListener(): SceneryListenerFunction<FocusEvent> | null { return this.getVoicingFocusListener(); }
-
-    /**
-     * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
-     */
-    public getVoicingFocusListener(): SceneryListenerFunction<FocusEvent> | null {
-      return this._voicingFocusListener;
-    }
-
-    /**
-     * The default focus listener attached to this Node during initialization.
-     */
-    public defaultFocusListener(): void {
-      this.voicingSpeakFullResponse( {
-        contextResponse: null
-      } );
-    }
-
-    /**
-     * Whether a Node composes Voicing.
-     */
-    public get isVoicing(): boolean {
-      return true;
-    }
-
-    /**
-     * Detaches references that ensure this components of this Trait are eligible for garbage collection.
-     */
-    public override dispose(): void {
-      this.removeInputListener( this._speakContentOnFocusListener );
-      this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
-
-      if ( this._voicingUtterance ) {
-        this.cleanVoicingUtterance();
-        this._voicingUtterance = null;
+        super.dispose();
       }
 
-      super.dispose();
-    }
+      public clean(): void {
+        this.removeInputListener( this._speakContentOnFocusListener );
+        this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
-    public clean(): void {
-      this.removeInputListener( this._speakContentOnFocusListener );
-      this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+        if ( this._voicingUtterance ) {
+          this.cleanVoicingUtterance();
+          this._voicingUtterance = null;
+        }
 
-      if ( this._voicingUtterance ) {
-        this.cleanVoicingUtterance();
-        this._voicingUtterance = null;
+        // @ts-expect-error
+        super.clean && super.clean();
       }
 
-      // @ts-expect-error
-      super.clean && super.clean();
-    }
+      /***********************************************************************************************************/
+      // PRIVATE METHODS
+      /***********************************************************************************************************/
 
-    /***********************************************************************************************************/
-    // PRIVATE METHODS
-    /***********************************************************************************************************/
+      /**
+       * When visibility and voicingVisibility change such that the Instance can now speak, update the counting
+       * variable that tracks how many Instances of this VoicingNode can speak. To speak the Instance must be globally\
+       * visible and voicingVisible.
+       */
+      private onInstanceCanVoiceChange( canSpeak: boolean ): void {
 
-    /**
-     * When visibility and voicingVisibility change such that the Instance can now speak, update the counting
-     * variable that tracks how many Instances of this VoicingNode can speak. To speak the Instance must be globally\
-     * visible and voicingVisible.
-     */
-    private onInstanceCanVoiceChange( canSpeak: boolean ): void {
+        if ( canSpeak ) {
+          this._voicingCanSpeakCount++;
+        }
+        else {
+          this._voicingCanSpeakCount--;
+        }
 
-      if ( canSpeak ) {
-        this._voicingCanSpeakCount++;
-      }
-      else {
-        this._voicingCanSpeakCount--;
-      }
+        assert && assert( this._voicingCanSpeakCount >= 0, 'the voicingCanSpeakCount should not go below zero' );
+        assert && assert( this._voicingCanSpeakCount <= this.instances.length,
+          'The voicingCanSpeakCount cannot be greater than the number of Instances.' );
 
-      assert && assert( this._voicingCanSpeakCount >= 0, 'the voicingCanSpeakCount should not go below zero' );
-      assert && assert( this._voicingCanSpeakCount <= this.instances.length,
-        'The voicingCanSpeakCount cannot be greater than the number of Instances.' );
-
-      this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
-    }
-
-    /**
-     * Update the canSpeakProperty and counting variable in response to an Instance of this Node being added or
-     * removed.
-     */
-    private handleInstancesChanged( instance: Instance, added: boolean ): void {
-      const isVisible = instance.visible && instance.voicingVisible;
-      if ( isVisible ) {
-
-        // If the added Instance was visible and voicingVisible it should increment the counter. If the removed
-        // instance is NOT visible/voicingVisible it would not have contributed to the counter so we should not
-        // decrement in that case.
-        this._voicingCanSpeakCount = added ? this._voicingCanSpeakCount + 1 : this._voicingCanSpeakCount - 1;
+        this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
       }
 
-      this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
-    }
+      /**
+       * Update the canSpeakProperty and counting variable in response to an Instance of this Node being added or
+       * removed.
+       */
+      private handleInstancesChanged( instance: Instance, added: boolean ): void {
+        const isVisible = instance.visible && instance.voicingVisible;
+        if ( isVisible ) {
 
-    /**
-     * Add or remove listeners on an Instance watching for changes to visible or voicingVisible that will modify
-     * the voicingCanSpeakCount. See documentation for voicingCanSpeakCount for details about how this controls the
-     * voicingCanSpeakProperty.
-     */
-    private addOrRemoveInstanceListeners( instance: Instance, added: boolean ): void {
-      assert && assert( instance.canVoiceEmitter, 'Instance must be initialized.' );
+          // If the added Instance was visible and voicingVisible it should increment the counter. If the removed
+          // instance is NOT visible/voicingVisible it would not have contributed to the counter so we should not
+          // decrement in that case.
+          this._voicingCanSpeakCount = added ? this._voicingCanSpeakCount + 1 : this._voicingCanSpeakCount - 1;
+        }
 
-      if ( added ) {
-        // @ts-expect-error - Emitters in Instance need typing
-        instance.canVoiceEmitter!.addListener( this._boundInstanceCanVoiceChangeListener );
-      }
-      else {
-        // @ts-expect-error - Emitters in Instance need typing
-        instance.canVoiceEmitter!.removeListener( this._boundInstanceCanVoiceChangeListener );
+        this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
       }
 
-      // eagerly update the canSpeakProperty and counting variables in addition to adding change listeners
-      this.handleInstancesChanged( instance, added );
-    }
+      /**
+       * Add or remove listeners on an Instance watching for changes to visible or voicingVisible that will modify
+       * the voicingCanSpeakCount. See documentation for voicingCanSpeakCount for details about how this controls the
+       * voicingCanSpeakProperty.
+       */
+      private addOrRemoveInstanceListeners( instance: Instance, added: boolean ): void {
+        assert && assert( instance.canVoiceEmitter, 'Instance must be initialized.' );
 
-    /**
-     * Clean this._voicingUtterance, disposing if we own it or unregistering it if we do not.
-     * @mixin-protected - made public for use in the mixin only
-     */
-    public cleanVoicingUtterance(): void {
-      assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
-      if ( this._voicingUtterance instanceof OwnedVoicingUtterance ) {
-        this._voicingUtterance.dispose();
-      }
-      else if ( this._voicingUtterance && !this._voicingUtterance.isDisposed ) {
-        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, this );
-      }
-    }
+        if ( added ) {
+          // @ts-expect-error - Emitters in Instance need typing
+          instance.canVoiceEmitter!.addListener( this._boundInstanceCanVoiceChangeListener );
+        }
+        else {
+          // @ts-expect-error - Emitters in Instance need typing
+          instance.canVoiceEmitter!.removeListener( this._boundInstanceCanVoiceChangeListener );
+        }
 
-    public override mutate( options?: SelfOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
-      return super.mutate( options );
-    }
-  } );
+        // eagerly update the canSpeakProperty and counting variables in addition to adding change listeners
+        this.handleInstancesChanged( instance, added );
+      }
+
+      /**
+       * Clean this._voicingUtterance, disposing if we own it or unregistering it if we do not.
+       * @mixin-protected - made public for use in the mixin only
+       */
+      public cleanVoicingUtterance(): void {
+        assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
+        if ( this._voicingUtterance instanceof OwnedVoicingUtterance ) {
+          this._voicingUtterance.dispose();
+        }
+        else if ( this._voicingUtterance && !this._voicingUtterance.isDisposed ) {
+          Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, this );
+        }
+      }
+
+      public override mutate( options?: SelfOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+        return super.mutate( options );
+      }
+    } );
 
   /**
    * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
