@@ -55,13 +55,44 @@ export type WidthSizableOptions = {
   widthSizable?: boolean;
 };
 
+export type TWidthSizable = {
+  readonly preferredWidthProperty: TinyProperty<number | null>;
+  readonly minimumWidthProperty: TinyProperty<number | null>;
+  readonly localPreferredWidthProperty: TinyProperty<number | null>;
+  readonly localMinimumWidthProperty: TinyProperty<number | null>;
+  readonly isWidthResizableProperty: TinyProperty<boolean>;
+  preferredWidth: number | null;
+  localPreferredWidth: number | null;
+  minimumWidth: number | null;
+  localMinimumWidth: number | null;
+  widthSizable: boolean;
+  get extendsWidthSizable(): boolean;
+  validateLocalPreferredWidth(): void;
+
+  // @mixin-protected - made public for use in the mixin only
+  _preferredSizeChanging: boolean;
+  _minimumSizeChanging: boolean;
+  _preferredSizeChangeAttemptDuringLock: boolean;
+  _minimumSizeChangeAttemptDuringLock: boolean;
+  _updatePreferredWidthListener: () => void;
+  _updateLocalPreferredWidthListener: () => void;
+  _updateMinimumWidthListener: () => void;
+  _updateLocalMinimumWidthListener: () => void;
+  _calculateLocalPreferredWidth(): number | null;
+  _onReentrantPreferredWidth(): void;
+  _calculatePreferredWidth(): number | null;
+  _calculateLocalMinimumWidth(): number | null;
+  _onReentrantLocalMinimumWidth(): void;
+  _calculateMinimumWidth(): number | null;
+};
+
 // IMPORTANT: If you're combining this in, typically don't pass options that WidthSizable would take through the
 // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
 // values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
-const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
-  const WidthSizableTrait = DelayedMutate( 'WidthSizable', WIDTH_SIZABLE_OPTION_KEYS, class WidthSizableTrait extends type {
+const WidthSizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ) => {
+  const WidthSizableTrait = DelayedMutate( 'WidthSizable', WIDTH_SIZABLE_OPTION_KEYS, class WidthSizableTrait extends Type implements TWidthSizable {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
     public readonly preferredWidthProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
@@ -74,8 +105,10 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
     // We want to lock out all other local or non-local preferred minimum sizes, whether in HeightSizable or WidthSizable
     // NOTE: We are merging declarations between HeightSizable and WidthSizable. If Sizable is used these flags
     // will be shared by both HeightSizable and WidthSizable.
-    protected _preferredSizeChanging = false;
-    protected _minimumSizeChanging = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _preferredSizeChanging = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _minimumSizeChanging = false;
 
     // We'll need to detect reentrancy when setting the dual of the preferred/minimum properties (e.g. local vs parent).
     // If we get a reentrant case, we'll need to detect it and clear things up at the end (updating the minimum size
@@ -84,14 +117,20 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
     // minimum size, we'll need to make sure that the local minimum size is updated AFTER everything has happened.
     // These locks are used to detect these cases, and then run the appropriate updates afterward to make sure that the
     // local and parent values are in sync (based on the transform used).
-    protected _preferredSizeChangeAttemptDuringLock = false;
-    protected _minimumSizeChangeAttemptDuringLock = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _preferredSizeChangeAttemptDuringLock = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _minimumSizeChangeAttemptDuringLock = false;
 
     // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
-    protected _updatePreferredWidthListener: () => void;
-    protected _updateLocalPreferredWidthListener: () => void;
-    protected _updateMinimumWidthListener: () => void;
-    protected _updateLocalMinimumWidthListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updatePreferredWidthListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updateLocalPreferredWidthListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updateMinimumWidthListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updateLocalMinimumWidthListener: () => void;
 
     // IMPORTANT: If you're combining this in, typically don't pass options that WidthSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
@@ -203,14 +242,16 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculateLocalPreferredWidth(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculateLocalPreferredWidth(): number | null {
       return ( this.matrix.isAligned() && this.preferredWidth !== null )
              ? Math.abs( this.transform.inverseDeltaX( this.preferredWidth ) )
              : null;
     }
 
     // Provides a hook to Sizable, since we'll need to cross-link this to also try updating the opposite dimension
-    protected _onReentrantPreferredWidth(): void {
+    // @mixin-protected - made public for use in the mixin only
+    public _onReentrantPreferredWidth(): void {
       this._updateLocalPreferredWidthListener();
     }
 
@@ -245,7 +286,8 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculatePreferredWidth(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculatePreferredWidth(): number | null {
       return ( this.matrix.isAligned() && this.localPreferredWidth !== null )
              ? Math.abs( this.transform.transformDeltaX( this.localPreferredWidth ) )
              : null;
@@ -278,13 +320,15 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculateLocalMinimumWidth(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculateLocalMinimumWidth(): number | null {
       return ( this.matrix.isAligned() && this.minimumWidth !== null )
              ? Math.abs( this.transform.inverseDeltaX( this.minimumWidth ) )
              : null;
     }
 
-    protected _onReentrantLocalMinimumWidth(): void {
+    // @mixin-protected - made public for use in the mixin only
+    public _onReentrantLocalMinimumWidth(): void {
       this._updateMinimumWidthListener();
     }
 
@@ -315,7 +359,8 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculateMinimumWidth(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculateMinimumWidth(): number | null {
       return ( this.matrix.isAligned() && this.localMinimumWidth !== null )
              ? Math.abs( this.transform.transformDeltaX( this.localMinimumWidth ) )
              : null;
@@ -369,18 +414,17 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( type: Super
   return WidthSizableTrait;
 } );
 
-// Some typescript gymnastics to provide a user-defined type guard that treats something as widthSizable
-// We need to define an unused function with a concrete type, so that we can extract the return type of the function
-// and provide a type for a Node that extends this type.
-const wrapper = () => WidthSizable( Node );
-export type WidthSizableNode = InstanceType<ReturnType<typeof wrapper>>;
-
 const isWidthSizable = ( node: Node ): node is WidthSizableNode => {
   return node.widthSizable;
 };
 const extendsWidthSizable = ( node: Node ): node is WidthSizableNode => {
   return node.extendsWidthSizable;
 };
+
+// Some typescript gymnastics to provide a user-defined type guard that treats something as widthSizable
+// We need to define an unused function with a concrete type, so that we can extract the return type of the function
+// and provide a type for a Node that extends this type.
+export type WidthSizableNode = Node & TWidthSizable;
 
 scenery.register( 'WidthSizable', WidthSizable );
 export default WidthSizable;

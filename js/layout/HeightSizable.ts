@@ -55,13 +55,44 @@ export type HeightSizableOptions = {
   heightSizable?: boolean;
 };
 
+export type THeightSizable = {
+
+  readonly preferredHeightProperty: TinyProperty<number | null>;
+  readonly minimumHeightProperty: TinyProperty<number | null>;
+  readonly localPreferredHeightProperty: TinyProperty<number | null>;
+  readonly localMinimumHeightProperty: TinyProperty<number | null>;
+  readonly isHeightResizableProperty: TinyProperty<boolean>;
+  preferredHeight: number | null;
+  localPreferredHeight: number | null;
+  minimumHeight: number | null;
+  localMinimumHeight: number | null;
+  heightSizable: boolean;
+  validateLocalPreferredHeight(): void;
+
+  // @mixin-protected - made public for use in the mixin only
+  _preferredSizeChanging: boolean;
+  _minimumSizeChanging: boolean;
+  _preferredSizeChangeAttemptDuringLock: boolean;
+  _minimumSizeChangeAttemptDuringLock: boolean;
+  _updatePreferredHeightListener: () => void;
+  _updateLocalPreferredHeightListener: () => void;
+  _updateMinimumHeightListener: () => void;
+  _updateLocalMinimumHeightListener: () => void;
+  _calculateLocalPreferredHeight(): number | null;
+  _onReentrantPreferredHeight(): void;
+  _calculatePreferredHeight(): number | null;
+  _calculateLocalMinimumHeight(): number | null;
+  _onReentrantLocalMinimumHeight(): void;
+  _calculateMinimumHeight(): number | null;
+};
+
 // IMPORTANT: If you're combining this in, typically don't pass options that HeightSizable would take through the
 // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
 // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
-const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
-  const HeightSizableTrait = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS, class HeightSizableTrait extends type {
+const HeightSizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<THeightSizable> => {
+  const HeightSizableTrait = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS, class HeightSizableTrait extends Type implements THeightSizable {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
     public readonly preferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
@@ -74,8 +105,10 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
     // We want to lock out all other local or non-local preferred minimum sizes, whether in HeightSizable or WidthSizable
     // NOTE: We are merging declarations between HeightSizable and WidthSizable. If Sizable is used these flags
     // will be shared by both HeightSizable and WidthSizable.
-    protected _preferredSizeChanging = false;
-    protected _minimumSizeChanging = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _preferredSizeChanging = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _minimumSizeChanging = false;
 
     // We'll need to detect reentrancy when setting the dual of the preferred/minimum properties (e.g. local vs parent).
     // If we get a reentrant case, we'll need to detect it and clear things up at the end (updating the minimum size
@@ -84,14 +117,20 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
     // minimum size, we'll need to make sure that the local minimum size is updated AFTER everything has happened.
     // These locks are used to detect these cases, and then run the appropriate updates afterward to make sure that the
     // local and parent values are in sync (based on the transform used).
-    protected _preferredSizeChangeAttemptDuringLock = false;
-    protected _minimumSizeChangeAttemptDuringLock = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _preferredSizeChangeAttemptDuringLock = false;
+    // @mixin-protected - made public for use in the mixin only
+    public _minimumSizeChangeAttemptDuringLock = false;
 
     // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
-    protected _updatePreferredHeightListener: () => void;
-    protected _updateLocalPreferredHeightListener: () => void;
-    protected _updateMinimumHeightListener: () => void;
-    protected _updateLocalMinimumHeightListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updatePreferredHeightListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updateLocalPreferredHeightListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updateMinimumHeightListener: () => void;
+    // @mixin-protected - made public for use in the mixin only
+    public _updateLocalMinimumHeightListener: () => void;
 
     // IMPORTANT: If you're combining this in, typically don't pass options that HeightSizable would take through the
     // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
@@ -202,7 +241,8 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculateLocalPreferredHeight(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculateLocalPreferredHeight(): number | null {
 
       return ( this.matrix.isAligned() && this.preferredHeight !== null )
              ? Math.abs( this.transform.inverseDeltaY( this.preferredHeight ) )
@@ -210,7 +250,8 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
     }
 
     // Provides a hook to Sizable, since we'll need to cross-link this to also try updating the opposite dimension
-    protected _onReentrantPreferredHeight(): void {
+    // @mixin-protected - made public for use in the mixin only
+    public _onReentrantPreferredHeight(): void {
       this._updateLocalPreferredHeightListener();
     }
 
@@ -245,7 +286,8 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculatePreferredHeight(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculatePreferredHeight(): number | null {
 
       return ( this.matrix.isAligned() && this.localPreferredHeight !== null )
              ? Math.abs( this.transform.transformDeltaY( this.localPreferredHeight ) )
@@ -279,13 +321,15 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculateLocalMinimumHeight(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculateLocalMinimumHeight(): number | null {
       return ( this.matrix.isAligned() && this.minimumHeight !== null )
              ? Math.abs( this.transform.inverseDeltaY( this.minimumHeight ) )
              : null;
     }
 
-    protected _onReentrantLocalMinimumHeight(): void {
+    // @mixin-protected - made public for use in the mixin only
+    public _onReentrantLocalMinimumHeight(): void {
       this._updateMinimumHeight();
     }
 
@@ -316,7 +360,8 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
     }
 
     // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    protected _calculateMinimumHeight(): number | null {
+    // @mixin-protected - made public for use in the mixin only
+    public _calculateMinimumHeight(): number | null {
       return ( this.matrix.isAligned() && this.localMinimumHeight !== null )
              ? Math.abs( this.transform.transformDeltaY( this.localMinimumHeight ) )
              : null;
@@ -370,8 +415,7 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( type: Supe
 // Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable.
 // We need to define an unused function with a concrete type, so that we can extract the return type of the function
 // and provide a type for a Node that extends this type.
-const wrapper = () => HeightSizable( Node );
-export type HeightSizableNode = InstanceType<ReturnType<typeof wrapper>>;
+export type HeightSizableNode = Node & THeightSizable;
 
 const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
   return node.heightSizable;

@@ -13,6 +13,8 @@ import Constructor from '../../../phet-core/js/types/Constructor.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { TWidthSizable } from './WidthSizable.js';
+import { THeightSizable } from './HeightSizable.js';
 
 export const SIZABLE_SELF_OPTION_KEYS = [
   'preferredSize',
@@ -64,9 +66,12 @@ type SelfOptions = {
 type ParentOptions = WidthSizableOptions & HeightSizableOptions;
 export type SizableOptions = SelfOptions & ParentOptions;
 
-const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
-  const SuperExtendedType = WidthSizable( HeightSizable( type ) );
-  const SizableTrait = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class SizableTrait extends SuperExtendedType {
+type TSizable = TWidthSizable & THeightSizable & {
+  validateLocalPreferredSize(): void;
+};
+
+const Sizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TSizable> => {
+  const SizableTrait = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class SizableTrait extends WidthSizable( HeightSizable( Type ) ) implements TSizable {
 
     public constructor( ...args: IntentionalAny[] ) {
       super( ...args );
@@ -187,7 +192,7 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculateLocalPreferredWidth(): number | null {
+    public override _calculateLocalPreferredWidth(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.preferredWidth !== null ) {
@@ -204,7 +209,7 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculateLocalPreferredHeight(): number | null {
+    public override _calculateLocalPreferredHeight(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.preferredHeight !== null ) {
@@ -221,7 +226,7 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculatePreferredWidth(): number | null {
+    public override _calculatePreferredWidth(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.localPreferredWidth !== null ) {
@@ -237,7 +242,7 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculatePreferredHeight(): number | null {
+    public override _calculatePreferredHeight(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.localPreferredHeight !== null ) {
@@ -253,31 +258,31 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // We'll need to cross-link because we might need to update either the width or height when the other changes
-    protected override _onReentrantLocalMinimumWidth(): void {
+    public override _onReentrantLocalMinimumWidth(): void {
       this._updateMinimumWidthListener();
       this._updateMinimumHeightListener();
     }
 
     // We'll need to cross-link because we might need to update either the width or height when the other changes
-    protected override _onReentrantLocalMinimumHeight(): void {
+    public override _onReentrantLocalMinimumHeight(): void {
       this._updateMinimumWidthListener();
       this._updateMinimumHeightListener();
     }
 
     // We'll need to cross-link because we might need to update either the width or height when the other changes
-    protected override _onReentrantPreferredWidth(): void {
+    public override _onReentrantPreferredWidth(): void {
       this._updateLocalPreferredWidthListener();
       this._updateLocalPreferredHeightListener();
     }
 
     // We'll need to cross-link because we might need to update either the width or height when the other changes
-    protected override _onReentrantPreferredHeight(): void {
+    public override _onReentrantPreferredHeight(): void {
       this._updateLocalPreferredWidthListener();
       this._updateLocalPreferredHeightListener();
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculateLocalMinimumWidth(): number | null {
+    public override _calculateLocalMinimumWidth(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.minimumWidth !== null ) {
@@ -293,7 +298,7 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculateLocalMinimumHeight(): number | null {
+    public override _calculateLocalMinimumHeight(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.minimumHeight !== null ) {
@@ -309,7 +314,7 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculateMinimumWidth(): number | null {
+    public override _calculateMinimumWidth(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.localMinimumWidth !== null ) {
@@ -325,7 +330,7 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
     }
 
     // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    protected override _calculateMinimumHeight(): number | null {
+    public override _calculateMinimumHeight(): number | null {
       if ( this.matrix.isAxisAligned() ) {
         if ( this.matrix.isAligned() ) {
           if ( this.localMinimumHeight !== null ) {
@@ -356,18 +361,14 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( type: SuperType 
   return SizableTrait;
 } );
 
-// Some typescript gymnastics to provide a user-defined type guard that treats something as Sizable
-// We need to define an unused function with a concrete type, so that we can extract the return type of the function
-// and provide a type for a Node that extends this type.
-const wrapper = () => Sizable( Node );
-export type SizableNode = InstanceType<ReturnType<typeof wrapper>>;
-
 const isSizable = ( node: Node ): node is SizableNode => {
   return node.widthSizable && node.heightSizable;
 };
 const extendsSizable = ( node: Node ): node is SizableNode => {
   return node.extendsSizable;
 };
+
+export type SizableNode = Node & TSizable;
 
 scenery.register( 'Sizable', Sizable );
 export default Sizable;
