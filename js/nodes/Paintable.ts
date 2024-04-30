@@ -68,7 +68,7 @@ export type PaintableNode = Path | Text;
 const PAINTABLE_DRAWABLE_MARK_FLAGS = [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ];
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-interface TPaintable {
+export interface TPaintable {
 
   _fill: TPaint;
   _fillPickable: boolean;
