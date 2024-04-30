@@ -11,7 +11,7 @@
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { scenery, voicingManager } from '../../imports.js';
 
-const voicingUtteranceQueue = new UtteranceQueue( voicingManager, {
+const voicingUtteranceQueue: UtteranceQueue = new UtteranceQueue( voicingManager, {
   featureSpecificAnnouncingControlPropertyName: 'voicingCanAnnounceProperty'
 } );
 
