@@ -92,310 +92,311 @@ export type THeightSizable = {
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
 const HeightSizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<THeightSizable> => {
-  const HeightSizableTrait = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS, class HeightSizableTrait extends Type implements THeightSizable {
+  const HeightSizableTrait = DelayedMutate( 'HeightSizable', HEIGHT_SIZABLE_OPTION_KEYS,
+    class HeightSizableTrait extends Type implements THeightSizable {
 
-    // parent/local preferred/minimum Properties. See the options above for more documentation
-    public readonly preferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    public readonly minimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    public readonly localPreferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    public readonly localMinimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
-    public readonly isHeightResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
+      // parent/local preferred/minimum Properties. See the options above for more documentation
+      public readonly preferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+      public readonly minimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+      public readonly localPreferredHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+      public readonly localMinimumHeightProperty: TinyProperty<number | null> = new TinyProperty<number | null>( null );
+      public readonly isHeightResizableProperty: TinyProperty<boolean> = new TinyProperty<boolean>( true );
 
-    // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the others.
-    // We want to lock out all other local or non-local preferred minimum sizes, whether in HeightSizable or WidthSizable
-    // NOTE: We are merging declarations between HeightSizable and WidthSizable. If Sizable is used these flags
-    // will be shared by both HeightSizable and WidthSizable.
-    // @mixin-protected - made public for use in the mixin only
-    public _preferredSizeChanging = false;
-    // @mixin-protected - made public for use in the mixin only
-    public _minimumSizeChanging = false;
+      // Flags so that we can change one (parent/local) value and not enter an infinite loop changing the others.
+      // We want to lock out all other local or non-local preferred minimum sizes, whether in HeightSizable or WidthSizable
+      // NOTE: We are merging declarations between HeightSizable and WidthSizable. If Sizable is used these flags
+      // will be shared by both HeightSizable and WidthSizable.
+      // @mixin-protected - made public for use in the mixin only
+      public _preferredSizeChanging = false;
+      // @mixin-protected - made public for use in the mixin only
+      public _minimumSizeChanging = false;
 
-    // We'll need to detect reentrancy when setting the dual of the preferred/minimum properties (e.g. local vs parent).
-    // If we get a reentrant case, we'll need to detect it and clear things up at the end (updating the minimum size
-    // in the parent coordinate frame, and the preferred size in the local coordinate frame).
-    // An example is if the minimum size is set, and that triggers a listener that UPDATES something that changes the
-    // minimum size, we'll need to make sure that the local minimum size is updated AFTER everything has happened.
-    // These locks are used to detect these cases, and then run the appropriate updates afterward to make sure that the
-    // local and parent values are in sync (based on the transform used).
-    // @mixin-protected - made public for use in the mixin only
-    public _preferredSizeChangeAttemptDuringLock = false;
-    // @mixin-protected - made public for use in the mixin only
-    public _minimumSizeChangeAttemptDuringLock = false;
+      // We'll need to detect reentrancy when setting the dual of the preferred/minimum properties (e.g. local vs parent).
+      // If we get a reentrant case, we'll need to detect it and clear things up at the end (updating the minimum size
+      // in the parent coordinate frame, and the preferred size in the local coordinate frame).
+      // An example is if the minimum size is set, and that triggers a listener that UPDATES something that changes the
+      // minimum size, we'll need to make sure that the local minimum size is updated AFTER everything has happened.
+      // These locks are used to detect these cases, and then run the appropriate updates afterward to make sure that the
+      // local and parent values are in sync (based on the transform used).
+      // @mixin-protected - made public for use in the mixin only
+      public _preferredSizeChangeAttemptDuringLock = false;
+      // @mixin-protected - made public for use in the mixin only
+      public _minimumSizeChangeAttemptDuringLock = false;
 
-    // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
-    // @mixin-protected - made public for use in the mixin only
-    public _updatePreferredHeightListener: () => void;
-    // @mixin-protected - made public for use in the mixin only
-    public _updateLocalPreferredHeightListener: () => void;
-    // @mixin-protected - made public for use in the mixin only
-    public _updateMinimumHeightListener: () => void;
-    // @mixin-protected - made public for use in the mixin only
-    public _updateLocalMinimumHeightListener: () => void;
+      // Expose listeners, so that we'll be able to hook them up to the opposite dimension in Sizable
+      // @mixin-protected - made public for use in the mixin only
+      public _updatePreferredHeightListener: () => void;
+      // @mixin-protected - made public for use in the mixin only
+      public _updateLocalPreferredHeightListener: () => void;
+      // @mixin-protected - made public for use in the mixin only
+      public _updateMinimumHeightListener: () => void;
+      // @mixin-protected - made public for use in the mixin only
+      public _updateLocalMinimumHeightListener: () => void;
 
-    // IMPORTANT: If you're combining this in, typically don't pass options that HeightSizable would take through the
-    // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
-    // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
-    // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
-    // is yet passing those options through.
-    public constructor( ...args: IntentionalAny[] ) {
-      super( ...args );
+      // IMPORTANT: If you're combining this in, typically don't pass options that HeightSizable would take through the
+      // constructor. It will hit Node's mutate() likely, and then will fail because we haven't been able to set the
+      // values yet. If you're making something HeightSizable, please use a later mutate() to pass these options through.
+      // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
+      // is yet passing those options through.
+      public constructor( ...args: IntentionalAny[] ) {
+        super( ...args );
 
-      this._updatePreferredHeightListener = this._updatePreferredHeight.bind( this );
-      this._updateLocalPreferredHeightListener = this._updateLocalPreferredHeight.bind( this );
-      this._updateMinimumHeightListener = this._updateMinimumHeight.bind( this );
-      this._updateLocalMinimumHeightListener = this._updateLocalMinimumHeight.bind( this );
+        this._updatePreferredHeightListener = this._updatePreferredHeight.bind( this );
+        this._updateLocalPreferredHeightListener = this._updateLocalPreferredHeight.bind( this );
+        this._updateMinimumHeightListener = this._updateMinimumHeight.bind( this );
+        this._updateLocalMinimumHeightListener = this._updateLocalMinimumHeight.bind( this );
 
-      // Update the opposite of parent/local when one changes
-      this.preferredHeightProperty.lazyLink( this._updateLocalPreferredHeightListener );
-      this.localPreferredHeightProperty.lazyLink( this._updatePreferredHeightListener );
-      this.minimumHeightProperty.lazyLink( this._updateLocalMinimumHeightListener );
-      this.localMinimumHeightProperty.lazyLink( this._updateMinimumHeightListener );
+        // Update the opposite of parent/local when one changes
+        this.preferredHeightProperty.lazyLink( this._updateLocalPreferredHeightListener );
+        this.localPreferredHeightProperty.lazyLink( this._updatePreferredHeightListener );
+        this.minimumHeightProperty.lazyLink( this._updateLocalMinimumHeightListener );
+        this.localMinimumHeightProperty.lazyLink( this._updateMinimumHeightListener );
 
-      // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
-      this.transformEmitter.addListener( this._updateLocalPreferredHeightListener );
-      // On a transform change this should update the minimum
-      this.transformEmitter.addListener( this._updateMinimumHeightListener );
-    }
-
-    public get preferredHeight(): number | null {
-      assert && assert( this.preferredHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      return this.preferredHeightProperty.value;
-    }
-
-    public set preferredHeight( value: number | null ) {
-      assert && assert( this.preferredHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
-        'preferredHeight should be null or a non-negative finite number' );
-
-      this.preferredHeightProperty.value = value;
-    }
-
-    public get localPreferredHeight(): number | null {
-      assert && assert( this.localPreferredHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      return this.localPreferredHeightProperty.value;
-    }
-
-    public set localPreferredHeight( value: number | null ) {
-      assert && assert( this.localPreferredHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
-        'localPreferredHeight should be null or a non-negative finite number' );
-
-      this.localPreferredHeightProperty.value = value;
-    }
-
-    public get minimumHeight(): number | null {
-      assert && assert( this.minimumHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      return this.minimumHeightProperty.value;
-    }
-
-    public set minimumHeight( value: number | null ) {
-      assert && assert( this.minimumHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      this.minimumHeightProperty.value = value;
-    }
-
-    public get localMinimumHeight(): number | null {
-      assert && assert( this.localMinimumHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      return this.localMinimumHeightProperty.value;
-    }
-
-    public set localMinimumHeight( value: number | null ) {
-      assert && assert( this.localMinimumHeightProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      this.localMinimumHeightProperty.value = value;
-    }
-
-    public override get heightSizable(): boolean {
-      assert && assert( this.isHeightResizableProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      return this.isHeightResizableProperty.value;
-    }
-
-    public override set heightSizable( value: boolean ) {
-      assert && assert( this.isHeightResizableProperty,
-        'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
-      this.isHeightResizableProperty.value = value;
-    }
-
-    public override get extendsHeightSizable(): boolean { return true; }
-
-    public validateLocalPreferredHeight(): void {
-      if ( assert ) {
-        const currentHeight = this.localHeight;
-        const effectiveMinimumHeight = this.localMinimumHeight === null ? currentHeight : this.localMinimumHeight;
-        const idealHeight = this.localPreferredHeight === null ? effectiveMinimumHeight : this.localPreferredHeight;
-
-        // Handle non-finite values with exact equality
-        assert( idealHeight === currentHeight || Math.abs( idealHeight - currentHeight ) < 1e-7 );
+        // On a transform change, keep our local minimum (presumably unchanged), and our parent preferred size
+        this.transformEmitter.addListener( this._updateLocalPreferredHeightListener );
+        // On a transform change this should update the minimum
+        this.transformEmitter.addListener( this._updateMinimumHeightListener );
       }
-    }
 
-    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    // @mixin-protected - made public for use in the mixin only
-    public _calculateLocalPreferredHeight(): number | null {
+      public get preferredHeight(): number | null {
+        assert && assert( this.preferredHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        return this.preferredHeightProperty.value;
+      }
 
-      return ( this.matrix.isAligned() && this.preferredHeight !== null )
-             ? Math.abs( this.transform.inverseDeltaY( this.preferredHeight ) )
-             : null;
-    }
+      public set preferredHeight( value: number | null ) {
+        assert && assert( this.preferredHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
+          'preferredHeight should be null or a non-negative finite number' );
 
-    // Provides a hook to Sizable, since we'll need to cross-link this to also try updating the opposite dimension
-    // @mixin-protected - made public for use in the mixin only
-    public _onReentrantPreferredHeight(): void {
-      this._updateLocalPreferredHeightListener();
-    }
+        this.preferredHeightProperty.value = value;
+      }
 
-    private _updateLocalPreferredHeight(): void {
-      assert && this.auditMaxDimensions();
+      public get localPreferredHeight(): number | null {
+        assert && assert( this.localPreferredHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        return this.localPreferredHeightProperty.value;
+      }
 
-      if ( !this._preferredSizeChanging ) {
-        this._preferredSizeChanging = true;
+      public set localPreferredHeight( value: number | null ) {
+        assert && assert( this.localPreferredHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
+          'localPreferredHeight should be null or a non-negative finite number' );
 
-        // Since the local "preferred" size is the one that we'll want to continue to update if we experience
-        // reentrancy (since we treat the non-local version as the ground truth), we'll loop here until we didn't get
-        // an attempt to change it. This will ensure that after changes, we'll have a consistent preferred and
-        // localPreferred size.
-        do {
+        this.localPreferredHeightProperty.value = value;
+      }
+
+      public get minimumHeight(): number | null {
+        assert && assert( this.minimumHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        return this.minimumHeightProperty.value;
+      }
+
+      public set minimumHeight( value: number | null ) {
+        assert && assert( this.minimumHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
+        this.minimumHeightProperty.value = value;
+      }
+
+      public get localMinimumHeight(): number | null {
+        assert && assert( this.localMinimumHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        return this.localMinimumHeightProperty.value;
+      }
+
+      public set localMinimumHeight( value: number | null ) {
+        assert && assert( this.localMinimumHeightProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
+        this.localMinimumHeightProperty.value = value;
+      }
+
+      public override get heightSizable(): boolean {
+        assert && assert( this.isHeightResizableProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        return this.isHeightResizableProperty.value;
+      }
+
+      public override set heightSizable( value: boolean ) {
+        assert && assert( this.isHeightResizableProperty,
+          'HeightSizable options should be set from a later mutate() call instead of the super constructor' );
+        this.isHeightResizableProperty.value = value;
+      }
+
+      public override get extendsHeightSizable(): boolean { return true; }
+
+      public validateLocalPreferredHeight(): void {
+        if ( assert ) {
+          const currentHeight = this.localHeight;
+          const effectiveMinimumHeight = this.localMinimumHeight === null ? currentHeight : this.localMinimumHeight;
+          const idealHeight = this.localPreferredHeight === null ? effectiveMinimumHeight : this.localPreferredHeight;
+
+          // Handle non-finite values with exact equality
+          assert( idealHeight === currentHeight || Math.abs( idealHeight - currentHeight ) < 1e-7 );
+        }
+      }
+
+      // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
+      // @mixin-protected - made public for use in the mixin only
+      public _calculateLocalPreferredHeight(): number | null {
+
+        return ( this.matrix.isAligned() && this.preferredHeight !== null )
+               ? Math.abs( this.transform.inverseDeltaY( this.preferredHeight ) )
+               : null;
+      }
+
+      // Provides a hook to Sizable, since we'll need to cross-link this to also try updating the opposite dimension
+      // @mixin-protected - made public for use in the mixin only
+      public _onReentrantPreferredHeight(): void {
+        this._updateLocalPreferredHeightListener();
+      }
+
+      private _updateLocalPreferredHeight(): void {
+        assert && this.auditMaxDimensions();
+
+        if ( !this._preferredSizeChanging ) {
+          this._preferredSizeChanging = true;
+
+          // Since the local "preferred" size is the one that we'll want to continue to update if we experience
+          // reentrancy (since we treat the non-local version as the ground truth), we'll loop here until we didn't get
+          // an attempt to change it. This will ensure that after changes, we'll have a consistent preferred and
+          // localPreferred size.
+          do {
+            this._preferredSizeChangeAttemptDuringLock = false;
+
+            const localPreferredHeight = this._calculateLocalPreferredHeight();
+
+            if ( this.localPreferredHeightProperty.value === null ||
+                 localPreferredHeight === null ||
+                 Math.abs( this.localPreferredHeightProperty.value - localPreferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
+              this.localPreferredHeightProperty.value = localPreferredHeight;
+            }
+          }
+          while ( this._preferredSizeChangeAttemptDuringLock );
+
+          this._preferredSizeChanging = false;
+        }
+        else {
+          this._preferredSizeChangeAttemptDuringLock = true;
+        }
+      }
+
+      // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
+      // @mixin-protected - made public for use in the mixin only
+      public _calculatePreferredHeight(): number | null {
+
+        return ( this.matrix.isAligned() && this.localPreferredHeight !== null )
+               ? Math.abs( this.transform.transformDeltaY( this.localPreferredHeight ) )
+               : null;
+      }
+
+      private _updatePreferredHeight(): void {
+        if ( !this._preferredSizeChanging ) {
+          this._preferredSizeChanging = true;
+
           this._preferredSizeChangeAttemptDuringLock = false;
 
-          const localPreferredHeight = this._calculateLocalPreferredHeight();
+          const preferredHeight = this._calculatePreferredHeight();
 
-          if ( this.localPreferredHeightProperty.value === null ||
-               localPreferredHeight === null ||
-               Math.abs( this.localPreferredHeightProperty.value - localPreferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
-            this.localPreferredHeightProperty.value = localPreferredHeight;
+          if ( this.preferredHeightProperty.value === null ||
+               preferredHeight === null ||
+               Math.abs( this.preferredHeightProperty.value - preferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
+            this.preferredHeightProperty.value = preferredHeight;
+          }
+          this._preferredSizeChanging = false;
+
+          // Here, in the case of reentrance, we'll actually want to switch to updating the local preferred size, since
+          // given any other changes it should be the primary one to change.
+          if ( this._preferredSizeChangeAttemptDuringLock ) {
+            this._onReentrantPreferredHeight();
           }
         }
-        while ( this._preferredSizeChangeAttemptDuringLock );
-
-        this._preferredSizeChanging = false;
-      }
-      else {
-        this._preferredSizeChangeAttemptDuringLock = true;
-      }
-    }
-
-    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    // @mixin-protected - made public for use in the mixin only
-    public _calculatePreferredHeight(): number | null {
-
-      return ( this.matrix.isAligned() && this.localPreferredHeight !== null )
-             ? Math.abs( this.transform.transformDeltaY( this.localPreferredHeight ) )
-             : null;
-    }
-
-    private _updatePreferredHeight(): void {
-      if ( !this._preferredSizeChanging ) {
-        this._preferredSizeChanging = true;
-
-        this._preferredSizeChangeAttemptDuringLock = false;
-
-        const preferredHeight = this._calculatePreferredHeight();
-
-        if ( this.preferredHeightProperty.value === null ||
-             preferredHeight === null ||
-             Math.abs( this.preferredHeightProperty.value - preferredHeight ) > CHANGE_POSITION_THRESHOLD ) {
-          this.preferredHeightProperty.value = preferredHeight;
-        }
-        this._preferredSizeChanging = false;
-
-        // Here, in the case of reentrance, we'll actually want to switch to updating the local preferred size, since
-        // given any other changes it should be the primary one to change.
-        if ( this._preferredSizeChangeAttemptDuringLock ) {
-          this._onReentrantPreferredHeight();
+        else {
+          this._preferredSizeChangeAttemptDuringLock = true;
         }
       }
-      else {
-        this._preferredSizeChangeAttemptDuringLock = true;
+
+      // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
+      // @mixin-protected - made public for use in the mixin only
+      public _calculateLocalMinimumHeight(): number | null {
+        return ( this.matrix.isAligned() && this.minimumHeight !== null )
+               ? Math.abs( this.transform.inverseDeltaY( this.minimumHeight ) )
+               : null;
       }
-    }
 
-    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    // @mixin-protected - made public for use in the mixin only
-    public _calculateLocalMinimumHeight(): number | null {
-      return ( this.matrix.isAligned() && this.minimumHeight !== null )
-             ? Math.abs( this.transform.inverseDeltaY( this.minimumHeight ) )
-             : null;
-    }
-
-    // @mixin-protected - made public for use in the mixin only
-    public _onReentrantLocalMinimumHeight(): void {
-      this._updateMinimumHeight();
-    }
-
-    private _updateLocalMinimumHeight(): void {
-      if ( !this._minimumSizeChanging ) {
-        this._minimumSizeChanging = true;
-
-        this._minimumSizeChangeAttemptDuringLock = false;
-
-        const localMinimumHeight = this._calculateLocalMinimumHeight();
-
-        if ( this.localMinimumHeightProperty.value === null ||
-             localMinimumHeight === null ||
-             Math.abs( this.localMinimumHeightProperty.value - localMinimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
-          this.localMinimumHeightProperty.value = localMinimumHeight;
-        }
-        this._minimumSizeChanging = false;
-
-        // Here, in the case of reentrance, we'll actually want to switch to updating the non-local minimum size, since
-        // given any other changes it should be the primary one to change.
-        if ( this._minimumSizeChangeAttemptDuringLock ) {
-          this._onReentrantLocalMinimumHeight();
-        }
+      // @mixin-protected - made public for use in the mixin only
+      public _onReentrantLocalMinimumHeight(): void {
+        this._updateMinimumHeight();
       }
-      else {
-        this._minimumSizeChangeAttemptDuringLock = true;
-      }
-    }
 
-    // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
-    // @mixin-protected - made public for use in the mixin only
-    public _calculateMinimumHeight(): number | null {
-      return ( this.matrix.isAligned() && this.localMinimumHeight !== null )
-             ? Math.abs( this.transform.transformDeltaY( this.localMinimumHeight ) )
-             : null;
-    }
+      private _updateLocalMinimumHeight(): void {
+        if ( !this._minimumSizeChanging ) {
+          this._minimumSizeChanging = true;
 
-    private _updateMinimumHeight(): void {
-      if ( !this._minimumSizeChanging ) {
-        this._minimumSizeChanging = true;
-
-        // Since the non-local "minimum" size is the one that we'll want to continue to update if we experience
-        // reentrancy (since we treat the local version as the ground truth), we'll loop here until we didn't get
-        // an attempt to change it. This will ensure that after changes, we'll have a consistent minimum and
-        // localMinimum size.
-        do {
           this._minimumSizeChangeAttemptDuringLock = false;
 
-          const minimumHeight = this._calculateMinimumHeight();
+          const localMinimumHeight = this._calculateLocalMinimumHeight();
 
-          if ( this.minimumHeightProperty.value === null ||
-               minimumHeight === null ||
-               Math.abs( this.minimumHeightProperty.value - minimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
-            this.minimumHeightProperty.value = minimumHeight;
+          if ( this.localMinimumHeightProperty.value === null ||
+               localMinimumHeight === null ||
+               Math.abs( this.localMinimumHeightProperty.value - localMinimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
+            this.localMinimumHeightProperty.value = localMinimumHeight;
+          }
+          this._minimumSizeChanging = false;
+
+          // Here, in the case of reentrance, we'll actually want to switch to updating the non-local minimum size, since
+          // given any other changes it should be the primary one to change.
+          if ( this._minimumSizeChangeAttemptDuringLock ) {
+            this._onReentrantLocalMinimumHeight();
           }
         }
-        while ( this._minimumSizeChangeAttemptDuringLock );
-
-        this._minimumSizeChanging = false;
+        else {
+          this._minimumSizeChangeAttemptDuringLock = true;
+        }
       }
-    }
 
-    public override mutate( options?: HeightSizableOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
-      return super.mutate( options );
-    }
-  } );
+      // This is provided to hook into the Sizable trait, so that we can update the opposite dimension
+      // @mixin-protected - made public for use in the mixin only
+      public _calculateMinimumHeight(): number | null {
+        return ( this.matrix.isAligned() && this.localMinimumHeight !== null )
+               ? Math.abs( this.transform.transformDeltaY( this.localMinimumHeight ) )
+               : null;
+      }
+
+      private _updateMinimumHeight(): void {
+        if ( !this._minimumSizeChanging ) {
+          this._minimumSizeChanging = true;
+
+          // Since the non-local "minimum" size is the one that we'll want to continue to update if we experience
+          // reentrancy (since we treat the local version as the ground truth), we'll loop here until we didn't get
+          // an attempt to change it. This will ensure that after changes, we'll have a consistent minimum and
+          // localMinimum size.
+          do {
+            this._minimumSizeChangeAttemptDuringLock = false;
+
+            const minimumHeight = this._calculateMinimumHeight();
+
+            if ( this.minimumHeightProperty.value === null ||
+                 minimumHeight === null ||
+                 Math.abs( this.minimumHeightProperty.value - minimumHeight ) > CHANGE_POSITION_THRESHOLD ) {
+              this.minimumHeightProperty.value = minimumHeight;
+            }
+          }
+          while ( this._minimumSizeChangeAttemptDuringLock );
+
+          this._minimumSizeChanging = false;
+        }
+      }
+
+      public override mutate( options?: HeightSizableOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+        return super.mutate( options );
+      }
+    } );
 
   // If we're extending into a Node type, include option keys
   if ( HeightSizableTrait.prototype._mutatorKeys ) {

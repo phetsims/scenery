@@ -71,280 +71,281 @@ type TSizable = TWidthSizable & THeightSizable & {
 };
 
 const Sizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TSizable> => {
-  const SizableTrait = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS, class SizableTrait extends WidthSizable( HeightSizable( Type ) ) implements TSizable {
+  const SizableTrait = DelayedMutate( 'Sizable', SIZABLE_SELF_OPTION_KEYS,
+    class SizableTrait extends WidthSizable( HeightSizable( Type ) ) implements TSizable {
 
-    public constructor( ...args: IntentionalAny[] ) {
-      super( ...args );
+      public constructor( ...args: IntentionalAny[] ) {
+        super( ...args );
 
-      // We've added code to conditionally update the preferred/minimum opposite dimensions, so we'll need to
-      // cross-link the listeners we've created in WidthSizable/HeightSizable
+        // We've added code to conditionally update the preferred/minimum opposite dimensions, so we'll need to
+        // cross-link the listeners we've created in WidthSizable/HeightSizable
 
-      this.preferredWidthProperty.lazyLink( this._updateLocalPreferredHeightListener );
-      this.preferredHeightProperty.lazyLink( this._updateLocalPreferredWidthListener );
+        this.preferredWidthProperty.lazyLink( this._updateLocalPreferredHeightListener );
+        this.preferredHeightProperty.lazyLink( this._updateLocalPreferredWidthListener );
 
-      this.localPreferredWidthProperty.lazyLink( this._updatePreferredHeightListener );
-      this.localPreferredHeightProperty.lazyLink( this._updatePreferredWidthListener );
+        this.localPreferredWidthProperty.lazyLink( this._updatePreferredHeightListener );
+        this.localPreferredHeightProperty.lazyLink( this._updatePreferredWidthListener );
 
-      this.minimumWidthProperty.lazyLink( this._updateLocalMinimumHeightListener );
-      this.minimumHeightProperty.lazyLink( this._updateLocalMinimumWidthListener );
+        this.minimumWidthProperty.lazyLink( this._updateLocalMinimumHeightListener );
+        this.minimumHeightProperty.lazyLink( this._updateLocalMinimumWidthListener );
 
-      this.localMinimumWidthProperty.lazyLink( this._updateMinimumHeightListener );
-      this.localMinimumHeightProperty.lazyLink( this._updateMinimumWidthListener );
-    }
+        this.localMinimumWidthProperty.lazyLink( this._updateMinimumHeightListener );
+        this.localMinimumHeightProperty.lazyLink( this._updateMinimumWidthListener );
+      }
 
-    public get preferredSize(): Dimension2 | null {
-      assert && assert( ( this.preferredWidth === null ) === ( this.preferredHeight === null ),
-        'Cannot get a preferredSize when one of preferredWidth/preferredHeight is null' );
+      public get preferredSize(): Dimension2 | null {
+        assert && assert( ( this.preferredWidth === null ) === ( this.preferredHeight === null ),
+          'Cannot get a preferredSize when one of preferredWidth/preferredHeight is null' );
 
-      if ( this.preferredWidth === null || this.preferredHeight === null ) {
+        if ( this.preferredWidth === null || this.preferredHeight === null ) {
+          return null;
+        }
+        else {
+          return new Dimension2( this.preferredWidth, this.preferredHeight );
+        }
+      }
+
+      public set preferredSize( value: Dimension2 | null ) {
+        this.preferredWidth = value === null ? null : value.width;
+        this.preferredHeight = value === null ? null : value.height;
+      }
+
+      public get localPreferredSize(): Dimension2 | null {
+        assert && assert( ( this.localPreferredWidth === null ) === ( this.localPreferredHeight === null ),
+          'Cannot get a preferredSize when one of preferredWidth/preferredHeight is null' );
+
+        if ( this.localPreferredWidth === null || this.localPreferredHeight === null ) {
+          return null;
+        }
+        else {
+          return new Dimension2( this.localPreferredWidth, this.localPreferredHeight );
+        }
+      }
+
+      public set localPreferredSize( value: Dimension2 | null ) {
+        this.localPreferredWidth = value === null ? null : value.width;
+        this.localPreferredHeight = value === null ? null : value.height;
+      }
+
+      public get minimumSize(): Dimension2 | null {
+        assert && assert( ( this.minimumWidth === null ) === ( this.minimumHeight === null ),
+          'Cannot get a minimumSize when one of minimumWidth/minimumHeight is null' );
+
+        if ( this.minimumWidth === null || this.minimumHeight === null ) {
+          return null;
+        }
+        else {
+          return new Dimension2( this.minimumWidth, this.minimumHeight );
+        }
+      }
+
+      public set minimumSize( value: Dimension2 | null ) {
+        this.minimumWidth = value === null ? null : value.width;
+        this.minimumHeight = value === null ? null : value.height;
+      }
+
+      public get localMinimumSize(): Dimension2 | null {
+        assert && assert( ( this.localMinimumWidth === null ) === ( this.localMinimumHeight === null ),
+          'Cannot get a minimumSize when one of minimumWidth/minimumHeight is null' );
+
+        if ( this.localMinimumWidth === null || this.localMinimumHeight === null ) {
+          return null;
+        }
+        else {
+          return new Dimension2( this.localMinimumWidth, this.localMinimumHeight );
+        }
+      }
+
+      public set localMinimumSize( value: Dimension2 | null ) {
+        this.localMinimumWidth = value === null ? null : value.width;
+        this.localMinimumHeight = value === null ? null : value.height;
+      }
+
+      public get sizable(): boolean {
+        assert && assert( this.widthSizable === this.heightSizable,
+          'widthSizable and heightSizable not the same, which is required for the sizable getter' );
+        return this.widthSizable;
+      }
+
+      public set sizable( value: boolean ) {
+        this.widthSizable = value;
+        this.heightSizable = value;
+      }
+
+      public override get extendsSizable(): boolean { return true; }
+
+      public validateLocalPreferredSize(): void {
+        if ( assert ) {
+          this.validateLocalPreferredWidth();
+          this.validateLocalPreferredHeight();
+        }
+      }
+
+      public override mutate( options?: SelfOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+
+        assertMutuallyExclusiveOptions( options, [ 'preferredSize' ], [ 'preferredWidth', 'preferredHeight' ] );
+        assertMutuallyExclusiveOptions( options, [ 'localPreferredSize' ], [ 'localPreferredWidth', 'localPreferredHeight' ] );
+        assertMutuallyExclusiveOptions( options, [ 'minimumSize' ], [ 'minimumWidth', 'minimumHeight' ] );
+        assertMutuallyExclusiveOptions( options, [ 'localMinimumSize' ], [ 'localMinimumWidth', 'localMinimumHeight' ] );
+        assertMutuallyExclusiveOptions( options, [ 'sizable' ], [ 'widthSizable', 'heightSizable' ] );
+
+        return super.mutate( options );
+      }
+
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculateLocalPreferredWidth(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.preferredWidth !== null ) {
+              return Math.abs( this.transform.inverseDeltaX( this.preferredWidth ) );
+            }
+          }
+          // If we're height-sizable and we have an orientation swap, set the correct preferred width!
+          else if ( this.preferredHeight !== null ) {
+            return Math.abs( this.transform.getInverse().m01() * this.preferredHeight );
+          }
+        }
+
         return null;
       }
-      else {
-        return new Dimension2( this.preferredWidth, this.preferredHeight );
-      }
-    }
 
-    public set preferredSize( value: Dimension2 | null ) {
-      this.preferredWidth = value === null ? null : value.width;
-      this.preferredHeight = value === null ? null : value.height;
-    }
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculateLocalPreferredHeight(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.preferredHeight !== null ) {
+              return Math.abs( this.transform.inverseDeltaY( this.preferredHeight ) );
+            }
+          }
+          // If we're width-sizable and we have an orientation swap, set the correct preferred height!
+          else if ( this.preferredWidth !== null ) {
+            return Math.abs( this.transform.getInverse().m10() * this.preferredWidth );
+          }
+        }
 
-    public get localPreferredSize(): Dimension2 | null {
-      assert && assert( ( this.localPreferredWidth === null ) === ( this.localPreferredHeight === null ),
-        'Cannot get a preferredSize when one of preferredWidth/preferredHeight is null' );
-
-      if ( this.localPreferredWidth === null || this.localPreferredHeight === null ) {
         return null;
       }
-      else {
-        return new Dimension2( this.localPreferredWidth, this.localPreferredHeight );
-      }
-    }
 
-    public set localPreferredSize( value: Dimension2 | null ) {
-      this.localPreferredWidth = value === null ? null : value.width;
-      this.localPreferredHeight = value === null ? null : value.height;
-    }
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculatePreferredWidth(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.localPreferredWidth !== null ) {
+              return Math.abs( this.transform.transformDeltaX( this.localPreferredWidth ) );
+            }
+          }
+          else if ( this.localPreferredHeight !== null ) {
+            return Math.abs( this.transform.matrix.m01() * this.localPreferredHeight );
+          }
+        }
 
-    public get minimumSize(): Dimension2 | null {
-      assert && assert( ( this.minimumWidth === null ) === ( this.minimumHeight === null ),
-        'Cannot get a minimumSize when one of minimumWidth/minimumHeight is null' );
-
-      if ( this.minimumWidth === null || this.minimumHeight === null ) {
         return null;
       }
-      else {
-        return new Dimension2( this.minimumWidth, this.minimumHeight );
-      }
-    }
 
-    public set minimumSize( value: Dimension2 | null ) {
-      this.minimumWidth = value === null ? null : value.width;
-      this.minimumHeight = value === null ? null : value.height;
-    }
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculatePreferredHeight(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.localPreferredHeight !== null ) {
+              return Math.abs( this.transform.transformDeltaY( this.localPreferredHeight ) );
+            }
+          }
+          else if ( this.localPreferredWidth !== null ) {
+            return Math.abs( this.transform.matrix.m10() * this.localPreferredWidth );
+          }
+        }
 
-    public get localMinimumSize(): Dimension2 | null {
-      assert && assert( ( this.localMinimumWidth === null ) === ( this.localMinimumHeight === null ),
-        'Cannot get a minimumSize when one of minimumWidth/minimumHeight is null' );
-
-      if ( this.localMinimumWidth === null || this.localMinimumHeight === null ) {
         return null;
       }
-      else {
-        return new Dimension2( this.localMinimumWidth, this.localMinimumHeight );
+
+      // We'll need to cross-link because we might need to update either the width or height when the other changes
+      public override _onReentrantLocalMinimumWidth(): void {
+        this._updateMinimumWidthListener();
+        this._updateMinimumHeightListener();
       }
-    }
 
-    public set localMinimumSize( value: Dimension2 | null ) {
-      this.localMinimumWidth = value === null ? null : value.width;
-      this.localMinimumHeight = value === null ? null : value.height;
-    }
-
-    public get sizable(): boolean {
-      assert && assert( this.widthSizable === this.heightSizable,
-        'widthSizable and heightSizable not the same, which is required for the sizable getter' );
-      return this.widthSizable;
-    }
-
-    public set sizable( value: boolean ) {
-      this.widthSizable = value;
-      this.heightSizable = value;
-    }
-
-    public override get extendsSizable(): boolean { return true; }
-
-    public validateLocalPreferredSize(): void {
-      if ( assert ) {
-        this.validateLocalPreferredWidth();
-        this.validateLocalPreferredHeight();
+      // We'll need to cross-link because we might need to update either the width or height when the other changes
+      public override _onReentrantLocalMinimumHeight(): void {
+        this._updateMinimumWidthListener();
+        this._updateMinimumHeightListener();
       }
-    }
 
-    public override mutate( options?: SelfOptions & Parameters<InstanceType<SuperType>[ 'mutate' ]>[ 0 ] ): this {
+      // We'll need to cross-link because we might need to update either the width or height when the other changes
+      public override _onReentrantPreferredWidth(): void {
+        this._updateLocalPreferredWidthListener();
+        this._updateLocalPreferredHeightListener();
+      }
 
-      assertMutuallyExclusiveOptions( options, [ 'preferredSize' ], [ 'preferredWidth', 'preferredHeight' ] );
-      assertMutuallyExclusiveOptions( options, [ 'localPreferredSize' ], [ 'localPreferredWidth', 'localPreferredHeight' ] );
-      assertMutuallyExclusiveOptions( options, [ 'minimumSize' ], [ 'minimumWidth', 'minimumHeight' ] );
-      assertMutuallyExclusiveOptions( options, [ 'localMinimumSize' ], [ 'localMinimumWidth', 'localMinimumHeight' ] );
-      assertMutuallyExclusiveOptions( options, [ 'sizable' ], [ 'widthSizable', 'heightSizable' ] );
+      // We'll need to cross-link because we might need to update either the width or height when the other changes
+      public override _onReentrantPreferredHeight(): void {
+        this._updateLocalPreferredWidthListener();
+        this._updateLocalPreferredHeightListener();
+      }
 
-      return super.mutate( options );
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculateLocalPreferredWidth(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.preferredWidth !== null ) {
-            return Math.abs( this.transform.inverseDeltaX( this.preferredWidth ) );
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculateLocalMinimumWidth(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.minimumWidth !== null ) {
+              return Math.abs( this.transform.inverseDeltaX( this.minimumWidth ) );
+            }
+          }
+          else if ( this.minimumHeight !== null ) {
+            return Math.abs( this.transform.getInverse().m01() * this.minimumHeight );
           }
         }
-        // If we're height-sizable and we have an orientation swap, set the correct preferred width!
-        else if ( this.preferredHeight !== null ) {
-          return Math.abs( this.transform.getInverse().m01() * this.preferredHeight );
-        }
+
+        return null;
       }
 
-      return null;
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculateLocalPreferredHeight(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.preferredHeight !== null ) {
-            return Math.abs( this.transform.inverseDeltaY( this.preferredHeight ) );
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculateLocalMinimumHeight(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.minimumHeight !== null ) {
+              return Math.abs( this.transform.inverseDeltaY( this.minimumHeight ) );
+            }
+          }
+          else if ( this.minimumWidth !== null ) {
+            return Math.abs( this.transform.getInverse().m10() * this.minimumWidth );
           }
         }
-        // If we're width-sizable and we have an orientation swap, set the correct preferred height!
-        else if ( this.preferredWidth !== null ) {
-          return Math.abs( this.transform.getInverse().m10() * this.preferredWidth );
-        }
+
+        return null;
       }
 
-      return null;
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculatePreferredWidth(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.localPreferredWidth !== null ) {
-            return Math.abs( this.transform.transformDeltaX( this.localPreferredWidth ) );
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculateMinimumWidth(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.localMinimumWidth !== null ) {
+              return Math.abs( this.transform.transformDeltaX( this.localMinimumWidth ) );
+            }
+          }
+          else if ( this.localMinimumHeight !== null ) {
+            return Math.abs( this.transform.matrix.m01() * this.localMinimumHeight );
           }
         }
-        else if ( this.localPreferredHeight !== null ) {
-          return Math.abs( this.transform.matrix.m01() * this.localPreferredHeight );
-        }
+
+        return null;
       }
 
-      return null;
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculatePreferredHeight(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.localPreferredHeight !== null ) {
-            return Math.abs( this.transform.transformDeltaY( this.localPreferredHeight ) );
+      // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
+      public override _calculateMinimumHeight(): number | null {
+        if ( this.matrix.isAxisAligned() ) {
+          if ( this.matrix.isAligned() ) {
+            if ( this.localMinimumHeight !== null ) {
+              return Math.abs( this.transform.transformDeltaY( this.localMinimumHeight ) );
+            }
+          }
+          else if ( this.localMinimumWidth !== null ) {
+            return Math.abs( this.transform.matrix.m10() * this.localMinimumWidth );
           }
         }
-        else if ( this.localPreferredWidth !== null ) {
-          return Math.abs( this.transform.matrix.m10() * this.localPreferredWidth );
-        }
+
+        return null;
       }
-
-      return null;
-    }
-
-    // We'll need to cross-link because we might need to update either the width or height when the other changes
-    public override _onReentrantLocalMinimumWidth(): void {
-      this._updateMinimumWidthListener();
-      this._updateMinimumHeightListener();
-    }
-
-    // We'll need to cross-link because we might need to update either the width or height when the other changes
-    public override _onReentrantLocalMinimumHeight(): void {
-      this._updateMinimumWidthListener();
-      this._updateMinimumHeightListener();
-    }
-
-    // We'll need to cross-link because we might need to update either the width or height when the other changes
-    public override _onReentrantPreferredWidth(): void {
-      this._updateLocalPreferredWidthListener();
-      this._updateLocalPreferredHeightListener();
-    }
-
-    // We'll need to cross-link because we might need to update either the width or height when the other changes
-    public override _onReentrantPreferredHeight(): void {
-      this._updateLocalPreferredWidthListener();
-      this._updateLocalPreferredHeightListener();
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculateLocalMinimumWidth(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.minimumWidth !== null ) {
-            return Math.abs( this.transform.inverseDeltaX( this.minimumWidth ) );
-          }
-        }
-        else if ( this.minimumHeight !== null ) {
-          return Math.abs( this.transform.getInverse().m01() * this.minimumHeight );
-        }
-      }
-
-      return null;
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculateLocalMinimumHeight(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.minimumHeight !== null ) {
-            return Math.abs( this.transform.inverseDeltaY( this.minimumHeight ) );
-          }
-        }
-        else if ( this.minimumWidth !== null ) {
-          return Math.abs( this.transform.getInverse().m10() * this.minimumWidth );
-        }
-      }
-
-      return null;
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculateMinimumWidth(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.localMinimumWidth !== null ) {
-            return Math.abs( this.transform.transformDeltaX( this.localMinimumWidth ) );
-          }
-        }
-        else if ( this.localMinimumHeight !== null ) {
-          return Math.abs( this.transform.matrix.m01() * this.localMinimumHeight );
-        }
-      }
-
-      return null;
-    }
-
-    // Override the calculation to potentially include the opposite dimension (if we have a rotation of that type)
-    public override _calculateMinimumHeight(): number | null {
-      if ( this.matrix.isAxisAligned() ) {
-        if ( this.matrix.isAligned() ) {
-          if ( this.localMinimumHeight !== null ) {
-            return Math.abs( this.transform.transformDeltaY( this.localMinimumHeight ) );
-          }
-        }
-        else if ( this.localMinimumWidth !== null ) {
-          return Math.abs( this.transform.matrix.m10() * this.localMinimumWidth );
-        }
-      }
-
-      return null;
-    }
-  } );
+    } );
 
   // If we're extending into a Node type, include option keys
   if ( SizableTrait.prototype._mutatorKeys ) {
