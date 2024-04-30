@@ -68,9 +68,35 @@ export type MarginLayoutConfigurableOptions = {
 // We remove the null values for the values that won't actually take null
 export type ExternalMarginLayoutConfigurableOptions = WithoutNull<MarginLayoutConfigurableOptions, Exclude<keyof MarginLayoutConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
 
+export type TMarginLayoutConfigurable = {
+  _leftMargin: number | null;
+  _rightMargin: number | null;
+  _topMargin: number | null;
+  _bottomMargin: number | null;
+  _minContentWidth: number | null;
+  _minContentHeight: number | null;
+  _maxContentWidth: number | null;
+  _maxContentHeight: number | null;
+  readonly changedEmitter: TEmitter;
+  mutateConfigurable( options?: MarginLayoutConfigurableOptions ): void;
+  setConfigToBaseDefault(): void;
+  setConfigToInherit(): void;
+  leftMargin: number | null;
+  rightMargin: number | null;
+  topMargin: number | null;
+  bottomMargin: number | null;
+  xMargin: number | null;
+  yMargin: number | null;
+  margin: number | null;
+  minContentWidth: number | null;
+  minContentHeight: number | null;
+  maxContentWidth: number | null;
+  maxContentHeight: number | null;
+};
+
 // (scenery-internal)
-const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  return class MarginLayoutConfigurableMixin extends type {
+const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( Type: SuperType ) => {
+  return class MarginLayoutConfigurableMixin extends Type implements TMarginLayoutConfigurable {
 
     // (scenery-internal)
     public _leftMargin: number | null = null;
@@ -378,5 +404,6 @@ const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( type:
 } );
 
 scenery.register( 'MarginLayoutConfigurable', MarginLayoutConfigurable );
+
 export default MarginLayoutConfigurable;
 export { MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS };

@@ -13,13 +13,17 @@ import Constructor from '../../../phet-core/js/types/Constructor.js';
 import { PressListener, PressListenerEvent, scenery, SpriteInstance, Sprites, Node } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
+type TSpriteListenable = {
+  spriteInstance: SpriteInstance | null;
+};
+
 /**
  * @param type - Should be a PressListener-based type
  */
-const SpriteListenable = memoize( <SuperType extends Constructor<PressListener>>( type: SuperType ) => {
+const SpriteListenable = memoize( <SuperType extends Constructor<PressListener>>( type: SuperType ): SuperType & Constructor<TSpriteListenable> => {
   assert && assert( _.includes( inheritance( type ), PressListener ), 'Only PressListener subtypes should mix SpriteListenable' );
 
-  return class extends type {
+  return class extends type implements TSpriteListenable {
 
     public spriteInstance: SpriteInstance | null = null;
 

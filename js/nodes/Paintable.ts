@@ -67,10 +67,137 @@ export type PaintableNode = Path | Text;
 
 const PAINTABLE_DRAWABLE_MARK_FLAGS = [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ];
 
-const Paintable = memoize( <SuperType extends Constructor<Node>>( type: SuperType ) => {
-  assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+interface TPaintable {
 
-  return class PaintableMixin extends type {
+  _fill: TPaint;
+  _fillPickable: boolean;
+  _stroke: TPaint;
+  _strokePickable: boolean;
+  _cachedPaints: Paint[];
+  _lineDrawingStyles: LineStyles;
+
+  setFill( fill: TPaint ): this;
+
+  fill: TPaint;
+
+  getFill(): TPaint;
+
+  hasFill(): boolean;
+
+  getFillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint;
+
+  get fillValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint;
+
+  setStroke( stroke: TPaint ): this;
+
+  stroke: TPaint;
+
+  getStroke(): TPaint;
+
+  hasStroke(): boolean;
+
+  hasPaintableStroke(): boolean;
+
+  getStrokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint;
+
+  get strokeValue(): null | string | Color | LinearGradient | RadialGradient | Pattern | Paint;
+
+  setFillPickable( pickable: boolean ): this;
+
+  fillPickable: boolean;
+
+  isFillPickable(): boolean;
+
+  setStrokePickable( pickable: boolean ): this;
+
+  strokePickable: boolean;
+
+  isStrokePickable(): boolean;
+
+  setLineWidth( lineWidth: number ): this;
+
+  lineWidth: number;
+
+  getLineWidth(): number;
+
+  setLineCap( lineCap: LineCap ): this;
+
+  lineCap: LineCap;
+
+  getLineCap(): LineCap;
+
+  setLineJoin( lineJoin: LineJoin ): this;
+
+  lineJoin: LineJoin;
+
+  getLineJoin(): LineJoin;
+
+  setMiterLimit( miterLimit: number ): this;
+
+  miterLimit: number;
+
+  getMiterLimit(): number;
+
+  setLineDash( lineDash: number[] ): this;
+
+  lineDash: number[];
+
+  getLineDash(): number[];
+
+  hasLineDash(): boolean;
+
+  setLineDashOffset( lineDashOffset: number ): this;
+
+  lineDashOffset: number;
+
+  getLineDashOffset(): number;
+
+  setLineStyles( lineStyles: LineStyles ): this;
+
+  lineStyles: LineStyles;
+
+  getLineStyles(): LineStyles;
+
+  setCachedPaints( paints: TPaint[] ): this;
+
+  cachedPaints: TPaint[];
+
+  getCachedPaints(): TPaint[];
+
+  addCachedPaint( paint: TPaint ): void;
+
+  removeCachedPaint( paint: TPaint ): void;
+
+  beforeCanvasFill( wrapper: CanvasContextWrapper ): void;
+
+  afterCanvasFill( wrapper: CanvasContextWrapper ): void;
+
+  beforeCanvasStroke( wrapper: CanvasContextWrapper ): void;
+
+  afterCanvasStroke( wrapper: CanvasContextWrapper ): void;
+
+  getCSSFill(): string;
+
+  getSimpleCSSStroke(): string;
+
+  appendFillablePropString( spaces: string, result: string ): string;
+
+  appendStrokablePropString( spaces: string, result: string ): string;
+
+  getFillRendererBitmask(): number;
+
+  getStrokeRendererBitmask(): number;
+
+  invalidateFill(): void;
+
+  invalidateStroke(): void;
+}
+
+const Paintable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TPaintable> => {
+  assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should mix Paintable' );
+
+  return class PaintableMixin extends Type implements TPaintable {
 
     // (scenery-internal)
     public _fill: TPaint;

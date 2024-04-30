@@ -29,6 +29,7 @@ import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
+import { TMarginLayoutConfigurable } from './MarginLayoutConfigurable.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
@@ -66,11 +67,28 @@ export type FlowConfigurableOptions = SelfOptions & MarginLayoutConfigurableOpti
 // We remove the null values for the values that won't actually take null
 export type ExternalFlowConfigurableOptions = WithoutNull<FlowConfigurableOptions, Exclude<keyof FlowConfigurableOptions, 'minContentWidth' | 'minContentHeight' | 'maxContentWidth' | 'maxContentHeight'>>;
 
-// (scenery-internal)
-const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
-  return class FlowConfigurableMixin extends MarginLayoutConfigurable( type ) {
+type TFlowConfigurable = {
 
-    protected _orientation: Orientation = Orientation.HORIZONTAL;
+  _align: LayoutAlign | null;
+  _stretch: boolean | null;
+  _grow: number | null;
+  readonly orientationChangedEmitter: TEmitter;
+  orientation: LayoutOrientation;
+  align: HorizontalLayoutAlign | VerticalLayoutAlign | null;
+  stretch: boolean | null;
+  grow: number | null;
+
+  // @mixin-protected - made public for use in the mixin only
+  _orientation: Orientation;
+
+} & TMarginLayoutConfigurable;
+
+// (scenery-internal)
+const FlowConfigurable = memoize( <SuperType extends Constructor>( Type: SuperType ): SuperType & Constructor<TFlowConfigurable> => {
+  return class FlowConfigurableMixin extends MarginLayoutConfigurable( Type ) implements TFlowConfigurable {
+
+    // @mixin-protected - made public for use in the mixin only
+    public _orientation: Orientation = Orientation.HORIZONTAL;
 
     // (scenery-internal)
     public _align: LayoutAlign | null = null;
