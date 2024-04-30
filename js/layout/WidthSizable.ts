@@ -91,7 +91,7 @@ export type TWidthSizable = {
 // values yet. If you're making something WidthSizable, please use a later mutate() to pass these options through.
 // They WILL be caught by assertions if someone adds one of those options, but it could be a silent bug if no one
 // is yet passing those options through.
-const WidthSizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ) => {
+const WidthSizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TWidthSizable> => {
   const WidthSizableTrait = DelayedMutate( 'WidthSizable', WIDTH_SIZABLE_OPTION_KEYS, class WidthSizableTrait extends Type implements TWidthSizable {
 
     // parent/local preferred/minimum Properties. See the options above for more documentation
