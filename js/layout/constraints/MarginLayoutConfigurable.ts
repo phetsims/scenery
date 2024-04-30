@@ -95,7 +95,7 @@ export type TMarginLayoutConfigurable = {
 };
 
 // (scenery-internal)
-const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( Type: SuperType ) => {
+const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( Type: SuperType ): SuperType & Constructor<TMarginLayoutConfigurable> => {
   return class MarginLayoutConfigurableMixin extends Type implements TMarginLayoutConfigurable {
 
     // (scenery-internal)
