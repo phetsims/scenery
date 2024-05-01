@@ -131,7 +131,7 @@ export type ImageableOptions = {
   hitTestPixels?: boolean;
 };
 
-// TODO: Allow interfaces for use of correct "this"? https://github.com/phetsims/tasks/issues/1132
+// Normally our project prefers type aliases to interfaces, but interfaces are necessary for correct usage of "this", see https://github.com/phetsims/tasks/issues/1132
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface TImageable {
   _image: ParsedImage | null;

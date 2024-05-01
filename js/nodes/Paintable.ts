@@ -67,6 +67,7 @@ export type PaintableNode = Path | Text;
 
 const PAINTABLE_DRAWABLE_MARK_FLAGS = [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ];
 
+// Normally our project prefers type aliases to interfaces, but interfaces are necessary for correct usage of "this", see https://github.com/phetsims/tasks/issues/1132
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export interface TPaintable {
 
