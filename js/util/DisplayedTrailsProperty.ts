@@ -30,23 +30,21 @@ export type DisplayedTrailsPropertyOptions = {
   // node, we will follow that order).
   // This essentially tracks the following:
   //
-  // REVIEW: Rename option to followPDOMOrder? Only matches of `[a-z]Pdom[A-Z]` are from this issue.
-  //
   // REVIEW: I'd actually add [a-z]?Pdom[A-Z] to bad-sim-text if you're alright with that. Close to https://github.com/phetsims/chipper/blob/f56c273970f22f857bc8f5bd0148f256534a702f/eslint/rules/bad-sim-text.js#L35-L36
   //
   // REVIEW: Aren't these boolean values opposite? followPDOMOrder:true should respect pdomOrder. Also, it isn't clear
   //         from the doc how you ask for "all trails, visual or PDOM". Is that part of the featureset? I believe
   //         that likely we would always force visible as a base feature, and only add on visibility, but this should
   //         be explained. As easy as the doc update above I just did: "we will _additionally_ follow the pdomParent"
-  // - followPdomOrder: true = visual trails (just children)
-  // - followPdomOrder: false = pdom trails (respecting pdomOrder)
-  followPdomOrder?: boolean;
+  // - followPDOMOrder: true = visual trails (just children)
+  // - followPDOMOrder: false = pdom trails (respecting pdomOrder)
+  followPDOMOrder?: boolean;
 
   // If true, we will only report trails where every node is visible: true.
   requireVisible?: boolean;
 
   // If true, we will only report trails where every node is pdomVisible: true.
-  requirePdomVisible?: boolean;
+  requirePDOMVisible?: boolean;
 
   // If true, we will only report trails where every node is enabled: true.
   requireEnabled?: boolean;
@@ -74,9 +72,9 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
   // REVIEW: Please rename this and the option to something less confusing. Perhaps `displaySupport`, or
   // `whichDisplay`, or something that sounds like it could be a predicate.
   private readonly display: DisplayPredicate;
-  private readonly followPdomOrder: boolean;
+  private readonly followPDOMOrder: boolean;
   private readonly requireVisible: boolean;
-  private readonly requirePdomVisible: boolean;
+  private readonly requirePDOMVisible: boolean;
   private readonly requireEnabled: boolean;
   private readonly requireInputEnabled: boolean;
 
@@ -90,9 +88,9 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       display: null,
 
       // Default to visual trails (just children), with only pruning by normal visibility
-      followPdomOrder: false,
+      followPDOMOrder: false,
       requireVisible: true,
-      requirePdomVisible: false,
+      requirePDOMVisible: false,
       requireEnabled: false,
       requireInputEnabled: false
     }, providedOptions );
@@ -102,9 +100,9 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     // Save options for later updates
     this.node = node;
     this.display = options.display;
-    this.followPdomOrder = options.followPdomOrder;
+    this.followPDOMOrder = options.followPDOMOrder;
     this.requireVisible = options.requireVisible;
-    this.requirePdomVisible = options.requirePdomVisible;
+    this.requirePDOMVisible = options.requirePDOMVisible;
     this.requireEnabled = options.requireEnabled;
     this.requireInputEnabled = options.requireInputEnabled;
 
@@ -117,9 +115,9 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
 
     // Factored out because we're using a "function" below for recursion (NOT an arrow function)
     const display = this.display;
-    const followPdomOrder = this.followPdomOrder;
+    const followPDOMOrder = this.followPDOMOrder;
     const requireVisible = this.requireVisible;
-    const requirePdomVisible = this.requirePdomVisible;
+    const requirePDOMVisible = this.requirePDOMVisible;
     const requireEnabled = this.requireEnabled;
     const requireInputEnabled = this.requireInputEnabled;
 
@@ -148,7 +146,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       // If we fail other conditions, we won't add a trail OR recurse, but we will STILL have listeners added to the Node.
       if (
         ( requireVisible && !root.visible ) ||
-        ( requirePdomVisible && !root.pdomVisible ) ||
+        ( requirePDOMVisible && !root.pdomVisible ) ||
         ( requireEnabled && !root.enabled ) ||
         ( requireInputEnabled && !root.inputEnabled )
       ) {
@@ -178,7 +176,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       // REVIEW: I'm officially confused about this feature. What is the value of "either or", why not be able to
       // support both visual and PDOM in the same Property? If this is indeed best, please be sure to explain where
       // the option is defined.
-      const parents = followPdomOrder && root.pdomParent ? [ root.pdomParent ] : root.parents;
+      const parents = followPDOMOrder && root.pdomParent ? [ root.pdomParent ] : root.parents;
 
       parents.forEach( parent => {
         trail.addAncestor( parent );
@@ -233,13 +231,13 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     node.rootedDisplayChangedEmitter.addListener( this._trailUpdateListener );
     node.disposeEmitter.addListener( this._trailUpdateListener );
 
-    if ( this.followPdomOrder ) {
+    if ( this.followPDOMOrder ) {
       node.pdomParentChangedEmitter.addListener( this._trailUpdateListener );
     }
     if ( this.requireVisible ) {
       node.visibleProperty.lazyLink( this._trailUpdateListener );
     }
-    if ( this.requirePdomVisible ) {
+    if ( this.requirePDOMVisible ) {
       node.pdomVisibleProperty.lazyLink( this._trailUpdateListener );
     }
     if ( this.requireEnabled ) {
@@ -257,13 +255,13 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     node.rootedDisplayChangedEmitter.removeListener( this._trailUpdateListener );
     node.disposeEmitter.removeListener( this._trailUpdateListener );
 
-    if ( this.followPdomOrder ) {
+    if ( this.followPDOMOrder ) {
       node.pdomParentChangedEmitter.removeListener( this._trailUpdateListener );
     }
     if ( this.requireVisible ) {
       node.visibleProperty.unlink( this._trailUpdateListener );
     }
-    if ( this.requirePdomVisible ) {
+    if ( this.requirePDOMVisible ) {
       node.pdomVisibleProperty.unlink( this._trailUpdateListener );
     }
     if ( this.requireEnabled ) {

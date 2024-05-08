@@ -374,10 +374,10 @@ class GlobalKeyboardListener extends KeyboardListener<OneKeyStroke[]> {
 
       // For alt input events, use the PDOM trail to determine if the trail is displayed. This may be different
       // from the "visual" trail if the Node is placed in a PDOM order that is different from the visual order.
-      followPdomOrder: true,
+      followPDOMOrder: true,
 
       // Additionally, the target must have each of these true up its Trails to receive alt input events.
-      requirePdomVisible: true,
+      requirePDOMVisible: true,
       requireEnabled: true,
       requireInputEnabled: true
     } );
