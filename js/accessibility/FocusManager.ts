@@ -201,7 +201,7 @@ export default class FocusManager {
         const display = displays[ i ];
 
         const activeElement = document.activeElement as HTMLElement;
-        if ( display.isElementUnderPDOM( activeElement ) ) {
+        if ( display.isElementUnderPDOM( activeElement, false ) ) {
           const uniqueId = activeElement.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID )!;
           assert && assert( uniqueId, 'Event target must have a unique ID on its data if it is in the PDOM.' );
 

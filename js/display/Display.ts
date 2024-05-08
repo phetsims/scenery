@@ -938,9 +938,20 @@ export default class Display {
 
   /**
    * Returns true if the element is in the PDOM. That is only possible if the display is accessible.
+   * @param element
+   * @param allowRoot - If true, the root of the PDOM is also considered to be "under" the PDOM.
    */
-  public isElementUnderPDOM( element: Element ): boolean {
-    return this._accessible && this.pdomRootElement!.contains( element );
+  public isElementUnderPDOM( element: Element, allowRoot: boolean ): boolean {
+    if ( !this._accessible ) {
+      return false;
+    }
+
+    const isElementContained = this.pdomRootElement!.contains( element );
+    const isNotRootElement = element !== this.pdomRootElement;
+
+    // If allowRoot is true, just return if the element is contained.
+    // Otherwise, also ensure it's not the root element itself.
+    return allowRoot ? isElementContained : ( isElementContained && isNotRootElement );
   }
 
   /**

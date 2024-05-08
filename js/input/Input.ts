@@ -1124,7 +1124,7 @@ export default class Input extends PhetioObject {
   public getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
     const relatedTargetElement = domEvent.relatedTarget;
 
-    if ( relatedTargetElement && this.display.isElementUnderPDOM( relatedTargetElement as HTMLElement ) ) {
+    if ( relatedTargetElement && this.display.isElementUnderPDOM( relatedTargetElement as HTMLElement, false ) ) {
 
       const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
       assert && assert( relatedTarget instanceof window.Element );
@@ -1154,7 +1154,7 @@ export default class Input extends PhetioObject {
     }
     else {
       const target = domEvent.target;
-      if ( target && target instanceof window.Element && this.display.isElementUnderPDOM( target ) ) {
+      if ( target && target instanceof window.Element && this.display.isElementUnderPDOM( target, false ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
         assert && assert( trailIndices, 'should not be null' );
         return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
@@ -1607,7 +1607,7 @@ export default class Input extends PhetioObject {
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.display.isElementUnderPDOM( context.domEvent.target as HTMLElement ) ) {
+    if ( this.display.isElementUnderPDOM( context.domEvent.target as HTMLElement, true ) ) {
       return;
     }
 
@@ -1636,7 +1636,7 @@ export default class Input extends PhetioObject {
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.display.isElementUnderPDOM( context.domEvent.target as HTMLElement ) ) {
+    if ( this.display.isElementUnderPDOM( context.domEvent.target as HTMLElement, true ) ) {
       return;
     }
 
