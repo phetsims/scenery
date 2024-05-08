@@ -109,12 +109,6 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
   a.addInputListener( listenerWithOverlappingKeys );
 
-  // TODO: https://github.com/phetsims/scenery/issues/1570, This is a workaround for a problem with hotkeyManager
-  //   where it doesn't update the availableHotkeys when new input listeners are added. We can manually update by
-  //   triggering focus changes.
-  a.blur();
-  a.focus();
-
   triggerKeydownEvent( domElementA, KeyboardUtils.KEY_P, true );
   assert.ok( !pFired, 'p should not fire because control key is down' );
   assert.ok( ctrlPFired, 'ctrl P should have fired' );

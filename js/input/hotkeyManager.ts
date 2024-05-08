@@ -23,7 +23,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EnglishKey, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, scenery } from '../imports.js';
+import { EnglishKey, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, Node, scenery } from '../imports.js';
 import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/DerivedProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -211,6 +211,22 @@ class HotkeyManager {
         }
       }
     } );
+  }
+
+  /**
+   * Scenery-internal. If a Node along the focused trail changes its input listeners we need to manually recompute
+   * the available hotkeys. There is no other way at this time to observe the input listeners of a Node. Otherwise,
+   * the available hotkeys will be recomputed when focus changes, inputEnabledProperty changes for Nodes along the
+   * trail, or when global hotkeys change.
+   *
+   * Called by Node.addInputListener/Node.removeInputListener.
+   *
+   * (scenery-internal)
+   */
+  public updateHotkeysFromInputListenerChange( node: Node ): void {
+    if ( FocusManager.pdomFocusProperty.value && FocusManager.pdomFocusProperty.value.trail.nodes.includes( node ) ) {
+      this.availableHotkeysProperty.recomputeDerivation();
+    }
   }
 
   /**

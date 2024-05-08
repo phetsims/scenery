@@ -170,7 +170,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, Image, ImageOptions, Instance, isHeightSizable, isWidthSizable, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, TInputListener, TLayoutOptions, Trail, WebGLSelfDrawable } from '../imports.js';
+import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, hotkeyManager, Image, ImageOptions, Instance, isHeightSizable, isWidthSizable, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, TInputListener, TLayoutOptions, Trail, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -2333,6 +2333,12 @@ class Node extends ParallelDOM {
       this._inputListeners.push( listener );
       this._picker.onAddInputListener();
       if ( assertSlow ) { this._picker.audit(); }
+
+      // If the listener contains hotkeys, active hotkeys may need to be updated. There is no event
+      // for changing input listeners. See hotkeyManager for more information.
+      if ( listener.hotkeys ) {
+        hotkeyManager.updateHotkeysFromInputListenerChange( this );
+      }
     }
     return this;
   }
@@ -2349,6 +2355,12 @@ class Node extends ParallelDOM {
       this._inputListeners.splice( index, 1 );
       this._picker.onRemoveInputListener();
       if ( assertSlow ) { this._picker.audit(); }
+
+      // If the listener contains hotkeys, active hotkeys may need to be updated. There is no event
+      // for changing input listeners. See hotkeyManager for more information.
+      if ( listener.hotkeys ) {
+        hotkeyManager.updateHotkeysFromInputListenerChange( this );
+      }
     }
 
     return this;
