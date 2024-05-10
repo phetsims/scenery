@@ -128,15 +128,27 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
      *
      * (scenery-internal)
      */
-    public override setConfigToInherit(): void {
-      this._xAlign = null;
-      this._yAlign = null;
-      this._xStretch = null;
-      this._yStretch = null;
-      this._xGrow = null;
-      this._yGrow = null;
+    public override setConfigToInherit( ignoreOptions?: GridConfigurableOptions ): void {
+      if ( !ignoreOptions || ignoreOptions.xAlign === undefined ) {
+        this._xAlign = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.yAlign === undefined ) {
+        this._yAlign = null;
+      }
+      if ( !ignoreOptions || ( ignoreOptions.stretch === undefined && ignoreOptions.xStretch === undefined ) ) {
+        this._xStretch = null;
+      }
+      if ( !ignoreOptions || ( ignoreOptions.stretch === undefined && ignoreOptions.yStretch === undefined ) ) {
+        this._yStretch = null;
+      }
+      if ( !ignoreOptions || ( ignoreOptions.grow === undefined && ignoreOptions.xGrow === undefined ) ) {
+        this._xGrow = null;
+      }
+      if ( !ignoreOptions || ( ignoreOptions.grow === undefined && ignoreOptions.yGrow === undefined ) ) {
+        this._yGrow = null;
+      }
 
-      super.setConfigToInherit();
+      super.setConfigToInherit( ignoreOptions );
     }
 
     /**

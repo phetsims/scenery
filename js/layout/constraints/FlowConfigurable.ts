@@ -140,12 +140,18 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( Type: SuperTy
      *
      * (scenery-internal)
      */
-    public override setConfigToInherit(): void {
-      this._align = null;
-      this._stretch = null;
-      this._grow = null;
+    public override setConfigToInherit( ignoreOptions?: FlowConfigurableOptions ): void {
+      if ( !ignoreOptions || ignoreOptions.align === undefined ) {
+        this._align = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.stretch === undefined ) {
+        this._stretch = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.grow === undefined ) {
+        this._grow = null;
+      }
 
-      super.setConfigToInherit();
+      super.setConfigToInherit( ignoreOptions );
     }
 
     /**

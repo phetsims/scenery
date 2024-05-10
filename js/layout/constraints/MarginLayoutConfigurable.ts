@@ -80,7 +80,7 @@ export type TMarginLayoutConfigurable = {
   readonly changedEmitter: TEmitter;
   mutateConfigurable( options?: MarginLayoutConfigurableOptions ): void;
   setConfigToBaseDefault(): void;
-  setConfigToInherit(): void;
+  setConfigToInherit( ignoreOptions?: MarginLayoutConfigurableOptions ): void;
   leftMargin: number | null;
   rightMargin: number | null;
   topMargin: number | null;
@@ -159,17 +159,36 @@ const MarginLayoutConfigurable = memoize( <SuperType extends Constructor>( Type:
      * These should be the default values for cells (e.g. "take all the behavior from the constraint, nothing is
      * overridden").
      *
+     * NOTE: If ignoreOptions is provided, we will omit setting any values for keys that are defined in the ignoreOptions.
+     * This allows us to avoid resetting values that we are just about to set to another value.
+     *
      * (scenery-internal)
      */
-    public setConfigToInherit(): void {
-      this._leftMargin = null;
-      this._rightMargin = null;
-      this._topMargin = null;
-      this._bottomMargin = null;
-      this._minContentWidth = null;
-      this._minContentHeight = null;
-      this._maxContentWidth = null;
-      this._maxContentHeight = null;
+    public setConfigToInherit( ignoreOptions?: MarginLayoutConfigurableOptions ): void {
+      if ( !ignoreOptions || ignoreOptions.leftMargin === undefined ) {
+        this._leftMargin = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.rightMargin === undefined ) {
+        this._rightMargin = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.topMargin === undefined ) {
+        this._topMargin = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.bottomMargin === undefined ) {
+        this._bottomMargin = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.minContentWidth === undefined ) {
+        this._minContentWidth = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.minContentHeight === undefined ) {
+        this._minContentHeight = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.maxContentWidth === undefined ) {
+        this._maxContentWidth = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.maxContentHeight === undefined ) {
+        this._maxContentHeight = null;
+      }
 
       this.changedEmitter.emit();
     }

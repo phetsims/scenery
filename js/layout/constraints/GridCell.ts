@@ -151,7 +151,9 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     assert && assert( typeof options.horizontalSpan === 'number' && Number.isInteger( options.horizontalSpan ) && isFinite( options.horizontalSpan ) && options.horizontalSpan >= 1 );
     assert && assert( typeof options.verticalSpan === 'number' && Number.isInteger( options.verticalSpan ) && isFinite( options.verticalSpan ) && options.verticalSpan >= 1 );
 
-    this.setConfigToInherit();
+    // Clear options that are not provided in the mutate options (but if they are present, do NOT clear, so we avoid
+    // more potential for infinite loops)
+    this.setConfigToInherit( options );
 
     this.position = new OrientationPair( options.column, options.row );
     this.size = new OrientationPair( options.horizontalSpan, options.verticalSpan );

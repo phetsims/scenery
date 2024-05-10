@@ -77,7 +77,10 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
 
     this._isSeparator = options.isSeparator;
 
-    this.setConfigToInherit();
+    // Clear options that are not provided in the mutate options (but if they are present, do NOT clear, so we avoid
+    // more potential for infinite loops)
+    this.setConfigToInherit( options );
+
     this.mutateConfigurable( options );
   }
 }
