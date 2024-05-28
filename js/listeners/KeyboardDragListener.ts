@@ -600,7 +600,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       // doesn't play a 'bonk' sound every arrow key press.
       domEvent.preventDefault();
 
-      // Cannot attach a listener to a Pointer that is already attached.
+      // Cannot attach a listener to a Pointer that is already attached
       if ( this.startNextKeyboardEvent && !event.pointer.isAttached() ) {
 
         // If there are no movement keys down, attach a listener to the Pointer that will tell the AnimatedPanZoomListener
@@ -613,7 +613,10 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
         this.startNextKeyboardEvent = false;
       }
 
-      if ( this.restartTimerNextKeyboardEvent ) {
+      // If the drag is already started, restart the callback timer on the next keydown event. The Pointer must
+      // be attached to this._pointerListener (already dragging) and not another listener (keyboard is interacting
+      // with another target).
+      if ( this.restartTimerNextKeyboardEvent && event.pointer.attachedListener === this._pointerListener ) {
 
         // restart the callback timer
         this.callbackTimer.stop( false );
