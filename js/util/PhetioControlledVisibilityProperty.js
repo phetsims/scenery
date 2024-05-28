@@ -28,7 +28,8 @@ class PhetioControlledVisibilityProperty extends DerivedProperty {
     // We'll create an instrumented BooleanProperty that, when toggled to false, will hide the node regardless of
     // what the derivation would return.
     const visibleProperty = new BooleanProperty( true, {
-      tandem: options.nodeTandem.createTandem( 'visibleProperty' )
+      tandem: options.nodeTandem.createTandem( 'visibleProperty' ),
+      phetioFeatured: true
     } );
 
     super( [ visibleProperty, ...dependencies ], ( visible, ...args ) => visible && derivation( ...args ) );
