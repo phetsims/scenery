@@ -1,4 +1,4 @@
-// Copyright 2021, University of Colorado Boulder
+// Copyright 2021-2024, University of Colorado Boulder
 
 /**
  * An enhanced DerivedProperty to be used as a visibilityProperty to a Node when phet-io needs to be able to
