@@ -125,6 +125,9 @@ type SelfOptions = {
   //   mapPosition: function( point ) { return dragBoundsProperty.value.closestPointTo( point ); }
   mapPosition?: MapPosition | null;
 
+  // If true, the effective target Node will be translated when the drag operation occurs.
+  translateNode?: boolean;
+
   // Called when keyboard drag is started (on initial press).
   start?: ( ( event: SceneryEvent, listener: KeyboardDragListener ) => void ) | null;
 
@@ -161,6 +164,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   private readonly _end: ( ( event: SceneryEvent | null, listener: KeyboardDragListener ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private readonly _mapPosition: MapPosition | null;
+  private readonly _translateNode: boolean;
   private _transform: Transform3 | TReadOnlyProperty<Transform3> | null;
   private readonly _positionProperty: Pick<TProperty<Vector2>, 'value'> | null;
   private _dragSpeed: number;
@@ -234,6 +238,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       transform: null,
       dragBoundsProperty: null,
       mapPosition: null,
+      translateNode: false,
       start: null,
       drag: null,
       end: null,
@@ -277,6 +282,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     this._end = options.end;
     this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
     this._mapPosition = options.mapPosition;
+    this._translateNode = options.translateNode;
     this._transform = options.transform;
     this._positionProperty = options.positionProperty;
     this._dragSpeed = options.dragSpeed;
@@ -309,6 +315,12 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     // PhET-iO clients.
     this.dragAction = new PhetioAction( () => {
       assert && assert( this.isPressedProperty.value, 'The listener should not be dragging if not pressed' );
+
+      if ( this._translateNode ) {
+        let newPosition = this.getCurrentTarget().translation.plus( this.vectorDelta );
+        newPosition = this.mapModelPoint( newPosition );
+        this.getCurrentTarget().translation = newPosition;
+      }
 
       // synchronize with model position
       if ( this._positionProperty ) {
