@@ -78,25 +78,25 @@ type MapPosition = ( point: Vector2 ) => Vector2;
 
 type SelfOptions = {
 
-  // How much the position Property will change in view coordinates every moveOnHoldInterval. Object will
+  // How much the position Property will change in view (parent) coordinates every moveOnHoldInterval. Object will
   // move in discrete steps at this interval. If you would like smoother "animated" motion use dragSpeed
   // instead. dragDelta produces a UX that is more typical for applications but dragSpeed is better for video
   // game-like components. dragDelta and dragSpeed are mutually exclusive options.
   dragDelta?: number;
 
-  // How much the PositionProperty will change in view coordinates every moveOnHoldInterval while the shift modifier
+  // How much the PositionProperty will change in view (parent) coordinates every moveOnHoldInterval while the shift modifier
   // key is pressed. Shift modifier should produce more fine-grained motion so this value needs to be less than
   // dragDelta if provided. Object will move in discrete steps. If you would like smoother "animated" motion use
   // dragSpeed options instead. dragDelta options produce a UX that is more typical for applications but dragSpeed
   // is better for game-like components. dragDelta and dragSpeed are mutually exclusive options.
   shiftDragDelta?: number;
 
-  // While a direction key is held down, the target will move by this amount in view coordinates every second.
+  // While a direction key is held down, the target will move by this amount in view (parent) coordinates every second.
   // This is an alternative way to control motion with keyboard than dragDelta and produces smoother motion for
   // the object. dragSpeed and dragDelta options are mutually exclusive. See dragDelta for more information.
   dragSpeed?: number;
 
-  // While a direction key is held down with the shift modifier key, the target will move by this amount in view
+  // While a direction key is held down with the shift modifier key, the target will move by this amount in parent view
   // coordinates every second. Shift modifier should produce more fine-grained motion so this value needs to be less
   // than dragSpeed if provided. This is an alternative way to control motion with keyboard than dragDelta and
   // produces smoother motion for the object. dragSpeed and dragDelta options are mutually exclusive. See dragDelta
@@ -131,12 +131,11 @@ type SelfOptions = {
   // Called when keyboard drag is started (on initial press).
   start?: ( ( event: SceneryEvent, listener: KeyboardDragListener ) => void ) | null;
 
-  // Called during drag. If providedOptions.transform is provided, vectorDelta will be in model coordinates.
-  // Otherwise, it will be in view coordinates. Note that this does not provide the SceneryEvent. Dragging
-  // happens during animation (as long as keys are down), so there is no event associated with the drag.
+  // Called during drag. If providedOptions.transform is provided, modelDelta will be in model coordinates.
+  // Otherwise, it will be in parent view coordinates.
   drag?: ( ( event: SceneryEvent, listener: KeyboardDragListener ) => void ) | null;
 
-  // Called when keyboard dragging ends.
+  // Called when keyboard dragging ends. The event may be null in cases of interruption.
   end?: ( ( event: SceneryEvent | null, listener: KeyboardDragListener ) => void ) | null;
 
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
@@ -209,9 +208,14 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   // dragSpeed and dragDelta for more information.
   private readonly useDragSpeed: boolean;
 
-  // The vector delta that is used to move the object during a drag operation. Assigned to the listener so that
-  // it is usable in the drag callback.
-  public vectorDelta: Vector2 = new Vector2( 0, 0 );
+  // The vector delta in model coordinates that is used to move the object during a drag operation.
+  public modelDelta: Vector2 = new Vector2( 0, 0 );
+
+  // The current drag point in the model coordinate frame.
+  public modelPoint: Vector2 = new Vector2( 0, 0 );
+
+  // The proposed delta in model coordinates, before mapping or other constraints are applied.
+  private vectorDelta: Vector2 = new Vector2( 0, 0 );
 
   // The callback timer that is used to move the object during a drag operation to support animated motion and
   // motion every moveOnHoldInterval.
@@ -223,8 +227,16 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     assert && assertMutuallyExclusiveOptions( providedOptions, [ 'dragSpeed', 'shiftDragSpeed' ], [ 'dragDelta', 'shiftDragDelta' ] );
 
     // 'move on hold' timings are only relevant for 'delta' implementations of dragging
-    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'dragSpeed' ], [ 'moveOnHoldDelay', 'moveOnHOldInterval' ] );
+    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'dragSpeed' ], [ 'moveOnHoldDelay', 'moveOnHoldInterval' ] );
     assert && assertMutuallyExclusiveOptions( providedOptions, [ 'mapPosition' ], [ 'dragBoundsProperty' ] );
+
+    // If you provide a dragBoundsProperty, you must provide either a positionProperty or use translateNode.
+    // KeyboardDragListener operates on deltas and without translating the Node or using a positionProperty there
+    // is no way to know where the drag target is or how to constrain it in the drag bounds.
+    assert && assert( !providedOptions ||
+                      !providedOptions.dragBoundsProperty ||
+                      providedOptions.positionProperty || providedOptions.translateNode,
+      'If you provide a dragBoundsProperty, you must provide either a positionProperty or use translateNode.' );
 
     const options = optionize<KeyboardDragListenerOptions, SelfOptions, ParentOptions>()( {
 
@@ -309,23 +321,37 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       phetioEventType: EventType.USER
     } );
 
-    // The drag action only executes when there is actual movement (vectorDelta is non-zero). For example, it does
+    // The drag action only executes when there is actual movement (modelDelta is non-zero). For example, it does
     // NOT execute if conflicting keys are pressed (e.g. left and right arrow keys at the same time). Note that this
     // is expected to be executed from the CallbackTimer. So there will be problems if this can be executed from
     // PhET-iO clients.
     this.dragAction = new PhetioAction( () => {
       assert && assert( this.isPressedProperty.value, 'The listener should not be dragging if not pressed' );
 
+      // Convert the proposed delta to model coordinates
+      if ( options.transform ) {
+        const transform = options.transform instanceof Transform3 ? options.transform : options.transform.value;
+        this.modelDelta = transform.inverseDelta2( this.vectorDelta );
+      }
+      else {
+        this.modelDelta = this.vectorDelta;
+      }
+
+      // Apply translation to the view coordinate frame.
       if ( this._translateNode ) {
         let newPosition = this.getCurrentTarget().translation.plus( this.vectorDelta );
         newPosition = this.mapModelPoint( newPosition );
         this.getCurrentTarget().translation = newPosition;
+
+        this.modelPoint = this.parentToModelPoint( newPosition );
       }
 
-      // synchronize with model position
+      // Synchronize with model position.
       if ( this._positionProperty ) {
-        let newPosition = this._positionProperty.value.plus( this.vectorDelta );
+        let newPosition = this._positionProperty.value.plus( this.modelDelta );
         newPosition = this.mapModelPoint( newPosition );
+
+        this.modelPoint = newPosition;
 
         // update the position if it is different
         if ( !newPosition.equals( this._positionProperty.value ) ) {
@@ -379,8 +405,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
 
     this.callbackTimer = new CallbackTimer( {
       delay: delay,
-      interval: interval,
-
       callback: () => {
 
         let deltaX = 0;
@@ -412,21 +436,16 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
           deltaY += delta;
         }
 
-        let vectorDelta = new Vector2( deltaX, deltaY );
+        const vectorDelta = new Vector2( deltaX, deltaY );
 
         // only initiate move if there was some attempted keyboard drag
         if ( !vectorDelta.equals( Vector2.ZERO ) ) {
-
-          // to model coordinates
-          if ( options.transform ) {
-            const transform = options.transform instanceof Transform3 ? options.transform : options.transform.value;
-            vectorDelta = transform.inverseDelta2( vectorDelta );
-          }
-
           this.vectorDelta = vectorDelta;
           this.dragAction.execute();
         }
-      }
+      },
+
+      interval: interval
     } );
 
     // When any of the movement keys first go down, start the drag operation on the next keydown event (so that
@@ -471,6 +490,22 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
 
       this.callbackTimer.dispose();
     };
+  }
+
+  /**
+   * Convert a point in the view (parent) coordinate frame to the model coordinate frame.
+   */
+  private parentToModelPoint( parentPoint: Vector2 ): Vector2 {
+    if ( this.transform ) {
+      const transform = this.transform instanceof Transform3 ? this.transform : this.transform.value;
+      return transform.inverseDelta2( parentPoint );
+    }
+    return parentPoint;
+  }
+
+  private localToParentPoint( localPoint: Vector2 ): Vector2 {
+    const target = this.getCurrentTarget();
+    return target.localToParentPoint( localPoint );
   }
 
   /**
