@@ -461,7 +461,9 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
         this.startNextKeyboardEvent = false;
         this.restartTimerNextKeyboardEvent = false;
 
-        this.dragEndAction.execute();
+        if ( this.isDragging() ) {
+          this.dragEndAction.execute();
+        }
       }
     } );
 
@@ -613,6 +615,14 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   }
 
   /**
+   * Returns true when this listener is currently dragging. The pointer must be assigned (drag started) and it
+   * must be attached to this _pointerListener (otherwise it is interacting with another target).
+   */
+  private isDragging(): boolean {
+    return !!this._pointer && this._pointer.attachedListener === this._pointerListener;
+  }
+
+  /**
    * Scenery internal. Part of the events API. Do not call directly.
    *
    * Does specific work for the keydown event. This is called during scenery event dispatch, and AFTER any global
@@ -663,7 +673,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       // If the drag is already started, restart the callback timer on the next keydown event. The Pointer must
       // be attached to this._pointerListener (already dragging) and not another listener (keyboard is interacting
       // with another target).
-      if ( this.restartTimerNextKeyboardEvent && event.pointer.attachedListener === this._pointerListener ) {
+      if ( this.restartTimerNextKeyboardEvent && this.isDragging() ) {
 
         // restart the callback timer
         this.callbackTimer.stop( false );
