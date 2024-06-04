@@ -27,9 +27,6 @@ SceneryStyle.addRule( `.${SIBLING_CLASS_NAME
                       // in PDOMPeer.positionElements
                       'position: fixed;' +
 
-                      // ABSOLUTELY CRITICAL - so PDOM elements do not interfere with rest of scenery input
-                      'pointer-events: none;' +
-
                       // default, to the 'relative' root PDOM element - will change with node transform if focusable
                       'top: 0px;' +
                       'left: 0px;' +
@@ -64,6 +61,9 @@ SceneryStyle.addRule( `.${ROOT_CLASS_NAME
                       }{` +
                       // so that this root can also be positioned
                       'position: absolute;' +
+
+                      // ABSOLUTELY CRITICAL - so PDOM elements do not interfere with rest of scenery input
+                      'pointer-events: none;' +
 
                       // 'fixed' positioned elements interfere with workarounds that are meant to prevent Safari from going to sleep
                       // when the browser is left inactive for a few minutes. This z-index keeps the PDOM from interfering, while still
