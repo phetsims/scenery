@@ -821,15 +821,11 @@ class PDOMPeer {
   }
 
   /**
-   * Focus the primary sibling of the peer.
+   * Focus the primary sibling of the peer. If this peer is not visible, this is a no-op (native behavior).
    * @public (scenery-internal)
    */
   focus() {
     assert && assert( this._primarySibling, 'must have a primary sibling to focus' );
-
-    // We do not support manually calling focus on an invisible HTML element, see https://github.com/phetsims/scenery/issues/1290
-    // TODO: support this in https://github.com/phetsims/scenery/issues/1290
-    // assert && assert( this.isVisible(), 'cannot focus() an invisible element' );
 
     // We do not want to steal focus from any parent application. For example, if this element is in an iframe.
     // See https://github.com/phetsims/joist/issues/897.
