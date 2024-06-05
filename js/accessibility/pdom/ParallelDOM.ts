@@ -2219,8 +2219,29 @@ export default class ParallelDOM extends PhetioObject {
     } );
     assert && pdomOrder && assert( ( this as unknown as Node ).getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
 
+    // First a comparison to see if the order is switching to or from null
+    let changed = ( this._pdomOrder === null && pdomOrder !== null ) ||
+                  ( this._pdomOrder !== null && pdomOrder === null );
+
+    if ( !changed && pdomOrder && this._pdomOrder ) {
+
+      // We are comparing two arrays, so need to check contents for differences.
+      changed = pdomOrder.length !== this._pdomOrder.length;
+
+      if ( !changed ) {
+
+        // Lengths are the same, so we need to look for content or order differences.
+        for ( let i = 0; i < pdomOrder.length; i++ ) {
+          if ( pdomOrder[ i ] !== this._pdomOrder[ i ] ) {
+            changed = true;
+            break;
+          }
+        }
+      }
+    }
+
     // Only update if it has changed
-    if ( this._pdomOrder !== pdomOrder ) {
+    if ( changed ) {
       const oldPDOMOrder = this._pdomOrder;
 
       // Store our own reference to this, so client modifications to the input array won't silently break things.

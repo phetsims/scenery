@@ -350,6 +350,61 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
 
 } );
 
+QUnit.test( 'pdomOrder tests', assert => {
+
+  // test the behavior of swapVisibility function
+  const rootNode = new Node( { tagName: 'div' } );
+  var display = new Display( rootNode ); // eslint-disable-line no-var
+  document.body.appendChild( display.domElement );
+
+  const firstChild = new Node( { tagName: 'div' } );
+  const a = new Node( { tagName: 'button' } );
+  const b = new Node( { tagName: 'button' } );
+  const c = new Node( { tagName: 'button' } );
+  const d = new Node( { tagName: 'button' } );
+
+  const arraysEqual = ( a: ( Node | null )[], b: ( Node | null )[] ) => {
+    return a.length === b.length && a.every( ( value, index ) => value === b[ index ] );
+  };
+
+  rootNode.addChild( firstChild );
+  firstChild.children = [ a, b, c, d ];
+
+  // pdomOrder is initially null
+  assert.ok( a.pdomOrder === null, 'pdomOrder is initially null' );
+
+  const firstOrder = [ c, a, d, b ];
+
+  // set the pdomOrder
+  firstChild.pdomOrder = firstOrder;
+  assert.ok( arraysEqual( firstChild.pdomOrder, firstOrder ), 'pdomOrder is set correctly' );
+
+  // New order should be applied
+  const secondOrder = [ a, b, c, d ];
+  firstChild.pdomOrder = secondOrder;
+  assert.ok( arraysEqual( firstChild.pdomOrder, secondOrder ), 'pdomOrder is set correctly' );
+
+  // Try providing the same instance of an array to pdomOrder
+  const thirdOrder = firstChild.pdomOrder;
+  const e = new Node( { tagName: 'button' } );
+  thirdOrder.splice( 1, 0, e );
+  firstChild.pdomOrder = thirdOrder;
+  assert.ok( arraysEqual( firstChild.pdomOrder, thirdOrder ), 'pdomOrder is set correctly' );
+
+  // Try removing an element from the pdomOrder
+  const fourthOrder = firstChild.pdomOrder.splice( 1, 1 );
+  firstChild.pdomOrder = fourthOrder;
+  assert.ok( arraysEqual( firstChild.pdomOrder, fourthOrder ), 'pdomOrder is set correctly' );
+
+  // Clear the pdomOrder
+  firstChild.pdomOrder = null;
+  assert.ok( firstChild.pdomOrder === null, 'pdomOrder is cleared' );
+
+  // Done with this test, clean up
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
 QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
 
   // test the behavior of swapVisibility function
