@@ -2239,8 +2239,8 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Returns the pdom (focus) order for this node.
-   * If there is an existing array, this returns a copy of that array. This is important because clients may then
-   * modify the array, and call setPDOMOrder - which is a no-op unless the array reference is different.
+   *
+   * Making changes to the returned array will not affect this Node's order. It returns a defensive copy.
    */
   public getPDOMOrder(): ( Node | null )[] | null {
     if ( this._pdomOrder ) {
