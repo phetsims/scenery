@@ -370,6 +370,10 @@ QUnit.test( 'pdomOrder tests', assert => {
   rootNode.addChild( firstChild );
   firstChild.children = [ a, b, c, d ];
 
+  //------------------------------------------------------------------
+  // Basic setter/getter tests
+  //------------------------------------------------------------------
+
   // pdomOrder is initially null
   assert.ok( a.pdomOrder === null, 'pdomOrder is initially null' );
 
@@ -400,7 +404,43 @@ QUnit.test( 'pdomOrder tests', assert => {
   firstChild.pdomOrder = null;
   assert.ok( firstChild.pdomOrder === null, 'pdomOrder is cleared' );
 
-  // Done with this test, clean up
+  //------------------------------------------------------------------
+  // disposing a Node should remove it from any pdomOrder
+  //------------------------------------------------------------------
+  // These Nodes are named based on their place in pdomOrder - all will be children of firstChild
+  const parent = new Node();
+  const child1 = new Node();
+  const child2 = new Node();
+  const grandchild1 = new Node();
+  const grandchild2 = new Node();
+  firstChild.children = [ parent, child1, child2, grandchild1, grandchild2 ];
+
+  // Setup nested pdomOrders
+  parent.pdomOrder = [ child1, child2 ];
+  child1.pdomOrder = [ grandchild1 ];
+  child2.pdomOrder = [ grandchild2 ];
+
+  // Verify initial pdomOrder setup
+  assert.ok( arraysEqual( parent.pdomOrder, [ child1, child2 ] ), 'parent pdomOrder is set correctly' );
+  assert.ok( arraysEqual( child1.pdomOrder, [ grandchild1 ] ), 'child1 pdomOrder is set correctly' );
+  assert.ok( arraysEqual( child2.pdomOrder, [ grandchild2 ] ), 'child2 pdomOrder is set correctly' );
+
+  // Dispose a grandchild and verify changes propagate correctly
+  grandchild1.dispose();
+  assert.ok( arraysEqual( child1.pdomOrder, [] ), 'child1 pdomOrder is updated when grandchild1 is disposed' );
+  assert.ok( arraysEqual( parent.pdomOrder, [ child1, child2 ] ), 'parent pdomOrder remains unchanged when grandchild1 is disposed' );
+
+  // Dispose a child and verify changes propagate to parent
+  child2.dispose();
+  assert.ok( arraysEqual( parent.pdomOrder, [ child1 ] ), 'parent pdomOrder is updated when child2 is disposed' );
+
+  // Dispose the remaining child to check the parent pdomOrder
+  child1.dispose();
+  assert.ok( arraysEqual( parent.pdomOrder, [] ), 'parent pdomOrder is empty when both children are disposed' );
+
+  //------------------------------------------------------------------
+  // Done with this tests, clean up
+  //------------------------------------------------------------------
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
