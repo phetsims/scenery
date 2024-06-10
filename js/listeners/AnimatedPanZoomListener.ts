@@ -1403,6 +1403,12 @@ class Wheel {
       translationY = translationY * 25;
     }
 
+    // Rotate the translation vector by 90 degrees if shift is held. This is a common behavior in many applications,
+    // particularly in Chrome.
+    if ( domEvent.shiftKey ) {
+      [ translationX, translationY ] = [ translationY, -translationX ];
+    }
+
     this.translationVector = scratchTranslationVector.setXY( translationX * targetScale, translationY * targetScale );
   }
 }
