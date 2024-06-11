@@ -2229,6 +2229,7 @@ export default class ParallelDOM extends PhetioObject {
           `Elements of pdomOrder should be either a Node or null. Element at index ${index} is: ${node}` );
       } );
       assert && assert( ( this as unknown as Node ).getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
+      assert && assert( pdomOrder.length === _.uniq( pdomOrder ).length, 'pdomOrder does not allow duplicate Nodes' );
     }
 
     // First a comparison to see if the order is switching to or from null
