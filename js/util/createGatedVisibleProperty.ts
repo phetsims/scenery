@@ -7,7 +7,6 @@
  * such as a studio or a PhET-iO client.
  *
  * @author Marla Schulz (PhET Interactive Simulations)
- *
  */
 
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -19,14 +18,25 @@ import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import { scenery } from '../imports.js';
 
-const createGatedVisibleProperty = ( visibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, selfVisiblePropertyOptions?: PhetioObjectOptions ): TReadOnlyProperty<boolean> => {
-  return DerivedProperty.and( [ visibleProperty, new BooleanProperty( true, combineOptions<PhetioObjectOptions>( {
+// TODO: Should be a class instead of a function, https://github.com/phetsims/buoyancy/issues/86
+const createGatedVisibleProperty = ( providedVisibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, selfVisiblePropertyOptions?: PhetioObjectOptions ): TReadOnlyProperty<boolean> => {
+
+  const selfVisibleProperty = new BooleanProperty( true, combineOptions<PhetioObjectOptions>( {
     tandem: tandem.createTandem( 'selfVisibleProperty' ),
-    phetioFeatured: true
-  }, selfVisiblePropertyOptions ) ) ], {
+    phetioFeatured: true,
+    phetioDocumentation: 'Provides an additional way to toggle the visibility for the PhET-iO Element.'
+  }, selfVisiblePropertyOptions ) );
+
+  const visibleProperty = DerivedProperty.and( [ providedVisibleProperty, selfVisibleProperty ], {
     tandem: tandem.createTandem( 'visibleProperty' ),
-    phetioValueType: BooleanIO
+    phetioValueType: BooleanIO,
+    phetioDocumentation: `Whether the PhET-iO Element is visible, see ${selfVisibleProperty.tandem.name} for customization.`
   } );
+
+  // Remove the selfVisibleProperty from the PhET-iO registry
+  visibleProperty.disposeEmitter.addListener( () => selfVisibleProperty.dispose() );
+
+  return visibleProperty;
 };
 
 export default createGatedVisibleProperty;
