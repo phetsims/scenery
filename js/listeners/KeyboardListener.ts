@@ -168,11 +168,12 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   // A Property that is true when any of the keys
   public readonly isPressedProperty: TReadOnlyProperty<boolean>;
 
-  // A Property that has the list of currenty pressed keys, from the keys array.
+  // A Property that has the list of currently pressed keys, from the keys array.
   public readonly pressedKeysProperty: TProperty<Array<Keys[number]>>;
 
   // (read-only) - Whether the last key press was interrupted. Will be valid until the next press.
   public interrupted: boolean;
+  private readonly enabledPropertyListener: ( enabled: boolean ) => void;
 
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
     const options = optionize<KeyboardListenerOptions<Keys>, KeyboardListenerSelfOptions<Keys>, EnabledComponentOptions>()( {
@@ -218,7 +219,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.pressedKeysProperty = new Property( [] );
     this.interrupted = false;
 
-    this.enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
+    this.enabledPropertyListener = this.onEnabledPropertyChange.bind( this );
+    this.enabledProperty.lazyLink( this.enabledPropertyListener );
   }
 
   /**
@@ -242,6 +244,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     ( this as unknown as TInputListener ).hotkeys!.forEach( hotkey => hotkey.dispose() );
     this.isPressedProperty.dispose();
     this.pressedKeysProperty.dispose();
+
+    this.enabledProperty.unlink( this.enabledPropertyListener );
+
     super.dispose();
   }
 
