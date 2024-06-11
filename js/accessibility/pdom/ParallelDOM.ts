@@ -2223,11 +2223,13 @@ export default class ParallelDOM extends PhetioObject {
   public setPDOMOrder( pdomOrder: ( Node | null )[] | null ): void {
     assert && assert( Array.isArray( pdomOrder ) || pdomOrder === null,
       `Array or null expected, received: ${pdomOrder}` );
-    assert && pdomOrder && pdomOrder.forEach( ( node, index ) => {
-      assert && assert( node === null || node instanceof Node,
-        `Elements of pdomOrder should be either a Node or null. Element at index ${index} is: ${node}` );
-    } );
-    assert && pdomOrder && assert( ( this as unknown as Node ).getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
+    if ( assert && pdomOrder ) {
+      pdomOrder.forEach( ( node, index ) => {
+        assert && assert( node === null || node instanceof Node,
+          `Elements of pdomOrder should be either a Node or null. Element at index ${index} is: ${node}` );
+      } );
+      assert && assert( ( this as unknown as Node ).getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
+    }
 
     // First a comparison to see if the order is switching to or from null
     let changed = ( this._pdomOrder === null && pdomOrder !== null ) ||
