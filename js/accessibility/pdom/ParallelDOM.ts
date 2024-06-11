@@ -700,10 +700,10 @@ export default class ParallelDOM extends PhetioObject {
     // If this Node is in any PDOM order, we need to remove it from the order of the other Node so there is
     // no reference to this Node.
     if ( this._pdomParent ) {
-      const pdomOrder = this._pdomParent._pdomOrder!;
-      assert && assert( pdomOrder, 'pdomParent should have a pdomOrder' );
-      arrayRemove( pdomOrder.slice(), this as unknown as Node );
-      this._pdomParent.pdomOrder = pdomOrder;
+      assert && assert( this._pdomParent._pdomOrder, 'pdomParent should have a pdomOrder' );
+      const updatedOrder = this._pdomParent._pdomOrder!.slice();
+      arrayRemove( updatedOrder, this as unknown as Node );
+      this._pdomParent.pdomOrder = updatedOrder;
     }
 
     // clear references to the pdomTransformSourceNode
