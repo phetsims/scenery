@@ -408,11 +408,11 @@ QUnit.test( 'pdomOrder tests', assert => {
   // disposing a Node should remove it from any pdomOrder
   //------------------------------------------------------------------
   // These Nodes are named based on their place in pdomOrder - all will be children of firstChild
-  const parent = new Node();
-  const child1 = new Node();
-  const child2 = new Node();
-  const grandchild1 = new Node();
-  const grandchild2 = new Node();
+  const parent = new Node( { tagName: 'div', labelContent: 'parent' } );
+  const child1 = new Node( { tagName: 'div', labelContent: 'child1' } );
+  const child2 = new Node( { tagName: 'div', labelContent: 'child2' } );
+  const grandchild1 = new Node( { tagName: 'div', labelContent: 'grandchild1' } );
+  const grandchild2 = new Node( { tagName: 'div', labelContent: 'grandchild2' } );
   firstChild.children = [ parent, child1, child2, grandchild1, grandchild2 ];
 
   // Setup nested pdomOrders
@@ -433,6 +433,8 @@ QUnit.test( 'pdomOrder tests', assert => {
   // Dispose a child and verify changes propagate to parent
   child2.dispose();
   assert.ok( arraysEqual( parent.pdomOrder, [ child1 ] ), 'parent pdomOrder is updated when child2 is disposed' );
+  const parentPeer = getPDOMPeerByNode( parent );
+  assert.ok( parentPeer.primarySibling!.children.length === 2, 'child2 was disposed, so only child1 label/primary are left' );
 
   // Dispose the remaining child to check the parent pdomOrder
   child1.dispose();
@@ -2086,7 +2088,8 @@ QUnit.test( 'Node.enabledProperty with PDOM', assert => {
   assert.ok( pdomNode.pdomInstances[ 0 ].peer!.primarySibling!.getAttribute( 'aria-disabled' ) === 'true', 'should be aria-disabled when disabled' );
   pdomNode.enabled = true;
   assert.ok( pdomNode.pdomInstances[ 0 ].peer!.primarySibling!.getAttribute( 'aria-disabled' ) === 'false', 'Actually set to false since it was previously disabled.' );
-  pdomNode.dispose;
+  pdomNode.dispose();
+  assert.ok( pdomNode.pdomInstances.length === 0, 'disposed nodes do not have a PDOM instance' );
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );

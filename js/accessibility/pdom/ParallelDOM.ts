@@ -142,6 +142,7 @@ import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioS
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
+import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -701,7 +702,8 @@ export default class ParallelDOM extends PhetioObject {
     if ( this._pdomParent ) {
       const pdomOrder = this._pdomParent._pdomOrder!;
       assert && assert( pdomOrder, 'pdomParent should have a pdomOrder' );
-      this._pdomParent.pdomOrder = pdomOrder.filter( node => node !== this as unknown as Node );
+      arrayRemove( pdomOrder.slice(), this as unknown as Node );
+      this._pdomParent.pdomOrder = pdomOrder;
     }
 
     // clear references to the pdomTransformSourceNode
