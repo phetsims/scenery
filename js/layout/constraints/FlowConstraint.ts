@@ -93,7 +93,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
       if ( cell._isSeparator ) {
         cell.node.visible = false;
       }
-      else if ( cell.node.visible && !cell.node.boundsProperty.value.isValid() ) {
+      else if ( cell.node.visible && cell.node.boundsProperty.value.isValid() ) {
         break;
       }
     }
@@ -107,7 +107,7 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         cell.node.visible = hasVisibleNonSeparator;
         hasVisibleNonSeparator = false;
       }
-      else if ( cell.node.visible && !cell.node.boundsProperty.value.isValid() ) {
+      else if ( cell.node.visible && cell.node.boundsProperty.value.isValid() ) {
         hasVisibleNonSeparator = true;
       }
     }
