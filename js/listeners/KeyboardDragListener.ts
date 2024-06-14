@@ -13,7 +13,7 @@
  *   if needed.
  * - Provides hooks for start, drag (movement), and end phases of a drag interaction through callback options.
  * - Includes support for drag bounds, restricting the draggable area within specified model coordinates.
- * - Utilizes a CallbackTimer for smooth, timed updates during drag operations, especially useful in continuous drag
+ * - Uses stepTimer for smooth, timed updates during drag operations, especially useful in continuous 'dragSpeed'
  *   mode.
  *
  * Usage:
@@ -57,6 +57,7 @@ import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import platform from '../../../phet-core/js/platform.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
@@ -221,6 +222,10 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   // motion every moveOnHoldInterval.
   private readonly callbackTimer: CallbackTimer;
 
+  // A listener bound to this that is added to the stepTimer to support dragSpeed implementations. Added and removed
+  // as drag starts/ends.
+  private readonly boundStepListener: ( ( dt: number ) => void );
+
   public constructor( providedOptions?: KeyboardDragListenerOptions ) {
 
     // Use either dragSpeed or dragDelta, cannot use both at the same time.
@@ -310,8 +315,10 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     this.dragStartAction = new PhetioAction( event => {
       this._start && this._start( event, this );
 
+      // If using dragSpeed, add the listener to the stepTimer to start animated dragging. For dragDelta, the
+      // callbackTimer is started every key press, see addStartCallbackTimerListener below.
       if ( this.useDragSpeed ) {
-        this.callbackTimer.start();
+        stepTimer.addListener( this.boundStepListener );
       }
     }, {
       parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
@@ -375,9 +382,12 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     } );
 
     this.dragEndAction = new PhetioAction( () => {
-
-      // stop the callback timer
-      this.callbackTimer.stop( false );
+      if ( this.useDragSpeed ) {
+        stepTimer.removeListener( this.boundStepListener );
+      }
+      else {
+        this.callbackTimer.stop( false );
+      }
 
       const syntheticEvent = this._pointer ? this.createSyntheticEvent( this._pointer ) : null;
       this._end && this._end( syntheticEvent, this );
@@ -398,55 +408,24 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
 
     this._pointer = null;
 
-    // For dragSpeed implementation, the CallbackTimer will fire every animation frame, so the interval is
-    // meant to work at 60 frames per second.
-    const interval = this.useDragSpeed ? 1000 / 60 : options.moveOnHoldInterval;
-    const delay = this.useDragSpeed ? 0 : options.moveOnHoldDelay;
-
+    // CallbackTimer will be used to support dragDelta callback intervals. It will be restarted whenever there is a
+    // new key press so that the object moves every time there is user input. It is stopped when all keys are released.
     this.callbackTimer = new CallbackTimer( {
-      delay: delay,
       callback: () => {
-
-        let deltaX = 0;
-        let deltaY = 0;
-
         const shiftKeyDown = globalKeyStateTracker.shiftKeyDown;
-
-        let delta: number;
-        if ( this.useDragSpeed ) {
-
-          // We know that CallbackTimer is going to fire at the interval so we can use that to get the dt.
-          const dt = interval / 1000; // the interval in seconds
-          delta = dt * ( shiftKeyDown ? options.shiftDragSpeed : options.dragSpeed );
-        }
-        else {
-          delta = shiftKeyDown ? options.shiftDragDelta : options.dragDelta;
-        }
-
-        if ( this.leftKeyDownProperty.value ) {
-          deltaX -= delta;
-        }
-        if ( this.rightKeyDownProperty.value ) {
-          deltaX += delta;
-        }
-        if ( this.upKeyDownProperty.value ) {
-          deltaY -= delta;
-        }
-        if ( this.downKeyDownProperty.value ) {
-          deltaY += delta;
-        }
-
-        const vectorDelta = new Vector2( deltaX, deltaY );
-
-        // only initiate move if there was some attempted keyboard drag
-        if ( !vectorDelta.equals( Vector2.ZERO ) ) {
-          this.vectorDelta = vectorDelta;
-          this.dragAction.execute();
-        }
+        const delta = shiftKeyDown ? options.shiftDragDelta : options.dragDelta;
+        this.moveFromDelta( delta );
       },
 
-      interval: interval
+      delay: options.moveOnHoldDelay,
+      interval: options.moveOnHoldInterval
     } );
+
+    // A listener is added to the stepTimer to support dragSpeed. Does not use CallbackTimer because CallbackTimer
+    // uses setInterval and may not be called every frame which results in choppy motion, see
+    // https://github.com/phetsims/scenery/issues/1638. It is added to the stepTimer when the drag starts and removed
+    // when the drag ends.
+    this.boundStepListener = this.stepForSpeed.bind( this );
 
     // When any of the movement keys first go down, start the drag operation on the next keydown event (so that
     // the SceneryEvent is available).
@@ -468,19 +447,19 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     } );
 
     // If not the shift key, the drag should start immediately in the direction of the newly pressed key instead
-    // of waiting for the next interval. Only important for !useDragSpeed.
+    // of waiting for the next interval. Only important for !useDragSpeed (using CallbackTimer).
     if ( !this.useDragSpeed ) {
-      const addStartTimerListener = ( keyProperty: TReadOnlyProperty<boolean> ) => {
+      const addStartCallbackTimerListener = ( keyProperty: TReadOnlyProperty<boolean> ) => {
         keyProperty.link( keyDown => {
           if ( keyDown ) {
             this.restartTimerNextKeyboardEvent = true;
           }
         } );
       };
-      addStartTimerListener( this.leftKeyDownProperty );
-      addStartTimerListener( this.rightKeyDownProperty );
-      addStartTimerListener( this.upKeyDownProperty );
-      addStartTimerListener( this.downKeyDownProperty );
+      addStartCallbackTimerListener( this.leftKeyDownProperty );
+      addStartCallbackTimerListener( this.rightKeyDownProperty );
+      addStartCallbackTimerListener( this.upKeyDownProperty );
+      addStartCallbackTimerListener( this.downKeyDownProperty );
     }
 
     this._disposeKeyboardDragListener = () => {
@@ -491,7 +470,52 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       this.downKeyDownProperty.dispose();
 
       this.callbackTimer.dispose();
+      if ( stepTimer.hasListener( this.boundStepListener ) ) {
+        stepTimer.removeListener( this.boundStepListener );
+      }
     };
+  }
+
+  /**
+   * Calculates a delta for movement from the time step. Only used for `dragSpeed`. This is bound and added to
+   * the stepTimer when dragging starts.
+   */
+  private stepForSpeed( dt: number ): void {
+    assert && assert( this.useDragSpeed, 'This method should only be called when using dragSpeed' );
+
+    const shiftKeyDown = globalKeyStateTracker.shiftKeyDown;
+    const delta = dt * ( shiftKeyDown ? this.shiftDragSpeed : this.dragSpeed );
+    this.moveFromDelta( delta );
+  }
+
+  /**
+   * Given a delta from dragSpeed or dragDelta, determine the direction of movement and move the object accordingly
+   * by using the dragAction.
+   */
+  private moveFromDelta( delta: number ): void {
+    let deltaX = 0;
+    let deltaY = 0;
+
+    if ( this.leftKeyDownProperty.value ) {
+      deltaX -= delta;
+    }
+    if ( this.rightKeyDownProperty.value ) {
+      deltaX += delta;
+    }
+    if ( this.upKeyDownProperty.value ) {
+      deltaY -= delta;
+    }
+    if ( this.downKeyDownProperty.value ) {
+      deltaY += delta;
+    }
+
+    const vectorDelta = new Vector2( deltaX, deltaY );
+
+    // only initiate move if there was some attempted keyboard drag
+    if ( !vectorDelta.equals( Vector2.ZERO ) ) {
+      this.vectorDelta = vectorDelta;
+      this.dragAction.execute();
+    }
   }
 
   /**
