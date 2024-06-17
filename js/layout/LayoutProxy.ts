@@ -18,6 +18,9 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import Pool from '../../../phet-core/js/Pool.js';
 import { HeightSizableNode, isHeightSizable, isWidthSizable, Node, scenery, Trail, WidthSizableNode } from '../imports.js';
 
+// For supporting general cases where you may layout a Node, or use in ManualConstraints.
+export type Layoutable = Node | LayoutProxy;
+
 export default class LayoutProxy {
 
   // Nulled out when disposed

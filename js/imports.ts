@@ -268,6 +268,7 @@ export type { VSeparatorOptions } from './layout/nodes/VSeparator.js';
 export { default as HSeparator } from './layout/nodes/HSeparator.js';
 export type { HSeparatorOptions } from './layout/nodes/HSeparator.js';
 export { default as LayoutProxy } from './layout/LayoutProxy.js';
+export type { Layoutable } from './layout/LayoutProxy.js';
 export { default as LayoutProxyProperty } from './layout/LayoutProxyProperty.js';
 export type { LayoutProxyPropertyOptions } from './layout/LayoutProxyProperty.js';
 export { default as LayoutConstraint } from './layout/constraints/LayoutConstraint.js';
