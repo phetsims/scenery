@@ -424,4 +424,3 @@ export type{ DisplayOptions } from './display/Display.js';
 
 export { default as IndexedNodeIO } from './nodes/IndexedNodeIO.js';
 export type { IndexedNodeIOParent } from './nodes/IndexedNodeIO.js';
-export { default as PhetioControlledVisibilityProperty } from './util/PhetioControlledVisibilityProperty.js';
