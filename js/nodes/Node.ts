@@ -1572,10 +1572,10 @@ class Node extends ParallelDOM {
     }
 
     if ( assert ) {
-      assert( this._originalBounds === this.boundsProperty._value, 'Reference for bounds changed!' );
-      assert( this._originalLocalBounds === this.localBoundsProperty._value, 'Reference for localBounds changed!' );
-      assert( this._originalSelfBounds === this.selfBoundsProperty._value, 'Reference for selfBounds changed!' );
-      assert( this._originalChildBounds === this.childBoundsProperty._value, 'Reference for childBounds changed!' );
+      assert( !this._originalBounds || this._originalBounds === this.boundsProperty._value, 'Reference for bounds changed!' );
+      assert( !this._originalLocalBounds || this._originalLocalBounds === this.localBoundsProperty._value, 'Reference for localBounds changed!' );
+      assert( !this._originalSelfBounds || this._originalSelfBounds === this.selfBoundsProperty._value, 'Reference for selfBounds changed!' );
+      assert( !this._originalChildBounds || this._originalChildBounds === this.childBoundsProperty._value, 'Reference for childBounds changed!' );
     }
 
     // double-check that all of our bounds handling has been accurate
