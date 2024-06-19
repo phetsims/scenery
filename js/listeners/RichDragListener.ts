@@ -89,15 +89,15 @@ type SelfOptions = {
 export type RichDragListenerOptions = SelfOptions;
 
 export default class RichDragListener implements TInputListener {
-  private readonly richPointerDragListener: DragListener;
-  private readonly richKeyboardDragListener: KeyboardDragListener;
+
+  // The DragListener and KeyboardDragListener that are composed to create this listener. Public so that you can
+  // add them to different Nodes if you need to, for cases where you need to access their properties directly,
+  // or if you only need one of the listeners.
+  public readonly dragListener: DragListener;
+  public readonly keyboardDragListener: KeyboardDragListener;
 
   // True if the listener is currently pressed (DragListener OR KeyboardDragListener).
   public readonly isPressedProperty: TReadOnlyProperty<boolean>;
-
-  // Properties for each of the pressed states of the DragListener and KeyboardDragListener.
-  public readonly keyboardListenerPressedProperty: TReadOnlyProperty<boolean>;
-  public readonly pointerListenerPressedProperty: TReadOnlyProperty<boolean>;
 
   // Implements TInputListener
   public readonly hotkeys: Hotkey[];
@@ -134,7 +134,7 @@ export default class RichDragListener implements TInputListener {
     const wrappedDragListenerStart = ( event: PressListenerEvent, listener: PressedDragListener ) => {
 
       // when the drag listener starts, interrupt the keyboard dragging
-      this.richKeyboardDragListener.interrupt();
+      this.keyboardDragListener.interrupt();
 
       options.start && options.start( event, listener );
       options.dragListenerOptions.start && options.dragListenerOptions.start( event, listener );
@@ -165,7 +165,7 @@ export default class RichDragListener implements TInputListener {
       }
     );
 
-    this.richPointerDragListener = new DragListener( dragListenerOptions );
+    this.dragListener = new DragListener( dragListenerOptions );
 
     //---------------------------------------------------------------------------------
     // Construct the KeyboardDragListener and combine its options.
@@ -173,7 +173,7 @@ export default class RichDragListener implements TInputListener {
     const wrappedKeyboardListenerStart = ( event: SceneryEvent, listener: KeyboardDragListener ) => {
 
       // when the drag listener starts, interrupt the pointer dragging
-      this.richPointerDragListener.interrupt();
+      this.dragListener.interrupt();
 
       options.start && options.start( event, listener );
       options.keyboardDragListenerOptions.start && options.keyboardDragListenerOptions.start( event, listener );
@@ -204,26 +204,24 @@ export default class RichDragListener implements TInputListener {
       }
     );
 
-    this.richKeyboardDragListener = new KeyboardDragListener( keyboardDragListenerOptions );
+    this.keyboardDragListener = new KeyboardDragListener( keyboardDragListenerOptions );
 
     // The hotkeys from the keyboard listener are assigned to this listener so that they are activated for Nodes
     // where this listener is added.
-    this.hotkeys = this.richKeyboardDragListener.hotkeys;
+    this.hotkeys = this.keyboardDragListener.hotkeys;
 
-    this.isPressedProperty = DerivedProperty.or( [ this.richPointerDragListener.isPressedProperty, this.richKeyboardDragListener.isPressedProperty ] );
-    this.keyboardListenerPressedProperty = this.richKeyboardDragListener.isPressedProperty;
-    this.pointerListenerPressedProperty = this.richPointerDragListener.isPressedProperty;
+    this.isPressedProperty = DerivedProperty.or( [ this.dragListener.isPressedProperty, this.keyboardDragListener.isPressedProperty ] );
   }
 
   public get isPressed(): boolean {
-    return this.richPointerDragListener.isPressed || this.richKeyboardDragListener.isPressed;
+    return this.dragListener.isPressed || this.keyboardDragListener.isPressed;
   }
 
   public dispose(): void {
     this.isPressedProperty.dispose();
 
-    this.richPointerDragListener.dispose();
-    this.richKeyboardDragListener.dispose();
+    this.dragListener.dispose();
+    this.keyboardDragListener.dispose();
   }
 
   /**
@@ -232,8 +230,8 @@ export default class RichDragListener implements TInputListener {
    * ********************************************************************
    */
   public interrupt(): void {
-    this.richPointerDragListener.interrupt();
-    this.richKeyboardDragListener.interrupt();
+    this.dragListener.interrupt();
+    this.keyboardDragListener.interrupt();
   }
 
   /**
@@ -242,19 +240,19 @@ export default class RichDragListener implements TInputListener {
    * ********************************************************************
    */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
-    this.richKeyboardDragListener.keydown( event );
+    this.keyboardDragListener.keydown( event );
   }
 
   public focusout( event: SceneryEvent ): void {
-    this.richKeyboardDragListener.focusout( event );
+    this.keyboardDragListener.focusout( event );
   }
 
   public focusin( event: SceneryEvent ): void {
-    this.richKeyboardDragListener.focusin( event );
+    this.keyboardDragListener.focusin( event );
   }
 
   public cancel(): void {
-    this.richKeyboardDragListener.cancel();
+    this.keyboardDragListener.cancel();
   }
 
   /**
@@ -263,59 +261,59 @@ export default class RichDragListener implements TInputListener {
    * ********************************************************************
    */
   public click( event: SceneryEvent<MouseEvent> ): void {
-    this.richPointerDragListener.click( event );
+    this.dragListener.click( event );
   }
 
   public touchenter( event: PressListenerEvent ): void {
-    this.richPointerDragListener.touchenter( event );
+    this.dragListener.touchenter( event );
   }
 
   public touchmove( event: PressListenerEvent ): void {
-    this.richPointerDragListener.touchmove( event );
+    this.dragListener.touchmove( event );
   }
 
   public focus( event: SceneryEvent<FocusEvent> ): void {
-    this.richPointerDragListener.focus( event );
+    this.dragListener.focus( event );
   }
 
   public blur(): void {
-    this.richPointerDragListener.blur();
+    this.dragListener.blur();
   }
 
   public down( event: PressListenerEvent ): void {
-    this.richPointerDragListener.down( event );
+    this.dragListener.down( event );
   }
 
   public up( event: PressListenerEvent ): void {
-    this.richPointerDragListener.up( event );
+    this.dragListener.up( event );
   }
 
   public enter( event: PressListenerEvent ): void {
-    this.richPointerDragListener.enter( event );
+    this.dragListener.enter( event );
   }
 
   public move( event: PressListenerEvent ): void {
-    this.richPointerDragListener.move( event );
+    this.dragListener.move( event );
   }
 
   public exit( event: PressListenerEvent ): void {
-    this.richPointerDragListener.exit( event );
+    this.dragListener.exit( event );
   }
 
   public pointerUp( event: PressListenerEvent ): void {
-    this.richPointerDragListener.pointerUp( event );
+    this.dragListener.pointerUp( event );
   }
 
   public pointerCancel( event: PressListenerEvent ): void {
-    this.richPointerDragListener.pointerCancel( event );
+    this.dragListener.pointerCancel( event );
   }
 
   public pointerMove( event: PressListenerEvent ): void {
-    this.richPointerDragListener.pointerMove( event );
+    this.dragListener.pointerMove( event );
   }
 
   public pointerInterrupt(): void {
-    this.richPointerDragListener.pointerInterrupt();
+    this.dragListener.pointerInterrupt();
   }
 }
 
