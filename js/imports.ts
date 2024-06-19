@@ -252,6 +252,8 @@ export type { KeyboardDragListenerOptions } from './listeners/KeyboardDragListen
 export type { OneKeyStroke } from './listeners/KeyboardListener.js';
 export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';
+export { default as RichDragListener } from './listeners/RichDragListener.js';
+export type { RichDragListenerOptions } from './listeners/RichDragListener.js';
 
 export { LayoutOrientationValues } from './layout/LayoutOrientation.js';
 export type { LayoutOrientation } from './layout/LayoutOrientation.js';
