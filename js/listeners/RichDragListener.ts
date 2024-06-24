@@ -2,7 +2,8 @@
 
 /**
  * A drag listener that supports both pointer and keyboard input. It is composed with a DragListener and a
- * KeyboardDragListener to support pointer input, alternative input, sounds, and other PhET-specific features.
+ * KeyboardDragListener to support pointer input and alternative input. In the future it can support other
+ * input modalities or PhET-specific features.
  *
  * Be sure to dispose of this listener when it is no longer needed.
  *
@@ -69,7 +70,7 @@ type SelfOptions = {
   dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
 
   // If provided, this allows custom mapping from the desired position (i.e. where the pointer is, or where the
-  // RichKeyboardListener will set the position) to the actual position that will be used.
+  // KeyboardDragListener will set the position) to the actual position that will be used.
   mapPosition?: null | ( ( point: Vector2 ) => Vector2 );
 
   // If true, the target Node will be translated during the drag operation.
@@ -170,7 +171,7 @@ export default class RichDragListener implements TInputListener {
     //---------------------------------------------------------------------------------
     // Construct the KeyboardDragListener and combine its options.
     //---------------------------------------------------------------------------------
-    const wrappedKeyboardListenerStart = ( event: SceneryEvent, listener: KeyboardDragListener ) => {
+    const wrappedKeyboardListenerStart = ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => {
 
       // when the drag listener starts, interrupt the pointer dragging
       this.dragListener.interrupt();
@@ -179,12 +180,12 @@ export default class RichDragListener implements TInputListener {
       options.keyboardDragListenerOptions.start && options.keyboardDragListenerOptions.start( event, listener );
     };
 
-    const wrappedKeyboardListenerDrag = ( event: SceneryEvent, listener: KeyboardDragListener ) => {
+    const wrappedKeyboardListenerDrag = ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => {
       options.drag && options.drag( event, listener );
       options.keyboardDragListenerOptions.drag && options.keyboardDragListenerOptions.drag( event, listener );
     };
 
-    const wrappedKeyboardListenerEnd = ( event: SceneryEvent | null, listener: KeyboardDragListener ) => {
+    const wrappedKeyboardListenerEnd = ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardDragListener ) => {
       options.end && options.end( event, listener );
       options.keyboardDragListenerOptions.end && options.keyboardDragListenerOptions.end( event, listener );
     };

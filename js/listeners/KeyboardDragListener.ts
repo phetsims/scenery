@@ -130,14 +130,14 @@ type SelfOptions = {
   translateNode?: boolean;
 
   // Called when keyboard drag is started (on initial press).
-  start?: ( ( event: SceneryEvent, listener: KeyboardDragListener ) => void ) | null;
+  start?: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
 
   // Called during drag. If providedOptions.transform is provided, modelDelta will be in model coordinates.
   // Otherwise, it will be in parent view coordinates.
-  drag?: ( ( event: SceneryEvent, listener: KeyboardDragListener ) => void ) | null;
+  drag?: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
 
   // Called when keyboard dragging ends. The event may be null in cases of interruption.
-  end?: ( ( event: SceneryEvent | null, listener: KeyboardDragListener ) => void ) | null;
+  end?: ( ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardDragListener ) => void ) | null;
 
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
   moveOnHoldDelay?: number;
@@ -159,9 +159,9 @@ export type KeyboardDragListenerOptions = SelfOptions & // Options specific to t
 class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStroke> {
 
   // See options for documentation
-  private readonly _start: ( ( event: SceneryEvent, listener: KeyboardDragListener ) => void ) | null;
-  private readonly _drag: ( ( event: SceneryEvent, listener: KeyboardDragListener ) => void ) | null;
-  private readonly _end: ( ( event: SceneryEvent | null, listener: KeyboardDragListener ) => void ) | null;
+  private readonly _start: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
+  private readonly _drag: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
+  private readonly _end: ( ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardDragListener ) => void ) | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private readonly _mapPosition: MapPosition | null;
   private readonly _translateNode: boolean;
@@ -182,7 +182,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   private downKeyDownProperty = new TinyProperty<boolean>( false );
 
   // Fires to conduct the start and end of a drag, added for PhET-iO interoperability
-  private dragStartAction: PhetioAction<[ SceneryEvent ]>;
+  private dragStartAction: PhetioAction<[ SceneryEvent<KeyboardEvent> ]>;
   private dragEndAction: PhetioAction;
   private dragAction: PhetioAction;
 

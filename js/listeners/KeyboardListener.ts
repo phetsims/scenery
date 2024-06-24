@@ -300,9 +300,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.hotkeys.forEach( hotkey => hotkey.interrupt() );
   }
 
-  protected createSyntheticEvent( pointer: PDOMPointer ): SceneryEvent {
+  protected createSyntheticEvent( pointer: PDOMPointer ): SceneryEvent<KeyboardEvent> {
     const context = EventContext.createSynthetic();
-    return new SceneryEvent( new Trail(), 'synthetic', pointer, context );
+    return new SceneryEvent( new Trail(), 'synthetic', pointer, context as EventContext<KeyboardEvent> );
   }
 
   /**
