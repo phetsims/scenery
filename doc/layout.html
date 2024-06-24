@@ -937,6 +937,13 @@
       details
     </p>
 
+    <p>
+      For the <code>'origin'</code> align, it is useful to note that the origin is at the top-left of the rectangles,
+      at the center of circles, and at the left of the baseline of text. For the above example of an HBox, the align
+      will control the vertical positioning of Nodes, and thus will only care about the Y component of the origin.
+      It places the origin of all of the Nodes at the same Y value (top of rectangles, center of circles, baseline of text).
+    </p>
+
     <h3 id="FlowBox-justifyLines" class="index">justifyLines</h3>
 
     <p><code>justifyLines</code> controls how lines are positioned along the secondary axis (null will default to a
@@ -2214,8 +2221,8 @@
     <h2 id="layoutOrigin" class="index">layoutOrigin</h2>
 
     <p>
-      FlowBox/GridBox typically lay out content so that the origin (0,0) is at the upper-left. There are some exceptions
-      to this.
+      FlowBox/GridBox will typically lay out content so that the origin (0,0) of the FlowBox/GridBox is at the upper-left.
+      There are some exceptions to this.
     </p>
 
     <p>The default behavior:</p>
@@ -2243,7 +2250,13 @@
     </script>
 
     <p>
-      When using <code>align: origin</code>, the origin of the entire FlowBox will be at the origin of the first line:
+      When using <code>align: origin</code>, the Y-origin of the entire FlowBox will be at the Y-origin of the first wrapped line of Nodes.
+    </p>
+
+    <p>
+      NOTE: The origin of the Circle nodes below is at the center of the Circle. The origin of the Text nodes below
+      (created by <code>bigText</code>/<code>normalText</code>) is the left end of the baseline of the text (since the word
+      "Text" doesn't have any <a href="https://en.wikipedia.org/wiki/Descender">descenders</a>, this will be at the bottom).
     </p>
 
     <div id="flowOrigin-example"></div>
