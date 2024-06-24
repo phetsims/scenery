@@ -2176,8 +2176,14 @@
     <p>
       Layout options can be set on individual child Nodes of a layout container. These will override the container's
       default for any options included. These can be mutated after (by setting the entire thing with <code>node.layoutOptions
-      =</code>or with <code>mutateLayoutOptions</code>). <code>mutateLayoutOptions</code> is recommended, since it will
-      keep some layout options that may be set by <code>rows/columns/autoRows/autoColumns</code> in GridBox.
+      =</code>or with <code>mutateLayoutOptions</code>).
+    </p>
+
+    <p>
+      <code>mutateLayoutOptions</code> is recommended when applying additional adjustments to <code>layoutOptions</code>,
+      so that it won't by accident remove any layout options that were set earlier OR some set by the container. For
+      example, GridBox with <code>rows/columns/autoRows/autoColumns</code> will set some layout options, and using
+      <code>gridBox.layoutOptions =</code> may wipe out the positioning information for the child.
     </p>
 
     <div id="layoutOptionsMutate-example"></div>
