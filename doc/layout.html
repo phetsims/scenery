@@ -2339,11 +2339,6 @@
     <h2 id="Constraint" class="index">Constraint</h2>
 
     <p>
-      The next sections requires a basic understanding of what a constraint is in scenery layout, how it's used, and
-      how it can be leveraged.
-    </p>
-
-    <p>
       Constraints are the foundational layer that handles layout logic for scenery elements. If you search through the
       PhET codebase you can find constraints such as: <code>ButtonConstraint</code>,<code>CarouselConstraint</code>,
       <code>SliderConstraint</code>, and many more. All of these constraints extend <code>LayoutConstraint</code>, and
@@ -2353,7 +2348,18 @@
       also to empower developers to use existing constraints or create their own constraint as is desirable.
     </p>
 
+    <p>
+      In general, try to not place a Node in multiple layout containers, as this can lead to unexpected behavior
+      (might trigger infinite loops when the layout constraints fight back-and-forth with where a Node should be placed).
+      It will generally be detected (in the case of FlowBox/GridBox) and will trigger an eager error.
+    </p>
+
     <h3 id="ManualConstraint" class="index">ManualConstraint</h3>
+
+    <p>
+      Sometimes more fine-grained control is needed over the layout of Nodes than what is provided by the built-in layout
+      containers.
+    </p>
 
     <p>
       ManualConstraint is for hooking up imperative-style layout code (e.g. <code>someNode.left = otherNode.right</code>)
@@ -2363,6 +2369,19 @@
       linking to multiple
       <code>BoundsProperty</code>, or connecting view positions for elements in different coordinate frames.
     </p>
+
+    <p>
+      Some layout examples where ManualConstraint is particularly useful:
+    </p>
+
+    <ul>
+      <li>
+        Aligning nodes in a single dimension, especially when the nodes are in different coordinate frames.
+      </li>
+      <li>
+        Custom layout logic that is not easily expressed with the built-in layout containers.
+      </li>
+    </ul>
 
     <p>
       It will also robustly handle cases where the Nodes are not connected (and will not run the layout), so the
@@ -2431,8 +2450,12 @@
     <h3 id="FlowConstraint" class="index">FlowConstraint</h3>
 
     <p>
-      FlowBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
-      similar to ManualConstraint:
+      Want to use a FlowBox (HBox/VBox), but the nodes don't have the same parent? Use FlowConstraint. It is the layout
+      constraint used by FlowBox.
+    </p>
+
+    <p>
+      Example of using FlowBox-like layout with disconnected Nodes that share some ancestor (with qualities similar to ManualConstraint):
     </p>
 
     <div id="flowConstraint-example"></div>
@@ -2492,8 +2515,12 @@
     <h3 id="GridConstraint" class="index">GridConstraint</h3>
 
     <p>
-      GridBox's constraint can also be used with disconnected Nodes that share some ancestor (with qualities
-      similar to ManualConstraint:
+      Want to use a GridBox, but the nodes don't have the same parent? Use GridConstraint. It is the layout
+      constraint used by GridBox.
+    </p>
+
+    <p>
+      Example of using GridBox-like layout with disconnected Nodes that share some ancestor (with qualities similar to ManualConstraint):
     </p>
 
     <div id="gridConstraint-example"></div>
