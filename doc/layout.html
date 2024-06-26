@@ -57,68 +57,6 @@
     _.extend( window, phet.kite );
     _.extend( window, phet.scenery );
 
-    function dynamicDemo( id, getBox, options ) {
-      options = merge( {
-        resize: 'both',
-        useMinWidth: true,
-        useMinHeight: false,
-        adjustDisplay: false,
-        initialWidth: null,
-        initialHeight: null,
-        step: null
-      }, options );
-
-      const container = document.getElementById( id );
-      const scene = new Node();
-      const box = getBox();
-      scene.addChild( box );
-      const display = new Display( scene, {
-        allowCSSHacks: false,
-
-        // so Display input does not interfere with documentation links
-        listenToOnlyElement: true
-      } );
-      display.domElement.classList.add( 'exampleScene' );
-      display.domElement.style.position = 'relative';
-      display.domElement.style.resize = options.resize;
-
-      // Initials
-      display.width = Math.ceil( options.initialWidth ? options.initialWidth : scene.right );
-      display.height = Math.ceil( options.initialHeight ? options.initialHeight : scene.bottom );
-      display.domElement.style.width = display.width + 'px';
-      display.domElement.style.height = display.height + 'px';
-      if ( options.useMinWidth ) {
-        display.domElement.style.minWidth = display.width + 'px';
-      }
-      if ( options.useMinHeight ) {
-        display.domElement.style.minHeight = display.height + 'px';
-      }
-
-      display.updateOnRequestAnimationFrame( dt => {
-        options.step && options.step( dt );
-
-        if ( options.adjustDisplay ) {
-          display.width = Math.ceil( scene.right );
-          display.height = Math.ceil( scene.bottom );
-          display.domElement.style.width = display.width + 'px';
-          display.domElement.style.height = display.height + 'px';
-        }
-        else {
-          if ( display.domElement.clientWidth ) {
-            display.width = display.domElement.clientWidth;
-            box.preferredWidth = display.domElement.clientWidth;
-          }
-          if ( display.domElement.clientHeight ) {
-            display.height = display.domElement.clientHeight;
-            box.preferredHeight = display.domElement.clientHeight;
-          }
-        }
-      } );
-
-      container.appendChild( display.domElement );
-      container.appendChild( getCodeSnippet( getBox ) );
-    }
-
     const colors = [
       new Color( 62, 171, 3 ),
       new Color( 23, 180, 77 ),
