@@ -16,7 +16,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import Pool from '../../../phet-core/js/Pool.js';
-import { HeightSizableNode, isHeightSizable, isWidthSizable, Node, scenery, Trail, WidthSizableNode } from '../imports.js';
+import { isHeightSizable, isWidthSizable, Node, scenery, SizableNode, Trail } from '../imports.js';
 
 // For supporting general cases where you may layout a Node, or use in ManualConstraints.
 export type Layoutable = Node | LayoutProxy;
@@ -427,42 +427,14 @@ export default class LayoutProxy {
     return this.node.heightSizable;
   }
 
-  public get preferredWidth(): number | null {
-    assert && this.checkPreconditions();
-    assert && assert( isWidthSizable( this.node ) );
-
-    const preferredWidth = ( this.node as WidthSizableNode ).preferredWidth;
-
-    return preferredWidth === null ? null : Math.abs( this.trail!.getParentTransform().transformDeltaX( preferredWidth ) );
-  }
-
-  public set preferredWidth( preferredWidth: number | null ) {
-    assert && this.checkPreconditions();
-    assert && assert( isWidthSizable( this.node ) );
-
-    ( this.node as WidthSizableNode ).preferredWidth = preferredWidth === null ? null : Math.abs( this.trail!.getParentTransform().inverseDeltaX( preferredWidth ) );
-  }
-
-  public get preferredHeight(): number | null {
-    assert && this.checkPreconditions();
-    assert && assert( isHeightSizable( this.node ) );
-
-    const preferredHeight = ( this.node as HeightSizableNode ).preferredHeight;
-
-    return preferredHeight === null ? null : Math.abs( this.trail!.getParentTransform().transformDeltaY( preferredHeight ) );
-  }
-
-  public set preferredHeight( preferredHeight: number | null ) {
-    assert && this.checkPreconditions();
-    assert && assert( isHeightSizable( this.node ) );
-
-    ( this.node as HeightSizableNode ).preferredHeight = preferredHeight === null ? null : Math.abs( this.trail!.getParentTransform().inverseDeltaY( preferredHeight ) );
+  public isSizable( orientation: Orientation ): boolean {
+    return orientation === Orientation.HORIZONTAL ? this.widthSizable : this.heightSizable;
   }
 
   public get minimumWidth(): number {
     assert && this.checkPreconditions();
 
-    const minimumWidth = isWidthSizable( this.node ) ? this.node.minimumWidth || 0 : this.node.width;
+    const minimumWidth = isWidthSizable( this.node ) ? this.node.minimumWidth ?? 0 : this.node.width;
 
     return Math.abs( this.trail!.getParentTransform().transformDeltaX( minimumWidth ) );
   }
@@ -470,7 +442,7 @@ export default class LayoutProxy {
   public get minimumHeight(): number {
     assert && this.checkPreconditions();
 
-    const minimumHeight = isHeightSizable( this.node ) ? this.node.minimumHeight || 0 : this.node.height;
+    const minimumHeight = isHeightSizable( this.node ) ? this.node.minimumHeight ?? 0 : this.node.height;
 
     return Math.abs( this.trail!.getParentTransform().transformDeltaY( minimumHeight ) );
   }
@@ -518,6 +490,67 @@ export default class LayoutProxy {
    */
   public getMax( orientation: Orientation ): number | null {
     return orientation === Orientation.HORIZONTAL ? this.maxWidth : this.maxHeight;
+  }
+
+  public attemptPreferredSize( orientation: Orientation, preferredSize: number | null ): void {
+    assert && this.checkPreconditions();
+
+    if ( this.isSizable( orientation ) ) {
+      if ( preferredSize === null ) {
+        ( this.node as SizableNode )[ orientation.preferredSize ] = null;
+      }
+      else {
+        // coordinate transformation
+        preferredSize = Math.abs( this.trail!.getParentTransform()[ orientation === Orientation.HORIZONTAL ? 'inverseDeltaX' : 'inverseDeltaY' ]( preferredSize ) );
+
+        const minimumSize = this.getMinimum( orientation );
+
+        assert && assert( isFinite( minimumSize ) );
+
+        preferredSize = Math.max( minimumSize, preferredSize );
+
+        const maxSize = this.getMax( orientation );
+        if ( maxSize !== null ) {
+          preferredSize = Math.min( maxSize, preferredSize );
+        }
+
+        ( this.node as SizableNode )[ orientation.preferredSize ] = preferredSize;
+      }
+    }
+  }
+
+  public get preferredWidth(): number | null {
+    assert && this.checkPreconditions();
+
+    if ( isWidthSizable( this.node ) ) {
+      const preferredWidth = this.node.preferredWidth;
+
+      return preferredWidth === null ? null : Math.abs( this.trail!.getParentTransform().transformDeltaX( preferredWidth ) );
+    }
+    else {
+      return null;
+    }
+  }
+
+  public set preferredWidth( preferredWidth: number | null ) {
+    this.attemptPreferredSize( Orientation.HORIZONTAL, preferredWidth );
+  }
+
+  public get preferredHeight(): number | null {
+    assert && this.checkPreconditions();
+
+    if ( isHeightSizable( this.node ) ) {
+      const preferredHeight = this.node.preferredHeight;
+
+      return preferredHeight === null ? null : Math.abs( this.trail!.getParentTransform().transformDeltaY( preferredHeight ) );
+    }
+    else {
+      return null;
+    }
+  }
+
+  public set preferredHeight( preferredHeight: number | null ) {
+    this.attemptPreferredSize( Orientation.VERTICAL, preferredHeight );
   }
 
   public get visible(): boolean {
