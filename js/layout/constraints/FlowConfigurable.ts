@@ -24,7 +24,7 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import memoize from '../../../../phet-core/js/memoize.js';
 import mutate from '../../../../phet-core/js/mutate.js';
-import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, scenery, VerticalLayoutAlign } from '../../imports.js';
+import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign, scenery, VerticalLayoutAlign } from '../../imports.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -34,6 +34,7 @@ import { TMarginLayoutConfigurable } from './MarginLayoutConfigurable.js';
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
   'align',
+  'cellAlign',
   'stretch',
   'grow'
 ].concat( MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS );
@@ -46,10 +47,15 @@ type SelfOptions = {
   // See https://phetsims.github.io/scenery/doc/layout#FlowBox-orientation
   orientation?: LayoutOrientation | null;
 
-  // Adjusts the position of elements in the "opposite" dimension, either to a specific side, the center, or so that all
+  // Adjusts the position of elements in the "opposite" axis, either to a specific side, the center, or so that all
   // the origins of items are aligned (similar to x=0 for a 'vertical' orientation).
   // See https://phetsims.github.io/scenery/doc/layout#FlowBox-align
   align?: HorizontalLayoutAlign | VerticalLayoutAlign | null;
+
+  // In the "primary" axis, IF the cell is marked with a grow value, AND the node cannot expand to fill the space,
+  // cellAlign will control the positioning of the node within the cell.
+  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-cellAlign
+  cellAlign?: RestrictedVerticalLayoutAlign | RestrictedHorizontalLayoutAlign | null;
 
   // Controls whether elements will attempt to expand along the "opposite" axis to take up the full size of the
   // largest layout element.
@@ -70,6 +76,7 @@ export type ExternalFlowConfigurableOptions = WithoutNull<FlowConfigurableOption
 type TFlowConfigurable = {
 
   _align: LayoutAlign | null;
+  _cellAlign: LayoutAlign | null;
   _stretch: boolean | null;
   _grow: number | null;
   readonly orientationChangedEmitter: TEmitter;
@@ -92,6 +99,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( Type: SuperTy
 
     // (scenery-internal)
     public _align: LayoutAlign | null = null;
+    public _cellAlign: LayoutAlign | null = null;
     public _stretch: boolean | null = null;
     public _grow: number | null = null;
 
@@ -126,6 +134,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( Type: SuperTy
      */
     public override setConfigToBaseDefault(): void {
       this._align = LayoutAlign.CENTER;
+      this._cellAlign = LayoutAlign.START;
       this._stretch = false;
       this._grow = 0;
 
@@ -143,6 +152,9 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( Type: SuperTy
     public override setConfigToInherit( ignoreOptions?: FlowConfigurableOptions ): void {
       if ( !ignoreOptions || ignoreOptions.align === undefined ) {
         this._align = null;
+      }
+      if ( !ignoreOptions || ignoreOptions.cellAlign === undefined ) {
+        this._cellAlign = null;
       }
       if ( !ignoreOptions || ignoreOptions.stretch === undefined ) {
         this._stretch = null;
@@ -181,7 +193,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( Type: SuperTy
      * (scenery-internal)
      */
     public get align(): HorizontalLayoutAlign | VerticalLayoutAlign | null {
-      const result = LayoutAlign.internalToAlign( this._orientation, this._align );
+      const result = LayoutAlign.internalToAlign( this._orientation.opposite, this._align );
 
       assert && assert( result === null || typeof result === 'string' );
 
@@ -202,6 +214,37 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( Type: SuperTy
 
       if ( this._align !== mappedValue ) {
         this._align = mappedValue;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    /**
+     * (scenery-internal)
+     */
+    public get cellAlign(): RestrictedHorizontalLayoutAlign | RestrictedVerticalLayoutAlign | null {
+      const result = LayoutAlign.internalToAlign( this._orientation, this._cellAlign );
+
+      assert && assert( result === null || typeof result === 'string' );
+      assert && assert( result !== 'origin' );
+
+      return result as Exclude<typeof result, 'origin'>;
+    }
+
+    /**
+     * (scenery-internal)
+     */
+    public set cellAlign( value: RestrictedHorizontalLayoutAlign | RestrictedVerticalLayoutAlign | null ) {
+      assert && assert( LayoutAlign.getAllowedRestrictedAligns( this._orientation ).includes( value ),
+        `cellAlign ${value} not supported, with the orientation ${this._orientation}, the valid values are ${LayoutAlign.getAllowedRestrictedAligns( this._orientation )}` );
+
+      // remapping align values to an independent set, so they aren't orientation-dependent
+      const mappedValue = LayoutAlign.alignToInternal( this._orientation, value );
+
+      assert && assert( mappedValue === null || mappedValue instanceof LayoutAlign );
+
+      if ( this._cellAlign !== mappedValue ) {
+        this._cellAlign = mappedValue;
 
         this.changedEmitter.emit();
       }

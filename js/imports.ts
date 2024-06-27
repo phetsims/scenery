@@ -257,8 +257,8 @@ export type { RichDragListenerOptions } from './listeners/RichDragListener.js';
 
 export { LayoutOrientationValues } from './layout/LayoutOrientation.js';
 export type { LayoutOrientation } from './layout/LayoutOrientation.js';
-export { default as LayoutAlign, HorizontalLayoutAlignValues, VerticalLayoutAlignValues } from './layout/LayoutAlign.js';
-export type { HorizontalLayoutAlign, VerticalLayoutAlign } from './layout/LayoutAlign.js';
+export { default as LayoutAlign, HorizontalLayoutAlignValues, VerticalLayoutAlignValues, RestrictedHorizontalLayoutAlignValues, RestrictedVerticalLayoutAlignValues } from './layout/LayoutAlign.js';
+export type { HorizontalLayoutAlign, VerticalLayoutAlign, RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign } from './layout/LayoutAlign.js';
 export { default as LayoutJustification, HorizontalLayoutJustificationValues, VerticalLayoutJustificationValues } from './layout/LayoutJustification.js';
 export type { HorizontalLayoutJustification, VerticalLayoutJustification } from './layout/LayoutJustification.js';
 export type { default as TLayoutOptions } from './layout/TLayoutOptions.js';

@@ -20,6 +20,12 @@ export type HorizontalLayoutAlign = typeof HorizontalLayoutAlignValues[number];
 export const VerticalLayoutAlignValues = [ 'top', 'bottom', 'center', 'origin' ] as const;
 export type VerticalLayoutAlign = typeof VerticalLayoutAlignValues[number];
 
+export const RestrictedHorizontalLayoutAlignValues = [ 'left', 'right', 'center' ] as const;
+export type RestrictedHorizontalLayoutAlign = typeof RestrictedHorizontalLayoutAlignValues[number];
+
+export const RestrictedVerticalLayoutAlignValues = [ 'top', 'bottom', 'center' ] as const;
+export type RestrictedVerticalLayoutAlign = typeof RestrictedVerticalLayoutAlignValues[number];
+
 export default class LayoutAlign extends EnumerationValue {
   public static readonly START = new LayoutAlign( 'left', 'top', 0 );
   public static readonly END = new LayoutAlign( 'right', 'bottom', 1 );
@@ -49,6 +55,10 @@ export default class LayoutAlign extends EnumerationValue {
 
   public static getAllowedAligns( orientation: Orientation ): readonly ( string | null )[] {
     return [ ...( orientation === Orientation.HORIZONTAL ? HorizontalLayoutAlignValues : VerticalLayoutAlignValues ), null ];
+  }
+
+  public static getAllowedRestrictedAligns( orientation: Orientation ): readonly ( string | null )[] {
+    return [ ...( orientation === Orientation.HORIZONTAL ? RestrictedHorizontalLayoutAlignValues : RestrictedVerticalLayoutAlignValues ), null ];
   }
 
   // Converts a string union value into the internal Enumeration value

@@ -19,6 +19,7 @@
  *   - align (see https://phetsims.github.io/scenery/doc/layout#FlowBox-align)
  *   - stretch (see https://phetsims.github.io/scenery/doc/layout#FlowBox-stretch)
  *   - grow (see https://phetsims.github.io/scenery/doc/layout#FlowBox-grow)
+ *   - cellAlign (see https://phetsims.github.io/scenery/doc/layout#FlowBox-cellAlign)
  *   - margin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
  *   - xMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
  *   - yMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)

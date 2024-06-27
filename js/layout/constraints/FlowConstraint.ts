@@ -264,9 +264,6 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         spaceRemaining -= amountToGrow * totalGrow;
       }
 
-      // Update preferred dimension based on the pending size
-      line.cells.forEach( cell => cell.attemptPreferredSize( orientation, cell.size ) );
-
       // Gives additional spacing based on justification
       const primarySpacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.cells.length );
 
@@ -280,10 +277,9 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
           position += this.spacing;
         }
 
-        // ACTUALLY position it!
-        cell.positionStart( orientation, position );
-        cell.lastAvailableBounds[ orientation.minCoordinate ] = position;
-        cell.lastAvailableBounds[ orientation.maxCoordinate ] = position + cell.size;
+        // Position it
+        // NOTE: hardcoded stretch:true and an ignored origin offset of 0. effectiveCellAlign will not take the 'origin' value.
+        cell.reposition( orientation, cell.size, position, true, 0, cell.effectiveCellAlign );
 
         position += cell.size;
         assert && assert( this.spacing >= 0 || cell.size >= -this.spacing - 1e-7,

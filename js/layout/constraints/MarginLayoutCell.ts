@@ -73,6 +73,7 @@ export default class MarginLayoutCell extends LayoutCell {
    * Returns the cell's bounds
    */
   public reposition( orientation: Orientation, lineSize: number, linePosition: number, stretch: boolean, originOffset: number, align: LayoutAlign ): Bounds2 {
+    console.log( orientation.name, lineSize, linePosition, stretch, originOffset, align.name );
     // Mimicking https://www.w3.org/TR/css-flexbox-1/#align-items-property for baseline (for our origin)
     // Origin will sync all origin-based items (so their origin matches), and then position ALL of that as if it was
     // align:left or align:top (depending on the orientation).
