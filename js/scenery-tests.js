@@ -17,6 +17,7 @@ import './display/DisplayTests.js';
 import './display/FuzzTests.js';
 import './layout/constraints/ManualConstraintTests.js';
 import './layout/nodes/AlignBoxTests.js';
+import './layout/nodes/FlowBoxTests.js';
 import './listeners/DragListenerTests.js';
 import './listeners/FireListenerTests.js';
 import './listeners/PressListenerTests.js';
