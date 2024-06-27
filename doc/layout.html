@@ -528,6 +528,43 @@
       } );
     </script>
 
+    <h3 id="FlowBox-cellAlign" class="index">cellAlign</h3>
+
+    <p>
+      When <code>grow</code> is used to expand a cell, but the content does not fill the cell, <code>cellAlign</code> can
+      control the relative positioning of the content within the cell. The default is to the left/top of the cell.
+    </p>
+
+    <div id="cellAlign-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'cellAlign-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          return new HBox( {
+            grow: 1, // expand everything
+            children: [
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 0 ] } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 4 ],
+                layoutOptions: { cellAlign: 'right' }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 6 ] } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 7 ],
+                layoutOptions: { cellAlign: 'center' }
+              } ),
+              new Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( display, box, {
+          widthResizable: true
+        } ) );
+      } );
+    </script>
+
     <h3 id="FlowBox-stretch" class="index">stretch</h3>
 
     <p><code>stretch</code> will have a resizable element take up the entire row/column size:</p>
