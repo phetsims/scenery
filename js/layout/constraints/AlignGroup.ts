@@ -223,15 +223,16 @@ export default class AlignGroup extends Disposable {
     for ( let i = 0; i < this._alignBoxes.length; i++ ) {
       const alignBox = this._alignBoxes[ i ];
 
-      const bounds = alignBox.getContentBounds();
+      const width = alignBox.getMinimumWidth();
+      const height = alignBox.getMinimumHeight();
 
       // Ignore bad bounds
-      if ( bounds.isEmpty() || !bounds.isFinite() ) {
-        continue;
+      if ( isFinite( width ) && width > 0 ) {
+        maxWidth = Math.max( maxWidth, width );
       }
-
-      maxWidth = Math.max( maxWidth, bounds.width );
-      maxHeight = Math.max( maxHeight, bounds.height );
+      if ( isFinite( height ) && height > 0 ) {
+        maxHeight = Math.max( maxHeight, height );
+      }
     }
 
     sceneryLog && sceneryLog.AlignGroup && sceneryLog.pop();

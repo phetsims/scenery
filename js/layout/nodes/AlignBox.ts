@@ -15,6 +15,12 @@
  * There are four margins: left, right, top, bottom. They can be set independently, or multiple can be set at the
  * same time (xMargin, yMargin and margin).
  *
+ * AlignBox will only adjust the preferred size of its content if:
+ * 1. The align for the axis is 'stretch'
+ * 2. The content is sizable for that axis
+ * Additionally, if the above is true and there is an associated AlignGroup, the minimum size of the content will be
+ * used to compute the AlignGroup's size (instead of current counts).
+ *
  * NOTE: AlignBox resize may not happen immediately, and may be delayed until bounds of a alignBox's child occurs.
  *       layout updates can be forced with invalidateAlignment(). If the alignBox's content that changed is connected
  *       to a Scenery display, its bounds will update when Display.updateDisplay() will called, so this will guarantee
@@ -30,7 +36,7 @@ import Multilink from '../../../../axon/js/Multilink.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { AlignGroup, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
+import { AlignGroup, extendsHeightSizable, extendsWidthSizable, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
@@ -171,6 +177,12 @@ export default class AlignBox extends SuperType {
 
     // Will be removed by dispose()
     this._content.boundsProperty.link( this._contentBoundsListener );
+    if ( extendsWidthSizable( this._content ) ) {
+      this._content.minimumWidthProperty.link( this._contentBoundsListener );
+    }
+    if ( extendsHeightSizable( this._content ) ) {
+      this._content.minimumHeightProperty.link( this._contentBoundsListener );
+    }
 
     this.mutate( options );
 
@@ -616,6 +628,18 @@ export default class AlignBox extends SuperType {
       bounds.bottom + this._bottomMargin );
   }
 
+  public getMinimumWidth(): number {
+    const contentWidth = this._xAlign === 'stretch' && isWidthSizable( this._content ) ? ( this._content.minimumWidth ?? 0 ) : this._content.width;
+
+    return contentWidth + this._leftMargin + this._rightMargin;
+  }
+
+  public getMinimumHeight(): number {
+    const contentHeight = this._yAlign === 'stretch' && isHeightSizable( this._content ) ? ( this._content.minimumHeight ?? 0 ) : this._content.height;
+
+    return contentHeight + this._topMargin + this._bottomMargin;
+  }
+
   // scenery-internal, designed so that we can ignore adjusting certain dimensions
   public setAdjustedLocalBounds( bounds: Bounds2 ): void {
     if ( this._xSet && this._ySet ) {
@@ -645,6 +669,12 @@ export default class AlignBox extends SuperType {
 
     // Remove our listener
     this._content.boundsProperty.unlink( this._contentBoundsListener );
+    if ( extendsWidthSizable( this._content ) ) {
+      this._content.minimumWidthProperty.unlink( this._contentBoundsListener );
+    }
+    if ( extendsHeightSizable( this._content ) ) {
+      this._content.minimumHeightProperty.unlink( this._contentBoundsListener );
+    }
     this._content = new Node(); // clear the reference for GC
 
     // Disconnects from the group
