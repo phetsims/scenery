@@ -123,6 +123,16 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
         return line;
       } );
 
+      const cellToLinesMap = new Map<GridCell, GridLine[]>( cells.map( cell => {
+        return [ cell, cell.getIndices( orientation ).map( index => {
+          const line = lineMap.get( index )!;
+          assert && assert( line );
+
+          return line;
+        } ) ];
+      } ) );
+      const linesIn = ( cell: GridCell ) => cellToLinesMap.get( cell )!;
+
       // Convert a simple spacing number (or a spacing array) into a spacing array of the correct size, only including
       // spacings AFTER our actually-visible lines. We'll also skip the spacing after the last line, as it won't be used
       const lineSpacings = lines.slice( 0, -1 ).map( line => {
@@ -147,22 +157,241 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
       } );
 
       // Then increase for spanning cells as necessary
-      cells.forEach( cell => {
-        if ( cell.size.get( orientation ) > 1 ) {
-          assert && assert( cell.getEffectiveAlign( orientation ) !== LayoutAlign.ORIGIN, 'origin alignment cannot be specified for cells that span >1 width or height' );
-          // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise) https://github.com/phetsims/scenery/issues/1581
-          // TODO: also handle maxes https://github.com/phetsims/scenery/issues/1581
-          const lines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
-          const currentMin = _.sum( lines.map( line => line.min ) );
-          const neededMin = cell.getMinimumSize( orientation );
-          if ( neededMin > currentMin ) {
-            const lineDelta = ( neededMin - currentMin ) / lines.length;
-            lines.forEach( line => {
-              line.min += lineDelta;
-            } );
+      {
+        // Problem:
+        //   Cells that span multiple lines (e.g. horizontalSpan/verticalSpan > 1) may be larger than the sum of their
+        //   lines' sizes. We need to grow the lines to accommodate these cells.
+        //
+        // Constraint:
+        //   Cells also can have maximum sizes. We don't want to grow lines in a way that would break this type of constraint.
+        //
+        // Goals:
+        //   Do the above, but try to spread out extra space proportionally. If `grow` is specified on cells (a line),
+        //   try to use that to dump space into those sections.
+
+        // An iterative approach, where we will try to grow lines.
+        //
+        // Every step, we will determine:
+        // 1. Grow constraints (how much is the most we'd need to grow things to satisfy an unsatisfied cell)
+        // 2. Max constraints (some cells might have a maximum size constraint)
+        // 3. Growable lines (the lines, given the above, that have a non-zero amount they can grow).
+        // 4. Weights for each growable line (HOW FAST we should grow the lines, proportionally).
+        //
+        // We will then see how much we can grow before hitting the FIRST constraint, do that, and then continue
+        // iteration.
+        //
+        // This is complicated by the fact that some "max constraints" might have grown enough that none of their
+        // lines should increase in size. When that happens, we'll need to add those lines to the "forbidden" list,
+        // and recompute things.
+
+        // NOTE: If this is suboptimal, we could try a force-directed iterative algorithm to minimize a specific loss
+        // function (or just... convex optimization).
+
+        const epsilon = 1e-9;
+
+        // What is the current (minimum) size of a cell
+        const getCurrentCellSize = ( cell: GridCell ) => {
+          return _.sum( linesIn( cell ).map( line => line.min ) );
+        };
+
+        // A cell is "unsatisfied" if its current size is less than its minimum size
+        const isUnsatisfied = ( cell: GridCell ) => {
+          return getCurrentCellSize( cell ) < cell.getMinimumSize( orientation ) - epsilon;
+        };
+
+        // We may need to "forbid" certain lines from growing further, even if they are not at THEIR limit.
+        // Then we can recompute things based on that lines are allowed to grow.
+        const forbiddenLines = new Set<GridLine>();
+
+        // Whether our line can grow (i.e. it's not at its maximum size, and it's not forbidden)
+        const lineCanGrow = ( line: GridLine ) => {
+          return ( !isFinite( line.max ) || line.min < line.max - epsilon ) && !forbiddenLines.has( line );
+        };
+
+        // Cells that:
+        // 1. Span multiple lines (since we handled single-line cells above)
+        // 2. Are unsatisfied (i.e. their current size is less than their minimum size)
+        let unsatisfiedSpanningCells = cells.filter( cell => cell.size.get( orientation ) > 1 ).filter( isUnsatisfied );
+
+        // NOTE: It may be possible to actually SKIP the above "single-line cell" step, and size things up JUST using
+        // this algorithm. It is unclear whether it would result in decent quality.
+        while ( unsatisfiedSpanningCells.length ) {
+
+          // A Grow or Max constraint
+          type Constraint = { cell: GridCell; growingLines: GridLine[]; space: number };
+
+          // Specializations for Grow constraints
+          type GrowConstraint = Constraint & { weights: Map<GridLine, number> };
+
+          // Gets the applicable (non-zero) grow constraint for a cell, or returns null if it does not need to be grown
+          // (or cannot be grown and doesn't fail assertions).
+          // We are somewhat permissive here for the runtime, even if assertions would fail we'll try to keep going.
+          const getGrowConstraint = ( cell: GridCell ): GrowConstraint | null => {
+            assert && assert( isUnsatisfied( cell ) );
+
+            const growableLines = linesIn( cell ).filter( lineCanGrow );
+
+            assert && assert( growableLines.length, 'GridCell for Node cannot find space due to maximum-size constraints' );
+            if ( !growableLines.length ) {
+              return null;
+            }
+
+            const currentSize = getCurrentCellSize( cell );
+            const neededMinSize = cell.getMinimumSize( orientation );
+
+            // How much space will need to be added (in total) to satisfy the cell.
+            const space = neededMinSize - currentSize;
+
+            assert && assert( space > 0 );
+            if ( space < epsilon ) {
+              return null;
+            }
+
+            // We'll check the "grow" values, IF there are any non-zero. If there are, we will use those proportionally
+            // to reallocate space.
+            //
+            // IF THERE IS NO NON-ZERO GROW VALUES, we will just evenly distribute the space.
+            const totalLinesGrow = _.sum( growableLines.map( line => line.grow ) );
+
+            return {
+              cell: cell,
+              growingLines: growableLines.slice(), // defensive copy, we may modify these later
+              space: space,
+              weights: new Map( growableLines.map( line => {
+                let weight: number;
+
+                if ( totalLinesGrow > 0 ) {
+                  weight = space * ( line.grow / totalLinesGrow );
+                }
+                else {
+                  weight = space / growableLines.length;
+                }
+
+                return [ line, weight ];
+              } ) )
+            };
+          };
+
+          // Initialize grow constraints
+          let growConstraints: GrowConstraint[] = [];
+          for ( const cell of unsatisfiedSpanningCells ) {
+            const growConstraint = getGrowConstraint( cell );
+            if ( growConstraint ) {
+              growConstraints.push( growConstraint );
+            }
+          }
+
+          // We'll need to recompute. We'll see which ones we can keep and which we can recompute (based on forbidden lines)
+          const recomputeGrowConstraints = () => {
+            growConstraints = growConstraints.map( constraint => {
+              if ( constraint.growingLines.some( line => forbiddenLines.has( line ) ) ) {
+                return getGrowConstraint( constraint.cell );
+              }
+              else {
+                return constraint;
+              }
+            } ).filter( constraint => constraint !== null ) as GrowConstraint[];
+          };
+
+          // Find all of the necessary max constraints that are relevant
+          let maxConstraints: Constraint[] = [];
+          let changed = true;
+          while ( changed && growConstraints.length ) {
+            // We'll need to iterate, and recompute constraints if our grow constraints have changed
+            changed = false;
+            maxConstraints = [];
+
+            // Find cells that can't grow any further. They are either:
+            // 1. Already at their maximum size - we may need to add forbidden lines
+            // 2. Not at their maximum size - we might add them as constraints
+            for ( const cell of cells ) {
+              const max = cell.getMaximumSize( orientation );
+
+              // Most cells will probably have an infinite max (e.g. NO maximum), so we'll skip those
+              if ( isFinite( max ) ) {
+                // Find out which lines are "dynamic" (i.e. they are part of a grow constraint)
+                // eslint-disable-next-line @typescript-eslint/no-loop-func
+                const dynamicLines = linesIn( cell ).filter( line => growConstraints.some( constraint => constraint.growingLines.includes( line ) ) );
+
+                // If there are none, it is not relevant, and we can skip it (won't affect any lines we are considering growing)
+                if ( dynamicLines.length ) {
+                  const currentSize = getCurrentCellSize( cell );
+
+                  const space = max - currentSize;
+
+                  // Check any "ungrowable" constraints, and remove all of their lines from consideration.
+                  if ( space < epsilon ) {
+                    for ( const badLine of dynamicLines ) {
+                      assert && assert( !forbiddenLines.has( badLine ), 'New only' );
+
+                      forbiddenLines.add( badLine );
+                    }
+
+                    changed = true;
+                  }
+                  else {
+                    // If we have space, we'll want to mark how much space
+                    maxConstraints.push( { cell: cell, growingLines: dynamicLines.slice(), space: space } );
+                  }
+                }
+              }
+            }
+
+            // If ANY forbidden lines changed, recompute grow constraints and try again
+            if ( changed ) {
+              recomputeGrowConstraints();
+            }
+          }
+
+          // Actual growing operation
+          if ( growConstraints.length ) {
+            // Which lines will we increase?
+            const growingLines = _.uniq( _.flatten( growConstraints.map( constraint => constraint.growingLines ) ) );
+
+            // Sum up weights from different constraints
+            const weightMap = new Map<GridLine, number>( growingLines.map( line => {
+              let weight = 0;
+
+              for ( const constraint of growConstraints ) {
+                if ( constraint.growingLines.includes( line ) ) {
+                  weight += constraint.weights.get( line )!;
+                }
+              }
+
+              assert && assert( isFinite( weight ) );
+
+              return [ line, weight ];
+            } ) );
+
+            // Find the multiplier that will allow us to (maximally) satisfy all the constraints.
+            // Later: increase for each line is multiplier * weight.
+            let multiplier = Number.POSITIVE_INFINITY;
+
+            // Minimize the multiplier by what will not violate any constraints
+            for ( const constraint of [ ...growConstraints, ...maxConstraints ] ) {
+              // Our "total" weight, i.e. how much space we gain if we had a multiplier of 1.
+              const velocity = _.sum( constraint.growingLines.map( line => weightMap.get( line )! ) );
+
+              // Adjust the multiplier
+              multiplier = Math.min( multiplier, constraint.space / velocity );
+              assert && assert( isFinite( multiplier ) && multiplier > 0 );
+            }
+
+            // Apply the multiplier
+            for ( const line of growingLines ) {
+              const velocity = weightMap.get( line )!;
+              line.min += velocity * multiplier;
+            }
+
+            // Now see which cells are unsatisfied still (so we can iterate)
+            unsatisfiedSpanningCells = unsatisfiedSpanningCells.filter( isUnsatisfied );
+          }
+          else {
+            // Bail (so we don't hard error) if we can't grow any further (but are still unsatisfied).
+            break;
           }
         }
-      } );
+      }
 
       // Adjust line sizes to the min
       lines.forEach( line => {
@@ -224,7 +453,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
         const cellLastIndexPosition = cellFirstIndexPosition + cellSize - 1;
 
         // All the lines our cell is composed of.
-        const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
+        const cellLines = linesIn( cell );
 
         const firstLine = lineMap.get( cellFirstIndexPosition )!;
 
