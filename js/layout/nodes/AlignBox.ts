@@ -36,6 +36,7 @@ import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutua
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
+  'align', // {string} - Sets all aligns, only 'center' and 'stretch'
   'xAlign', // {string} - 'left', 'center', 'right' or 'stretch', see setXAlign() for more documentation
   'yAlign', // {string} - 'top', 'center', 'bottom' or 'stretch', see setYAlign() for more documentation
   'margin', // {number} - Sets all margins, see setMargin() for more documentation
@@ -57,6 +58,7 @@ export type AlignBoxYAlign = ( typeof AlignBoxYAlignValues )[number];
 type SelfOptions = {
   alignBounds?: Bounds2 | null;
   alignBoundsProperty?: TReadOnlyProperty<Bounds2>; // if passed in will override alignBounds option
+  align?: AlignBoxXAlign & AlignBoxYAlign;
   xAlign?: AlignBoxXAlign;
   yAlign?: AlignBoxYAlign;
   margin?: number;
@@ -343,6 +345,23 @@ export default class AlignBox extends SuperType {
   public getYAlign(): AlignBoxYAlign {
     return this._yAlign;
   }
+
+  public getAlign(): AlignBoxXAlign & AlignBoxYAlign {
+    assert && assert( this._xAlign === this._yAlign );
+
+    return this._xAlign as AlignBoxXAlign & AlignBoxYAlign;
+  }
+
+  public setAlign( value: AlignBoxXAlign & AlignBoxYAlign ): this {
+    this.setXAlign( value );
+    this.setYAlign( value );
+
+    return this;
+  }
+
+  public get align(): AlignBoxXAlign & AlignBoxYAlign { return this.getAlign(); }
+
+  public set align( value: AlignBoxXAlign & AlignBoxYAlign ) { this.setAlign( value ); }
 
   /**
    * Sets the margin of this box (setting margin values for all sides at once).
