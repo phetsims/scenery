@@ -48,6 +48,11 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
   }
 
   // The used value, with this cell's value taking precedence over the constraint's default
+  public get effectiveCellAlign(): LayoutAlign {
+    return this._cellAlign !== null ? this._cellAlign : this.flowConstraint._cellAlign!;
+  }
+
+  // The used value, with this cell's value taking precedence over the constraint's default
   public get effectiveStretch(): boolean {
     return this._stretch !== null ? this._stretch : this.flowConstraint._stretch!;
   }
