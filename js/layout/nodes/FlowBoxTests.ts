@@ -24,9 +24,14 @@
 import Rectangle, { RectangleOptions } from '../../nodes/Rectangle.js';
 import VBox from './VBox.js';
 import HBox from './HBox.js';
+import Utils from '../../../../dot/js/Utils.js';
 
 const RECT_WIDTH = 100;
 const RECT_HEIGHT = 25;
+
+const aboutEqual = ( a: number, b: number, epsilon = 0.0001 ) => {
+  return Utils.equalsEpsilon( a, b, epsilon );
+};
 
 const createRectangles = ( count: number, indexToOptions?: ( index: number ) => RectangleOptions ) => {
   return _.times( count, ( index: number ) => {
@@ -237,4 +242,89 @@ QUnit.test( 'Children that grow, stretch, and have size constraints', assert => 
   } );
 
   assert.equal( combinedBox.width, RECT_WIDTH * 8, 'width should be sum of children minContentWidths (applied to all cells)' );
+} );
+
+QUnit.test( 'Justify tests', assert => {
+  const [ a, b, c, d ] = createRectangles( 4 );
+
+  const hBox = new HBox( { children: [ a, b, c, d ] } );
+  assert.equal( hBox.width, 4 * RECT_WIDTH, 'width should be sum of children widths' );
+
+  // Double the preferred width of the container to play with justify effects
+  hBox.preferredWidth = RECT_WIDTH * 8;
+
+  assert.equal( hBox.width, RECT_WIDTH * 8, 'width should be the preferred width' );
+
+  //---------------------------------------------------------------------------------
+  // justify left
+  //---------------------------------------------------------------------------------
+  hBox.justify = 'left';
+  assert.equal( a.left, hBox.left, 'a.left should be hBox.left' );
+  assert.equal( a.right, b.left, 'a.right should be b.left' );
+  assert.equal( b.right, c.left, 'b.right should be c.left' );
+  assert.equal( c.right, d.left, 'c.right should be d.left' );
+  assert.equal( d.right, 4 * RECT_WIDTH, 'd.right should be 4 * RECT_WIDTH' );
+
+  //---------------------------------------------------------------------------------
+  // justify right
+  //---------------------------------------------------------------------------------
+  hBox.justify = 'right';
+  assert.equal( a.left, 4 * RECT_WIDTH, 'a.left should be 4 * RECT_WIDTH' );
+  assert.equal( b.left, a.right, 'b.left should be a.right' );
+  assert.equal( c.left, b.right, 'c.left should be b.right' );
+  assert.equal( d.left, c.right, 'd.left should be c.right' );
+  assert.equal( d.right, hBox.right, 'd.right should be hBox.right' );
+
+  //---------------------------------------------------------------------------------
+  // justify spaceBetween
+  //---------------------------------------------------------------------------------
+  hBox.justify = 'spaceBetween';
+  assert.equal( a.left, hBox.left, 'a.left should be hBox.left' );
+  assert.equal( d.right, hBox.right, 'd.right should be hBox.right' );
+  assert.ok( aboutEqual( b.left - a.right, c.left - b.right ), 'space between a and b should be equal to space between b and c' );
+  assert.ok( aboutEqual( c.left - b.right, d.left - c.right ), 'space between b and c should be equal to space between c and d' );
+
+  //---------------------------------------------------------------------------------
+  // justify spaceAround
+  //---------------------------------------------------------------------------------
+  hBox.justify = 'spaceAround';
+
+  // space around has half the space on the outside of the first and last nodes, and the other half between each pair
+  // of nodes
+  const totalSpace = hBox.width - 4 * RECT_WIDTH;
+  const sideSpacing = totalSpace / 4 / 2; // Each Node gets half space to the left and right
+
+  assert.ok( aboutEqual( a.left, hBox.left + sideSpacing ), 'a.left should be hBox.left + spaceAround' );
+  assert.ok( aboutEqual( a.right + sideSpacing * 2, b.left ), 'a.right + sideSpacing * 2 should be b.left' );
+  assert.ok( aboutEqual( b.right + sideSpacing * 2, c.left ), 'b.right + sideSpacing * 2 should be c.left' );
+  assert.ok( aboutEqual( c.right + sideSpacing * 2, d.left ), 'c.right + sideSpacing * 2 should be d.left' );
+  assert.ok( aboutEqual( d.right, hBox.right - sideSpacing ), 'd.right should be hBox.right - spaceAround' );
+
+  //---------------------------------------------------------------------------------
+  // justify spaceEvenly
+  //---------------------------------------------------------------------------------
+  hBox.justify = 'spaceEvenly';
+
+  // space evenly has equal space between each pair of nodes and on the outside of the first and last nodes
+  const spaceBetween = totalSpace / 5; // 4 spaces between 5 nodes
+
+  assert.ok( aboutEqual( a.left, hBox.left + spaceBetween ), 'a.left should be hBox.left + spaceEvenly' );
+  assert.ok( aboutEqual( a.right + spaceBetween, b.left ), 'a.right + spaceBetween should be b.left' );
+  assert.ok( aboutEqual( b.right + spaceBetween, c.left ), 'b.right + spaceBetween should be c.left' );
+  assert.ok( aboutEqual( c.right + spaceBetween, d.left ), 'c.right + spaceBetween should be d.left' );
+  assert.ok( aboutEqual( d.right, hBox.right - spaceBetween ), 'd.right should be hBox.right - spaceEvenly' );
+
+  //---------------------------------------------------------------------------------
+  // justify center
+  //---------------------------------------------------------------------------------
+  hBox.justify = 'center';
+
+  const remainingSpace = hBox.width - 4 * RECT_WIDTH;
+  const halfRemainingSpace = remainingSpace / 2;
+
+  assert.ok( aboutEqual( a.left, hBox.left + halfRemainingSpace ), 'a.left should be hBox.left + halfRemainingSpace' );
+  assert.equal( a.right, b.left, 'a.right should be b.left' );
+  assert.equal( b.right, c.left, 'b.right should be c.left' );
+  assert.equal( c.right, d.left, 'c.right should be d.left' );
+  assert.ok( aboutEqual( d.right, hBox.right - halfRemainingSpace ), 'd.right should be hBox.right - halfRemainingSpace' );
 } );
