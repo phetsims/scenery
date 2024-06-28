@@ -21,15 +21,18 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import Rectangle from '../../nodes/Rectangle.js';
+import Rectangle, { RectangleOptions } from '../../nodes/Rectangle.js';
 import VBox from './VBox.js';
 import HBox from './HBox.js';
 
 const RECT_WIDTH = 100;
 const RECT_HEIGHT = 25;
 
-const createRectangles = ( count: number ) => {
-  return _.times( count, () => new Rectangle( 0, 0, RECT_WIDTH, RECT_HEIGHT, { fill: 'red' } ) );
+const createRectangles = ( count: number, indexToOptions?: ( index: number ) => RectangleOptions ) => {
+  return _.times( count, ( index: number ) => {
+    const options = indexToOptions ? indexToOptions( index ) : {};
+    return new Rectangle( 0, 0, RECT_WIDTH, RECT_HEIGHT, options );
+  } );
 };
 
 QUnit.module( 'FlowBox' );
@@ -109,13 +112,129 @@ QUnit.test( 'FlowBox cell resizing', assert => {
   assert.equal( a.bottom, RECT_HEIGHT * 2, 'a.bottom === RECT_HEIGHT * 2 for vBoxNoResize after resize' );
   assert.equal( b.top, RECT_HEIGHT, 'b.top === RECT_HEIGHT for vBox after resize' );
   vBoxNoResize.dispose();
+} );
+
+QUnit.test( 'Invisible children', assert => {
+  const [ c, d, e ] = createRectangles( 3 );
+  d.visible = false;
+
+  // Invisible Nodes should not be included in layout bounds by default.
+  const hBoxInvisible = new HBox( { children: [ c, d, e ] } );
+
+  assert.equal( hBoxInvisible.width, RECT_WIDTH * 2, 'width should not include invisible node' );
+  assert.equal( c.right, e.left, 'c.right === e.left for middle Node invisible in HBox' );
+
+  // Invisible Nodes can be included in layout bounds if specified.
+  hBoxInvisible.setExcludeInvisibleChildrenFromBounds( false );
+  assert.equal( hBoxInvisible.width, RECT_WIDTH * 3, 'width should include invisible node' );
+  assert.notEqual( c.right, e.left, 'c.right !== e.left when invisible node is included in HBox bounds' );
+  assert.equal( c.right, d.left, 'c.right === d.left when invisible node is included in HBox bounds' );
+  assert.equal( d.right, e.left, 'd.right === e.left when invisible node is included in HBox bounds' );
+  hBoxInvisible.dispose();
+} );
+
+QUnit.test( 'Children that grow, stretch, and have size constraints', assert => {
+  const [ a, b, c ] = createRectangles( 3, index => {
+
+    // Make these rectangles sizable so that they can grow/stretch for these tests
+    return {
+      sizable: true,
+      localMinimumWidth: RECT_WIDTH,
+      localMinimumHeight: RECT_HEIGHT
+    };
+  } );
+
+  // initial test
+  const hBox = new HBox( { children: [ a, b, c ] } );
+  assert.equal( hBox.width, RECT_WIDTH * 3, 'width should be sum of children widths' );
+
+  // Make it larger than its contents to test
+  hBox.preferredWidth = RECT_WIDTH * 6;
+  assert.equal( hBox.width, RECT_WIDTH * 6, 'width should take up preferred width' );
+  assert.equal( b.width, RECT_WIDTH, 'b.width should be RECT_WIDTH' );
+
+  // Make b grow to take up all remaining space
+  b.layoutOptions = { grow: 1 };
+  assert.equal( b.width, RECT_WIDTH * 4, 'b.width should be RECT_WIDTH * 4' );
+
+  // Make a grow and extra space should be shared between a and b
+  a.layoutOptions = { grow: 1 };
+  assert.equal( a.width, RECT_WIDTH * 2.5, 'a.width should be RECT_WIDTH * 2' );
+  assert.equal( b.width, RECT_WIDTH * 2.5, 'b.width should be RECT_WIDTH * 4' );
+  assert.equal( c.width, RECT_WIDTH, 'c.width should be RECT_WIDTH' );
+
+  // make c grow and extra space should be shared between all three
+  c.layoutOptions = { grow: 1 };
+  assert.equal( a.width, RECT_WIDTH * 2, 'a.width should be RECT_WIDTH * 2' );
+  assert.equal( b.width, RECT_WIDTH * 2, 'b.width should be RECT_WIDTH * 2' );
+  assert.equal( c.width, RECT_WIDTH * 2, 'c.width should be RECT_WIDTH * 2' );
+
+  // Double c's grow value and it should take up proportionally more space - each should tak up the minimum width
+  // plus its proportion of teh remaining space as specified by grow.
+  c.layoutOptions = { grow: 2 };
+
+  // grow lets nodes take up the remaining EXTRA space, so the distribution should be:
+  const extraSpace = RECT_WIDTH * 6 - RECT_WIDTH * 3; // preferred width - sum of minimum widths
+  const expectedAWidth = RECT_WIDTH + extraSpace / 4; // distribution of grow values
+  const expectedBWidth = RECT_WIDTH + extraSpace / 4;
+  const expectedCWidth = RECT_WIDTH + extraSpace / 2;
+
+  assert.equal( a.width, expectedAWidth, 'a.width should be RECT_WIDTH' );
+  assert.equal( b.width, expectedBWidth, 'b.width should be RECT_WIDTH' );
+  assert.equal( c.width, expectedCWidth, 'c.width should be RECT_WIDTH' );
 
   //---------------------------------------------------------------------------------
-  // Tests involving invisible children
+  // stretch
   //---------------------------------------------------------------------------------
-  // let [ c, d, e ] = createRectangles( 3 );
-  // d.visible = false;
-  //
-  // // Invisible Nodes should not be included in layout bounds by default.
-  // const hBoxInvisible = new HBox( { children: [ c, d, e ] } );
+  hBox.preferredHeight = RECT_HEIGHT * 3; // extend height of the container
+  assert.equal( a.height, RECT_HEIGHT, 'a.height should be RECT_HEIGHT before stretch' );
+  a.layoutOptions = { stretch: true };
+  assert.equal( a.height, RECT_HEIGHT * 3, 'a.height should be RECT_HEIGHT * 3 after stretch' );
+
+  //---------------------------------------------------------------------------------
+  // size constraints
+  //---------------------------------------------------------------------------------
+  a.layoutOptions = { stretch: false, grow: 1, maxContentWidth: RECT_WIDTH, maxContentHeight: RECT_HEIGHT };
+  b.layoutOptions = { stretch: true, grow: 1 };
+  c.layoutOptions = { stretch: false, grow: 1 };
+
+  hBox.preferredWidth = RECT_WIDTH * 10;
+  hBox.preferredHeight = RECT_HEIGHT * 10;
+
+  const remainingWidth = RECT_WIDTH * 10 - RECT_WIDTH; // the preferred width minus the constrained width of rect a
+
+  assert.equal( a.width, RECT_WIDTH, 'a.width should be RECT_WIDTH because of maxContentWidth, even though it grows' );
+  assert.equal( a.height, RECT_HEIGHT, 'a.height should be RECT_HEIGHT because of maxContentHeight, even though it stretches' );
+
+  assert.equal( b.width, remainingWidth / 2, 'b.width should be half of the remaining width' );
+  assert.equal( b.height, RECT_HEIGHT * 10, 'b.height should be RECT_HEIGHT * 10 because it stretches' );
+
+  assert.equal( c.width, remainingWidth / 2, 'c.width should be half of the remaining width' );
+  assert.equal( c.height, RECT_HEIGHT, 'c.height should be RECT_HEIGHT because it doesnt stretch' );
+
+  //---------------------------------------------------------------------------------
+  // size constraints on the container
+  //---------------------------------------------------------------------------------
+  const [ d, e ] = createRectangles( 3 );
+  const [ f, g ] = createRectangles( 2 );
+
+  const hBoxWithConstraint = new HBox( {
+    layoutOptions: {
+      minContentWidth: RECT_WIDTH * 4
+    },
+    children: [ d, e ]
+  } );
+
+  const vBoxWithConstraint = new VBox( {
+    layoutOptions: {
+      minContentWidth: RECT_WIDTH * 4
+    },
+    children: [ f, g ]
+  } );
+
+  const combinedBox = new HBox( {
+    children: [ hBoxWithConstraint, vBoxWithConstraint ]
+  } );
+
+  assert.equal( combinedBox.width, RECT_WIDTH * 8, 'width should be sum of children minContentWidths (applied to all cells)' );
 } );
