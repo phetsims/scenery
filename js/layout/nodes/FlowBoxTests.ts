@@ -328,3 +328,78 @@ QUnit.test( 'Justify tests', assert => {
   assert.equal( c.right, d.left, 'c.right should be d.left' );
   assert.ok( aboutEqual( d.right, hBox.right - halfRemainingSpace ), 'd.right should be hBox.right - halfRemainingSpace' );
 } );
+
+QUnit.test( 'Wrap tests', assert => {
+  const [ a, b, c, d ] = createRectangles( 4 );
+  const hBox = new HBox( { children: [ a, b, c, d ], wrap: true } );
+
+  assert.equal( hBox.width, 4 * RECT_WIDTH, 'width should be sum of children widths' );
+  assert.equal( hBox.height, RECT_HEIGHT, 'height should be RECT_HEIGHT' );
+
+  // restrict the preferred width of the container to test wrap
+  hBox.preferredWidth = RECT_WIDTH * 2;
+
+  assert.equal( hBox.width, RECT_WIDTH * 2, 'width should be the preferred width' );
+  assert.equal( hBox.height, RECT_HEIGHT * 2, 'height should be larger due to wrap' );
+
+  // make the container even smaller to test wrap
+  hBox.preferredWidth = RECT_WIDTH;
+  assert.equal( hBox.width, RECT_WIDTH, 'width should be the preferred width' );
+  assert.equal( hBox.height, RECT_HEIGHT * 4, 'height should be larger due to wrap' );
+} );
+
+QUnit.test( 'Align tests', assert => {
+  const a = new Rectangle( 0, 0, RECT_WIDTH, 10 );
+  const b = new Rectangle( 0, 0, RECT_WIDTH, 20 );
+  const c = new Rectangle( 0, 0, RECT_WIDTH, 30 );
+  const d = new Rectangle( 0, 0, RECT_WIDTH, 40 );
+
+  const hBox = new HBox( { children: [ a, b, c, d ] } );
+
+  //---------------------------------------------------------------------------------
+  // align top
+  //---------------------------------------------------------------------------------
+  hBox.align = 'top';
+
+  assert.equal( a.top, hBox.top, 'a.top should be hBox.top (align top)' );
+  assert.equal( b.top, hBox.top, 'b.top should be hBox.top (align top)' );
+  assert.equal( c.top, hBox.top, 'c.top should be hBox.top (align top)' );
+  assert.equal( d.top, hBox.top, 'd.top should be hBox.top (align top)' );
+  assert.notEqual( a.bottom, b.bottom, 'a.bottom should not be b.bottom (align top)' );
+  assert.notEqual( b.bottom, c.bottom, 'b.bottom should not be c.bottom (align top)' );
+  assert.notEqual( c.bottom, d.bottom, 'c.bottom should not be d.bottom (align top)' );
+
+  //---------------------------------------------------------------------------------
+  // align bottom
+  //---------------------------------------------------------------------------------
+  hBox.align = 'bottom';
+
+  assert.equal( a.bottom, hBox.bottom, 'a.bottom should be hBox.bottom (align bottom)' );
+  assert.equal( b.bottom, hBox.bottom, 'b.bottom should be hBox.bottom (align bottom)' );
+  assert.equal( c.bottom, hBox.bottom, 'c.bottom should be hBox.bottom (align bottom)' );
+  assert.equal( d.bottom, hBox.bottom, 'd.bottom should be hBox.bottom (align bottom)' );
+  assert.notEqual( a.top, b.top, 'a.top should not be b.top (align bottom)' );
+  assert.notEqual( b.top, c.top, 'b.top should not be c.top (align bottom)' );
+  assert.notEqual( c.top, d.top, 'c.top should not be d.top (align bottom)' );
+
+  //---------------------------------------------------------------------------------
+  // align center
+  //---------------------------------------------------------------------------------
+  hBox.align = 'center';
+
+  assert.equal( a.centerY, hBox.centerY, 'a.centerY should be hBox.centerY (align center)' );
+  assert.equal( b.centerY, hBox.centerY, 'b.centerY should be hBox.centerY (align center)' );
+  assert.equal( c.centerY, hBox.centerY, 'c.centerY should be hBox.centerY (align center)' );
+  assert.equal( d.centerY, hBox.centerY, 'd.centerY should be hBox.centerY (align center)' );
+
+  //---------------------------------------------------------------------------------
+  // align origin
+  //---------------------------------------------------------------------------------
+  hBox.align = 'origin';
+
+  // rectangle origins at top left
+  assert.equal( a.top, hBox.top, 'a.top should be hBox.top (align origin)' );
+  assert.equal( b.top, hBox.top, 'b.top should be hBox.top (align origin)' );
+  assert.equal( c.top, hBox.top, 'c.top should be hBox.top (align origin)' );
+  assert.equal( d.top, hBox.top, 'd.top should be hBox.top (align origin)' );
+} );
