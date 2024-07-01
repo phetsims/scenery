@@ -45,7 +45,7 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -77,7 +77,12 @@ const KeyboardDragDirectionToKeysMap = new Map<KeyboardDragDirection, KeyboardDr
 
 type MapPosition = ( point: Vector2 ) => Vector2;
 
-type SelfOptions = {
+
+export type KeyboardDragListenerCallback<Listener extends KeyboardDragListener> = SceneryListenerCallback<Listener, KeyboardEvent>;
+export type KeyboardDragListenerNullableCallback<Listener extends KeyboardDragListener> = SceneryListenerNullableCallback<Listener, KeyboardEvent>;
+
+
+type SelfOptions<Listener extends KeyboardDragListener> = {
 
   // How much the position Property will change in view (parent) coordinates every moveOnHoldInterval. Object will
   // move in discrete steps at this interval. If you would like smoother "animated" motion use dragSpeed
@@ -130,14 +135,14 @@ type SelfOptions = {
   translateNode?: boolean;
 
   // Called when keyboard drag is started (on initial press).
-  start?: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
+  start?: KeyboardDragListenerCallback<Listener> | null;
 
   // Called during drag. If providedOptions.transform is provided, modelDelta will be in model coordinates.
   // Otherwise, it will be in parent view coordinates.
-  drag?: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
+  drag?: KeyboardDragListenerCallback<Listener> | null;
 
   // Called when keyboard dragging ends. The event may be null in cases of interruption.
-  end?: ( ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardDragListener ) => void ) | null;
+  end?: KeyboardDragListenerNullableCallback<Listener> | null;
 
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
   moveOnHoldDelay?: number;
@@ -152,7 +157,7 @@ type SelfOptions = {
 
 type ParentOptions = StrictOmit<KeyboardListenerOptions<KeyboardDragListenerKeyStroke>, 'keys'>;
 
-export type KeyboardDragListenerOptions = SelfOptions & // Options specific to this class
+export type KeyboardDragListenerOptions = SelfOptions<KeyboardDragListener> & // Options specific to this class
   PickOptional<ParentOptions, 'focus' | 'blur'> & // Only focus/blur are optional from the superclass
   EnabledComponentOptions; // Other superclass options are allowed
 
@@ -243,7 +248,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
                       providedOptions.positionProperty || providedOptions.translateNode,
       'If you provide a dragBoundsProperty, you must provide either a positionProperty or use translateNode.' );
 
-    const options = optionize<KeyboardDragListenerOptions, SelfOptions, ParentOptions>()( {
+    const options = optionize<KeyboardDragListenerOptions, SelfOptions<KeyboardDragListener>, ParentOptions>()( {
 
       // default moves the object roughly 600 view coordinates every second, assuming 60 fps
       dragDelta: 10,

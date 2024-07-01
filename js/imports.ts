@@ -231,7 +231,7 @@ export { default as ButtonListener } from './input/ButtonListener.js';
 export { default as SimpleDragHandler } from './input/SimpleDragHandler.js';
 
 export { default as PressListener } from './listeners/PressListener.js';
-export type { PressListenerOptions, PressListenerDOMEvent, PressListenerEvent, PressedPressListener, PressListenerCallback, PressListenerNullableCallback, PressListenerCanStartPressCallback } from './listeners/PressListener.js';
+export type { PressListenerOptions, PressListenerDOMEvent, PressListenerEvent, PressedPressListener, PressListenerCallback, PressListenerNullableCallback, PressListenerCanStartPressCallback, SceneryListenerCallback, SceneryListenerNullableCallback } from './listeners/PressListener.js';
 export { default as FireListener } from './listeners/FireListener.js';
 export type { FireListenerOptions } from './listeners/FireListener.js';
 export { default as DragListener } from './listeners/DragListener.js';

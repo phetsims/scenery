@@ -45,10 +45,14 @@ let globalID = 0;
 // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
 const truePredicate: ( ( ...args: IntentionalAny[] ) => true ) = _.constant( true );
 
+// General type of callback structure shared by many scenery input-listeners
+export type SceneryListenerCallback<Listener, DomEventTypes extends Event> = ( event: SceneryEvent<DomEventTypes>, listener: Listener ) => void;
+export type SceneryListenerNullableCallback<Listener, DomEventTypes extends Event> = ( event: SceneryEvent<DomEventTypes> | null, listener: Listener ) => void;
+
 export type PressListenerDOMEvent = MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent;
 export type PressListenerEvent = SceneryEvent<PressListenerDOMEvent>;
-export type PressListenerCallback<Listener extends PressListener> = ( event: PressListenerEvent, listener: Listener ) => void;
-export type PressListenerNullableCallback<Listener extends PressListener> = ( event: PressListenerEvent | null, listener: Listener ) => void;
+export type PressListenerCallback<Listener extends PressListener> = SceneryListenerCallback<Listener, PressListenerDOMEvent>;
+export type PressListenerNullableCallback<Listener extends PressListener> = SceneryListenerNullableCallback<Listener, PressListenerDOMEvent>;
 export type PressListenerCanStartPressCallback<Listener extends PressListener> = ( event: PressListenerEvent | null, listener: Listener ) => boolean;
 
 type SelfOptions<Listener extends PressListener> = {

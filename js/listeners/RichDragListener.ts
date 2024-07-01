@@ -40,7 +40,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 
-type SelfOptions = {
+export type AllDragListenerOptions = {
 
   // Called when the drag is started, for any input type. If you want to determine the type of input, you can check
   // SceneryEvent.isFromPDOM or SceneryEvent.type. If you need a start behavior for a specific form of input,
@@ -75,6 +75,9 @@ type SelfOptions = {
 
   // If true, the target Node will be translated during the drag operation.
   translateNode?: boolean;
+};
+
+type SelfOptions = AllDragListenerOptions & {
 
   // Additional options for the DragListener, OR any overrides for the DragListener that should
   // be used instead of the above options. For example, if the DragListener should have different
