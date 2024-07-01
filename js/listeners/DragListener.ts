@@ -79,37 +79,16 @@ import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerNullableCallback, PressListenerOptions, scenery, SceneryEvent, TInputListener, TransformTracker } from '../imports.js';
+import { Node, Pointer, PressedPressListener, PressListener, PressListenerDOMEvent, PressListenerEvent, PressListenerOptions, scenery, SceneryEvent, TInputListener, TransformTracker } from '../imports.js';
 import Property from '../../../axon/js/Property.js';
+import { AllDragListenerOptions } from './RichDragListener.js';
 
 // Scratch vectors used to prevent allocations
 const scratchVector2A = new Vector2( 0, 0 );
 
-type MapPosition = ( point: Vector2 ) => Vector2;
 type OffsetPosition<Listener extends DragListener> = ( point: Vector2, listener: Listener ) => Vector2;
 
-type SelfOptions<Listener extends DragListener> = {
-  // If provided, it will be synchronized with the drag position in the model coordinate
-  // frame (applying any provided transforms as needed). Typically, DURING a drag this Property should not be
-  // modified externally (as the next drag event will probably undo the change), but it's completely fine to modify
-  // this Property at any other time.
-  positionProperty?: Pick<TProperty<Vector2>, 'value'> | null;
-
-  // Called as start( event: {SceneryEvent}, listener: {DragListener} ) when the drag is started.
-  // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
-  start?: PressListenerCallback<Listener> | null;
-
-  // Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
-  // passing release(), as the drag start hasn't been fully processed at that point.
-  // NOTE: This will also be called if the drag is ended due to being interrupted or canceled.
-  end?: PressListenerNullableCallback<Listener> | null;
-
-  // If provided, this will be the conversion between the parent (view) and model coordinate
-  // frames. Usually most useful when paired with the positionProperty.
-  transform?: Transform3 | TReadOnlyProperty<Transform3> | null;
-
-  // If provided, the model position will be constrained to be inside these bounds.
-  dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
+type SelfOptions<Listener extends DragListener> = AllDragListenerOptions<Listener, PressListenerDOMEvent> & {
 
   // If true, unattached touches that move across our node will trigger a press(). This helps sometimes
   // for small draggable objects.
@@ -138,15 +117,6 @@ type SelfOptions<Listener extends DragListener> = {
   // which will usually adjust the position/transform to maintain position.
   trackAncestors?: boolean;
 
-  // If true, the effective currentTarget will be translated when the drag position changes.
-  translateNode?: boolean;
-
-  // If provided, it will allow custom mapping
-  // from the desired position (i.e. where the pointer is) to the actual possible position (i.e. where the dragged
-  // object ends up). For example, using dragBoundsProperty is equivalent to passing:
-  //   mapPosition: function( point ) { return dragBoundsProperty.value.closestPointTo( point ); }
-  mapPosition?: MapPosition | null;
-
   // If provided, its result will be added to the parentPoint before computation continues, to allow the ability to
   // "offset" where the pointer position seems to be. Useful for touch, where things shouldn't be under the pointer
   // directly.
@@ -159,11 +129,12 @@ type SelfOptions<Listener extends DragListener> = {
   // https://github.com/phetsims/sun/issues/696
   canClick?: boolean;
 };
-export type DragListenerOptions<Listener extends DragListener> = SelfOptions<Listener> & PressListenerOptions<Listener>;
+
 type CreateForwardingListenerOptions = {
   allowTouchSnag?: boolean;
 };
 
+export type DragListenerOptions<Listener extends DragListener> = SelfOptions<Listener> & PressListenerOptions<Listener>;
 export type PressedDragListener = DragListener & PressedPressListener;
 const isPressedListener = ( listener: DragListener ): listener is PressedDragListener => listener.isPressed;
 
@@ -226,6 +197,7 @@ export default class DragListener extends PressListener implements TInputListene
       positionProperty: null,
       start: null,
       end: null,
+      drag: _.noop,
       transform: null,
       dragBoundsProperty: null,
       allowTouchSnag: true,

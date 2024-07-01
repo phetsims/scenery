@@ -32,7 +32,7 @@
  */
 
 import TProperty from '../../../axon/js/TProperty.js';
-import { DragListener, DragListenerOptions, Hotkey, KeyboardDragListener, KeyboardDragListenerOptions, PressedDragListener, PressListenerEvent, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { DragListener, DragListenerOptions, Hotkey, KeyboardDragListener, KeyboardDragListenerOptions, PressedDragListener, PressListenerDOMEvent, PressListenerEvent, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -40,23 +40,28 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 
-export type AllDragListenerOptions = {
+type MapPosition = ( point: Vector2 ) => Vector2;
+
+//  TODO: Is there a better spot for these options? https://github.com/phetsims/scenery-phet/issues/858
+// Options shared between DragListener and KeyboardDragListener
+export type AllDragListenerOptions<Listener, DOMEvent extends Event> = {
+  // TODO: Fix doc to apply to any dragging listener https://github.com/phetsims/scenery-phet/issues/858
 
   // Called when the drag is started, for any input type. If you want to determine the type of input, you can check
   // SceneryEvent.isFromPDOM or SceneryEvent.type. If you need a start behavior for a specific form of input,
   // provide a start callback for that listener's options. It will be called IN ADDITION to this callback.
-  start?: ( ( event: SceneryEvent, listener: DragListener | KeyboardDragListener ) => void ) | null;
+  start?: SceneryListenerCallback<Listener, DOMEvent> | null;
 
   // Called during the drag event, for any input type. If you want to determine the type of input, you can check
   // SceneryEvent.isFromPDOM or SceneryEvent.type. If you need a drag behavior for a specific form of input,
   // provide a drag callback for that listener's options. It will be called IN ADDITION to this callback.
-  drag?: ( ( event: SceneryEvent, listener: DragListener | KeyboardDragListener ) => void ) | null;
+  drag?: SceneryListenerCallback<Listener, DOMEvent> | null;
 
   // Called when the drag is ended, for any input type. If you want to determine the type of input, you can check
   // SceneryEvent.isFromPDOM or SceneryEvent.type. If you need an end behavior for a specific form of input,
   // provide an end callback for that listener's options. It will be called IN ADDITION to this callback. The event
   // may be null for cases of interruption.
-  end?: ( ( event: SceneryEvent | null, listener: DragListener | KeyboardDragListener ) => void ) | null;
+  end?: SceneryListenerNullableCallback<Listener, DOMEvent> | null;
 
   // If provided, it will be synchronized with the drag position in the model coordinate frame. The optional transform
   // is applied.
@@ -71,21 +76,22 @@ export type AllDragListenerOptions = {
 
   // If provided, this allows custom mapping from the desired position (i.e. where the pointer is, or where the
   // KeyboardDragListener will set the position) to the actual position that will be used.
-  mapPosition?: null | ( ( point: Vector2 ) => Vector2 );
+  mapPosition?: null | MapPosition;
 
   // If true, the target Node will be translated during the drag operation.
   translateNode?: boolean;
 };
 
-type SelfOptions = AllDragListenerOptions & {
+// Any options in "All" dragging options whill be applied to both the keyboard and pointer dragging listener instances.
+type SelfOptions = AllDragListenerOptions<DragListener | KeyboardDragListener, PressListenerDOMEvent | KeyboardEvent> & {
 
   // Additional options for the DragListener, OR any overrides for the DragListener that should
-  // be used instead of the above options. For example, if the DragListener should have different
+  // be used instead of AllDragListenerOptions. For example, if the DragListener should have different
   // mapPosition, you can provide that option here.
   dragListenerOptions?: DragListenerOptions<DragListener>;
 
   // Additional options for the KeyboardDragListener, OR any overrides for the KeyboardDragListener that should
-  // be used instead of the above options. For example, if the KeyboardDragListener should have different
+  // be used instead of AllDragListenerOptions. For example, if the KeyboardDragListener should have different
   // mapPosition, you can provide that option here.
   keyboardDragListenerOptions?: KeyboardDragListenerOptions;
 };

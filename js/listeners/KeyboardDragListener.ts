@@ -58,6 +58,7 @@ import platform from '../../../phet-core/js/platform.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import { AllDragListenerOptions } from './RichDragListener.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
@@ -114,36 +115,6 @@ type SelfOptions<Listener extends KeyboardDragListener> = {
   // with this value.
   keyboardDragDirection?: KeyboardDragDirection;
 
-  // If provided, it will be synchronized with the drag position in the model frame, applying provided transforms as
-  // needed. Most useful when used with transform option
-  positionProperty?: Pick<TProperty<Vector2>, 'value'> | null;
-
-  // If provided, this will be the conversion between the view and model coordinate frames. Usually most useful when
-  // paired with the positionProperty.
-  transform?: Transform3 | TReadOnlyProperty<Transform3> | null;
-
-  // If provided, the model position will be constrained to be inside these bounds, in model coordinates
-  dragBoundsProperty?: TReadOnlyProperty<Bounds2 | null> | null;
-
-  // If provided, it will allow custom mapping
-  // from the desired position (i.e. where the pointer is) to the actual possible position (i.e. where the dragged
-  // object ends up). For example, using dragBoundsProperty is equivalent to passing:
-  //   mapPosition: function( point ) { return dragBoundsProperty.value.closestPointTo( point ); }
-  mapPosition?: MapPosition | null;
-
-  // If true, the effective target Node will be translated when the drag operation occurs.
-  translateNode?: boolean;
-
-  // Called when keyboard drag is started (on initial press).
-  start?: KeyboardDragListenerCallback<Listener> | null;
-
-  // Called during drag. If providedOptions.transform is provided, modelDelta will be in model coordinates.
-  // Otherwise, it will be in parent view coordinates.
-  drag?: KeyboardDragListenerCallback<Listener> | null;
-
-  // Called when keyboard dragging ends. The event may be null in cases of interruption.
-  end?: KeyboardDragListenerNullableCallback<Listener> | null;
-
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
   moveOnHoldDelay?: number;
 
@@ -151,9 +122,11 @@ type SelfOptions<Listener extends KeyboardDragListener> = {
   // than 0 to prevent dragging that is based on how often animation-frame steps occur.
   moveOnHoldInterval?: number;
 
+} & AllDragListenerOptions<Listener, KeyboardEvent> &
+
   // Though DragListener is not instrumented, declare these here to support properly passing this to children, see
   // https://github.com/phetsims/tandem/issues/60.
-} & Pick<PhetioObjectOptions, 'tandem' | 'phetioReadOnly'>;
+  Pick<PhetioObjectOptions, 'tandem' | 'phetioReadOnly'>;
 
 type ParentOptions = StrictOmit<KeyboardListenerOptions<KeyboardDragListenerKeyStroke>, 'keys'>;
 
