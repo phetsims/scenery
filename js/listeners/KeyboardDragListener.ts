@@ -78,10 +78,9 @@ const KeyboardDragDirectionToKeysMap = new Map<KeyboardDragDirection, KeyboardDr
 
 type MapPosition = ( point: Vector2 ) => Vector2;
 
-
-export type KeyboardDragListenerCallback<Listener extends KeyboardDragListener> = SceneryListenerCallback<Listener, KeyboardEvent>;
-export type KeyboardDragListenerNullableCallback<Listener extends KeyboardDragListener> = SceneryListenerNullableCallback<Listener, KeyboardEvent>;
-
+export type KeyboardDragListenerDOMEvent = KeyboardEvent;
+export type KeyboardDragListenerCallback<Listener extends KeyboardDragListener = KeyboardDragListener> = SceneryListenerCallback<Listener, KeyboardDragListenerDOMEvent>;
+export type KeyboardDragListenerNullableCallback<Listener extends KeyboardDragListener = KeyboardDragListener> = SceneryListenerNullableCallback<Listener, KeyboardDragListenerDOMEvent>;
 
 type SelfOptions<Listener extends KeyboardDragListener> = {
 
@@ -122,7 +121,7 @@ type SelfOptions<Listener extends KeyboardDragListener> = {
   // than 0 to prevent dragging that is based on how often animation-frame steps occur.
   moveOnHoldInterval?: number;
 
-} & AllDragListenerOptions<Listener, KeyboardEvent> &
+} & AllDragListenerOptions<Listener, KeyboardDragListenerDOMEvent> &
 
   // Though DragListener is not instrumented, declare these here to support properly passing this to children, see
   // https://github.com/phetsims/tandem/issues/60.
@@ -137,9 +136,9 @@ export type KeyboardDragListenerOptions = SelfOptions<KeyboardDragListener> & //
 class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStroke> {
 
   // See options for documentation
-  private readonly _start: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
-  private readonly _drag: ( ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => void ) | null;
-  private readonly _end: ( ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardDragListener ) => void ) | null;
+  private readonly _start: KeyboardDragListenerCallback | null;
+  private readonly _drag: KeyboardDragListenerCallback | null;
+  private readonly _end: KeyboardDragListenerNullableCallback | null;
   private _dragBoundsProperty: TReadOnlyProperty<Bounds2 | null>;
   private readonly _mapPosition: MapPosition | null;
   private readonly _translateNode: boolean;
@@ -160,7 +159,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   private downKeyDownProperty = new TinyProperty<boolean>( false );
 
   // Fires to conduct the start and end of a drag, added for PhET-iO interoperability
-  private dragStartAction: PhetioAction<[ SceneryEvent<KeyboardEvent> ]>;
+  private dragStartAction: PhetioAction<[ SceneryEvent<KeyboardDragListenerDOMEvent> ]>;
   private dragEndAction: PhetioAction;
   private dragAction: PhetioAction;
 

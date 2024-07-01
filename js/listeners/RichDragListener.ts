@@ -32,13 +32,14 @@
  */
 
 import TProperty from '../../../axon/js/TProperty.js';
-import { DragListener, DragListenerOptions, Hotkey, KeyboardDragListener, KeyboardDragListenerOptions, PressedDragListener, PressListenerDOMEvent, PressListenerEvent, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
+import { DragListener, DragListenerOptions, Hotkey, KeyboardDragListener, KeyboardDragListenerCallback, KeyboardDragListenerNullableCallback, KeyboardDragListenerOptions, PressedDragListener, PressListenerCallback, PressListenerDOMEvent, PressListenerEvent, PressListenerNullableCallback, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import { KeyboardDragListenerDOMEvent } from './KeyboardDragListener.js';
 
 type MapPosition = ( point: Vector2 ) => Vector2;
 
@@ -83,7 +84,7 @@ export type AllDragListenerOptions<Listener, DOMEvent extends Event> = {
 };
 
 // Any options in "All" dragging options whill be applied to both the keyboard and pointer dragging listener instances.
-type SelfOptions = AllDragListenerOptions<DragListener | KeyboardDragListener, PressListenerDOMEvent | KeyboardEvent> & {
+type SelfOptions = AllDragListenerOptions<DragListener | KeyboardDragListener, PressListenerDOMEvent | KeyboardDragListenerDOMEvent> & {
 
   // Additional options for the DragListener, OR any overrides for the DragListener that should
   // be used instead of AllDragListenerOptions. For example, if the DragListener should have different
@@ -141,7 +142,7 @@ export default class RichDragListener implements TInputListener {
     //---------------------------------------------------------------------------------
     // Construct the DragListener and combine its options.
     //---------------------------------------------------------------------------------
-    const wrappedDragListenerStart = ( event: PressListenerEvent, listener: PressedDragListener ) => {
+    const wrappedDragListenerStart: PressListenerCallback<PressedDragListener> = ( event, listener ) => {
 
       // when the drag listener starts, interrupt the keyboard dragging
       this.keyboardDragListener.interrupt();
@@ -150,12 +151,12 @@ export default class RichDragListener implements TInputListener {
       options.dragListenerOptions.start && options.dragListenerOptions.start( event, listener );
     };
 
-    const wrappedDragListenerDrag = ( event: PressListenerEvent, listener: PressedDragListener ) => {
+    const wrappedDragListenerDrag: PressListenerCallback<PressedDragListener> = ( event, listener ) => {
       options.drag && options.drag( event, listener );
       options.dragListenerOptions.drag && options.dragListenerOptions.drag( event, listener );
     };
 
-    const wrappedDragListenerEnd = ( event: PressListenerEvent | null, listener: PressedDragListener ) => {
+    const wrappedDragListenerEnd: PressListenerNullableCallback<PressedDragListener> = ( event, listener ) => {
       options.end && options.end( event, listener );
       options.dragListenerOptions.end && options.dragListenerOptions.end( event, listener );
     };
@@ -180,7 +181,7 @@ export default class RichDragListener implements TInputListener {
     //---------------------------------------------------------------------------------
     // Construct the KeyboardDragListener and combine its options.
     //---------------------------------------------------------------------------------
-    const wrappedKeyboardListenerStart = ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => {
+    const wrappedKeyboardListenerStart: KeyboardDragListenerCallback = ( event, listener ) => {
 
       // when the drag listener starts, interrupt the pointer dragging
       this.dragListener.interrupt();
@@ -189,12 +190,12 @@ export default class RichDragListener implements TInputListener {
       options.keyboardDragListenerOptions.start && options.keyboardDragListenerOptions.start( event, listener );
     };
 
-    const wrappedKeyboardListenerDrag = ( event: SceneryEvent<KeyboardEvent>, listener: KeyboardDragListener ) => {
+    const wrappedKeyboardListenerDrag: KeyboardDragListenerCallback = ( event, listener ) => {
       options.drag && options.drag( event, listener );
       options.keyboardDragListenerOptions.drag && options.keyboardDragListenerOptions.drag( event, listener );
     };
 
-    const wrappedKeyboardListenerEnd = ( event: SceneryEvent<KeyboardEvent> | null, listener: KeyboardDragListener ) => {
+    const wrappedKeyboardListenerEnd: KeyboardDragListenerNullableCallback = ( event, listener ) => {
       options.end && options.end( event, listener );
       options.keyboardDragListenerOptions.end && options.keyboardDragListenerOptions.end( event, listener );
     };
