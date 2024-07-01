@@ -18,7 +18,7 @@ import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import { scenery } from '../imports.js';
 
-// TODO: Should be a class instead of a function, https://github.com/phetsims/buoyancy/issues/86
+// TODO: Should be a class instead of a function, https://github.com/phetsims/scenery/issues/1641
 const createGatedVisibleProperty = ( providedVisibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, selfVisiblePropertyOptions?: PhetioObjectOptions ): TReadOnlyProperty<boolean> => {
 
   const selfVisibleProperty = new BooleanProperty( true, combineOptions<PhetioObjectOptions>( {
