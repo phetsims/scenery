@@ -134,7 +134,7 @@ type CreateForwardingListenerOptions = {
   allowTouchSnag?: boolean;
 };
 
-export type DragListenerOptions<Listener extends DragListener> = SelfOptions<Listener> & PressListenerOptions<Listener>;
+export type DragListenerOptions<Listener extends DragListener = DragListener> = SelfOptions<Listener> & PressListenerOptions<Listener>;
 export type PressedDragListener = DragListener & PressedPressListener;
 const isPressedListener = ( listener: DragListener ): listener is PressedDragListener => listener.isPressed;
 

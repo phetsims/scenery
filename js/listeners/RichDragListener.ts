@@ -89,7 +89,7 @@ type SelfOptions = AllDragListenerOptions<DragListener | KeyboardDragListener, P
   // Additional options for the DragListener, OR any overrides for the DragListener that should
   // be used instead of AllDragListenerOptions. For example, if the DragListener should have different
   // mapPosition, you can provide that option here.
-  dragListenerOptions?: DragListenerOptions<DragListener>;
+  dragListenerOptions?: DragListenerOptions;
 
   // Additional options for the KeyboardDragListener, OR any overrides for the KeyboardDragListener that should
   // be used instead of AllDragListenerOptions. For example, if the KeyboardDragListener should have different
