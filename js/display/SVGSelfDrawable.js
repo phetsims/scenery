@@ -79,10 +79,6 @@ class SVGSelfDrawable extends SelfDrawable {
    * @protected
    */
   updateSVG() {
-    if ( this.paintDirty ) {
-      this.updateSVGSelf( this.node, this.svgElement );
-    }
-
     // sync the differences between the previously-recorded list of cached paints and the new list
     if ( this.usesPaint && this.dirtyCachedPaints ) {
       const newCachedPaints = this.node._cachedPaints.slice(); // defensive copy for now
@@ -119,6 +115,10 @@ class SVGSelfDrawable extends SelfDrawable {
       }
 
       this.lastCachedPaints = newCachedPaints;
+    }
+
+    if ( this.paintDirty ) {
+      this.updateSVGSelf( this.node, this.svgElement );
     }
 
     // clear all of the dirty flags
