@@ -45,6 +45,9 @@ class TextSVGDrawable extends TextStatefulDrawable( SVGSelfDrawable ) {
     // @private {boolean}
     this.hasLength = false;
 
+    // @private {'ltr' | 'rtl'}
+    this.direction = 'ltr';
+
     if ( !this.svgElement ) {
       const text = document.createElementNS( svgns, 'text' );
 
@@ -98,7 +101,44 @@ class TextSVGDrawable extends TextStatefulDrawable( SVGSelfDrawable ) {
 
     // update the text-node's value
     if ( this.dirtyText ) {
-      text.lastChild.nodeValue = Utils.safariEmbeddingMarkWorkaround( this.node.renderedText );
+      let string = Utils.safariEmbeddingMarkWorkaround( this.node.renderedText );
+
+      // Workaround for Firefox handling of RTL embedding marks, https://github.com/phetsims/scenery/issues/1643
+      // We strip off outer containing embedding marks, and adjust the direction and text-anchor accordingly to match
+      // our normal behavior.
+      if ( platform.firefox ) {
+        let direction = 'ltr';
+
+        // While our string is long enough AND the last character is a POP embedding mark
+        while ( string.length > 2 && string[ string.length - 1 ] === '\u202c' ) {
+          const isLTR = string[ 0 ] === '\u202a';
+          const isRTL = string[ 0 ] === '\u202b';
+
+          if ( isLTR ) {
+            direction = 'ltr';
+          }
+          else if ( isRTL ) {
+            direction = 'rtl';
+          }
+          else {
+            break;
+          }
+
+          // Strip off the outer embedding marks
+          string = string.slice( 1, -1 );
+        }
+
+        if ( this.direction !== direction ) {
+          this.direction = direction;
+
+          text.setAttribute( 'direction', direction );
+
+          // To maintain the same positioning, we need to adjust the text-anchor
+          text.setAttribute( 'text-anchor', direction === 'rtl' ? 'end' : 'start' );
+        }
+      }
+
+      text.lastChild.nodeValue = string;
     }
 
     // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
