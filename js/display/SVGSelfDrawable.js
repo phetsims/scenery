@@ -15,7 +15,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import { PaintSVGState, scenery, SelfDrawable } from '../imports.js';
+
+// Scratch arrays so that we are not creating array objects during paint checks
+const scratchOldPaints = [];
+const scratchNewPaints = [];
+const scratchSimilarPaints = [];
+const emptyArray = [];
 
 class SVGSelfDrawable extends SelfDrawable {
   /**
@@ -23,7 +30,7 @@ class SVGSelfDrawable extends SelfDrawable {
    *
    * @param {number} renderer
    * @param {Instance} instance
-   * @param {boolean} usesPaint
+   * @param {boolean} usesPaint - Effectively true if we mix in PaintableStatefulDrawable
    * @param {boolean} keepElements
    * @returns {SVGSelfDrawable}
    */
@@ -34,8 +41,8 @@ class SVGSelfDrawable extends SelfDrawable {
     super.initialize( renderer, instance );
 
     // @private {boolean}
-    this.usesPaint = usesPaint;
-    this.keepElements = keepElements;
+    this.usesPaint = usesPaint; // const! (always the same) - Effectively true if we mix in PaintableStatefulDrawable
+    this.keepElements = keepElements; // const! (always the same)
 
     // @public {SVGElement} - should be filled in by subtype
     this.svgElement = null;
@@ -75,46 +82,44 @@ class SVGSelfDrawable extends SelfDrawable {
   }
 
   /**
+   * Updates the cached paints for this drawable. This should be called when the paints for the drawable have changed.
+   * @protected
+   */
+  setCachedPaints( cachedPaints ) {
+    assert && assert( this.usesPaint );
+    assert && assert( Array.isArray( this.lastCachedPaints ) );
+
+    // Fill scratch arrays with the differences between the last cached paints and the new cached paints
+    arrayDifference( this.lastCachedPaints, cachedPaints, scratchOldPaints, scratchNewPaints, scratchSimilarPaints );
+
+    // Increment paints first, so we DO NOT get rid of things we don't need.
+    for ( let i = 0; i < scratchNewPaints.length; i++ ) {
+      this.svgBlock.incrementPaint( scratchNewPaints[ i ] );
+    }
+
+    for ( let i = 0; i < scratchOldPaints.length; i++ ) {
+      this.svgBlock.decrementPaint( scratchOldPaints[ i ] );
+    }
+
+    // Clear arrays so we don't temporarily leak memory (the next arrayDifference will push into these). Reduces
+    // GC/created references.
+    scratchOldPaints.length = 0;
+    scratchNewPaints.length = 0;
+    scratchSimilarPaints.length = 0;
+
+    // Replace lastCachedPaints contents
+    this.lastCachedPaints.length = 0;
+    this.lastCachedPaints.push( ...cachedPaints );
+  }
+
+  /**
    * Called to update the visual appearance of our svgElement
    * @protected
    */
   updateSVG() {
     // sync the differences between the previously-recorded list of cached paints and the new list
     if ( this.usesPaint && this.dirtyCachedPaints ) {
-      const newCachedPaints = this.node._cachedPaints.slice(); // defensive copy for now
-      let i;
-      let j;
-
-      // scan for new cached paints (not in the old list)
-      for ( i = 0; i < newCachedPaints.length; i++ ) {
-        const newPaint = newCachedPaints[ i ];
-        let isNew = true;
-        for ( j = 0; j < this.lastCachedPaints.length; j++ ) {
-          if ( newPaint === this.lastCachedPaints[ j ] ) {
-            isNew = false;
-            break;
-          }
-        }
-        if ( isNew ) {
-          this.svgBlock.incrementPaint( newPaint );
-        }
-      }
-      // scan for removed cached paints (not in the new list)
-      for ( i = 0; i < this.lastCachedPaints.length; i++ ) {
-        const oldPaint = this.lastCachedPaints[ i ];
-        let isRemoved = true;
-        for ( j = 0; j < newCachedPaints.length; j++ ) {
-          if ( oldPaint === newCachedPaints[ j ] ) {
-            isRemoved = false;
-            break;
-          }
-        }
-        if ( isRemoved ) {
-          this.svgBlock.decrementPaint( oldPaint );
-        }
-      }
-
-      this.lastCachedPaints = newCachedPaints;
+      this.setCachedPaints( this.node._cachedPaints );
     }
 
     if ( this.paintDirty ) {
@@ -198,7 +203,14 @@ class SVGSelfDrawable extends SelfDrawable {
 
     // release any defs, and dispose composed state objects
     this.updateDefsSelf && this.updateDefsSelf( null );
-    this.usesPaint && this.paintState.dispose();
+
+    if ( this.usesPaint ) {
+      // When we are disposed, clear the cached paints (since we might switch to another node with a different set of
+      // cached paints in the future). See https://github.com/phetsims/unit-rates/issues/226
+      this.setCachedPaints( emptyArray );
+
+      this.paintState.dispose();
+    }
 
     this.defs = null;
 
