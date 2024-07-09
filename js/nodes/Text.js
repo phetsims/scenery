@@ -705,6 +705,7 @@ define( function( require ) {
         var text = document.createElementNS( scenery.svgns, 'text' );
         text.appendChild( document.createTextNode( '' ) );
         this.text = text;
+        this.direction = 'ltr';
 
         if ( useTransparentSVGTextWorkaround ) {
           var group = document.createElementNS( scenery.svgns, 'g' );
@@ -751,7 +752,44 @@ define( function( require ) {
 
       // update the text-node's value
       if ( this.dirtyText ) {
-        text.lastChild.nodeValue = this.node.getNonBreakingText();
+        var string = this.node.getNonBreakingText();
+
+        // Workaround for Firefox handling of RTL embedding marks, https://github.com/phetsims/scenery/issues/1643
+        // We strip off outer containing embedding marks, and adjust the direction and text-anchor accordingly to match
+        // our normal behavior.
+        if ( platform.firefox ) {
+          var direction = 'ltr';
+
+          // While our string is long enough AND the last character is a POP embedding mark
+          while ( string.length > 2 && string[ string.length - 1 ] === '\u202c' ) {
+            var isLTR = string[ 0 ] === '\u202a';
+            var isRTL = string[ 0 ] === '\u202b';
+
+            if ( isLTR ) {
+              direction = 'ltr';
+            }
+            else if ( isRTL ) {
+              direction = 'rtl';
+            }
+            else {
+              break;
+            }
+
+            // Strip off the outer embedding marks
+            string = string.slice( 1, -1 );
+          }
+
+          if ( this.direction !== direction ) {
+            this.direction = direction;
+
+            text.setAttribute( 'direction', direction );
+
+            // To maintain the same positioning, we need to adjust the text-anchor
+            text.setAttribute( 'text-anchor', direction === 'rtl' ? 'end' : 'start' );
+          }
+        }
+
+        text.lastChild.nodeValue = string;
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
