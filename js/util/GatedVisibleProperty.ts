@@ -22,7 +22,7 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 
 type SelfOptions = {
   selfVisibleInitiallyVisible?: boolean;
-  selfVisiblePropertyOptions: StrictOmit<BooleanPropertyOptions<boolean>, 'tandem'>;
+  selfVisiblePropertyOptions?: BooleanPropertyOptions;
 };
 type ParentOptions = DerivedPropertyOptions<boolean>;
 type GatedVisiblePropertyOptions = SelfOptions & StrictOmit<ParentOptions, 'tandem'>;
@@ -30,19 +30,19 @@ type GatedVisiblePropertyOptions = SelfOptions & StrictOmit<ParentOptions, 'tand
 class GatedVisibleProperty extends DerivedProperty2<boolean, boolean, boolean> {
   public readonly selfVisibleProperty: TProperty<boolean>;
 
-  public constructor( providedVisibleProperty: TReadOnlyProperty<boolean>, tandem: Tandem, providedOptions?: GatedVisiblePropertyOptions ) {
+  public constructor( providedVisibleProperty: TReadOnlyProperty<boolean>, parentTandem: Tandem, providedOptions?: GatedVisiblePropertyOptions ) {
 
     const options = optionize<GatedVisiblePropertyOptions, SelfOptions, ParentOptions>()( {
       selfVisibleInitiallyVisible: true,
       selfVisiblePropertyOptions: {
-        tandem: tandem.createTandem( 'selfVisibleProperty' ),
+        tandem: parentTandem.createTandem( 'selfVisibleProperty' ),
         phetioFeatured: true,
         phetioDocumentation: 'Provides an additional way to toggle the visibility for the PhET-iO Element.'
       },
 
-      tandem: tandem.createTandem( 'visibleProperty' ),
-      phetioValueType: BooleanIO,
-      phetioDocumentation: null
+      tandem: parentTandem.createTandem( 'visibleProperty' ),
+      phetioValueType: BooleanIO
+      // see below for phetioDocumentation
     }, providedOptions );
 
     const selfVisibleProperty = new BooleanProperty( options.selfVisibleInitiallyVisible, options.selfVisiblePropertyOptions );
@@ -50,8 +50,11 @@ class GatedVisibleProperty extends DerivedProperty2<boolean, boolean, boolean> {
       options.phetioDocumentation = `Whether the PhET-iO Element is visible, see ${selfVisibleProperty.tandem.name} for customization.`;
     }
 
-    super( [ providedVisibleProperty, selfVisibleProperty ],
-      ( providedVisible, selfVisible ) => providedVisible && selfVisible, options );
+    super(
+      [ providedVisibleProperty, selfVisibleProperty ],
+      ( providedVisible, selfVisible ) => providedVisible && selfVisible,
+      options
+    );
 
     this.selfVisibleProperty = selfVisibleProperty;
   }
