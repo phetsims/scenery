@@ -102,7 +102,7 @@ class TextSVGDrawable extends TextStatefulDrawable( SVGSelfDrawable ) {
 
       // Workaround for Firefox handling of RTL embedding marks, https://github.com/phetsims/scenery/issues/1643
       if ( platform.firefox ) {
-        string = '\u200b' + string;
+        string = `\u200b${string}`;
       }
 
       text.lastChild.nodeValue = string;
