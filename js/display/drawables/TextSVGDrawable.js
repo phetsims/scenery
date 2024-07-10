@@ -48,9 +48,6 @@ define( require => {
     // @private {boolean}
     this.hasLength = false;
 
-    // @private {'ltr' | 'rtl'}
-    this.direction = 'ltr';
-
     if ( !this.svgElement ) {
       const text = document.createElementNS( scenery.svgns, 'text' );
       text.appendChild( document.createTextNode( '' ) );
@@ -109,38 +106,8 @@ define( require => {
       let string = this.node.renderedText;
 
       // Workaround for Firefox handling of RTL embedding marks, https://github.com/phetsims/scenery/issues/1643
-      // We strip off outer containing embedding marks, and adjust the direction and text-anchor accordingly to match
-      // our normal behavior.
       if ( platform.firefox ) {
-        let direction = 'ltr';
-
-        // While our string is long enough AND the last character is a POP embedding mark
-        while ( string.length > 2 && string[ string.length - 1 ] === '\u202c' ) {
-          const isLTR = string[ 0 ] === '\u202a';
-          const isRTL = string[ 0 ] === '\u202b';
-
-          if ( isLTR ) {
-            direction = 'ltr';
-          }
-          else if ( isRTL ) {
-            direction = 'rtl';
-          }
-          else {
-            break;
-          }
-
-          // Strip off the outer embedding marks
-          string = string.slice( 1, -1 );
-        }
-
-        if ( this.direction !== direction ) {
-          this.direction = direction;
-
-          text.setAttribute( 'direction', direction );
-
-          // To maintain the same positioning, we need to adjust the text-anchor
-          text.setAttribute( 'text-anchor', direction === 'rtl' ? 'end' : 'start' );
-        }
+        string = '\u200b' + string;
       }
 
       text.lastChild.nodeValue = string;
