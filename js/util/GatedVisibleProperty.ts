@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2024, University of Colorado Boulder
 
 /**
  * The GatedVisibleProperty class abstracts the process of creating a "gated" visibility Property
