@@ -1,13 +1,25 @@
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="1007" height="833">
   <g transform="translate(100,0)">
-    <line x1="0" y1="0" x2="0" y2="90" stroke="black" stroke-width="0.5"/>
+    <line x1="0" y1="0" x2="0" y2="180" stroke="black" stroke-width="0.5"/>
     <g transform="translate(0,30)">
       <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: red" text-anchor="start">‫القانون الثاني‬</text>
       <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: blue" text-anchor="end">‫القانون الثاني‬</text>
     </g>
     <g transform="translate(0,60)">
+      <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: red" text-anchor="start">​‫القانون الثاني‬</text>
+      <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: blue" text-anchor="end">​‫القانون الثاني‬</text>
+    </g>
+    <g transform="translate(0,90)">
       <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: red" text-anchor="start">Test String</text>
       <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: blue" text-anchor="end">Test String</text>
+    </g>
+    <g transform="translate(0,120)">
+      <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: red" text-anchor="start">‫pH‬: 7.00</text>
+      <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: blue" text-anchor="end">‫pH‬: 7.00</text>
+    </g>
+    <g transform="translate(0,150)">
+      <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: red" text-anchor="start">​‫pH‬: 7.00</text>
+      <text direction="ltr" font-family="Arial, sans-serif" font-size="18px" style="fill: blue" text-anchor="end">​‫pH‬: 7.00</text>
     </g>
   </g>
 </svg>
