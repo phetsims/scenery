@@ -1420,15 +1420,22 @@ class Node extends ParallelDOM {
 
       sceneryLog && sceneryLog.bounds && sceneryLog.bounds( 'childBounds dirty' );
 
-      // have each child validate their own bounds
-      i = this._children.length;
-      while ( i-- ) {
-        const child = this._children[ i ];
+      // have each child validate their own bounds (potentially multiple times, until there are no changes)
+      let changed = true;
+      let count = 0;
+      while ( changed ) {
+        changed = false;
+        i = this._children.length;
+        while ( i-- ) {
+          const child = this._children[ i ];
 
-        // Reentrancy might cause the child to be removed
-        if ( child ) {
-          child.validateBounds();
+          // Reentrancy might cause the child to be removed
+          if ( child ) {
+            changed = child.validateBounds() || changed;
+          }
         }
+
+        assert && assert( count++ < 500, 'Infinite loop detected - children are changing bounds during validation' );
       }
 
       // and recompute our childBounds
