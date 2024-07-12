@@ -21,31 +21,20 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import Rectangle, { RectangleOptions } from '../../nodes/Rectangle.js';
 import VBox from './VBox.js';
 import HBox from './HBox.js';
-import Utils from '../../../../dot/js/Utils.js';
-import { VSeparator } from '../../imports.js';
+import LayoutTestUtils from '../LayoutTestUtils.js';
+import Rectangle from '../../nodes/Rectangle.js';
+import VSeparator from './VSeparator.js';
 
-const RECT_WIDTH = 100;
-const RECT_HEIGHT = 25;
-
-const aboutEqual = ( a: number, b: number, epsilon = 0.0001 ) => {
-  return Utils.equalsEpsilon( a, b, epsilon );
-};
-
-const createRectangles = ( count: number, indexToOptions?: ( index: number ) => RectangleOptions ) => {
-  return _.times( count, ( index: number ) => {
-    const options = indexToOptions ? indexToOptions( index ) : {};
-    return new Rectangle( 0, 0, RECT_WIDTH, RECT_HEIGHT, options );
-  } );
-};
+const RECT_WIDTH = LayoutTestUtils.RECT_WIDTH;
+const RECT_HEIGHT = LayoutTestUtils.RECT_HEIGHT;
 
 QUnit.module( 'FlowBox' );
 
 QUnit.test( 'Basic HBox/VBox tests', assert => {
 
-  const [ a, b ] = createRectangles( 2 );
+  const [ a, b ] = LayoutTestUtils.createRectangles( 2 );
 
   const hBox = new HBox( { children: [ a, b ] } );
   hBox.validateBounds();
@@ -74,7 +63,7 @@ QUnit.test( 'Basic HBox/VBox tests', assert => {
 
 QUnit.test( 'FlowBox cell resizing', assert => {
 
-  let [ a, b ] = createRectangles( 2 );
+  let [ a, b ] = LayoutTestUtils.createRectangles( 2 );
   const hBox = new HBox( { children: [ a, b ] } );
   hBox.validateBounds();
 
@@ -100,7 +89,7 @@ QUnit.test( 'FlowBox cell resizing', assert => {
   //---------------------------------------------------------------------------------
   // Tests that disable resizing
   //---------------------------------------------------------------------------------
-  [ a, b ] = createRectangles( 2 );
+  [ a, b ] = LayoutTestUtils.createRectangles( 2 );
   const hBoxNoResize = new HBox( { children: [ a, b ], resize: false } );
 
   // resize a and make sure layout is correct - it should not adjust
@@ -121,7 +110,7 @@ QUnit.test( 'FlowBox cell resizing', assert => {
 } );
 
 QUnit.test( 'Invisible children', assert => {
-  const [ c, d, e ] = createRectangles( 3 );
+  const [ c, d, e ] = LayoutTestUtils.createRectangles( 3 );
   d.visible = false;
 
   // Invisible Nodes should not be included in layout bounds by default.
@@ -140,7 +129,7 @@ QUnit.test( 'Invisible children', assert => {
 } );
 
 QUnit.test( 'Children that grow, stretch, and have size constraints', assert => {
-  const [ a, b, c ] = createRectangles( 3, index => {
+  const [ a, b, c ] = LayoutTestUtils.createRectangles( 3, index => {
 
     // Make these rectangles sizable so that they can grow/stretch for these tests
     return {
@@ -221,8 +210,8 @@ QUnit.test( 'Children that grow, stretch, and have size constraints', assert => 
   //---------------------------------------------------------------------------------
   // size constraints on the container
   //---------------------------------------------------------------------------------
-  const [ d, e ] = createRectangles( 3 );
-  const [ f, g ] = createRectangles( 2 );
+  const [ d, e ] = LayoutTestUtils.createRectangles( 3 );
+  const [ f, g ] = LayoutTestUtils.createRectangles( 2 );
 
   const hBoxWithConstraint = new HBox( {
     layoutOptions: {
@@ -246,7 +235,7 @@ QUnit.test( 'Children that grow, stretch, and have size constraints', assert => 
 } );
 
 QUnit.test( 'Justify tests', assert => {
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
 
   const hBox = new HBox( { children: [ a, b, c, d ] } );
   assert.equal( hBox.width, 4 * RECT_WIDTH, 'width should be sum of children widths' );
@@ -282,8 +271,8 @@ QUnit.test( 'Justify tests', assert => {
   hBox.justify = 'spaceBetween';
   assert.equal( a.left, hBox.left, 'a.left should be hBox.left' );
   assert.equal( d.right, hBox.right, 'd.right should be hBox.right' );
-  assert.ok( aboutEqual( b.left - a.right, c.left - b.right ), 'space between a and b should be equal to space between b and c' );
-  assert.ok( aboutEqual( c.left - b.right, d.left - c.right ), 'space between b and c should be equal to space between c and d' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.left - a.right, c.left - b.right ), 'space between a and b should be equal to space between b and c' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.left - b.right, d.left - c.right ), 'space between b and c should be equal to space between c and d' );
 
   //---------------------------------------------------------------------------------
   // justify spaceAround
@@ -295,11 +284,11 @@ QUnit.test( 'Justify tests', assert => {
   const totalSpace = hBox.width - 4 * RECT_WIDTH;
   const sideSpacing = totalSpace / 4 / 2; // Each Node gets half space to the left and right
 
-  assert.ok( aboutEqual( a.left, hBox.left + sideSpacing ), 'a.left should be hBox.left + spaceAround' );
-  assert.ok( aboutEqual( a.right + sideSpacing * 2, b.left ), 'a.right + sideSpacing * 2 should be b.left' );
-  assert.ok( aboutEqual( b.right + sideSpacing * 2, c.left ), 'b.right + sideSpacing * 2 should be c.left' );
-  assert.ok( aboutEqual( c.right + sideSpacing * 2, d.left ), 'c.right + sideSpacing * 2 should be d.left' );
-  assert.ok( aboutEqual( d.right, hBox.right - sideSpacing ), 'd.right should be hBox.right - spaceAround' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.left, hBox.left + sideSpacing ), 'a.left should be hBox.left + spaceAround' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.right + sideSpacing * 2, b.left ), 'a.right + sideSpacing * 2 should be b.left' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.right + sideSpacing * 2, c.left ), 'b.right + sideSpacing * 2 should be c.left' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.right + sideSpacing * 2, d.left ), 'c.right + sideSpacing * 2 should be d.left' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right - sideSpacing ), 'd.right should be hBox.right - spaceAround' );
 
   //---------------------------------------------------------------------------------
   // justify spaceEvenly
@@ -309,11 +298,11 @@ QUnit.test( 'Justify tests', assert => {
   // space evenly has equal space between each pair of nodes and on the outside of the first and last nodes
   const spaceBetween = totalSpace / 5; // 4 spaces between 5 nodes
 
-  assert.ok( aboutEqual( a.left, hBox.left + spaceBetween ), 'a.left should be hBox.left + spaceEvenly' );
-  assert.ok( aboutEqual( a.right + spaceBetween, b.left ), 'a.right + spaceBetween should be b.left' );
-  assert.ok( aboutEqual( b.right + spaceBetween, c.left ), 'b.right + spaceBetween should be c.left' );
-  assert.ok( aboutEqual( c.right + spaceBetween, d.left ), 'c.right + spaceBetween should be d.left' );
-  assert.ok( aboutEqual( d.right, hBox.right - spaceBetween ), 'd.right should be hBox.right - spaceEvenly' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.left, hBox.left + spaceBetween ), 'a.left should be hBox.left + spaceEvenly' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.right + spaceBetween, b.left ), 'a.right + spaceBetween should be b.left' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.right + spaceBetween, c.left ), 'b.right + spaceBetween should be c.left' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.right + spaceBetween, d.left ), 'c.right + spaceBetween should be d.left' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right - spaceBetween ), 'd.right should be hBox.right - spaceEvenly' );
 
   //---------------------------------------------------------------------------------
   // justify center
@@ -323,15 +312,15 @@ QUnit.test( 'Justify tests', assert => {
   const remainingSpace = hBox.width - 4 * RECT_WIDTH;
   const halfRemainingSpace = remainingSpace / 2;
 
-  assert.ok( aboutEqual( a.left, hBox.left + halfRemainingSpace ), 'a.left should be hBox.left + halfRemainingSpace' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.left, hBox.left + halfRemainingSpace ), 'a.left should be hBox.left + halfRemainingSpace' );
   assert.equal( a.right, b.left, 'a.right should be b.left' );
   assert.equal( b.right, c.left, 'b.right should be c.left' );
   assert.equal( c.right, d.left, 'c.right should be d.left' );
-  assert.ok( aboutEqual( d.right, hBox.right - halfRemainingSpace ), 'd.right should be hBox.right - halfRemainingSpace' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right - halfRemainingSpace ), 'd.right should be hBox.right - halfRemainingSpace' );
 } );
 
 QUnit.test( 'Wrap tests', assert => {
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
   const hBox = new HBox( { children: [ a, b, c, d ], wrap: true } );
 
   assert.equal( hBox.width, 4 * RECT_WIDTH, 'width should be sum of children widths' );
@@ -408,7 +397,7 @@ QUnit.test( 'Align tests', assert => {
 
 QUnit.test( 'Justify Lines Tests', assert => {
 
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
   const hBox = new HBox( {
     children: [ a, b, c, d ],
 
@@ -455,10 +444,10 @@ QUnit.test( 'Justify Lines Tests', assert => {
   //---------------------------------------------------------------------------------
   hBox.justifyLines = 'spaceBetween';
 
-  assert.ok( aboutEqual( a.top, hBox.top ), 'a.top should be hBox.top (justifyLines spaceBetween)' );
-  assert.ok( aboutEqual( d.bottom, hBox.bottom ), 'd.bottom should be hBox.bottom (justifyLines spaceBetween)' );
-  assert.ok( aboutEqual( b.top - a.bottom, c.top - b.bottom ), 'space between a and b should be equal to space between b and c' );
-  assert.ok( aboutEqual( c.top - b.bottom, d.top - c.bottom ), 'space between b and c should be equal to space between c and d' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top ), 'a.top should be hBox.top (justifyLines spaceBetween)' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.bottom, hBox.bottom ), 'd.bottom should be hBox.bottom (justifyLines spaceBetween)' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.top - a.bottom, c.top - b.bottom ), 'space between a and b should be equal to space between b and c' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.top - b.bottom, d.top - c.bottom ), 'space between b and c should be equal to space between c and d' );
 
   //---------------------------------------------------------------------------------
   // justifyLines spaceAround
@@ -468,11 +457,11 @@ QUnit.test( 'Justify Lines Tests', assert => {
   const totalSpace = hBox.height - 4 * RECT_HEIGHT;
   const sideSpacing = totalSpace / 4 / 2; // Each Node gets half space to the top and bottom
 
-  assert.ok( aboutEqual( a.top, hBox.top + sideSpacing ), 'a.top should be hBox.top + spaceAround' );
-  assert.ok( aboutEqual( a.bottom + sideSpacing * 2, b.top ), 'a.bottom + sideSpacing * 2 should be b.top' );
-  assert.ok( aboutEqual( b.bottom + sideSpacing * 2, c.top ), 'b.bottom + sideSpacing * 2 should be c.top' );
-  assert.ok( aboutEqual( c.bottom + sideSpacing * 2, d.top ), 'c.bottom + sideSpacing * 2 should be d.top' );
-  assert.ok( aboutEqual( d.bottom, hBox.bottom - sideSpacing ), 'd.bottom should be hBox.bottom - spaceAround' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top + sideSpacing ), 'a.top should be hBox.top + spaceAround' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.bottom + sideSpacing * 2, b.top ), 'a.bottom + sideSpacing * 2 should be b.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.bottom + sideSpacing * 2, c.top ), 'b.bottom + sideSpacing * 2 should be c.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.bottom + sideSpacing * 2, d.top ), 'c.bottom + sideSpacing * 2 should be d.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.bottom, hBox.bottom - sideSpacing ), 'd.bottom should be hBox.bottom - spaceAround' );
 
   //---------------------------------------------------------------------------------
   // justifyLines spaceEvenly
@@ -481,11 +470,11 @@ QUnit.test( 'Justify Lines Tests', assert => {
 
   const spaceBetween = totalSpace / 5; // 4 spaces between 5 nodes
 
-  assert.ok( aboutEqual( a.top, hBox.top + spaceBetween ), 'a.top should be hBox.top + spaceEvenly' );
-  assert.ok( aboutEqual( a.bottom + spaceBetween, b.top ), 'a.bottom + spaceBetween should be b.top' );
-  assert.ok( aboutEqual( b.bottom + spaceBetween, c.top ), 'b.bottom + spaceBetween should be c.top' );
-  assert.ok( aboutEqual( c.bottom + spaceBetween, d.top ), 'c.bottom + spaceBetween should be d.top' );
-  assert.ok( aboutEqual( d.bottom, hBox.bottom - spaceBetween ), 'd.bottom should be hBox.bottom - spaceEvenly' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top + spaceBetween ), 'a.top should be hBox.top + spaceEvenly' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.bottom + spaceBetween, b.top ), 'a.bottom + spaceBetween should be b.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.bottom + spaceBetween, c.top ), 'b.bottom + spaceBetween should be c.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.bottom + spaceBetween, d.top ), 'c.bottom + spaceBetween should be d.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.bottom, hBox.bottom - spaceBetween ), 'd.bottom should be hBox.bottom - spaceEvenly' );
 
 
   //---------------------------------------------------------------------------------
@@ -493,28 +482,28 @@ QUnit.test( 'Justify Lines Tests', assert => {
   //---------------------------------------------------------------------------------
   hBox.justifyLines = null;
 
-  assert.ok( aboutEqual( a.top, hBox.top + sideSpacing ), 'a.top should be hBox.top + spaceAround' );
-  assert.ok( aboutEqual( a.bottom + sideSpacing * 2, b.top ), 'a.bottom + sideSpacing * 2 should be b.top' );
-  assert.ok( aboutEqual( b.bottom + sideSpacing * 2, c.top ), 'b.bottom + sideSpacing * 2 should be c.top' );
-  assert.ok( aboutEqual( c.bottom + sideSpacing * 2, d.top ), 'c.bottom + sideSpacing * 2 should be d.top' );
-  assert.ok( aboutEqual( d.bottom, hBox.bottom - sideSpacing ), 'd.bottom should be hBox.bottom - spaceAround' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top + sideSpacing ), 'a.top should be hBox.top + spaceAround' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.bottom + sideSpacing * 2, b.top ), 'a.bottom + sideSpacing * 2 should be b.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.bottom + sideSpacing * 2, c.top ), 'b.bottom + sideSpacing * 2 should be c.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.bottom + sideSpacing * 2, d.top ), 'c.bottom + sideSpacing * 2 should be d.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.bottom, hBox.bottom - sideSpacing ), 'd.bottom should be hBox.bottom - spaceAround' );
 } );
 
 QUnit.test( 'Spacing tests', assert => {
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
 
   const hBox = new HBox( { children: [ a, b, c, d ], spacing: 10 } );
 
-  assert.ok( aboutEqual( b.left - a.right, 10 ), 'b.left - a.right should be 10' );
-  assert.ok( aboutEqual( c.left - b.right, 10 ), 'c.left - b.right should be 10' );
-  assert.ok( aboutEqual( d.left - c.right, 10 ), 'd.left - c.right should be 10' );
-  assert.ok( aboutEqual( hBox.width, 4 * RECT_WIDTH + 3 * 10 ), 'width should be sum of children widths plus spacing' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.left - a.right, 10 ), 'b.left - a.right should be 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.left - b.right, 10 ), 'c.left - b.right should be 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.left - c.right, 10 ), 'd.left - c.right should be 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( hBox.width, 4 * RECT_WIDTH + 3 * 10 ), 'width should be sum of children widths plus spacing' );
 } );
 
 QUnit.test( 'lineSpacing tests', assert => {
 
   // Line spacing is the spacing between lines of nodes in a wrap layout
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
 
   const hBox = new HBox( {
     children: [ a, b, c, d ],
@@ -525,16 +514,16 @@ QUnit.test( 'lineSpacing tests', assert => {
     preferredWidth: RECT_WIDTH
   } );
 
-  assert.ok( aboutEqual( a.top, hBox.top ), 'a.top should be hBox.top' );
-  assert.ok( aboutEqual( b.top - a.bottom, 10 ), 'b.top - a.bottom should be 10' );
-  assert.ok( aboutEqual( c.top - b.bottom, 10 ), 'c.top - b.bottom should be 10' );
-  assert.ok( aboutEqual( d.top - c.bottom, 10 ), 'd.top - c.bottom should be 10' );
-  assert.ok( aboutEqual( hBox.height, 4 * RECT_HEIGHT + 3 * 10 ), 'height should be sum of children heights plus lineSpacing' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top ), 'a.top should be hBox.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.top - a.bottom, 10 ), 'b.top - a.bottom should be 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.top - b.bottom, 10 ), 'c.top - b.bottom should be 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.top - c.bottom, 10 ), 'd.top - c.bottom should be 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( hBox.height, 4 * RECT_HEIGHT + 3 * 10 ), 'height should be sum of children heights plus lineSpacing' );
 } );
 
 QUnit.test( 'Margins tests', assert => {
 
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
 
   const hBox = new HBox( {
     children: [ a, b, c, d ]
@@ -545,15 +534,15 @@ QUnit.test( 'Margins tests', assert => {
   //---------------------------------------------------------------------------------
   hBox.margin = 10;
 
-  assert.ok( aboutEqual( a.left, hBox.left + 10 ), 'a.left should be hBox.left + 10' );
-  assert.ok( aboutEqual( b.left, a.right + 20 ), 'b.left should be a.right + 10' );
-  assert.ok( aboutEqual( c.left, b.right + 20 ), 'c.left should be b.right + 10' );
-  assert.ok( aboutEqual( d.left, c.right + 20 ), 'd.left should be c.right + 10' );
-  assert.ok( aboutEqual( d.right, hBox.right - 10 ), 'd.right should be hBox.right - 10' );
-  assert.ok( aboutEqual( a.top, hBox.top + 10 ), 'a.top should be hBox.top + 10' );
-  assert.ok( aboutEqual( b.top, hBox.top + 10 ), 'b.top should be hBox.top + 10' );
-  assert.ok( aboutEqual( c.top, hBox.top + 10 ), 'c.top should be hBox.top + 10' );
-  assert.ok( aboutEqual( d.top, hBox.top + 10 ), 'd.top should be hBox.top + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.left, hBox.left + 10 ), 'a.left should be hBox.left + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.left, a.right + 20 ), 'b.left should be a.right + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.left, b.right + 20 ), 'c.left should be b.right + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.left, c.right + 20 ), 'd.left should be c.right + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right - 10 ), 'd.right should be hBox.right - 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top + 10 ), 'a.top should be hBox.top + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.top, hBox.top + 10 ), 'b.top should be hBox.top + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.top, hBox.top + 10 ), 'c.top should be hBox.top + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.top, hBox.top + 10 ), 'd.top should be hBox.top + 10' );
 
   //---------------------------------------------------------------------------------
   // left margin tests
@@ -561,15 +550,15 @@ QUnit.test( 'Margins tests', assert => {
   hBox.margin = 0;
   hBox.leftMargin = 10;
 
-  assert.ok( aboutEqual( a.left, hBox.left + 10 ), 'a.left should be hBox.left' );
-  assert.ok( aboutEqual( b.left, a.right + 10 ), 'b.left should be a.right + 10' );
-  assert.ok( aboutEqual( c.left, b.right + 10 ), 'c.left should be b.right + 10' );
-  assert.ok( aboutEqual( d.left, c.right + 10 ), 'd.left should be c.right + 10' );
-  assert.ok( aboutEqual( d.right, hBox.right ), 'd.right should be hBox.right' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.left, hBox.left + 10 ), 'a.left should be hBox.left' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.left, a.right + 10 ), 'b.left should be a.right + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.left, b.right + 10 ), 'c.left should be b.right + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.left, c.right + 10 ), 'd.left should be c.right + 10' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right ), 'd.right should be hBox.right' );
 } );
 
 QUnit.test( 'Per-cell layout options', assert => {
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
 
   const hBox = new HBox( {
     children: [ a, b, c, d ]
@@ -583,11 +572,11 @@ QUnit.test( 'Per-cell layout options', assert => {
   a.layoutOptions = { topMargin: margin };
   d.layoutOptions = { leftMargin: margin };
 
-  assert.ok( aboutEqual( a.top, hBox.top + margin ), 'a.top should be hBox.top + margin' );
-  assert.ok( aboutEqual( b.top, hBox.top + margin / 2 ), 'hBox dimensions grow but b remains centered by default' );
-  assert.ok( aboutEqual( c.top, hBox.top + margin / 2 ), 'hBox dimensions grow but c remains centered by default' );
-  assert.ok( aboutEqual( d.left, c.right + margin ), 'd.left should be c.left + margin' );
-  assert.ok( aboutEqual( d.right, hBox.right ), 'd.right should be hBox.right' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top + margin ), 'a.top should be hBox.top + margin' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.top, hBox.top + margin / 2 ), 'hBox dimensions grow but b remains centered by default' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.top, hBox.top + margin / 2 ), 'hBox dimensions grow but c remains centered by default' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.left, c.right + margin ), 'd.left should be c.left + margin' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right ), 'd.right should be hBox.right' );
 
   //---------------------------------------------------------------------------------
   // per-cel alignment
@@ -598,10 +587,10 @@ QUnit.test( 'Per-cell layout options', assert => {
   c.layoutOptions = { align: 'center' };
   d.layoutOptions = {};
 
-  assert.ok( aboutEqual( a.top, hBox.top ), 'a.top should be hBox.top' );
-  assert.ok( aboutEqual( b.bottom, hBox.bottom ), 'b.bottom should be hBox.bottom' );
-  assert.ok( aboutEqual( c.centerY, hBox.centerY ), 'c.centerY should be hBox.centerY' );
-  assert.ok( aboutEqual( d.centerY, hBox.centerY ), 'd.centerY should be hBox.centerY' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.top, hBox.top ), 'a.top should be hBox.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.bottom, hBox.bottom ), 'b.bottom should be hBox.bottom' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.centerY, hBox.centerY ), 'c.centerY should be hBox.centerY' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.centerY, hBox.centerY ), 'd.centerY should be hBox.centerY' );
 
   //---------------------------------------------------------------------------------
   // cells override the container
@@ -613,24 +602,24 @@ QUnit.test( 'Per-cell layout options', assert => {
   c.layoutOptions = { align: 'bottom' };
   d.layoutOptions = {};
 
-  assert.ok( aboutEqual( a.bottom, hBox.bottom ), 'a.bottom should be hBox.bottom' );
-  assert.ok( aboutEqual( b.centerY, hBox.centerY ), 'b.centerY should be hBox.centerY' );
-  assert.ok( aboutEqual( c.bottom, hBox.bottom ), 'c.bottom should be hBox.bottom' );
-  assert.ok( aboutEqual( d.top, hBox.top ), 'd.top should be hBox.top' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.bottom, hBox.bottom ), 'a.bottom should be hBox.bottom' );
+  assert.ok( LayoutTestUtils.aboutEqual( b.centerY, hBox.centerY ), 'b.centerY should be hBox.centerY' );
+  assert.ok( LayoutTestUtils.aboutEqual( c.bottom, hBox.bottom ), 'c.bottom should be hBox.bottom' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.top, hBox.top ), 'd.top should be hBox.top' );
 } );
 
 QUnit.test( 'Separators', assert => {
   const margin = 5;
 
-  const [ a, b, c, d ] = createRectangles( 4 );
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
   const hBox = new HBox( {
     margin: margin
   } );
 
   const verifySeparatorLayout = ( separatorWidth: number ) => {
-    assert.ok( aboutEqual( b.left, a.right + separatorWidth + margin * 4 ), 'b.left should be a.right + separatorWidth + margin * 4 (each side of rectangles + each side of separator)' );
-    assert.ok( aboutEqual( c.left, b.right + separatorWidth + margin * 4 ), 'c.left should be b.right + separatorWidth + margin * 4' );
-    assert.ok( aboutEqual( d.left, c.right + separatorWidth + margin * 4 ), 'd.left should be c.right + separatorWidth + margin * 4' );
+    assert.ok( LayoutTestUtils.aboutEqual( b.left, a.right + separatorWidth + margin * 4 ), 'b.left should be a.right + separatorWidth + margin * 4 (each side of rectangles + each side of separator)' );
+    assert.ok( LayoutTestUtils.aboutEqual( c.left, b.right + separatorWidth + margin * 4 ), 'c.left should be b.right + separatorWidth + margin * 4' );
+    assert.ok( LayoutTestUtils.aboutEqual( d.left, c.right + separatorWidth + margin * 4 ), 'd.left should be c.right + separatorWidth + margin * 4' );
   };
 
   const testSeparator = new VSeparator();
@@ -652,8 +641,8 @@ QUnit.test( 'Separators', assert => {
   //---------------------------------------------------------------------------------
   hBox.children = [ new VSeparator(), a, new VSeparator(), b, new VSeparator(), c, new VSeparator(), d, new VSeparator() ];
   verifySeparatorLayout( testSeparator.width );
-  assert.ok( aboutEqual( a.left, hBox.left + margin ), 'a.left should be hBox.left + margin (separator removed)' );
-  assert.ok( aboutEqual( d.right, hBox.right - margin ), 'd.right should be hBox.right - margin (separator removed)' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.left, hBox.left + margin ), 'a.left should be hBox.left + margin (separator removed)' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right - margin ), 'd.right should be hBox.right - margin (separator removed)' );
 
   //---------------------------------------------------------------------------------
   // custom separators
@@ -672,6 +661,6 @@ QUnit.test( 'Separators', assert => {
   // separators at the ends are removed
   hBox.children = [ createCustomSeparator(), a, createCustomSeparator(), b, createCustomSeparator(), c, createCustomSeparator(), d, createCustomSeparator() ];
   verifySeparatorLayout( testCustomSeparator.width );
-  assert.ok( aboutEqual( a.left, hBox.left + margin ), 'a.left should be hBox.left + margin (separator removed)' );
-  assert.ok( aboutEqual( d.right, hBox.right - margin ), 'd.right should be hBox.right - margin (separator removed)' );
+  assert.ok( LayoutTestUtils.aboutEqual( a.left, hBox.left + margin ), 'a.left should be hBox.left + margin (separator removed)' );
+  assert.ok( LayoutTestUtils.aboutEqual( d.right, hBox.right - margin ), 'd.right should be hBox.right - margin (separator removed)' );
 } );
