@@ -291,10 +291,6 @@ QUnit.test( 'Stretch', assert => {
   assert.equal( d.centerX, b.centerX, 'd should be centered with b (column constraint)' );
 } );
 
-QUnit.test( 'Sizable', assert => {
-  assert.ok( true, 'TODO: write tests for sizable' );
-} );
-
 QUnit.test( 'Cell alignment', assert => {
 
   const [ a, b, c, d, e, f ] = LayoutTestUtils.createRectangles( 6 );
