@@ -54,7 +54,7 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     this.gridConstraint = constraint;
 
     this.setOptions( node.layoutOptions as ExternalGridConfigurableOptions );
-    this.onLayoutOptionsChange();
+    this.onLayoutOptionsChange( true );
   }
 
   /**
@@ -126,10 +126,14 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     return orientation === Orientation.HORIZONTAL ? this.effectiveXStretch : this.effectiveYStretch;
   }
 
-  protected override onLayoutOptionsChange(): void {
+  protected override onLayoutOptionsChange( isInitial = false ): void {
     this.setOptions( this.node.layoutOptions as ExternalGridConfigurableOptions );
 
     super.onLayoutOptionsChange();
+
+    if ( !isInitial ) {
+      this.gridConstraint.updateLayoutAutomatically();
+    }
   }
 
   private setOptions( providedOptions?: ExternalGridConfigurableOptions ): void {

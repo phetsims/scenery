@@ -39,7 +39,7 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
     this.flowConstraint = constraint;
 
     this.orientation = constraint.orientation;
-    this.onLayoutOptionsChange();
+    this.onLayoutOptionsChange( true );
   }
 
   // The used value, with this cell's value taking precedence over the constraint's default
@@ -62,12 +62,16 @@ export default class FlowCell extends FlowConfigurable( MarginLayoutCell ) {
     return this._grow !== null ? this._grow : this.flowConstraint._grow!;
   }
 
-  protected override onLayoutOptionsChange(): void {
+  protected override onLayoutOptionsChange( isInitial = false ): void {
     if ( this.node.layoutOptions ) {
       this.setOptions( this.node.layoutOptions as ExternalFlowConfigurableOptions );
     }
 
     super.onLayoutOptionsChange();
+
+    if ( !isInitial ) {
+      this.flowConstraint.updateLayoutAutomatically();
+    }
   }
 
   private setOptions( providedOptions?: ExternalFlowConfigurableOptions ): void {
