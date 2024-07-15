@@ -1711,6 +1711,15 @@
       component (particularly useful if you want to set a preferredWidth/preferredHeight on it that won't change):
     </p>
 
+    <p>
+      In the example below, the rectangle is made to be sizable only for its height. It will have a fixed width,
+      but the height will stretch to take up that of its cell.
+    </p>
+
+    <p>
+      Additionally, if you do not want a child of a GridBox to grow in size at all, you can set <code>sizable: false</code> on it.
+    </p>
+
     <div id="gridResizable-example"></div>
     <script type="text/javascript">
       createSandbox( 'gridResizable-example', ( scene, stepEmitter, display ) => {
@@ -1734,11 +1743,16 @@
                   fill: colors[ 6 ]
                 } ),
                 new Rectangle( {
-                  sizable: true,
-                  localMinimumWidth: 50,
+                  // This rectangle will adjust its height
+                  heightSizable: true,
+                  layoutOptions: { grow: 1, stretch: true },
                   localMinimumHeight: 50,
-                  fill: 'gray',
-                  layoutOptions: { grow: 1, stretch: true }
+
+                  // But will not adjust its width
+                  widthSizable: false,
+                  rectWidth: 50,
+
+                  fill: 'gray'
                 } ),
                 new Rectangle( 0, 0, 50, 50, {
                   fill: colors[ 8 ]
