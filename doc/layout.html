@@ -1806,7 +1806,42 @@
 
     <p>
       Cells can take up more than one row/column with the <code>horizontalSpan</code> / <code>verticalSpan</code>
-      layout options:
+      layout options.
+    </p>
+
+    <p>
+      Each of these default to 1, meaning:
+    </p>
+
+    <ul>
+      <li>
+        <code>horizontalSpan</code> of 1 means "this cell takes up one column"
+      </li>
+      <li>
+        <code>verticalSpan</code> of 1 means "this cell takes up one row"
+      </li>
+    </ul>
+
+    <p>
+      However, one or both values can be increased, and thus will take up multiple rows or columns, e.g.:
+    </p>
+
+    <ul>
+      <li>
+        <code>horizontalSpan</code> of 2 means "this cell takes up two columns", thus it will fill two "spots"
+        in the grid, and the actual cell will span across both columns. In the example below, the second (blue-green)
+        rectangle (in the upper right) does this. It effectively takes up both the <code>column:1, row:0</code> and
+        <code>column:2, row:0</code> spots.
+      </li>
+      <li>
+        <code>horizontalSpan</code> <em>and</em> <code>verticalSpan</code> of 2 means "this cell takes up two columns AND
+        two rows". An example is the third rectangle in the below example (blue), which effectively takes up the spots
+        <code>column:0, row:1</code>, <code>column:1, row:1</code>, <code>column:0, row:2</code>, and <code>column:1, row:2</code>.
+      </li>
+    </ul>
+
+    <p>
+      The content within these larger cells will use the rectangle that spans all of the rows and columns for layout.
     </p>
 
     <div id="span-grid-example"></div>
