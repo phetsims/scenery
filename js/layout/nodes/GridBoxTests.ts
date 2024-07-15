@@ -291,6 +291,42 @@ QUnit.test( 'Stretch', assert => {
   assert.equal( d.centerX, b.centerX, 'd should be centered with b (column constraint)' );
 } );
 
+QUnit.test( 'Sizable', assert => {
+
+  const [ a, b, c, d, f ] = LayoutTestUtils.createRectangles( 6 );
+  const e = new Rectangle( {
+    heightSizable: true,
+    layoutOptions: { grow: 1, stretch: true },
+    localMinimumHeight: 50,
+    widthSizable: false,
+    rectWidth: RECT_WIDTH
+  } );
+
+  // extra width/height to make space for sizable rectangle
+  const totalWidth = RECT_WIDTH * 8;
+  const totalHeight = RECT_HEIGHT * 8;
+
+  const grid = new GridBox( {
+    preferredWidth: totalWidth,
+    preferredHeight: totalHeight,
+    rows: [
+      [ a, b, c ],
+      [ d, e, f ]
+    ]
+  } );
+
+  assert.ok( a.left === 0, 'a should be at the left edge' );
+  assert.ok( b.centerX === totalWidth / 2, 'b should be centered in the grid' );
+  assert.ok( c.right === totalWidth, 'c should be at the right edge' );
+  assert.ok( d.left === 0, 'd should be at the left edge' );
+  assert.ok( e.centerX === totalWidth / 2, 'e should be centered in the grid' );
+  assert.ok( e.width === RECT_WIDTH, 'e should not be sizable in the width' );
+  assert.ok( e.height === totalHeight - RECT_HEIGHT, 'e should be sizable in the height' );
+  assert.ok( f.right === totalWidth, 'f should be at the right edge' );
+  assert.ok( grid.height === totalHeight, 'grid should be full height' );
+  assert.ok( grid.width === totalWidth, 'grid should be full width' );
+} );
+
 QUnit.test( 'Cell alignment', assert => {
 
   const [ a, b, c, d, e, f ] = LayoutTestUtils.createRectangles( 6 );
