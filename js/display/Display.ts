@@ -1163,12 +1163,14 @@ export default class Display {
 
     if ( this._allowCSSHacks ) {
       // Prevents selection cursor issues in Safari, see https://github.com/phetsims/scenery/issues/476
-      document.onselectstart = () => false;
+      if ( !this._listenToOnlyElement ) {
+        document.onselectstart = () => false;
 
-      // prevent any default zooming behavior from a trackpad on IE11 and Edge, all should be handled by scenery - must
-      // be on the body, doesn't prevent behavior if on the display div
-      // @ts-expect-error legacy
-      document.body.style.msContentZooming = 'none';
+        // prevent any default zooming behavior from a trackpad on IE11 and Edge, all should be handled by scenery - must
+        // be on the body, doesn't prevent behavior if on the display div
+        // @ts-expect-error legacy
+        document.body.style.msContentZooming = 'none';
+      }
 
       // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js).
       // modified to only apply the proper prefixed version instead of spamming all of them, and doesn't use jQuery.
