@@ -337,7 +337,48 @@ QUnit.test( 'Cell alignment', assert => {
 } );
 
 QUnit.test( 'Horizontal span/Vertical span', assert => {
-  assert.ok( true, 'TODO: Tests for horizontal/vertical span' );
+
+  const [ a, c, d ] = LayoutTestUtils.createRectangles( 4 );
+
+  // b is sizable to take up more space so that we can test horizontal/vertical span
+  const b = new Rectangle( {
+    sizable: true,
+    localMinimumWidth: RECT_WIDTH,
+    localMinimumHeight: RECT_HEIGHT
+  } );
+  a.layoutOptions = { column: 0, row: 0 };
+  b.layoutOptions = { column: 1, row: 0, grow: 1, stretch: true };
+  c.layoutOptions = { column: 0, row: 1 };
+  d.layoutOptions = { column: 1, row: 1 };
+
+  const totalWidth = 800;
+
+  // Amount of horizontal spacing that will be distributed within each row (each row has 2 rectangles)
+  const horizontalSpacing = totalWidth - 2 * RECT_WIDTH;
+
+  const grid = new GridBox( {
+    children: [ a, b, c, d ],
+    preferredWidth: totalWidth
+  } );
+
+  assert.ok( a.left === 0, 'a should be at the left edge' );
+  assert.ok( b.left === RECT_WIDTH, 'b should be to the right of a' );
+  assert.ok( c.left === 0, 'c should be at the left edge' );
+  assert.ok( d.left === c.right + horizontalSpacing / 2, 'd should be ' );
+  assert.ok( d.centerX === b.centerX, 'd should be centered with b in its column' );
+
+  // Now add verticalSpan to b - it should take up two rows
+  b.layoutOptions = { column: 1, row: 0, verticalSpan: 2, stretch: true, grow: 1 };
+  assert.ok( b.top === 0, 'b should be at the top edge' );
+  assert.ok( b.bottom === grid.height, 'b should span 2 rows to the bottom' );
+  assert.ok( d.top === RECT_HEIGHT, 'd should be in the bottom row' );
+  assert.ok( d.bottom === c.bottom, 'd bottom should be aligned with c bottom' );
+
+  // Now test horizontalSpan on b - it should take up 2 columns
+  b.layoutOptions = { column: 1, row: 0, horizontalSpan: 2, stretch: true, grow: 1 };
+  assert.ok( b.left === a.right, 'b should be adjacent to a' );
+  assert.ok( b.width === totalWidth - RECT_WIDTH, 'b should span 2 columns' );
+  assert.ok( d.centerX === horizontalSpacing / 2, 'd centered in its column (b spans 2 columns)' );
 } );
 
 QUnit.test( 'Spacing', assert => {
@@ -365,4 +406,32 @@ QUnit.test( 'Spacing', assert => {
   assert.ok( b.top === 0, 'b should be at the top edge' );
   assert.ok( c.top === RECT_HEIGHT + 10, 'c should be below a' );
   assert.ok( d.top === RECT_HEIGHT + 10, 'd should be below b' );
+} );
+
+QUnit.test( 'margins', assert => {
+  const [ a, b, c, d ] = LayoutTestUtils.createRectangles( 4 );
+
+  const margin = 5;
+  const grid = new GridBox( {
+    margin: margin,
+    rows: [ [ a, b ], [ c, d ] ]
+  } );
+
+  const expectedWidth = 2 * RECT_WIDTH + margin * 4;
+  const expectedHeight = 2 * RECT_HEIGHT + margin * 4;
+
+  assert.ok( grid.width === expectedWidth, 'grid should have correct width' );
+  assert.ok( grid.height === expectedHeight, 'grid should have correct height' );
+  assert.ok( a.left === 5, 'a should be at the left edge, with a margin' );
+  assert.ok( b.left === a.right + margin * 2, 'b should be to the right of a, with a margin on each side' );
+  assert.ok( c.left === 5, 'c should be at the left edge, with a margin' );
+
+  // Add a topMargin to b - should override the grid and push the rectangle down
+  const additionalMargin = 10;
+  b.layoutOptions = { topMargin: additionalMargin };
+
+  // New expected height is the margin + additionalMargin + RECT_HEIGHT + margin + RECT_HEIGHT + margin -
+  // individual margins compound with grid margin
+  const newExpectedHeight = margin + additionalMargin + RECT_HEIGHT + margin + RECT_HEIGHT + margin;
+  assert.ok( grid.height === newExpectedHeight, 'grid should have correct height' );
 } );
