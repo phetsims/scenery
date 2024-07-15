@@ -776,8 +776,36 @@
 
     <h3 id="FlowBox-justify" class="index">justify</h3>
 
-    <p><code>justify</code> controls how extra space is allocated around cells (after any possible growing has been
-      done):</p>
+    <p>
+      <code>justify</code> controls how extra space is allocated around cells (after any possible growing has been
+      done)
+    </p>
+
+    <p>
+      This closely models the CSS flexbox <a href="https://css-tricks.com/snippets/css/a-guide-to-flexbox/#aa-justify-content">justify-content</a> property.
+    </p>
+
+    <p>
+      The default is <code>spaceBetween</code>, which will only place space between cells, not at the start or end (with an even split of space between every object).
+      This works very well for common layout cases, especially where two items are placed into a FlowBox, so they will expand to either side of it.
+    </p>
+
+    <p>
+      <code>left/top</code> / <code>right/bottom</code> simply puts all of the extra space either at the start or the end of the FlowBox.
+    </p>
+
+    <p>
+      <code>center</code> puts an even amount of extra space both at the start AND the end of the FlowBox.
+    </p>
+
+    <p>
+      <code>spaceEvenly</code> will place the same amount of space at the start, end, and between each object.
+    </p>
+
+    <p>
+      <code>spaceAround</code> is as if each object has margins, such that each object gets evenly-split space before and after it.
+      Thus the space at the start would be half that of the space between object A and B (since that space is a combined margin for both objects).
+    </p>
 
     <div id="justification-example"></div>
     <script type="text/javascript">
