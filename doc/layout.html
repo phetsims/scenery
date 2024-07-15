@@ -230,6 +230,75 @@
   </div>
   <div class="span8">
 
+    <h2 id="introduction">Introduction</h2>
+
+    <p>
+      Here we will cover the layout system in <a href="https://phetsims.github.io/scenery/">Scenery</a>.
+    </p>
+
+    <h3>Bounds</h3>
+
+    <p>
+      The layout system in Scenery is based on the concept of <code>bounds</code>. Each <em>paintable</em> Node (that
+      displays something, like <code>Text</code> or <code>Path</code>) will define its own <code>selfBounds</code>
+      (as a <code>Bounds2</code> object, that stores a left/top/right/bottom).
+    </p>
+
+    <p>
+      The <code>localBounds</code> of a Node is the combination of the <code>selfBounds</code> along with the <code>bounds</code>
+      of each of the child Nodes. This defines the size of the Node within its <em>local coordinate frame</em>.
+    </p>
+
+    <p>
+      Each Node has an affine transform that can be used to transform the Node's local coordinate frame into the parent's
+      coordinate frame. This is used to position and scale the Node within its parent.
+    </p>
+
+    <p>
+      This transform is used to calculate the <code>bounds</code> of the Node from its <code>localBounds</code>. The
+      <code>bounds</code> are in what is known as the <em>parent coordinate frame</em>, and define the size of the Node to
+      everything else.
+    </p>
+
+    <p>
+      Most getters for things like <code>width</code> / <code>height</code> will return the value of the <code>bounds</code>.
+    </p>
+
+    <h3>Layout Containers</h3>
+
+    <p>
+      Some Nodes are called <em>layout containers</em> if they will control the position and size of child content.
+      Some, like <code>HBox</code> / <code>VBox</code> / <code>GridBox</code> (discussed below), will be responsible for
+      all of their children. Some, like <code>Panel</code> will only control one child (its main content).
+      Layout containers will also usually control the <em>preferred</em> bounds of their children, if they are sizable
+      (discussed later).
+    </p>
+
+    <p>
+      When a layout container is given children, it will typically reposition them whenever any of the children change
+      in size, or have any change in properties that would affect the layout. Sometimes this is done immediately,
+      however for performance reasons many times bounds are not proactively computed, and are instead computed lazily
+      (at the next animation frame) when needed. To force the bounds of a Node to be updated immediately, please use
+      `node.validateBounds()`. It is usually best to write code where this is not needed.
+    </p>
+
+    <p>
+      The most important Scenery layout containers are discussed below:
+    </p>
+
+    <ul>
+      <li><code>FlowBox</code>, with its <code>HBox</code> / <code>VBox</code> shortcuts, acts similarly to a CSS flexbox container</li>
+      <li><code>GridBox</code> acts similarly to CSS grid</li>
+      <li><code>ManualConstraint</code> allows writing imperative-style connections between Nodes with different parents</li>
+      <li><code>AlignBox</code> allows positioning a Node within a rectangle, with margins/alignment</li>
+    </ul>
+
+    <h3>References and Documentation</h3>
+
+    <p>
+      It is recommended to view assorted PhET simulations and libraries for examples to see how layout is used in practice.
+    </p>
+
     <p id="localOnly">
       If you have the main PhET libraries checked out (sun, etc.), there are a
       <a href="../../scenery-phet/doc/layout-exemplars.html">number of examples</a> that show layout in action with
