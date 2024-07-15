@@ -243,6 +243,7 @@ const NODE_OPTION_KEYS = [
   'rotation', // rotation (in radians) of the Node, see setRotation() for more documentation
   'scale', // scale of the Node, see scale() for more documentation
   'excludeInvisibleChildrenFromBounds', // Controls bounds depending on child visibility, see setExcludeInvisibleChildrenFromBounds() for more documentation
+  'interruptSubtreeOnInvisible', // Interrupts subtree input events when made invisible.
   'layoutOptions', // Provided to layout containers for options, see setLayoutOptions() for more documentation
   'localBounds', // bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
   'maxWidth', // Constrains width of this Node, see setMaxWidth() for more documentation
@@ -345,6 +346,7 @@ export type NodeOptions = {
   disabledOpacity?: number;
   filters?: Filter[];
   excludeInvisibleChildrenFromBounds?: boolean;
+  interruptSubtreeOnInvisible?: boolean;
   layoutOptions?: TLayoutOptions | null;
   localBounds?: Bounds2 | null;
   maxWidth?: number | null;
@@ -546,29 +548,32 @@ class Node extends ParallelDOM {
   // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
   // overridden value.
   // (scenery-internal)
-  public _localBoundsOverridden: boolean;
+  public _localBoundsOverridden = false;
 
   // [mutable] Whether invisible children will be excluded from this Node's bounds
-  private _excludeInvisibleChildrenFromBounds: boolean;
+  private _excludeInvisibleChildrenFromBounds = false;
+
+  // [mutable] Whether to interrupt input events on the subtree when this Node is made invisible
+  private _interruptSubtreeOnInvisible = true;
 
   // Options that can be provided to layout managers to adjust positioning for this node.
-  private _layoutOptions: TLayoutOptions | null;
+  private _layoutOptions: TLayoutOptions | null = null;
 
   // Whether bounds needs to be recomputed to be valid.
   // (scenery-internal)
-  public _boundsDirty: boolean;
+  public _boundsDirty = true;
 
   // Whether localBounds needs to be recomputed to be valid.
   // (scenery-internal)
-  public _localBoundsDirty: boolean;
+  public _localBoundsDirty = true;
 
   // Whether selfBounds needs to be recomputed to be valid.
   // (scenery-internal)
-  public _selfBoundsDirty: boolean;
+  public _selfBoundsDirty = true;
 
   // Whether childBounds needs to be recomputed to be valid.
   // (scenery-internal)
-  public _childBoundsDirty: boolean;
+  public _childBoundsDirty = true;
 
   // (scenery-internal)
   public _filters: Filter[];
@@ -821,14 +826,6 @@ class Node extends ParallelDOM {
     this.childBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
     this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), selfBoundsInvalidationListener );
-
-    this._localBoundsOverridden = false;
-    this._excludeInvisibleChildrenFromBounds = false;
-    this._layoutOptions = null;
-    this._boundsDirty = true;
-    this._localBoundsDirty = true;
-    this._selfBoundsDirty = true;
-    this._childBoundsDirty = true;
 
     if ( assert ) {
       // for assertions later to ensure that we are using the same Bounds2 copies as before
@@ -2410,7 +2407,13 @@ class Node extends ParallelDOM {
 
     const children = this._children.slice();
     for ( let i = 0; i < children.length; i++ ) {
-      children[ i ].interruptSubtreeInput();
+      const child = children[ i ];
+
+      // Performance enhancement by pruning out subtrees that have no input listeners or would not be pickable anyway.
+      // See https://github.com/phetsims/scenery/issues/1645
+      if ( child._picker.isPotentiallyPickable() ) {
+        child.interruptSubtreeInput();
+      }
     }
 
     return this;
@@ -3882,6 +3885,11 @@ class Node extends ParallelDOM {
    */
   private onVisiblePropertyChange( visible: boolean ): void {
 
+    // Interrupt the subtree when made invisible by default, see https://github.com/phetsims/scenery/issues/1645
+    if ( !visible && this._interruptSubtreeOnInvisible ) {
+      this.interruptSubtreeInput();
+    }
+
     // changing visibility can affect pickability pruning, which affects mouse/touch bounds
     this._picker.onVisibilityChange();
 
@@ -5003,6 +5011,38 @@ class Node extends ParallelDOM {
    */
   public isExcludeInvisibleChildrenFromBounds(): boolean {
     return this._excludeInvisibleChildrenFromBounds;
+  }
+
+  /**
+   * If this is set to true, this node will call interruptSubtreeInput() on itself when it is made invisible.
+   * See https://github.com/phetsims/scenery/issues/1645.
+   */
+  public setInterruptSubtreeOnInvisible( interruptSubtreeOnInvisible: boolean ): void {
+    if ( interruptSubtreeOnInvisible !== this._interruptSubtreeOnInvisible ) {
+      this._interruptSubtreeOnInvisible = interruptSubtreeOnInvisible;
+    }
+  }
+
+  /**
+   * See setInterruptSubtreeOnInvisible() for more information
+   */
+  public set interruptSubtreeOnInvisible( value: boolean ) {
+    this.setInterruptSubtreeOnInvisible( value );
+  }
+
+  /**
+   * See isInterruptSubtreeOnInvisible() for more information
+   */
+  public get interruptSubtreeOnInvisible(): boolean {
+    return this.isInterruptSubtreeOnInvisible();
+  }
+
+  /**
+   * Returns whether the interruptSubtreeOnInvisible flag is set, see
+   * setInterruptSubtreeOnInvisible() for documentation.
+   */
+  public isInterruptSubtreeOnInvisible(): boolean {
+    return this._interruptSubtreeOnInvisible;
   }
 
   /**

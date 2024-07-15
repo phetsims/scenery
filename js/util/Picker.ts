@@ -669,6 +669,16 @@ export default class Picker {
   }
 
   /**
+   * Returns whether our node is potentially pickable from its parents (i.e. whether it could be hit-tested and sent
+   * input events, and thus whether its input listeners are relevant and could be interrupted).
+   */
+  public isPotentiallyPickable(): boolean {
+    // subtreePrunable is equivalent to:
+    // node.pickable === false || !node.isVisible() || ( node.pickable !== true && subtreePickableCount === 0 )
+    return !this.subtreePrunable && this.node.inputEnabled;
+  }
+
+  /**
    * Runs a number of consistency tests when assertSlow is enabled. Verifies most conditions, and helps to catch
    * bugs earlier when they are initially triggered. (scenery-internal)
    */
