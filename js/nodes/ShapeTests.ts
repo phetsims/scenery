@@ -50,7 +50,7 @@ function sceneEquals( assert: Assert, constructionA: ( node: Node ) => void, con
   // sceneA.renderScene();
   // sceneB.renderScene();
 
-  const isEqual = PixelComparisonTestUtils.snapshotEquals( assert, snapshot( sceneA ), snapshot( sceneB ), threshold, message || '');
+  const isEqual = PixelComparisonTestUtils.snapshotEquals( assert, snapshot( sceneA ), snapshot( sceneB ), threshold, message || '' );
 
   // TODO: consider showing if tests fail https://github.com/phetsims/scenery/issues/1581
   return isEqual;
