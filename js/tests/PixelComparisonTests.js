@@ -11,9 +11,7 @@ import Property from '../../../axon/js/Property.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import platform from '../../../phet-core/js/platform.js';
-import Display from '../display/Display.js';
-import { Color, FlowBox, GridBox } from '../imports.js';
+import { FlowBox, GridBox } from '../imports.js';
 import Circle from '../nodes/Circle.js';
 import Image from '../nodes/Image.js';
 import Node from '../nodes/Node.js';
@@ -22,138 +20,21 @@ import Rectangle from '../nodes/Rectangle.js';
 import LinearGradient from '../util/LinearGradient.js';
 import Pattern from '../util/Pattern.js';
 import RadialGradient from '../util/RadialGradient.js';
-import snapshotEquals from './snapshotEquals.js';
+import PixelComparisonTestUtils from './PixelComparisonTestUtils.js';
 
 QUnit.module( 'PixelComparison' );
 
-const DEFAULT_THRESHOLD = 1.5;
+// for readability
+const DEFAULT_THRESHOLD = PixelComparisonTestUtils.DEFAULT_THRESHOLD;
+const testedRenderers = PixelComparisonTestUtils.TESTED_RENDERERS;
+const layoutTestedRenderers = PixelComparisonTestUtils.LAYOUT_TESTED_RENDERERS;
+const nonDomWebGLTestedRenderers = PixelComparisonTestUtils.NON_DOM_WEBGL_TESTED_RENDERERS;
+const colors = PixelComparisonTestUtils.COLORS;
 
-function snapshotFromImage( image ) {
-
-  const canvas = document.createElement( 'canvas' );
-  canvas.width = image.width;
-  canvas.height = image.height;
-  const context = canvas.getContext( '2d' );
-  context.drawImage( image, 0, 0, image.width, image.height );
-  return context.getImageData( 0, 0, image.width, image.height );
-}
-
-const testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
-const layoutTestedRenderers = [ 'svg' ];
-
-const colors = [
-  new Color( 62, 171, 3 ),
-  new Color( 23, 180, 77 ),
-  new Color( 24, 183, 138 ),
-  new Color( 23, 178, 194 ),
-  new Color( 20, 163, 238 ),
-  new Color( 71, 136, 255 ),
-  new Color( 171, 101, 255 ),
-  new Color( 228, 72, 235 ),
-  new Color( 252, 66, 186 ),
-  new Color( 252, 82, 127 )
-];
-
-// known clipping issues to fix
-const nonDomWebGLTestedRenderers = testedRenderers.filter( renderer => renderer !== 'dom' && renderer !== 'webgl' );
-
- 
-// We can only guarantee comparisons for Firefox and Chrome
-if ( !platform.firefox && !platform.chromium ) {
-  window.console && window.console.log && window.console.log( 'Not running pixel-comparison tests' );
-
-}
-else {
-
-  /**
-   * Runs a pixel comparison test between a reference data URL and a Display (with options and setup).
-   *
-   * @param {string} name - Test name
-   * @param {function} setup - Called to set up the scene and display with rendered content.
-   *                           function( scene, display, asyncCallback ). If asynchronous, call the asyncCallback when
-   *                           the Display is ready to be rasterized.
-   * @param {string} dataURL - The reference data URL to compare against
-   * @param {number} threshold - Numerical threshold to determine how much error is acceptable
-   */
-  const pixelTest = ( name, setup, dataURL, threshold, isAsync ) => {
-    QUnit.test( name, assert => {
-      const done = assert.async();
-      // set up the scene/display
-      const scene = new Node();
-      const display = new Display( scene, {
-        preserveDrawingBuffer: true
-      } );
-
-      function loadImages() {
-        // called when both images have been loaded
-        function compareSnapshots() {
-          const referenceSnapshot = snapshotFromImage( referenceImage );
-          const freshSnapshot = snapshotFromImage( freshImage );
-
-          display.domElement.style.position = 'relative'; // don't have it be absolutely positioned
-          display.domElement.style.border = '1px solid black'; // border
-
-          // the actual comparison statement
-          snapshotEquals( assert, freshSnapshot, referenceSnapshot, threshold, name, display.domElement );
-
-          // tell qunit that we're done? (that's what the old version did, seems potentially wrong but working?)
-          done();
-        }
-
-        // load images to compare
-        let loadedCount = 0;
-        const referenceImage = document.createElement( 'img' );
-        const freshImage = document.createElement( 'img' );
-        referenceImage.onload = freshImage.onload = () => {
-          if ( ++loadedCount === 2 ) {
-            compareSnapshots();
-          }
-        };
-        referenceImage.onerror = () => {
-          assert.ok( false, `${name} reference image failed to load` );
-          done();
-        };
-        freshImage.onerror = () => {
-          assert.ok( false, `${name} fresh image failed to load` );
-          done();
-        };
-
-        referenceImage.src = dataURL;
-
-        display.foreignObjectRasterization( url => {
-          if ( !url ) {
-            assert.ok( false, `${name} failed to rasterize the display` );
-            done();
-            return;
-          }
-          freshImage.src = url;
-        } );
-      }
-
-      setup( scene, display, loadImages );
-
-      if ( !isAsync ) {
-        loadImages();
-      }
-    } );
-  };
-
-  // Like pixelTest, but for multiple listeners ({string[]}). Don't override the renderer on the scene.
-  const multipleRendererTest = ( name, setup, dataURL, threshold, renderers, isAsync ) => {
-    for ( let i = 0; i < renderers.length; i++ ) {
-      ( () => {
-        const renderer = renderers[ i ];
-
-        pixelTest( `${name} (${renderer})`, ( scene, display, asyncCallback ) => {
-          scene.renderer = renderer;
-          setup( scene, display, asyncCallback );
-        }, dataURL, threshold, isAsync );
-      } )();
-    }
-  };
+if ( PixelComparisonTestUtils.platformSupportsPixelComparisonTests() ) {
 
   const simpleRectangleDataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAcElEQVRYR+3YwQoAIQhFUfv/j572NQRiQTOc1ipyn0+kFpe/dnl/ocGqQgieJPhUiyfzX9VcSazBgTCCyZGbwhFEcCRgzVgzVVcgiGDE8uS3ZpiESZgkNwMO1hyvORpBBD938lcl25Lv+62KEcHfE+wTtBwp2K8YwAAAAABJRU5ErkJggg==';
-  multipleRendererTest( 'Simple Rectangle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Simple Rectangle',
     ( scene, display ) => {
       display.width = 40;
       display.height = 40;
@@ -165,7 +46,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Shifted Rectangle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Shifted Rectangle',
     ( scene, display ) => {
       display.width = 40;
       display.height = 40;
@@ -179,7 +60,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Delay-shifted Rectangle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Delay-shifted Rectangle',
     ( scene, display ) => {
       display.width = 40;
       display.height = 40;
@@ -197,7 +78,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Color-change Rectangle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Color-change Rectangle',
     ( scene, display ) => {
       display.width = 40;
       display.height = 40;
@@ -213,7 +94,7 @@ else {
   );
 
   // try rendering the image itself
-  multipleRendererTest( 'Image with PNG data URL',
+  PixelComparisonTestUtils.multipleRendererTest( 'Image with PNG data URL',
     ( scene, display, asyncCallback ) => {
       const img = document.createElement( 'img' );
       img.onload = () => {
@@ -232,7 +113,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers, true // asynchronous
   );
 
-  multipleRendererTest( 'Color change from property',
+  PixelComparisonTestUtils.multipleRendererTest( 'Color change from property',
     ( scene, display ) => {
       display.width = 40;
       display.height = 40;
@@ -247,7 +128,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Invisible node with rectangles (paths) above and below',
+  PixelComparisonTestUtils.multipleRendererTest( 'Invisible node with rectangles (paths) above and below',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -276,7 +157,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Invisible => Visible',
+  PixelComparisonTestUtils.multipleRendererTest( 'Invisible => Visible',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -290,7 +171,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Invisible repaints',
+  PixelComparisonTestUtils.multipleRendererTest( 'Invisible repaints',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -306,7 +187,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Invisible Rectangle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Invisible Rectangle',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -322,7 +203,7 @@ else {
   *----------------------------------------------------------------------------*/
 
   const redCenteredCircle = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABLElEQVRYR+2W0XHCMAyGP01QOgllAjpC2aCM0AlKNmADugF0gzJBYRM6gTldzDUcsWXHufNL9JKHONIX6bd/C5VDKtdnApg6kN0BB2/AHHgFXryIT8APcBL4zhF2MoBri+06RUN1FGYtoE8zkgAcbIBPM9v9go1AY31jAgwsfqv7IbCNQUQBfNt/rb8w3i9i47AAdI4quJJQYS5CCYIAXu37ksqdb1cCh75cMYAhwgvxNtIK+SFiALqvlyN14CjtuZEFcAGeRgK4CDzXBPgTmOUCVB9BdRGq6dTbhjov1xpK6UF0ln/XTN8FHkAdsN5R7CFKtFBmRrd+DXREs7jmN+24A6Hj+ErQxBl4H/VC0lWONymFCV3Jek0n2w1HOoLNNMkjMDMNXDABTB24AvQKQiGCr2i0AAAAAElFTkSuQmCC';
-  multipleRendererTest( 'Simple Circle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Simple Circle',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -333,7 +214,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Shifted Repainted Circle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Shifted Repainted Circle',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -348,7 +229,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Scaled Circle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Scaled Circle',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -359,7 +240,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Radius Change Circle',
+  PixelComparisonTestUtils.multipleRendererTest( 'Radius Change Circle',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -372,7 +253,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Static Circles',
+  PixelComparisonTestUtils.multipleRendererTest( 'Static Circles',
     ( scene, display ) => {
       display.width = 64;
       display.height = 64;
@@ -393,7 +274,7 @@ else {
   * General tests
   *----------------------------------------------------------------------------*/
 
-  multipleRendererTest( 'Simple Node/Fill/Stroke Opacity',
+  PixelComparisonTestUtils.multipleRendererTest( 'Simple Node/Fill/Stroke Opacity',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -408,7 +289,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Nested Node/Fill/Stroke Opacity',
+  PixelComparisonTestUtils.multipleRendererTest( 'Nested Node/Fill/Stroke Opacity',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -431,7 +312,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Simple clipping',
+  PixelComparisonTestUtils.multipleRendererTest( 'Simple clipping',
     ( scene, display ) => {
       display.width = 32;
       display.height = 32;
@@ -446,7 +327,7 @@ else {
     1, nonDomWebGLTestedRenderers
   );
 
-  multipleRendererTest( 'Nested clipping and background',
+  PixelComparisonTestUtils.multipleRendererTest( 'Nested clipping and background',
     ( scene, display ) => {
       display.width = 64;
       display.height = 40;
@@ -469,7 +350,7 @@ else {
     2.5, testedRenderers // higher threshold due to antialiasing :(
   );
 
-  multipleRendererTest( 'Ellipses and Elliptical Arcs',
+  PixelComparisonTestUtils.multipleRendererTest( 'Ellipses and Elliptical Arcs',
     ( scene, display ) => {
       display.width = 200;
       display.height = 50;
@@ -509,7 +390,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Circles and Arcs',
+  PixelComparisonTestUtils.multipleRendererTest( 'Circles and Arcs',
     ( scene, display ) => {
       display.width = 200;
       display.height = 50;
@@ -549,7 +430,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'DAG support',
+  PixelComparisonTestUtils.multipleRendererTest( 'DAG support',
     ( scene, display ) => {
       display.width = 250;
       display.height = 120;
@@ -589,7 +470,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Overlapping/nested transforms',
+  PixelComparisonTestUtils.multipleRendererTest( 'Overlapping/nested transforms',
     ( scene, display ) => {
       display.width = 64;
       display.height = 44;
@@ -624,7 +505,7 @@ else {
   // 16x16 with black circle in the middle
   const patternUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAo0lEQVQ4T7WT4Q2CMBCFPyZAN2EDcAOcQJ1MmABHkA0YBTcwL6FELhYvFpr0B+n13X2vj4zElSXeJyZwBS5AMTUYgAZobUMrcAA6oIpM9gTOwBjOrYAKyh9Yqjl9E9DYd6cntwlp4YGne9DvA+Yngrhy5wSqPar2X4EXIMO3RUg2URN5jJwNtAj6FtdjJQu6XK8FKTyCcLRtlBXnxdrtZ3LGAd6BXBwR28m13gAAAABJRU5ErkJggg==';
 
-  multipleRendererTest( 'Patterns',
+  PixelComparisonTestUtils.multipleRendererTest( 'Patterns',
     ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
@@ -647,7 +528,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers, true
   );
 
-  multipleRendererTest( 'Transformed Patterns',
+  PixelComparisonTestUtils.multipleRendererTest( 'Transformed Patterns',
     ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
@@ -670,7 +551,7 @@ else {
     2.8, testedRenderers, true // larger threshold due to antialiasing
   );
 
-  multipleRendererTest( 'Dashes',
+  PixelComparisonTestUtils.multipleRendererTest( 'Dashes',
     ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
@@ -700,7 +581,7 @@ else {
     2.5, testedRenderers
   );
 
-  multipleRendererTest( 'Radial Gradients',
+  PixelComparisonTestUtils.multipleRendererTest( 'Radial Gradients',
     ( scene, display, asyncCallback ) => {
       display.width = 192;
       display.height = 64;
@@ -741,7 +622,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Linear Gradients',
+  PixelComparisonTestUtils.multipleRendererTest( 'Linear Gradients',
     ( scene, display, asyncCallback ) => {
       display.width = 128;
       display.height = 64;
@@ -777,7 +658,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Cubic B\u00E9zier',
+  PixelComparisonTestUtils.multipleRendererTest( 'Cubic B\u00E9zier',
     ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
@@ -793,7 +674,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Quadratic B\u00E9zier',
+  PixelComparisonTestUtils.multipleRendererTest( 'Quadratic B\u00E9zier',
     ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
@@ -809,7 +690,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Opacity and Blending',
+  PixelComparisonTestUtils.multipleRendererTest( 'Opacity and Blending',
     ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
@@ -827,7 +708,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'Image shifted',
+  PixelComparisonTestUtils.multipleRendererTest( 'Image shifted',
     ( scene, display, asyncCallback ) => {
       const img = document.createElement( 'img' );
       img.onload = () => {
@@ -850,7 +731,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers, true // asynchronous
   );
 
-  multipleRendererTest( 'Image changed after display',
+  PixelComparisonTestUtils.multipleRendererTest( 'Image changed after display',
     ( scene, display, asyncCallback ) => {
       const img1 = document.createElement( 'img' );
       img1.onload = () => {
@@ -880,7 +761,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers, true // asynchronous
   );
 
-  multipleRendererTest( 'External image displayed before load, then after load',
+  PixelComparisonTestUtils.multipleRendererTest( 'External image displayed before load, then after load',
     ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
@@ -907,7 +788,7 @@ else {
     2, [ 'canvas', 'webgl' ], true // asynchronous, don't test SVG/DOM, since foreignobject doesn't work with external images
   );
 
-  multipleRendererTest( 'Horizontal FlowBox',
+  PixelComparisonTestUtils.multipleRendererTest( 'Horizontal FlowBox',
     ( scene, display ) => {
       scene.addChild( new FlowBox( {
         orientation: 'horizontal',
@@ -926,7 +807,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'Vertical FlowBox',
+  PixelComparisonTestUtils.multipleRendererTest( 'Vertical FlowBox',
     ( scene, display ) => {
       scene.addChild( new FlowBox( {
         orientation: 'vertical',
@@ -945,7 +826,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'Horizontal FlowBox with preferredWidth',
+  PixelComparisonTestUtils.multipleRendererTest( 'Horizontal FlowBox with preferredWidth',
     ( scene, display ) => {
       scene.addChild( new FlowBox( {
         orientation: 'horizontal',
@@ -965,7 +846,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'Vertical FlowBox with preferredHeight',
+  PixelComparisonTestUtils.multipleRendererTest( 'Vertical FlowBox with preferredHeight',
     ( scene, display ) => {
       scene.addChild( new FlowBox( {
         orientation: 'vertical',
@@ -985,7 +866,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox simple child-bounds update listening',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox simple child-bounds update listening',
     ( scene, display ) => {
       const middleRect = new Rectangle( 0, 0, 20, 20, { fill: 'black' } );
       scene.addChild( new FlowBox( {
@@ -1009,7 +890,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox manually repositioning child after layout',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox manually repositioning child after layout',
     ( scene, display ) => {
       const middleRect = new Rectangle( 0, 0, 20, 20, { fill: 'black' } );
       scene.addChild( new FlowBox( {
@@ -1033,7 +914,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox horizontal align (simple)',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox horizontal align (simple)',
     ( scene, display ) => {
       scene.addChild( new FlowBox( {
         orientation: 'horizontal',
@@ -1054,7 +935,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox vertical align (simple)',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox vertical align (simple)',
     ( scene, display ) => {
       scene.addChild( new FlowBox( {
         orientation: 'vertical',
@@ -1075,7 +956,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox resize:false',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox resize:false',
     ( scene, display ) => {
       const circle = new Circle( 10, { fill: colors[ 4 ] } );
       scene.addChild( new FlowBox( {
@@ -1099,7 +980,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox invisible child',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox invisible child',
     ( scene, display ) => {
       scene.addChild( new FlowBox( {
         orientation: 'horizontal',
@@ -1120,7 +1001,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox invisible=>visible child',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox invisible=>visible child',
     ( scene, display ) => {
       const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ], visible: false } );
       scene.addChild( new FlowBox( {
@@ -1143,7 +1024,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'FlowBox visible=>invisible child',
+  PixelComparisonTestUtils.multipleRendererTest( 'FlowBox visible=>invisible child',
     ( scene, display ) => {
       const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 4 ] } );
       scene.addChild( new FlowBox( {
@@ -1166,7 +1047,7 @@ else {
     DEFAULT_THRESHOLD, layoutTestedRenderers
   );
 
-  multipleRendererTest( 'GridBox rows',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox rows',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         rows: [
@@ -1190,7 +1071,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox columns',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox columns',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         columns: [
@@ -1214,7 +1095,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox coordinates',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox coordinates',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         children: [
@@ -1248,7 +1129,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox autoColumns',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox autoColumns',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         autoColumns: 3,
@@ -1266,7 +1147,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox autoRows',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox autoRows',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         autoRows: 3,
@@ -1284,7 +1165,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox addRow/addColumn',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox addRow/addColumn',
     ( scene, display ) => {
       const box = new GridBox( { x: 10, y: 10 } );
       box.addRow( [
@@ -1306,7 +1187,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox insertRow/insertColumn',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox insertRow/insertColumn',
     ( scene, display ) => {
       const box = new GridBox( { x: 10, y: 10 } );
       box.insertRow( 0, [
@@ -1333,7 +1214,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox consistent spacing',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox consistent spacing',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         spacing: 5,
@@ -1351,7 +1232,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox x/y spacing',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox x/y spacing',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         xSpacing: 5,
@@ -1370,7 +1251,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox x/y spacing arrays',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox x/y spacing arrays',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         xSpacing: [ 0, 5, 10, 5, 0 ],
@@ -1389,7 +1270,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox x/y spacing arrays with invisible children',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox x/y spacing arrays with invisible children',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         xSpacing: [ 0, 5, 10, 5, 0 ],
@@ -1408,7 +1289,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox autoRows with invisible child',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox autoRows with invisible child',
     ( scene, display ) => {
       const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ], visible: false } );
       scene.addChild( new GridBox( {
@@ -1430,7 +1311,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox autoRows with child made invisible later',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox autoRows with child made invisible later',
     ( scene, display ) => {
       const child = new Rectangle( 0, 0, 20, 20, { fill: colors[ 6 ] } );
       scene.addChild( new GridBox( {
@@ -1453,7 +1334,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox preferred size grow',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox preferred size grow',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         rows: [
@@ -1480,7 +1361,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox preferred size asymmetric grow',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox preferred size asymmetric grow',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         x: 10,
@@ -1519,7 +1400,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox preferred size stretch',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox preferred size stretch',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         x: 10,
@@ -1563,7 +1444,7 @@ else {
     DEFAULT_THRESHOLD, testedRenderers
   );
 
-  multipleRendererTest( 'GridBox preferred size align',
+  PixelComparisonTestUtils.multipleRendererTest( 'GridBox preferred size align',
     ( scene, display ) => {
       scene.addChild( new GridBox( {
         grow: 1,

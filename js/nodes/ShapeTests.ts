@@ -9,9 +9,9 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { LineStyles, Shape } from '../../../kite/js/imports.js';
-import snapshotEquals from '../tests/snapshotEquals.js';
 import Node from './Node.js';
 import Path from './Path.js';
+import PixelComparisonTestUtils from '../tests/PixelComparisonTestUtils.js';
 
 QUnit.module( 'Shape' );
 
@@ -50,7 +50,7 @@ function sceneEquals( assert: Assert, constructionA: ( node: Node ) => void, con
   // sceneA.renderScene();
   // sceneB.renderScene();
 
-  const isEqual = snapshotEquals( assert, snapshot( sceneA ), snapshot( sceneB ), threshold, message );
+  const isEqual = PixelComparisonTestUtils.snapshotEquals( assert, snapshot( sceneA ), snapshot( sceneB ), threshold, message || '');
 
   // TODO: consider showing if tests fail https://github.com/phetsims/scenery/issues/1581
   return isEqual;
