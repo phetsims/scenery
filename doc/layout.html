@@ -362,14 +362,22 @@
         const box = ( () => {
           /*START*/
           const box = new HBox( {
-            children: colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) )
-          } );
-          box.children[ 0 ].rectHeight = 100;
-          box.children[ 3 ].mutateLayoutOptions( {
-            leftMargin: 10
-          } );
-          box.children[ 5 ].mutateLayoutOptions( {
-            align: 'top'
+            children: [
+              new Rectangle( 0, 0, 50, 100, {
+                fill: colors[ 0 ]
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 2 ],
+                layoutOptions: { leftMargin: 10 }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 4 ],
+                layoutOptions: { align: 'top' }
+              } ),
+              new Rectangle( 0, 0, 50, 50, {
+                fill: colors[ 6 ]
+              } )
+            ]
           } );
           return box;
           /*END*/
