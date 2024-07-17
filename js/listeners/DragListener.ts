@@ -413,6 +413,11 @@ export default class DragListener extends PressListener implements TInputListene
       return;
     }
 
+    // If we got interrupted while events were queued up, we MAY get a drag when not pressed. We can ignore this.
+    if ( !this.isPressed ) {
+      return;
+    }
+
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

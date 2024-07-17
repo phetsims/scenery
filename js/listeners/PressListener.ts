@@ -525,7 +525,10 @@ export default class PressListener extends EnabledComponent implements TInputLis
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} drag` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    assert && assert( this.isPressed, 'Can only drag while pressed' );
+    // If we got interrupted while events were queued up, we MAY get a drag when not pressed. We can ignore this.
+    if ( !this.isPressed ) {
+      return;
+    }
 
     this._dragListener( event, this );
 
