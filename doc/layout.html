@@ -230,13 +230,13 @@
   </div>
   <div class="span8">
 
-    <h2 id="introduction">Introduction</h2>
+    <h2 id="introduction" class="index">Introduction</h2>
 
     <p>
       Here we will cover the layout system in <a href="https://phetsims.github.io/scenery/">Scenery</a>.
     </p>
 
-    <h3>Bounds</h3>
+    <h3 id="bounds" class="index">Bounds</h3>
 
     <p>
       The layout system in Scenery is based on the concept of <code>bounds</code>. Each <em>paintable</em> Node (that
@@ -264,7 +264,7 @@
       Most getters for things like <code>width</code> / <code>height</code> will return the value of the <code>bounds</code>.
     </p>
 
-    <h3>Layout Containers</h3>
+    <h3 id="layout-containers" class="index">Layout Containers</h3>
 
     <p>
       Some Nodes are called <em>layout containers</em> if they will control the position and size of child content.
@@ -293,7 +293,95 @@
       <li><code>AlignBox</code> allows positioning a Node within a rectangle, with margins/alignment</li>
     </ul>
 
-    <h3>References and Documentation</h3>
+    <h3 id="sizable-components" class="index">Sizable Components</h3>
+
+    <p>
+      Nodes like FlowBox (HBox/VBox), GridBox, and many <a href="https://github.com/phetsims/sun">sun</a> components
+      (buttons, AccordionBox, Panel, Slider, Checkbox) are <em>sizable</em>: they can be adjusted to different
+      <em>preferred</em> sizes/bounds, which are equal to or larger than their <em>minimum</em> sizes. When the preferred
+      size is set, the Node is responsible for adjusting its own layout so that it takes up that size.
+    </p>
+
+    <p>
+      Sizable nodes will either mix in <code>WidthSizable</code>, <code>HeightSizable</code>, or <code>Sizable</code>
+      (indicating that both width and height can be adjusted). This provides preferred and minimum sizes in BOTH local
+      and parent coordinate frames (e.g. <code>preferredWidth</code> / <code>localPreferredWidth</code>).
+      These separate coordinate frame versions will be kept in sync (and are backed by Properties).
+    </p>
+
+    <p>
+      Typically Nodes will compute their own minimum width/height. The local version of this (e.g. <code>localMinimumWidth</code>)
+      is considered the "primary" one, since Nodes usually do layout in their local coordinate frame. This means that
+      when a Node's transform changes, its minimum sizes will be adjusted to match the equivalent
+      <code>localMinimum</code> sizes.
+    </p>
+
+    <p>
+      Typically layout containers (but also clients, manually) will set the preferred sizes on a Node, thus the
+      parent version will be primary (e.g. when a sizable Node is transformed, its <code>localPreferredWidth</code> will
+      be adjusted to match the <code>preferredWidth</code> after the transformation).
+    </p>
+
+    <p>
+      Some Nodes by default have this "sizability" turned off, and clients can do this manually with
+      <code>widthSizable/heightSizable/sizable:false</code>. Layout containers should not attempt to set preferred sizes
+      when the Node is not considered "sizable".
+    </p>
+
+    <p>
+      For instance, Rectangles mix in Sizable, but are marked as <code>sizable: false</code> by default, so it won't
+      take up space even when a container has a larger preferred size. They can be made resizable with <code>sizable:
+      true</code>:
+    </p>
+
+    <p>
+      NOTE: This is different than the <code>stretch</code> layout option. <code>stretch</code> will potentially change
+      what preferred size it will set to a Node. <code>sizable</code> on a Node will prevent that setting of preferred
+      size.
+    </p>
+
+    <h3 id="layoutOptions" class="index">Layout Options</h3>
+
+    <p>
+      The section below will show off many layout options that are typically set on the container (and apply to all
+      children). These can also be set on individual children, and will override the container's default for any options
+      included. These can be mutated after (by setting the entire thing with <code>node.layoutOptions =</code> or with
+      <code>mutateLayoutOptions</code>).
+    </p>
+
+    <p>
+      <code>mutateLayoutOptions</code> is recommended when applying additional adjustments to <code>layoutOptions</code>,
+      so that it won't by accident remove any layout options that were set earlier OR some set by the container. For
+      example, GridBox with <code>rows/columns/autoRows/autoColumns</code> will set some layout options, and using
+      <code>gridBox.layoutOptions =</code> may wipe out the positioning information for the child.
+    </p>
+
+    <div id="layoutOptionsMutate-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'layoutOptionsMutate-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          const box = new HBox( {
+            children: colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) )
+          } );
+          box.children[ 0 ].rectHeight = 100;
+          box.children[ 3 ].mutateLayoutOptions( {
+            leftMargin: 10
+          } );
+          box.children[ 5 ].mutateLayoutOptions( {
+            align: 'top'
+          } );
+          return box;
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( display, box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
+    </script>
+
+    <h3 id="references-and-documentation" class="index">References and Documentation</h3>
 
     <p>
       It is recommended to view assorted PhET simulations and libraries for examples to see how layout is used in practice.
@@ -2203,138 +2291,6 @@
           /*END*/
         } )();
         scene.addChild( new ResizableNode( display, box, {} ) );
-      } );
-    </script>
-
-    <h2 id="Sizable" class="index">Sizables</h2>
-
-    <p>
-      Nodes like FlowBox (HBox/VBox), GridBox, and many <a href="https://github.com/phetsims/sun">sun</a> components
-      (buttons, AccordionBox, Panel, Slider, Checkbox) are <em>sizable</em>: they can be adjusted to different
-      <em>preferred</em> sizes/bounds, which are equal to or larger than their <em>minimum</em> sizes. When the preferred
-      size is set, the Node is responsible for adjusting its own layout so that it takes up that size.
-    </p>
-
-    <p>
-      Sizable nodes will either mix in <code>WidthSizable</code>, <code>HeightSizable</code>, or <code>Sizable</code>
-      (indicating that both width and height can be adjusted). This provides preferred and minimum sizes in BOTH local
-      and parent coordinate frames (e.g. <code>preferredWidth</code> / <code>localPreferredWidth</code>).
-      These separate coordinate frame versions will be kept in sync (and are backed by Properties).
-    </p>
-
-    <p>
-      Typically Nodes will compute their own minimum width/height. The local version of this (e.g. <code>localMinimumWidth</code>)
-      is considered the "primary" one, since Nodes usually do layout in their local coordinate frame. This means that
-      when a Node's transform changes, its minimum sizes will be adjusted to match the equivalent
-      <code>localMinimum</code> sizes.
-    </p>
-
-    <p>
-      Typically layout containers (but also clients, manually) will set the preferred sizes on a Node, thus the
-      parent version will be primary (e.g. when a sizable Node is transformed, its <code>localPreferredWidth</code> will
-      be adjusted to match the <code>preferredWidth</code> after the transformation).
-    </p>
-
-    <p>
-      Some Nodes by default have this "sizability" turned off, and clients can do this manually with
-      <code>widthSizable/heightSizable/sizable:false</code>. Layout containers should not attempt to set preferred sizes
-      when the Node is not considered "sizable".
-    </p>
-
-    <p>
-      For instance, Rectangles mix in Sizable, but are marked as <code>sizable: false</code> by default, so it won't
-      take up space even when a container has a larger preferred size. They can be made resizable with <code>sizable:
-      true</code>:
-    </p>
-
-    <div id="rectUnsizable-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'rectUnsizable-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          return new GridBox( {
-            // Resize everything up evenly
-            grow: 1,
-            stretch: true,
-
-            // Show the effect without having to drag to make it larger
-            minContentWidth: 100,
-            minContentHeight: 100,
-            rows: [ [
-              new Rectangle( 0, 0, 50, 50, {
-                fill: colors[ 2 ]
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                minimumWidth: 50,
-                fill: colors[ 4 ],
-                widthSizable: true
-              } )
-            ], [
-              new Rectangle( 0, 0, 50, 50, {
-                minimumHeight: 50,
-                fill: colors[ 6 ],
-                heightSizable: true
-              } ),
-              new Rectangle( 0, 0, 50, 50, {
-                minimumWidth: 50,
-                minimumHeight: 50,
-                fill: colors[ 8 ],
-                sizable: true
-              } )
-            ] ]
-          } );
-          /*END*/
-        } )();
-        scene.addChild( new ResizableNode( display, box, {
-          widthResizable: true,
-          heightResizable: true
-        } ) );
-      } );
-    </script>
-
-    <p>
-      NOTE: This is different than the <code>stretch</code> layout option. <code>stretch</code> will potentially change
-      what preferred size it will set to a Node. <code>sizable</code> on a Node will prevent that setting of preferred
-      size.
-    </p>
-
-    <h2 id="layoutOptions" class="index">layoutOptions</h2>
-
-    <p>
-      Layout options can be set on individual child Nodes of a layout container. These will override the container's
-      default for any options included. These can be mutated after (by setting the entire thing with <code>node.layoutOptions
-      =</code>or with <code>mutateLayoutOptions</code>).
-    </p>
-
-    <p>
-      <code>mutateLayoutOptions</code> is recommended when applying additional adjustments to <code>layoutOptions</code>,
-      so that it won't by accident remove any layout options that were set earlier OR some set by the container. For
-      example, GridBox with <code>rows/columns/autoRows/autoColumns</code> will set some layout options, and using
-      <code>gridBox.layoutOptions =</code> may wipe out the positioning information for the child.
-    </p>
-
-    <div id="layoutOptionsMutate-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'layoutOptionsMutate-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          const box = new HBox( {
-            children: colors.map( color => new Rectangle( 0, 0, 50, 50, { fill: color } ) )
-          } );
-          box.children[ 0 ].rectHeight = 100;
-          box.children[ 3 ].mutateLayoutOptions( {
-            leftMargin: 10
-          } );
-          box.children[ 5 ].mutateLayoutOptions( {
-            align: 'top'
-          } );
-          return box;
-          /*END*/
-        } )();
-        scene.addChild( new ResizableNode( display, box, {
-          widthResizable: true,
-          heightResizable: true
-        } ) );
       } );
     </script>
 
