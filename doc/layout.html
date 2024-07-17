@@ -2437,6 +2437,190 @@
       } );
     </script>
 
+    <h2 id="AlignBox" class="index">AlignBox</h2>
+
+    <h3 class="index">alignBounds</h3>
+
+    <p>AlignBox on its own will position content within a specific bounding box (its <code>alignBounds</code>):</p>
+
+    <div id="simpleAlignBox-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'simpleAlignBox-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          const rect = new Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new AlignBox( rect, {
+            alignBounds: new Bounds2( 0, 0, 100, 100 )
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
+    </script>
+
+    <h3 class="index">Alignment</h3>
+
+    <p>Content can be aligned within this:</p>
+
+    <div id="alignBoxAlign-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'alignBoxAlign-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          const rect = new Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new AlignBox( rect, {
+            alignBounds: new Bounds2( 0, 0, 100, 100 ),
+            xAlign: 'left',
+            yAlign: 'bottom'
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
+    </script>
+
+    <h3 class="index">Margins</h3>
+
+    <p>And margins can be specified on each side:</p>
+
+    <div id="alignBoxMargins-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'alignBoxMargins-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          const rect = new Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new AlignBox( rect, {
+            alignBounds: new Bounds2( 0, 0, 100, 100 ),
+            xAlign: 'left',
+            yAlign: 'bottom',
+            leftMargin: 5,
+            bottomMargin: 10
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
+    </script>
+
+    <p>
+      Margins can also be used on their own (without <code>alignBounds</code> / <code>align</code>) to just create a
+      Node with larger bounds:
+    </p>
+
+    <div id="alignBoxOnlyMargins-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'alignBoxOnlyMargins-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          const rect = new Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new AlignBox( rect, {
+            topMargin: 30,
+            xMargin: 10
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
+    </script>
+
+    <p>AlignBox can also be used with preferred dimensions instead of an explicit <code>alignBounds</code>:</p>
+
+    <div id="alignBoxPreferred-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'alignBoxPreferred-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          const rect = new Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new AlignBox( rect, {
+            preferredWidth: 100,
+            preferredHeight: 100,
+            xAlign: 'left',
+            yAlign: 'bottom'
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new Node( {
+          children: [
+            box,
+            new Rectangle( {
+              rectBounds: box.bounds,
+              stroke: 'black'
+            } )
+          ]
+        } ) );
+      } );
+    </script>
+
+    <p>
+      and can be dynamically resizable (off by default because it's usually not used for that purpose in legacy
+      code):
+    </p>
+
+    <div id="alignBoxSizable-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'alignBoxSizable-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+          const rect = new Rectangle( 0, 0, 50, 50, {
+            fill: 'red'
+          } );
+          return new AlignBox( rect, {
+            xAlign: 'left',
+            yAlign: 'bottom',
+            sizable: true,
+            margin: 10
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( display, box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
+    </script>
+
     <h2 id="Constraint" class="index">Constraint</h2>
 
     <p>
@@ -2682,190 +2866,6 @@
           return scene;
         } )();
         scene.addChild( new ResizableNode( display, box, {} ) );
-      } );
-    </script>
-
-    <h2 id="AlignBox" class="index">AlignBox</h2>
-
-    <h3 class="index">alignBounds</h3>
-
-    <p>AlignBox on its own will position content within a specific bounding box (its <code>alignBounds</code>):</p>
-
-    <div id="simpleAlignBox-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'simpleAlignBox-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          const rect = new Rectangle( 0, 0, 50, 50, {
-            fill: 'red'
-          } );
-          return new AlignBox( rect, {
-            alignBounds: new Bounds2( 0, 0, 100, 100 )
-          } );
-          /*END*/
-        } )();
-        scene.addChild( new Node( {
-          children: [
-            box,
-            new Rectangle( {
-              rectBounds: box.bounds,
-              stroke: 'black'
-            } )
-          ]
-        } ) );
-      } );
-    </script>
-
-    <h3 class="index">Alignment</h3>
-
-    <p>Content can be aligned within this:</p>
-
-    <div id="alignBoxAlign-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'alignBoxAlign-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          const rect = new Rectangle( 0, 0, 50, 50, {
-            fill: 'red'
-          } );
-          return new AlignBox( rect, {
-            alignBounds: new Bounds2( 0, 0, 100, 100 ),
-            xAlign: 'left',
-            yAlign: 'bottom'
-          } );
-          /*END*/
-        } )();
-        scene.addChild( new Node( {
-          children: [
-            box,
-            new Rectangle( {
-              rectBounds: box.bounds,
-              stroke: 'black'
-            } )
-          ]
-        } ) );
-      } );
-    </script>
-
-    <h3 class="index">Margins</h3>
-
-    <p>And margins can be specified on each side:</p>
-
-    <div id="alignBoxMargins-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'alignBoxMargins-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          const rect = new Rectangle( 0, 0, 50, 50, {
-            fill: 'red'
-          } );
-          return new AlignBox( rect, {
-            alignBounds: new Bounds2( 0, 0, 100, 100 ),
-            xAlign: 'left',
-            yAlign: 'bottom',
-            leftMargin: 5,
-            bottomMargin: 10
-          } );
-          /*END*/
-        } )();
-        scene.addChild( new Node( {
-          children: [
-            box,
-            new Rectangle( {
-              rectBounds: box.bounds,
-              stroke: 'black'
-            } )
-          ]
-        } ) );
-      } );
-    </script>
-
-    <p>
-      Margins can also be used on their own (without <code>alignBounds</code> / <code>align</code>) to just create a
-      Node with larger bounds:
-    </p>
-
-    <div id="alignBoxOnlyMargins-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'alignBoxOnlyMargins-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          const rect = new Rectangle( 0, 0, 50, 50, {
-            fill: 'red'
-          } );
-          return new AlignBox( rect, {
-            topMargin: 30,
-            xMargin: 10
-          } );
-          /*END*/
-        } )();
-        scene.addChild( new Node( {
-          children: [
-            box,
-            new Rectangle( {
-              rectBounds: box.bounds,
-              stroke: 'black'
-            } )
-          ]
-        } ) );
-      } );
-    </script>
-
-    <p>AlignBox can also be used with preferred dimensions instead of an explicit <code>alignBounds</code>:</p>
-
-    <div id="alignBoxPreferred-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'alignBoxPreferred-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          const rect = new Rectangle( 0, 0, 50, 50, {
-            fill: 'red'
-          } );
-          return new AlignBox( rect, {
-            preferredWidth: 100,
-            preferredHeight: 100,
-            xAlign: 'left',
-            yAlign: 'bottom'
-          } );
-          /*END*/
-        } )();
-        scene.addChild( new Node( {
-          children: [
-            box,
-            new Rectangle( {
-              rectBounds: box.bounds,
-              stroke: 'black'
-            } )
-          ]
-        } ) );
-      } );
-    </script>
-
-    <p>
-      and can be dynamically resizable (off by default because it's usually not used for that purpose in legacy
-      code):
-    </p>
-
-    <div id="alignBoxSizable-example"></div>
-    <script type="text/javascript">
-      createSandbox( 'alignBoxSizable-example', ( scene, stepEmitter, display ) => {
-        const box = ( () => {
-          /*START*/
-          const rect = new Rectangle( 0, 0, 50, 50, {
-            fill: 'red'
-          } );
-          return new AlignBox( rect, {
-            xAlign: 'left',
-            yAlign: 'bottom',
-            sizable: true,
-            margin: 10
-          } );
-          /*END*/
-        } )();
-        scene.addChild( new ResizableNode( display, box, {
-          widthResizable: true,
-          heightResizable: true
-        } ) );
       } );
     </script>
 
