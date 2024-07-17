@@ -20,6 +20,7 @@ import './layout/nodes/AlignBoxTests.js';
 import './layout/nodes/FlowBoxTests.js';
 import './layout/constraints/FlowConstraintTests.js';
 import './layout/nodes/GridBoxTests.js';
+import './layout/constraints/GridConstraintTests.js';
 import './listeners/DragListenerTests.js';
 import './listeners/FireListenerTests.js';
 import './listeners/PressListenerTests.js';
