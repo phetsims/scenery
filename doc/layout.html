@@ -2621,6 +2621,98 @@
       } );
     </script>
 
+    <h3 class="index">AlignGroup</h3>
+
+    <p>
+      It is often the case where you want to wrap a bunch of different Nodes in AlignBoxes, such that they all have the
+      same bounds (e.g. a set of icons for buttons that you want to be the same size, or need to align things on top of
+      each other and toggle visibility).
+    </p>
+
+    <p>
+      AlignGroup handles this with ease. Once you have an AlignGroup, AlignBoxes can be created with `alignGroup.createBox( content, options )`.
+      This has the full power of the AlignBox API, however the AlignGroup controls the bounds of the boxes, so that
+      their widths and heights are all the same.
+    </p>
+
+    <div id="alignGroup-example"></div>
+    <script type="text/javascript">
+      createSandbox( 'alignGroup-example', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+
+          // AlignGroup by default matches both width and height
+          const alignGroup = new AlignGroup();
+
+          // Wrap some icons in AlignBoxes
+          const iconA = alignGroup.createBox( new Rectangle( 0, 0, 50, 30, { fill: colors[ 0 ] } ) );
+          const iconB = alignGroup.createBox( new Rectangle( 0, 0, 30, 50, { fill: colors[ 2 ] } ) );
+          const iconC = alignGroup.createBox( new Circle( 20, { fill: colors[ 4 ] } ) );
+
+          return new HBox( {
+            spacing: 2,
+            children: [ iconA, iconB, iconC ].map( icon => {
+              // Shows a background behind each item (to see the AlignBox bounds)
+              return new Node( {
+                children: [
+                  Rectangle.bounds( icon.bounds, { fill: '#ccc' } ),
+                  icon
+                ]
+              } );
+            } )
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( display, box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
+    </script>
+
+    <p>
+      It is possible to create an AlignGroup which only matches the width OR height (not both), by constructing with
+      `matchHorizontal:false` or `matchVertical:false`. In this case, each AlignBox will use its own Node's width or
+      height (for the dimension that is not matched). The below example shows this with `matchHorizontal:false`.
+    </p>
+
+    <div id="alignGroup-example2"></div>
+    <script type="text/javascript">
+      createSandbox( 'alignGroup-example2', ( scene, stepEmitter, display ) => {
+        const box = ( () => {
+          /*START*/
+
+          // AlignGroup by default matches both width and height
+          const alignGroup = new AlignGroup( {
+            matchHorizontal: false
+          } );
+
+          // Wrap some icons in AlignBoxes
+          const iconA = alignGroup.createBox( new Rectangle( 0, 0, 50, 30, { fill: colors[ 0 ] } ) );
+          const iconB = alignGroup.createBox( new Rectangle( 0, 0, 30, 50, { fill: colors[ 2 ] } ) );
+          const iconC = alignGroup.createBox( new Circle( 20, { fill: colors[ 4 ] } ) );
+
+          return new HBox( {
+            spacing: 2,
+            children: [ iconA, iconB, iconC ].map( icon => {
+              // Shows a background behind each item (to see the AlignBox bounds)
+              return new Node( {
+                children: [
+                  Rectangle.bounds( icon.bounds, { fill: '#ccc' } ),
+                  icon
+                ]
+              } );
+            } )
+          } );
+          /*END*/
+        } )();
+        scene.addChild( new ResizableNode( display, box, {
+          widthResizable: true,
+          heightResizable: true
+        } ) );
+      } );
+    </script>
+
     <h2 id="Constraint" class="index">Constraint</h2>
 
     <p>
