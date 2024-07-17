@@ -49,10 +49,6 @@ if ( PixelComparisonTestUtils.platformSupportsPixelComparisonTests() ) {
           new Rectangle( { fill: 'yellow', layoutOptions: { column: 2, ...topLayoutOptions }, ...topOptions } ),
           new Rectangle( { fill: 'green', layoutOptions: { column: 3, ...topLayoutOptions }, ...topOptions } ),
           new Rectangle( { fill: 'blue', layoutOptions: { column: 4, ...topLayoutOptions }, ...topOptions } )
-
-//    new Rectangle( 0, 0, 350, 50, { fill: 'black', layoutOptions: { row: 1, column: 0, horizontalSpan: 2} } ),
-          //  new Rectangle( 0, 0, 300, 50, { fill: 'black', layoutOptions: { row: 2, column: 1, horizontalSpan: 2} } ),
-          //new Rectangle( 0, 0, 300, 50, { fill: 'black', layoutOptions: { row: 3, column: 1, horizontalSpan: 2} } ),
         ]
       } );
 
