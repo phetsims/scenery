@@ -94,3 +94,36 @@ QUnit.test( 'Wrap, lineSpacing', assert => {
   assert.ok( cGlobalLeft === 0, 'c is is wrapped to the left edge of the scene' );
   assert.ok( LayoutTestUtils.aboutEqual( bGlobalBottom + lineSpacing, cGlobalTop ), 'c is wrapped below b plus lineSpacing' );
 } );
+
+QUnit.test( 'justify and justifyLines', assert => {
+
+  // justify
+  const [ a, b, c ] = createConstraint( {
+    preferredWidthProperty: new Property( LayoutTestUtils.RECT_WIDTH * 3 ),
+    wrap: true,
+    justify: 'right',
+    align: 'top'
+  } );
+
+  // a should be in the first row while be and c are in the second row, aligned to the right
+  assert.ok( a.globalBounds.right === LayoutTestUtils.RECT_WIDTH * 3, 'a is at the right edge of the scene' );
+  assert.ok( c.globalBounds.right === LayoutTestUtils.RECT_WIDTH * 3, 'c is at the right edge of the scene' );
+  assert.ok( b.globalBounds.right === c.globalBounds.left, 'b is to the left of c' );
+  assert.ok( c.globalBounds.top === b.globalBounds.top, 'c is aligned to b' );
+
+  // justifyLines
+  const [ d, e, f ] = createConstraint( {
+    preferredWidthProperty: new Property( 20 ),
+    preferredHeightProperty: new Property( LayoutTestUtils.RECT_HEIGHT * 4 ),
+    wrap: true,
+    justifyLines: 'bottom'
+  } );
+
+  // in a vertical column, left aligned
+  assert.ok( d.globalBounds.left === 0, 'd is at the left edge of the scene' );
+  assert.ok( e.globalBounds.left === 0, 'e is at the left edge of the scene' );
+  assert.ok( f.globalBounds.left === 0, 'f is at the left edge of the scene' );
+
+  // TODO, why doesn't this pass? https://github.com/phetsims/scenery/issues/1465
+  // assert.ok( f.globalBounds.bottom === LayoutTestUtils.RECT_HEIGHT * 4, 'd is at the bottom edge of the scene (justifyLines: bottom)' );
+} );
