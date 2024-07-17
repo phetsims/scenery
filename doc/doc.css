@@ -12,10 +12,12 @@ h3 {
 }
 
 .navlink {
+  display: block;
   font-weight: bold;
 }
 
 .sublink {
+  display: block;
   padding-left: 1em;
 }
 

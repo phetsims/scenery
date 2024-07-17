@@ -44,6 +44,5 @@ window.generateAPIList = () => {
     anchor.href = `#${element.id}`;
     anchor.innerHTML = element.dataset.index ? element.dataset.index : element.innerHTML;
     apiList.appendChild( anchor );
-    apiList.appendChild( document.createElement( 'br' ) );
   } );
 };
