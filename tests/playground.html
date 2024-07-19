@@ -840,32 +840,53 @@ an UI and Display made for visual testing and debugging.
     // display.height = 160;
     // display.updateDisplay();
 
+    const firstChild = new Rectangle( 0, 0, 150, 30, { fill: 'red' } );
+    const secondChild = new Rectangle( 0, 0, 150, 30, { fill: 'green' } );
+    const thirdChild = new Rectangle( 0, 0, 150, 30, { fill: 'blue' } );
+    firstChild.layoutOptions = { row: 0, column: 0 };
+    secondChild.layoutOptions = { row: 1, column: 0 };
+    thirdChild.layoutOptions = { row: 0, column: 1 };
 
-    const topOptions = {
-      sizable: true
-    };
-    const topLayoutOptions = {
-      row: 0,
-      minContentWidth: 50,
-      minContentHeight: 50
-    };
-
-    const box = new GridBox( {
-      stretch: true,
+    const firstParent = new Node( {
       children: [
-        new Rectangle( { fill: 'red', layoutOptions: { column: 0, ...topLayoutOptions }, ...topOptions } ),
-        new Rectangle( { fill: 'orange', layoutOptions: { column: 1, ...topLayoutOptions }, ...topOptions } ),
-        new Rectangle( { fill: 'yellow', layoutOptions: { column: 2, ...topLayoutOptions }, ...topOptions } ),
-        new Rectangle( { fill: 'green', layoutOptions: { column: 3, ...topLayoutOptions }, ...topOptions } ),
-        new Rectangle( { fill: 'blue', layoutOptions: { column: 4, ...topLayoutOptions }, ...topOptions } ),
-
-        new Rectangle( 0, 0, 350, 50, { fill: 'black', layoutOptions: { row: 1, column: 0, horizontalSpan: 3 } } ),
-        new Rectangle( 0, 0, 350, 50, { fill: 'black', layoutOptions: { row: 2, column: 1, horizontalSpan: 3 } } ),
-        new Rectangle( 0, 0, 350, 50, { fill: 'black', layoutOptions: { row: 3, column: 2, horizontalSpan: 3 } } )
+        firstChild,
+        new Rectangle( 0, 0, 400, 200, { stroke: 'black' } )
       ]
     } );
+    const secondParent = new Node( {
+      children: [
+        secondChild,
+        new Rectangle( 0, 0, 400, 200, { stroke: 'black' } )
+      ],
+      scale: 0.75
+    } );
+    const thirdParent = new Node( {
+      children: [
+        thirdChild,
+        new Rectangle( 0, 0, 400, 200, { stroke: 'black' } )
+      ],
+      scale: 0.5
+    } );
 
-    scene.addChild( box );
+    const exampleNode = new Node( {
+      children: [ firstParent, secondParent, thirdParent ]
+    } );
+
+    // Directly create the constraint, specifying a layoutOrigin to position the content
+    const constraint = new GridConstraint( exampleNode, {
+      layoutOriginProperty: new phet.axon.Property( new phet.dot.Vector2( 10, 10 ) ),
+      xAlign: 'left',
+      yAlign: 'top',
+      spacing: 10
+    } );
+
+    // For the grid, cells are created and added (they can be removed/disposed later).
+    constraint.addCell( new GridCell( constraint, firstChild, null ) );
+    constraint.addCell( new GridCell( constraint, secondChild, null ) );
+    constraint.addCell( new GridCell( constraint, thirdChild, null ) );
+    constraint.updateLayout();
+
+    scene.addChild( exampleNode );
 
     display.width = 600;
     display.height = 300;
