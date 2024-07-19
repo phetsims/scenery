@@ -2920,9 +2920,9 @@
           const firstChild = createLabeledBox( 'First child', '#faa', 150, 30 );
           const secondChild = createLabeledBox( 'Second child', '#afa', 150, 30 );
           const thirdChild = createLabeledBox( 'Third child', '#aaf', 150, 30 );
-          firstChild.layoutOptions = { x: 0, y: 0 };
-          secondChild.layoutOptions = { x: 1, y: 0 };
-          thirdChild.layoutOptions = { x: 0, y: 1 };
+          firstChild.layoutOptions = { row: 0, column: 0 };
+          secondChild.layoutOptions = { row: 1, column: 0 };
+          thirdChild.layoutOptions = { row: 0, column: 1 };
 
           const firstParent = new Node( {
             children: [
