@@ -270,12 +270,12 @@ an UI and Display made for visual testing and debugging.
       children: [
         new phet.scenery.Rectangle( 0, 0, 512, 256, {
           fill: new phet.scenery.LinearGradient( 0, 0, 0, 256 )
-              .addColorStop( 0, 'rgba(255,0,0,1)' )
-              .addColorStop( 0.3, 'rgba(255,0,0,0)' )
-              .addColorStop( 0.4, 'rgba(255,255,255,0)' )
-              .addColorStop( 0.6, 'rgba(255,255,0,1)' )
-              .addColorStop( 0.8, 'rgba(0,0,0,1)' )
-              .addColorStop( 1, 'rgba(128,128,128,0.5)' )
+            .addColorStop( 0, 'rgba(255,0,0,1)' )
+            .addColorStop( 0.3, 'rgba(255,0,0,0)' )
+            .addColorStop( 0.4, 'rgba(255,255,255,0)' )
+            .addColorStop( 0.6, 'rgba(255,255,0,1)' )
+            .addColorStop( 0.8, 'rgba(0,0,0,1)' )
+            .addColorStop( 1, 'rgba(128,128,128,0.5)' )
         } ),
         bars
       ]
@@ -425,7 +425,7 @@ an UI and Display made for visual testing and debugging.
       scene.insertChild( 0, node0 );
       node0.insertChild( 0, path1 );
       scene.transform.append( phet.dot.Matrix3.scaling( 1.5586118499044517 ) );
-      node0.renderer = "canvas";
+      node0.renderer = 'canvas';
       display.updateDisplay();
     } );
   };
@@ -840,63 +840,36 @@ an UI and Display made for visual testing and debugging.
     // display.height = 160;
     // display.updateDisplay();
 
-    scene.addChild( new GridBox( {
-      x: 10,
-      y: 10,
-      preferredWidth: 100,
-      preferredHeight: 100,
+
+    const topOptions = {
+      sizable: true
+    };
+    const topLayoutOptions = {
+      row: 0,
+      minContentWidth: 50,
+      minContentHeight: 50
+    };
+
+    const box = new GridBox( {
+      stretch: true,
       children: [
-        new Rectangle( 0, 0, 15, 15, {
-          fill: colors[ 0 ],
-          layoutOptions: { column: 0, row: 0 }
-        } ),
-        new Rectangle( 0, 0, 30, 15, {
-          fill: colors[ 2 ],
-          sizable: true,
-          localMinimumWidth: 30,
-          localMinimumHeight: 15,
-          layoutOptions: { column: 1, row: 0, horizontalSpan: 2, stretch: true, grow: 1 }
-        } ),
-        new Rectangle( 0, 0, 30, 30, {
-          fill: colors[ 4 ],
-          sizable: true,
-          localMinimumWidth: 30,
-          localMinimumHeight: 30,
-          layoutOptions: { column: 0, row: 1, horizontalSpan: 2, verticalSpan: 2, stretch: true }
-        } ),
-        new Rectangle( 0, 0, 15, 15, {
-          fill: colors[ 6 ],
-          layoutOptions: { column: 2, row: 1 }
-        } ),
-        new Rectangle( 0, 0, 15, 15, {
-          fill: colors[ 8 ],
-          layoutOptions: { column: 2, row: 2 }
-        } ),
-        new Rectangle( 0, 0, 15, 15, {
-          fill: colors[ 0 ],
-          layoutOptions: { column: 0, row: 3 }
-        } ),
-        new Rectangle( 0, 0, 15, 15, {
-          fill: colors[ 1 ],
-          layoutOptions: { column: 1, row: 3 }
-        } ),
-        new Rectangle( 0, 0, 15, 15, {
-          fill: colors[ 2 ],
-          layoutOptions: { column: 2, row: 3 }
-        } )
+        new Rectangle( { fill: 'red', layoutOptions: { column: 0, ...topLayoutOptions }, ...topOptions } ),
+        new Rectangle( { fill: 'orange', layoutOptions: { column: 1, ...topLayoutOptions }, ...topOptions } ),
+        new Rectangle( { fill: 'yellow', layoutOptions: { column: 2, ...topLayoutOptions }, ...topOptions } ),
+        new Rectangle( { fill: 'green', layoutOptions: { column: 3, ...topLayoutOptions }, ...topOptions } ),
+        new Rectangle( { fill: 'blue', layoutOptions: { column: 4, ...topLayoutOptions }, ...topOptions } ),
+
+        new Rectangle( 0, 0, 350, 50, { fill: 'black', layoutOptions: { row: 1, column: 0, horizontalSpan: 3 } } ),
+        new Rectangle( 0, 0, 350, 50, { fill: 'black', layoutOptions: { row: 2, column: 1, horizontalSpan: 3 } } ),
+        new Rectangle( 0, 0, 350, 50, { fill: 'black', layoutOptions: { row: 3, column: 2, horizontalSpan: 3 } } )
       ]
-    } ) );
+    } );
 
-    // Well, eeek
-    debugger;
+    scene.addChild( box );
 
-    display.width = 120;
-    display.height = 120;
+    display.width = 600;
+    display.height = 300;
     display.updateDisplay();
-
-
-
-
 
 
     display.foreignObjectRasterization( url => {
