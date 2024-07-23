@@ -9,14 +9,14 @@
  * For example:
  *
  *    globalHotkeyRegistry.add( new Hotkey( {
- *      key: 'y',
+ *      keyDescriptorProperty: new Property( new KeyDescriptor( { key: 'y' } ) ),
  *      fire: () => console.log( 'fire: y' )
  *    } ) );
  *
  *    myNode.addInputListener( {
  *      hotkeys: [
  *        new Hotkey( {
- *          key: 'x',
+ *          keyDescriptorProperty: new Property( new KeyDescriptor( { key: 'x' } ) ),
  *          fire: () => console.log( 'fire: x' )
  *        } )
  *      ]
@@ -38,35 +38,18 @@ import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/Enab
 import TProperty from '../../../axon/js/TProperty.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
+import KeyDescriptor from './KeyDescriptor.js';
+import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 export type HotkeyFireOnHoldTiming = 'browser' | 'custom';
 
 type SelfOptions = {
-  // The key that should be pressed to trigger the hotkey (in fireOnDown:true mode) or released to trigger the hotkey
-  // (in fireOnDown:false mode).
-  key: EnglishKey;
 
-  // A set of modifier keys that:
-  //
-  // 1. Need to be pressed before the main key before this hotkey is considered pressed.
-  // 2. Must NOT be pressed for other hotkeys to be activated when this hotkey is present.
-  //
-  // A Hotkey will also not activate if the standard modifier keys (ctrl/alt/meta/shift) are pressed, unless they
-  // are explicitly included in the modifierKeys array.
-  //
-  // NOTE: This is a generalization of the normal concept of "modifier key"
-  // (https://en.wikipedia.org/wiki/Modifier_key). It is a PhET-specific concept that allows other non-standard
-  // modifier keys to be used as modifiers. The standard modifier keys (ctrl/alt/meta/shift) are automatically handled
-  // by the hotkey system, but this can expand the set of modifier keys that can be used. When a modifier key is added,
-  // pressing it will prevent any other Hotkeys from becoming active. This is how the typical modifier keys behave and
-  // so that is kept consistent for PhET-specific modifier keys.
-  //
-  // Note that the release of a modifier key may "activate" the hotkey for "fire-on-hold", but not for "fire-on-down".
-  modifierKeys?: EnglishKey[];
-
-  // A set of modifier keys that can be down and the hotkey will still fire. Essentially ignoring the modifier
-  // key behavior for this key.
-  ignoredModifierKeys?: EnglishKey[];
+  // Describes the keys, modifier keys, and ignored modifier keys for this hotkey. This is a Property to support
+  // dynamic behavior. This will be useful for i18n or creating new keymaps. See KeyDescriptor for documentation
+  // about the key and modifierKeys.
+  keyDescriptorProperty: TProperty<KeyDescriptor>;
 
   // Called as fire() when the hotkey is fired (see fireOnDown/fireOnHold for when that happens).
   // The event will be null if the hotkey was fired due to fire-on-hold.
@@ -112,9 +95,7 @@ export type HotkeyOptions = SelfOptions & EnabledComponentOptions;
 export default class Hotkey extends EnabledComponent {
 
   // Straight from options
-  public readonly key: EnglishKey;
-  public readonly modifierKeys: EnglishKey[];
-  public readonly ignoredModifierKeys: EnglishKey[];
+  public readonly keyDescriptorProperty: TProperty<KeyDescriptor>;
   public readonly fire: ( event: KeyboardEvent | null ) => void;
   public readonly press: ( event: KeyboardEvent | null ) => void;
   public readonly release: ( event: KeyboardEvent | null ) => void;
@@ -124,8 +105,8 @@ export default class Hotkey extends EnabledComponent {
   public readonly allowOverlap: boolean;
   public readonly override: boolean;
 
-  // All keys that are part of this hotkey (key + modifierKeys)
-  public readonly keys: EnglishKey[];
+  // All keys that are part of this hotkey (key + modifierKeys) as defined by the current KeyDescriptor.
+  public keysProperty: TReadOnlyProperty<EnglishKey[]>;
 
   // A Property that tracks whether the hotkey is currently pressed.
   // Will be true if it meets the following conditions:
@@ -151,8 +132,6 @@ export default class Hotkey extends EnabledComponent {
       'Cannot specify fireOnHoldCustomDelay / fireOnHoldCustomInterval if fireOnHoldTiming is not custom' );
 
     const options = optionize<HotkeyOptions, SelfOptions, EnabledComponentOptions>()( {
-      modifierKeys: [],
-      ignoredModifierKeys: [],
       fire: _.noop,
       press: _.noop,
       release: _.noop,
@@ -168,9 +147,7 @@ export default class Hotkey extends EnabledComponent {
     super( options );
 
     // Store public things
-    this.key = options.key;
-    this.modifierKeys = options.modifierKeys;
-    this.ignoredModifierKeys = options.ignoredModifierKeys;
+    this.keyDescriptorProperty = options.keyDescriptorProperty;
     this.fire = options.fire;
     this.press = options.press;
     this.release = options.release;
@@ -180,12 +157,16 @@ export default class Hotkey extends EnabledComponent {
     this.allowOverlap = options.allowOverlap;
     this.override = options.override;
 
-    this.keys = _.uniq( [ this.key, ...this.modifierKeys ] );
+    this.keysProperty = new DerivedProperty( [ this.keyDescriptorProperty ], ( keyDescriptor: KeyDescriptor ) => {
+      const keys = _.uniq( [ keyDescriptor.key, ...keyDescriptor.modifierKeys ] );
 
-    // Make sure that every key has an entry in the EnglishStringToCodeMap
-    for ( const key of this.keys ) {
-      assert && assert( EnglishStringToCodeMap[ key ], `No codes for this key exists, do you need to add it to EnglishStringToCodeMap?: ${key}` );
-    }
+      // Make sure that every key has an entry in the EnglishStringToCodeMap
+      for ( const key of keys ) {
+        assert && assert( EnglishStringToCodeMap[ key ], `No codes for this key exists, do you need to add it to EnglishStringToCodeMap?: ${key}` );
+      }
+
+      return keys;
+    } );
 
     // Create a timer to handle the optional fire-on-hold feature.
     if ( this.fireOnHold && this.fireOnHoldTiming === 'custom' ) {
@@ -254,15 +235,9 @@ export default class Hotkey extends EnabledComponent {
     }
   }
 
-  public getHotkeyString(): string {
-    return [
-      ...this.modifierKeys,
-      this.key
-    ].join( '+' );
-  }
-
   public override dispose(): void {
     this.isPressedProperty.dispose();
+    this.keysProperty.dispose();
 
     super.dispose();
   }

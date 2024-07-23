@@ -105,7 +105,8 @@ class HotkeyManager {
       }
     } );
 
-    // Update enabledHotkeysProperty when availableHotkeysProperty (or any enabledProperty) changes
+    // Update enabledHotkeysProperty when availableHotkeysProperty (or any enabledProperty or keyDescriptorProperty)
+    // changes.
     const rebuildHotkeys = () => {
       const overriddenHotkeyStrings = new Set<string>();
       const enabledHotkeys: Hotkey[] = [];
@@ -114,9 +115,11 @@ class HotkeyManager {
         if ( hotkey.enabledProperty.value ) {
           // Each hotkey will have a canonical way to represent it, so we can check for duplicates when overridden.
           // Catch shift+ctrl+c and ctrl+shift+c as the same hotkey.
+          const modifierKeys = hotkey.keyDescriptorProperty.value.modifierKeys;
+          const key = hotkey.keyDescriptorProperty.value.key;
           const hotkeyCanonicalString = [
-            ...hotkey.modifierKeys.slice().sort(),
-            hotkey.key
+            ...modifierKeys.slice().sort(),
+            key
           ].join( '+' );
 
           if ( !overriddenHotkeyStrings.has( hotkeyCanonicalString ) ) {
@@ -146,6 +149,7 @@ class HotkeyManager {
             assert && assert( listener );
 
             hotkey.enabledProperty.unlink( listener );
+            hotkey.keyDescriptorProperty.unlink( listener );
             hotkeysChanged = true;
           }
         }
@@ -160,6 +164,7 @@ class HotkeyManager {
           hotkeyRebuildListenerMap.set( hotkey, listener );
 
           hotkey.enabledProperty.lazyLink( listener );
+          hotkey.keyDescriptorProperty.lazyLink( listener );
           hotkeysChanged = true;
         }
       }
@@ -174,7 +179,10 @@ class HotkeyManager {
     this.enabledHotkeysProperty.link( ( newHotkeys, oldHotkeys ) => {
       this.modifierKeys = _.uniq( [
         ...metaEnglishKeys,
-        ...[ ...newHotkeys ].flatMap( hotkey => hotkey.modifierKeys )
+
+        // enabledHotkeysProperty is recomputed when the keyDescriptorProperty changes, so we can rely on the current
+        // value of keyDescriptorProperty.
+        ...[ ...newHotkeys ].flatMap( hotkey => hotkey.keyDescriptorProperty.value.modifierKeys )
       ] );
 
       // Remove any hotkeys that are no longer available or enabled
@@ -248,21 +256,23 @@ class HotkeyManager {
     const compatibleKeys = [ ...this.enabledHotkeysProperty.value ].filter( hotkey => {
 
       // Filter out hotkeys that don't have the main key
-      if ( hotkey.key !== mainKey ) {
+      const key = hotkey.keyDescriptorProperty.value.key;
+      if ( key !== mainKey ) {
         return false;
       }
 
       // See whether the modifier keys match
       return this.modifierKeys.every( modifierKey => {
-        return this.englishKeysDown.has( modifierKey ) === hotkey.keys.includes( modifierKey ) ||
-               hotkey.ignoredModifierKeys.includes( modifierKey );
+        const ignoredModifierKeys = hotkey.keyDescriptorProperty.value.ignoredModifierKeys;
+        return this.englishKeysDown.has( modifierKey ) === hotkey.keysProperty.value.includes( modifierKey ) ||
+               ignoredModifierKeys.includes( modifierKey );
       } );
     } );
 
     if ( assert ) {
       const conflictingKeys = compatibleKeys.filter( hotkey => !hotkey.allowOverlap );
 
-      assert && assert( conflictingKeys.length < 2, `Key conflict detected: ${conflictingKeys.map( hotkey => hotkey.getHotkeyString() )}` );
+      assert && assert( conflictingKeys.length < 2, `Key conflict detected: ${conflictingKeys.map( hotkey => hotkey.keyDescriptorProperty.value.getHotkeyString() )}` );
     }
 
     return compatibleKeys;
@@ -284,17 +294,19 @@ class HotkeyManager {
       // A hotkey should be  active if its main key is pressed. If it was interrupted, it can only become
       // active again if there was an actual key press event from the user. If a Hotkey is interrupted during
       // a press, it should remain inactive and interrupted until the NEXT press.
-      const keyPressed = this.getHotkeysForMainKey( hotkey.key ).includes( hotkey );
+      const key = hotkey.keyDescriptorProperty.value.key;
+      const keyPressed = this.getHotkeysForMainKey( key ).includes( hotkey );
       const notInterrupted = !hotkey.interrupted || ( keyboardEvent && keyboardEvent.type === 'keydown' );
       const shouldBeActive = keyPressed && notInterrupted;
 
       const isActive = this.activeHotkeys.has( hotkey );
 
+      const descriptorKey = hotkey.keyDescriptorProperty.value.key;
       if ( shouldBeActive && !isActive ) {
-        this.addActiveHotkey( hotkey, keyboardEvent, hotkey.key === pressedOrReleasedEnglishKey );
+        this.addActiveHotkey( hotkey, keyboardEvent, descriptorKey === pressedOrReleasedEnglishKey );
       }
       else if ( !shouldBeActive && isActive ) {
-        this.removeActiveHotkey( hotkey, keyboardEvent, hotkey.key === pressedOrReleasedEnglishKey );
+        this.removeActiveHotkey( hotkey, keyboardEvent, descriptorKey === pressedOrReleasedEnglishKey );
       }
     }
   }

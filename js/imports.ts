@@ -220,6 +220,8 @@ export type { InputOptions } from './input/Input.js';
 export { default as BatchedDOMEvent, BatchedDOMEventType } from './input/BatchedDOMEvent.js';
 export type { BatchedDOMEventCallback } from './input/BatchedDOMEvent.js';
 export { default as BrowserEvents } from './input/BrowserEvents.js';
+export { default as KeyDescriptor } from './input/KeyDescriptor.js';
+export type { KeyDescriptorOptions } from './input/KeyDescriptor.js';
 export { default as Hotkey } from './input/Hotkey.js';
 export type { HotkeyOptions, HotkeyFireOnHoldTiming } from './input/Hotkey.js';
 export { default as globalHotkeyRegistry } from './input/globalHotkeyRegistry.js';
