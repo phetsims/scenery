@@ -57,7 +57,7 @@ export default class SpriteInstance {
   }
 
   /**
-   * For pooling. Please use SpriteInstance.dirtyFromPool() to grab a copy
+   * For pooling. Please use SpriteInstance.pool.fetch() to grab a copy
    */
   public initialize(): this {
     // We need an empty initialization method here, so that we can grab dirty versions and use them for higher
