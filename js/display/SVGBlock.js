@@ -279,24 +279,26 @@ class SVGBlock extends FittedBlock {
 
     sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `update #${this.id}` );
 
-    //OHTWO TODO: call here! https://github.com/phetsims/scenery/issues/1581
-    // TODO: What does the above TODO mean? https://github.com/phetsims/scenery/issues/1581
     while ( this.dirtyGroups.length ) {
       const group = this.dirtyGroups.pop();
 
-      // if this group has been disposed or moved to another block, don't mess with it
+      // If this group has been disposed or moved to another block, don't mess with it.
+      // We don't scan through dirtyGroups when we update which group is assigned to which block (for performance
+      // reasons), so we need to check here to make sure it is still "attached" to this block.
       if ( group.block === this ) {
         group.update();
       }
     }
     while ( this.dirtyGradients.length ) {
+      // It is safe enough to update gradients regardless of the block they are in.
       this.dirtyGradients.pop().update();
     }
     while ( this.dirtyDrawables.length ) {
       const drawable = this.dirtyDrawables.pop();
 
-      // if this drawable has been disposed or moved to another block, don't mess with it
-      // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check? https://github.com/phetsims/scenery/issues/1581
+      // If this drawable has been disposed or moved to another block, don't mess with it.
+      // We don't scan through dirtyDrawables when we update which drawable is assigned to which block (for performance
+      // reasons), so we need to check here to make sure it is still "attached" to this block.
       if ( drawable.parentDrawable === this ) {
         drawable.update();
       }
