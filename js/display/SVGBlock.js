@@ -17,8 +17,12 @@ class SVGBlock extends FittedBlock {
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js
-   * @param {Instance} transformRootInstance - TODO: Documentation https://github.com/phetsims/scenery/issues/1581
-   * @param {Instance} filterRootInstance - TODO: Documentation
+   * @param {Instance} transformRootInstance - All transforms of this instance and its ancestors will already have been
+   *                                           applied. This block will only be responsible for applying transforms of
+   *                                           this instance's descendants.
+   * @param {Instance} filterRootInstance - All filters (visibility/opacity/filters) of this instance and its ancestors
+   *                                        will already have been applied. This block will only be responsible for
+   *                                        applying filters of this instance's descendants.
    */
   constructor( display, renderer, transformRootInstance, filterRootInstance ) {
     super();
@@ -31,8 +35,12 @@ class SVGBlock extends FittedBlock {
    *
    * @param {Display} display - the scenery Display this SVGBlock will appear in
    * @param {number} renderer - the bitmask for the renderer, see Renderer.js
-   * @param {Instance} transformRootInstance - TODO: Documentation https://github.com/phetsims/scenery/issues/1581
-   * @param {Instance} filterRootInstance - TODO: Documentation
+   * @param {Instance} transformRootInstance - All transforms of this instance and its ancestors will already have been
+   *                                           applied. This block will only be responsible for applying transforms of
+   *                                           this instance's descendants.
+   * @param {Instance} filterRootInstance - All filters (visibility/opacity/filters) of this instance and its ancestors
+   *                                        will already have been applied. This block will only be responsible for
+   *                                        applying filters of this instance's descendants.
    * @returns {FittedBlock}
    */
   initialize( display, renderer, transformRootInstance, filterRootInstance ) {

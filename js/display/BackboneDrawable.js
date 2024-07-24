@@ -21,7 +21,9 @@ class BackboneDrawable extends Drawable {
    *
    * @param {Display} display
    * @param {Instance} backboneInstance
-   * @param {Instance} transformRootInstance
+   * @param {Instance} transformRootInstance - All transforms of this instance and its ancestors will already have been
+   *                                           applied. This block will only be responsible for applying transforms of
+   *                                           this instance's descendants.
    * @param {number} renderer
    * @param {boolean} isDisplayRoot
    */

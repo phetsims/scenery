@@ -21,8 +21,12 @@ class CanvasBlock extends FittedBlock {
    *
    * @param {Display} display
    * @param {number} renderer - See Renderer.js for more information
-   * @param {Instance} transformRootInstance
-   * @param {Instance} filterRootInstance
+   * @param {Instance} transformRootInstance - All transforms of this instance and its ancestors will already have been
+   *                                           applied. This block will only be responsible for applying transforms of
+   *                                           this instance's descendants.
+   * @param {Instance} filterRootInstance - All filters (visibility/opacity/filters) of this instance and its ancestors
+   *                                        will already have been applied. This block will only be responsible for
+   *                                        applying filters of this instance's descendants.
    */
   constructor( display, renderer, transformRootInstance, filterRootInstance ) {
     super();
@@ -35,8 +39,12 @@ class CanvasBlock extends FittedBlock {
    *
    * @param {Display} display
    * @param {number} renderer
-   * @param {Instance} transformRootInstance
-   * @param {Instance} filterRootInstance
+   * @param {Instance} transformRootInstance - All transforms of this instance and its ancestors will already have been
+   *                                           applied. This block will only be responsible for applying transforms of
+   *                                           this instance's descendants.
+   * @param {Instance} filterRootInstance - All filters (visibility/opacity/filters) of this instance and its ancestors
+   *                                        will already have been applied. This block will only be responsible for
+   *                                        applying filters of this instance's descendants.
    */
   initialize( display, renderer, transformRootInstance, filterRootInstance ) {
     super.initialize( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );

@@ -19,7 +19,9 @@ class FittedBlock extends Block {
    *
    * @param {Display} display
    * @param {number} renderer
-   * @param {Instance} transformRootInstance
+   * @param {Instance} transformRootInstance - All transforms of this instance and its ancestors will already have been
+   *                                           applied. This block will only be responsible for applying transforms of
+   *                                           this instance's descendants.
    * @param {FittedBlock.Fit} preferredFit
    * @returns {FittedBlock} - For chaining
    */
