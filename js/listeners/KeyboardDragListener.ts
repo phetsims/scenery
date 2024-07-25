@@ -45,7 +45,7 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { EnglishKey, globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, KeyDescriptor, KeyDescriptorOptions, Node, PDOMPointer, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
+import { AllDragListenerOptions, EnglishKey, globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, KeyDescriptor, KeyDescriptorOptions, Node, PDOMPointer, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -58,7 +58,6 @@ import platform from '../../../phet-core/js/platform.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
-import { AllDragListenerOptions } from './RichDragListener.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.

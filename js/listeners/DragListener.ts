@@ -79,9 +79,8 @@ import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { Node, Pointer, PressedPressListener, PressListener, PressListenerDOMEvent, PressListenerEvent, PressListenerOptions, scenery, SceneryEvent, TInputListener, TransformTracker } from '../imports.js';
+import { AllDragListenerOptions, Node, Pointer, PressedPressListener, PressListener, PressListenerDOMEvent, PressListenerEvent, PressListenerOptions, scenery, SceneryEvent, TInputListener, TransformTracker } from '../imports.js';
 import Property from '../../../axon/js/Property.js';
-import { AllDragListenerOptions } from './RichDragListener.js';
 
 // Scratch vectors used to prevent allocations
 const scratchVector2A = new Vector2( 0, 0 );
@@ -195,8 +194,13 @@ export default class DragListener extends PressListener implements TInputListene
   public constructor( providedOptions?: DragListenerOptions<PressedDragListener> ) {
     const options = optionize<DragListenerOptions<PressedDragListener>, SelfOptions<PressedDragListener>, PressListenerOptions<PressedDragListener>>()( {
       positionProperty: null,
+
+      // start is preferred over passing press(), as the drag start hasn't been fully processed at that point.
       start: null,
+
+      // end is preferred over passing release(), as the drag start hasn't been fully processed at that point.
       end: null,
+
       drag: _.noop,
       transform: null,
       dragBoundsProperty: null,

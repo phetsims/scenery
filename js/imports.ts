@@ -237,6 +237,7 @@ export type { PressListenerOptions, PressListenerDOMEvent, PressListenerEvent, P
 export { default as FireListener } from './listeners/FireListener.js';
 export type { FireListenerOptions } from './listeners/FireListener.js';
 export { default as DragListener } from './listeners/DragListener.js';
+export type { AllDragListenerOptions } from './listeners/AllDragListenerOptions.js';
 export type { DragListenerOptions, PressedDragListener } from './listeners/DragListener.js';
 
 export { default as MultiListenerPress } from './listeners/MultiListenerPress.js';
