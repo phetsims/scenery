@@ -74,7 +74,7 @@
 
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { DisplayedTrailsProperty, EnglishKey, EventContext, globalHotkeyRegistry, Hotkey, HotkeyFireOnHoldTiming, Node, OneKeyStroke, PDOMPointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
+import { DisplayedTrailsProperty, EventContext, globalHotkeyRegistry, Hotkey, HotkeyFireOnHoldTiming, Node, OneKeyStroke, PDOMPointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import Property from '../../../axon/js/Property.js';
@@ -136,11 +136,6 @@ type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // KeyboardListeners added to focusable Nodes, and false for global KeyboardListeners to catch overlapping global
   // keys.
   override?: boolean;
-
-  // If you want the callback to fire when a particular modifier key is down, you can add that key to this list.
-  // For example, you may want to fire the callback even when 'shift' is down, but not when another modifier key
-  // is pressed.
-  ignoredModifierKeys?: EnglishKey[];
 };
 
 export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[]> = KeyboardListenerSelfOptions<Keys> & EnabledComponentOptions;
@@ -159,7 +154,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   public readonly fireOnHoldCustomDelay: number;
   public readonly fireOnHoldCustomInterval: number;
   public readonly allowOverlap: boolean;
-  public readonly ignoredModifierKeys: EnglishKey[];
   private readonly override: boolean;
 
   public readonly hotkeys: Hotkey[];
@@ -177,7 +171,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
 
     // You can either provide keys directly OR provide a list of KeyDescriptor Properties. You cannot provide both.
-    assertMutuallyExclusiveOptions( providedOptions, [ 'keys', 'ignoredModifierKeys' ], [ 'keyDescriptorProperties' ] );
+    assertMutuallyExclusiveOptions( providedOptions, [ 'keys' ], [ 'keyDescriptorProperties' ] );
 
     const options = optionize<KeyboardListenerOptions<Keys>, KeyboardListenerSelfOptions<Keys>, EnabledComponentOptions>()( {
       keys: null,
@@ -194,7 +188,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
       fireOnHoldCustomInterval: 100,
       allowOverlap: false,
       override: true,
-      ignoredModifierKeys: [],
 
       // EnabledComponent
       // By default, do not instrument the enabledProperty; opt in with this option. See EnabledComponent
@@ -214,7 +207,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.fireOnHoldCustomDelay = options.fireOnHoldCustomDelay;
     this.fireOnHoldCustomInterval = options.fireOnHoldCustomInterval;
     this.allowOverlap = options.allowOverlap;
-    this.ignoredModifierKeys = options.ignoredModifierKeys;
     this.override = options.override;
 
     // convert the provided keys to data that we can respond to with scenery's Input system
