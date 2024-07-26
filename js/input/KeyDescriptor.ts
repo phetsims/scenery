@@ -10,8 +10,40 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { EnglishKey, OneKeyStroke, scenery } from '../imports.js';
+import { EnglishKey, EnglishStringToCodeMap, metaEnglishKeys, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
+
+// NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
+//       entries in a union type. If that limitation is not acceptable remove this typing. OR maybe TypeScript will
+//       someday support regex patterns for a type. See https://github.com/microsoft/TypeScript/issues/41160
+// If we run out of union space for template strings, consider the above comment or remove some from the type.
+type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | 'a' | 's' | 'd' |
+  'f' | 'g' | 'h' | 'j' | 'k' | 'l' | 'z' | 'x' | 'c' |
+  'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
+
+const IGNORE_DELIMITER = '?';
+type IgnoreDelimiter = typeof IGNORE_DELIMITER;
+
+type IgnoreModifierKey = `${ModifierKey}${IgnoreDelimiter}`;
+type IgnoreOtherModifierKeys = `${IgnoreDelimiter}${ModifierKey}`;
+
+// Allowed keys are the keys of the EnglishStringToCodeMap.
+type AllowedKeys = keyof typeof EnglishStringToCodeMap;
+
+export type OneKeyStrokeEntry = `${AllowedKeys}` | `${IgnoreModifierKey}+${EnglishKey}` | `${IgnoreOtherModifierKeys}+${EnglishKey}`;
+
+export type OneKeyStroke =
+  `${AllowedKeys}` | // e.g. 't'
+  `${ModifierKey}+${AllowedKeys}` | // e.g. 'shift+t'
+  `${ModifierKey}+${ModifierKey}+${AllowedKeys}` | // e.g. 'ctrl+shift+t'
+  `${IgnoreModifierKey}+${AllowedKeys}` | // e.g. 'shift?+t' (shift added to ignoredModifierKeys)
+  `${IgnoreModifierKey}+${ModifierKey}+${AllowedKeys}` | // e.g. 'shift?+ctrl+t' (shift added to ignoredModifierKeys)
+  `${IgnoreOtherModifierKeys}+${AllowedKeys}` | // e.g. '?shift+t' (shift is a modifier key but ALL other default modifier keys are ignored)
+  `${IgnoreOtherModifierKeys}+${ModifierKey}+${AllowedKeys}`; // e.g. '?shift+j+t' (shift is a modifier key but ALL other default modifier keys are ignored)
+// These combinations are not supported by TypeScript: "TS2590: Expression produces a union type that is too complex to
+// represent." See above note and https://github.com/microsoft/TypeScript/issues/41160#issuecomment-1287271132.
+// `${AllowedKeys}+${AllowedKeys}+${AllowedKeys}+${AllowedKeys}`;
+// type KeyCombinations = `${OneKeyStroke}` | `${OneKeyStroke},${OneKeyStroke}`;
 
 export type KeyDescriptorOptions = {
 
@@ -59,13 +91,6 @@ export default class KeyDescriptor {
   }
 
   /**
-   * Returns an array of all keys that are part of this hotkey. This includes the key and all modifier keys.
-   */
-  public getKeysArray(): EnglishKey[] {
-    return [ this.key, ...this.modifierKeys ];
-  }
-
-  /**
    * Returns a string representation of the hotkey in the format of "natural" english. Modifier keys first, followed
    * by the final key. For example, if the key is 't' and the modifier keys are 'shift', the string would be 'shift+t'.
    */
@@ -74,6 +99,97 @@ export default class KeyDescriptor {
       ...this.modifierKeys,
       this.key
     ].join( '+' );
+  }
+
+  /**
+   * Parses an input string to extract the main key and its associated modifier keys, while considering ignored
+   * modifier keys based on the placement of the '?' delimiter.
+   *
+   * The function handles the following cases:
+   * 1. If a word is followed by '?', it is added to `ignoredModifierKeys`.
+   * 2. If a word is preceded by '?', it indicates all other default modifier keys should be ignored,
+   *    except the word itself, which is added to `modifierKeys`.
+   *
+   * keyStrokeToKeyDescriptor('r');
+   * // Output: { key: 'r', modifierKeys: [], ignoredModifierKeys: [] }
+   *
+   * keyStrokeToKeyDescriptor('alt+r');
+   * // Output: { key: 'r', modifierKeys: ['alt'], ignoredModifierKeys: [] }
+   *
+   * keyStrokeToKeyDescriptor('alt+j+r');
+   * // Output: { key: 'r', modifierKeys: ['alt', 'j'], ignoredModifierKeys: [] }
+   *
+   * keyStrokeToKeyDescriptor('alt?+j+r');
+   * // Output: { key: 'r', modifierKeys: ['j'], ignoredModifierKeys: ['alt'] }
+   *
+   * keyStrokeToKeyDescriptor('shift?+t');
+   * // Output: { key: 't', modifierKeys: [], ignoredModifierKeys: ['shift'] }
+   *
+   * keyStrokeToKeyDescriptor('?shift+t');
+   * // Output: { key: 't', modifierKeys: ['shift'], ignoredModifierKeys: ['alt', 'control', 'meta'] }
+   *
+   * keyStrokeToKeyDescriptor('?shift+t+j');
+   * // Output: { key: 'j', modifierKeys: ['shift', 't'], ignoredModifierKeys: ['alt', 'control', 'meta'] }
+   *
+   */
+  public static keyStrokeToKeyDescriptor( keyStroke: OneKeyStroke ): KeyDescriptor {
+
+    const tokens = keyStroke.split( '+' );
+
+    // assertions
+    let foundIgnoreDelimiter = false;
+    tokens.forEach( token => {
+
+      // the ignore delimiter can only be used on default modifier keys
+      if ( token.length > 1 && token.includes( IGNORE_DELIMITER ) ) {
+        assert && assert( !foundIgnoreDelimiter, 'There can only be one ignore delimiter' );
+        assert && assert( metaEnglishKeys.includes( token.replace( IGNORE_DELIMITER, '' ) as EnglishKey ), 'The ignore delimiter can only be used on default modifier keys' );
+        foundIgnoreDelimiter = true;
+      }
+    } );
+
+    const modifierKeys: string[] = [];
+    const ignoredModifierKeys: string[] = [];
+
+    tokens.forEach( token => {
+
+      // Check if the token contains a question mark
+      if ( token.includes( IGNORE_DELIMITER ) ) {
+        const strippedToken = token.replace( IGNORE_DELIMITER, '' );
+
+        if ( token.startsWith( IGNORE_DELIMITER ) ) {
+
+          // Add all default modifiers except the current stripped token to the ignored keys
+          const otherModifiers = metaEnglishKeys.filter( mod => mod !== strippedToken ) as string[];
+          ignoredModifierKeys.push( ...otherModifiers );
+
+          // Include the stripped token as a regular modifier key
+          modifierKeys.push( strippedToken );
+        }
+        else {
+
+          // Add the stripped token to the ignored modifier keys
+          ignoredModifierKeys.push( strippedToken );
+        }
+      }
+      else {
+
+        // If there's no question mark, add the token to the modifier keys
+        modifierKeys.push( token );
+      }
+    } );
+
+    // Assume the last token is the key
+    const key = modifierKeys.pop() as EnglishKey;
+
+    // Filter out ignored modifier keys from the modifier keys list
+    const filteredModifierKeys = modifierKeys.filter( mod => !ignoredModifierKeys.includes( mod ) );
+
+    return new KeyDescriptor( {
+      key: key,
+      modifierKeys: filteredModifierKeys as EnglishKey[],
+      ignoredModifierKeys: ignoredModifierKeys as EnglishKey[]
+    } );
   }
 }
 

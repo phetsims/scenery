@@ -49,7 +49,7 @@ type SelfOptions = {
   // Describes the keys, modifier keys, and ignored modifier keys for this hotkey. This is a Property to support
   // dynamic behavior. This will be useful for i18n or creating new keymaps. See KeyDescriptor for documentation
   // about the key and modifierKeys.
-  keyDescriptorProperty: TProperty<KeyDescriptor>;
+  keyDescriptorProperty: TReadOnlyProperty<KeyDescriptor>;
 
   // Called as fire() when the hotkey is fired (see fireOnDown/fireOnHold for when that happens).
   // The event will be null if the hotkey was fired due to fire-on-hold.
@@ -95,7 +95,7 @@ export type HotkeyOptions = SelfOptions & EnabledComponentOptions;
 export default class Hotkey extends EnabledComponent {
 
   // Straight from options
-  public readonly keyDescriptorProperty: TProperty<KeyDescriptor>;
+  public readonly keyDescriptorProperty: TReadOnlyProperty<KeyDescriptor>;
   public readonly fire: ( event: KeyboardEvent | null ) => void;
   public readonly press: ( event: KeyboardEvent | null ) => void;
   public readonly release: ( event: KeyboardEvent | null ) => void;

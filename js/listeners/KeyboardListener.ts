@@ -63,32 +63,13 @@
 
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { DisplayedTrailsProperty, EnglishKey, EnglishStringToCodeMap, EventContext, globalHotkeyRegistry, Hotkey, HotkeyFireOnHoldTiming, Node, PDOMPointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
+import { DisplayedTrailsProperty, EnglishKey, EventContext, globalHotkeyRegistry, Hotkey, HotkeyFireOnHoldTiming, Node, OneKeyStroke, PDOMPointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import KeyDescriptor from '../input/KeyDescriptor.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
-
-// NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
-//       entries in a union type. If that limitation is not acceptable remove this typing. OR maybe TypeScript will
-//       someday support regex patterns for a type. See https://github.com/microsoft/TypeScript/issues/41160
-// If we run out of union space for template strings, consider the above comment or remove some from the type.
-type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | 'a' | 's' | 'd' |
-  'f' | 'g' | 'h' | 'j' | 'k' | 'l' | 'z' | 'x' | 'c' |
-  'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
-
-// Allowed keys are the keys of the EnglishStringToCodeMap.
-type AllowedKeys = keyof typeof EnglishStringToCodeMap;
-
-export type OneKeyStroke = `${AllowedKeys}` |
-  `${ModifierKey}+${AllowedKeys}` |
-  `${ModifierKey}+${ModifierKey}+${AllowedKeys}`;
-// These combinations are not supported by TypeScript: "TS2590: Expression produces a union type that is too complex to
-// represent." See above note and https://github.com/microsoft/TypeScript/issues/41160#issuecomment-1287271132.
-// `${AllowedKeys}+${AllowedKeys}+${AllowedKeys}+${AllowedKeys}`;
-// type KeyCombinations = `${OneKeyStroke}` | `${OneKeyStroke},${OneKeyStroke}`;
 
 type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
 
@@ -332,17 +313,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
 
       // Convert provided keys into KeyDescriptors for the Hotkey.
       usableKeyDescriptorProperties = keys!.map( naturalKeys => {
-
-        // Split the keys into the main key and the modifier keys
-        const allKeys = naturalKeys.split( '+' );
-        const modifierKeys = allKeys.slice( 0, allKeys.length - 1 );
-        const naturalKey = allKeys[ allKeys.length - 1 ];
-
-        return new Property( new KeyDescriptor( {
-          key: naturalKey as EnglishKey,
-          modifierKeys: modifierKeys as EnglishKey[],
-          ignoredModifierKeys: this.ignoredModifierKeys
-        } ) );
+        return new Property( KeyDescriptor.keyStrokeToKeyDescriptor( naturalKeys ) );
       } );
     }
 

@@ -221,7 +221,7 @@ export { default as BatchedDOMEvent, BatchedDOMEventType } from './input/Batched
 export type { BatchedDOMEventCallback } from './input/BatchedDOMEvent.js';
 export { default as BrowserEvents } from './input/BrowserEvents.js';
 export { default as KeyDescriptor } from './input/KeyDescriptor.js';
-export type { KeyDescriptorOptions } from './input/KeyDescriptor.js';
+export type { KeyDescriptorOptions, OneKeyStroke, OneKeyStrokeEntry } from './input/KeyDescriptor.js';
 export { default as Hotkey } from './input/Hotkey.js';
 export type { HotkeyOptions, HotkeyFireOnHoldTiming } from './input/Hotkey.js';
 export { default as globalHotkeyRegistry } from './input/globalHotkeyRegistry.js';
@@ -252,7 +252,6 @@ export { default as KeyboardListener } from './listeners/KeyboardListener.js';
 export type { KeyboardListenerOptions } from './listeners/KeyboardListener.js';
 export { default as KeyboardDragListener } from './listeners/KeyboardDragListener.js';
 export type { KeyboardDragListenerOptions, KeyboardDragListenerDOMEvent, KeyboardDragListenerCallback, KeyboardDragListenerNullableCallback } from './listeners/KeyboardDragListener.js';
-export type { OneKeyStroke } from './listeners/KeyboardListener.js';
 export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';
 export { default as RichDragListener } from './listeners/RichDragListener.js';
