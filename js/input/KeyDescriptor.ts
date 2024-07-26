@@ -105,6 +105,8 @@ export default class KeyDescriptor {
    * Parses an input string to extract the main key and its associated modifier keys, while considering ignored
    * modifier keys based on the placement of the '?' delimiter.
    *
+   * See KeyboardListener for a description of key and modifierKey behavior.
+   *
    * The function handles the following cases:
    * 1. If a word is followed by '?', it is added to `ignoredModifierKeys`.
    * 2. If a word is preceded by '?', it indicates all other default modifier keys should be ignored,

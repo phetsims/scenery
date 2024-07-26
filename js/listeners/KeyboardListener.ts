@@ -46,6 +46,17 @@
  * 'j+t' and 'y', pressing 'j' will prevent 'y' from firing. This is a PhET specific design decision, but it
  * is consistent with typical modifier key behavior.
  *
+ * **Ignored Modifier Keys**
+ * You can specify modifier keys that should be ignored while the hotkey is active. This allows you to override
+ * default modifier key behavior. For example, if you have a listener for the 'y' key and you want it to
+ * trigger even when the shift key is pressed, you would add 'shift' to the ignored modifier keys list.
+ *
+ * Ignored modifier keys are indicated in the key string using the '?' character. You can also choose to ignore
+ * all other modifier keys by placing the '?' before the modifier key. Here are some examples:
+ *
+ * 'shift?+y' - fires when 'y' is pressed, even if 'shift' is down.
+ * '?shift+y' - fires when 'y' and shift are pressed, but also allows 'ctrl', 'alt', or 'meta' to be down.
+ *
  * **Global Keyboard Listeners**
  * A KeyboardListener can be added to a Node with addInputListener, and it will fire with normal scenery input dispatch
  * behavior when the Node has focus. However, a KeyboardListener can also be added "globally", meaning it will fire
