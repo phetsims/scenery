@@ -215,6 +215,10 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
 
         // NOTE: It may be possible to actually SKIP the above "single-line cell" step, and size things up JUST using
         // this algorithm. It is unclear whether it would result in decent quality.
+
+        // We'll iterate until we have satisfied all of the unsatisfied cells OR we'll bail (with a break) if
+        // we can't grow any further. Otherwise, every step will grow at least something, so we will make incremental
+        // forward progress.
         while ( unsatisfiedSpanningCells.length ) {
 
           // A Grow or Max constraint
@@ -346,7 +350,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
           // Actual growing operation
           if ( growConstraints.length ) {
             // Which lines will we increase?
-            const growingLines = _.uniq( _.flatten( growConstraints.map( constraint => constraint.growingLines ) ) );
+            const growingLines = _.uniq( growConstraints.flatMap( constraint => constraint.growingLines ) );
 
             // Sum up weights from different constraints
             const weightMap = new Map<GridLine, number>( growingLines.map( line => {
@@ -388,6 +392,8 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
           }
           else {
             // Bail (so we don't hard error) if we can't grow any further (but are still unsatisfied).
+            // This might result from maxContentSize constraints, where it is not possible to expand further.
+            assert && assert( false, 'GridCell for Node cannot find space due to maximum-size constraints' );
             break;
           }
         }
