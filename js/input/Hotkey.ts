@@ -9,14 +9,14 @@
  * For example:
  *
  *    globalHotkeyRegistry.add( new Hotkey( {
- *      keyDescriptorProperty: new Property( new KeyDescriptor( { key: 'y' } ) ),
+ *      keyStringProperty: new Property( 'y' ),
  *      fire: () => console.log( 'fire: y' )
  *    } ) );
  *
  *    myNode.addInputListener( {
  *      hotkeys: [
  *        new Hotkey( {
- *          keyDescriptorProperty: new Property( new KeyDescriptor( { key: 'x' } ) ),
+ *          keyStringProperty: new Property( 'x' ),
  *          fire: () => console.log( 'fire: x' )
  *        } )
  *      ]
@@ -32,7 +32,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EnglishKey, EnglishStringToCodeMap, hotkeyManager, scenery } from '../imports.js';
+import { EnglishKey, EnglishStringToCodeMap, hotkeyManager, OneKeyStroke, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import TProperty from '../../../axon/js/TProperty.js';
@@ -49,7 +49,7 @@ type SelfOptions = {
   // Describes the keys, modifier keys, and ignored modifier keys for this hotkey. This is a Property to support
   // dynamic behavior. This will be useful for i18n or creating new keymaps. See KeyDescriptor for documentation
   // about the key and modifierKeys.
-  keyDescriptorProperty: TReadOnlyProperty<KeyDescriptor>;
+  keyStringProperty: TReadOnlyProperty<OneKeyStroke>;
 
   // Called as fire() when the hotkey is fired (see fireOnDown/fireOnHold for when that happens).
   // The event will be null if the hotkey was fired due to fire-on-hold.
@@ -95,7 +95,7 @@ export type HotkeyOptions = SelfOptions & EnabledComponentOptions;
 export default class Hotkey extends EnabledComponent {
 
   // Straight from options
-  public readonly keyDescriptorProperty: TReadOnlyProperty<KeyDescriptor>;
+  public readonly keyStringProperty: TReadOnlyProperty<OneKeyStroke>;
   public readonly fire: ( event: KeyboardEvent | null ) => void;
   public readonly press: ( event: KeyboardEvent | null ) => void;
   public readonly release: ( event: KeyboardEvent | null ) => void;
@@ -104,6 +104,9 @@ export default class Hotkey extends EnabledComponent {
   public readonly fireOnHoldTiming: HotkeyFireOnHoldTiming;
   public readonly allowOverlap: boolean;
   public readonly override: boolean;
+
+  // A Property for the KeyDescriptor describing the key and modifier keys for this hotkey from the keyStringProperty.
+  public readonly keyDescriptorProperty: TReadOnlyProperty<KeyDescriptor>;
 
   // All keys that are part of this hotkey (key + modifierKeys) as defined by the current KeyDescriptor.
   public keysProperty: TReadOnlyProperty<EnglishKey[]>;
@@ -147,7 +150,7 @@ export default class Hotkey extends EnabledComponent {
     super( options );
 
     // Store public things
-    this.keyDescriptorProperty = options.keyDescriptorProperty;
+    this.keyStringProperty = options.keyStringProperty;
     this.fire = options.fire;
     this.press = options.press;
     this.release = options.release;
@@ -156,6 +159,10 @@ export default class Hotkey extends EnabledComponent {
     this.fireOnHoldTiming = options.fireOnHoldTiming;
     this.allowOverlap = options.allowOverlap;
     this.override = options.override;
+
+    this.keyDescriptorProperty = new DerivedProperty( [ this.keyStringProperty ], ( keyString: OneKeyStroke ) => {
+      return KeyDescriptor.keyStrokeToKeyDescriptor( keyString );
+    } );
 
     this.keysProperty = new DerivedProperty( [ this.keyDescriptorProperty ], ( keyDescriptor: KeyDescriptor ) => {
       const keys = _.uniq( [ keyDescriptor.key, ...keyDescriptor.modifierKeys ] );
@@ -238,6 +245,7 @@ export default class Hotkey extends EnabledComponent {
   public override dispose(): void {
     this.isPressedProperty.dispose();
     this.keysProperty.dispose();
+    this.keyDescriptorProperty.dispose();
 
     super.dispose();
   }

@@ -45,7 +45,7 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { AllDragListenerOptions, EnglishKey, globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, KeyDescriptor, KeyDescriptorOptions, Node, PDOMPointer, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
+import { AllDragListenerOptions, globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, Node, OneKeyStroke, PDOMPointer, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -65,36 +65,32 @@ const allKeys = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown', 'w', 'a', '
 const leftRightKeys = [ 'arrowLeft', 'arrowRight', 'a', 'd' ] as const;
 const upDownKeys = [ 'arrowUp', 'arrowDown', 'w', 's' ] as const;
 
-// Create options used by the KeyDescriptor for each key.
-const createKeyDescriptorOptions = ( key: EnglishKey ): KeyDescriptorOptions => {
-
-  // We still want to start drag operations when the shift modifier key is pressed, even though it is not
-  // listed in keys for the listener.
-  return { key: key, ignoredModifierKeys: [ 'shift' ] };
-};
+// We still want to start drag operations when the shift modifier key is pressed, even though it is not
+// listed in keys for the listener.
+const ignoredShiftPattern = 'shift?+';
 
 // KeyDescriptorProperties for each key that can be pressed to move the object.
-const A_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 'a' ) ) );
-const D_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 'd' ) ) );
-const W_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 'w' ) ) );
-const S_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 's' ) ) );
-const ARROW_LEFT_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 'arrowLeft' ) ) );
-const ARROW_RIGHT_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 'arrowRight' ) ) );
-const ARROW_UP_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 'arrowUp' ) ) );
-const ARROW_DOWN_DESCRIPTOR_PROPERTY = new Property( new KeyDescriptor( createKeyDescriptorOptions( 'arrowDown' ) ) );
+const A_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}a` );
+const D_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}d` );
+const W_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}w` );
+const S_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}s` );
+const ARROW_LEFT_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}arrowLeft` );
+const ARROW_RIGHT_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}arrowRight` );
+const ARROW_UP_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}arrowUp` );
+const ARROW_DOWN_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}arrowDown` );
 
-const LEFT_RIGHT_DESCRIPTOR_PROPERTIES = [ A_DESCRIPTOR_PROPERTY, D_DESCRIPTOR_PROPERTY, ARROW_LEFT_DESCRIPTOR_PROPERTY, ARROW_RIGHT_DESCRIPTOR_PROPERTY ];
-const UP_DOWN_DESCRIPTOR_PROPERTIES = [ W_DESCRIPTOR_PROPERTY, S_DESCRIPTOR_PROPERTY, ARROW_UP_DESCRIPTOR_PROPERTY, ARROW_DOWN_DESCRIPTOR_PROPERTY ];
-const ALL_DESCRIPTOR_PROPERTIES = [ ...LEFT_RIGHT_DESCRIPTOR_PROPERTIES, ...UP_DOWN_DESCRIPTOR_PROPERTIES ];
+const LEFT_RIGHT_KEY_STRING_PROPERTIES = [ A_KEY_STRING_PROPERTY, D_KEY_STRING_PROPERTY, ARROW_LEFT_KEY_STRING_PROPERTY, ARROW_RIGHT_KEY_STRING_PROPERTY ];
+const UP_DOWN_KEY_STRING_PROPERTIES = [ W_KEY_STRING_PROPERTY, S_KEY_STRING_PROPERTY, ARROW_UP_KEY_STRING_PROPERTY, ARROW_DOWN_KEY_STRING_PROPERTY ];
+const ALL_KEY_STRING_PROPERTIES = [ ...LEFT_RIGHT_KEY_STRING_PROPERTIES, ...UP_DOWN_KEY_STRING_PROPERTIES ];
 
 type KeyboardDragListenerKeyStroke = typeof allKeys | typeof leftRightKeys | typeof upDownKeys;
 
 // Possible movement types for this KeyboardDragListener. 2D motion ('both') or 1D motion ('leftRight' or 'upDown').
 type KeyboardDragDirection = 'both' | 'leftRight' | 'upDown';
-const KeyboardDragDirectionToKeyDescriptorPropertiesMap = new Map<KeyboardDragDirection, TProperty<KeyDescriptor>[]>( [
-  [ 'both', ALL_DESCRIPTOR_PROPERTIES ],
-  [ 'leftRight', LEFT_RIGHT_DESCRIPTOR_PROPERTIES ],
-  [ 'upDown', UP_DOWN_DESCRIPTOR_PROPERTIES ]
+const KeyboardDragDirectionToKeyStringPropertiesMap = new Map<KeyboardDragDirection, TProperty<OneKeyStroke>[]>( [
+  [ 'both', ALL_KEY_STRING_PROPERTIES ],
+  [ 'leftRight', LEFT_RIGHT_KEY_STRING_PROPERTIES ],
+  [ 'upDown', UP_DOWN_KEY_STRING_PROPERTIES ]
 ] );
 
 type MapPosition = ( point: Vector2 ) => Vector2;
@@ -268,11 +264,11 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     assert && assert( options.shiftDragSpeed <= options.dragSpeed, 'shiftDragSpeed should be less than or equal to shiftDragSpeed, it is intended to provide more fine-grained control' );
     assert && assert( options.shiftDragDelta <= options.dragDelta, 'shiftDragDelta should be less than or equal to dragDelta, it is intended to provide more fine-grained control' );
 
-    const keyDescriptorProperties = KeyboardDragDirectionToKeyDescriptorPropertiesMap.get( options.keyboardDragDirection )!;
-    assert && assert( keyDescriptorProperties, 'Invalid keyboardDragDirection' );
+    const keyStringProperties = KeyboardDragDirectionToKeyStringPropertiesMap.get( options.keyboardDragDirection )!;
+    assert && assert( keyStringProperties, 'Invalid keyboardDragDirection' );
 
     const superOptions = optionize<KeyboardDragListenerOptions, EmptySelfOptions, KeyboardListenerOptions<KeyboardDragListenerKeyStroke>>()( {
-      keyDescriptorProperties: keyDescriptorProperties
+      keyStringProperties: keyStringProperties
     }, options );
 
     super( superOptions );
@@ -280,11 +276,11 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     // pressedKeysProperty comes from KeyboardListener, and it is used to determine the state of the movement keys.
     // This approach gives more control over the positionProperty in the callbackTimer than using the KeyboardListener
     // callback.
-    this.pressedKeyDescriptorPropertiesProperty.link( pressedKeyDescriptorProperties => {
-      this.leftKeyDownProperty.value = pressedKeyDescriptorProperties.includes( ARROW_LEFT_DESCRIPTOR_PROPERTY ) || pressedKeyDescriptorProperties.includes( A_DESCRIPTOR_PROPERTY );
-      this.rightKeyDownProperty.value = pressedKeyDescriptorProperties.includes( ARROW_RIGHT_DESCRIPTOR_PROPERTY ) || pressedKeyDescriptorProperties.includes( D_DESCRIPTOR_PROPERTY );
-      this.upKeyDownProperty.value = pressedKeyDescriptorProperties.includes( ARROW_UP_DESCRIPTOR_PROPERTY ) || pressedKeyDescriptorProperties.includes( W_DESCRIPTOR_PROPERTY );
-      this.downKeyDownProperty.value = pressedKeyDescriptorProperties.includes( ARROW_DOWN_DESCRIPTOR_PROPERTY ) || pressedKeyDescriptorProperties.includes( S_DESCRIPTOR_PROPERTY );
+    this.pressedKeyStringPropertiesProperty.link( pressedKeyStringProperties => {
+      this.leftKeyDownProperty.value = pressedKeyStringProperties.includes( ARROW_LEFT_KEY_STRING_PROPERTY ) || pressedKeyStringProperties.includes( A_KEY_STRING_PROPERTY );
+      this.rightKeyDownProperty.value = pressedKeyStringProperties.includes( ARROW_RIGHT_KEY_STRING_PROPERTY ) || pressedKeyStringProperties.includes( D_KEY_STRING_PROPERTY );
+      this.upKeyDownProperty.value = pressedKeyStringProperties.includes( ARROW_UP_KEY_STRING_PROPERTY ) || pressedKeyStringProperties.includes( W_KEY_STRING_PROPERTY );
+      this.downKeyDownProperty.value = pressedKeyStringProperties.includes( ARROW_DOWN_KEY_STRING_PROPERTY ) || pressedKeyStringProperties.includes( S_KEY_STRING_PROPERTY );
     } );
 
     // Mutable attributes declared from options, see options for info, as well as getters and setters.
@@ -666,7 +662,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keys
       // through the keyup event - as a workaround, we only allow one arrow key to be down at a time. If two are pressed
       // down, we immediately interrupt.
-      if ( platform.safari && this.pressedKeyDescriptorPropertiesProperty.value.length > 1 ) {
+      if ( platform.safari && this.pressedKeyStringPropertiesProperty.value.length > 1 ) {
         this.interrupt();
         return;
       }

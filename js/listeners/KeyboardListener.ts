@@ -79,7 +79,6 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import KeyDescriptor from '../input/KeyDescriptor.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
 type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
@@ -91,7 +90,7 @@ type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // A list of KeyDescriptor Properties that describe the keys that need to be pressed to fire the callback.
   // This is an alternative to providing keys directly. You cannot provide both keys and keyDescriptorProperties.
   // This is useful for dynamic behavior, such as i18n or mapping to a different set of keys.
-  keyDescriptorProperties?: TProperty<KeyDescriptor>[] | null;
+  keyStringProperties?: TReadOnlyProperty<OneKeyStroke>[] | null;
 
   // Called when the listener detects that the set of keys are pressed.
   fire?: ( event: KeyboardEvent | null, keysPressed: Keys[number], listener: KeyboardListener<Keys> ) => void;
@@ -162,7 +161,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   public readonly isPressedProperty: TReadOnlyProperty<boolean>;
 
   // A Property that contains all the Property<KeyDescriptor> that are currently pressed down.
-  public readonly pressedKeyDescriptorPropertiesProperty: TProperty<TProperty<KeyDescriptor>[]>;
+  public readonly pressedKeyStringPropertiesProperty: TProperty<TReadOnlyProperty<OneKeyStroke>[]>;
 
   // (read-only) - Whether the last key press was interrupted. Will be valid until the next presss.
   public interrupted: boolean;
@@ -171,11 +170,11 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   public constructor( providedOptions: KeyboardListenerOptions<Keys> ) {
 
     // You can either provide keys directly OR provide a list of KeyDescriptor Properties. You cannot provide both.
-    assertMutuallyExclusiveOptions( providedOptions, [ 'keys' ], [ 'keyDescriptorProperties' ] );
+    assertMutuallyExclusiveOptions( providedOptions, [ 'keys' ], [ 'keyStringProperties' ] );
 
     const options = optionize<KeyboardListenerOptions<Keys>, KeyboardListenerSelfOptions<Keys>, EnabledComponentOptions>()( {
       keys: null,
-      keyDescriptorProperties: null,
+      keyStringProperties: null,
       fire: _.noop,
       press: _.noop,
       release: _.noop,
@@ -210,10 +209,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.override = options.override;
 
     // convert the provided keys to data that we can respond to with scenery's Input system
-    this.hotkeys = this.createHotkeys( options.keys, options.keyDescriptorProperties );
+    this.hotkeys = this.createHotkeys( options.keys, options.keyStringProperties );
 
     this.isPressedProperty = DerivedProperty.or( this.hotkeys.map( hotkey => hotkey.isPressedProperty ) );
-    this.pressedKeyDescriptorPropertiesProperty = new Property( [] );
+    this.pressedKeyStringPropertiesProperty = new Property( [] );
     this.interrupted = false;
 
     this.enabledPropertyListener = this.onEnabledPropertyChange.bind( this );
@@ -240,7 +239,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   public override dispose(): void {
     ( this as unknown as TInputListener ).hotkeys!.forEach( hotkey => hotkey.dispose() );
     this.isPressedProperty.dispose();
-    this.pressedKeyDescriptorPropertiesProperty.dispose();
+    this.pressedKeyStringPropertiesProperty.dispose();
 
     this.enabledProperty.unlink( this.enabledPropertyListener );
 
@@ -305,44 +304,44 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   /**
    * Converts the provided keys for this listener into a collection of Hotkeys to easily track what keys are down.
    */
-  private createHotkeys( keys: Keys | null, keyDescriptorProperties: TProperty<KeyDescriptor>[] | null ): Hotkey[] {
-    assert && assert( keys || keyDescriptorProperties, 'Must provide keys or keyDescriptorProperties' );
+  private createHotkeys( keys: Keys | null, keyStringProperties: TReadOnlyProperty<OneKeyStroke>[] | null ): Hotkey[] {
+    assert && assert( keys || keyStringProperties, 'Must provide keys or keyDescriptorProperties' );
 
-    let usableKeyDescriptorProperties: TProperty<KeyDescriptor>[];
-    if ( keyDescriptorProperties ) {
-      usableKeyDescriptorProperties = keyDescriptorProperties;
+    let usableKeyStringProperties: TReadOnlyProperty<OneKeyStroke>[];
+    if ( keyStringProperties ) {
+      usableKeyStringProperties = keyStringProperties;
     }
     else {
 
       // Convert provided keys into KeyDescriptors for the Hotkey.
-      usableKeyDescriptorProperties = keys!.map( naturalKeys => {
-        return new Property( KeyDescriptor.keyStrokeToKeyDescriptor( naturalKeys ) );
+      usableKeyStringProperties = keys!.map( naturalKeys => {
+        return new Property( naturalKeys );
       } );
     }
 
-    return usableKeyDescriptorProperties.map( descriptorProperty => {
+    return usableKeyStringProperties.map( keyStringProperty => {
       const hotkey = new Hotkey( {
-        keyDescriptorProperty: descriptorProperty,
+        keyStringProperty: keyStringProperty,
         fire: ( event: KeyboardEvent | null ) => {
-          this._fire( event, descriptorProperty.value.getHotkeyString() as Keys[number], this );
+          this._fire( event, keyStringProperty.value as Keys[number], this );
         },
         press: ( event: KeyboardEvent | null ) => {
           this.interrupted = false;
 
-          const naturalKeys = descriptorProperty.value.getHotkeyString() as Keys[number];
+          const naturalKeys = keyStringProperty.value as Keys[number];
           this._press( event, naturalKeys, this );
 
-          assert && assert( !this.pressedKeyDescriptorPropertiesProperty.value.includes( descriptorProperty ), 'Key already pressed' );
-          this.pressedKeyDescriptorPropertiesProperty.value = [ ...this.pressedKeyDescriptorPropertiesProperty.value, descriptorProperty ];
+          assert && assert( !this.pressedKeyStringPropertiesProperty.value.includes( keyStringProperty ), 'Key already pressed' );
+          this.pressedKeyStringPropertiesProperty.value = [ ...this.pressedKeyStringPropertiesProperty.value, keyStringProperty ];
         },
         release: ( event: KeyboardEvent | null ) => {
           this.interrupted = hotkey.interrupted;
-          const naturalKeys = descriptorProperty.value.getHotkeyString() as Keys[number];
+          const naturalKeys = keyStringProperty.value as Keys[number];
 
           this._release( event, naturalKeys, this );
 
-          assert && assert( this.pressedKeyDescriptorPropertiesProperty.value.includes( descriptorProperty ), 'Key not pressed' );
-          this.pressedKeyDescriptorPropertiesProperty.value = this.pressedKeyDescriptorPropertiesProperty.value.filter( descriptor => descriptor !== descriptorProperty );
+          assert && assert( this.pressedKeyStringPropertiesProperty.value.includes( keyStringProperty ), 'Key not pressed' );
+          this.pressedKeyStringPropertiesProperty.value = this.pressedKeyStringPropertiesProperty.value.filter( descriptor => descriptor !== keyStringProperty );
         },
         fireOnDown: this.fireOnDown,
         fireOnHold: this.fireOnHold,
