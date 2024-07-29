@@ -94,7 +94,8 @@
 
         // Create a display using this root node, using our existing div
         const display = new phet.scenery.Display( scene, {
-          container: document.getElementById( 'hello-world-scene' )
+          container: document.getElementById( 'hello-world-scene' ),
+          listenToOnlyElement: true
         } );
 
         // Add our text
@@ -161,7 +162,8 @@ display.updateDisplay();
       $( window ).ready( () => {
         const scene = new phet.scenery.Node();
         const display = new phet.scenery.Display( scene, {
-          container: document.getElementById( 'shapes-scene' )
+          container: document.getElementById( 'shapes-scene' ),
+          listenToOnlyElement: true
         } );
 
         // A rectangle at (10,10) with a width of 50 and height of 80
@@ -291,7 +293,8 @@ node2.rotation === node3.getRotation();
       $( window ).ready( () => {
         const scene = new phet.scenery.Node();
         const display = new phet.scenery.Display( scene, {
-          container: document.getElementById( 'self-and-children' )
+          container: document.getElementById( 'self-and-children' ),
+          listenToOnlyElement: true
         } );
 
         // create a node that will have child nodes.
@@ -397,7 +400,8 @@ container.addChild( child2 );
       $( window ).ready( () => {
         const scene = new phet.scenery.Node();
         const display = new phet.scenery.Display( scene, {
-          container: document.getElementById( 'image-scene' )
+          container: document.getElementById( 'image-scene' ),
+          listenToOnlyElement: true
         } );
 
         // TODO: support different ways of handling the asynchronous load https://github.com/phetsims/scenery/issues/1581
@@ -445,7 +449,8 @@ thumbnailImage.src = 'https://phet.colorado.edu/sims/energy-skate-park/energy-sk
       $( window ).ready( () => {
         const scene = new phet.scenery.Node();
         const display = new phet.scenery.Display( scene, {
-          container: document.getElementById( 'dom-simple' )
+          container: document.getElementById( 'dom-simple' ),
+          listenToOnlyElement: true
         } );
 
         const element = document.createElement( 'span' );
@@ -453,7 +458,8 @@ thumbnailImage.src = 'https://phet.colorado.edu/sims/energy-skate-park/energy-sk
 
         scene.addChild( new phet.scenery.DOM( element, {
           x: 50,
-          rotation: Math.PI / 4
+          rotation: Math.PI / 4,
+          allowInput: true
         } ) );
 
         display.updateDisplay();
@@ -466,7 +472,8 @@ element.innerHTML = '<label>Type in me:</label><input type="text">';
 
 scene.addChild( new phet.scenery.DOM( element, {
   x: 50,
-  rotation: Math.PI / 4
+  rotation: Math.PI / 4,
+  allowInput: true
 } ) );
       </pre>
 
@@ -492,7 +499,8 @@ scene.addChild( new phet.scenery.DOM( element, {
       $( window ).ready( () => {
         const scene = new phet.scenery.Node();
         const display = new phet.scenery.Display( scene, {
-          container: document.getElementById( 'animation-simple' )
+          container: document.getElementById( 'animation-simple' ),
+          listenToOnlyElement: true
         } );
 
         // a hexagon to rotate
@@ -603,7 +611,8 @@ display.updateOnRequestAnimationFrame( function( timeElapsed ) {
       $( window ).ready( () => {
         const scene = new phet.scenery.Node();
         const display = new phet.scenery.Display( scene, {
-          container: document.getElementById( 'input-mouseover' )
+          container: document.getElementById( 'input-mouseover' ),
+          listenToOnlyElement: true
         } );
 
         // hook up event listeners just on this scene (not the whole document)
