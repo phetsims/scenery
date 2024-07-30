@@ -278,7 +278,10 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
         }
 
         // Position it
-        // NOTE: hardcoded stretch:true and an ignored origin offset of 0. effectiveCellAlign will not take the 'origin' value.
+        // FlowConstraint does not have options to control the main-orientation stretch of each cell, so we will fill
+        // in the value stretch:true when positioning the cell.
+        // FlowConstraint ALSO cannot take align-origin in the primary direction, so we hardcode a 0 for the origin offset,
+        // since all of the possible align values passed (cell.effectiveCellAlign) will not be origin-based.
         cell.reposition( orientation, cell.size, position, true, 0, cell.effectiveCellAlign );
 
         position += cell.size;
