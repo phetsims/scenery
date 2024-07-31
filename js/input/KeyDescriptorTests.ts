@@ -6,12 +6,12 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { EnglishKey, KeyDescriptor } from '../imports.js';
+import { EnglishKeyString, KeyDescriptor } from '../imports.js';
 
 QUnit.module( 'KeyDescriptor' );
 
 // Helper function to compare two arrays with QUnit assertions, ignoring order.
-const arraysEqualIgnoringOrder = function( array1: EnglishKey[], array2: EnglishKey[], assert: Assert, message: string ) {
+const arraysEqualIgnoringOrder = function( array1: EnglishKeyString[], array2: EnglishKeyString[], assert: Assert, message: string ) {
   array1 = array1.slice().sort();
   array2 = array2.slice().sort();
 

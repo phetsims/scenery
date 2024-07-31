@@ -10,7 +10,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { EnglishKey, EnglishStringToCodeMap, metaEnglishKeys, scenery } from '../imports.js';
+import { EnglishKey, EnglishKeyString, EnglishStringToCodeMap, metaEnglishKeys, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
 // NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
@@ -30,6 +30,10 @@ type IgnoreOtherModifierKeys = `${IgnoreDelimiter}${ModifierKey}`;
 // Allowed keys are the keys of the EnglishStringToCodeMap.
 type AllowedKeys = keyof typeof EnglishStringToCodeMap;
 
+// Allowed keys as a string - the format they will be provided by the user.
+export type AllowedKeysString = `${AllowedKeys}`;
+
+// A key stroke entry is a single key or a key with "ignore" modifiers, see examples and keyStrokeToKeyDescriptor.
 export type OneKeyStrokeEntry = `${AllowedKeys}` | `${IgnoreModifierKey}+${EnglishKey}` | `${IgnoreOtherModifierKeys}+${EnglishKey}`;
 
 export type OneKeyStroke =
@@ -49,7 +53,7 @@ export type KeyDescriptorOptions = {
 
   // The key that should be pressed to trigger the hotkey (in fireOnDown:true mode) or released to trigger the hotkey
   // (in fireOnDown:false mode).
-  key: EnglishKey;
+  key: AllowedKeysString;
 
   // A set of modifier keys that:
   //
@@ -67,17 +71,17 @@ export type KeyDescriptorOptions = {
   // so that is kept consistent for PhET-specific modifier keys.
   //
   // Note that the release of a modifier key may "activate" the hotkey for "fire-on-hold", but not for "fire-on-down".
-  modifierKeys?: EnglishKey[];
+  modifierKeys?: AllowedKeysString[];
 
   // A set of modifier keys that can be down and the hotkey will still fire. Essentially ignoring the modifier
   // key behavior for this key.
-  ignoredModifierKeys?: EnglishKey[];
+  ignoredModifierKeys?: AllowedKeysString[];
 };
 
 export default class KeyDescriptor {
-  public readonly key: EnglishKey;
-  public readonly modifierKeys: EnglishKey[];
-  public readonly ignoredModifierKeys: EnglishKey[];
+  public readonly key: AllowedKeysString;
+  public readonly modifierKeys: AllowedKeysString[];
+  public readonly ignoredModifierKeys: AllowedKeysString[];
 
   public constructor( providedOptions?: KeyDescriptorOptions ) {
     const options = optionize<KeyDescriptorOptions>()( {
@@ -136,7 +140,7 @@ export default class KeyDescriptor {
    */
   public static keyStrokeToKeyDescriptor( keyStroke: OneKeyStroke ): KeyDescriptor {
 
-    const tokens = keyStroke.split( '+' );
+    const tokens = keyStroke.split( '+' ) as OneKeyStrokeEntry[];
 
     // assertions
     let foundIgnoreDelimiter = false;
@@ -145,13 +149,13 @@ export default class KeyDescriptor {
       // the ignore delimiter can only be used on default modifier keys
       if ( token.length > 1 && token.includes( IGNORE_DELIMITER ) ) {
         assert && assert( !foundIgnoreDelimiter, 'There can only be one ignore delimiter' );
-        assert && assert( metaEnglishKeys.includes( token.replace( IGNORE_DELIMITER, '' ) as EnglishKey ), 'The ignore delimiter can only be used on default modifier keys' );
+        assert && assert( metaEnglishKeys.includes( token.replace( IGNORE_DELIMITER, '' ) as EnglishKeyString ), 'The ignore delimiter can only be used on default modifier keys' );
         foundIgnoreDelimiter = true;
       }
     } );
 
-    const modifierKeys: string[] = [];
-    const ignoredModifierKeys: string[] = [];
+    const modifierKeys: AllowedKeysString[] = [];
+    const ignoredModifierKeys: AllowedKeysString[] = [];
 
     tokens.forEach( token => {
 
@@ -162,35 +166,35 @@ export default class KeyDescriptor {
         if ( token.startsWith( IGNORE_DELIMITER ) ) {
 
           // Add all default modifiers except the current stripped token to the ignored keys
-          const otherModifiers = metaEnglishKeys.filter( mod => mod !== strippedToken ) as string[];
+          const otherModifiers = metaEnglishKeys.filter( mod => mod !== strippedToken );
           ignoredModifierKeys.push( ...otherModifiers );
 
           // Include the stripped token as a regular modifier key
-          modifierKeys.push( strippedToken );
+          modifierKeys.push( strippedToken as AllowedKeysString );
         }
         else {
 
           // Add the stripped token to the ignored modifier keys
-          ignoredModifierKeys.push( strippedToken );
+          ignoredModifierKeys.push( strippedToken as AllowedKeysString );
         }
       }
       else {
 
         // If there's no question mark, add the token to the modifier keys
-        modifierKeys.push( token );
+        modifierKeys.push( token as AllowedKeysString );
       }
     } );
 
     // Assume the last token is the key
-    const key = modifierKeys.pop() as EnglishKey;
+    const key = modifierKeys.pop()!;
 
     // Filter out ignored modifier keys from the modifier keys list
     const filteredModifierKeys = modifierKeys.filter( mod => !ignoredModifierKeys.includes( mod ) );
 
     return new KeyDescriptor( {
       key: key,
-      modifierKeys: filteredModifierKeys as EnglishKey[],
-      ignoredModifierKeys: ignoredModifierKeys as EnglishKey[]
+      modifierKeys: filteredModifierKeys,
+      ignoredModifierKeys: ignoredModifierKeys
     } );
   }
 }

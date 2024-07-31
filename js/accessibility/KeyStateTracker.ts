@@ -14,7 +14,7 @@ import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import EventType from '../../../tandem/js/EventType.js';
-import { EnglishKey, EnglishStringToCodeMap, eventCodeToEnglishString, EventIO, KeyboardUtils, scenery } from '../imports.js';
+import { EnglishKey, EnglishKeyString, EnglishStringToCodeMap, eventCodeToEnglishString, EventIO, KeyboardUtils, scenery } from '../imports.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
@@ -306,8 +306,8 @@ class KeyStateTracker {
    *
    * NOTE: Always returns a new Set, so a defensive copy is not needed.
    */
-  public getEnglishKeysDown(): Set<EnglishKey> {
-    const englishKeySet = new Set<EnglishKey>();
+  public getEnglishKeysDown(): Set<EnglishKeyString> {
+    const englishKeySet = new Set<EnglishKeyString>();
 
     for ( const key of this.getKeysDown() ) {
       const englishKey = eventCodeToEnglishString( key );

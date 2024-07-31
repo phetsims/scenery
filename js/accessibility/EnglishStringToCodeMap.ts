@@ -10,6 +10,7 @@
 import { KeyboardUtils, scenery } from '../imports.js';
 
 export type EnglishKey = keyof typeof EnglishStringToCodeMap;
+export type EnglishKeyString = `${EnglishKey}`;
 
 const EnglishStringToCodeMap = {
 
@@ -83,7 +84,7 @@ const EnglishStringToCodeMap = {
 scenery.register( 'EnglishStringToCodeMap', EnglishStringToCodeMap );
 export default EnglishStringToCodeMap;
 
-export const metaEnglishKeys: EnglishKey[] = [ 'ctrl', 'alt', 'shift', 'meta' ];
+export const metaEnglishKeys: EnglishKeyString[] = [ 'ctrl', 'alt', 'shift', 'meta' ];
 
 /**
  * Returns the first EnglishStringToCodeMap that corresponds to the provided event.code. Null if no match is found.
@@ -98,11 +99,11 @@ export const metaEnglishKeys: EnglishKey[] = [ 'ctrl', 'alt', 'shift', 'meta' ];
  *
  * NOTE: This cannot be in KeyboardUtils because it would create a circular dependency.
  */
-export const eventCodeToEnglishString = ( eventCode: string ): EnglishKey | null => {
+export const eventCodeToEnglishString = ( eventCode: string ): EnglishKeyString | null => {
   for ( const key in EnglishStringToCodeMap ) {
     if ( EnglishStringToCodeMap.hasOwnProperty( key ) &&
          ( EnglishStringToCodeMap[ key as EnglishKey ] ).includes( eventCode ) ) {
-      return key as EnglishKey;
+      return key as EnglishKeyString;
     }
   }
   return null;

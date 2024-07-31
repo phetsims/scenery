@@ -32,13 +32,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EnglishKey, EnglishStringToCodeMap, hotkeyManager, OneKeyStroke, scenery } from '../imports.js';
+import { AllowedKeysString, EnglishStringToCodeMap, hotkeyManager, KeyDescriptor, OneKeyStroke, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
-import KeyDescriptor from './KeyDescriptor.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
@@ -109,7 +108,7 @@ export default class Hotkey extends EnabledComponent {
   public readonly keyDescriptorProperty: TReadOnlyProperty<KeyDescriptor>;
 
   // All keys that are part of this hotkey (key + modifierKeys) as defined by the current KeyDescriptor.
-  public keysProperty: TReadOnlyProperty<EnglishKey[]>;
+  public keysProperty: TReadOnlyProperty<AllowedKeysString[]>;
 
   // A Property that tracks whether the hotkey is currently pressed.
   // Will be true if it meets the following conditions:

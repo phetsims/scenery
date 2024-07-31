@@ -23,7 +23,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EnglishKey, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, Node, scenery } from '../imports.js';
+import { AllowedKeysString, EnglishKeyString, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, Node, scenery } from '../imports.js';
 import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/DerivedProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -46,12 +46,12 @@ class HotkeyManager {
   private readonly enabledHotkeysProperty: TProperty<Hotkey[]> = new TinyProperty( [] );
 
   // The set of EnglishKeys that are currently pressed.
-  private englishKeysDown: Set<EnglishKey> = new Set<EnglishKey>();
+  private englishKeysDown: Set<EnglishKeyString> = new Set<EnglishKeyString>();
 
   // The current set of modifier keys (pressed or not) based on current enabled hotkeys
   // NOTE: Pressed modifier keys will prevent any other Hotkeys from becoming active. For example if you have a hotkey
   // with 'b+x', pressing 'b' will prevent any other hotkeys from becoming active.
-  private modifierKeys: EnglishKey[] = [];
+  private modifierKeys: AllowedKeysString[] = [];
 
   // Hotkeys that are actively pressed
   private readonly activeHotkeys: Set<Hotkey> = new Set<Hotkey>();
@@ -246,7 +246,7 @@ class HotkeyManager {
    * 2. All modifier keys in the hotkey's modifierKeys pressed
    * 3. All modifier keys not in the hotkey's modifierKeys (but in the other hotkeys above) not pressed
    */
-  private getHotkeysForMainKey( mainKey: EnglishKey ): Hotkey[] {
+  private getHotkeysForMainKey( mainKey: EnglishKeyString ): Hotkey[] {
 
     // If the main key isn't down, there's no way it could be active
     if ( !this.englishKeysDown.has( mainKey ) ) {
