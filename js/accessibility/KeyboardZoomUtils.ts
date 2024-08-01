@@ -37,6 +37,8 @@ const KeyboardZoomUtils = {
    * @param zoomIn - do you want to check for zoom in or zoom out?
    */
   isZoomCommand: ( event: Event, zoomIn: boolean ): boolean => {
+
+    // This function checks the meta key on the event, so it cannot use HotkeyData.
     const zoomKey = zoomIn ? KeyboardUtils.KEY_EQUALS : KeyboardUtils.KEY_MINUS;
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
 
@@ -50,10 +52,13 @@ const KeyboardZoomUtils = {
   isZoomResetCommand: ( event: Event ): boolean => {
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
 
+    // This function uses the meta key on the event, so it cannot use HotkeyData.
     // @ts-expect-error
     return event[ metaKey ] && KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_0 );
   },
 
+  // Hotkey data is not used in the implementation but is provided for documentation purposes.
+  // Beware if you change keys in these, you will need to change other methods in this utils file.
   ZOOM_IN_HOTKEY_DATA: new HotkeyData( {
     keyStringProperties: [ new Property( 'ctrl+equals' ), new Property( 'meta+equals' ) ],
     binderName: 'Zoom in',
