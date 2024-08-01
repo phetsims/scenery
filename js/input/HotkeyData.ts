@@ -116,6 +116,13 @@ export default class HotkeyData {
       return accumulator.concat( hotkeyData.keyStringProperties );
     }, [] );
   }
+
+  /**
+   * Returns true if any of the HotkeyData in the array have the given keyStroke.
+   */
+  public static anyHaveKeyStroke( hotkeyDataArray: HotkeyData[], keyStroke: OneKeyStroke ): boolean {
+    return hotkeyDataArray.some( hotkeyData => hotkeyData.hasKeyStroke( keyStroke ) );
+  }
 }
 
 scenery.register( 'HotkeyData', HotkeyData );
