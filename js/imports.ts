@@ -193,7 +193,6 @@ export type { HighlightFromNodeOptions } from './accessibility/HighlightFromNode
 export { default as ReadingBlockHighlight } from './accessibility/voicing/ReadingBlockHighlight.js';
 export { default as ReadingBlock } from './accessibility/voicing/ReadingBlock.js';
 export type { ReadingBlockOptions, TReadingBlock } from './accessibility/voicing/ReadingBlock.js';
-export { default as KeyboardZoomUtils } from './accessibility/KeyboardZoomUtils.js';
 export { default as KeyboardFuzzer } from './accessibility/KeyboardFuzzer.js';
 export { default as GroupHighlightFromNode } from './accessibility/GroupHighlightFromNode.js';
 export { default as ActivatedReadingBlockHighlight } from './accessibility/voicing/ActivatedReadingBlockHighlight.js';
@@ -227,6 +226,8 @@ export { default as Hotkey } from './input/Hotkey.js';
 export type { HotkeyOptions, HotkeyFireOnHoldTiming } from './input/Hotkey.js';
 export { default as globalHotkeyRegistry } from './input/globalHotkeyRegistry.js';
 export { default as hotkeyManager } from './input/hotkeyManager.js';
+
+export { default as KeyboardZoomUtils } from './accessibility/KeyboardZoomUtils.js';
 
 export { default as InputFuzzer } from './input/InputFuzzer.js';
 export { default as DownUpListener } from './input/DownUpListener.js';

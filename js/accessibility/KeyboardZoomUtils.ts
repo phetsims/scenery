@@ -6,7 +6,8 @@
  * @author Jesse Greenberg
  */
 
-import { KeyboardUtils, scenery } from '../imports.js';
+import { HotkeyData, KeyboardUtils, scenery } from '../imports.js';
+import Property from '../../../axon/js/Property.js';
 
 const KeyboardZoomUtils = {
 
@@ -51,7 +52,28 @@ const KeyboardZoomUtils = {
 
     // @ts-expect-error
     return event[ metaKey ] && KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_0 );
-  }
+  },
+
+  ZOOM_IN_HOTKEY_DATA: new HotkeyData( {
+    keyStringProperties: [ new Property( 'ctrl+equals' ), new Property( 'meta+equals' ) ],
+    binderName: 'Zoom in',
+    repoName: 'scenery',
+    global: true
+  } ),
+
+  ZOOM_OUT_HOTKEY_DATA: new HotkeyData( {
+    keyStringProperties: [ new Property( 'ctrl+minus' ), new Property( 'meta+minus' ) ],
+    binderName: 'Zoom in',
+    repoName: 'scenery',
+    global: true
+  } ),
+
+  RESET_ZOOM_HOTKEY_DATA: new HotkeyData( {
+    keyStringProperties: [ new Property( 'ctrl+0' ), new Property( 'meta+0' ) ],
+    binderName: 'Reset zoom',
+    repoName: 'scenery',
+    global: true
+  } )
 };
 
 scenery.register( 'KeyboardZoomUtils', KeyboardZoomUtils );

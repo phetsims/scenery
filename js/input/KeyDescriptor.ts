@@ -19,7 +19,7 @@ import optionize from '../../../phet-core/js/optionize.js';
 // If we run out of union space for template strings, consider the above comment or remove some from the type.
 type ModifierKey = 'q' | 'w' | 'e' | 'r' | 't' | 'y' | 'u' | 'i' | 'o' | 'p' | 'a' | 's' | 'd' |
   'f' | 'g' | 'h' | 'j' | 'k' | 'l' | 'z' | 'x' | 'c' |
-  'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab';
+  'v' | 'b' | 'n' | 'm' | 'ctrl' | 'alt' | 'shift' | 'tab' | 'meta';
 
 const IGNORE_DELIMITER = '?';
 type IgnoreDelimiter = typeof IGNORE_DELIMITER;
