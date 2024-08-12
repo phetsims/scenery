@@ -173,6 +173,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 
 const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 
@@ -657,7 +658,14 @@ export default class Input extends PhetioObject {
       const pointer = this.findPointerById( id );
 
       if ( pointer ) {
-        pointer.onLostPointerCapture();
+
+        // While investigating https://github.com/phetsims/mean-share-and-balance/issues/336 it was discovered that
+        // pointerUp events were not being transmitted before lostPointerCapture events by the browser. This was
+        // surprising since the spec says otherwise: https://w3c.github.io/pointerevents/#implicit-release-of-pointer-capture
+        // This behavior was found to be occurring while using a mac trackpad with finger movements that could
+        // potentially be perceived as gesture. The following setTimeout gives the pointerUp event a chance to fire first
+        // before the lostPointerCapture event so that listeners can rely on the expected order.
+        stepTimer.setTimeout( () => { pointer.onLostPointerCapture(); }, 2 );
       }
     }, {
       phetioPlayback: true,
