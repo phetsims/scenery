@@ -310,7 +310,7 @@ type PDOMClass = {
   options: SetPDOMClassOptions;
 };
 
-type Association = {
+export type Association = {
   otherNode: Node;
   otherElementName: string;
   thisElementName: string;
