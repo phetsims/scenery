@@ -318,7 +318,7 @@ export type Association = {
 
 type SetPDOMAttributeOptions = {
   namespace?: string | null;
-  asProperty?: boolean;
+  type?: 'attribute' | 'property'; // javascript Property instead of AXON/Property
   elementName?: string;
 };
 
@@ -2500,7 +2500,7 @@ export default class ParallelDOM extends PhetioObject {
       this._pdomChecked = checked;
 
       this.setPDOMAttribute( 'checked', checked, {
-        asProperty: true
+        type: 'property'
       } );
     }
   }
@@ -2545,12 +2545,13 @@ export default class ParallelDOM extends PhetioObject {
       namespace: null,
 
       // set the "attribute" as a javascript property on the DOMElement instead of a DOM element attribute
-      asProperty: false,
+      type: 'attribute',
 
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
     }, providedOptions );
 
     assert && assert( !ASSOCIATION_ATTRIBUTES.includes( attribute ), 'setPDOMAttribute does not support association attributes' );
+    assert && options.namespace && assert( options.type === 'attribute', 'property-setting is not supported for custom namespaces' );
 
     // if the pdom attribute already exists in the list, remove it - no need
     // to remove from the peers, existing attributes will simply be replaced in the DOM
@@ -2560,12 +2561,13 @@ export default class ParallelDOM extends PhetioObject {
            currentAttribute.options.namespace === options.namespace &&
            currentAttribute.options.elementName === options.elementName ) {
 
-        if ( !isTReadOnlyProperty( currentAttribute.value ) && currentAttribute.options.asProperty === options.asProperty ) {
+        // We can simplify the new value set as long as there isn't cleanup (from a Property listener) or logic change (from a different type)
+        if ( !isTReadOnlyProperty( currentAttribute.value ) && currentAttribute.options.type === options.type ) {
           this._pdomAttributes.splice( i, 1 );
         }
         else {
 
-          // Swapping asProperty setting strategies should remove the attribute so it can be set as a property.
+          // Swapping type strategies should remove the attribute, so it can be set as a property/attribute correctly.
           this.removePDOMAttribute( currentAttribute.attribute, currentAttribute.options );
         }
       }
@@ -2602,7 +2604,7 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Remove a particular attribute, removing the associated semantic information from the DOM element.
    *
-   * It is HIGHLY recommended that you never call this function from an attribute set with `asProperty:true`, see
+   * It is HIGHLY recommended that you never call this function from an attribute set with `type:'property'`, see
    * setPDOMAttribute for the option details.
    *
    * @param attribute - name of the attribute to remove

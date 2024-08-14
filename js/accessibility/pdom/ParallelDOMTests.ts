@@ -1035,7 +1035,7 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
   assert.ok( getPrimarySiblingElementByNode( b ).tabIndex >= 0, 'set tagName after focusable' );
 
   // test setting attribute as DOM property, should NOT have attribute value pair (DOM uses empty string for empty)
-  a1.setPDOMAttribute( 'hidden', true, { asProperty: true } );
+  a1.setPDOMAttribute( 'hidden', true, { type: 'property' } );
   a1Element = getPrimarySiblingElementByNode( a1 );
   assert.equal( a1Element.hidden, true, 'hidden set as Property' );
   assert.ok( a1Element.getAttribute( 'hidden' ) === '', 'hidden should not be set as attribute' );
@@ -1514,21 +1514,21 @@ QUnit.test( 'setPDOMAttribute', assert => {
   a.removePDOMAttributes();
   const attributeName = 'multiTest';
   a.setPDOMAttribute( attributeName, 'true', {
-    asProperty: false
+    type: 'attribute'
   } );
   aElement = getPrimarySiblingElementByNode( a );
-  assert.ok( aElement.getAttribute( attributeName ) === 'true', 'asProperty:false should set attribute' );
+  assert.ok( aElement.getAttribute( attributeName ) === 'true', 'type:attribute should set attribute' );
 
   a.setPDOMAttribute( attributeName, false, {
-    asProperty: true
+    type: 'property'
   } );
-  assert.ok( !aElement.getAttribute( attributeName ), 'asProperty:true should remove attribute' );
+  assert.ok( !aElement.getAttribute( attributeName ), 'type:property should remove attribute' );
 
   // @ts-expect-error for testing
-  assert.equal( aElement[ attributeName ], false, 'asProperty:true should set property' );
+  assert.equal( aElement[ attributeName ], false, 'type:property should set property' );
 
   const testAttributes = a.getPDOMAttributes().filter( a => a.attribute === attributeName );
-  assert.ok( testAttributes.length === 1, 'asProperty change should alter the attribute, not add a new one.' );
+  assert.ok( testAttributes.length === 1, 'type change should alter the attribute, not add a new one.' );
 
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
@@ -2153,10 +2153,10 @@ QUnit.test( 'Display.interactive toggling in the PDOM', assert => {
   testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild second toggled not interactive' );
   testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild second toggled not interactive' );
 
-  pdomParent.setPDOMAttribute( 'disabled', true, { asProperty: true } );
-  pdomRangeChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
-  pdomParagraphChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
-  pdomButtonChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
+  pdomParent.setPDOMAttribute( 'disabled', true, { type: 'property' } );
+  pdomRangeChild.setPDOMAttribute( 'disabled', true, { type: 'property' } );
+  pdomParagraphChild.setPDOMAttribute( 'disabled', true, { type: 'property' } );
+  pdomButtonChild.setPDOMAttribute( 'disabled', true, { type: 'property' } );
 
   testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent not interactive after setting disabled manually as property, display not interactive' );
   testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild not interactive after setting disabled manually as property, display not interactive' );
@@ -2250,7 +2250,7 @@ QUnit.test( 'Display.interactive toggling in the PDOM', assert => {
   testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled.' );
   testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled with dag.', 1 );
 
-  pdomButtonChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
+  pdomButtonChild.setPDOMAttribute( 'disabled', true, { type: 'property' } );
 
   testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled set property too.' );
   testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled set property too, with dag.', 1 );

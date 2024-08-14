@@ -497,7 +497,7 @@ class PDOMPeer {
 
       // type conversion for DOM spec
       const valueString = `${this.node.inputValue}`;
-      this.setAttributeToElement( 'value', valueString, { asProperty: true } );
+      this.setAttributeToElement( 'value', valueString, { type: 'property' } );
     }
   }
 
@@ -540,7 +540,7 @@ class PDOMPeer {
       namespace: null,
 
       // set as a javascript property instead of an attribute on the DOM Element.
-      asProperty: false,
+      type: 'attribute',
 
       elementName: PRIMARY_SIBLING, // see this.getElementName() for valid values, default to the primary sibling
 
@@ -563,13 +563,13 @@ class PDOMPeer {
     if ( attribute === DISABLED_ATTRIBUTE_NAME && !this.display.interactive ) {
 
       // The presence of the `disabled` attribute means it is always disabled.
-      this._preservedDisabledValue = options.asProperty ? attributeValueWithoutMarks : true;
+      this._preservedDisabledValue = options.type === 'property' ? attributeValueWithoutMarks : true;
     }
 
     if ( options.namespace ) {
       element.setAttributeNS( options.namespace, attribute, attributeValueWithoutMarks );
     }
-    else if ( options.asProperty ) {
+    else if ( options.type === 'property' ) {
       element[ attribute ] = attributeValueWithoutMarks;
     }
     else {
