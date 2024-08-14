@@ -147,7 +147,8 @@ export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
     }, providedOptions );
 
     assert && Object.keys( options ).forEach( key => {
-      assert && assert( GRID_CELL_KEYS.includes( key ), `Cannot provide key ${key} to a GridCell's layoutOptions. Perhaps this is a Flow-style layout option?` );
+      assert && assert( GRID_CELL_KEYS.includes( key ) || key === 'isSeparator',
+        `Cannot provide key ${key} to a GridCell's layoutOptions. Perhaps this is a Flow-style layout option?` );
     } );
 
     assert && assert( typeof options.column === 'number' && Number.isInteger( options.column ) && isFinite( options.column ) && options.column >= 0 );
