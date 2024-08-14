@@ -2544,7 +2544,7 @@ export default class ParallelDOM extends PhetioObject {
       // for setting certain attributes (e.g. MathML).
       namespace: null,
 
-      // set the "attribute" as a javascript property on the DOMElement instead
+      // set the "attribute" as a javascript property on the DOMElement instead of a DOM element attribute
       asProperty: false,
 
       elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
@@ -2560,7 +2560,7 @@ export default class ParallelDOM extends PhetioObject {
            currentAttribute.options.namespace === options.namespace &&
            currentAttribute.options.elementName === options.elementName ) {
 
-        if ( currentAttribute.options.asProperty === options.asProperty ) {
+        if ( !isTReadOnlyProperty( currentAttribute.value ) && currentAttribute.options.asProperty === options.asProperty ) {
           this._pdomAttributes.splice( i, 1 );
         }
         else {
