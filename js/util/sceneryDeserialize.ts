@@ -1,8 +1,7 @@
 // Copyright 2022-2024, University of Colorado Boulder
 
 /**
- * Deserializes a generalized object
- * @deprecated
+ * Used by the scenery inspector
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -15,6 +14,7 @@ import { Shape } from '../../../kite/js/imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { Circle, Color, DOM, Gradient, Image, Line, LinearGradient, Mipmap, Node, Paint, Path, Pattern, RadialGradient, Rectangle, scenery, Text } from '../imports.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
+import MipmapElement from '../../../phet-core/js/MipmapElement.js';
 
 const sceneryDeserialize = ( value: { type: string; [ key: string ]: IntentionalAny } ): IntentionalAny => {
   const nodeTypes = [
@@ -111,25 +111,7 @@ const sceneryDeserialize = ( value: { type: string; [ key: string ]: Intentional
       }
       else if ( setup.imageType === 'mipmapData' ) {
         const mipmapData = setup.mipmapData.map( ( level: Mipmap[0] ) => {
-          const result: IntentionalAny = {
-            width: level.width,
-            height: level.height,
-            url: level.url
-          };
-          result.img = new window.Image();
-          result.img.src = level.url;
-          result.canvas = document.createElement( 'canvas' );
-          result.canvas.width = level.width;
-          result.canvas.height = level.height;
-          const context = result.canvas.getContext( '2d' );
-          // delayed loading like in mipmap plugin
-          result.updateCanvas = function() {
-            if ( result.img.complete && ( typeof result.img.naturalWidth === 'undefined' || result.img.naturalWidth > 0 ) ) {
-              context.drawImage( result.img, 0, 0 );
-              delete result.updateCanvas;
-            }
-          };
-          return result;
+          return new MipmapElement( level.width, level.height, level.url, false );
         } );
         node = new Image( mipmapData );
       }
