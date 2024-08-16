@@ -189,7 +189,6 @@ import './util/Picker.js';
 import './util/RadialGradient.js';
 import './util/RendererSummary.js';
 import './util/SceneImage.js';
-import './util/sceneryCopy.js';
 import './util/sceneryDeserialize.js';
 import './util/scenerySerialize.js';
 import './util/SceneryStyle.js';

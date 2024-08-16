@@ -339,7 +339,6 @@ export type { VoicingRichTextOptions } from './accessibility/voicing/nodes/Voici
 
 export { default as scenerySerialize, serializeConnectedNodes } from './util/scenerySerialize.js';
 export { default as sceneryDeserialize } from './util/sceneryDeserialize.js';
-export { default as sceneryCopy } from './util/sceneryCopy.js';
 
 export { default as Drawable } from './display/Drawable.js';
 export { default as SelfDrawable } from './display/SelfDrawable.js';
