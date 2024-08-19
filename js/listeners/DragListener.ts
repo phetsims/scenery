@@ -224,11 +224,6 @@ export default class DragListener extends PressListener implements TInputListene
     assert && assert( !( options as unknown as { dragBounds: Bounds2 } ).dragBounds, 'options.dragBounds was removed in favor of options.dragBoundsProperty' );
     assert && assert( !options.useParentOffset || options.positionProperty, 'If useParentOffset is set, a positionProperty is required' );
 
-    assert && assert(
-      !( options.mapPosition && options.dragBoundsProperty ),
-      'Only one of mapPosition and dragBoundsProperty can be provided, as they handle mapping of the drag point'
-    );
-
     // @ts-expect-error TODO: See https://github.com/phetsims/phet-core/issues/128
     super( options );
 
@@ -598,9 +593,10 @@ export default class DragListener extends PressListener implements TInputListene
    */
   protected mapModelPoint( modelPoint: Vector2 ): Vector2 {
     if ( this._mapPosition ) {
-      return this._mapPosition( modelPoint );
+      modelPoint = this._mapPosition( modelPoint );
     }
-    else if ( this._dragBoundsProperty.value ) {
+
+    if ( this._dragBoundsProperty.value ) {
       return this._dragBoundsProperty.value.closestPointTo( modelPoint );
     }
     else {
