@@ -408,9 +408,15 @@ type RasterizedOptions = {
   // Defaults to false
   useCanvas?: boolean;
 
+  // Options to be passed to the Node that is returned by the rasterized call, this could be the direct Image or a
+  // wrapped Node, depending on the value of options.wrap. In general it is best to use this option, and only provide
+  // imageOptions for specific requirements. These options will override any imageOptions if wrap:false. Defaults to \
+  // the empty object.
+  nodeOptions?: NodeOptions;
+
   // To be passed to the Image node created from the rasterization. See below for options that will override
-  // what is passed in.
-  // Defaults to the empty object
+  // what is passed in. In general, it is better to use nodeOptions. These options are overridden by nodeOptions when
+  // wrap:false. Defaults to the empty object.
   imageOptions?: ImageOptions;
 };
 
@@ -5786,6 +5792,7 @@ class Node extends ParallelDOM {
       useTargetBounds: true,
       wrap: true,
       useCanvas: false,
+      nodeOptions: {},
       imageOptions: {}
     }, providedOptions );
 
@@ -5803,7 +5810,7 @@ class Node extends ParallelDOM {
     }
 
     // We'll need to wrap it in a container Node temporarily (while rasterizing) for the scale
-    const wrapperNode = new Node( { // eslint-disable-line no-html-constructors
+    const tempWrapperNode = new Node( { // eslint-disable-line no-html-constructors
       scale: resolution,
       children: [ this ]
     } );
@@ -5827,13 +5834,13 @@ class Node extends ParallelDOM {
       }
     }
 
-    let image: Image | null = null;
+    let imageOrNull: Image | null = null;
 
     // NOTE: This callback is executed SYNCHRONOUSLY
     function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ): void {
       const imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
-      image = new Image( imageSource, combineOptions<ImageOptions>( {}, options.imageOptions, {
+      imageOrNull = new Image( imageSource, combineOptions<ImageOptions>( {}, options.imageOptions, {
         x: -x,
         y: -y,
         initialWidth: width,
@@ -5841,15 +5848,16 @@ class Node extends ParallelDOM {
       } ) );
 
       // We need to prepend the scale due to order of operations
-      image.scale( 1 / resolution, 1 / resolution, true );
+      imageOrNull.scale( 1 / resolution, 1 / resolution, true );
     }
 
     // NOTE: Rounding necessary due to floating point arithmetic in the width/height computation of the bounds
-    wrapperNode.toCanvas( callback, -transformedBounds.minX, -transformedBounds.minY, Utils.roundSymmetric( transformedBounds.width ), Utils.roundSymmetric( transformedBounds.height ) );
+    tempWrapperNode.toCanvas( callback, -transformedBounds.minX, -transformedBounds.minY, Utils.roundSymmetric( transformedBounds.width ), Utils.roundSymmetric( transformedBounds.height ) );
 
-    assert && assert( image, 'The toCanvas should have executed synchronously' );
+    assert && assert( imageOrNull, 'The toCanvas should have executed synchronously' );
+    const image = imageOrNull!;
 
-    wrapperNode.dispose();
+    tempWrapperNode.dispose();
 
     // For our useTargetBounds option, we do NOT want to include any "safe" bounds, and instead want to stay true to
     // the original bounds. We do filter out invisible subtrees to set the bounds.
@@ -5860,22 +5868,25 @@ class Node extends ParallelDOM {
     }
 
     if ( options.useTargetBounds ) {
-      image!.imageBounds = image!.parentToLocalBounds( finalParentBounds );
+      image.imageBounds = image.parentToLocalBounds( finalParentBounds );
     }
 
+    let returnNode: Node;
     if ( options.wrap ) {
-      const wrappedNode = new Node( { children: [ image! ] } ); // eslint-disable-line no-html-constructors
+      const wrappedNode = new Node( { children: [ image ] } ); // eslint-disable-line no-html-constructors
       if ( options.useTargetBounds ) {
         wrappedNode.localBounds = finalParentBounds;
       }
-      return wrappedNode;
+      returnNode = wrappedNode;
     }
     else {
       if ( options.useTargetBounds ) {
-        image!.localBounds = image!.parentToLocalBounds( finalParentBounds );
+        image.localBounds = image.parentToLocalBounds( finalParentBounds );
       }
-      return image!;
+      returnNode = image;
     }
+
+    return returnNode.mutate( options.nodeOptions );
   }
 
   /**
