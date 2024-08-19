@@ -5781,9 +5781,8 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Returns a Node (backed by a scenery Image) that is a rasterized version of this node.
-   *
-   * @param [options] - See below options. This is also passed directly to the created Image object.
+   * Returns a Node (backed by a scenery Image) that is a rasterized version of this node. See options, by default the
+   * image is wrapped with a container Node.
    */
   public rasterized( providedOptions?: RasterizedOptions ): Node {
     const options = optionize<RasterizedOptions, RasterizedOptions>()( {
