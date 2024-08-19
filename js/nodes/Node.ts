@@ -5677,7 +5677,7 @@ class Node extends ParallelDOM {
       'If provided, height should be a non-negative integer' );
 
     this.toImage( ( image, x, y ) => {
-      callback( new Node( { // eslint-disable-line no-html-constructors
+      callback( new Node( {
         children: [
           new Image( image, { x: -x, y: -y } )
         ]
@@ -5708,7 +5708,7 @@ class Node extends ParallelDOM {
 
     let result: Node | null = null;
     this.toCanvas( ( canvas, x, y ) => {
-      result = new Node( { // eslint-disable-line no-html-constructors
+      result = new Node( {
         children: [
           new Image( canvas, { x: -x, y: -y } )
         ]
@@ -5773,7 +5773,7 @@ class Node extends ParallelDOM {
     assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
       'If provided, height should be a non-negative integer' );
 
-    return new Node( { // eslint-disable-line no-html-constructors
+    return new Node( {
       children: [
         this.toDataURLImageSynchronous( x, y, width, height )
       ]
@@ -5809,7 +5809,7 @@ class Node extends ParallelDOM {
     }
 
     // We'll need to wrap it in a container Node temporarily (while rasterizing) for the scale
-    const tempWrapperNode = new Node( { // eslint-disable-line no-html-constructors
+    const tempWrapperNode = new Node( {
       scale: resolution,
       children: [ this ]
     } );
@@ -5872,7 +5872,7 @@ class Node extends ParallelDOM {
 
     let returnNode: Node;
     if ( options.wrap ) {
-      const wrappedNode = new Node( { children: [ image ] } ); // eslint-disable-line no-html-constructors
+      const wrappedNode = new Node( { children: [ image ] } );
       if ( options.useTargetBounds ) {
         wrappedNode.localBounds = finalParentBounds;
       }
