@@ -65,7 +65,7 @@ import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Range from '../../../dot/js/Range.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { allowLinksProperty, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint, WidthSizable } from '../imports.js';
+import { allowLinksProperty, assertNoAdditionalChildren, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint, WidthSizable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
@@ -382,6 +382,9 @@ export default class RichText extends WidthSizable( Node ) {
     this.localPreferredWidthProperty.lazyLink( () => this.rebuildRichText() );
 
     this.mutate( options );
+
+    // Decorating with additional content is an anti-pattern, see https://github.com/phetsims/sun/issues/860
+    assert && assertNoAdditionalChildren( this );
   }
 
   /**

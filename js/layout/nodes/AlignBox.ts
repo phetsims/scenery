@@ -36,7 +36,7 @@ import Multilink from '../../../../axon/js/Multilink.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { AlignGroup, extendsHeightSizable, extendsWidthSizable, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
+import { AlignGroup, assertNoAdditionalChildren, extendsHeightSizable, extendsWidthSizable, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
@@ -208,6 +208,9 @@ export default class AlignBox extends SuperType {
         this.constraint.updateLayout();
       }
     } );
+
+    // Decorating with additional content is an anti-pattern, see https://github.com/phetsims/sun/issues/860
+    assert && assertNoAdditionalChildren( this );
   }
 
   /**
