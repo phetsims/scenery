@@ -43,6 +43,8 @@ export { default as getLineBreakRanges } from './util/getLineBreakRanges.js';
 export type { GetLineBreaksOptions } from './util/getLineBreakRanges.js';
 export type { default as WindowTouch } from './input/WindowTouch.js';
 
+export { default as assertNoAdditionalChildren } from './util/assertNoAdditionalChildren.js';
+
 export { default as SpriteInstance, SpriteInstanceTransformType } from './util/SpriteInstance.js';
 export { default as SpriteSheet } from './util/SpriteSheet.js';
 export { default as ShaderProgram } from './util/ShaderProgram.js';
