@@ -79,7 +79,7 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
 } );
 
-export type TReadingBlock = {
+export type TReadingBlock<SuperType extends Node = Node> = {
   readingBlockActiveHighlightChangedEmitter: TEmitter;
   get isReadingBlock(): boolean;
   setReadingBlockTagName( tagName: string | null ): void;
@@ -101,12 +101,12 @@ export type TReadingBlock = {
   getReadingBlockActiveHighlight(): Highlight;
   isReadingBlockActivated(): boolean;
   get readingBlockActivated(): boolean;
-} & TVoicing;
+} & TVoicing<SuperType>;
 
-const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TReadingBlock> => {
+const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TReadingBlock<InstanceType<SuperType>>> => {
 
   const ReadingBlockClass = DelayedMutate( 'ReadingBlock', READING_BLOCK_OPTION_KEYS,
-    class ReadingBlockClass extends Voicing( Type ) implements TReadingBlock {
+    class ReadingBlockClass extends Voicing( Type ) implements TReadingBlock<InstanceType<SuperType>> {
 
       // The tagName used for the ReadingBlock when "Voicing" is enabled, default
       // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this

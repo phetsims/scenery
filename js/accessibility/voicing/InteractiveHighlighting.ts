@@ -32,7 +32,9 @@ type SelfOptions = {
 
 export type InteractiveHighlightingOptions = SelfOptions;
 
-export type TInteractiveHighlighting = {
+// Normally our project prefers type aliases to interfaces, but interfaces are necessary for correct usage of "this", see https://github.com/phetsims/tasks/issues/1132
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export interface TInteractiveHighlighting<SuperType extends Node = Node> {
 
   // @mixin-protected - made public for use in the mixin only
   displays: Record<string, Display>;
@@ -54,15 +56,18 @@ export type TInteractiveHighlighting = {
 
   // @mixin-protected - made public for use in the mixin only
   getDescendantsUseHighlighting( trail: Trail ): boolean;
-};
 
-const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TInteractiveHighlighting> => {
+  // Better options type for the subtype implementation that adds mutator keys
+  mutate( options?: SelfOptions & Parameters<SuperType[ 'mutate' ]>[ 0 ] ): this;
+}
+
+const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TInteractiveHighlighting<InstanceType<SuperType>>> => {
 
   // @ts-expect-error
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
 
   const InteractiveHighlightingClass = DelayedMutate( 'InteractiveHighlightingClass', INTERACTIVE_HIGHLIGHTING_OPTIONS,
-    class InteractiveHighlightingClass extends Type implements TInteractiveHighlighting {
+    class InteractiveHighlightingClass extends Type implements TInteractiveHighlighting<InstanceType<SuperType>> {
 
       // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
       // because we do not want this to fire from bubbling. The highlight should be around this Node when it receives

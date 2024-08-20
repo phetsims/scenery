@@ -101,7 +101,7 @@ export type SpeakingOptions = {
 
 // Normally our project prefers type aliases to interfaces, but interfaces are necessary for correct usage of "this", see https://github.com/phetsims/tasks/issues/1132
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export interface TVoicing extends TInteractiveHighlighting {
+export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHighlighting<SuperType> {
   _voicingResponsePacket: ResponsePacket;
 
   // @mixin-protected - made public for use in the mixin only
@@ -185,14 +185,17 @@ export interface TVoicing extends TInteractiveHighlighting {
 
   // @mixin-protected - made public for use in the mixin only
   cleanVoicingUtterance(): void;
+
+  // Better options type for the subtype implementation that adds mutator keys
+  mutate( options?: SelfOptions & Parameters<SuperType[ 'mutate' ]>[ 0 ] ): this;
 }
 
-const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TVoicing> => {
+const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TVoicing<InstanceType<SuperType>>> => {
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
   const VoicingClass = DelayedMutate( 'Voicing', VOICING_OPTION_KEYS,
-    class VoicingClass extends InteractiveHighlighting( Type ) implements TVoicing {
+    class VoicingClass extends InteractiveHighlighting( Type ) implements TVoicing<InstanceType<SuperType>> {
 
       // ResponsePacket that holds all the supported responses to be Voiced
       public _voicingResponsePacket!: ResponsePacket;
