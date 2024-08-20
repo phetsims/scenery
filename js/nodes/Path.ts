@@ -45,7 +45,7 @@ export type PathBoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safe
  *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
  *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
  */
-type InputShape = Shape | string | null;
+export type InputShape = Shape | string | null;
 
 /**
  * See InputShape for details, but this type differs in that it only supports a Shape, and any "string" data will

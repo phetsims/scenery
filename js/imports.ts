@@ -119,7 +119,7 @@ export { default as DelayedMutate } from './util/DelayedMutate.js';
 export { default as Image } from './nodes/Image.js';
 export type { ImageOptions } from './nodes/Image.js';
 export { default as Path } from './nodes/Path.js';
-export type { PathOptions, PathBoundsMethod } from './nodes/Path.js';
+export type { PathOptions, PathBoundsMethod, InputShape } from './nodes/Path.js';
 export { default as Text } from './nodes/Text.js';
 export type { TextOptions, TextBoundsMethod } from './nodes/Text.js';
 
