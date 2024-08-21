@@ -68,10 +68,10 @@ class HighlightPath extends Path {
   private _outerHighlightColor: TPaint;
 
   // Emits whenever this highlight changes.
-  public highlightChangedEmitter = new Emitter();
+  public readonly highlightChangedEmitter = new Emitter();
 
   // See option for documentation.
-  public transformSourceNode: Node | null;
+  public readonly transformSourceNode: Node | null;
   private readonly outerLineWidth: number | null;
   private readonly innerLineWidth: number | null;
 
