@@ -135,7 +135,10 @@ class HotkeyManager {
       this.enabledHotkeysProperty.value = enabledHotkeys;
     };
     // Because we can't add duplicate listeners, we create extra closures to have a unique handle for each hotkey
-    const hotkeyRebuildListenerMap = new Map<Hotkey, () => void>(); // eslint-disable-line no-spaced-func
+
+    // eslint-disable-next-line comma-spacing, @stylistic/comma-spacing
+    const hotkeyRebuildListenerMap = new Map<Hotkey,() => void>();
+
     this.availableHotkeysProperty.link( ( newHotkeys, oldHotkeys ) => {
       // Track whether any hotkeys changed. If none did, we don't need to rebuild.
       let hotkeysChanged = false;

@@ -314,7 +314,7 @@ for ( const keyKey in KeyboardUtils ) {
   if ( KeyboardUtils.hasOwnProperty( keyKey ) && typeof KeyboardUtils[ keyKey ] === 'string' ) {
 
     // @ts-expect-error
-    ALL_KEY_CODES.push( KeyboardUtils[ keyKey ] as string );
+    ALL_KEY_CODES.push( KeyboardUtils[ keyKey ] );
   }
 }
 

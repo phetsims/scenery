@@ -907,7 +907,7 @@ function testAssociationAttributeBySetters( assert: Assert, attribute: Associati
   rootNode.addChild( m );
   assert.ok( _.isEqual( m[ associationsArrayName ], options[ associationsArrayName ] ), 'test association object getter' );
   m[ associationRemovalFunction ]( randomAssociationObject );
-  options[ associationsArrayName ]!.splice( options[ associationsArrayName ]!.indexOf( randomAssociationObject ), 1 );
+  options[ associationsArrayName ].splice( options[ associationsArrayName ].indexOf( randomAssociationObject ), 1 );
   assert.ok( _.isEqual( m[ associationsArrayName ], options[ associationsArrayName ] ), 'test association object getter after removal' );
 
   m[ associationsArrayName ] = [];

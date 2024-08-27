@@ -61,8 +61,14 @@ import stepTimer from '../../../axon/js/stepTimer.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const allKeys = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown', 'w', 'a', 's', 'd' ] as const;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const leftRightKeys = [ 'arrowLeft', 'arrowRight', 'a', 'd' ] as const;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const upDownKeys = [ 'arrowUp', 'arrowDown', 'w', 's' ] as const;
 
 // We still want to start drag operations when the shift modifier key is pressed, even though it is not

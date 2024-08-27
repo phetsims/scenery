@@ -294,7 +294,7 @@ export default class GridConstraint extends GridConfigurable( NodeLayoutConstrai
               else {
                 return constraint;
               }
-            } ).filter( constraint => constraint !== null ) as GrowConstraint[];
+            } ).filter( constraint => constraint !== null );
           };
 
           // Find all of the necessary max constraints that are relevant
