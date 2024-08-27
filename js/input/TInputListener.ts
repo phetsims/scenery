@@ -13,6 +13,7 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { Hotkey, SceneryEvent } from '../imports.js';
 
 export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
+export type SceneryNullableListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> | null ) => void;
 
 type TInputListener = {
   interrupt?: () => void;
