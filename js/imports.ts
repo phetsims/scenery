@@ -254,7 +254,7 @@ export { default as animatedPanZoomSingleton } from './listeners/animatedPanZoom
 export { default as HandleDownListener } from './listeners/HandleDownListener.js';
 export { default as KeyboardListener } from './listeners/KeyboardListener.js';
 export type { KeyboardListenerOptions } from './listeners/KeyboardListener.js';
-export { default as KeyboardDragListener } from './listeners/KeyboardDragListener.js';
+export { default as KeyboardDragListener, keyboardDraggingKeys } from './listeners/KeyboardDragListener.js';
 export type { KeyboardDragListenerOptions, KeyboardDragListenerDOMEvent, KeyboardDragListenerCallback, KeyboardDragListenerNullableCallback } from './listeners/KeyboardDragListener.js';
 export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';

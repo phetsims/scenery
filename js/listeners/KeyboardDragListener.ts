@@ -62,8 +62,7 @@ import stepTimer from '../../../axon/js/stepTimer.js';
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const allKeys = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown', 'w', 'a', 's', 'd' ] as const;
+export const keyboardDraggingKeys = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown', 'w', 'a', 's', 'd' ] as const;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const leftRightKeys = [ 'arrowLeft', 'arrowRight', 'a', 'd' ] as const;
@@ -89,7 +88,7 @@ const LEFT_RIGHT_KEY_STRING_PROPERTIES = [ A_KEY_STRING_PROPERTY, D_KEY_STRING_P
 const UP_DOWN_KEY_STRING_PROPERTIES = [ W_KEY_STRING_PROPERTY, S_KEY_STRING_PROPERTY, ARROW_UP_KEY_STRING_PROPERTY, ARROW_DOWN_KEY_STRING_PROPERTY ];
 const ALL_KEY_STRING_PROPERTIES = [ ...LEFT_RIGHT_KEY_STRING_PROPERTIES, ...UP_DOWN_KEY_STRING_PROPERTIES ];
 
-type KeyboardDragListenerKeyStroke = typeof allKeys | typeof leftRightKeys | typeof upDownKeys;
+type KeyboardDragListenerKeyStroke = typeof keyboardDraggingKeys | typeof leftRightKeys | typeof upDownKeys;
 
 // Possible movement types for this KeyboardDragListener. 2D motion ('both') or 1D motion ('leftRight' or 'upDown').
 type KeyboardDragDirection = 'both' | 'leftRight' | 'upDown';
