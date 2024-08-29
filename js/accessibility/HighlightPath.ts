@@ -150,6 +150,7 @@ class HighlightPath extends Path {
 
   /**
    * Mutate both inner and outer Paths to make the stroke dashed by using `lineDash`.
+   * TODO: https://github.com/phetsims/scenery-phet/issues/869 Rename to setDashed
    */
   public makeDashed( dashOn: boolean ): void {
     const lineDash = dashOn ? [ 7, 7 ] : [];
