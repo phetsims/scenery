@@ -12,10 +12,10 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { Shape } from '../../../kite/js/imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { animatedPanZoomSingleton, Color, Node, Path, PathOptions, scenery, TPaint, Trail } from '../imports.js';
+import { animatedPanZoomSingleton, Color, InputShape, Node, Path, PathOptions, scenery, TPaint, Trail } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 // constants
 // default inner and outer strokes for the focus highlight
@@ -99,7 +99,7 @@ class HighlightPath extends Path {
    * @param [shape] - the shape for the focus highlight
    * @param [providedOptions]
    */
-  public constructor( shape: Shape | string | null, providedOptions?: HighlightPathOptions ) {
+  public constructor( shape: InputShape | TReadOnlyProperty<InputShape>, providedOptions?: HighlightPathOptions ) {
 
     const options = optionize<HighlightPathOptions, SelfOptions, PathOptions>()( {
       outerStroke: OUTER_FOCUS_COLOR,
@@ -163,7 +163,7 @@ class HighlightPath extends Path {
    * Update the shape of the child path (inner highlight) and this path (outer highlight). Note for the purposes
    * of chaining the outer Path (this) is returned, not the inner Path.
    */
-  public override setShape( shape: Shape | string | null ): this {
+  public override setShape( shape: InputShape ): this {
     super.setShape( shape );
     this.innerHighlightPath && this.innerHighlightPath.setShape( shape );
     this.highlightChangedEmitter && this.highlightChangedEmitter.emit();
