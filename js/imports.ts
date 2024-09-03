@@ -181,7 +181,7 @@ export { default as InteractiveHighlightingNode } from './accessibility/voicing/
 export type { InteractiveHighlightingNodeOptions } from './accessibility/voicing/nodes/InteractiveHighlightingNode.js';
 export { default as voicingManager } from './accessibility/voicing/voicingManager.js';
 export { default as voicingUtteranceQueue } from './accessibility/voicing/voicingUtteranceQueue.js';
-export { default as Voicing } from './accessibility/voicing/Voicing.js';
+export { default as Voicing, isVoicing } from './accessibility/voicing/Voicing.js';
 export type { VoicingOptions, VoicingNode, SpeakingOptions, TVoicing } from './accessibility/voicing/Voicing.js';
 export { default as ReadingBlockUtterance } from './accessibility/voicing/ReadingBlockUtterance.js';
 export type { ReadingBlockUtteranceOptions } from './accessibility/voicing/ReadingBlockUtterance.js';

@@ -41,7 +41,7 @@ export interface TInteractiveHighlighting<SuperType extends Node = Node> {
 
   interactiveHighlightChangedEmitter: TEmitter;
   readonly isInteractiveHighlightActiveProperty: TReadOnlyProperty<boolean>;
-  readonly isInteractiveHighlighting: boolean;
+  readonly isInteractiveHighlighting: true;
 
   setInteractiveHighlight( interactiveHighlight: Highlight ): void;
 
@@ -170,7 +170,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       /**
        * Whether a Node composes InteractiveHighlighting.
        */
-      public get isInteractiveHighlighting(): boolean {
+      public get isInteractiveHighlighting(): true {
         return true;
       }
 

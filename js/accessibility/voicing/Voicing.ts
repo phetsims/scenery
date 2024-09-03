@@ -179,7 +179,7 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
 
   defaultFocusListener(): void;
 
-  get isVoicing(): boolean;
+  get isVoicing(): true;
 
   clean(): void;
 
@@ -618,7 +618,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       /**
        * Whether a Node composes Voicing.
        */
-      public get isVoicing(): boolean {
+      public get isVoicing(): true {
         return true;
       }
 
@@ -822,6 +822,10 @@ Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
 };
 
 export type VoicingNode = Node & TVoicing;
+
+export function isVoicing( something: IntentionalAny ): something is VoicingNode {
+  return something instanceof Node && ( something as VoicingNode ).isVoicing;
+}
 
 scenery.register( 'Voicing', Voicing );
 export default Voicing;
