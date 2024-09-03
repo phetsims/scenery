@@ -42,16 +42,27 @@ export interface TInteractiveHighlighting<SuperType extends Node = Node> {
   interactiveHighlightChangedEmitter: TEmitter;
   readonly isInteractiveHighlightActiveProperty: TReadOnlyProperty<boolean>;
   readonly isInteractiveHighlighting: boolean;
+
   setInteractiveHighlight( interactiveHighlight: Highlight ): void;
+
   interactiveHighlight: Highlight;
+
   getInteractiveHighlight(): Highlight;
+
   setInteractiveHighlightLayerable( interactiveHighlightLayerable: boolean ): void;
+
   interactiveHighlightLayerable: boolean;
+
   getInteractiveHighlightLayerable(): boolean;
+
   setInteractiveHighlightEnabled( enabled: boolean ): void;
+
   getInteractiveHighlightEnabled(): boolean;
+
   interactiveHighlightEnabled: boolean;
+
   handleHighlightActiveChange(): void;
+
   onChangedInstance( instance: Instance, added: boolean ): void;
 
   // @mixin-protected - made public for use in the mixin only
@@ -680,6 +691,10 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 } );
 
 export type InteractiveHighlightingNode = Node & TInteractiveHighlighting;
+
+export function isInteractiveHighlighting( something: IntentionalAny ): something is InteractiveHighlightingNode {
+  return something instanceof Node && ( something as InteractiveHighlightingNode ).isInteractiveHighlighting;
+}
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
 export default InteractiveHighlighting;

@@ -175,7 +175,7 @@ export { default as Cursor } from './accessibility/reader/Cursor.js';
 export { default as Reader } from './accessibility/reader/Reader.js';
 export { default as KeyStateTracker } from './accessibility/KeyStateTracker.js';
 export { default as globalKeyStateTracker } from './accessibility/globalKeyStateTracker.js';
-export { default as InteractiveHighlighting } from './accessibility/voicing/InteractiveHighlighting.js';
+export { default as InteractiveHighlighting, isInteractiveHighlighting } from './accessibility/voicing/InteractiveHighlighting.js';
 export type { InteractiveHighlightingOptions, TInteractiveHighlighting } from './accessibility/voicing/InteractiveHighlighting.js';
 export { default as InteractiveHighlightingNode } from './accessibility/voicing/nodes/InteractiveHighlightingNode.js';
 export type { InteractiveHighlightingNodeOptions } from './accessibility/voicing/nodes/InteractiveHighlightingNode.js';
