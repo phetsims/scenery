@@ -135,7 +135,7 @@ class HighlightPath extends Path {
     this.addChild( this.innerHighlightPath );
 
     if ( options.dashed ) {
-      this.makeDashed( true );
+      this.setDashed( true );
     }
   }
 
@@ -150,9 +150,8 @@ class HighlightPath extends Path {
 
   /**
    * Mutate both inner and outer Paths to make the stroke dashed by using `lineDash`.
-   * TODO: https://github.com/phetsims/scenery-phet/issues/869 Rename to setDashed
    */
-  public makeDashed( dashOn: boolean ): void {
+  public setDashed( dashOn: boolean ): void {
     const lineDash = dashOn ? [ 7, 7 ] : [];
     this.mutateWithInnerHighlight( {
       lineDash: lineDash
