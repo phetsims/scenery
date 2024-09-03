@@ -259,7 +259,7 @@ export default class Display {
   private _backgroundColor: Color | string | null;
 
   // Used for shortcut animation frame functions
-  private _requestAnimationFrameID: number;
+  private _requestAnimationFrameID: number | null = null;
 
   // Listeners that will be called for every event.
   private _inputListeners: TInputListener[];
@@ -442,7 +442,6 @@ export default class Display {
     this._lastCursor = null;
     this._currentBackgroundCSS = null;
     this._backgroundColor = null;
-    this._requestAnimationFrameID = 0;
     this._input = null;
     this._inputListeners = [];
     this._interactive = options.interactive;
@@ -1340,7 +1339,7 @@ export default class Display {
   }
 
   public cancelUpdateOnRequestAnimationFrame(): void {
-    window.cancelAnimationFrame( this._requestAnimationFrameID );
+    this._requestAnimationFrameID !== null && window.cancelAnimationFrame( this._requestAnimationFrameID );
   }
 
   /**
@@ -2161,6 +2160,8 @@ export default class Display {
     this.descriptionUtteranceQueue.dispose();
 
     this.focusManager && this.focusManager.dispose();
+
+    this.cancelUpdateOnRequestAnimationFrame();
 
     if ( assert ) {
       this._isDisposing = false;
