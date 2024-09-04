@@ -176,6 +176,7 @@ import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
+import SceneryQueryParameters from '../SceneryQueryParameters.js';
 
 let globalIdCounter = 1;
 
@@ -885,24 +886,24 @@ class Node extends ParallelDOM {
     this._rendererSummary.summaryChange( RendererSummary.bitmaskAll, node._rendererSummary.bitmask );
 
     node._parents.push( this );
-    if ( assert && window.phet?.chipper?.queryParameters && isFinite( phet.chipper.queryParameters.parentLimit ) ) {
+    if ( assert && window.phet?.chipper?.queryParameters && isFinite( SceneryQueryParameters.parentLimit ) ) {
       const parentCount = node._parents.length;
       if ( maxParentCount < parentCount ) {
         maxParentCount = parentCount;
         console.log( `Max Node parents: ${maxParentCount}` );
-        assert( maxParentCount <= phet.chipper.queryParameters.parentLimit,
-          `parent count of ${maxParentCount} above ?parentLimit=${phet.chipper.queryParameters.parentLimit}` );
+        assert( maxParentCount <= SceneryQueryParameters.parentLimit,
+          `parent count of ${maxParentCount} above ?parentLimit=${SceneryQueryParameters.parentLimit}` );
       }
     }
 
     this._children.splice( index, 0, node );
-    if ( assert && window.phet?.chipper?.queryParameters && isFinite( phet.chipper.queryParameters.childLimit ) ) {
+    if ( assert && window.phet?.chipper?.queryParameters && isFinite( SceneryQueryParameters.childLimit ) ) {
       const childCount = this._children.length;
       if ( maxChildCount < childCount ) {
         maxChildCount = childCount;
         console.log( `Max Node children: ${maxChildCount}` );
-        assert( maxChildCount <= phet.chipper.queryParameters.childLimit,
-          `child count of ${maxChildCount} above ?childLimit=${phet.chipper.queryParameters.childLimit}` );
+        assert( maxChildCount <= SceneryQueryParameters.childLimit,
+          `child count of ${maxChildCount} above ?childLimit=${SceneryQueryParameters.childLimit}` );
       }
     }
 
