@@ -1,4 +1,4 @@
-// Copyright 2016-2024, University of Colorado Boulder
+// Copyright 2024, University of Colorado Boulder
 
 /**
  * Query parameters for the scenery library.
