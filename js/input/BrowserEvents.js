@@ -23,6 +23,10 @@ const BrowserEvents = {
   // caused by user interaction.
   blockFocusCallbacks: false,
 
+  // True while Scenery is dispatching focus and blur related events. Scenery (PDOMTree) needs to restore focus
+  // after operations, but that can be very buggy while focus events are already being handled.
+  dispatchingFocusEvents: false,
+
   /**
    * Adds a Display to the list of displays that will be notified of input events.
    * @public
@@ -763,11 +767,15 @@ const BrowserEvents = {
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
 
+    BrowserEvents.dispatchingFocusEvents = true;
+
     // Update state related to focus immediately and allowing for reentrancy for focus state
     // that must match the browser's focus state.
     FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent, true );
 
     BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusIn', true );
+
+    BrowserEvents.dispatchingFocusEvents = false;
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },
@@ -778,11 +786,14 @@ const BrowserEvents = {
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
 
+    BrowserEvents.dispatchingFocusEvents = true;
+
     // Update state related to focus immediately and allowing for reentrancy for focus state
-    // that must match the browser's focus state.
     FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent, false );
 
     BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusOut', true );
+
+    BrowserEvents.dispatchingFocusEvents = false;
 
     sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
   },

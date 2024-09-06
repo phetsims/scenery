@@ -402,7 +402,11 @@ const PDOMTree = {
    * @private
    */
   afterOp( focusedNode ) {
-    focusedNode && focusedNode.focusable && focusedNode.focus();
+
+    // If Scenery is in the middle of dispatching focus events, it is buggy to change focus again internally.
+    if ( !BrowserEvents.dispatchingFocusEvents ) {
+      focusedNode && focusedNode.focusable && focusedNode.focus();
+    }
     BrowserEvents.blockFocusCallbacks = false;
   },
 
