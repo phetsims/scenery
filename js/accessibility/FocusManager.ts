@@ -238,6 +238,10 @@ export default class FocusManager {
         // will be null if it is not in the PDOM or if it is undefined
         const relatedTargetTrail = display._input!.getRelatedTargetTrail( event );
 
+        // If there is a related target, set focus to the element that will receive focus right away. This prevents
+        // the pdomFocus from being set to null. That is important for PDOMTree operations that will restore focus
+        // to the next element after the PDOM is re-rendered.
+        // See https://github.com/phetsims/scenery/issues/1296.
         if ( relatedTargetTrail && relatedTargetTrail.lastNode().focusable ) {
           FocusManager.pdomFocus = new Focus( display, PDOMInstance.guessVisualTrail( relatedTargetTrail, display.rootNode ) );
         }
