@@ -315,10 +315,8 @@ export default class HighlightOverlay implements TOverlay {
 
       // if using a focus highlight from another node, we will track that node's transform instead of the focused node
       if ( highlight instanceof HighlightPath ) {
-        const highlightPath = highlight;
-        assert && assert( highlight.shape !== null, 'The shape of the Node highlight should be set by now. Does it have bounds?' );
 
-        if ( highlightPath.transformSourceNode ) {
+        if ( highlight.transformSourceNode ) {
           trailToTrack = highlight.getUniqueHighlightTrail( this.trail );
         }
       }
