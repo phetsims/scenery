@@ -98,6 +98,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       // away another IndexedNode state set. See https://github.com/phetsims/ph-scale/issues/227
       const children = nodeParent.children;
       const currentIndex = nodeParent.indexOfChild( node );
+      assert && assert( stateObject.index < children.length, 'index goes beyond number of children' );
       children[ currentIndex ] = children[ stateObject.index ];
       children[ stateObject.index ] = node;
       nodeParent.setChildren( children );
