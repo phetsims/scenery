@@ -41,4 +41,4 @@ const sceneryQueryParameters = window.hasOwnProperty( 'QueryStringMachine' ) ?
 
 scenery.register( 'sceneryQueryParameters', sceneryQueryParameters );
 
-export default sceneryQueryParameters;
+export default sceneryQueryParameters as QSMParsedParameters<typeof schema>;
