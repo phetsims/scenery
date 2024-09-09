@@ -8,7 +8,8 @@
 
 import scenery from './scenery.js';
 
-const sceneryQueryParameters = QueryStringMachine.getAll( {
+// All scenery query parameters MUST have a default value, since we do not always support QSM as a global.
+const schema = {
 
   /**
    * If this is a finite number AND assertions are enabled, it will track maximum Node parent counts, and
@@ -29,7 +30,14 @@ const sceneryQueryParameters = QueryStringMachine.getAll( {
     defaultValue: Number.POSITIVE_INFINITY,
     public: false
   }
-} );
+} satisfies Record<string, QueryStringMachineSchema>;
+
+// Scenery doesn't depend on QSM, so be graceful here, and take default values.
+const sceneryQueryParameters = window.hasOwnProperty( 'QueryStringMachine' ) ?
+                               QueryStringMachine.getAll( schema ) :
+                               ( Object.keys( schema ) as ( keyof typeof schema )[] ).map( key => {
+                                 return { [ key ]: schema[ key ].defaultValue };
+                               } );
 
 scenery.register( 'sceneryQueryParameters', sceneryQueryParameters );
 
