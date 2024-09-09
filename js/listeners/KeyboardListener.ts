@@ -69,6 +69,10 @@
  * 'shift+tab' in the array to observe 'shift+tab' presses. If you provide 'tab' alone, the callback will not fire
  * if 'shift' is also pressed.
  *
+ * Beware of "key ghosting". Some key combinations are not possible on certain keyboards. For example, some keyboards
+ * cannot press all arrow keys at the same time. Be sure to test your key combinations on a variety of keyboards.
+ * See https://github.com/phetsims/scenery/issues/1655.
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
