@@ -113,6 +113,15 @@
  * it is not necessary to use that option unless the desired tag name is  something other than 'div'.
  *
  * --------------------------------------------------------------------------------------------------------------------
+ * #Input listeners
+ * ParallelDOM is the primary way we listen to keyboard events in scenery. See TInputListener for supported keyboard
+ * events that you can add. Note that the input events from the DOM that your ParallelDOM instance will receive is
+ * dependent on what the DOM Element is (see tagName).
+ *
+ * NOTE: Be VERY careful about mutating ParallelDOM content in input listeners, this can result in events being dropped.
+ * For example, if you press enter on a 'button', you would expect a keydown event followed by a click event, but if the
+ * keydown listener changes the tagName to 'div', the click event will not occur.
+ * --------------------------------------------------------------------------------------------------------------------
  *
  * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. To understand the
  * PDOM more, see PDOMPeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
