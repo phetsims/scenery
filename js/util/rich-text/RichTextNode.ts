@@ -1,7 +1,7 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
 /**
- * A leaf node element in the RichText, which will display a Node (e.g. with the `nodes` feature)
+ * A leaf node element in the RichText, which will display a Node (e.g. with the `nodes` or `tags` feature)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

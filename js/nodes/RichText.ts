@@ -21,6 +21,7 @@
  * - <span> tags with a dir="ltr" / dir="rtl" attribute
  * - <br> for explicit line breaks
  * - <node id="id"> for embedding a Node into the text (pass in { nodes: { id: NODE } }), with optional align attribute
+ * - Custom Scenery wrapping around arbitrary tags, e.g. <blur>...</blur>, pass in { tags: { blur: ... } }, see below
  * - Unicode bidirectional marks (present in PhET strings) for full RTL support
  * - CSS style="..." attributes, with color and font settings, see https://github.com/phetsims/scenery/issues/807
  *
@@ -101,6 +102,7 @@ const RICH_TEXT_OPTION_KEYS = [
   'linkEventsHandled',
   'links',
   'nodes',
+  'tags',
   'replaceNewlines',
   'align',
   'leading',
@@ -222,6 +224,58 @@ type SelfOptions = {
   // the text".
   nodes?: Record<string, Node>;
 
+  // A map of string => Node replacement function ( node: Node ) => Node, where RichText will "render" line content
+  // inside the tag, and then pass it to the function to replace the content of the Node. Each tag function should
+  // return a new Node.
+  //
+  // For example:
+  //
+  //   new RichText( 'There is <blue>blue text</blue> and <blur>blurry text</blur>', {
+  //     tags: {
+  //       blur: node => new Node( { children: [ node ], filters: [ new GaussianBlur( 1.5 ) ] } ),
+  //       blue: node => new Node( { children: [ Rectangle.bounds( node.bounds, { fill: '#88f' } ), node ] } )
+  //     }
+  //   } )
+  //
+  // NOTE: This does NOT affect the layout or bounds of the resulting content, since the layout is done BEFORE this
+  // wrapping is done. If we ever need the wrapping to be done BEFORE, the wrapping will need to be called many times
+  // when line-wrapping is done.
+  //
+  // Here is a more in-depth example with many elements:
+  //
+  //   new RichText( 'This is a test with <blue>blue</blue> text being <blue>wrapped in a blue color that should support line wrap</blue>. Text can also be <translucent>more transparent</translucent>, or can be <blur>blurred</blur> or have <shadow>drop shadow</shadow>. Tags can be <blue>repeated or <blur>nested</blur></blue>', {
+  //     lineWrap: 300,
+  //     tags: {
+  //       blur: node => {
+  //         return new Node( {
+  //           children: [ node ],
+  //           filters: [ new GaussianBlur( 1.5 ) ]
+  //         } );
+  //       },
+  //       shadow: node => {
+  //         return new Node( {
+  //           children: [ node ],
+  //           filters: [ new DropShadow( new Vector2( 2, 1 ), 2, 'red' ) ]
+  //         } );
+  //       },
+  //       translucent: node => {
+  //         return new Node( {
+  //           children: [ node ],
+  //           opacity: 0.5
+  //         } );
+  //       },
+  //       blue: node => {
+  //         return new Node( {
+  //           children: [
+  //             Rectangle.bounds( node.bounds.dilated( 1 ), { fill: '#88f' } ),
+  //             node
+  //           ]
+  //         } );
+  //       }
+  //     }
+  //   } )
+  tags?: Record<string, ( node: Node ) => Node>;
+
   // Will replace newlines (`\n`) with <br>, similar to the old MultiLineText (defaults to false)
   replaceNewlines?: boolean;
 
@@ -323,6 +377,7 @@ export default class RichText extends WidthSizable( Node ) {
   private _links: RichTextLinks = {};
 
   private _nodes: Record<string, Node> = {};
+  private _tags: Record<string, ( node: Node ) => Node> = {};
 
   private _replaceNewlines = false;
   private _align: RichTextAlign = 'left';
@@ -1016,6 +1071,16 @@ export default class RichText extends WidthSizable( Node ) {
           } ) );
         }
       }
+
+      if ( this._tags && this._tags[ element.tagName ] && node.bounds.isValid() ) {
+        const originalNode = node;
+        const originalBounds = node.bounds;
+        node = RichTextNode.pool.create( this._tags[ element.tagName ]( node ) );
+        if ( originalNode !== node ) {
+          node.localBounds = originalBounds;
+        }
+      }
+
       sceneryLog && sceneryLog.RichText && sceneryLog.pop();
     }
 
@@ -1527,6 +1592,25 @@ export default class RichText extends WidthSizable( Node ) {
   public set nodes( value: Record<string, Node> ) { this.setNodes( value ); }
 
   public get nodes(): Record<string, Node> { return this.getNodes(); }
+
+  public setTags( tags: Record<string, ( node: Node ) => Node> ): this {
+    assert && assert( Object.getPrototypeOf( tags ) === Object.prototype );
+
+    if ( this._tags !== tags ) {
+      this._tags = tags;
+      this.rebuildRichText();
+    }
+
+    return this;
+  }
+
+  public getTags(): Record<string, ( node: Node ) => Node> {
+    return this._tags;
+  }
+
+  public set tags( value: Record<string, ( node: Node ) => Node> ) { this.setTags( value ); }
+
+  public get tags(): Record<string, ( node: Node ) => Node> { return this.getTags(); }
 
   /**
    * Sets whether newlines are replaced with <br>
