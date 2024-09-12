@@ -816,10 +816,12 @@ export default class HighlightOverlay implements TOverlay {
   private onInteractiveHighlightChange(): void {
 
     if ( assert ) {
-      const interactiveHighlightNode = this.node as InteractiveHighlightingNode;
-      const lockedPointerFocus = this.display.focusManager.lockedPointerFocusProperty.value;
-      assert( interactiveHighlightNode || ( lockedPointerFocus && lockedPointerFocus.trail.lastNode() === this.node ),
-        'Update should only be necessary if Node is activated with a Pointer or pointer focus is locked during interaction' );
+      assert && assert( isInteractiveHighlighting( this.node ) );
+      if ( isInteractiveHighlighting( this.node ) ) {
+        const lockedPointerFocus = this.display.focusManager.lockedPointerFocusProperty.value;
+        assert && assert( this.node || ( lockedPointerFocus && lockedPointerFocus.trail.lastNode() === this.node ),
+          'Update should only be necessary if Node is activated with a Pointer or pointer focus is locked during interaction' );
+      }
     }
 
     // Prefer the trail to the 'locked' highlight
