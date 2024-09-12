@@ -81,7 +81,9 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
 
 export type TReadingBlock<SuperType extends Node = Node> = {
   readingBlockActiveHighlightChangedEmitter: TEmitter;
-  get isReadingBlock(): boolean;
+
+  // Prefer exported function isReadingBlock() for better TypeScript support
+  get _isReadingBlock(): true;
   setReadingBlockTagName( tagName: string | null ): void;
   readingBlockTagName: string | null;
   getReadingBlockTagName(): string | null;
@@ -169,7 +171,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
       /**
        * Whether a Node composes ReadingBlock.
        */
-      public get isReadingBlock(): boolean {
+      public get _isReadingBlock(): true {
         return true;
       }
 
@@ -451,6 +453,10 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
 
 // Export a type that lets you check if your Node is composed with ReadingBlock
 export type ReadingBlockNode = Node & TReadingBlock;
+
+export function isReadingBlock( something: IntentionalAny ): something is ReadingBlockNode {
+  return something instanceof Node && ( something as ReadingBlockNode )._isReadingBlock;
+}
 
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;

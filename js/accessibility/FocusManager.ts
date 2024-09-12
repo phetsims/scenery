@@ -33,8 +33,7 @@ import Property from '../../../axon/js/Property.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Utterance from '../../../utterance-queue/js/Utterance.js';
-import { Display, Focus, FocusDisplayedController, Node, PDOMInstance, PDOMUtils, ReadingBlockUtterance, scenery, voicingManager } from '../imports.js';
-import { InteractiveHighlightingNode } from './voicing/InteractiveHighlighting.js';
+import { Display, Focus, FocusDisplayedController, isInteractiveHighlighting, Node, PDOMInstance, PDOMUtils, ReadingBlockUtterance, scenery, voicingManager } from '../imports.js';
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 
@@ -257,10 +256,10 @@ export default class FocusManager {
 
   // Listener to update the "active" highlight state for an interactiveHighlightingNode
   private onPointerFocusChange( pointerFocus: Focus | null, oldFocus: Focus | null ): void {
-    const focusNode = pointerFocus?.trail.lastNode() as InteractiveHighlightingNode;
-    focusNode && focusNode.isInteractiveHighlighting && focusNode.handleHighlightActiveChange();
-    const oldFocusNode = oldFocus?.trail.lastNode() as InteractiveHighlightingNode;
-    oldFocusNode && oldFocusNode.isInteractiveHighlighting && oldFocusNode.handleHighlightActiveChange();
+    const focusNode = pointerFocus?.trail.lastNode();
+    focusNode && isInteractiveHighlighting( focusNode ) && focusNode.handleHighlightActiveChange();
+    const oldFocusNode = oldFocus?.trail.lastNode();
+    oldFocusNode && isInteractiveHighlighting( oldFocusNode ) && oldFocusNode.handleHighlightActiveChange();
   }
 
   /**

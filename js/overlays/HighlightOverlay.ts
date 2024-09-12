@@ -12,9 +12,9 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { ActivatedReadingBlockHighlight, Display, Focus, FocusManager, HighlightFromNode, HighlightPath, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, FocusManager, HighlightFromNode, HighlightPath, isInteractiveHighlighting, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
 import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
-import { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
+import { isReadingBlock, ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import TProperty from '../../../axon/js/TProperty.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
@@ -396,7 +396,7 @@ export default class HighlightOverlay implements TOverlay {
     );
 
     // sanity check that our Node actually uses InteractiveHighlighting
-    assert && assert( node.isInteractiveHighlighting, 'Node does not support any kind of interactive highlighting.' );
+    assert && assert( isInteractiveHighlighting( node ), 'Node does not support any kind of interactive highlighting.' );
     node.interactiveHighlightChangedEmitter.addListener( this.interactiveHighlightListener );
 
     // handle changes to the highlight while it is active - Since the highlight can fall back to the focus highlight
@@ -415,44 +415,47 @@ export default class HighlightOverlay implements TOverlay {
   private activateReadingBlockHighlight( trail: Trail ): void {
     this.readingBlockTrail = trail;
 
-    const readingBlockNode = trail.lastNode() as ReadingBlockNode;
-    assert && assert( readingBlockNode.isReadingBlock,
+    const node = trail.lastNode();
+    assert && assert( isReadingBlock( node ),
       'should not activate a reading block highlight for a Node that is not a ReadingBlock' );
-    this.activeReadingBlockNode = readingBlockNode;
+    if ( isReadingBlock( node ) ) { // For TypeScript casting
 
-    const readingBlockHighlight = this.activeReadingBlockNode.readingBlockActiveHighlight;
+      this.activeReadingBlockNode = node;
 
-    this.addedReadingBlockHighlight = readingBlockHighlight;
+      const readingBlockHighlight = this.activeReadingBlockNode.readingBlockActiveHighlight;
 
-    if ( readingBlockHighlight === 'invisible' ) {
-      // nothing to draw
+      this.addedReadingBlockHighlight = readingBlockHighlight;
+
+      if ( readingBlockHighlight === 'invisible' ) {
+        // nothing to draw
+      }
+      else if ( readingBlockHighlight instanceof Shape ) {
+        this.readingBlockHighlightPath.setShape( readingBlockHighlight );
+        this.readingBlockHighlightPath.visible = true;
+      }
+      else if ( readingBlockHighlight instanceof Node ) {
+
+        // node mode
+        this.readingBlockHighlightNode.addChild( readingBlockHighlight );
+      }
+      else {
+
+        // bounds mode
+        this.readingBlockHighlightPath.setShapeFromNode( this.activeReadingBlockNode, this.readingBlockTrail );
+        this.readingBlockHighlightPath.visible = true;
+      }
+
+      // update the highlight if the transform for the Node ever changes
+      this.readingBlockTransformTracker = new TransformTracker( this.readingBlockTrail, {
+        isStatic: true
+      } );
+      this.readingBlockTransformTracker.addListener( this.readingBlockTransformListener );
+
+      // update the highlight if it is changed on the Node while active
+      this.activeReadingBlockNode.readingBlockActiveHighlightChangedEmitter.addListener( this.readingBlockHighlightChangeListener );
+
+      this.readingBlockTransformDirty = true;
     }
-    else if ( readingBlockHighlight instanceof Shape ) {
-      this.readingBlockHighlightPath.setShape( readingBlockHighlight );
-      this.readingBlockHighlightPath.visible = true;
-    }
-    else if ( readingBlockHighlight instanceof Node ) {
-
-      // node mode
-      this.readingBlockHighlightNode.addChild( readingBlockHighlight );
-    }
-    else {
-
-      // bounds mode
-      this.readingBlockHighlightPath.setShapeFromNode( this.activeReadingBlockNode, this.readingBlockTrail );
-      this.readingBlockHighlightPath.visible = true;
-    }
-
-    // update the highlight if the transform for the Node ever changes
-    this.readingBlockTransformTracker = new TransformTracker( this.readingBlockTrail, {
-      isStatic: true
-    } );
-    this.readingBlockTransformTracker.addListener( this.readingBlockTransformListener );
-
-    // update the highlight if it is changed on the Node while active
-    this.activeReadingBlockNode.readingBlockActiveHighlightChangedEmitter.addListener( this.readingBlockHighlightChangeListener );
-
-    this.readingBlockTransformDirty = true;
   }
 
   /**
@@ -515,13 +518,12 @@ export default class HighlightOverlay implements TOverlay {
       activeNode.focusHighlightChangedEmitter.removeListener( this.focusHighlightListener );
     }
 
-    const activeInteractiveHighlightingNode = activeNode as InteractiveHighlightingNode;
-    if ( activeInteractiveHighlightingNode.isInteractiveHighlighting ) {
-      if ( activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
-        activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
+    if ( isInteractiveHighlighting( activeNode ) ) {
+      if ( activeNode.interactiveHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
+        activeNode.interactiveHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
       }
-      if ( activeInteractiveHighlightingNode.focusHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
-        activeInteractiveHighlightingNode.focusHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
+      if ( activeNode.focusHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
+        activeNode.focusHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
       }
     }
 
@@ -757,9 +759,11 @@ export default class HighlightOverlay implements TOverlay {
     // only activate a new highlight if PDOM focus highlights are not displayed, see JSDoc
     let activated = false;
     if ( newTrail && !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
-      const node = newTrail.lastNode() as ReadingBlockNode;
+      const node = newTrail.lastNode();
 
-      if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
+      // TODO: Is this logic change ok? https://github.com/phetsims/scenery/issues/1653
+      if ( ( isReadingBlock( node ) && this.readingBlockHighlightsVisibleProperty.value ) ||
+           ( !isReadingBlock( node ) && isInteractiveHighlighting( node ) && this.interactiveHighlightsVisibleProperty.value ) ) {
         this.activateInteractiveHighlight( newTrail, node );
         activated = true;
       }

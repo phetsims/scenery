@@ -41,7 +41,9 @@ export interface TInteractiveHighlighting<SuperType extends Node = Node> {
 
   interactiveHighlightChangedEmitter: TEmitter;
   readonly isInteractiveHighlightActiveProperty: TReadOnlyProperty<boolean>;
-  readonly isInteractiveHighlighting: true;
+
+  // Prefer exported function isInteractiveHighlighting() for better TypeScript support
+  readonly _isInteractiveHighlighting: true;
 
   setInteractiveHighlight( interactiveHighlight: Highlight ): void;
 
@@ -170,7 +172,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       /**
        * Whether a Node composes InteractiveHighlighting.
        */
-      public get isInteractiveHighlighting(): true {
+      public get _isInteractiveHighlighting(): true {
         return true;
       }
 
@@ -346,7 +348,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 
         // If there is an ancestor that is a group focus highlight that is composed with InteractiveHighlight (
         // (should activate with pointer input)...
-        const groupHighlightNode = event.trail.nodes.find( node => ( node.groupFocusHighlight && ( node as InteractiveHighlightingNode ).isInteractiveHighlighting ) );
+        const groupHighlightNode = event.trail.nodes.find( node => ( node.groupFocusHighlight && isInteractiveHighlighting( node ) ) );
         if ( groupHighlightNode ) {
 
           // trail to the group highlight Node
@@ -660,7 +662,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         // speak the content for this Node
         let descendantsUseVoicing = false;
         for ( let i = 0; i < childToLeafNodes.length; i++ ) {
-          if ( ( childToLeafNodes[ i ] as InteractiveHighlightingNode ).isInteractiveHighlighting ) {
+          if ( isInteractiveHighlighting( childToLeafNodes[ i ] ) ) {
             descendantsUseVoicing = true;
             break;
           }
@@ -693,7 +695,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 export type InteractiveHighlightingNode = Node & TInteractiveHighlighting;
 
 export function isInteractiveHighlighting( something: IntentionalAny ): something is InteractiveHighlightingNode {
-  return something instanceof Node && ( something as InteractiveHighlightingNode ).isInteractiveHighlighting;
+  return something instanceof Node && ( something as InteractiveHighlightingNode )._isInteractiveHighlighting;
 }
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
