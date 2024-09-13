@@ -761,7 +761,6 @@ export default class HighlightOverlay implements TOverlay {
     if ( newTrail && !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
 
-      // TODO: Is this logic change ok? https://github.com/phetsims/scenery/issues/1653
       if ( ( isReadingBlock( node ) && this.readingBlockHighlightsVisibleProperty.value ) ||
            ( !isReadingBlock( node ) && isInteractiveHighlighting( node ) && this.interactiveHighlightsVisibleProperty.value ) ) {
         this.activateInteractiveHighlight( newTrail, node );
