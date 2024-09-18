@@ -13,7 +13,6 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
-import Tandem from '../../../tandem/js/Tandem.js';
 import { MultiListener, MultiListenerOptions, MultiListenerPress, Node, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
@@ -73,9 +72,7 @@ class PanZoomListener extends MultiListener {
     this._targetBounds = options.targetBounds || targetNode.globalBounds.copy();
     this._targetScale = options.targetScale;
 
-    // When generating a PhET-iO API, the specific bounds of the window should be excluded from the initial state
-    // so that the initial state part of the API doesn't depend on the window size.
-    this.sourceFramePanBoundsProperty = new Property( Tandem.API_GENERATION ? new Bounds2( 0, 0, 0, 0 ) : this._panBounds, {
+    this.sourceFramePanBoundsProperty = new Property( this._panBounds, {
       tandem: options.tandem?.createTandem( 'sourceFramePanBoundsProperty' ),
       phetioReadOnly: true,
       phetioValueType: Bounds2.Bounds2IO
@@ -168,11 +165,7 @@ class PanZoomListener extends MultiListener {
   public setPanBounds( panBounds: Bounds2 ): void {
     this._panBounds = panBounds;
 
-    // When generating a PhET-iO API, the specific bounds of the window should be excluded from the initial state
-    // so that the initial state part of the API doesn't depend on the window size.
-    if ( !Tandem.API_GENERATION ) {
-      this.sourceFramePanBoundsProperty.set( this._panBounds );
-    }
+    this.sourceFramePanBoundsProperty.set( this._panBounds );
     this.correctReposition();
   }
 
