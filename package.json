@@ -40,6 +40,18 @@
       "LineBreaker": "readonly",
       "sceneryLog": "readonly",
       "he": "readonly"
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/*.ts"
+        ],
+        "parserOptions": {
+          "project": [
+            "../scenery/tsconfig.json"
+          ]
+        }
+      }
+    ]
   }
 }

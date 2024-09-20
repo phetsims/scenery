@@ -5,5 +5,10 @@
     "images/**/*",
     "mipmaps/**/*",
     "sounds/**/*"
+  ],
+  "references": [
+    {
+      "path": "../chipper/tsconfig/buildjson"
+    }
   ]
 }
