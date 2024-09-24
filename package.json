@@ -40,18 +40,6 @@
       "LineBreaker": "readonly",
       "sceneryLog": "readonly",
       "he": "readonly"
-    },
-    "overrides": [
-      {
-        "files": [
-          "**/*.ts"
-        ],
-        "parserOptions": {
-          "project": [
-            "../chipper/tsconfig/eslint-all/tsconfig.json"
-          ]
-        }
-      }
-    ]
+    }
   }
 }
