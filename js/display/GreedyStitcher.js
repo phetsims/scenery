@@ -114,7 +114,6 @@ function getLastCompatibleExternalDrawable( interval ) {
 
     let drawable = firstDrawable;
 
-    // TODO: https://github.com/phetsims/chipper/issues/1451
     while ( true ) {
       const nextDrawable = drawable.nextDrawable;
 
@@ -330,7 +329,7 @@ class GreedyStitcher extends Stitcher {
       let isFirst = true;
 
       // separate our new-drawable linked-list into sub-blocks that we will process individually
-      while ( true ) { // TODO: https://github.com/phetsims/chipper/issues/1451
+      while ( true ) {
         const nextDrawable = drawable.nextDrawable;
         const isLast = nextDrawable === interval.drawableAfter;
 
