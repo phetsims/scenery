@@ -15,10 +15,6 @@ export default [
     rules: {
       'no-bitwise': 'off'
     },
-    ignores: [
-      'js/display/swash/pkg',
-      'js/display/guillotiere/pkg'
-    ],
     languageOptions: {
       globals: {
         himalaya: 'readonly',
@@ -27,5 +23,20 @@ export default [
         he: 'readonly'
       }
     }
+  },
+  {
+    files: [
+      'tests/**/*.html',
+      'examples/**/*.html'
+    ],
+    rules: {
+      'phet/bad-sim-text': 'off'
+    }
+  },
+  {
+    ignores: [
+      'js/display/swash/pkg',
+      'js/display/guillotiere/pkg'
+    ]
   }
 ];
