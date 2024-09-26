@@ -7,10 +7,10 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import parent from '../chipper/eslint/phet-library.eslint.config.mjs';
+import phetLibraryEslintConfig from '../chipper/eslint/phet-library.eslint.config.mjs';
 
 export default [
-  ...parent,
+  ...phetLibraryEslintConfig,
   {
     rules: {
       'no-bitwise': 'off'
