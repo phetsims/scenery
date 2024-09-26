@@ -774,7 +774,7 @@ if ( PixelComparisonTestUtils.platformSupportsPixelComparisonTests() ) {
       // add handler after creating the image
       img.onload = () => {
         // a bit of extra time afterwards
-        setTimeout( () => { // eslint-disable-line bad-sim-text
+        setTimeout( () => { // eslint-disable-line phet/bad-sim-text
           display.updateDisplay();
 
           asyncCallback();

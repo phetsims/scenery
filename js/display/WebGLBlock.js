@@ -227,7 +227,7 @@ class WebGLBlock extends FittedBlock {
 
     // TODO: Can we move this to before the update() step? Could happen same-frame in that case. https://github.com/phetsims/scenery/issues/1581
     // NOTE: We don't want to rely on a common timer, so we're using the built-in form on purpose.
-    window.setTimeout( function() { // eslint-disable-line bad-sim-text
+    window.setTimeout( function() { // eslint-disable-line phet/bad-sim-text
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `Executing delayed rebuilding #${this.id}` );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
       self.rebuildCanvas();

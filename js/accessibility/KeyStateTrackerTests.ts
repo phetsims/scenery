@@ -39,7 +39,7 @@ QUnit.module( 'KeyStateTracker', {
 
     // step the stepTimer, because utteranceQueue runs on stepTimer
     let previousTime = Date.now();
-    intervalID = window.setInterval( () => { // eslint-disable-line bad-sim-text
+    intervalID = window.setInterval( () => { // eslint-disable-line phet/bad-sim-text
       const currentTime = Date.now();
       const timeStep = ( currentTime - previousTime ) / 1000; // convert to seconds
       previousTime = currentTime;

@@ -118,7 +118,7 @@ class Reader {
             // a small delay will allow the utterance to be read in full, even if
             // added after cancel().
             if ( this.speaking ) {
-              setTimeout( () => { readPolite(); }, 2000 ); // eslint-disable-line bad-sim-text
+              setTimeout( () => { readPolite(); }, 2000 ); // eslint-disable-line phet/bad-sim-text
             }
             else {
               this.synth.speak( utterThis );

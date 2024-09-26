@@ -1303,7 +1303,7 @@ export default class Display {
    */
   public resizeOnWindowResize(): void {
     const resizer = () => {
-      this.setWidthHeight( window.innerWidth, window.innerHeight ); // eslint-disable-line bad-sim-text
+      this.setWidthHeight( window.innerWidth, window.innerHeight ); // eslint-disable-line phet/bad-sim-text
     };
     window.addEventListener( 'resize', resizer );
     resizer();
@@ -1856,8 +1856,8 @@ export default class Display {
    */
   public iframeDebug(): void {
     const iframe = document.createElement( 'iframe' );
-    iframe.width = '' + window.innerWidth; // eslint-disable-line bad-sim-text
-    iframe.height = '' + window.innerHeight; // eslint-disable-line bad-sim-text
+    iframe.width = '' + window.innerWidth; // eslint-disable-line phet/bad-sim-text
+    iframe.height = '' + window.innerHeight; // eslint-disable-line phet/bad-sim-text
     iframe.style.position = 'absolute';
     iframe.style.left = '0';
     iframe.style.top = '0';

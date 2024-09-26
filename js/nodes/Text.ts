@@ -25,7 +25,7 @@ import { combineOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 
-const STRING_PROPERTY_NAME = 'stringProperty'; // eslint-disable-line bad-sim-text
+const STRING_PROPERTY_NAME = 'stringProperty'; // eslint-disable-line phet/bad-sim-text
 
 // constants
 const TEXT_OPTION_KEYS = [

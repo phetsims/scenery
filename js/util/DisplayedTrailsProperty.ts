@@ -30,7 +30,7 @@ export type DisplayedTrailsPropertyOptions = {
   // node, we will follow that order).
   // This essentially tracks the following:
   //
-  // REVIEW: I'd actually add [a-z]?Pdom[A-Z] to bad-sim-text if you're alright with that. Close to https://github.com/phetsims/chipper/blob/f56c273970f22f857bc8f5bd0148f256534a702f/eslint/rules/bad-sim-text.js#L35-L36
+  // REVIEW: I'd actually add [a-z]?Pdom[A-Z] to phet/bad-sim-text if you're alright with that. Close to https://github.com/phetsims/chipper/blob/f56c273970f22f857bc8f5bd0148f256534a702f/eslint/rules/bad-sim-text.js#L35-L36
   //
   // REVIEW: Aren't these boolean values opposite? followPDOMOrder:true should respect pdomOrder. Also, it isn't clear
   //         from the doc how you ask for "all trails, visual or PDOM". Is that part of the featureset? I believe

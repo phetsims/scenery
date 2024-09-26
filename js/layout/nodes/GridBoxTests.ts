@@ -1,7 +1,7 @@
 // Copyright 2024, University of Colorado Boulder
 
 // I want to use spread to work with options easily in this testing file.
-/* eslint-disable no-object-spread-on-non-literals */
+/* eslint-disable phet/no-object-spread-on-non-literals */
 
 import LayoutTestUtils from '../LayoutTestUtils.js';
 import Rectangle from '../../nodes/Rectangle.js';

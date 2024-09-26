@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-/* eslint-env node */
+/* global require:readonly */
 
 const http = require( 'http' );
 const fs = require( 'fs' );

@@ -1709,7 +1709,7 @@ export default class ParallelDOM extends PhetioObject {
       if ( this._focusHighlightLayerable ) {
 
         // if focus highlight is layerable, it must be a node in the scene graph
-        assert && assert( focusHighlight instanceof Node ); // eslint-disable-line no-simple-type-checking-assertions
+        assert && assert( focusHighlight instanceof Node ); // eslint-disable-line phet/no-simple-type-checking-assertions
 
         // the highlight starts off invisible, HighlightOverlay will make it visible when this Node has DOM focus
         ( focusHighlight as Node ).visible = false;

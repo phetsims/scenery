@@ -279,7 +279,7 @@ export default class Color {
       // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
       // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
       // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-      let alpha = this.a.toFixed( 20 ); // eslint-disable-line bad-sim-text
+      let alpha = this.a.toFixed( 20 ); // eslint-disable-line phet/bad-sim-text
       while ( alpha.length >= 2 && alpha.endsWith( '0' ) && alpha[ alpha.length - 2 ] !== '.' ) {
         alpha = alpha.slice( 0, alpha.length - 1 );
       }
@@ -992,20 +992,20 @@ export default class Color {
     yellowgreen: '9acd32'
   };
 
-  public static BLACK: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static BLUE: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static CYAN: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static DARK_GRAY: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static GRAY: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static GREEN: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static LIGHT_GRAY: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static MAGENTA: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static ORANGE: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static PINK: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static RED: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static WHITE: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static YELLOW: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
-  public static TRANSPARENT: Color;  // eslint-disable-line uppercase-statics-should-be-readonly
+  public static BLACK: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static BLUE: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static CYAN: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static DARK_GRAY: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static GRAY: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static GREEN: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static LIGHT_GRAY: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static MAGENTA: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static ORANGE: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static PINK: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static RED: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static WHITE: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static YELLOW: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
+  public static TRANSPARENT: Color;  // eslint-disable-line phet/uppercase-statics-should-be-readonly
 
   public static black: Color;
   public static blue: Color;

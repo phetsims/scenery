@@ -546,7 +546,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   public keydown( event: SceneryEvent ): void {
     const domEvent = event.domEvent!;
-    assert && assert( domEvent instanceof KeyboardEvent, 'keydown event must be a KeyboardEvent' ); // eslint-disable-line no-simple-type-checking-assertions
+    assert && assert( domEvent instanceof KeyboardEvent, 'keydown event must be a KeyboardEvent' ); // eslint-disable-line phet/no-simple-type-checking-assertions
 
     // on any keyboard reposition interrupt the middle press panning
     this.cancelMiddlePress();
@@ -833,7 +833,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
     const domEvent = event.domEvent!;
-    assert && assert( domEvent instanceof WheelEvent, 'wheel event must be a WheelEvent' ); // eslint-disable-line no-simple-type-checking-assertions
+    assert && assert( domEvent instanceof WheelEvent, 'wheel event must be a WheelEvent' ); // eslint-disable-line phet/no-simple-type-checking-assertions
 
     const sourcePosition = this.sourcePosition!;
     assert && assert( sourcePosition, 'sourcePosition must be defined to handle wheel, be sure to call initializePositions' );
@@ -1384,7 +1384,7 @@ class Wheel {
    */
   public constructor( event: SceneryEvent, targetScale: number ) {
     const domEvent = event.domEvent as WheelEvent;
-    assert && assert( domEvent instanceof WheelEvent, 'SceneryEvent should have a DOMEvent from the wheel input' ); // eslint-disable-line no-simple-type-checking-assertions
+    assert && assert( domEvent instanceof WheelEvent, 'SceneryEvent should have a DOMEvent from the wheel input' ); // eslint-disable-line phet/no-simple-type-checking-assertions
 
     this.isCtrlKeyDown = domEvent.ctrlKey;
     this.scaleDelta = domEvent.deltaY > 0 ? -0.5 : 0.5;

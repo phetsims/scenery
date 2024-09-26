@@ -117,7 +117,7 @@
         window[ `stepEmitter${id}` ] = stepEmitter;
         window[ `display${id}` ] = display;
 
-        const code = `${Math.random()};(${options.jsBefore}\n${codeMirror.getValue()}\n${options.jsAfter}\n)( window[ 'scene${id}' ], window[ 'stepEmitter${id}' ], window[ 'display${id}' ] )`; // eslint-disable-line bad-sim-text
+        const code = `${Math.random()};(${options.jsBefore}\n${codeMirror.getValue()}\n${options.jsAfter}\n)( window[ 'scene${id}' ], window[ 'stepEmitter${id}' ], window[ 'display${id}' ] )`; // eslint-disable-line phet/bad-sim-text
 
         // Assumes it's in a function, differently from the sandbox
         const dataURI = `data:text/javascript;base64,${btoa( code )}`;
