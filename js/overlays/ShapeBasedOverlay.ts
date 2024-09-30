@@ -77,7 +77,7 @@ export default abstract class ShapeBasedOverlay implements TOverlay {
    * Releases references
    */
   public dispose(): void {
-  // Nothing to dispose
+    // Nothing to dispose
   }
 }
 

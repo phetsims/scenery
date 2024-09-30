@@ -12,12 +12,12 @@
 
 import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import { scenery, TPaint } from '../imports.js';
 import TColor from './TColor.js';
-import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 
 // constants
 const clamp = Utils.clamp;

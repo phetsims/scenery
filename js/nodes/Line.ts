@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, TLineDrawable } from '../imports.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position

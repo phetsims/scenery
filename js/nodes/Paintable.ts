@@ -6,17 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import { LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin, LineStyles } from '../../../kite/js/imports.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
-import platform from '../../../phet-core/js/platform.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { CanvasContextWrapper, Color, Gradient, LinearGradient, Node, Paint, PaintDef, Path, Pattern, RadialGradient, Renderer, scenery, Text, TPaint, TPaintableDrawable } from '../imports.js';
+import platform from '../../../phet-core/js/platform.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import { CanvasContextWrapper, Color, Gradient, LinearGradient, Node, Paint, PaintDef, Path, Pattern, RadialGradient, Renderer, scenery, Text, TPaint, TPaintableDrawable } from '../imports.js';
 
 const isSafari5 = platform.safari5;
 

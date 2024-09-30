@@ -32,14 +32,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AllowedKeysString, EnglishStringToCodeMap, hotkeyManager, KeyDescriptor, OneKeyStroke, scenery } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
-import TProperty from '../../../axon/js/TProperty.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { AllowedKeysString, EnglishStringToCodeMap, hotkeyManager, KeyDescriptor, OneKeyStroke, scenery } from '../imports.js';
 
 export type HotkeyFireOnHoldTiming = 'browser' | 'custom';
 

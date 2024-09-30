@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
 import { allowLinksProperty } from '../imports.js';
+import scenery from '../scenery.js';
 
 /**
  * Opens the URL in a new window or tab.

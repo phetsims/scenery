@@ -10,15 +10,15 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import Tandem from '../../../tandem/js/Tandem.js';
-import { DerivedProperty2, DerivedPropertyOptions } from '../../../axon/js/DerivedProperty.js';
 import BooleanProperty, { BooleanPropertyOptions } from '../../../axon/js/BooleanProperty.js';
-import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
+import { DerivedProperty2, DerivedPropertyOptions } from '../../../axon/js/DerivedProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { scenery } from '../imports.js';
-import TProperty from '../../../axon/js/TProperty.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
+import Tandem from '../../../tandem/js/Tandem.js';
+import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
+import { scenery } from '../imports.js';
 
 type SelfOptions = {
   selfVisibleInitiallyVisible?: boolean;

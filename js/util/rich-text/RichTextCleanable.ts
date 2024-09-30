@@ -8,9 +8,9 @@
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import memoize from '../../../../phet-core/js/memoize.js';
+import { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import { Node, scenery } from '../../imports.js';
-import { TPoolable } from '../../../../phet-core/js/Pool.js';
 
 type TRichTextCleanable = {
   readonly isCleanable: boolean;

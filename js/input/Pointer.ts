@@ -29,8 +29,8 @@ import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import TAttachableInputListener from './TAttachableInputListener.js';
 import { EventContext, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
+import TAttachableInputListener from './TAttachableInputListener.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging

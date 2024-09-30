@@ -158,22 +158,22 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import PhetioAction from '../../../tandem/js/PhetioAction.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
+import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
+import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import EventType from '../../../tandem/js/EventType.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventContext, EventContextIO, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, SupportedEventTypes, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
-import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
-import IOType from '../../../tandem/js/types/IOType.js';
-import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
-import PickOptional from '../../../phet-core/js/types/PickOptional.js';
-import TEmitter from '../../../axon/js/TEmitter.js';
-import stepTimer from '../../../axon/js/stepTimer.js';
 
 const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 

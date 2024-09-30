@@ -7,15 +7,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Matrix3 from '../../../dot/js/Matrix3.js';
+import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
-import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import ReadOnlyProperty from '../../../axon/js/ReadOnlyProperty.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
+import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
 
 const scenerySerialize = ( value: unknown ): IntentionalAny => {
   if ( value instanceof Vector2 ) {

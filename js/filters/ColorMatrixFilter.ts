@@ -54,9 +54,9 @@ export default class ColorMatrixFilter extends Filter {
    *                           [ 1 ]
    */
   public constructor( m00: number, m01: number, m02: number, m03: number, m04: number,
-               m10: number, m11: number, m12: number, m13: number, m14: number,
-               m20: number, m21: number, m22: number, m23: number, m24: number,
-               m30: number, m31: number, m32: number, m33: number, m34: number ) {
+                      m10: number, m11: number, m12: number, m13: number, m14: number,
+                      m20: number, m21: number, m22: number, m23: number, m24: number,
+                      m30: number, m31: number, m32: number, m33: number, m34: number ) {
 
     assert && assert( isFinite( m00 ), 'm00 should be a finite number' );
     assert && assert( isFinite( m01 ), 'm01 should be a finite number' );

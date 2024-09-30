@@ -6,17 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import { Shape } from '../../../kite/js/imports.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable, TPathDrawable } from '../imports.js';
-import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
-import WithRequired from '../../../phet-core/js/types/WithRequired.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import { Shape } from '../../../kite/js/imports.js';
+import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
+import WithRequired from '../../../phet-core/js/types/WithRequired.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable, TPathDrawable } from '../imports.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod',

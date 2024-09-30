@@ -59,21 +59,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import TProperty from '../../../axon/js/TProperty.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Range from '../../../dot/js/Range.js';
+import cleanArray from '../../../phet-core/js/cleanArray.js';
+import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
+import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
+import '../../../sherpa/lib/himalaya-1.1.0.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { allowLinksProperty, assertNoAdditionalChildren, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint, WidthSizable } from '../imports.js';
-import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import cleanArray from '../../../phet-core/js/cleanArray.js';
-import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
-import '../../../sherpa/lib/himalaya-1.1.0.js';
-import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 
 // @ts-expect-error - Since himalaya isn't in tsconfig
 const himalayaVar = himalaya;

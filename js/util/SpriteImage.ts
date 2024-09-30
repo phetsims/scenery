@@ -7,14 +7,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { Imageable, ImageableImage, ImageableOptions, scenery } from '../imports.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import PickRequired from '../../../phet-core/js/types/PickRequired.js';
+import { Imageable, ImageableImage, ImageableOptions, scenery } from '../imports.js';
 
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );

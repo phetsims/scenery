@@ -21,6 +21,7 @@ export default class NodePattern extends Pattern {
     function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ): void {
       imageElement.src = canvas.toDataURL();
     }
+
     const tmpNode = new Node( {
       scale: resolution,
       children: [ node ]

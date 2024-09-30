@@ -1,5 +1,7 @@
 // Copyright 2022-2024, University of Colorado Boulder
 
+import Range from '../../../dot/js/Range.js';
+import optionize from '../../../phet-core/js/optionize.js';
 /**
  * Returns where possible line breaks can exist in a given string, according to the
  * Unicode Line Breaking Algorithm (UAX #14). Uses https://github.com/foliojs/linebreak.
@@ -7,8 +9,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import { scenery } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import Range from '../../../dot/js/Range.js';
 
 export type GetLineBreaksOptions = {
   // Line breaks can be "required" or "optional". If this is true, ranges will only be given for required line breaks.

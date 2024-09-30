@@ -6,15 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import Dimension2 from '../../../dot/js/Dimension2.js';
-import { Shape } from '../../../kite/js/imports.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, TRectangleDrawable, WebGLSelfDrawable } from '../imports.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import { combineOptions } from '../../../phet-core/js/optionize.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
+import Dimension2 from '../../../dot/js/Dimension2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import { Shape } from '../../../kite/js/imports.js';
+import { combineOptions } from '../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, TRectangleDrawable, WebGLSelfDrawable } from '../imports.js';
 
 const RECTANGLE_OPTION_KEYS = [
   'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.

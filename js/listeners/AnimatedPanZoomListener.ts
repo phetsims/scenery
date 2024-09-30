@@ -8,19 +8,19 @@
  * @author Jesse Greenberg
  */
 
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import { PropertyLinkListener } from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
-import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, LimitPanDirection, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
-import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import BooleanProperty from '../../../axon/js/BooleanProperty.js';
-import { PropertyLinkListener } from '../../../axon/js/TReadOnlyProperty.js';
+import { EventIO, Focus, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, KeyStateTracker, LimitPanDirection, Mouse, MultiListenerPress, Node, PanZoomListener, PanZoomListenerOptions, PDOMPointer, PDOMUtils, Pointer, PressListener, scenery, SceneryEvent, Trail, TransformTracker } from '../imports.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';

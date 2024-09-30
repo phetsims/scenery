@@ -7,9 +7,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Hotkey, scenery } from '../imports.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
+import { Hotkey, scenery } from '../imports.js';
 
 class GlobalHotkeyRegistry {
 
@@ -28,6 +28,7 @@ class GlobalHotkeyRegistry {
     this.hotkeysProperty.value = new Set( [ ...this.hotkeysProperty.value ].filter( value => value !== hotkey ) );
   }
 }
+
 scenery.register( 'GlobalHotkeyRegistry', GlobalHotkeyRegistry );
 
 const globalHotkeyRegistry = new GlobalHotkeyRegistry();

@@ -28,10 +28,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Node, NodeOptions, scenery } from '../imports.js';
-import Constructor from '../../../phet-core/js/types/Constructor.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { Node, NodeOptions, scenery } from '../imports.js';
 
 /**
  * @param name - A unique name for each call, which customizes the internal key names used to track state

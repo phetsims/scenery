@@ -8,22 +8,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty, { StringPropertyOptions } from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
+import { combineOptions } from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
+import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
-import TProperty from '../../../axon/js/TProperty.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable, TTextDrawable } from '../imports.js';
-import { PropertyOptions } from '../../../axon/js/Property.js';
-import { combineOptions } from '../../../phet-core/js/optionize.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 
 const STRING_PROPERTY_NAME = 'stringProperty'; // eslint-disable-line phet/bad-sim-text
 

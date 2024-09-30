@@ -7,14 +7,14 @@
  */
 
 import Property from '../../../axon/js/Property.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
+import MipmapElement from '../../../phet-core/js/MipmapElement.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { Circle, Color, DOM, Gradient, Image, Line, LinearGradient, Mipmap, Node, Paint, Path, Pattern, RadialGradient, Rectangle, scenery, Text } from '../imports.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
-import MipmapElement from '../../../phet-core/js/MipmapElement.js';
 
 const sceneryDeserialize = ( value: { type: string; [ key: string ]: IntentionalAny } ): IntentionalAny => {
   const nodeTypes = [

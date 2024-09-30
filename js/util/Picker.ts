@@ -11,8 +11,8 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Node, scenery, Trail } from '../imports.js';
 import { Shape } from '../../../kite/js/imports.js';
+import { Node, scenery, Trail } from '../imports.js';
 
 export default class Picker {
 

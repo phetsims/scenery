@@ -6,19 +6,19 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
+import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, svgns, xlinkns } from '../imports.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import TEmitter from '../../../axon/js/TEmitter.js';
-import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import TProperty from '../../../axon/js/TProperty.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { scenery, svgns, xlinkns } from '../imports.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };

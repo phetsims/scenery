@@ -7,11 +7,11 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { KeyDescriptor, OneKeyStroke, scenery } from '../../../scenery/js/imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import InstanceRegistry from '../../../phet-core/js/documentation/InstanceRegistry.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { KeyDescriptor, OneKeyStroke, scenery } from '../../../scenery/js/imports.js';
 
 // The type for a serialized HotkeyData object for documentation (binder).
 type SerializedHotkeyData = {

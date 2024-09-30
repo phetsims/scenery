@@ -7,16 +7,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import IOType from '../../../tandem/js/types/IOType.js';
-import StringIO from '../../../tandem/js/types/StringIO.js';
-import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, TImageDrawable, WebGLSelfDrawable } from '../imports.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
+import VoidIO from '../../../tandem/js/types/VoidIO.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, TImageDrawable, WebGLSelfDrawable } from '../imports.js';
 
 
 // Image-specific options that can be passed in the constructor or mutate() call.
