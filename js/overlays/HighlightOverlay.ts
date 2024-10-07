@@ -494,6 +494,10 @@ export default class HighlightOverlay implements TOverlay {
     }
     else if ( this.mode === 'node' ) {
       assert && assert( this.nodeModeHighlight, 'How can we deactivate if nodeModeHighlight is not assigned' );
+
+      // Note it is possible and acceptable that this has been previously disposed, before deactivateHighlight.
+      // If we want to re-sequence the calls to make sure this is never disposed at this point, it puts a burden
+      // on the client to make sure to blur() at the appropriate point beforehand.
       const nodeModeHighlight = this.nodeModeHighlight!;
 
       // If layered, client has put the Node where they want in the scene graph and we cannot remove it
@@ -501,11 +505,14 @@ export default class HighlightOverlay implements TOverlay {
         this.nodeModeHighlightLayered = false;
       }
       else {
-        this.highlightNode.removeChild( nodeModeHighlight );
+        !nodeModeHighlight.isDisposed && this.highlightNode.removeChild( nodeModeHighlight );
+      }
+
+      if ( !nodeModeHighlight.isDisposed ) {
+        nodeModeHighlight.visible = false;
       }
 
       // node focus highlight can be cleared now that it has been removed
-      nodeModeHighlight.visible = false;
       this.nodeModeHighlight = null;
     }
     else if ( this.mode === 'bounds' ) {
