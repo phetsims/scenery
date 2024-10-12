@@ -1,5 +1,5 @@
 {
-  "extends": "../chipper/tsconfig-core.json",
+  "extends": "../chipper/tsconfig-browser.json",
   "include": [
     "js/**/*",
     "images/**/*",
