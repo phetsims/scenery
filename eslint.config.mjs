@@ -7,7 +7,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import phetLibraryEslintConfig from '../chipper/eslint/phet-library.eslint.config.mjs';
+import phetLibraryEslintConfig from '../perennial-alias/js/eslint/phet-library.eslint.config.mjs';
 
 export default [
   ...phetLibraryEslintConfig,

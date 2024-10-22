@@ -1,5 +1,5 @@
 {
-  "extends": "../chipper/tsconfig/shared/tsconfig-browser.json",
+  "extends": "../perennial-alias/tsconfig/shared/tsconfig-browser.json",
   "include": [
     "js/**/*",
     "images/**/*",
@@ -8,7 +8,7 @@
   ],
   "references": [
     {
-      "path": "../chipper/tsconfig/buildjson/tsconfig.json"
+      "path": "../perennial-alias/tsconfig/buildjson/tsconfig.json"
     }
   ]
 }
