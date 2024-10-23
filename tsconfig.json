@@ -1,5 +1,5 @@
 {
-  "extends": "../perennial-alias/tsconfig/shared/tsconfig-browser.json",
+  "extends": "../perennial-alias/tsconfig/tsconfig-browser.json",
   "include": [
     "js/**/*",
     "images/**/*",
