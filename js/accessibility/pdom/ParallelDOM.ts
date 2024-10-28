@@ -132,31 +132,33 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import validate from '../../../../axon/js/validate.js';
-import Validation from '../../../../axon/js/Validation.js';
-import { Shape } from '../../../../kite/js/imports.js';
-import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
-import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
-import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
-import { Highlight } from '../../overlays/HighlightOverlay.js';
-import optionize from '../../../../phet-core/js/optionize.js';
-import Tandem from '../../../../tandem/js/Tandem.js';
-import TEmitter from '../../../../axon/js/TEmitter.js';
-import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import ReadOnlyProperty from '../../../../axon/js/ReadOnlyProperty.js';
-import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
-import Bounds2 from '../../../../dot/js/Bounds2.js';
+import TEmitter from '../../../../axon/js/TEmitter.js';
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
+import validate from '../../../../axon/js/validate.js';
+import Validation from '../../../../axon/js/Validation.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import { Shape } from '../../../../kite/js/imports.js';
+import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
+import optionize from '../../../../phet-core/js/optionize.js';
+import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
+import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
+import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
+import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
+import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
+import { Highlight } from '../../overlays/HighlightOverlay.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
+const DIV_TAG = PDOMUtils.TAGS.DIV;
 
 // default tag names for siblings
+const DEFAULT_TAG_NAME = DIV_TAG;
 const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
@@ -3276,6 +3278,36 @@ export default class ParallelDOM extends PhetioObject {
     return options;
   }
 
+  /**
+   * A behavior function for accessible name so that when accessibleName is set on the provided Node, it will be forwarded
+   * to otherNode. This is useful when a component is composed of other Nodes that implement the accessibility,
+   * but the high level API should be available for the entire component.
+   */
+  public static forwardAccessibleName( node: ParallelDOM, otherNode: ParallelDOM ): void {
+    ParallelDOM.useDefaultTagName( node );
+    node.accessibleNameBehavior = ( node: Node, options: ParallelDOMOptions, accessibleName: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => {
+      callbacksForOtherNodes.push( () => {
+        otherNode.accessibleName = accessibleName;
+      } );
+      return options;
+    };
+  }
+
+  /**
+   * A behavior function for help text so that when helpText is set on the provided 'node', it will be forwarded `otherNode`.
+   * This is useful when a component is composed of other Nodes that implement the accessibility, but the high level API
+   * should be available for the entire component.
+   */
+  public static forwardHelpText( node: ParallelDOM, otherNode: ParallelDOM ): void {
+    ParallelDOM.useDefaultTagName( node );
+    node.helpTextBehavior = ( node: Node, options: ParallelDOMOptions, helpText: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => {
+      callbacksForOtherNodes.push( () => {
+        otherNode.helpText = helpText;
+      } );
+      return options;
+    };
+  }
+
   public static HELP_TEXT_BEFORE_CONTENT( node: Node, options: ParallelDOMOptions, helpText: PDOMValueType ): ParallelDOMOptions {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
@@ -3288,6 +3320,15 @@ export default class ParallelDOM extends PhetioObject {
     options.descriptionContent = helpText;
     options.appendDescription = true;
     return options;
+  }
+
+  /**
+   * If the Node does not have a tagName yet, set it to the default.
+   */
+  private static useDefaultTagName( node: ParallelDOM ): void {
+    if ( !node.tagName ) {
+      node.tagName = DEFAULT_TAG_NAME;
+    }
   }
 }
 
