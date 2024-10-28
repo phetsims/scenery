@@ -313,11 +313,11 @@ type ParallelDOMSelfOptions = {
 // behaves as a default.
 export type ParallelDOMOptions = ParallelDOMSelfOptions & PhetioObjectOptions;
 
-type AccessibleNameAndHelpTextOptions = PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'helpText'>;
-
-// Removes all options from T that are in ParallelDOMSelfOptions, except for accessibleName and helpText.
-// This is uefeful for creating a ParallelDOM subclass that only exposes these high level options.
-export type TrimmedParallelDOMOptions<T extends ParallelDOMSelfOptions> = StrictOmit<T, keyof ParallelDOMSelfOptions> & AccessibleNameAndHelpTextOptions;
+// Removes all options from T that are in ParallelDOMSelfOptions, except for the most fundamental ones.
+// This is uefeful for creating a ParallelDOM subclass that only exposes these high level options while implementing accessibility
+// with the lower level API.
+export type TrimmedParallelDOMOptions<T extends ParallelDOMSelfOptions> = StrictOmit<T, keyof ParallelDOMSelfOptions>
+  & PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'helpText' | 'focusable' | 'pdomVisible'>;
 
 type PDOMAttribute = {
   attribute: string;
