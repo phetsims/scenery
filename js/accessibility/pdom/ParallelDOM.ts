@@ -314,8 +314,8 @@ type ParallelDOMSelfOptions = {
 export type ParallelDOMOptions = ParallelDOMSelfOptions & PhetioObjectOptions;
 
 // Removes all options from T that are in ParallelDOMSelfOptions, except for the most fundamental ones.
-// This is uefeful for creating a ParallelDOM subclass that only exposes these high level options while implementing accessibility
-// with the lower level API.
+// This is useful for creating a ParallelDOM subclass that only exposes these high-level options while implementing
+// accessibility with the lower-level API.
 export type TrimmedParallelDOMOptions<T extends ParallelDOMSelfOptions> = StrictOmit<T, keyof ParallelDOMSelfOptions>
   & PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'helpText' | 'focusable' | 'pdomVisible'>;
 
