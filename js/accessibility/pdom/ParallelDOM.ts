@@ -720,6 +720,11 @@ export default class ParallelDOM extends PhetioObject {
     // clear references to the pdomTransformSourceNode
     this.setPDOMTransformSourceNode( null );
 
+    // Clear behavior functions because they may create references between other nodes
+    this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
+    this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
+    this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
+
     // Clear out aria association attributes, which hold references to other nodes.
     this.setAriaLabelledbyAssociations( [] );
     this.setAriaDescribedbyAssociations( [] );
