@@ -145,6 +145,8 @@ import { Shape } from '../../../../kite/js/imports.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import optionize from '../../../../phet-core/js/optionize.js';
+import PickOptional from '../../../../phet-core/js/types/PickOptional.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
@@ -251,9 +253,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'pdomTransformSourceNode'
 ];
 
-// Most options use null for their default behavior, see the setters for each option for a description of how null
-// behaves as a default.
-export type ParallelDOMOptions = {
+type ParallelDOMSelfOptions = {
   focusable?: boolean | null; // Sets whether the node can receive keyboard focus
   tagName?: string | null; // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
 
@@ -307,7 +307,17 @@ export type ParallelDOMOptions = {
   positionInPDOM?: boolean; // Sets whether the node's DOM elements are positioned in the viewport
 
   pdomTransformSourceNode?: Node | null; // { sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
-} & PhetioObjectOptions;
+};
+
+// Most options use null for their default behavior, see the setters for each option for a description of how null
+// behaves as a default.
+export type ParallelDOMOptions = ParallelDOMSelfOptions & PhetioObjectOptions;
+
+type AccessibleNameAndHelpTextOptions = PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'helpText'>;
+
+// Removes all options from T that are in ParallelDOMSelfOptions, except for accessibleName and helpText.
+// This is uefeful for creating a ParallelDOM subclass that only exposes these high level options.
+export type TrimmedParallelDOMOptions<T extends ParallelDOMSelfOptions> = StrictOmit<T, keyof ParallelDOMSelfOptions> & AccessibleNameAndHelpTextOptions;
 
 type PDOMAttribute = {
   attribute: string;
