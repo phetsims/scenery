@@ -3280,7 +3280,10 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   public static BASIC_ACCESSIBLE_NAME_BEHAVIOR( node: Node, options: ParallelDOMOptions, accessibleName: PDOMValueType ): ParallelDOMOptions {
-    if ( node.tagName === 'input' ) {
+    if ( node.labelTagName && PDOMUtils.tagNameSupportsContent( node.labelTagName ) ) {
+      options.labelContent = accessibleName;
+    }
+    else if ( node.tagName === 'input' ) {
       options.labelTagName = 'label';
       options.labelContent = accessibleName;
     }
