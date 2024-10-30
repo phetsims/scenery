@@ -6,6 +6,8 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+/* globals QSMParsedParameters */
+
 import scenery from './scenery.js';
 
 // All scenery query parameters MUST have a default value, since we do not always support QSM as a global.
