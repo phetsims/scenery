@@ -6,7 +6,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-/* globals QSMParsedParameters */
+/* global QSMParsedParameters QueryStringMachineSchema */
 
 import scenery from './scenery.js';
 
