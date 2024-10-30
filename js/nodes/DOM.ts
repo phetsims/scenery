@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+/* global JQuery */
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import { DOMDrawable, DOMSelfDrawable, Instance, Node, NodeOptions, Renderer, scenery } from '../imports.js';
