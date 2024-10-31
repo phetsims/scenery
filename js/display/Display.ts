@@ -2209,9 +2209,9 @@ export default class Display {
     // We can't btoa() arbitrary unicode, so we need another solution,
     // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
     // @ts-expect-error - Exterior lib
-    const uint8array = new window.TextEncoderLite( 'utf-8' ).encode( data );
-    // @ts-expect-error - Exterior lib
-    const base64 = window.fromByteArray( uint8array );
+    const uint8array = new TextEncoderLite( 'utf-8' ).encode( data ); // eslint-disable-line no-undef
+    // @ts-expect-error - fromByteArray Exterior lib
+    const base64 = fromByteArray( uint8array ); // eslint-disable-line no-undef
 
     // turn it to base64 and wrap it in the data URL format
     img.src = `data:image/svg+xml;base64,${base64}`;
