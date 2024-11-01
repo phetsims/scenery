@@ -6,6 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import { Node, RichText, Text } from '../../imports.js';
 import PDOMUtils from './PDOMUtils.js';
 
 QUnit.module( 'AccessibilityUtils' );
@@ -147,4 +148,41 @@ QUnit.test( 'setTextContent', assert => {
   PDOMUtils.setTextContent( toyElement, invalidHTMLContent );
   assert.ok( toyElement.textContent === invalidHTMLContent, 'invalid HTML set as content' );
   assert.ok( toyElement.firstElementChild === null, 'fallback to textContent for disallowed tags' );
+} );
+
+QUnit.test( 'findStringProperty', assert => {
+  const testString = 'testing';
+
+  const rootNode = new Node();
+  const a = new Node();
+  const b = new Node();
+  const testText = new Text( testString );
+  const testRichText = new RichText( testString );
+
+  rootNode.addChild( a );
+  a.addChild( b );
+  b.addChild( testText );
+
+  // basic find test
+  let foundStringProperty = PDOMUtils.findStringProperty( rootNode );
+  assert.ok( foundStringProperty && foundStringProperty.value === testString, 'found the string content' );
+
+  // test with no string to find
+  b.removeChild( testText );
+  foundStringProperty = PDOMUtils.findStringProperty( rootNode );
+  assert.ok( foundStringProperty === null, 'no string content found' );
+
+  // test with RichText
+  b.addChild( testRichText );
+  foundStringProperty = PDOMUtils.findStringProperty( rootNode );
+  assert.ok( foundStringProperty && foundStringProperty.value === testString, 'found the RichText content' );
+
+  // test with an empty Node
+  foundStringProperty = PDOMUtils.findStringProperty( new Node() );
+  assert.ok( foundStringProperty === null, 'no content found in empty Node' );
+
+  // test with Text and RichText in the subtree
+  b.addChild( testText );
+  foundStringProperty = PDOMUtils.findStringProperty( rootNode );
+  assert.ok( foundStringProperty && foundStringProperty.value === testString, 'found the string content in subtree' );
 } );
