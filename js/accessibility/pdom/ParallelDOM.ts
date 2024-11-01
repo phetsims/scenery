@@ -1363,7 +1363,7 @@ export default class ParallelDOM extends PhetioObject {
     const labelContent = this.labelContent;
 
     // if trying to set labelContent, make sure that there is a labelTagName default
-    if ( !this._labelTagName ) {
+    if ( labelContent && !this._labelTagName ) {
       this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
     }
 
@@ -1455,7 +1455,7 @@ export default class ParallelDOM extends PhetioObject {
     const descriptionContent = this.descriptionContent;
 
     // if there is no description element, assume that a paragraph element should be used
-    if ( !this._descriptionTagName ) {
+    if ( descriptionContent && !this._descriptionTagName ) {
       this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
     }
 
