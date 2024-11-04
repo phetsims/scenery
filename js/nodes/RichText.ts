@@ -743,6 +743,34 @@ export default class RichText extends WidthSizable( Node ) {
   }
 
   /**
+   * Transforms a given string with HTML markup into a string suitable for screen readers.
+   * Preserves basic styling tags while removing non-accessible markup.
+   */
+  public static getAccessibleString( string: string | number | TReadOnlyProperty<string> ): string {
+
+    let parsable = '';
+    if ( typeof string === 'string' || typeof string === 'number' ) {
+      parsable = string.toString();
+    }
+    else {
+      parsable = string.value;
+    }
+    const rootElements = himalayaVar.parse( parsable );
+
+    let deconstructed = '';
+    rootElements.forEach( element => {
+      if ( isHimalayaTextNode( element ) ) {
+        deconstructed += element.content;
+      }
+      else if ( isHimalayaElementNode( element ) ) {
+        deconstructed += RichText.himalayaElementToAccessibleString( element );
+      }
+    } );
+
+    return deconstructed;
+  }
+
+  /**
    * Main recursive function for constructing the RichText Node tree.
    *
    * We'll add any relevant content to the containerNode. The element will be mutated as things are added, so that
