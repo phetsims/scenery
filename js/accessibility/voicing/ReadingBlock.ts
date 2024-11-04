@@ -121,7 +121,8 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
       // be sure that the ReadingBlock will still respond to `click` events when enabled.
       private _readingBlockTagName: string | null;
 
-      // The tagName to apply to the Node when voicing is disabled.
+      // The tagName to apply to the Node when voicing is disabled. Set to null to remove from the PDOM
+      // entirely when voicing is disabled.
       private _readingBlockDisabledTagName: string | null;
 
       // The highlight that surrounds this ReadingBlock when it is "active" and
