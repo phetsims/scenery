@@ -17,23 +17,24 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { Shape } from '../../../../kite/js/imports.js';
+import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
+import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import { DelayedMutate, Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import TInputListener from '../../input/TInputListener.js';
-import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
-import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import TEmitter from '../../../../axon/js/TEmitter.js';
-import memoize from '../../../../phet-core/js/memoize.js';
 import { TVoicing } from './Voicing.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
+  'readingBlockDisabledTagName',
   'readingBlockNameResponse',
   'readingBlockHintResponse',
   'readingBlockResponsePatternCollection',
@@ -42,6 +43,7 @@ const READING_BLOCK_OPTION_KEYS = [
 
 type SelfOptions = {
   readingBlockTagName?: string | null;
+  readingBlockDisabledTagName?: string | null;
   readingBlockNameResponse?: VoicingResponse;
   readingBlockHintResponse?: VoicingResponse;
   readingBlockResponsePatternCollection?: ResponsePatternCollection;
@@ -87,6 +89,9 @@ export type TReadingBlock<SuperType extends Node = Node> = {
   setReadingBlockTagName( tagName: string | null ): void;
   readingBlockTagName: string | null;
   getReadingBlockTagName(): string | null;
+  setReadingBlockDisabledTagName( tagName: string | null ): void;
+  readingBlockDisabledTagName: string | null;
+  getReadingBlockDisabledTagName(): string | null;
   setReadingBlockNameResponse( content: VoicingResponse ): void;
   set readingBlockNameResponse( content: VoicingResponse );
   get readingBlockNameResponse(): ResolvedResponse;
@@ -117,7 +122,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
       private _readingBlockTagName: string | null;
 
       // The tagName to apply to the Node when voicing is disabled.
-      private readonly _readingBlockDisabledTagName: string;
+      private _readingBlockDisabledTagName: string | null;
 
       // The highlight that surrounds this ReadingBlock when it is "active" and
       // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
@@ -193,6 +198,23 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
        */
       public getReadingBlockTagName(): string | null {
         return this._readingBlockTagName;
+      }
+
+      /**
+       * Sets the tagName for the node composing ReadingBlock. This is the tagName (of ParallelDOM) that will be applied
+       * to this Node when Reading Blocks are disabled. If you do not want the ReadingBlock to appear at all, set to null.
+       */
+      public setReadingBlockDisabledTagName( tagName: string | null ): void {
+        this._readingBlockDisabledTagName = tagName;
+        this._onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
+      }
+
+      public set readingBlockDisabledTagName( tagName: string | null ) { this.setReadingBlockDisabledTagName( tagName ); }
+
+      public get readingBlockDisabledTagName(): string | null { return this.getReadingBlockDisabledTagName(); }
+
+      public getReadingBlockDisabledTagName(): string | null {
+        return this._readingBlockDisabledTagName;
       }
 
       /**

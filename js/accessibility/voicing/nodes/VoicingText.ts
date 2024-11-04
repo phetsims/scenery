@@ -26,7 +26,6 @@ class VoicingText extends ReadingBlock( Text ) {
       readingBlockNameResponse: text,
 
       // pdom
-      tagName: 'p',
       innerContent: text
     }, providedOptions );
 
