@@ -59,6 +59,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import DerivedStringProperty from '../../../axon/js/DerivedStringProperty.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
@@ -746,28 +747,22 @@ export default class RichText extends WidthSizable( Node ) {
    * Transforms a given string with HTML markup into a string suitable for screen readers.
    * Preserves basic styling tags while removing non-accessible markup.
    */
-  public static getAccessibleString( string: string | number | TReadOnlyProperty<string> ): string {
+  public static getAccessibleStringProperty( stringProperty: TReadOnlyProperty<string> ): string {
+    return new DerivedStringProperty( [ stringProperty ], string => {
+      const rootElements = himalayaVar.parse( string );
 
-    let parsable = '';
-    if ( typeof string === 'string' || typeof string === 'number' ) {
-      parsable = string.toString();
-    }
-    else {
-      parsable = string.value;
-    }
-    const rootElements = himalayaVar.parse( parsable );
+      let accessibleString = '';
+      rootElements.forEach( element => {
+        if ( isHimalayaTextNode( element ) ) {
+          accessibleString += element.content;
+        }
+        else if ( isHimalayaElementNode( element ) ) {
+          accessibleString += RichText.himalayaElementToAccessibleString( element );
+        }
+      } );
 
-    let deconstructed = '';
-    rootElements.forEach( element => {
-      if ( isHimalayaTextNode( element ) ) {
-        deconstructed += element.content;
-      }
-      else if ( isHimalayaElementNode( element ) ) {
-        deconstructed += RichText.himalayaElementToAccessibleString( element );
-      }
+      return accessibleString;
     } );
-
-    return deconstructed;
   }
 
   /**
