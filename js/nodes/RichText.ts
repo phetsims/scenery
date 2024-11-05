@@ -452,12 +452,15 @@ export default class RichText extends WidthSizable( Node ) {
 
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
+   *
+   * NOTE: Setting the .string after passing a truly read-only Property will fail at runtime. We choose to allow passing
+   * in read-only Properties for convenience.
    */
-  public setStringProperty( newTarget: TProperty<string> | null ): this {
-    return this._stringProperty.setTargetProperty( newTarget, this, RichText.STRING_PROPERTY_TANDEM_NAME );
+  public setStringProperty( newTarget: TReadOnlyProperty<string> | null ): this {
+    return this._stringProperty.setTargetProperty( newTarget as TProperty<string>, this, RichText.STRING_PROPERTY_TANDEM_NAME );
   }
 
-  public set stringProperty( property: TProperty<string> | null ) { this.setStringProperty( property ); }
+  public set stringProperty( property: TReadOnlyProperty<string> | null ) { this.setStringProperty( property ); }
 
   public get stringProperty(): TProperty<string> { return this.getStringProperty(); }
 
