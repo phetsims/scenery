@@ -747,9 +747,9 @@ export default class RichText extends WidthSizable( Node ) {
    * Transforms a given string with HTML markup into a string suitable for screen readers.
    * Preserves basic styling tags while removing non-accessible markup.
    */
-  public static getAccessibleStringProperty( stringProperty: TReadOnlyProperty<string> ): string {
+  public static getAccessibleStringProperty( stringProperty: TReadOnlyProperty<string> ): TReadOnlyProperty<string> {
     return new DerivedStringProperty( [ stringProperty ], string => {
-      const rootElements = himalayaVar.parse( string );
+      const rootElements: HimalayaNode[] = himalayaVar.parse( string );
 
       let accessibleString = '';
       rootElements.forEach( element => {
@@ -757,7 +757,9 @@ export default class RichText extends WidthSizable( Node ) {
           accessibleString += element.content;
         }
         else if ( isHimalayaElementNode( element ) ) {
-          accessibleString += RichText.himalayaElementToAccessibleString( element );
+
+          // TODO: How to get LTR? https://github.com/phetsims/scenery/issues/1669
+          accessibleString += RichText.himalayaElementToAccessibleString( element, true );
         }
       } );
 
