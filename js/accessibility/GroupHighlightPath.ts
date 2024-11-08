@@ -8,9 +8,9 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { HighlightPath, HighlightPathOptions, scenery } from '../imports.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import { HighlightPath, HighlightPathOptions, scenery } from '../imports.js';
 
 type SelfOptions = EmptySelfOptions;
 export type GroupHighlightPathOptions = HighlightPathOptions & SelfOptions;

@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import dotRandom from '../../../dot/js/dotRandom.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import dotRandom from '../../../dot/js/dotRandom.js';
 import { CountMap, FittedBlock, scenery, SVGGroup, svgns, Utils } from '../imports.js';
 
 class SVGBlock extends FittedBlock {

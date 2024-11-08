@@ -21,23 +21,23 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import createObservableArray, { ObservableArray } from '../../../axon/js/createObservableArray.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
-import createObservableArray, { ObservableArray } from '../../../axon/js/createObservableArray.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import TProperty from '../../../axon/js/TProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 import EventType from '../../../tandem/js/EventType.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import { Display, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
-import TProperty from '../../../axon/js/TProperty.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 // global
 let globalID = 0;

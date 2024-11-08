@@ -8,12 +8,12 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import Vector2 from '../../../dot/js/Vector2.js';
-import { SceneryListenerCallback, SceneryListenerNullableCallback } from '../imports.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import Transform3 from '../../../dot/js/Transform3.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import Transform3 from '../../../dot/js/Transform3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import { SceneryListenerCallback, SceneryListenerNullableCallback } from '../imports.js';
 
 type MapPosition = ( point: Vector2 ) => Vector2;
 

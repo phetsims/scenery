@@ -9,8 +9,8 @@
 
 import TReadOnlyProperty from '../../../../../axon/js/TReadOnlyProperty.js';
 import optionize, { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
-import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, RichText, RichTextOptions, scenery } from '../../../imports.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, RichText, RichTextOptions, scenery } from '../../../imports.js';
 
 type SelfOptions = EmptySelfOptions;
 

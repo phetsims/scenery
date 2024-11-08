@@ -51,10 +51,10 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import TProperty from '../../../axon/js/TProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import { Matrix3Type } from '../../../dot/js/Matrix3.js';
@@ -62,11 +62,11 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import { BackboneDrawable, Block, CanvasBlock, CanvasNodeBoundsOverlay, ChangeInterval, Color, DOMBlock, DOMDrawable, Drawable, Features, FittedBlockBoundsOverlay, FocusManager, FullScreen, globalKeyStateTracker, HighlightOverlay, HitAreaOverlay, Input, InputOptions, Instance, KeyboardUtils, Node, PDOMInstance, PDOMSiblingStyle, PDOMTree, PDOMUtils, Pointer, PointerAreaOverlay, PointerOverlay, Renderer, scenery, SceneryEvent, scenerySerialize, SelfDrawable, TInputListener, TOverlay, Trail, Utils, WebGLBlock } from '../imports.js';
-import TEmitter from '../../../axon/js/TEmitter.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
 
 type SelfOptions = {

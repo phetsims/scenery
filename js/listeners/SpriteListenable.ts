@@ -10,8 +10,8 @@
 import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
-import { PressListener, PressListenerEvent, scenery, SpriteInstance, Sprites, Node } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { Node, PressListener, PressListenerEvent, scenery, SpriteInstance, Sprites } from '../imports.js';
 
 type TSpriteListenable = {
   spriteInstance: SpriteInstance | null;

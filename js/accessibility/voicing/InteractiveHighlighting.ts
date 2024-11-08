@@ -6,15 +6,15 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
+import TinyProperty from '../../../../axon/js/TinyProperty.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import { DelayedMutate, Display, Focus, FocusManager, Instance, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
 import { Highlight } from '../../overlays/HighlightOverlay.js';
-import TEmitter from '../../../../axon/js/TEmitter.js';
-import memoize from '../../../../phet-core/js/memoize.js';
-import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
-import TinyProperty from '../../../../axon/js/TinyProperty.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()

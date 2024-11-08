@@ -38,26 +38,26 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import PhetioAction from '../../../tandem/js/PhetioAction.js';
+import CallbackTimer from '../../../axon/js/CallbackTimer.js';
+import { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import Property from '../../../axon/js/Property.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import platform from '../../../phet-core/js/platform.js';
+import PickOptional from '../../../phet-core/js/types/PickOptional.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import EventType from '../../../tandem/js/EventType.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { AllDragListenerOptions, globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, Node, OneKeyStroke, PDOMPointer, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
-import TProperty from '../../../axon/js/TProperty.js';
-import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
-import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
-import CallbackTimer from '../../../axon/js/CallbackTimer.js';
-import PickOptional from '../../../phet-core/js/types/PickOptional.js';
-import platform from '../../../phet-core/js/platform.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
-import stepTimer from '../../../axon/js/stepTimer.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.

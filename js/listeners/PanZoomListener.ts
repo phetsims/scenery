@@ -11,10 +11,10 @@
 import Property from '../../../axon/js/Property.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import { MultiListener, MultiListenerOptions, MultiListenerPress, Node, scenery } from '../imports.js';
-import optionize from '../../../phet-core/js/optionize.js';
 
 // constants
 // Reusable Matrix3 instance to avoid creating lots of them

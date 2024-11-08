@@ -27,10 +27,10 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import SingularValueDecomposition from '../../../dot/js/SingularValueDecomposition.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import { Intent, Mouse, MultiListenerPress, Node, Pointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
-import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import { Intent, Mouse, MultiListenerPress, Node, Pointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
 
 // constants
 // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame

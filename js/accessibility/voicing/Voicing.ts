@@ -24,17 +24,17 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
+import { combineOptions } from '../../../../phet-core/js/optionize.js';
+import Constructor from '../../../../phet-core/js/types/Constructor.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
+import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePacket, { ResolvedResponse, SpeakableResolvedOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
-import { combineOptions } from '../../../../phet-core/js/optionize.js';
-import Constructor from '../../../../phet-core/js/types/Constructor.js';
-import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import TinyProperty from '../../../../axon/js/TinyProperty.js';
-import Tandem from '../../../../tandem/js/Tandem.js';
 import { TInteractiveHighlighting } from './InteractiveHighlighting.js';
 
 // Helps enforce that the utterance is defined.

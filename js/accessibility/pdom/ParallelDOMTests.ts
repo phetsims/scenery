@@ -10,10 +10,10 @@ import Display from '../../display/Display.js';
 import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
 import Rectangle from '../../nodes/Rectangle.js';
+import { ParallelDOMOptions, PDOMBehaviorFunction } from './ParallelDOM.js';
 import PDOMFuzzer from './PDOMFuzzer.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMUtils from './PDOMUtils.js';
-import { ParallelDOMOptions, PDOMBehaviorFunction } from './ParallelDOM.js';
 
 // constants
 const TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';

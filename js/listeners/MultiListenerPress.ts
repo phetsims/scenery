@@ -7,8 +7,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { Pointer, scenery, Trail } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import { Pointer, scenery, Trail } from '../imports.js';
 
 export default class MultiListenerPress {
   public pointer: Pointer;

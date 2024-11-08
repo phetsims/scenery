@@ -9,10 +9,10 @@
  * @author Jesse Greenberg
  */
 
+import { TReadOnlyEmitter } from '../../../../axon/js/TEmitter.js';
+import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import SpeechSynthesisAnnouncer, { SpeechSynthesisAnnouncerOptions, SpeechSynthesisInitializeOptions } from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
 import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
-import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { TReadOnlyEmitter } from '../../../../axon/js/TEmitter.js';
 
 type SelfOptions = EmptySelfOptions;
 type VoicingManagerOptions = SelfOptions & SpeechSynthesisAnnouncerOptions;

@@ -11,10 +11,10 @@
  */
 
 import TProperty from '../../../axon/js/TProperty.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import { HighlightPath, HighlightPathOptions, Node, scenery, Trail } from '../imports.js';
 
 type SelfOptions = {
