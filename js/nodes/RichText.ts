@@ -75,6 +75,7 @@ import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObje
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { allowLinksProperty, assertNoAdditionalChildren, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint, WidthSizable } from '../imports.js';
+import StringUtils from '../../../phetcommon/js/util/StringUtils.js';
 
 // @ts-expect-error - Since himalaya isn't in tsconfig
 const himalayaVar = himalaya;
@@ -747,30 +748,6 @@ export default class RichText extends WidthSizable( Node ) {
   }
 
   /**
-   * Transforms a given string with HTML markup into a string suitable for screen readers.
-   * Preserves basic styling tags while removing non-accessible markup.
-   */
-  public static getAccessibleStringProperty( stringProperty: TReadOnlyProperty<string> ): TReadOnlyProperty<string> {
-    return new DerivedStringProperty( [ stringProperty ], string => {
-      const rootElements: HimalayaNode[] = himalayaVar.parse( string );
-
-      let accessibleString = '';
-      rootElements.forEach( element => {
-        if ( isHimalayaTextNode( element ) ) {
-          accessibleString += element.content;
-        }
-        else if ( isHimalayaElementNode( element ) ) {
-
-          // TODO: How to get LTR? https://github.com/phetsims/scenery/issues/1669
-          accessibleString += RichText.himalayaElementToAccessibleString( element, true );
-        }
-      } );
-
-      return accessibleString;
-    } );
-  }
-
-  /**
    * Main recursive function for constructing the RichText Node tree.
    *
    * We'll add any relevant content to the containerNode. The element will be mutated as things are added, so that
@@ -1004,7 +981,7 @@ export default class RichText extends WidthSizable( Node ) {
           }
           // Don't overwrite only innerContents once things have been "torn down"
           if ( !element.innerContent ) {
-            element.innerContent = RichText.himalayaElementToAccessibleString( element, isLTR );
+            element.innerContent = RichText.himalayaElementToAccessibleString( element );
           }
 
           // Store information about it for the "regroup links" step
@@ -1765,19 +1742,21 @@ export default class RichText extends WidthSizable( Node ) {
   /**
    * Stringifies an HTML subtree defined by the given element.
    */
-  public static himalayaElementToString( element: HimalayaNode, isLTR: boolean ): string {
+  public static himalayaElementToString( element: HimalayaNode ): string {
     if ( isHimalayaTextNode( element ) ) {
-      return RichText.contentToString( element.content, isLTR );
+      return RichText.contentToString( element.content );
     }
     else if ( isHimalayaElementNode( element ) ) {
-      const dirAttributeString = RichTextUtils.himalayaGetAttribute( 'dir', element );
+      const content = element.children.map( child => RichText.himalayaElementToString( child ) ).join( '' );
 
-      if ( element.tagName === 'span' && dirAttributeString ) {
-        isLTR = dirAttributeString === 'ltr';
+      const dir = RichTextUtils.himalayaGetAttribute( 'dir', element );
+
+      if ( dir === 'ltr' || dir === 'rtl' ) {
+        return StringUtils.wrapDirection( content, dir );
       }
-
-      // Process children
-      return element.children.map( child => RichText.himalayaElementToString( child, isLTR ) ).join( '' );
+      else {
+        return content;
+      }
     }
     else {
       return '';
@@ -1788,19 +1767,18 @@ export default class RichText extends WidthSizable( Node ) {
    * Stringifies an HTML subtree defined by the given element, but removing certain tags that we don't need for
    * accessibility (like <a>, <span>, etc.), and adding in tags we do want (see ACCESSIBLE_TAGS).
    */
-  public static himalayaElementToAccessibleString( element: HimalayaNode, isLTR: boolean ): string {
+  public static himalayaElementToAccessibleString( element: HimalayaNode ): string {
     if ( isHimalayaTextNode( element ) ) {
-      return RichText.contentToString( element.content, isLTR );
+      return RichText.contentToString( element.content );
     }
     else if ( isHimalayaElementNode( element ) ) {
-      const dirAttribute = RichTextUtils.himalayaGetAttribute( 'dir', element );
+      let content = element.children.map( child => RichText.himalayaElementToAccessibleString( child ) ).join( '' );
 
-      if ( element.tagName === 'span' && dirAttribute ) {
-        isLTR = dirAttribute === 'ltr';
+      const dir = RichTextUtils.himalayaGetAttribute( 'dir', element );
+
+      if ( dir === 'ltr' || dir === 'rtl' ) {
+        content = StringUtils.wrapDirection( content, dir );
       }
-
-      // Process children
-      const content = element.children.map( child => RichText.himalayaElementToAccessibleString( child, isLTR ) ).join( '' );
 
       if ( _.includes( ACCESSIBLE_TAGS, element.tagName ) ) {
         return `<${element.tagName}>${content}</${element.tagName}>`;
@@ -1815,14 +1793,32 @@ export default class RichText extends WidthSizable( Node ) {
   }
 
   /**
+   * Transforms a given string with HTML markup into a string suitable for screen readers.
+   * Preserves basic styling tags while removing non-accessible markup.
+   */
+  public static getAccessibleStringProperty( stringProperty: TReadOnlyProperty<string> ): TReadOnlyProperty<string> {
+    return new DerivedStringProperty( [ stringProperty ], string => {
+      const rootElements: HimalayaNode[] = himalayaVar.parse( string );
+
+      let accessibleString = '';
+      rootElements.forEach( element => {
+        accessibleString += RichText.himalayaElementToAccessibleString( element );
+      } );
+
+      return accessibleString;
+    } );
+  }
+
+  /**
    * Takes the element.content from himalaya, unescapes HTML entities, and applies the proper directional tags.
    *
    * See https://github.com/phetsims/scenery-phet/issues/315
    */
-  public static contentToString( content: string, isLTR: boolean ): string {
+  public static contentToString( content: string, isLTR?: boolean ): string {
     // @ts-expect-error - we should get a string from this
     const unescapedContent: string = he.decode( content );
-    return isLTR ? ( `\u202a${unescapedContent}\u202c` ) : ( `\u202b${unescapedContent}\u202c` );
+
+    return isLTR === undefined ? unescapedContent : `${isLTR ? '\u202a' : '\u202b'}${unescapedContent}\u202c`;
   }
 
   public static RichTextIO: IOType;
