@@ -21,10 +21,10 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import VBox from './VBox.js';
-import HBox from './HBox.js';
-import LayoutTestUtils from '../LayoutTestUtils.js';
 import Rectangle from '../../nodes/Rectangle.js';
+import LayoutTestUtils from '../LayoutTestUtils.js';
+import HBox from './HBox.js';
+import VBox from './VBox.js';
 import VSeparator from './VSeparator.js';
 
 const RECT_WIDTH = LayoutTestUtils.RECT_WIDTH;

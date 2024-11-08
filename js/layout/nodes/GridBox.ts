@@ -47,9 +47,9 @@
  */
 
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
-import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutAlign, LayoutNode, LayoutNodeOptions, MarginLayoutCell, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SIZABLE_OPTION_KEYS, VerticalLayoutAlign } from '../../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.

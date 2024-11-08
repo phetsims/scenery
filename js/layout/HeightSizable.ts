@@ -10,9 +10,9 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { DelayedMutate, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { DelayedMutate, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery } from '../imports.js';
 
 // Position changes smaller than this will be ignored
 const CHANGE_POSITION_THRESHOLD = 1e-9;

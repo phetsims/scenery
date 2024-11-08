@@ -19,16 +19,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import TProperty from '../../../../axon/js/TProperty.js';
+import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
-import { AlignBox, Node, scenery } from '../../imports.js';
-import { AlignBoxOptions } from '../nodes/AlignBox.js';
-import Disposable, { DisposableOptions } from '../../../../axon/js/Disposable.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import { AlignBox, Node, scenery } from '../../imports.js';
+import { AlignBoxOptions } from '../nodes/AlignBox.js';
 
 let globalId = 1;
 

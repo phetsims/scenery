@@ -23,10 +23,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AllowedKeysString, EnglishKeyString, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, Node, scenery } from '../imports.js';
 import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/DerivedProperty.js';
-import TProperty from '../../../axon/js/TProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
+import TProperty from '../../../axon/js/TProperty.js';
+import { AllowedKeysString, EnglishKeyString, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, Node, scenery } from '../imports.js';
 
 const arrayComparator = <Key>( a: Key[], b: Key[] ): boolean => {
   return a.length === b.length && a.every( ( element, index ) => element === b[ index ] );

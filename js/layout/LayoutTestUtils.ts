@@ -5,8 +5,8 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { Rectangle, RectangleOptions } from '../imports.js';
 import Utils from '../../../dot/js/Utils.js';
+import { Rectangle, RectangleOptions } from '../imports.js';
 
 const RECT_WIDTH = 100;
 const RECT_HEIGHT = 25;

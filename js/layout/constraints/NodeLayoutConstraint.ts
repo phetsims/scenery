@@ -8,14 +8,14 @@
  */
 
 import Property from '../../../../axon/js/Property.js';
-import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
-import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { LayoutConstraint, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
 import TProperty from '../../../../axon/js/TProperty.js';
-import optionize from '../../../../phet-core/js/optionize.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
+import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import { LayoutConstraint, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
 
 // Position changes smaller than this will be ignored
 const CHANGE_POSITION_THRESHOLD = 1e-9;

@@ -33,12 +33,12 @@
  */
 
 import Multilink from '../../../../axon/js/Multilink.js';
-import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import Bounds2 from '../../../../dot/js/Bounds2.js';
-import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { AlignGroup, assertNoAdditionalChildren, extendsHeightSizable, extendsWidthSizable, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import { AlignGroup, assertNoAdditionalChildren, extendsHeightSizable, extendsWidthSizable, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation

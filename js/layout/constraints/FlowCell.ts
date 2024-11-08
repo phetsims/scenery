@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurable, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
-import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import optionize from '../../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import { ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurable, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
 
 const FLOW_CELL_KEYS = [
   ...FLOW_CONFIGURABLE_OPTION_KEYS,

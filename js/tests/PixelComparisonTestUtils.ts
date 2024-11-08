@@ -8,8 +8,8 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { Color, Display, Node, RendererType } from '../imports.js';
 import platform from '../../../phet-core/js/platform.js';
+import { Color, Display, Node, RendererType } from '../imports.js';
 
 const TESTED_RENDERERS: RendererType[] = [ 'canvas', 'svg', 'dom', 'webgl' ];
 

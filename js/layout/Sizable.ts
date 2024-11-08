@@ -7,14 +7,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import memoize from '../../../phet-core/js/memoize.js';
-import { DelayedMutate, HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, WIDTH_SIZABLE_OPTION_KEYS, WidthSizable, WidthSizableOptions } from '../imports.js';
-import Constructor from '../../../phet-core/js/types/Constructor.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import memoize from '../../../phet-core/js/memoize.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { TWidthSizable } from './WidthSizable.js';
+import { DelayedMutate, HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, WIDTH_SIZABLE_OPTION_KEYS, WidthSizable, WidthSizableOptions } from '../imports.js';
 import { THeightSizable } from './HeightSizable.js';
+import { TWidthSizable } from './WidthSizable.js';
 
 export const SIZABLE_SELF_OPTION_KEYS = [
   'preferredSize',

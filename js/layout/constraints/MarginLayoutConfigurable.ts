@@ -15,14 +15,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import memoize from '../../../../phet-core/js/memoize.js';
-import { scenery } from '../../imports.js';
-import Constructor from '../../../../phet-core/js/types/Constructor.js';
-import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
-import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
-import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import TEmitter from '../../../../axon/js/TEmitter.js';
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
+import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
+import memoize from '../../../../phet-core/js/memoize.js';
+import Constructor from '../../../../phet-core/js/types/Constructor.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
+import { scenery } from '../../imports.js';
 
 const MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS = [
   'margin',

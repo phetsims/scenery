@@ -20,15 +20,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import Orientation from '../../../../phet-core/js/Orientation.js';
 import memoize from '../../../../phet-core/js/memoize.js';
 import mutate from '../../../../phet-core/js/mutate.js';
-import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign, scenery, VerticalLayoutAlign } from '../../imports.js';
+import Orientation from '../../../../phet-core/js/Orientation.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
-import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import TEmitter from '../../../../axon/js/TEmitter.js';
+import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
+import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign, scenery, VerticalLayoutAlign } from '../../imports.js';
 import { TMarginLayoutConfigurable } from './MarginLayoutConfigurable.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [

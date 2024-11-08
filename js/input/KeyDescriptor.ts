@@ -10,8 +10,8 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { EnglishKey, EnglishKeyString, EnglishStringToCodeMap, metaEnglishKeys, scenery } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import { EnglishKey, EnglishKeyString, EnglishStringToCodeMap, metaEnglishKeys, scenery } from '../imports.js';
 
 // NOTE: The typing for ModifierKey and OneKeyStroke is limited TypeScript, there is a limitation to the number of
 //       entries in a union type. If that limitation is not acceptable remove this typing. OR maybe TypeScript will

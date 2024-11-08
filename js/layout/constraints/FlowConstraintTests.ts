@@ -6,9 +6,9 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import LayoutTestUtils from '../LayoutTestUtils.js';
-import { FlowCell, FlowConstraint, FlowConstraintOptions, Node } from '../../imports.js';
 import Property from '../../../../axon/js/Property.js';
+import { FlowCell, FlowConstraint, FlowConstraintOptions, Node } from '../../imports.js';
+import LayoutTestUtils from '../LayoutTestUtils.js';
 
 QUnit.module( 'FlowConstraint' );
 

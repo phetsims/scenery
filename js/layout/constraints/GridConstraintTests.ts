@@ -6,13 +6,13 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import PixelComparisonTestUtils from '../../tests/PixelComparisonTestUtils.js';
-import Rectangle from '../../nodes/Rectangle.js';
-import Node from '../../nodes/Node.js';
-import GridConstraint from './GridConstraint.js';
-import GridCell from './GridCell.js';
 import Property from '../../../../axon/js/Property.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
+import Node from '../../nodes/Node.js';
+import Rectangle from '../../nodes/Rectangle.js';
+import PixelComparisonTestUtils from '../../tests/PixelComparisonTestUtils.js';
+import GridCell from './GridCell.js';
+import GridConstraint from './GridConstraint.js';
 
 
 QUnit.module( 'GridConstraint' );
