@@ -237,9 +237,7 @@ const domEventPropertiesSetInConstructor: SerializedPropertiesForDeserialization
 
 type SerializedDOMEvent = {
   constructorName: string; // used to get the constructor from the window object, see Input.deserializeDOMEvent
-} & {
-  [key in SerializedPropertiesForDeserialization]?: unknown;
-};
+} & Partial<Record<SerializedPropertiesForDeserialization, unknown>>;
 
 // A list of keys on events that need to be serialized into HTMLElements
 const EVENT_KEY_VALUES_AS_ELEMENTS: SerializedPropertiesForDeserialization[] = [ 'target', 'relatedTarget' ];

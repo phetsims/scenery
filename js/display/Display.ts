@@ -2029,11 +2029,12 @@ export default class Display {
         replacedImages++;
         hasReplacedImages = true;
 
-        ( () => { // eslint-disable-line @typescript-eslint/no-loop-func
+        ( () => {
           // Closure variables need to be stored for each individual SVG image.
           const refImage = new window.Image();
           const svgImage = displaySVGImage;
 
+          // eslint-disable-next-line @typescript-eslint/no-loop-func
           refImage.onload = () => {
             // Get a Canvas
             const refCanvas = document.createElement( 'canvas' );
@@ -2054,6 +2055,7 @@ export default class Display {
 
             assert && assert( replacedImages >= 0 );
           };
+          // eslint-disable-next-line @typescript-eslint/no-loop-func
           refImage.onerror = () => {
             // NOTE: not much we can do, leave this element alone.
 
