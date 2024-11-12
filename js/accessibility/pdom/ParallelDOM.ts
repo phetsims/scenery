@@ -854,8 +854,6 @@ export default class ParallelDOM extends PhetioObject {
    * HTML components and code situations require different methods of setting the Accessible Name. See
    * setAccessibleNameBehavior for details on how this string is rendered in the PDOM. Setting to null will clear
    * this Node's accessibleName
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public setAccessibleName( accessibleName: PDOMValueType | null ): void {
     if ( accessibleName !== this._accessibleName ) {
@@ -879,8 +877,6 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Get the tag name of the DOM element representing this Node for accessibility.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public getAccessibleName(): string | null {
     if ( isTReadOnlyProperty( this._accessibleName ) ) {
@@ -919,9 +915,6 @@ export default class ParallelDOM extends PhetioObject {
    *
    * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
    * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public setAccessibleNameBehavior( accessibleNameBehavior: PDOMBehaviorFunction ): void {
 
@@ -939,9 +932,6 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Get the help text of the interactive element.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public getAccessibleNameBehavior(): PDOMBehaviorFunction {
     return this._accessibleNameBehavior;
@@ -1067,9 +1057,6 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Set the help text for a Node. See setAccessibleNameBehavior for details on how this string is
    * rendered in the PDOM. Null will clear the help text for this Node.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public setHelpText( helpText: PDOMValueType | null ): void {
     if ( helpText !== this._helpText ) {
@@ -1093,9 +1080,6 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Get the help text of the interactive element.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public getHelpText(): string | null {
     if ( isTReadOnlyProperty( this._helpText ) ) {
@@ -1109,9 +1093,6 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * helpTextBehavior is a function that will set the appropriate options on this Node to get the desired
    * "Help Text".
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public setHelpTextBehavior( helpTextBehavior: PDOMBehaviorFunction ): void {
 
@@ -1129,9 +1110,6 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Get the help text of the interactive element.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   public getHelpTextBehavior(): PDOMBehaviorFunction {
     return this._helpTextBehavior;
