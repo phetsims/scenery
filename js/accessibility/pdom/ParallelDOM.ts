@@ -260,16 +260,17 @@ type ParallelDOMSelfOptions = {
   /*
    * Higher Level API Functions
    */
-  accessibleName?: PDOMValueType | null; // Sets the name of this Node, read when this Node receives focus and inserted appropriately based on accessibleNameBehavior
-  accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the way in which accessibleName will be set for the Node, see BASIC_ACCESSIBLE_NAME_BEHAVIOR for example
-  helpText?: PDOMValueType | null; // Sets the descriptive content for this Node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
-  helpTextBehavior?: PDOMBehaviorFunction; // Sets the way in which help text will be set for the Node, see HELP_TEXT_AFTER_CONTENT for example
-  pdomHeading?: PDOMValueType | null; // Sets content for the heading whose level will be automatically generated if specified
-  pdomHeadingBehavior?: PDOMBehaviorFunction; // Set to modify default behavior for inserting pdomHeading string
+  accessibleName?: PDOMValueType | null; // Sets the accessible name for this Node, see setAccessibleName() for more information.
+  helpText?: PDOMValueType | null; // Sets the help text for this Node, see setHelpText() for more information
+  pdomHeading?: PDOMValueType | null; // @experimental - not ready for use
 
   /*
    * Lower Level API Functions
    */
+  accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
+  helpTextBehavior?: PDOMBehaviorFunction; // Sets the implementation for the helpText, see setHelpTextBehavior() for more information
+  pdomHeadingBehavior?: PDOMBehaviorFunction; // @experimental - not ready for use
+
   containerTagName?: string | null; // Sets the tag name for an [optional] element that contains this Node's siblings
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
 
@@ -850,10 +851,14 @@ export default class ParallelDOM extends PhetioObject {
   /***********************************************************************************************************/
 
   /**
-   * Set the Node's pdom content in a way that will define the Accessible Name for the browser. Different
-   * HTML components and code situations require different methods of setting the Accessible Name. See
-   * setAccessibleNameBehavior for details on how this string is rendered in the PDOM. Setting to null will clear
-   * this Node's accessibleName
+   * Sets the accessible name that describes this Node. The accessible name is the semantic title for the Node. It is
+   * the content that will be read by a screen reader when the Node is discovered by the virtual cursor.
+   *
+   * For more information about accessible names in web accessibility see
+   * https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/.
+   *
+   * Part of the higher level API, the accessibleNameBehavior function will set the appropriate options on this Node
+   * to create the desired accessible name. See the documentation for setAccessibleNameBehavior() for more information.
    */
   public setAccessibleName( accessibleName: PDOMValueType | null ): void {
     if ( accessibleName !== this._accessibleName ) {
@@ -876,7 +881,7 @@ export default class ParallelDOM extends PhetioObject {
   public get accessibleName(): string | null { return this.getAccessibleName(); }
 
   /**
-   * Get the tag name of the DOM element representing this Node for accessibility.
+   * Get the accessible name that describes this Node.
    */
   public getAccessibleName(): string | null {
     if ( isTReadOnlyProperty( this._accessibleName ) ) {
@@ -899,22 +904,12 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * accessibleNameBehavior is a function that will set the appropriate options on this Node to get the desired
-   * "Accessible Name"
+   * accessible name.
    *
-   * This accessibleNameBehavior's default does the best it can to create a general method to set the Accessible
-   * Name for a variety of different Node types and configurations, but if a Node is more complicated, then this
-   * method will not properly set the Accessible Name for the Node's HTML content. In this situation this function
-   * needs to be overridden by the subtype to meet its specific constraints. When doing this make it is up to the
-   * usage site to make sure that the Accessible Name is properly being set and conveyed to AT, as it is very hard
-   * to validate this function.
-   *
-   * NOTE: By Accessible Name (capitalized), we mean the proper title of the HTML element that will be set in
-   * the browser ParallelDOM Tree and then interpreted by AT. This is necessily different from scenery internal
-   * names of HTML elements like "label sibling" (even though, in certain circumstances, an Accessible Name could
-   * be set by using the "label sibling" with tag name "label" and a "for" attribute).
-   *
-   * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
-   * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
+   * The default value does the best it can to create an accessible name for a variety of different ParallelDOM
+   * options and tag names. If a Node uses more complicated markup, you can provide your own function to
+   * meet your requirements. If you do this, it is up to you to make sure that the Accessible Name is properly
+   * being set and conveyed to AT, as it is very hard to validate this function.
    */
   public setAccessibleNameBehavior( accessibleNameBehavior: PDOMBehaviorFunction ): void {
 
@@ -1055,8 +1050,11 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * Set the help text for a Node. See setAccessibleNameBehavior for details on how this string is
-   * rendered in the PDOM. Null will clear the help text for this Node.
+   * Sets the help text for this Node. Help text usually provides additional information that describes what a Node
+   * is or how to interact with it. It will be read by a screen reader when discovered by the virtual cursor.
+   *
+   * Part of the higher level API, the helpTextBehavior function will set the appropriate options on this Node
+   * to create the desired help text. See the documentation for setHelpTextBehavior() for more information.
    */
   public setHelpText( helpText: PDOMValueType | null ): void {
     if ( helpText !== this._helpText ) {
@@ -1079,7 +1077,7 @@ export default class ParallelDOM extends PhetioObject {
   public get helpText(): string | null { return this.getHelpText(); }
 
   /**
-   * Get the help text of the interactive element.
+   * Get the help text for this Node.
    */
   public getHelpText(): string | null {
     if ( isTReadOnlyProperty( this._helpText ) ) {
@@ -1091,8 +1089,12 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * helpTextBehavior is a function that will set the appropriate options on this Node to get the desired
-   * "Help Text".
+   * helpTextBehavior is a function that will set the appropriate options on this Node to get the desired help text.
+   *
+   * The default value does the best it can to create the help text based on the values for other ParallelDOM options.
+   * Usually, this is a paragraph element that comes after the Node's primary sibling in the PDOM. If you need to
+   * customize this behavior, you can provide your own function to meet your requirements. If you provide your own
+   * function, it is up to you to make sure that the help text is properly being set and is discoverable by AT.
    */
   public setHelpTextBehavior( helpTextBehavior: PDOMBehaviorFunction ): void {
 
