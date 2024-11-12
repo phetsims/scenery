@@ -261,9 +261,9 @@ type ParallelDOMSelfOptions = {
    * Higher Level API Functions
    */
   accessibleName?: PDOMValueType | null; // Sets the name of this Node, read when this Node receives focus and inserted appropriately based on accessibleNameBehavior
-  accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the way in which accessibleName will be set for the Node, see DEFAULT_ACCESSIBLE_NAME_BEHAVIOR for example
+  accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the way in which accessibleName will be set for the Node, see BASIC_ACCESSIBLE_NAME_BEHAVIOR for example
   helpText?: PDOMValueType | null; // Sets the descriptive content for this Node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
-  helpTextBehavior?: PDOMBehaviorFunction; // Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
+  helpTextBehavior?: PDOMBehaviorFunction; // Sets the way in which help text will be set for the Node, see HELP_TEXT_AFTER_CONTENT for example
   pdomHeading?: PDOMValueType | null; // Sets content for the heading whose level will be automatically generated if specified
   pdomHeadingBehavior?: PDOMBehaviorFunction; // Set to modify default behavior for inserting pdomHeading string
 
