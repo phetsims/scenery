@@ -2,4 +2,4 @@
 
 
 // use chipper's gruntfile
-module.exports = require( '../chipper/js/grunt/gruntMain.js' );
+module.exports = require( '../chipper/js/grunt/commonjs/gruntMain.js' );
