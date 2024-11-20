@@ -1456,7 +1456,7 @@ export default class Display {
   }
 
   public static readonly INTERRUPT_OTHER_POINTERS = ( event: SceneryEvent ): void => {
-    phet?.joist?.display?.interruptOtherPointers( event?.pointer );
+    window.phet?.joist?.display?.interruptOtherPointers( event?.pointer );
   };
 
   /**

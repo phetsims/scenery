@@ -78,7 +78,7 @@ export default class HotkeyData {
 
     // Add this Hotkey to the binder registry for documentation. See documentation in the binder repository
     // for more information about how this is done.
-    assert && phet?.chipper?.queryParameters?.binder && InstanceRegistry.registerHotkey( this );
+    assert && window.phet?.chipper?.queryParameters?.binder && InstanceRegistry.registerHotkey( this );
   }
 
   /**
