@@ -28,7 +28,7 @@ const PaintableStatefulDrawable = memoize( type => {
   return class extends type {
     /**
      * Initializes the paintable part of the stateful trait state, starting its "lifetime" until it is disposed
-     * @protected
+     * @public
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
@@ -78,7 +78,7 @@ const PaintableStatefulDrawable = memoize( type => {
 
     /**
      * Cleans the dirty-flag states to the 'not-dirty' option, so that we can listen for future changes.
-     * @protected
+     * @public
      */
     cleanPaintableState() {
       // TODO: is this being called when we need it to be called? https://github.com/phetsims/scenery/issues/1581
