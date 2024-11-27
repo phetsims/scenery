@@ -69,13 +69,13 @@ import Range from '../../../dot/js/Range.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
+import StringUtils from '../../../phetcommon/js/util/StringUtils.js';
 import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 import '../../../sherpa/lib/himalaya-1.1.0.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { allowLinksProperty, assertNoAdditionalChildren, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint, WidthSizable } from '../imports.js';
-import StringUtils from '../../../phetcommon/js/util/StringUtils.js';
 
 // @ts-expect-error - Since himalaya isn't in tsconfig
 const himalayaVar = himalaya;
