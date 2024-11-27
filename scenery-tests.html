@@ -91,13 +91,13 @@
     '../sherpa/lib/he-1.1.1.js',
     '../assert/js/assert.js',
     '../query-string-machine/js/QueryStringMachine.js',
-    '../chipper/js/initialize-globals.js',
+    '../chipper/js/browser/initialize-globals.js',
     '../sherpa/lib/seedrandom-2.4.2.js',
     '../sherpa/lib/base64-js-1.2.0.js',
     '../sherpa/lib/TextEncoderLite-3c9f6f0.js',
     '../tandem/js/PhetioIDUtils.js',
     '../sherpa/lib/qunit-2.20.0.js',
-    '../chipper/js/sim-tests/qunit-connector.js'
+    '../chipper/js/browser/sim-tests/qunit-connector.js'
   ];
 
   if ( brand === 'phet-io' ) {
@@ -120,7 +120,7 @@
   };
 
   // Kick off string loading immediately
-  loadURL( '../chipper/js/load-unbuilt-strings.js' );
+  loadURL( '../chipper/js/browser/load-unbuilt-strings.js' );
 
   // Queue all of the preloads to be loaded.
   preloads.forEach( preload => loadURL( preload ) );
