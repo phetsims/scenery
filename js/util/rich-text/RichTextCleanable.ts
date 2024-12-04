@@ -34,9 +34,9 @@ const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperT
       // Remove all children (and recursively clean)
       for ( let i = thisNode._children.length - 1; i >= 0; i-- ) {
         const child = thisNode._children[ i ] as RichTextCleanableNode;
+        thisNode.removeChild( child );
 
         if ( child.isCleanable ) {
-          thisNode.removeChild( child );
           child.clean();
         }
       }
