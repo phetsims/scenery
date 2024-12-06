@@ -448,7 +448,10 @@ class Node extends ParallelDOM {
   public readonly opacityProperty: TinyProperty<number>;
 
   // Disabled opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
-  // Combined with the normal opacity ONLY when the node is disabled.
+  // disabled opacity depends greatly on the value of this.opacity. This acts as a multiplier
+  // Combined with the normal opacity ONLY when the node is disabled. Note, the rendered
+  // to that value. i.e. read disabledOpacity = .5 as "50% of the current opacity", so if
+  // this.opacity is .5, then this renders as 25% opacity, see this.getEffectiveOpacity
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
   public readonly disabledOpacityProperty: TinyProperty<number>;
 
@@ -4410,8 +4413,13 @@ class Node extends ParallelDOM {
    */
   protected onEnabledPropertyChange( enabled: boolean ): void {
     !enabled && this.interruptSubtreeInput();
-    this.inputEnabled = enabled;
 
+    // We don't want to overstep here if inputEnabledProperty has been set elsewhere to be a DerivedProperty.
+    if ( this.inputEnabledProperty.isSettable() ) {
+      this.inputEnabled = enabled;
+    }
+
+    // 1 means "no different than the current, enabled opacity", see this.getEffectiveOpacity()
     if ( this.disabledOpacityProperty.value !== 1 ) {
       this.filterChangeEmitter.emit();
     }
