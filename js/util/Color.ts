@@ -440,6 +440,7 @@ export default class Color {
    */
   public brighterColor( factor?: number ): Color {
     factor = this.checkFactor( factor );
+    assert && assert( factor > 0, 'Color.brighterColor requires a factor greater than 0' );
     const red = Math.min( 255, Math.floor( this.r / factor ) );
     const green = Math.min( 255, Math.floor( this.g / factor ) );
     const blue = Math.min( 255, Math.floor( this.b / factor ) );
