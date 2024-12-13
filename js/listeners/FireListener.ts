@@ -55,7 +55,7 @@ export default class FireListener extends PressListener implements TInputListene
       phetioReleaseActionInstrumented: false,
 
       // Though FireListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
-      // TODO: Note how PushButtonModel.firedEmitter is a recommended, readOnly:false way of firing the button. That is the opposite here (in a good way),
+      // TODO: Note how PushButtonModel.firedEmitter is a recommended, readOnly:false way of firing the button. That is the opposite here (in a good way), https://github.com/phetsims/scenery/issues/1676
       phetioReadOnly: true
     }, providedOptions );
 
