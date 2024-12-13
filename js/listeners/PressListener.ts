@@ -115,6 +115,11 @@ type SelfOptions<Listener extends PressListener> = {
   // PressListener by default doesn't allow PhET-iO to trigger press/release Action events
   phetioReadOnly?: boolean;
   phetioFeatured?: boolean;
+
+  // Opt out of instrumenting pressAction and releaseAction, only useful in subtypes where you have a better API that
+  // makes these redundant.
+  phetioPressActionInstrumented?: boolean;
+  phetioReleaseActionInstrumented?: boolean;
 };
 
 export type PressListenerOptions<Listener extends PressListener = PressListener> = SelfOptions<Listener> & EnabledComponentOptions;
@@ -250,6 +255,8 @@ export default class PressListener extends EnabledComponent implements TInputLis
       canStartPress: truePredicate,
       a11yLooksPressedInterval: 100,
       collapseDragEvents: false,
+      phetioPressActionInstrumented: true,
+      phetioReleaseActionInstrumented: true,
 
       // EnabledComponent
       // By default, PressListener does not have an instrumented enabledProperty, but you can opt in with this option.
@@ -338,10 +345,10 @@ export default class PressListener extends EnabledComponent implements TInputLis
     };
 
     this._pressAction = new PhetioAction( this.onPress.bind( this ), {
-      tandem: options.tandem.createTandem( 'pressAction' ),
+      tandem: options.phetioPressActionInstrumented ? options.tandem.createTandem( 'pressAction' ) : Tandem.OPT_OUT,
       phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
                            'used to convey info about the SceneryEvent.',
-      phetioReadOnly: true,
+      phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: EventType.USER,
       parameters: [ {
@@ -367,9 +374,9 @@ export default class PressListener extends EnabledComponent implements TInputLis
       } ],
 
       // phet-io
-      tandem: options.tandem.createTandem( 'releaseAction' ),
+      tandem: options.phetioReleaseActionInstrumented ? options.tandem.createTandem( 'releaseAction' ) : Tandem.OPT_OUT,
       phetioDocumentation: 'Executes whenever a release occurs.',
-      phetioReadOnly: true,
+      phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: EventType.USER
     } );

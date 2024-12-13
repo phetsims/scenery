@@ -14,7 +14,6 @@ import Emitter from '../../../axon/js/Emitter.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import EventType from '../../../tandem/js/EventType.js';
-import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import { Node, PressListener, PressListenerOptions, scenery, SceneryEvent, TInputListener } from '../imports.js';
@@ -52,9 +51,12 @@ export default class FireListener extends PressListener implements TInputListene
 
       // phet-io
       tandem: Tandem.REQUIRED,
+      phetioPressActionInstrumented: false,
+      phetioReleaseActionInstrumented: false,
 
-      // Though FireListener is not instrumented, declare these here to support properly passing this to children
-      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
+      // Though FireListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
+      // TODO: Note how PushButtonModel.firedEmitter is a recommended, readOnly:false way of firing the button. That is the opposite here (in a good way),
+      phetioReadOnly: true
     }, providedOptions );
 
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
