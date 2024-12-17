@@ -24,7 +24,7 @@
 import Property from '../../../axon/js/Property.js';
 import Matrix from '../../../dot/js/Matrix.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import SingularValueDecomposition from '../../../dot/js/SingularValueDecomposition.js';
+import { SingularValueDecomposition } from '../../../dot/js/Matrix.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import optionize from '../../../phet-core/js/optionize.js';
