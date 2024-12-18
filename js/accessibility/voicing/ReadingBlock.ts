@@ -29,8 +29,8 @@ import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/j
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import { DelayedMutate, Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
-import TInputListener from '../../input/TInputListener.js';
-import { TVoicing } from './Voicing.js';
+import type TInputListener from '../../input/TInputListener.js';
+import type { TVoicing } from './Voicing.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',

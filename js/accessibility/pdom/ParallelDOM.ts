@@ -151,9 +151,8 @@ import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioS
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
-import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
-import { Highlight } from '../../overlays/HighlightOverlay.js';
+import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
+import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail, Highlight } from '../../imports.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;

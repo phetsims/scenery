@@ -35,7 +35,7 @@ import ResponsePacket, { ResolvedResponse, SpeakableResolvedOptions, VoicingResp
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
-import { TInteractiveHighlighting } from './InteractiveHighlighting.js';
+import type { TInteractiveHighlighting } from './InteractiveHighlighting.js';
 
 // Helps enforce that the utterance is defined.
 function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {

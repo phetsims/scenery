@@ -692,10 +692,12 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
   return InteractiveHighlightingClass;
 } );
 
-export type InteractiveHighlightingNode = Node & TInteractiveHighlighting;
+// NOTE!!! This used to be called "InteractiveHighlightingNode", which conflicts with (or is confusing) with the actual
+// InteractiveHighlightingNode.ts type. Renamed here so they can be in the same namespace.
+export type InteractiveHighlightingNodeType = Node & TInteractiveHighlighting;
 
-export function isInteractiveHighlighting( something: IntentionalAny ): something is InteractiveHighlightingNode {
-  return something instanceof Node && ( something as InteractiveHighlightingNode )._isInteractiveHighlighting;
+export function isInteractiveHighlighting( something: IntentionalAny ): something is InteractiveHighlightingNodeType {
+  return something instanceof Node && ( something as InteractiveHighlightingNodeType )._isInteractiveHighlighting;
 }
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );

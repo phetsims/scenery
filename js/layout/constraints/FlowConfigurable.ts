@@ -28,8 +28,7 @@ import Orientation from '../../../../phet-core/js/Orientation.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
-import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign, scenery, VerticalLayoutAlign } from '../../imports.js';
-import { TMarginLayoutConfigurable } from './MarginLayoutConfigurable.js';
+import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign, scenery, VerticalLayoutAlign, TMarginLayoutConfigurable } from '../../imports.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',

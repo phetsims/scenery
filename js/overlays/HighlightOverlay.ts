@@ -13,9 +13,7 @@ import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
-import { isReadingBlock, ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
-import { ActivatedReadingBlockHighlight, Display, Focus, FocusManager, HighlightFromNode, HighlightPath, isInteractiveHighlighting, Node, scenery, TOverlay, TPaint, Trail, TransformTracker } from '../imports.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, FocusManager, HighlightFromNode, HighlightPath, isInteractiveHighlighting, Node, scenery, TOverlay, TPaint, Trail, TransformTracker, isReadingBlock, ReadingBlockNode, InteractiveHighlightingNodeType } from '../imports.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.
@@ -385,7 +383,7 @@ export default class HighlightOverlay implements TOverlay {
    * Activate an interactive highlight, activating the highlight and adding a listener that will update the highlight
    * changes while it is active.
    */
-  private activateInteractiveHighlight( trail: Trail, node: InteractiveHighlightingNode ): void {
+  private activateInteractiveHighlight( trail: Trail, node: InteractiveHighlightingNodeType ): void {
 
     this.activateHighlight(
       trail,

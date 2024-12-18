@@ -9,7 +9,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { EnglishKey } from './EnglishStringToCodeMap.js';
+import { EnglishKey } from '../imports.js';
 
 const ARROW_KEYS: EnglishKey[] = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown' ];
 const MOVEMENT_KEYS: EnglishKey[] = [ ...ARROW_KEYS, 'w', 'a', 's', 'd' ];
