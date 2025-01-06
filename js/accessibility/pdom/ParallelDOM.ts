@@ -152,7 +152,7 @@ import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioO
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail, Highlight } from '../../imports.js';
+import { Highlight, Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -207,6 +207,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'accessibleNameBehavior',
   'helpText',
   'helpTextBehavior',
+  'accessibleParagraph',
   'pdomHeading',
   'pdomHeadingBehavior',
 
@@ -260,6 +261,7 @@ type ParallelDOMSelfOptions = {
    * Higher Level API Functions
    */
   accessibleName?: PDOMValueType | null; // Sets the accessible name for this Node, see setAccessibleName() for more information.
+  accessibleParagraph?: PDOMValueType | null; // Sets the accessible paragraph for this Node, see setAccessibleParagraph() for more information.
   helpText?: PDOMValueType | null; // Sets the help text for this Node, see setHelpText() for more information
   pdomHeading?: PDOMValueType | null; // @experimental - not ready for use
 
@@ -570,6 +572,10 @@ export default class ParallelDOM extends PhetioObject {
 
   // Function that returns the options needed to set the appropriate accessible name for the Node
   private _accessibleNameBehavior: PDOMBehaviorFunction;
+
+  // Sets the 'Accessible Paragraph' for the Node. This makes this Node a paragraph of descriptive content, often
+  // for non-interactive elements.
+  private _accessibleParagraph: PDOMValueType | null = null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
   private _helpText: PDOMValueType | null = null;
@@ -892,6 +898,42 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
+   * Sets this Node as a paragraph with the provided content. This lets you easily describe Nodes for screen readers. This
+   * is most useful for non-interactive elements that need to be described.
+   *
+   * myImageNode.setAccessibleParagraph( 'This is a picture of a cat' );
+   *
+   * This is part of the "Higher level API", but there is no customizing behavior function for this function.
+   */
+  public setAccessibleParagraph( accessibleParagraph: PDOMValueType | null ): void {
+    assert && assert( this.tagName === null || this.tagName === 'p', `accessibleParagraph can only be set on a Node with a p tag: ${this.tagName}` );
+    if ( accessibleParagraph !== this._accessibleParagraph ) {
+
+      // Forward to the lower level API.
+      this.tagName = 'p';
+      this.innerContent = accessibleParagraph;
+
+      this._accessibleParagraph = accessibleParagraph;
+    }
+  }
+
+  public set accessibleParagraph( accessibleParagraph: PDOMValueType | null ) { this.setAccessibleParagraph( accessibleParagraph ); }
+
+  public get accessibleParagraph(): string | null { return this.getAccessibleParagraph(); }
+
+  /**
+   * Get the accessible paragraph that represents/describe.
+   */
+  public getAccessibleParagraph(): string | null {
+    if ( isTReadOnlyProperty( this._accessibleParagraph ) ) {
+      return this._accessibleParagraph.value;
+    }
+    else {
+      return this._accessibleParagraph;
+    }
+  }
+
+  /**
    * Remove this Node from the PDOM by clearing its pdom content. This can be useful when creating icons from
    * pdom content.
    */
@@ -1131,6 +1173,11 @@ export default class ParallelDOM extends PhetioObject {
    */
   public setTagName( tagName: string | null ): void {
     assert && assert( tagName === null || typeof tagName === 'string' );
+
+    // For the higher level API, if using accessibleParagraph the tag name must be 'p'.
+    if ( this._accessibleParagraph ) {
+      assert && assert( tagName === 'p' || tagName === null, 'accessibleParagraph can only be set on a Node with a p tag' );
+    }
 
     if ( tagName !== this._tagName ) {
       this._tagName = tagName;
