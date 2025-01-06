@@ -152,6 +152,7 @@
  */
 
 import BooleanProperty, { BooleanPropertyOptions } from '../../../axon/js/BooleanProperty.js';
+import { DisposerOptions } from '../../../axon/js/Disposable.js';
 import EnabledProperty, { EnabledPropertyOptions } from '../../../axon/js/EnabledProperty.js';
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
@@ -2337,7 +2338,7 @@ class Node extends ParallelDOM {
    * - cursor {string|null}: If node.cursor is null, any non-null cursor of an input listener will effectively
    *                         "override" it. NOTE: this can be implemented as an es5 getter, if the cursor can change
    */
-  public addInputListener( listener: TInputListener ): this {
+  public addInputListener( listener: TInputListener, options?: DisposerOptions ): this {
     assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
     assert && assert( listener !== null, 'Input listener cannot be null' );
     assert && assert( listener !== undefined, 'Input listener cannot be undefined' );
@@ -2353,7 +2354,11 @@ class Node extends ParallelDOM {
       if ( listener.hotkeys ) {
         hotkeyManager.updateHotkeysFromInputListenerChange( this );
       }
+
+      // If a disposer is specified, then automatically remove this input listener when the disposer is disposed.
+      options?.disposer && this.addDisposerAction( 'inputListener', listener, options.disposer, () => this.removeInputListener( listener ) );
     }
+
     return this;
   }
 
@@ -2375,6 +2380,9 @@ class Node extends ParallelDOM {
       if ( listener.hotkeys ) {
         hotkeyManager.updateHotkeysFromInputListenerChange( this );
       }
+
+      // undo addDisposerAction (see above)
+      this.removeDisposerAction( 'inputListener', listener );
     }
 
     return this;
