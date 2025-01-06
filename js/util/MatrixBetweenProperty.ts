@@ -188,6 +188,12 @@ export default class MatrixBetweenProperty extends TinyProperty<Matrix3 | null> 
     this.fromAncestorsProperty.dispose();
     this.toAncestorsProperty.dispose();
 
+    // Remove listeners not needed anymore
+    this.listenedNodeSet.forEach( node => {
+      node.transformEmitter.hasListener( this._nodeTransformListener ) &&
+      node.transformEmitter.removeListener( this._nodeTransformListener );
+    } );
+
     super.dispose();
   }
 }

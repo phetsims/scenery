@@ -88,7 +88,7 @@ export default class AncestorNodesProperty extends TinyProperty<Set<Node>> {
 
   public override dispose(): void {
     this.listenedNodeSet.forEach( node => this.removeNodeListener( node ) );
-
+    this.updateEmitter.dispose();
     super.dispose();
   }
 }
