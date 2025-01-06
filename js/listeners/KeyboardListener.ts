@@ -241,7 +241,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    * Dispose of this listener by disposing of any Callback timers. Then clear all KeyGroups.
    */
   public override dispose(): void {
-    ( this as unknown as TInputListener ).hotkeys!.forEach( hotkey => hotkey.dispose() );
+    this.hotkeys.forEach( hotkey => hotkey.dispose() );
     this.isPressedProperty.dispose();
     this.pressedKeyStringPropertiesProperty.dispose();
 
