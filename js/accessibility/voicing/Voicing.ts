@@ -460,7 +460,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
        * responseCollector.nameResponsesEnabledProperty is set to true.
        */
       public setVoicingNameResponse( response: VoicingResponse ): void {
-        this._voicingNameResponseOverride = true;
+        this._voicingNameResponseOverride = response !== null;
         this._voicingResponsePacket.nameResponse = response;
       }
 
@@ -538,7 +538,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
        * true.
        */
       public setVoicingHintResponse( response: VoicingResponse ): void {
-        this._voicingHintResponseOverride = true;
+        this._voicingHintResponseOverride = response !== null;
         this._voicingResponsePacket.hintResponse = response;
       }
 
