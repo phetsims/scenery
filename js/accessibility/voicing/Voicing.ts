@@ -34,7 +34,7 @@ import responseCollector from '../../../../utterance-queue/js/responseCollector.
 import ResponsePacket, { ResolvedResponse, SpeakableResolvedOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
-import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
+import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, ParallelDOM, ParallelDOMOptions, PDOMValueType, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import type { TInteractiveHighlighting } from './InteractiveHighlighting.js';
 
 // Helps enforce that the utterance is defined.
@@ -110,6 +110,10 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
   // @mixin-private - private to this file, but public needed for the interface
   _voicingCanSpeakProperty: TinyProperty<boolean>;
 
+  // @mixin-private - private to this file, but public needed for the interface
+  _voicingNameResponseOverride: boolean;
+  _voicingHintResponseOverride: boolean;
+
   initialize( ...args: IntentionalAny[] ): this;
 
   voicingSpeakFullResponse( providedOptions?: SpeakingOptions ): void;
@@ -135,6 +139,8 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
 
   getVoicingNameResponse(): ResolvedResponse;
 
+  applyDefaultNameResponse( accessibleName: VoicingResponse ): void;
+
   setVoicingObjectResponse( response: VoicingResponse ): void;
 
   voicingObjectResponse: ResolvedResponse;
@@ -152,6 +158,8 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
   voicingHintResponse: ResolvedResponse;
 
   getVoicingHintResponse(): ResolvedResponse;
+
+  applyDefaultHintResponse( helpText: VoicingResponse ): void;
 
   setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ): void;
 
@@ -218,6 +226,12 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       // As long as this value is greater than zero, this Node can speak. See onInstanceVisibilityChange
       // and onInstanceVoicingVisibilityChange for more implementation details.
       private _voicingCanSpeakCount!: number;
+
+      // Flags that indicate that voicing name or hint response have been set manually. If false,
+      // a default accessible name or help text from ParallelDOM may be used by applyDefaultNameResponse or
+      // applyDefaultHintResponse. See those functions for more information.
+      public _voicingNameResponseOverride = false;
+      public _voicingHintResponseOverride = false;
 
       // Called when `canVoiceEmitter` emits for an Instance.
       private readonly _boundInstanceCanVoiceChangeListener: ( canSpeak: boolean ) => void;
@@ -446,6 +460,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
        * responseCollector.nameResponsesEnabledProperty is set to true.
        */
       public setVoicingNameResponse( response: VoicingResponse ): void {
+        this._voicingNameResponseOverride = true;
         this._voicingResponsePacket.nameResponse = response;
       }
 
@@ -458,6 +473,23 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
        */
       public getVoicingNameResponse(): ResolvedResponse {
         return this._voicingResponsePacket.nameResponse;
+      }
+
+      /**
+       * Sets the name response for this VoicingNode to match the provided accessibleName. If setAccessibleName
+       * has been used once, this is a no-op.
+       *
+       * This should rarely be used. It is intended for use cases where the name response should match the
+       * ParallelDOM.accessibleName to align the APIs. See Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR. It is probably most
+       * useful in your own behavior function.
+       */
+      public applyDefaultNameResponse( accessibleName: VoicingResponse ): void {
+
+        // If the voicingNameResponse has not been set manually, it will take the same value
+        // as the accessibleName.
+        if ( !this._voicingNameResponseOverride ) {
+          this._voicingResponsePacket.nameResponse = accessibleName;
+        }
       }
 
       /**
@@ -506,6 +538,7 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
        * true.
        */
       public setVoicingHintResponse( response: VoicingResponse ): void {
+        this._voicingHintResponseOverride = true;
         this._voicingResponsePacket.hintResponse = response;
       }
 
@@ -518,6 +551,23 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
        */
       public getVoicingHintResponse(): ResolvedResponse {
         return this._voicingResponsePacket.hintResponse;
+      }
+
+      /**
+       * Sets the hint response for this VoicingNode to match the provided help text. If setVoicingHintResponse
+       * has been used once, this is a no-op.
+       *
+       * This should rarely be used. It is intended for use cases where the hint response should match the
+       * ParallelDOM.helpText to align the APIs. See Voicing.BASIC_HELP_TEXT_BEHAVIOR. It is probably most useful in
+       * your own behavior function.
+       */
+      public applyDefaultHintResponse( helpText: VoicingResponse ): void {
+
+        // If the voicingHintResponse has not been set manually, it will take the same value
+        // as the helpText.
+        if ( !this._voicingHintResponseOverride ) {
+          this._voicingResponsePacket.hintResponse = helpText;
+        }
       }
 
       /**
@@ -820,6 +870,49 @@ Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
   const withoutBothProperties = existingCanAnnounceProperties.splice( voicingVisiblePropertyIndex, 1 );
 
   utterance.voicingCanAnnounceProperties = withoutBothProperties;
+};
+
+/**
+ * A basic behavior function for Voicing that sets the both the ParallelDOM.accessibleName and Voicing.voicingNameResponse.
+ * By using a behavior function, we can ensure that the accessibleName and voicingNameResponse are always in sync when you
+ * mutate the accessibleName.
+ *
+ * For example:
+ *   myNode.accessibleNameBehavior = Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
+ *   myNode.accessibleName = 'My Node'; // This will also set myNode.voicingNameResponse to 'My Node'
+ */
+Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, accessibleName: PDOMValueType ): ParallelDOMOptions => {
+  assert && assert( isVoicing( node ), 'Node must be a VoicingNode to use Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR' );
+  const voicingNode = node as VoicingNode;
+
+  // Create the basic accessible name options - the behavior function will use these options to mutate the Node.
+  options = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR( voicingNode, options, accessibleName );
+  voicingNode.applyDefaultNameResponse( accessibleName );
+
+  return options;
+};
+
+/**
+ * A basic behavior function for Voicing that sets the both the ParallelDOM.helpText and Voicing.voicingHintResponse.
+ * By using a behavior function, we can ensure that the helpText and voicingHintResponse are always in sync when you
+ * mutate the helpText.
+ *
+ * For example:
+ *   myNode.helpTextBehavior = Voicing.BASIC_HELP_TEXT_BEHAVIOR;
+ *   myNode.helpText = 'This is a helpful hint'; // This will also set myNode.voicingHintResponse to 'This is a helpful hint'
+ */
+Voicing.BASIC_HELP_TEXT_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, helpText: PDOMValueType ): ParallelDOMOptions => {
+  assert && assert( isVoicing( node ), 'Node must be a VoicingNode to use Voicing.BASIC_HELP_TEXT_BEHAVIOR' );
+  const voicingNode = node as VoicingNode;
+
+  // Create the basic help text options - the behavior function will use these options to mutate the Node.
+  options = ParallelDOM.HELP_TEXT_AFTER_CONTENT( voicingNode, options, helpText );
+
+  // If the voicingNameResponse has not been set manually, it will take the same value
+  // as the accessibleName.
+  voicingNode.applyDefaultHintResponse( helpText );
+
+  return options;
 };
 
 export type VoicingNode = Node & TVoicing;
