@@ -181,6 +181,7 @@ export { default as voicingManager } from './accessibility/voicing/voicingManage
 export { default as voicingUtteranceQueue } from './accessibility/voicing/voicingUtteranceQueue.js';
 export { default as Voicing, isVoicing } from './accessibility/voicing/Voicing.js';
 export type { VoicingOptions, VoicingNode, SpeakingOptions, TVoicing } from './accessibility/voicing/Voicing.js';
+export { default as VoicingCircle } from './accessibility/voicing/nodes/VoicingCircle.js';
 export { default as ReadingBlockUtterance } from './accessibility/voicing/ReadingBlockUtterance.js';
 export type { ReadingBlockUtteranceOptions } from './accessibility/voicing/ReadingBlockUtterance.js';
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
