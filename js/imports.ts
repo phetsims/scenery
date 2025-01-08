@@ -338,6 +338,7 @@ export { default as VoicingText } from './accessibility/voicing/nodes/VoicingTex
 export type { VoicingTextOptions } from './accessibility/voicing/nodes/VoicingText.js';
 export { default as VoicingRichText } from './accessibility/voicing/nodes/VoicingRichText.js';
 export type { VoicingRichTextOptions } from './accessibility/voicing/nodes/VoicingRichText.js';
+export { default as VoicingActivationResponseListener } from './accessibility/voicing/VoicingActivationResponseListener.js';
 
 export { default as scenerySerialize, serializeConnectedNodes } from './util/scenerySerialize.js';
 export { default as sceneryDeserialize } from './util/sceneryDeserialize.js';
