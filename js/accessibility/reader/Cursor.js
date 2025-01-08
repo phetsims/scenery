@@ -32,8 +32,6 @@ class Cursor {
    */
   constructor( domElement ) {
 
-    const self = this;
-
     // the output utterance for the cursor, to be read by the synth and handled in various ways
     // initial output is the document title
     // @public (read-only)
@@ -215,19 +213,19 @@ class Cursor {
     // listen for when an element is about to receive focus
     // we are using focusin (and not focus) because we want the event to bubble up the document
     // this will handle both tab navigation AND programatic focus by the simulation
-    document.addEventListener( 'focusin', function( event ) {
+    document.addEventListener( 'focusin', event => {
 
       // anounce the new focus if it is different from the active element
-      if ( event.target !== self.activeElement ) {
-        self.activeElement = event.target;
+      if ( event.target !== this.activeElement ) {
+        this.activeElement = event.target;
 
         // so read out all content from aria markup since focus moved via application behavior
         const withApplicationContent = true;
-        const outputText = self.getAccessibleText( this.activeElement, withApplicationContent );
+        const outputText = this.getAccessibleText( this.activeElement, withApplicationContent );
 
         if ( outputText ) {
-          const liveRole = self.activeElement.getAttribute( 'aria-live' );
-          self.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
+          const liveRole = this.activeElement.getAttribute( 'aria-live' );
+          this.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
         }
       }
     } );

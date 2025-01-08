@@ -1318,10 +1318,11 @@ export default class Display {
     let lastTime = 0;
     let timeElapsedInSeconds = 0;
 
-    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const selfReference = this; // eslint-disable-line consistent-this
     ( function step() {
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
-      self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
+      selfReference._requestAnimationFrameID = window.requestAnimationFrame( step, selfReference._domElement );
 
       // calculate how much time has elapsed since we rendered the last frame
       const timeNow = Date.now();
@@ -1334,7 +1335,7 @@ export default class Display {
       stepTimer.emit( timeElapsedInSeconds );
 
       stepCallback && stepCallback( timeElapsedInSeconds );
-      self.updateDisplay();
+      selfReference.updateDisplay();
     } )();
   }
 

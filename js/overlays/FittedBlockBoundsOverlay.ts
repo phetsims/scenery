@@ -17,7 +17,8 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
 
   public addShapes(): void {
 
-    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const selfReference = this; // eslint-disable-line consistent-this
 
     function processBackbone( backbone: BackboneDrawable, matrix: Matrix3 ): void {
       if ( backbone.willApplyTransform ) {
@@ -30,7 +31,7 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
 
     function processBlock( block: Block, matrix: Matrix3 ): void {
       if ( block instanceof FittedBlock && !block.fitBounds!.isEmpty() ) {
-        self.addShape( Shape.bounds( block.fitBounds! ).transformed( matrix ), 'rgba(255,0,0,0.8)', true );
+        selfReference.addShape( Shape.bounds( block.fitBounds! ).transformed( matrix ), 'rgba(255,0,0,0.8)', true );
       }
       if ( block.firstDrawable && block.lastDrawable ) {
         for ( let childDrawable = block.firstDrawable; childDrawable !== block.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
