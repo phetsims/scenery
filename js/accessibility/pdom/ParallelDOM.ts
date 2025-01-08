@@ -583,6 +583,11 @@ export default class ParallelDOM extends PhetioObject {
   // Sets the help text of the Node, this most often corresponds to description text.
   private _helpTextBehavior: PDOMBehaviorFunction;
 
+  // Forces an update from the behavior functions in PDOMPeer.
+  // (scenery-internal)
+  public _accessibleNameDirty = false;
+  public _helpTextDirty = false;
+
   // Sets the help text of the Node, this most often corresponds to label sibling text.
   private _pdomHeading: PDOMValueType | null = null;
 
@@ -877,6 +882,8 @@ export default class ParallelDOM extends PhetioObject {
         accessibleName.lazyLink( this._onPDOMContentChangeListener );
       }
 
+      this._accessibleNameDirty = true;
+
       this.onPDOMContentChange();
     }
   }
@@ -1108,6 +1115,8 @@ export default class ParallelDOM extends PhetioObject {
       if ( isTReadOnlyProperty( helpText ) ) {
         helpText.lazyLink( this._onPDOMContentChangeListener );
       }
+
+      this._helpTextDirty = true;
 
       this.onPDOMContentChange();
     }

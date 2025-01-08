@@ -190,9 +190,20 @@ class PDOMPeer {
 
     const callbacksForOtherNodes = [];
 
-    if ( this.node.accessibleName !== null ) {
-      options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName, callbacksForOtherNodes );
+    // Even if the accessibleName is null, we need to run the behavior function if the dirty flag is set
+    // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
+    if ( this.node.accessibleName !== null || this.node._accessibleNameDirty ) {
+      if ( this.node.accessibleName === null ) {
+
+        // There is no accessibleName, so we don't want to modify options - just run the behavior for cleanup
+        // and to update other nodes.
+        this.node.accessibleNameBehavior( this.node, {}, this.node.accessibleName, callbacksForOtherNodes );
+      }
+      else {
+        options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName, callbacksForOtherNodes );
+      }
       assert && assert( typeof options === 'object', 'should return an object' );
+      this.node._accessibleNameDirty = false;
     }
 
     if ( this.node.pdomHeading !== null ) {
@@ -200,9 +211,20 @@ class PDOMPeer {
       assert && assert( typeof options === 'object', 'should return an object' );
     }
 
-    if ( this.node.helpText !== null ) {
-      options = this.node.helpTextBehavior( this.node, options, this.node.helpText, callbacksForOtherNodes );
+    // Even if the helpText is null, we need to run the behavior function if the dirty flag is set
+    // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
+    if ( this.node.helpText !== null || this.node._helpTextDirty ) {
+      if ( this.node.helpText === null ) {
+
+        // There is no helpText, so we don't want to modify options - just run the behavior for cleanup
+        // and to update other nodes.
+        this.node.helpTextBehavior( this.node, {}, this.node.helpText, callbacksForOtherNodes );
+      }
+      else {
+        options = this.node.helpTextBehavior( this.node, options, this.node.helpText, callbacksForOtherNodes );
+      }
       assert && assert( typeof options === 'object', 'should return an object' );
+      this.node._helpTextDirty = false;
     }
 
     // create the base DOM element representing this accessible instance

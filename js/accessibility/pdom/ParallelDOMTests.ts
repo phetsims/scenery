@@ -2014,7 +2014,7 @@ QUnit.test( 'helpText option', assert => {
   };
 
   let bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement!.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
-  assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
+  assert.ok( bDescriptionElement.textContent === 'overrideThis', 'initial textContent from descriptionContent' );
   b.helpText = 'help text description';
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement!.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
   assert.ok( bDescriptionElement.textContent === 'help text description', 'help text setter' );
@@ -2024,9 +2024,14 @@ QUnit.test( 'helpText option', assert => {
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement!.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
   assert.ok( bDescriptionElement.textContent === '', 'helpTextBehavior should work for empty string' );
 
+  b.helpText = 'some content';
+  bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement!.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+  assert.ok( bDescriptionElement.textContent === 'some content', 'some content set after empty string' );
+
+  // Make sure that setting the helpText to null results in restoring the description content.
   b.helpText = null;
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement!.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
-  assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
+  assert.ok( bDescriptionElement.textContent === 'overrideThis', 'fall back to descriptionContent when helpText is null' );
 
   pdomAuditRootNode( rootNode );
   display.dispose();
