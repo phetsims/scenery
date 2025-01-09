@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2025, University of Colorado Boulder
 
 /**
  * A PressListener that speaks the name and hint responses of a VoicingNode when it is clicked. If there

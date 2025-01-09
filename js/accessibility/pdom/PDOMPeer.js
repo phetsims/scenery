@@ -1,4 +1,4 @@
-// Copyright 2015-2024, University of Colorado Boulder
+// Copyright 2015-2025, University of Colorado Boulder
 
 /**
  * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. A PDOMPeer can
