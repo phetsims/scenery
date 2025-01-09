@@ -378,7 +378,7 @@ class PDOMInstance {
     // if we hid a parent element, blur focus if active element was an ancestor
     if ( !this.peer!.isVisible() && FocusManager.pdomFocusedNode ) {
       assert && assert( FocusManager.pdomFocusedNode.pdomInstances.length === 1,
-        'focusable Nodes do not support DAG, and should be connected with an instance if focused.' );
+        'The focused Node should have a one and only one PDOM instance', FocusManager.pdomFocusedNode );
 
       // NOTE: We don't seem to be able to import normally here
       if ( FocusManager.pdomFocusedNode.pdomInstances[ 0 ].trail!.containsNode( this.node! ) ) {
