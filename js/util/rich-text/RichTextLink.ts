@@ -68,7 +68,7 @@ export default class RichTextLink extends Voicing( RichTextCleanable( Node ) ) i
     else {
       this.fireListener = new FireListener( {
         fire: event => {
-          if ( event.isFromPDOM() ) {
+          if ( event?.isFromPDOM() ) {
 
             // prevent default from pdom activation so we don't also open a new tab from native DOM input on a link
             event.domEvent!.preventDefault();

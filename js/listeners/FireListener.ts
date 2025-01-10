@@ -20,7 +20,7 @@ import { Node, PressListener, PressListenerOptions, scenery, SceneryEvent, TInpu
 
 type SelfOptions = {
   // Called as fire() when the button is fired.
-  fire?: ( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> ) => void;
+  fire?: ( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent | FocusEvent | KeyboardEvent> | null ) => void;
 
   // If true, the button will fire when the button is pressed. If false, the button will fire when the
   // button is released while the pointer is over the button.
@@ -77,7 +77,6 @@ export default class FireListener extends PressListener implements TInputListene
         phetioType: NullableIO( SceneryEvent.SceneryEventIO )
       } ]
     } );
-    // @ts-expect-error TODO Emitter https://github.com/phetsims/scenery/issues/1581
     this.firedEmitter.addListener( options.fire );
 
     // Create a timer to handle the optional fire-on-hold feature.
