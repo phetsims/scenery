@@ -263,9 +263,10 @@ export default class PressListener extends EnabledComponent implements TInputLis
       phetioEnabledPropertyInstrumented: false,
 
       // phet-io (EnabledComponent)
-      // For PhET-iO instrumentation. If only using the PressListener for hover behavior, there is no need to
-      // instrument because events are only added to the data stream for press/release and not for hover events. Please pass
-      // Tandem.OPT_OUT as the tandem option to not instrument an instance.
+      // For PhET-iO instrumentation. Please note, many occurrences opt out of this instrumentation. The PhET-iO design
+      // requires that there is some way to know when user input triggered a change (instead of only having a model
+      // Property instrumented). It is only required though if there isn't a better way to instrument the view. For
+      // example, many push buttons have a "firedEmitter" that is more descriptive, so they opt out of this. See https://github.com/phetsims/scenery/issues/1680
       tandem: Tandem.REQUIRED,
 
       phetioReadOnly: true,
