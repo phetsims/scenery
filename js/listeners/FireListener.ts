@@ -13,6 +13,7 @@ import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import TEmitter from '../../../axon/js/TEmitter.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -33,7 +34,10 @@ type SelfOptions = {
   fireOnHoldInterval?: number; // fire continuously at this interval (milliseconds)
 };
 
-export type FireListenerOptions<Listener extends FireListener> = SelfOptions & PressListenerOptions<Listener>;
+type ParentOptions<Listener extends FireListener> = PressListenerOptions<Listener>;
+
+export type FireListenerOptions<Listener extends FireListener> = SelfOptions &
+  StrictOmit<ParentOptions<Listener>, 'phetioPressActionInstrumented' | 'phetioReleaseActionInstrumented'>;
 
 export default class FireListener extends PressListener implements TInputListener {
 
@@ -42,7 +46,7 @@ export default class FireListener extends PressListener implements TInputListene
   private _timer?: CallbackTimer;
 
   public constructor( providedOptions?: FireListenerOptions<FireListener> ) {
-    const options = optionize<FireListenerOptions<FireListener>, SelfOptions, PressListenerOptions<FireListener>>()( {
+    const options = optionize<FireListenerOptions<FireListener>, SelfOptions, ParentOptions<FireListener>>()( {
       fire: _.noop,
       fireOnDown: false,
       fireOnHold: false,
