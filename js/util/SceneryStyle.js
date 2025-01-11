@@ -1,6 +1,5 @@
 // Copyright 2013-2021, University of Colorado Boulder
 
-
 /**
  * Creates and references a stylesheet that can be built up while Scenery is loading.
  *
@@ -22,7 +21,17 @@ const SceneryStyle = {
 
   addRule( ruleString ) {
     // using a this reference so it doesn't need to be a closure
-    this.stylesheet.insertRule( ruleString, 0 );
+    try {
+      this.stylesheet.insertRule( ruleString, 0 );
+    }
+    catch( e ) {
+      try {
+        this.stylesheet.insertRule( ruleString, stylesheet.cssRules.length );
+      }
+      catch( e ) {
+        console.log( 'Error adding CSS rule: ' + ruleString );
+      }
+    }
   }
 };
 scenery.register( 'SceneryStyle', SceneryStyle );
