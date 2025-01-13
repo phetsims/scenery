@@ -3,6 +3,7 @@
 /**
  * VBox is a convenience specialization of FlowBox with vertical orientation.
  *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid (PhET Interactive Simulations)
  */
 

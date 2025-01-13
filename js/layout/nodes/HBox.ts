@@ -3,6 +3,7 @@
 /**
  * HBox is a convenience specialization of FlowBox with horizontal orientation.
  *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
