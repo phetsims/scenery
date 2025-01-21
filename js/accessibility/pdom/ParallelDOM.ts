@@ -241,6 +241,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'pdomVisible',
   'pdomOrder',
 
+  'pdomAttributes',
+
   'ariaLabelledbyAssociations',
   'ariaDescribedbyAssociations',
   'activeDescendantAssociations',
@@ -299,6 +301,8 @@ type ParallelDOMSelfOptions = {
   pdomVisible?: boolean; // Sets whether or not the Node's DOM element is visible in the parallel DOM
   pdomOrder?: ( Node | null )[] | null; // Modifies the order of accessible navigation
 
+  pdomAttributes?: PDOMAttribute[]; // Sets a list of attributes all at once, see setPDOMAttributes().
+
   ariaLabelledbyAssociations?: Association[]; // sets the list of aria-labelledby associations between from this Node to others (including itself)
   ariaDescribedbyAssociations?: Association[]; // sets the list of aria-describedby associations between from this Node to others (including itself)
   activeDescendantAssociations?: Association[]; // sets the list of aria-activedescendant associations between from this Node to others (including itself)
@@ -327,8 +331,8 @@ export type TrimParallelDOMOptions<T extends ParallelDOMSelfOptions> = RemovePar
 type PDOMAttribute = {
   attribute: string;
   value: PDOMValueType | boolean | number;
-  listener: ( ( rawValue: string | boolean | number ) => void ) | null;
-  options: SetPDOMAttributeOptions;
+  listener?: ( ( rawValue: string | boolean | number ) => void ) | null;
+  options?: SetPDOMAttributeOptions;
 };
 
 type PDOMClass = {
@@ -2587,7 +2591,26 @@ export default class ParallelDOM extends PhetioObject {
     return this._pdomAttributes.slice( 0 ); // defensive copy
   }
 
+  /**
+   * Sets all of the attributes for this Node's accessible content at once. See setPDOMAttribute for more information.
+   *
+   * Clears the old list of attributes before setting to this attribute list.
+   */
+  public setPDOMAttributes( attributes: PDOMAttribute[] ): void {
+
+    // Remove all previous attributes.
+    this.removePDOMAttributes();
+
+    // Add the new attributes.
+    for ( let i = 0; i < attributes.length; i++ ) {
+      const attribute = attributes[ i ];
+      this.setPDOMAttribute( attribute.attribute, attribute.value, attribute.options );
+    }
+  }
+
   public get pdomAttributes(): PDOMAttribute[] { return this.getPDOMAttributes(); }
+
+  public set pdomAttributes( attributes: PDOMAttribute[] ) { this.setPDOMAttributes( attributes ); }
 
   /**
    * Set a particular attribute or property for this Node's primary sibling, generally to provide extra semantic information for
@@ -2622,8 +2645,8 @@ export default class ParallelDOM extends PhetioObject {
     for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
       const currentAttribute = this._pdomAttributes[ i ];
       if ( currentAttribute.attribute === attribute &&
-           currentAttribute.options.namespace === options.namespace &&
-           currentAttribute.options.elementName === options.elementName ) {
+           currentAttribute.options?.namespace === options.namespace &&
+           currentAttribute.options?.elementName === options.elementName ) {
 
         // We can simplify the new value set as long as there isn't cleanup (from a Property listener) or logic change (from a different type)
         if ( !isTReadOnlyProperty( currentAttribute.value ) && currentAttribute.options.type === options.type ) {
@@ -2690,8 +2713,8 @@ export default class ParallelDOM extends PhetioObject {
     let attributeRemoved = false;
     for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
       if ( this._pdomAttributes[ i ].attribute === attribute &&
-           this._pdomAttributes[ i ].options.namespace === options.namespace &&
-           this._pdomAttributes[ i ].options.elementName === options.elementName ) {
+           this._pdomAttributes[ i ].options?.namespace === options.namespace &&
+           this._pdomAttributes[ i ].options?.elementName === options.elementName ) {
 
         const oldAttribute = this._pdomAttributes[ i ];
         if ( oldAttribute.listener && isTReadOnlyProperty( oldAttribute.value ) && !oldAttribute.value.isDisposed ) {
@@ -2746,8 +2769,8 @@ export default class ParallelDOM extends PhetioObject {
     let attributeFound = false;
     for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
       if ( this._pdomAttributes[ i ].attribute === attribute &&
-           this._pdomAttributes[ i ].options.namespace === options.namespace &&
-           this._pdomAttributes[ i ].options.elementName === options.elementName ) {
+           this._pdomAttributes[ i ].options?.namespace === options.namespace &&
+           this._pdomAttributes[ i ].options?.elementName === options.elementName ) {
         attributeFound = true;
       }
     }
