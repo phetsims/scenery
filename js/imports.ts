@@ -186,6 +186,7 @@ export { default as ReadingBlockUtterance } from './accessibility/voicing/Readin
 export type { ReadingBlockUtteranceOptions } from './accessibility/voicing/ReadingBlockUtterance.js';
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
 export { default as FocusManager } from './accessibility/FocusManager.js';
+export { default as GroupFocusListener } from './accessibility/GroupFocusListener.js';
 export { default as HighlightPath } from './accessibility/HighlightPath.js';
 export type { HighlightPathOptions } from './accessibility/HighlightPath.js';
 export { default as GroupHighlightPath } from './accessibility/GroupHighlightPath.js';
