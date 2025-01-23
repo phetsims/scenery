@@ -24,6 +24,7 @@ class VoicingText extends ReadingBlock( Text ) {
       // {string|null} - if provided, alternative text that will be spoken that is different from the
       // visually displayed text
       readingBlockNameResponse: text,
+      readingBlockDisabledTagName: 'p',
 
       // pdom
       innerContent: text

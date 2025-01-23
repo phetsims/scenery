@@ -148,7 +148,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
         super( ...args );
 
         this._readingBlockTagName = 'button';
-        this._readingBlockDisabledTagName = 'p';
+        this._readingBlockDisabledTagName = null;
         this._readingBlockActiveHighlight = null;
         this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
         this.readingBlockResponsePatternCollection = DEFAULT_CONTENT_HINT_PATTERN;
