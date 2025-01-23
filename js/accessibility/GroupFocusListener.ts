@@ -1,4 +1,4 @@
-// Copyright 2021-2024, University of Colorado Boulder
+// Copyright 2025, University of Colorado Boulder
 
 /**
  * A listener that helps track focus for groups of Nodes. Properties allow you to observe when focus enters a group or
