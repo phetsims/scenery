@@ -1,4 +1,4 @@
-// Copyright 2021-2024, University of Colorado Boulder
+// Copyright 2021-2025, University of Colorado Boulder
 
 /**
  * Text that mixes ReadingBlock, supporting features of Voicing and adding listeners that speak the text string
