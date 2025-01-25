@@ -461,6 +461,10 @@ export default class FlowConstraint extends FlowConfigurable( NodeLayoutConstrai
     this.updateLayoutAutomatically();
   }
 
+  public getCellQuantity(): number {
+    return this.cells.length;
+  }
+
   public reorderCells( cells: FlowCell[], minChangeIndex: number, maxChangeIndex: number ): void {
     this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
 

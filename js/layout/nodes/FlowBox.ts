@@ -14,6 +14,7 @@
  *   - justifyLines (see https://phetsims.github.io/scenery/doc/layout#FlowBox-justifyLines)
  *   - wrap (see https://phetsims.github.io/scenery/doc/layout#FlowBox-wrap)
  *   - layoutOrigin (see https://phetsims.github.io/scenery/doc/layout#layoutOrigin)
+ *   - forward (see https://phetsims.github.io/scenery/doc/layout#FlowBox-forward)
  *
  * FlowBox and layoutOptions options (can be set either in the FlowBox itself, or within its child nodes' layoutOptions):
  *   - align (see https://phetsims.github.io/scenery/doc/layout#FlowBox-align)
@@ -39,18 +40,24 @@ import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, HorizontalLayoutAlign, HorizontalLayoutJustification, LAYOUT_NODE_OPTION_KEYS, LayoutAlign, LayoutNode, LayoutNodeOptions, LayoutOrientation, MarginLayoutCell, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SceneryConstants, SIZABLE_OPTION_KEYS, VerticalLayoutAlign, VerticalLayoutJustification } from '../../imports.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
   ...LAYOUT_NODE_OPTION_KEYS,
-  ...FLOW_CONSTRAINT_OPTION_KEYS.filter( key => key !== 'excludeInvisible' )
+  ...FLOW_CONSTRAINT_OPTION_KEYS.filter( key => key !== 'excludeInvisible' ),
+  'forward',
+  'forwardProperty'
 ];
 
 const DEFAULT_OPTIONS = {
   orientation: 'horizontal',
   spacing: 0,
   align: 'center',
-  stretch: false
+  stretch: false,
+  forward: true
 } as const;
 
 type ExcludeFlowConstraintOptions = 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty' | 'layoutOriginProperty';
@@ -59,6 +66,14 @@ type SelfOptions = {
   // The FlowBox will layout once after processing the options object, but if resize:false, then after that manual
   // layout calls will need to be done (with updateLayout())
   resize?: boolean;
+
+  // If true, the nodes in this FlowBox will be ordered in a forward order.
+  // If false, the nodes will appear reversed in order.
+  forward?: boolean;
+
+  // Like forward, but allows specifying a boolean Property to forward the order
+  // Notably, for HBoxes this is useful to pass in localeProperty.
+  forwardProperty?: TReadOnlyProperty<boolean> | null;
 } & StrictOmit<FlowConstraintOptions, ExcludeFlowConstraintOptions>;
 
 export type FlowBoxOptions = SelfOptions & LayoutNodeOptions;
@@ -74,6 +89,10 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   private readonly onChildrenReordered: ( minChangeIndex: number, maxChangeIndex: number ) => void;
   private readonly onChildrenChanged: () => void;
 
+  // Whether this FlowBox will have its elements forward or reversed (stored as a
+  // forwardable Property so localeProperty could be used).
+  private readonly _forwardProperty: TinyForwardingProperty<boolean>;
+
   public constructor( providedOptions?: FlowBoxOptions ) {
     const options = optionize<FlowBoxOptions, StrictOmit<SelfOptions, Exclude<keyof FlowConstraintOptions, ExcludeFlowConstraintOptions>>, LayoutNodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
@@ -81,7 +100,10 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
       resize: true,
 
       // For LayoutBox compatibility
-      disabledOpacity: SceneryConstants.DISABLED_OPACITY
+      disabledOpacity: SceneryConstants.DISABLED_OPACITY,
+
+      forward: DEFAULT_OPTIONS.forward,
+      forwardProperty: null
     }, providedOptions );
 
     super();
@@ -99,6 +121,8 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
       stretch: DEFAULT_OPTIONS.stretch,
       excludeInvisible: false // Should be handled by the options mutate below
     } );
+
+    this._forwardProperty = new TinyForwardingProperty<boolean>( DEFAULT_OPTIONS.forward, false, this.onFlowBoxForwardReverseChanged.bind( this ) );
 
     this.onChildInserted = this.onFlowBoxChildInserted.bind( this );
     this.onChildRemoved = this.onFlowBoxChildRemoved.bind( this );
@@ -135,7 +159,14 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     const cell = new FlowCell( this._constraint, node, this._constraint.createLayoutProxy( node ) );
     this._cellMap.set( node, cell );
 
-    this._constraint.insertCell( index, cell );
+    if ( this.forward ) {
+      this._constraint.insertCell( index, cell );
+    }
+    else {
+      const reverseIndex = this._constraint.getCellQuantity() - index;
+
+      this._constraint.insertCell( reverseIndex, cell );
+    }
   }
 
   /**
@@ -157,8 +188,14 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
    * Called when children are rearranged
    */
   private onFlowBoxChildrenReordered( minChangeIndex: number, maxChangeIndex: number ): void {
+    const nodes = this._children.slice( minChangeIndex, maxChangeIndex + 1 );
+
+    if ( !this.forward ) {
+      nodes.reverse();
+    }
+
     this._constraint.reorderCells(
-      this._children.slice( minChangeIndex, maxChangeIndex + 1 ).map( node => this._cellMap.get( node )! ),
+      nodes.map( node => this._cellMap.get( node )! ),
       minChangeIndex,
       maxChangeIndex
     );
@@ -169,6 +206,14 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
    */
   private onFlowBoxChildrenChanged(): void {
     this._constraint.updateLayoutAutomatically();
+  }
+
+  /**
+   * Called when our `forward` value changes.
+   */
+  private onFlowBoxForwardReverseChanged(): void {
+    this.onFlowBoxChildrenReordered( 0, this._children.length - 1 );
+    this.onFlowBoxChildrenChanged();
   }
 
   public getCell( node: Node ): FlowCell {
@@ -343,6 +388,72 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   }
 
   /**
+   * Sets what Property our forwardProperty is backed by
+   */
+  public setForwardProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
+    return this._forwardProperty.setTargetProperty( newTarget, this, null );
+  }
+
+  /**
+   * See setForwardProperty() for more information
+   */
+  public set forwardProperty( property: TReadOnlyProperty<boolean> | null ) {
+    this.setForwardProperty( property );
+  }
+
+  /**
+   * See getForwardProperty() for more information
+   */
+  public get forwardProperty(): TProperty<boolean> {
+    return this.getForwardProperty();
+  }
+
+  /**
+   * Get this Node's forwardProperty. Note! This is not the reciprocal of setForwardProperty. Node.prototype._forwardProperty
+   * is a TinyForwardingProperty, and is set up to listen to changes from the forwardProperty provided by
+   * setForwardProperty(), but the underlying reference does not change. This means the following:
+   *     * const myNode = new Node();
+   * const forwardProperty = new Property( false );
+   * myNode.setForwardProperty( forwardProperty )
+   * => myNode.getForwardProperty() !== forwardProperty (!!!!!!)
+   *
+   * Please use this with caution. See setForwardProperty() for more information.
+   */
+  public getForwardProperty(): TProperty<boolean> {
+    return this._forwardProperty;
+  }
+
+  /**
+   * Sets whether the nodes in this FlowBox are ordered in a forward order.
+   * If false, the nodes will appear reversed in the layout.
+   */
+  public setForward( forward: boolean ): this {
+    this.forwardProperty.set( forward );
+    return this;
+  }
+
+  /**
+   * See setForward() for more information
+   */
+  public set forward( value: boolean ) {
+    this.setForward( value );
+  }
+
+  /**
+   * See isForward() for more information
+   */
+  public get forward(): boolean {
+    return this.isForward();
+  }
+
+  /**
+   * Returns whether this Node is forward.
+   */
+  public isForward(): boolean {
+    return this.forwardProperty.value;
+  }
+
+  /**
    * Releases references
    */
   public override dispose(): void {
@@ -354,6 +465,8 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
     this.childRemovedEmitter.removeListener( this.onChildRemoved );
     this.childrenReorderedEmitter.removeListener( this.onChildrenReordered );
     this.childrenChangedEmitter.removeListener( this.onChildrenChanged );
+
+    this._forwardProperty.dispose();
 
     // Dispose our cells here. We won't be getting the children-removed listeners fired (we removed them above)
     for ( const cell of this._cellMap.values() ) {
@@ -409,6 +522,15 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
   }
 
   public override mutate( options?: FlowBoxOptions ): this {
+
+    if ( !options ) {
+      return this;
+    }
+
+    if ( assert && options.hasOwnProperty( 'forward' ) && options.hasOwnProperty( 'forwardProperty' ) && options.forwardProperty !== null ) {
+      assert && assert( options.forwardProperty!.value === options.forward, 'If both forward and forwardProperty are provided, then values should match' );
+    }
+
     return super.mutate( options );
   }
 
