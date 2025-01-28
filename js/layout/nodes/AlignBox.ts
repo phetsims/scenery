@@ -27,7 +27,7 @@
  *       that the layout will be applied before it is displayed. alignBox.getBounds() will not force a refresh, and
  *       may return stale bounds.
  *
- * See https://phetsims.github.io/scenery/doc/layout#AlignBox for details
+ * See https://scenerystack.org/learn/scenery-layout/#AlignBox for details
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

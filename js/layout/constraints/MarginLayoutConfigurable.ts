@@ -41,8 +41,8 @@ const MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS = [
 export type MarginLayoutConfigurableOptions = {
   // Adds extra space for each cell in the layout (margin controls all 4 sides, xMargin controls left/right, yMargin
   // controls top/bottom).
-  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-margins
-  // See https://phetsims.github.io/scenery/doc/layout#GridBox-margins
+  // See https://scenerystack.org/learn/scenery-layout/#FlowBox-margins
+  // See https://scenerystack.org/learn/scenery-layout/#GridBox-margins
   // Margins will control how much extra space is FORCED around content within a cell's available area. These margins do
   // not collapse (each cell gets its own).
   margin?: number | null; // shortcut for left/right/top/bottom margins
@@ -55,10 +55,10 @@ export type MarginLayoutConfigurableOptions = {
 
   // Forces size minimums and maximums on the cells (which does not include the margins).
   // NOTE: For these, the nullable portion is actually part of the possible "value"
-  // See https://phetsims.github.io/scenery/doc/layout#FlowBox-minContent and
-  // https://phetsims.github.io/scenery/doc/layout#FlowBox-maxContent
-  // See https://phetsims.github.io/scenery/doc/layout#GridBox-minContent and
-  // https://phetsims.github.io/scenery/doc/layout#GridBox-maxContent
+  // See https://scenerystack.org/learn/scenery-layout/#FlowBox-minContent and
+  // https://scenerystack.org/learn/scenery-layout/#FlowBox-maxContent
+  // See https://scenerystack.org/learn/scenery-layout/#GridBox-minContent and
+  // https://scenerystack.org/learn/scenery-layout/#GridBox-maxContent
   minContentWidth?: number | null;
   minContentHeight?: number | null;
   maxContentWidth?: number | null;

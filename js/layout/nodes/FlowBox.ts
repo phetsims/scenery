@@ -3,35 +3,35 @@
 /**
  * A vertical/horizontal flow-based layout container.
  *
- * See https://phetsims.github.io/scenery/doc/layout#FlowBox for details
+ * See https://scenerystack.org/learn/scenery-layout/#FlowBox for details
  *
  * FlowBox-only options:
- *   - resize (see https://phetsims.github.io/scenery/doc/layout#FlowBox-resize)
- *   - orientation (see https://phetsims.github.io/scenery/doc/layout#FlowBox-orientation)
- *   - spacing (see https://phetsims.github.io/scenery/doc/layout#FlowBox-spacing)
- *   - lineSpacing (see https://phetsims.github.io/scenery/doc/layout#FlowBox-lineSpacing)
- *   - justify (see https://phetsims.github.io/scenery/doc/layout#FlowBox-justify)
- *   - justifyLines (see https://phetsims.github.io/scenery/doc/layout#FlowBox-justifyLines)
- *   - wrap (see https://phetsims.github.io/scenery/doc/layout#FlowBox-wrap)
- *   - layoutOrigin (see https://phetsims.github.io/scenery/doc/layout#layoutOrigin)
- *   - forward (see https://phetsims.github.io/scenery/doc/layout#FlowBox-forward)
+ *   - resize (see https://scenerystack.org/learn/scenery-layout/#FlowBox-resize)
+ *   - orientation (see https://scenerystack.org/learn/scenery-layout/#FlowBox-orientation)
+ *   - spacing (see https://scenerystack.org/learn/scenery-layout/#FlowBox-spacing)
+ *   - lineSpacing (see https://scenerystack.org/learn/scenery-layout/#FlowBox-lineSpacing)
+ *   - justify (see https://scenerystack.org/learn/scenery-layout/#FlowBox-justify)
+ *   - justifyLines (see https://scenerystack.org/learn/scenery-layout/#FlowBox-justifyLines)
+ *   - wrap (see https://scenerystack.org/learn/scenery-layout/#FlowBox-wrap)
+ *   - layoutOrigin (see https://scenerystack.org/learn/scenery-layout/#layoutOrigin)
+ *   - forward (see https://scenerystack.org/learn/scenery-layout/#FlowBox-forward)
  *
  * FlowBox and layoutOptions options (can be set either in the FlowBox itself, or within its child nodes' layoutOptions):
- *   - align (see https://phetsims.github.io/scenery/doc/layout#FlowBox-align)
- *   - stretch (see https://phetsims.github.io/scenery/doc/layout#FlowBox-stretch)
- *   - grow (see https://phetsims.github.io/scenery/doc/layout#FlowBox-grow)
- *   - cellAlign (see https://phetsims.github.io/scenery/doc/layout#FlowBox-cellAlign)
- *   - margin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
- *   - xMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
- *   - yMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
- *   - leftMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
- *   - rightMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
- *   - topMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
- *   - bottomMargin (see https://phetsims.github.io/scenery/doc/layout#FlowBox-margins)
- *   - minContentWidth (see https://phetsims.github.io/scenery/doc/layout#FlowBox-minContent)
- *   - minContentHeight (see https://phetsims.github.io/scenery/doc/layout#FlowBox-minContent)
- *   - maxContentWidth (see https://phetsims.github.io/scenery/doc/layout#FlowBox-maxContent)
- *   - maxContentHeight (see https://phetsims.github.io/scenery/doc/layout#FlowBox-maxContent)
+ *   - align (see https://scenerystack.org/learn/scenery-layout/#FlowBox-align)
+ *   - stretch (see https://scenerystack.org/learn/scenery-layout/#FlowBox-stretch)
+ *   - grow (see https://scenerystack.org/learn/scenery-layout/#FlowBox-grow)
+ *   - cellAlign (see https://scenerystack.org/learn/scenery-layout/#FlowBox-cellAlign)
+ *   - margin (see https://scenerystack.org/learn/scenery-layout/#FlowBox-margins)
+ *   - xMargin (see https://scenerystack.org/learn/scenery-layout/#FlowBox-margins)
+ *   - yMargin (see https://scenerystack.org/learn/scenery-layout/#FlowBox-margins)
+ *   - leftMargin (see https://scenerystack.org/learn/scenery-layout/#FlowBox-margins)
+ *   - rightMargin (see https://scenerystack.org/learn/scenery-layout/#FlowBox-margins)
+ *   - topMargin (see https://scenerystack.org/learn/scenery-layout/#FlowBox-margins)
+ *   - bottomMargin (see https://scenerystack.org/learn/scenery-layout/#FlowBox-margins)
+ *   - minContentWidth (see https://scenerystack.org/learn/scenery-layout/#FlowBox-minContent)
+ *   - minContentHeight (see https://scenerystack.org/learn/scenery-layout/#FlowBox-minContent)
+ *   - maxContentWidth (see https://scenerystack.org/learn/scenery-layout/#FlowBox-maxContent)
+ *   - maxContentHeight (see https://scenerystack.org/learn/scenery-layout/#FlowBox-maxContent)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
