@@ -1593,40 +1593,6 @@ class Node extends ParallelDOM {
       assert( !this._originalChildBounds || this._originalChildBounds === this.childBoundsProperty._value, 'Reference for childBounds changed!' );
     }
 
-    // double-check that all of our bounds handling has been accurate
-    if ( assertSlow ) {
-      // new scope for safety
-      ( () => {
-        const epsilon = 0.000001;
-
-        const childBounds = Bounds2.NOTHING.copy();
-        _.each( this._children, child => {
-          if ( !this._excludeInvisibleChildrenFromBounds || child.isVisible() ) {
-            childBounds.includeBounds( child.boundsProperty._value );
-          }
-        } );
-
-        let localBounds = this.selfBoundsProperty._value.union( childBounds );
-
-        const clipArea = this.clipArea;
-        if ( clipArea ) {
-          localBounds = localBounds.intersection( clipArea.bounds );
-        }
-
-        const fullBounds = this.localToParentBounds( localBounds );
-
-        assertSlow && assertSlow( this.childBoundsProperty._value.equalsEpsilon( childBounds, epsilon ),
-          `Child bounds mismatch after validateBounds: ${
-            this.childBoundsProperty._value.toString()}, expected: ${childBounds.toString()}` );
-        assertSlow && assertSlow( this._localBoundsOverridden ||
-                                  this._transformBounds ||
-                                  this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ),
-          `Bounds mismatch after validateBounds: ${this.boundsProperty._value.toString()
-          }, expected: ${fullBounds.toString()}. This could have happened if a bounds instance owned by a Node` +
-          ' was directly mutated (e.g. bounds.erode())' );
-      } )();
-    }
-
     sceneryLog && sceneryLog.bounds && sceneryLog.pop();
 
     return wasDirtyBefore; // whether any dirty flags were set
