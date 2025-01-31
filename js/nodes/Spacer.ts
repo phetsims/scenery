@@ -8,8 +8,8 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Leaf from '../nodes/Leaf.js';
-import Node from '../nodes/Node.js';
 import type { NodeOptions } from '../nodes/Node.js';
+import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 
 export type SpacerOptions = NodeOptions;

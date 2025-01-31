@@ -12,8 +12,8 @@ import extendDefined from '../../../phet-core/js/extendDefined.js';
 import DOMDrawable from '../display/drawables/DOMDrawable.js';
 import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
 import Instance from '../display/Instance.js';
-import Node from '../nodes/Node.js';
 import type { NodeOptions } from '../nodes/Node.js';
+import Node from '../nodes/Node.js';
 import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 

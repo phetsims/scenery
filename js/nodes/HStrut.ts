@@ -8,8 +8,8 @@
  */
 
 import scenery from '../scenery.js';
-import Spacer from '../nodes/Spacer.js';
 import type { SpacerOptions } from '../nodes/Spacer.js';
+import Spacer from '../nodes/Spacer.js';
 
 export type HStrutOptions = SpacerOptions;
 

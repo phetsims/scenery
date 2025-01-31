@@ -9,8 +9,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Node from '../nodes/Node.js';
 import Renderer from '../display/Renderer.js';
+import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 
 const summaryBits = [

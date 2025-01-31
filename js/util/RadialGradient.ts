@@ -11,8 +11,8 @@
 import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
 import ColorDef from '../util/ColorDef.js';
-import Gradient from '../util/Gradient.js';
 import type { GradientStop } from '../util/Gradient.js';
+import Gradient from '../util/Gradient.js';
 import scenery from '../scenery.js';
 import SVGBlock from '../display/SVGBlock.js';
 import SVGRadialGradient from '../display/SVGRadialGradient.js';

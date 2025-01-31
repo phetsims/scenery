@@ -11,8 +11,8 @@ import RichText from '../../nodes/RichText.js';
 import RichTextCleanable from '../../util/rich-text/RichTextCleanable.js';
 import RichTextUtils from '../../util/rich-text/RichTextUtils.js';
 import scenery from '../../scenery.js';
-import Text from '../../nodes/Text.js';
 import type { TextBoundsMethod } from '../../nodes/Text.js';
+import Text from '../../nodes/Text.js';
 import TPaint from '../../util/TPaint.js';
 
 export default class RichTextLeaf extends RichTextCleanable( Text ) implements TPoolable {

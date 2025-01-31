@@ -7,9 +7,9 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Font from '../util/Font.js';
-import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 import Utils from '../util/Utils.js';
 

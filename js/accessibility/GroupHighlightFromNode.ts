@@ -8,8 +8,8 @@
  */
 
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import HighlightFromNode from '../accessibility/HighlightFromNode.js';
 import type { HighlightFromNodeOptions } from '../accessibility/HighlightFromNode.js';
+import HighlightFromNode from '../accessibility/HighlightFromNode.js';
 import HighlightPath from '../accessibility/HighlightPath.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
