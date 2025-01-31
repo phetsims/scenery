@@ -10,8 +10,8 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import Rectangle from '../nodes/Rectangle.js';
 import type { RectangleOptions } from '../nodes/Rectangle.js';
+import Rectangle from '../nodes/Rectangle.js';
 import scenery from '../scenery.js';
 
 export type PlaneOptions = RectangleOptions;

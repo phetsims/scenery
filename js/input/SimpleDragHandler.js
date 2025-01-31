@@ -15,8 +15,8 @@ import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import Mouse from '../input/Mouse.js';
-import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
+import scenery from '../scenery.js';
 
 /**
  * @deprecated - please use DragListener for new code

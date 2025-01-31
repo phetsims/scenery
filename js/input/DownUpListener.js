@@ -11,8 +11,8 @@ import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import EventContext from '../input/EventContext.js';
 import Mouse from '../input/Mouse.js';
-import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
+import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 
 /**
