@@ -11,25 +11,24 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin, LineStyles } from '../../../kite/js/imports.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
-import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import platform from '../../../phet-core/js/platform.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Color from '../util/Color.js';
-import Gradient from '../util/Gradient.js';
-import LinearGradient from '../util/LinearGradient.js';
-import Node from '../nodes/Node.js';
+import type Gradient from '../util/Gradient.js';
+import type LinearGradient from '../util/LinearGradient.js';
+import type Node from '../nodes/Node.js';
 import Paint from '../util/Paint.js';
 import PaintDef from '../util/PaintDef.js';
-import Path from '../nodes/Path.js';
-import Pattern from '../util/Pattern.js';
-import RadialGradient from '../util/RadialGradient.js';
+import type Path from '../nodes/Path.js';
+import type Pattern from '../util/Pattern.js';
+import type RadialGradient from '../util/RadialGradient.js';
 import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
-import Text from '../nodes/Text.js';
-import TPaint from '../util/TPaint.js';
+import type Text from '../nodes/Text.js';
+import type TPaint from '../util/TPaint.js';
 import type TPaintableDrawable from '../display/drawables/TPaintableDrawable.js';
 
 const isSafari5 = platform.safari5;
@@ -210,8 +209,6 @@ export interface TPaintable {
 }
 
 const Paintable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TPaintable> => {
-  assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should mix Paintable' );
-
   return class PaintableMixin extends Type implements TPaintable {
 
     // (scenery-internal)
@@ -886,7 +883,7 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( Type: SuperTyp
       let bitmask = 0;
 
       // Safari 5 has buggy issues with SVG gradients
-      if ( !( isSafari5 && this._fill instanceof Gradient ) ) {
+      if ( !( isSafari5 && this._fill && ( this._fill as Gradient ).isGradient ) ) {
         bitmask |= Renderer.bitmaskSVG;
       }
 
@@ -898,10 +895,10 @@ const Paintable = memoize( <SuperType extends Constructor<Node>>( Type: SuperTyp
         bitmask |= Renderer.bitmaskDOM;
         bitmask |= Renderer.bitmaskWebGL;
       }
-      else if ( this._fill instanceof Pattern ) {
+      else if ( this._fill && ( this._fill as Pattern ).isPattern ) {
         // no pattern support for DOM or WebGL (for now!)
       }
-      else if ( this._fill instanceof Gradient ) {
+      else if ( this._fill && ( this._fill as Gradient ).isGradient ) {
         // no gradient support for DOM or WebGL (for now!)
       }
       else {

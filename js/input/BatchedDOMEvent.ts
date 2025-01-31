@@ -12,8 +12,9 @@ import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import EventContext from '../input/EventContext.js';
-import Input from '../input/Input.js';
+import type Input from '../input/Input.js';
 import scenery from '../scenery.js';
+import { getMSPointerType } from './getMSPointerType.js';
 
 export type BatchedDOMEventCallback = ( ...args: IntentionalAny[] ) => void;
 
@@ -69,7 +70,7 @@ export default class BatchedDOMEvent implements TPoolable {
     else if ( this.type === BatchedDOMEventType.MS_POINTER_TYPE ) {
       const context = this.eventContext as EventContext<PointerEvent>;
       const pointerEvent = context.domEvent;
-      callback.call( input, pointerEvent.pointerId, Input.msPointerType( pointerEvent ), input.pointFromEvent( pointerEvent ), context );
+      callback.call( input, pointerEvent.pointerId, getMSPointerType( pointerEvent ), input.pointFromEvent( pointerEvent ), context );
     }
     else if ( this.type === BatchedDOMEventType.TOUCH_TYPE ) {
       const context = this.eventContext as EventContext<TouchEvent>;

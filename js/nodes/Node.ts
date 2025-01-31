@@ -152,16 +152,16 @@
  */
 
 import BooleanProperty, { BooleanPropertyOptions } from '../../../axon/js/BooleanProperty.js';
-import { DisposerOptions } from '../../../axon/js/Disposable.js';
+import type { DisposerOptions } from '../../../axon/js/Disposable.js';
 import EnabledProperty, { EnabledPropertyOptions } from '../../../axon/js/EnabledProperty.js';
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
-import TEmitter from '../../../axon/js/TEmitter.js';
+import type TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TinyStaticProperty from '../../../axon/js/TinyStaticProperty.js';
-import TProperty from '../../../axon/js/TProperty.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import type TProperty from '../../../axon/js/TProperty.js';
+import type TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
@@ -171,7 +171,7 @@ import { Shape } from '../../../kite/js/imports.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import optionize, { combineOptions, EmptySelfOptions, optionize3 } from '../../../phet-core/js/optionize.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import type IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
@@ -180,27 +180,26 @@ import Image, { ImageOptions } from './Image.js';
 import SceneryQueryParameters from '../SceneryQueryParameters.js';
 import ParallelDOM, { ACCESSIBILITY_OPTION_KEYS, ParallelDOMOptions } from '../accessibility/pdom/ParallelDOM.js';
 import Renderer from '../display/Renderer.js';
-import TInputListener from '../input/TInputListener.js';
-import Filter from '../filters/Filter.js';
-import TLayoutOptions from '../layout/TLayoutOptions.js';
-import Instance from '../display/Instance.js';
-import Display from '../display/Display.js';
-import Drawable from '../display/Drawable.js';
+import type TInputListener from '../input/TInputListener.js';
+import type Filter from '../filters/Filter.js';
+import type TLayoutOptions from '../layout/TLayoutOptions.js';
+import type Instance from '../display/Instance.js';
+import type Display from '../display/Display.js';
+import type Drawable from '../display/Drawable.js';
 import RendererSummary from '../util/RendererSummary.js';
 import Picker from '../util/Picker.js';
-import LayoutConstraint from '../layout/constraints/LayoutConstraint.js';
+import type LayoutConstraint from '../layout/constraints/LayoutConstraint.js';
 import Trail from '../util/Trail.js';
-import Pointer from '../input/Pointer.js';
-import Mouse from '../input/Mouse.js';
+import type Pointer from '../input/Pointer.js';
 import hotkeyManager from '../input/hotkeyManager.js';
 import { isWidthSizable } from '../layout/WidthSizable.js';
 import { isHeightSizable } from '../layout/HeightSizable.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Features from '../util/Features.js';
-import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
-import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
-import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
-import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
+import type DOMSelfDrawable from '../display/DOMSelfDrawable.js';
+import type SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import type CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import type WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
 import { serializeConnectedNodes } from '../util/scenerySerialize.js';
 import scenery from '../scenery.js';
 
@@ -2136,7 +2135,7 @@ class Node extends ParallelDOM {
    * See hitTest() for more details about what will be returned.
    */
   public trailUnderPointer( pointer: Pointer ): Trail | null {
-    return pointer.point === null ? null : this.hitTest( pointer.point, pointer instanceof Mouse, pointer.isTouchLike() );
+    return pointer.point === null ? null : this.hitTest( pointer.point, pointer.type === 'mouse', pointer.isTouchLike() );
   }
 
   /**
@@ -4165,9 +4164,6 @@ class Node extends ParallelDOM {
    * Filter.js has more information in general on filters.
    */
   public setFilters( filters: Filter[] ): void {
-    assert && assert( Array.isArray( filters ), 'filters should be an array' );
-    assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
-
     // We re-use the same array internally, so we don't reference a potentially-mutable array from outside.
     this._filters.length = 0;
     this._filters.push( ...filters );

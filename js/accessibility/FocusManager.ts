@@ -33,16 +33,17 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Utterance from '../../../utterance-queue/js/Utterance.js';
-import Display from '../display/Display.js';
+import type Display from '../display/Display.js';
 import Focus from '../accessibility/Focus.js';
 import FocusDisplayedController from '../accessibility/FocusDisplayedController.js';
 import { isInteractiveHighlighting } from '../accessibility/voicing/InteractiveHighlighting.js';
 import Node from '../nodes/Node.js';
-import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import ReadingBlockUtterance from '../accessibility/voicing/ReadingBlockUtterance.js';
 import scenery from '../scenery.js';
 import voicingManager from '../accessibility/voicing/voicingManager.js';
+import { guessVisualTrail } from './pdom/guessVisualTrail.js';
+import { pdomUniqueIdToTrail } from './pdom/pdomUniqueIdToTrail.js';
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 
@@ -213,10 +214,10 @@ export default class FocusManager {
           const uniqueId = activeElement.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID )!;
           assert && assert( uniqueId, 'Event target must have a unique ID on its data if it is in the PDOM.' );
 
-          const trail = PDOMInstance.uniqueIdToTrail( display, uniqueId )!;
+          const trail = pdomUniqueIdToTrail( display, uniqueId )!;
           assert && assert( trail, 'We must have a trail since the target was under the PDOM.' );
 
-          const visualTrail = PDOMInstance.guessVisualTrail( trail, display.rootNode );
+          const visualTrail = guessVisualTrail( trail, display.rootNode );
           if ( visualTrail.lastNode().focusable ) {
             FocusManager.pdomFocus = new Focus( display, visualTrail );
           }
@@ -251,7 +252,7 @@ export default class FocusManager {
         // to the next element after the PDOM is re-rendered.
         // See https://github.com/phetsims/scenery/issues/1296.
         if ( relatedTargetTrail && relatedTargetTrail.lastNode().focusable ) {
-          FocusManager.pdomFocus = new Focus( display, PDOMInstance.guessVisualTrail( relatedTargetTrail, display.rootNode ) );
+          FocusManager.pdomFocus = new Focus( display, guessVisualTrail( relatedTargetTrail, display.rootNode ) );
         }
         else {
 

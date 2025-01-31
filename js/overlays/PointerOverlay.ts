@@ -11,8 +11,8 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
+import type Display from '../display/Display.js';
+import type Node from '../nodes/Node.js';
 import PDOMPointer from '../input/PDOMPointer.js';
 import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';

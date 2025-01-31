@@ -9,8 +9,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Node from '../../nodes/Node.js';
-import Display from '../../display/Display.js';
+import type Node from '../../nodes/Node.js';
+import type Display from '../../display/Display.js';
 import Renderer from '../../display/Renderer.js';
 import scenery from '../../scenery.js';
 

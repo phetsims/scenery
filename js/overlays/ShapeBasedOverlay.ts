@@ -7,8 +7,8 @@
  */
 
 import { Shape } from '../../../kite/js/imports.js';
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
+import type Display from '../display/Display.js';
+import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 import type TOverlay from '../overlays/TOverlay.js';

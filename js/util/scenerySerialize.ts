@@ -412,3 +412,8 @@ const serializeConnectedNodes = ( rootNode: Node ): IntentionalAny => {
 
 scenery.register( 'scenerySerialize', scenerySerialize );
 export { scenerySerialize as default, serializeConnectedNodes };
+
+export const inspectDisplay = ( display: Display ): void => {
+  localStorage.scenerySnapshot = JSON.stringify( scenerySerialize( display ) );
+};
+scenery.register( 'inspectDisplay', inspectDisplay );
