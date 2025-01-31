@@ -8,7 +8,10 @@
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
-import { Gradient, scenery, SVGBlock, SVGGradientStop } from '../imports.js';
+import Gradient from '../util/Gradient.js';
+import scenery from '../scenery.js';
+import SVGBlock from '../display/SVGBlock.js';
+import SVGGradientStop from '../display/SVGGradientStop.js';
 
 export type ActiveSVGGradient = WithoutNull<SVGGradient, 'svgBlock' | 'gradient'>;
 

@@ -32,7 +32,14 @@ import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import Enumeration from '../../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../../phet-core/js/EnumerationValue.js';
 import Pool from '../../../../phet-core/js/Pool.js';
-import { Display, FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
+import Display from '../../display/Display.js';
+import FocusManager from '../../accessibility/FocusManager.js';
+import Node from '../../nodes/Node.js';
+import PDOMPeer from '../../accessibility/pdom/PDOMPeer.js';
+import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
+import scenery from '../../scenery.js';
+import Trail from '../../util/Trail.js';
+import TransformTracker from '../../util/TransformTracker.js';
 
 // PDOMInstances support two different styles of unique IDs, each with their own tradeoffs, https://github.com/phetsims/phet-io/issues/1851
 class PDOMUniqueIdStrategy extends EnumerationValue {

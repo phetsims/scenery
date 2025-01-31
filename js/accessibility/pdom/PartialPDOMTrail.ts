@@ -6,7 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { PDOMInstance, scenery, Trail } from '../../imports.js';
+import scenery from '../../scenery.js';
+import Trail from '../../util/Trail.js';
+import PDOMInstance from './PDOMInstance.js';
 
 export default class PartialPDOMTrail {
 

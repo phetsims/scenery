@@ -10,7 +10,10 @@
  */
 
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { HighlightFromNode, HighlightFromNodeOptions, Node, scenery } from '../../imports.js';
+import HighlightFromNode from '../../accessibility/HighlightFromNode.js';
+import type { HighlightFromNodeOptions } from '../../accessibility/HighlightFromNode.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 type SelfOptions = EmptySelfOptions;
 type ReadingBlockHighlightOptions = SelfOptions & HighlightFromNodeOptions;

@@ -27,7 +27,10 @@ import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { AlignBox, AlignBoxOptions, Node, scenery } from '../../imports.js';
+import AlignBox from '../../layout/nodes/AlignBox.js';
+import type { AlignBoxOptions } from '../../layout/nodes/AlignBox.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 let globalId = 1;
 

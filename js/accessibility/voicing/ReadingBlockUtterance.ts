@@ -9,7 +9,8 @@
  */
 
 import Utterance, { UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
-import { Focus, scenery } from '../../imports.js';
+import Focus from '../../accessibility/Focus.js';
+import scenery from '../../scenery.js';
 
 export type ReadingBlockUtteranceOptions = UtteranceOptions;
 

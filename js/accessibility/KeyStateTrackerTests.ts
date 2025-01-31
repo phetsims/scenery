@@ -8,8 +8,6 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-
-// modules
 import stepTimer from '../../../axon/js/stepTimer.js';
 import KeyboardUtils from './KeyboardUtils.js';
 import KeyStateTracker from './KeyStateTracker.js';

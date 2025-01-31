@@ -37,7 +37,11 @@
 
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { Color, PaintDef, PaintObserver, scenery, TPaint } from '../imports.js';
+import Color from '../util/Color.js';
+import PaintDef from '../util/PaintDef.js';
+import PaintObserver from '../display/PaintObserver.js';
+import scenery from '../scenery.js';
+import TPaint from '../util/TPaint.js';
 
 type SelfOptions = {
   // 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken

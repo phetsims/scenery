@@ -11,7 +11,10 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import { CanvasContextWrapper, Filter, scenery, svgns } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Filter from '../filters/Filter.js';
+import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
 
 export default class GaussianBlur extends Filter {
 

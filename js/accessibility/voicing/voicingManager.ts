@@ -12,7 +12,9 @@
 import { TReadOnlyEmitter } from '../../../../axon/js/TEmitter.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import SpeechSynthesisAnnouncer, { SpeechSynthesisAnnouncerOptions, SpeechSynthesisInitializeOptions } from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
-import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
+import globalKeyStateTracker from '../../accessibility/globalKeyStateTracker.js';
+import KeyboardUtils from '../../accessibility/KeyboardUtils.js';
+import scenery from '../../scenery.js';
 
 type SelfOptions = EmptySelfOptions;
 type VoicingManagerOptions = SelfOptions & SpeechSynthesisAnnouncerOptions;

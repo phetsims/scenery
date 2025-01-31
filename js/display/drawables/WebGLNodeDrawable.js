@@ -8,7 +8,10 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { Renderer, scenery, WebGLNode, WebGLSelfDrawable } from '../../imports.js';
+import Renderer from '../../display/Renderer.js';
+import scenery from '../../scenery.js';
+import WebGLNode from '../../nodes/WebGLNode.js';
+import WebGLSelfDrawable from '../../display/WebGLSelfDrawable.js';
 
 class WebGLNodeDrawable extends WebGLSelfDrawable {
   /**

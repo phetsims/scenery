@@ -422,7 +422,7 @@ export { default as ShapeBasedOverlay } from './overlays/ShapeBasedOverlay.js';
 export { default as CanvasNodeBoundsOverlay } from './overlays/CanvasNodeBoundsOverlay.js';
 export { default as FittedBlockBoundsOverlay } from './overlays/FittedBlockBoundsOverlay.js';
 export { default as HighlightOverlay } from './overlays/HighlightOverlay.js';
-export type { Highlight, HighlightOverlayOptions } from './overlays/HighlightOverlay.js';
+export type { HighlightOverlayOptions } from './overlays/HighlightOverlay.js';
 export { default as HitAreaOverlay } from './overlays/HitAreaOverlay.js';
 export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js';
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
@@ -434,3 +434,4 @@ export type{ DisplayOptions } from './display/Display.js';
 
 export { default as IndexedNodeIO } from './nodes/IndexedNodeIO.js';
 export type { IndexedNodeIOParent } from './nodes/IndexedNodeIO.js';
+export type { Highlight } from './accessibility/Highlight.js';

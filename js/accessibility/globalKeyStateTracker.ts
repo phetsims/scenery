@@ -9,7 +9,8 @@
  */
 
 import Tandem from '../../../tandem/js/Tandem.js';
-import { KeyStateTracker, scenery } from '../imports.js';
+import KeyStateTracker from '../accessibility/KeyStateTracker.js';
+import scenery from '../scenery.js';
 import { KeyStateTrackerOptions } from './KeyStateTracker.js';
 
 class GlobalKeyStateTracker extends KeyStateTracker {

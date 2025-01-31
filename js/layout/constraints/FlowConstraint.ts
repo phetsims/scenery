@@ -12,7 +12,17 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import mutate from '../../../../phet-core/js/mutate.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
-import { ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowCell, FlowConfigurable, FlowLine, HorizontalLayoutJustification, LayoutAlign, LayoutJustification, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery, VerticalLayoutJustification } from '../../imports.js';
+import type { ExternalFlowConfigurableOptions } from '../../layout/constraints/FlowConfigurable.js';
+import { FLOW_CONFIGURABLE_OPTION_KEYS } from '../../layout/constraints/FlowConfigurable.js';
+import FlowCell from '../../layout/constraints/FlowCell.js';
+import FlowConfigurable from '../../layout/constraints/FlowConfigurable.js';
+import FlowLine from '../../layout/constraints/FlowLine.js';
+import type { HorizontalLayoutJustification, VerticalLayoutJustification } from '../../layout/LayoutJustification.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import LayoutJustification from '../../layout/LayoutJustification.js';
+import Node from '../../nodes/Node.js';
+import { NodeLayoutAvailableConstraintOptions, default as NodeLayoutConstraint } from '../../layout/constraints/NodeLayoutConstraint.js';
+import scenery from '../../scenery.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
   ...FLOW_CONFIGURABLE_OPTION_KEYS,

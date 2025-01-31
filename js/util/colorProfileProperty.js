@@ -12,7 +12,8 @@
  */
 import StringProperty from '../../../axon/js/StringProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { scenery, SceneryConstants } from '../imports.js';
+import scenery from '../scenery.js';
+import SceneryConstants from '../SceneryConstants.js';
 
 // Use the color profile specified in query parameters, or default to 'default'
 const initialProfileName = _.hasIn( window, 'phet.chipper.queryParameters.colorProfile' ) ?

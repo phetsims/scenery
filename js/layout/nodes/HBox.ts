@@ -9,7 +9,11 @@
 
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { FlowBox, FlowBoxOptions, HSeparator, Node, scenery } from '../../imports.js';
+import FlowBox from '../../layout/nodes/FlowBox.js';
+import type { FlowBoxOptions } from '../../layout/nodes/FlowBox.js';
+import HSeparator from '../../layout/nodes/HSeparator.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 type SelfOptions = EmptySelfOptions;
 export type HBoxOptions = StrictOmit<FlowBoxOptions, 'orientation'>;

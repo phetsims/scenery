@@ -176,8 +176,33 @@ import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObje
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, hotkeyManager, Image, ImageOptions, Instance, isHeightSizable, isWidthSizable, LayoutConstraint, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, TInputListener, TLayoutOptions, Trail, WebGLSelfDrawable } from '../imports.js';
+import Image, { ImageOptions } from './Image.js';
 import SceneryQueryParameters from '../SceneryQueryParameters.js';
+import ParallelDOM, { ACCESSIBILITY_OPTION_KEYS, ParallelDOMOptions } from '../accessibility/pdom/ParallelDOM.js';
+import Renderer from '../display/Renderer.js';
+import TInputListener from '../input/TInputListener.js';
+import Filter from '../filters/Filter.js';
+import TLayoutOptions from '../layout/TLayoutOptions.js';
+import Instance from '../display/Instance.js';
+import Display from '../display/Display.js';
+import Drawable from '../display/Drawable.js';
+import RendererSummary from '../util/RendererSummary.js';
+import Picker from '../util/Picker.js';
+import LayoutConstraint from '../layout/constraints/LayoutConstraint.js';
+import Trail from '../util/Trail.js';
+import Pointer from '../input/Pointer.js';
+import Mouse from '../input/Mouse.js';
+import hotkeyManager from '../input/hotkeyManager.js';
+import { isWidthSizable } from '../layout/WidthSizable.js';
+import { isHeightSizable } from '../layout/HeightSizable.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Features from '../util/Features.js';
+import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
+import { serializeConnectedNodes } from '../util/scenerySerialize.js';
+import scenery from '../scenery.js';
 
 let globalIdCounter = 1;
 

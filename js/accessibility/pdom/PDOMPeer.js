@@ -15,7 +15,11 @@ import merge from '../../../../phet-core/js/merge.js';
 import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import { FocusManager, PDOMInstance, PDOMSiblingStyle, PDOMUtils, scenery } from '../../imports.js';
+import FocusManager from '../../accessibility/FocusManager.js';
+import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
+import PDOMSiblingStyle from '../../accessibility/pdom/PDOMSiblingStyle.js';
+import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
+import scenery from '../../scenery.js';
 
 // constants
 const PRIMARY_SIBLING = 'PRIMARY_SIBLING';

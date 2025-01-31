@@ -9,7 +9,11 @@
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
-import { ActiveSVGGradient, Color, scenery, svgns, TColor } from '../imports.js';
+import type { ActiveSVGGradient } from '../display/SVGGradient.js';
+import Color from '../util/Color.js';
+import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
+import type TColor from '../util/TColor.js';
 
 const scratchColor = new Color( 'transparent' );
 

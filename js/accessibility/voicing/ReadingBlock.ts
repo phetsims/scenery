@@ -28,9 +28,21 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import { DelayedMutate, Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, ReadingBlockUtteranceOptions, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
+import DelayedMutate from '../../util/DelayedMutate.js';
+import Focus from '../../accessibility/Focus.js';
+import Node from '../../nodes/Node.js';
+import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
+import ReadingBlockHighlight from '../../accessibility/voicing/ReadingBlockHighlight.js';
+import ReadingBlockUtterance from '../../accessibility/voicing/ReadingBlockUtterance.js';
+import type { ReadingBlockUtteranceOptions } from '../../accessibility/voicing/ReadingBlockUtterance.js';
+import scenery from '../../scenery.js';
+import SceneryEvent from '../../input/SceneryEvent.js';
+import Voicing from '../../accessibility/voicing/Voicing.js';
+import voicingManager from '../../accessibility/voicing/voicingManager.js';
+import type { VoicingOptions } from '../../accessibility/voicing/Voicing.js';
 import type TInputListener from '../../input/TInputListener.js';
 import type { TVoicing } from './Voicing.js';
+import { Highlight } from '../Highlight.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',

@@ -11,7 +11,7 @@
  */
 
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
-import { scenery } from '../imports.js';
+import scenery from '../scenery.js';
 
 class CanvasContextWrapper {
   /**

@@ -16,7 +16,24 @@ import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, TImageDrawable, WebGLSelfDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
+import Imageable from '../nodes/Imageable.js';
+import type { ImageableImage, ImageableOptions } from '../nodes/Imageable.js';
+import ImageCanvasDrawable from '../display/drawables/ImageCanvasDrawable.js';
+import ImageDOMDrawable from '../display/drawables/ImageDOMDrawable.js';
+import ImageSVGDrawable from '../display/drawables/ImageSVGDrawable.js';
+import ImageWebGLDrawable from '../display/drawables/ImageWebGLDrawable.js';
+import Instance from '../display/Instance.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import SpriteSheet from '../util/SpriteSheet.js';
+import type TImageDrawable from '../display/drawables/TImageDrawable.js';
+import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 
 
 // Image-specific options that can be passed in the constructor or mutate() call.

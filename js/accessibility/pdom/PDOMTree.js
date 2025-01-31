@@ -7,7 +7,13 @@
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import { BrowserEvents, FocusManager, Node, PartialPDOMTrail, PDOMInstance, scenery, Trail } from '../../imports.js';
+import BrowserEvents from '../../input/BrowserEvents.js';
+import FocusManager from '../../accessibility/FocusManager.js';
+import Node from '../../nodes/Node.js';
+import PartialPDOMTrail from '../../accessibility/pdom/PartialPDOMTrail.js';
+import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
+import scenery from '../../scenery.js';
+import Trail from '../../util/Trail.js';
 
 const PDOMTree = {
   /**

@@ -7,7 +7,7 @@
  */
 
 import detectPrefix from '../../../phet-core/js/detectPrefix.js';
-import { scenery } from '../imports.js';
+import scenery from '../scenery.js';
 
 const Features = {};
 scenery.register( 'Features', Features );

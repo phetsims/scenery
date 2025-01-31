@@ -27,7 +27,7 @@ import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { scenery } from '../imports.js';
+import scenery from '../scenery.js';
 
 // Valid values for the 'style' property of Font
 const VALID_STYLES = [ 'normal', 'italic', 'oblique' ];

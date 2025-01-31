@@ -9,7 +9,23 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { CanvasNode, Color, Display, HStrut, Line, Node, Path, Rectangle, Renderer, Spacer, Text, TextBounds, Trail, TrailPointer, Utils, VStrut, WebGLNode } from '../imports.js';
+import CanvasNode from '../nodes/CanvasNode.js';
+import Color from '../util/Color.js';
+import Display from '../display/Display.js';
+import HStrut from '../nodes/HStrut.js';
+import Line from '../nodes/Line.js';
+import Node from '../nodes/Node.js';
+import Path from '../nodes/Path.js';
+import Rectangle from '../nodes/Rectangle.js';
+import Renderer from '../display/Renderer.js';
+import Spacer from '../nodes/Spacer.js';
+import Text from '../nodes/Text.js';
+import TextBounds from '../util/TextBounds.js';
+import Trail from '../util/Trail.js';
+import TrailPointer from '../util/TrailPointer.js';
+import Utils from '../util/Utils.js';
+import VStrut from '../nodes/VStrut.js';
+import WebGLNode from '../nodes/WebGLNode.js';
 
 QUnit.module( 'Trail' );
 

@@ -9,7 +9,15 @@
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
-import { ExternalGridConfigurableOptions, GRID_CONFIGURABLE_OPTION_KEYS, GridConfigurable, GridConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
+import type { ExternalGridConfigurableOptions } from '../../layout/constraints/GridConfigurable.js';
+import { GRID_CONFIGURABLE_OPTION_KEYS } from '../../layout/constraints/GridConfigurable.js';
+import GridConfigurable from '../../layout/constraints/GridConfigurable.js';
+import GridConstraint from '../../layout/constraints/GridConstraint.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import LayoutProxy from '../../layout/LayoutProxy.js';
+import MarginLayoutCell from '../../layout/constraints/MarginLayoutCell.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 const GRID_CELL_KEYS = [
   ...GRID_CONFIGURABLE_OPTION_KEYS,

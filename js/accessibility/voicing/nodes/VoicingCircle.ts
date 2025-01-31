@@ -7,7 +7,11 @@
  */
 
 import { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
-import { Circle, CircleOptions, ReadingBlockOptions, scenery, Voicing } from '../../../imports.js';
+import Circle from '../../../nodes/Circle.js';
+import type { CircleOptions } from '../../../nodes/Circle.js';
+import type { ReadingBlockOptions } from '../../../accessibility/voicing/ReadingBlock.js';
+import scenery from '../../../scenery.js';
+import Voicing from '../../../accessibility/voicing/Voicing.js';
 
 type SelfOptions = EmptySelfOptions;
 type ParentOptions = ReadingBlockOptions & CircleOptions;

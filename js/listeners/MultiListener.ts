@@ -30,7 +30,14 @@ import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { Intent, Mouse, MultiListenerPress, Node, Pointer, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import { Intent } from '../input/Pointer.js';
+import Mouse from '../input/Mouse.js';
+import MultiListenerPress from '../listeners/MultiListenerPress.js';
+import Node from '../nodes/Node.js';
+import Pointer from '../input/Pointer.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type TInputListener from '../input/TInputListener.js';
 
 // constants
 // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame

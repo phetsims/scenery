@@ -54,7 +54,9 @@
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
-import { Block, Renderer, scenery } from '../imports.js';
+import Block from '../display/Block.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
 
 let globalId = 1;
 

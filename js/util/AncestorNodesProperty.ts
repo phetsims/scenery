@@ -8,7 +8,8 @@
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
-import { Node, scenery } from '../imports.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
 
 const valueComparisonStrategy = ( a: Set<Node>, b: Set<Node> ): boolean => {
 

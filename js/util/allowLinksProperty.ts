@@ -7,7 +7,7 @@
  */
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { scenery } from '../imports.js';
+import scenery from '../scenery.js';
 
 const allowLinksProperty = new BooleanProperty( !( window?.phet?.chipper?.queryParameters ) || ( window?.phet?.chipper?.queryParameters?.allowLinks ), {
   tandem: Tandem.GENERAL_MODEL.createTandem( 'allowLinksProperty' )

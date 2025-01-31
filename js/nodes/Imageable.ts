@@ -18,7 +18,9 @@ import { Shape } from '../../../kite/js/imports.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { scenery, svgns, xlinkns } from '../imports.js';
+import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
+import xlinkns from '../util/xlinkns.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };

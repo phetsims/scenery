@@ -8,7 +8,15 @@
  */
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import { allowLinksProperty, FireListener, Node, openPopup, RichTextCleanable, RichTextHref, scenery, TInputListener, Voicing } from '../../imports.js';
+import allowLinksProperty from '../../util/allowLinksProperty.js';
+import FireListener from '../../listeners/FireListener.js';
+import Node from '../../nodes/Node.js';
+import openPopup from '../../util/openPopup.js';
+import RichTextCleanable from '../../util/rich-text/RichTextCleanable.js';
+import type { RichTextHref } from '../../nodes/RichText.js';
+import scenery from '../../scenery.js';
+import type TInputListener from '../../input/TInputListener.js';
+import Voicing from '../../accessibility/voicing/Voicing.js';
 
 export default class RichTextLink extends Voicing( RichTextCleanable( Node ) ) implements TPoolable {
 

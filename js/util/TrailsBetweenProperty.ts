@@ -8,7 +8,9 @@
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
-import { Node, scenery, Trail } from '../imports.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 export default class TrailsBetweenProperty extends TinyProperty<Trail[]> {
 

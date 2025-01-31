@@ -8,7 +8,10 @@
  */
 
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
-import { HighlightFromNode, HighlightFromNodeOptions, Node, scenery } from '../../imports.js';
+import HighlightFromNode from '../../accessibility/HighlightFromNode.js';
+import type { HighlightFromNodeOptions } from '../../accessibility/HighlightFromNode.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 // constants
 const ACTIVATED_HIGHLIGHT_COLOR = 'rgba(255,255,0,0.5)';

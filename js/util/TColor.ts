@@ -1,14 +1,14 @@
 // Copyright 2021-2024, University of Colorado Boulder
 
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import { Color } from '../imports.js';
-
 /**
  * Type representing a ColorDef
  * Please see Color.toColor() for a way to transform these colors.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import Color from '../util/Color.js';
 
 type TColor = TReadOnlyProperty<Color | string | null> |
   TReadOnlyProperty<Color | string> |

@@ -7,7 +7,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Spacer, SpacerOptions } from '../imports.js';
+import scenery from '../scenery.js';
+import Spacer from '../nodes/Spacer.js';
+import type { SpacerOptions } from '../nodes/Spacer.js';
 
 export type VStrutOptions = SpacerOptions;
 

@@ -173,7 +173,27 @@ import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventContext, EventContextIO, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, SupportedEventTypes, TInputListener, Touch, Trail, WindowTouch } from '../imports.js';
+import BatchedDOMEvent from '../input/BatchedDOMEvent.js';
+import { BatchedDOMEventCallback, BatchedDOMEventType } from '../input/BatchedDOMEvent.js';
+import BrowserEvents from '../input/BrowserEvents.js';
+import Display from '../display/Display.js';
+import EventContext from '../input/EventContext.js';
+import { EventContextIO } from '../input/EventContext.js';
+import Mouse from '../input/Mouse.js';
+import Node from '../nodes/Node.js';
+import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
+import PDOMPointer from '../input/PDOMPointer.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import Pen from '../input/Pen.js';
+import Pointer from '../input/Pointer.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type { SceneryListenerFunction } from '../input/TInputListener.js';
+import type { SupportedEventTypes } from '../input/TInputListener.js';
+import type TInputListener from '../input/TInputListener.js';
+import Touch from '../input/Touch.js';
+import Trail from '../util/Trail.js';
+import WindowTouch from '../input/WindowTouch.js';
 
 const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 

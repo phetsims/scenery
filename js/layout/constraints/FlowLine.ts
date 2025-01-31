@@ -8,7 +8,9 @@
 
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import Pool from '../../../../phet-core/js/Pool.js';
-import { FlowCell, LayoutLine, scenery } from '../../imports.js';
+import FlowCell from '../../layout/constraints/FlowCell.js';
+import LayoutLine from '../../layout/constraints/LayoutLine.js';
+import scenery from '../../scenery.js';
 
 export default class FlowLine extends LayoutLine {
 

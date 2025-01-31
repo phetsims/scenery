@@ -15,7 +15,10 @@ import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import { PDOMSiblingStyle, RichText, scenery, Text } from '../../imports.js';
+import PDOMSiblingStyle from '../../accessibility/pdom/PDOMSiblingStyle.js';
+import RichText from '../../nodes/RichText.js';
+import scenery from '../../scenery.js';
+import Text from '../../nodes/Text.js';
 
 // constants
 const NEXT = 'NEXT';

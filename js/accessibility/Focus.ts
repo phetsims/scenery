@@ -11,7 +11,9 @@
 import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { Display, scenery, Trail } from '../imports.js';
+import Display from '../display/Display.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 type FocusStateType = {
   focusedPhetioElement: string[];

@@ -8,7 +8,8 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { CanvasSelfDrawable, scenery } from '../../imports.js';
+import CanvasSelfDrawable from '../../display/CanvasSelfDrawable.js';
+import scenery from '../../scenery.js';
 
 const emptyArray = []; // constant, used for line-dash
 

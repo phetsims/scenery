@@ -7,7 +7,10 @@
  */
 
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
-import { Color, Gradient, Paint, scenery } from '../imports.js';
+import Color from '../util/Color.js';
+import Gradient from '../util/Gradient.js';
+import Paint from '../util/Paint.js';
+import scenery from '../scenery.js';
 
 const PaintDef = {
   /**

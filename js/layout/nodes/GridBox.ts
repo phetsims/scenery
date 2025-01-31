@@ -50,7 +50,19 @@ import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutua
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, HorizontalLayoutAlign, LAYOUT_NODE_OPTION_KEYS, LayoutAlign, LayoutNode, LayoutNodeOptions, MarginLayoutCell, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, SIZABLE_OPTION_KEYS, VerticalLayoutAlign } from '../../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS } from '../../layout/constraints/GridConstraint.js';
+import GridCell from '../../layout/constraints/GridCell.js';
+import GridConstraint from '../../layout/constraints/GridConstraint.js';
+import type { GridConstraintOptions } from '../../layout/constraints/GridConstraint.js';
+import { HorizontalLayoutAlign, VerticalLayoutAlign } from '../../layout/LayoutAlign.js';
+import { LAYOUT_NODE_OPTION_KEYS } from '../../layout/nodes/LayoutNode.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import LayoutNode from '../../layout/nodes/LayoutNode.js';
+import type { LayoutNodeOptions } from '../../layout/nodes/LayoutNode.js';
+import MarginLayoutCell from '../../layout/constraints/MarginLayoutCell.js';
+import Node, { REQUIRES_BOUNDS_OPTION_KEYS } from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
+import { SIZABLE_OPTION_KEYS } from '../../layout/Sizable.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [

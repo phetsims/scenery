@@ -7,7 +7,9 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import { HotkeyData, KeyboardUtils, scenery } from '../imports.js';
+import HotkeyData from '../input/HotkeyData.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import scenery from '../scenery.js';
 
 const KeyboardZoomUtils = {
 

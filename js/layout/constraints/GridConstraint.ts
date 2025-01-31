@@ -15,7 +15,15 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import mutate from '../../../../phet-core/js/mutate.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
-import { ExternalGridConfigurableOptions, GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridLine, LayoutAlign, Node, NodeLayoutAvailableConstraintOptions, NodeLayoutConstraint, scenery } from '../../imports.js';
+import type { ExternalGridConfigurableOptions } from '../../layout/constraints/GridConfigurable.js';
+import { GRID_CONFIGURABLE_OPTION_KEYS } from '../../layout/constraints/GridConfigurable.js';
+import GridCell from '../../layout/constraints/GridCell.js';
+import GridConfigurable from '../../layout/constraints/GridConfigurable.js';
+import GridLine from '../../layout/constraints/GridLine.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import Node from '../../nodes/Node.js';
+import { NodeLayoutAvailableConstraintOptions, default as NodeLayoutConstraint } from '../../layout/constraints/NodeLayoutConstraint.js';
+import scenery from '../../scenery.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   ...GRID_CONFIGURABLE_OPTION_KEYS,

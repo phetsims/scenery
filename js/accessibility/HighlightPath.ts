@@ -15,7 +15,15 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { animatedPanZoomSingleton, Color, InputShape, Node, Path, PathOptions, scenery, TPaint, Trail } from '../imports.js';
+import animatedPanZoomSingleton from '../listeners/animatedPanZoomSingleton.js';
+import Color from '../util/Color.js';
+import type { InputShape } from '../nodes/Path.js';
+import Node from '../nodes/Node.js';
+import Path from '../nodes/Path.js';
+import type { PathOptions } from '../nodes/Path.js';
+import scenery from '../scenery.js';
+import type TPaint from '../util/TPaint.js';
+import Trail from '../util/Trail.js';
 
 // constants
 // default inner and outer strokes for the focus highlight

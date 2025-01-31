@@ -5,7 +5,8 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import { scenery, Text } from '../../imports.js';
+import scenery from '../../scenery.js';
+import Text from '../../nodes/Text.js';
 
 // Types for Himalaya
 export type HimalayaAttribute = {

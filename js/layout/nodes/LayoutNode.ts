@@ -9,7 +9,12 @@
 import TProperty from '../../../../axon/js/TProperty.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector2Property from '../../../../dot/js/Vector2Property.js';
-import { Node, NodeLayoutConstraint, NodeOptions, scenery, Sizable, SizableOptions } from '../../imports.js';
+import Node from '../../nodes/Node.js';
+import NodeLayoutConstraint from '../../layout/constraints/NodeLayoutConstraint.js';
+import type { NodeOptions } from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
+import Sizable from '../../layout/Sizable.js';
+import type { SizableOptions } from '../../layout/Sizable.js';
 
 type SelfOptions = {
   // Controls whether the layout container will re-trigger layout automatically after the "first" layout during

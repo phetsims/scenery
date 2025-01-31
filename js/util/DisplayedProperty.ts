@@ -7,7 +7,11 @@
  */
 
 import { DerivedProperty1, DerivedPropertyOptions } from '../../../axon/js/DerivedProperty.js';
-import { DisplayedTrailsProperty, DisplayedTrailsPropertyOptions, Node, scenery, Trail } from '../imports.js';
+import DisplayedTrailsProperty from '../util/DisplayedTrailsProperty.js';
+import type { DisplayedTrailsPropertyOptions } from '../util/DisplayedTrailsProperty.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 export type DisplayedPropertyOptions = DisplayedTrailsPropertyOptions & DerivedPropertyOptions<boolean>;
 

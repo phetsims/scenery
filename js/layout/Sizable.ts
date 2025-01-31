@@ -12,7 +12,15 @@ import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutually
 import memoize from '../../../phet-core/js/memoize.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { DelayedMutate, HEIGHT_SIZABLE_OPTION_KEYS, HeightSizable, HeightSizableOptions, Node, REQUIRES_BOUNDS_OPTION_KEYS, scenery, WIDTH_SIZABLE_OPTION_KEYS, WidthSizable, WidthSizableOptions } from '../imports.js';
+import DelayedMutate from '../util/DelayedMutate.js';
+import { HEIGHT_SIZABLE_OPTION_KEYS } from '../layout/HeightSizable.js';
+import HeightSizable from '../layout/HeightSizable.js';
+import type { HeightSizableOptions } from '../layout/HeightSizable.js';
+import Node, { REQUIRES_BOUNDS_OPTION_KEYS } from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import { WIDTH_SIZABLE_OPTION_KEYS } from '../layout/WidthSizable.js';
+import WidthSizable from '../layout/WidthSizable.js';
+import type { WidthSizableOptions } from '../layout/WidthSizable.js';
 import { THeightSizable } from './HeightSizable.js';
 import { TWidthSizable } from './WidthSizable.js';
 

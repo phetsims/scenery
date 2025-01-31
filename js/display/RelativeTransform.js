@@ -86,7 +86,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import { scenery } from '../imports.js';
+import scenery from '../scenery.js';
 
 class RelativeTransform {
   /**

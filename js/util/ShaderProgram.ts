@@ -7,7 +7,8 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { scenery, Utils } from '../imports.js';
+import scenery from '../scenery.js';
+import Utils from '../util/Utils.js';
 
 export type ShaderProgramOptions = {
   // (vertex) attribute names in the shader source

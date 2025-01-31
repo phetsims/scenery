@@ -38,7 +38,16 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { AlignGroup, assertNoAdditionalChildren, extendsHeightSizable, extendsWidthSizable, HeightSizableNode, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, Sizable, SizableOptions, WidthSizableNode } from '../../imports.js';
+import AlignGroup from '../../layout/constraints/AlignGroup.js';
+import assertNoAdditionalChildren from '../../util/assertNoAdditionalChildren.js';
+import { extendsHeightSizable, isHeightSizable, HeightSizableNode } from '../../layout/HeightSizable.js';
+import { extendsWidthSizable, isWidthSizable, WidthSizableNode } from '../../layout/WidthSizable.js';
+import LayoutConstraint from '../../layout/constraints/LayoutConstraint.js';
+import Node from '../../nodes/Node.js';
+import type { NodeOptions } from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
+import Sizable from '../../layout/Sizable.js';
+import type { SizableOptions } from '../../layout/Sizable.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation

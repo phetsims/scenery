@@ -10,7 +10,9 @@
 
 import { Shape } from '../../../kite/js/imports.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { HighlightPath, HighlightPathOptions, scenery } from '../imports.js';
+import HighlightPath from '../accessibility/HighlightPath.js';
+import type { HighlightPathOptions } from '../accessibility/HighlightPath.js';
+import scenery from '../scenery.js';
 
 type SelfOptions = EmptySelfOptions;
 export type GroupHighlightPathOptions = HighlightPathOptions & SelfOptions;

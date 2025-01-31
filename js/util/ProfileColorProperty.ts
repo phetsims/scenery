@@ -10,7 +10,11 @@ import { PropertyOptions } from '../../../axon/js/Property.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import Namespace from '../../../phet-core/js/Namespace.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { Color, colorProfileProperty, ColorProperty, scenery, SceneryConstants } from '../imports.js';
+import Color from '../util/Color.js';
+import colorProfileProperty from '../util/colorProfileProperty.js';
+import ColorProperty from '../util/ColorProperty.js';
+import scenery from '../scenery.js';
+import SceneryConstants from '../SceneryConstants.js';
 
 // constant
 const NAME_SEPARATOR = '.';

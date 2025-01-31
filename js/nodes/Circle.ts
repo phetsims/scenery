@@ -13,7 +13,21 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, CircleCanvasDrawable, CircleDOMDrawable, CircleSVGDrawable, DOMSelfDrawable, Features, Instance, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, TCircleDrawable, VoicingOptions } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import CircleCanvasDrawable from '../display/drawables/CircleCanvasDrawable.js';
+import CircleDOMDrawable from '../display/drawables/CircleDOMDrawable.js';
+import CircleSVGDrawable from '../display/drawables/CircleSVGDrawable.js';
+import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
+import Features from '../util/Features.js';
+import Instance from '../display/Instance.js';
+import Path from '../nodes/Path.js';
+import type { PathOptions } from '../nodes/Path.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import type TCircleDrawable from '../display/drawables/TCircleDrawable.js';
+import type { VoicingOptions } from '../accessibility/voicing/Voicing.js';
 
 const CIRCLE_OPTION_KEYS = [
   'radius' // {number} - see setRadius() for more documentation

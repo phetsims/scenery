@@ -15,7 +15,15 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { CanvasContextWrapper, Instance, Node, NodeOptions, Renderer, scenery, Utils, WebGLNodeDrawable, WebGLSelfDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Instance from '../display/Instance.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from './Node.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import Utils from '../util/Utils.js';
+import WebGLNodeDrawable from '../display/drawables/WebGLNodeDrawable.js';
+import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
 
 const WEBGL_NODE_OPTION_KEYS = [
   'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()

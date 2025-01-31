@@ -7,7 +7,11 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { CanvasSelfDrawable, Imageable, Node, scenery, SpriteInstanceTransformType } from '../../imports.js';
+import CanvasSelfDrawable from '../../display/CanvasSelfDrawable.js';
+import Imageable from '../../nodes/Imageable.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
+import { SpriteInstanceTransformType } from '../../util/SpriteInstance.js';
 
 class SpritesCanvasDrawable extends CanvasSelfDrawable {
   /**

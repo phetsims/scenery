@@ -11,7 +11,8 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { scenery, Trail } from '../imports.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 type SelfOptions = {
   // Whether the bounds listeners should be added with on() or onStatic().

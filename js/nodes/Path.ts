@@ -16,7 +16,21 @@ import { Shape } from '../../../kite/js/imports.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import WithRequired from '../../../phet-core/js/types/WithRequired.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable, TPathDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import Instance from '../display/Instance.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import Paint from '../util/Paint.js';
+import Paintable from '../nodes/Paintable.js';
+import { PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS } from '../nodes/Paintable.js';
+import type { PaintableOptions } from '../nodes/Paintable.js';
+import PathCanvasDrawable from '../display/drawables/PathCanvasDrawable.js';
+import PathSVGDrawable from '../display/drawables/PathSVGDrawable.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import type TPathDrawable from '../display/drawables/TPathDrawable.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod',

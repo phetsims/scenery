@@ -7,7 +7,9 @@
  */
 
 import IOType from '../../../tandem/js/types/IOType.js';
-import { EventIO, Input, scenery } from '../imports.js';
+import EventIO from '../input/EventIO.js';
+import Input from '../input/Input.js';
+import scenery from '../scenery.js';
 
 export default class EventContext<out DOMEvent extends Event = Event> {
 

@@ -6,7 +6,8 @@
  */
 
 import Utils from '../../../dot/js/Utils.js';
-import { Rectangle, RectangleOptions } from '../imports.js';
+import Rectangle from '../nodes/Rectangle.js';
+import type { RectangleOptions } from '../nodes/Rectangle.js';
 
 const RECT_WIDTH = 100;
 const RECT_HEIGHT = 25;

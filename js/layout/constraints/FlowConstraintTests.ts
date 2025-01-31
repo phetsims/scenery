@@ -7,7 +7,10 @@
  */
 
 import Property from '../../../../axon/js/Property.js';
-import { FlowCell, FlowConstraint, FlowConstraintOptions, Node } from '../../imports.js';
+import FlowCell from '../../layout/constraints/FlowCell.js';
+import FlowConstraint from '../../layout/constraints/FlowConstraint.js';
+import type { FlowConstraintOptions } from '../../layout/constraints/FlowConstraint.js';
+import Node from '../../nodes/Node.js';
 import LayoutTestUtils from '../LayoutTestUtils.js';
 
 QUnit.module( 'FlowConstraint' );

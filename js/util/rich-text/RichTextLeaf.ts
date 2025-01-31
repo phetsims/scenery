@@ -6,7 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
-import { Font, RichText, RichTextCleanable, RichTextUtils, scenery, Text, TextBoundsMethod, TPaint } from '../../imports.js';
+import Font from '../../util/Font.js';
+import RichText from '../../nodes/RichText.js';
+import RichTextCleanable from '../../util/rich-text/RichTextCleanable.js';
+import RichTextUtils from '../../util/rich-text/RichTextUtils.js';
+import scenery from '../../scenery.js';
+import Text from '../../nodes/Text.js';
+import type { TextBoundsMethod } from '../../nodes/Text.js';
+import TPaint from '../../util/TPaint.js';
 
 export default class RichTextLeaf extends RichTextCleanable( Text ) implements TPoolable {
 
