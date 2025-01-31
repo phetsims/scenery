@@ -267,7 +267,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       phetioReadOnly: true
     }, providedOptions );
 
-    assert && assert( options.shiftDragSpeed <= options.dragSpeed, 'shiftDragSpeed should be less than or equal to shiftDragSpeed, it is intended to provide more fine-grained control' );
+    assert && assert( options.shiftDragSpeed <= options.dragSpeed, 'shiftDragSpeed should be less than or equal to dragSpeed, it is intended to provide more fine-grained control' );
     assert && assert( options.shiftDragDelta <= options.dragDelta, 'shiftDragDelta should be less than or equal to dragDelta, it is intended to provide more fine-grained control' );
 
     const keyStringProperties = KeyboardDragDirectionToKeyStringPropertiesMap.get( options.keyboardDragDirection )!;
