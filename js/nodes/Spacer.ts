@@ -7,7 +7,10 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { Leaf, Node, NodeOptions, scenery } from '../imports.js';
+import Leaf from '../nodes/Leaf.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import scenery from '../scenery.js';
 
 export type SpacerOptions = NodeOptions;
 

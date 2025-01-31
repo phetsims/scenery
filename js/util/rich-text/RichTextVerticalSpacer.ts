@@ -7,7 +7,9 @@
  */
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
-import { Node, RichTextCleanable, scenery } from '../../imports.js';
+import Node from '../../nodes/Node.js';
+import RichTextCleanable from '../../util/rich-text/RichTextCleanable.js';
+import scenery from '../../scenery.js';
 
 class RichTextVerticalSpacer extends RichTextCleanable( Node ) implements TPoolable {
   public constructor( height: number ) {

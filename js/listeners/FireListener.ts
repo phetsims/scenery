@@ -17,7 +17,12 @@ import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { Node, PressListener, PressListenerOptions, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import Node from '../nodes/Node.js';
+import PressListener from '../listeners/PressListener.js';
+import type { PressListenerOptions } from '../listeners/PressListener.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type TInputListener from '../input/TInputListener.js';
 
 type SelfOptions = {
   // Called as fire() when the button is fired.

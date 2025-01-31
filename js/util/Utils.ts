@@ -11,7 +11,8 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
-import { Features, scenery } from '../imports.js';
+import Features from '../util/Features.js';
+import scenery from '../scenery.js';
 
 // convenience function
 function p( x: number, y: number ): Vector2 {

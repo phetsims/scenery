@@ -37,7 +37,14 @@ import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { Display, Mouse, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
+import Display from '../display/Display.js';
+import Mouse from '../input/Mouse.js';
+import Node from '../nodes/Node.js';
+import Pointer from '../input/Pointer.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type TInputListener from '../input/TInputListener.js';
+import Trail from '../util/Trail.js';
 
 // global
 let globalID = 0;

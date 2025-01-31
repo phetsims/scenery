@@ -9,7 +9,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Node, Renderer, scenery } from '../imports.js';
+import Node from '../nodes/Node.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
 
 const summaryBits = [
   // renderer bits ("Is renderer X supported by the entire sub-tree?")

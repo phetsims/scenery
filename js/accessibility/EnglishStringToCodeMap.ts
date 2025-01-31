@@ -7,7 +7,8 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { KeyboardUtils, scenery } from '../imports.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import scenery from '../scenery.js';
 
 export type EnglishKey = keyof typeof EnglishStringToCodeMap;
 export type EnglishKeyString = `${EnglishKey}`;

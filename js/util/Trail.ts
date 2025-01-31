@@ -19,7 +19,10 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Node, PDOMUtils, scenery, TrailPointer } from '../imports.js';
+import Node from '../nodes/Node.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import scenery from '../scenery.js';
+import TrailPointer from '../util/TrailPointer.js';
 
 // constants
 const ID_SEPARATOR = PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR;

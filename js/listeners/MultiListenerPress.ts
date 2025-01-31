@@ -8,7 +8,9 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Pointer, scenery, Trail } from '../imports.js';
+import Pointer from '../input/Pointer.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 export default class MultiListenerPress {
   public pointer: Pointer;

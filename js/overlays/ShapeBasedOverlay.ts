@@ -7,7 +7,11 @@
  */
 
 import { Shape } from '../../../kite/js/imports.js';
-import { Display, Node, scenery, svgns, TOverlay } from '../imports.js';
+import Display from '../display/Display.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
+import type TOverlay from '../overlays/TOverlay.js';
 
 export default abstract class ShapeBasedOverlay implements TOverlay {
 

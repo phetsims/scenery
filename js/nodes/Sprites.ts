@@ -13,7 +13,18 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, Node, NodeOptions, Renderer, scenery, Sprite, SpriteInstance, SpritesCanvasDrawable, SpritesWebGLDrawable, WebGLSelfDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import Instance from '../display/Instance.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import Sprite from '../util/Sprite.js';
+import SpriteInstance from '../util/SpriteInstance.js';
+import SpritesCanvasDrawable from '../display/drawables/SpritesCanvasDrawable.js';
+import SpritesWebGLDrawable from '../display/drawables/SpritesWebGLDrawable.js';
+import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
 
 type SelfOptions = {
   // Provide a fixed set of Sprite objects that will be used for this node. Currently, it cannot be modified after

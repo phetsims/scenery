@@ -19,7 +19,8 @@ import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { DownUpListener, scenery } from '../imports.js';
+import DownUpListener from '../input/DownUpListener.js';
+import scenery from '../scenery.js';
 
 /**
  * @deprecated - please use FireListener for new code (set up for the `fire` callback to be easy, and has Properties

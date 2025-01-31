@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { allowLinksProperty } from '../imports.js';
+import allowLinksProperty from '../util/allowLinksProperty.js';
 import scenery from '../scenery.js';
 
 /**

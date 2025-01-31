@@ -13,7 +13,10 @@ import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { AncestorNodesProperty, Node, scenery, Trail } from '../imports.js';
+import AncestorNodesProperty from '../util/AncestorNodesProperty.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 type CoordinateFrame = 'parent' | 'local';
 

@@ -7,7 +7,9 @@
  */
 
 import Pool from '../../../../phet-core/js/Pool.js';
-import { GridCell, LayoutLine, scenery } from '../../imports.js';
+import GridCell from '../../layout/constraints/GridCell.js';
+import LayoutLine from '../../layout/constraints/LayoutLine.js';
+import scenery from '../../scenery.js';
 
 export default class GridLine extends LayoutLine {
 

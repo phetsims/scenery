@@ -12,7 +12,12 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { FittedBlock, Renderer, scenery, ShaderProgram, SpriteSheet, Utils } from '../imports.js';
+import FittedBlock from '../display/FittedBlock.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import ShaderProgram from '../util/ShaderProgram.js';
+import SpriteSheet from '../util/SpriteSheet.js';
+import Utils from '../util/Utils.js';
 
 class WebGLBlock extends FittedBlock {
   /**

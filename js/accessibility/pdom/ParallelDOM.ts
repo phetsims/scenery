@@ -152,7 +152,16 @@ import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioO
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { Highlight, Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
+import scenery from '../../scenery.js';
+import Node from '../../nodes/Node.js';
+import PDOMUtils from './PDOMUtils.js';
+import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
+import PDOMInstance from './PDOMInstance.js';
+import PDOMPeer from './PDOMPeer.js';
+import PDOMTree from './PDOMTree.js';
+import Trail from '../../util/Trail.js';
+
+import { Highlight } from '../Highlight.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;

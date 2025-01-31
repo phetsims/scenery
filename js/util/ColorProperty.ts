@@ -1,14 +1,16 @@
 // Copyright 2020-2024, University of Colorado Boulder
 
-import Property, { PropertyOptions } from '../../../axon/js/Property.js';
-import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { Color, scenery } from '../imports.js';
-
 /**
  * Convenience type for creating Property.<Color>
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
+
+import Property, { PropertyOptions } from '../../../axon/js/Property.js';
+import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import Color from '../util/Color.js';
+import scenery from '../scenery.js';
+
 export default class ColorProperty extends Property<Color> {
   public constructor( color: Color, providedOptions?: PropertyOptions<Color> ) {
 

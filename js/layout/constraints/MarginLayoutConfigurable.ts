@@ -22,7 +22,7 @@ import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
-import { scenery } from '../../imports.js';
+import scenery from '../../scenery.js';
 
 const MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS = [
   'margin',

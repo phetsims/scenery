@@ -6,7 +6,10 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import { Display, FocusManager, Node, Trail } from '../imports.js';
+import Display from '../display/Display.js';
+import FocusManager from '../accessibility/FocusManager.js';
+import Node from '../nodes/Node.js';
+import Trail from '../util/Trail.js';
 
 QUnit.module( 'Focus' );
 

@@ -10,7 +10,8 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { Hotkey, SceneryEvent } from '../imports.js';
+import Hotkey from '../input/Hotkey.js';
+import SceneryEvent from '../input/SceneryEvent.js';
 
 export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
 export type SceneryNullableListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> | null ) => void;

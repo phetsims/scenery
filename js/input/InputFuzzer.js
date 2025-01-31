@@ -8,7 +8,8 @@
 
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { EventContext, scenery } from '../imports.js';
+import EventContext from '../input/EventContext.js';
+import scenery from '../scenery.js';
 
 class InputFuzzer {
   /**

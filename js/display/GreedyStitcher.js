@@ -35,7 +35,12 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import { Block, ChangeInterval, Drawable, Renderer, scenery, Stitcher } from '../imports.js';
+import Block from '../display/Block.js';
+import ChangeInterval from '../display/ChangeInterval.js';
+import Drawable from '../display/Drawable.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import Stitcher from '../display/Stitcher.js';
 
 // Returns whether the consecutive {Drawable}s 'a' and 'b' should be put into separate blocks
 function hasGapBetweenDrawables( a, b ) {

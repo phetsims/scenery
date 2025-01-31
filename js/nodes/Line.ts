@@ -13,7 +13,17 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, Instance, LineCanvasDrawable, LineSVGDrawable, Path, PathOptions, Renderer, scenery, SVGSelfDrawable, TLineDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import Instance from '../display/Instance.js';
+import LineCanvasDrawable from '../display/drawables/LineCanvasDrawable.js';
+import LineSVGDrawable from '../display/drawables/LineSVGDrawable.js';
+import Path from '../nodes/Path.js';
+import type { PathOptions } from '../nodes/Path.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import type TLineDrawable from '../display/drawables/TLineDrawable.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position

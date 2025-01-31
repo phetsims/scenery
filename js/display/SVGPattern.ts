@@ -7,7 +7,10 @@
  */
 
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
-import { Pattern, scenery, svgns, xlinkns } from '../imports.js';
+import Pattern from '../util/Pattern.js';
+import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
+import xlinkns from '../util/xlinkns.js';
 
 export default class SVGPattern implements TPoolable {
 

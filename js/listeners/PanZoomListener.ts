@@ -14,7 +14,11 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
-import { MultiListener, MultiListenerOptions, MultiListenerPress, Node, scenery } from '../imports.js';
+import MultiListener from '../listeners/MultiListener.js';
+import type { MultiListenerOptions } from '../listeners/MultiListener.js';
+import MultiListenerPress from '../listeners/MultiListenerPress.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
 
 // constants
 // Reusable Matrix3 instance to avoid creating lots of them

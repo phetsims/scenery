@@ -24,7 +24,18 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { BackboneDrawable, CanvasBlock, ChangeInterval, Drawable, Fittability, InlineCanvasCacheDrawable, RelativeTransform, Renderer, scenery, SharedCanvasCacheDrawable, Trail, Utils } from '../imports.js';
+import BackboneDrawable from '../display/BackboneDrawable.js';
+import CanvasBlock from '../display/CanvasBlock.js';
+import ChangeInterval from '../display/ChangeInterval.js';
+import Drawable from '../display/Drawable.js';
+import Fittability from '../display/Fittability.js';
+import InlineCanvasCacheDrawable from '../display/InlineCanvasCacheDrawable.js';
+import RelativeTransform from '../display/RelativeTransform.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import SharedCanvasCacheDrawable from '../display/SharedCanvasCacheDrawable.js';
+import Trail from '../util/Trail.js';
+import Utils from '../util/Utils.js';
 
 // This fixes how Typescript recognizes the "Display" type, used this pattern in javascript files we can't convert to
 // TypeScript right now.

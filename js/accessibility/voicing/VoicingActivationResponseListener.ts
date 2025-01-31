@@ -8,7 +8,9 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import { PressListener, scenery, VoicingNode } from '../../../js/imports.js';
+import PressListener from '../../listeners/PressListener.js';
+import scenery from '../../scenery.js';
+import type { VoicingNode } from './Voicing.js';
 
 // If the mouse moves this much in the global coordinate frame, we consider it a drag event and the voicing response
 // behavior is interrupted.

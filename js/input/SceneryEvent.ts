@@ -16,7 +16,13 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { EventContext, Mouse, Node, PDOMPointer, Pointer, scenery, Trail } from '../imports.js';
+import EventContext from '../input/EventContext.js';
+import Mouse from '../input/Mouse.js';
+import Node from '../nodes/Node.js';
+import PDOMPointer from '../input/PDOMPointer.js';
+import Pointer from '../input/Pointer.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 import EventIO from './EventIO.js';
 
 // "out" here ensures that SceneryListenerFunctions don't specify a wider type arguments for the event, see  https://github.com/phetsims/scenery/issues/1483

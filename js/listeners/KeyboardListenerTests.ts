@@ -8,7 +8,11 @@
  * @author Agustín Vallejo (PhET Interactive Simulations)
  */
 
-import { Display, globalKeyStateTracker, KeyboardListener, KeyboardUtils, Node } from '../imports.js';
+import Display from '../display/Display.js';
+import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
+import KeyboardListener from '../listeners/KeyboardListener.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import Node from '../nodes/Node.js';
 
 QUnit.module( 'KeyboardListener', {
   before() {

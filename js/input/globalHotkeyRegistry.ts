@@ -9,7 +9,8 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import { Hotkey, scenery } from '../imports.js';
+import Hotkey from '../input/Hotkey.js';
+import scenery from '../scenery.js';
 
 class GlobalHotkeyRegistry {
 

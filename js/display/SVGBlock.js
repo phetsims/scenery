@@ -9,7 +9,12 @@
 import dotRandom from '../../../dot/js/dotRandom.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { CountMap, FittedBlock, scenery, SVGGroup, svgns, Utils } from '../imports.js';
+import CountMap from '../util/CountMap.js';
+import FittedBlock from '../display/FittedBlock.js';
+import scenery from '../scenery.js';
+import SVGGroup from '../display/SVGGroup.js';
+import svgns from '../util/svgns.js';
+import Utils from '../util/Utils.js';
 
 class SVGBlock extends FittedBlock {
   /**

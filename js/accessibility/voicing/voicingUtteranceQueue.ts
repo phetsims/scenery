@@ -9,7 +9,8 @@
  */
 
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { scenery, voicingManager } from '../../imports.js';
+import scenery from '../../scenery.js';
+import voicingManager from '../../accessibility/voicing/voicingManager.js';
 
 const voicingUtteranceQueue: UtteranceQueue = new UtteranceQueue( voicingManager, {
   featureSpecificAnnouncingControlPropertyName: 'voicingCanAnnounceProperty'

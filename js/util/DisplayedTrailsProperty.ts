@@ -18,7 +18,10 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { Display, Node, scenery, Trail } from '../imports.js';
+import Display from '../display/Display.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 type DisplayPredicate = Display | ( ( display: Display ) => boolean ) | null;
 

@@ -13,7 +13,20 @@ import { Shape } from '../../../../kite/js/imports.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import { Font, LayoutAlign, LayoutCell, LayoutProxy, Node, NodeLayoutConstraint, NodePattern, Path, PressListener, Rectangle, RichText, scenery, TColor, Text } from '../../imports.js';
+import Font from '../../util/Font.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import LayoutCell from '../../layout/constraints/LayoutCell.js';
+import LayoutProxy from '../../layout/LayoutProxy.js';
+import Node from '../../nodes/Node.js';
+import NodeLayoutConstraint from '../../layout/constraints/NodeLayoutConstraint.js';
+import NodePattern from '../../util/NodePattern.js';
+import Path from '../../nodes/Path.js';
+import PressListener from '../../listeners/PressListener.js';
+import Rectangle from '../../nodes/Rectangle.js';
+import RichText from '../../nodes/RichText.js';
+import scenery from '../../scenery.js';
+import type TColor from '../../util/TColor.js';
+import Text from '../../nodes/Text.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export type MarginLayout = {

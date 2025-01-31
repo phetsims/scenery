@@ -34,7 +34,16 @@
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { AllDragListenerOptions, DragListener, DragListenerOptions, Hotkey, KeyboardDragListener, KeyboardDragListenerCallback, KeyboardDragListenerNullableCallback, KeyboardDragListenerOptions, PressedDragListener, PressListenerCallback, PressListenerDOMEvent, PressListenerEvent, PressListenerNullableCallback, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
+import DragListener, { PressedDragListener } from '../listeners/DragListener.js';
+import type { DragListenerOptions } from '../listeners/DragListener.js';
+import Hotkey from '../input/Hotkey.js';
+import KeyboardDragListener from '../listeners/KeyboardDragListener.js';
+import type { KeyboardDragListenerCallback, KeyboardDragListenerNullableCallback, KeyboardDragListenerOptions } from '../listeners/KeyboardDragListener.js';
+import type { PressListenerCallback, PressListenerDOMEvent, PressListenerEvent, PressListenerNullableCallback } from '../listeners/PressListener.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type TInputListener from '../input/TInputListener.js';
 import { KeyboardDragListenerDOMEvent } from './KeyboardDragListener.js';
 
 type SelfOptions = AllDragListenerOptions<DragListener | KeyboardDragListener, PressListenerDOMEvent | KeyboardDragListenerDOMEvent> & {

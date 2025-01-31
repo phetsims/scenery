@@ -13,7 +13,11 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import { FocusManager, Node, scenery, SceneryEvent, TInputListener } from '../imports.js';
+import FocusManager from '../accessibility/FocusManager.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type TInputListener from '../input/TInputListener.js';
 
 export default class GroupFocusListener implements TInputListener {
 

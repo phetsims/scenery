@@ -10,7 +10,12 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { CanvasContextWrapper, Features, FittedBlock, Renderer, scenery, Utils } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Features from '../util/Features.js';
+import FittedBlock from '../display/FittedBlock.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import Utils from '../util/Utils.js';
 
 const scratchMatrix = new Matrix3();
 const scratchMatrix2 = new Matrix3();

@@ -17,7 +17,7 @@
  * @author Jesse Greenberg
  */
 
-import { Node } from '../imports.js';
+import Node from '../nodes/Node.js';
 
 /**
  * @param node - Prevent changes on this Node

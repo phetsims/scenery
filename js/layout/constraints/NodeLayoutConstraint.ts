@@ -15,7 +15,11 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { LayoutConstraint, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
+import LayoutConstraint from '../../layout/constraints/LayoutConstraint.js';
+import LayoutProxy from '../../layout/LayoutProxy.js';
+import MarginLayoutCell from '../../layout/constraints/MarginLayoutCell.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 // Position changes smaller than this will be ignored
 const CHANGE_POSITION_THRESHOLD = 1e-9;

@@ -6,7 +6,9 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import { Node, RichText, Text } from '../../imports.js';
+import Node from '../../nodes/Node.js';
+import RichText from '../../nodes/RichText.js';
+import Text from '../../nodes/Text.js';
 import PDOMUtils from './PDOMUtils.js';
 
 QUnit.module( 'AccessibilityUtils' );

@@ -18,7 +18,11 @@ import PickOptional from '../../../phet-core/js/types/PickOptional.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
-import { EnglishKey, EnglishKeyString, EnglishStringToCodeMap, eventCodeToEnglishString, EventIO, KeyboardUtils, scenery } from '../imports.js';
+import type { EnglishKey, EnglishKeyString } from '../accessibility/EnglishStringToCodeMap.js';
+import EnglishStringToCodeMap, { eventCodeToEnglishString } from '../accessibility/EnglishStringToCodeMap.js';
+import EventIO from '../input/EventIO.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import scenery from '../scenery.js';
 
 // Type describing the state of a single key in the KeyState.
 type KeyStateInfo = {

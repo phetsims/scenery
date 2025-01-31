@@ -39,7 +39,12 @@ import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/Enab
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { AllowedKeysString, EnglishStringToCodeMap, hotkeyManager, KeyDescriptor, OneKeyStroke, scenery } from '../imports.js';
+import type { AllowedKeysString } from '../input/KeyDescriptor.js';
+import EnglishStringToCodeMap from '../accessibility/EnglishStringToCodeMap.js';
+import hotkeyManager from '../input/hotkeyManager.js';
+import KeyDescriptor from '../input/KeyDescriptor.js';
+import type { OneKeyStroke } from '../input/KeyDescriptor.js';
+import scenery from '../scenery.js';
 
 export type HotkeyFireOnHoldTiming = 'browser' | 'custom';
 

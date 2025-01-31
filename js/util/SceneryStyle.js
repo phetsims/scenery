@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../imports.js';
+import scenery from '../scenery.js';
 
 const styleElement = document.createElement( 'style' );
 styleElement.type = 'text/css';

@@ -9,7 +9,11 @@
 import { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { Color, RectangleStatefulDrawable, Renderer, scenery, WebGLSelfDrawable } from '../../imports.js';
+import Color from '../../util/Color.js';
+import RectangleStatefulDrawable from '../../display/drawables/RectangleStatefulDrawable.js';
+import Renderer from '../../display/Renderer.js';
+import scenery from '../../scenery.js';
+import WebGLSelfDrawable from '../../display/WebGLSelfDrawable.js';
 
 const scratchColor = new Color( 'transparent' );
 

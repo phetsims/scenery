@@ -26,7 +26,16 @@
 import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/DerivedProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import { AllowedKeysString, EnglishKeyString, eventCodeToEnglishString, FocusManager, globalHotkeyRegistry, globalKeyStateTracker, Hotkey, KeyboardUtils, metaEnglishKeys, Node, scenery } from '../imports.js';
+import type { AllowedKeysString } from '../input/KeyDescriptor.js';
+import type { EnglishKeyString } from '../accessibility/EnglishStringToCodeMap.js';
+import { eventCodeToEnglishString, metaEnglishKeys } from '../accessibility/EnglishStringToCodeMap.js';
+import FocusManager from '../accessibility/FocusManager.js';
+import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
+import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
+import Hotkey from '../input/Hotkey.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
 
 const arrayComparator = <Key>( a: Key[], b: Key[] ): boolean => {
   return a.length === b.length && a.every( ( element, index ) => element === b[ index ] );

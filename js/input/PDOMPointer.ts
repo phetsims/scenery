@@ -9,7 +9,12 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Display, Node, PDOMInstance, Pointer, scenery, Trail } from '../imports.js';
+import Display from '../display/Display.js';
+import Node from '../nodes/Node.js';
+import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
+import Pointer from '../input/Pointer.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 export default class PDOMPointer extends Pointer {
 

@@ -83,7 +83,18 @@ import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import { DisplayedTrailsProperty, EventContext, globalHotkeyRegistry, Hotkey, HotkeyFireOnHoldTiming, Node, OneKeyStroke, PDOMPointer, scenery, SceneryEvent, TInputListener, Trail } from '../imports.js';
+import DisplayedTrailsProperty from '../util/DisplayedTrailsProperty.js';
+import EventContext from '../input/EventContext.js';
+import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
+import Hotkey from '../input/Hotkey.js';
+import type { HotkeyFireOnHoldTiming } from '../input/Hotkey.js';
+import Node from '../nodes/Node.js';
+import type { OneKeyStroke } from '../input/KeyDescriptor.js';
+import PDOMPointer from '../input/PDOMPointer.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type TInputListener from '../input/TInputListener.js';
+import Trail from '../util/Trail.js';
 
 type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
 

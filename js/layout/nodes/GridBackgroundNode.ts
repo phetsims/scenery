@@ -11,7 +11,13 @@
 
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import { GridCell, GridConstraint, Node, NodeOptions, Rectangle, scenery, TPaint } from '../../imports.js';
+import GridCell from '../../layout/constraints/GridCell.js';
+import GridConstraint from '../../layout/constraints/GridConstraint.js';
+import Node from '../../nodes/Node.js';
+import type { NodeOptions } from '../../nodes/Node.js';
+import Rectangle from '../../nodes/Rectangle.js';
+import scenery from '../../scenery.js';
+import TPaint from '../../util/TPaint.js';
 
 type CreateCellBackground = ( gridCell: GridCell ) => Node | null;
 type SelfOptions = {

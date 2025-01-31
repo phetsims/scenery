@@ -14,7 +14,26 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Features, Gradient, Instance, Path, PathOptions, Pattern, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, Renderer, scenery, Sizable, SizableOptions, SVGSelfDrawable, TRectangleDrawable, WebGLSelfDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
+import Features from '../util/Features.js';
+import Gradient from '../util/Gradient.js';
+import Instance from '../display/Instance.js';
+import Path from '../nodes/Path.js';
+import type { PathOptions } from '../nodes/Path.js';
+import Pattern from '../util/Pattern.js';
+import RectangleCanvasDrawable from '../display/drawables/RectangleCanvasDrawable.js';
+import RectangleDOMDrawable from '../display/drawables/RectangleDOMDrawable.js';
+import RectangleSVGDrawable from '../display/drawables/RectangleSVGDrawable.js';
+import RectangleWebGLDrawable from '../display/drawables/RectangleWebGLDrawable.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import Sizable from '../layout/Sizable.js';
+import type { SizableOptions } from '../layout/Sizable.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import type TRectangleDrawable from '../display/drawables/TRectangleDrawable.js';
+import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
 
 const RECTANGLE_OPTION_KEYS = [
   'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.

@@ -34,7 +34,16 @@ import responseCollector from '../../../../utterance-queue/js/responseCollector.
 import ResponsePacket, { ResolvedResponse, SpeakableResolvedOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
-import { DelayedMutate, Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, ParallelDOM, ParallelDOMOptions, PDOMValueType, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
+import DelayedMutate from '../../util/DelayedMutate.js';
+import Instance from '../../display/Instance.js';
+import InteractiveHighlighting from '../../accessibility/voicing/InteractiveHighlighting.js';
+import type { InteractiveHighlightingOptions } from '../../accessibility/voicing/InteractiveHighlighting.js';
+import Node from '../../nodes/Node.js';
+import ParallelDOM from '../../accessibility/pdom/ParallelDOM.js';
+import type { ParallelDOMOptions, PDOMValueType } from '../../accessibility/pdom/ParallelDOM.js';
+import scenery from '../../scenery.js';
+import type { SceneryListenerFunction } from '../../input/TInputListener.js';
+import voicingUtteranceQueue from '../../accessibility/voicing/voicingUtteranceQueue.js';
 import type { TInteractiveHighlighting } from './InteractiveHighlighting.js';
 
 // Helps enforce that the utterance is defined.

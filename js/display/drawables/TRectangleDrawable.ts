@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { TPathDrawable } from '../../imports.js';
+import type TPathDrawable from '../../display/drawables/TPathDrawable.js';
 
 type TRectangleDrawable = {
   markDirtyRectangle(): void;

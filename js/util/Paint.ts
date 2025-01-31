@@ -7,7 +7,10 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { scenery, SVGBlock, SVGGradient, SVGPattern } from '../imports.js';
+import scenery from '../scenery.js';
+import SVGBlock from '../display/SVGBlock.js';
+import SVGGradient from '../display/SVGGradient.js';
+import SVGPattern from '../display/SVGPattern.js';
 
 let globalId = 1;
 

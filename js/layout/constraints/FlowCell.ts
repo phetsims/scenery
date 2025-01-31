@@ -8,7 +8,15 @@
 
 import optionize from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { ExternalFlowConfigurableOptions, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurable, FlowConstraint, LayoutAlign, LayoutProxy, MarginLayoutCell, Node, scenery } from '../../imports.js';
+import type { ExternalFlowConfigurableOptions } from '../../layout/constraints/FlowConfigurable.js';
+import { FLOW_CONFIGURABLE_OPTION_KEYS } from '../../layout/constraints/FlowConfigurable.js';
+import FlowConfigurable from '../../layout/constraints/FlowConfigurable.js';
+import FlowConstraint from '../../layout/constraints/FlowConstraint.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import LayoutProxy from '../../layout/LayoutProxy.js';
+import MarginLayoutCell from '../../layout/constraints/MarginLayoutCell.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 const FLOW_CELL_KEYS = [
   ...FLOW_CONFIGURABLE_OPTION_KEYS,

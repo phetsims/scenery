@@ -23,7 +23,25 @@ import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSele
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable, TTextDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
+import Font from '../util/Font.js';
+import type { FontStretch, FontStyle, FontWeight } from '../util/Font.js';
+import Instance from '../display/Instance.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import Paintable from '../nodes/Paintable.js';
+import { PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS } from '../nodes/Paintable.js';
+import type { PaintableOptions } from '../nodes/Paintable.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import TextBounds from '../util/TextBounds.js';
+import TextCanvasDrawable from '../display/drawables/TextCanvasDrawable.js';
+import TextDOMDrawable from '../display/drawables/TextDOMDrawable.js';
+import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
+import type TTextDrawable from '../display/drawables/TTextDrawable.js';
 
 const STRING_PROPERTY_NAME = 'stringProperty'; // eslint-disable-line phet/bad-sim-text
 

@@ -8,7 +8,7 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import Display from '../display/Display.js';
-import { EventContext } from '../imports.js';
+import EventContext from '../input/EventContext.js';
 import Node from '../nodes/Node.js';
 import Rectangle from '../nodes/Rectangle.js';
 

@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AncestorNodesProperty, Node } from '../imports.js';
+import AncestorNodesProperty from '../util/AncestorNodesProperty.js';
+import Node from '../nodes/Node.js';
 
 QUnit.module( 'AncestorNodesProperty' );
 

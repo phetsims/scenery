@@ -8,7 +8,14 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import platform from '../../../phet-core/js/platform.js';
-import { BatchedDOMEventType, Display, EventContext, Features, FocusManager, globalKeyStateTracker, PDOMUtils, scenery } from '../imports.js';
+import { BatchedDOMEventType } from '../input/BatchedDOMEvent.js';
+import Display from '../display/Display.js';
+import EventContext from '../input/EventContext.js';
+import Features from '../util/Features.js';
+import FocusManager from '../accessibility/FocusManager.js';
+import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import scenery from '../scenery.js';
 
 // Sometimes we need to add a listener that does absolutely nothing
 const noop = () => {};

@@ -15,7 +15,26 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasNode from '../nodes/CanvasNode.js';
+import Circle from '../nodes/Circle.js';
+import Color from '../util/Color.js';
+import Display from '../display/Display.js';
+import DOM from '../nodes/DOM.js';
+import Gradient from '../util/Gradient.js';
+import Image from '../nodes/Image.js';
+import Line from '../nodes/Line.js';
+import LinearGradient from '../util/LinearGradient.js';
+import Node from '../nodes/Node.js';
+import Paint from '../util/Paint.js';
+import { PAINTABLE_DEFAULT_OPTIONS } from '../nodes/Paintable.js';
+import Path from '../nodes/Path.js';
+import Pattern from '../util/Pattern.js';
+import RadialGradient from '../util/RadialGradient.js';
+import Rectangle from '../nodes/Rectangle.js';
+import scenery from '../scenery.js';
+import Text from '../nodes/Text.js';
+import WebGLNode from '../nodes/WebGLNode.js';
 
 const scenerySerialize = ( value: unknown ): IntentionalAny => {
   if ( value instanceof Vector2 ) {

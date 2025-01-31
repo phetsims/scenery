@@ -12,7 +12,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, SelfDrawable } from '../imports.js';
+import scenery from '../scenery.js';
+import SelfDrawable from '../display/SelfDrawable.js';
 
 class DOMSelfDrawable extends SelfDrawable {
   /**

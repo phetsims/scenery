@@ -9,7 +9,12 @@
 
 import TReadOnlyProperty from '../../../../../axon/js/TReadOnlyProperty.js';
 import optionize, { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
-import { ReadingBlock, ReadingBlockHighlight, ReadingBlockOptions, scenery, Text, TextOptions } from '../../../imports.js';
+import ReadingBlock from '../../../accessibility/voicing/ReadingBlock.js';
+import ReadingBlockHighlight from '../../../accessibility/voicing/ReadingBlockHighlight.js';
+import type { ReadingBlockOptions } from '../../../accessibility/voicing/ReadingBlock.js';
+import scenery from '../../../scenery.js';
+import Text from '../../../nodes/Text.js';
+import type { TextOptions } from '../../../nodes/Text.js';
 
 type SelfOptions = EmptySelfOptions;
 type ParentOptions = ReadingBlockOptions & TextOptions;

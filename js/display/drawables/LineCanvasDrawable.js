@@ -7,7 +7,10 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { CanvasSelfDrawable, LineStatelessDrawable, Node, scenery } from '../../imports.js';
+import CanvasSelfDrawable from '../../display/CanvasSelfDrawable.js';
+import LineStatelessDrawable from '../../display/drawables/LineStatelessDrawable.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 
 class LineCanvasDrawable extends LineStatelessDrawable( CanvasSelfDrawable ) {
   /**

@@ -31,7 +31,9 @@
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { Node, NodeOptions, scenery } from '../imports.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import scenery from '../scenery.js';
 
 /**
  * @param name - A unique name for each call, which customizes the internal key names used to track state

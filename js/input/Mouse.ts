@@ -8,7 +8,8 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
-import { Pointer, scenery } from '../imports.js';
+import Pointer from '../input/Pointer.js';
+import scenery from '../scenery.js';
 
 export default class Mouse extends Pointer {
 

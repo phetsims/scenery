@@ -80,7 +80,15 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { AllDragListenerOptions, Node, Pointer, PressedPressListener, PressListener, PressListenerDOMEvent, PressListenerEvent, PressListenerOptions, scenery, SceneryEvent, TInputListener, TransformTracker } from '../imports.js';
+import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
+import Node from '../nodes/Node.js';
+import Pointer from '../input/Pointer.js';
+import type { PressedPressListener, PressListenerDOMEvent, PressListenerEvent, PressListenerOptions } from '../listeners/PressListener.js';
+import PressListener from '../listeners/PressListener.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type TInputListener from '../input/TInputListener.js';
+import TransformTracker from '../util/TransformTracker.js';
 
 // Scratch vectors used to prevent allocations
 const scratchVector2A = new Vector2( 0, 0 );

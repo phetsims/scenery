@@ -16,7 +16,21 @@ import memoize from '../../../phet-core/js/memoize.js';
 import platform from '../../../phet-core/js/platform.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { CanvasContextWrapper, Color, Gradient, LinearGradient, Node, Paint, PaintDef, Path, Pattern, RadialGradient, Renderer, scenery, Text, TPaint, TPaintableDrawable } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Color from '../util/Color.js';
+import Gradient from '../util/Gradient.js';
+import LinearGradient from '../util/LinearGradient.js';
+import Node from '../nodes/Node.js';
+import Paint from '../util/Paint.js';
+import PaintDef from '../util/PaintDef.js';
+import Path from '../nodes/Path.js';
+import Pattern from '../util/Pattern.js';
+import RadialGradient from '../util/RadialGradient.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
+import Text from '../nodes/Text.js';
+import TPaint from '../util/TPaint.js';
+import type TPaintableDrawable from '../display/drawables/TPaintableDrawable.js';
 
 const isSafari5 = platform.safari5;
 

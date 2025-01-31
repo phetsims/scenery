@@ -15,7 +15,11 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { HighlightPath, HighlightPathOptions, Node, scenery, Trail } from '../imports.js';
+import HighlightPath from '../accessibility/HighlightPath.js';
+import type { HighlightPathOptions } from '../accessibility/HighlightPath.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 type SelfOptions = {
 

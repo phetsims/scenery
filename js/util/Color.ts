@@ -16,7 +16,8 @@ import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { scenery, TPaint } from '../imports.js';
+import scenery from '../scenery.js';
+import TPaint from '../util/TPaint.js';
 import TColor from './TColor.js';
 
 // constants

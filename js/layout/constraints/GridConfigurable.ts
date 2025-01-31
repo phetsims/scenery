@@ -23,7 +23,13 @@ import mutate from '../../../../phet-core/js/mutate.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
-import { HorizontalLayoutAlign, HorizontalLayoutAlignValues, LayoutAlign, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, scenery, VerticalLayoutAlign, VerticalLayoutAlignValues } from '../../imports.js';
+import type { HorizontalLayoutAlign, VerticalLayoutAlign } from '../../layout/LayoutAlign.js';
+import { HorizontalLayoutAlignValues, VerticalLayoutAlignValues } from '../../layout/LayoutAlign.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import { MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS } from '../../layout/constraints/MarginLayoutConfigurable.js';
+import MarginLayoutConfigurable from '../../layout/constraints/MarginLayoutConfigurable.js';
+import type { MarginLayoutConfigurableOptions } from '../../layout/constraints/MarginLayoutConfigurable.js';
+import scenery from '../../scenery.js';
 
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',

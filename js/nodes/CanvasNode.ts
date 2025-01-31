@@ -14,7 +14,14 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { CanvasContextWrapper, CanvasNodeDrawable, CanvasSelfDrawable, Instance, Node, NodeOptions, Renderer, scenery } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import CanvasNodeDrawable from '../display/drawables/CanvasNodeDrawable.js';
+import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import Instance from '../display/Instance.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import Renderer from '../display/Renderer.js';
+import scenery from '../scenery.js';
 
 const CANVAS_NODE_OPTION_KEYS = [
   'canvasBounds'

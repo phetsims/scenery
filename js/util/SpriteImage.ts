@@ -14,7 +14,9 @@ import { Shape } from '../../../kite/js/imports.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import PickRequired from '../../../phet-core/js/types/PickRequired.js';
-import { Imageable, ImageableImage, ImageableOptions, scenery } from '../imports.js';
+import Imageable from '../nodes/Imageable.js';
+import type { ImageableImage, ImageableOptions } from '../nodes/Imageable.js';
+import scenery from '../scenery.js';
 
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );

@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Drawable, scenery } from '../imports.js';
+import Drawable from '../display/Drawable.js';
+import scenery from '../scenery.js';
 
 class InlineCanvasCacheDrawable extends Drawable {
   /**

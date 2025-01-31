@@ -57,7 +57,18 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { AllDragListenerOptions, globalKeyStateTracker, KeyboardListener, KeyboardListenerOptions, KeyboardUtils, Node, OneKeyStroke, PDOMPointer, scenery, SceneryEvent, SceneryListenerCallback, SceneryListenerNullableCallback, TInputListener } from '../imports.js';
+import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
+import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
+import KeyboardListener from '../listeners/KeyboardListener.js';
+import type { KeyboardListenerOptions } from '../listeners/KeyboardListener.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import Node from '../nodes/Node.js';
+import type { OneKeyStroke } from '../input/KeyDescriptor.js';
+import PDOMPointer from '../input/PDOMPointer.js';
+import scenery from '../scenery.js';
+import SceneryEvent from '../input/SceneryEvent.js';
+import type { SceneryListenerCallback, SceneryListenerNullableCallback } from '../listeners/PressListener.js';
+import type TInputListener from '../input/TInputListener.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.

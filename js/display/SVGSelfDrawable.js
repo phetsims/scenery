@@ -16,7 +16,9 @@
  */
 
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
-import { PaintSVGState, scenery, SelfDrawable } from '../imports.js';
+import PaintSVGState from '../display/PaintSVGState.js';
+import scenery from '../scenery.js';
+import SelfDrawable from '../display/SelfDrawable.js';
 
 // Scratch arrays so that we are not creating array objects during paint checks
 const scratchOldPaints = [];

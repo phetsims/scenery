@@ -6,7 +6,8 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { EnglishKeyString, KeyDescriptor } from '../imports.js';
+import type { EnglishKeyString } from '../accessibility/EnglishStringToCodeMap.js';
+import KeyDescriptor from '../input/KeyDescriptor.js';
 
 QUnit.module( 'KeyDescriptor' );
 

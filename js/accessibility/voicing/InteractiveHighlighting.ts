@@ -13,8 +13,18 @@ import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { DelayedMutate, Display, Focus, FocusManager, Instance, Node, Pointer, scenery, SceneryEvent, TInputListener, Trail } from '../../imports.js';
-import { Highlight } from '../../overlays/HighlightOverlay.js';
+import DelayedMutate from '../../util/DelayedMutate.js';
+import Display from '../../display/Display.js';
+import Focus from '../../accessibility/Focus.js';
+import FocusManager from '../../accessibility/FocusManager.js';
+import Instance from '../../display/Instance.js';
+import Node from '../../nodes/Node.js';
+import Pointer from '../../input/Pointer.js';
+import scenery from '../../scenery.js';
+import SceneryEvent from '../../input/SceneryEvent.js';
+import type TInputListener from '../../input/TInputListener.js';
+import Trail from '../../util/Trail.js';
+import { Highlight } from '../Highlight.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -628,7 +638,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         const uniqueId = instance.trail!.uniqueId;
 
         if ( added ) {
-          const display = instance.display as Display; // eslint-disable-line @typescript-eslint/non-nullable-type-assertion-style
+          const display = instance.display!;
           this.displays[ uniqueId ] = display;
           this.onDisplayAdded( display );
         }

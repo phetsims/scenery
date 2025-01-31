@@ -11,7 +11,9 @@ import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { EventContext, Input, scenery } from '../imports.js';
+import EventContext from '../input/EventContext.js';
+import Input from '../input/Input.js';
+import scenery from '../scenery.js';
 
 export type BatchedDOMEventCallback = ( ...args: IntentionalAny[] ) => void;
 

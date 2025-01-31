@@ -33,7 +33,16 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Utterance from '../../../utterance-queue/js/Utterance.js';
-import { Display, Focus, FocusDisplayedController, isInteractiveHighlighting, Node, PDOMInstance, PDOMUtils, ReadingBlockUtterance, scenery, voicingManager } from '../imports.js';
+import Display from '../display/Display.js';
+import Focus from '../accessibility/Focus.js';
+import FocusDisplayedController from '../accessibility/FocusDisplayedController.js';
+import { isInteractiveHighlighting } from '../accessibility/voicing/InteractiveHighlighting.js';
+import Node from '../nodes/Node.js';
+import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import ReadingBlockUtterance from '../accessibility/voicing/ReadingBlockUtterance.js';
+import scenery from '../scenery.js';
+import voicingManager from '../accessibility/voicing/voicingManager.js';
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 

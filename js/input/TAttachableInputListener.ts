@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { TInputListener } from '../imports.js';
+import TInputListener from '../input/TInputListener.js';
 
 type TAttachableInputListener = {
   // Has to be interruptable

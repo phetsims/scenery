@@ -7,7 +7,8 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { MatrixBetweenProperty, Node } from '../imports.js';
+import MatrixBetweenProperty from '../util/MatrixBetweenProperty.js';
+import Node from '../nodes/Node.js';
 
 QUnit.module( 'MatrixBetweenProperty' );
 

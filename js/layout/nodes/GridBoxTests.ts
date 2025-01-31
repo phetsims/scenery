@@ -4,7 +4,6 @@
 /* eslint-disable phet/no-object-spread-on-non-literals */
 
 import Rectangle from '../../nodes/Rectangle.js';
-
 import PixelComparisonTestUtils from '../../tests/PixelComparisonTestUtils.js';
 import LayoutTestUtils from '../LayoutTestUtils.js';
 import GridBox from '../nodes/GridBox.js';

@@ -18,7 +18,12 @@
  */
 
 import { DerivedProperty1 } from '../../../axon/js/DerivedProperty.js';
-import { LayoutProxy, Node, scenery, Trail, TrailsBetweenProperty, TransformTracker } from '../imports.js';
+import LayoutProxy from '../layout/LayoutProxy.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
+import TrailsBetweenProperty from '../util/TrailsBetweenProperty.js';
+import TransformTracker from '../util/TransformTracker.js';
 
 type SelfOptions = {
   // If provided, this will be called when the transform of the proxy changes

@@ -75,7 +75,27 @@ import '../../../sherpa/lib/himalaya-1.1.0.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { allowLinksProperty, assertNoAdditionalChildren, Color, Font, getLineBreakRanges, HimalayaNode, isHimalayaElementNode, isHimalayaTextNode, Line, Node, NodeOptions, RichTextCleanableNode, RichTextElement, RichTextLeaf, RichTextLink, RichTextNode, RichTextUtils, RichTextVerticalSpacer, scenery, Text, TextBoundsMethod, TPaint, WidthSizable } from '../imports.js';
+import allowLinksProperty from '../util/allowLinksProperty.js';
+import assertNoAdditionalChildren from '../util/assertNoAdditionalChildren.js';
+import Color from '../util/Color.js';
+import Font from '../util/Font.js';
+import getLineBreakRanges from '../util/getLineBreakRanges.js';
+import { HimalayaNode, isHimalayaElementNode, isHimalayaTextNode } from '../util/rich-text/RichTextUtils.js';
+import Line from '../nodes/Line.js';
+import Node from '../nodes/Node.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import RichTextElement from '../util/rich-text/RichTextElement.js';
+import RichTextLeaf from '../util/rich-text/RichTextLeaf.js';
+import RichTextLink from '../util/rich-text/RichTextLink.js';
+import RichTextNode from '../util/rich-text/RichTextNode.js';
+import RichTextUtils from '../util/rich-text/RichTextUtils.js';
+import RichTextVerticalSpacer from '../util/rich-text/RichTextVerticalSpacer.js';
+import scenery from '../scenery.js';
+import Text from '../nodes/Text.js';
+import type { TextBoundsMethod } from '../nodes/Text.js';
+import TPaint from '../util/TPaint.js';
+import WidthSizable from '../layout/WidthSizable.js';
+import { RichTextCleanableNode } from '../util/rich-text/RichTextCleanable.js';
 
 // @ts-expect-error - Since himalaya isn't in tsconfig
 const himalayaVar = himalaya;

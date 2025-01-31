@@ -9,7 +9,9 @@
 
 import { EmptySelfOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { Line, LineOptions, scenery } from '../../imports.js';
+import Line from '../../nodes/Line.js';
+import type { LineOptions } from '../../nodes/Line.js';
+import scenery from '../../scenery.js';
 
 type SelfOptions = EmptySelfOptions;
 

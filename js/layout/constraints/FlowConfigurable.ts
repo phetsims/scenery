@@ -28,7 +28,15 @@ import Orientation from '../../../../phet-core/js/Orientation.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import WithoutNull from '../../../../phet-core/js/types/WithoutNull.js';
-import { HorizontalLayoutAlign, LayoutAlign, LayoutOrientation, MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS, MarginLayoutConfigurable, MarginLayoutConfigurableOptions, RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign, scenery, VerticalLayoutAlign, TMarginLayoutConfigurable } from '../../imports.js';
+import type { HorizontalLayoutAlign, VerticalLayoutAlign } from '../../layout/LayoutAlign.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import { LayoutOrientation } from '../../layout/LayoutOrientation.js';
+import { MARGIN_LAYOUT_CONFIGURABLE_OPTION_KEYS } from '../../layout/constraints/MarginLayoutConfigurable.js';
+import MarginLayoutConfigurable from '../../layout/constraints/MarginLayoutConfigurable.js';
+import type { MarginLayoutConfigurableOptions } from '../../layout/constraints/MarginLayoutConfigurable.js';
+import type { RestrictedHorizontalLayoutAlign, RestrictedVerticalLayoutAlign } from '../../layout/LayoutAlign.js';
+import scenery from '../../scenery.js';
+import type { TMarginLayoutConfigurable } from '../../layout/constraints/MarginLayoutConfigurable.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',

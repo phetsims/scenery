@@ -7,7 +7,11 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { InteractiveHighlighting, InteractiveHighlightingOptions, Node, NodeOptions, scenery } from '../../../imports.js';
+import InteractiveHighlighting from '../../../accessibility/voicing/InteractiveHighlighting.js';
+import type { InteractiveHighlightingOptions } from '../../../accessibility/voicing/InteractiveHighlighting.js';
+import Node from '../../../nodes/Node.js';
+import type { NodeOptions } from '../../../nodes/Node.js';
+import scenery from '../../../scenery.js';
 
 export type InteractiveHighlightingNodeOptions = InteractiveHighlightingOptions & NodeOptions;
 

@@ -10,7 +10,11 @@
 import stepTimer from '../../../axon/js/stepTimer.js';
 import { TimerListener } from '../../../axon/js/Timer.js';
 import Random from '../../../dot/js/Random.js';
-import { Display, globalKeyStateTracker, KeyboardUtils, PDOMUtils, scenery } from '../imports.js';
+import Display from '../display/Display.js';
+import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import scenery from '../scenery.js';
 
 type KeyupListener = ( () => void ) & {
   timeout: TimerListener;

@@ -14,7 +14,8 @@
 
 import optionize from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { Node, NodeOptions, scenery } from '../../imports.js';
+import scenery from '../../scenery.js';
+import Node, { NodeOptions } from '../../nodes/Node.js';
 
 // Available heading levels, according to DOM spec.
 type HeadingLevelNumber = 1 | 2 | 3 | 4 | 5 | 6;

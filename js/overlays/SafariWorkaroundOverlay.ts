@@ -7,7 +7,10 @@
  */
 
 import dotRandom from '../../../dot/js/dotRandom.js';
-import { Display, scenery, svgns, TOverlay } from '../imports.js';
+import Display from '../display/Display.js';
+import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
+import type TOverlay from '../overlays/TOverlay.js';
 
 export default class SafariWorkaroundOverlay implements TOverlay {
 

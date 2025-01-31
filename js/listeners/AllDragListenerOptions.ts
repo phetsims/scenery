@@ -13,7 +13,7 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { SceneryListenerCallback, SceneryListenerNullableCallback } from '../imports.js';
+import type { SceneryListenerCallback, SceneryListenerNullableCallback } from '../listeners/PressListener.js';
 
 type MapPosition = ( point: Vector2 ) => Vector2;
 

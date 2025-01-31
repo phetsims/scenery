@@ -9,7 +9,10 @@
  */
 
 import platform from '../../../phet-core/js/platform.js';
-import { Color, Display, Node, RendererType } from '../imports.js';
+import Color from '../util/Color.js';
+import Display from '../display/Display.js';
+import Node from '../nodes/Node.js';
+import type { RendererType } from '../nodes/Node.js';
 
 const TESTED_RENDERERS: RendererType[] = [ 'canvas', 'svg', 'dom', 'webgl' ];
 

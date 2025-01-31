@@ -7,7 +7,11 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { CanvasContextWrapper, Font, scenery, svgns, Utils } from '../imports.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Font from '../util/Font.js';
+import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
+import Utils from '../util/Utils.js';
 
 // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
 const TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';

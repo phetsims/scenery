@@ -8,7 +8,10 @@
  * @author Jesse Greenberg
  */
 
-import { AnimatedPanZoomListener, Node, PanZoomListenerOptions, scenery } from '../imports.js';
+import AnimatedPanZoomListener from '../listeners/AnimatedPanZoomListener.js';
+import Node from '../nodes/Node.js';
+import type { PanZoomListenerOptions } from '../listeners/PanZoomListener.js';
+import scenery from '../scenery.js';
 
 class AnimatedPanZoomSingleton {
 
