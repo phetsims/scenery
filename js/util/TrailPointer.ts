@@ -13,9 +13,9 @@
  */
 
 import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
-import Node from '../nodes/Node.js';
+import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import Trail from '../util/Trail.js';
+import type Trail from '../util/Trail.js';
 import { TrailCallback } from './Trail.js';
 
 export type ActiveTrailPointer = WithoutNull<TrailPointer, 'trail'>;

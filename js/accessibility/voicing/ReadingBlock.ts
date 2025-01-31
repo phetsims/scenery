@@ -31,7 +31,6 @@ import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import DelayedMutate from '../../util/DelayedMutate.js';
 import Focus from '../../accessibility/Focus.js';
 import Node from '../../nodes/Node.js';
-import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
 import ReadingBlockHighlight from '../../accessibility/voicing/ReadingBlockHighlight.js';
 import ReadingBlockUtterance from '../../accessibility/voicing/ReadingBlockUtterance.js';
 import type { ReadingBlockUtteranceOptions } from '../../accessibility/voicing/ReadingBlockUtterance.js';
@@ -43,6 +42,7 @@ import type { VoicingOptions } from '../../accessibility/voicing/Voicing.js';
 import type TInputListener from '../../input/TInputListener.js';
 import type { TVoicing } from './Voicing.js';
 import { Highlight } from '../Highlight.js';
+import { guessVisualTrail } from '../pdom/guessVisualTrail.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -433,7 +433,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
 
               // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
               // this finds the actual visual trail to use
-              const visualTrail = PDOMInstance.guessVisualTrail( rootToSelf, displays[ i ].rootNode );
+              const visualTrail = guessVisualTrail( rootToSelf, displays[ i ].rootNode );
 
               const focus = new Focus( displays[ i ], visualTrail );
               readingBlockUtterance.readingBlockFocus = focus;

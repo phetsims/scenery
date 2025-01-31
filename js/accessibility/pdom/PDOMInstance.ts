@@ -29,8 +29,6 @@
 
 import dotRandom from '../../../../dot/js/dotRandom.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
-import Enumeration from '../../../../phet-core/js/Enumeration.js';
-import EnumerationValue from '../../../../phet-core/js/EnumerationValue.js';
 import Pool from '../../../../phet-core/js/Pool.js';
 import Display from '../../display/Display.js';
 import FocusManager from '../../accessibility/FocusManager.js';
@@ -40,26 +38,16 @@ import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
 import TransformTracker from '../../util/TransformTracker.js';
-
-// PDOMInstances support two different styles of unique IDs, each with their own tradeoffs, https://github.com/phetsims/phet-io/issues/1851
-class PDOMUniqueIdStrategy extends EnumerationValue {
-  public static readonly INDICES = new PDOMUniqueIdStrategy();
-  public static readonly TRAIL_ID = new PDOMUniqueIdStrategy();
-
-  public static readonly enumeration = new Enumeration( PDOMUniqueIdStrategy );
-}
+import { PDOM_UNIQUE_ID_SEPARATOR } from './PDOM_UNIQUE_ID_SEPARATOR.js';
+import { guessVisualTrail } from './guessVisualTrail.js';
+import PDOMUniqueIdStrategy from './PDOMUniqueIdStrategy.js';
+import UNIQUE_ID_STRATEGY from './UNIQUE_ID_STRATEGY.js';
 
 // A type representing a fake instance, for some aggressive auditing (under ?assertslow)
 type FakeInstance = {
   node: Node | null;
   children: FakeInstance[];
 };
-
-// This constant is set up to allow us to change our unique id strategy. Both strategies have trade-offs that are
-// described in https://github.com/phetsims/phet-io/issues/1847#issuecomment-1068377336. TRAIL_ID is our path forward
-// currently, but will break PhET-iO playback if any Nodes are created in the recorded sim OR playback sim but not
-// both. Further information in the above issue and https://github.com/phetsims/phet-io/issues/1851.
-const UNIQUE_ID_STRATEGY = PDOMUniqueIdStrategy.TRAIL_ID;
 
 let globalId = 1;
 
@@ -566,7 +554,7 @@ class PDOMInstance {
       trackedTrail = pdomTransformSourceNode.getUniqueTrail();
     }
     else {
-      trackedTrail = PDOMInstance.guessVisualTrail( this.trail!, this.display!.rootNode );
+      trackedTrail = guessVisualTrail( this.trail!, this.display!.rootNode );
     }
 
     this.transformTracker = new TransformTracker( trackedTrail );
@@ -591,7 +579,7 @@ class PDOMInstance {
         indicesString.unshift( indexOf );
         pdomInstance = pdomInstance.parent;
       }
-      return indicesString.join( PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR );
+      return indicesString.join( PDOM_UNIQUE_ID_SEPARATOR );
     }
     else {
       assert && assert( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
@@ -611,21 +599,6 @@ class PDOMInstance {
       const pdomInstance = toUpdate.shift()!;
       pdomInstance.peer!.updateIndicesStringAndElementIds();
       toUpdate.push( ...pdomInstance.children );
-    }
-  }
-
-  /**
-   * @param display
-   * @param uniqueId - value returned from PDOMInstance.getPDOMInstanceUniqueId()
-   * @returns null if there is no path to the unique id provided.
-   */
-  public static uniqueIdToTrail( display: Display, uniqueId: string ): Trail | null {
-    if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
-      return display.getTrailFromPDOMIndicesString( uniqueId );
-    }
-    else {
-      assert && assert( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
-      return Trail.fromUniqueId( display.rootNode, uniqueId );
     }
   }
 
@@ -732,49 +705,6 @@ class PDOMInstance {
     }
 
     audit( PDOMInstance.createFakePDOMTree( rootNode ), this );
-  }
-
-  /**
-   * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to pdomOrder), this finds the best
-   * actual visual Trail to use, from the trail of a PDOMInstance to the root of a Display.
-   *
-   * @param trail - trail of the PDOMInstance, which can containe "gaps"
-   * @param rootNode - root of a Display
-   */
-  public static guessVisualTrail( trail: Trail, rootNode: Node ): Trail {
-    trail.reindex();
-
-    // Search for places in the trail where adjacent nodes do NOT have a parent-child relationship, i.e.
-    // !nodes[ n ].hasChild( nodes[ n + 1 ] ).
-    // NOTE: This index points to the parent where this is the case, because the indices in the trail are such that:
-    // trail.nodes[ n ].children[ trail.indices[ n ] ] = trail.nodes[ n + 1 ]
-    const lastBadIndex = trail.indices.lastIndexOf( -1 );
-
-    // If we have no bad indices, just return our trail immediately.
-    if ( lastBadIndex < 0 ) {
-      return trail;
-    }
-
-    const firstGoodIndex = lastBadIndex + 1;
-    const firstGoodNode = trail.nodes[ firstGoodIndex ];
-    const baseTrails = firstGoodNode.getTrailsTo( rootNode );
-
-    // firstGoodNode might not be attached to a Display either! Maybe client just hasn't gotten to it yet, so we
-    // fail gracefully-ish?
-    // assert && assert( baseTrails.length > 0, '"good node" in trail with gap not attached to root')
-    if ( baseTrails.length === 0 ) {
-      return trail;
-    }
-
-    // Add the rest of the trail back in
-    const baseTrail = baseTrails[ 0 ];
-    for ( let i = firstGoodIndex + 1; i < trail.length; i++ ) {
-      baseTrail.addDescendant( trail.nodes[ i ] );
-    }
-
-    assert && assert( baseTrail.isValid(), `trail not valid: ${trail.uniqueId}` );
-
-    return baseTrail;
   }
 
   /**

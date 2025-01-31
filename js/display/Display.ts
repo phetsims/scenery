@@ -97,7 +97,6 @@ import PointerOverlay from '../overlays/PointerOverlay.js';
 import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
-import scenerySerialize from '../util/scenerySerialize.js';
 import SelfDrawable from '../display/SelfDrawable.js';
 import type TInputListener from '../input/TInputListener.js';
 import type TOverlay from '../overlays/TOverlay.js';
@@ -105,6 +104,7 @@ import Trail from '../util/Trail.js';
 import Utils from '../util/Utils.js';
 import WebGLBlock from '../display/WebGLBlock.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
+import { PDOM_UNIQUE_ID_SEPARATOR } from '../accessibility/pdom/PDOM_UNIQUE_ID_SEPARATOR.js';
 
 type SelfOptions = {
   // Initial (or override) display width
@@ -1533,13 +1533,6 @@ export default class Display {
   }
 
   /**
-   * Makes this Display available for inspection.
-   */
-  public inspect(): void {
-    localStorage.scenerySnapshot = JSON.stringify( scenerySerialize( this ) );
-  }
-
-  /**
    * Returns an HTML fragment that includes a large amount of debugging information, including a view of the
    * instance tree and drawable tree.
    */
@@ -2136,7 +2129,7 @@ export default class Display {
     }
 
     let instance = this._rootPDOMInstance;
-    const indexStrings = indicesString.split( PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR );
+    const indexStrings = indicesString.split( PDOM_UNIQUE_ID_SEPARATOR );
     for ( let i = 0; i < indexStrings.length; i++ ) {
       const digit = Number( indexStrings[ i ] );
       instance = instance.children[ digit ];

@@ -156,12 +156,13 @@ import scenery from '../../scenery.js';
 import Node from '../../nodes/Node.js';
 import PDOMUtils from './PDOMUtils.js';
 import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
-import PDOMInstance from './PDOMInstance.js';
-import PDOMPeer from './PDOMPeer.js';
+import type PDOMInstance from './PDOMInstance.js';
 import PDOMTree from './PDOMTree.js';
 import Trail from '../../util/Trail.js';
 
 import { Highlight } from '../Highlight.js';
+import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
+import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -1610,14 +1611,14 @@ export default class ParallelDOM extends PhetioObject {
       // clear out the attribute
       if ( ariaRole === null ) {
         this.removePDOMAttribute( 'role', {
-          elementName: PDOMPeer.CONTAINER_PARENT
+          elementName: PEER_CONTAINER_PARENT
         } );
       }
 
       // add the attribute
       else {
         this.setPDOMAttribute( 'role', ariaRole, {
-          elementName: PDOMPeer.CONTAINER_PARENT
+          elementName: PEER_CONTAINER_PARENT
         } );
       }
     }
@@ -2647,7 +2648,7 @@ export default class ParallelDOM extends PhetioObject {
       // set the "attribute" as a javascript property on the DOMElement instead of a DOM element attribute
       type: 'attribute',
 
-      elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
+      elementName: PEER_PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
     }, providedOptions );
 
     assert && assert( !ASSOCIATION_ATTRIBUTES.includes( attribute ), 'setPDOMAttribute does not support association attributes' );
@@ -2720,7 +2721,7 @@ export default class ParallelDOM extends PhetioObject {
       // for removing certain attributes (e.g. MathML).
       namespace: null,
 
-      elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
+      elementName: PEER_PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
     }, providedOptions );
 
     let attributeRemoved = false;
@@ -2776,7 +2777,7 @@ export default class ParallelDOM extends PhetioObject {
       // for removing certain attributes (e.g. MathML).
       namespace: null,
 
-      elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
+      elementName: PEER_PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
     }, providedOptions );
 
     let attributeFound = false;
@@ -2798,7 +2799,7 @@ export default class ParallelDOM extends PhetioObject {
   public setPDOMClass( className: string, providedOptions?: SetPDOMClassOptions ): void {
 
     const options = optionize<SetPDOMClassOptions>()( {
-      elementName: PDOMPeer.PRIMARY_SIBLING
+      elementName: PEER_PRIMARY_SIBLING
     }, providedOptions );
 
     // if we already have the provided className set to the sibling, do nothing
@@ -2823,7 +2824,7 @@ export default class ParallelDOM extends PhetioObject {
   public removePDOMClass( className: string, providedOptions?: RemovePDOMClassOptions ): void {
 
     const options = optionize<RemovePDOMClassOptions>()( {
-      elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
+      elementName: PEER_PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
     }, providedOptions );
 
     let classRemoved = false;

@@ -9,12 +9,12 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
-import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
+import type Display from '../display/Display.js';
+import type Node from '../nodes/Node.js';
 import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
+import { guessVisualTrail } from '../accessibility/pdom/guessVisualTrail.js';
 
 export default class PDOMPointer extends Pointer {
 
@@ -60,7 +60,7 @@ export default class PDOMPointer extends Pointer {
 
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( lastNode.focusable ) {
-          const visualTrail = PDOMInstance.guessVisualTrail( this.trail!, this.display.rootNode );
+          const visualTrail = guessVisualTrail( this.trail!, this.display.rootNode );
           this.point = visualTrail.parentToGlobalPoint( lastNode.center );
 
           // TODO: it would be better if we could use this assertion instead, but guessVisualTrail seems to not be working here, https://github.com/phetsims/phet-io/issues/1847

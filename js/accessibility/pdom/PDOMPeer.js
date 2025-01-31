@@ -16,16 +16,20 @@ import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import FocusManager from '../../accessibility/FocusManager.js';
-import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
 import PDOMSiblingStyle from '../../accessibility/pdom/PDOMSiblingStyle.js';
 import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
 import scenery from '../../scenery.js';
+import { guessVisualTrail } from './guessVisualTrail.js';
+import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
+import { PEER_DESCRIPTION_SIBLING } from './PEER_DESCRIPTION_SIBLING.js';
+import { PEER_LABEL_SIBLING } from './PEER_LABEL_SIBLING.js';
+import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
 
 // constants
-const PRIMARY_SIBLING = 'PRIMARY_SIBLING';
-const LABEL_SIBLING = 'LABEL_SIBLING';
-const DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
-const CONTAINER_PARENT = 'CONTAINER_PARENT';
+const PRIMARY_SIBLING = PEER_PRIMARY_SIBLING;
+const LABEL_SIBLING = PEER_LABEL_SIBLING;
+const DESCRIPTION_SIBLING = PEER_DESCRIPTION_SIBLING;
+const CONTAINER_PARENT = PEER_CONTAINER_PARENT;
 const LABEL_TAG = PDOMUtils.TAGS.LABEL;
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const DISABLED_ATTRIBUTE_NAME = 'disabled';
@@ -841,7 +845,7 @@ class PDOMPeer {
    * @returns {boolean}
    */
   isFocused() {
-    const visualFocusTrail = PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
+    const visualFocusTrail = guessVisualTrail( this.trail, this.display.rootNode );
 
     return FocusManager.pdomFocusProperty.value && FocusManager.pdomFocusProperty.value.trail.equals( visualFocusTrail );
   }

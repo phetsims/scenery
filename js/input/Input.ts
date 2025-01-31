@@ -179,7 +179,6 @@ import Display from '../display/Display.js';
 import EventContext, { EventContextIO } from '../input/EventContext.js';
 import Mouse from '../input/Mouse.js';
 import Node from '../nodes/Node.js';
-import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMPointer from '../input/PDOMPointer.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Pen from '../input/Pen.js';
@@ -190,77 +189,14 @@ import type { default as TInputListener, SceneryListenerFunction, SupportedEvent
 import Touch from '../input/Touch.js';
 import Trail from '../util/Trail.js';
 import WindowTouch from '../input/WindowTouch.js';
+import { TARGET_SUBSTITUTE_KEY } from './eventSerialization.js';
+import { pdomUniqueIdToTrail } from '../accessibility/pdom/pdomUniqueIdToTrail.js';
 
 const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 
-// This is the list of keys that get serialized AND deserialized. NOTE: Do not add or change this without
-// consulting the PhET-iO IOType schema for this in EventIO
-const domEventPropertiesToSerialize = [
-  'altKey',
-  'button',
-  'charCode',
-  'clientX',
-  'clientY',
-  'code',
-  'ctrlKey',
-  'deltaMode',
-  'deltaX',
-  'deltaY',
-  'deltaZ',
-  'key',
-  'keyCode',
-  'metaKey',
-  'pageX',
-  'pageY',
-  'pointerId',
-  'pointerType',
-  'scale',
-  'shiftKey',
-  'target',
-  'type',
-  'relatedTarget',
-  'which'
-] as const;
-
-// The list of serialized properties needed for deserialization
-type SerializedPropertiesForDeserialization = typeof domEventPropertiesToSerialize[number];
-
-// Cannot be set after construction, and should be provided in the init config to the constructor(), see Input.deserializeDOMEvent
-const domEventPropertiesSetInConstructor: SerializedPropertiesForDeserialization[] = [
-  'deltaMode',
-  'deltaX',
-  'deltaY',
-  'deltaZ',
-  'altKey',
-  'button',
-  'charCode',
-  'clientX',
-  'clientY',
-  'code',
-  'ctrlKey',
-  'key',
-  'keyCode',
-  'metaKey',
-  'pageX',
-  'pageY',
-  'pointerId',
-  'pointerType',
-  'shiftKey',
-  'type',
-  'relatedTarget',
-  'which'
-];
-
-type SerializedDOMEvent = {
-  constructorName: string; // used to get the constructor from the window object, see Input.deserializeDOMEvent
-} & Partial<Record<SerializedPropertiesForDeserialization, unknown>>;
-
-// A list of keys on events that need to be serialized into HTMLElements
-const EVENT_KEY_VALUES_AS_ELEMENTS: SerializedPropertiesForDeserialization[] = [ 'target', 'relatedTarget' ];
-
 // A list of events that should still fire, even when the Node is not pickable
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
-const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
+
 type TargetSubstitudeAugmentedEvent = Event & {
   [ TARGET_SUBSTITUTE_KEY ]?: Element;
 };
@@ -1153,7 +1089,7 @@ export default class Input extends PhetioObject {
       const trailIndices = relatedTarget.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
       assert && assert( trailIndices, 'should not be null' );
 
-      return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
+      return pdomUniqueIdToTrail( this.display, trailIndices! );
     }
     return null;
   }
@@ -1172,14 +1108,14 @@ export default class Input extends PhetioObject {
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
     if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
       const trailIndices = domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
-      return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
+      return pdomUniqueIdToTrail( this.display, trailIndices! );
     }
     else {
       const target = domEvent.target;
       if ( target && target instanceof window.Element && this.display.isElementUnderPDOM( target, false ) ) {
         const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
         assert && assert( trailIndices, 'should not be null' );
-        return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
+        return pdomUniqueIdToTrail( this.display, trailIndices! );
       }
     }
     return null;
@@ -1937,104 +1873,6 @@ export default class Input extends PhetioObject {
   }
 
   /**
-   * Saves the main information we care about from a DOM `Event` into a JSON-like structure. To support
-   * polymorphism, all supported DOM event keys that scenery uses will always be included in this serialization. If
-   * the particular Event interface for the instance being serialized doesn't have a certain property, then it will be
-   * set as `null`. See domEventPropertiesToSerialize for the full list of supported Event properties.
-   *
-   * @returns - see domEventPropertiesToSerialize for list keys that are serialized
-   */
-  public static serializeDomEvent( domEvent: Event ): SerializedDOMEvent {
-    const entries: SerializedDOMEvent = {
-      constructorName: domEvent.constructor.name
-    };
-
-    domEventPropertiesToSerialize.forEach( property => {
-
-      const domEventProperty: Event[ keyof Event ] | Element = domEvent[ property as keyof Event ];
-
-      // We serialize many Event APIs into a single object, so be graceful if properties don't exist.
-      if ( domEventProperty === undefined || domEventProperty === null ) {
-        entries[ property ] = null;
-      }
-
-      else if ( domEventProperty instanceof Element && EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
-
-                // If false, then this target isn't a PDOM element, so we can skip this serialization
-                domEventProperty.hasAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID ) ) {
-
-        // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
-        entries[ property ] = {
-          [ PDOMUtils.DATA_PDOM_UNIQUE_ID ]: domEventProperty.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID ),
-
-          // Have the ID also
-          id: domEventProperty.getAttribute( 'id' )
-        };
-      }
-      else {
-
-        // Parse to get rid of functions and circular references.
-        entries[ property ] = ( ( typeof domEventProperty === 'object' ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) );
-      }
-    } );
-
-    return entries;
-  }
-
-  /**
-   * From a serialized dom event, return a recreated window.Event (scenery-internal)
-   */
-  public static deserializeDomEvent( eventObject: SerializedDOMEvent ): Event {
-    const constructorName = eventObject.constructorName || 'Event';
-
-    const configForConstructor = _.pick( eventObject, domEventPropertiesSetInConstructor );
-    // serialize the relatedTarget back into an event Object, so that it can be passed to the init config in the Event
-    // constructor
-    if ( configForConstructor.relatedTarget ) {
-      // @ts-expect-error
-      const htmlElement = document.getElementById( configForConstructor.relatedTarget.id );
-      assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
-      configForConstructor.relatedTarget = htmlElement;
-    }
-
-    // @ts-expect-error
-    const domEvent: Event = new window[ constructorName ]( constructorName, configForConstructor );
-
-    for ( const key in eventObject ) {
-
-      // `type` is readonly, so don't try to set it.
-      if ( eventObject.hasOwnProperty( key ) && !( domEventPropertiesSetInConstructor as string[] ).includes( key ) ) {
-
-        // Special case for target since we can't set that read-only property. Instead use a substitute key.
-        if ( key === 'target' ) {
-
-          if ( assert ) {
-            const target = eventObject.target as { id?: string } | undefined;
-            if ( target && target.id ) {
-              assert( document.getElementById( target.id ), 'target should exist in the PDOM to support playback.' );
-            }
-          }
-
-          // @ts-expect-error
-          domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};
-
-          // This may not be needed since https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailFromPDOMEvent() too
-          // @ts-expect-error
-          domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute = function( key ) {
-            return this[ key ];
-          };
-        }
-        else {
-
-          // @ts-expect-error
-          domEvent[ key ] = eventObject[ key ];
-        }
-      }
-    }
-    return domEvent;
-  }
-
-  /**
    * Convenience function for logging out a point/event combination.
    *
    * @param point - Not logged if null
@@ -2046,27 +1884,6 @@ export default class Input extends PhetioObject {
       result = `${point.x},${point.y} ${result}`;
     }
     return result;
-  }
-
-  /**
-   * Maps the current MS pointer types onto the pointer spec. (scenery-internal)
-   */
-  public static msPointerType( event: PointerEvent ): string {
-    // @ts-expect-error -- legacy API
-    if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
-      return 'touch';
-    }
-    // @ts-expect-error -- legacy API
-    else if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
-      return 'pen';
-    }
-    // @ts-expect-error -- legacy API
-    else if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
-      return 'mouse';
-    }
-    else {
-      return event.pointerType; // hope for the best
-    }
   }
 }
 

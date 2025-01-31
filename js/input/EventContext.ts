@@ -8,8 +8,8 @@
 
 import IOType from '../../../tandem/js/types/IOType.js';
 import EventIO from '../input/EventIO.js';
-import Input from '../input/Input.js';
 import scenery from '../scenery.js';
+import { deserializeDomEvent, serializeDomEvent } from './eventSerialization.js';
 
 export default class EventContext<out DOMEvent extends Event = Event> {
 
@@ -58,13 +58,13 @@ export const EventContextIO = new IOType( 'EventContextIO', {
   documentation: 'A DOM event and its context',
   toStateObject: eventContext => {
     return {
-      domEvent: Input.serializeDomEvent( eventContext.domEvent )
+      domEvent: serializeDomEvent( eventContext.domEvent )
 
       // Ignores the activeElement, since we don't have a good way of serializing that at this point?
     };
   },
   fromStateObject: stateObject => {
-    return new EventContext( Input.deserializeDomEvent( stateObject.domEvent ) );
+    return new EventContext( deserializeDomEvent( stateObject.domEvent ) );
   },
 
   // This should remain the same as Input.domEventPropertiesToSerialize (local var). Each key can be null depending on

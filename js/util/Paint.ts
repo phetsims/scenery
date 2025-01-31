@@ -8,9 +8,9 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import scenery from '../scenery.js';
-import SVGBlock from '../display/SVGBlock.js';
-import SVGGradient from '../display/SVGGradient.js';
-import SVGPattern from '../display/SVGPattern.js';
+import type SVGBlock from '../display/SVGBlock.js';
+import type SVGGradient from '../display/SVGGradient.js';
+import type SVGPattern from '../display/SVGPattern.js';
 
 let globalId = 1;
 

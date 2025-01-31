@@ -38,7 +38,7 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import AlignGroup from '../../layout/constraints/AlignGroup.js';
+import type AlignGroup from '../../layout/constraints/AlignGroup.js';
 import assertNoAdditionalChildren from '../../util/assertNoAdditionalChildren.js';
 import { extendsHeightSizable, isHeightSizable, HeightSizableNode } from '../../layout/HeightSizable.js';
 import { extendsWidthSizable, isWidthSizable, WidthSizableNode } from '../../layout/WidthSizable.js';
@@ -286,7 +286,6 @@ export default class AlignBox extends SuperType {
    * Sets the attachment to an AlignGroup. When attached, our alignBounds will be controlled by the group.
    */
   public setGroup( group: AlignGroup | null ): this {
-    assert && assert( group === null || group instanceof AlignGroup, 'group should be an AlignGroup' );
 
     if ( this._group !== group ) {
       // Remove from a previous group

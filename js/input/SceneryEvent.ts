@@ -17,10 +17,8 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import EventContext from '../input/EventContext.js';
-import Mouse from '../input/Mouse.js';
 import Node from '../nodes/Node.js';
-import PDOMPointer from '../input/PDOMPointer.js';
-import Pointer from '../input/Pointer.js';
+import type Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import EventIO from './EventIO.js';
@@ -83,7 +81,7 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
     this.target = trail.lastNode();
 
     // TODO: don't require check on domEvent (seems sometimes this is passed as null as a hack?) https://github.com/phetsims/scenery/issues/1581
-    this.isPrimary = !( pointer instanceof Mouse ) || !this.domEvent || ( this.domEvent as unknown as MouseEvent ).button === 0;
+    this.isPrimary = !( pointer.type === 'mouse' ) || !this.domEvent || ( this.domEvent as unknown as MouseEvent ).button === 0;
 
     // Store the last-used non-null DOM event for future use if required.
     pointer.lastEventContext = context;
@@ -111,7 +109,7 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
    * description.
    */
   public isFromPDOM(): boolean {
-    return this.pointer instanceof PDOMPointer;
+    return this.pointer.type === 'pdom';
   }
 
   /**
@@ -133,7 +131,7 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
   public canStartPress(): boolean {
     // If the pointer is already attached (some other press probably), it can't start a press.
     // Additionally, we generally want to ignore non-left mouse buttons.
-    return !this.pointer.isAttached() && ( !( this.pointer instanceof Mouse ) || ( this.domEvent as unknown as MouseEvent ).button === 0 );
+    return !this.pointer.isAttached() && ( !( this.pointer.type === 'mouse' ) || ( this.domEvent as unknown as MouseEvent ).button === 0 );
   }
 
   public static readonly SceneryEventIO = new IOType( 'SceneryEventIO', {

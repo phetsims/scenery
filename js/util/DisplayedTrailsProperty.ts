@@ -18,7 +18,7 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import Display from '../display/Display.js';
+import type Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
@@ -164,7 +164,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       if ( display === null ) {
         displayMatches = displays.length > 0;
       }
-      else if ( display instanceof Display ) {
+      else if ( typeof display !== 'function' ) {
         displayMatches = displays.includes( display );
       }
       else {

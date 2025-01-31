@@ -15,14 +15,14 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import ObjectLiteralIO from '../../../tandem/js/types/ObjectLiteralIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import Input from '../input/Input.js';
 import scenery from '../scenery.js';
+import { deserializeDomEvent, serializeDomEvent } from './eventSerialization.js';
 
 const EventIO = new IOType( 'EventIO', {
   valueType: window.Event,
   documentation: 'A DOM Event',
-  toStateObject: domEvent => Input.serializeDomEvent( domEvent ),
-  fromStateObject: stateObject => Input.deserializeDomEvent( stateObject ),
+  toStateObject: domEvent => serializeDomEvent( domEvent ),
+  fromStateObject: stateObject => deserializeDomEvent( stateObject ),
 
   // This should remain the same as Input.domEventPropertiesToSerialize (local var). Each key can be null depending on
   // what Event interface is being serialized (which depends on what DOM Event the instance is).

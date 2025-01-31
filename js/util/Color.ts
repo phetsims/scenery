@@ -10,15 +10,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import TEmitter from '../../../axon/js/TEmitter.js';
+import type TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import scenery from '../scenery.js';
-import TPaint from '../util/TPaint.js';
-import TColor from './TColor.js';
+import type TPaint from '../util/TPaint.js';
+import type TColor from './TColor.js';
 
 // constants
 const clamp = Utils.clamp;

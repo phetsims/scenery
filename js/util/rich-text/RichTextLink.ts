@@ -6,6 +6,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import allowLinksProperty from '../../util/allowLinksProperty.js';

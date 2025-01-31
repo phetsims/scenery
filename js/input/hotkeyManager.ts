@@ -32,7 +32,7 @@ import { eventCodeToEnglishString, metaEnglishKeys } from '../accessibility/Engl
 import FocusManager from '../accessibility/FocusManager.js';
 import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
-import Hotkey from '../input/Hotkey.js';
+import type Hotkey from '../input/Hotkey.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
