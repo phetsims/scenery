@@ -40,8 +40,7 @@ import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import type AlignGroup from '../../layout/constraints/AlignGroup.js';
 import assertNoAdditionalChildren from '../../util/assertNoAdditionalChildren.js';
-import { extendsHeightSizable, isHeightSizable, HeightSizableNode } from '../../layout/HeightSizable.js';
-import { extendsWidthSizable, isWidthSizable, WidthSizableNode } from '../../layout/WidthSizable.js';
+import { extendsHeightSizable, isHeightSizable, HeightSizableNode, extendsWidthSizable, isWidthSizable, WidthSizableNode } from '../../layout/sizableTypeChecks.js';
 import LayoutConstraint from '../../layout/constraints/LayoutConstraint.js';
 import Node from '../../nodes/Node.js';
 import type { NodeOptions } from '../../nodes/Node.js';

@@ -18,12 +18,10 @@
 
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import { extendsHeightSizable, HeightSizableNode } from '../../layout/HeightSizable.js';
-import { extendsWidthSizable, WidthSizableNode } from '../../layout/WidthSizable.js';
+import { extendsHeightSizable, HeightSizableNode, extendsWidthSizable, WidthSizableNode, SizableNode } from '../../layout/sizableTypeChecks.js';
 import LayoutProxy from '../../layout/LayoutProxy.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
-import { SizableNode } from '../Sizable.js';
 
 export default abstract class LayoutConstraint {
 
