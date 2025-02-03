@@ -175,7 +175,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import BatchedDOMEvent, { BatchedDOMEventCallback, BatchedDOMEventType } from '../input/BatchedDOMEvent.js';
 import BrowserEvents from '../input/BrowserEvents.js';
-import Display from '../display/Display.js';
+import type Display from '../display/Display.js';
 import EventContext, { EventContextIO } from '../input/EventContext.js';
 import Mouse from '../input/Mouse.js';
 import Node from '../nodes/Node.js';
@@ -191,6 +191,7 @@ import Trail from '../util/Trail.js';
 import WindowTouch from '../input/WindowTouch.js';
 import { TARGET_SUBSTITUTE_KEY } from './eventSerialization.js';
 import { pdomUniqueIdToTrail } from '../accessibility/pdom/pdomUniqueIdToTrail.js';
+import DisplayGlobals from '../display/DisplayGlobals.js';
 
 const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 
@@ -1052,7 +1053,7 @@ export default class Input extends PhetioObject {
 
     // exclude focus and blur events because they can happen with scripting without user input
     if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) ) {
-      Display.userGestureEmitter.emit();
+      DisplayGlobals.userGestureEmitter.emit();
     }
 
     const domEvent = context.domEvent;
@@ -1783,8 +1784,8 @@ export default class Input extends PhetioObject {
     this.dispatchToListeners<DOMEvent>( pointer, this.display.getInputListeners(), type, inputEvent );
 
     // Notify input listeners to any Display
-    if ( Display.inputListeners.length ) {
-      this.dispatchToListeners<DOMEvent>( pointer, Display.inputListeners.slice(), type, inputEvent );
+    if ( DisplayGlobals.inputListeners.length ) {
+      this.dispatchToListeners<DOMEvent>( pointer, DisplayGlobals.inputListeners.slice(), type, inputEvent );
     }
 
     this.currentSceneryEvent = null;

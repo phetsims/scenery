@@ -52,7 +52,6 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
-import TEmitter from '../../../axon/js/TEmitter.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -105,6 +104,7 @@ import Utils from '../util/Utils.js';
 import WebGLBlock from '../display/WebGLBlock.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
 import { PDOM_UNIQUE_ID_SEPARATOR } from '../accessibility/pdom/PDOM_UNIQUE_ID_SEPARATOR.js';
+import DisplayGlobals from './DisplayGlobals.js';
 
 type SelfOptions = {
   // Initial (or override) display width
@@ -2267,11 +2267,11 @@ export default class Display {
    * Adds an input listener to be fired for ANY Display
    */
   public static addInputListener( listener: TInputListener ): void {
-    assert && assert( !_.includes( Display.inputListeners, listener ), 'Input listener already registered' );
+    assert && assert( !_.includes( DisplayGlobals.inputListeners, listener ), 'Input listener already registered' );
 
     // don't allow listeners to be added multiple times
-    if ( !_.includes( Display.inputListeners, listener ) ) {
-      Display.inputListeners.push( listener );
+    if ( !_.includes( DisplayGlobals.inputListeners, listener ) ) {
+      DisplayGlobals.inputListeners.push( listener );
     }
   }
 
@@ -2280,16 +2280,16 @@ export default class Display {
    */
   public static removeInputListener( listener: TInputListener ): void {
     // ensure the listener is in our list
-    assert && assert( _.includes( Display.inputListeners, listener ) );
+    assert && assert( _.includes( DisplayGlobals.inputListeners, listener ) );
 
-    Display.inputListeners.splice( _.indexOf( Display.inputListeners, listener ), 1 );
+    DisplayGlobals.inputListeners.splice( _.indexOf( DisplayGlobals.inputListeners, listener ), 1 );
   }
 
   /**
    * Interrupts all input listeners that are attached to all Displays.
    */
   public static interruptInput(): void {
-    const listenersCopy = Display.inputListeners.slice( 0 );
+    const listenersCopy = DisplayGlobals.inputListeners.slice( 0 );
 
     for ( let i = 0; i < listenersCopy.length; i++ ) {
       const listener = listenersCopy[ i ];
@@ -2297,19 +2297,6 @@ export default class Display {
       listener.interrupt && listener.interrupt();
     }
   }
-
-  // Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
-  // that we can trigger browser actions that are only allowed as a result.
-  // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
-  // information.
-  public static userGestureEmitter: TEmitter;
-
-  // Listeners that will be called for every event on ANY Display, see
-  // https://github.com/phetsims/scenery/issues/1149. Do not directly modify this!
-  public static inputListeners: TInputListener[];
 }
 
 scenery.register( 'Display', Display );
-
-Display.userGestureEmitter = new Emitter();
-Display.inputListeners = [];

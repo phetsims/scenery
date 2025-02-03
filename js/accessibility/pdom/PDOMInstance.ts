@@ -30,9 +30,9 @@
 import dotRandom from '../../../../dot/js/dotRandom.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import Pool from '../../../../phet-core/js/Pool.js';
-import Display from '../../display/Display.js';
+import type Display from '../../display/Display.js';
 import FocusManager from '../../accessibility/FocusManager.js';
-import Node from '../../nodes/Node.js';
+import type Node from '../../nodes/Node.js';
 import PDOMPeer from '../../accessibility/pdom/PDOMPeer.js';
 import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
 import scenery from '../../scenery.js';
@@ -231,7 +231,7 @@ class PDOMInstance {
     }
 
     if ( assert && this.node ) {
-      assert && assert( this.node instanceof Node );
+      assert && assert( !!this.node );
 
       // We do not support rendering children into a Node that has innerContent.
       // If you hit this when mutating both children and innerContent at the same time, it is an issue with scenery.
@@ -481,7 +481,7 @@ class PDOMInstance {
     // added to a single parent DOMElement (this PDOMInstance's PDOMPeer's primarySibling)
     let i = primarySibling.childNodes.length - 1;
 
-    const focusedChildInstance = focusedTrail && _.find( this.children, child => focusedTrail.containsNode( child.peer!.node! ) );
+    const focusedChildInstance = focusedTrail && _.find( this.children, child => focusedTrail.containsNode( child.peer!.node ) );
     if ( focusedChildInstance ) {
       // If there's a focused child instance, we need to make sure that its primarySibling is not detached from the DOM
       // (this has caused focus issues, see https://github.com/phetsims/my-solar-system/issues/142).

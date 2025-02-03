@@ -68,7 +68,7 @@ const ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 const DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
 // DOM events that must have been triggered from user input of some kind, and will trigger the
-// Display.userGestureEmitter. focus and blur events will trigger from scripting so they must be excluded.
+// DisplayGlobals.userGestureEmitter. focus and blur events will trigger from scripting so they must be excluded.
 const USER_GESTURE_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup' ];
 
 // A collection of DOM events which should be blocked from reaching the scenery Display div

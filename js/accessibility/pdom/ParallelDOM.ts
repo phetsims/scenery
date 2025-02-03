@@ -153,7 +153,7 @@ import Tandem from '../../../../tandem/js/Tandem.js';
 import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import scenery from '../../scenery.js';
-import Node from '../../nodes/Node.js';
+import type Node from '../../nodes/Node.js';
 import PDOMUtils from './PDOMUtils.js';
 import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
 import type PDOMInstance from './PDOMInstance.js';
@@ -853,7 +853,7 @@ export default class ParallelDOM extends PhetioObject {
       this._pdomChecked && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
       this._inputValue && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
       this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.includes( this._inputType!.toUpperCase() ), `inputType does not support checked attribute: ${this._inputType}` );
-      this._focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
+      this._focusHighlightLayerable && assert( this.focusHighlight instanceof ParallelDOM, 'focusHighlight must be Node if highlight is layerable' );
       this._tagName!.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
 
       // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
@@ -1782,7 +1782,7 @@ export default class ParallelDOM extends PhetioObject {
       if ( this._focusHighlightLayerable ) {
 
         // if focus highlight is layerable, it must be a Node in the scene graph
-        assert && assert( focusHighlight instanceof Node ); // eslint-disable-line phet/no-simple-type-checking-assertions
+        assert && assert( focusHighlight instanceof ParallelDOM ); // eslint-disable-line phet/no-simple-type-checking-assertions
 
         // the highlight starts off invisible, HighlightOverlay will make it visible when this Node has DOM focus
         ( focusHighlight as Node ).visible = false;
@@ -1816,7 +1816,7 @@ export default class ParallelDOM extends PhetioObject {
       // if a focus highlight is defined (it must be a Node), update its visibility so it is linked to focus
       // of the associated Node
       if ( this._focusHighlight ) {
-        assert && assert( this._focusHighlight instanceof Node );
+        assert && assert( this._focusHighlight instanceof ParallelDOM );
         ( this._focusHighlight as Node ).visible = false;
 
         // emit that the highlight has changed and we may need to update its visual representation
@@ -2307,7 +2307,7 @@ export default class ParallelDOM extends PhetioObject {
       `Array or null expected, received: ${pdomOrder}` );
     if ( assert && pdomOrder ) {
       pdomOrder.forEach( ( node, index ) => {
-        assert && assert( node === null || node instanceof Node,
+        assert && assert( node === null || node instanceof ParallelDOM,
           `Elements of pdomOrder should be either a Node or null. Element at index ${index} is: ${node}` );
       } );
       assert && assert( ( this as unknown as Node ).getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the Node itself' );
