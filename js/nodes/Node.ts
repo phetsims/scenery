@@ -199,7 +199,6 @@ import type DOMSelfDrawable from '../display/DOMSelfDrawable.js';
 import type SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 import type CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
 import type WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
-import { serializeConnectedNodes } from '../util/scenerySerialize.js';
 import scenery from '../scenery.js';
 
 let globalIdCounter = 1;
@@ -6523,17 +6522,6 @@ class Node extends ParallelDOM {
    */
   public getDebugHTMLExtras(): string {
     return '';
-  }
-
-  /**
-   * Makes this Node's subtree available for inspection.
-   */
-  public inspect(): void {
-    localStorage.scenerySnapshot = JSON.stringify( {
-      type: 'Subtree',
-      rootNodeId: this.id,
-      nodes: serializeConnectedNodes( this )
-    } );
   }
 
   /**

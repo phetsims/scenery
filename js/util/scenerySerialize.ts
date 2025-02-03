@@ -417,3 +417,12 @@ export const inspectDisplay = ( display: Display ): void => {
   localStorage.scenerySnapshot = JSON.stringify( scenerySerialize( display ) );
 };
 scenery.register( 'inspectDisplay', inspectDisplay );
+
+export const inspectNode = ( node: Node ): void => {
+  localStorage.scenerySnapshot = JSON.stringify( {
+    type: 'Subtree',
+    rootNodeId: node.id,
+    nodes: serializeConnectedNodes( node )
+  } );
+};
+scenery.register( 'inspectNode', inspectNode );
