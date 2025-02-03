@@ -9,26 +9,21 @@
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import BrowserEvents from '../../input/BrowserEvents.js';
 import FocusManager from '../../accessibility/FocusManager.js';
-import Node from '../../nodes/Node.js';
+import type Node from '../../nodes/Node.js';
 import PartialPDOMTrail from '../../accessibility/pdom/PartialPDOMTrail.js';
 import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
+import type Display from '../../display/Display.js';
 
-const PDOMTree = {
+export default class PDOMTree {
   /**
    * Called when a child node is added to a parent node (and the child is likely to have pdom content).
-   * @public
-   *
-   * @param {Node} parent
-   * @param {Node} child
    */
-  addChild( parent, child ) {
+  public static addChild( parent: Node, child: Node ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `addChild parent:n#${parent._id}, child:n#${child._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( parent instanceof Node );
-    assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.hasNoPDOM() );
 
     const focusedNode = PDOMTree.beforeOp();
@@ -40,21 +35,15 @@ const PDOMTree = {
     PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when a child node is removed from a parent node (and the child is likely to have pdom content).
-   * @public
-   *
-   * @param {Node} parent
-   * @param {Node} child
    */
-  removeChild( parent, child ) {
+  public static removeChild( parent: Node, child: Node ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `removeChild parent:n#${parent._id}, child:n#${child._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( parent instanceof Node );
-    assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.hasNoPDOM() );
 
     const focusedNode = PDOMTree.beforeOp();
@@ -66,19 +55,15 @@ const PDOMTree = {
     PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when a node's children are reordered (no additions/removals).
-   * @public
-   *
-   * @param {Node} node
    */
-  childrenOrderChange( node ) {
+  public static childrenOrderChange( node: Node ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `childrenOrderChange node:n#${node._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( node instanceof Node );
     assert && assert( !node._rendererSummary.hasNoPDOM() );
 
     const focusedNode = PDOMTree.beforeOp();
@@ -88,26 +73,23 @@ const PDOMTree = {
     PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when a node has a pdomOrder change.
-   * @public
-   *
-   * @param {Node} node
-   * @param {Array.<Node|null>|null} oldOrder
-   * @param {Array.<Node|null>|null} newOrder
    */
-  pdomOrderChange( node, oldOrder, newOrder ) {
+  public static pdomOrderChange(
+    node: Node,
+    oldOrder: ( Node | null )[] | null,
+    newOrder: ( Node | null )[] | null
+  ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `pdomOrderChange n#${node._id}: ${PDOMTree.debugOrder( oldOrder )},${PDOMTree.debugOrder( newOrder )}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( node instanceof Node );
-
     const focusedNode = PDOMTree.beforeOp();
 
-    const removedItems = []; // {Array.<Node|null>} - May contain the placeholder null
-    const addedItems = []; // {Array.<Node|null>} - May contain the placeholder null
+    const removedItems: ( Node | null )[] = []; // {Array.<Node|null>} - May contain the placeholder null
+    const addedItems: ( Node | null )[] = []; // {Array.<Node|null>} - May contain the placeholder null
 
     arrayDifference( oldOrder || [], newOrder || [], removedItems, addedItems );
 
@@ -119,11 +101,11 @@ const PDOMTree = {
 
     // Check some initial conditions
     if ( assert ) {
-      for ( i = 0; i < removedItems; i++ ) {
+      for ( i = 0; i < removedItems.length; i++ ) {
         assert( removedItems[ i ] === null || removedItems[ i ]._pdomParent === node,
           'Node should have had a pdomOrder' );
       }
-      for ( i = 0; i < addedItems; i++ ) {
+      for ( i = 0; i < addedItems.length; i++ ) {
         assert( addedItems[ i ] === null || addedItems[ i ]._pdomParent === null,
           'Node is already specified in a pdomOrder' );
       }
@@ -181,19 +163,14 @@ const PDOMTree = {
     PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when a node has a pdomContent change.
-   * @public
-   *
-   * @param {Node} node
    */
-  pdomContentChange( node ) {
+  public static pdomContentChange( node: Node ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `pdomContentChange n#${node._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
-
-    assert && assert( node instanceof Node );
 
     const focusedNode = PDOMTree.beforeOp();
 
@@ -228,32 +205,26 @@ const PDOMTree = {
     PDOMTree.afterOp( focusedNode );
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Sets up a root instance with a given root node.
-   * @public
-   *
-   * @param {PDOMInstance} rootInstance
    */
-  rebuildInstanceTree( rootInstance ) {
-    const rootNode = rootInstance.display.rootNode;
+  public static rebuildInstanceTree( rootInstance: PDOMInstance ): void {
+    const rootNode = rootInstance.display!.rootNode;
     assert && assert( rootNode );
 
     rootInstance.removeAllChildren();
 
     rootInstance.addConsecutiveInstances( PDOMTree.createTree( new Trail( rootNode ), rootInstance.display, rootInstance ) );
-  },
+  }
 
   /**
    * Handles the conceptual addition of a pdom subtree.
-   * @private
    *
-   * @param {Node} parent
-   * @param {Node} child
-   * @param {Array.<PartialPDOMTrail>} [pdomTrails] - Will be computed if needed
+   * @param [pdomTrails] - Will be computed if needed
    */
-  addTree( parent, child, pdomTrails ) {
+  private static addTree( parent: Node, child: Node, pdomTrails?: PartialPDOMTrail[] ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `addTree parent:n#${parent._id}, child:n#${child._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -279,17 +250,14 @@ const PDOMTree = {
     }
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Handles the conceptual removal of a pdom subtree.
-   * @private
    *
-   * @param {Node} parent
-   * @param {Node} child
-   * @param {Array.<PartialPDOMTrail>} [pdomTrails] - Will be computed if needed
+   * @param [pdomTrails] - Will be computed if needed
    */
-  removeTree( parent, child, pdomTrails ) {
+  private static removeTree( parent: Node, child: Node, pdomTrails?: PartialPDOMTrail ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `removeTree parent:n#${parent._id}, child:n#${child._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -305,16 +273,14 @@ const PDOMTree = {
     }
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Handles the conceptual sorting of a pdom subtree.
-   * @private
    *
-   * @param {Node} node
-   * @param {Array.<PartialPDOMTrail>} [pdomTrails] - Will be computed if needed
+   * @param - Will be computed if needed
    */
-  reorder( node, pdomTrails ) {
+  private static reorder( node: Node, pdomTrails?: PartialPDOMTrail ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `reorder n#${node._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -328,22 +294,18 @@ const PDOMTree = {
     }
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
-  },
+  }
 
   /**
    * Creates PDOM instances, returning an array of instances that should be added to the next level.
-   * @private
    *
    * NOTE: Trails for which an already-existing instance exists will NOT create a new instance here. We only want to
    * fill in the "missing" structure. There are cases (a.children=[b,c], b.children=[c]) where removing an
    * pdomOrder can trigger addTree(a,b) AND addTree(b,c), and we can't create duplicate content.
    *
-   * @param {Trail} trail
-   * @param {Display} display
-   * @param {PDOMInstance} parentInstance - Since we don't create the root here, can't be null
-   * @returns {Array.<PDOMInstance>}
+   * @param parentInstance - Since we don't create the root here, can't be null
    */
-  createTree( trail, display, parentInstance ) {
+  private static createTree( trail: Trail, display: Display, parentInstance: PDOMInstance ): PDOMInstance[] {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `createTree ${trail.toString()} parent:${parentInstance ? parentInstance.toString() : 'null'}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -370,7 +332,7 @@ const PDOMTree = {
     }
 
     // Create all of the direct-child instances.
-    const childInstances = [];
+    const childInstances: PDOMInstance[] = [];
     for ( let i = 0; i < effectiveChildren.length; i++ ) {
       trail.addDescendant( effectiveChildren[ i ], i );
       Array.prototype.push.apply( childInstances, PDOMTree.createTree( trail, display, parentInstance ) );
@@ -389,57 +351,48 @@ const PDOMTree = {
       sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
       return childInstances;
     }
-  },
+  }
 
   /**
    * Prepares for a pdom-tree-changing operation (saving some state). During DOM operations we don't want Display
    * input to dispatch events as focus changes.
-   * @private
-   * @returns {Node|null}
    */
-  beforeOp() {
+  private static beforeOp(): Node | null {
     BrowserEvents.blockFocusCallbacks = true;
     return FocusManager.pdomFocusedNode;
-  },
+  }
 
   /**
    * Finalizes a pdom-tree-changing operation (restoring some state).
-   * @param {Node|null} focusedNode
-   * @private
    */
-  afterOp( focusedNode ) {
+  private static afterOp( focusedNode: Node | null ): void {
 
     // If Scenery is in the middle of dispatching focus events, it is buggy to change focus again internally.
     if ( !BrowserEvents.dispatchingFocusEvents ) {
       focusedNode && focusedNode.focusable && focusedNode.focus();
     }
     BrowserEvents.blockFocusCallbacks = false;
-  },
+  }
 
   /**
    * Returns all "pdom" trails from this node ancestor-wise to nodes that have display roots.
-   * @private
    *
    * NOTE: "pdom" trails may not have strict parent-child relationships between adjacent nodes, as remapping of
    * the tree can have a "PDOM parent" and "pdom child" case (the child is in the parent's pdomOrder).
-   *
-   * @param {Node} node
-   * @returns {Array.<PartialPDOMTrail>}
    */
-  findPDOMTrails( node ) {
+  private static findPDOMTrails( node: Node ): PartialPDOMTrail[] {
     const trails = [];
     PDOMTree.recursivePDOMTrailSearch( trails, new Trail( node ) );
     return trails;
-  },
+  }
 
   /**
    * Finds all partial "pdom" trails
-   * @private
    *
-   * @param {Array.<PartialPDOMTrail>} trailResults - Mutated, this is how we "return" our value.
-   * @param {Trail} trail - Where to start from
+   * @param trailResults - Mutated, this is how we "return" our value.
+   * @param trail - Where to start from
    */
-  recursivePDOMTrailSearch( trailResults, trail ) {
+  private static recursivePDOMTrailSearch( trailResults: PartialPDOMTrail[], trail: Trail ): void {
     const root = trail.rootNode();
     let i;
 
@@ -475,13 +428,12 @@ const PDOMTree = {
       PDOMTree.recursivePDOMTrailSearch( trailResults, trail );
       trail.removeAncestor();
     }
-  },
+  }
 
   /**
    * Ensures that the pdomDisplays on the node (and its subtree) are accurate.
-   * @public
    */
-  auditPDOMDisplays( node ) {
+  public static auditPDOMDisplays( node: Node ): void {
     if ( assertSlow ) {
       if ( node._pdomDisplaysInfo.canHavePDOMDisplays() ) {
 
@@ -522,19 +474,17 @@ const PDOMTree = {
         assertSlow( node._pdomDisplaysInfo.pdomDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
       }
     }
-  },
+  }
 
   /**
    * Checks a given Node (with assertions) to ensure it is not part of a cycle in the combined graph with edges
    * defined by "there is a parent-child or pdomParent-pdomOrder" relationship between the two nodes.
-   * @public (scenery-internal)
+   * (scenery-internal)
    *
    * See https://github.com/phetsims/scenery/issues/787 for more information (and for some detail on the cases
    * that we want to catch).
-   *
-   * @param {Node} node
    */
-  auditNodeForPDOMCycles( node ) {
+  public static auditNodeForPDOMCycles( node: Node ): void {
     if ( assert ) {
       const trail = new Trail( node );
 
@@ -562,22 +512,16 @@ const PDOMTree = {
         }
       } )();
     }
-  },
+  }
 
   /**
    * Returns a string representation of an order (using Node ids) for debugging.
-   * @private
-   *
-   * @param {Array.<Node|null>|null} pdomOrder
-   * @returns {string}
    */
-  debugOrder( pdomOrder ) {
+  private static debugOrder( pdomOrder: ( Node | null )[] | null ): string {
     if ( pdomOrder === null ) { return 'null'; }
 
     return `[${pdomOrder.map( nodeOrNull => nodeOrNull === null ? 'null' : nodeOrNull._id ).join( ',' )}]`;
   }
-};
+}
 
 scenery.register( 'PDOMTree', PDOMTree );
-
-export default PDOMTree;
