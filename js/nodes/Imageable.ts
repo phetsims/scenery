@@ -652,7 +652,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ): SuperType 
      * - A positive bias will typically decrease the displayed resolution
      *
      * This is done approximately like the following formula:
-     *   mipmapLevel = Utils.roundSymmetric( computedMipmapLevel + mipmapBias )
+     *   mipmapLevel = roundSymmetric( computedMipmapLevel + mipmapBias )
      */
     public setMipmapBias( bias: number ): this {
       if ( this._mipmapBias !== bias ) {
