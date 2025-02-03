@@ -16,12 +16,10 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import Pool from '../../../phet-core/js/Pool.js';
-import { isHeightSizable } from '../layout/HeightSizable.js';
+import { isHeightSizable, isWidthSizable, SizableNode } from '../layout/sizableTypeChecks.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
-import { isWidthSizable } from './WidthSizable.js';
-import { SizableNode } from './Sizable.js';
 
 // For supporting general cases where you may layout a Node, or use in ManualConstraints.
 export type Layoutable = Node | LayoutProxy;

@@ -417,18 +417,5 @@ const WidthSizable = memoize( <SuperType extends Constructor<Node>>( Type: Super
   return WidthSizableTrait;
 } );
 
-const isWidthSizable = ( node: Node ): node is WidthSizableNode => {
-  return node.widthSizable;
-};
-const extendsWidthSizable = ( node: Node ): node is WidthSizableNode => {
-  return node.extendsWidthSizable;
-};
-
-// Some typescript gymnastics to provide a user-defined type guard that treats something as widthSizable
-// We need to define an unused function with a concrete type, so that we can extract the return type of the function
-// and provide a type for a Node that extends this type.
-export type WidthSizableNode = Node & TWidthSizable;
-
 scenery.register( 'WidthSizable', WidthSizable );
 export default WidthSizable;
-export { isWidthSizable, extendsWidthSizable };

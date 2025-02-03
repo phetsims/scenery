@@ -415,18 +415,5 @@ const HeightSizable = memoize( <SuperType extends Constructor<Node>>( Type: Supe
   return HeightSizableTrait;
 } );
 
-// Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable.
-// We need to define an unused function with a concrete type, so that we can extract the return type of the function
-// and provide a type for a Node that extends this type.
-export type HeightSizableNode = Node & THeightSizable;
-
-const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
-  return node.heightSizable;
-};
-const extendsHeightSizable = ( node: Node ): node is HeightSizableNode => {
-  return node.extendsHeightSizable;
-};
-
 scenery.register( 'HeightSizable', HeightSizable );
 export default HeightSizable;
-export { isHeightSizable, extendsHeightSizable };

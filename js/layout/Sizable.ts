@@ -74,7 +74,7 @@ type SelfOptions = {
 type ParentOptions = WidthSizableOptions & HeightSizableOptions;
 export type SizableOptions = SelfOptions & ParentOptions;
 
-type TSizable = TWidthSizable & THeightSizable & {
+export type TSizable = TWidthSizable & THeightSizable & {
   validateLocalPreferredSize(): void;
 };
 
@@ -370,15 +370,5 @@ const Sizable = memoize( <SuperType extends Constructor<Node>>( Type: SuperType 
   return SizableTrait;
 } );
 
-const isSizable = ( node: Node ): node is SizableNode => {
-  return node.widthSizable && node.heightSizable;
-};
-const extendsSizable = ( node: Node ): node is SizableNode => {
-  return node.extendsSizable;
-};
-
-export type SizableNode = Node & TSizable;
-
 scenery.register( 'Sizable', Sizable );
 export default Sizable;
-export { isSizable, extendsSizable };
