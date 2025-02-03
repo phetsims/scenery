@@ -401,7 +401,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
     instrumented.dispose();
 
-    apiValidation.enabled = true;
+    Tandem.apiValidationEnabled = true;
     apiValidation.simHasStarted = true;
     // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (after startup)
     const instrumented1 = new Node( {
@@ -449,9 +449,9 @@ if ( Tandem.PHET_IO_ENABLED ) {
     window.assert && assert.throws( () => {
       instrumented5.mutate( { [ nodeProperty ]: uninstrumentedProperty } );
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
-    apiValidation.enabled = false;
+    Tandem.apiValidationEnabled = false;
 
-    apiValidation.enabled = true;
+    Tandem.apiValidationEnabled = true;
 
     apiValidation.simHasStarted = false;
 
@@ -465,7 +465,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     instrumented6[ nodeProperty ] = new BooleanProperty( false, {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyBooleanProperty` )
     } );
-    apiValidation.enabled = false;
+    Tandem.apiValidationEnabled = false;
 
     instrumented6.dispose();
     instrumented1.dispose();
@@ -507,6 +507,6 @@ if ( Tandem.PHET_IO_ENABLED ) {
     instrumentedProperty.dispose();
     otherInstrumentedProperty.dispose();
     apiValidation.simHasStarted = previousSimStarted;
-    apiValidation.enabled = previousAPIValidationEnabled;
+    Tandem.apiValidationEnabled = previousAPIValidationEnabled;
   };
 }
