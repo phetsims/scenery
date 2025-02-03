@@ -22,7 +22,6 @@ import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import EventIO from '../input/EventIO.js';
 import Focus from '../accessibility/Focus.js';
-import FocusManager from '../accessibility/FocusManager.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import { Intent } from '../input/Pointer.js';
 import KeyboardDragListener from '../listeners/KeyboardDragListener.js';
@@ -43,6 +42,7 @@ import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import Trail from '../util/Trail.js';
 import TransformTracker from '../util/TransformTracker.js';
+import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -230,7 +230,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // Make sure that the focused Node stays in view and automatically pan to keep it displayed when it is animated
     // with a transformation change
     const displayFocusListener = this.handleFocusChange.bind( this );
-    FocusManager.pdomFocusProperty.link( displayFocusListener );
+    pdomFocusProperty.link( displayFocusListener );
 
     // set source and destination positions and scales after setting from state
     // to initialize values for animation with AnimatedPanZoomListener
@@ -260,7 +260,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       if ( this._transformTracker ) {
         this._transformTracker.dispose();
       }
-      FocusManager.pdomFocusProperty.unlink( displayFocusListener );
+      pdomFocusProperty.unlink( displayFocusListener );
     };
   }
 
@@ -1349,7 +1349,7 @@ class KeyPress {
 
     // zoom into the focused Node if it has defined bounds, it may not if it is for controlling the
     // virtual cursor and has an invisible focus highlight
-    const focus = FocusManager.pdomFocusProperty.value;
+    const focus = pdomFocusProperty.value;
     if ( focus ) {
       const focusTrail = focus.trail;
       const focusedNode = focusTrail.lastNode();

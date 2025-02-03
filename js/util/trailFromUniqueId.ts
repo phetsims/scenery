@@ -9,7 +9,7 @@
 
 
 import { PDOM_UNIQUE_ID_SEPARATOR } from '../accessibility/pdom/PDOM_UNIQUE_ID_SEPARATOR.js';
-import Node from '../nodes/Node.js';
+import type Node from '../nodes/Node.js';
 import Trail from './Trail.js';
 
 /**

@@ -30,20 +30,18 @@ import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
-import Tandem from '../../../tandem/js/Tandem.js';
-import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Utterance from '../../../utterance-queue/js/Utterance.js';
 import type Display from '../display/Display.js';
 import Focus from '../accessibility/Focus.js';
 import FocusDisplayedController from '../accessibility/FocusDisplayedController.js';
 import { isInteractiveHighlighting } from '../accessibility/voicing/InteractiveHighlighting.js';
-import Node from '../nodes/Node.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import ReadingBlockUtterance from '../accessibility/voicing/ReadingBlockUtterance.js';
 import scenery from '../scenery.js';
 import voicingManager from '../accessibility/voicing/voicingManager.js';
 import { guessVisualTrail } from './pdom/guessVisualTrail.js';
 import { pdomUniqueIdToTrail } from './pdom/pdomUniqueIdToTrail.js';
+import { getPDOMFocusedNode, pdomFocusProperty } from './pdomFocusProperty.js';
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 
@@ -277,14 +275,14 @@ export default class FocusManager {
    * be a static for the FocusManager.
    */
   public static set pdomFocus( value: Focus | null ) {
-    if ( FocusManager.pdomFocusProperty.value !== value ) {
+    if ( pdomFocusProperty.value !== value ) {
 
       let previousFocus;
-      if ( FocusManager.pdomFocusProperty.value ) {
-        previousFocus = FocusManager.pdomFocusedNode;
+      if ( pdomFocusProperty.value ) {
+        previousFocus = getPDOMFocusedNode();
       }
 
-      FocusManager.pdomFocusProperty.value = value;
+      pdomFocusProperty.value = value;
 
       // if set to null, make sure that the active element is no longer focused
       if ( previousFocus && !value ) {
@@ -297,24 +295,10 @@ export default class FocusManager {
    * Get the Focus pointing to the Node whose Parallel DOM element has DOM focus.
    */
   public static get pdomFocus(): Focus | null {
-    return FocusManager.pdomFocusProperty.value;
+    return pdomFocusProperty.value;
   }
 
   /**
-   * Get the Node that currently has DOM focus, the leaf-most Node of the Focus Trail. Null if no
-   * Node has focus.
-   */
-  public static getPDOMFocusedNode(): Node | null {
-    let focusedNode = null;
-    const focus = FocusManager.pdomFocusProperty.get();
-    if ( focus ) {
-      focusedNode = focus.trail.lastNode();
-    }
-    return focusedNode;
-  }
-
-  public static get pdomFocusedNode(): Node | null { return this.getPDOMFocusedNode(); }
-
   // Display has an axon `Property to indicate which component is focused (or null if no
   // scenery Node has focus). By passing the tandem and phetioTye, PhET-iO is able to interoperate (save, restore,
   // control, observe what is currently focused). See FocusManager.pdomFocus for setting the focus. Don't set the value

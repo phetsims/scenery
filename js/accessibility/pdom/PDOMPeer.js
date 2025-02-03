@@ -19,6 +19,7 @@ import FocusManager from '../../accessibility/FocusManager.js';
 import PDOMSiblingStyle from '../../accessibility/pdom/PDOMSiblingStyle.js';
 import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
 import scenery from '../../scenery.js';
+import { pdomFocusProperty } from '../pdomFocusProperty.js';
 import { guessVisualTrail } from './guessVisualTrail.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 import { PEER_DESCRIPTION_SIBLING } from './PEER_DESCRIPTION_SIBLING.js';
@@ -847,7 +848,7 @@ class PDOMPeer {
   isFocused() {
     const visualFocusTrail = guessVisualTrail( this.trail, this.display.rootNode );
 
-    return FocusManager.pdomFocusProperty.value && FocusManager.pdomFocusProperty.value.trail.equals( visualFocusTrail );
+    return pdomFocusProperty.value && pdomFocusProperty.value.trail.equals( visualFocusTrail );
   }
 
   /**

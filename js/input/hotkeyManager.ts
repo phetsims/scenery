@@ -4,7 +4,7 @@
  * Manages hotkeys based on two sources:
  *
  * 1. Global hotkeys (from globalHotkeyRegistry)
- * 2. Hotkeys from the current focus trail (FocusManager.pdomFocusProperty, all hotkeys on all input listeners of
+ * 2. Hotkeys from the current focus trail (pdomFocusProperty, all hotkeys on all input listeners of
  *    nodes in the trail)
  *
  * Manages key press state using EnglishKey from globalKeyStateTracker.
@@ -29,13 +29,13 @@ import TProperty from '../../../axon/js/TProperty.js';
 import type { AllowedKeysString } from '../input/KeyDescriptor.js';
 import type { EnglishKeyString } from '../accessibility/EnglishStringToCodeMap.js';
 import { eventCodeToEnglishString, metaEnglishKeys } from '../accessibility/EnglishStringToCodeMap.js';
-import FocusManager from '../accessibility/FocusManager.js';
 import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import type Hotkey from '../input/Hotkey.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
+import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
 
 const arrayComparator = <Key>( a: Key[], b: Key[] ): boolean => {
   return a.length === b.length && a.every( ( element, index ) => element === b[ index ] );
@@ -68,7 +68,7 @@ class HotkeyManager {
   public constructor() {
     this.availableHotkeysProperty = new DerivedProperty( [
       globalHotkeyRegistry.hotkeysProperty,
-      FocusManager.pdomFocusProperty
+      pdomFocusProperty
     ], ( globalHotkeys, focus ) => {
       const hotkeys: Hotkey[] = [];
 
@@ -100,7 +100,7 @@ class HotkeyManager {
     const onInputEnabledChanged = () => {
       this.availableHotkeysProperty.recomputeDerivation();
     };
-    FocusManager.pdomFocusProperty.link( ( focus, oldFocus ) => {
+    pdomFocusProperty.link( ( focus, oldFocus ) => {
       if ( oldFocus ) {
         oldFocus.trail.nodes.forEach( node => {
           node.inputEnabledProperty.unlink( onInputEnabledChanged );
@@ -244,7 +244,7 @@ class HotkeyManager {
    * (scenery-internal)
    */
   public updateHotkeysFromInputListenerChange( node: Node ): void {
-    if ( FocusManager.pdomFocusProperty.value && FocusManager.pdomFocusProperty.value.trail.nodes.includes( node ) ) {
+    if ( pdomFocusProperty.value && pdomFocusProperty.value.trail.nodes.includes( node ) ) {
       this.availableHotkeysProperty.recomputeDerivation();
     }
   }

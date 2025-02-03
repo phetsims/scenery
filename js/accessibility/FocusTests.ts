@@ -10,6 +10,7 @@ import Display from '../display/Display.js';
 import FocusManager from '../accessibility/FocusManager.js';
 import Node from '../nodes/Node.js';
 import Trail from '../util/Trail.js';
+import { getPDOMFocusedNode } from './pdomFocusProperty.js';
 
 QUnit.module( 'Focus' );
 
@@ -463,7 +464,7 @@ QUnit.test( 'pdomOrder with reentrant events', assert => {
       d1.focus();
 
       assert.ok( d1.focused, 'd1 should have focus even though focus was set in a reentrant event' );
-      assert.ok( FocusManager.pdomFocusedNode === d1, 'pdomFocusedNode should be correct during reentrant events' );
+      assert.ok( getPDOMFocusedNode() === d1, 'pdomFocusedNode should be correct during reentrant events' );
       assert.ok( document.activeElement === getDOMElement( d1 ), 'activeElement should be correct during reentrant events' );
 
       // change the trail to the Node
