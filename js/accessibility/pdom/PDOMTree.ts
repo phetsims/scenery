@@ -8,13 +8,13 @@
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import BrowserEvents from '../../input/BrowserEvents.js';
-import FocusManager from '../../accessibility/FocusManager.js';
 import type Node from '../../nodes/Node.js';
 import PartialPDOMTrail from '../../accessibility/pdom/PartialPDOMTrail.js';
 import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
 import type Display from '../../display/Display.js';
+import { getPDOMFocusedNode } from '../pdomFocusProperty.js';
 
 export default class PDOMTree {
   /**
@@ -363,7 +363,7 @@ export default class PDOMTree {
    */
   private static beforeOp(): Node | null {
     BrowserEvents.blockFocusCallbacks = true;
-    return FocusManager.pdomFocusedNode;
+    return getPDOMFocusedNode();
   }
 
   /**

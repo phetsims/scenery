@@ -11,8 +11,8 @@
  * @author Jesse Greenberg
  */
 
-import Node from '../../nodes/Node.js';
-import Trail from '../../util/Trail.js';
+import type Node from '../../nodes/Node.js';
+import type Trail from '../../util/Trail.js';
 
 export const guessVisualTrail = ( trail: Trail, rootNode: Node ): Trail => {
   trail.reindex();

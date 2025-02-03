@@ -30,6 +30,7 @@ import TransformTracker from '../util/TransformTracker.js';
 import type { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import { isReadingBlock } from '../accessibility/voicing/ReadingBlock.js';
 import { Highlight } from '../accessibility/Highlight.js';
+import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.
@@ -247,7 +248,7 @@ export default class HighlightOverlay implements TOverlay {
     this.readingBlockFocusListener = this.onReadingBlockFocusChange.bind( this );
     this.readingBlockHighlightChangeListener = this.onReadingBlockHighlightChange.bind( this );
 
-    FocusManager.pdomFocusProperty.link( this.domFocusListener );
+    pdomFocusProperty.link( this.domFocusListener );
     display.focusManager.pointerFocusProperty.link( this.pointerFocusListener );
     display.focusManager.readingBlockFocusProperty.link( this.readingBlockFocusListener );
 
@@ -265,7 +266,7 @@ export default class HighlightOverlay implements TOverlay {
       this.deactivateHighlight();
     }
 
-    FocusManager.pdomFocusProperty.unlink( this.domFocusListener );
+    pdomFocusProperty.unlink( this.domFocusListener );
     this.pdomFocusHighlightsVisibleProperty.unlink( this.focusHighlightsVisibleListener );
     this.interactiveHighlightsVisibleProperty.unlink( this.voicingHighlightsVisibleListener );
 

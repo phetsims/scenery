@@ -187,6 +187,7 @@ export { default as VoicingCircle } from './accessibility/voicing/nodes/VoicingC
 export { default as ReadingBlockUtterance } from './accessibility/voicing/ReadingBlockUtterance.js';
 export type { ReadingBlockUtteranceOptions } from './accessibility/voicing/ReadingBlockUtterance.js';
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
+export { pdomFocusProperty, getPDOMFocusedNode } from './accessibility/pdomFocusProperty.js';
 export { default as FocusManager } from './accessibility/FocusManager.js';
 export { default as GroupFocusListener } from './accessibility/GroupFocusListener.js';
 export { default as HighlightPath } from './accessibility/HighlightPath.js';

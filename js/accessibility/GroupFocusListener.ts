@@ -13,11 +13,11 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import FocusManager from '../accessibility/FocusManager.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type TInputListener from '../input/TInputListener.js';
+import { pdomFocusProperty } from './pdomFocusProperty.js';
 
 export default class GroupFocusListener implements TInputListener {
 
@@ -45,7 +45,7 @@ export default class GroupFocusListener implements TInputListener {
   }
 
   public focusout( event: SceneryEvent ): void {
-    const nextTargetTrail = FocusManager.pdomFocusProperty.value?.trail;
+    const nextTargetTrail = pdomFocusProperty.value?.trail;
     if ( nextTargetTrail && nextTargetTrail.containsNode( this.groupParent ) ) {
 
       // The focusTargetProperty will be updated in the focusin event so there is

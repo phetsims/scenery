@@ -13,7 +13,7 @@
 import TProperty from '../../../axon/js/TProperty.js';
 import type Focus from '../accessibility/Focus.js';
 import type Instance from '../display/Instance.js';
-import Node from '../nodes/Node.js';
+import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import TrailVisibilityTracker from '../util/TrailVisibilityTracker.js';
 

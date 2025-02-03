@@ -42,6 +42,7 @@ import { PDOM_UNIQUE_ID_SEPARATOR } from './PDOM_UNIQUE_ID_SEPARATOR.js';
 import { guessVisualTrail } from './guessVisualTrail.js';
 import PDOMUniqueIdStrategy from './PDOMUniqueIdStrategy.js';
 import UNIQUE_ID_STRATEGY from './UNIQUE_ID_STRATEGY.js';
+import { getPDOMFocusedNode } from '../pdomFocusProperty.js';
 
 // A type representing a fake instance, for some aggressive auditing (under ?assertslow)
 type FakeInstance = {
@@ -371,7 +372,7 @@ class PDOMInstance {
     this.peer!.setVisible( this.invisibleCount <= 0 );
 
     // if we hid a parent element, blur focus if active element was an ancestor
-    if ( !this.peer!.isVisible() && FocusManager.pdomFocusedNode?.pdomInstances[ 0 ]?.trail!.containsNode( this.node! ) ) {
+    if ( !this.peer!.isVisible() && getPDOMFocusedNode()?.pdomInstances[ 0 ]?.trail!.containsNode( this.node! ) ) {
       FocusManager.pdomFocus = null;
     }
   }
@@ -475,7 +476,7 @@ class PDOMInstance {
 
     // Ignore DAG for focused trail. We need to know if there is a focused child instance so that we can avoid
     // temporarily detaching the focused element from the DOM. See https://github.com/phetsims/my-solar-system/issues/142
-    const focusedTrail = FocusManager.pdomFocusedNode?.pdomInstances[ 0 ]?.trail || null;
+    const focusedTrail = getPDOMFocusedNode()?.pdomInstances[ 0 ]?.trail || null;
 
     // "i" will keep track of the "collapsed" index when all DOMElements for all PDOMInstance children are
     // added to a single parent DOMElement (this PDOMInstance's PDOMPeer's primarySibling)
