@@ -335,6 +335,8 @@ export { default as RichTextLink } from './util/rich-text/RichTextLink.js';
 export { default as RichText } from './nodes/RichText.js';
 export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks } from './nodes/RichText.js';
 
+export { findStringProperty } from './accessibility/pdom/findStringProperty.js';
+
 export { default as VoicingText } from './accessibility/voicing/nodes/VoicingText.js';
 export type { VoicingTextOptions } from './accessibility/voicing/nodes/VoicingText.js';
 export { default as VoicingRichText } from './accessibility/voicing/nodes/VoicingRichText.js';
@@ -426,6 +428,8 @@ export type { HighlightOverlayOptions } from './overlays/HighlightOverlay.js';
 export { default as HitAreaOverlay } from './overlays/HitAreaOverlay.js';
 export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js';
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
+
+export { default as DisplayGlobals } from './display/DisplayGlobals.js';
 
 export { default as Instance } from './display/Instance.js';
 export type { default as TOverlay } from './overlays/TOverlay.js';

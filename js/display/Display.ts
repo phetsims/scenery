@@ -2286,6 +2286,13 @@ export default class Display {
   }
 
   /**
+   * Returns whether this input listener is currently listening to this Display.
+   */
+  public static hasInputListener( listener: TInputListener ): boolean {
+    return _.includes( DisplayGlobals.inputListeners, listener );
+  }
+
+  /**
    * Interrupts all input listeners that are attached to all Displays.
    */
   public static interruptInput(): void {

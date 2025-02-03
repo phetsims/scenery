@@ -385,7 +385,7 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        phet.scenery.voicingManager.initialize( phet.scenery.Display.userGestureEmitter );
+        phet.scenery.voicingManager.initialize( phet.scenery.DisplayGlobals.userGestureEmitter );
         phet.scenery.voicingManager.enabledProperty.value = true;
         /*END*/
       } );
@@ -448,7 +448,7 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        phet.scenery.voicingManager.initialize( phet.scenery.Display.userGestureEmitter );
+        phet.scenery.voicingManager.initialize( phet.scenery.DisplayGlobals.userGestureEmitter );
         phet.scenery.voicingManager.enabledProperty.value = true;
 
         // globally enable/disable object responses
