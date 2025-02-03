@@ -58,8 +58,8 @@ class PDOMInstance {
 
   public parent!: PDOMInstance | null;
 
-  // {Display}
-  private display!: Display | null;
+  // (scenery-internal)
+  public display!: Display | null;
 
   public trail!: Trail | null;
   public isRootInstance!: boolean;

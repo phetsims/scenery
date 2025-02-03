@@ -102,11 +102,15 @@ export default class PDOMTree {
     // Check some initial conditions
     if ( assert ) {
       for ( i = 0; i < removedItems.length; i++ ) {
-        assert( removedItems[ i ] === null || removedItems[ i ]._pdomParent === node,
+        const item = removedItems[ i ];
+
+        assert( item === null || item._pdomParent === node,
           'Node should have had a pdomOrder' );
       }
       for ( i = 0; i < addedItems.length; i++ ) {
-        assert( addedItems[ i ] === null || addedItems[ i ]._pdomParent === null,
+        const item = addedItems[ i ];
+
+        assert( item === null || item._pdomParent === null,
           'Node is already specified in a pdomOrder' );
       }
     }
@@ -198,7 +202,7 @@ export default class PDOMTree {
     for ( i = 0; i < node._rootedDisplays.length; i++ ) {
       const display = node._rootedDisplays[ i ];
       if ( display._accessible ) {
-        PDOMTree.rebuildInstanceTree( display._rootPDOMInstance );
+        PDOMTree.rebuildInstanceTree( display._rootPDOMInstance! );
       }
     }
 
@@ -216,7 +220,7 @@ export default class PDOMTree {
 
     rootInstance.removeAllChildren();
 
-    rootInstance.addConsecutiveInstances( PDOMTree.createTree( new Trail( rootNode ), rootInstance.display, rootInstance ) );
+    rootInstance.addConsecutiveInstances( PDOMTree.createTree( new Trail( rootNode ), rootInstance.display!, rootInstance ) );
   }
 
   /**
@@ -241,8 +245,8 @@ export default class PDOMTree {
 
       // The full trail doesn't have the child in it, so we temporarily add that for tree creation
       partialTrail.fullTrail.addDescendant( child );
-      const childInstances = PDOMTree.createTree( partialTrail.fullTrail, parentInstance.display, parentInstance );
-      partialTrail.fullTrail.removeDescendant( child );
+      const childInstances = PDOMTree.createTree( partialTrail.fullTrail, parentInstance.display!, parentInstance );
+      partialTrail.fullTrail.removeDescendant();
 
       parentInstance.addConsecutiveInstances( childInstances );
 
@@ -257,7 +261,7 @@ export default class PDOMTree {
    *
    * @param [pdomTrails] - Will be computed if needed
    */
-  private static removeTree( parent: Node, child: Node, pdomTrails?: PartialPDOMTrail ): void {
+  private static removeTree( parent: Node, child: Node, pdomTrails?: PartialPDOMTrail[] ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `removeTree parent:n#${parent._id}, child:n#${child._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -269,7 +273,7 @@ export default class PDOMTree {
       // The full trail doesn't have the child in it, so we temporarily add that for tree removal
       partialTrail.fullTrail.addDescendant( child );
       partialTrail.pdomInstance.removeInstancesForTrail( partialTrail.fullTrail );
-      partialTrail.fullTrail.removeDescendant( child );
+      partialTrail.fullTrail.removeDescendant();
     }
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
@@ -280,7 +284,7 @@ export default class PDOMTree {
    *
    * @param - Will be computed if needed
    */
-  private static reorder( node: Node, pdomTrails?: PartialPDOMTrail ): void {
+  private static reorder( node: Node, pdomTrails?: PartialPDOMTrail[] ): void {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `reorder n#${node._id}` );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -381,7 +385,7 @@ export default class PDOMTree {
    * the tree can have a "PDOM parent" and "pdom child" case (the child is in the parent's pdomOrder).
    */
   private static findPDOMTrails( node: Node ): PartialPDOMTrail[] {
-    const trails = [];
+    const trails: PartialPDOMTrail[] = [];
     PDOMTree.recursivePDOMTrailSearch( trails, new Trail( node ) );
     return trails;
   }
@@ -414,7 +418,7 @@ export default class PDOMTree {
         const display = rootedDisplays[ i ];
 
         if ( display._accessible ) {
-          trailResults.push( new PartialPDOMTrail( display._rootPDOMInstance, trail.copy(), true ) );
+          trailResults.push( new PartialPDOMTrail( display._rootPDOMInstance!, trail.copy(), true ) );
         }
       }
     }
@@ -438,7 +442,7 @@ export default class PDOMTree {
       if ( node._pdomDisplaysInfo.canHavePDOMDisplays() ) {
 
         let i;
-        const displays = [];
+        const displays: Display[] = [];
 
         // Concatenation of our parents' pdomDisplays
         for ( i = 0; i < node._parents.length; i++ ) {

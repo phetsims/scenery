@@ -113,13 +113,13 @@ export default class BrowserEvents {
    *
    * @param isMain - If false, it is used on the "document" for workarounds.
    */
-  private getEventOptions( passiveEvents: boolean | null, isMain: boolean ): { passive: boolean } | boolean {
+  private static getEventOptions( passiveEvents: boolean | null, isMain: boolean ): { passive: boolean; capture?: boolean } | boolean {
     const passDirectPassiveFlag = Features.passive && passiveEvents !== null;
     if ( !passDirectPassiveFlag ) {
       return false;
     }
     else {
-      const eventOptions = { passive: passiveEvents };
+      const eventOptions: { passive: boolean; capture?: boolean } = { passive: passiveEvents };
       if ( isMain ) {
         eventOptions.capture = false;
       }
@@ -150,12 +150,18 @@ export default class BrowserEvents {
    *
    * NOTE: Pointer events are currently disabled for Firefox due to https://github.com/phetsims/scenery/issues/837.
    */
-  private static canUsePointerEvents = !!( ( window.navigator && window.navigator.pointerEnabled ) || window.PointerEvent ) && !platform.firefox;
+  private static canUsePointerEvents = !!(
+    // @ts-expect-error pointerEnabled should exist
+    ( window.navigator && window.navigator.pointerEnabled )
+    || window.PointerEvent ) && !platform.firefox;
 
   /**
    * Whether pointer events in the format specified by the MS specification are allowed.
    */
-  private static canUseMSPointerEvents = window.navigator && window.navigator.msPointerEnabled;
+  private static canUseMSPointerEvents =
+    window.navigator &&
+    // @ts-expect-error msPointerEnabled should exist
+    window.navigator.msPointerEnabled;
 
   /**
    * All W3C pointer event types that we care about.
@@ -219,7 +225,7 @@ export default class BrowserEvents {
   /**
    * Returns all event types that will be listened to on this specific platform.
    */
-  private getNonWheelUsedTypes(): string[] {
+  private static getNonWheelUsedTypes(): string[] {
     let eventTypes;
 
     if ( this.canUsePointerEvents ) {
@@ -251,7 +257,7 @@ export default class BrowserEvents {
    *
    * @param passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
-  private connectWindowListeners( passiveEvents: boolean | null ): void {
+  private static connectWindowListeners( passiveEvents: boolean | null ): void {
     this.addOrRemoveListeners( window, true, passiveEvents );
   }
 
@@ -260,7 +266,7 @@ export default class BrowserEvents {
    *
    * @param passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
-  private disconnectWindowListeners( passiveEvents: boolean | null ): void {
+  private static disconnectWindowListeners( passiveEvents: boolean | null ): void {
     this.addOrRemoveListeners( window, false, passiveEvents );
   }
 
@@ -273,7 +279,7 @@ export default class BrowserEvents {
    *                                       NOTE: if it is passed in as null, the default value for the browser will be
    *                                       used.
    */
-  private addOrRemoveListeners( element: Element | typeof window, addOrRemove: boolean, passiveEvents: boolean | null ): void {
+  private static addOrRemoveListeners( element: Element | typeof window, addOrRemove: boolean, passiveEvents: boolean | null ): void {
     const forWindow = element === window;
     assert && assert( !forWindow || ( BrowserEvents.listenersAttachedToWindow > 0 ) === !addOrRemove,
       'Do not add listeners to the window when already attached, or remove listeners when none are attached' );
@@ -325,7 +331,7 @@ export default class BrowserEvents {
    *                           necessary for certain security-sensitive actions (like triggering
    *                           full-screen).
    */
-  private batchWindowEvent(
+  private static batchWindowEvent(
     eventContext: EventContext,
     batchType: BatchedDOMEventType,
     inputCallbackName: string,
@@ -339,6 +345,7 @@ export default class BrowserEvents {
       const input = display._input!;
 
       if ( !BrowserEvents.blockFocusCallbacks || ( inputCallbackName !== 'focusIn' && inputCallbackName !== 'focusOut' ) ) {
+        // @ts-expect-error Method should exist
         input.batchEvent( eventContext, batchType, input[ inputCallbackName ], triggerImmediate );
       }
     }
@@ -354,7 +361,7 @@ export default class BrowserEvents {
     // Get the active element BEFORE any actions are taken
     const eventContext = new EventContext( domEvent );
 
-    if ( domEvent.pointerType === 'mouse' ) {
+    if ( ( domEvent as PointerEvent ).pointerType === 'mouse' ) {
       DisplayGlobals.userGestureEmitter.emit();
     }
 
@@ -693,7 +700,7 @@ export default class BrowserEvents {
 
     // Update state related to focus immediately and allowing for reentrancy for focus state
     // that must match the browser's focus state.
-    FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent, true );
+    FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent as FocusEvent, true );
 
     BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusIn', true );
 
@@ -711,7 +718,7 @@ export default class BrowserEvents {
     BrowserEvents.dispatchingFocusEvents = true;
 
     // Update state related to focus immediately and allowing for reentrancy for focus state
-    FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent, false );
+    FocusManager.updatePDOMFocusFromEvent( BrowserEvents.attachedDisplays, domEvent as FocusEvent, false );
 
     BrowserEvents.batchWindowEvent( new EventContext( domEvent ), BatchedDOMEventType.ALT_TYPE, 'focusOut', true );
 
