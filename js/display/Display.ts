@@ -522,7 +522,7 @@ export default class Display {
     // Features that require the HighlightOverlay
     if ( this._accessible || options.supportsInteractiveHighlights ) {
       this._focusRootNode = new Node();
-      this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, {
+      this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, Display, {
         pdomFocusHighlightsVisibleProperty: this.focusManager.pdomFocusHighlightsVisibleProperty,
         interactiveHighlightsVisibleProperty: this.focusManager.interactiveHighlightsVisibleProperty,
         readingBlockHighlightsVisibleProperty: this.focusManager.readingBlockHighlightsVisibleProperty

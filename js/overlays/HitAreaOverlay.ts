@@ -13,6 +13,7 @@ import scenery from '../scenery.js';
 import ShapeBasedOverlay from '../overlays/ShapeBasedOverlay.js';
 import type TOverlay from '../overlays/TOverlay.js';
 import Trail from '../util/Trail.js';
+import TrailPointer from '../util/TrailPointer.js';
 
 export default class HitAreaOverlay extends ShapeBasedOverlay implements TOverlay {
   public constructor( display: Display, rootNode: Node ) {
@@ -20,7 +21,7 @@ export default class HitAreaOverlay extends ShapeBasedOverlay implements TOverla
   }
 
   public addShapes(): void {
-    new Trail( this.rootNode ).eachTrailUnder( trail => {
+    TrailPointer.eachTrailUnder( new Trail( this.rootNode ), trail => {
       const node = trail.lastNode();
 
       if ( !node.isVisible() || node.pickable === false ) {

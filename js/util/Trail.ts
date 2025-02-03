@@ -21,7 +21,6 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import TrailPointer from '../util/TrailPointer.js';
 import { PDOM_UNIQUE_ID_SEPARATOR } from '../accessibility/pdom/PDOM_UNIQUE_ID_SEPARATOR.js';
 
 // constants
@@ -638,14 +637,6 @@ export default class Trail {
   }
 
   /**
-   * Calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
-   */
-  public eachTrailUnder( callback: TrailCallback ): void {
-    // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after https://github.com/phetsims/scenery/issues/1581
-    new TrailPointer( this, true ).eachTrailBetween( new TrailPointer( this, false ), callback );
-  }
-
-  /**
    * Standard Java-style compare. -1 means this trail is before (under) the other trail, 0 means equal, and 1 means this trail is
    * after (on top of) the other trail.
    * A shorter subtrail will compare as -1.
@@ -783,44 +774,6 @@ export default class Trail {
    */
   public toDebugString(): string {
     return `${this.toString()} ${this.toPathString()}`;
-  }
-
-  /**
-   * Like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
-   */
-  public static eachPaintedTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ): void {
-    Trail.eachTrailBetween( a, b, ( trail: Trail ) => {
-      if ( trail.isPainted() ) {
-        return callback( trail );
-      }
-      return false;
-    }, excludeEndTrails, rootNode );
-  }
-
-  /**
-   * Global way of iterating across trails. when callback returns true, subtree will be skipped
-   */
-  public static eachTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ): void {
-    const aPointer = a ? new TrailPointer( a.copy(), true ) : new TrailPointer( new Trail( rootNode ), true );
-    const bPointer = b ? new TrailPointer( b.copy(), true ) : new TrailPointer( new Trail( rootNode ), false );
-
-    // if we are excluding endpoints, just bump the pointers towards each other by one step
-    if ( excludeEndTrails ) {
-      aPointer.nestedForwards();
-      bPointer.nestedBackwards();
-
-      // they were adjacent, so no callbacks will be executed
-      if ( aPointer.compareNested( bPointer ) === 1 ) {
-        return;
-      }
-    }
-
-    aPointer.depthFirstUntil( bPointer, pointer => {
-      if ( pointer.isBefore ) {
-        return callback( pointer.trail );
-      }
-      return false;
-    }, false );
   }
 
   /**

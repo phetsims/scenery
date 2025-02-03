@@ -221,7 +221,7 @@ QUnit.test( 'Trail eachTrailBetween', assert => {
   for ( let i = 0; i < trails.length; i++ ) {
     for ( let j = i; j < trails.length; j++ ) {
       const inclusiveList = [];
-      Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
+      TrailPointer.eachTrailBetween( trails[ i ], trails[ j ], trail => {
         inclusiveList.push( trail.copy() );
       }, false, node );
       const trailString = `${i},${j} ${trails[ i ].toString()} to ${trails[ j ].toString()}`;
@@ -231,7 +231,7 @@ QUnit.test( 'Trail eachTrailBetween', assert => {
 
       if ( i < j ) {
         const exclusiveList = [];
-        Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
+        TrailPointer.eachTrailBetween( trails[ i ], trails[ j ], trail => {
           exclusiveList.push( trail.copy() );
         }, true, node );
         assert.equal( exclusiveList.length, j - i - 1, `exclusive length on ${i},${j}` );
@@ -254,11 +254,11 @@ QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', assert => {
   }, false );
 } );
 
-QUnit.test( 'Trail eachTrailUnder with subtree skipping', assert => {
+QUnit.test( 'TrailPointer.eachTrailUnder with subtree skipping', assert => {
   const node = createTestNodeTree();
   node.children[ 0 ].children[ 2 ].visible = false;
   node.children[ 0 ].children[ 3 ].visible = false;
-  new Trail( node ).eachTrailUnder( trail => {
+  TrailPointer.eachTrailUnder( new Trail( node ), trail => {
     if ( !trail.lastNode().isVisible() ) {
       // should skip
       return true;
