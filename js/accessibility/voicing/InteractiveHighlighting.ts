@@ -16,7 +16,7 @@ import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import DelayedMutate from '../../util/DelayedMutate.js';
 import type Display from '../../display/Display.js';
 import Focus from '../../accessibility/Focus.js';
-import FocusManager from '../../accessibility/FocusManager.js';
+import type FocusManager from '../../accessibility/FocusManager.js';
 import type Instance from '../../display/Instance.js';
 import Node from '../../nodes/Node.js';
 import type Pointer from '../../input/Pointer.js';

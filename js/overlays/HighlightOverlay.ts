@@ -14,7 +14,7 @@ import TProperty from '../../../axon/js/TProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import ActivatedReadingBlockHighlight from '../accessibility/voicing/ActivatedReadingBlockHighlight.js';
-import Display from '../display/Display.js';
+import type Display from '../display/Display.js';
 import Focus from '../accessibility/Focus.js';
 import FocusManager from '../accessibility/FocusManager.js';
 import HighlightFromNode from '../accessibility/HighlightFromNode.js';
@@ -165,7 +165,12 @@ export default class HighlightOverlay implements TOverlay {
   private readonly readingBlockFocusListener: ( focus: Focus | null ) => void;
   private readonly readingBlockHighlightChangeListener: () => void;
 
-  public constructor( display: Display, focusRootNode: Node, providedOptions?: HighlightOverlayOptions ) {
+  public constructor(
+    display: Display,
+    focusRootNode: Node,
+    DisplayType: typeof Display, // workaround so we aren't declaring many circular dependencies
+    providedOptions?: HighlightOverlayOptions
+  ) {
 
     const options = optionize<HighlightOverlayOptions>()( {
 
@@ -190,7 +195,7 @@ export default class HighlightOverlay implements TOverlay {
     this.interactiveHighlightsVisibleProperty = options.interactiveHighlightsVisibleProperty;
     this.readingBlockHighlightsVisibleProperty = options.readingBlockHighlightsVisibleProperty;
 
-    this.focusDisplay = new Display( this.focusRootNode, {
+    this.focusDisplay = new DisplayType( this.focusRootNode, {
       allowWebGL: display.isWebGLAllowed(),
       allowCSSHacks: false,
       accessibility: false,

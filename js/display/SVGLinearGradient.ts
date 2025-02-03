@@ -9,7 +9,7 @@
  */
 
 import Pool, { TPoolable } from '../../../phet-core/js/Pool.js';
-import LinearGradient from '../util/LinearGradient.js';
+import type LinearGradient from '../util/LinearGradient.js';
 import scenery from '../scenery.js';
 import SVGBlock from '../display/SVGBlock.js';
 import SVGGradient from '../display/SVGGradient.js';

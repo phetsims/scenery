@@ -18,7 +18,7 @@ import LayoutAlign from '../../layout/LayoutAlign.js';
 import LayoutCell from '../../layout/constraints/LayoutCell.js';
 import LayoutProxy from '../../layout/LayoutProxy.js';
 import Node from '../../nodes/Node.js';
-import NodeLayoutConstraint from '../../layout/constraints/NodeLayoutConstraint.js';
+import type NodeLayoutConstraint from '../../layout/constraints/NodeLayoutConstraint.js';
 import NodePattern from '../../util/NodePattern.js';
 import Path from '../../nodes/Path.js';
 import PressListener from '../../listeners/PressListener.js';
