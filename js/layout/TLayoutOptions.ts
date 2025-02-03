@@ -8,5 +8,5 @@ import { FlowCellOptions, GridCellOptions } from '../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export type TLayoutOptions = GridCellOptions & FlowCellOptions;
+type TLayoutOptions = GridCellOptions & FlowCellOptions;
 export default TLayoutOptions;

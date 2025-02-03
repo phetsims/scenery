@@ -11,7 +11,7 @@ import { Circle, CircleOptions, ReadingBlockOptions, scenery, Voicing } from '..
 
 type SelfOptions = EmptySelfOptions;
 type ParentOptions = ReadingBlockOptions & CircleOptions;
-export type VoicingTextOptions = SelfOptions & ParentOptions;
+export type VoicingCircleOptions = SelfOptions & ParentOptions;
 
 class VoicingCircle extends Voicing( Circle ) {
   public constructor( radius?: number | CircleOptions, options?: CircleOptions ) {
