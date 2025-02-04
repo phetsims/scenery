@@ -8,10 +8,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import Hotkey from '../input/Hotkey.js';
-import SceneryEvent from '../input/SceneryEvent.js';
+import type Bounds2 from '../../../dot/js/Bounds2.js';
+import type StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
+import type Hotkey from '../input/Hotkey.js';
+import type SceneryEvent from '../input/SceneryEvent.js';
 
 export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
 export type SceneryNullableListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> | null ) => void;
