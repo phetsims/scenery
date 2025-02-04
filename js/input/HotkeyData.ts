@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * Data pertaining to a hotkey, including keystrokes and associated metadata for documentation and the keyboard help

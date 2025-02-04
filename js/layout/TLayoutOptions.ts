@@ -1,4 +1,4 @@
-// Copyright 2021-2024, University of Colorado Boulder
+// Copyright 2021-2025, University of Colorado Boulder
 
 import type { FlowCellOptions } from '../layout/constraints/FlowCell.js';
 import type { GridCellOptions } from '../layout/constraints/GridCell.js';

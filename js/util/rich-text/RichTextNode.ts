@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * A leaf node element in the RichText, which will display a Node (e.g. with the `nodes` or `tags` feature)

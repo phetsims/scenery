@@ -1,4 +1,4 @@
-// Copyright 2021-2024, University of Colorado Boulder
+// Copyright 2021-2025, University of Colorado Boulder
 
 /**
  * A LayoutCell that has margins, and can be positioned and sized relative to those. Used for Flow/Grid layouts

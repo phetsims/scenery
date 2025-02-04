@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * A collection of fields that describes keys for a Hotkey. This includes a key that should be pressed to fire the

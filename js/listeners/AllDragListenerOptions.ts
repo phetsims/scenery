@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * Options used by many drag listeners in scenery. At this time, that includes DragListener and KeyboardDragListener.

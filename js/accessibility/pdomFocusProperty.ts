@@ -1,4 +1,4 @@
-// Copyright 2018-2024, University of Colorado Boulder
+// Copyright 2025, University of Colorado Boulder
 
 /**
  * Display has an axon `Property to indicate which component is focused (or null if no

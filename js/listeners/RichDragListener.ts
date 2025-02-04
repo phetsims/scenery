@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * A drag listener that supports both pointer and keyboard input. It is composed with a DragListener and a

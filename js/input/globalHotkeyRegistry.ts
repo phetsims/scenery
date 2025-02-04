@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * Stores a record of all global hotkeys (Hotkey instances that should be available regardless of focus).

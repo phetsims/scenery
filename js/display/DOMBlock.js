@@ -1,4 +1,4 @@
-// Copyright 2014-2023, University of Colorado Boulder
+// Copyright 2014-2025, University of Colorado Boulder
 
 /**
  * DOM Drawable wrapper for another DOM Drawable. Used so that we can have our own independent siblings, generally as part

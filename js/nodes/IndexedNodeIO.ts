@@ -1,4 +1,4 @@
-// Copyright 2020-2024, University of Colorado Boulder
+// Copyright 2020-2025, University of Colorado Boulder
 
 /**
  * IOType for Nodes that can save their own index (if phetioState: true).  Can be used to customize z-order

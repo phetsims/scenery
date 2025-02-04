@@ -1,4 +1,4 @@
-// Copyright 2021-2024, University of Colorado Boulder
+// Copyright 2021-2025, University of Colorado Boulder
 
 /**
  * Base type for a line-divider (when put in a layout container, it will be hidden if it is before/after all visible

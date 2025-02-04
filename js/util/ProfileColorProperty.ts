@@ -1,4 +1,4 @@
-// Copyright 2021-2024, University of Colorado Boulder
+// Copyright 2021-2025, University of Colorado Boulder
 
 /**
  * ProfileColorProperty is a ColorProperty that changes its value based on the value of colorProfileProperty.
