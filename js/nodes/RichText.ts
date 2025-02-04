@@ -95,6 +95,7 @@ import Text from '../nodes/Text.js';
 import TPaint from '../util/TPaint.js';
 import WidthSizable from '../layout/WidthSizable.js';
 import { RichTextCleanableNode } from '../util/rich-text/RichTextCleanable.js';
+import { richTextContentToString } from '../util/rich-text/richTextContentToString.js';
 
 // @ts-expect-error - Since himalaya isn't in tsconfig
 const himalayaVar = himalaya;
@@ -1763,7 +1764,7 @@ export default class RichText extends WidthSizable( Node ) {
    */
   public static himalayaElementToString( element: HimalayaNode ): string {
     if ( isHimalayaTextNode( element ) ) {
-      return RichText.contentToString( element.content );
+      return richTextContentToString( element.content );
     }
     else if ( isHimalayaElementNode( element ) ) {
       const content = element.children.map( child => RichText.himalayaElementToString( child ) ).join( '' );
@@ -1788,7 +1789,7 @@ export default class RichText extends WidthSizable( Node ) {
    */
   public static himalayaElementToAccessibleString( element: HimalayaNode ): string {
     if ( isHimalayaTextNode( element ) ) {
-      return RichText.contentToString( element.content );
+      return richTextContentToString( element.content );
     }
     else if ( isHimalayaElementNode( element ) ) {
       let content = element.children.map( child => RichText.himalayaElementToAccessibleString( child ) ).join( '' );
@@ -1826,18 +1827,6 @@ export default class RichText extends WidthSizable( Node ) {
 
       return accessibleString;
     } );
-  }
-
-  /**
-   * Takes the element.content from himalaya, unescapes HTML entities, and applies the proper directional tags.
-   *
-   * See https://github.com/phetsims/scenery-phet/issues/315
-   */
-  public static contentToString( content: string, isLTR?: boolean ): string {
-    // @ts-expect-error - we should get a string from this
-    const unescapedContent: string = he.decode( content );
-
-    return isLTR === undefined ? unescapedContent : `${isLTR ? '\u202a' : '\u202b'}${unescapedContent}\u202c`;
   }
 
   public static RichTextIO: IOType;

@@ -7,13 +7,13 @@
  */
 import Pool, { TPoolable } from '../../../../phet-core/js/Pool.js';
 import Font from '../../util/Font.js';
-import RichText from '../../nodes/RichText.js';
 import RichTextCleanable from '../../util/rich-text/RichTextCleanable.js';
 import RichTextUtils from '../../util/rich-text/RichTextUtils.js';
 import scenery from '../../scenery.js';
 import type { TextBoundsMethod } from '../../nodes/Text.js';
 import Text from '../../nodes/Text.js';
 import TPaint from '../../util/TPaint.js';
+import { richTextContentToString } from './richTextContentToString.js';
 
 export default class RichTextLeaf extends RichTextCleanable( Text ) implements TPoolable {
 
@@ -42,7 +42,7 @@ export default class RichTextLeaf extends RichTextCleanable( Text ) implements T
       content = content.slice( 0, content.length - 1 );
     }
 
-    this.string = RichText.contentToString( content, isLTR );
+    this.string = richTextContentToString( content, isLTR );
     this.boundsMethod = boundsMethod;
     this.font = font;
     this.fill = fill;

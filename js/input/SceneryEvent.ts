@@ -17,7 +17,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import EventContext from '../input/EventContext.js';
-import Node from '../nodes/Node.js';
+import type Node from '../nodes/Node.js';
 import type Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
