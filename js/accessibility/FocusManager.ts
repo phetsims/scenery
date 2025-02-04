@@ -34,7 +34,6 @@ import Utterance from '../../../utterance-queue/js/Utterance.js';
 import type Display from '../display/Display.js';
 import Focus from '../accessibility/Focus.js';
 import FocusDisplayedController from '../accessibility/FocusDisplayedController.js';
-import { isInteractiveHighlighting } from '../accessibility/voicing/InteractiveHighlighting.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import ReadingBlockUtterance from '../accessibility/voicing/ReadingBlockUtterance.js';
 import scenery from '../scenery.js';
@@ -42,6 +41,7 @@ import voicingManager from '../accessibility/voicing/voicingManager.js';
 import { guessVisualTrail } from './pdom/guessVisualTrail.js';
 import { pdomUniqueIdToTrail } from './pdom/pdomUniqueIdToTrail.js';
 import { getPDOMFocusedNode, pdomFocusProperty } from './pdomFocusProperty.js';
+import { isInteractiveHighlighting } from './voicing/isInteractiveHighlighting.js';
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 

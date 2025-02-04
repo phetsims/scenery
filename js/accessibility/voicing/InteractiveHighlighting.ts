@@ -18,13 +18,14 @@ import type Display from '../../display/Display.js';
 import Focus from '../../accessibility/Focus.js';
 import type FocusManager from '../../accessibility/FocusManager.js';
 import type Instance from '../../display/Instance.js';
-import Node from '../../nodes/Node.js';
+import type Node from '../../nodes/Node.js';
 import type Pointer from '../../input/Pointer.js';
 import scenery from '../../scenery.js';
 import type SceneryEvent from '../../input/SceneryEvent.js';
 import type TInputListener from '../../input/TInputListener.js';
 import Trail from '../../util/Trail.js';
 import { Highlight } from '../Highlight.js';
+import { isInteractiveHighlighting } from './isInteractiveHighlighting.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -200,7 +201,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
           if ( this._interactiveHighlightLayerable ) {
 
             // if focus highlight is layerable, it must be a node for the scene graph
-            assert && assert( interactiveHighlight instanceof Node ); // eslint-disable-line phet/no-simple-type-checking-assertions
+            assert && assert( typeof interactiveHighlight === 'object' && !!( interactiveHighlight as Node )._isNode );
 
             // make sure the highlight is invisible, the HighlightOverlay will manage visibility
             ( interactiveHighlight as Node ).visible = false;
@@ -231,7 +232,7 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
           this._interactiveHighlightLayerable = interactiveHighlightLayerable;
 
           if ( this._interactiveHighlight ) {
-            assert && assert( this._interactiveHighlight instanceof Node );
+            assert && assert( typeof this._interactiveHighlight === 'object' && !!( this._interactiveHighlight as Node )._isNode );
             ( this._interactiveHighlight as Node ).visible = false;
 
             this.interactiveHighlightChangedEmitter.emit();
@@ -705,10 +706,6 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
 // NOTE!!! This used to be called "InteractiveHighlightingNode", which conflicts with (or is confusing) with the actual
 // InteractiveHighlightingNode.ts type. Renamed here so they can be in the same namespace.
 export type InteractiveHighlightingNodeType = Node & TInteractiveHighlighting;
-
-export function isInteractiveHighlighting( something: IntentionalAny ): something is InteractiveHighlightingNodeType {
-  return something instanceof Node && ( something as InteractiveHighlightingNodeType )._isInteractiveHighlighting;
-}
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
 export default InteractiveHighlighting;
