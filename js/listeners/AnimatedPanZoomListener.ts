@@ -24,7 +24,7 @@ import EventIO from '../input/EventIO.js';
 import Focus from '../accessibility/Focus.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import { Intent } from '../input/Pointer.js';
-import KeyboardDragListener from '../listeners/KeyboardDragListener.js';
+import type KeyboardDragListener from '../listeners/KeyboardDragListener.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
@@ -37,12 +37,13 @@ import type { PanZoomListenerOptions } from '../listeners/PanZoomListener.js';
 import PDOMPointer from '../input/PDOMPointer.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Pointer from '../input/Pointer.js';
-import PressListener from '../listeners/PressListener.js';
+import type PressListener from '../listeners/PressListener.js';
 import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import Trail from '../util/Trail.js';
 import TransformTracker from '../util/TransformTracker.js';
 import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -404,8 +405,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       const activeListener = this._attachedPointers[ 0 ].attachedListener!;
       assert && assert( activeListener, 'The attached Pointer is expected to have an attached listener.' );
 
-      if ( activeListener.listener instanceof PressListener ||
-           activeListener.listener instanceof KeyboardDragListener ) {
+      if ( isPressOrKeyboardDragListener( activeListener.listener ) ) {
         const attachedPressListener = activeListener.listener;
 
         // The PressListener might not be pressed anymore but the Pointer is still down, in which case it
@@ -444,8 +444,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
         // Pointer to support multitouch cases)
         globalBoundsToView = activeListener.createPanTargetBounds();
       }
-      else if ( activeListener.listener instanceof PressListener ||
-                activeListener.listener instanceof KeyboardDragListener ) {
+      else if ( isPressOrKeyboardDragListener( activeListener.listener ) ) {
         const attachedPressListener = activeListener.listener;
 
         // The PressListener might not be pressed anymore but the Pointer is still down, in which case it
@@ -1482,6 +1481,14 @@ const calculateDiscreteScales = ( minScale: number, maxScale: number ): number[]
   }
 
   return discreteScales;
+};
+
+// Helper function that reduces circular dependencies by checking tags
+const isPressOrKeyboardDragListener = ( obj: IntentionalAny ): obj is PressListener | KeyboardDragListener => {
+  return typeof obj === 'object' && (
+    ( obj as PressListener )._isPressListener ||
+    ( obj as KeyboardDragListener )._isKeyboardDragListener
+  );
 };
 
 scenery.register( 'AnimatedPanZoomListener', AnimatedPanZoomListener );

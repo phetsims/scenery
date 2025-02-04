@@ -6605,7 +6605,7 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Tag so we can avoid importing Node for instanceof checks.
+   * (scenery-internal) Tag so we can avoid importing Node for instanceof checks.
    */
   public readonly _isNode = true;
 
