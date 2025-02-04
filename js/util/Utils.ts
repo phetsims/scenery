@@ -13,6 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
 import Features from '../util/Features.js';
 import scenery from '../scenery.js';
+import { scratchContext } from './scratches.js';
 
 // convenience function
 function p( x: number, y: number ): Vector2 {
@@ -147,8 +148,7 @@ const Utils = {
    * store pixel ratio that is non-1, we'll be blurring out things during that operation, which would be unacceptable.
    */
   supportsImageDataCanvasFilter(): boolean {
-    // @ts-expect-error TODO: scenery and typing https://github.com/phetsims/scenery/issues/1581
-    return Utils.backingStorePixelRatio( scenery.scratchContext ) === 1;
+    return Utils.backingStorePixelRatio( scratchContext ) === 1;
   },
 
   /*---------------------------------------------------------------------------*
