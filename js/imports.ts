@@ -123,6 +123,9 @@ export type { PathOptions, PathBoundsMethod, InputShape } from './nodes/Path.js'
 export { default as Text } from './nodes/Text.js';
 export type { TextOptions, TextBoundsMethod } from './nodes/Text.js';
 
+export { rasterized, toImageNodeAsynchronous, toCanvasNodeSynchronous, toDataURLImageSynchronous, toDataURLNodeSynchronous } from './util/rasterized.js';
+export type { RasterizedOptions } from './util/rasterized.js';
+
 export { default as CanvasNode } from './nodes/CanvasNode.js';
 export type { CanvasNodeOptions } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
