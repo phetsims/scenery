@@ -99,6 +99,16 @@
     '../chipper/js/browser/sim-tests/qunit-connector.js'
   ];
 
+  const query = new URLSearchParams( window.location.search );
+  const esbuild = !!query.has( 'esbuild' );
+  const liveReload = !!query.has( 'liveReload' );
+
+  // RichText imports himalaya but it is skipped by esbuild, so we add it as a preload here.
+  // see https://github.com/phetsims/scenery/issues/1583 and https://github.com/phetsims/chipper/issues/1409 and https://github.com/phetsims/membrane-channels/issues/6#issuecomment-2631403462
+  if ( esbuild ) {
+    preloads.push( '../sherpa/lib/himalaya-1.1.0.js' );
+  }
+
   if ( brand === 'phet-io' ) {
     preloads = preloads.concat( [
       '../phet-io/js/phet-io-initialize-globals.js'
@@ -124,9 +134,16 @@
   // Queue all of the preloads to be loaded.
   preloads.forEach( preload => loadURL( preload ) );
 
+  const targetSource = esbuild ? './dist/bundle.js' : '../chipper/dist/js/scenery/js/scenery-tests.js';
+
   // Module loading in compilation-free (development) mode will be kicked off once strings are loaded.
   // This is done in load-unbuilt-strings.js
-  window.phet.chipper.loadModules = () => loadURL( '../chipper/dist/js/scenery/js/scenery-tests.js', 'module' );
+  window.phet.chipper.loadModules = () => loadURL( targetSource, 'module' );
+
+    // Live reload, see https://esbuild.github.io/api/#live-reload
+  if ( liveReload ) {
+    new EventSource( '/esbuild' ).addEventListener( 'change', () => location.reload() );
+  }
 </script>
 </body>
 </html>
