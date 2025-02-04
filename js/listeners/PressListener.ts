@@ -1031,6 +1031,9 @@ export default class PressListener extends EnabledComponent implements TInputLis
     this.isFocusedProperty.value = false;
   }
 
+  // (scenery-internal) Tagged for instanceof-like checks that do not require an import
+  public readonly _isPressListener = true;
+
   /**
    * Disposes the listener, releasing references. It should not be used after this.
    */

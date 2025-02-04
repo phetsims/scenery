@@ -757,6 +757,9 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     }
   }
 
+  // (scenery-internal) Tagged for instanceof-like checks that do not require an import
+  public readonly _isKeyboardDragListener = true;
+
   /**
    * Make eligible for garbage collection.
    */
