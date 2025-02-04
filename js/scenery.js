@@ -18,16 +18,9 @@ import Namespace from '../../phet-core/js/Namespace.js';
 // @public (scenery-internal)
 window.sceneryLog = null;
 
-const scratchCanvas = document.createElement( 'canvas' );
-const scratchContext = scratchCanvas.getContext( '2d' );
-
 let logPadding = '';
 
 const scenery = new Namespace( 'scenery' );
-
-// @public - A Canvas and 2D Canvas context used for convenience functions (think of it as having arbitrary state).
-scenery.register( 'scratchCanvas', scratchCanvas );
-scenery.register( 'scratchContext', scratchContext );
 
 /*---------------------------------------------------------------------------*
  * Logging

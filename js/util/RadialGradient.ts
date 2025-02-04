@@ -17,6 +17,7 @@ import scenery from '../scenery.js';
 import SVGBlock from '../display/SVGBlock.js';
 import SVGRadialGradient from '../display/SVGRadialGradient.js';
 import TColor from '../util/TColor.js';
+import { scratchContext } from './scratches.js';
 
 export default class RadialGradient extends Gradient {
 
@@ -94,8 +95,7 @@ export default class RadialGradient extends Gradient {
    */
   public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
-    // @ts-expect-error TODO scenery namespace https://github.com/phetsims/scenery/issues/1581
-    return scenery.scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
+    return scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
   }
 
   /**

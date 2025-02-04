@@ -14,6 +14,7 @@ import Gradient from '../util/Gradient.js';
 import scenery from '../scenery.js';
 import SVGBlock from '../display/SVGBlock.js';
 import SVGLinearGradient from '../display/SVGLinearGradient.js';
+import { scratchContext } from './scratches.js';
 
 export default class LinearGradient extends Gradient {
 
@@ -43,8 +44,7 @@ export default class LinearGradient extends Gradient {
    */
   public createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
-    // @ts-expect-error TODO scenery namespace https://github.com/phetsims/scenery/issues/1581
-    return scenery.scratchContext.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
+    return scratchContext.createLinearGradient( this.start.x, this.start.y, this.end.x, this.end.y );
   }
 
   /**

@@ -13,6 +13,7 @@ import Paint from '../util/Paint.js';
 import scenery from '../scenery.js';
 import SVGBlock from '../display/SVGBlock.js';
 import SVGPattern from '../display/SVGPattern.js';
+import { scratchContext } from './scratches.js';
 
 export default class Pattern extends Paint {
 
@@ -29,7 +30,7 @@ export default class Pattern extends Paint {
 
     // Use the global scratch canvas instead of creating a new Canvas
     // @ts-expect-error TODO: scenery namespace https://github.com/phetsims/scenery/issues/1581
-    this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
+    this.canvasPattern = scratchContext.createPattern( image, 'repeat' );
   }
 
 

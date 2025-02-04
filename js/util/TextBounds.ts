@@ -12,40 +12,35 @@ import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Font from '../util/Font.js';
 import svgns from '../util/svgns.js';
 import Utils from '../util/Utils.js';
+import type Text from '../nodes/Text.js';
+import { scratchContext } from './scratches.js';
 
-// @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
+// ID for a container for our SVG test element (determined to find the size of text elements with SVG)
 const TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';
 
-// @private {string} - ID for our SVG test element (determined to find the size of text elements with SVG)
+// ID for our SVG test element (determined to find the size of text elements with SVG)
 const TEXT_SIZE_ELEMENT_ID = 'sceneryTextSizeElement';
 
-// @private {SVGElement} - Container for our SVG test element (determined to find the size of text elements with SVG)
-let svgTextSizeContainer;
+// Container for our SVG test element (determined to find the size of text elements with SVG)
+let svgTextSizeContainer: SVGSVGElement;
 
-// @private {SVGElement} - Test SVG element (determined to find the size of text elements with SVG)
-let svgTextSizeElement;
+// Test SVG element (determined to find the size of text elements with SVG)
+let svgTextSizeElement: SVGTextElement;
 
-// Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
-const hybridFontVerticalCache = {};
+// Maps CSS string => Bounds2, so that we can cache the vertical font sizes outside of the Font objects themselves.
+const hybridFontVerticalCache: Record<string, Bounds2> = {};
 
 let deliveredWarning = false;
 
-const TextBounds = {
+export default class TextBounds {
   /**
    * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font and renderedText.
-   * @public
    *
    * This method uses an SVG Text element, sets its text, and then determines its size to estimate the size of rendered text.
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
-   *
-   * @param {Font} font - The font of the text
-   * @param {string} renderedText - Text to display (with any special characters replaced)
-   * @returns {Bounds2}
    */
-  approximateSVGBounds( font, renderedText ) {
-    assert && assert( font instanceof Font, 'Font required' );
-    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+  public static approximateSVGBounds( font: Font, renderedText: string ): Bounds2 {
 
     if ( !svgTextSizeContainer.parentNode ) {
       if ( document.body ) {
@@ -68,36 +63,27 @@ const TextBounds = {
     }
 
     return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
-  },
+  }
 
   /**
    * Returns a guess for what the SVG bounds of a font would be, based on PhetFont as an example.
-   * @public
-   *
-   * @param {Font} font
-   * @param {string} renderedText
-   * @returns {Bounds2}
    */
-  guessSVGBounds( font, renderedText ) {
+  public static guessSVGBounds( font: Font, renderedText: string ): Bounds2 {
     const px = font.getNumericSize();
     const isBold = font.weight === 'bold';
 
     // Our best guess, based on PhetFont in macOS Chrome. Things may differ, but hopefully this approximation
     // is useful.
     return new Bounds2( 0, -0.9 * px, ( isBold ? 0.435 : 0.4 ) * px * renderedText.length, 0.22 * px );
-  },
+  }
 
   /**
    * Returns a new Bounds2 that is the approximate bounds of the specified Text node.
-   * @public
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
-   *
-   * @param {scenery.Text} text - The Text node
-   * @returns {Bounds2}
    */
-  accurateCanvasBounds( text ) {
-    const context = scenery.scratchContext;
+  public static accurateCanvasBounds( text: Text ): Bounds2 {
+    const context = scratchContext;
     context.font = text._font.toCSS();
     context.direction = 'ltr';
     const metrics = context.measureText( text.renderedText );
@@ -107,21 +93,17 @@ const TextBounds = {
       metrics.actualBoundingBoxRight,
       metrics.actualBoundingBoxDescent
     );
-  },
+  }
 
   /**
    * Returns a new Bounds2 that is the approximate bounds of the specified Text node.
-   * @public
    *
    * This method repeatedly renders the text into a Canvas and checks for what pixels are filled. Iteratively doing this for each bound
    * (top/left/bottom/right) until a tolerance results in very accurate bounds of what is displayed.
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
-   *
-   * @param {scenery.Text} text - The Text node
-   * @returns {Bounds2}
    */
-  accurateCanvasBoundsFallback( text ) {
+  public static accurateCanvasBoundsFallback( text: Text ): Bounds2 {
     // this seems to be slower than expected, mostly due to Font getters
     const svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText );
 
@@ -136,7 +118,7 @@ const TextBounds = {
       context.direction = 'ltr';
       context.fillText( text.renderedText, 0, 0 );
       if ( text.hasPaintableStroke() ) {
-        const fakeWrapper = new CanvasContextWrapper( null, context );
+        const fakeWrapper = new CanvasContextWrapper( null as unknown as HTMLCanvasElement, context );
         text.beforeCanvasStroke( fakeWrapper );
         context.strokeText( text.renderedText, 0, 0 );
         text.afterCanvasStroke( fakeWrapper );
@@ -148,19 +130,14 @@ const TextBounds = {
     } );
     // Try falling back to SVG bounds if our accurate bounds are not finite
     return accurateBounds.isFinite() ? accurateBounds : svgBounds;
-  },
+  }
 
   /**
    * Returns a possibly-cached (treat as immutable) Bounds2 for use mainly for vertical parameters, given a specific Font.
-   * @public
    *
    * Uses SVG bounds determination for this value.
-   *
-   * @param {Font} font - The font of the text
-   * @returns {Bounds2}
    */
-  getVerticalBounds( font ) {
-    assert && assert( font instanceof Font, 'Font required' );
+  public static getVerticalBounds( font: Font ): Bounds2 {
 
     const css = font.toCSS();
 
@@ -171,41 +148,33 @@ const TextBounds = {
     }
 
     return verticalBounds;
-  },
+  }
 
   /**
    * Returns an approximate width for text, determined by using Canvas' measureText().
-   * @public
    *
-   * @param {Font} font - The font of the text
-   * @param {string} renderedText - Text to display (with any special characters replaced)
-   * @returns {number}
+   * @param font - The font of the text
+   * @param renderedText - Text to display (with any special characters replaced)
    */
-  approximateCanvasWidth( font, renderedText ) {
-    assert && assert( font instanceof Font, 'Font required' );
-    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+  public static approximateCanvasWidth( font: Font, renderedText: string ): number {
 
-    const context = scenery.scratchContext;
+    const context = scratchContext;
     context.font = font.toCSS();
     context.direction = 'ltr';
     return context.measureText( renderedText ).width;
-  },
+  }
 
   /**
    * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font and renderedText.
-   * @public
    *
    * This method uses a hybrid approach, using SVG measurement to determine the height, but using Canvas to determine the width.
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
    *
-   * @param {Font} font - The font of the text
-   * @param {string} renderedText - Text to display (with any special characters replaced)
-   * @returns {Bounds2}
+   * @param font - The font of the text
+   * @param renderedText - Text to display (with any special characters replaced)
    */
-  approximateHybridBounds( font, renderedText ) {
-    assert && assert( font instanceof Font, 'Font required' );
-    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+  public static approximateHybridBounds( font: Font, renderedText: string ): Bounds2 {
 
     const verticalBounds = TextBounds.getVerticalBounds( font );
 
@@ -213,20 +182,17 @@ const TextBounds = {
 
     // it seems that SVG bounds generally have x=0, so we hard code that here
     return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
-  },
+  }
 
   /**
    * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font, given a DOM element
-   * @public
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
    *
-   * @param {Font} font - The font of the text
-   * @param {Element} element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
-   * @returns {Bounds2}
+   * @param font - The font of the text
+   * @param element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
    */
-  approximateDOMBounds( font, element ) {
-    assert && assert( font instanceof Font, 'Font required' );
+  public static approximateDOMBounds( font: Font, element: HTMLElement ): Bounds2 {
 
     const maxHeight = 1024; // technically this will fail if the font is taller than this!
 
@@ -268,22 +234,19 @@ const TextBounds = {
     document.body.removeChild( div );
 
     return result;
-  },
+  }
 
   /**
    * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font, given a DOM element
-   * @public
    *
    * TODO: Can we use this? What are the differences? https://github.com/phetsims/scenery/issues/1581
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
    *
-   * @param {Font} font - The font of the text
-   * @param {Element} element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
-   * @returns {Bounds2}
+   * @param font - The font of the text
+   * @param element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
    */
-  approximateImprovedDOMBounds( font, element ) {
-    assert && assert( font instanceof Font, 'Font required' );
+  public static approximateImprovedDOMBounds( font: Font, element: HTMLElement ): Bounds2 {
 
     // TODO: reuse this div? https://github.com/phetsims/scenery/issues/1581
     const div = document.createElement( 'div' );
@@ -305,19 +268,16 @@ const TextBounds = {
     // Compensate for the baseline alignment
     const verticalBounds = TextBounds.getVerticalBounds( font );
     return bounds.shiftedY( verticalBounds.minY );
-  },
+  }
 
   /**
    * Modifies an SVG text element's properties to match the specified font and text.
-   * @public
    *
-   * @param {SVGTextElement} textElement
-   * @param {Font} font - The font of the text
-   * @param {string} renderedText - Text to display (with any special characters replaced)
+   * @param textElement
+   * @param font - The font of the text
+   * @param renderedText - Text to display (with any special characters replaced)
    */
-  setSVGTextAttributes( textElement, font, renderedText ) {
-    assert && assert( font instanceof Font, 'Font required' );
-    assert && assert( typeof renderedText === 'string', 'renderedText required' );
+  public static setSVGTextAttributes( textElement: SVGTextElement, font: Font, renderedText: string ): void {
 
     textElement.setAttribute( 'direction', 'ltr' );
     textElement.setAttribute( 'font-family', font.getFamily() );
@@ -325,15 +285,14 @@ const TextBounds = {
     textElement.setAttribute( 'font-style', font.getStyle() );
     textElement.setAttribute( 'font-weight', font.getWeight() );
     textElement.setAttribute( 'font-stretch', font.getStretch() );
-    textElement.lastChild.nodeValue = renderedText;
-  },
+    textElement.lastChild!.nodeValue = renderedText;
+  }
 
   /**
    * Initializes containers and elements required for SVG text measurement.
-   * @public
    */
-  initializeTextBounds() {
-    svgTextSizeContainer = document.getElementById( TEXT_SIZE_CONTAINER_ID );
+  public static initializeTextBounds(): void {
+    svgTextSizeContainer = document.getElementById( TEXT_SIZE_CONTAINER_ID ) as unknown as SVGSVGElement;
 
     if ( !svgTextSizeContainer ) {
       // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
@@ -344,7 +303,7 @@ const TextBounds = {
       svgTextSizeContainer.setAttribute( 'style', 'visibility: hidden; pointer-events: none; position: absolute; left: -65535px; right: -65535px;' ); // so we don't flash it in a visible way to the user
     }
 
-    svgTextSizeElement = document.getElementById( TEXT_SIZE_ELEMENT_ID );
+    svgTextSizeElement = document.getElementById( TEXT_SIZE_ELEMENT_ID ) as unknown as SVGTextElement;
 
     // NOTE! copies createSVGElement
     if ( !svgTextSizeElement ) {
@@ -357,8 +316,6 @@ const TextBounds = {
       svgTextSizeContainer.appendChild( svgTextSizeElement );
     }
   }
-};
+}
 
 scenery.register( 'TextBounds', TextBounds );
-
-export default TextBounds;
