@@ -6604,6 +6604,10 @@ class Node extends ParallelDOM {
     }
   }
 
+  /**
+   * Tag so we can avoid importing Node for instanceof checks.
+   */
+  public readonly _isNode = true;
 
   /**
    * A default for getTrails() searches, returns whether the Node has no parents.

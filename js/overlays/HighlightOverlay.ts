@@ -20,7 +20,6 @@ import FocusManager from '../accessibility/FocusManager.js';
 import HighlightFromNode from '../accessibility/HighlightFromNode.js';
 import HighlightPath from '../accessibility/HighlightPath.js';
 import type { InteractiveHighlightingNodeType } from '../accessibility/voicing/InteractiveHighlighting.js';
-import { isInteractiveHighlighting } from '../accessibility/voicing/InteractiveHighlighting.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import type TOverlay from '../overlays/TOverlay.js';
@@ -31,6 +30,7 @@ import type { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js'
 import { isReadingBlock } from '../accessibility/voicing/ReadingBlock.js';
 import { Highlight } from '../accessibility/Highlight.js';
 import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
+import { isInteractiveHighlighting } from '../accessibility/voicing/isInteractiveHighlighting.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.
