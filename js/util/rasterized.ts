@@ -59,11 +59,16 @@ export type RasterizedOptions = {
   imageOptions?: ImageOptions;
 };
 
+// Overload signatures, when wrap is true, the return type is a Node, otherwise it is an Image
+export function rasterized( node: Node, providedOptions?: RasterizedOptions & { wrap?: true } ): Node;
+export function rasterized( node: Node, providedOptions: RasterizedOptions & { wrap: false } ): Image;
+
+// Implementation signature (must be compatible with the overloads)
 /**
  * Returns a Node (backed by a scenery Image) that is a rasterized version of this node. See options, by default the
  * image is wrapped with a container Node.
  */
-export const rasterized = ( node: Node, providedOptions?: RasterizedOptions ): Node => {
+export function rasterized( node: Node, providedOptions?: RasterizedOptions ): Node | Image {
   const options = optionize<RasterizedOptions, RasterizedOptions>()( {
     resolution: 1,
     sourceBounds: null,
@@ -165,7 +170,7 @@ export const rasterized = ( node: Node, providedOptions?: RasterizedOptions ): N
   }
 
   return returnNode.mutate( options.nodeOptions );
-};
+}
 
 /**
  * Calls the callback with an Image Node that contains this Node's subtree's visual form. This is always
