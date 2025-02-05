@@ -483,14 +483,14 @@ export default class Text extends Paintable( Node ) {
    *
    * This is needed since we have to handle HTML text differently.
    */
-  public getDOMTextNode(): Element {
+  public getDOMTextNode(): globalThis.Node {
     if ( this._isHTML ) {
       const span = document.createElement( 'span' );
       span.innerHTML = this.string;
       return span;
     }
     else {
-      return document.createTextNode( this.renderedText ) as unknown as Element;
+      return document.createTextNode( this.renderedText );
     }
   }
 

@@ -192,7 +192,7 @@ export default class TextBounds {
    * @param font - The font of the text
    * @param element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
    */
-  public static approximateDOMBounds( font: Font, element: HTMLElement ): Bounds2 {
+  public static approximateDOMBounds( font: Font, element: globalThis.Node ): Bounds2 {
 
     const maxHeight = 1024; // technically this will fail if the font is taller than this!
 
@@ -246,7 +246,7 @@ export default class TextBounds {
    * @param font - The font of the text
    * @param element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
    */
-  public static approximateImprovedDOMBounds( font: Font, element: HTMLElement ): Bounds2 {
+  public static approximateImprovedDOMBounds( font: Font, element: globalThis.Node ): Bounds2 {
 
     // TODO: reuse this div? https://github.com/phetsims/scenery/issues/1581
     const div = document.createElement( 'div' );
