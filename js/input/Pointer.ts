@@ -312,7 +312,7 @@ export default abstract class Pointer {
    */
   public updatePoint( point: Vector2, eventName = 'event' ): boolean {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `pointer ${eventName} at ${point.toString()}` );
+    sceneryLog && point && sceneryLog.InputEvent && sceneryLog.InputEvent( `pointer ${eventName} at ${point.toString()}` );
 
     this.point = point;
     return pointChanged;

@@ -99,7 +99,7 @@ export default class Mouse extends Pointer {
    */
   public move( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse move at ${point.toString()}` );
+    sceneryLog && point && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse move at ${point.toString()}` );
 
     this.point = point;
 
@@ -113,7 +113,7 @@ export default class Mouse extends Pointer {
    */
   public over( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse over at ${point.toString()}` );
+    sceneryLog && point && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse over at ${point.toString()}` );
 
     this.point = point;
 
@@ -127,7 +127,7 @@ export default class Mouse extends Pointer {
    */
   public out( point: Vector2 ): boolean {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
+    sceneryLog && point && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
 
     return pointChanged;
   }
