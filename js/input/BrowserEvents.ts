@@ -146,16 +146,6 @@ export default class BrowserEvents {
   private static attachedDisplays: Display[] = [];
 
   /**
-   * Whether pointer events in the format specified by the W3C specification are allowed.
-   *
-   * NOTE: Pointer events are currently disabled for Firefox due to https://github.com/phetsims/scenery/issues/837.
-   */
-  private static canUsePointerEvents = !!(
-    // @ts-expect-error pointerEnabled should exist
-    ( window.navigator && window.navigator.pointerEnabled )
-    || window.PointerEvent ) && !platform.firefox;
-
-  /**
    * Whether pointer events in the format specified by the MS specification are allowed.
    */
   private static canUseMSPointerEvents =
@@ -225,10 +215,23 @@ export default class BrowserEvents {
   /**
    * Returns all event types that will be listened to on this specific platform.
    */
-  private static getNonWheelUsedTypes(): string[] {
+  private static getNonWheelUsedTypes( listeningToWindow: boolean ): string[] {
     let eventTypes;
 
-    if ( this.canUsePointerEvents ) {
+    // NOTE: Pointer events are currently disabled for Firefox due to
+    // https://github.com/phetsims/scenery/issues/837. This only applies if we
+    // are listening to the entire window, because otherwise this results in
+    // very buggy-seeming behavior, see
+    // https://github.com/scenerystack/scenerystack/issues/42
+    const disableBuggyPointerEvents = platform.firefox && listeningToWindow;
+
+    /**
+     * Whether pointer events in the format specified by the W3C specification are allowed.
+     */
+    // @ts-expect-error pointerEnabled should exist
+    const canUsePointerEvents = !!( ( window.navigator && window.navigator.pointerEnabled ) || window.PointerEvent ) && !disableBuggyPointerEvents;
+
+    if ( canUsePointerEvents ) {
       // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'Detected pointer events support, using that instead of mouse/touch events' );
 
@@ -297,7 +300,7 @@ export default class BrowserEvents {
     const method = addOrRemove ? 'addEventListener' : 'removeEventListener';
 
     // {Array.<string>}
-    const eventTypes = this.getNonWheelUsedTypes();
+    const eventTypes = this.getNonWheelUsedTypes( element === window );
 
     for ( let i = 0; i < eventTypes.length; i++ ) {
       const type = eventTypes[ i ];
@@ -343,6 +346,16 @@ export default class BrowserEvents {
     for ( let i = 0; i < BrowserEvents.attachedDisplays.length; i++ ) {
       const display = BrowserEvents.attachedDisplays[ i ];
       const input = display._input!;
+
+      // Filter out events that are specific to another Display's DOM element
+      // See https://github.com/scenerystack/scenerystack/issues/42
+      if (
+        eventContext.domEvent.currentTarget &&
+        eventContext.domEvent.currentTarget !== window &&
+        eventContext.domEvent.currentTarget !== display.domElement
+      ) {
+        continue;
+      }
 
       if ( !BrowserEvents.blockFocusCallbacks || ( inputCallbackName !== 'focusIn' && inputCallbackName !== 'focusOut' ) ) {
         // @ts-expect-error Method should exist

@@ -1307,7 +1307,9 @@ export default class Input extends PhetioObject {
     // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
     // http://news.qooxdoo.org/mouse-capturing.
     const target = this.attachToWindow ? document.body : this.display.domElement;
-    if ( target.setPointerCapture && context.domEvent.pointerId && !context.allowsDOMInput() ) {
+
+    // NOTE: pointerId can be zero. It usually is zero for the mouse for Firefox.
+    if ( target.setPointerCapture && !context.allowsDOMInput() ) {
       // NOTE: This will error out if run on a playback destination, where a pointer with the given ID does not exist.
       target.setPointerCapture( context.domEvent.pointerId );
     }
