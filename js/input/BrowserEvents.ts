@@ -7,7 +7,6 @@
  */
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import platform from '../../../phet-core/js/platform.js';
 import FocusManager from '../accessibility/FocusManager.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
@@ -218,18 +217,13 @@ export default class BrowserEvents {
   private static getNonWheelUsedTypes( listeningToWindow: boolean ): string[] {
     let eventTypes;
 
-    // NOTE: Pointer events are currently disabled for Firefox due to
-    // https://github.com/phetsims/scenery/issues/837. This only applies if we
-    // are listening to the entire window, because otherwise this results in
-    // very buggy-seeming behavior, see
-    // https://github.com/scenerystack/scenerystack/issues/42
-    const disableBuggyPointerEvents = platform.firefox && listeningToWindow;
-
-    /**
-     * Whether pointer events in the format specified by the W3C specification are allowed.
-     */
+    // Whether pointer events in the format specified by the W3C specification are allowed.
+    // NOTE: We used to disable this for Firefox, but with skipping preventDefault()
+    // on pointer events, it seems to work fine.
+    // See https://github.com/phetsims/scenery/issues/837 and
+    // https://github.com/scenerystack/scenerystack/issues/42 for reference.
     // @ts-expect-error pointerEnabled should exist
-    const canUsePointerEvents = !!( ( window.navigator && window.navigator.pointerEnabled ) || window.PointerEvent ) && !disableBuggyPointerEvents;
+    const canUsePointerEvents = !!( ( window.navigator && window.navigator.pointerEnabled ) || window.PointerEvent );
 
     if ( canUsePointerEvents ) {
       // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/

@@ -817,6 +817,18 @@ export default class Input extends PhetioObject {
       // NOTE: If we ever want to Display.updateDisplay() on events, do so here
     }
 
+    // Firefox has issues with preventDefault on pointer down events +
+    // multitouch. https://github.com/scenerystack/scenerystack/issues/42 tracks
+    // the main issue, we skip preventDefault here to prevent
+    // https://github.com/phetsims/scenery/issues/837 from happening.
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1729465 notes preventDefault()
+    // as the culprit.
+    const isFirefoxPointerDownTouch =
+      platform.firefox &&
+      context.domEvent instanceof PointerEvent &&
+      callback === this.pointerDown &&
+      context.domEvent.pointerType === 'touch';
+
     // Always preventDefault on touch events, since we don't want mouse events triggered afterwards. See
     // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
     // Additionally, IE had some issues with skipping prevent default, see
@@ -825,6 +837,7 @@ export default class Input extends PhetioObject {
     if (
       !( this.passiveEvents === true ) &&
       ( callback !== this.mouseDown || platform.edge ) &&
+      !isFirefoxPointerDownTouch &&
       batchType !== BatchedDOMEventType.ALT_TYPE &&
       !context.allowsDOMInput()
     ) {
