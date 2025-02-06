@@ -10,8 +10,8 @@ https://phet.colorado.edu/
 ### Documentation
 
 The majority of the documentation exists within the code itself, but our
-[main documentation](http://phetsims.github.io/scenery/doc/)
-and [a tour of features](http://phetsims.github.io/scenery/doc/a-tour-of-scenery.html)
+[main documentation](https://scenerystack.org/learn/overview/)
+and [Scenery Basics](https://scenerystack.org/learn/scenery-basics/)
 is available online, along with other resources under [the dedicated website](http://phetsims.github.io/scenery/)
 
 Currently, you can grab the unminified [scenery.debug.js](http://phetsims.github.io/scenery/dist/scenery.debug.js)
