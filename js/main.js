@@ -90,7 +90,6 @@ import './filters/Invert.js';
 import './filters/Opacity.js';
 import './filters/Saturate.js';
 import './filters/Sepia.js';
-import './imports.js';
 import './input/BatchedDOMEvent.js';
 import './input/BrowserEvents.js';
 import './input/ButtonListener.js';
