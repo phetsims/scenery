@@ -36,7 +36,13 @@
 
 <script type="module">
 
-import { Node, HBox, Rectangle, Text, Display, Grayscale, LinearGradient } from '../../chipper/dist/js/scenery/js/imports.js';
+import Node from '../../chipper/dist/js/scenery/js/nodes/Node.js';
+import HBox from '../../chipper/dist/js/scenery/js/layout/nodes/HBox.js';
+import Rectangle from '../../chipper/dist/js/scenery/js/nodes/Rectangle.js';
+import Text from '../../chipper/dist/js/scenery/js/nodes/Text.js';
+import Display from '../../chipper/dist/js/scenery/js/display/Display.js';
+import Grayscale from '../../chipper/dist/js/scenery/js/filters/Grayscale.js';
+import LinearGradient from '../../chipper/dist/js/scenery/js/util/LinearGradient.js';
 
 const scene = new Node();
 const display = new Display( scene, {
