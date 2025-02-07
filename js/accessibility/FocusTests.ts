@@ -139,29 +139,6 @@ QUnit.test( 'pdomOrder Descendant Pruning Test', assert => {
   ] );
 } );
 
-QUnit.test( 'pdomOrder Descendant Override', assert => {
-
-  const a1 = new Node( { tagName: 'div' } );
-  const a2 = new Node( { tagName: 'div' } );
-
-  const b1 = new Node( { tagName: 'div' } );
-  const b2 = new Node( { tagName: 'div' } );
-
-  const a = new Node( { children: [ a1, a2 ] } );
-  const b = new Node( { children: [ b1, b2 ], pdomOrder: [ b1, b2 ] } );
-
-  const root = new Node( { children: [ a, b ], pdomOrder: [ b, b1, a ] } );
-
-  const nestedOrder = root.getNestedPDOMOrder();
-
-  nestedEquality( assert, nestedOrder, [
-    { trail: new Trail( [ root, b, b2 ] ), children: [] },
-    { trail: new Trail( [ root, b, b1 ] ), children: [] },
-    { trail: new Trail( [ root, a, a1 ] ), children: [] },
-    { trail: new Trail( [ root, a, a2 ] ), children: [] }
-  ] );
-} );
-
 QUnit.test( 'pdomOrder Hierarchy', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
@@ -187,11 +164,30 @@ QUnit.test( 'pdomOrder Hierarchy', assert => {
 
 QUnit.test( 'pdomOrder DAG test', assert => {
 
+  // Scene graph looks like (notice DAG):
+  // root
+  //   a
+  //     a1
+  //     a2
+  //   b
+  //     a1
+  //     a2
+
+  // PDOM order looks like:
+  // root
+  //   a
+  //     a2
+  //     a1
+  //   b
+  //     a1
+  //     a2
+
+
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
 
   const a = new Node( { children: [ a1, a2 ], pdomOrder: [ a2, a1 ] } );
-  const b = new Node( { children: [ a1, a2 ], pdomOrder: [ a1, a2 ] } );
+  const b = new Node( { children: [ a1, a2 ] } );
 
   const root = new Node( { children: [ a, b ] } );
 
@@ -206,6 +202,37 @@ QUnit.test( 'pdomOrder DAG test', assert => {
 } );
 
 QUnit.test( 'pdomOrder DAG test', assert => {
+
+  // Scene graph looks like this:
+  // x
+  //   a
+  //     k
+  //     b
+  //       d
+  //       e
+  //         j
+  //         f
+  //           h
+  //           i
+  //         g
+  //     c
+  //       e
+
+  // PDOM order looks like:
+  // x
+  //   f
+  //     h
+  //     i
+  //   c
+  //     e
+  //   d
+  //   l
+  //   a
+  //     k
+  //     b
+  //       e
+  //         g
+  //         j
 
   const x = new Node();
   const a = new Node();
@@ -229,8 +256,8 @@ QUnit.test( 'pdomOrder DAG test', assert => {
   f.children = [ h, i ];
 
   x.pdomOrder = [ f, c, d, l ];
-  a.pdomOrder = [ c, b ];
-  e.pdomOrder = [ g, f, j ];
+  a.pdomOrder = [ b ];
+  e.pdomOrder = [ g, j ];
 
   const nestedOrder = x.getNestedPDOMOrder();
 
