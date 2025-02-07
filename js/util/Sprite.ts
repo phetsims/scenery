@@ -9,7 +9,7 @@
 import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import scenery from '../scenery.js';
 import SpriteImage from '../util/SpriteImage.js';
 

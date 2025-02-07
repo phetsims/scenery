@@ -11,29 +11,29 @@ import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOn
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
-import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
 import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
-import type { ImageableImage, ImageableOptions } from '../nodes/Imageable.js';
-import Imageable from '../nodes/Imageable.js';
 import ImageCanvasDrawable from '../display/drawables/ImageCanvasDrawable.js';
 import ImageDOMDrawable from '../display/drawables/ImageDOMDrawable.js';
 import ImageSVGDrawable from '../display/drawables/ImageSVGDrawable.js';
 import ImageWebGLDrawable from '../display/drawables/ImageWebGLDrawable.js';
+import type TImageDrawable from '../display/drawables/TImageDrawable.js';
 import Instance from '../display/Instance.js';
+import Renderer from '../display/Renderer.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
+import type { ImageableImage, ImageableOptions } from '../nodes/Imageable.js';
+import Imageable from '../nodes/Imageable.js';
 import type { NodeOptions } from '../nodes/Node.js';
 import Node from '../nodes/Node.js';
-import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import SpriteSheet from '../util/SpriteSheet.js';
-import type TImageDrawable from '../display/drawables/TImageDrawable.js';
-import WebGLSelfDrawable from '../display/WebGLSelfDrawable.js';
-import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 
 
 // Image-specific options that can be passed in the constructor or mutate() call.

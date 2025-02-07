@@ -7,16 +7,16 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import BackboneDrawable from '../display/BackboneDrawable.js';
 import Block from '../display/Block.js';
 import type Display from '../display/Display.js';
 import Drawable from '../display/Drawable.js';
 import FittedBlock from '../display/FittedBlock.js';
 import type Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
 import ShapeBasedOverlay from '../overlays/ShapeBasedOverlay.js';
 import type TOverlay from '../overlays/TOverlay.js';
+import scenery from '../scenery.js';
 
 export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implements TOverlay {
   public constructor( display: Display, rootNode: Node ) {

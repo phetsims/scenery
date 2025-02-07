@@ -10,24 +10,24 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import type { VoicingOptions } from '../accessibility/voicing/Voicing.js';
 import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
+import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
 import CircleCanvasDrawable from '../display/drawables/CircleCanvasDrawable.js';
 import CircleDOMDrawable from '../display/drawables/CircleDOMDrawable.js';
 import CircleSVGDrawable from '../display/drawables/CircleSVGDrawable.js';
-import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
-import Features from '../util/Features.js';
+import type TCircleDrawable from '../display/drawables/TCircleDrawable.js';
 import Instance from '../display/Instance.js';
+import Renderer from '../display/Renderer.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 import type { PathOptions } from '../nodes/Path.js';
 import Path from '../nodes/Path.js';
-import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
-import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
-import type TCircleDrawable from '../display/drawables/TCircleDrawable.js';
-import type { VoicingOptions } from '../accessibility/voicing/Voicing.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Features from '../util/Features.js';
 
 const CIRCLE_OPTION_KEYS = [
   'radius' // {number} - see setRadius() for more documentation

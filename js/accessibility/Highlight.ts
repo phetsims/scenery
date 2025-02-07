@@ -10,7 +10,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import Shape from '../../../kite/js/Shape.js';
 import type Node from '../nodes/Node.js';
-import type { Shape } from '../../../kite/js/imports.js';
 
 export type Highlight = Node | Shape | null | 'invisible';

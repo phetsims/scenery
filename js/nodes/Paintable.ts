@@ -8,28 +8,28 @@
 
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin, LineStyles } from '../../../kite/js/imports.js';
+import LineStyles, { LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin } from '../../../kite/js/util/LineStyles.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import platform from '../../../phet-core/js/platform.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import type TPaintableDrawable from '../display/drawables/TPaintableDrawable.js';
+import Renderer from '../display/Renderer.js';
+import type Node from '../nodes/Node.js';
+import type Path from '../nodes/Path.js';
+import type Text from '../nodes/Text.js';
+import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Color from '../util/Color.js';
 import type Gradient from '../util/Gradient.js';
 import type LinearGradient from '../util/LinearGradient.js';
-import type Node from '../nodes/Node.js';
 import Paint from '../util/Paint.js';
 import PaintDef from '../util/PaintDef.js';
-import type Path from '../nodes/Path.js';
 import type Pattern from '../util/Pattern.js';
 import type RadialGradient from '../util/RadialGradient.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import type Text from '../nodes/Text.js';
 import type TPaint from '../util/TPaint.js';
-import type TPaintableDrawable from '../display/drawables/TPaintableDrawable.js';
 
 const isSafari5 = platform.safari5;
 

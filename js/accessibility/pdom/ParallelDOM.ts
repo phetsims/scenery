@@ -141,7 +141,7 @@ import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TRea
 import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { Shape } from '../../../../kite/js/imports.js';
+import Shape from '../../../../kite/js/Shape.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import optionize from '../../../../phet-core/js/optionize.js';
@@ -152,17 +152,17 @@ import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioO
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import scenery from '../../scenery.js';
 import type Node from '../../nodes/Node.js';
-import PDOMUtils from './PDOMUtils.js';
-import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
-import type PDOMInstance from './PDOMInstance.js';
-import PDOMTree from './PDOMTree.js';
+import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
 
 import { Highlight } from '../Highlight.js';
-import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
+import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
+import type PDOMInstance from './PDOMInstance.js';
+import PDOMTree from './PDOMTree.js';
+import PDOMUtils from './PDOMUtils.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
+import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;

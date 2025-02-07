@@ -8,7 +8,8 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { LineStyles, Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
+import LineStyles from '../../../kite/js/util/LineStyles.js';
 import PixelComparisonTestUtils from '../tests/PixelComparisonTestUtils.js';
 import Node from './Node.js';
 import Path from './Path.js';

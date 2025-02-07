@@ -8,7 +8,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import Display from '../display/Display.js';
 import Renderer from '../display/Renderer.js';
 import CanvasNode from '../nodes/CanvasNode.js';

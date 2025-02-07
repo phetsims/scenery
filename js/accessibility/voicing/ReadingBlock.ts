@@ -20,7 +20,7 @@
 import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
-import { Shape } from '../../../../kite/js/imports.js';
+import Shape from '../../../../kite/js/Shape.js';
 import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -28,21 +28,21 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import DelayedMutate from '../../util/DelayedMutate.js';
 import Focus from '../../accessibility/Focus.js';
-import Node from '../../nodes/Node.js';
 import ReadingBlockHighlight from '../../accessibility/voicing/ReadingBlockHighlight.js';
-import ReadingBlockUtterance from '../../accessibility/voicing/ReadingBlockUtterance.js';
 import type { ReadingBlockUtteranceOptions } from '../../accessibility/voicing/ReadingBlockUtterance.js';
-import scenery from '../../scenery.js';
-import SceneryEvent from '../../input/SceneryEvent.js';
+import ReadingBlockUtterance from '../../accessibility/voicing/ReadingBlockUtterance.js';
+import type { VoicingOptions } from '../../accessibility/voicing/Voicing.js';
 import Voicing from '../../accessibility/voicing/Voicing.js';
 import voicingManager from '../../accessibility/voicing/voicingManager.js';
-import type { VoicingOptions } from '../../accessibility/voicing/Voicing.js';
+import SceneryEvent from '../../input/SceneryEvent.js';
 import type TInputListener from '../../input/TInputListener.js';
-import type { TVoicing } from './Voicing.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
+import DelayedMutate from '../../util/DelayedMutate.js';
 import { Highlight } from '../Highlight.js';
 import { guessVisualTrail } from '../pdom/guessVisualTrail.js';
+import type { TVoicing } from './Voicing.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',

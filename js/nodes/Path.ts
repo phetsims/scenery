@@ -12,24 +12,24 @@ import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOn
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import WithRequired from '../../../phet-core/js/types/WithRequired.js';
-import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
-import Instance from '../display/Instance.js';
-import type { NodeOptions } from '../nodes/Node.js';
-import Node from '../nodes/Node.js';
-import Paint from '../util/Paint.js';
-import type { PaintableOptions } from '../nodes/Paintable.js';
-import Paintable, { PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS } from '../nodes/Paintable.js';
 import PathCanvasDrawable from '../display/drawables/PathCanvasDrawable.js';
 import PathSVGDrawable from '../display/drawables/PathSVGDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 import type TPathDrawable from '../display/drawables/TPathDrawable.js';
+import Instance from '../display/Instance.js';
+import Renderer from '../display/Renderer.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import Node from '../nodes/Node.js';
+import type { PaintableOptions } from '../nodes/Paintable.js';
+import Paintable, { PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS } from '../nodes/Paintable.js';
+import scenery from '../scenery.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Paint from '../util/Paint.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod',

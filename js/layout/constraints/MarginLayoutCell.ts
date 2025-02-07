@@ -9,24 +9,24 @@
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Utils from '../../../../dot/js/Utils.js';
-import { Shape } from '../../../../kite/js/imports.js';
+import Shape from '../../../../kite/js/Shape.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import Font from '../../util/Font.js';
-import LayoutAlign from '../../layout/LayoutAlign.js';
 import LayoutCell from '../../layout/constraints/LayoutCell.js';
-import LayoutProxy from '../../layout/LayoutProxy.js';
-import Node from '../../nodes/Node.js';
 import type NodeLayoutConstraint from '../../layout/constraints/NodeLayoutConstraint.js';
-import NodePattern from '../../util/NodePattern.js';
-import Path from '../../nodes/Path.js';
+import LayoutAlign from '../../layout/LayoutAlign.js';
+import LayoutProxy from '../../layout/LayoutProxy.js';
 import PressListener from '../../listeners/PressListener.js';
+import Node from '../../nodes/Node.js';
+import Path from '../../nodes/Path.js';
 import Rectangle from '../../nodes/Rectangle.js';
 import RichText from '../../nodes/RichText.js';
-import scenery from '../../scenery.js';
-import type TColor from '../../util/TColor.js';
 import Text from '../../nodes/Text.js';
+import scenery from '../../scenery.js';
+import Font from '../../util/Font.js';
+import NodePattern from '../../util/NodePattern.js';
+import type TColor from '../../util/TColor.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export type MarginLayout = {

@@ -10,20 +10,20 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
-import Instance from '../display/Instance.js';
 import LineCanvasDrawable from '../display/drawables/LineCanvasDrawable.js';
 import LineSVGDrawable from '../display/drawables/LineSVGDrawable.js';
+import type TLineDrawable from '../display/drawables/TLineDrawable.js';
+import Instance from '../display/Instance.js';
+import Renderer from '../display/Renderer.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
 import type { PathOptions } from '../nodes/Path.js';
 import Path from '../nodes/Path.js';
-import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
-import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
-import type TLineDrawable from '../display/drawables/TLineDrawable.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position

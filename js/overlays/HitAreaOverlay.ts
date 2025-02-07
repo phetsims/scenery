@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import type Display from '../display/Display.js';
 import type Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
 import ShapeBasedOverlay from '../overlays/ShapeBasedOverlay.js';
 import type TOverlay from '../overlays/TOverlay.js';
+import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import TrailPointer from '../util/TrailPointer.js';
 

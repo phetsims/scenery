@@ -8,28 +8,28 @@
 
 import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
+import MipmapElement from '../../../chipper/js/browser/MipmapElement.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
-import MipmapElement from '../../../chipper/js/browser/MipmapElement.js';
+import Shape from '../../../kite/js/Shape.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Circle from '../nodes/Circle.js';
-import Color from '../util/Color.js';
 import DOM from '../nodes/DOM.js';
-import Gradient from '../util/Gradient.js';
 import Image from '../nodes/Image.js';
-import Line from '../nodes/Line.js';
-import LinearGradient from '../util/LinearGradient.js';
 import type { Mipmap } from '../nodes/Imageable.js';
+import Line from '../nodes/Line.js';
 import Node from '../nodes/Node.js';
-import Paint from '../util/Paint.js';
 import Path from '../nodes/Path.js';
+import Rectangle from '../nodes/Rectangle.js';
+import Text from '../nodes/Text.js';
+import scenery from '../scenery.js';
+import Color from '../util/Color.js';
+import Gradient from '../util/Gradient.js';
+import LinearGradient from '../util/LinearGradient.js';
+import Paint from '../util/Paint.js';
 import Pattern from '../util/Pattern.js';
 import RadialGradient from '../util/RadialGradient.js';
-import Rectangle from '../nodes/Rectangle.js';
-import scenery from '../scenery.js';
-import Text from '../nodes/Text.js';
 
 const sceneryDeserialize = ( value: { type: string; [ key: string ]: IntentionalAny } ): IntentionalAny => {
   const nodeTypes = [

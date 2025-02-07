@@ -11,7 +11,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Shape } from '../../../kite/js/imports.js';
+import Shape from '../../../kite/js/Shape.js';
 import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';

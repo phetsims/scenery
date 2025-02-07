@@ -7,14 +7,14 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { Shape } from '../../../kite/js/imports.js';
-import Color from '../util/Color.js';
+import Shape from '../../../kite/js/Shape.js';
 import Display from '../display/Display.js';
-import LinearGradient from '../util/LinearGradient.js';
 import Node from '../nodes/Node.js';
 import Path from '../nodes/Path.js';
-import RadialGradient from '../util/RadialGradient.js';
 import Text from '../nodes/Text.js';
+import Color from '../util/Color.js';
+import LinearGradient from '../util/LinearGradient.js';
+import RadialGradient from '../util/RadialGradient.js';
 
 QUnit.module( 'Fuzz' );
 
