@@ -927,14 +927,13 @@ export default class ParallelDOM extends PhetioObject {
    * This is part of the "Higher level API", but there is no customizing behavior function for this function.
    */
   public setAccessibleParagraph( accessibleParagraph: PDOMValueType | null ): void {
-    assert && assert( this.tagName === null || this.tagName === 'div', `accessibleParagraph can only be set on a Node with a div tag: ${this.tagName}` );
     assert && assert( this.descriptionTagName === null || this.descriptionTagName === 'p', `accessibleParagraph can only be set on a Node with descriptionTagName p: ${this.descriptionTagName}` );
     if ( accessibleParagraph !== this._accessibleParagraph ) {
 
       // Forward to the lower level API. Set to the descriptionTagName so that the Node can still have children with
       // accessible content if necessary. For example this si required for Voicing since reading blocks are focusable
       // and maybe children of conainer with accessibleParagraph.
-      this.tagName = 'div';
+      this.tagName = this.tagName || 'div';
       this.descriptionTagName = 'p';
       this.descriptionContent = accessibleParagraph;
 
@@ -1200,11 +1199,6 @@ export default class ParallelDOM extends PhetioObject {
    */
   public setTagName( tagName: string | null ): void {
     assert && assert( tagName === null || typeof tagName === 'string' );
-
-    // For the higher level API, if using accessibleParagraph the tag name must be 'p'.
-    if ( this._accessibleParagraph ) {
-      assert && assert( tagName === 'div' || tagName === null, 'accessibleParagraph can only be set on a Node with a div tag' );
-    }
 
     if ( tagName !== this._tagName ) {
       this._tagName = tagName;
