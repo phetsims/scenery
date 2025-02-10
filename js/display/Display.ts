@@ -196,6 +196,12 @@ type SelfOptions = {
   // antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
   allowBackingScaleAntialiasing?: boolean;
 
+  // Turns off multitouch at the Display level (so that multiple pointers will not
+  // be active), see https://github.com/phetsims/scenery/issues/1684.
+  // This will mainly prevent multiple touch-level pointers, but mouse + touch
+  // or multiple mice will still be possible.
+  preventMultitouch?: boolean;
+
   // An HTMLElement used to contain the contents of the Display
   container?: HTMLElement;
 };
@@ -247,6 +253,7 @@ export default class Display {
   public _allowBackingScaleAntialiasing: boolean;
   public _allowLayerFitting: boolean;
   public _forceSVGRefresh: boolean;
+  public _preventMultitouch: boolean;
 
   private readonly _allowWebGL: boolean;
   private readonly _allowCSSHacks: boolean;
@@ -442,7 +449,9 @@ export default class Display {
 
       // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
       //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
-      allowBackingScaleAntialiasing: true
+      allowBackingScaleAntialiasing: true,
+
+      preventMultitouch: false
     }, providedOptions );
 
     this.id = globalIdCounter++;
@@ -486,6 +495,7 @@ export default class Display {
     this._batchDOMEvents = options.batchDOMEvents;
     this._assumeFullWindow = options.assumeFullWindow;
     this._passiveEvents = options.passiveEvents;
+    this._preventMultitouch = options.preventMultitouch;
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
     this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
     this._allowLayerFitting = options.allowLayerFitting;
@@ -1389,7 +1399,15 @@ export default class Display {
     assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
     // TODO: refactor here https://github.com/phetsims/scenery/issues/1581
-    const input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, options );
+    const input = new Input(
+      this,
+      !this._listenToOnlyElement,
+      this._batchDOMEvents,
+      this._assumeFullWindow,
+      this._passiveEvents,
+      this._preventMultitouch,
+      options
+    );
     this._input = input;
 
     input.connectListeners();

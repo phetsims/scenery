@@ -483,6 +483,10 @@ export default abstract class Pointer {
     this._pointerCaptured = false;
   }
 
+  public hasPointerCaptured(): boolean {
+    return this._pointerCaptured;
+  }
+
   /**
    * Releases references so it can be garbage collected.
    */

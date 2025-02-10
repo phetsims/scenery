@@ -220,6 +220,7 @@ export default class Input extends PhetioObject {
   public readonly batchDOMEvents: boolean;
   public readonly assumeFullWindow: boolean;
   public readonly passiveEvents: boolean | null;
+  public readonly preventMultitouch: boolean;
 
   // Pointer for accessibility, only created lazily on first pdom event.
   public pdomPointer: PDOMPointer | null;
@@ -300,7 +301,15 @@ export default class Input extends PhetioObject {
    *
    * @param [providedOptions]
    */
-  public constructor( display: Display, attachToWindow: boolean, batchDOMEvents: boolean, assumeFullWindow: boolean, passiveEvents: boolean | null, providedOptions?: InputOptions ) {
+  public constructor(
+    display: Display,
+    attachToWindow: boolean,
+    batchDOMEvents: boolean,
+    assumeFullWindow: boolean,
+    passiveEvents: boolean | null,
+    preventMultitouch: boolean,
+    providedOptions?: InputOptions
+  ) {
 
     const options = optionize<InputOptions, SelfOptions, PhetioObjectOptions>()( {
       phetioType: Input.InputIO,
@@ -316,6 +325,7 @@ export default class Input extends PhetioObject {
     this.batchDOMEvents = batchDOMEvents;
     this.assumeFullWindow = assumeFullWindow;
     this.passiveEvents = passiveEvents;
+    this.preventMultitouch = preventMultitouch;
     this.batchedEvents = [];
     this.pdomPointer = null;
     this.mouse = null;
@@ -959,6 +969,17 @@ export default class Input extends PhetioObject {
    * Adds a pointer to our list.
    */
   private addPointer( pointer: Pointer ): void {
+    // Disable multitouch, see https://github.com/phetsims/scenery/issues/1684
+    // For now, this is done by preventing a new "pointer" from being added, so that
+    // the events that would be forwarded to it are ignored.
+    // NOTE: NOT doing ` || this.mouse?.hasPointerCaptured()`, since it seems
+    // like we are not fully clearing the capture state when we should be.
+    if (
+      this.preventMultitouch && ( this.pointers.some( pointer => pointer.isTouchLike() ) )
+    ) {
+      return;
+    }
+
     this.pointers.push( pointer );
 
     this.pointerAddedEmitter.emit( pointer );
