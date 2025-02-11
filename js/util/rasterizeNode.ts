@@ -47,7 +47,7 @@ export type RasterizedOptions = {
   // Defaults to false
   useCanvas?: boolean;
 
-  // Options to be passed to the Node that is returned by the rasterized call, this could be the direct Image or a
+  // Options to be passed to the Node that is returned by the rasterizeNode call, this could be the direct Image or a
   // wrapped Node, depending on the value of options.wrap. In general it is best to use this option, and only provide
   // imageOptions for specific requirements. These options will override any imageOptions if wrap:false. Defaults to \
   // the empty object.
@@ -60,15 +60,15 @@ export type RasterizedOptions = {
 };
 
 // Overload signatures, when wrap is true, the return type is a Node, otherwise it is an Image
-export function rasterized( node: Node, providedOptions?: RasterizedOptions & { wrap?: true } ): Node;
-export function rasterized( node: Node, providedOptions: RasterizedOptions & { wrap: false } ): Image;
+export function rasterizeNode( node: Node, providedOptions?: RasterizedOptions & { wrap?: true } ): Node;
+export function rasterizeNode( node: Node, providedOptions: RasterizedOptions & { wrap: false } ): Image;
 
 // Implementation signature (must be compatible with the overloads)
 /**
  * Returns a Node (backed by a scenery Image) that is a rasterized version of this node. See options, by default the
  * image is wrapped with a container Node.
  */
-export function rasterized( node: Node, providedOptions?: RasterizedOptions ): Node | Image {
+export function rasterizeNode( node: Node, providedOptions?: RasterizedOptions ): Node | Image {
   const options = optionize<RasterizedOptions, RasterizedOptions>()( {
     resolution: 1,
     sourceBounds: null,
@@ -175,7 +175,7 @@ export function rasterized( node: Node, providedOptions?: RasterizedOptions ): N
 /**
  * Calls the callback with an Image Node that contains this Node's subtree's visual form. This is always
  * asynchronous, but the resulting image Node can be used with any back-end (Canvas/WebGL/SVG/etc.)
- * @deprecated - Use rasterized() instead (should avoid the asynchronous-ness)
+ * @deprecated - Use rasterizeNode() instead (should avoid the asynchronous-ness)
  *
  * @param callback - callback( imageNode {Image} ) is called
  * @param [x] - The X offset for where the upper-left of the content drawn into the Canvas
@@ -185,7 +185,7 @@ export function rasterized( node: Node, providedOptions?: RasterizedOptions ): N
  */
 export const toImageNodeAsynchronous = ( node: Node, callback: ( image: Node ) => void, x?: number, y?: number, width?: number, height?: number ): void => {
 
-  assert && deprecationWarning( 'Node.toImageNodeAsyncrhonous() is deprecated, please use rasterized() instead' );
+  assert && deprecationWarning( 'Node.toImageNodeAsyncrhonous() is deprecated, please use rasterizeNode() instead' );
 
   assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
   assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -206,7 +206,7 @@ export const toImageNodeAsynchronous = ( node: Node, callback: ( image: Node ) =
 /**
  * Creates a Node containing an Image Node that contains this Node's subtree's visual form. This is always
  * synchronous, but the resulting image Node can ONLY used with Canvas/WebGL (NOT SVG).
- * @deprecated - Use rasterized() instead, should be mostly equivalent if useCanvas:true is provided.
+ * @deprecated - Use rasterizeNode() instead, should be mostly equivalent if useCanvas:true is provided.
  *
  * @param [x] - The X offset for where the upper-left of the content drawn into the Canvas
  * @param [y] - The Y offset for where the upper-left of the content drawn into the Canvas
@@ -215,7 +215,7 @@ export const toImageNodeAsynchronous = ( node: Node, callback: ( image: Node ) =
  */
 export const toCanvasNodeSynchronous = ( node: Node, x?: number, y?: number, width?: number, height?: number ): Node => {
 
-  assert && deprecationWarning( 'Node.toCanvasNodeSynchronous() is deprecated, please use rasterized() instead' );
+  assert && deprecationWarning( 'Node.toCanvasNodeSynchronous() is deprecated, please use rasterizeNode() instead' );
 
   assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
   assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -242,7 +242,7 @@ export const toCanvasNodeSynchronous = ( node: Node, x?: number, y?: number, wid
  *
  * NOTE: the resultant Image should be positioned using its bounds rather than (x,y).  To create a Node that can be
  * positioned like any other node, please use toDataURLNodeSynchronous.
- * @deprecated - Use rasterized() instead, should be mostly equivalent if wrap:false is provided.
+ * @deprecated - Use rasterizeNode() instead, should be mostly equivalent if wrap:false is provided.
  *
  * @param [x] - The X offset for where the upper-left of the content drawn into the Canvas
  * @param [y] - The Y offset for where the upper-left of the content drawn into the Canvas
@@ -251,7 +251,7 @@ export const toCanvasNodeSynchronous = ( node: Node, x?: number, y?: number, wid
  */
 export const toDataURLImageSynchronous = ( node: Node, x?: number, y?: number, width?: number, height?: number ): Image => {
 
-  assert && deprecationWarning( 'Node.toDataURLImageSychronous() is deprecated, please use rasterized() instead' );
+  assert && deprecationWarning( 'Node.toDataURLImageSychronous() is deprecated, please use rasterizeNode() instead' );
 
   assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
   assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -273,7 +273,7 @@ export const toDataURLImageSynchronous = ( node: Node, x?: number, y?: number, w
  * initialWidth/initialHeight so that we have the bounds immediately.  An extra wrapper Node is provided
  * so that transforms can be done independently.  Use this method if you need to be able to transform the node
  * the same way as if it had not been rasterized.
- * @deprecated - Use rasterized() instead, should be mostly equivalent
+ * @deprecated - Use rasterizeNode() instead, should be mostly equivalent
  *
  * @param [x] - The X offset for where the upper-left of the content drawn into the Canvas
  * @param [y] - The Y offset for where the upper-left of the content drawn into the Canvas
@@ -282,7 +282,7 @@ export const toDataURLImageSynchronous = ( node: Node, x?: number, y?: number, w
  */
 export const toDataURLNodeSynchronous = ( node: Node, x?: number, y?: number, width?: number, height?: number ): Node => {
 
-  assert && deprecationWarning( 'Node.toDataURLNodeSynchronous() is deprecated, please use rasterized() instead' );
+  assert && deprecationWarning( 'Node.toDataURLNodeSynchronous() is deprecated, please use rasterizeNode() instead' );
 
   assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
   assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );

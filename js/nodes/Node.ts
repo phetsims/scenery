@@ -5479,7 +5479,7 @@ class Node extends ParallelDOM {
    */
   public renderToCanvas( canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, callback?: () => void, backgroundColor?: string ): void {
 
-    assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use rasterized() instead' );
+    assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use rasterizeNode() instead' );
 
     // should basically reset everything (and clear the Canvas)
     canvas.width = canvas.width; // eslint-disable-line no-self-assign
@@ -5571,7 +5571,7 @@ class Node extends ParallelDOM {
   /**
    * Calls the callback with an HTMLImageElement that contains this Node's subtree's visual form.
    * Will always be asynchronous.
-   * @deprecated - Use rasterized() for creating a rasterized copy, or generally it's best to get the data
+   * @deprecated - Use rasterizeNode() for creating a rasterized copy, or generally it's best to get the data
    *               URL instead directly.
    *
    * @param callback - callback( image {HTMLImageElement}, x, y ) is called
@@ -5582,7 +5582,7 @@ class Node extends ParallelDOM {
    */
   public toImage( callback: ( image: HTMLImageElement, x: number, y: number ) => void, x?: number, y?: number, width?: number, height?: number ): void {
 
-    assert && deprecationWarning( 'Node.toImage() is deprecated, please use rasterized() instead' );
+    assert && deprecationWarning( 'Node.toImage() is deprecated, please use rasterizeNode() instead' );
 
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
