@@ -221,6 +221,7 @@ export default class Input extends PhetioObject {
   public readonly assumeFullWindow: boolean;
   public readonly passiveEvents: boolean | null;
   public readonly preventMultitouch: boolean;
+  public readonly interruptMultitouch: boolean;
 
   // Pointer for accessibility, only created lazily on first pdom event.
   public pdomPointer: PDOMPointer | null;
@@ -308,6 +309,7 @@ export default class Input extends PhetioObject {
     assumeFullWindow: boolean,
     passiveEvents: boolean | null,
     preventMultitouch: boolean,
+    interruptMultitouch: boolean,
     providedOptions?: InputOptions
   ) {
 
@@ -326,6 +328,7 @@ export default class Input extends PhetioObject {
     this.assumeFullWindow = assumeFullWindow;
     this.passiveEvents = passiveEvents;
     this.preventMultitouch = preventMultitouch;
+    this.interruptMultitouch = interruptMultitouch;
     this.batchedEvents = [];
     this.pdomPointer = null;
     this.mouse = null;
@@ -353,7 +356,7 @@ export default class Input extends PhetioObject {
     } );
 
     this.mouseUpAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
-      const mouse = this.ensureMouse( point );
+      const mouse = this.ensureMouse( point, context );
       mouse.id = null;
       this.upEvent<MouseEvent>( mouse, context, point );
     }, {
@@ -368,7 +371,11 @@ export default class Input extends PhetioObject {
     } );
 
     this.mouseDownAction = new PhetioAction( ( id: number, point: Vector2, context: EventContext<MouseEvent> ) => {
-      const mouse = this.ensureMouse( point );
+      if ( this.interruptMultitouch ) {
+        this.interruptMultitouchPointers( point, context );
+      }
+
+      const mouse = this.ensureMouse( point, context );
       mouse.id = id;
       this.downEvent<MouseEvent>( mouse, context, point );
     }, {
@@ -384,7 +391,7 @@ export default class Input extends PhetioObject {
     } );
 
     this.mouseMoveAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
-      const mouse = this.ensureMouse( point );
+      const mouse = this.ensureMouse( point, context );
       mouse.move( point );
       this.moveEvent<MouseEvent>( mouse, context );
     }, {
@@ -400,7 +407,7 @@ export default class Input extends PhetioObject {
     } );
 
     this.mouseOverAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
-      const mouse = this.ensureMouse( point );
+      const mouse = this.ensureMouse( point, context );
       mouse.over( point );
       // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/scenery/issues/1581
     }, {
@@ -415,7 +422,7 @@ export default class Input extends PhetioObject {
     } );
 
     this.mouseOutAction = new PhetioAction( ( point: Vector2, context: EventContext<MouseEvent> ) => {
-      const mouse = this.ensureMouse( point );
+      const mouse = this.ensureMouse( point, context );
       mouse.out( point );
       // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change? https://github.com/phetsims/scenery/issues/1581
     }, {
@@ -432,7 +439,7 @@ export default class Input extends PhetioObject {
     this.wheelScrollAction = new PhetioAction( ( context: EventContext<WheelEvent> ) => {
       const event = context.domEvent;
 
-      const mouse = this.ensureMouse( this.pointFromEvent( event ) );
+      const mouse = this.ensureMouse( this.pointFromEvent( event ), context );
       mouse.wheel( event );
 
       // don't send mouse-wheel events if we don't yet have a mouse location!
@@ -454,7 +461,7 @@ export default class Input extends PhetioObject {
 
     this.touchStartAction = new PhetioAction( ( id: number, point: Vector2, context: EventContext<TouchEvent | PointerEvent> ) => {
       const touch = new Touch( id, point, context.domEvent );
-      this.addPointer( touch );
+      this.addPointer( touch, point, context );
       this.downEvent<TouchEvent | PointerEvent>( touch, context, point );
     }, {
       phetioPlayback: true,
@@ -528,7 +535,7 @@ export default class Input extends PhetioObject {
 
     this.penStartAction = new PhetioAction( ( id: number, point: Vector2, context: EventContext<PointerEvent> ) => {
       const pen = new Pen( id, point, context.domEvent );
-      this.addPointer( pen );
+      this.addPointer( pen, point, context );
       this.downEvent<PointerEvent>( pen, context, point );
     }, {
       phetioPlayback: true,
@@ -965,19 +972,39 @@ export default class Input extends PhetioObject {
     return position;
   }
 
+  private interruptMultitouchPointers( point: Vector2, context: EventContext ): void {
+    const touchLikePointers = this.pointers.filter( otherPointer => otherPointer.isTouchLike() );
+    for ( const otherPointer of touchLikePointers ) {
+      this.cancelEvent( otherPointer, context, point );
+      this.removePointer( otherPointer );
+    }
+  }
+
   /**
    * Adds a pointer to our list.
    */
-  private addPointer( pointer: Pointer ): void {
+  private addPointer( pointer: Pointer, point: Vector2, context: EventContext ): void {
     // Disable multitouch, see https://github.com/phetsims/scenery/issues/1684
     // For now, this is done by preventing a new "pointer" from being added, so that
     // the events that would be forwarded to it are ignored.
     // NOTE: NOT doing ` || this.mouse?.hasPointerCaptured()`, since it seems
     // like we are not fully clearing the capture state when we should be.
     if (
-      this.preventMultitouch && ( this.pointers.some( pointer => pointer.isTouchLike() ) )
+      this.preventMultitouch &&
+      pointer.isTouchLike() &&
+      this.pointers.some( otherPointer => otherPointer.isTouchLike() )
     ) {
       return;
+    }
+
+    // Interrupt touchlike pointers on a new pointer
+    if ( this.interruptMultitouch ) {
+      this.interruptMultitouchPointers( point, context );
+
+      // And if we have a mouse, interrupt listeners on it as well.
+      if ( this.mouse ) {
+        this.mouse.interruptAll();
+      }
     }
 
     this.pointers.push( pointer );
@@ -1035,45 +1062,33 @@ export default class Input extends PhetioObject {
     return notBlockingSubsequentClicksOccurringTooQuickly ? trail : null;
   }
 
-  /**
-   * Initializes the Mouse object on the first mouse event (this may never happen on touch devices).
-   */
-  private initMouse( point: Vector2 ): Mouse {
-    const mouse = new Mouse( point );
-    this.mouse = mouse;
-    this.addPointer( mouse );
-    return mouse;
-  }
-
-  private ensureMouse( point: Vector2 ): Mouse {
+  private ensureMouse( point: Vector2, context: EventContext<MouseEvent> | EventContext<WheelEvent> ): Mouse {
     const mouse = this.mouse;
     if ( mouse ) {
       return mouse;
     }
     else {
-      return this.initMouse( point );
+      // Initializes the Mouse object on the first mouse event (this may never happen on touch devices).
+      const mouse = new Mouse( point );
+      this.mouse = mouse;
+      this.addPointer( mouse, point, context );
+      return mouse;
     }
   }
 
-  /**
-   * Initializes the accessible pointer object on the first pdom event.
-   */
-  private initPDOMPointer(): PDOMPointer {
-    const pdomPointer = new PDOMPointer( this.display );
-    this.pdomPointer = pdomPointer;
-
-    this.addPointer( pdomPointer );
-
-    return pdomPointer;
-  }
-
-  private ensurePDOMPointer(): PDOMPointer {
+  private ensurePDOMPointer( context: EventContext ): PDOMPointer {
     const pdomPointer = this.pdomPointer;
     if ( pdomPointer ) {
       return pdomPointer;
     }
     else {
-      return this.initPDOMPointer();
+      // Initializes the accessible pointer object on the first pdom event.
+      const pdomPointer = new PDOMPointer( this.display );
+      this.pdomPointer = pdomPointer;
+
+      this.addPointer( pdomPointer, Vector2.ZERO, context );
+
+      return pdomPointer;
     }
   }
 
@@ -1083,7 +1098,7 @@ export default class Input extends PhetioObject {
    */
   private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: SupportedEventTypes, context: EventContext<DOMEvent>, bubbles: boolean ): void {
 
-    this.ensurePDOMPointer().updateTrail( trail );
+    this.ensurePDOMPointer( context ).updateTrail( trail );
 
     // exclude focus and blur events because they can happen with scripting without user input
     if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) ) {

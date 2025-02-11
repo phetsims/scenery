@@ -202,6 +202,10 @@ type SelfOptions = {
   // or multiple mice will still be possible.
   preventMultitouch?: boolean;
 
+  // If true, and a second touch is detected, it will interrupt the first (active)
+  // touch. See https://github.com/phetsims/scenery/issues/1684.
+  interruptMultitouch?: boolean;
+
   // An HTMLElement used to contain the contents of the Display
   container?: HTMLElement;
 };
@@ -254,6 +258,7 @@ export default class Display {
   public _allowLayerFitting: boolean;
   public _forceSVGRefresh: boolean;
   public _preventMultitouch: boolean;
+  public _interruptMultitouch: boolean;
 
   private readonly _allowWebGL: boolean;
   private readonly _allowCSSHacks: boolean;
@@ -451,7 +456,8 @@ export default class Display {
       //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
       allowBackingScaleAntialiasing: true,
 
-      preventMultitouch: false
+      preventMultitouch: false,
+      interruptMultitouch: false
     }, providedOptions );
 
     this.id = globalIdCounter++;
@@ -496,6 +502,7 @@ export default class Display {
     this._assumeFullWindow = options.assumeFullWindow;
     this._passiveEvents = options.passiveEvents;
     this._preventMultitouch = options.preventMultitouch;
+    this._interruptMultitouch = options.interruptMultitouch;
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
     this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
     this._allowLayerFitting = options.allowLayerFitting;
@@ -1406,6 +1413,7 @@ export default class Display {
       this._assumeFullWindow,
       this._passiveEvents,
       this._preventMultitouch,
+      this._interruptMultitouch,
       options
     );
     this._input = input;
