@@ -39,8 +39,7 @@ class VoicingRichText extends ReadingBlock( RichText ) {
       // voicing
       // default tag name for a ReadingBlock, but there are cases where you may want to override this (such as
       // RichText links)
-      readingBlockTagName: 'button',
-      readingBlockDisabledTagName: 'p'
+      readingBlockTagName: 'button'
     }, providedOptions );
 
     super( text, options );

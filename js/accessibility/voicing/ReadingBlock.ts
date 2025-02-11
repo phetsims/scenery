@@ -135,6 +135,10 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
 
       // The tagName to apply to the Node when voicing is disabled. Set to null to remove from the PDOM
       // entirely when voicing is disabled.
+      // The default value is a div because most often we want the accessible content of a ReadingBlock
+      // to be readable in the PDOM when voicing is disabled.
+      // node.accessibleParagraph = 'This is readable content.';
+      // node.readingBlockNameResponse = node.accessibleParagraph;
       private _readingBlockDisabledTagName: string | null;
 
       // The highlight that surrounds this ReadingBlock when it is "active" and
@@ -160,7 +164,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
         super( ...args );
 
         this._readingBlockTagName = 'button';
-        this._readingBlockDisabledTagName = null;
+        this._readingBlockDisabledTagName = 'div';
         this._readingBlockActiveHighlight = null;
         this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
         this.readingBlockResponsePatternCollection = DEFAULT_CONTENT_HINT_PATTERN;
