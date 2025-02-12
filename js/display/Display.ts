@@ -105,6 +105,8 @@ import WebGLBlock from '../display/WebGLBlock.js';
 import SafariWorkaroundOverlay from '../overlays/SafariWorkaroundOverlay.js';
 import { PDOM_UNIQUE_ID_SEPARATOR } from '../accessibility/pdom/PDOM_UNIQUE_ID_SEPARATOR.js';
 import DisplayGlobals from './DisplayGlobals.js';
+import HighlightVisibilityController from '../accessibility/HighlightVisibilityController.js';
+import Property from '../../../axon/js/Property.js';
 
 type SelfOptions = {
   // Initial (or override) display width
@@ -149,12 +151,12 @@ type SelfOptions = {
   // Enables accessibility features
   accessibility?: boolean;
 
-  // {boolean} - Enables Interactive Highlights in the HighlightOverlay. These are highlights that surround
-  // interactive components when using mouse or touch which improves low vision access.
-  supportsInteractiveHighlights?: boolean;
+  // Controls the enabled state of interactive highlights. When true, highlights will surround Nodes that are
+  // composed with InteractiveHighlighting. Only relevant if the Display has accessibility enabled.
+  interactive?: boolean;
 
   // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
-  interactive?: boolean;
+  interactiveHighlightsEnabledProperty?: TProperty<boolean>;
 
   // If true, input event listeners will be attached to the Display's DOM element instead of the window.
   // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
@@ -350,6 +352,9 @@ export default class Display {
   // (if accessible)
   private _boundHandleFullScreenNavigation?: ( domEvent: KeyboardEvent ) => void;
 
+  // (if accessible) Manages visibility of PDOM and interactive (pointer) highlights
+  private _highlightVisibilityController: HighlightVisibilityController | null = null;
+
   // If logging performance
   private perfSyncTreeCount?: number;
   private perfStitchCount?: number;
@@ -410,8 +415,8 @@ export default class Display {
       // {boolean} - Enables accessibility features
       accessibility: true,
 
-      // {boolean} - See declaration.
-      supportsInteractiveHighlights: false,
+      // {TProperty<boolean>} See above.
+      interactiveHighlightsEnabledProperty: new Property( false ),
 
       // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
       interactive: true,
@@ -537,7 +542,7 @@ export default class Display {
     this.focusManager = new FocusManager();
 
     // Features that require the HighlightOverlay
-    if ( this._accessible || options.supportsInteractiveHighlights ) {
+    if ( this._accessible ) {
       this._focusRootNode = new Node();
       this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, Display, {
         pdomFocusHighlightsVisibleProperty: this.focusManager.pdomFocusHighlightsVisibleProperty,
@@ -545,6 +550,10 @@ export default class Display {
         readingBlockHighlightsVisibleProperty: this.focusManager.readingBlockHighlightsVisibleProperty
       } );
       this.addOverlay( this._focusOverlay );
+
+      this._highlightVisibilityController = new HighlightVisibilityController( this, {
+        interactiveHighlightsEnabledProperty: options.interactiveHighlightsEnabledProperty
+      } );
     }
 
     if ( this._accessible ) {
@@ -2207,6 +2216,8 @@ export default class Display {
       globalKeyStateTracker.keydownEmitter.removeListener( this._boundHandleFullScreenNavigation! );
       this._rootPDOMInstance!.dispose();
     }
+
+    this._highlightVisibilityController && this._highlightVisibilityController.dispose();
 
     this._focusOverlay && this._focusOverlay.dispose();
 
