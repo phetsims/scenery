@@ -333,6 +333,8 @@ export default class Display {
   private _canvasAreaBoundsOverlay: CanvasNodeBoundsOverlay | null;
   private _fittedBlockBoundsOverlay: FittedBlockBoundsOverlay | null;
 
+  private _interactiveHighlightsEnabledProperty: TProperty<boolean>;
+
   // @assertion-only - Whether we are running the paint phase of updateDisplay() for this Display.
   private _isPainting?: boolean;
 
@@ -518,6 +520,7 @@ export default class Display {
     this._hitAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
     this._fittedBlockBoundsOverlay = null;
+    this._interactiveHighlightsEnabledProperty = options.interactiveHighlightsEnabledProperty;
 
     if ( assert ) {
       this._isPainting = false;
@@ -552,7 +555,7 @@ export default class Display {
       this.addOverlay( this._focusOverlay );
 
       this._highlightVisibilityController = new HighlightVisibilityController( this, {
-        interactiveHighlightsEnabledProperty: options.interactiveHighlightsEnabledProperty
+        interactiveHighlightsEnabledProperty: this._interactiveHighlightsEnabledProperty
       } );
     }
 
@@ -941,6 +944,23 @@ export default class Display {
 
   public getBackgroundColor(): Color | string | null {
     return this._backgroundColor;
+  }
+
+  /**
+   * See interactiveHighlightsEnabled option for Display. Mutates the current value.
+   */
+  public setInteractiveHighlightsEnabled( interactiveHighlightsEnabled: boolean ): this {
+    this._interactiveHighlightsEnabledProperty.value = interactiveHighlightsEnabled;
+
+    return this;
+  }
+
+  public set interactiveHighlightsEnabled( value: boolean ) { this.setInteractiveHighlightsEnabled( value ); }
+
+  public get interactiveHighlightsEnabled(): boolean { return this.getInteractiveHighlightsEnabled(); }
+
+  public getInteractiveHighlightsEnabled(): boolean {
+    return this._interactiveHighlightsEnabledProperty.value;
   }
 
   public get interactive(): boolean { return this._interactive; }
