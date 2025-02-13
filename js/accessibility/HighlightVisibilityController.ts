@@ -1,4 +1,4 @@
-// Copyright 2021-2025, University of Colorado Boulder
+// Copyright 2025, University of Colorado Boulder
 
 /**
  * A listener that manages the visibility of different highlights when switching between mouse/touch and alternative
