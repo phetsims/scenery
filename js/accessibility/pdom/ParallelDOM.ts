@@ -274,7 +274,6 @@ type ParallelDOMSelfOptions = {
    */
   accessibleName?: PDOMValueType | null; // Sets the accessible name for this Node, see setAccessibleName() for more information.
   accessibleParagraph?: PDOMValueType | null; // Sets the accessible paragraph for this Node, see setAccessibleParagraph() for more information.
-  helpText?: PDOMValueType | null; // Sets the help text for this Node, see setHelpText() for more information
   accessibleHelpText?: PDOMValueType | null; // Sets the help text for this Node, see setAccessibleHelpText() for more information
   pdomHeading?: PDOMValueType | null; // @experimental - not ready for use
 
@@ -282,7 +281,6 @@ type ParallelDOMSelfOptions = {
    * Lower Level API Functions
    */
   accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
-  helpTextBehavior?: PDOMBehaviorFunction; // Sets the implementation for the helpText, see setHelpTextBehavior() for more information
   accessibleHelpTextBehavior?: PDOMBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
   pdomHeadingBehavior?: PDOMBehaviorFunction; // @experimental - not ready for use
 
@@ -594,11 +592,9 @@ export default class ParallelDOM extends PhetioObject {
   private _accessibleParagraph: PDOMValueType | null = null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
-  private _helpText: PDOMValueType | null = null;
   private _accessibleHelpText: PDOMValueType | null = null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
-  private _helpTextBehavior: PDOMBehaviorFunction;
   private _accessibleHelpTextBehavior: PDOMBehaviorFunction;
 
   // Forces an update from the behavior functions in PDOMPeer.
@@ -688,7 +684,6 @@ export default class ParallelDOM extends PhetioObject {
     // HIGHER LEVEL API INITIALIZATION
 
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
-    this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
     this._accessibleHelpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
     this._headingLevel = null;
     this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
@@ -709,11 +704,6 @@ export default class ParallelDOM extends PhetioObject {
     if ( isTReadOnlyProperty( this._accessibleName ) && !this._accessibleName.isDisposed ) {
       this._accessibleName.unlink( this._onPDOMContentChangeListener );
       this._accessibleName = null;
-    }
-
-    if ( isTReadOnlyProperty( this._helpText ) && !this._helpText.isDisposed ) {
-      this._helpText.unlink( this._onPDOMContentChangeListener );
-      this._helpText = null;
     }
 
     if ( isTReadOnlyProperty( this._accessibleHelpText ) && !this._accessibleHelpText.isDisposed ) {
@@ -771,7 +761,6 @@ export default class ParallelDOM extends PhetioObject {
 
     // Clear behavior functions because they may create references between other Nodes
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
-    this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
     this._accessibleHelpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
     this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
 

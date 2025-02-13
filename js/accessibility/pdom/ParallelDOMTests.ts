@@ -2022,7 +2022,7 @@ QUnit.test( 'accessibleHelpText option', assert => {
   b.accessibleHelpText = '';
 
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement!.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
-  assert.ok( bDescriptionElement.textContent === '', 'helpTextBehavior should work for empty string' );
+  assert.ok( bDescriptionElement.textContent === '', 'accessibleHelpTextBehavior should work for empty string' );
 
   b.accessibleHelpText = 'some content';
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement!.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
