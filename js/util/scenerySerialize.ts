@@ -182,7 +182,7 @@ const scenerySerialize = ( value: unknown ): IntentionalAny => {
       'tagName',
       'innerContent',
       'accessibleName',
-      'helpText'
+      'accessibleHelpText'
     ].forEach( simpleKey => {
 
       // All default to null

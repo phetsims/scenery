@@ -168,7 +168,7 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
 
   getVoicingHintResponse(): ResolvedResponse;
 
-  applyDefaultHintResponse( helpText: VoicingResponse ): void;
+  applyDefaultHintResponse( accessibleHelpText: VoicingResponse ): void;
 
   setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ): void;
 
@@ -567,15 +567,15 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
        * has been used once, this is a no-op.
        *
        * This should rarely be used. It is intended for use cases where the hint response should match the
-       * ParallelDOM.helpText to align the APIs. See Voicing.BASIC_HELP_TEXT_BEHAVIOR. It is probably most useful in
+       * ParallelDOM.accessibleHelpText to align the APIs. See Voicing.BASIC_HELP_TEXT_BEHAVIOR. It is probably most useful in
        * your own behavior function.
        */
-      public applyDefaultHintResponse( helpText: VoicingResponse ): void {
+      public applyDefaultHintResponse( accessibleHelpText: VoicingResponse ): void {
 
         // If the voicingHintResponse has not been set manually, it will take the same value
-        // as the helpText.
+        // as the accessibleHelpText.
         if ( !this._voicingHintResponseOverride ) {
-          this._voicingResponsePacket.hintResponse = helpText;
+          this._voicingResponsePacket.hintResponse = accessibleHelpText;
         }
       }
 
@@ -902,24 +902,24 @@ Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR = ( node: Node, options: ParallelDOMOptio
 };
 
 /**
- * A basic behavior function for Voicing that sets the both the ParallelDOM.helpText and Voicing.voicingHintResponse.
- * By using a behavior function, we can ensure that the helpText and voicingHintResponse are always in sync when you
- * mutate the helpText.
+ * A basic behavior function for Voicing that sets the both the ParallelDOM.accessibleHelpText and Voicing.voicingHintResponse.
+ * By using a behavior function, we can ensure that the accessibleHelpText and voicingHintResponse are always in sync when you
+ * mutate the accessibleHelpText.
  *
  * For example:
- *   myNode.helpTextBehavior = Voicing.BASIC_HELP_TEXT_BEHAVIOR;
- *   myNode.helpText = 'This is a helpful hint'; // This will also set myNode.voicingHintResponse to 'This is a helpful hint'
+ *   myNode.accessibleHelpTextBehavior = Voicing.BASIC_HELP_TEXT_BEHAVIOR;
+ *   myNode.accessibleHelpText = 'This is a helpful hint'; // This will also set myNode.voicingHintResponse to 'This is a helpful hint'
  */
-Voicing.BASIC_HELP_TEXT_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, helpText: PDOMValueType ): ParallelDOMOptions => {
+Voicing.BASIC_HELP_TEXT_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, accessibleHelpText: PDOMValueType ): ParallelDOMOptions => {
   assert && assert( isVoicing( node ), 'Node must be a VoicingNode to use Voicing.BASIC_HELP_TEXT_BEHAVIOR' );
   const voicingNode = node as VoicingNode;
 
   // Create the basic help text options - the behavior function will use these options to mutate the Node.
-  options = ParallelDOM.HELP_TEXT_AFTER_CONTENT( voicingNode, options, helpText );
+  options = ParallelDOM.HELP_TEXT_AFTER_CONTENT( voicingNode, options, accessibleHelpText );
 
   // If the voicingNameResponse has not been set manually, it will take the same value
   // as the accessibleName.
-  voicingNode.applyDefaultHintResponse( helpText );
+  voicingNode.applyDefaultHintResponse( accessibleHelpText );
 
   return options;
 };

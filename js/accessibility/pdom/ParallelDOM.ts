@@ -215,8 +215,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
    */
   'accessibleName',
   'accessibleNameBehavior',
-  'helpText',
-  'helpTextBehavior',
+  'accessibleHelpText',
+  'accessibleHelpTextBehavior',
   'accessibleParagraph',
   'pdomHeading',
   'pdomHeadingBehavior',
@@ -275,6 +275,7 @@ type ParallelDOMSelfOptions = {
   accessibleName?: PDOMValueType | null; // Sets the accessible name for this Node, see setAccessibleName() for more information.
   accessibleParagraph?: PDOMValueType | null; // Sets the accessible paragraph for this Node, see setAccessibleParagraph() for more information.
   helpText?: PDOMValueType | null; // Sets the help text for this Node, see setHelpText() for more information
+  accessibleHelpText?: PDOMValueType | null; // Sets the help text for this Node, see setAccessibleHelpText() for more information
   pdomHeading?: PDOMValueType | null; // @experimental - not ready for use
 
   /*
@@ -282,6 +283,7 @@ type ParallelDOMSelfOptions = {
    */
   accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
   helpTextBehavior?: PDOMBehaviorFunction; // Sets the implementation for the helpText, see setHelpTextBehavior() for more information
+  accessibleHelpTextBehavior?: PDOMBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
   pdomHeadingBehavior?: PDOMBehaviorFunction; // @experimental - not ready for use
 
   containerTagName?: string | null; // Sets the tag name for an [optional] element that contains this Node's siblings
@@ -336,7 +338,7 @@ export type RemoveParallelDOMOptions<T extends ParallelDOMOptions> = StrictOmit<
 // This is useful for creating a ParallelDOM subclass that only exposes these high-level options while implementing
 // accessibility with the lower-level API.
 export type TrimParallelDOMOptions<T extends ParallelDOMSelfOptions> = RemoveParallelDOMOptions<T> &
-  PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'helpText' | 'accessibleParagraph' | 'focusable' | 'pdomVisible'>;
+  PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'accessibleHelpText' | 'accessibleParagraph' | 'focusable' | 'pdomVisible'>;
 
 type PDOMAttribute = {
   attribute: string;
@@ -593,14 +595,17 @@ export default class ParallelDOM extends PhetioObject {
 
   // Sets the help text of the Node, this most often corresponds to description text.
   private _helpText: PDOMValueType | null = null;
+  private _accessibleHelpText: PDOMValueType | null = null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
   private _helpTextBehavior: PDOMBehaviorFunction;
+  private _accessibleHelpTextBehavior: PDOMBehaviorFunction;
 
   // Forces an update from the behavior functions in PDOMPeer.
   // (scenery-internal)
   public _accessibleNameDirty = false;
   public _helpTextDirty = false;
+  public _accessibleHelpTextDirty = false;
 
   // Sets the help text of the Node, this most often corresponds to label sibling text.
   private _pdomHeading: PDOMValueType | null = null;
@@ -684,6 +689,7 @@ export default class ParallelDOM extends PhetioObject {
 
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
     this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
+    this._accessibleHelpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
     this._headingLevel = null;
     this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
     this.pdomBoundInputEnabledListener = this.pdomInputEnabledListener.bind( this );
@@ -708,6 +714,11 @@ export default class ParallelDOM extends PhetioObject {
     if ( isTReadOnlyProperty( this._helpText ) && !this._helpText.isDisposed ) {
       this._helpText.unlink( this._onPDOMContentChangeListener );
       this._helpText = null;
+    }
+
+    if ( isTReadOnlyProperty( this._accessibleHelpText ) && !this._accessibleHelpText.isDisposed ) {
+      this._accessibleHelpText.unlink( this._onPDOMContentChangeListener );
+      this._accessibleHelpText = null;
     }
 
     if ( isTReadOnlyProperty( this._pdomHeading ) && !this._pdomHeading.isDisposed ) {
@@ -761,6 +772,7 @@ export default class ParallelDOM extends PhetioObject {
     // Clear behavior functions because they may create references between other Nodes
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
     this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
+    this._accessibleHelpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
     this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
 
     // Clear out aria association attributes, which hold references to other Nodes.
@@ -1115,75 +1127,75 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * Sets the help text for this Node. Help text usually provides additional information that describes what a Node
-   * is or how to interact with it. It will be read by a screen reader when discovered by the virtual cursor.
+   * Sets the accessible help text for this Node. Help text usually provides additional information that describes
+   * what a Node is or how to interact with it. It will be read by a screen reader when discovered by the virtual
+   * cursor.
    *
-   * Part of the higher level API, the helpTextBehavior function will set the appropriate options on this Node
-   * to create the desired help text. See the documentation for setHelpTextBehavior() for more information.
+   * Part of the higher level API, the accessibleHelpTextBehavior function will set the appropriate options on this Node
+   * to create the desired help text. See the documentation for setAccessibleHelpTextBehavior() for more information.
    */
-  public setHelpText( helpText: PDOMValueType | null ): void {
-    if ( helpText !== this._helpText ) {
-      if ( isTReadOnlyProperty( this._helpText ) && !this._helpText.isDisposed ) {
-        this._helpText.unlink( this._onPDOMContentChangeListener );
+  public setAccessibleHelpText( accessibleHelpText: PDOMValueType | null ): void {
+    if ( accessibleHelpText !== this._accessibleHelpText ) {
+      if ( isTReadOnlyProperty( this._accessibleHelpText ) && !this._accessibleHelpText.isDisposed ) {
+        this._accessibleHelpText.unlink( this._onPDOMContentChangeListener );
       }
 
-      this._helpText = helpText;
+      this._accessibleHelpText = accessibleHelpText;
 
-      if ( isTReadOnlyProperty( helpText ) ) {
-        helpText.lazyLink( this._onPDOMContentChangeListener );
+      if ( isTReadOnlyProperty( accessibleHelpText ) ) {
+        accessibleHelpText.lazyLink( this._onPDOMContentChangeListener );
       }
 
-      this._helpTextDirty = true;
+      this._accessibleHelpTextDirty = true;
 
       this.onPDOMContentChange();
     }
   }
 
-  public set helpText( helpText: PDOMValueType | null ) { this.setHelpText( helpText ); }
+  public set accessibleHelpText( accessibleHelpText: PDOMValueType | null ) { this.setAccessibleHelpText( accessibleHelpText ); }
 
-  public get helpText(): string | null { return this.getHelpText(); }
+  public get accessibleHelpText(): string | null { return this.getAccessibleHelpText(); }
 
   /**
    * Get the help text for this Node.
    */
-  public getHelpText(): string | null {
-    if ( isTReadOnlyProperty( this._helpText ) ) {
-      return this._helpText.value;
+  public getAccessibleHelpText(): string | null {
+    if ( isTReadOnlyProperty( this._accessibleHelpText ) ) {
+      return this._accessibleHelpText.value;
     }
     else {
-      return this._helpText;
+      return this._accessibleHelpText;
     }
   }
 
   /**
-   * helpTextBehavior is a function that will set the appropriate options on this Node to get the desired help text.
+   * accessibleHelpTextBehavior is a function that will set the appropriate options on this Node to get the desired help text.
    *
    * The default value does the best it can to create the help text based on the values for other ParallelDOM options.
    * Usually, this is a paragraph element that comes after the Node's primary sibling in the PDOM. If you need to
    * customize this behavior, you can provide your own function to meet your requirements. If you provide your own
    * function, it is up to you to make sure that the help text is properly being set and is discoverable by AT.
    */
-  public setHelpTextBehavior( helpTextBehavior: PDOMBehaviorFunction ): void {
+  public setAccessibleHelpTextBehavior( accessibleHelpTextBehavior: PDOMBehaviorFunction ): void {
 
-    if ( this._helpTextBehavior !== helpTextBehavior ) {
+    if ( this._accessibleHelpTextBehavior !== accessibleHelpTextBehavior ) {
 
-      this._helpTextBehavior = helpTextBehavior;
+      this._accessibleHelpTextBehavior = accessibleHelpTextBehavior;
 
       this.onPDOMContentChange();
     }
   }
 
-  public set helpTextBehavior( helpTextBehavior: PDOMBehaviorFunction ) { this.setHelpTextBehavior( helpTextBehavior ); }
+  public set accessibleHelpTextBehavior( accessibleHelpTextBehavior: PDOMBehaviorFunction ) { this.setAccessibleHelpTextBehavior( accessibleHelpTextBehavior ); }
 
-  public get helpTextBehavior(): PDOMBehaviorFunction { return this.getHelpTextBehavior(); }
+  public get accessibleHelpTextBehavior(): PDOMBehaviorFunction { return this.getAccessibleHelpTextBehavior(); }
 
   /**
    * Get the help text of the interactive element.
    */
-  public getHelpTextBehavior(): PDOMBehaviorFunction {
-    return this._helpTextBehavior;
+  public getAccessibleHelpTextBehavior(): PDOMBehaviorFunction {
+    return this._accessibleHelpTextBehavior;
   }
-
 
   /***********************************************************************************************************/
   // LOWER LEVEL GETTERS AND SETTERS FOR PDOM API OPTIONS
@@ -3381,30 +3393,30 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * A behavior function for help text so that when helpText is set on the provided 'node', it will be forwarded `otherNode`.
+   * A behavior function for help text so that when accessibleHelpText is set on the provided 'node', it will be forwarded `otherNode`.
    * This is useful when a component is composed of other Nodes that implement the accessibility, but the high level API
    * should be available for the entire component.
    */
   public static forwardHelpText( node: ParallelDOM, otherNode: ParallelDOM ): void {
     ParallelDOM.useDefaultTagName( node );
-    node.helpTextBehavior = ( node: Node, options: ParallelDOMOptions, helpText: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => {
+    node.accessibleHelpTextBehavior = ( node: Node, options: ParallelDOMOptions, accessibleHelpText: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => {
       callbacksForOtherNodes.push( () => {
-        otherNode.helpText = helpText;
+        otherNode.accessibleHelpText = accessibleHelpText;
       } );
       return options;
     };
   }
 
-  public static HELP_TEXT_BEFORE_CONTENT( node: Node, options: ParallelDOMOptions, helpText: PDOMValueType ): ParallelDOMOptions {
+  public static HELP_TEXT_BEFORE_CONTENT( node: Node, options: ParallelDOMOptions, accessibleHelpText: PDOMValueType ): ParallelDOMOptions {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
-    options.descriptionContent = helpText;
+    options.descriptionContent = accessibleHelpText;
     options.appendDescription = false;
     return options;
   }
 
-  public static HELP_TEXT_AFTER_CONTENT( node: Node, options: ParallelDOMOptions, helpText: PDOMValueType ): ParallelDOMOptions {
+  public static HELP_TEXT_AFTER_CONTENT( node: Node, options: ParallelDOMOptions, accessibleHelpText: PDOMValueType ): ParallelDOMOptions {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
-    options.descriptionContent = helpText;
+    options.descriptionContent = accessibleHelpText;
     options.appendDescription = true;
     return options;
   }

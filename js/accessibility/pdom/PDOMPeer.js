@@ -220,20 +220,20 @@ class PDOMPeer {
       assert && assert( typeof options === 'object', 'should return an object' );
     }
 
-    // Even if the helpText is null, we need to run the behavior function if the dirty flag is set
+    // Even if the accessibleHelpText is null, we need to run the behavior function if the dirty flag is set
     // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
-    if ( this.node.helpText !== null || this.node._helpTextDirty ) {
-      if ( this.node.helpText === null ) {
+    if ( this.node.accessibleHelpText !== null || this.node._accessibleHelpTextDirty ) {
+      if ( this.node.accessibleHelpText === null ) {
 
-        // There is no helpText, so we don't want to modify options - just run the behavior for cleanup
+        // There is no accessibleHelpText, so we don't want to modify options - just run the behavior for cleanup
         // and to update other nodes.
-        this.node.helpTextBehavior( this.node, {}, this.node.helpText, callbacksForOtherNodes );
+        this.node.accessibleHelpTextBehavior( this.node, {}, this.node.accessibleHelpText, callbacksForOtherNodes );
       }
       else {
-        options = this.node.helpTextBehavior( this.node, options, this.node.helpText, callbacksForOtherNodes );
+        options = this.node.accessibleHelpTextBehavior( this.node, options, this.node.accessibleHelpText, callbacksForOtherNodes );
       }
       assert && assert( typeof options === 'object', 'should return an object' );
-      this.node._helpTextDirty = false;
+      this.node._accessibleHelpTextDirty = false;
     }
 
     // create the base DOM element representing this accessible instance
