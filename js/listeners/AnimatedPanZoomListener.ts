@@ -14,7 +14,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
@@ -44,6 +44,8 @@ import Trail from '../util/Trail.js';
 import TransformTracker from '../util/TransformTracker.js';
 import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { TReadOnlyEmitter } from '../../../axon/js/TEmitter.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -67,6 +69,16 @@ type GestureEvent = {
   pageX: number;
   pageY: number;
 } & Event;
+
+type SelfOptions = {
+  // One of the following config:
+  // The Emitter (which provides a dt {number} value on emit) which drives the animation, or null if the client
+  // will drive the animation by calling `step(dt)` manually.  Defaults to the axon stepTimer which runs automatically
+  // as part of the Sim time step.
+  stepEmitter?: TReadOnlyEmitter<[ number ]> | null;
+};
+
+export type AnimatedPanZoomListenerOptions = PanZoomListenerOptions & SelfOptions;
 
 class AnimatedPanZoomListener extends PanZoomListener {
 
@@ -145,9 +157,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * targetNode - Node to be transformed by this listener
    * {Object} [providedOptions]
    */
-  public constructor( targetNode: Node, providedOptions?: PanZoomListenerOptions ) {
-    const options = optionize<PanZoomListenerOptions, EmptySelfOptions, PanZoomListenerOptions>()( {
-      tandem: Tandem.REQUIRED
+  public constructor( targetNode: Node, providedOptions?: AnimatedPanZoomListenerOptions ) {
+    const options = optionize<AnimatedPanZoomListenerOptions, SelfOptions, PanZoomListenerOptions>()( {
+      tandem: Tandem.REQUIRED,
+      stepEmitter: stepTimer
     }, providedOptions );
     super( targetNode, options );
 
@@ -248,6 +261,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
       phetioDependencies: [ this.matrixProperty ]
     } );
 
+    const stepEmitterListener = this.step.bind( this );
+    if ( options.stepEmitter ) {
+      options.stepEmitter.addListener( stepEmitterListener );
+    }
+
     this.disposeAnimatedPanZoomListener = () => {
 
       // @ts-expect-error - Event type for this Safari specific event isn't available yet
@@ -255,6 +273,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
       // @ts-expect-error - Event type for this Safari specific event isn't available yet
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
+
+      if ( options.stepEmitter ) {
+        options.stepEmitter.removeListener( stepEmitterListener );
+      }
 
       this.animatingProperty.dispose();
 

@@ -8,9 +8,8 @@
  * @author Jesse Greenberg
  */
 
-import AnimatedPanZoomListener from '../listeners/AnimatedPanZoomListener.js';
+import AnimatedPanZoomListener, { AnimatedPanZoomListenerOptions } from '../listeners/AnimatedPanZoomListener.js';
 import Node from '../nodes/Node.js';
-import type { PanZoomListenerOptions } from '../listeners/PanZoomListener.js';
 import scenery from '../scenery.js';
 
 class AnimatedPanZoomSingleton {
@@ -18,7 +17,7 @@ class AnimatedPanZoomSingleton {
   // A reference to the instance of the listener, null until initialized.
   private _listener: AnimatedPanZoomListener | null = null;
 
-  public initialize( targetNode: Node, options?: PanZoomListenerOptions ): void {
+  public initialize( targetNode: Node, options?: AnimatedPanZoomListenerOptions ): void {
     this._listener = new AnimatedPanZoomListener( targetNode, options );
   }
 
