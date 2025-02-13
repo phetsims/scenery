@@ -221,6 +221,7 @@ const CUSTOM_CURSORS = {
 } as Record<string, string[]>;
 
 let globalIdCounter = 1;
+let lastStepTimerTimestamp: CSSNumberish | null = 0;
 
 export default class Display {
 
@@ -1415,7 +1416,12 @@ export default class Display {
       lastTime = timeNow;
 
       // step the timer that drives any time dependent updates of the Display
-      stepTimer.emit( timeElapsedInSeconds );
+      const currentTimestamp = document.timeline.currentTime;
+      if ( currentTimestamp === null || currentTimestamp !== lastStepTimerTimestamp ) {
+        lastStepTimerTimestamp = currentTimestamp;
+
+        stepTimer.emit( timeElapsedInSeconds );
+      }
 
       stepCallback && stepCallback( timeElapsedInSeconds );
       selfReference.updateDisplay();
