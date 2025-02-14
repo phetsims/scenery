@@ -631,6 +631,7 @@ export default class ParallelDOM extends PhetioObject {
   protected _onAriaValueTextChangeListener: () => void;
   protected _onLabelContentChangeListener: () => void;
   protected _onDescriptionContentChangeListener: () => void;
+  protected _onAccessibleParagraphContentChangeListener: () => void;
   protected _onInnerContentChangeListener: () => void;
 
   protected constructor( options?: PhetioObjectOptions ) {
@@ -643,6 +644,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onAriaValueTextChangeListener = this.onAriaValueTextChange.bind( this );
     this._onLabelContentChangeListener = this.invalidatePeerLabelSiblingContent.bind( this );
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
+    this._onAccessibleParagraphContentChangeListener = this.invalidatePeerParagraphSiblingContent.bind( this );
     this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
 
     this._tagName = null;
@@ -739,6 +741,10 @@ export default class ParallelDOM extends PhetioObject {
 
     if ( isTReadOnlyProperty( this._descriptionContent ) && !this._descriptionContent.isDisposed ) {
       this._descriptionContent.unlink( this._onDescriptionContentChangeListener );
+    }
+
+    if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
+      this._accessibleParagraph.unlink( this._onDescriptionContentChangeListener );
     }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
@@ -922,6 +928,13 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
+  private invalidatePeerParagraphSiblingContent(): void {
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.setAccessibleParagraphContent( this.accessibleParagraph );
+    }
+  }
+
   /**
    * Sets this Node as a paragraph with the provided content. This lets you easily describe Nodes for screen readers. This
    * is most useful for non-interactive elements that need to be described.
@@ -936,7 +949,15 @@ export default class ParallelDOM extends PhetioObject {
       // If setting to null, or just becoming null, need to update the renderer summary
       const contentChange = !!this._accessibleParagraph !== !!accessibleParagraph;
 
+      if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
+        this._accessibleParagraph.unlink( this._onAccessibleParagraphContentChangeListener );
+      }
+
       this._accessibleParagraph = accessibleParagraph;
+
+      if ( isTReadOnlyProperty( accessibleParagraph ) ) {
+        accessibleParagraph.lazyLink( this._onAccessibleParagraphContentChangeListener );
+      }
 
       contentChange && this.onPDOMContentChange();
     }
