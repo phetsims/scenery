@@ -406,17 +406,17 @@ window.assertions.disableAssertSlow();
       <li><a href="#node-visible">visible</a>: If false, this node (and its children) will not be displayed (or get input events)</li>
       <li><a href="#node-pickable">pickable</a>: If false, this node (and its children) will not get input events</li>
       <li><a href="#node-opacity">opacity</a>: From 0 (transparent) to 1 (opaque)</li>
-      <li><a href="#node-matrix">matrix</a>: Sets the transform matrix of the node to the specified <a href="../../dot/doc#matrix3">dot.Matrix3</a>
+      <li><a href="#node-matrix">matrix</a>: Sets the transform matrix of the node to the specified <a href="https://scenerystack.org/reference/api/dot/Matrix3/">dot.Matrix3</a>
         value
       </li>
-      <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified <a href="../../dot/doc#vector2">dot.Vector2</a>
+      <li><a href="#node-translation">translation</a>: Sets the translation of the node to either the specified <a href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a>
         value, or the x,y values from an object (e.g. translation: { x: 1, y: 2 } )
       </li>
       <li><a href="#node-x">x</a>: Sets the x-translation of the node</li>
       <li><a href="#node-y">y</a>: Sets the y-translation of the node</li>
       <li><a href="#node-rotation">rotation</a>: Sets the rotation of the node in radians</li>
       <li><a href="#node-scale">scale</a>: Sets the scale of the node. Supports either a number (same x-y scale), or a <a
-          href="../../dot/doc#vector2">dot.Vector2</a> / object with ob.x and ob.y to set the scale for each axis independently
+          href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a> / object with ob.x and ob.y to set the scale for each axis independently
       </li>
       <li><a href="#node-left">left</a>: Sets the x-translation so that the left (min X) of the bounding box (in the parent coordinate frame) is at
         the specified value
@@ -431,7 +431,7 @@ window.assertions.disableAssertSlow();
         at the specified value
       </li>
       <li><a href="#node-center">center</a>: Sets the translation so that the center of the bounding box (in the parent coordinate frame) is at the
-        specified <a href="../../dot/doc#vector2">dot.Vector2</a> value
+        specified <a href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a> value
       </li>
       <li><a href="#node-centerX">centerX</a>: Sets the x-translation so that the horizontal center of the bounding box (in the parent coordinate
         frame) is at the specified value
@@ -614,7 +614,7 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      Accepts both arbitrary shapes (<a href="../../kite/doc#shape">Shape</a>) and bounding boxes (<a href="../../dot/doc#bounds2">Bounds2</a>).
+      Accepts both arbitrary shapes (<a href="https://scenerystack.org/reference/api/kite/Shape/">Shape</a>) and bounding boxes (<a href="https://scenerystack.org/reference/api/dot/Bounds2/">Bounds2</a>).
     </p>
 
     <p>
@@ -631,7 +631,7 @@ window.assertions.disableAssertSlow();
     </p>
 
     <p>
-      Accepts both arbitrary shapes (<a href="../../kite/doc#shape">Shape</a>) and bounding boxes (<a href="../../dot/doc#bounds2">Bounds2</a>).
+      Accepts both arbitrary shapes (<a href="https://scenerystack.org/reference/api/kite/Shape/">Shape</a>) and bounding boxes (<a href="https://scenerystack.org/reference/api/dot/Bounds2/">Bounds2</a>).
     </p>
 
     <p>
@@ -644,7 +644,7 @@ window.assertions.disableAssertSlow();
 
     <p>
       <code>node.clipArea</code> is a getter/setter linked to <code>node.getClipArea()</code> and <code>node.setClipArea( shape )</code>.
-      Default is <code>null</code> (no clipping), but when the clipArea is set to a <a href="../../kite/doc#shape">Shape</a>, anything outside
+      Default is <code>null</code> (no clipping), but when the clipArea is set to a <a href="https://scenerystack.org/reference/api/kite/Shape/">Shape</a>, anything outside
       of the clip area Shape (in the node's local coordinate frame) is not displayed. This clipping affects both the node's own display, and the
       display of any
       of its children.
@@ -756,22 +756,22 @@ window.assertions.disableAssertSlow();
     <p>
       <code>node.matrix</code> (<code>node.getMatrix()</code>, <code>node.setMatrix( matrix )</code>) gets or sets the transformation matrix
       associated with the
-      node, of type <a href="../../dot/doc#matrix3">dot.Matrix3</a>.
+      node, of type <a href="https://scenerystack.org/reference/api/dot/Matrix3/">dot.Matrix3</a>.
     </p>
 
     <h4 id="node-translation">node.translation</h4>
 
     <p>
       Getting the translation: <code>node.translation</code> or <code>node.getTranslation()</code>. It always returns a <a
-        href="../../dot/doc#vector2">dot.Vector2</a> instance representing
-      the translation part of the node's transform. See <a href="../../dot/doc#matrix3-getTranslation">dot.Matrix3.getTranslation</a> for more
+        href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a> instance representing
+      the translation part of the node's transform. See <a href="https://scenerystack.org/reference/api/dot/Matrix3/-getTranslation">dot.Matrix3.getTranslation</a> for more
       information.
     </p>
 
     <p>
       Setting the translation: <code>node.translation = translation</code>, <code>node.setTranslation( translation )</code> or <code>node.setTranslation(
       x, y )</code>.
-      In both instances, <code>translation</code> can be either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object literal like <code>{ x:
+      In both instances, <code>translation</code> can be either a <a href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a> or an object literal like <code>{ x:
       5, y: 10 }</code>.
     </p>
 
@@ -780,7 +780,7 @@ window.assertions.disableAssertSlow();
     <p>
       Translates the node relatively by <code>x</code> and <code>y</code>. In addition to <code>node.translate( x, y )</code>, <code>node.translate(
       translation )</code>
-      can be used, where <code>transform</code> is either a <a href="../../dot/doc#vector2">dot.Vector2</a> or an object like <code>{ x: 5, y: 10
+      can be used, where <code>transform</code> is either a <a href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a> or an object like <code>{ x: 5, y: 10
       }</code>
     </p>
 
@@ -820,7 +820,7 @@ window.assertions.disableAssertSlow();
     <h4 id="node-rotateAround">node.rotateAround( <span class="args">point, angle</span> )</h4>
 
     <p>
-      Rotates the node by <code>angle</code> in radians around the <a href="../../dot/doc#vector2">dot.Vector2</a> <code>point</code>.
+      Rotates the node by <code>angle</code> in radians around the <a href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a> <code>point</code>.
       <code>point</code> should be in the node's parent coordinate frame.
     </p>
 
@@ -839,7 +839,7 @@ window.assertions.disableAssertSlow();
     <h4 id="node-bounds">node.bounds</h4>
 
     <p>
-      Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with
+      Returns the <a href="https://scenerystack.org/reference/api/dot/Bounds2/">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with
       <code>node.getBounds()</code>. It includes all children, regardless
       of whether they are visible or not.
       <!-- TODO: add an example -->
@@ -848,7 +848,7 @@ window.assertions.disableAssertSlow();
     <h4 id="node-selfBounds">node.selfBounds</h4>
 
     <p>
-      Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (without its children) in the local coordinate frame. Also available
+      Returns the <a href="https://scenerystack.org/reference/api/dot/Bounds2/">bounding box</a> of this node (without its children) in the local coordinate frame. Also available
       with <code>node.getSelfBounds()</code>.
       <!-- TODO: add an example -->
     </p>
@@ -856,7 +856,7 @@ window.assertions.disableAssertSlow();
     <h4 id="node-childBounds">node.childBounds</h4>
 
     <p>
-      Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node's children (without include the node's selfBounds) in the local
+      Returns the <a href="https://scenerystack.org/reference/api/dot/Bounds2/">bounding box</a> of this node's children (without include the node's selfBounds) in the local
       coordinate frame. Also available with <code>node.getChildBounds()</code>.
       <!-- TODO: add an example -->
     </p>
@@ -864,7 +864,7 @@ window.assertions.disableAssertSlow();
     <h4 id="node-visibleBounds">node.visibleBounds</h4>
 
     <p>
-      Returns the <a href="../../dot/doc#bounds2">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with
+      Returns the <a href="https://scenerystack.org/reference/api/dot/Bounds2/">bounding box</a> of this node (and its children) in the parent coordinate frame. Also available with
       <code>node.getVisibleBounds()</code>. Unlike <a href="#node-bounds">bounds</a>, this includes only descendants which are visible. It is not
       tracked, so each call will
       need to traverse the subtree to get the bounds.
@@ -908,7 +908,7 @@ window.assertions.disableAssertSlow();
     <p>
       <code>node.center</code> gets or sets the center of this node's <a href="#node-bounds">bounds</a> in the parent coordinate frame, with
       <code>node.getCenter()</code> and <code>node.setCenter( center )</code>, which both handle the center as a
-      <a href="../../dot/doc#vector2">dot.Vector2</a> instance. Setting center effectively translates the node.
+      <a href="https://scenerystack.org/reference/api/dot/Vector2/">dot.Vector2</a> instance. Setting center effectively translates the node.
     </p>
 
     <h4 id="node-centerX">node.centerX</h4>
@@ -1012,7 +1012,7 @@ window.assertions.disableAssertSlow();
     <p>
       <code>display.size</code> is a getter/setter for <code>display.getSize()</code> and <code>display.setSize( size )</code> which can retrieve or
       set the size of the display's DOM element (of type
-      <a href="../../dot/doc#dimension2">Dimension2</a>). The size will not change until after the next <a
+      <a href="https://scenerystack.org/reference/api/dot/Dimension2/">Dimension2</a>). The size will not change until after the next <a
         href="#display-updateDisplay">updateDisplay</a> call.
     </p>
 
@@ -1355,9 +1355,9 @@ window.assertions.disableAssertSlow();
     <p>
       <code>node.shape</code> (<code>node.getShape()</code>, <code>node.setShape( shape )</code>)
       controls the shape of this path, and is either an instance of <a href="../../kite">Kite</a>'s
-      <a href="../../kite/doc#shape">Shape</a>, or it is a string representing an <a href="http://www.w3.org/TR/SVG/paths.html#DAttribute">SVG
+      <a href="https://scenerystack.org/reference/api/kite/Shape/">Shape</a>, or it is a string representing an <a href="http://www.w3.org/TR/SVG/paths.html#DAttribute">SVG
       path</a>,
-      and will be converted into a <a href="../../kite/doc#shape">Shape</a>.
+      and will be converted into a <a href="https://scenerystack.org/reference/api/kite/Shape/">Shape</a>.
     </p>
 
     <h3 id="image" class="section">Image</h3>
@@ -1655,7 +1655,7 @@ window.assertions.disableAssertSlow();
     <h4 id="linearGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
 
     <p>
-      Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
+      Given a <a href="https://scenerystack.org/reference/api/dot/Matrix3/">Matrix3</a> for <code>matrix</code>, it will transform
       the gradient as it is applied. This should only be done before adding it as a fill/stroke to
       any nodes.
     </p>
@@ -1726,7 +1726,7 @@ window.assertions.disableAssertSlow();
     <h4 id="radialGradient-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
 
     <p>
-      Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
+      Given a <a href="https://scenerystack.org/reference/api/dot/Matrix3/">Matrix3</a> for <code>matrix</code>, it will transform
       the gradient as it is applied. This should only be done before adding it as a fill/stroke to
       any nodes.
     </p>
@@ -1770,7 +1770,7 @@ window.assertions.disableAssertSlow();
     <h4 id="pattern-setTransformMatrix">setTransformMatrix( <span class="args">matrix</span> )</h4>
 
     <p>
-      Given a <a href="../../dot/doc#matrix3">Matrix3</a> for <code>matrix</code>, it will transform
+      Given a <a href="https://scenerystack.org/reference/api/dot/Matrix3/">Matrix3</a> for <code>matrix</code>, it will transform
       the gradient as it is applied. This should only be done before adding it as a fill/stroke to
       any nodes.
     </p>
