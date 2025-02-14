@@ -77,14 +77,14 @@
  * ## Creating Nodes
  *
  * Generally, there are two types of Nodes:
- * - Nodes that don't display anything, but serve as a container for other Nodes (e.g. Node itself, HBox, VBox)
- * - Nodes that display content, but ALSO serve as a container (e.g. Circle, Image, Text)
+ * - Nodes that don't display anything, but serve as a container for other Nodes (e.g. `Node` itself, `HBox`, `VBox`)
+ * - Nodes that display content, but ALSO serve as a container (e.g. `Circle`, `Image`, `Text`)
  *
  * When a Node is created with the default Node constructor, e.g.:
  *   var node = new Node();
  * then that Node will not display anything by itself.
  *
- * Generally subtypes of Node are used for displaying things, such as Circle, e.g.:
+ * Generally subtypes of Node are used for displaying things, such as `Circle`, e.g.:
  *   var circle = new Circle( 20 ); // radius of 20
  *
  * Almost all Nodes (with the exception of leaf-only Nodes like Spacer) can contain children.
