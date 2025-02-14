@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import toSVGNumber from '../../../dot/js/toSVGNumber.js';
+import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';
 import platform from '../../../phet-core/js/platform.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Filter from '../filters/Filter.js';

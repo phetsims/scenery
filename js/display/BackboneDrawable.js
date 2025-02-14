@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import toSVGNumber from '../../../dot/js/toSVGNumber.js';
+import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import Drawable from '../display/Drawable.js';

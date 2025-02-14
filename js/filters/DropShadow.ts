@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import toSVGNumber from '../../../dot/js/toSVGNumber.js';
+import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import ColorDef from '../util/ColorDef.js';
 import Filter from '../filters/Filter.js';
