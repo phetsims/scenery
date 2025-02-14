@@ -21,6 +21,7 @@ import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
 import scenery from '../../scenery.js';
 import { pdomFocusProperty } from '../pdomFocusProperty.js';
 import { guessVisualTrail } from './guessVisualTrail.js';
+import { PEER_ACCESSIBLE_PARAGRAPH_SIBLING } from './PEER_ACCESSIBLE_PARAGRAPH_SIBLING.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 import { PEER_DESCRIPTION_SIBLING } from './PEER_DESCRIPTION_SIBLING.js';
 import { PEER_LABEL_SIBLING } from './PEER_LABEL_SIBLING.js';
@@ -30,6 +31,7 @@ import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
 const PRIMARY_SIBLING = PEER_PRIMARY_SIBLING;
 const LABEL_SIBLING = PEER_LABEL_SIBLING;
 const DESCRIPTION_SIBLING = PEER_DESCRIPTION_SIBLING;
+const ACCESSIBLE_PARAGRAPH_SIBLING = PEER_ACCESSIBLE_PARAGRAPH_SIBLING;
 const CONTAINER_PARENT = PEER_CONTAINER_PARENT;
 const LABEL_TAG = PDOMUtils.TAGS.LABEL;
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
@@ -103,6 +105,9 @@ class PDOMPeer {
     // @private {HTMLElement|null} - Optional label/description elements
     this._labelSibling = null;
     this._descriptionSibling = null;
+
+    // @private {HTMLElement|null} - Optional paragraph element for the "high level" API.
+    this._accessibleParagraphSibling = null;
 
     // @private {HTMLElement|null} - A parent element that can contain this primarySibling and other siblings, usually
     // the label and description content.
@@ -199,6 +204,10 @@ class PDOMPeer {
 
     const callbacksForOtherNodes = [];
 
+    // In case update() is called more than once on an instance of PDOMPeer. Observer will be set up
+    // later if there is a primary sibling.
+    this.mutationObserver.disconnect();
+
     // Even if the accessibleName is null, we need to run the behavior function if the dirty flag is set
     // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
     if ( this.node.accessibleName !== null || this.node._accessibleNameDirty ) {
@@ -236,87 +245,99 @@ class PDOMPeer {
       this.node._accessibleHelpTextDirty = false;
     }
 
+    if ( options.accessibleParagraph ) {
+      this._accessibleParagraphSibling = createElement( 'p', false );
+      this.setAccessibleParagraphContent( options.accessibleParagraph );
+    }
+
     // create the base DOM element representing this accessible instance
-    // TODO: why not just options.focusable? https://github.com/phetsims/scenery/issues/1581
-    this._primarySibling = createElement( options.tagName, this.node.focusable, {
-      namespace: options.pdomNamespace
-    } );
+    if ( options.tagName ) {
 
-    // create the container parent for the dom siblings
-    if ( options.containerTagName ) {
-      this._containerParent = createElement( options.containerTagName, false );
-    }
-
-    // create the label DOM element representing this instance
-    if ( options.labelTagName ) {
-      this._labelSibling = createElement( options.labelTagName, false, {
-        excludeFromInput: this.node.excludeLabelSiblingFromInput
+      // TODO: why not just options.focusable? https://github.com/phetsims/scenery/issues/1581
+      this._primarySibling = createElement( options.tagName, this.node.focusable, {
+        namespace: options.pdomNamespace
       } );
+
+      // create the container parent for the dom siblings
+      if ( options.containerTagName ) {
+        this._containerParent = createElement( options.containerTagName, false );
+      }
+
+      // create the label DOM element representing this instance
+      if ( options.labelTagName ) {
+        this._labelSibling = createElement( options.labelTagName, false, {
+          excludeFromInput: this.node.excludeLabelSiblingFromInput
+        } );
+      }
+
+      // create the description DOM element representing this instance
+      if ( options.descriptionTagName ) {
+        this._descriptionSibling = createElement( options.descriptionTagName, false );
+      }
     }
 
-    // create the description DOM element representing this instance
-    if ( options.descriptionTagName ) {
-      this._descriptionSibling = createElement( options.descriptionTagName, false );
-    }
-
+    // Set ids on the elements - Attributes set below this call may require that the ids are set!!
     updateIndicesStringAndElementIds && this.updateIndicesStringAndElementIds();
 
     this.orderElements( options );
 
-    // assign listeners (to be removed or disconnected during disposal)
-    this.mutationObserver.disconnect(); // in case update() is called more than once on an instance of PDOMPeer
-    this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
+    // The primary sibling (set with Node.tagName) is required for the peer to be visible in the PDOM.
+    if ( this._primarySibling ) {
 
-    // set the accessible label now that the element has been recreated again, but not if the tagName
-    // has been cleared out
-    if ( options.labelContent && options.labelTagName !== null ) {
-      this.setLabelSiblingContent( options.labelContent );
+      // assign listeners (to be removed or disconnected during disposal)
+      this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
+
+      // set the accessible label now that the element has been recreated again, but not if the tagName
+      // has been cleared out
+      if ( options.labelContent && options.labelTagName !== null ) {
+        this.setLabelSiblingContent( options.labelContent );
+      }
+
+      // restore the innerContent
+      if ( options.innerContent && options.tagName !== null ) {
+        this.setPrimarySiblingContent( options.innerContent );
+      }
+
+      // set the accessible description, but not if the tagName has been cleared out.
+      if ( options.descriptionContent && options.descriptionTagName !== null ) {
+        this.setDescriptionSiblingContent( options.descriptionContent );
+      }
+
+      // if element is an input element, set input type
+      if ( options.tagName.toUpperCase() === INPUT_TAG && options.inputType ) {
+        this.setAttributeToElement( 'type', options.inputType );
+      }
+
+      // if the label element happens to be a 'label', associate with 'for' attribute (must be done after updating IDs)
+      if ( options.labelTagName && options.labelTagName.toUpperCase() === LABEL_TAG ) {
+        this.setAttributeToElement( 'for', this._primarySibling.id, {
+          elementName: PDOMPeer.LABEL_SIBLING
+        } );
+      }
+
+      this.setFocusable( this.node.focusable );
+
+      // set the positionInPDOM field to our updated instance
+      this.setPositionInPDOM( this.node.positionInPDOM );
+
+      // recompute and assign the association attributes that link two elements (like aria-labelledby)
+      this.onAriaLabelledbyAssociationChange();
+      this.onAriaDescribedbyAssociationChange();
+      this.onActiveDescendantAssociationChange();
+
+      // update all attributes for the peer, should cover aria-label, role, and others
+      this.onAttributeChange( options );
+
+      // update all classes for the peer
+      this.onClassChange();
+
+      // update input value attribute for the peer
+      this.onInputValueChange();
+
+      this.node.updateOtherNodesAriaLabelledby();
+      this.node.updateOtherNodesAriaDescribedby();
+      this.node.updateOtherNodesActiveDescendant();
     }
-
-    // restore the innerContent
-    if ( options.innerContent && options.tagName !== null ) {
-      this.setPrimarySiblingContent( options.innerContent );
-    }
-
-    // set the accessible description, but not if the tagName has been cleared out.
-    if ( options.descriptionContent && options.descriptionTagName !== null ) {
-      this.setDescriptionSiblingContent( options.descriptionContent );
-    }
-
-    // if element is an input element, set input type
-    if ( options.tagName.toUpperCase() === INPUT_TAG && options.inputType ) {
-      this.setAttributeToElement( 'type', options.inputType );
-    }
-
-    // if the label element happens to be a 'label', associate with 'for' attribute (must be done after updating IDs)
-    if ( options.labelTagName && options.labelTagName.toUpperCase() === LABEL_TAG ) {
-      this.setAttributeToElement( 'for', this._primarySibling.id, {
-        elementName: PDOMPeer.LABEL_SIBLING
-      } );
-    }
-
-    this.setFocusable( this.node.focusable );
-
-    // set the positionInPDOM field to our updated instance
-    this.setPositionInPDOM( this.node.positionInPDOM );
-
-    // recompute and assign the association attributes that link two elements (like aria-labelledby)
-    this.onAriaLabelledbyAssociationChange();
-    this.onAriaDescribedbyAssociationChange();
-    this.onActiveDescendantAssociationChange();
-
-    // update all attributes for the peer, should cover aria-label, role, and others
-    this.onAttributeChange( options );
-
-    // update all classes for the peer
-    this.onClassChange();
-
-    // update input value attribute for the peer
-    this.onInputValueChange();
-
-    this.node.updateOtherNodesAriaLabelledby();
-    this.node.updateOtherNodesAriaDescribedby();
-    this.node.updateOtherNodesActiveDescendant();
 
     callbacksForOtherNodes.forEach( callback => {
       assert && assert( typeof callback === 'function' );
@@ -340,14 +361,29 @@ class PDOMPeer {
     else {
 
       // Wean out any null siblings
-      this.topLevelElements = [ this._labelSibling, this._descriptionSibling, this._primarySibling ].filter( _.identity );
+      this.topLevelElements = [ this._labelSibling, this._descriptionSibling, this._primarySibling, this._accessibleParagraphSibling ].filter( _.identity );
     }
 
     // insert the label and description elements in the correct location if they exist
     // NOTE: Important for arrangeContentElement to be called on the label sibling first for correct order
     this._labelSibling && this.arrangeContentElement( this._labelSibling, config.appendLabel );
     this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, config.appendDescription );
+    this._accessibleParagraphSibling && this.arrangeContentElement( this._accessibleParagraphSibling, true );
+  }
 
+  /**
+   * Returns the sibling that can be placed in the PDOM. This is the primary sibling if it exists, otherwise the
+   * accessible paragraph.
+   *
+   * If other elements can be placed without the primary sibling, they could be added to this function.
+   *
+   * @public
+   */
+  getPlaceableSibling() {
+    const placeable = this._primarySibling || this._accessibleParagraphSibling;
+    assert && assert( placeable, 'No placeable sibling found!' );
+
+    return placeable;
   }
 
   /**
@@ -552,6 +588,9 @@ class PDOMPeer {
     else if ( elementName === PDOMPeer.CONTAINER_PARENT ) {
       return this._containerParent;
     }
+    else if ( elementName === ACCESSIBLE_PARAGRAPH_SIBLING ) {
+      return this._accessibleParagraphSibling;
+    }
 
     throw new Error( `invalid elementName name: ${elementName}` );
   }
@@ -653,6 +692,7 @@ class PDOMPeer {
     this._primarySibling && this._primarySibling.removeAttribute( attribute );
     this._labelSibling && this._labelSibling.removeAttribute( attribute );
     this._descriptionSibling && this._descriptionSibling.removeAttribute( attribute );
+    this._accessibleParagraphSibling && this._accessibleParagraphSibling.removeAttribute( attribute );
     this._containerParent && this._containerParent.removeAttribute( attribute );
   }
 
@@ -933,6 +973,21 @@ class PDOMPeer {
   }
 
   /**
+   * Responsible for setting the content for the paragraph sibling.
+   * @public (scenery-internal)
+   * @param {string|null} content - the content for the paragraph sibling.
+   */
+  setAccessibleParagraphContent( content ) {
+    assert && assert( content === null || typeof content === 'string', 'incorrect description content type' );
+
+    // no-op to support any option order
+    if ( !this._accessibleParagraphSibling ) {
+      return;
+    }
+    PDOMUtils.setTextContent( this._accessibleParagraphSibling, content );
+  }
+
+  /**
    * Responsible for setting the content for the primary sibling
    * @public (scenery-internal)
    * @param {string|null} content - the content for the primary sibling.
@@ -1014,6 +1069,12 @@ class PDOMPeer {
       this._descriptionSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._descriptionSibling.id = this.getElementId( 'description', indices );
     }
+    if ( this._accessibleParagraphSibling ) {
+
+      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
+      this._accessibleParagraphSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._accessibleParagraphSibling.id = this.getElementId( 'paragraph', indices );
+    }
     if ( this._containerParent ) {
 
       // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
@@ -1089,7 +1150,8 @@ class PDOMPeer {
    * @private
    */
   positionElements( positionInPDOM ) {
-    assert && assert( this._primarySibling, 'a primary sibling required to receive CSS positioning' );
+    const placeableSibling = this.getPlaceableSibling();
+    assert && assert( placeableSibling, 'a primary sibling required to receive CSS positioning' );
     assert && assert( this.positionDirty, 'elements should only be repositioned if dirty' );
 
     // CSS transformation only needs to be applied if the node is focusable - otherwise the element will be found
@@ -1111,14 +1173,14 @@ class PDOMPeer {
           // the Display, where VoiceOver would otherwise send pointer events.
           scratchGlobalBounds.constrainBounds( displayBounds );
 
-          let clientDimensions = getClientDimensions( this._primarySibling );
+          let clientDimensions = getClientDimensions( placeableSibling );
           let clientWidth = clientDimensions.width;
           let clientHeight = clientDimensions.height;
 
           if ( clientWidth > 0 && clientHeight > 0 ) {
             scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
             scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-            setClientBounds( this._primarySibling, scratchSiblingBounds );
+            setClientBounds( placeableSibling, scratchSiblingBounds );
           }
 
           if ( this.labelSibling ) {
@@ -1139,7 +1201,7 @@ class PDOMPeer {
 
       // not positioning, just move off screen
       scratchSiblingBounds.set( PDOMPeer.OFFSCREEN_SIBLING_BOUNDS );
-      setClientBounds( this._primarySibling, scratchSiblingBounds );
+      setClientBounds( placeableSibling, scratchSiblingBounds );
       if ( this._labelSibling ) {
         setClientBounds( this._labelSibling, scratchSiblingBounds );
       }
@@ -1210,11 +1272,14 @@ class PDOMPeer {
     this.isDisposed = true;
 
     // remove focus if the disposed peer is the active element
-    this.blur();
+    if ( this._primarySibling ) {
+      this.blur();
+
+      this._primarySibling.removeEventListener( 'blur', this.blurEventListener );
+      this._primarySibling.removeEventListener( 'focus', this.focusEventListener );
+    }
 
     // remove listeners
-    this._primarySibling.removeEventListener( 'blur', this.blurEventListener );
-    this._primarySibling.removeEventListener( 'focus', this.focusEventListener );
     this.pdomInstance.transformTracker.removeListener( this.transformListener );
     this.mutationObserver.disconnect();
 
@@ -1226,6 +1291,7 @@ class PDOMPeer {
     this._primarySibling = null;
     this._labelSibling = null;
     this._descriptionSibling = null;
+    this._accessibleParagraphSibling = null;
     this._containerParent = null;
     this.focusable = null;
 

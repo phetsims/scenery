@@ -176,7 +176,7 @@ class PDOMInstance {
       // The peer is not fully constructed until this update function is called, see https://github.com/phetsims/scenery/issues/832
       // Trail Ids will never change, so update them eagerly, a single time during construction.
       this.peer!.update( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
-      assert && assert( this.peer!.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
+      assert && assert( this.peer!.getPlaceableSibling(), 'accessible peer must have elements ready upon completion of construction' );
 
       // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for pdomDisplays
       // so we can initialize our invisibleCount and add listeners.
@@ -221,10 +221,11 @@ class PDOMInstance {
     for ( let i = 0; i < pdomInstances.length; i++ ) {
       // Append the container parent to the end (so that, when provided in order, we don't have to resort below
       // when initializing).
-      assert && assert( !!this.peer!.primarySibling, 'Primary sibling must be defined to insert elements.' );
+      const placeableSibling = this.peer!.getPlaceableSibling();
+      assert && assert( !!placeableSibling, 'Primary sibling must be defined to insert elements.' );
 
       // @ts-expect-error - when PDOMPeer is converted to TS this ts-expect-error can probably be removed
-      PDOMUtils.insertElements( this.peer.primarySibling!, pdomInstances[ i ].peer.topLevelElements );
+      PDOMUtils.insertElements( placeableSibling, pdomInstances[ i ].peer.topLevelElements );
     }
 
     if ( hadChildren ) {
@@ -472,7 +473,7 @@ class PDOMInstance {
     this.children = targetChildren;
 
     // the DOMElement to add the child DOMElements to.
-    const primarySibling = this.peer!.primarySibling!;
+    const placeableSibling = this.peer!.getPlaceableSibling();
 
     // Ignore DAG for focused trail. We need to know if there is a focused child instance so that we can avoid
     // temporarily detaching the focused element from the DOM. See https://github.com/phetsims/my-solar-system/issues/142
@@ -480,7 +481,7 @@ class PDOMInstance {
 
     // "i" will keep track of the "collapsed" index when all DOMElements for all PDOMInstance children are
     // added to a single parent DOMElement (this PDOMInstance's PDOMPeer's primarySibling)
-    let i = primarySibling.childNodes.length - 1;
+    let i = placeableSibling.childNodes.length - 1;
 
     const focusedChildInstance = focusedTrail && _.find( this.children, child => focusedTrail.containsNode( child.peer!.node ) );
     if ( focusedChildInstance ) {
@@ -489,7 +490,7 @@ class PDOMInstance {
       // Since this doesn't happen often, we can just recompute the full order, and move every other element.
 
       const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements! ) );
-      const needsOrderChange = !_.every( desiredOrder, ( desiredElement, index ) => primarySibling.children[ index ] === desiredElement );
+      const needsOrderChange = !_.every( desiredOrder, ( desiredElement, index ) => placeableSibling.children[ index ] === desiredElement );
 
       if ( needsOrderChange ) {
         const pivotElement = focusedChildInstance.peer!.getTopLevelElementContainingPrimarySibling();
@@ -498,12 +499,12 @@ class PDOMInstance {
 
         // Insert all elements before the pivot element
         for ( let j = 0; j < pivotIndex; j++ ) {
-          primarySibling.insertBefore( desiredOrder[ j ], pivotElement );
+          placeableSibling.insertBefore( desiredOrder[ j ], pivotElement );
         }
 
         // Insert all elements after the pivot element
         for ( let j = pivotIndex + 1; j < desiredOrder.length; j++ ) {
-          primarySibling.appendChild( desiredOrder[ j ] );
+          placeableSibling.appendChild( desiredOrder[ j ] );
         }
       }
     }
@@ -518,8 +519,8 @@ class PDOMInstance {
 
           // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
           // No need to reinsert if `element` is already in the right order
-          if ( primarySibling.childNodes[ i ] !== element ) {
-            primarySibling.insertBefore( element, primarySibling.childNodes[ i + 1 ] );
+          if ( placeableSibling.childNodes[ i ] !== element ) {
+            placeableSibling.insertBefore( element, placeableSibling.childNodes[ i + 1 ] );
           }
 
           // Decrement so that it is easier to place elements using the browser's Node.insertBefore API
@@ -532,7 +533,7 @@ class PDOMInstance {
       const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements! ) );
 
       // Verify the order
-      assert( _.every( desiredOrder, ( desiredElement, index ) => primarySibling.children[ index ] === desiredElement ) );
+      assert( _.every( desiredOrder, ( desiredElement, index ) => placeableSibling.children[ index ] === desiredElement ) );
     }
 
     if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
@@ -621,7 +622,7 @@ class PDOMInstance {
 
       // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
       // primary sibling (or its child container)
-      PDOMUtils.removeElements( this.parent!.peer!.primarySibling!, thisPeer.topLevelElements! );
+      PDOMUtils.removeElements( this.parent!.peer!.getPlaceableSibling(), thisPeer.topLevelElements! );
 
       for ( let i = 0; i < this.relativeNodes!.length; i++ ) {
         this.relativeNodes![ i ].pdomDisplaysEmitter.removeListener( this.relativeListeners[ i ] );

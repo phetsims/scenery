@@ -850,12 +850,15 @@ export default class ParallelDOM extends PhetioObject {
 
     if ( this.hasPDOMContent && assert ) {
 
-      this._inputType && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
-      this._pdomChecked && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
-      this._inputValue && assert( this._tagName!.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
-      this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.includes( this._inputType!.toUpperCase() ), `inputType does not support checked attribute: ${this._inputType}` );
-      this._focusHighlightLayerable && assert( this.focusHighlight instanceof ParallelDOM, 'focusHighlight must be Node if highlight is layerable' );
-      this._tagName!.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
+      if ( this._tagName ) {
+        this._inputType && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
+        this._pdomChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
+        this._inputValue && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
+
+        this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.includes( this._inputType!.toUpperCase() ), `inputType does not support checked attribute: ${this._inputType}` );
+        this._focusHighlightLayerable && assert( this.focusHighlight instanceof ParallelDOM, 'focusHighlight must be Node if highlight is layerable' );
+        this._tagName.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
+      }
 
       // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
       // but this will catch most cases since often things that get added to the focus order have the application
@@ -928,17 +931,14 @@ export default class ParallelDOM extends PhetioObject {
    * This is part of the "Higher level API", but there is no customizing behavior function for this function.
    */
   public setAccessibleParagraph( accessibleParagraph: PDOMValueType | null ): void {
-    assert && assert( this.descriptionTagName === null || this.descriptionTagName === 'p', `accessibleParagraph can only be set on a Node with descriptionTagName p: ${this.descriptionTagName}` );
     if ( accessibleParagraph !== this._accessibleParagraph ) {
 
-      // Forward to the lower level API. Set to the descriptionTagName so that the Node can still have children with
-      // accessible content if necessary. For example this si required for Voicing since reading blocks are focusable
-      // and maybe children of conainer with accessibleParagraph.
-      this.tagName = this.tagName || 'div';
-      this.descriptionTagName = 'p';
-      this.descriptionContent = accessibleParagraph;
+      // If setting to null, or just becoming null, need to update the renderer summary
+      const contentChange = !!this._accessibleParagraph !== !!accessibleParagraph;
 
       this._accessibleParagraph = accessibleParagraph;
+
+      contentChange && this.onPDOMContentChange();
     }
   }
 
@@ -3240,7 +3240,7 @@ export default class ParallelDOM extends PhetioObject {
    * Note this is still true if the content is pdomVisible=false or is otherwise hidden.
    */
   public get hasPDOMContent(): boolean {
-    return !!this._tagName;
+    return !!this._tagName || !!this._accessibleParagraph;
   }
 
   /**

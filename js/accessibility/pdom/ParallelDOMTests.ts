@@ -2284,6 +2284,78 @@ QUnit.test( 'Display.interactive toggling in the PDOM', assert => {
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
 
+QUnit.test( 'accessibleParagraph', assert => {
+
+  const rootNode = new Node( { tagName: 'div' } );
+  var display = new Display( rootNode ); // eslint-disable-line no-var
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+
+  const paragraphContent = 'Test Paragraph';
+
+  //-------------------------------------------------------------------------
+  // Basics
+  //-------------------------------------------------------------------------
+  const a = new Node();
+
+  rootNode.addChild( a );
+
+  a.accessibleParagraph = paragraphContent;
+  assert.ok( a.accessibleParagraph === paragraphContent, 'getter and setter' );
+
+  const aPeer = getPDOMPeerByNode( a );
+  assert.ok( !!aPeer, 'A peer should be created from accessibleParagraph' );
+
+  const aRenderedElement = aPeer.getPlaceableSibling();
+  assert.ok( aRenderedElement.tagName === 'P', 'A paragraph should be created in the DOM' );
+
+  assert.ok( a.tagName === null, 'There is no tagName on Node, but the element is still in the DOM' );
+
+  //-------------------------------------------------------------------------
+  // Integration with the lower level API and ordering
+  //-------------------------------------------------------------------------
+  const bLabelTagName = 'H3';
+  const bTagName = 'BUTTON';
+  const bDescriptionTagName = 'SPAN';
+  const bParagraphTagName = 'P';
+  const b = new Node( {
+    tagName: 'button',
+
+    labelTagName: 'h3',
+    labelContent: 'Test Button',
+
+    descriptionTagName: 'span',
+    descriptionContent: 'Test Description',
+
+    accessibleParagraph: paragraphContent
+  } );
+
+  rootNode.addChild( b );
+
+  const bPeer = getPDOMPeerByNode( b );
+  let bRenderedElements = bPeer.topLevelElements!;
+  assert.ok( !!bRenderedElements, 'A peer should be created from tagName and accessibleParagraph' );
+
+  assert.ok( bRenderedElements[ 0 ].tagName === bLabelTagName, 'b label element is in the DOM and before the paragraph' );
+  assert.ok( bRenderedElements[ 1 ].tagName === bDescriptionTagName, 'b description element is in the DOM and after the focusable element' );
+  assert.ok( bRenderedElements[ 2 ].tagName === bTagName, 'b primary element is in the DOM' );
+  assert.ok( bRenderedElements[ 3 ].tagName === bParagraphTagName, 'b paragraph is in the DOM and after the primary element' );
+
+  // Update order with appendLabel and appendDescription
+  b.appendLabel = true;
+  b.appendDescription = true;
+  display.updateDisplay(); // required as the reorder happens in display update
+
+  bRenderedElements = bPeer.topLevelElements!;
+  assert.ok( bRenderedElements[ 0 ].tagName === bTagName, 'b label element is in the DOM and before the paragraph' );
+  assert.ok( bRenderedElements[ 1 ].tagName === bLabelTagName, 'b description element is in the DOM and after the focusable element' );
+  assert.ok( bRenderedElements[ 2 ].tagName === bDescriptionTagName, 'b primary element is in the DOM' );
+  assert.ok( bRenderedElements[ 3 ].tagName === bParagraphTagName, 'b paragraph is in the DOM and after the primary element' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
 // these fuzzers take time, so it is nice when they are last
 QUnit.test( 'PDOMFuzzer with 3 nodes', assert => {
   const fuzzer = new PDOMFuzzer( 3, false );
