@@ -12,7 +12,7 @@
  */
 
 import scenery from '../../scenery.js';
-import SceneryStyle from '../../util/SceneryStyle.js';
+import { addCSSRule } from '../../util/SceneryStyle.js';
 
 // constants
 const SIBLING_CLASS_NAME = 'a11y-pdom-element';
@@ -21,7 +21,7 @@ const LIST_ITEM_CLASS_NAME = 'a11y-pdom-list-item';
 
 // All elements that use PDOMUtils.createElement should have this style. The only exception is the root of
 // the PDOM, which should use root class attributes instead.
-SceneryStyle.addRule( `.${SIBLING_CLASS_NAME
+addCSSRule( `.${SIBLING_CLASS_NAME
                       }{` +
 
                       // 'fixed' positions elements relative to the ViewPort (global coordinate frame), a requirement for the approach
@@ -58,7 +58,7 @@ SceneryStyle.addRule( `.${SIBLING_CLASS_NAME
                       '}'
 );
 
-SceneryStyle.addRule( `.${ROOT_CLASS_NAME
+addCSSRule( `.${ROOT_CLASS_NAME
                       }{` +
                       // so that this root can also be positioned
                       'position: absolute;' +
@@ -82,7 +82,7 @@ SceneryStyle.addRule( `.${ROOT_CLASS_NAME
                       '}'
 );
 
-SceneryStyle.addRule( `.${LIST_ITEM_CLASS_NAME
+addCSSRule( `.${LIST_ITEM_CLASS_NAME
                       }{` +
 
                       // removing list styling prevents a VoiceOver behavior where 'bullet' is read in a confusing way.
