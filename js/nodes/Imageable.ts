@@ -12,7 +12,7 @@ import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
@@ -21,6 +21,7 @@ import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 import xlinkns from '../util/xlinkns.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
@@ -876,7 +877,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ): SuperType 
       let level = log2( 1 / scale );
 
       // convert to an integer level (-0.7 is a good default)
-      level = Utils.roundSymmetric( level + this._mipmapBias + additionalBias - 0.7 );
+      level = roundSymmetric( level + this._mipmapBias + additionalBias - 0.7 );
 
       if ( level < 0 ) {
         level = 0;
@@ -1091,8 +1092,8 @@ Imageable.getHitTestData = ( image: ParsedImage, width: number, height: number )
  */
 Imageable.testHitTestData = ( imageData: ImageData, width: number, height: number, point: Vector2 ): boolean => {
   // For sanity, map it based on the image dimensions and image data dimensions, and carefully clamp in case things are weird.
-  const x = Utils.clamp( Math.floor( ( point.x / width ) * imageData.width ), 0, imageData.width - 1 );
-  const y = Utils.clamp( Math.floor( ( point.y / height ) * imageData.height ), 0, imageData.height - 1 );
+  const x = clamp( Math.floor( ( point.x / width ) * imageData.width ), 0, imageData.width - 1 );
+  const y = clamp( Math.floor( ( point.y / height ) * imageData.height ), 0, imageData.height - 1 );
 
   const index = 4 * ( x + y * imageData.width ) + 3;
 

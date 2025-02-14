@@ -7,9 +7,9 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import Utils from '../../../dot/js/Utils.js';
 import ColorMatrixFilter from '../filters/ColorMatrixFilter.js';
 import scenery from '../scenery.js';
+import { toDegrees } from '../../../dot/js/util/toDegrees.js';
 
 export default class HueRotate extends ColorMatrixFilter {
 
@@ -51,7 +51,7 @@ export default class HueRotate extends ColorMatrixFilter {
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
   public override getCSSFilterString(): string {
-    return `hue-rotate(${toSVGNumber( Utils.toDegrees( this.amount ) )}deg)`;
+    return `hue-rotate(${toSVGNumber( toDegrees( this.amount ) )}deg)`;
   }
 
   public override isDOMCompatible(): boolean {

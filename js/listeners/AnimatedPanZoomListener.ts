@@ -12,7 +12,6 @@ import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { PropertyLinkListener } from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
@@ -46,6 +45,8 @@ import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { TReadOnlyEmitter } from '../../../axon/js/TEmitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import { equalsEpsilon } from '../../../dot/js/util/equalsEpsilon.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -1096,7 +1097,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // only animate to targets if within this precision so that we don't animate forever, since animation speed
     // is dependent on the difference betwen source and destination positions
     const positionDirty = !destinationPosition.equalsEpsilon( sourcePosition, 0.1 );
-    const scaleDirty = !Utils.equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
+    const scaleDirty = !equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
 
     this.animatingProperty.value = positionDirty || scaleDirty;
 
@@ -1295,7 +1296,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     nearestIndex = nearestIndex!;
     assert && assert( nearestIndex !== null, 'nearestIndex should have been found' );
     let nextIndex = zoomIn ? nearestIndex + 1 : nearestIndex - 1;
-    nextIndex = Utils.clamp( nextIndex, 0, this.discreteScales.length - 1 );
+    nextIndex = clamp( nextIndex, 0, this.discreteScales.length - 1 );
     return this.discreteScales[ nextIndex ];
   }
 

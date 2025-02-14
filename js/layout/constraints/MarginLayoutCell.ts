@@ -8,7 +8,6 @@
 
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import Utils from '../../../../dot/js/Utils.js';
 import Shape from '../../../../kite/js/Shape.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../../phet-core/js/OrientationPair.js';
@@ -27,6 +26,7 @@ import scenery from '../../scenery.js';
 import Font from '../../util/Font.js';
 import NodePattern from '../../util/NodePattern.js';
 import type TColor from '../../util/TColor.js';
+import { clamp } from '../../../../dot/js/util/clamp.js';
 
 // Interface expected to be overridden by subtypes (GridCell, FlowCell)
 export type MarginLayout = {
@@ -244,7 +244,7 @@ export default class MarginLayoutCell extends LayoutCell {
       assert && assert( isFinite( minimumSize ) );
       assert && assert( maximumSize >= minimumSize );
 
-      value = Utils.clamp( value, minimumSize, maximumSize );
+      value = clamp( value, minimumSize, maximumSize );
 
       let preferredSize = value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation );
       const maxSize = this.proxy.getMax( orientation );

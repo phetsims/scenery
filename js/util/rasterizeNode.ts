@@ -11,7 +11,7 @@ import Node, { NodeOptions } from '../nodes/Node.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Utils from '../../../dot/js/Utils.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 export type RasterizedOptions = {
 
@@ -135,7 +135,7 @@ export function rasterizeNode( node: Node, providedOptions?: RasterizedOptions )
   }
 
   // NOTE: Rounding necessary due to floating point arithmetic in the width/height computation of the bounds
-  tempWrapperNode.toCanvas( callback, -transformedBounds.minX, -transformedBounds.minY, Utils.roundSymmetric( transformedBounds.width ), Utils.roundSymmetric( transformedBounds.height ) );
+  tempWrapperNode.toCanvas( callback, -transformedBounds.minX, -transformedBounds.minY, roundSymmetric( transformedBounds.width ), roundSymmetric( transformedBounds.height ) );
 
   assert && assert( imageOrNull, 'The toCanvas should have executed synchronously' );
   const image = imageOrNull!;

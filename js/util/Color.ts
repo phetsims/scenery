@@ -13,16 +13,14 @@
 import type TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
-import Utils from '../../../dot/js/Utils.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import scenery from '../scenery.js';
 import type TPaint from '../util/TPaint.js';
 import type TColor from './TColor.js';
-
-// constants
-const clamp = Utils.clamp;
-const linear = Utils.linear;
+import { linear } from '../../../dot/js/util/linear.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 type FormatParser = {
   regexp: RegExp;
@@ -44,7 +42,7 @@ function parseRGBNumber( str: string ): number {
     str = str.slice( 0, str.length - 1 );
   }
 
-  return Utils.roundSymmetric( Number( str ) * multiplier );
+  return roundSymmetric( Number( str ) * multiplier );
 }
 
 export default class Color {
@@ -235,9 +233,9 @@ export default class Color {
    * Sets the value of this Color using RGB integral between 0-255, alpha (float) between 0-1.
    */
   public setRGBA( red: number, green: number, blue: number, alpha: number ): this {
-    this.r = Utils.roundSymmetric( clamp( red, 0, 255 ) );
-    this.g = Utils.roundSymmetric( clamp( green, 0, 255 ) );
-    this.b = Utils.roundSymmetric( clamp( blue, 0, 255 ) );
+    this.r = roundSymmetric( clamp( red, 0, 255 ) );
+    this.g = roundSymmetric( clamp( green, 0, 255 ) );
+    this.b = roundSymmetric( clamp( blue, 0, 255 ) );
     this.a = clamp( alpha, 0, 1 );
 
     this.updateColor(); // update the cached value
@@ -409,9 +407,9 @@ export default class Color {
     }
     const m1 = lightness * 2 - m2;
 
-    this.r = Utils.roundSymmetric( Color.hueToRGB( m1, m2, hue + 1 / 3 ) * 255 );
-    this.g = Utils.roundSymmetric( Color.hueToRGB( m1, m2, hue ) * 255 );
-    this.b = Utils.roundSymmetric( Color.hueToRGB( m1, m2, hue - 1 / 3 ) * 255 );
+    this.r = roundSymmetric( Color.hueToRGB( m1, m2, hue + 1 / 3 ) * 255 );
+    this.g = roundSymmetric( Color.hueToRGB( m1, m2, hue ) * 255 );
+    this.b = roundSymmetric( Color.hueToRGB( m1, m2, hue - 1 / 3 ) * 255 );
     this.a = clamp( alpha, 0, 1 );
 
     this.updateColor(); // update the cached value
