@@ -12,32 +12,39 @@
  * whose descendants (Nodes that can be traced from the root by child relationships) will be displayed.
  *
  * For instance, say there are Nodes named A, B, C, D and E, who have the relationships:
+ *
  * - B is a child of A (thus A is a parent of B)
  * - C is a child of A (thus A is a parent of C)
  * - D is a child of C (thus C is a parent of D)
  * - E is a child of C (thus C is a parent of E)
+ *
  * where A would be the root Node. This can be visually represented as a scene graph, where a line connects a parent
  * Node to a child Node (where the parent is usually always at the top of the line, and the child is at the bottom):
  * For example:
  *
+ * #begin monospace
  *   A
  *  / \
  * B   C
  *    / \
  *   D   E
+ * #end monospace
  *
  * Additionally, in this case:
+ *
  * - D is a 'descendant' of A (due to the C being a child of A, and D being a child of C)
  * - A is an 'ancestor' of D (due to the reverse)
  * - C's 'subtree' is C, D and E, which consists of C itself and all of its descendants.
  *
  * Note that Scenery allows some more complicated forms, where Nodes can have multiple parents, e.g.:
  *
+ * #begin monospace
  *   A
  *  / \
  * B   C
  *  \ /
  *   D
+ * #end monospace
  *
  * In this case, D has two parents (B and C). Scenery disallows any Node from being its own ancestor or descendant,
  * so that loops are not possible. When a Node has two or more parents, it means that the Node's subtree will typically
@@ -54,19 +61,23 @@
  *
  * Say we have the following scene graph:
  *
+ * #begin monospace
  *   A
  *   |
  *   B
  *   |
  *   C
+ * #end monospace
  *
  * where there are the following transforms:
+ *
  * - A has a 'translation' that moves the content 100 pixels to the right
  * - B has a 'scale' that doubles the size of the content
  * - C has a 'rotation' that rotates 180-degrees around the origin
  *
  * If C displays a square that fills the area with 0 <= x <= 10 and 0 <= y <= 10, we can determine the position on
  * the display by applying transforms starting at C and moving towards the root Node (in this case, A):
+ *
  * 1. We apply C's rotation to our square, so the filled area will now be -10 <= x <= 0 and -10 <= y <= 0
  * 2. We apply B's scale to our square, so now we have -20 <= x <= 0 and -20 <= y <= 0
  * 3. We apply A's translation to our square, moving it to 80 <= x <= 100 and -20 <= y <= 0
@@ -103,11 +114,13 @@
  *
  * This is generally easiest to represent by notating scene graphs with children in order from left to right, thus:
  *
+ * #begin monospace
  *   A
  *  / \
  * B   C
  *    / \
  *   D   E
+ * #end monospace
  *
  * would indicate that A's children are [B,C], so C's subtree is drawn ON TOP of B. The same is true of C's children
  * [D,E], so E is drawn on top of D. If a Node itself has content, it is drawn below that of its children (so C itself
@@ -115,6 +128,7 @@
  *
  * This means that for every scene graph, Nodes instances can be ordered from bottom to top. For the above example, the
  * order is:
+ *
  * 1. A (on the very bottom visually, may get covered up by other Nodes)
  * 2. B
  * 3. C
@@ -130,6 +144,7 @@
  * A Trail is basically a list of Nodes, where every Node in the list is a child of its previous element, and a parent
  * of its next element. Thus for the scene graph:
  *
+ * #begin monospace
  *   A
  *  / \
  * B   C
@@ -137,11 +152,14 @@
  *   D   E
  *    \ /
  *     F
+ * #end monospace
  *
  * there are actually three instances of F being displayed, with three trails:
+ *
  * - [A,B,D,F]
  * - [A,C,D,F]
  * - [A,C,E,F]
+ *
  * Note that the trails are essentially listing Nodes used in walking from the root (A) to the relevant Node (F) using
  * connections between parents and children.
  *
