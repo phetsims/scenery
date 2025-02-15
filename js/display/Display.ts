@@ -486,7 +486,7 @@ export default class Display {
     this._rootBackbone = null; // to be filled in later
     this._domElement = options.container ?
                        BackboneDrawable.repurposeBackboneContainer( options.container ) :
-                       BackboneDrawable.createDivBackbone();
+                       BackboneDrawable.createRootDivBackbone();
 
     this._sharedCanvasInstances = {};
     this._baseInstance = null; // will be filled with the root Instance

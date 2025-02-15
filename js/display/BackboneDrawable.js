@@ -520,13 +520,27 @@ class BackboneDrawable extends Drawable {
    *
    * @returns {HTMLDivElement}
    */
-  static createDivBackbone() {
+  static createRootDivBackbone() {
     const div = document.createElement( 'div' );
     div.style.position = 'absolute';
     div.style.left = '0';
     div.style.top = '0';
     div.style.width = '0';
     div.style.height = '0';
+    return div;
+  }
+
+  /**
+   * Creates a DOM element for a backbone.
+   * @public
+   *
+   * @returns {HTMLDivElement}
+   */
+  static createDivBackbone() {
+    const div = document.createElement( 'div' );
+    div.style.position = 'relative';
+    div.style.left = '0';
+    div.style.top = '0';
     return div;
   }
 
