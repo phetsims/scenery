@@ -7,14 +7,13 @@
  */
 
 import toSVGNumber from '../../../dot/js/util/toSVGNumber.js';
-import platform from '../../../phet-core/js/platform.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Filter from '../filters/Filter.js';
 import scenery from '../scenery.js';
 import Utils from '../util/Utils.js';
 
 const isImageDataSupported = Utils.supportsImageDataCanvasFilter();
-const useFakeGamma = platform.chromium;
+const useFakeGamma = true;
 
 export default class ColorMatrixFilter extends Filter {
 
