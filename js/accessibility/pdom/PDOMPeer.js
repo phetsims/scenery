@@ -622,7 +622,7 @@ class PDOMPeer {
 
     // There may not be an element due to order of operations, or if there is no default primary sibling.
     const element = options.element || this.getElementByName( options.elementName );
-    if ( element === null ) {
+    if ( !element ) {
       return;
     }
 
