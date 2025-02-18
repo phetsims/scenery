@@ -355,6 +355,7 @@ class PDOMPeer {
     if ( this._containerParent ) {
       // The first child of the container parent element should be the peer dom element
       // if undefined, the insertBefore method will insert the this._primarySibling as the first child
+      assert && assert( this._primarySibling, 'There should be a _primarySibling if there is a _containerParent' );
       this._containerParent.insertBefore( this._primarySibling, this._containerParent.children[ 0 ] || null );
       this.topLevelElements = [ this._containerParent ];
     }
@@ -816,6 +817,9 @@ class PDOMPeer {
 
     // If there are multiple top level nodes
     else {
+      if ( assert && !appendElement ) {
+        assert && assert( this._primarySibling, 'There must be a primary sibling to sort relative to it if not appending.' );
+      }
 
       // keep this.topLevelElements in sync
       arrayRemove( this.topLevelElements, contentElement );
@@ -993,15 +997,17 @@ class PDOMPeer {
    * @param {string|null} content - the content for the primary sibling.
    */
   setPrimarySiblingContent( content ) {
-    assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
-    assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-    assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
-      `tagName: ${this.node.tagName} does not support inner content` );
 
     // no-op to support any option order
     if ( !this._primarySibling ) {
       return;
     }
+
+    assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
+    assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
+    assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
+      `tagName: ${this.node.tagName} does not support inner content` );
+
     PDOMUtils.setTextContent( this._primarySibling, content );
   }
 
@@ -1251,12 +1257,14 @@ class PDOMPeer {
    */
   recursiveDisable( disabled ) {
 
-    if ( disabled ) {
-      this._preservedDisabledValue = this._primarySibling.disabled;
-      this._primarySibling.disabled = true;
-    }
-    else {
-      this._primarySibling.disabled = this._preservedDisabledValue;
+    if ( this._primarySibling ) {
+      if ( disabled ) {
+        this._preservedDisabledValue = this._primarySibling.disabled;
+        this._primarySibling.disabled = true;
+      }
+      else {
+        this._primarySibling.disabled = this._preservedDisabledValue;
+      }
     }
 
     for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
