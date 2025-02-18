@@ -925,7 +925,7 @@ class PDOMPeer {
     assert && assert( typeof focusable === 'boolean' );
 
     const peerHadFocus = this.isFocused();
-    if ( this.focusable !== focusable ) {
+    if ( this.focusable !== focusable && this.primarySibling ) {
       this.focusable = focusable;
       PDOMUtils.overrideFocusWithTabIndex( this.primarySibling, focusable );
 
