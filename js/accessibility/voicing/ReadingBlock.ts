@@ -37,7 +37,7 @@ import Voicing from '../../accessibility/voicing/Voicing.js';
 import voicingManager from '../../accessibility/voicing/voicingManager.js';
 import SceneryEvent from '../../input/SceneryEvent.js';
 import type TInputListener from '../../input/TInputListener.js';
-import Node from '../../nodes/Node.js';
+import Node, { NodeOptions } from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import DelayedMutate from '../../util/DelayedMutate.js';
 import { Highlight } from '../Highlight.js';
@@ -71,7 +71,8 @@ type UnsupportedVoicingOptions =
   'voicingResponsePatternCollection';
 
 export type ReadingBlockOptions = SelfOptions &
-  StrictOmit<VoicingOptions, UnsupportedVoicingOptions>;
+  StrictOmit<VoicingOptions, UnsupportedVoicingOptions> &
+  StrictOmit<NodeOptions, 'tagName' | 'focusable'>;
 
 // Use an assertion signature to narrow the type to ReadingBlockUtterance
 function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance is ReadingBlockUtterance {
@@ -164,7 +165,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
         super( ...args );
 
         this._readingBlockTagName = 'button';
-        this._readingBlockDisabledTagName = 'div';
+        this._readingBlockDisabledTagName = null;
         this._readingBlockActiveHighlight = null;
         this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
         this.readingBlockResponsePatternCollection = DEFAULT_CONTENT_HINT_PATTERN;

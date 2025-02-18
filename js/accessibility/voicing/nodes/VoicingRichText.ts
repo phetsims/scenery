@@ -4,28 +4,41 @@
  * RichText that composes ReadingBlock, adding support for Voicing and input listeners that speak content upon
  * user activation.
  *
+ * Example usage:
+ *   const voicingRichText = new VoicingRichText( 'Hello, world!' );
+ *
+ * Example usage:
+ *   const voicingRichText = new VoicingRichText( 'Hello, world!', {
+ *     accessibleParagraph: 'Custom Voicing Text'
+ *   } );
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
 import TReadOnlyProperty from '../../../../../axon/js/TReadOnlyProperty.js';
 import optionize, { EmptySelfOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import type { ReadingBlockOptions } from '../../../accessibility/voicing/ReadingBlock.js';
 import ReadingBlock from '../../../accessibility/voicing/ReadingBlock.js';
 import ReadingBlockHighlight from '../../../accessibility/voicing/ReadingBlockHighlight.js';
-import type { ReadingBlockOptions } from '../../../accessibility/voicing/ReadingBlock.js';
-import RichText from '../../../nodes/RichText.js';
 import type { RichTextOptions } from '../../../nodes/RichText.js';
+import RichText from '../../../nodes/RichText.js';
 import scenery from '../../../scenery.js';
+import assertMutuallyExclusiveOptions from '../../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
 type SelfOptions = EmptySelfOptions;
 
 // focusHighlight will always be set by this class
-type ParentOptions = ReadingBlockOptions & StrictOmit<RichTextOptions, 'focusHighlight'>;
+type ParentOptions = ReadingBlockOptions & StrictOmit<RichTextOptions, 'focusHighlight' | 'innerContent'>;
 export type VoicingRichTextOptions = SelfOptions & ParentOptions;
 
 class VoicingRichText extends ReadingBlock( RichText ) {
 
   public constructor( text: string | TReadOnlyProperty<string>, providedOptions?: VoicingRichTextOptions ) {
+
+    // readingBlockDisabledTagName is an advanced option for cases where you need custom PDOM behavior for the
+    // ReadingBlock. Use accessibleParagraph for most cases.
+    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'readingBlockDisabledTagName', 'accessibleName' ], [ 'accessibleParagraph' ] );
 
     const options = optionize<VoicingRichTextOptions, SelfOptions, ParentOptions>()( {
 
@@ -33,14 +46,23 @@ class VoicingRichText extends ReadingBlock( RichText ) {
       // visually displayed text
       readingBlockNameResponse: text,
 
-      // pdom
-      innerContent: text,
-
       // voicing
       // default tag name for a ReadingBlock, but there are cases where you may want to override this (such as
       // RichText links)
       readingBlockTagName: 'button'
     }, providedOptions );
+
+    if ( options.readingBlockDisabledTagName ) {
+
+      // If a custom tagName is provided for the ReadingBlock when Voicing is disabled, use accessibleName
+      // for that PDOM content.
+      options.accessibleName = options.accessibleName === undefined ? text : options.accessibleName;
+    }
+    else {
+
+      // Otherwise, use accessibleParagraph so that the RichText will appear in the PDOM as a paragraph.
+      options.accessibleParagraph = options.accessibleParagraph === undefined ? text : options.accessibleParagraph;
+    }
 
     super( text, options );
 
