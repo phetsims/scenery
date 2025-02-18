@@ -620,7 +620,11 @@ class PDOMPeer {
       element: null
     }, options );
 
+    // There may not be an element due to order of operations, or if there is no default primary sibling.
     const element = options.element || this.getElementByName( options.elementName );
+    if ( element === null ) {
+      return;
+    }
 
     // For dynamic strings, we may need to retrieve the actual value.
     const rawAttributeValue = PDOMUtils.unwrapProperty( attributeValue );
