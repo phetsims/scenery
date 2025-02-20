@@ -4,8 +4,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+// @param {function|string} func
 window.extractFunctionJS = func => {
-  const functionString = func.toString();
+  const functionString = typeof func === 'string' ? func : func.toString();
   let js = functionString.match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ];
   let jsBefore = '';
   let jsAfter = '';
