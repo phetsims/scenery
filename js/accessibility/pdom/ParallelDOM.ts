@@ -959,6 +959,8 @@ export default class ParallelDOM extends PhetioObject {
         accessibleParagraph.lazyLink( this._onAccessibleParagraphContentChangeListener );
       }
 
+      this.invalidatePeerParagraphSiblingContent();
+
       contentChange && this.onPDOMContentChange();
     }
   }
