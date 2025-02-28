@@ -251,17 +251,26 @@
   noAccessibility && ( simulationQueryString += 'supportsInteractiveDescription=true' );
 
   // in unbuilt mode and on phet-server, the brand suffix is removed
-  const filenameEnding = ( window.location.hostname === 'phet.colorado.edu' || !IS_BUILT ) ? '.html' : '_phet.html';
+  const filenameEnding = window.location.hostname === 'phet.colorado.edu' ? '.html' : '_phet.html';
 
-  const sim = query.get( 'sim' );
+  // TODO: This code is very PhET-sim specific, we would like a way to specify an arbitrary scenery-stack app
+  // TODO: https://github.com/phetsims/chipper/issues/1512
+  let sim = query.get( 'sim' );
+
+  if ( IS_BUILT ) {
+    sim = '{{PHET_REPOSITORY}}';
+  }
   if ( !sim ) {
     throw new Error( 'No sim query parameter provided' );
   }
 
   // Unbuilt sims include all locales in the en file, built versions only include all strings in the all file
   const simWithLocale = `${sim}_${IS_BUILT ? 'all' : 'en'}`;
-  // const simURL = repoLocale + filenameEnding + simulationQueryString;
-  const simURL = `../../../${sim}/${simWithLocale}${filenameEnding}${simulationQueryString}`;
+  let simURL = `../../../${sim}/${simWithLocale}${filenameEnding}${simulationQueryString}`;
+
+  if ( IS_BUILT ) {
+    simURL = `./${simWithLocale}${filenameEnding}${simulationQueryString}`;
+  }
 
   // set the source of the sim iframe
   document.getElementById( 'iframe' ).setAttribute( 'src', simURL );
