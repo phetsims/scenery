@@ -251,7 +251,7 @@
   noAccessibility && ( simulationQueryString += 'supportsInteractiveDescription=true' );
 
   // in unbuilt mode and on phet-server, the brand suffix is removed
-  const filenameEnding = window.location.hostname === 'phet.colorado.edu' ? '.html' : '_phet.html';
+  const filenameEnding = ( window.location.hostname === 'phet.colorado.edu' || !IS_BUILT ) ? '.html' : '_phet.html';
 
   // TODO: This code is very PhET-sim specific, we would like a way to specify an arbitrary scenery-stack app
   // TODO: https://github.com/phetsims/chipper/issues/1512
