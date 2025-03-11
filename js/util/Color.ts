@@ -14,13 +14,13 @@ import type TEmitter from '../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import { clamp } from '../../../dot/js/util/clamp.js';
+import { linear } from '../../../dot/js/util/linear.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import scenery from '../scenery.js';
 import type TPaint from '../util/TPaint.js';
 import type TColor from './TColor.js';
-import { linear } from '../../../dot/js/util/linear.js';
-import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 type FormatParser = {
   regexp: RegExp;
@@ -385,8 +385,6 @@ export default class Color {
   /**
    * Sets this color using HSLA values.
    *
-   * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5! https://github.com/phetsims/scenery/issues/1581
-   *
    * @param hue - integer modulo 360
    * @param saturation - percentage
    * @param lightness - percentage
@@ -415,6 +413,103 @@ export default class Color {
     this.updateColor(); // update the cached value
 
     return this; // allow chaining
+  }
+
+  /**
+   * Gets the HSLA values of this color.
+   */
+  public getHSLA(): number[] {
+    return [ this.getHue(), this.getSaturation(), this.getLightness(), this.getAlpha() ];
+  }
+
+  /**
+   * Returns the hue component of this color in degrees (0-359)
+   */
+  public getHue(): number {
+    // RGB to HSL conversion algorithm
+    const r = this.r / 255;
+    const g = this.g / 255;
+    const b = this.b / 255;
+
+    const max = Math.max( r, g, b );
+    const min = Math.min( r, g, b );
+    const delta = max - min;
+
+    let h = 0; // Default hue for achromatic colors (delta === 0)
+
+    if ( delta !== 0 ) {
+      // Calculate hue based on which component is the maximum
+      if ( max === r ) {
+        // Between yellow and magenta
+        h = ( ( g - b ) / delta ) % 6;
+      }
+      else if ( max === g ) {
+        // Between cyan and yellow
+        h = ( b - r ) / delta + 2;
+      }
+      else {
+        // Between magenta and cyan
+        h = ( r - g ) / delta + 4;
+      }
+
+      // Convert to degrees
+      h = roundSymmetric( h * 60 );
+
+      // Ensure positive value
+      if ( h < 0 ) {
+        h += 360;
+      }
+    }
+
+    return h;
+  }
+
+  /**
+   * Returns the saturation component of this color as a percentage (0-100)
+   */
+  public getSaturation(): number {
+    // RGB to HSL conversion - saturation component
+    const r = this.r / 255;
+    const g = this.g / 255;
+    const b = this.b / 255;
+
+    const max = Math.max( r, g, b );
+    const min = Math.min( r, g, b );
+    const delta = max - min;
+
+    // Calculate lightness first (needed for saturation)
+    const l = ( max + min ) / 2;
+
+    let s = 0; // Default saturation for achromatic colors
+
+    if ( delta !== 0 ) {
+      // Formula differs based on lightness
+      s = l > 0.5
+          ? delta / ( 2 - max - min )
+          : delta / ( max + min );
+    }
+
+    // Convert to percentage and round
+    return roundSymmetric( s * 100 );
+  }
+
+  /**
+   * Returns the lightness component of this color as a percentage (0-100)
+   */
+  public getLightness(): number {
+    // RGB to HSL conversion - lightness component
+    const r = this.r / 255;
+    const g = this.g / 255;
+    const b = this.b / 255;
+
+    const max = Math.max( r, g, b );
+    const min = Math.min( r, g, b );
+
+    // Lightness is the average of the maximum and minimum RGB components
+    const l = ( max + min ) / 2;
+
+    // Convert to percentage and round
+    return roundSymmetric( l * 100 );
   }
 
   public equals( color: Color ): boolean {
