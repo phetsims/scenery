@@ -6,8 +6,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-/* global QSMParsedParameters QueryStringMachineSchema */
-
+import { type QSMParsedParameters, type QueryStringMachineSchema } from '../../query-string-machine/js/QueryStringMachineModule.js';
 import scenery from './scenery.js';
 
 // All scenery query parameters MUST have a default value, since we do not always support QSM as a global.
