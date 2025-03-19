@@ -139,7 +139,7 @@ type RichTextLinksObject = Record<string, RichTextHref>;
 export type RichTextLinks = RichTextLinksObject | true;
 
 // Used only for guarding against assertions, we want to know that we aren't in stringTesting mode
-const isStringTest = QueryStringMachine && QueryStringMachine.containsKey( 'stringTest' );
+const isStringTest = self.QueryStringMachine && QueryStringMachine.containsKey( 'stringTest' );
 
 type SelfOptions = {
   // Sets how bounds are determined for text
