@@ -6,11 +6,11 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import { type QSMParsedParameters, type QueryStringMachineSchema } from '../../query-string-machine/js/QueryStringMachineModule.js';
+import QueryStringMachineModule from '../../query-string-machine/js/QueryStringMachineModule.js';
 import scenery from './scenery.js';
 
-// All scenery query parameters MUST have a default value, since we do not always support QSM as a global.
-const schema = {
+// Scenery doesn't depend on QSM, so be graceful here, and take default values.
+const sceneryQueryParameters = QueryStringMachineModule.getAll( {
 
   /**
    * If this is a finite number AND assertions are enabled, it will track maximum Node parent counts, and
@@ -31,15 +31,8 @@ const schema = {
     defaultValue: Number.POSITIVE_INFINITY,
     public: false
   }
-} satisfies Record<string, QueryStringMachineSchema>;
-
-// Scenery doesn't depend on QSM, so be graceful here, and take default values.
-const sceneryQueryParameters = window.hasOwnProperty( 'QueryStringMachine' ) ?
-                               QueryStringMachine.getAll( schema ) :
-                               ( Object.keys( schema ) as ( keyof typeof schema )[] ).map( key => {
-                                 return { [ key ]: schema[ key ].defaultValue };
-                               } );
+} );
 
 scenery.register( 'sceneryQueryParameters', sceneryQueryParameters );
 
-export default sceneryQueryParameters as QSMParsedParameters<typeof schema>;
+export default sceneryQueryParameters;
