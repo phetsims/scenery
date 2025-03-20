@@ -6,11 +6,11 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import QueryStringMachineModule from '../../query-string-machine/js/QueryStringMachineModule.js';
+import { QueryStringMachine } from '../../query-string-machine/js/QueryStringMachineModule.js';
 import scenery from './scenery.js';
 
 // Scenery doesn't depend on QSM, so be graceful here, and take default values.
-const sceneryQueryParameters = QueryStringMachineModule.getAll( {
+const sceneryQueryParameters = QueryStringMachine.getAll( {
 
   /**
    * If this is a finite number AND assertions are enabled, it will track maximum Node parent counts, and
