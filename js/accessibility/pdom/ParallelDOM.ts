@@ -854,7 +854,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   public pdomAudit(): void {
 
-    if ( this.hasPDOMContent && assert ) {
+    if ( assert && this.hasPDOMContent ) {
 
       if ( this._tagName ) {
         this._inputType && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );

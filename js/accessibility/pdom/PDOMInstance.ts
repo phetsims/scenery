@@ -674,39 +674,39 @@ class PDOMInstance {
    * (scenery-internal)
    */
   public auditRoot(): void {
-    if ( !assert ) { return; }
-
-    const rootNode = this.display!.rootNode;
-
-    assert( this.trail!.length === 0,
-      'Should only call auditRoot() on the root PDOMInstance for a display' );
-
-    function audit( fakeInstance: FakeInstance, pdomInstance: PDOMInstance ): void {
-      assert && assert( fakeInstance.children.length === pdomInstance.children.length,
-        'Different number of children in accessible instance' );
-
-      assert && assert( fakeInstance.node === pdomInstance.node, 'Node mismatch for PDOMInstance' );
-
-      for ( let i = 0; i < pdomInstance.children.length; i++ ) {
-        audit( fakeInstance.children[ i ], pdomInstance.children[ i ] );
-      }
-
-      const isVisible = pdomInstance.isGloballyVisible();
-
-      let shouldBeVisible = true;
-      for ( let i = 0; i < pdomInstance.trail!.length; i++ ) {
-        const node = pdomInstance.trail!.nodes[ i ];
-        const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isPDOMVisible() );
-        if ( trails.length === 0 ) {
-          shouldBeVisible = false;
-          break;
+    if ( assert ) {
+      const rootNode = this.display!.rootNode;
+  
+      assert( this.trail!.length === 0,
+        'Should only call auditRoot() on the root PDOMInstance for a display' );
+  
+      function audit( fakeInstance: FakeInstance, pdomInstance: PDOMInstance ): void {
+        assert && assert( fakeInstance.children.length === pdomInstance.children.length,
+          'Different number of children in accessible instance' );
+  
+        assert && assert( fakeInstance.node === pdomInstance.node, 'Node mismatch for PDOMInstance' );
+  
+        for ( let i = 0; i < pdomInstance.children.length; i++ ) {
+          audit( fakeInstance.children[ i ], pdomInstance.children[ i ] );
         }
+  
+        const isVisible = pdomInstance.isGloballyVisible();
+  
+        let shouldBeVisible = true;
+        for ( let i = 0; i < pdomInstance.trail!.length; i++ ) {
+          const node = pdomInstance.trail!.nodes[ i ];
+          const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isPDOMVisible() );
+          if ( trails.length === 0 ) {
+            shouldBeVisible = false;
+            break;
+          }
+        }
+  
+        assert && assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
       }
-
-      assert && assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
+  
+      audit( PDOMInstance.createFakePDOMTree( rootNode ), this );
     }
-
-    audit( PDOMInstance.createFakePDOMTree( rootNode ), this );
   }
 
   /**
