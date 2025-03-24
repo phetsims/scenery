@@ -31,13 +31,13 @@ import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Utterance from '../../../utterance-queue/js/Utterance.js';
-import type Display from '../display/Display.js';
 import Focus from '../accessibility/Focus.js';
 import FocusDisplayedController from '../accessibility/FocusDisplayedController.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import ReadingBlockUtterance from '../accessibility/voicing/ReadingBlockUtterance.js';
-import scenery from '../scenery.js';
 import voicingManager from '../accessibility/voicing/voicingManager.js';
+import type Display from '../display/Display.js';
+import scenery from '../scenery.js';
 import { guessVisualTrail } from './pdom/guessVisualTrail.js';
 import { pdomUniqueIdToTrail } from './pdom/pdomUniqueIdToTrail.js';
 import { getPDOMFocusedNode, pdomFocusProperty } from './pdomFocusProperty.js';
@@ -299,22 +299,22 @@ export default class FocusManager {
   }
 
   /**
-  // Display has an axon `Property to indicate which component is focused (or null if no
-  // scenery Node has focus). By passing the tandem and phetioTye, PhET-iO is able to interoperate (save, restore,
-  // control, observe what is currently focused). See FocusManager.pdomFocus for setting the focus. Don't set the value
-  // of this Property directly.
-  public static readonly pdomFocusProperty = new Property<Focus | null>( null, {
-    tandem: Tandem.GENERAL_MODEL.createTandem( 'pdomFocusProperty' ),
-    phetioDocumentation: 'Stores the current focus in the Parallel DOM, null if nothing has focus. This is not updated ' +
-                         'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
-                         'applies to simulations that support alternative input.',
-    phetioValueType: NullableIO( Focus.FocusIO ),
-    phetioState: false,
-    phetioFeatured: true,
-    phetioReadOnly: true
-  } );
+   // Display has an axon `Property to indicate which component is focused (or null if no
+   // scenery Node has focus). By passing the tandem and phetioTye, PhET-iO is able to interoperate (save, restore,
+   // control, observe what is currently focused). See FocusManager.pdomFocus for setting the focus. Don't set the value
+   // of this Property directly.
+   public static readonly pdomFocusProperty = new Property<Focus | null>( null, {
+   tandem: Tandem.GENERAL_MODEL.createTandem( 'pdomFocusProperty' ),
+   phetioDocumentation: 'Stores the current focus in the Parallel DOM, null if nothing has focus. This is not updated ' +
+   'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
+   'applies to simulations that support alternative input.',
+   phetioValueType: NullableIO( Focus.FocusIO ),
+   phetioState: false,
+   phetioFeatured: true,
+   phetioReadOnly: true
+   } );
 
-  /**
+   /**
    * A Property that lets you know when the window has focus. When the window has focus, it is in the user's foreground.
    * When in the background, the window does not receive keyboard input (important for global keyboard events).
    */

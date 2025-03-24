@@ -80,14 +80,15 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
-import Node from '../nodes/Node.js';
+import { isInteractiveHighlighting } from '../accessibility/voicing/isInteractiveHighlighting.js';
 import Pointer from '../input/Pointer.js';
-import type { PressedPressListener, PressListenerDOMEvent, PressListenerEvent, PressListenerOptions } from '../listeners/PressListener.js';
-import PressListener from '../listeners/PressListener.js';
-import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type TInputListener from '../input/TInputListener.js';
+import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
+import type { PressedPressListener, PressListenerDOMEvent, PressListenerEvent, PressListenerOptions } from '../listeners/PressListener.js';
+import PressListener from '../listeners/PressListener.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
 import TransformTracker from '../util/TransformTracker.js';
 
 // Scratch vectors used to prevent allocations
@@ -819,6 +820,17 @@ export default class DragListener extends PressListener implements TInputListene
     return {
       down( event ) {
         if ( event.canStartPress() ) {
+
+          // For InteractiveHighlighting, unlock the highlight for any Node under the Pointer
+          // so that the highlight can be activated for the new target. See
+          // https://github.com/phetsims/scenery/issues/1697#issuecomment-2749214235 for additional
+          // comments.
+          event.trail.nodes.forEach( node => {
+            if ( isInteractiveHighlighting( node ) ) {
+              node.unlockHighlight();
+            }
+          } );
+
           down( event );
         }
       },

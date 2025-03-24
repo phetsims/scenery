@@ -13,16 +13,16 @@ import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import DelayedMutate from '../../util/DelayedMutate.js';
-import type Display from '../../display/Display.js';
 import Focus from '../../accessibility/Focus.js';
 import type FocusManager from '../../accessibility/FocusManager.js';
+import type Display from '../../display/Display.js';
 import type Instance from '../../display/Instance.js';
-import type Node from '../../nodes/Node.js';
 import type Pointer from '../../input/Pointer.js';
-import scenery from '../../scenery.js';
 import type SceneryEvent from '../../input/SceneryEvent.js';
 import type TInputListener from '../../input/TInputListener.js';
+import type Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
+import DelayedMutate from '../../util/DelayedMutate.js';
 import Trail from '../../util/Trail.js';
 import { Highlight } from '../Highlight.js';
 import { isInteractiveHighlighting } from './isInteractiveHighlighting.js';
@@ -80,6 +80,8 @@ export interface TInteractiveHighlighting<SuperType extends Node = Node> {
 
   // @mixin-protected - made public for use in the mixin only
   getDescendantsUseHighlighting( trail: Trail ): boolean;
+
+  unlockHighlight(): void;
 
   // Better options type for the subtype implementation that adds mutator keys
   mutate( options?: SelfOptions & Parameters<SuperType[ 'mutate' ]>[ 0 ] ): this;
@@ -595,6 +597,19 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
           'this listener still on the lockedPointerFocusProperty indicates a memory leak'
         );
         focusManager.lockedPointerFocusProperty.link( this._boundPointerFocusClearedListener );
+      }
+
+      /**
+       * Remove the highlight from this Node and unlock the highlight so that a new highlight can be activated.
+       * Useful for cases like event forwarding where clicking on one Node should begin interaction with another.
+       *
+       * (scenery-internal)
+       */
+      public unlockHighlight(): void {
+        Object.values( this.displays ).forEach( display => {
+          display.focusManager.pointerFocusProperty.value = null;
+        } );
+        this.handleLockedPointerFocusCleared( null );
       }
 
       /**
