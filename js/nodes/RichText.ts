@@ -70,6 +70,7 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import StringUtils from '../../../phetcommon/js/util/StringUtils.js';
+import { QueryStringMachine } from '../../../query-string-machine/js/QueryStringMachineModule.js';
 import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 import '../../../sherpa/lib/himalaya-1.1.0.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
@@ -139,7 +140,7 @@ type RichTextLinksObject = Record<string, RichTextHref>;
 export type RichTextLinks = RichTextLinksObject | true;
 
 // Used only for guarding against assertions, we want to know that we aren't in stringTesting mode
-const isStringTest = self.QueryStringMachine && QueryStringMachine.containsKey( 'stringTest' );
+const isStringTest = QueryStringMachine.containsKey( 'stringTest' );
 
 type SelfOptions = {
   // Sets how bounds are determined for text
