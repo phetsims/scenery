@@ -80,6 +80,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import InteractiveHighlighting from '../accessibility/voicing/InteractiveHighlighting.js';
 import { isInteractiveHighlighting } from '../accessibility/voicing/isInteractiveHighlighting.js';
 import Pointer from '../input/Pointer.js';
 import SceneryEvent from '../input/SceneryEvent.js';
@@ -310,6 +311,12 @@ export default class DragListener extends PressListener implements TInputListene
       // signify that this listener is reserved for dragging so that other listeners can change
       // their behavior during scenery event dispatch
       pressedListener.pointer.reserveForDrag();
+
+      // If a target Node is provided, attempt to activate an Interactive Highlight for that target.
+      // Most useful for forwarded presses.
+      if ( targetNode ) {
+        InteractiveHighlighting.forwardInteractiveHighlightFromPress( targetNode, event );
+      }
 
       this.attachTransformTracker();
 

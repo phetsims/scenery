@@ -10,7 +10,6 @@ import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
-import memoize from '../../../../phet-core/js/memoize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Focus from '../../accessibility/Focus.js';
@@ -20,6 +19,7 @@ import type Instance from '../../display/Instance.js';
 import type Pointer from '../../input/Pointer.js';
 import type SceneryEvent from '../../input/SceneryEvent.js';
 import type TInputListener from '../../input/TInputListener.js';
+import { PressListenerEvent } from '../../listeners/PressListener.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import DelayedMutate from '../../util/DelayedMutate.js';
@@ -83,11 +83,13 @@ export interface TInteractiveHighlighting<SuperType extends Node = Node> {
 
   unlockHighlight(): void;
 
+  forwardInteractiveHighlight( event: SceneryEvent ): void;
+
   // Better options type for the subtype implementation that adds mutator keys
   mutate( options?: SelfOptions & Parameters<SuperType[ 'mutate' ]>[ 0 ] ): this;
 }
 
-const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TInteractiveHighlighting<InstanceType<SuperType>>> => {
+const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperType & Constructor<TInteractiveHighlighting<InstanceType<SuperType>>> => {
 
   // @ts-expect-error
   assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
@@ -104,6 +106,11 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
       // Since this is on the trait, only one pointer can have a listener for this Node that uses InteractiveHighlighting
       // at one time.
       private _pointer: null | Pointer = null;
+
+      // A reference to a Pointer that we try to lock to when manually activating this Node from a forwarded event.
+      // With event forwarding, this can sometimes happen before the Node is added to the scene graph, and so we try
+      // to activate the highlight once this Node's list of displays updates.
+      private _forwardingHighlightForPointer: null | Pointer = null;
 
       // A map that collects all of the Displays that this InteractiveHighlighting Node is
       // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
@@ -339,6 +346,8 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
           this._pointer = null;
         }
 
+        this._forwardingHighlightForPointer = null;
+
         // remove listeners on displays and remove Displays from the map
         const trailIds = Object.keys( this.displays );
         for ( let i = 0; i < trailIds.length; i++ ) {
@@ -512,6 +521,17 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
         if ( !display.focusManager.pointerHighlightsVisibleProperty.hasListener( this._interactiveHighlightingEnabledListener ) ) {
           display.focusManager.pointerHighlightsVisibleProperty.link( this._interactiveHighlightingEnabledListener );
         }
+
+        // Attempt to activate the highlight arround this Node as soon as it is added to a display
+        // because it may have been activated before it was added to the scene graph.
+        if ( this._forwardingHighlightForPointer ) {
+
+          // Only try to forward a highlight if the pointer Focus isn't already set.
+          if ( display.focusManager.pointerFocusProperty.value === null ) {
+            this.manualActivateAndLock( this._forwardingHighlightForPointer );
+          }
+          this._forwardingHighlightForPointer = null;
+        }
       }
 
       private onDisplayRemoved( display: Display ): void {
@@ -610,6 +630,48 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
           display.focusManager.pointerFocusProperty.value = null;
         } );
         this.handleLockedPointerFocusCleared( null );
+      }
+
+      public forwardInteractiveHighlight( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
+        if ( Object.values( this.displays ).length === 0 ) {
+
+          // If this target is not displayed, try to activate when the Node is added to the scene graph.
+          this._forwardingHighlightForPointer = event.pointer;
+        }
+        else {
+          Object.values( this.displays ).forEach( display => {
+
+            // Only try to forward a highlight if the pointer Focus isn't already set.
+            if ( display.focusManager.pointerFocusProperty.value === null ) {
+              this.manualActivateAndLock( event.pointer );
+            }
+          } );
+        }
+      }
+
+      /**
+       * Manually attempt to activate the highlight for this Node. Used when forwarding a highlight
+       * from one target to another with event forwarding.
+       */
+      private manualActivateAndLock( pointer: Pointer ): void {
+
+        // Trails to this interactive highlighting Node which we want to activate (different from Pointer trail).
+        const trails = this.getTrails();
+
+        // This strategy does not work for DAG, but it is graceful otherwise.
+        if ( trails.length === 1 ) {
+          const trail = trails[ 0 ];
+          const displays = Object.values( this.displays );
+          for ( let i = 0; i < displays.length; i++ ) {
+            const display = displays[ i ];
+            const forwardFocus = new Focus( display, trail );
+
+            // Set the pointer focus to this new target and lock.
+            display.focusManager.pointerFocusProperty.set( forwardFocus );
+            this.lockHighlight( forwardFocus, display.focusManager );
+            this.savePointer( pointer );
+          }
+        }
       }
 
       /**
@@ -716,7 +778,25 @@ const InteractiveHighlighting = memoize( <SuperType extends Constructor<Node>>( 
     'duplicate mutator keys in InteractiveHighlighting' );
 
   return InteractiveHighlightingClass;
-} );
+};
+
+/**
+ * Attempt to forward an interactive highlight to a target Node. Usually useful when forwarding events from
+ * one Node to another (like DragListener.createForwardingListener).
+ * @static
+ */
+InteractiveHighlighting.forwardInteractiveHighlightFromPress = ( targetNode: Node, event: PressListenerEvent ): void => {
+  const targetTrails = targetNode.getLeafTrails();
+  targetTrails.some( trail => {
+    return trail.nodes.some( node => {
+      if ( isInteractiveHighlighting( node ) ) {
+        node.forwardInteractiveHighlight( event );
+        return true;
+      }
+      return false;
+    } );
+  } );
+};
 
 // NOTE!!! This used to be called "InteractiveHighlightingNode", which conflicts with (or is confusing) with the actual
 // InteractiveHighlightingNode.ts type. Renamed here so they can be in the same namespace.
