@@ -217,12 +217,12 @@ export default abstract class WebGLNode extends Node {
   // Return code from painter.paint() when nothing was painted to the WebGL context.
   // NOTE: these constants are duplicated in WebGLNodeDrawable to reduce circular references
   //       If changing, please change them there also!
-  public static readonly PAINTED_NOTHING = 0 as const;
+  public static readonly PAINTED_NOTHING = 0;
 
   // Return code from painter.paint() when something was painted to the WebGL context.
   // NOTE: these constants are duplicated in WebGLNodeDrawable to reduce circular references
   //       If changing, please change them there also!
-  public static readonly PAINTED_SOMETHING = 1 as const;
+  public static readonly PAINTED_SOMETHING = 1;
 }
 
 /**
