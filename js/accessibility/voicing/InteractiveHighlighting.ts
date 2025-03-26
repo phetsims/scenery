@@ -19,7 +19,7 @@ import type Instance from '../../display/Instance.js';
 import type Pointer from '../../input/Pointer.js';
 import type SceneryEvent from '../../input/SceneryEvent.js';
 import type TInputListener from '../../input/TInputListener.js';
-import { PressListenerEvent } from '../../listeners/PressListener.js';
+import type { PressListenerEvent } from '../../listeners/PressListener.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import DelayedMutate from '../../util/DelayedMutate.js';
