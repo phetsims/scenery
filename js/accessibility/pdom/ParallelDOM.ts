@@ -3084,7 +3084,7 @@ export default class ParallelDOM extends PhetioObject {
    * Node.getConnectedDisplays. Note that if your Node is not connected to a Display, this function will have
    * no effect.
    */
-  public alertDescriptionUtterance( utterance: TAlertable ): void {
+  public addAccessibleResponse( utterance: TAlertable ): void {
 
     // No description should be alerted if setting PhET-iO state, see https://github.com/phetsims/scenery/issues/1397
     if ( isSettingPhetioStateProperty.value ) {
