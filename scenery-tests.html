@@ -104,7 +104,7 @@
   const liveReload = !!query.has( 'liveReload' );
 
   // RichText imports himalaya but it is skipped by esbuild, so we add it as a preload here.
-  // see https://github.com/phetsims/scenery/issues/1583 and https://github.com/phetsims/chipper/issues/1409 and https://github.com/phetsims/membrane-channels/issues/6#issuecomment-2631403462
+  // see https://github.com/phetsims/scenery/issues/1583 and https://github.com/phetsims/chipper/issues/1409 and https://github.com/phetsims/membrane-transport/issues/6#issuecomment-2631403462
   if ( esbuild ) {
     preloads.push( '../sherpa/lib/himalaya-1.1.0.js' );
   }
