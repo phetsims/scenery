@@ -167,7 +167,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
 
   // (read-only) - True when either isOverProperty is true, or when focused and the
   // related Display is showing its focusHighlights, see this.validateOver() for details.
-  public readonly looksOverProperty: TProperty<boolean>;
+  public readonly isOverOrFocusedProperty: TProperty<boolean>;
 
   // (read-only) - It will be set to true when either:
   //   1. The listener is pressed and the pointer that is pressing is over the listener.
@@ -240,7 +240,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
   // nicely for phet-io.
   private _releaseAction: PhetioAction<[ PressListenerEvent | null, ( () => void ) | null ]>;
 
-  // To support looksOverProperty being true based on focus, we need to monitor the display from which
+  // To support isOverOrFocusedProperty being true based on focus, we need to monitor the display from which
   // the event has come from to see if that display is showing its focusHighlights, see
   // Display.prototype.focusManager.FocusManager.pdomFocusHighlightsVisibleProperty for details.
   public display: Display | null;
@@ -320,7 +320,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
 
     this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
     this.isOverProperty = new BooleanProperty( false );
-    this.looksOverProperty = new BooleanProperty( false );
+    this.isOverOrFocusedProperty = new BooleanProperty( false );
     this.isHoveringProperty = new BooleanProperty( false );
     this.isHighlightedProperty = new BooleanProperty( false );
     this.isFocusedProperty = new BooleanProperty( false );
@@ -684,10 +684,10 @@ export default class PressListener extends EnabledComponent implements TInputLis
       }
     }
 
-    // isOverProperty is only for the `over` event, looksOverProperty includes focused pressListeners (only when the
+    // isOverProperty is only for the `over` event, isOverOrFocusedProperty includes focused pressListeners (only when the
     // display is showing focus highlights)
     this.isOverProperty.value = ( this.overPointers.length > 0 && !pointerAttachedToOther );
-    this.looksOverProperty.value = this.isOverProperty.value ||
+    this.isOverOrFocusedProperty.value = this.isOverProperty.value ||
                                    ( this.isFocusedProperty.value && !!this.display && this.display.focusManager.pdomFocusHighlightsVisibleProperty.value );
   }
 
@@ -1064,7 +1064,7 @@ export default class PressListener extends EnabledComponent implements TInputLis
     this.isFocusedProperty.dispose();
     this.isHighlightedProperty.dispose();
     this.isHoveringProperty.dispose();
-    this.looksOverProperty.dispose();
+    this.isOverOrFocusedProperty.dispose();
     this.isOverProperty.dispose();
     this.isPressedProperty.dispose();
     this.overPointers.dispose();
