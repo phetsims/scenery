@@ -83,17 +83,17 @@ import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import DisplayedTrailsProperty from '../util/DisplayedTrailsProperty.js';
 import EventContext from '../input/EventContext.js';
 import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
+import type { HotkeyFireOnHoldTiming, OverlapBehavior } from '../input/Hotkey.js';
 import Hotkey from '../input/Hotkey.js';
-import type { HotkeyFireOnHoldTiming } from '../input/Hotkey.js';
-import Node from '../nodes/Node.js';
 import type { OneKeyStroke } from '../input/KeyDescriptor.js';
 import PDOMPointer from '../input/PDOMPointer.js';
-import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type TInputListener from '../input/TInputListener.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import DisplayedTrailsProperty from '../util/DisplayedTrailsProperty.js';
 import Trail from '../util/Trail.js';
 
 type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
@@ -140,16 +140,9 @@ type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // Fire continuously at this interval (milliseconds)
   fireOnHoldCustomInterval?: number;
 
-  // Controls whether the keys used by this KeyboardListener are allowed to overlap with other KeyboardListeners
-  // that are listening for the same keys. If true, the KeyboardListener will fire even if another KeyboardListener.
-  // This is implemented with Hotkey, see Hotkey.ts for more information.
-  allowOverlap?: boolean;
-
-  // If true, Keyboard listeners with overlapping keys (either added to an ancestor's inputListener or later in the
-  // local/global order) will be ignored. Only the most 'local' Hotkey will fire. The default is true for
-  // KeyboardListeners added to focusable Nodes, and false for global KeyboardListeners to catch overlapping global
-  // keys.
-  override?: boolean;
+  // Controls how this KeyboardListener will behave when other KeyboardListeners with the same (overlapping) keys
+  // are present.
+  overlapBehavior?: OverlapBehavior;
 };
 
 export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[]> = KeyboardListenerSelfOptions<Keys> & EnabledComponentOptions;
@@ -167,8 +160,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   public readonly fireOnHoldTiming: HotkeyFireOnHoldTiming;
   public readonly fireOnHoldCustomDelay: number;
   public readonly fireOnHoldCustomInterval: number;
-  public readonly allowOverlap: boolean;
-  private readonly override: boolean;
+  private readonly overlapBehavior: OverlapBehavior;
 
   public readonly hotkeys: Hotkey[];
 
@@ -200,8 +192,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
       fireOnHoldTiming: 'browser',
       fireOnHoldCustomDelay: 400,
       fireOnHoldCustomInterval: 100,
-      allowOverlap: false,
-      override: true,
+      overlapBehavior: 'handle',
 
       // EnabledComponent
       // By default, do not instrument the enabledProperty; opt in with this option. See EnabledComponent
@@ -220,8 +211,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.fireOnHoldTiming = options.fireOnHoldTiming;
     this.fireOnHoldCustomDelay = options.fireOnHoldCustomDelay;
     this.fireOnHoldCustomInterval = options.fireOnHoldCustomInterval;
-    this.allowOverlap = options.allowOverlap;
-    this.override = options.override;
+    this.overlapBehavior = options.overlapBehavior;
 
     // convert the provided keys to data that we can respond to with scenery's Input system
     this.hotkeys = this.createHotkeys( options.keys, options.keyStringProperties );
@@ -363,9 +353,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
         fireOnHoldTiming: this.fireOnHoldTiming,
         fireOnHoldCustomDelay: this.fireOnHoldTiming === 'custom' ? this.fireOnHoldCustomDelay : undefined,
         fireOnHoldCustomInterval: this.fireOnHoldTiming === 'custom' ? this.fireOnHoldCustomInterval : undefined,
-        allowOverlap: this.allowOverlap,
         enabledProperty: this.enabledProperty,
-        override: this.override
+        overlapBehavior: this.overlapBehavior
       } );
 
       return hotkey;

@@ -26,16 +26,16 @@
 import DerivedProperty, { UnknownDerivedProperty } from '../../../axon/js/DerivedProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import type { AllowedKeysString } from '../input/KeyDescriptor.js';
 import type { EnglishKeyString } from '../accessibility/EnglishStringToCodeMap.js';
 import { eventCodeToEnglishString, metaEnglishKeys } from '../accessibility/EnglishStringToCodeMap.js';
-import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
-import type Hotkey from '../input/Hotkey.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
+import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
+import type Hotkey from '../input/Hotkey.js';
+import type { AllowedKeysString } from '../input/KeyDescriptor.js';
 import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
 
 const arrayComparator = <Key>( a: Key[], b: Key[] ): boolean => {
   return a.length === b.length && a.every( ( element, index ) => element === b[ index ] );
@@ -117,7 +117,7 @@ class HotkeyManager {
     // Update enabledHotkeysProperty when availableHotkeysProperty (or any enabledProperty or keyDescriptorProperty)
     // changes.
     const rebuildHotkeys = () => {
-      const overriddenHotkeyStrings = new Set<string>();
+      const handledHotkeyStrings = new Set<string>();
       const enabledHotkeys: Hotkey[] = [];
 
       for ( const hotkey of this.availableHotkeysProperty.value ) {
@@ -131,11 +131,18 @@ class HotkeyManager {
             key
           ].join( '+' );
 
-          if ( !overriddenHotkeyStrings.has( hotkeyCanonicalString ) ) {
+          if ( hotkey.overlapBehavior === 'allow' ) {
+
+            // If this hotkey allows overlaps, we can add it regardless of whether we have seen this canonical string.
+            enabledHotkeys.push( hotkey );
+          }
+          else if ( !handledHotkeyStrings.has( hotkeyCanonicalString ) ) {
             enabledHotkeys.push( hotkey );
 
-            if ( hotkey.override ) {
-              overriddenHotkeyStrings.add( hotkeyCanonicalString );
+            // If this hotkey 'handles' the overlap behavior, no other hotkeys with the same canonical string can be
+            // active (unless they specifically allow the overlap).
+            if ( hotkey.overlapBehavior === 'handle' ) {
+              handledHotkeyStrings.add( hotkeyCanonicalString );
             }
           }
         }
@@ -282,7 +289,9 @@ class HotkeyManager {
     } );
 
     if ( assert ) {
-      const conflictingKeys = compatibleKeys.filter( hotkey => !hotkey.allowOverlap );
+
+      // Check for conflicts. Any hotkeys with handle or allow behavior do not count as conflicts.
+      const conflictingKeys = compatibleKeys.filter( hotkey => hotkey.overlapBehavior === 'prevent' );
 
       assert && assert( conflictingKeys.length < 2, `Key conflict detected: ${conflictingKeys.map( hotkey => hotkey.keyDescriptorProperty.value.getHotkeyString() )}` );
     }

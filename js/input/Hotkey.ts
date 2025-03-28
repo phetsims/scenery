@@ -39,13 +39,26 @@ import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/Enab
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import type { AllowedKeysString, OneKeyStroke } from '../input/KeyDescriptor.js';
-import KeyDescriptor from '../input/KeyDescriptor.js';
 import EnglishStringToCodeMap from '../accessibility/EnglishStringToCodeMap.js';
 import hotkeyManager from '../input/hotkeyManager.js';
+import type { AllowedKeysString, OneKeyStroke } from '../input/KeyDescriptor.js';
+import KeyDescriptor from '../input/KeyDescriptor.js';
 import scenery from '../scenery.js';
 
 export type HotkeyFireOnHoldTiming = 'browser' | 'custom';
+
+// The way this Hotkey will behave when other Hotkeys with the same keys are present.
+// - 'prevent' - Overlaps are not allowed and any detected overlaps will throw an assertion.
+// - 'allow' - Overlaps are allowed and both listeners will fire if their keys are pressed.
+// - 'handle' - Overlaps are allowed, but only the most local listener in the global/scene graph order will fire.
+//
+// 'allow' takes precedence over 'prevent' and 'handle'. If two Hotkeys are active and one has 'allow' and
+// the other has 'prevent', both will fire if their keys are pressed.
+//
+// The default for most Hotkeys is 'handle' so that only the closest listener to the Node with focus
+// will fire, but listeners with overlapping keys will not throw an error.
+// The default for global listeners is 'prevent', so that overlapping global hotkeys are caught as a programming error.
+export type OverlapBehavior = 'prevent' | 'allow' | 'handle';
 
 type SelfOptions = {
 
@@ -84,13 +97,8 @@ type SelfOptions = {
   // Fire continuously at this interval (milliseconds)
   fireOnHoldCustomInterval?: number;
 
-  // For each main `key`, the hotkey system will only allow one hotkey with allowOverlap:false to be active at any time.
-  // This is provided to allow multiple hotkeys with the same keys to fire. Default is false.
-  allowOverlap?: boolean;
-
-  // If true, any overlapping hotkeys (either added to an ancestor's inputListener or later in the local/global order)
-  // will be ignored.
-  override?: boolean;
+  // How this Hotkey should behave when other Hotkeys with the same (overlapping) keys are present.
+  overlapBehavior?: OverlapBehavior;
 };
 
 export type HotkeyOptions = SelfOptions & EnabledComponentOptions;
@@ -105,8 +113,7 @@ export default class Hotkey extends EnabledComponent {
   public readonly fireOnDown: boolean;
   public readonly fireOnHold: boolean;
   public readonly fireOnHoldTiming: HotkeyFireOnHoldTiming;
-  public readonly allowOverlap: boolean;
-  public readonly override: boolean;
+  public readonly overlapBehavior: OverlapBehavior;
 
   // A Property for the KeyDescriptor describing the key and modifier keys for this hotkey from the keyStringProperty.
   public readonly keyDescriptorProperty: TReadOnlyProperty<KeyDescriptor>;
@@ -146,8 +153,7 @@ export default class Hotkey extends EnabledComponent {
       fireOnHoldTiming: 'browser',
       fireOnHoldCustomDelay: 400,
       fireOnHoldCustomInterval: 100,
-      allowOverlap: false,
-      override: false
+      overlapBehavior: 'handle'
     }, providedOptions );
 
     super( options );
@@ -160,8 +166,7 @@ export default class Hotkey extends EnabledComponent {
     this.fireOnDown = options.fireOnDown;
     this.fireOnHold = options.fireOnHold;
     this.fireOnHoldTiming = options.fireOnHoldTiming;
-    this.allowOverlap = options.allowOverlap;
-    this.override = options.override;
+    this.overlapBehavior = options.overlapBehavior;
 
     this.keyDescriptorProperty = new DerivedProperty( [ this.keyStringProperty ], ( keyString: OneKeyStroke ) => {
       return KeyDescriptor.keyStrokeToKeyDescriptor( keyString );
