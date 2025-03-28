@@ -402,7 +402,11 @@ class GlobalKeyboardListener extends KeyboardListener<OneKeyStroke[]> {
     const options = optionize<KeyboardListenerOptions<OneKeyStroke[]>, EmptySelfOptions, KeyboardListenerOptions<OneKeyStroke[]>>()( {
 
       // The enabledProperty is forwarded to the Hotkeys so that they are disabled when the target cannot receive input.
-      enabledProperty: globallyEnabledProperty
+      enabledProperty: globallyEnabledProperty,
+
+      // For global keyboard listeners, it is generally a programming error if there are multiple
+      // listeners with the same keys.
+      overlapBehavior: 'prevent'
     }, providedOptions );
 
     super( options );
