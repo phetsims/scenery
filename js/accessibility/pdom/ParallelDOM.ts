@@ -381,13 +381,13 @@ type RemovePDOMClassOptions = {
 };
 
 /**
- *
  * @param node - the Node that the pdom behavior is being applied to
  * @param options - options to mutate within the function
  * @param value - the value that you are setting the behavior of, like the accessibleName
  * @param callbacksForOtherNodes - behavior function also support taking state from a Node and using it to
- * set the accessible content for another Node. If this is the case, that logic should be set in a closure and added to
- * this list for execution after this Node is fully created. See discussion in https://github.com/phetsims/sun/issues/503#issuecomment-676541373
+ *   set the accessible content for another Node. If this is the case, that logic should be set in a closure and added to
+ *   this list for execution after this Node is fully created. See discussion in https://github.com/phetsims/sun/issues/503#issuecomment-676541373
+ *   NOTE: The other Nodes must be a child of this Node, or not in the same subtree. Otherwise, updates could trigger infinite loops in PDOMTree/PDOMPeer update.
  * @returns the options that have been mutated by the behavior function.
  */
 export type PDOMBehaviorFunction = ( node: Node, options: ParallelDOMOptions, value: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
@@ -624,6 +624,10 @@ export default class ParallelDOM extends PhetioObject {
 
   // PDOM specific enabled listener
   protected pdomBoundInputEnabledListener: ( enabled: boolean ) => void;
+
+  // Used to make sure that we do not recursively create PDOMInstances when doing PDOMTree operations.
+  // (scenery-internal)
+  public _lockedPDOMInstanceCreation = false;
 
   protected _onPDOMContentChangeListener: () => void;
   protected _onInputValueChangeListener: () => void;

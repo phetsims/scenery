@@ -7,13 +7,13 @@
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import BrowserEvents from '../../input/BrowserEvents.js';
-import type Node from '../../nodes/Node.js';
 import PartialPDOMTrail from '../../accessibility/pdom/PartialPDOMTrail.js';
 import PDOMInstance from '../../accessibility/pdom/PDOMInstance.js';
+import type Display from '../../display/Display.js';
+import BrowserEvents from '../../input/BrowserEvents.js';
+import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
-import type Display from '../../display/Display.js';
 import { getPDOMFocusedNode } from '../pdomFocusProperty.js';
 
 export default class PDOMTree {
@@ -318,16 +318,26 @@ export default class PDOMTree {
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( `effectiveChildren: ${PDOMTree.debugOrder( effectiveChildren )}` );
 
+    // A PDOMTree operation may have been triggered while already
+    // creating new PDOMInstances. That will cause problems so
+    // throw an assertion to notify.
+    assert && assert( !node._lockedPDOMInstanceCreation,
+      'You are recursively creating another PDOMInstance for the same Node! Probably because a child instance is triggering a createTree on a parent.'
+    );
+
     // If we have pdom content ourself, we need to create the instance (so we can provide it to child instances).
     let instance;
     let existed = false;
     if ( node.hasPDOMContent ) {
+
       instance = parentInstance.findChildWithTrail( trail );
       if ( instance ) {
         existed = true;
       }
       else {
+        node._lockedPDOMInstanceCreation = true;
         instance = PDOMInstance.pool.create( parentInstance, display, trail.copy() );
+        node._lockedPDOMInstanceCreation = false;
       }
 
       // If there was an instance, then it should be the parent to effective children, otherwise, it isn't part of the

@@ -1945,6 +1945,65 @@ QUnit.test( 'accessibleName option', assert => {
   dLabelElement = getPrimarySiblingElementByNode( d ).parentElement!.children[ DEFAULT_LABEL_SIBLING_INDEX ];
   assert.ok( dLabelElement.getAttribute( 'aria-label' ) === null, 'accessibleNameBehavior should not work until there is accessible name' );
 
+  //-------------------------------------------------------------------------------
+  // An accessibleNameBehavior that triggers PDOMTree.createTree is not supported
+  // and should throw an error
+  //-------------------------------------------------------------------------------
+  const e = new Node( { tagName: 'div' } );
+  const f = new Node( { tagName: 'div' } );
+  rootNode.addChild( e );
+  e.addChild( f );
+
+  f.accessibleNameBehavior = ( node, options, accessibleName, otherNodeCallbacks ) => {
+    otherNodeCallbacks.push( () => {
+      e.accessibleName = accessibleName;
+    } );
+    return options;
+  };
+
+  const testAccessibleName = 'This is a test';
+
+  window.assert && assert.throws( () => {
+    f.accessibleName = testAccessibleName;
+  }, 'Triggering re-render on parent is not supported because it would cause recursion and should throw.' );
+  rootNode.removeChild( e );
+
+  //-------------------------------------------------------------------------------
+  // An accessibleNameBehavior that triggers PDOMTree.createTree is not supported
+  // and should throw an error
+  //-------------------------------------------------------------------------------
+  const g = new Node( { tagName: 'div' } );
+  rootNode.addChild( g );
+  g.accessibleNameBehavior = ( node, options, accessibleName, otherNodeCallbacks ) => {
+
+    // Change the content so that this is not a no-op
+    node.accessibleName = accessibleName + 'blarg';
+    return options;
+  };
+
+  window.assert && assert.throws( () => {
+    g.accessibleName = testAccessibleName;
+  }, 'Doing something that would trigger a full PDOMTree.update recursively should throw.' );
+  rootNode.removeChild( g );
+
+  //-------------------------------------------------------------------------------
+  // An accessibleNameBehavior that triggers PDOMTree.createTree is not supported
+  // and should throw an error
+  //-------------------------------------------------------------------------------
+  const h = new Node( { tagName: 'div' } );
+  rootNode.addChild( h );
+  h.accessibleNameBehavior = ( node, options, accessibleName, otherNodeCallbacks ) => {
+
+    // Clear the content to remove the Node form the PDOM
+    node.tagName = null;
+    return options;
+  };
+
+  window.assert && assert.throws( () => {
+    h.accessibleName = testAccessibleName;
+  }, 'Clearing an accessibleName while updating will trigger recursive updates and is not supported.' );
+  rootNode.removeChild( h );
+
   pdomAuditRootNode( rootNode );
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
