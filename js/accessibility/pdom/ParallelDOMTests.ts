@@ -10,7 +10,7 @@ import Display from '../../display/Display.js';
 import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
 import Rectangle from '../../nodes/Rectangle.js';
-import { ParallelDOMOptions, PDOMBehaviorFunction } from './ParallelDOM.js';
+import { AccessibleNameBehaviorFunction, ParallelDOMOptions } from './ParallelDOM.js';
 import PDOMFuzzer from './PDOMFuzzer.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMUtils from './PDOMUtils.js';
@@ -1895,7 +1895,7 @@ QUnit.test( 'accessibleName option', assert => {
 
   const c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
   rootNode.addChild( c );
-  const cAccessibleNameBehavior: PDOMBehaviorFunction = ( node, options, accessibleName ) => {
+  const cAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
     options.ariaLabel = accessibleName;
     return options;
   };
@@ -1921,7 +1921,7 @@ QUnit.test( 'accessibleName option', assert => {
 
   const d = new Node( { containerTagName: 'div', tagName: 'div' } );
   rootNode.addChild( d );
-  const dAccessibleNameBehavior: PDOMBehaviorFunction = ( node, options, accessibleName ) => {
+  const dAccessibleNameBehavior: AccessibleNameBehaviorFunction = ( node, options, accessibleName ) => {
 
     options.ariaLabel = accessibleName;
     return options;

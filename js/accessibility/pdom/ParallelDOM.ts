@@ -280,9 +280,9 @@ type ParallelDOMSelfOptions = {
   /*
    * Lower Level API Functions
    */
-  accessibleNameBehavior?: PDOMBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
-  accessibleHelpTextBehavior?: PDOMBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
-  pdomHeadingBehavior?: PDOMBehaviorFunction; // @experimental - not ready for use
+  accessibleNameBehavior?: AccessibleNameBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
+  accessibleHelpTextBehavior?: AccessibleHelpTextBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
+  pdomHeadingBehavior?: AccessibleHeadingBehaviorFunction; // @experimental - not ready for use
 
   containerTagName?: string | null; // Sets the tag name for an [optional] element that contains this Node's siblings
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
@@ -390,7 +390,13 @@ type RemovePDOMClassOptions = {
  *   NOTE: The other Nodes must be a child of this Node, or not in the same subtree. Otherwise, updates could trigger infinite loops in PDOMTree/PDOMPeer update.
  * @returns the options that have been mutated by the behavior function.
  */
-export type PDOMBehaviorFunction = ( node: Node, options: ParallelDOMOptions, value: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
+type PDOMBehaviorFunction<AllowedKeys extends keyof ParallelDOMOptions> = ( node: Node, options: Pick<ParallelDOMOptions, AllowedKeys>, value: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
+
+// Each behavior function supports a limited set of lower level options, as full access to the API in the behavior function can create
+// confusing side effects.
+export type AccessibleNameBehaviorFunction = PDOMBehaviorFunction<'innerContent' | 'ariaLabel' | 'labelContent' | 'labelTagName' | 'appendLabel'>;
+export type AccessibleHelpTextBehaviorFunction = PDOMBehaviorFunction<'descriptionTagName' | 'descriptionContent' | 'appendDescription'>;
+export type AccessibleHeadingBehaviorFunction = PDOMBehaviorFunction<'labelTagName' | 'labelContent' | 'appendLabel'>;
 
 export default class ParallelDOM extends PhetioObject {
 
@@ -585,7 +591,7 @@ export default class ParallelDOM extends PhetioObject {
   private _accessibleName: PDOMValueType | null = null;
 
   // Function that returns the options needed to set the appropriate accessible name for the Node
-  private _accessibleNameBehavior: PDOMBehaviorFunction;
+  private _accessibleNameBehavior: AccessibleNameBehaviorFunction;
 
   // Sets the 'Accessible Paragraph' for the Node. This makes this Node a paragraph of descriptive content, often
   // for non-interactive elements.
@@ -595,7 +601,7 @@ export default class ParallelDOM extends PhetioObject {
   private _accessibleHelpText: PDOMValueType | null = null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
-  private _accessibleHelpTextBehavior: PDOMBehaviorFunction;
+  private _accessibleHelpTextBehavior: AccessibleHelpTextBehaviorFunction;
 
   // Forces an update from the behavior functions in PDOMPeer.
   // (scenery-internal)
@@ -611,7 +617,7 @@ export default class ParallelDOM extends PhetioObject {
   private _headingLevel: number | null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
-  private _pdomHeadingBehavior: PDOMBehaviorFunction;
+  private _pdomHeadingBehavior: AccessibleHeadingBehaviorFunction;
 
   // Emits an event when the focus highlight is changed.
   public readonly focusHighlightChangedEmitter: TEmitter = new TinyEmitter();
@@ -1004,7 +1010,7 @@ export default class ParallelDOM extends PhetioObject {
    * meet your requirements. If you do this, it is up to you to make sure that the Accessible Name is properly
    * being set and conveyed to AT, as it is very hard to validate this function.
    */
-  public setAccessibleNameBehavior( accessibleNameBehavior: PDOMBehaviorFunction ): void {
+  public setAccessibleNameBehavior( accessibleNameBehavior: AccessibleNameBehaviorFunction ): void {
 
     if ( this._accessibleNameBehavior !== accessibleNameBehavior ) {
 
@@ -1014,14 +1020,14 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleNameBehavior( accessibleNameBehavior: PDOMBehaviorFunction ) { this.setAccessibleNameBehavior( accessibleNameBehavior ); }
+  public set accessibleNameBehavior( accessibleNameBehavior: AccessibleNameBehaviorFunction ) { this.setAccessibleNameBehavior( accessibleNameBehavior ); }
 
-  public get accessibleNameBehavior(): PDOMBehaviorFunction { return this.getAccessibleNameBehavior(); }
+  public get accessibleNameBehavior(): AccessibleNameBehaviorFunction { return this.getAccessibleNameBehavior(); }
 
   /**
    * Get the help text of the interactive element.
    */
-  public getAccessibleNameBehavior(): PDOMBehaviorFunction {
+  public getAccessibleNameBehavior(): AccessibleNameBehaviorFunction {
     return this._accessibleNameBehavior;
   }
 
@@ -1074,7 +1080,7 @@ export default class ParallelDOM extends PhetioObject {
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public setPDOMHeadingBehavior( pdomHeadingBehavior: PDOMBehaviorFunction ): void {
+  public setPDOMHeadingBehavior( pdomHeadingBehavior: AccessibleHeadingBehaviorFunction ): void {
 
     if ( this._pdomHeadingBehavior !== pdomHeadingBehavior ) {
 
@@ -1084,9 +1090,9 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set pdomHeadingBehavior( pdomHeadingBehavior: PDOMBehaviorFunction ) { this.setPDOMHeadingBehavior( pdomHeadingBehavior ); }
+  public set pdomHeadingBehavior( pdomHeadingBehavior: AccessibleHeadingBehaviorFunction ) { this.setPDOMHeadingBehavior( pdomHeadingBehavior ); }
 
-  public get pdomHeadingBehavior(): PDOMBehaviorFunction { return this.getPDOMHeadingBehavior(); }
+  public get pdomHeadingBehavior(): AccessibleHeadingBehaviorFunction { return this.getPDOMHeadingBehavior(); }
 
   /**
    * Get the help text of the interactive element.
@@ -1094,7 +1100,7 @@ export default class ParallelDOM extends PhetioObject {
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
-  public getPDOMHeadingBehavior(): PDOMBehaviorFunction {
+  public getPDOMHeadingBehavior(): AccessibleHeadingBehaviorFunction {
     return this._pdomHeadingBehavior;
   }
 
@@ -1192,7 +1198,7 @@ export default class ParallelDOM extends PhetioObject {
    * customize this behavior, you can provide your own function to meet your requirements. If you provide your own
    * function, it is up to you to make sure that the help text is properly being set and is discoverable by AT.
    */
-  public setAccessibleHelpTextBehavior( accessibleHelpTextBehavior: PDOMBehaviorFunction ): void {
+  public setAccessibleHelpTextBehavior( accessibleHelpTextBehavior: AccessibleHelpTextBehaviorFunction ): void {
 
     if ( this._accessibleHelpTextBehavior !== accessibleHelpTextBehavior ) {
 
@@ -1202,14 +1208,14 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleHelpTextBehavior( accessibleHelpTextBehavior: PDOMBehaviorFunction ) { this.setAccessibleHelpTextBehavior( accessibleHelpTextBehavior ); }
+  public set accessibleHelpTextBehavior( accessibleHelpTextBehavior: AccessibleHelpTextBehaviorFunction ) { this.setAccessibleHelpTextBehavior( accessibleHelpTextBehavior ); }
 
-  public get accessibleHelpTextBehavior(): PDOMBehaviorFunction { return this.getAccessibleHelpTextBehavior(); }
+  public get accessibleHelpTextBehavior(): AccessibleHelpTextBehaviorFunction { return this.getAccessibleHelpTextBehavior(); }
 
   /**
    * Get the help text of the interactive element.
    */
-  public getAccessibleHelpTextBehavior(): PDOMBehaviorFunction {
+  public getAccessibleHelpTextBehavior(): AccessibleHelpTextBehaviorFunction {
     return this._accessibleHelpTextBehavior;
   }
 
