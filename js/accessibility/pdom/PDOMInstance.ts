@@ -67,6 +67,8 @@ class PDOMInstance {
   public node!: Node | null;
   public children!: PDOMInstance[];
   public peer!: PDOMPeer | null;
+  public parentHeadingLevel!: number; // the parent/ancestor heading level (logically)
+  public headingLevel!: number | null; // the heading level used for a heading for this instance (or null)
 
   // {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
   // display in their pdomDisplays. For non-root instances, this is initialized later in the constructor.
@@ -97,8 +99,8 @@ class PDOMInstance {
    * @param display
    * @param trail - trail to the node for this PDOMInstance
    */
-  public constructor( parent: PDOMInstance | null, display: Display, trail: Trail ) {
-    this.initializePDOMInstance( parent, display, trail );
+  public constructor( parent: PDOMInstance | null, display: Display, trail: Trail, rootParentHeadingLevel?: number ) {
+    this.initializePDOMInstance( parent, display, trail, rootParentHeadingLevel );
   }
 
   /**
@@ -109,7 +111,7 @@ class PDOMInstance {
    * @param trail - trail to node for this PDOMInstance
    * @returns - Returns 'this' reference, for chaining
    */
-  public initializePDOMInstance( parent: PDOMInstance | null, display: Display, trail: Trail ): PDOMInstance {
+  public initializePDOMInstance( parent: PDOMInstance | null, display: Display, trail: Trail, rootParentHeadingLevel?: number ): PDOMInstance {
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
     // unique ID
@@ -159,6 +161,15 @@ class PDOMInstance {
     // {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
     // re-initialized
     this.isDisposed = false;
+
+    assert && assert( this.parent || rootParentHeadingLevel !== undefined, 'rootParentHeadingLevel required for root instance' );
+
+    // NOTE: we are relying on `onPDOMContentChange()` to rebuild the PDOMInstance tree when the presence of an
+    // accessibleHeading OR the value of accessibleHeadingIncrement changes! Thus these computed heading levels will
+    // not change once constructed.
+    this.parentHeadingLevel = this.parent ? ( this.parent.headingLevel ?? this.parent.parentHeadingLevel ) : rootParentHeadingLevel!;
+    this.headingLevel = ( this.node && this.node.accessibleHeading !== null ) ? this.parentHeadingLevel + this.node.accessibleHeadingIncrement : null;
+    assert && assert( this.headingLevel === null || ( this.headingLevel >= 1 && this.headingLevel <= 6 ), `Heading level of h${this.headingLevel} is invalid` );
 
     if ( this.isRootInstance ) {
       const accessibilityContainer = document.createElement( 'div' );

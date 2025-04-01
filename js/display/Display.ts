@@ -158,6 +158,9 @@ type SelfOptions = {
   // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
   interactiveHighlightsEnabledProperty?: TProperty<boolean>;
 
+  // For headings created with `node.accessibleHeading`, this will control what heading level is at the base.
+  baseHeadingLevel?: number;
+
   // If true, input event listeners will be attached to the Display's DOM element instead of the window.
   // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
   // window, allowing correct button tracking), however there may be instances where a global listener is not
@@ -421,6 +424,8 @@ export default class Display {
       // {TProperty<boolean>} See above.
       interactiveHighlightsEnabledProperty: new Property( false ),
 
+      baseHeadingLevel: 1, // Controls the heading level for `accessibleHeading` at the base. Starts at <h1> by default
+
       // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
       interactive: true,
 
@@ -561,7 +566,7 @@ export default class Display {
     }
 
     if ( this._accessible ) {
-      this._rootPDOMInstance = PDOMInstance.pool.create( null, this, new Trail() );
+      this._rootPDOMInstance = PDOMInstance.pool.create( null, this, new Trail(), options.baseHeadingLevel - 1 );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
         `Display root instance: ${this._rootPDOMInstance.toString()}` );
       PDOMTree.rebuildInstanceTree( this._rootPDOMInstance );

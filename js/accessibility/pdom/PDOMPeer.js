@@ -26,9 +26,11 @@ import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 import { PEER_DESCRIPTION_SIBLING } from './PEER_DESCRIPTION_SIBLING.js';
 import { PEER_LABEL_SIBLING } from './PEER_LABEL_SIBLING.js';
 import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
+import { PEER_HEADING_SIBLING } from './PEER_HEADING_SIBLING.js';
 
 // constants
 const PRIMARY_SIBLING = PEER_PRIMARY_SIBLING;
+const HEADING_SIBLING = PEER_HEADING_SIBLING;
 const LABEL_SIBLING = PEER_LABEL_SIBLING;
 const DESCRIPTION_SIBLING = PEER_DESCRIPTION_SIBLING;
 const ACCESSIBLE_PARAGRAPH_SIBLING = PEER_ACCESSIBLE_PARAGRAPH_SIBLING;
@@ -103,6 +105,7 @@ class PDOMPeer {
     this.focusable = null;
 
     // @private {HTMLElement|null} - Optional label/description elements
+    this._headingSibling = null;
     this._labelSibling = null;
     this._descriptionSibling = null;
 
@@ -195,11 +198,13 @@ class PDOMPeer {
   }
 
   /**
-   * Update the content of the peer. This must be called after the AccessibePeer is constructed from pool.
+   * Update the content of the peer. This must be called after the AccessiblePeer is constructed from pool.
    * @param {boolean} updateIndicesStringAndElementIds - if this function should be called upon initial "construction" (in update), allows for the option to do this lazily, see https://github.com/phetsims/phet-io/issues/1847
    * @public (scenery-internal)
    */
   update( updateIndicesStringAndElementIds ) {
+    // NOTE: JO: 2025-04-01: This looks like it will usually convert string Properties to strings (because of the getters)
+    // but this will probably make TypeScript conversion problematic.
     let options = this.node.getBaseOptions();
 
     const callbacksForOtherNodes = [];
@@ -263,6 +268,12 @@ class PDOMPeer {
         this._containerParent = createElement( options.containerTagName, false );
       }
 
+      if ( options.accessibleHeading ) {
+        assert && assert( this.pdomInstance.headingLevel !== null, 'headingLevel required to create an accessibleHeading' );
+
+        this._headingSibling = createElement( `h${this.pdomInstance.headingLevel}`, false );
+      }
+
       // create the label DOM element representing this instance
       if ( options.labelTagName ) {
         this._labelSibling = createElement( options.labelTagName, false, {
@@ -286,6 +297,10 @@ class PDOMPeer {
 
       // assign listeners (to be removed or disconnected during disposal)
       this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
+
+      if ( options.accessibleHeading !== null ) {
+        this.setHeadingContent( options.accessibleHeading );
+      }
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
       // has been cleared out
@@ -362,11 +377,13 @@ class PDOMPeer {
     else {
 
       // Wean out any null siblings
-      this.topLevelElements = [ this._labelSibling, this._descriptionSibling, this._primarySibling, this._accessibleParagraphSibling ].filter( _.identity );
+      this.topLevelElements = [ this._headingSibling, this._labelSibling, this._descriptionSibling, this._primarySibling, this._accessibleParagraphSibling ].filter( _.identity );
     }
 
-    // insert the label and description elements in the correct location if they exist
-    // NOTE: Important for arrangeContentElement to be called on the label sibling first for correct order
+    // insert the heading/label/description elements in the correct location if they exist
+    // NOTE: Important for arrangeContentElement to be called on the heading sibling, then the label sibling first for
+    // correct order. This should ensure that the heading sibling is first (if present)
+    this._headingSibling && this.arrangeContentElement( this._headingSibling, false );
     this._labelSibling && this.arrangeContentElement( this._labelSibling, config.appendLabel );
     this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, config.appendDescription );
     this._accessibleParagraphSibling && this.arrangeContentElement( this._accessibleParagraphSibling, true );
@@ -399,7 +416,18 @@ class PDOMPeer {
   get primarySibling() { return this.getPrimarySibling(); }
 
   /**
-   * Get the primary sibling element for the peer
+   * Get the heading sibling element for the peer
+   * @public
+   * @returns {HTMLElement|null}
+   */
+  getHeadingSibling() {
+    return this._headingSibling;
+  }
+
+  get headingSibling() { return this.getHeadingSibling(); }
+
+  /**
+   * Get the label sibling element for the peer
    * @public
    * @returns {HTMLElement|null}
    */
@@ -410,7 +438,7 @@ class PDOMPeer {
   get labelSibling() { return this.getLabelSibling(); }
 
   /**
-   * Get the primary sibling element for the peer
+   * Get the description sibling element for the peer
    * @public
    * @returns {HTMLElement|null}
    */
@@ -421,7 +449,7 @@ class PDOMPeer {
   get descriptionSibling() { return this.getDescriptionSibling(); }
 
   /**
-   * Get the primary sibling element for the peer
+   * Get the container parent element for the peer
    * @public
    * @returns {HTMLElement|null}
    */
@@ -950,6 +978,23 @@ class PDOMPeer {
   }
 
   /**
+   * Sets the heading content
+   * @public (scenery-internal)
+   * @param {string|null} content --- NOTE that this is called from update(), where the value gets string-ified, so this
+   * type info is correct
+   */
+  setHeadingContent( content ) {
+    assert && assert( content === null || typeof content === 'string', 'incorrect heading content type' );
+
+    // no-op to support any option order
+    if ( !this._headingSibling ) {
+      return;
+    }
+
+    PDOMUtils.setTextContent( this._headingSibling, content );
+  }
+
+  /**
    * Responsible for setting the content for the label sibling
    * @public (scenery-internal)
    * @param {string|null} content - the content for the label sibling.
@@ -1314,6 +1359,7 @@ class PDOMPeer {
 
 // @public {string} - specifies valid associations between related PDOMPeers in the DOM
 PDOMPeer.PRIMARY_SIBLING = PRIMARY_SIBLING; // associate with all accessible content related to this peer
+PDOMPeer.HEADING_SIBLING = HEADING_SIBLING; // associate with just the heading content of this peer
 PDOMPeer.LABEL_SIBLING = LABEL_SIBLING; // associate with just the label content of this peer
 PDOMPeer.DESCRIPTION_SIBLING = DESCRIPTION_SIBLING; // associate with just the description content of this peer
 PDOMPeer.CONTAINER_PARENT = CONTAINER_PARENT; // associate with everything under the container parent of this peer

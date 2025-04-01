@@ -224,6 +224,9 @@ const ACCESSIBILITY_OPTION_KEYS = [
   /*
    * Lower Level API Functions
    */
+  'accessibleHeading',
+  'accessibleHeadingIncrement',
+
   'containerTagName',
   'containerAriaRole',
 
@@ -283,6 +286,9 @@ type ParallelDOMSelfOptions = {
   accessibleNameBehavior?: AccessibleNameBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
   accessibleHelpTextBehavior?: AccessibleHelpTextBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
   pdomHeadingBehavior?: AccessibleHeadingBehaviorFunction; // @experimental - not ready for use
+
+  accessibleHeading?: PDOMValueType | null; // Sets the heading text for this Node, see setAccessibleHeading() for more information
+  accessibleHeadingIncrement?: number; // Sets the heading level increment for this Node, see setAccessibleHeadingIncrement() for more information
 
   containerTagName?: string | null; // Sets the tag name for an [optional] element that contains this Node's siblings
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
@@ -452,6 +458,14 @@ export default class ParallelDOM extends PhetioObject {
   // Collection of class attributes that are applied to the Node's DOM element.
   // Objects have the form { className:{string}, options:{*} }
   private _pdomClasses: PDOMClass[];
+
+  // The heading content for the auto-generated accessible heading (or null indicates no heading is generated).
+  // See setAccessibleHeading() for more documentation
+  private _accessibleHeading: PDOMValueType | null = null;
+
+  // The label content for this Node's DOM element.  There are multiple ways that a label
+  // can be associated with a Node's dom element, see setLabelContent() for more documentation
+  private _accessibleHeadingIncrement = 1;
 
   // The label content for this Node's DOM element.  There are multiple ways that a label
   // can be associated with a Node's dom element, see setLabelContent() for more documentation
@@ -640,6 +654,7 @@ export default class ParallelDOM extends PhetioObject {
   protected _onAriaLabelChangeListener: () => void;
   protected _onAriaValueTextChangeListener: () => void;
   protected _onLabelContentChangeListener: () => void;
+  protected _onAccessibleHeadingChangeListener: () => void;
   protected _onDescriptionContentChangeListener: () => void;
   protected _onAccessibleParagraphContentChangeListener: () => void;
   protected _onInnerContentChangeListener: () => void;
@@ -653,6 +668,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onAriaLabelChangeListener = this.onAriaLabelChange.bind( this );
     this._onAriaValueTextChangeListener = this.onAriaValueTextChange.bind( this );
     this._onLabelContentChangeListener = this.invalidatePeerLabelSiblingContent.bind( this );
+    this._onAccessibleHeadingChangeListener = this.invalidateAccessibleHeadingContent.bind( this );
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
     this._onAccessibleParagraphContentChangeListener = this.invalidatePeerParagraphSiblingContent.bind( this );
     this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
@@ -747,6 +763,10 @@ export default class ParallelDOM extends PhetioObject {
 
     if ( isTReadOnlyProperty( this._labelContent ) && !this._labelContent.isDisposed ) {
       this._labelContent.unlink( this._onLabelContentChangeListener );
+    }
+
+    if ( isTReadOnlyProperty( this._accessibleHeading ) && !this._accessibleHeading.isDisposed ) {
+      this._accessibleHeading.unlink( this._onAccessibleHeadingChangeListener );
     }
 
     if ( isTReadOnlyProperty( this._descriptionContent ) && !this._descriptionContent.isDisposed ) {
@@ -1187,6 +1207,103 @@ export default class ParallelDOM extends PhetioObject {
     }
     else {
       return this._accessibleHelpText;
+    }
+  }
+
+  /**
+   * Sets the accessible heading for this Node. If non-null, a heading element (e.g. <h3>) will be created and will have
+   * text content equal to this value. It will be read by a screen reader when discovered by the virtual cursor.
+   *
+   * By default, the heading level (h1 ... h6) that is chosen will be one greater than the heading level of the closest
+   * ancestor. The base level is set on the Display with `baseHeadingLevel` (which can be useful if embedding the Display
+   * within another document that has outside headings.
+   *
+   * If the heading level REQUIRES adjustment (due to node structure that cannot be easily changed), it is possible to
+   * modify the heading level, see accessibleHeadingIncrement.
+   *
+   * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
+   * The DOM setter is chosen based on if the label passes the `containsFormattingTags`.
+   */
+  public setAccessibleHeading( accessibleHeading: PDOMValueType | null ): void {
+    if ( accessibleHeading !== this._accessibleHeading ) {
+      const headingExistenceChanged = ( accessibleHeading === null ) !== ( this._accessibleHeading === null );
+
+      if ( isTReadOnlyProperty( this._accessibleHeading ) && !this._accessibleHeading.isDisposed ) {
+        this._accessibleHeading.unlink( this._onAccessibleHeadingChangeListener );
+      }
+
+      this._accessibleHeading = accessibleHeading;
+
+      if ( isTReadOnlyProperty( accessibleHeading ) ) {
+        accessibleHeading.lazyLink( this._onAccessibleHeadingChangeListener );
+      }
+
+      if ( headingExistenceChanged ) {
+        this.invalidateAccessibleHeading();
+      }
+      else {
+        this.invalidateAccessibleHeadingContent();
+      }
+    }
+  }
+
+  public set accessibleHeading( label: PDOMValueType | null ) { this.setAccessibleHeading( label ); }
+
+  public get accessibleHeading(): string | null { return this.getAccessibleHeading(); }
+
+  /**
+   * Get the value of this Node's accessibleHeading. See setAccessibleHeading() for more information.
+   */
+  public getAccessibleHeading(): string | null {
+    return unwrapProperty( this._accessibleHeading );
+  }
+
+  /**
+   * Sets the heading increment. THIS IS AN OVERRIDE, please instead adjust the node structure so this isn't needed!
+   *
+   * The heading level chosen for this node will be `nearestParentHeadingLevel + accessibleHeadingIncrement`, where
+   * nearestParentHeadingLevel is found on a parent, or is determined by the default `baseHeadingLevel` on the `Display`.
+   *
+   * The default is 1 (so that nesting headings results in a natural structure, increasing the level).
+   *
+   * For cases where there is a parent-child relationship between two nodes that both have headings, BUT it is desired
+   * for them to have the same heading level (e.g. both <h3>), the accessibleHeadingIncrement can be set to 0.
+   *
+   * For cases where there is a sibling relationship between two nodes that both have headings, BUT it is desired for them
+   * to have different heading levels (as if they were a parent-child relationship), you can set the accessibleHeadingIncrement
+   * on the child-like node to 2.
+   */
+  public setAccessibleHeadingIncrement( accessibleHeadingIncrement: number ): void {
+    if ( accessibleHeadingIncrement !== this._accessibleHeadingIncrement ) {
+      this._accessibleHeadingIncrement = accessibleHeadingIncrement;
+
+      this.invalidateAccessibleHeading();
+    }
+  }
+
+  public set accessibleHeadingIncrement( accessibleHeadingIncrement: number ) {
+    this.setAccessibleHeadingIncrement( accessibleHeadingIncrement );
+  }
+
+  public get accessibleHeadingIncrement(): number { return this.getAccessibleHeadingIncrement(); }
+
+  /**
+   * Get the content for this Node's label sibling DOM element.
+   */
+  public getAccessibleHeadingIncrement(): number {
+    return this._accessibleHeadingIncrement;
+  }
+
+  private invalidateAccessibleHeading(): void {
+    this.onPDOMContentChange();
+
+    this.invalidateAccessibleHeadingContent();
+  }
+
+  private invalidateAccessibleHeadingContent(): void {
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.setHeadingContent( unwrapProperty( this._accessibleHeading ) );
     }
   }
 
