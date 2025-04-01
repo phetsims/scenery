@@ -218,6 +218,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'accessibleHelpText',
   'accessibleHelpTextBehavior',
   'accessibleParagraph',
+  'accessibleParagraphBehavior',
   'pdomHeading',
   'pdomHeadingBehavior',
 
@@ -246,6 +247,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'descriptionTagName',
   'descriptionContent',
   'appendDescription',
+
+  'accessibleParagraphContent',
 
   'focusHighlight',
   'focusHighlightLayerable',
@@ -285,6 +288,7 @@ type ParallelDOMSelfOptions = {
    */
   accessibleNameBehavior?: AccessibleNameBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
   accessibleHelpTextBehavior?: AccessibleHelpTextBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
+  accessibleParagraphBehavior?: AccessibleParagraphBehaviorFunction; // Sets the implementation for the accessibleParagraph, see setAccessibleParagraphBehavior() for more information
   pdomHeadingBehavior?: AccessibleHeadingBehaviorFunction; // @experimental - not ready for use
 
   accessibleHeading?: PDOMValueType | null; // Sets the heading text for this Node, see setAccessibleHeading() for more information
@@ -309,6 +313,8 @@ type ParallelDOMSelfOptions = {
   descriptionTagName?: string | null; // Sets the tag name for the DOM element sibling describing this Node
   descriptionContent?: PDOMValueType | null; // Sets the description content for the Node
   appendDescription?: boolean; // Sets the description sibling to come after the primary sibling in the PDOM
+
+  accessibleParagraphContent?: PDOMValueType | null; // Sets the accessible paragraph content for the Node
 
   focusHighlight?: Highlight; // Sets the focus highlight for the Node
   focusHighlightLayerable?: boolean; //lag to determine if the focus highlight Node can be layered in the scene graph
@@ -402,6 +408,7 @@ type PDOMBehaviorFunction<AllowedKeys extends keyof ParallelDOMOptions> = ( node
 // confusing side effects.
 export type AccessibleNameBehaviorFunction = PDOMBehaviorFunction<'innerContent' | 'ariaLabel' | 'labelContent' | 'labelTagName' | 'appendLabel'>;
 export type AccessibleHelpTextBehaviorFunction = PDOMBehaviorFunction<'descriptionTagName' | 'descriptionContent' | 'appendDescription'>;
+export type AccessibleParagraphBehaviorFunction = PDOMBehaviorFunction<'accessibleParagraphContent'>;
 export type AccessibleHeadingBehaviorFunction = PDOMBehaviorFunction<'labelTagName' | 'labelContent' | 'appendLabel'>;
 
 export default class ParallelDOM extends PhetioObject {
@@ -477,6 +484,9 @@ export default class ParallelDOM extends PhetioObject {
 
   // The description content for this Node's DOM element.
   private _descriptionContent: PDOMValueType | null = null;
+
+  // The content for the accessible paragraph for this Node's DOM element.
+  private _accessibleParagraphContent: PDOMValueType | null = null;
 
   // If provided, it will create the primary DOM element with the specified namespace.
   // This may be needed, for example, with MathML/SVG/etc.
@@ -611,6 +621,9 @@ export default class ParallelDOM extends PhetioObject {
   // for non-interactive elements.
   private _accessibleParagraph: PDOMValueType | null = null;
 
+  // Function that returns the options needed to set the appropriate accessible paragraph for the Node.
+  private _accessibleParagraphBehavior: AccessibleParagraphBehaviorFunction;
+
   // Sets the help text of the Node, this most often corresponds to description text.
   private _accessibleHelpText: PDOMValueType | null = null;
 
@@ -620,8 +633,8 @@ export default class ParallelDOM extends PhetioObject {
   // Forces an update from the behavior functions in PDOMPeer.
   // (scenery-internal)
   public _accessibleNameDirty = false;
-  public _helpTextDirty = false;
   public _accessibleHelpTextDirty = false;
+  public _accessibleParagraphDirty = false;
 
   // Sets the help text of the Node, this most often corresponds to label sibling text.
   private _pdomHeading: PDOMValueType | null = null;
@@ -713,6 +726,7 @@ export default class ParallelDOM extends PhetioObject {
 
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
     this._accessibleHelpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
+    this._accessibleParagraphBehavior = ParallelDOM.BASIC_ACCESSIBLE_PARAGRAPH_BEHAVIOR;
     this._headingLevel = null;
     this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
     this.pdomBoundInputEnabledListener = this.pdomInputEnabledListener.bind( this );
@@ -737,6 +751,11 @@ export default class ParallelDOM extends PhetioObject {
     if ( isTReadOnlyProperty( this._accessibleHelpText ) && !this._accessibleHelpText.isDisposed ) {
       this._accessibleHelpText.unlink( this._onPDOMContentChangeListener );
       this._accessibleHelpText = null;
+    }
+
+    if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
+      this._accessibleParagraph.unlink( this._onPDOMContentChangeListener );
+      this._accessibleParagraph = null;
     }
 
     if ( isTReadOnlyProperty( this._pdomHeading ) && !this._pdomHeading.isDisposed ) {
@@ -773,8 +792,8 @@ export default class ParallelDOM extends PhetioObject {
       this._descriptionContent.unlink( this._onDescriptionContentChangeListener );
     }
 
-    if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
-      this._accessibleParagraph.unlink( this._onAccessibleParagraphContentChangeListener );
+    if ( isTReadOnlyProperty( this._accessibleParagraphContent ) && !this._accessibleParagraphContent.isDisposed ) {
+      this._accessibleParagraphContent.unlink( this._onAccessibleParagraphContentChangeListener );
     }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
@@ -958,40 +977,30 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  private invalidatePeerParagraphSiblingContent(): void {
-    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      const peer = this._pdomInstances[ i ].peer!;
-      peer.setAccessibleParagraphContent( this.accessibleParagraph );
-    }
-  }
-
   /**
-   * Sets this Node as a paragraph with the provided content. This lets you easily describe Nodes for screen readers. This
+   * Sets content for a paragraph that describes this Node for screen readers. This
    * is most useful for non-interactive elements that need to be described.
    *
+   * For example:
    * myImageNode.setAccessibleParagraph( 'This is a picture of a cat' );
-   *
-   * This is part of the "Higher level API", but there is no customizing behavior function for this function.
    */
   public setAccessibleParagraph( accessibleParagraph: PDOMValueType | null ): void {
     if ( accessibleParagraph !== this._accessibleParagraph ) {
 
-      // If setting to null, or just becoming null, need to update the renderer summary
-      const contentChange = !!this._accessibleParagraph !== !!accessibleParagraph;
-
       if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
-        this._accessibleParagraph.unlink( this._onAccessibleParagraphContentChangeListener );
+        this._accessibleParagraph.unlink( this._onPDOMContentChangeListener );
       }
 
       this._accessibleParagraph = accessibleParagraph;
 
       if ( isTReadOnlyProperty( accessibleParagraph ) ) {
-        accessibleParagraph.lazyLink( this._onAccessibleParagraphContentChangeListener );
+        accessibleParagraph.lazyLink( this._onPDOMContentChangeListener );
       }
 
-      this.invalidatePeerParagraphSiblingContent();
+      this._accessibleParagraphDirty = true;
 
-      contentChange && this.onPDOMContentChange();
+      // The behavior function may change any of this Node's state so we need to recompute all content.
+      this.onPDOMContentChange();
     }
   }
 
@@ -1209,6 +1218,41 @@ export default class ParallelDOM extends PhetioObject {
       return this._accessibleHelpText;
     }
   }
+
+  /**
+   * Sets the accessible paragraph content for this Node. This is a paragraph of descriptive content, often
+   * for non-interactive elements.
+   *
+   * This is the lower level API function for accessibleParagraph. You probably just want to use setAccessibleParagraph
+   * instead.
+   */
+  public setAccessibleParagraphContent( accessibleParagraphContent: PDOMValueType | null ): void {
+    if ( accessibleParagraphContent !== this._accessibleParagraphContent ) {
+      if ( isTReadOnlyProperty( this._accessibleParagraphContent ) && !this._accessibleParagraphContent.isDisposed ) {
+        this._accessibleParagraphContent.unlink( this._onAccessibleParagraphContentChangeListener );
+      }
+
+      this._accessibleParagraphContent = accessibleParagraphContent;
+
+      if ( isTReadOnlyProperty( accessibleParagraphContent ) ) {
+        accessibleParagraphContent.lazyLink( this._onAccessibleParagraphContentChangeListener );
+      }
+
+      this.invalidatePeerParagraphSiblingContent();
+    }
+  }
+
+  public set accessibleParagraphContent( content: PDOMValueType | null ) { this.setAccessibleParagraphContent( content ); }
+
+  /**
+   * Returns the accessibleParagraph content for this Node.
+   */
+  public get accessibleParagraphContent(): string | null { return this.getAccessibleParagraphContent(); }
+
+  public getAccessibleParagraphContent(): string | null {
+    return unwrapProperty( this._accessibleParagraphContent );
+  }
+
 
   /**
    * Sets the accessible heading for this Node. If non-null, a heading element (e.g. <h3>) will be created and will have
@@ -1667,6 +1711,17 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
+   * When the accessible paragraph changes, this will update content in the ParallelDOM by forwarding
+   * the update change to the PDOMPeer.
+   */
+  private invalidatePeerParagraphSiblingContent(): void {
+    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+      const peer = this._pdomInstances[ i ].peer!;
+      peer.setAccessibleParagraphContent( this.accessibleParagraphContent );
+    }
+  }
+
+  /**
    * Set the description content for this Node's primary sibling. The description sibling tag name must support
    * innerHTML and textContent. If a description element does not exist yet, a default
    * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
@@ -1696,6 +1751,26 @@ export default class ParallelDOM extends PhetioObject {
    */
   public getDescriptionContent(): string | null {
     return unwrapProperty( this._descriptionContent );
+  }
+
+  /**
+   * Set the accessibleParagraph behavior function which can be used to control the implementation of the accessbibleParagraph.
+   */
+  public setAccessibleParagraphBehavior( accessibleParagraphBehavior: AccessibleParagraphBehaviorFunction ): void {
+    if ( this._accessibleParagraphBehavior !== accessibleParagraphBehavior ) {
+
+      this._accessibleParagraphBehavior = accessibleParagraphBehavior;
+
+      this.onPDOMContentChange();
+    }
+  }
+
+  public set accessibleParagraphBehavior( accessibleParagraphBehavior: AccessibleParagraphBehaviorFunction ) { this.setAccessibleParagraphBehavior( accessibleParagraphBehavior ); }
+
+  public get accessibleParagraphBehavior(): AccessibleParagraphBehaviorFunction { return this.getAccessibleParagraphBehavior(); }
+
+  public getAccessibleParagraphBehavior(): AccessibleParagraphBehaviorFunction {
+    return this._accessibleParagraphBehavior;
   }
 
   /**
@@ -3513,6 +3588,15 @@ export default class ParallelDOM extends PhetioObject {
     else {
       options.ariaLabel = accessibleName;
     }
+    return options;
+  }
+
+  /**
+   * The basic accessibleParagraph behavior function - sets the accessibleParagraphContent so that there is a paragraph
+   * describing this Node.
+   */
+  public static BASIC_ACCESSIBLE_PARAGRAPH_BEHAVIOR( node: Node, options: ParallelDOMOptions, accessibleParagrah: PDOMValueType ): ParallelDOMOptions {
+    options.accessibleParagraphContent = accessibleParagrah;
     return options;
   }
 

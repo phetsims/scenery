@@ -24,9 +24,9 @@ import { guessVisualTrail } from './guessVisualTrail.js';
 import { PEER_ACCESSIBLE_PARAGRAPH_SIBLING } from './PEER_ACCESSIBLE_PARAGRAPH_SIBLING.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 import { PEER_DESCRIPTION_SIBLING } from './PEER_DESCRIPTION_SIBLING.js';
+import { PEER_HEADING_SIBLING } from './PEER_HEADING_SIBLING.js';
 import { PEER_LABEL_SIBLING } from './PEER_LABEL_SIBLING.js';
 import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
-import { PEER_HEADING_SIBLING } from './PEER_HEADING_SIBLING.js';
 
 // constants
 const PRIMARY_SIBLING = PEER_PRIMARY_SIBLING;
@@ -250,8 +250,25 @@ class PDOMPeer {
       this.node._accessibleHelpTextDirty = false;
     }
 
+    // Even if the accessibleHelpText is null, we need to run the behavior function if the dirty flag is set
+    // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
+    if ( this.node.accessibleParagraph !== null || this.node._accessibleParagraphDirty ) {
+      if ( this.node.accessibleParagraph === null ) {
+
+        // There is no accessibleParagraph, so we don't want to modify options - just run the behavior for cleanup
+        // and to update other nodes.
+        this.node.accessibleParagraphBehavior( this.node, {}, this.node.accessibleParagraph, callbacksForOtherNodes );
+      }
+      else {
+        options = this.node.accessibleParagraphBehavior( this.node, options, this.node.accessibleParagraph, callbacksForOtherNodes );
+      }
+      assert && assert( typeof options === 'object', 'should return an object' );
+      this.node._accessibleParagraphDirty = false;
+    }
+
+    // If there is an accessible paragraph, create it now.
     if ( options.accessibleParagraph ) {
-      this._accessibleParagraphSibling = createElement( 'p', false );
+      this._accessibleParagraphSibling = createElement( PDOMUtils.TAGS.P, false );
       this.setAccessibleParagraphContent( options.accessibleParagraph );
     }
 

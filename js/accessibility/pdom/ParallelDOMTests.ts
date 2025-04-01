@@ -2411,6 +2411,32 @@ QUnit.test( 'accessibleParagraph', assert => {
   assert.ok( bRenderedElements[ 2 ].tagName === bDescriptionTagName, 'b primary element is in the DOM' );
   assert.ok( bRenderedElements[ 3 ].tagName === bParagraphTagName, 'b paragraph is in the DOM and after the primary element' );
 
+  //-------------------------------------------------------------------------
+  // Using behavior functions to forward to another Node
+  //-------------------------------------------------------------------------
+  const testParagraph = 'This is a test';
+
+  const c = new Node();
+  const d = new Node();
+  const e = new Node();
+
+  rootNode.addChild( c );
+  c.addChild( d );
+  c.addChild( e );
+
+  // The behavior function cannot add a Node to the PDOM, so it must
+  // have some accessibleContent first.
+  d.accessibleParagraph = '';
+  c.accessibleParagraphBehavior = ( node, options, accessibleParagraph, callbacksForOtherNodes ) => {
+    callbacksForOtherNodes.push( () => {
+      d.accessibleParagraph = accessibleParagraph;
+    } );
+    return options;
+  };
+  c.accessibleParagraph = testParagraph;
+
+  assert.ok( d.accessibleParagraph === testParagraph );
+
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
