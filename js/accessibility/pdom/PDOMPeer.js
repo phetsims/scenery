@@ -637,6 +637,9 @@ class PDOMPeer {
     else if ( elementName === ACCESSIBLE_PARAGRAPH_SIBLING ) {
       return this._accessibleParagraphSibling;
     }
+    else if ( elementName === HEADING_SIBLING ) {
+      return this._headingSibling;
+    }
 
     throw new Error( `invalid elementName name: ${elementName}` );
   }
@@ -1140,6 +1143,12 @@ class PDOMPeer {
       // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
       this._descriptionSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._descriptionSibling.id = this.getElementId( 'description', indices );
+    }
+    if ( this._headingSibling ) {
+
+      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
+      this._headingSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._headingSibling.id = this.getElementId( 'heading', indices );
     }
     if ( this._accessibleParagraphSibling ) {
 
