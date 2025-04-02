@@ -1268,6 +1268,10 @@ export default class ParallelDOM extends PhetioObject {
    * If the heading level REQUIRES adjustment (due to node structure that cannot be easily changed), it is possible to
    * modify the heading level, see accessibleHeadingIncrement.
    *
+   * Another way to adjust the computed heading level is to just use low level API options (labelTagName
+   * and labelContent). The computed heading level does not consider Nodes with headings defined with
+   * labelTagName or other options.
+   *
    * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
    * The DOM setter is chosen based on if the label passes the `containsFormattingTags`.
    */
