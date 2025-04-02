@@ -16,7 +16,7 @@ import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import { clamp } from '../../../dot/js/util/clamp.js';
 import { linear } from '../../../dot/js/util/linear.js';
 import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
-import IOType from '../../../tandem/js/types/IOType.js';
+import IOType, { AnyIOType } from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import scenery from '../scenery.js';
 import type TPaint from '../util/TPaint.js';
@@ -1117,7 +1117,7 @@ export default class Color {
   public static yellow: Color;
   public static transparent: Color;
 
-  public static ColorIO: IOType;
+  public static ColorIO: AnyIOType;
 }
 
 scenery.register( 'Color', Color );

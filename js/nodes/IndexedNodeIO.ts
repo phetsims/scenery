@@ -17,6 +17,7 @@
  */
 
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import FunctionIO from '../../../tandem/js/types/FunctionIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -75,7 +76,7 @@ function moveChild( parent: IndexedNodeIOObserver, child: Node, delta: number ):
   parent.onIndexedNodeIOChildMoved && parent.onIndexedNodeIOChildMoved( child );
 }
 
-const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
+const IndexedNodeIO = new IOType<IntentionalAny, IntentionalAny>( 'IndexedNodeIO', {
   valueType: Node,
   documentation: 'Node that can be moved forward/back by index, which specifies z-order and/or layout order',
   supertype: Node.NodeIO,

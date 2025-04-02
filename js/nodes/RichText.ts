@@ -68,6 +68,7 @@ import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import Range from '../../../dot/js/Range.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import StringUtils from '../../../phetcommon/js/util/StringUtils.js';
 import { QueryStringMachine } from '../../../query-string-machine/js/QueryStringMachineModule.js';
@@ -75,7 +76,7 @@ import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSele
 import '../../../sherpa/lib/himalaya-1.1.0.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import IOType from '../../../tandem/js/types/IOType.js';
+import IOType, { AnyIOType } from '../../../tandem/js/types/IOType.js';
 import WidthSizable from '../layout/WidthSizable.js';
 import Line from '../nodes/Line.js';
 import type { NodeOptions } from '../nodes/Node.js';
@@ -1830,7 +1831,7 @@ export default class RichText extends WidthSizable( Node ) {
     } );
   }
 
-  public static RichTextIO: IOType;
+  public static RichTextIO: AnyIOType;
 }
 
 /**
@@ -1844,7 +1845,7 @@ RichText.prototype._mutatorKeys = RICH_TEXT_OPTION_KEYS.concat( Node.prototype._
 
 scenery.register( 'RichText', RichText );
 
-RichText.RichTextIO = new IOType( 'RichTextIO', {
+RichText.RichTextIO = new IOType<IntentionalAny, IntentionalAny>( 'RichTextIO', {
   valueType: RichText,
   supertype: Node.NodeIO,
   documentation: 'The PhET-iO Type for the scenery RichText node'

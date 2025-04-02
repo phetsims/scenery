@@ -13,6 +13,7 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
@@ -134,7 +135,7 @@ export default class SceneryEvent<out DOMEvent extends Event = Event> {
     return !this.pointer.isAttached() && ( !( this.pointer.type === 'mouse' ) || ( this.domEvent as unknown as MouseEvent ).button === 0 );
   }
 
-  public static readonly SceneryEventIO = new IOType( 'SceneryEventIO', {
+  public static readonly SceneryEventIO = new IOType<IntentionalAny, IntentionalAny>( 'SceneryEventIO', {
     valueType: SceneryEvent,
     documentation: 'An event, with a "point" field',
     toStateObject: ( event: SceneryEvent ) => {

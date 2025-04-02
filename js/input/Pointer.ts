@@ -24,17 +24,17 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import Vector2 from '../../../dot/js/Vector2.js';
+import Vector2, { Vector2StateObject } from '../../../dot/js/Vector2.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import EventContext from '../input/EventContext.js';
-import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
-import type TInputListener from '../input/TInputListener.js';
-import Trail from '../util/Trail.js';
 import type TAttachableInputListener from '../input/TAttachableInputListener.js';
+import type TInputListener from '../input/TInputListener.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
@@ -50,6 +50,10 @@ export class Intent extends EnumerationValue {
 
 type PointerType = 'pdom' | 'touch' | 'mouse' | 'pen';
 
+export type PointerState = {
+  point: Vector2StateObject;
+  type: PointerType;
+};
 export type ActivePointer = {
   point: Vector2;
 } & Pointer;
@@ -109,7 +113,7 @@ export default abstract class Pointer {
 
   // Pointer is not a PhetioObject and not instrumented, but this type is used for
   // toStateObject in Input
-  public static readonly PointerIO = new IOType<Pointer>( 'PointerIO', {
+  public static readonly PointerIO = new IOType<Pointer, PointerState>( 'PointerIO', {
     valueType: Pointer,
     toStateObject: ( pointer: Pointer ) => {
       return {

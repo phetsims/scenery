@@ -9,6 +9,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -18,7 +19,7 @@ import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 import { deserializeDomEvent, serializeDomEvent } from './eventSerialization.js';
 
-const EventIO = new IOType( 'EventIO', {
+const EventIO = new IOType<IntentionalAny, IntentionalAny>( 'EventIO', {
   valueType: window.Event,
   documentation: 'A DOM Event',
   toStateObject: domEvent => serializeDomEvent( domEvent ),

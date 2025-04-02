@@ -19,10 +19,11 @@ import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSelectionProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import IOType from '../../../tandem/js/types/IOType.js';
+import IOType, { AnyIOType } from '../../../tandem/js/types/IOType.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
 import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
@@ -842,7 +843,7 @@ export default class Text extends Paintable( Node ) {
     return stringify( simplify( root ) );
   }
 
-  public static TextIO: IOType;
+  public static TextIO: AnyIOType;
 }
 
 /**
@@ -874,7 +875,7 @@ const POP = '\u202c';
 // Initialize computation of hybrid text
 TextBounds.initializeTextBounds();
 
-Text.TextIO = new IOType( 'TextIO', {
+Text.TextIO = new IOType<IntentionalAny, IntentionalAny>( 'TextIO', {
   valueType: Text,
   supertype: Node.NodeIO,
   documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +

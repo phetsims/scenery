@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import EventIO from '../input/EventIO.js';
 import scenery from '../scenery.js';
@@ -53,7 +54,7 @@ export default class EventContext<out DOMEvent extends Event = Event> {
   }
 }
 
-export const EventContextIO = new IOType( 'EventContextIO', {
+export const EventContextIO = new IOType<IntentionalAny, IntentionalAny>( 'EventContextIO', {
   valueType: EventContext,
   documentation: 'A DOM event and its context',
   toStateObject: eventContext => {

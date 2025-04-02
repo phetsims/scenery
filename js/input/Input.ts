@@ -173,25 +173,25 @@ import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
+import { pdomUniqueIdToTrail } from '../accessibility/pdom/pdomUniqueIdToTrail.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import type Display from '../display/Display.js';
+import DisplayGlobals from '../display/DisplayGlobals.js';
 import BatchedDOMEvent, { BatchedDOMEventCallback, BatchedDOMEventType } from '../input/BatchedDOMEvent.js';
 import BrowserEvents from '../input/BrowserEvents.js';
-import type Display from '../display/Display.js';
 import EventContext, { EventContextIO } from '../input/EventContext.js';
 import Mouse from '../input/Mouse.js';
-import Node from '../nodes/Node.js';
 import PDOMPointer from '../input/PDOMPointer.js';
-import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Pen from '../input/Pen.js';
-import Pointer from '../input/Pointer.js';
-import scenery from '../scenery.js';
+import Pointer, { PointerState } from '../input/Pointer.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type { default as TInputListener, SceneryListenerFunction, SupportedEventTypes } from '../input/TInputListener.js';
 import Touch from '../input/Touch.js';
-import Trail from '../util/Trail.js';
 import WindowTouch from '../input/WindowTouch.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 import { TARGET_SUBSTITUTE_KEY } from './eventSerialization.js';
-import { pdomUniqueIdToTrail } from '../accessibility/pdom/pdomUniqueIdToTrail.js';
-import DisplayGlobals from '../display/DisplayGlobals.js';
 
 const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 
@@ -200,6 +200,10 @@ const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
 
 type TargetSubstitudeAugmentedEvent = Event & {
   [ TARGET_SUBSTITUTE_KEY ]?: Element;
+};
+
+type InputState = {
+  pointers: PointerState[];
 };
 
 
@@ -278,7 +282,7 @@ export default class Input extends PhetioObject {
   private readonly keydownAction: PhetioAction<[ EventContext<KeyboardEvent> ]>;
   private readonly keyupAction: PhetioAction<[ EventContext<KeyboardEvent> ]>;
 
-  public static readonly InputIO = new IOType<Input>( 'InputIO', {
+  public static readonly InputIO = new IOType<Input, InputState>( 'InputIO', {
     valueType: Input,
     applyState: _.noop,
     toStateObject: ( input: Input ) => {

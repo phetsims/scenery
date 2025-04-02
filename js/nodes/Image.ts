@@ -13,7 +13,8 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
-import IOType from '../../../tandem/js/types/IOType.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import IOType, { AnyIOType } from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
@@ -300,7 +301,7 @@ export default class Image extends Imageable( Node ) {
     return super.mutate( options );
   }
 
-  public static ImageIO: IOType;
+  public static ImageIO: AnyIOType;
 
   // Initial values for most Node mutator options
   public static readonly DEFAULT_IMAGE_OPTIONS = combineOptions<ImageOptions>( {}, Node.DEFAULT_NODE_OPTIONS, Imageable.DEFAULT_OPTIONS );
@@ -325,7 +326,7 @@ Image.prototype._mutatorKeys = [ ...IMAGE_OPTION_KEYS, ...Node.prototype._mutato
 Image.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, 'image', 'imageOpacity', 'mipmap' ];
 
 // NOTE: Not currently in use
-Image.ImageIO = new IOType( 'ImageIO', {
+Image.ImageIO = new IOType<IntentionalAny, IntentionalAny>( 'ImageIO', {
   valueType: Image,
   supertype: Node.NodeIO,
   events: [ 'changed' ],

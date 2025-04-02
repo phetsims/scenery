@@ -192,7 +192,7 @@ import type IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
-import IOType from '../../../tandem/js/types/IOType.js';
+import IOType, { AnyIOType } from '../../../tandem/js/types/IOType.js';
 import ParallelDOM, { ACCESSIBILITY_OPTION_KEYS, ParallelDOMOptions } from '../accessibility/pdom/ParallelDOM.js';
 import type CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
 import type Display from '../display/Display.js';
@@ -6359,7 +6359,7 @@ class Node extends ParallelDOM {
     return node._children.length === 0;
   }
 
-  public static NodeIO: IOType;
+  public static NodeIO: AnyIOType;
 
   // A mapping of all of the default options provided to Node
   public static readonly DEFAULT_NODE_OPTIONS = DEFAULT_OPTIONS;
@@ -6381,7 +6381,7 @@ Node.prototype.drawableMarkFlags = [];
 scenery.register( 'Node', Node );
 
 // {IOType}
-Node.NodeIO = new IOType( 'NodeIO', {
+Node.NodeIO = new IOType<IntentionalAny, IntentionalAny>( 'NodeIO', {
   valueType: Node,
   documentation: 'The base type for graphical and potentially interactive objects.',
   metadataDefaults: {

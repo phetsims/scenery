@@ -9,7 +9,8 @@
 
 import Property from '../../../axon/js/Property.js';
 import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
-import IOType from '../../../tandem/js/types/IOType.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import IOType, { AnyIOType } from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
 import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
@@ -50,10 +51,10 @@ const ColorDef = {
   },
 
   // phet-io IOType for serialization and documentation
-  ColorDefIO: null as unknown as IOType // Defined below, typed here
+  ColorDefIO: null as unknown as AnyIOType // Defined below, typed here
 };
 
-ColorDef.ColorDefIO = new IOType( 'ColorDefIO', {
+ColorDef.ColorDefIO = new IOType<IntentionalAny, IntentionalAny>( 'ColorDefIO', {
   isValidValue: ColorDef.isColorDef,
   supertype: NullableIO( OrIO( [ StringIO, Color.ColorIO, ReferenceIO( Property.PropertyIO( NullableIO( OrIO( [ StringIO, Color.ColorIO ] ) ) ) ) ] ) )
 } );
