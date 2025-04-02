@@ -294,7 +294,7 @@ class PDOMPeer {
       // create the label DOM element representing this instance
       if ( options.labelTagName ) {
         this._labelSibling = createElement( options.labelTagName, false, {
-          excludeFromInput: this.node.excludeLabelSiblingFromInput
+          excludeFromInput: this.node._excludeLabelSiblingFromInput
         } );
       }
 

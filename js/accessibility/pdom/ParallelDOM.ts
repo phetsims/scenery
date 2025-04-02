@@ -605,9 +605,12 @@ export default class ParallelDOM extends PhetioObject {
   // See setPositionInPDOM for more information.
   private _positionInPDOM: boolean;
 
-  // If true, any DOM events received on the label sibling
-  // will not dispatch SceneryEvents through the scene graph, see setExcludeLabelSiblingFromInput() - scenery internal
-  private excludeLabelSiblingFromInput: boolean;
+  // If true, any DOM input events received from the label sibling will not be dispatched as SceneryEvents in Input.js.
+  // The label sibling may receive input by screen readers if the virtual cursor is over it. That is usually fine,
+  // but there is a bug with NVDA and Firefox where both the label sibling AND primary sibling receive events in
+  // this case, and both bubble up to the root of the PDOM, and so we would otherwise dispatch two SceneryEvents
+  // instead of one.
+  private _excludeLabelSiblingFromInput: boolean;
 
   // HIGHER LEVEL API INITIALIZATION
 
@@ -718,7 +721,7 @@ export default class ParallelDOM extends PhetioObject {
     this._pdomDisplaysInfo = new PDOMDisplaysInfo( this as unknown as Node );
     this._pdomInstances = [];
     this._positionInPDOM = false;
-    this.excludeLabelSiblingFromInput = false;
+    this._excludeLabelSiblingFromInput = false;
 
     this._pdomVisibleProperty = new TinyForwardingProperty<boolean>( true, false, this.onPdomVisiblePropertyChange.bind( this ) );
 
@@ -3261,7 +3264,7 @@ export default class ParallelDOM extends PhetioObject {
    * See https://github.com/phetsims/a11y-research/issues/156 for more information.
    */
   public setExcludeLabelSiblingFromInput(): void {
-    this.excludeLabelSiblingFromInput = true;
+    this._excludeLabelSiblingFromInput = true;
     this.onPDOMContentChange();
   }
 
