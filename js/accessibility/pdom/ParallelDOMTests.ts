@@ -6,6 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import StringProperty from '../../../../axon/js/StringProperty.js';
 import Display from '../../display/Display.js';
 import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
@@ -75,6 +76,15 @@ function getPDOMPeerByNode( node: Node ): PDOMPeer {
   }
 
   return node.pdomInstances[ 0 ].peer;
+}
+
+/**
+ * Get an HTML Element for a Node from a particular PDOMPeer element name.
+ * Assertions are thrown if none is found.
+ */
+function getDOMElementByName( node: Node, name: string ): HTMLElement {
+  const peer = getPDOMPeerByNode( node );
+  return peer.getElementByName( name );
 }
 
 /**
@@ -2436,6 +2446,165 @@ QUnit.test( 'accessibleParagraph', assert => {
   c.accessibleParagraph = testParagraph;
 
   assert.ok( d.accessibleParagraph === testParagraph );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'accessibleHeading', assert => {
+
+  const rootNode = new Node( { tagName: 'div' } );
+  var display = new Display( rootNode ); // eslint-disable-line no-var
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+
+  const testHeadingContent = 'Heading';
+
+  //--------------------------------------------------------------------------
+  // Basic heading creation
+  //--------------------------------------------------------------------------
+  const t1 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  rootNode.addChild( t1 );
+  const t1Heading = getDOMElementByName( t1, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t1Heading.tagName === 'H1', 'Heading should be created in the DOM' );
+
+  //--------------------------------------------------------------------------
+  // Basic level computation
+  //--------------------------------------------------------------------------
+  const t2 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  const t3 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  const t4 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  t1.addChild( t2 );
+  t2.addChild( t3 );
+  t3.addChild( t4 );
+
+  const t2Heading = getDOMElementByName( t2, PDOMPeer.HEADING_SIBLING );
+  const t3Heading = getDOMElementByName( t3, PDOMPeer.HEADING_SIBLING );
+  const t4Heading = getDOMElementByName( t4, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t2Heading.tagName === 'H2', 'Next child should be an h2' );
+  assert.ok( t3Heading.tagName === 'H3', 'Next child should be an h3' );
+  assert.ok( t4Heading.tagName === 'H4', 'Next child should be an h4' );
+
+  //--------------------------------------------------------------------------
+  // Override with setAccessibleHeadingIncrement
+  //--------------------------------------------------------------------------
+  const t5 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent, accessibleHeadingIncrement: 0 } );
+  t4.addChild( t5 );
+  const t5Heading = getDOMElementByName( t5, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t5Heading.tagName === 'H4', 'Child under h4 with accessibleHeadingIncrement 0 should result in h4' );
+
+  //--------------------------------------------------------------------------
+  // Change accessibleHeadingIncrement causes recompute
+  //--------------------------------------------------------------------------
+  t5.accessibleHeadingIncrement = 2;
+  const t5Heading2 = getDOMElementByName( t5, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t5Heading2.tagName === 'H6', 'Child under h4 with accessibleHeadingIncrement 2 should result in h6' );
+
+  t5.accessibleHeadingIncrement = 0;
+  const t5Heading3 = getDOMElementByName( t5, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t5Heading3.tagName === 'H4', 'Child under h4 with accessibleHeadingIncrement 0 should result in h4' );
+
+  //--------------------------------------------------------------------------
+  // Change accessibleHeading updates content
+  //--------------------------------------------------------------------------
+  const updatedHeading = 'New Heading';
+  t5.accessibleHeading = updatedHeading;
+  const t5Heading4 = getDOMElementByName( t5, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t5Heading4.textContent === updatedHeading, 'Heading should have the correct content' );
+
+  //--------------------------------------------------------------------------
+  // Child under Node with accessibleHeadingIncrement respects parent level
+  //--------------------------------------------------------------------------
+  const t6 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  t5.addChild( t6 );
+  const t6Heading = getDOMElementByName( t6, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t6Heading.tagName === 'H5', 'Next child should be an h2' );
+
+  //--------------------------------------------------------------------------
+  // accessibleHeading works with associations
+  //--------------------------------------------------------------------------
+  const t7 = new Node( { tagName: 'div' } );
+  t7.addAriaLabelledbyAssociation( { otherNode: t6, otherElementName: PDOMPeer.HEADING_SIBLING, thisElementName: PDOMPeer.PRIMARY_SIBLING } );
+  t6.addChild( t7 );
+  const t7Element = getDOMElementByName( t7, PDOMPeer.PRIMARY_SIBLING );
+  const t6Element = getDOMElementByName( t6, PDOMPeer.HEADING_SIBLING );
+  const t7LabelledBy = t7Element.getAttribute( 'aria-labelledby' );
+  assert.ok( t7LabelledBy === t6Element.id, 'aria-labelledby should be set to the heading id' );
+
+  //--------------------------------------------------------------------------
+  // accessibleHeading respects pdomOrder
+  //--------------------------------------------------------------------------
+  const t8 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  const t9 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  const t10 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  const t11 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+
+  // Test Nodes are siblings of eachother
+  rootNode.addChild( t8 );
+  rootNode.addChild( t9 );
+  rootNode.addChild( t10 );
+  rootNode.addChild( t11 );
+
+  /// pdomOrder creates a hierarchy
+  t8.pdomOrder = [ t9, t10 ];
+  t10.pdomOrder = [ t11 ];
+
+  const t8Heading = getDOMElementByName( t8, PDOMPeer.HEADING_SIBLING );
+  const t9Heading = getDOMElementByName( t9, PDOMPeer.HEADING_SIBLING );
+  const t10Heading = getDOMElementByName( t10, PDOMPeer.HEADING_SIBLING );
+  const t11Heading = getDOMElementByName( t11, PDOMPeer.HEADING_SIBLING );
+
+  assert.ok( t8Heading.tagName === 'H1', 't8 should be an h1' );
+  assert.ok( t9Heading.tagName === 'H2', 't9 should be an h2' );
+  assert.ok( t10Heading.tagName === 'H2', 't10 should be an h2' );
+  assert.ok( t11Heading.tagName === 'H3', 't11 should be an h3' );
+
+  //--------------------------------------------------------------------------
+  // Changing pdomOrder causes recompute
+  //--------------------------------------------------------------------------
+  t8.pdomOrder = null;
+  t10.pdomOrder = null;
+
+  const t8Heading2 = getDOMElementByName( t8, PDOMPeer.HEADING_SIBLING );
+  const t9Heading2 = getDOMElementByName( t9, PDOMPeer.HEADING_SIBLING );
+  const t10Heading2 = getDOMElementByName( t10, PDOMPeer.HEADING_SIBLING );
+  const t11Heading2 = getDOMElementByName( t11, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t8Heading2.tagName === 'H1', 't8 should be an h1' );
+  assert.ok( t9Heading2.tagName === 'H1', 't9 should be an h1' );
+  assert.ok( t10Heading2.tagName === 'H1', 't10 should be an h1' );
+  assert.ok( t11Heading2.tagName === 'H1', 't11 should be an h2' );
+
+  //--------------------------------------------------------------------------
+  // accessibleHeading works with string Properties
+  //--------------------------------------------------------------------------
+  const valueA = 'testA';
+  const valueB = 'testB';
+  const headingStringProperty = new StringProperty( valueA );
+  const t12 = new Node( { tagName: 'div', accessibleHeading: headingStringProperty } );
+  rootNode.addChild( t12 );
+
+  const t12Heading = getDOMElementByName( t12, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t12Heading.tagName === 'H1', 'Heading should be created in the DOM' );
+  assert.ok( t12Heading.textContent === valueA, 'Heading should have the correct content' );
+
+  // Change the value of the StringProperty
+  headingStringProperty.value = valueB;
+  const t12Heading2 = getDOMElementByName( t12, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t12Heading2.tagName === 'H1', 'Heading should be created in the DOM' );
+  assert.ok( t12Heading2.textContent === valueB, 'Heading should have the correct content' );
+
+  //--------------------------------------------------------------------------
+  // Heading levels are constrained to 1-6
+  //--------------------------------------------------------------------------
+  window.assert && assert.throws( () => {
+    const t13 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent, accessibleHeadingIncrement: -1 } );
+    rootNode.addChild( t13 );
+  }, 'Setting an accessibleHeadingIncrement that is less than 1 should throw' );
+
+  window.assert && assert.throws( () => {
+    const t14 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent, accessibleHeadingIncrement: 7 } );
+    rootNode.addChild( t14 );
+  }, 'Setting an accessibleHeadingIncrement that is greater than 6 should throw' );
 
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
