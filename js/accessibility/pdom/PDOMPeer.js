@@ -1122,43 +1122,39 @@ class PDOMPeer {
     return `display${this.display.id}-${siblingName}-${stringId}`;
   }
 
-  // @public
+
+  /**
+   * Set ids on elements so for easy lookup with document.getElementById. Also assign a unique
+   * data attribute to the elements so that scenery can look up an element from a Trail (mostly
+   * for input handling).
+   *
+   * Note that dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute.
+   * @public
+   */
   updateIndicesStringAndElementIds() {
     const indices = this.pdomInstance.getPDOMInstanceUniqueId();
 
     if ( this._primarySibling ) {
-
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
       this._primarySibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._primarySibling.id = this.getElementId( 'primary', indices );
     }
     if ( this._labelSibling ) {
-
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
       this._labelSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._labelSibling.id = this.getElementId( 'label', indices );
     }
     if ( this._descriptionSibling ) {
-
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
       this._descriptionSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._descriptionSibling.id = this.getElementId( 'description', indices );
     }
     if ( this._headingSibling ) {
-
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
       this._headingSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._headingSibling.id = this.getElementId( 'heading', indices );
     }
     if ( this._accessibleParagraphSibling ) {
-
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
       this._accessibleParagraphSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._accessibleParagraphSibling.id = this.getElementId( 'paragraph', indices );
     }
     if ( this._containerParent ) {
-
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
       this._containerParent.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._containerParent.id = this.getElementId( 'container', indices );
     }
