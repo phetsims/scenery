@@ -199,29 +199,25 @@ export default class TextBounds {
     // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
 
     const div = document.createElement( 'div' );
-    $( div ).css( {
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      padding: '0 !important',
-      margin: '0 !important',
-      display: 'hidden'
-    } );
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.style.setProperty( 'padding', '0', 'important' );
+    div.style.setProperty( 'margin', '0', 'important' );
+    div.style.display = 'hidden';
 
     const span = document.createElement( 'span' );
-    $( span ).css( 'font', font.toCSS() );
+    span.style.font = font.toCSS();
     span.appendChild( element );
     span.setAttribute( 'direction', 'ltr' );
 
     const fakeImage = document.createElement( 'div' );
-    $( fakeImage ).css( {
-      'vertical-align': 'baseline',
-      display: 'inline-block',
-      width: 0,
-      height: `${maxHeight}px`,
-      margin: '0 !important',
-      padding: '0 !important'
-    } );
+    fakeImage.style.verticalAlign = 'baseline';
+    fakeImage.style.display = 'inline-block';
+    fakeImage.style.width = '0px';
+    fakeImage.style.height = `${maxHeight}px`;
+    fakeImage.style.setProperty( 'margin', '0', 'important' );
+    fakeImage.style.setProperty( 'padding', '0', 'important' );
 
     div.appendChild( span );
     div.appendChild( fakeImage );

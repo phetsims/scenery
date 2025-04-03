@@ -6,7 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-/* global JQuery */
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import DOMDrawable from '../display/drawables/DOMDrawable.js';
@@ -36,8 +35,7 @@ type SelfOptions = {
 
 export type DOMOptions = SelfOptions & NodeOptions;
 
-// User-defined type guard
-const isJQueryElement = ( element: Element | JQuery ): element is JQuery => !!( element && ( element as JQuery ).jquery );
+let boundsMeasurementContainer: HTMLDivElement | null = null;
 
 export default class DOM extends Node {
 
@@ -45,9 +43,6 @@ export default class DOM extends Node {
 
   // Container div that will have our main element as a child (so we can position and mutate it).
   public readonly _container: HTMLDivElement; // scenery-internal
-
-  // jQuery selection so that we can properly determine size information
-  private readonly _$container: JQuery<HTMLDivElement>;
 
   // Flag that indicates whether we are updating/invalidating ourself due to changes to the DOM element. The flag is
   // needed so that updates to our element that we make in the update/invalidate section doesn't trigger an infinite
@@ -65,18 +60,9 @@ export default class DOM extends Node {
    * @param [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  public constructor( element: Element | JQuery, options?: DOMOptions ) {
+  public constructor( element: Element, options?: DOMOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
-
-    assert && assert( element instanceof window.Element || element.jquery, 'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' );
-
-    // unwrap from jQuery if that is passed in, for consistency
-    if ( isJQueryElement( element ) ) {
-      element = element[ 0 ];
-
-      assert && assert( element instanceof window.Element );
-    }
 
     super();
 
@@ -84,9 +70,9 @@ export default class DOM extends Node {
     this._container.style.position = 'absolute';
     this._container.style.left = '0';
     this._container.style.top = '0';
+    this._container.style.setProperty( 'padding', '0', 'important' );
+    this._container.style.setProperty( 'margin', '0', 'important' );
     this._allowInput = false;
-
-    this._$container = $( this._container );
 
     this.invalidateDOMLock = false;
     this._preventTransform = false;
@@ -115,8 +101,7 @@ export default class DOM extends Node {
    * Alternative getBoundingClientRect explored, but did not seem sufficient (possibly due to CSS transforms)?
    */
   protected calculateDOMBounds(): Bounds2 {
-    const $element = $( this._element );
-    return new Bounds2( 0, 0, $element.width()!, $element.height()! );
+    return new Bounds2( 0, 0, this._element.offsetWidth, this._element.offsetHeight );
   }
 
   /**
@@ -132,34 +117,34 @@ export default class DOM extends Node {
     }
     this.invalidateDOMLock = true;
 
-    // we will place ourselves in a temporary container to get our real desired bounds
-    const temporaryContainer = document.createElement( 'div' );
-    $( temporaryContainer ).css( {
-      display: 'hidden',
-      padding: '0 !important',
-      margin: '0 !important',
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      width: 65535,
-      height: 65535
-    } );
+    const needsReparenting = !this._container.isConnected;
 
-    // move to the temporary container
-    this._container.removeChild( this._element );
-    temporaryContainer.appendChild( this._element );
-    document.body.appendChild( temporaryContainer );
+    if ( needsReparenting ) {
+      if ( !boundsMeasurementContainer ) {
+        boundsMeasurementContainer = document.createElement( 'div' );
+        boundsMeasurementContainer.style.visibility = 'hidden';
+        boundsMeasurementContainer.style.position = 'absolute'; // using offset dimensions, so we need this to be positioned
+        boundsMeasurementContainer.style.left = '0px';
+        boundsMeasurementContainer.style.top = '0px';
+        boundsMeasurementContainer.style.setProperty( 'padding', '0', 'important' );
+        boundsMeasurementContainer.style.setProperty( 'margin', '0', 'important' );
+      }
+
+      // move to the temporary container
+      this._container.removeChild( this._element );
+      boundsMeasurementContainer.appendChild( this._element );
+      document.body.appendChild( boundsMeasurementContainer );
+    }
 
     // bounds computation and resize our container to fit precisely
     const selfBounds = this.calculateDOMBounds();
     this.invalidateSelf( selfBounds );
-    this._$container.width( selfBounds.getWidth() );
-    this._$container.height( selfBounds.getHeight() );
 
-    // move back to the main container
-    document.body.removeChild( temporaryContainer );
-    temporaryContainer.removeChild( this._element );
-    this._container.appendChild( this._element );
+    if ( needsReparenting ) {
+      document.body.removeChild( boundsMeasurementContainer! );
+      boundsMeasurementContainer!.removeChild( this._element );
+      this._container.appendChild( this._element );
+    }
 
     // unlock
     this.invalidateDOMLock = false;

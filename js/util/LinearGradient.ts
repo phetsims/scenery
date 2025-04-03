@@ -58,7 +58,7 @@ export default class LinearGradient extends Gradient {
    * Returns a string form of this object
    */
   public override toString(): string {
-    let result = `new phet.scenery.LinearGradient( ${this.start.x}, ${this.start.y}, ${this.end.x}, ${this.end.y} )`;
+    let result = `LinearGradient( ${this.start.x}, ${this.start.y}, ${this.end.x}, ${this.end.y} )`;
 
     _.each( this.stops, stop => {
       result += `.addColorStop( ${stop.ratio}, ${ColorDef.scenerySerialize( stop.color )} )`;

@@ -223,11 +223,9 @@ const Utils = {
     const context = canvas.getContext( '2d' )!;
 
     if ( debugChromeBoundsScanning ) {
-      $( window ).ready( () => {
-        const header = document.createElement( 'h2' );
-        $( header ).text( 'Bounds Scan' );
-        $( '#display' ).append( header );
-      } );
+      const header = document.createElement( 'h2' );
+      header.textContent = 'Bounds Scan';
+      document.getElementById( 'display' )!.appendChild( header );
     }
 
     // TODO: Don't use Transform3 unless it is necessary https://github.com/phetsims/scenery/issues/1581
@@ -241,21 +239,19 @@ const Utils = {
       const data = context.getImageData( 0, 0, resolution, resolution );
       const minMaxBounds = Utils.scanBounds( data, resolution, transform );
 
-      function snapshotToCanvas( snapshot: ImageData ): void {
-        const canvas = document.createElement( 'canvas' );
-        canvas.width = resolution;
-        canvas.height = resolution;
-        const context = canvas.getContext( '2d' )!;
-        context.putImageData( snapshot, 0, 0 );
-        $( canvas ).css( 'border', '1px solid black' );
-        $( window ).ready( () => {
-          //$( '#display' ).append( $( document.createElement( 'div' ) ).text( 'Bounds: ' +  ) );
-          $( '#display' ).append( canvas );
-        } );
-      }
-
       // TODO: remove after debug https://github.com/phetsims/scenery/issues/1581
       if ( debugChromeBoundsScanning ) {
+
+        function snapshotToCanvas( snapshot: ImageData ): void {
+          const canvas = document.createElement( 'canvas' );
+          canvas.width = resolution;
+          canvas.height = resolution;
+          const context = canvas.getContext( '2d' )!;
+          context.putImageData( snapshot, 0, 0 );
+          canvas.style.border = '1px solid black';
+          document.getElementById( 'display' )!.appendChild( canvas );
+        }
+
         snapshotToCanvas( data );
       }
 
