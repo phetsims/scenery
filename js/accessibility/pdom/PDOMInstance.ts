@@ -30,19 +30,19 @@
 import dotRandom from '../../../../dot/js/dotRandom.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import Pool from '../../../../phet-core/js/Pool.js';
-import type Display from '../../display/Display.js';
 import FocusManager from '../../accessibility/FocusManager.js';
-import type Node from '../../nodes/Node.js';
 import PDOMPeer from '../../accessibility/pdom/PDOMPeer.js';
 import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
+import type Display from '../../display/Display.js';
+import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
 import TransformTracker from '../../util/TransformTracker.js';
-import { PDOM_UNIQUE_ID_SEPARATOR } from './PDOM_UNIQUE_ID_SEPARATOR.js';
+import { getPDOMFocusedNode } from '../pdomFocusProperty.js';
 import { guessVisualTrail } from './guessVisualTrail.js';
+import { PDOM_UNIQUE_ID_SEPARATOR } from './PDOM_UNIQUE_ID_SEPARATOR.js';
 import PDOMUniqueIdStrategy from './PDOMUniqueIdStrategy.js';
 import UNIQUE_ID_STRATEGY from './UNIQUE_ID_STRATEGY.js';
-import { getPDOMFocusedNode } from '../pdomFocusProperty.js';
 
 // A type representing a fake instance, for some aggressive auditing (under ?assertslow)
 type FakeInstance = {
@@ -68,6 +68,7 @@ class PDOMInstance {
   public children!: PDOMInstance[];
   public peer!: PDOMPeer | null;
   public parentHeadingLevel!: number; // the parent/ancestor heading level (logically)
+  public pendingHeadingLevel!: number; // heading level we expect to assign to the instance, if there is an accessibleHeading for the peer
   public headingLevel!: number | null; // the heading level used for a heading for this instance (or null)
 
   // {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
@@ -168,8 +169,10 @@ class PDOMInstance {
     // accessibleHeading OR the value of accessibleHeadingIncrement changes! Thus these computed heading levels will
     // not change once constructed.
     this.parentHeadingLevel = this.parent ? ( this.parent.headingLevel ?? this.parent.parentHeadingLevel ) : rootParentHeadingLevel!;
-    this.headingLevel = ( this.node && this.node.accessibleHeading !== null ) ? this.parentHeadingLevel + this.node.accessibleHeadingIncrement : null;
-    assert && assert( this.headingLevel === null || ( this.headingLevel >= 1 && this.headingLevel <= 6 ), `Heading level of h${this.headingLevel} is invalid` );
+
+    // An accessibleHeading may be computed by PDOMPeer.update, so wait to assign a headingLevel for descendants until
+    // after the update call.
+    this.pendingHeadingLevel = this.parentHeadingLevel + ( this.node ? this.node.accessibleHeadingIncrement : 1 );
 
     if ( this.isRootInstance ) {
       const accessibilityContainer = document.createElement( 'div' );
@@ -178,6 +181,9 @@ class PDOMInstance {
       this.peer = PDOMPeer.createFromPool( this, {
         primarySibling: accessibilityContainer
       } );
+
+      // The root level instance has no Node and therefore no heading level.
+      this.headingLevel = null;
     }
     else {
 
@@ -188,6 +194,10 @@ class PDOMInstance {
       // Trail Ids will never change, so update them eagerly, a single time during construction.
       this.peer!.update( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
       assert && assert( this.peer!.getPlaceableSibling(), 'accessible peer must have elements ready upon completion of construction' );
+
+      // If the peer has a heading level after its update, then we need to set the heading level of this instance.
+      this.headingLevel = this.peer!.headingSibling ? this.pendingHeadingLevel : null;
+      assert && assert( this.headingLevel === null || ( this.headingLevel >= 1 && this.headingLevel <= 6 ), `Heading level of h${this.headingLevel} is invalid` );
 
       // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for pdomDisplays
       // so we can initialize our invisibleCount and add listeners.
@@ -687,22 +697,22 @@ class PDOMInstance {
   public auditRoot(): void {
     if ( assert ) {
       const rootNode = this.display!.rootNode;
-  
+
       assert( this.trail!.length === 0,
         'Should only call auditRoot() on the root PDOMInstance for a display' );
-  
+
       function audit( fakeInstance: FakeInstance, pdomInstance: PDOMInstance ): void {
         assert && assert( fakeInstance.children.length === pdomInstance.children.length,
           'Different number of children in accessible instance' );
-  
+
         assert && assert( fakeInstance.node === pdomInstance.node, 'Node mismatch for PDOMInstance' );
-  
+
         for ( let i = 0; i < pdomInstance.children.length; i++ ) {
           audit( fakeInstance.children[ i ], pdomInstance.children[ i ] );
         }
-  
+
         const isVisible = pdomInstance.isGloballyVisible();
-  
+
         let shouldBeVisible = true;
         for ( let i = 0; i < pdomInstance.trail!.length; i++ ) {
           const node = pdomInstance.trail!.nodes[ i ];
@@ -712,10 +722,10 @@ class PDOMInstance {
             break;
           }
         }
-  
+
         assert && assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
       }
-  
+
       audit( PDOMInstance.createFakePDOMTree( rootNode ), this );
     }
   }

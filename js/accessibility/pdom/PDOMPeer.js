@@ -286,9 +286,7 @@ class PDOMPeer {
       }
 
       if ( options.accessibleHeading ) {
-        assert && assert( this.pdomInstance.headingLevel !== null, 'headingLevel required to create an accessibleHeading' );
-
-        this._headingSibling = createElement( `h${this.pdomInstance.headingLevel}`, false );
+        this._headingSibling = createElement( `h${this.pdomInstance.pendingHeadingLevel}`, false );
       }
 
       // create the label DOM element representing this instance
@@ -1370,6 +1368,7 @@ class PDOMPeer {
     this._primarySibling = null;
     this._labelSibling = null;
     this._descriptionSibling = null;
+    this._headingSibling = null;
     this._accessibleParagraphSibling = null;
     this._containerParent = null;
     this.focusable = null;
