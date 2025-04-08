@@ -227,6 +227,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
    */
   'accessibleHeading',
   'accessibleHeadingIncrement',
+  'accessibleRoleDescription',
 
   'containerTagName',
   'containerAriaRole',
@@ -305,6 +306,7 @@ type ParallelDOMSelfOptions = {
   ariaLabel?: PDOMValueType | null; // Sets the value of the 'aria-label' attribute on the primary sibling of this Node
   ariaRole?: string | null; // Sets the ARIA role for the primary sibling of this Node
   ariaValueText?: PDOMValueType | null; // sets the aria-valuetext attribute of the primary sibling
+  accessibleRoleDescription?: PDOMValueType | null; // Sets the aria-roledescription for the primary sibling
 
   labelTagName?: string | null; // Sets the tag name for the DOM element sibling labeling this Node
   labelContent?: PDOMValueType | null; // Sets the label content for the Node
@@ -513,6 +515,9 @@ export default class ParallelDOM extends PhetioObject {
   private _ariaValueText: PDOMValueType | null = null;
   private _hasAppliedAriaValueText = false;
 
+  // The aria-roledescription assigned to this Node.
+  private _accessibleRoleDescription: PDOMValueType | null = null;
+
   // Keep track of what this Node is aria-labelledby via "associationObjects"
   // see addAriaLabelledbyAssociation for why we support more than one association.
   private _ariaLabelledbyAssociations: Association[];
@@ -668,6 +673,7 @@ export default class ParallelDOM extends PhetioObject {
   protected _onPDOMContentChangeListener: () => void;
   protected _onInputValueChangeListener: () => void;
   protected _onAriaLabelChangeListener: () => void;
+  protected _onAccessibleRoleDescriptionChangeListener: () => void;
   protected _onAriaValueTextChangeListener: () => void;
   protected _onLabelContentChangeListener: () => void;
   protected _onAccessibleHeadingChangeListener: () => void;
@@ -688,6 +694,7 @@ export default class ParallelDOM extends PhetioObject {
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
     this._onAccessibleParagraphContentChangeListener = this.invalidatePeerParagraphSiblingContent.bind( this );
     this._onInnerContentChangeListener = this.onInnerContentPropertyChange.bind( this );
+    this._onAccessibleRoleDescriptionChangeListener = this.onAccessibleRoleDescriptionChange.bind( this );
 
     this._tagName = null;
     this._containerTagName = null;
@@ -777,6 +784,10 @@ export default class ParallelDOM extends PhetioObject {
 
     if ( isTReadOnlyProperty( this._ariaValueText ) && !this._ariaValueText.isDisposed ) {
       this._ariaValueText.unlink( this._onAriaValueTextChangeListener );
+    }
+
+    if ( isTReadOnlyProperty( this._accessibleRoleDescription ) && !this._accessibleRoleDescription.isDisposed ) {
+      this._accessibleRoleDescription.unlink( this._onAccessibleRoleDescriptionChangeListener );
     }
 
     if ( isTReadOnlyProperty( this._innerContent ) && !this._innerContent.isDisposed ) {
@@ -1878,6 +1889,19 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
+   * Updates the attribute value whenever there is a change to the aria-roledescription.
+   */
+  private onAccessibleRoleDescriptionChange(): void {
+    const accessibleRoleDescription = this.accessibleRoleDescription;
+    if ( accessibleRoleDescription === null ) {
+      this.removePDOMAttribute( 'aria-roledescription' );
+    }
+    else {
+      this.setPDOMAttribute( 'aria-roledescription', accessibleRoleDescription );
+    }
+  }
+
+  /**
    * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
    * clear this attribute.
    */
@@ -1992,6 +2016,37 @@ export default class ParallelDOM extends PhetioObject {
   public getAriaLabel(): string | null {
     return unwrapProperty( this._ariaLabel );
   }
+
+  /**
+   * Sets an aria-roledescription for this Node, describing its interactive purpose and user
+   * interaction methods.
+   *
+   * Use sparingly, and avoid overriding standard roles. This is especially helpful for
+   * unique or unconventional UI components.
+   *
+   * This function works by adding aria-roledescription to this Node's list of PDOM attributes.
+   */
+  public setAccessibleRoleDescription( roleDescription: PDOMValueType | null ): void {
+    if ( this._accessibleRoleDescription !== roleDescription ) {
+      if ( isTReadOnlyProperty( this._accessibleRoleDescription ) && !this._accessibleRoleDescription.isDisposed ) {
+        this._accessibleRoleDescription.unlink( this._onAccessibleRoleDescriptionChangeListener );
+      }
+
+      this._accessibleRoleDescription = roleDescription;
+
+      if ( isTReadOnlyProperty( roleDescription ) ) {
+        roleDescription.lazyLink( this._onAccessibleRoleDescriptionChangeListener );
+      }
+
+      this.onAccessibleRoleDescriptionChange();
+    }
+  }
+
+  public set accessibleRoleDescription( roleDescription: PDOMValueType | null ) { this.setAccessibleRoleDescription( roleDescription ); }
+
+  public get accessibleRoleDescription(): string | null { return this.getAccessibleRoleDescription(); }
+
+  public getAccessibleRoleDescription(): string | null { return unwrapProperty( this._accessibleRoleDescription ); }
 
   /**
    * Set the focus highlight for this Node. By default, the focus highlight will be a pink rectangle that

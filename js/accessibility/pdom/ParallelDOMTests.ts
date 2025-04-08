@@ -2641,6 +2641,58 @@ QUnit.test( 'accessibleHeading', assert => {
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
 
+QUnit.test( 'accessibleRoleDescription', assert => {
+
+
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+
+  const testRoleA = 'Movable';
+  const testRoleB = 'Thing';
+  const testRoleProperty = new StringProperty( 'Draggable' );
+
+  //-------------------------------------------------------------------------
+  // Basic getter/setter
+  //-------------------------------------------------------------------------
+  const a = new Node( { tagName: 'div', accessibleRoleDescription: testRoleA } );
+  rootNode.addChild( a );
+  assert.ok( a.accessibleRoleDescription === testRoleA, 'Option for accessibleRoleDescription works.' );
+  const elementRoleA = getPrimarySiblingElementByNode( a ).getAttribute( 'aria-roledescription' );
+  assert.ok( elementRoleA === testRoleA, 'Element should have the aria-roledescription attribute set' );
+
+  a.accessibleRoleDescription = testRoleB;
+  assert.ok( a.accessibleRoleDescription === testRoleB, 'Setter for accessibleRoleDescription works.' );
+  const elementRoleB = getPrimarySiblingElementByNode( a ).getAttribute( 'aria-roledescription' );
+  assert.ok( elementRoleB === testRoleB, 'Element should have the aria-roledescription from the setter' );
+
+  //-------------------------------------------------------------------------
+  // Test Property behavior
+  //-------------------------------------------------------------------------
+  a.accessibleRoleDescription = testRoleProperty;
+  assert.ok( a.accessibleRoleDescription === testRoleProperty.value, 'Setter works with Property' );
+  const elementRoleC = getPrimarySiblingElementByNode( a ).getAttribute( 'aria-roledescription' );
+  assert.ok( elementRoleC === testRoleProperty.value, 'Element should have the aria-roledescription from the Property' );
+
+  // Update the Property value
+  testRoleProperty.value = 'New Value';
+  assert.ok( a.accessibleRoleDescription === testRoleProperty.value, 'String Property update updates the accessibleRoleDescription state' );
+  const elementRoleD = getPrimarySiblingElementByNode( a ).getAttribute( 'aria-roledescription' );
+  assert.ok( elementRoleD === testRoleProperty.value, 'Element should have the aria-roledescription from the Property value change' );
+
+  //-------------------------------------------------------------------------
+  // Setting to null removes the value
+  //-------------------------------------------------------------------------
+  a.accessibleRoleDescription = null;
+  const elementRoleE = getPrimarySiblingElementByNode( a ).getAttribute( 'aria-roledescription' );
+  assert.ok( elementRoleE === null, 'The element should not have a roledescription once it has been cleared' );
+
+  display.dispose();
+  display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+
 // these fuzzers take time, so it is nice when they are last
 QUnit.test( 'PDOMFuzzer with 3 nodes', assert => {
   const fuzzer = new PDOMFuzzer( 3, false );
