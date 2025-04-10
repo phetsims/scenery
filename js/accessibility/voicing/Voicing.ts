@@ -34,17 +34,18 @@ import responseCollector from '../../../../utterance-queue/js/responseCollector.
 import ResponsePacket, { ResolvedResponse, SpeakableResolvedOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
-import DelayedMutate from '../../util/DelayedMutate.js';
-import Instance from '../../display/Instance.js';
-import InteractiveHighlighting from '../../accessibility/voicing/InteractiveHighlighting.js';
-import type { InteractiveHighlightingOptions } from '../../accessibility/voicing/InteractiveHighlighting.js';
-import Node from '../../nodes/Node.js';
-import ParallelDOM from '../../accessibility/pdom/ParallelDOM.js';
 import type { ParallelDOMOptions, PDOMValueType } from '../../accessibility/pdom/ParallelDOM.js';
-import scenery from '../../scenery.js';
-import type { SceneryListenerFunction } from '../../input/TInputListener.js';
+import ParallelDOM from '../../accessibility/pdom/ParallelDOM.js';
+import type { InteractiveHighlightingOptions } from '../../accessibility/voicing/InteractiveHighlighting.js';
+import InteractiveHighlighting from '../../accessibility/voicing/InteractiveHighlighting.js';
 import voicingUtteranceQueue from '../../accessibility/voicing/voicingUtteranceQueue.js';
+import Instance from '../../display/Instance.js';
+import type { SceneryListenerFunction } from '../../input/TInputListener.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
+import DelayedMutate from '../../util/DelayedMutate.js';
 import type { TInteractiveHighlighting } from './InteractiveHighlighting.js';
+import VoicingActivationResponseListener from './VoicingActivationResponseListener.js';
 
 // Helps enforce that the utterance is defined.
 function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {
@@ -70,7 +71,8 @@ const VOICING_OPTION_KEYS = [
   'voicingUtterance',
   'voicingResponsePatternCollection',
   'voicingIgnoreVoicingManagerProperties',
-  'voicingFocusListener'
+  'voicingFocusListener',
+  'voicingPressable'
 ];
 
 type SelfOptions = {
@@ -100,6 +102,10 @@ type SelfOptions = {
   // The utterance to use if you want this response to be more controlled in the UtteranceQueue. This Utterance will be
   // used by all responses spoken by this class. Null to not use an Utterance.
   voicingUtterance?: Utterance | null;
+
+  // If true, a VoicingActivationResponseListener will be added to this Node so that responses are spoken
+  // when you press on the Node.
+  voicingPressable?: boolean;
 };
 
 export type VoicingOptions = SelfOptions & InteractiveHighlightingOptions;
@@ -122,6 +128,9 @@ export interface TVoicing<SuperType extends Node = Node> extends TInteractiveHig
   // @mixin-private - private to this file, but public needed for the interface
   _voicingNameResponseOverride: boolean;
   _voicingHintResponseOverride: boolean;
+
+  // @mixin-private
+  _voicingPressable: boolean;
 
   initialize( ...args: IntentionalAny[] ): this;
 
@@ -225,6 +234,13 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       // Called when this node is focused.
       private _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
 
+      // A reference to a listener that is added to this node if it is voicingPressable.
+      // This listener speaks the responses when the Voicing Node is clicked with a mouse.
+      private _voicingActivationListener!: VoicingActivationResponseListener | null;
+
+      // True when this Voicing Node is voicingPressable. See options.
+      public _voicingPressable = false;
+
       // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
       // voicingVisible. This is private because its value depends on the state of the Instance tree. Listening to this
       // to change the scene graph state can be incredibly dangerous and buggy, see https://github.com/phetsims/scenery/issues/1615
@@ -279,6 +295,9 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
         this._voicingCanSpeakProperty = new TinyProperty<boolean>( true );
         this._voicingResponsePacket = new ResponsePacket();
         this._voicingFocusListener = this.defaultFocusListener;
+
+        this._voicingActivationListener = null;
+        this._voicingPressable = false;
 
         // Sets the default voicingUtterance and makes this.canSpeakProperty a dependency on its ability to announce.
         this.setVoicingUtterance( new OwnedVoicingUtterance() );
@@ -649,6 +668,35 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       }
 
       /**
+       * When voicingPressable is true, a listener is added to this Node to speak responses when it is
+       * pressed with a pointer.
+       */
+      public setVoicingPressable( pressable: boolean ): void {
+        if ( pressable !== this._voicingPressable ) {
+          if ( pressable ) {
+            this._voicingActivationListener = new VoicingActivationResponseListener( this );
+            this.addInputListener( this._voicingActivationListener );
+          }
+          else if ( !pressable && this._voicingActivationListener ) {
+            this.removeInputListener( this._voicingActivationListener );
+            this._voicingActivationListener.dispose();
+            this._voicingActivationListener = null;
+          }
+
+          this._voicingPressable = pressable;
+        }
+      }
+
+      public set voicingPressable( pressable: boolean ) { this.setVoicingPressable( pressable ); }
+
+      public get voicingPressable(): boolean { return this.getVoicingPressable(); }
+
+      public getVoicingPressable(): boolean {
+        return this._voicingPressable;
+      }
+
+
+      /**
        * Called whenever this Node is focused.
        */
       public setVoicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ): void {
@@ -689,6 +737,15 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
         this.removeInputListener( this._speakContentOnFocusListener );
         this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
+        if ( this._voicingPressable ) {
+          assert && assert( this._voicingActivationListener, 'voicingActivationListener should be set if voicingPressable is true' );
+          const voicingActivationListener = this._voicingActivationListener!;
+          this.removeInputListener( voicingActivationListener );
+          voicingActivationListener.dispose();
+          this._voicingActivationListener = null;
+          this._voicingPressable = false;
+        }
+
         if ( this._voicingUtterance ) {
           this.cleanVoicingUtterance();
           this._voicingUtterance = null;
@@ -700,6 +757,15 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       public clean(): void {
         this.removeInputListener( this._speakContentOnFocusListener );
         this.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+
+        if ( this._voicingPressable ) {
+          assert && assert( this._voicingActivationListener, 'voicingActivationListener should be set if voicingPressable is true' );
+          const voicingActivationListener = this._voicingActivationListener!;
+          this.removeInputListener( voicingActivationListener );
+          voicingActivationListener.dispose();
+          this._voicingActivationListener = null;
+          this._voicingPressable = false;
+        }
 
         if ( this._voicingUtterance ) {
           this.cleanVoicingUtterance();

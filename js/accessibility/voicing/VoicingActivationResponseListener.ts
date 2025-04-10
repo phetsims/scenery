@@ -2,7 +2,7 @@
 
 /**
  * A PressListener that speaks the name and hint responses of a VoicingNode when it is clicked. If there
- * is movement of the pressed mouse, the voicing response is interrupted.
+ * is movement of the pressed pointer, the voicing response is interrupted.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
