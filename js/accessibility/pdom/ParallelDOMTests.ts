@@ -2019,29 +2019,6 @@ QUnit.test( 'accessibleName option', assert => {
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
 
-
-QUnit.test( 'pdomHeading option', assert => {
-
-  assert.ok( true );
-
-  // test the behavior of focusable function
-  const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line no-var
-  document.body.appendChild( display.domElement );
-
-  const a = new Node( { tagName: 'div', pdomHeading: TEST_LABEL, containerTagName: 'div' } );
-  rootNode.addChild( a );
-
-  assert.ok( a.pdomHeading === TEST_LABEL, 'accessibleName getter' );
-
-  const aLabelSibling = getPrimarySiblingElementByNode( a ).parentElement!.children[ DEFAULT_LABEL_SIBLING_INDEX ];
-  assert.ok( aLabelSibling.textContent === TEST_LABEL, 'pdomHeading setter on div' );
-  assert.ok( aLabelSibling.tagName === 'H1', 'pdomHeading setter should be h1' );
-  display.dispose();
-  display.domElement.parentElement!.removeChild( display.domElement );
-
-} );
-
 QUnit.test( 'accessibleHelpText option', assert => {
 
   assert.ok( true );

@@ -176,14 +176,6 @@ const DEFAULT_LABEL_TAG_NAME = P_TAG;
 export type PDOMValueType = string | TReadOnlyProperty<string>;
 export type LimitPanDirection = 'horizontal' | 'vertical';
 
-// see setPDOMHeadingBehavior for more details
-const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, heading: PDOMValueType ) => {
-
-  options.labelTagName = `h${node.headingLevel}`; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
-  options.labelContent = heading;
-  return options;
-};
-
 const unwrapProperty = ( valueOrProperty: PDOMValueType | null ): string | null => {
   const result = valueOrProperty === null ? null : ( typeof valueOrProperty === 'string' ? valueOrProperty : valueOrProperty.value );
 
@@ -219,8 +211,6 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'accessibleHelpTextBehavior',
   'accessibleParagraph',
   'accessibleParagraphBehavior',
-  'pdomHeading',
-  'pdomHeadingBehavior',
 
   /*
    * Lower Level API Functions
@@ -282,7 +272,6 @@ type ParallelDOMSelfOptions = {
   accessibleName?: PDOMValueType | null; // Sets the accessible name for this Node, see setAccessibleName() for more information.
   accessibleParagraph?: PDOMValueType | null; // Sets the accessible paragraph for this Node, see setAccessibleParagraph() for more information.
   accessibleHelpText?: PDOMValueType | null; // Sets the help text for this Node, see setAccessibleHelpText() for more information
-  pdomHeading?: PDOMValueType | null; // @experimental - not ready for use
 
   /*
    * Lower Level API Functions
@@ -290,7 +279,6 @@ type ParallelDOMSelfOptions = {
   accessibleNameBehavior?: AccessibleNameBehaviorFunction; // Sets the implementation for the accessibleName, see setAccessibleNameBehavior() for more information
   accessibleHelpTextBehavior?: AccessibleHelpTextBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
   accessibleParagraphBehavior?: AccessibleParagraphBehaviorFunction; // Sets the implementation for the accessibleParagraph, see setAccessibleParagraphBehavior() for more information
-  pdomHeadingBehavior?: AccessibleHeadingBehaviorFunction; // @experimental - not ready for use
 
   accessibleHeading?: PDOMValueType | null; // Sets the heading text for this Node, see setAccessibleHeading() for more information
   accessibleHeadingIncrement?: number; // Sets the heading level increment for this Node, see setAccessibleHeadingIncrement() for more information
@@ -411,7 +399,6 @@ type PDOMBehaviorFunction<AllowedKeys extends keyof ParallelDOMOptions> = ( node
 export type AccessibleNameBehaviorFunction = PDOMBehaviorFunction<'innerContent' | 'ariaLabel' | 'labelContent' | 'labelTagName' | 'appendLabel'>;
 export type AccessibleHelpTextBehaviorFunction = PDOMBehaviorFunction<'descriptionTagName' | 'descriptionContent' | 'appendDescription'>;
 export type AccessibleParagraphBehaviorFunction = PDOMBehaviorFunction<'accessibleParagraphContent'>;
-export type AccessibleHeadingBehaviorFunction = PDOMBehaviorFunction<'labelTagName' | 'labelContent' | 'appendLabel'>;
 
 export default class ParallelDOM extends PhetioObject {
 
@@ -644,16 +631,6 @@ export default class ParallelDOM extends PhetioObject {
   public _accessibleHelpTextDirty = false;
   public _accessibleParagraphDirty = false;
 
-  // Sets the help text of the Node, this most often corresponds to label sibling text.
-  private _pdomHeading: PDOMValueType | null = null;
-
-  // TODO: implement headingLevel override, see https://github.com/phetsims/scenery/issues/855
-  // The number that corresponds to the heading tag the Node will get if using the pdomHeading API,.
-  private _headingLevel: number | null;
-
-  // Sets the help text of the Node, this most often corresponds to description text.
-  private _pdomHeadingBehavior: AccessibleHeadingBehaviorFunction;
-
   // Emits an event when the focus highlight is changed.
   public readonly focusHighlightChangedEmitter: TEmitter = new TinyEmitter();
 
@@ -737,8 +714,6 @@ export default class ParallelDOM extends PhetioObject {
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
     this._accessibleHelpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
     this._accessibleParagraphBehavior = ParallelDOM.BASIC_ACCESSIBLE_PARAGRAPH_BEHAVIOR;
-    this._headingLevel = null;
-    this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
     this.pdomBoundInputEnabledListener = this.pdomInputEnabledListener.bind( this );
   }
 
@@ -766,11 +741,6 @@ export default class ParallelDOM extends PhetioObject {
     if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
       this._accessibleParagraph.unlink( this._onPDOMContentChangeListener );
       this._accessibleParagraph = null;
-    }
-
-    if ( isTReadOnlyProperty( this._pdomHeading ) && !this._pdomHeading.isDisposed ) {
-      this._pdomHeading.unlink( this._onPDOMContentChangeListener );
-      this._pdomHeading = null;
     }
 
     if ( isTReadOnlyProperty( this._inputValue ) && !this._inputValue.isDisposed ) {
@@ -831,7 +801,6 @@ export default class ParallelDOM extends PhetioObject {
     // Clear behavior functions because they may create references between other Nodes
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
     this._accessibleHelpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
-    this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
 
     // Clear out aria association attributes, which hold references to other Nodes.
     this.setAriaLabelledbyAssociations( [] );
@@ -1072,123 +1041,6 @@ export default class ParallelDOM extends PhetioObject {
    */
   public getAccessibleNameBehavior(): AccessibleNameBehaviorFunction {
     return this._accessibleNameBehavior;
-  }
-
-  /**
-   * Set the Node heading content. This by default will be a heading tag whose level is dependent on how many parents
-   * Nodes are heading Nodes. See computeHeadingLevel() for more info
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   */
-  public setPDOMHeading( pdomHeading: PDOMValueType | null ): void {
-    if ( pdomHeading !== this._pdomHeading ) {
-      if ( isTReadOnlyProperty( this._pdomHeading ) && !this._pdomHeading.isDisposed ) {
-        this._pdomHeading.unlink( this._onPDOMContentChangeListener );
-      }
-
-      this._pdomHeading = pdomHeading;
-
-      if ( isTReadOnlyProperty( pdomHeading ) ) {
-        pdomHeading.lazyLink( this._onPDOMContentChangeListener );
-      }
-
-      this.onPDOMContentChange();
-    }
-  }
-
-  public set pdomHeading( pdomHeading: PDOMValueType | null ) { this.setPDOMHeading( pdomHeading ); }
-
-  public get pdomHeading(): string | null { return this.getPDOMHeading(); }
-
-  /**
-   * Get the value of this Node's heading. Use null to clear the heading
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   */
-  public getPDOMHeading(): string | null {
-    if ( isTReadOnlyProperty( this._pdomHeading ) ) {
-      return this._pdomHeading.value;
-    }
-    else {
-      return this._pdomHeading;
-    }
-  }
-
-  /**
-   * Set the behavior of how `this.pdomHeading` is set in the PDOM. See default behavior function for more
-   * information.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   */
-  public setPDOMHeadingBehavior( pdomHeadingBehavior: AccessibleHeadingBehaviorFunction ): void {
-
-    if ( this._pdomHeadingBehavior !== pdomHeadingBehavior ) {
-
-      this._pdomHeadingBehavior = pdomHeadingBehavior;
-
-      this.onPDOMContentChange();
-    }
-  }
-
-  public set pdomHeadingBehavior( pdomHeadingBehavior: AccessibleHeadingBehaviorFunction ) { this.setPDOMHeadingBehavior( pdomHeadingBehavior ); }
-
-  public get pdomHeadingBehavior(): AccessibleHeadingBehaviorFunction { return this.getPDOMHeadingBehavior(); }
-
-  /**
-   * Get the help text of the interactive element.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   */
-  public getPDOMHeadingBehavior(): AccessibleHeadingBehaviorFunction {
-    return this._pdomHeadingBehavior;
-  }
-
-  /**
-   * Get the tag name of the DOM element representing this Node for accessibility.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   */
-  public getHeadingLevel(): number | null {
-    return this._headingLevel;
-  }
-
-  public get headingLevel(): number | null { return this.getHeadingLevel(); }
-
-
-  /**
-   // TODO: what if ancestor changes, see https://github.com/phetsims/scenery/issues/855
-   * Sets this Node's heading level, by recursing up the accessibility tree to find headings this Node
-   * is nested under.
-   *
-   * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
-   *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-   */
-  private computeHeadingLevel(): number {
-
-    // TODO: assert??? assert( this.headingLevel || this._pdomParent); see https://github.com/phetsims/scenery/issues/855
-    // Either ^ which may break during construction, or V (below)
-    //  base case to heading level 1
-    if ( !this._pdomParent ) {
-      if ( this.pdomHeading ) {
-        this._headingLevel = 1;
-        return 1;
-      }
-      return 0; // so that the first Node with a heading is headingLevel 1
-    }
-
-    if ( this.pdomHeading ) {
-      const level = this._pdomParent.computeHeadingLevel() + 1;
-      this._headingLevel = level;
-      return level;
-    }
-    else {
-      return this._pdomParent.computeHeadingLevel();
-    }
   }
 
   /**
@@ -3515,9 +3367,6 @@ export default class ParallelDOM extends PhetioObject {
   private onPDOMContentChange(): void {
 
     PDOMTree.pdomContentChange( this as unknown as Node );
-
-    // recompute the heading level for this Node if it is using the pdomHeading API.
-    this.pdomHeading && this.computeHeadingLevel();
 
     ( this as unknown as Node ).rendererSummaryRefreshEmitter.emit();
   }

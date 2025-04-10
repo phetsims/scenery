@@ -229,11 +229,6 @@ class PDOMPeer {
       this.node._accessibleNameDirty = false;
     }
 
-    if ( this.node.pdomHeading !== null ) {
-      options = this.node.pdomHeadingBehavior( this.node, options, this.node.pdomHeading, callbacksForOtherNodes );
-      assert && assert( typeof options === 'object', 'should return an object' );
-    }
-
     // Even if the accessibleHelpText is null, we need to run the behavior function if the dirty flag is set
     // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
     if ( this.node.accessibleHelpText !== null || this.node._accessibleHelpTextDirty ) {
