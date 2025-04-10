@@ -192,7 +192,10 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
       }
 
       /**
-       * Whether a Node composes ReadingBlock.
+       * Whether a Node composes ReadingBlock. Use exported function isReadingBlock instead for better
+       * typescript support.
+       *
+       * (scenery-internal)
        */
       public get _isReadingBlock(): true {
         return true;
