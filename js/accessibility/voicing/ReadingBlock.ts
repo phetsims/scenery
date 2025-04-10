@@ -494,9 +494,5 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
 // Export a type that lets you check if your Node is composed with ReadingBlock
 export type ReadingBlockNode = Node & TReadingBlock;
 
-export function isReadingBlock( something: IntentionalAny ): something is ReadingBlockNode {
-  return something instanceof Node && ( something as ReadingBlockNode )._isReadingBlock;
-}
-
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;
