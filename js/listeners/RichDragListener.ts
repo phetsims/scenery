@@ -305,7 +305,6 @@ export default class RichDragListener implements TInputListener {
 
   /**
    * Creates an input listener that forwards events to a DragListener or a KeyboardDragListener.
-   * Useful when you need to forward to a RichDragListener that implements both keyboard and pointer dragging
    *
    * Example:
    * iconNode.addInputListener( RichDragListener.createForwardingListener( targetNode, event => {
@@ -323,9 +322,8 @@ export default class RichDragListener implements TInputListener {
    * } ) );
    *
    * @param targetNode - The Node that will receive focus when forwarding.
-   * @param activate - The function that will be called when the listener receives an event that should forward to
-   *                   another listener.
-   * @param dragListenerForwardingOptions - Options for the DragListener that will be created.
+   * @param activate - The function that will be called when forwarding to other listeners.
+   * @param dragListenerForwardingOptions
    */
   public static createForwardingListener( targetNode: Node, activate: ( event: PressListenerEvent ) => void, dragListenerForwardingOptions?: CreateForwardingListenerOptions ): TInputListener {
     const forwardDragListener = DragListener.createForwardingListener( activate, dragListenerForwardingOptions );

@@ -771,14 +771,13 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   }
 
   /**
-   * Creates an input listener that forwards interaction to another Node. Upon activation,
-   * focus is transferred to another Node. Focus is set after the callback so any setup can
-   * be done (like creating a new target Node) before focus is set.
+   * Creates an input listener that forwards interaction to another Node. Transfers focus to the target Node.
+   * Focus is set after the callback so any setup can be done first (like creating a new target Node).
    *
    * Most useful for forwarding input from an icon to another draggable Node.
    *
    * @param targetNode - The Node to forward focus to.
-   * @param click - The function to call when the click event occurs.
+   * @param click - Function that will do any other setup work.
    */
   public static createForwardingListener( targetNode: Node, click: SceneryListenerFunction<MouseEvent | KeyboardEvent> ): TInputListener {
     return {
