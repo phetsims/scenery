@@ -34,16 +34,17 @@
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
-import DragListener, { PressedDragListener } from '../listeners/DragListener.js';
-import type { DragListenerOptions } from '../listeners/DragListener.js';
 import Hotkey from '../input/Hotkey.js';
-import KeyboardDragListener from '../listeners/KeyboardDragListener.js';
-import type { KeyboardDragListenerCallback, KeyboardDragListenerNullableCallback, KeyboardDragListenerOptions } from '../listeners/KeyboardDragListener.js';
-import type { PressListenerCallback, PressListenerDOMEvent, PressListenerEvent, PressListenerNullableCallback } from '../listeners/PressListener.js';
-import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type TInputListener from '../input/TInputListener.js';
+import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
+import type { CreateForwardingListenerOptions, DragListenerOptions } from '../listeners/DragListener.js';
+import DragListener, { PressedDragListener } from '../listeners/DragListener.js';
+import type { KeyboardDragListenerCallback, KeyboardDragListenerNullableCallback, KeyboardDragListenerOptions } from '../listeners/KeyboardDragListener.js';
+import KeyboardDragListener from '../listeners/KeyboardDragListener.js';
+import type { PressListenerCallback, PressListenerDOMEvent, PressListenerEvent, PressListenerNullableCallback } from '../listeners/PressListener.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
 import { KeyboardDragListenerDOMEvent } from './KeyboardDragListener.js';
 
 type SelfOptions = AllDragListenerOptions<DragListener | KeyboardDragListener, PressListenerDOMEvent | KeyboardDragListenerDOMEvent> & {
@@ -300,6 +301,43 @@ export default class RichDragListener implements TInputListener {
 
   public pointerInterrupt(): void {
     this.dragListener.pointerInterrupt();
+  }
+
+  /**
+   * Creates an input listener that forwards events to a DragListener or a KeyboardDragListener.
+   * Useful when you need to forward to a RichDragListener that implements both keyboard and pointer dragging
+   *
+   * Example:
+   * iconNode.addInputListener( RichDragListener.createForwardingListener( targetNode, event => {
+   *   if ( event.isFromPDOM() ) {
+   *
+   *     // any keyboard specific work...
+   *   }
+   *   else {
+   *
+   *     // any pointer specific work, like forwarding to a DragListener...
+   *     richDragListener.dragListener.press( event, toolNode );
+   *   }
+   *
+   *   // any work that is common to both input types
+   * } ) );
+   *
+   * @param targetNode - The Node that will receive focus when forwarding.
+   * @param activate - The function that will be called when the listener receives an event that should forward to
+   *                   another listener.
+   * @param dragListenerForwardingOptions - Options for the DragListener that will be created.
+   */
+  public static createForwardingListener( targetNode: Node, activate: ( event: PressListenerEvent ) => void, dragListenerForwardingOptions?: CreateForwardingListenerOptions ): TInputListener {
+    const forwardDragListener = DragListener.createForwardingListener( activate, dragListenerForwardingOptions );
+    const forwardKeyboardDragListener = KeyboardDragListener.createForwardingListener( targetNode, activate );
+
+    // Make sure that the two listeners have no overlapping keys or else one will be overridden by the other.
+    const keys1 = Object.keys( forwardDragListener );
+    const keys2 = Object.keys( forwardKeyboardDragListener );
+    const overlap = keys1.filter( k => keys2.includes( k ) );
+    assert && assert( overlap.length === 0, 'The forwarding listeners have overlapping keys.' );
+
+    return _.merge( forwardDragListener, forwardKeyboardDragListener );
   }
 }
 

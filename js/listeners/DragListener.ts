@@ -139,7 +139,7 @@ type SelfOptions<Listener extends DragListener> = AllDragListenerOptions<Listene
   canClick?: boolean;
 };
 
-type CreateForwardingListenerOptions = {
+export type CreateForwardingListenerOptions = {
   allowTouchSnag?: boolean;
 };
 

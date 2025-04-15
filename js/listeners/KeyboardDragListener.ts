@@ -57,18 +57,19 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
-import KeyboardListener from '../listeners/KeyboardListener.js';
-import type { KeyboardListenerOptions } from '../listeners/KeyboardListener.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
-import Node from '../nodes/Node.js';
 import type { OneKeyStroke } from '../input/KeyDescriptor.js';
 import PDOMPointer from '../input/PDOMPointer.js';
-import scenery from '../scenery.js';
 import SceneryEvent from '../input/SceneryEvent.js';
+import type { SceneryListenerFunction } from '../input/TInputListener.js';
+import TInputListener from '../input/TInputListener.js';
+import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
+import type { KeyboardListenerOptions } from '../listeners/KeyboardListener.js';
+import KeyboardListener from '../listeners/KeyboardListener.js';
 import type { SceneryListenerCallback, SceneryListenerNullableCallback } from '../listeners/PressListener.js';
-import type TInputListener from '../input/TInputListener.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
@@ -767,6 +768,39 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     this.interrupt();
     this._disposeKeyboardDragListener();
     super.dispose();
+  }
+
+  /**
+   * Creates an input listener that forwards interaction to another Node. Upon activation,
+   * focus is transferred to another Node. Focus is set after the callback so any setup can
+   * be done (like creating a new target Node) before focus is set.
+   *
+   * Most useful for forwarding input from an icon to another draggable Node.
+   *
+   * @param targetNode - The Node to forward focus to.
+   * @param click - The function to call when the click event occurs.
+   */
+  public static createForwardingListener( targetNode: Node, click: SceneryListenerFunction<MouseEvent | KeyboardEvent> ): TInputListener {
+    return {
+      click( event ) {
+        if ( event.canStartPress() ) {
+          click( event );
+
+          assert && assert( targetNode.focusable, 'You are trying to forward keyboard dragging to a Node that is not focsauble.' );
+          targetNode.focus();
+        }
+      },
+      keydown( event ) {
+
+        // Handle enter/space so that the forwarding Node is not required to use `tagName: button` to receive
+        // click events.
+        if ( KeyboardUtils.isAnyKeyEvent( event.domEvent, [ KeyboardUtils.KEY_ENTER, KeyboardUtils.KEY_SPACE ] ) ) {
+
+          // Click actually uses a MouseEvent, but that is not relevant here.
+          this.click!( event as unknown as SceneryEvent<MouseEvent> );
+        }
+      }
+    };
   }
 }
 
