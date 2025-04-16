@@ -333,20 +333,23 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
         press: ( event: KeyboardEvent | null ) => {
           this.interrupted = false;
 
-          const naturalKeys = keyStringProperty.value as Keys[number];
-          this._press( event, naturalKeys, this );
-
+          // Set before the press is called so that it is up do date before optional callbacks. The press callback may
+          // also interrupt the listener and clear the pressedKeyStringPropertiesProperty.
           assert && assert( !this.pressedKeyStringPropertiesProperty.value.includes( keyStringProperty ), 'Key already pressed' );
           this.pressedKeyStringPropertiesProperty.value = [ ...this.pressedKeyStringPropertiesProperty.value, keyStringProperty ];
+
+          const naturalKeys = keyStringProperty.value as Keys[number];
+          this._press( event, naturalKeys, this );
         },
         release: ( event: KeyboardEvent | null ) => {
           this.interrupted = hotkey.interrupted;
           const naturalKeys = keyStringProperty.value as Keys[number];
 
-          this._release( event, naturalKeys, this );
-
+          // Set before the press is called so the Property is up to date before optional callbacks.
           assert && assert( this.pressedKeyStringPropertiesProperty.value.includes( keyStringProperty ), 'Key not pressed' );
           this.pressedKeyStringPropertiesProperty.value = this.pressedKeyStringPropertiesProperty.value.filter( descriptor => descriptor !== keyStringProperty );
+
+          this._release( event, naturalKeys, this );
         },
         fireOnDown: this.fireOnDown,
         fireOnHold: this.fireOnHold,
