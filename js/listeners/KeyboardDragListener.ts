@@ -62,14 +62,13 @@ import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import type { OneKeyStroke } from '../input/KeyDescriptor.js';
 import PDOMPointer from '../input/PDOMPointer.js';
 import SceneryEvent from '../input/SceneryEvent.js';
-import type { SceneryListenerFunction } from '../input/TInputListener.js';
-import TInputListener from '../input/TInputListener.js';
-import type { AllDragListenerOptions } from '../listeners/AllDragListenerOptions.js';
-import type { KeyboardListenerOptions } from '../listeners/KeyboardListener.js';
-import KeyboardListener from '../listeners/KeyboardListener.js';
-import type { SceneryListenerCallback, SceneryListenerNullableCallback } from '../listeners/PressListener.js';
+import type { default as TInputListener, SceneryListenerFunction } from '../input/TInputListener.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
+import type { AllDragListenerOptions } from './AllDragListenerOptions.js';
+import type { KeyboardListenerOptions } from './KeyboardListener.js';
+import KeyboardListener from './KeyboardListener.js';
+import type { SceneryListenerCallback, SceneryListenerNullableCallback } from './PressListener.js';
 
 // 'shift' is not included in any list of keys because we don't want the KeyboardListener to be 'pressed' when only
 // the shift key is down. State of the shift key is tracked by the globalKeyStateTracker.
