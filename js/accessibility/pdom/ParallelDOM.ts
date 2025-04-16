@@ -3383,7 +3383,7 @@ export default class ParallelDOM extends PhetioObject {
    * Note this is still true if the content is pdomVisible=false or is otherwise hidden.
    */
   public get hasPDOMContent(): boolean {
-    return !!this._tagName || !!this._accessibleParagraph;
+    return !!this._tagName || !!this._accessibleParagraph || !!this._accessibleHeading;
   }
 
   /**

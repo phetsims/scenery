@@ -2614,6 +2614,42 @@ QUnit.test( 'accessibleHeading', assert => {
   assert.ok( t18Heading.tagName === 'H2', 't18 should be an h2' );
   assert.ok( t19Heading.tagName === 'H2', 't19 should be an h2' );
 
+  //--------------------------------------------------------------------------
+  // accessibleHeading without tagName
+  //--------------------------------------------------------------------------
+  // basic default tag name
+  const t20 = new Node( { accessibleHeading: testHeadingContent } );
+  rootNode.addChild( t20 );
+
+  const t20Heading = getDOMElementByName( t20, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t20Heading.tagName === 'H1', 'Heading should be created in the DOM' );
+  assert.ok( t20Heading.parentElement, 'The heading should be placed in the DOM' );
+
+  // Clearing the heading should fully remove the content from the DOM because there is no set tagName
+  t20.accessibleHeading = null;
+  assert.ok( t20.pdomInstances.length === 0, 'Clearing accessibleHeading removes all instances' );
+
+  const t21 = new Node( { accessibleParagraph: 'Test paragraph', accessibleHeading: testHeadingContent } );
+  const t22 = new Node( { tagName: 'button' } );
+
+  rootNode.addChild( t21 );
+  t21.addChild( t22 );
+
+  const t21Heading = getDOMElementByName( t21, PDOMPeer.HEADING_SIBLING );
+  const t21Paragraph = getDOMElementByName( t21, PDOMPeer.PARAGRAPH_SIBLING );
+  const t21Primary = getDOMElementByName( t21, PDOMPeer.PRIMARY_SIBLING );
+  const t22Primary = getDOMElementByName( t22, PDOMPeer.PRIMARY_SIBLING );
+
+  assert.ok( t21Heading.tagName === 'H1', 'Heading should be created in the DOM' );
+  assert.ok( t21Paragraph.tagName === 'P', 'Paragraph should be created in the DOM' );
+  assert.ok( t21Primary.tagName === 'DIV', 'Primary should be created in the DOM by default.' );
+  assert.ok( t22Primary.tagName === 'BUTTON', 'Button should be created in the DOM' );
+  assert.ok( t22Primary.parentElement === t21Primary, 'The t22 element is added under the default primary element of t21' );
+
+  t21.accessibleHeading = null;
+  t21.accessibleParagraph = null;
+  assert.ok( t21.pdomInstances.length === 0, 'Clearing accessibleHeading and accessibleParagraph removes all instances' );
+
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );

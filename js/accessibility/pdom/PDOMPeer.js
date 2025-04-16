@@ -261,10 +261,19 @@ class PDOMPeer {
       this.node._accessibleParagraphDirty = false;
     }
 
-    // If there is an accessible paragraph, create it now.
+    // If there is an accessible paragraph, create it now. Accessible paragraph does not require a tagName. But assertions are thrown
+    // if this instance has children without a tagName, so one is not created by default.
     if ( options.accessibleParagraph ) {
       this._accessibleParagraphSibling = createElement( PDOMUtils.TAGS.P, false );
       this.setAccessibleParagraphContent( options.accessibleParagraph );
+    }
+
+    // accessibleHeading can be used without a tagName, and it enables PDOM for the Node. If there is no tagName, create one
+    // so that children under the heading are added under it by default.
+    // This is done in PDOMPeer instead of on the Node, so that removing accessibleHeading from the Node when there is no
+    // set tagName will fully remove all content from the DOM (clear all PDOMInstances).
+    if ( options.accessibleHeading && !options.tagName ) {
+      options.tagName = PDOMUtils.TAGS.DIV;
     }
 
     // create the base DOM element representing this accessible instance
@@ -1378,6 +1387,7 @@ PDOMPeer.PRIMARY_SIBLING = PRIMARY_SIBLING; // associate with all accessible con
 PDOMPeer.HEADING_SIBLING = HEADING_SIBLING; // associate with just the heading content of this peer
 PDOMPeer.LABEL_SIBLING = LABEL_SIBLING; // associate with just the label content of this peer
 PDOMPeer.DESCRIPTION_SIBLING = DESCRIPTION_SIBLING; // associate with just the description content of this peer
+PDOMPeer.PARAGRAPH_SIBLING = ACCESSIBLE_PARAGRAPH_SIBLING; // associate with just the paragraph content of this peer
 PDOMPeer.CONTAINER_PARENT = CONTAINER_PARENT; // associate with everything under the container parent of this peer
 
 // @public (scenery-internal) - bounds for a sibling that should be moved off-screen when not positioning, in
