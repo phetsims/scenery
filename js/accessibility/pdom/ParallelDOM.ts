@@ -338,7 +338,7 @@ export type RemoveParallelDOMOptions<T extends ParallelDOMOptions> = StrictOmit<
 // This is useful for creating a ParallelDOM subclass that only exposes these high-level options while implementing
 // accessibility with the lower-level API.
 export type TrimParallelDOMOptions<T extends ParallelDOMSelfOptions> = RemoveParallelDOMOptions<T> &
-  PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'accessibleHelpText' | 'accessibleParagraph' | 'focusable' | 'pdomVisible'>;
+  PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'accessibleHelpText' | 'accessibleParagraph' | 'accessibleHeading' | 'accessibleHeadingIncrement' | 'focusable' | 'pdomVisible'>;
 
 type PDOMAttribute = {
   attribute: string;
@@ -3515,6 +3515,19 @@ export default class ParallelDOM extends PhetioObject {
    */
   public static BASIC_ACCESSIBLE_PARAGRAPH_BEHAVIOR( node: Node, options: ParallelDOMOptions, accessibleParagrah: PDOMValueType ): ParallelDOMOptions {
     options.accessibleParagraphContent = accessibleParagrah;
+    return options;
+  }
+
+  /**
+   * A heading behavior that forwards the accessibleName to the accessibleHeading. For components where
+   * the accessibleName is logically represented with a heading, this allows you to still use the accessibleName
+   * API.
+   *
+   * The accessibleName is cleared so there isn't a duplication.
+   */
+  public static HEADING_ACCESSIBLE_NAME_BEHAVIOR( node: Node, options: ParallelDOMOptions, accessibleName: PDOMValueType ): ParallelDOMOptions {
+    options.accessibleName = null;
+    options.accessibleHeading = accessibleName;
     return options;
   }
 
