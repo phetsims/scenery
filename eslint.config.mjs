@@ -13,7 +13,8 @@ export default [
   ...phetLibraryEslintConfig,
   {
     rules: {
-      'no-bitwise': 'off'
+      'no-bitwise': 'off',
+      'phet/documentation-before-imports': 'off'
     },
     languageOptions: {
       globals: {
