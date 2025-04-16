@@ -902,6 +902,13 @@ export default class ParallelDOM extends PhetioObject {
       // but this will catch most cases since often things that get added to the focus order have the application
       // role for custom input. Note that accessibleName will not be checked that it specifically changes innerContent, it is up to the dev to do this.
       this.ariaRole === 'application' && assert( this.innerContent || this.accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
+
+      // If using accessibleParagraph without a tagName, this Node cannot have any descendants with accessible content
+      if ( this.accessibleParagraph && !this.tagName ) {
+        this.pdomInstances.forEach( pdomInstance => {
+          assert && assert( pdomInstance.children.length === 0, 'Assign a tagName to a Node if it has descendants with accessible content.' );
+        } );
+      }
     }
 
     for ( let i = 0; i < ( this as unknown as Node ).children.length; i++ ) {
