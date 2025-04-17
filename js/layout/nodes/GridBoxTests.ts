@@ -1,13 +1,5 @@
 // Copyright 2024-2025, University of Colorado Boulder
 
-// I want to use spread to work with options easily in this testing file.
-/* eslint-disable phet/no-object-spread-on-non-literals */
-
-import Rectangle from '../../nodes/Rectangle.js';
-import PixelComparisonTestUtils from '../../tests/PixelComparisonTestUtils.js';
-import LayoutTestUtils from '../LayoutTestUtils.js';
-import GridBox from '../nodes/GridBox.js';
-
 /**
  * Tests for GridBox. Covering its various features such as:
  *
@@ -25,6 +17,14 @@ import GridBox from '../nodes/GridBox.js';
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
+
+// I want to use spread to work with options easily in this testing file.
+/* eslint-disable phet/no-object-spread-on-non-literals */
+
+import Rectangle from '../../nodes/Rectangle.js';
+import PixelComparisonTestUtils from '../../tests/PixelComparisonTestUtils.js';
+import LayoutTestUtils from '../LayoutTestUtils.js';
+import GridBox from '../nodes/GridBox.js';
 
 const RECT_WIDTH = LayoutTestUtils.RECT_WIDTH;
 const RECT_HEIGHT = LayoutTestUtils.RECT_HEIGHT;

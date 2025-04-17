@@ -1,6 +1,6 @@
 // Copyright 2013-2025, University of Colorado Boulder
 
-/*
+/**
  * A pointer is an abstraction that includes a mouse and touch points (and possibly keys). The mouse is a single
  * pointer, and each finger (for touch) is a pointer.
  *
