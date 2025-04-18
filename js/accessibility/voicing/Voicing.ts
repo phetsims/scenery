@@ -948,7 +948,7 @@ Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
 };
 
 /**
- * A basic behavior function for Voicing that sets the both the ParallelDOM.accessibleName and Voicing.voicingNameResponse.
+ * A basic behavior function for Voicing that sets both the ParallelDOM.accessibleName and Voicing.voicingNameResponse.
  * By using a behavior function, we can ensure that the accessibleName and voicingNameResponse are always in sync when you
  * mutate the accessibleName.
  *
