@@ -9,44 +9,44 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
+import { TReadOnlyEmitter } from '../../../axon/js/TEmitter.js';
 import { PropertyLinkListener } from '../../../axon/js/TReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
+import { equalsEpsilon } from '../../../dot/js/util/equalsEpsilon.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import EventType from '../../../tandem/js/EventType.js';
 import isSettingPhetioStateProperty from '../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import EventIO from '../input/EventIO.js';
 import Focus from '../accessibility/Focus.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
-import { Intent } from '../input/Pointer.js';
-import type KeyboardDragListener from '../listeners/KeyboardDragListener.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
 import type { LimitPanDirection } from '../accessibility/pdom/ParallelDOM.js';
-import Mouse from '../input/Mouse.js';
-import MultiListenerPress from '../listeners/MultiListenerPress.js';
-import Node from '../nodes/Node.js';
-import PanZoomListener from '../listeners/PanZoomListener.js';
-import type { PanZoomListenerOptions } from '../listeners/PanZoomListener.js';
-import PDOMPointer from '../input/PDOMPointer.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import Pointer from '../input/Pointer.js';
-import type PressListener from '../listeners/PressListener.js';
-import scenery from '../scenery.js';
+import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
+import BrowserEvents from '../input/BrowserEvents.js';
+import EventIO from '../input/EventIO.js';
+import Mouse from '../input/Mouse.js';
+import PDOMPointer from '../input/PDOMPointer.js';
+import Pointer, { Intent } from '../input/Pointer.js';
 import SceneryEvent from '../input/SceneryEvent.js';
+import type KeyboardDragListener from '../listeners/KeyboardDragListener.js';
+import MultiListenerPress from '../listeners/MultiListenerPress.js';
+import type { PanZoomListenerOptions } from '../listeners/PanZoomListener.js';
+import PanZoomListener from '../listeners/PanZoomListener.js';
+import type PressListener from '../listeners/PressListener.js';
+import Node from '../nodes/Node.js';
+import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import TransformTracker from '../util/TransformTracker.js';
-import { pdomFocusProperty } from '../accessibility/pdomFocusProperty.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { TReadOnlyEmitter } from '../../../axon/js/TEmitter.js';
-import stepTimer from '../../../axon/js/stepTimer.js';
-import { equalsEpsilon } from '../../../dot/js/util/equalsEpsilon.js';
-import { clamp } from '../../../dot/js/util/clamp.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -681,8 +681,14 @@ class AnimatedPanZoomListener extends PanZoomListener {
         lastNode.focusPanTargetBoundsProperty.link( this._focusBoundsListener );
       }
 
-      // Pan to the focus trail right away if it is off-screen
-      this.keepTrailInView( focus.trail, lastNode.limitPanDirection );
+      // If Scenery indicates that focus changed because of internal operations, do not attempt to pan.
+      // This is necessary because we observe the pdomFocusProperty instead of responding to scenery focus,
+      // which are not dispatched in this case.
+      if ( !BrowserEvents.blockFocusCallbacks ) {
+
+        // Pan to the focus trail right away if it is off-screen
+        this.keepTrailInView( focus.trail, lastNode.limitPanDirection );
+      }
     }
   }
 
