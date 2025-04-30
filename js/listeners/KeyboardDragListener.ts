@@ -221,12 +221,15 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   private readonly useDragSpeed: boolean;
 
   // The vector delta in model coordinates that is used to move the object during a drag operation.
+  // If dragSpeed is used, this will be zero in the start callback until there is movement during the
+  // animation frame.
   public modelDelta: Vector2 = new Vector2( 0, 0 );
 
   // The current drag point in the model coordinate frame.
   public modelPoint: Vector2 = new Vector2( 0, 0 );
 
-  // The proposed delta in model coordinates, before mapping or other constraints are applied.
+  // The proposed delta in model coordinates, before mapping or other constraints are applied. If using
+  // dragSpeed, this will be zero in the start callback until there is some movement during the animation.
   private vectorDelta: Vector2 = new Vector2( 0, 0 );
 
   // The callback timer that is used to move the object during a drag operation to support animated motion and
@@ -320,6 +323,19 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     this.useDragSpeed = options.dragSpeed > 0 || options.shiftDragSpeed > 0;
 
     this.dragStartAction = new PhetioAction( event => {
+
+      // If dragging with deltas, we can eagerly compute listener deltas so they are available for
+      // the start callback. Otherwise, there will be no motion until the animation frame so deltas
+      // are zero.
+      if ( !this.useDragSpeed ) {
+        const shiftKeyDown = globalKeyStateTracker.shiftKeyDown;
+        const delta = shiftKeyDown ? this.shiftDragDelta : this.dragDelta;
+        this.computeDeltas( delta );
+      }
+      else {
+        this.computeDeltas( 0 );
+      }
+
       this._start && this._start( event, this );
 
       // If using dragSpeed, add the listener to the stepTimer to start animated dragging. For dragDelta, the
@@ -341,15 +357,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     // PhET-iO clients.
     this.dragAction = new PhetioAction( () => {
       assert && assert( this.isPressedProperty.value, 'The listener should not be dragging if not pressed' );
-
-      // Convert the proposed delta to model coordinates
-      if ( options.transform ) {
-        const transform = options.transform instanceof Transform3 ? options.transform : options.transform.value;
-        this.modelDelta = transform.inverseDelta2( this.vectorDelta );
-      }
-      else {
-        this.modelDelta = this.vectorDelta;
-      }
 
       // Apply translation to the view coordinate frame.
       if ( this._translateNode ) {
@@ -400,6 +407,9 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       this._end && this._end( syntheticEvent, this );
 
       this.clearPointer();
+
+      // The listener deltas go back to zero at the end of interaction.
+      this.computeDeltas( 0 );
     }, {
       parameters: [],
       tandem: options.tandem.createTandem( 'dragEndAction' ),
@@ -500,6 +510,18 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
    * by using the dragAction.
    */
   private moveFromDelta( delta: number ): void {
+    this.computeDeltas( delta );
+
+    // only initiate move if there was some attempted keyboard drag
+    if ( !this.vectorDelta.equals( Vector2.ZERO ) ) {
+      this.dragAction.execute();
+    }
+  }
+
+  /**
+   * Compute vectorDelta and modelDelta for this listener from keys pressed and a provided delta.
+   */
+  private computeDeltas( delta: number ): void {
     let deltaX = 0;
     let deltaY = 0;
 
@@ -515,13 +537,15 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     if ( this.downKeyDownProperty.value ) {
       deltaY += delta;
     }
+    this.vectorDelta = new Vector2( deltaX, deltaY );
 
-    const vectorDelta = new Vector2( deltaX, deltaY );
-
-    // only initiate move if there was some attempted keyboard drag
-    if ( !vectorDelta.equals( Vector2.ZERO ) ) {
-      this.vectorDelta = vectorDelta;
-      this.dragAction.execute();
+    // Convert the proposed delta to model coordinates
+    if ( this.transform ) {
+      const transform = this.transform instanceof Transform3 ? this.transform : this.transform.value;
+      this.modelDelta = transform.inverseDelta2( this.vectorDelta );
+    }
+    else {
+      this.modelDelta = this.vectorDelta;
     }
   }
 
@@ -688,7 +712,8 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       // doesn't play a 'bonk' sound every arrow key press.
       domEvent.preventDefault();
 
-      // Cannot attach a listener to a Pointer that is already attached
+      // Cannot attach a listener to a Pointer that is already attached. This needs to happen before
+      // firing the callback timer, which can initiate a call to drag().
       if ( this.startNextKeyboardEvent && !event.pointer.isAttached() ) {
 
         // If there are no movement keys down, attach a listener to the Pointer that will tell the AnimatedPanZoomListener
