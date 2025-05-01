@@ -46,7 +46,6 @@ import type { TVoicing } from './Voicing.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
-  'readingBlockDisabledTagName',
   'readingBlockNameResponse',
   'readingBlockHintResponse',
   'readingBlockResponsePatternCollection',
@@ -55,7 +54,6 @@ const READING_BLOCK_OPTION_KEYS = [
 
 type SelfOptions = {
   readingBlockTagName?: string | null;
-  readingBlockDisabledTagName?: string | null;
   readingBlockNameResponse?: VoicingResponse;
   readingBlockHintResponse?: VoicingResponse;
   readingBlockResponsePatternCollection?: ResponsePatternCollection;
@@ -102,9 +100,6 @@ export type TReadingBlock<SuperType extends Node = Node> = {
   setReadingBlockTagName( tagName: string | null ): void;
   readingBlockTagName: string | null;
   getReadingBlockTagName(): string | null;
-  setReadingBlockDisabledTagName( tagName: string | null ): void;
-  readingBlockDisabledTagName: string | null;
-  getReadingBlockDisabledTagName(): string | null;
   setReadingBlockNameResponse( content: VoicingResponse ): void;
   set readingBlockNameResponse( content: VoicingResponse );
   get readingBlockNameResponse(): ResolvedResponse;
@@ -134,14 +129,6 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
       // be sure that the ReadingBlock will still respond to `click` events when enabled.
       private _readingBlockTagName: string | null;
 
-      // The tagName to apply to the Node when voicing is disabled. Set to null to remove from the PDOM
-      // entirely when voicing is disabled.
-      // The default value is a div because most often we want the accessible content of a ReadingBlock
-      // to be readable in the PDOM when voicing is disabled.
-      // node.accessibleParagraph = 'This is readable content.';
-      // node.readingBlockNameResponse = node.accessibleParagraph;
-      private _readingBlockDisabledTagName: string | null;
-
       // The highlight that surrounds this ReadingBlock when it is "active" and
       // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
       // yellow highlight surrounds this Node's bounds.
@@ -165,7 +152,6 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
         super( ...args );
 
         this._readingBlockTagName = 'button';
-        this._readingBlockDisabledTagName = null;
         this._readingBlockActiveHighlight = null;
         this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
         this.readingBlockResponsePatternCollection = DEFAULT_CONTENT_HINT_PATTERN;
@@ -219,23 +205,6 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
        */
       public getReadingBlockTagName(): string | null {
         return this._readingBlockTagName;
-      }
-
-      /**
-       * Sets the tagName for the node composing ReadingBlock. This is the tagName (of ParallelDOM) that will be applied
-       * to this Node when Reading Blocks are disabled. If you do not want the ReadingBlock to appear at all, set to null.
-       */
-      public setReadingBlockDisabledTagName( tagName: string | null ): void {
-        this._readingBlockDisabledTagName = tagName;
-        this._onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
-      }
-
-      public set readingBlockDisabledTagName( tagName: string | null ) { this.setReadingBlockDisabledTagName( tagName ); }
-
-      public get readingBlockDisabledTagName(): string | null { return this.getReadingBlockDisabledTagName(); }
-
-      public getReadingBlockDisabledTagName(): string | null {
-        return this._readingBlockDisabledTagName;
       }
 
       /**
@@ -398,7 +367,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
           }
         }
         else {
-          this.tagName = this._readingBlockDisabledTagName;
+          this.tagName = null;
           if ( this.hasInputListener( this._readingBlockInputListener ) ) {
             this.removeInputListener( this._readingBlockInputListener );
           }

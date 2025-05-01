@@ -24,7 +24,6 @@ import ReadingBlockHighlight from '../../../accessibility/voicing/ReadingBlockHi
 import type { RichTextOptions } from '../../../nodes/RichText.js';
 import RichText from '../../../nodes/RichText.js';
 import scenery from '../../../scenery.js';
-import assertMutuallyExclusiveOptions from '../../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 
 type SelfOptions = EmptySelfOptions;
 
@@ -35,11 +34,6 @@ export type VoicingRichTextOptions = SelfOptions & ParentOptions;
 class VoicingRichText extends ReadingBlock( RichText ) {
 
   public constructor( text: string | TReadOnlyProperty<string>, providedOptions?: VoicingRichTextOptions ) {
-
-    // readingBlockDisabledTagName is an advanced option for cases where you need custom PDOM behavior for the
-    // ReadingBlock. Use accessibleParagraph for most cases.
-    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'readingBlockDisabledTagName', 'accessibleName' ], [ 'accessibleParagraph' ] );
-
     const options = optionize<VoicingRichTextOptions, SelfOptions, ParentOptions>()( {
 
       // {string|null} - if provided, alternative text that will be read that is different from the
@@ -52,17 +46,9 @@ class VoicingRichText extends ReadingBlock( RichText ) {
       readingBlockTagName: 'button'
     }, providedOptions );
 
-    if ( options.readingBlockDisabledTagName ) {
 
-      // If a custom tagName is provided for the ReadingBlock when Voicing is disabled, use accessibleName
-      // for that PDOM content.
-      options.accessibleName = options.accessibleName === undefined ? text : options.accessibleName;
-    }
-    else {
-
-      // Otherwise, use accessibleParagraph so that the RichText will appear in the PDOM as a paragraph.
-      options.accessibleParagraph = options.accessibleParagraph === undefined ? text : options.accessibleParagraph;
-    }
+    // Use accessibleParagraph so that the RichText will appear in the PDOM as a paragraph.
+    options.accessibleParagraph = options.accessibleParagraph === undefined ? text : options.accessibleParagraph;
 
     super( text, options );
 
