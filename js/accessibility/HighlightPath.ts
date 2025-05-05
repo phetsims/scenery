@@ -16,12 +16,11 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 import animatedPanZoomSingleton from '../listeners/animatedPanZoomSingleton.js';
-import Color from '../util/Color.js';
-import type { InputShape } from '../nodes/Path.js';
 import Node from '../nodes/Node.js';
+import type { InputShape, PathOptions } from '../nodes/Path.js';
 import Path from '../nodes/Path.js';
-import type { PathOptions } from '../nodes/Path.js';
 import scenery from '../scenery.js';
+import Color from '../util/Color.js';
 import type TPaint from '../util/TPaint.js';
 import Trail from '../util/Trail.js';
 
@@ -41,6 +40,7 @@ const OUTER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
 // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
 const INNER_LINE_WIDTH_BASE = 2.5;
 const OUTER_LINE_WIDTH_BASE = 4;
+const LINE_DASH_BASE = 7;
 
 // determined by inspection, group focus highlights are thinner than default focus highlights
 const GROUP_OUTER_LINE_WIDTH = 2;
@@ -56,6 +56,11 @@ type SelfOptions = {
   // the Node of this highlight (or the transformSourceNode).
   outerLineWidth?: number | null;
   innerLineWidth?: number | null;
+
+  // A lineDash to apply to the highlight. If specified, this will override the default lineDash for the highlight.
+  // If null, the lineDash will be calculated from the transform of the Node of this highlight (or the
+  // transformSourceNode). If an override is provided, no transformation will be applied to the lineDash.
+  lineDashOverride?: number[] | null;
 
   // If true, the highlight will appear dashed with a lineDash effect. Used often by PhET to indicate that an
   // interactive component is currently picked up and being manipulated by the user.
@@ -82,6 +87,10 @@ class HighlightPath extends Path {
   public readonly transformSourceNode: Node | null;
   private readonly outerLineWidth: number | null;
   private readonly innerLineWidth: number | null;
+
+  // The line dash for the highlight for setDashed. Will be transformed so that scale Nodes have consistent line dashes.
+  private transformedLineDash = [ LINE_DASH_BASE, LINE_DASH_BASE ];
+  private readonly lineDashOverride: number[] | null;
 
   // The 'inner' focus highlight, the (by default) slightly darker and more opaque path that is on the inside of the
   // outer path to give the focus highlight a 'fade-out' appearance
@@ -114,6 +123,7 @@ class HighlightPath extends Path {
       innerStroke: INNER_FOCUS_COLOR,
       outerLineWidth: null,
       innerLineWidth: null,
+      lineDashOverride: null,
       dashed: false,
       transformSourceNode: null
     }, providedOptions );
@@ -128,6 +138,7 @@ class HighlightPath extends Path {
     // Path cannot take null for lineWidth.
     this.innerLineWidth = options.innerLineWidth;
     this.outerLineWidth = options.outerLineWidth;
+    this.lineDashOverride = options.lineDashOverride;
 
     this.transformSourceNode = options.transformSourceNode;
 
@@ -160,7 +171,11 @@ class HighlightPath extends Path {
    * Mutate both inner and outer Paths to make the stroke dashed by using `lineDash`.
    */
   public setDashed( dashOn: boolean ): void {
-    const lineDash = dashOn ? [ 7, 7 ] : [];
+
+    // If there is a lineDashOverride, use that instead of the transformedLineDash. If the dash is off,
+    // set the lineDash to an empty array.
+    const lineDash = dashOn ? ( this.lineDashOverride ? this.lineDashOverride : this.transformedLineDash ) : [];
+
     this.mutateWithInnerHighlight( {
       lineDash: lineDash
     } );
@@ -179,13 +194,14 @@ class HighlightPath extends Path {
   }
 
   /**
-   * Update the line width of both Paths based on transform of this Path, or another Node passed in (usually the
-   * node that is being highlighted). Can be overridden by the options
+   * Update the line width and dashes of both Paths based on transform of this Path, or another Node passed
+   * in (usually the node that is being highlighted). Can be overridden by the options
    * passed in the constructor.
    */
   public updateLineWidth( matrix: Matrix3 ): void {
     this.lineWidth = this.getOuterLineWidth( matrix );
     this.innerHighlightPath.lineWidth = this.getInnerLineWidth( matrix );
+    this.transformedLineDash = this.getTransformedLineDash( matrix );
     this.highlightChangedEmitter.emit();
   }
 
@@ -215,6 +231,14 @@ class HighlightPath extends Path {
       return this.innerLineWidth;
     }
     return HighlightPath.getInnerLineWidthFromMatrix( matrix );
+  }
+
+  /**
+   * Given a transformation matrix, return the lineDash of this focus highlight to produce a consistent
+   * lineDash effect.
+   */
+  private getTransformedLineDash( matrix: Matrix3 ): number[] {
+    return HighlightPath.getLineDashFromMatrix( matrix );
   }
 
   /**
@@ -308,6 +332,15 @@ class HighlightPath extends Path {
    */
   private static getOuterLineWidthFromMatrix( matrix: Matrix3 ): number {
     return OUTER_LINE_WIDTH_BASE / HighlightPath.localToGlobalScaleFromMatrix( matrix );
+  }
+
+  /**
+   * Get the line dash for a transformation matrix (presumably from the Node being highlighted).
+   * This is used to make sure that the line dash is consistent across different scales.
+   */
+  private static getLineDashFromMatrix( matrix: Matrix3 ): number[] {
+    const scale = HighlightPath.localToGlobalScaleFromMatrix( matrix );
+    return [ LINE_DASH_BASE / scale, LINE_DASH_BASE / scale ];
   }
 
   /**
