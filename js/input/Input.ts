@@ -195,8 +195,8 @@ import { TARGET_SUBSTITUTE_KEY } from './eventSerialization.js';
 
 const ArrayIOPointerIO = ArrayIO( Pointer.PointerIO );
 
-// A list of events that should still fire, even when the Node is not pickable
-const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
+// A list of events that will still fire, even when the Node does not have input enabled or is not pickable.
+const PDOM_ALWAYS_ACTIVE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
 
 type TargetSubstitudeAugmentedEvent = Event & {
   [ TARGET_SUBSTITUTE_KEY ]?: Element;
@@ -1114,15 +1114,12 @@ export default class Input extends PhetioObject {
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
     if ( !( domEvent.target && ( domEvent.target as Element ).hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
 
-      // If the trail is not pickable, don't dispatch PDOM events to those targets - but we still
-      // dispatch with an empty trail to call listeners on the Display and Pointer.
-      const canFireListeners = trail.isPickable() || PDOM_UNPICKABLE_EVENTS.includes( eventType );
+      // If the trail is not pickable, do not dispatch to those targets. However, a subset of events WILL still dispatch
+      // to targets to support focus events on disabled/non-interactive Nodes.
+      const canDispatchToTrail = trail.isPickable() || PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType );
 
-      if ( !canFireListeners ) {
-        trail = new Trail( [] );
-      }
       assert && assert( this.pdomPointer );
-      this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer!, context, bubbles );
+      this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer!, context, bubbles, PDOM_ALWAYS_ACTIVE_EVENTS.includes( eventType ), canDispatchToTrail );
     }
   }
 
@@ -1813,8 +1810,16 @@ export default class Input extends PhetioObject {
    * @param context
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
+   * @param dispatchToTargets - Whether to fire the event on targets along the Trail. If false, only Display and Pointer listeners are fired.
    */
-  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: SupportedEventTypes, pointer: Pointer, context: EventContext<DOMEvent>, bubbles: boolean, fireOnInputDisabled = false ): void {
+  private dispatchEvent<DOMEvent extends Event>(
+    trail: Trail,
+    type: SupportedEventTypes,
+    pointer: Pointer,
+    context: EventContext<DOMEvent>,
+    bubbles: boolean,
+    fireOnInputDisabled = false,
+    dispatchToTargets = true ): void {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
       `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point ? pointer.point.toString() : 'null'}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1833,7 +1838,7 @@ export default class Input extends PhetioObject {
 
     // if not yet handled, run through the trail in order to see if one of them will handle the event
     // at the base of the trail should be the scene node, so the scene will be notified last
-    this.dispatchToTargets<DOMEvent>( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled );
+    dispatchToTargets && this.dispatchToTargets<DOMEvent>( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled );
 
     // Notify input listeners on the Display
     this.dispatchToListeners<DOMEvent>( pointer, this.display.getInputListeners(), type, inputEvent );
