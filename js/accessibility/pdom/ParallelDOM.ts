@@ -3209,6 +3209,11 @@ export default class ParallelDOM extends PhetioObject {
    */
   public addAccessibleResponse( utterance: TAlertable ): void {
 
+    // Nothing to do if there is no content.
+    if ( utterance === null ) {
+      return;
+    }
+
     // No description should be alerted if setting PhET-iO state, see https://github.com/phetsims/scenery/issues/1397
     if ( isSettingPhetioStateProperty.value ) {
       return;
