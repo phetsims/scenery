@@ -34,6 +34,10 @@
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
+import PickOptional from '../../../phet-core/js/types/PickOptional.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
+import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import Hotkey from '../input/Hotkey.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type TInputListener from '../input/TInputListener.js';
@@ -52,13 +56,13 @@ type SelfOptions = AllDragListenerOptions<DragListener | KeyboardDragListener, P
   // Additional options for the DragListener, OR any overrides for the DragListener that should
   // be used instead of AllDragListenerOptions. For example, if the DragListener should have different
   // mapPosition, you can provide that option here.
-  dragListenerOptions?: DragListenerOptions;
+  dragListenerOptions?: StrictOmit<DragListenerOptions, 'tandem'>;
 
   // Additional options for the KeyboardDragListener, OR any overrides for the KeyboardDragListener that should
   // be used instead of AllDragListenerOptions. For example, if the KeyboardDragListener should have different
   // mapPosition, you can provide that option here.
-  keyboardDragListenerOptions?: KeyboardDragListenerOptions;
-};
+  keyboardDragListenerOptions?: StrictOmit<KeyboardDragListenerOptions, 'tandem'>;
+} & PickOptional<PhetioObjectOptions, 'tandem'>;
 
 export type RichDragListenerOptions = SelfOptions;
 
@@ -78,10 +82,11 @@ export default class RichDragListener implements TInputListener {
 
   public constructor( providedOptions?: RichDragListenerOptions ) {
 
-    const options = optionize<RichDragListenerOptions>()( {
+    const options = optionize<RichDragListenerOptions, SelfOptions>()( {
 
       // RichDragListenerOptions
       positionProperty: null,
+      tandem: Tandem.REQUIRED,
 
       // Called when the drag is started, for any input type. If you want to determine the type of input, you can check
       // SceneryEvent.isFromPDOM or SceneryEvent.type. If you need a start behavior for a specific form of input,
@@ -139,7 +144,9 @@ export default class RichDragListener implements TInputListener {
 
     const dragListenerOptions = combineOptions<DragListenerOptions<PressedDragListener>>(
       // target object
-      {},
+      {
+        tandem: options.tandem.createTandem( 'dragListener' )
+      },
       // Options that apply to both, but can be overridden by provided listener-specific options
       sharedOptions,
       // Provided listener-specific options
@@ -178,7 +185,9 @@ export default class RichDragListener implements TInputListener {
 
     const keyboardDragListenerOptions = combineOptions<KeyboardDragListenerOptions>(
       // target object
-      {},
+      {
+        tandem: options.tandem.createTandem( 'keyboardDragListener' )
+      },
       // Options that apply to both, but can be overridden by provided listener-specific options
       sharedOptions,
       // Provided listener-specific options
