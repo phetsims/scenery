@@ -119,6 +119,7 @@ class HighlightFromNode extends HighlightPath {
       }
 
       const visibleBounds = this.useLocalBounds ? node.getVisibleLocalBounds() : node.getVisibleBounds();
+      assert && assert( visibleBounds.isFinite(), 'node must have finite bounds.' );
       const dilatedVisibleBounds = visibleBounds.dilated( dilationCoefficient! );
 
       // Update the line width of the focus highlight based on the transform of the node
