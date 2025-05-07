@@ -173,10 +173,10 @@ const DEFAULT_TAG_NAME = DIV_TAG;
 const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
-export type PDOMValueType = string | TReadOnlyProperty<string>;
+export type PDOMValueType = string | TReadOnlyProperty<string> | null;
 export type LimitPanDirection = 'horizontal' | 'vertical';
 
-const unwrapProperty = ( valueOrProperty: PDOMValueType | null ): string | null => {
+const unwrapProperty = ( valueOrProperty: PDOMValueType ): string | null => {
   const result = valueOrProperty === null ? null : ( typeof valueOrProperty === 'string' ? valueOrProperty : valueOrProperty.value );
 
   assert && assert( result === null || typeof result === 'string' );
@@ -269,9 +269,9 @@ type ParallelDOMSelfOptions = {
   /*
    * Higher Level API Functions
    */
-  accessibleName?: PDOMValueType | null; // Sets the accessible name for this Node, see setAccessibleName() for more information.
-  accessibleParagraph?: PDOMValueType | null; // Sets the accessible paragraph for this Node, see setAccessibleParagraph() for more information.
-  accessibleHelpText?: PDOMValueType | null; // Sets the help text for this Node, see setAccessibleHelpText() for more information
+  accessibleName?: PDOMValueType; // Sets the accessible name for this Node, see setAccessibleName() for more information.
+  accessibleParagraph?: PDOMValueType; // Sets the accessible paragraph for this Node, see setAccessibleParagraph() for more information.
+  accessibleHelpText?: PDOMValueType; // Sets the help text for this Node, see setAccessibleHelpText() for more information
 
   /*
    * Lower Level API Functions
@@ -280,31 +280,31 @@ type ParallelDOMSelfOptions = {
   accessibleHelpTextBehavior?: AccessibleHelpTextBehaviorFunction; // Sets the implementation for the accessibleHelpText, see setAccessibleHelpTextBehavior() for more// information
   accessibleParagraphBehavior?: AccessibleParagraphBehaviorFunction; // Sets the implementation for the accessibleParagraph, see setAccessibleParagraphBehavior() for more information
 
-  accessibleHeading?: PDOMValueType | null; // Sets the heading text for this Node, see setAccessibleHeading() for more information
+  accessibleHeading?: PDOMValueType; // Sets the heading text for this Node, see setAccessibleHeading() for more information
   accessibleHeadingIncrement?: number; // Sets the heading level increment for this Node, see setAccessibleHeadingIncrement() for more information
 
   containerTagName?: string | null; // Sets the tag name for an [optional] element that contains this Node's siblings
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
 
-  innerContent?: PDOMValueType | null; // Sets the inner text or HTML for a Node's primary sibling element
+  innerContent?: PDOMValueType; // Sets the inner text or HTML for a Node's primary sibling element
   inputType?: string | null; // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
-  inputValue?: PDOMValueType | null | number; // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
+  inputValue?: PDOMValueType | number; // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
   pdomChecked?: boolean; // Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
   pdomNamespace?: string | null; // Sets the namespace for the primary element
-  ariaLabel?: PDOMValueType | null; // Sets the value of the 'aria-label' attribute on the primary sibling of this Node
+  ariaLabel?: PDOMValueType; // Sets the value of the 'aria-label' attribute on the primary sibling of this Node
   ariaRole?: string | null; // Sets the ARIA role for the primary sibling of this Node
-  ariaValueText?: PDOMValueType | null; // sets the aria-valuetext attribute of the primary sibling
-  accessibleRoleDescription?: PDOMValueType | null; // Sets the aria-roledescription for the primary sibling
+  ariaValueText?: PDOMValueType; // sets the aria-valuetext attribute of the primary sibling
+  accessibleRoleDescription?: PDOMValueType; // Sets the aria-roledescription for the primary sibling
 
   labelTagName?: string | null; // Sets the tag name for the DOM element sibling labeling this Node
-  labelContent?: PDOMValueType | null; // Sets the label content for the Node
+  labelContent?: PDOMValueType; // Sets the label content for the Node
   appendLabel?: boolean; // Sets the label sibling to come after the primary sibling in the PDOM
 
   descriptionTagName?: string | null; // Sets the tag name for the DOM element sibling describing this Node
-  descriptionContent?: PDOMValueType | null; // Sets the description content for the Node
+  descriptionContent?: PDOMValueType; // Sets the description content for the Node
   appendDescription?: boolean; // Sets the description sibling to come after the primary sibling in the PDOM
 
-  accessibleParagraphContent?: PDOMValueType | null; // Sets the accessible paragraph content for the Node
+  accessibleParagraphContent?: PDOMValueType; // Sets the accessible paragraph content for the Node
 
   focusHighlight?: Highlight; // Sets the focus highlight for the Node
   focusHighlightLayerable?: boolean; //lag to determine if the focus highlight Node can be layered in the scene graph
@@ -342,7 +342,7 @@ export type TrimParallelDOMOptions<T extends ParallelDOMSelfOptions> = RemovePar
 
 type PDOMAttribute = {
   attribute: string;
-  value: PDOMValueType | boolean | number;
+  value: Exclude<PDOMValueType, null> | boolean | number;
   listener?: ( ( rawValue: string | boolean | number ) => void ) | null;
   options?: SetPDOMAttributeOptions;
 };
@@ -457,7 +457,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // The heading content for the auto-generated accessible heading (or null indicates no heading is generated).
   // See setAccessibleHeading() for more documentation
-  private _accessibleHeading: PDOMValueType | null = null;
+  private _accessibleHeading: PDOMValueType = null;
 
   // The label content for this Node's DOM element.  There are multiple ways that a label
   // can be associated with a Node's dom element, see setLabelContent() for more documentation
@@ -465,17 +465,17 @@ export default class ParallelDOM extends PhetioObject {
 
   // The label content for this Node's DOM element.  There are multiple ways that a label
   // can be associated with a Node's dom element, see setLabelContent() for more documentation
-  private _labelContent: PDOMValueType | null = null;
+  private _labelContent: PDOMValueType = null;
 
   // The inner label content for this Node's primary sibling. Set as inner HTML
   // or text content of the actual DOM element. If this is used, the Node should not have children.
-  private _innerContent: PDOMValueType | null = null;
+  private _innerContent: PDOMValueType = null;
 
   // The description content for this Node's DOM element.
-  private _descriptionContent: PDOMValueType | null = null;
+  private _descriptionContent: PDOMValueType = null;
 
   // The content for the accessible paragraph for this Node's DOM element.
-  private _accessibleParagraphContent: PDOMValueType | null = null;
+  private _accessibleParagraphContent: PDOMValueType = null;
 
   // If provided, it will create the primary DOM element with the specified namespace.
   // This may be needed, for example, with MathML/SVG/etc.
@@ -483,7 +483,7 @@ export default class ParallelDOM extends PhetioObject {
 
   // If provided, "aria-label" will be added as an inline attribute on the Node's DOM
   // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
-  private _ariaLabel: PDOMValueType | null = null;
+  private _ariaLabel: PDOMValueType = null;
   private _hasAppliedAriaLabel = false;
 
   // The ARIA role for this Node's primary sibling, added as an HTML attribute.  For a complete
@@ -499,11 +499,11 @@ export default class ParallelDOM extends PhetioObject {
 
   // If provided, "aria-valuetext" will be added as an inline attribute on the Node's
   // primary sibling and set to this value. Setting back to null will clear this attribute in the view.
-  private _ariaValueText: PDOMValueType | null = null;
+  private _ariaValueText: PDOMValueType = null;
   private _hasAppliedAriaValueText = false;
 
   // The aria-roledescription assigned to this Node.
-  private _accessibleRoleDescription: PDOMValueType | null = null;
+  private _accessibleRoleDescription: PDOMValueType = null;
 
   // Keep track of what this Node is aria-labelledby via "associationObjects"
   // see addAriaLabelledbyAssociation for why we support more than one association.
@@ -607,20 +607,20 @@ export default class ParallelDOM extends PhetioObject {
   // HIGHER LEVEL API INITIALIZATION
 
   // Sets the "Accessible Name" of the Node, as defined by the Browser's ParallelDOM Tree
-  private _accessibleName: PDOMValueType | null = null;
+  private _accessibleName: PDOMValueType = null;
 
   // Function that returns the options needed to set the appropriate accessible name for the Node
   private _accessibleNameBehavior: AccessibleNameBehaviorFunction;
 
   // Sets the 'Accessible Paragraph' for the Node. This makes this Node a paragraph of descriptive content, often
   // for non-interactive elements.
-  private _accessibleParagraph: PDOMValueType | null = null;
+  private _accessibleParagraph: PDOMValueType = null;
 
   // Function that returns the options needed to set the appropriate accessible paragraph for the Node.
   private _accessibleParagraphBehavior: AccessibleParagraphBehaviorFunction;
 
   // Sets the help text of the Node, this most often corresponds to description text.
-  private _accessibleHelpText: PDOMValueType | null = null;
+  private _accessibleHelpText: PDOMValueType = null;
 
   // Sets the help text of the Node, this most often corresponds to description text.
   private _accessibleHelpTextBehavior: AccessibleHelpTextBehaviorFunction;
@@ -933,7 +933,7 @@ export default class ParallelDOM extends PhetioObject {
    * Part of the higher level API, the accessibleNameBehavior function will set the appropriate options on this Node
    * to create the desired accessible name. See the documentation for setAccessibleNameBehavior() for more information.
    */
-  public setAccessibleName( accessibleName: PDOMValueType | null ): void {
+  public setAccessibleName( accessibleName: PDOMValueType ): void {
     if ( accessibleName !== this._accessibleName ) {
       if ( isTReadOnlyProperty( this._accessibleName ) && !this._accessibleName.isDisposed ) {
         this._accessibleName.unlink( this._onPDOMContentChangeListener );
@@ -951,7 +951,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleName( accessibleName: PDOMValueType | null ) { this.setAccessibleName( accessibleName ); }
+  public set accessibleName( accessibleName: PDOMValueType ) { this.setAccessibleName( accessibleName ); }
 
   public get accessibleName(): string | null { return this.getAccessibleName(); }
 
@@ -974,7 +974,7 @@ export default class ParallelDOM extends PhetioObject {
    * For example:
    * myImageNode.setAccessibleParagraph( 'This is a picture of a cat' );
    */
-  public setAccessibleParagraph( accessibleParagraph: PDOMValueType | null ): void {
+  public setAccessibleParagraph( accessibleParagraph: PDOMValueType ): void {
     if ( accessibleParagraph !== this._accessibleParagraph ) {
 
       if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
@@ -994,7 +994,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleParagraph( accessibleParagraph: PDOMValueType | null ) { this.setAccessibleParagraph( accessibleParagraph ); }
+  public set accessibleParagraph( accessibleParagraph: PDOMValueType ) { this.setAccessibleParagraph( accessibleParagraph ); }
 
   public get accessibleParagraph(): string | null { return this.getAccessibleParagraph(); }
 
@@ -1058,7 +1058,7 @@ export default class ParallelDOM extends PhetioObject {
    * Part of the higher level API, the accessibleHelpTextBehavior function will set the appropriate options on this Node
    * to create the desired help text. See the documentation for setAccessibleHelpTextBehavior() for more information.
    */
-  public setAccessibleHelpText( accessibleHelpText: PDOMValueType | null ): void {
+  public setAccessibleHelpText( accessibleHelpText: PDOMValueType ): void {
     if ( accessibleHelpText !== this._accessibleHelpText ) {
       if ( isTReadOnlyProperty( this._accessibleHelpText ) && !this._accessibleHelpText.isDisposed ) {
         this._accessibleHelpText.unlink( this._onPDOMContentChangeListener );
@@ -1076,7 +1076,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleHelpText( accessibleHelpText: PDOMValueType | null ) { this.setAccessibleHelpText( accessibleHelpText ); }
+  public set accessibleHelpText( accessibleHelpText: PDOMValueType ) { this.setAccessibleHelpText( accessibleHelpText ); }
 
   public get accessibleHelpText(): string | null { return this.getAccessibleHelpText(); }
 
@@ -1099,7 +1099,7 @@ export default class ParallelDOM extends PhetioObject {
    * This is the lower level API function for accessibleParagraph. You probably just want to use setAccessibleParagraph
    * instead.
    */
-  public setAccessibleParagraphContent( accessibleParagraphContent: PDOMValueType | null ): void {
+  public setAccessibleParagraphContent( accessibleParagraphContent: PDOMValueType ): void {
     if ( accessibleParagraphContent !== this._accessibleParagraphContent ) {
       if ( isTReadOnlyProperty( this._accessibleParagraphContent ) && !this._accessibleParagraphContent.isDisposed ) {
         this._accessibleParagraphContent.unlink( this._onAccessibleParagraphContentChangeListener );
@@ -1115,7 +1115,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleParagraphContent( content: PDOMValueType | null ) { this.setAccessibleParagraphContent( content ); }
+  public set accessibleParagraphContent( content: PDOMValueType ) { this.setAccessibleParagraphContent( content ); }
 
   /**
    * Returns the accessibleParagraph content for this Node.
@@ -1145,7 +1145,7 @@ export default class ParallelDOM extends PhetioObject {
    * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
    * The DOM setter is chosen based on if the label passes the `containsFormattingTags`.
    */
-  public setAccessibleHeading( accessibleHeading: PDOMValueType | null ): void {
+  public setAccessibleHeading( accessibleHeading: PDOMValueType ): void {
     if ( accessibleHeading !== this._accessibleHeading ) {
       const headingExistenceChanged = ( accessibleHeading === null ) !== ( this._accessibleHeading === null );
 
@@ -1168,7 +1168,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleHeading( label: PDOMValueType | null ) { this.setAccessibleHeading( label ); }
+  public set accessibleHeading( label: PDOMValueType ) { this.setAccessibleHeading( label ); }
 
   public get accessibleHeading(): string | null { return this.getAccessibleHeading(); }
 
@@ -1505,7 +1505,7 @@ export default class ParallelDOM extends PhetioObject {
    *
    * Passing a null label value will not clear the whole label sibling, just the inner content of the DOM Element.
    */
-  public setLabelContent( labelContent: PDOMValueType | null ): void {
+  public setLabelContent( labelContent: PDOMValueType ): void {
     if ( labelContent !== this._labelContent ) {
       if ( isTReadOnlyProperty( this._labelContent ) && !this._labelContent.isDisposed ) {
         this._labelContent.unlink( this._onLabelContentChangeListener );
@@ -1521,7 +1521,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set labelContent( label: PDOMValueType | null ) { this.setLabelContent( label ); }
+  public set labelContent( label: PDOMValueType ) { this.setLabelContent( label ); }
 
   public get labelContent(): string | null { return this.getLabelContent(); }
 
@@ -1546,7 +1546,7 @@ export default class ParallelDOM extends PhetioObject {
    * unless content is html which uses exclusively formatting tags. A Node with inner content cannot
    * have accessible descendants because this content will override the HTML of descendants of this Node.
    */
-  public setInnerContent( innerContent: PDOMValueType | null ): void {
+  public setInnerContent( innerContent: PDOMValueType ): void {
     if ( innerContent !== this._innerContent ) {
       if ( isTReadOnlyProperty( this._innerContent ) && !this._innerContent.isDisposed ) {
         this._innerContent.unlink( this._onInnerContentChangeListener );
@@ -1562,7 +1562,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set innerContent( content: PDOMValueType | null ) { this.setInnerContent( content ); }
+  public set innerContent( content: PDOMValueType ) { this.setInnerContent( content ); }
 
   public get innerContent(): string | null { return this.getInnerContent(); }
 
@@ -1603,7 +1603,7 @@ export default class ParallelDOM extends PhetioObject {
    * innerHTML and textContent. If a description element does not exist yet, a default
    * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
    */
-  public setDescriptionContent( descriptionContent: PDOMValueType | null ): void {
+  public setDescriptionContent( descriptionContent: PDOMValueType ): void {
     if ( descriptionContent !== this._descriptionContent ) {
       if ( isTReadOnlyProperty( this._descriptionContent ) && !this._descriptionContent.isDisposed ) {
         this._descriptionContent.unlink( this._onDescriptionContentChangeListener );
@@ -1619,7 +1619,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set descriptionContent( textContent: PDOMValueType | null ) { this.setDescriptionContent( textContent ); }
+  public set descriptionContent( textContent: PDOMValueType ) { this.setDescriptionContent( textContent ); }
 
   public get descriptionContent(): string | null { return this.getDescriptionContent(); }
 
@@ -1764,7 +1764,7 @@ export default class ParallelDOM extends PhetioObject {
    * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
    * clear this attribute.
    */
-  public setAriaValueText( ariaValueText: PDOMValueType | null ): void {
+  public setAriaValueText( ariaValueText: PDOMValueType ): void {
     if ( this._ariaValueText !== ariaValueText ) {
       if ( isTReadOnlyProperty( this._ariaValueText ) && !this._ariaValueText.isDisposed ) {
         this._ariaValueText.unlink( this._onAriaValueTextChangeListener );
@@ -1780,7 +1780,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set ariaValueText( ariaValueText: PDOMValueType | null ) { this.setAriaValueText( ariaValueText ); }
+  public set ariaValueText( ariaValueText: PDOMValueType ) { this.setAriaValueText( ariaValueText ); }
 
   public get ariaValueText(): string | null { return this.getAriaValueText(); }
 
@@ -1849,7 +1849,7 @@ export default class ParallelDOM extends PhetioObject {
    *
    * @param ariaLabel - the text for the aria label attribute
    */
-  public setAriaLabel( ariaLabel: PDOMValueType | null ): void {
+  public setAriaLabel( ariaLabel: PDOMValueType ): void {
     if ( this._ariaLabel !== ariaLabel ) {
       if ( isTReadOnlyProperty( this._ariaLabel ) && !this._ariaLabel.isDisposed ) {
         this._ariaLabel.unlink( this._onAriaLabelChangeListener );
@@ -1865,7 +1865,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set ariaLabel( ariaLabel: PDOMValueType | null ) { this.setAriaLabel( ariaLabel ); }
+  public set ariaLabel( ariaLabel: PDOMValueType ) { this.setAriaLabel( ariaLabel ); }
 
   public get ariaLabel(): string | null { return this.getAriaLabel(); }
 
@@ -1885,7 +1885,7 @@ export default class ParallelDOM extends PhetioObject {
    *
    * This function works by adding aria-roledescription to this Node's list of PDOM attributes.
    */
-  public setAccessibleRoleDescription( roleDescription: PDOMValueType | null ): void {
+  public setAccessibleRoleDescription( roleDescription: PDOMValueType ): void {
     if ( this._accessibleRoleDescription !== roleDescription ) {
       if ( isTReadOnlyProperty( this._accessibleRoleDescription ) && !this._accessibleRoleDescription.isDisposed ) {
         this._accessibleRoleDescription.unlink( this._onAccessibleRoleDescriptionChangeListener );
@@ -1901,7 +1901,7 @@ export default class ParallelDOM extends PhetioObject {
     }
   }
 
-  public set accessibleRoleDescription( roleDescription: PDOMValueType | null ) { this.setAccessibleRoleDescription( roleDescription ); }
+  public set accessibleRoleDescription( roleDescription: PDOMValueType ) { this.setAccessibleRoleDescription( roleDescription ); }
 
   public get accessibleRoleDescription(): string | null { return this.getAccessibleRoleDescription(); }
 
@@ -2775,7 +2775,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
    * @param [providedOptions]
    */
-  public setPDOMAttribute( attribute: string, value: PDOMValueType | boolean | number, providedOptions?: SetPDOMAttributeOptions ): void {
+  public setPDOMAttribute( attribute: string, value: Exclude<PDOMValueType, null> | boolean | number, providedOptions?: SetPDOMAttributeOptions ): void {
 
     assert && providedOptions && assert( Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
@@ -2829,7 +2829,8 @@ export default class ParallelDOM extends PhetioObject {
       value.link( listener );
     }
     else {
-      // run it once and toss it, so we don't need to store the reference or unlink it later
+      // Run it once and toss it, so we don't need to store the reference or unlink it later.
+      // The listener ensures that the value is non-null.
       listener( value );
       listener = null;
     }
