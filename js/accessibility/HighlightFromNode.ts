@@ -3,8 +3,7 @@
 /**
  * A HighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
  * the node. The focusHighlight will update as the Node's bounds changes. Handles transformations so that when the
- * source node is transformed, the HighlightFromNode will
- * updated be as well.
+ * source node is transformed, the HighlightFromNode will be updated as well.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
