@@ -221,7 +221,7 @@ function tagNameSupportsContent( tagName ) {
 const PDOMUtils = {
 
   /**
-   * Given a Property or string, return the Propergy value if it is a property. Otherwise just return the string.
+   * Given a Property or string, return the Property value if it is a property. Otherwise just return the string.
    * Useful for forwarding the string to DOM content, but allowing the API to take a StringProperty. Eventually
    * PDOM may support dynamic strings.
    * @param valueOrProperty
@@ -429,7 +429,7 @@ const PDOMUtils = {
   },
 
   /**
-   * Given a tagName, test if the element will be focuable by default by the browser.
+   * Given a tagName, test if the element will be focusable by default by the browser.
    * Different from isElementFocusable, because this only looks at tags that the browser will automatically put
    * a >=0 tab index on.
    * @public
@@ -462,7 +462,7 @@ const PDOMUtils = {
       return false;
     }
 
-    // if element is for formatting, skipe over it - required since IE gives these tabindex="0"
+    // if element is for formatting, skip over it - required since IE gives these tabindex="0"
     if ( _.includes( FORMATTING_TAGS, domElement.tagName ) ) {
       return false;
     }
@@ -569,7 +569,7 @@ const PDOMUtils = {
   overrideFocusWithTabIndex( element, focusable ) {
     const defaultFocusable = PDOMUtils.tagIsDefaultFocusable( element.tagName );
 
-    // only add a tabindex when we are overriding the default focusable bahvior of the browser for the tag name
+    // only add a tabindex when we are overriding the default focusable behavior of the browser for the tag name
     if ( defaultFocusable !== focusable ) {
       element.tabIndex = focusable ? 0 : -1;
     }
