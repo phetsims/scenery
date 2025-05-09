@@ -110,7 +110,6 @@ function pdomAuditRootNode( rootNode: Node ): void {
 
 QUnit.test( 'tagName/innerContent options', assert => {
 
-  // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
@@ -170,7 +169,6 @@ QUnit.test( 'tagName/innerContent options', assert => {
 
 QUnit.test( 'containerTagName option', assert => {
 
-  // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
@@ -199,7 +197,6 @@ QUnit.test( 'containerTagName option', assert => {
 
 QUnit.test( 'labelTagName/labelContent option', assert => {
 
-  // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
@@ -264,7 +261,6 @@ QUnit.test( 'labelTagName/labelContent option', assert => {
 
 QUnit.test( 'container element not needed for multiple siblings', assert => {
 
-  // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
@@ -362,7 +358,6 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
 
 QUnit.test( 'pdomOrder tests', assert => {
 
-  // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
@@ -459,7 +454,6 @@ QUnit.test( 'pdomOrder tests', assert => {
 
 QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
 
-  // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );
@@ -1569,80 +1563,8 @@ QUnit.test( 'pdomChecked', assert => {
 
 } );
 
-QUnit.test( 'swapVisibility', assert => {
-  if ( !canRunTests ) {
-    assert.ok( true, 'Skipping test because document does not have focus' );
-    return;
-  }
-
-  // test the behavior of swapVisibility function
-  const rootNode = new Node( { tagName: 'div' } );
-  var display = new Display( rootNode ); // eslint-disable-line no-var
-  document.body.appendChild( display.domElement );
-
-  display.initializeEvents();
-
-  // a custom focus highlight (since dummy node's have no bounds)
-  const focusHighlight = new Rectangle( 0, 0, 10, 10 );
-
-  // create some nodes for testing
-  const a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-  const b = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-  const c = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-
-  rootNode.addChild( a );
-  a.children = [ b, c ];
-
-  // swap visibility between two nodes, visibility should be swapped and neither should have keyboard focus
-  b.visible = true;
-  c.visible = false;
-  b.swapVisibility( c );
-  assert.equal( b.visible, false, 'b should now be invisible' );
-  assert.equal( c.visible, true, 'c should now be visible' );
-  assert.equal( b.focused, false, 'b should not have focus after being made invisible' );
-  assert.equal( c.focused, false, 'c should not have  focus since b did not have focus' );
-
-  // swap visibility between two nodes where the one that is initially visible has keyboard focus, the newly visible
-  // node then receive focus
-  b.visible = true;
-  c.visible = false;
-  b.focus();
-  b.swapVisibility( c );
-  assert.equal( b.visible, false, 'b should be invisible after swapVisibility' );
-  assert.equal( c.visible, true, 'c should be visible after  swapVisibility' );
-  assert.equal( b.focused, false, 'b should no longer have focus  after swapVisibility' );
-  assert.equal( c.focused, true, 'c should now have focus after swapVisibility' );
-
-  // swap visibility between two nodes where the one that is initially visible has keyboard focus, the newly visible
-  // node then receive focus - like the previous test but c.swapVisibility( b ) is the same as b.swapVisibility( c )
-  b.visible = true;
-  c.visible = false;
-  b.focus();
-  b.swapVisibility( c );
-  assert.equal( b.visible, false, 'b should be invisible after swapVisibility' );
-  assert.equal( c.visible, true, 'c should be visible after  swapVisibility' );
-  assert.equal( b.focused, false, 'b should no longer have focus  after swapVisibility' );
-  assert.equal( c.focused, true, 'c should now have focus after swapVisibility' );
-
-  // swap visibility between two nodes where the first node has focus, but the second node is not focusable. After
-  // swapping, neither should have focus
-  b.visible = true;
-  c.visible = false;
-  b.focus();
-  c.focusable = false;
-  b.swapVisibility( c );
-  assert.equal( b.visible, false, 'b should be invisible after visibility is swapped' );
-  assert.equal( c.visible, true, 'c should be visible after visibility is swapped' );
-  assert.equal( b.focused, false, 'b should no longer have focus after visibility is swapped' );
-  assert.equal( c.focused, false, 'c should not have focus after visibility is swapped because it is not focusable' );
-
-  display.dispose();
-  display.domElement.parentElement!.removeChild( display.domElement );
-} );
-
 QUnit.test( 'Aria Label Setter', assert => {
 
-  // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line no-var
   document.body.appendChild( display.domElement );

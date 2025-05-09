@@ -4002,29 +4002,6 @@ class Node extends ParallelDOM {
   }
 
   /**
-   * Swap the visibility of this node with another node. The Node that is made visible will receive keyboard focus
-   * if it is focusable and the previously visible Node had focus.
-   */
-  public swapVisibility( otherNode: Node ): this {
-    assert && assert( this.visible !== otherNode.visible );
-
-    const visibleNode = this.visible ? this : otherNode;
-    const invisibleNode = this.visible ? otherNode : this;
-
-    // if the visible node has focus we will restore focus on the invisible Node once it is visible
-    const visibleNodeFocused = visibleNode.focused;
-
-    visibleNode.visible = false;
-    invisibleNode.visible = true;
-
-    if ( visibleNodeFocused && invisibleNode.focusable ) {
-      invisibleNode.focus();
-    }
-
-    return this; // allow chaining
-  }
-
-  /**
    * Sets the opacity of this Node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.  Values
    * outside of that range throw an Error.
    * @throws Error if opacity out of range
