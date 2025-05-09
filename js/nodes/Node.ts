@@ -472,6 +472,9 @@ class Node extends ParallelDOM {
   // and Voicing.ts for more information about Voicing.
   public readonly voicingVisibleProperty: TinyProperty<boolean>;
 
+  // A lazily created Property indicating whether this Node is focused. See getter for the focusedProperty.
+  private _focusedProperty?: TinyProperty<boolean>;
+
   // Areas for hit intersection. If set on a Node, no descendants can handle events.
   // (scenery-internal)
   public _mouseArea: Shape | Bounds2 | null; // for mouse position in the local coordinate frame
@@ -3980,6 +3983,22 @@ class Node extends ParallelDOM {
 
   public getPhetioVisiblePropertyInstrumented(): boolean {
     return this._visibleProperty.getTargetPropertyInstrumented();
+  }
+
+  /**
+   * Returns a read-only Property indicating whether this Node is focused. The Property is lazily created
+   * on access.
+   */
+  public get focusedProperty(): TReadOnlyProperty<boolean> {
+    if ( !this._focusedProperty ) {
+      const focusedProperty = new TinyProperty( this.focused );
+      this.addInputListener( {
+        focus: () => focusedProperty.set( true ),
+        blur: () => focusedProperty.set( false )
+      }, { disposer: this } );
+      this._focusedProperty = focusedProperty;
+    }
+    return this._focusedProperty;
   }
 
   /**
