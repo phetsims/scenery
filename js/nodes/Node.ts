@@ -3995,7 +3995,7 @@ class Node extends ParallelDOM {
       this.addInputListener( {
         focus: () => focusedProperty.set( true ),
         blur: () => focusedProperty.set( false )
-      }, { disposer: this } );
+      } );
       this._focusedProperty = focusedProperty;
     }
     return this._focusedProperty;
@@ -6312,6 +6312,7 @@ class Node extends ParallelDOM {
     this._enabledProperty.dispose();
     this._pickableProperty.dispose();
     this._visibleProperty.dispose();
+    this._focusedProperty?.dispose();
 
     // Tear-down in the reverse order Node was created
     super.dispose();
