@@ -901,7 +901,7 @@ export default class ParallelDOM extends PhetioObject {
       // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
       // but this will catch most cases since often things that get added to the focus order have the application
       // role for custom input. Note that accessibleName will not be checked that it specifically changes innerContent, it is up to the dev to do this.
-      this.ariaRole === 'application' && assert( this.innerContent || this.accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
+      this.ariaRole === 'application' && this.focusable && assert( this.innerContent || this.accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
 
       // If using accessibleParagraph without a tagName, this Node cannot have any descendants with accessible content
       if ( this.accessibleParagraph && !this.tagName ) {
