@@ -234,12 +234,12 @@ export default class Display {
   // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
   public readonly sizeProperty: TProperty<Dimension2>;
 
-  // data structure for managing aria-live alerts the this Display instance
-  public descriptionUtteranceQueue: UtteranceQueue;
+  // data structure for managing aria-live alerts this Display instance
+  public readonly descriptionUtteranceQueue: UtteranceQueue;
 
   // Manages the various types of Focus that can go through the Display, as well as Properties
   // controlling which forms of focus should be displayed in the HighlightOverlay.
-  public focusManager: FocusManager;
+  public readonly focusManager: FocusManager;
 
   // (phet-io,scenery) - Will be filled in with a phet.scenery.Input if event handling is enabled
   public _input: Input | null;
