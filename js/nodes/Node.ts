@@ -473,7 +473,7 @@ class Node extends ParallelDOM {
   public readonly voicingVisibleProperty: TinyProperty<boolean>;
 
   // A lazily created Property indicating whether this Node is focused. See getter for the focusedProperty.
-  private _focusedProperty?: TinyProperty<boolean>;
+  private _focusedProperty?: BooleanProperty;
 
   // Areas for hit intersection. If set on a Node, no descendants can handle events.
   // (scenery-internal)
@@ -3989,9 +3989,9 @@ class Node extends ParallelDOM {
    * Returns a read-only Property indicating whether this Node is focused. The Property is lazily created
    * on access.
    */
-  public get focusedProperty(): TReadOnlyProperty<boolean> {
+  public get focusedProperty(): BooleanProperty {
     if ( !this._focusedProperty ) {
-      const focusedProperty = new TinyProperty( this.focused );
+      const focusedProperty = new BooleanProperty( this.focused );
       this.addInputListener( {
         focus: () => focusedProperty.set( true ),
         blur: () => focusedProperty.set( false )
