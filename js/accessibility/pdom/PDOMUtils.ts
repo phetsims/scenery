@@ -14,11 +14,21 @@ import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TRea
 import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import Random from '../../../../dot/js/Random.js';
-import merge from '../../../../phet-core/js/merge.js';
+import optionize from '../../../../phet-core/js/optionize.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import PDOMSiblingStyle from '../../accessibility/pdom/PDOMSiblingStyle.js';
 import scenery from '../../scenery.js';
+
+type CreateElementOptions = {
+
+  // If non-null, the element will be created with the specific namespace
+  namespace?: string | null;
+
+  // A string id that uniquely represents this element in the DOM, must be completely
+  // unique in the DOM.
+  id?: string | null;
+};
 
 // constants
 const NEXT = 'NEXT';
@@ -491,13 +501,8 @@ const PDOMUtils = {
    */
   createElement( tagName: string, focusable: boolean, options: IntentionalAny ): HTMLElement {
 
-    // eslint-disable-next-line phet/bad-typescript-text
-    options = merge( {
-      // {string|null} - If non-null, the element will be created with the specific namespace
+    options = optionize<CreateElementOptions>()( {
       namespace: null,
-
-      // {string|null} - A string id that uniquely represents this element in the DOM, must be completely
-      // unique in the DOM.
       id: null
     }, options );
 
