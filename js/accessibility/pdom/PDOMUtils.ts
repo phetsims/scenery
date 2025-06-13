@@ -144,8 +144,8 @@ function getLinearDOMElements( domElement: HTMLElement ): Element[] {
  * Determine if an element is hidden.  An element is considered 'hidden' if it (or any of its ancestors) has the
  * 'hidden' attribute.
  */
-function isElementHidden( domElement: HTMLElement ): boolean {
-  if ( domElement.hidden ) {
+function isElementHidden( domElement: Element ): boolean {
+  if ( domElement instanceof HTMLElement && domElement.hidden ) {
     return true;
   }
   else if ( domElement === document.body ) {
@@ -181,17 +181,13 @@ function getNextPreviousFocusable( direction: 'NEXT' | 'PREVIOUS', parentElement
     const nextElement = linearDOM[ nextIndex ];
     nextIndex += delta;
 
-    // @ts-expect-error
     if ( PDOMUtils.isElementFocusable( nextElement ) ) {
-
-      // @ts-expect-error
-      return nextElement;
+      return nextElement as HTMLElement;
     }
   }
 
   // if no next focusable is found, return the active DOM element
-  // @ts-expect-error
-  return activeElement!;
+  return activeElement as HTMLElement;
 }
 
 /**
@@ -262,21 +258,19 @@ const PDOMUtils = {
     const linearDOM = getLinearDOMElements( parent );
 
     // return the document.body if no element is found
-    let firstFocusable: Element = document.body;
+    let firstFocusable = document.body;
 
     let nextIndex = 0;
     while ( nextIndex < linearDOM.length ) {
       const nextElement = linearDOM[ nextIndex ];
       nextIndex++;
 
-      // @ts-expect-error
       if ( PDOMUtils.isElementFocusable( nextElement ) ) {
-        firstFocusable = nextElement;
+        firstFocusable = nextElement as HTMLElement;
         break;
       }
     }
 
-    // @ts-expect-error
     return firstFocusable;
   },
 
@@ -289,13 +283,10 @@ const PDOMUtils = {
     const linearDOM = getLinearDOMElements( document.body );
     const focusableElements = [];
     for ( let i = 0; i < linearDOM.length; i++ ) {
-
-      // @ts-expect-error
       PDOMUtils.isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
     }
 
-    // @ts-expect-error
-    return focusableElements[ random.nextInt( focusableElements.length ) ];
+    return focusableElements[ random.nextInt( focusableElements.length ) ] as HTMLElement;
   },
 
   /**
@@ -380,10 +371,8 @@ const PDOMUtils = {
    * @param domElement
    * @param textContent - domElement is cleared of content if null, could have acceptable HTML
    *                                    "formatting" tags in it
-   *
-   * TODO: textContent probably wants to support type number, see https://github.com/phetsims/membrane-transport/issues/163
    */
-  setTextContent( domElement: Element, textContent: string | number | null ): void {
+  setTextContent( domElement: Element, textContent: string | null ): void {
 
     // Continue testing for JavaScript usages
     // eslint-disable-next-line phet/no-simple-type-checking-assertions
@@ -397,8 +386,7 @@ const PDOMUtils = {
 
       // XHTML requires <br/> instead of <br>, but <br/> is still valid in HTML. See
       // https://github.com/phetsims/scenery/issues/1309
-      // @ts-expect-error - this will probably crash with a number
-      const textWithoutBreaks = textContent.replaceAll( '<br>', '<br/>' );
+      const textWithoutBreaks = textContent.replace( /<br>/g, '<br/>' ); // because replaceAll is not supported in es2021
 
       // TODO: this line must be removed to support i18n Interactive Description, see https://github.com/phetsims/chipper/issues/798
       const textWithoutEmbeddingMarks = stripEmbeddingMarks( textWithoutBreaks );
@@ -435,7 +423,7 @@ const PDOMUtils = {
    * Returns true if the element is focusable. Assumes that all focusable  elements have tabIndex >= 0, which
    * is only true for elements of the Parallel DOM.
    */
-  isElementFocusable( domElement: HTMLElement ): boolean {
+  isElementFocusable( domElement: Element ): boolean {
 
     if ( !document.body.contains( domElement ) ) {
       return false;
@@ -550,8 +538,7 @@ const PDOMUtils = {
       element.removeAttribute( 'tabindex' );
     }
 
-    // @ts-expect-error
-    element.setAttribute( DATA_FOCUSABLE, focusable );
+    element.setAttribute( DATA_FOCUSABLE, String( focusable ) );
   },
 
   TAGS: {
