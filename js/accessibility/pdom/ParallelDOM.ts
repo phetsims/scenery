@@ -150,7 +150,7 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
+import { AlertableNoUtterance, TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
@@ -3226,14 +3226,61 @@ export default class ParallelDOM extends PhetioObject {
     }
 
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
+
+    // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
     for ( let i = 0; i < connectedDisplays.length; i++ ) {
       const display = connectedDisplays[ i ];
       if ( display.isAccessible() ) {
-
-        // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
         display.descriptionUtteranceQueue.addToBack( utterance );
       }
     }
+  }
+
+  /**
+   * Helper method to add an accessible response of a specific category, with control over interruption behavior.
+   *
+   * @param alertable - The content to be announced by screen readers
+   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   */
+  private addCategorizedResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' ): void {
+    if ( alertBehavior === 'interrupt' ) {
+      this.forEachUtteranceQueue( queue => queue.clear() );
+    }
+
+    this.addAccessibleResponse( alertable );
+  }
+
+  /**
+   * Add an object description to the utterance queue for screen readers. Object descriptions describe what an
+   * object is or its current state.
+   *
+   * @param alertable - The content to be announced by screen readers
+   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   */
+  public addAccessibleObjectResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+    this.addCategorizedResponse( alertable, alertBehavior );
+  }
+
+  /**
+   * Add a context description to the utterance queue for screen readers. Context descriptions provide
+   * information about the surrounding environment or the relationship of objects to one another.
+   *
+   * @param alertable - The content to be announced by screen readers
+   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   */
+  public addAccessibleContextResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+    this.addCategorizedResponse( alertable, alertBehavior );
+  }
+
+  /**
+   * Add a hint description to the utterance queue for screen readers. Hints provide guidance about
+   * what the user can do or how they can interact with an object.
+   *
+   * @param alertable - The content to be announced by screen readers
+   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   */
+  public addAccessibleHintResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+    this.addCategorizedResponse( alertable, alertBehavior );
   }
 
   /**
