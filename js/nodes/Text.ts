@@ -13,6 +13,7 @@ import StringProperty, { StringPropertyOptions } from '../../../axon/js/StringPr
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import FluentConstant from '../../../chipper/js/browser/FluentConstant.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
@@ -24,24 +25,24 @@ import phetioElementSelectionProperty from '../../../tandem/js/phetioElementSele
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType, { AnyIOType } from '../../../tandem/js/types/IOType.js';
-import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import CanvasSelfDrawable from '../display/CanvasSelfDrawable.js';
 import DOMSelfDrawable from '../display/DOMSelfDrawable.js';
-import type { FontStretch, FontStyle, FontWeight } from '../util/Font.js';
-import Font from '../util/Font.js';
-import Instance from '../display/Instance.js';
-import type { NodeOptions } from '../nodes/Node.js';
-import Node from '../nodes/Node.js';
-import type { PaintableOptions } from '../nodes/Paintable.js';
-import Paintable, { PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS } from '../nodes/Paintable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
-import TextBounds from '../util/TextBounds.js';
 import TextCanvasDrawable from '../display/drawables/TextCanvasDrawable.js';
 import TextDOMDrawable from '../display/drawables/TextDOMDrawable.js';
 import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
 import type TTextDrawable from '../display/drawables/TTextDrawable.js';
+import Instance from '../display/Instance.js';
+import Renderer from '../display/Renderer.js';
+import SVGSelfDrawable from '../display/SVGSelfDrawable.js';
+import type { NodeOptions } from '../nodes/Node.js';
+import Node from '../nodes/Node.js';
+import type { PaintableOptions } from '../nodes/Paintable.js';
+import Paintable, { PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS } from '../nodes/Paintable.js';
+import scenery from '../scenery.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import type { FontStretch, FontStyle, FontWeight } from '../util/Font.js';
+import Font from '../util/Font.js';
+import TextBounds from '../util/TextBounds.js';
 
 const STRING_PROPERTY_NAME = 'stringProperty'; // eslint-disable-line phet/bad-sim-text
 
@@ -276,8 +277,8 @@ export default class Text extends Paintable( Node ) {
     const targetStringProperty = this._stringProperty.getTargetProperty();
 
     // Even if this isn't PhET-iO instrumented, it still qualifies as this RichText's hit
-    return targetStringProperty instanceof PhetioObject ?
-           targetStringProperty.getPhetioMouseHitTarget( fromLinking ) :
+    return targetStringProperty instanceof FluentConstant ? targetStringProperty.targetProperty.getPhetioMouseHitTarget( fromLinking ) :
+           targetStringProperty instanceof PhetioObject ? targetStringProperty.getPhetioMouseHitTarget( fromLinking ) :
            'phetioNotSelectable';
   }
 

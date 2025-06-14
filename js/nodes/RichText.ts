@@ -65,6 +65,7 @@ import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import FluentConstant from '../../../chipper/js/browser/FluentConstant.js';
 import Range from '../../../dot/js/Range.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import optionize, { combineOptions, EmptySelfOptions } from '../../../phet-core/js/optionize.js';
@@ -509,8 +510,8 @@ export default class RichText extends WidthSizable( Node ) {
     const targetStringProperty = this._stringProperty.getTargetProperty();
 
     // Even if this isn't PhET-iO instrumented, it still qualifies as this RichText's hit
-    return targetStringProperty instanceof PhetioObject ?
-           targetStringProperty.getPhetioMouseHitTarget( fromLinking ) :
+    return targetStringProperty instanceof FluentConstant ? targetStringProperty.targetProperty.getPhetioMouseHitTarget( fromLinking ) :
+           targetStringProperty instanceof PhetioObject ? targetStringProperty.getPhetioMouseHitTarget( fromLinking ) :
            'phetioNotSelectable';
   }
 
