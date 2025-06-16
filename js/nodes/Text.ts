@@ -14,6 +14,7 @@ import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
 import FluentConstant from '../../../chipper/js/browser/FluentConstant.js';
+import { FluentPatternDerivedProperty } from '../../../chipper/js/browser/FluentPattern.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
@@ -273,13 +274,18 @@ export default class Text extends Paintable( Node ) {
            super.getPhetioMouseHitTarget( fromLinking );
   }
 
-  private getStringPropertyPhetioMouseHitTarget( fromLinking = false ): PhetioObject | 'phetioNotSelectable' {
-    const targetStringProperty = this._stringProperty.getTargetProperty();
+  public static getStringPropertyPhetioMouseHitTarget( fromLinking: boolean, forwardingProperty: TinyForwardingProperty<string> ): PhetioObject | 'phetioNotSelectable' {
+    const targetStringProperty = forwardingProperty.getTargetProperty();
 
     // Even if this isn't PhET-iO instrumented, it still qualifies as this RichText's hit
-    return targetStringProperty instanceof FluentConstant ? targetStringProperty.targetProperty.getPhetioMouseHitTarget( fromLinking ) :
+    return targetStringProperty instanceof FluentConstant ? targetStringProperty.targetProperty!.getPhetioMouseHitTarget( fromLinking ) :
+           targetStringProperty instanceof FluentPatternDerivedProperty ? targetStringProperty.targetProperty!.getPhetioMouseHitTarget( fromLinking ) :
            targetStringProperty instanceof PhetioObject ? targetStringProperty.getPhetioMouseHitTarget( fromLinking ) :
            'phetioNotSelectable';
+  }
+
+  private getStringPropertyPhetioMouseHitTarget( fromLinking = false ): PhetioObject | 'phetioNotSelectable' {
+    return Text.getStringPropertyPhetioMouseHitTarget( fromLinking, this._stringProperty );
   }
 
   /**
