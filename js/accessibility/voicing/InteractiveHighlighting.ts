@@ -305,8 +305,13 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
         for ( let i = 0; i < trailIds.length; i++ ) {
           const display = this.displays[ trailIds[ i ] ];
 
-          // Only if the interactive highlights feature is enabled can we be active
-          if ( display.focusManager.pointerHighlightsVisibleProperty.value ) {
+          // The highlight is activated if
+          // 1) The pointer highlights are visible (and the feature is enabled)
+          // 2) Alt input highlights are not visible - if they are visible then alt input highlights are used instead
+          if (
+            display.focusManager.pointerHighlightsVisibleProperty.value &&
+            !display.focusManager.pdomFocusHighlightsVisibleProperty.value
+          ) {
 
             const pointerFocus = display.focusManager.pointerFocusProperty.value;
             const lockedPointerFocus = display.focusManager.lockedPointerFocusProperty.value;
