@@ -3279,7 +3279,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param alertable - The content to be announced by screen readers
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
-  public accessibleHelpResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+  public addAccessibleHelpResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
     this.addCategorizedResponse( alertable, alertBehavior );
   }
 
