@@ -229,7 +229,6 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'pdomNamespace',
   'ariaLabel',
   'ariaRole',
-  'ariaValueText',
 
   'labelTagName',
   'labelContent',
@@ -293,7 +292,6 @@ type ParallelDOMSelfOptions = {
   pdomNamespace?: string | null; // Sets the namespace for the primary element
   ariaLabel?: PDOMValueType; // Sets the value of the 'aria-label' attribute on the primary sibling of this Node
   ariaRole?: string | null; // Sets the ARIA role for the primary sibling of this Node
-  ariaValueText?: PDOMValueType; // sets the aria-valuetext attribute of the primary sibling
   accessibleRoleDescription?: PDOMValueType; // Sets the aria-roledescription for the primary sibling
 
   labelTagName?: string | null; // Sets the tag name for the DOM element sibling labeling this Node
@@ -497,11 +495,6 @@ export default class ParallelDOM extends PhetioObject {
   // possible.
   private _containerAriaRole: string | null;
 
-  // If provided, "aria-valuetext" will be added as an inline attribute on the Node's
-  // primary sibling and set to this value. Setting back to null will clear this attribute in the view.
-  private _ariaValueText: PDOMValueType = null;
-  private _hasAppliedAriaValueText = false;
-
   // The aria-roledescription assigned to this Node.
   private _accessibleRoleDescription: PDOMValueType = null;
 
@@ -651,7 +644,6 @@ export default class ParallelDOM extends PhetioObject {
   protected _onInputValueChangeListener: () => void;
   protected _onAriaLabelChangeListener: () => void;
   protected _onAccessibleRoleDescriptionChangeListener: () => void;
-  protected _onAriaValueTextChangeListener: () => void;
   protected _onLabelContentChangeListener: () => void;
   protected _onAccessibleHeadingChangeListener: () => void;
   protected _onDescriptionContentChangeListener: () => void;
@@ -665,7 +657,6 @@ export default class ParallelDOM extends PhetioObject {
     this._onPDOMContentChangeListener = this.onPDOMContentChange.bind( this );
     this._onInputValueChangeListener = this.invalidatePeerInputValue.bind( this );
     this._onAriaLabelChangeListener = this.onAriaLabelChange.bind( this );
-    this._onAriaValueTextChangeListener = this.onAriaValueTextChange.bind( this );
     this._onLabelContentChangeListener = this.invalidatePeerLabelSiblingContent.bind( this );
     this._onAccessibleHeadingChangeListener = this.invalidateAccessibleHeadingContent.bind( this );
     this._onDescriptionContentChangeListener = this.invalidatePeerDescriptionSiblingContent.bind( this );
@@ -750,10 +741,6 @@ export default class ParallelDOM extends PhetioObject {
 
     if ( isTReadOnlyProperty( this._ariaLabel ) && !this._ariaLabel.isDisposed ) {
       this._ariaLabel.unlink( this._onAriaLabelChangeListener );
-    }
-
-    if ( isTReadOnlyProperty( this._ariaValueText ) && !this._ariaValueText.isDisposed ) {
-      this._ariaValueText.unlink( this._onAriaValueTextChangeListener );
     }
 
     if ( isTReadOnlyProperty( this._accessibleRoleDescription ) && !this._accessibleRoleDescription.isDisposed ) {
@@ -1732,21 +1719,6 @@ export default class ParallelDOM extends PhetioObject {
     return this._containerAriaRole;
   }
 
-  private onAriaValueTextChange(): void {
-    const ariaValueText = this.ariaValueText;
-
-    if ( ariaValueText === null ) {
-      if ( this._hasAppliedAriaLabel ) {
-        this.removePDOMAttribute( 'aria-valuetext' );
-        this._hasAppliedAriaLabel = false;
-      }
-    }
-    else {
-      this.setPDOMAttribute( 'aria-valuetext', ariaValueText );
-      this._hasAppliedAriaLabel = true;
-    }
-  }
-
   /**
    * Updates the attribute value whenever there is a change to the aria-roledescription.
    */
@@ -1758,38 +1730,6 @@ export default class ParallelDOM extends PhetioObject {
     else {
       this.setPDOMAttribute( 'aria-roledescription', accessibleRoleDescription );
     }
-  }
-
-  /**
-   * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
-   * clear this attribute.
-   */
-  public setAriaValueText( ariaValueText: PDOMValueType ): void {
-    if ( this._ariaValueText !== ariaValueText ) {
-      if ( isTReadOnlyProperty( this._ariaValueText ) && !this._ariaValueText.isDisposed ) {
-        this._ariaValueText.unlink( this._onAriaValueTextChangeListener );
-      }
-
-      this._ariaValueText = ariaValueText;
-
-      if ( isTReadOnlyProperty( ariaValueText ) ) {
-        ariaValueText.lazyLink( this._onAriaValueTextChangeListener );
-      }
-
-      this.onAriaValueTextChange();
-    }
-  }
-
-  public set ariaValueText( ariaValueText: PDOMValueType ) { this.setAriaValueText( ariaValueText ); }
-
-  public get ariaValueText(): string | null { return this.getAriaValueText(); }
-
-  /**
-   * Get the value of the aria-valuetext attribute for this Node's primary sibling. If null, then the attribute
-   * has not been set on the primary sibling.
-   */
-  public getAriaValueText(): string | null {
-    return unwrapProperty( this._ariaValueText );
   }
 
   /**

@@ -1439,40 +1439,6 @@ QUnit.test( 'inputValue', assert => {
 
 } );
 
-QUnit.test( 'ariaValueText', assert => {
-
-  const rootNode = new Node();
-  const display = new Display( rootNode );
-  document.body.appendChild( display.domElement );
-
-  const ariaValueText = 'this is my value text';
-  const a = new Node( { tagName: 'input', ariaValueText: ariaValueText, inputType: 'range' } );
-  rootNode.addChild( a );
-  let aElement = getPrimarySiblingElementByNode( a );
-  assert.ok( aElement.getAttribute( 'aria-valuetext' ) === ariaValueText, 'should have correct value text.' );
-  assert.ok( a.ariaValueText === ariaValueText, 'should have correct value text, getter' );
-
-  const differentValue = 'i am different value text';
-  a.ariaValueText = differentValue;
-  aElement = getPrimarySiblingElementByNode( a );
-  assert.ok( aElement.getAttribute( 'aria-valuetext' ) === differentValue, 'should have different value text' );
-  assert.ok( a.ariaValueText === differentValue, 'should have different value text, getter' );
-
-  rootNode.addChild( new Node( { children: [ a ] } ) );
-  aElement = a.pdomInstances[ 1 ].peer!.primarySibling!;
-  assert.ok( aElement.getAttribute( 'aria-valuetext' ) === differentValue, 'should have the same different value text after children moving' );
-  assert.ok( a.ariaValueText === differentValue, 'should have the same different value text after children moving, getter' );
-
-  a.tagName = 'div';
-  aElement = a.pdomInstances[ 1 ].peer!.primarySibling!;
-  assert.ok( aElement.getAttribute( 'aria-valuetext' ) === differentValue, 'value text as div' );
-  assert.ok( a.ariaValueText === differentValue, 'value text as div, getter' );
-  display.dispose();
-  display.domElement.parentElement!.removeChild( display.domElement );
-
-} );
-
-
 QUnit.test( 'setPDOMAttribute', assert => {
 
   const rootNode = new Node();
