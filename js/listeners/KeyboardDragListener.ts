@@ -86,7 +86,7 @@ const upDownKeys = [ 'arrowUp', 'arrowDown', 'w', 's' ] as const;
 // listed in keys for the listener.
 const ignoredShiftPattern = 'shift?+';
 
-// KeyDescriptorProperties for each key that can be pressed to move the object.
+// OneKeyStroke Properties for each key that can be pressed to move the object.
 const A_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}a` );
 const D_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}d` );
 const W_KEY_STRING_PROPERTY = new Property<OneKeyStroke>( `${ignoredShiftPattern}w` );

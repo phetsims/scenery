@@ -102,8 +102,8 @@ type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // level documentation for more information and an example of providing keys.
   keys?: Keys | null;
 
-  // A list of KeyDescriptor Properties that describe the keys that need to be pressed to fire the callback.
-  // This is an alternative to providing keys directly. You cannot provide both keys and keyDescriptorProperties.
+  // A list of OneKeyStroke Properties that describe the keys that need to be pressed to fire the callback.
+  // This is an alternative to providing keys directly. You cannot provide both keys and keyStringProperties.
   // This is useful for dynamic behavior, such as i18n or mapping to a different set of keys.
   keyStringProperties?: TReadOnlyProperty<OneKeyStroke>[] | null;
 
@@ -310,7 +310,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    * Converts the provided keys for this listener into a collection of Hotkeys to easily track what keys are down.
    */
   private createHotkeys( keys: Keys | null, keyStringProperties: TReadOnlyProperty<OneKeyStroke>[] | null ): Hotkey[] {
-    assert && assert( keys || keyStringProperties, 'Must provide keys or keyDescriptorProperties' );
+    assert && assert( keys || keyStringProperties, 'Must provide keys or keyStringProperties' );
 
     let usableKeyStringProperties: TReadOnlyProperty<OneKeyStroke>[];
     if ( keyStringProperties ) {
