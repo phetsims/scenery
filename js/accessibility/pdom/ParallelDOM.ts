@@ -150,7 +150,7 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import { AlertableNoUtterance, TAlertable } from '../../../../utterance-queue/js/Utterance.js';
+import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
@@ -3182,7 +3182,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param alertable - The content to be announced by screen readers
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
-  private addCategorizedResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' ): void {
+  private addCategorizedResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' ): void {
     if ( alertBehavior === 'interrupt' ) {
       this.forEachUtteranceQueue( queue => queue.clear() );
     }
@@ -3197,7 +3197,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param alertable - The content to be announced by screen readers
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
-  public addAccessibleObjectResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+  public addAccessibleObjectResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
     this.addCategorizedResponse( alertable, alertBehavior );
   }
 
@@ -3208,7 +3208,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param alertable - The content to be announced by screen readers
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
-  public addAccessibleContextResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+  public addAccessibleContextResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
     this.addCategorizedResponse( alertable, alertBehavior );
   }
 
@@ -3219,7 +3219,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param alertable - The content to be announced by screen readers
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
-  public addAccessibleHelpResponse( alertable: AlertableNoUtterance, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+  public addAccessibleHelpResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
     this.addCategorizedResponse( alertable, alertBehavior );
   }
 
