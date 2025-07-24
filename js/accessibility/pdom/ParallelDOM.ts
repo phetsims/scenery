@@ -3230,11 +3230,6 @@ export default class ParallelDOM extends PhetioObject {
   public forEachUtteranceQueue( callback: ( queue: UtteranceQueue ) => void ): void {
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
 
-    // If you run into this assertion, talk to @jessegreenberg and @zepumph, because it is quite possible we would
-    // remove this assertion for your case.
-    assert && assert( connectedDisplays.length > 0,
-      'must be connected to a display to use UtteranceQueue features' );
-
     for ( let i = 0; i < connectedDisplays.length; i++ ) {
       const display = connectedDisplays[ i ];
       if ( display.isAccessible() ) {
