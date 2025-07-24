@@ -6,9 +6,8 @@
  * @author Jesse Greenberg
  */
 
-import Property from '../../../axon/js/Property.js';
-import HotkeyData from '../input/HotkeyData.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import HotkeyData from '../input/HotkeyData.js';
 import scenery from '../scenery.js';
 
 const KeyboardZoomUtils = {
@@ -62,21 +61,21 @@ const KeyboardZoomUtils = {
   // Hotkey data is not used in the implementation but is provided for documentation purposes.
   // Beware if you change keys in these, you will need to change other methods in this utils file.
   ZOOM_IN_HOTKEY_DATA: new HotkeyData( {
-    keyStringProperties: [ new Property( 'ctrl+equals' ), new Property( 'meta+equals' ) ],
+    keys: [ 'ctrl+equals', 'meta+equals' ],
     binderName: 'Zoom in',
     repoName: 'scenery',
     global: true
   } ),
 
   ZOOM_OUT_HOTKEY_DATA: new HotkeyData( {
-    keyStringProperties: [ new Property( 'ctrl+minus' ), new Property( 'meta+minus' ) ],
+    keys: [ 'ctrl+minus', 'meta+minus' ],
     binderName: 'Zoom in',
     repoName: 'scenery',
     global: true
   } ),
 
   RESET_ZOOM_HOTKEY_DATA: new HotkeyData( {
-    keyStringProperties: [ new Property( 'ctrl+0' ), new Property( 'meta+0' ) ],
+    keys: [ 'ctrl+0', 'meta+0' ],
     binderName: 'Reset zoom',
     repoName: 'scenery',
     global: true

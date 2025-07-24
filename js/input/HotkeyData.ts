@@ -8,12 +8,13 @@
  */
 
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import Property from '../../../axon/js/Property.js';
+import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import InstanceRegistry from '../../../phet-core/js/documentation/InstanceRegistry.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import scenery from '../scenery.js';
 import type { OneKeyStroke } from './KeyDescriptor.js';
 import KeyDescriptor from './KeyDescriptor.js';
-import scenery from '../scenery.js';
 
 // The type for a serialized HotkeyData object for documentation (binder).
 type SerializedHotkeyData = {
@@ -26,7 +27,7 @@ type SerializedHotkeyData = {
 export type HotkeyDataOptions = {
 
   // The list of keystrokes that will trigger the hotkey. Wrapping in a Property allows for i18n in the future.
-  keyStringProperties: TReadOnlyProperty<OneKeyStroke>[];
+  keys: Array<TReadOnlyProperty<OneKeyStroke> | OneKeyStroke>;
 
   // The visual label for this Hotkey in the Keyboard Help dialog. This will also be used as the label in
   // generated documentation, unless binderName is provided.
@@ -46,7 +47,7 @@ export default class HotkeyData {
   public readonly keyboardHelpDialogLabelStringProperty: TReadOnlyProperty<string> | null;
   public readonly keyboardHelpDialogPDOMLabelStringProperty: TReadOnlyProperty<string> | string | null;
 
-  // KeyDescriptors derived from keyStringProperties.
+  // KeyDescriptors derived from keys.
   public readonly keyDescriptorsProperty: TReadOnlyProperty<KeyDescriptor[]>;
 
   private readonly repoName: string;
@@ -64,13 +65,22 @@ export default class HotkeyData {
       binderName: ''
     }, providedOptions );
 
-    this.keyStringProperties = options.keyStringProperties;
     this.keyboardHelpDialogLabelStringProperty = options.keyboardHelpDialogLabelStringProperty;
     this.keyboardHelpDialogPDOMLabelStringProperty = options.keyboardHelpDialogPDOMLabelStringProperty;
 
     this.repoName = options.repoName;
     this.global = options.global;
     this.binderName = options.binderName;
+
+    // If the keys are provided as OneKeyStroke[], convert them to TReadOnlyProperty<OneKeyStroke>[].
+    this.keyStringProperties = options.keys.map( keyStroke => {
+      if ( isTReadOnlyProperty( keyStroke ) ) {
+        return keyStroke;
+      }
+      else {
+        return new Property<OneKeyStroke>( keyStroke );
+      }
+    } );
 
     this.keyDescriptorsProperty = DerivedProperty.deriveAny( this.keyStringProperties, () => {
       return this.keyStringProperties.map( keyStringProperty => {
@@ -84,7 +94,7 @@ export default class HotkeyData {
   }
 
   /**
-   * Returns true if any of the keyStringProperties of this HotkeyData have the given keyStroke.
+   * Returns true if any of the keys of this HotkeyData have the given keyStroke.
    */
   public hasKeyStroke( keyStroke: OneKeyStroke ): boolean {
     return this.keyStringProperties.some( keyStringProperty => keyStringProperty.value === keyStroke );
@@ -110,7 +120,7 @@ export default class HotkeyData {
   }
 
   /**
-   * Combine the keyStringProperties of an array of HotkeyData into a single array. Useful if you want to combine
+   * Combine the keys of an array of HotkeyData into a single array. Useful if you want to combine
    * multiple HotkeyData for a single KeyboardListener.
    */
   public static combineKeyStringProperties( hotkeyDataArray: HotkeyData[] ): TReadOnlyProperty<OneKeyStroke>[] {
