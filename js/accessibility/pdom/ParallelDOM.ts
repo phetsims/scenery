@@ -3183,7 +3183,10 @@ export default class ParallelDOM extends PhetioObject {
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
   private addCategorizedResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' ): void {
-    if ( alertBehavior === 'interrupt' ) {
+
+    // only clear if there is content (graceful if alertable is null so that reusable components can use this method
+    // without requiring content)
+    if ( alertable && alertBehavior === 'interrupt' ) {
       this.forEachUtteranceQueue( queue => queue.clear() );
     }
 
