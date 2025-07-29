@@ -36,28 +36,26 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
+import TProperty from '../../../../axon/js/TProperty.js';
+import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Orientation from '../../../../phet-core/js/Orientation.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS } from '../../layout/constraints/FlowConstraint.js';
+import ParallelDOM from '../../accessibility/pdom/ParallelDOM.js';
 import FlowCell from '../../layout/constraints/FlowCell.js';
-import FlowConstraint from '../../layout/constraints/FlowConstraint.js';
 import type { FlowConstraintOptions } from '../../layout/constraints/FlowConstraint.js';
-import { HorizontalLayoutAlign, VerticalLayoutAlign } from '../../layout/LayoutAlign.js';
-import { HorizontalLayoutJustification, VerticalLayoutJustification } from '../../layout/LayoutJustification.js';
-import { LAYOUT_NODE_OPTION_KEYS } from '../../layout/nodes/LayoutNode.js';
-import LayoutAlign from '../../layout/LayoutAlign.js';
-import LayoutNode from '../../layout/nodes/LayoutNode.js';
-import type { LayoutNodeOptions } from '../../layout/nodes/LayoutNode.js';
-import { LayoutOrientation } from '../../layout/LayoutOrientation.js';
+import FlowConstraint, { FLOW_CONSTRAINT_OPTION_KEYS } from '../../layout/constraints/FlowConstraint.js';
 import MarginLayoutCell from '../../layout/constraints/MarginLayoutCell.js';
+import LayoutAlign, { HorizontalLayoutAlign, VerticalLayoutAlign } from '../../layout/LayoutAlign.js';
+import { HorizontalLayoutJustification, VerticalLayoutJustification } from '../../layout/LayoutJustification.js';
+import { LayoutOrientation } from '../../layout/LayoutOrientation.js';
+import type { LayoutNodeOptions } from '../../layout/nodes/LayoutNode.js';
+import LayoutNode, { LAYOUT_NODE_OPTION_KEYS } from '../../layout/nodes/LayoutNode.js';
+import { SIZABLE_OPTION_KEYS } from '../../layout/Sizable.js';
 import Node, { REQUIRES_BOUNDS_OPTION_KEYS } from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import SceneryConstants from '../../SceneryConstants.js';
-import { SIZABLE_OPTION_KEYS } from '../../layout/Sizable.js';
-import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
-import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
-import TProperty from '../../../../axon/js/TProperty.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -116,6 +114,9 @@ export default class FlowBox extends LayoutNode<FlowConstraint> {
 
       // For LayoutBox compatibility
       disabledOpacity: SceneryConstants.DISABLED_OPACITY,
+
+      // pdom - accessibleHelpText comes before child content for layout containers
+      accessibleHelpTextBehavior: ParallelDOM.HELP_TEXT_BEFORE_CONTENT,
 
       forward: DEFAULT_OPTIONS.forward,
       forwardProperty: null
