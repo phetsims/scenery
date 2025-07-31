@@ -620,37 +620,37 @@ class Node extends ParallelDOM {
   // This is fired only once for any single operation that may change the children of a Node.
   // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
   // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
-  public readonly childrenChangedEmitter: TEmitter = new TinyEmitter();
+  public readonly childrenChangedEmitter: TEmitter = new TinyEmitter( null, null, null, true );
 
   // For every single added child Node, emits with {Node} Node, {number} indexOfChild
-  public readonly childInsertedEmitter: TEmitter<[ node: Node, indexOfChild: number ]> = new TinyEmitter();
+  public readonly childInsertedEmitter: TEmitter<[ node: Node, indexOfChild: number ]> = new TinyEmitter( null, null, null, true );
 
   // For every single removed child Node, emits with {Node} Node, {number} indexOfChild
-  public readonly childRemovedEmitter: TEmitter<[ node: Node, indexOfChild: number ]> = new TinyEmitter();
+  public readonly childRemovedEmitter: TEmitter<[ node: Node, indexOfChild: number ]> = new TinyEmitter( null, null, null, true );
 
   // Provides a given range that may be affected by the reordering
-  public readonly childrenReorderedEmitter: TEmitter<[ minChangedIndex: number, maxChangedIndex: number ]> = new TinyEmitter();
+  public readonly childrenReorderedEmitter: TEmitter<[ minChangedIndex: number, maxChangedIndex: number ]> = new TinyEmitter( null, null, null, true );
 
   // Fired whenever a parent is added
-  public readonly parentAddedEmitter: TEmitter<[ node: Node ]> = new TinyEmitter();
+  public readonly parentAddedEmitter: TEmitter<[ node: Node ]> = new TinyEmitter( null, null, null, true );
 
   // Fired whenever a parent is removed
-  public readonly parentRemovedEmitter: TEmitter<[ node: Node ]> = new TinyEmitter();
+  public readonly parentRemovedEmitter: TEmitter<[ node: Node ]> = new TinyEmitter( null, null, null, true );
 
   // Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
   // change to a Node's translation/rotation/scale/etc. will trigger this event.
-  public readonly transformEmitter: TEmitter = new TinyEmitter();
+  public readonly transformEmitter: TEmitter = new TinyEmitter( null, null, null, true );
 
   // Should be emitted when we need to check full metadata updates directly on Instances,
   // to see if we need to change drawable types, etc.
-  public readonly instanceRefreshEmitter: TEmitter = new TinyEmitter();
+  public readonly instanceRefreshEmitter: TEmitter = new TinyEmitter( null, null, null, true );
 
   // Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
   // things that could affect descendants)
-  public readonly rendererSummaryRefreshEmitter: TEmitter = new TinyEmitter();
+  public readonly rendererSummaryRefreshEmitter: TEmitter = new TinyEmitter( null, null, null, true );
 
   // Emitted to when we change filters (either opacity or generalized filters)
-  public readonly filterChangeEmitter: TEmitter = new TinyEmitter();
+  public readonly filterChangeEmitter: TEmitter = new TinyEmitter( null, null, null, true );
 
   // Fired when an instance is changed (added/removed). CAREFUL!! This is potentially a very dangerous thing to listen
   // to. Instances are updated in an asynchronous batch during `updateDisplay()`, and it is very important that display
@@ -780,7 +780,7 @@ class Node extends ParallelDOM {
     this._rootedDisplays = [];
     this._drawables = [];
     this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, DEFAULT_OPTIONS.phetioVisiblePropertyInstrumented,
-      this.onVisiblePropertyChange.bind( this ) );
+      this.onVisiblePropertyChange.bind( this ), true );
     this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity, this.onOpacityPropertyChange.bind( this ) );
     this.disabledOpacityProperty = new TinyProperty( DEFAULT_OPTIONS.disabledOpacity, this.onDisabledOpacityPropertyChange.bind( this ) );
     this._pickableProperty = new TinyForwardingProperty<boolean | null>( DEFAULT_OPTIONS.pickable,
@@ -790,8 +790,8 @@ class Node extends ParallelDOM {
 
     this._inputEnabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.inputEnabled,
       DEFAULT_OPTIONS.phetioInputEnabledPropertyInstrumented );
-    this.clipAreaProperty = new TinyProperty<Shape | null>( DEFAULT_OPTIONS.clipArea );
-    this.voicingVisibleProperty = new TinyProperty<boolean>( true );
+    this.clipAreaProperty = new TinyProperty<Shape | null>( DEFAULT_OPTIONS.clipArea, null, null, null, true );
+    this.voicingVisibleProperty = new TinyProperty<boolean>( true, null, null, null, true );
     this._mouseArea = DEFAULT_OPTIONS.mouseArea;
     this._touchArea = DEFAULT_OPTIONS.touchArea;
     this._cursor = DEFAULT_OPTIONS.cursor;

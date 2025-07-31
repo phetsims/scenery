@@ -118,7 +118,7 @@ export default class FocusManager {
       [ this.interactiveHighlightsVisibleProperty, this.readingBlockHighlightsVisibleProperty ],
       ( interactiveHighlightsVisible, voicingEnabled ) => {
         return interactiveHighlightsVisible || voicingEnabled;
-      } );
+      }, { disableListenerLimit: true } );
 
     //-----------------------------------------------------------------------------------------------------------------
     // The following section manages control of ReadingBlockFocusProperty. It takes a value whenever the
