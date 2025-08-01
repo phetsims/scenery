@@ -336,7 +336,7 @@ export type RemoveParallelDOMOptions<T extends ParallelDOMOptions> = StrictOmit<
 // This is useful for creating a ParallelDOM subclass that only exposes these high-level options while implementing
 // accessibility with the lower-level API.
 export type TrimParallelDOMOptions<T extends ParallelDOMSelfOptions> = RemoveParallelDOMOptions<T> &
-  PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'accessibleHelpText' | 'accessibleParagraph' | 'accessibleHeading' | 'accessibleHeadingIncrement' | 'focusable' | 'pdomVisible' | 'containerTagName'>;
+  PickOptional<ParallelDOMSelfOptions, 'accessibleName' | 'accessibleHelpText' | 'accessibleParagraph' | 'accessibleHeading' | 'accessibleHeadingIncrement' | 'focusable' | 'pdomVisible'>;
 
 type PDOMAttribute = {
   attribute: string;
