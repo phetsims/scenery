@@ -46,6 +46,7 @@ import type { TVoicing } from './Voicing.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
+  'readingBlockDisabledTagName',
   'readingBlockNameResponse',
   'readingBlockHintResponse',
   'readingBlockResponsePatternCollection',
@@ -54,6 +55,7 @@ const READING_BLOCK_OPTION_KEYS = [
 
 type SelfOptions = {
   readingBlockTagName?: string | null;
+  readingBlockDisabledTagName?: string | null;
   readingBlockNameResponse?: VoicingResponse;
   readingBlockHintResponse?: VoicingResponse;
   readingBlockResponsePatternCollection?: ResponsePatternCollection;
@@ -100,6 +102,9 @@ export type TReadingBlock<SuperType extends Node = Node> = {
   setReadingBlockTagName( tagName: string | null ): void;
   readingBlockTagName: string | null;
   getReadingBlockTagName(): string | null;
+  setReadingBlockDisabledTagName( tagName: string | null ): void;
+  readingBlockDisabledTagName: string | null;
+  getReadingBlockDisabledTagName(): string | null;
   setReadingBlockNameResponse( content: VoicingResponse ): void;
   set readingBlockNameResponse( content: VoicingResponse );
   get readingBlockNameResponse(): ResolvedResponse;
@@ -129,6 +134,11 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
       // be sure that the ReadingBlock will still respond to `click` events when enabled.
       private _readingBlockTagName: string | null;
 
+      // The tagName (of ParallelDOM) that will be applied to this Node when Reading Blocks are disabled.
+      // Usually, when Voicing is disabled, ReadingBlocks should be fully removed from the DOM. If you need
+      // accessible content when reading blocks are disabled, you can set this value.
+      private _readingBlockDisabledTagName: string | null;
+
       // The highlight that surrounds this ReadingBlock when it is "active" and
       // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
       // yellow highlight surrounds this Node's bounds.
@@ -152,6 +162,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
         super( ...args );
 
         this._readingBlockTagName = 'button';
+        this._readingBlockDisabledTagName = null; // default is null to fully remove from the DOM.
         this._readingBlockActiveHighlight = null;
         this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
         this.readingBlockResponsePatternCollection = DEFAULT_CONTENT_HINT_PATTERN;
@@ -205,6 +216,27 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
        */
       public getReadingBlockTagName(): string | null {
         return this._readingBlockTagName;
+      }
+
+      /**
+       * Set the tagName for the node composing ReadingBlock. This is the tagName (of ParallelDOM) that will be applied
+       * to this Node when Reading Blocks are disabled. Usually, when the Voicing is disabled, ReadingBlocks should be
+       * fully removed from the DOM. If you need accessible content when reading blocks are disabled, you can set this value.
+       */
+      public setReadingBlockDisabledTagName( tagName: string | null ): void {
+        this._readingBlockDisabledTagName = tagName;
+        this._onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
+      }
+
+      public set readingBlockDisabledTagName( tagName: string | null ) { this.setReadingBlockDisabledTagName( tagName ); }
+
+      public get readingBlockDisabledTagName(): string | null { return this.getReadingBlockDisabledTagName(); }
+
+      /**
+       * Get the tagName for this Node (of ParallelDOM) when Voicing is disabled.
+       */
+      public getReadingBlockDisabledTagName(): string | null {
+        return this._readingBlockDisabledTagName;
       }
 
       /**
@@ -367,7 +399,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
           }
         }
         else {
-          this.tagName = null;
+          this.tagName = this._readingBlockDisabledTagName;
           if ( this.hasInputListener( this._readingBlockInputListener ) ) {
             this.removeInputListener( this._readingBlockInputListener );
           }
@@ -464,7 +496,7 @@ const ReadingBlock = memoize( <SuperType extends Constructor<Node>>( Type: Super
 } );
 
 // Export a type that lets you check if your Node is composed with ReadingBlock
-export type ReadingBlockNode = Node & TReadingBlock;
+export type TReadingBlockNode = Node & TReadingBlock;
 
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;

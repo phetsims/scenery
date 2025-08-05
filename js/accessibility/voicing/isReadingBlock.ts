@@ -9,8 +9,8 @@
 
 import type IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import Node from '../../../../scenery/js/nodes/Node.js';
-import type { ReadingBlockNode } from './ReadingBlock.js';
+import type { TReadingBlockNode } from './ReadingBlock.js';
 
-export function isReadingBlock( something: IntentionalAny ): something is ReadingBlockNode {
-  return something instanceof Node && ( something as ReadingBlockNode )._isReadingBlock;
+export function isReadingBlock( something: IntentionalAny ): something is TReadingBlockNode {
+  return something instanceof Node && ( something as TReadingBlockNode )._isReadingBlock;
 }

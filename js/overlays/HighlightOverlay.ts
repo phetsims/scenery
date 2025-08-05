@@ -23,7 +23,7 @@ import ActivatedReadingBlockHighlight from '../accessibility/voicing/ActivatedRe
 import type { InteractiveHighlightingNodeType } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { isInteractiveHighlighting } from '../accessibility/voicing/isInteractiveHighlighting.js';
 import { isReadingBlock } from '../accessibility/voicing/isReadingBlock.js';
-import type { ReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
+import type { TReadingBlockNode } from '../accessibility/voicing/ReadingBlock.js';
 import type Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import type TOverlay from '../overlays/TOverlay.js';
@@ -110,7 +110,7 @@ export default class HighlightOverlay implements TOverlay {
   private addedReadingBlockHighlight: Highlight = null;
 
   // A reference to the Node that is a ReadingBlock which the Voicing framework is currently speaking about.
-  private activeReadingBlockNode: null | ReadingBlockNode = null;
+  private activeReadingBlockNode: null | TReadingBlockNode = null;
 
   // Trail to the ReadingBlock Node with an active highlight around it while the voicingManager is speaking its content.
   private readingBlockTrail: null | Trail = null;
