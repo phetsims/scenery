@@ -430,7 +430,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     this.callbackTimer = new CallbackTimer( {
       callback: () => {
         const shiftKeyDown = globalKeyStateTracker.shiftKeyDown;
-        const delta = shiftKeyDown ? options.shiftDragDelta : options.dragDelta;
+        const delta = shiftKeyDown ? this._shiftDragDelta : this._dragDelta;
         this.moveFromDelta( delta );
       },
 
