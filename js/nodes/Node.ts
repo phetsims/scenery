@@ -6303,6 +6303,12 @@ class Node extends ParallelDOM {
     // remove all PDOM input listeners
     this.disposeParallelDOM();
 
+    // Ensures any necessary cleanup occurs when the Node loses focus, before disposing the
+    // Node, its listeners, and its Property.
+    if ( this._focusedProperty ) {
+      this._focusedProperty.value = false;
+    }
+
     // When disposing, remove all children and parents. See https://github.com/phetsims/scenery/issues/629
     this.removeAllChildren();
     this.detach();
