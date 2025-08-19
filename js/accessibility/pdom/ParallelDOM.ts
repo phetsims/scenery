@@ -3145,8 +3145,12 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Alert on all interactive description utteranceQueues located on each connected Display. See
-   * Node.getConnectedDisplays. Note that if your Node is not connected to a Display, this function will have
-   * no effect.
+   * Node.getConnectedDisplays.
+   *
+   * Note that if your Node is not connected to a Display, this function will hav no effect.
+   *
+   * This function will also have no effect if your Node is visible: false or pdomVisible: false.
+   * This ensures that Nodes on hidden screens or behind hidden layers do not create responses.
    */
   public addAccessibleResponse( utterance: TAlertable ): void {
 
@@ -3162,6 +3166,11 @@ export default class ParallelDOM extends PhetioObject {
 
     // No description should be alerted if an archetype of a PhET-iO dynamic element, see https://github.com/phetsims/joist/issues/817
     if ( Tandem.PHET_IO_ENABLED && this.isInsidePhetioArchetype() ) {
+      return;
+    }
+
+    // If this Node is not globally visible in the PDOM, or is not displayed visually, then there should be no response from this Node.
+    if ( !this.isPDOMDisplayed() || !( this as unknown as Node ).wasVisuallyDisplayed() ) {
       return;
     }
 
