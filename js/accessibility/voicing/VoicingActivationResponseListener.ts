@@ -10,14 +10,14 @@
 import Vector2 from '../../../../dot/js/Vector2.js';
 import PressListener from '../../listeners/PressListener.js';
 import scenery from '../../scenery.js';
-import type { VoicingNode } from './Voicing.js';
+import type { TVoicingNode } from './Voicing.js';
 
 // If the mouse moves this much in the global coordinate frame, we consider it a drag event and the voicing response
 // behavior is interrupted.
 const GLOBAL_DELTA = 1;
 
 export default class VoicingActivationResponseListener extends PressListener {
-  public constructor( voicingNode: VoicingNode ) {
+  public constructor( voicingNode: TVoicingNode ) {
 
     let startPosition: Vector2 | null = null;
 

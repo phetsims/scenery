@@ -1,6 +1,8 @@
 // Copyright 2025, University of Colorado Boulder
 
 /**
+ * A superclass Node that is composed with ReadingBlock, for where inheritance is a preferred pattern.
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 

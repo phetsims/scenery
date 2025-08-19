@@ -903,7 +903,7 @@ Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: TV
  * Remove a voicingNode's voicingCanSpeakProperty from the Utterance.
  * @static
  */
-Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
+Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: TVoicingNode ) => {
   const existingCanAnnounceProperties = utterance.voicingCanAnnounceProperties;
 
   const voicingCanSpeakProperty = voicingNode._voicingCanSpeakProperty;
@@ -958,7 +958,7 @@ Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
  */
 Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, accessibleName: PDOMValueType ): ParallelDOMOptions => {
   assert && assert( isVoicing( node ), 'Node must be a VoicingNode to use Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR' );
-  const voicingNode = node as VoicingNode;
+  const voicingNode = node as TVoicingNode;
 
   // Create the basic accessible name options - the behavior function will use these options to mutate the Node.
   options = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR( voicingNode, options, accessibleName );
@@ -978,7 +978,7 @@ Voicing.BASIC_ACCESSIBLE_NAME_BEHAVIOR = ( node: Node, options: ParallelDOMOptio
  */
 Voicing.BASIC_HELP_TEXT_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, accessibleHelpText: PDOMValueType ): ParallelDOMOptions => {
   assert && assert( isVoicing( node ), 'Node must be a VoicingNode to use Voicing.BASIC_HELP_TEXT_BEHAVIOR' );
-  const voicingNode = node as VoicingNode;
+  const voicingNode = node as TVoicingNode;
 
   // Create the basic help text options - the behavior function will use these options to mutate the Node.
   options = ParallelDOM.HELP_TEXT_AFTER_CONTENT( voicingNode, options, accessibleHelpText );
@@ -990,10 +990,10 @@ Voicing.BASIC_HELP_TEXT_BEHAVIOR = ( node: Node, options: ParallelDOMOptions, ac
   return options;
 };
 
-export type VoicingNode = Node & TVoicing;
+export type TVoicingNode = Node & TVoicing;
 
-export function isVoicing( something: IntentionalAny ): something is VoicingNode {
-  return something instanceof Node && ( something as VoicingNode )._isVoicing;
+export function isVoicing( something: IntentionalAny ): something is TVoicingNode {
+  return something instanceof Node && ( something as TVoicingNode )._isVoicing;
 }
 
 scenery.register( 'Voicing', Voicing );
