@@ -154,6 +154,7 @@ import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
+import DisplayedProperty from '../../util/DisplayedProperty.js';
 import Trail from '../../util/Trail.js';
 
 import { Highlight } from '../Highlight.js';
@@ -582,6 +583,10 @@ export default class ParallelDOM extends PhetioObject {
   // (scenery-internal)
   public _pdomDisplaysInfo: PDOMDisplaysInfo;
 
+  // A DisplayedProperty that watches to see if this Node is visible or pdomVisible. Lazily created only when needed
+  // for performance/optimization. When this is false, all accessible responses are disabled for this Node.
+  private _pdomDisplayedProperty: DisplayedProperty | null = null;
+
   // Empty unless the Node contains some pdom content (PDOMInstance).
   private readonly _pdomInstances: PDOMInstance[];
 
@@ -768,6 +773,9 @@ export default class ParallelDOM extends PhetioObject {
     }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
+
+    this._pdomDisplayedProperty?.dispose();
+    this._pdomDisplayedProperty = null;
 
     // To prevent memory leaks, we want to clear our order (since otherwise Nodes in our order will reference
     // this Node).
@@ -3170,8 +3178,12 @@ export default class ParallelDOM extends PhetioObject {
     }
 
     // If this Node is not globally visible in the PDOM, or is not displayed visually, then there should be no response from this Node.
-    if ( !this.isPDOMDisplayed() || !( this as unknown as Node ).wasVisuallyDisplayed() ) {
-      return;
+    if ( !this._pdomDisplayedProperty ) {
+      this._pdomDisplayedProperty = new DisplayedProperty( this as unknown as Node, {
+        followPDOMOrder: true,
+        requireVisible: true,
+        requirePDOMVisible: true
+      } );
     }
 
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
@@ -3179,7 +3191,7 @@ export default class ParallelDOM extends PhetioObject {
     // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
     for ( let i = 0; i < connectedDisplays.length; i++ ) {
       const display = connectedDisplays[ i ];
-      if ( display.isAccessible() ) {
+      if ( display.isAccessible() && this._pdomDisplayedProperty.value ) {
         display.descriptionUtteranceQueue.addToBack( utterance );
       }
     }
