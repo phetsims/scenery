@@ -19,7 +19,7 @@
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import type Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
+import type Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 
