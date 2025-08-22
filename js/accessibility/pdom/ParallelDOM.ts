@@ -150,7 +150,7 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
-import { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
+import Utterance, { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
@@ -173,6 +173,9 @@ const DIV_TAG = PDOMUtils.TAGS.DIV;
 const DEFAULT_TAG_NAME = DIV_TAG;
 const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
+
+// TODO: Remove after https://github.com/phetsims/qa/issues/1293, it is to assist with testing.
+const LOG_BLOCKED_RESPONSES = new URLSearchParams( window.location.search ).has( 'logBlockedResponses' );
 
 export type PDOMValueType = string | TReadOnlyProperty<string> | null;
 export type LimitPanDirection = 'horizontal' | 'vertical';
@@ -3191,6 +3194,12 @@ export default class ParallelDOM extends PhetioObject {
     // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
     for ( let i = 0; i < connectedDisplays.length; i++ ) {
       const display = connectedDisplays[ i ];
+
+      // TODO: Remove after https://github.com/phetsims/qa/issues/1293, it is to assist with testing.
+      if ( LOG_BLOCKED_RESPONSES && !this._pdomDisplayedProperty.value ) {
+        console.log( 'Response blocked:', Utterance.alertableToText( utterance ) );
+      }
+
       if ( display.isAccessible() && this._pdomDisplayedProperty.value ) {
         display.descriptionUtteranceQueue.addToBack( utterance );
       }
