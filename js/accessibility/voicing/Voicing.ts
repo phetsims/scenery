@@ -882,6 +882,10 @@ Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
  */
 Voicing.alertUtterance = ( utterance: Utterance ) => {
   assert && assert( utterance.voicingCanAnnounceProperties.length > 0, 'voicingCanAnnounceProperties required, this Utterance might not be connected to Node in the scene graph.' );
+
+  if ( !Utterance.alertableToText( utterance ) ) {
+    return;
+  }
   voicingUtteranceQueue.addToBack( utterance ); // eslint-disable-line phet/bad-sim-text
 };
 
