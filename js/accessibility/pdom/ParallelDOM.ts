@@ -154,7 +154,6 @@ import Utterance, { TAlertable } from '../../../../utterance-queue/js/Utterance.
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
-import DisplayedProperty from '../../util/DisplayedProperty.js';
 import Trail from '../../util/Trail.js';
 
 import { Highlight } from '../Highlight.js';
@@ -586,10 +585,6 @@ export default class ParallelDOM extends PhetioObject {
   // (scenery-internal)
   public _pdomDisplaysInfo: PDOMDisplaysInfo;
 
-  // A DisplayedProperty that watches to see if this Node is visible or pdomVisible. Lazily created only when needed
-  // for performance/optimization. When this is false, all accessible responses are disabled for this Node.
-  private _pdomDisplayedProperty: DisplayedProperty | null = null;
-
   // Empty unless the Node contains some pdom content (PDOMInstance).
   private readonly _pdomInstances: PDOMInstance[];
 
@@ -776,9 +771,6 @@ export default class ParallelDOM extends PhetioObject {
     }
 
     ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
-
-    this._pdomDisplayedProperty?.dispose();
-    this._pdomDisplayedProperty = null;
 
     // To prevent memory leaks, we want to clear our order (since otherwise Nodes in our order will reference
     // this Node).
@@ -3180,27 +3172,26 @@ export default class ParallelDOM extends PhetioObject {
       return;
     }
 
-    // If this Node is not globally visible in the PDOM, or is not displayed visually, then there should be no response from this Node.
-    if ( !this._pdomDisplayedProperty ) {
-      this._pdomDisplayedProperty = new DisplayedProperty( this as unknown as Node, {
-        followPDOMOrder: true,
-        requireVisible: true,
-        requirePDOMVisible: true
-      } );
-    }
-
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
 
     // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
     for ( let i = 0; i < connectedDisplays.length; i++ ) {
       const display = connectedDisplays[ i ];
 
+      // Only speak if the Node is globally visible with both `visible` and `pdomVisible`.
+      // Cannot use Node.wasVisuallyDisplayed() because it is not synchronous.
+      // Cannot use a DisplayedProperty because it observes `visibleProperty`, which may not
+      // be up-to-date in application specific code because of the listener order.
+      const nodeDisplayed = ( this as unknown as Node ).getTrails().some(
+        trail => trail.isVisible() && trail.isPDOMVisible()
+      );
+
       // TODO: Remove after https://github.com/phetsims/qa/issues/1293, it is to assist with testing.
-      if ( LOG_BLOCKED_RESPONSES && !this._pdomDisplayedProperty.value ) {
+      if ( LOG_BLOCKED_RESPONSES && !( nodeDisplayed ) ) {
         console.log( 'Response blocked:', Utterance.alertableToText( utterance ) );
       }
 
-      if ( display.isAccessible() && this._pdomDisplayedProperty.value ) {
+      if ( display.isAccessible() && nodeDisplayed ) {
         display.descriptionUtteranceQueue.addToBack( utterance );
       }
     }
