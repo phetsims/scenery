@@ -173,9 +173,6 @@ const DEFAULT_TAG_NAME = DIV_TAG;
 const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
-// TODO: Remove after https://github.com/phetsims/qa/issues/1293, it is to assist with testing.
-const LOG_BLOCKED_RESPONSES = new URLSearchParams( window.location.search ).has( 'logBlockedResponses' );
-
 export type PDOMValueType = string | TReadOnlyProperty<string> | null;
 export type LimitPanDirection = 'horizontal' | 'vertical';
 
@@ -3185,11 +3182,6 @@ export default class ParallelDOM extends PhetioObject {
       const nodeDisplayed = ( this as unknown as Node ).getTrails().some(
         trail => trail.isVisible() && trail.isPDOMVisible()
       );
-
-      // TODO: Remove after https://github.com/phetsims/qa/issues/1293, it is to assist with testing.
-      if ( LOG_BLOCKED_RESPONSES && !( nodeDisplayed ) ) {
-        console.log( 'Response blocked:', Utterance.alertableToText( utterance ) );
-      }
 
       if ( display.isAccessible() && nodeDisplayed ) {
         display.descriptionUtteranceQueue.addToBack( utterance );
