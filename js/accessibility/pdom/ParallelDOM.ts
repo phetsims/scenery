@@ -3158,7 +3158,7 @@ export default class ParallelDOM extends PhetioObject {
   public addAccessibleResponse( utterance: TAlertable ): void {
 
     // Nothing to do if there is no content.
-    if ( utterance === null ) {
+    if ( utterance === null || Utterance.alertableToText( utterance ) === '' ) {
       return;
     }
 
