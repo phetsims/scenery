@@ -11,7 +11,7 @@
  * @author Jesse Greenberg
  */
 
-import TReadOnlyProperty from '../../../../axon/js/TReadOnlyProperty.js';
+import { TReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import Node from '../../nodes/Node.js';
 import RichText from '../../nodes/RichText.js';
 import Text from '../../nodes/Text.js';

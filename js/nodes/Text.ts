@@ -12,7 +12,7 @@ import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty, { StringPropertyOptions } from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import FluentConstant from '../../../chipper/js/browser/FluentConstant.js';
 import { FluentPatternDerivedProperty } from '../../../chipper/js/browser/FluentPattern.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';

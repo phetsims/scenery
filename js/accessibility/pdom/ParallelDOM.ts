@@ -137,7 +137,7 @@ import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
-import TReadOnlyProperty, { isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
+import { TReadOnlyProperty, isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';

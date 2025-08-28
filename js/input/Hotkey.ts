@@ -37,7 +37,7 @@ import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
 import TProperty from '../../../axon/js/TProperty.js';
-import TReadOnlyProperty from '../../../axon/js/TReadOnlyProperty.js';
+import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import EnglishStringToCodeMap from '../accessibility/EnglishStringToCodeMap.js';
 import hotkeyManager from '../input/hotkeyManager.js';
