@@ -137,7 +137,7 @@ import TEmitter from '../../../../axon/js/TEmitter.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../../axon/js/TinyForwardingProperty.js';
 import TProperty from '../../../../axon/js/TProperty.js';
-import { TReadOnlyProperty, isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
+import { isTReadOnlyProperty, TReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
@@ -883,12 +883,13 @@ export default class ParallelDOM extends PhetioObject {
         this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.includes( this._inputType!.toUpperCase() ), `inputType does not support checked attribute: ${this._inputType}` );
         this._focusHighlightLayerable && assert( this.focusHighlight instanceof ParallelDOM, 'focusHighlight must be Node if highlight is layerable' );
         this._tagName.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
-      }
 
-      // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
-      // but this will catch most cases since often things that get added to the focus order have the application
-      // role for custom input. Note that accessibleName will not be checked that it specifically changes innerContent, it is up to the dev to do this.
-      this.ariaRole === 'application' && this.focusable && assert( this.innerContent || this.accessibleName, 'must have some innerContent or element will never be focusable in VoiceOver' );
+        // If focusable and this element is a div, ariaRole is required. It is likely that the application role
+        // (AccessibleInteractiveOptions) was forgotten. Without it, alt input will not work with a screen reader.
+        if ( !PDOMUtils.tagIsDefaultFocusable( this._tagName ) && this.focusable ) {
+          assert( this._ariaRole !== null && this._ariaRole !== '', `${this.constructor.name}: Option ariaRole is required for custom interactive components. Consider using AccessibleDraggableOptions or AccessibleInteractiveOptions.` );
+        }
+      }
 
       // If using accessibleParagraph without a tagName, this Node cannot have any descendants with accessible content
       if ( this.accessibleParagraph && !this.tagName ) {

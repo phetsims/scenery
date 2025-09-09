@@ -1036,6 +1036,7 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
   const b = new Node( { focusable: true } );
   a1.addChild( b );
   b.tagName = 'div';
+  b.ariaRole = 'button';
   assert.ok( getPrimarySiblingElementByNode( b ).tabIndex >= 0, 'set tagName after focusable' );
 
   // test setting attribute as DOM property, should NOT have attribute value pair (DOM uses empty string for empty)
@@ -1089,17 +1090,17 @@ QUnit.test( 'Next/Previous focusable', assert => {
   else {
     const util = PDOMUtils;
 
-    const rootNode = new Node( { tagName: 'div', focusable: true } );
+    const rootNode = new Node( { tagName: 'div', focusable: true, ariaRole: 'application' } );
     var display = new Display( rootNode ); // eslint-disable-line no-var
     display.initializeEvents();
     document.body.appendChild( display.domElement );
 
     // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
-    const a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    const b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    const c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    const d = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    const e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const a = new Node( { tagName: 'div', focusable: true, ariaRole: 'application', focusHighlight: 'invisible' } );
+    const b = new Node( { tagName: 'div', focusable: true, ariaRole: 'application', focusHighlight: 'invisible' } );
+    const c = new Node( { tagName: 'div', focusable: true, ariaRole: 'application', focusHighlight: 'invisible' } );
+    const d = new Node( { tagName: 'div', focusable: true, ariaRole: 'application', focusHighlight: 'invisible' } );
+    const e = new Node( { tagName: 'div', focusable: true, ariaRole: 'application', focusHighlight: 'invisible' } );
     rootNode.children = [ a, b, c, d ];
 
     assert.ok( a.focusable, 'should be focusable' );
