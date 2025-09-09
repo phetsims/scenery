@@ -514,17 +514,27 @@ class PDOMInstance {
       const needsOrderChange = !_.every( desiredOrder, ( desiredElement, index ) => placeableSibling.children[ index ] === desiredElement );
 
       if ( needsOrderChange ) {
-        const pivotElement = focusedChildInstance.peer!.getTopLevelElementContainingPrimarySibling();
-        const pivotIndex = desiredOrder.indexOf( pivotElement );
-        assert && assert( pivotIndex >= 0 );
 
-        // Insert all elements before the pivot element
-        for ( let j = 0; j < pivotIndex; j++ ) {
-          placeableSibling.insertBefore( desiredOrder[ j ], pivotElement );
+        // "top level" elements which may be the primary sibling, a parent container, or one or more of the
+        // accessibleParagraph or accessibleHeading.
+        const pivotElements = focusedChildInstance.peer!.topLevelElements!;
+        assert && assert( pivotElements.length > 0, 'At least one pivot element must be present' );
+
+        // Find indices of all pivot elements in desired order
+        const pivotIndices = pivotElements.map( pivot => desiredOrder.indexOf( pivot ) );
+        assert && assert( pivotIndices.every( index => index >= 0 ), 'All pivot elements must be present in desiredOrder' );
+
+        const firstPivotIndex = Math.min( ...pivotIndices );
+        const lastPivotIndex = Math.max( ...pivotIndices );
+        const firstPivotElement = desiredOrder[ firstPivotIndex ];
+
+        // Insert all elements before the first pivot element
+        for ( let j = 0; j < firstPivotIndex; j++ ) {
+          placeableSibling.insertBefore( desiredOrder[ j ], firstPivotElement );
         }
 
-        // Insert all elements after the pivot element
-        for ( let j = pivotIndex + 1; j < desiredOrder.length; j++ ) {
+        // Insert all elements after the last pivot element (append to end)
+        for ( let j = lastPivotIndex + 1; j < desiredOrder.length; j++ ) {
           placeableSibling.appendChild( desiredOrder[ j ] );
         }
       }
