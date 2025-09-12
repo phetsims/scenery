@@ -728,8 +728,18 @@ class Node extends ParallelDOM {
   //       occurring "after" the rotation / scaling
   // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
   //       changes of bounds that may happen beforehand
+  //
+  // _mutatorKeys is intentionally provided via prototype/mixins, not as a per-instance class field.
+  // Using declare keeps the type in TS but emits no JS at runtime, preventing a shadowing field like _mutatorKeys;
+  // that some toolchains (e.g., esbuild with modern class fields) would otherwise output from public _mutatorKeys!: string[];.
+  // This avoids the dev-server/playground failure where an emitted instance field masked the prototype value.
+  //
+  // See:
+  // - https://github.com/phetsims/scenery/issues/1694
+  // - https://github.com/phetsims/scenery/issues/1737
+  //
   // (scenery-internal)
-  public _mutatorKeys!: string[];
+  declare public _mutatorKeys: string[];
 
   // List of all dirty flags that should be available on drawables created from this Node (or
   // subtype). Given a flag (e.g. radius), it indicates the existence of a function
