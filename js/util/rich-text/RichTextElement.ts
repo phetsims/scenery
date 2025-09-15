@@ -15,11 +15,11 @@ import scenery from '../../scenery.js';
 
 export default class RichTextElement extends RichTextCleanable( Node ) implements TPoolable {
 
-  private isLTR!: boolean;
+  declare private isLTR: boolean;
 
   // The amount of local-coordinate spacing to apply on each side
-  public leftSpacing!: number;
-  public rightSpacing!: number;
+  declare public leftSpacing: number;
+  declare public rightSpacing: number;
 
   /**
    * @param isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be

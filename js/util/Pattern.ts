@@ -55,7 +55,7 @@ export default class Pattern extends Paint {
     return `Pattern( ${this.image.src} )`;
   }
 
-  public isPattern!: boolean;
+  declare public isPattern: boolean;
 }
 
 Pattern.prototype.isPattern = true;

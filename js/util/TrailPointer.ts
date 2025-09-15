@@ -25,8 +25,8 @@ type ActiveTrailPointerCallback = ( ( trailPointer: ActiveTrailPointer ) => bool
 export default class TrailPointer {
 
   public trail: Trail | null;
-  public isBefore!: boolean;
-  public isAfter!: boolean;
+  declare public isBefore: boolean;
+  declare public isAfter: boolean;
 
   /**
    * @param trail

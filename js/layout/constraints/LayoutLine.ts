@@ -12,22 +12,22 @@ export default class LayoutLine {
 
   // A range of sizes along the secondary axis that our cells could take up
   // (scenery-internal)
-  public min!: number;
-  public max!: number;
+  declare public min: number;
+  declare public max: number;
 
   // A range of positions where our align:origin content could go out to (the farthest +/- from 0 that our align:origin
   // nodes go).
   // (scenery-internal)
-  public minOrigin!: number;
-  public maxOrigin!: number;
+  declare public minOrigin: number;
+  declare public maxOrigin: number;
 
   // The line's size (along the secondary axis)
   // (scenery-internal)
-  public size!: number;
+  declare public size: number;
 
   // The line's position (along the primary axis)
   // (scenery-internal)
-  public position!: number;
+  declare public position: number;
 
   protected initializeLayoutLine(): void {
     this.min = 0;

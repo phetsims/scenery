@@ -181,7 +181,7 @@ export default abstract class Gradient extends Paint {
     return color;
   }
 
-  public isGradient!: boolean;
+  declare public isGradient: boolean;
 }
 
 Gradient.prototype.isGradient = true;

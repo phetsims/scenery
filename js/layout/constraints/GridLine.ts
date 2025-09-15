@@ -14,9 +14,9 @@ import scenery from '../../scenery.js';
 export default class GridLine extends LayoutLine {
 
   // (scenery-internal)
-  public index!: number;
-  public cells!: GridCell[];
-  public grow!: number;
+  declare public index: number;
+  declare public cells: GridCell[];
+  declare public grow: number;
 
   /**
    * (scenery-internal)

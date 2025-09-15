@@ -160,7 +160,7 @@ export default class RadialGradient extends Gradient {
     return result;
   }
 
-  public isRadialGradient!: boolean;
+  declare public isRadialGradient: boolean;
 }
 
 RadialGradient.prototype.isRadialGradient = true;

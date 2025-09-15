@@ -225,18 +225,18 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
     class VoicingClass extends InteractiveHighlighting( Type ) implements TVoicing<InstanceType<SuperType>> {
 
       // ResponsePacket that holds all the supported responses to be Voiced
-      public _voicingResponsePacket!: ResponsePacket;
+      declare public _voicingResponsePacket: ResponsePacket;
 
       // The utterance that all responses are spoken through.
       // @mixin-protected - made public for use in the mixin only
       public _voicingUtterance: Utterance | null;
 
       // Called when this node is focused.
-      private _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
+      declare private _voicingFocusListener: SceneryListenerFunction<FocusEvent> | null;
 
       // A reference to a listener that is added to this node if it is voicingPressable.
       // This listener speaks the responses when the Voicing Node is clicked with a mouse.
-      private _voicingActivationListener!: VoicingActivationResponseListener | null;
+      declare private _voicingActivationListener: VoicingActivationResponseListener | null;
 
       // True when this Voicing Node is voicingPressable. See options.
       public _voicingPressable = false;
@@ -245,12 +245,12 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
       // voicingVisible. This is private because its value depends on the state of the Instance tree. Listening to this
       // to change the scene graph state can be incredibly dangerous and buggy, see https://github.com/phetsims/scenery/issues/1615
       // @mixin-private - private to this file, but public needed for the interface
-      public _voicingCanSpeakProperty!: TinyProperty<boolean>;
+      declare public _voicingCanSpeakProperty: TinyProperty<boolean>;
 
       // A counter that keeps track of visible and voicingVisible Instances of this Node.
       // As long as this value is greater than zero, this Node can speak. See onInstanceVisibilityChange
       // and onInstanceVoicingVisibilityChange for more implementation details.
-      private _voicingCanSpeakCount!: number;
+      declare private _voicingCanSpeakCount: number;
 
       // Flags that indicate that voicing name or hint response have been set manually. If false,
       // a default accessible name or help text from ParallelDOM may be used by applyDefaultNameResponse or
@@ -263,12 +263,12 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
 
       // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
       // canSpeakProperty.
-      private _boundInstancesChangedListener!: ( instance: Instance, added: boolean ) => void;
+      declare private _boundInstancesChangedListener: ( instance: Instance, added: boolean ) => void;
 
       // Input listener that speaks content on focus. This is the only input listener added
       // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
       // response, and interaction hint.
-      private _speakContentOnFocusListener!: { focus: SceneryListenerFunction<FocusEvent> };
+      declare private _speakContentOnFocusListener: { focus: SceneryListenerFunction<FocusEvent> };
 
       public constructor( ...args: IntentionalAny[] ) {
         super( ...args );

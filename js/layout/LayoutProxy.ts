@@ -27,7 +27,7 @@ export type Layoutable = Node | LayoutProxy;
 export default class LayoutProxy {
 
   // Nulled out when disposed
-  public trail!: Trail | null;
+  declare public trail: Trail | null;
 
   /**
    * @param trail - The wrapped Node is the leaf-most node, but coordinates will be handled in the global frame

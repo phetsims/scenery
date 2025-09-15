@@ -39,7 +39,7 @@ let boundsMeasurementContainer: HTMLDivElement | null = null;
 
 export default class DOM extends Node {
 
-  private _element!: HTMLElement;
+  declare private _element: HTMLElement;
 
   // Container div that will have our main element as a child (so we can position and mutate it).
   public readonly _container: HTMLDivElement; // scenery-internal

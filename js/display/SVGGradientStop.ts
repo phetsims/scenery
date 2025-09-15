@@ -22,20 +22,20 @@ export type ActiveSVGGradientStop = WithoutNull<SVGGradientStop, 'svgGradient'>;
 class SVGGradientStop implements TPoolable {
 
   // persistent
-  public svgElement!: SVGStopElement;
+  declare public svgElement: SVGStopElement;
 
   // transient
-  public svgGradient!: ActiveSVGGradient | null;
-  public color!: TColor;
+  declare public svgGradient: ActiveSVGGradient | null;
+  declare public color: TColor;
 
-  public ratio!: number;
-  private dirty!: boolean;
-  private propertyListener!: () => void;
-  private colorListener!: () => void;
+  declare public ratio: number;
+  declare private dirty: boolean;
+  declare private propertyListener: () => void;
+  declare private colorListener: () => void;
 
   // As a workaround for Property deferment issues, we'll keep track of the last Color that we added a listener to, so
   // that we can clean up things Property EVEN when we don't get correct Property change notifications. TODO: remove in https://github.com/phetsims/scenery/issues/1624
-  private lastColor!: Color | null;
+  declare private lastColor: Color | null;
 
   public constructor( svgGradient: ActiveSVGGradient, ratio: number, color: TColor ) {
     this.lastColor = null;

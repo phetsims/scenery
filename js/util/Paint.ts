@@ -60,7 +60,7 @@ export default abstract class Paint {
     return this.id;
   }
 
-  public isPaint!: boolean;
+  declare public isPaint: boolean;
 }
 
 // TODO: can we remove this in favor of type checks? https://github.com/phetsims/scenery/issues/1581

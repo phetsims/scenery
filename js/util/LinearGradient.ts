@@ -67,7 +67,7 @@ export default class LinearGradient extends Gradient {
     return result;
   }
 
-  public isLinearGradient!: boolean;
+  declare public isLinearGradient: boolean;
 }
 
 LinearGradient.prototype.isLinearGradient = true;

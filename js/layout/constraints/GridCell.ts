@@ -47,8 +47,8 @@ export type GridCellOptions = SelfOptions & ExternalGridConfigurableOptions;
 export default class GridCell extends GridConfigurable( MarginLayoutCell ) {
 
   // (scenery-internal) These are only set initially, and ignored for the future
-  public position!: OrientationPair<number>;
-  public size!: OrientationPair<number>;
+  declare public position: OrientationPair<number>;
+  declare public size: OrientationPair<number>;
 
   private readonly gridConstraint: GridConstraint;
 

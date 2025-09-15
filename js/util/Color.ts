@@ -47,10 +47,10 @@ function parseRGBNumber( str: string ): number {
 
 export default class Color {
   // RGBA values
-  public r!: number;
-  public g!: number;
-  public b!: number;
-  public a!: number;
+  declare public r: number;
+  declare public g: number;
+  declare public b: number;
+  declare public a: number;
 
   // For caching and performance
   private _css?: string;

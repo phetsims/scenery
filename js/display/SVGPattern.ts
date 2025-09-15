@@ -15,8 +15,8 @@ import xlinkns from '../util/xlinkns.js';
 export default class SVGPattern implements TPoolable {
 
   // persistent
-  public definition!: SVGPatternElement;
-  private imageElement!: SVGImageElement;
+  declare public definition: SVGPatternElement;
+  declare private imageElement: SVGImageElement;
 
   public constructor( pattern: Pattern ) {
     this.initialize( pattern );

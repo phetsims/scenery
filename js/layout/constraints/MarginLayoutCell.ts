@@ -52,14 +52,14 @@ export default class MarginLayoutCell extends LayoutCell {
   // These will get overridden, they're needed since mixins have many limitations and we'd have to have a ton of casts
   // without these existing.
   // (scenery-internal)
-  public _leftMargin!: number | null;
-  public _rightMargin!: number | null;
-  public _topMargin!: number | null;
-  public _bottomMargin!: number | null;
-  public _minContentWidth!: number | null;
-  public _minContentHeight!: number | null;
-  public _maxContentWidth!: number | null;
-  public _maxContentHeight!: number | null;
+  declare public _leftMargin: number | null;
+  declare public _rightMargin: number | null;
+  declare public _topMargin: number | null;
+  declare public _bottomMargin: number | null;
+  declare public _minContentWidth: number | null;
+  declare public _minContentHeight: number | null;
+  declare public _maxContentWidth: number | null;
+  declare public _maxContentHeight: number | null;
 
   // (scenery-internal) Set to be the bounds available for the cell
   public lastAvailableBounds: Bounds2 = Bounds2.NOTHING.copy();

@@ -33,9 +33,9 @@ export class BatchedDOMEventType extends EnumerationValue {
 
 export default class BatchedDOMEvent implements TPoolable {
 
-  private eventContext!: EventContext | null;
-  private type!: BatchedDOMEventType | null;
-  private callback!: BatchedDOMEventCallback | null;
+  declare private eventContext: EventContext | null;
+  declare private type: BatchedDOMEventType | null;
+  declare private callback: BatchedDOMEventCallback | null;
 
   public constructor( eventContext: EventContext, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ) {
     this.initialize( eventContext, type, callback );

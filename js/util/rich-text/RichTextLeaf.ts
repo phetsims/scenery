@@ -17,8 +17,8 @@ import { richTextContentToString } from './richTextContentToString.js';
 
 export default class RichTextLeaf extends RichTextCleanable( Text ) implements TPoolable {
 
-  public leftSpacing!: number;
-  public rightSpacing!: number;
+  declare public leftSpacing: number;
+  declare public rightSpacing: number;
 
   public constructor( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: TPaint, stroke: TPaint, lineWidth: number ) {
     super( '' );

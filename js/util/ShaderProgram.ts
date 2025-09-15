@@ -26,17 +26,17 @@ export default class ShaderProgram {
   private attributeNames: string[];
   private uniformNames: string[];
 
-  private gl!: WebGLRenderingContext;
-  private used!: boolean;
-  private program!: WebGLProgram;
-  private vertexShader!: WebGLShader;
-  private fragmentShader!: WebGLShader;
+  declare private gl: WebGLRenderingContext;
+  declare private used: boolean;
+  declare private program: WebGLProgram;
+  declare private vertexShader: WebGLShader;
+  declare private fragmentShader: WebGLShader;
 
-  public uniformLocations!: Record<string, WebGLUniformLocation>;
-  public attributeLocations!: Record<string, number>;
-  public activeAttributes!: Record<string, boolean>; // whether they are enabled
+  declare public uniformLocations: Record<string, WebGLUniformLocation>;
+  declare public attributeLocations: Record<string, number>;
+  declare public activeAttributes: Record<string, boolean>; // whether they are enabled
 
-  private isInitialized!: boolean;
+  declare private isInitialized: boolean;
 
   public constructor( gl: WebGLRenderingContext, vertexSource: string, fragmentSource: string, providedOptions?: ShaderProgramOptions ) {
     const options = optionize<ShaderProgramOptions>()( {

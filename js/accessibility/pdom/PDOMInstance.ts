@@ -55,25 +55,25 @@ let globalId = 1;
 class PDOMInstance {
 
   // unique ID
-  private id!: number;
+  declare private id: number;
 
-  public parent!: PDOMInstance | null;
+  declare public parent: PDOMInstance | null;
 
   // (scenery-internal)
-  public display!: Display | null;
+  declare public display: Display | null;
 
-  public trail!: Trail | null;
-  public isRootInstance!: boolean;
-  public node!: Node | null;
-  public children!: PDOMInstance[];
-  public peer!: PDOMPeer | null;
-  public parentHeadingLevel!: number; // the parent/ancestor heading level (logically)
-  public pendingHeadingLevel!: number; // heading level we expect to assign to the instance, if there is an accessibleHeading for the peer
-  public headingLevel!: number | null; // the heading level used for a heading for this instance (or null)
+  declare public trail: Trail | null;
+  declare public isRootInstance: boolean;
+  declare public node: Node | null;
+  declare public children: PDOMInstance[];
+  declare public peer: PDOMPeer | null;
+  declare public parentHeadingLevel: number; // the parent/ancestor heading level (logically)
+  declare public pendingHeadingLevel: number; // heading level we expect to assign to the instance, if there is an accessibleHeading for the peer
+  declare public headingLevel: number | null; // the heading level used for a heading for this instance (or null)
 
   // {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
   // display in their pdomDisplays. For non-root instances, this is initialized later in the constructor.
-  private invisibleCount!: number;
+  declare private invisibleCount: number;
 
   // {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
   private relativeNodes: Node[] | null = [];
@@ -91,7 +91,7 @@ class PDOMInstance {
 
   // {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
   // re-initialized
-  private isDisposed!: boolean;
+  declare private isDisposed: boolean;
 
   /**
    * Constructor for PDOMInstance, uses an initialize method for pooling.

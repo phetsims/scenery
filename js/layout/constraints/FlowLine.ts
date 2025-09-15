@@ -15,8 +15,8 @@ import scenery from '../../scenery.js';
 export default class FlowLine extends LayoutLine {
 
   // (scenery-internal)
-  public orientation!: Orientation;
-  public cells!: FlowCell[];
+  declare public orientation: Orientation;
+  declare public cells: FlowCell[];
 
   /**
    * (scenery-internal)

@@ -18,14 +18,14 @@ export type ActiveSVGGradient = WithoutNull<SVGGradient, 'svgBlock' | 'gradient'
 export default abstract class SVGGradient {
 
   // transient (scenery-internal)
-  public svgBlock!: SVGBlock | null;
-  public gradient!: Gradient | null;
-  public stops!: SVGGradientStop[];
+  declare public svgBlock: SVGBlock | null;
+  declare public gradient: Gradient | null;
+  declare public stops: SVGGradientStop[];
 
   // persistent
-  public definition!: SVGGradientElement;
+  declare public definition: SVGGradientElement;
 
-  private dirty!: boolean;
+  declare private dirty: boolean;
 
   public constructor( svgBlock: SVGBlock, gradient: Gradient ) {
     this.initialize( svgBlock, gradient );

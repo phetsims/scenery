@@ -747,7 +747,7 @@ class Node extends ParallelDOM {
   // (scenery-internal)
   //
   // Should be overridden by subtypes.
-  public drawableMarkFlags!: string[];
+  declare public drawableMarkFlags: string[];
 
   /**
    * Creates a Node with options.
