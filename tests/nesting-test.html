@@ -6,8 +6,7 @@
 
   <title>Text Tests</title>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash dependency -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Canvg for SVG to Canvas -->
@@ -39,21 +38,21 @@
 <div id="main" style="width: 512px; height: 512px;" class="scene"></div>
 <script>
 
-  const mainScene = new phet.scenery.Scene( $( '#main' ) );
+  const mainScene = new phet.scenery.Scene( document.getElementById( 'main' ) );
   mainScene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 512, 512 ), {
     fill: '#ffffaa'
   } ) );
 
-  const $div = $( '<div>' );
-  $div.width( 256 );
-  $div.height( 256 );
-  const nestedScene = new phet.scenery.Scene( $div );
+  const div = document.createElement( 'div' );
+  div.style.width = '256px';
+  div.style.height = '256px';
+  const nestedScene = new phet.scenery.Scene( div );
   nestedScene.addChild( new phet.scenery.Path( phet.kite.Shape.rectangle( 0, 0, 256, 256 ), {
     fill: '#aaffff'
   } ) );
   nestedScene.updateScene();
 
-  const domNode = new phet.scenery.DOM( $div );
+  const domNode = new phet.scenery.DOM( div );
   mainScene.addChild( domNode );
 
   mainScene.updateScene();

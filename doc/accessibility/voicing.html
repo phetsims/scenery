@@ -16,8 +16,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash dependency -->
   <script src="../../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- For the styling -->
@@ -39,22 +38,23 @@
     phet.scenery.Utils.polyfillRequestAnimationFrame();
 
     window.docExample = ( id, draw ) => {
-
-      var $container = $( '#' + id );
-      var scene = new phet.scenery.Node();
-      var display = new phet.scenery.Display( scene, {
-        width: $container.width(),
-        height: $container.height(),
+      const container = document.getElementById( id );
+      const scene = new phet.scenery.Node();
+      const display = new phet.scenery.Display( scene, {
+        width: container.offsetWidth,
+        height: container.offsetHeight,
 
         // input should not be attached to window so input for documentation is not interrupted
         listenToOnlyElement: true
       } );
-      $container[ 0 ].appendChild( display.domElement );
+      container.appendChild( display.domElement );
       draw( scene, display );
       display.updateDisplay();
-      var $code = $( '<pre class="brush: js"></pre>' );
-      $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
-      $container.after( $code );
+
+      const code = document.createElement( 'pre' );
+      code.className = 'brush: js';
+      code.textContent = draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ];
+      container.parentNode.insertBefore( code, container.nextSibling );
     }
   </script>
 

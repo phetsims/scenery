@@ -6,8 +6,7 @@
 
   <title>Text Tests</title>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash (if needed) -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Canvg for SVG to Canvas -->
@@ -105,7 +104,7 @@
   var svgBoundsB = new phet.dot.Bounds2( svgBox.x / 5, svgBox.y / 5, ( svgBox.x + svgBox.width) / 5, ( svgBox.y + svgBox.height ) / 5 );
   console.log( 'svg B: ' + svgBoundsB.toString() + ' (' + svgBoundsB.width + ',' + svgBoundsB.height + ')' );
 
-  var main = $( '#main' );
+  var main = document.getElementById( 'main' );
 
   /*---------------------------------------------------------------------------*
    * Canvas-based (recursively accurate) methods
@@ -171,7 +170,7 @@
    * Displays of bounds for accuracy
    *----------------------------------------------------------------------------*/
 
-  var boundsScene = new phet.scenery.Scene( $( '#bounds' ) );
+  var boundsScene = new phet.scenery.Scene( document.getElementById( 'bounds' ) );
   boundsScene.addChild( new phet.scenery.Path( phet.kite.Shape.bounds( svgBoundsA ), {
     fill: 'rgba(255,0,0,0.1)'
   } ) );
@@ -246,29 +245,25 @@
     // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
 
     var div = document.createElement( 'div' );
-    $( div ).css( {
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      padding: '0 !important',
-      margin: '0 !important',
-      display: 'hidden'
-    } );
+    div.style.position = 'absolute';
+    div.style.left = 0;
+    div.style.top = 0;
+    div.style.padding = '0';
+    div.style.margin = '0';
+    div.style.display = 'none';
 
     var span = document.createElement( 'span' );
-    $( span ).css( 'font', textNode.font );
+    span.style.font = textNode.font;
     span.appendChild( document.createTextNode( textNode.string ) );
     span.setAttribute( 'direction', textNode.direction );
 
     var fakeImage = document.createElement( 'div' );
-    $( fakeImage ).css( {
-      'vertical-align': 'baseline',
-      display: 'inline-block',
-      width: 0,
-      height: maxHeight + 'px',
-      margin: '0 !important',
-      padding: '0 !important'
-    } );
+    fakeImage.style.verticalAlign = 'baseline';
+    fakeImage.style.display = 'inline-block';
+    fakeImage.style.width = '0';
+    fakeImage.style.height = maxHeight + 'px';
+    fakeImage.style.margin = '0';
+    fakeImage.style.padding = '0';
 
     div.appendChild( span );
     div.appendChild( fakeImage );

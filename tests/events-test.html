@@ -13,7 +13,6 @@
 
   <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
 
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
   <!--<script src="../scenery.js"></script>-->
@@ -94,7 +93,7 @@
 <script>
   /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
 
-  var main = $( '#main' );
+  var main = document.getElementById( 'main' );
 
 
   // some css hacks (from https://github.com/EightMedia/hammer.js/blob/master/hammer.js)
@@ -110,17 +109,17 @@
 
     _.each( prefixes, function( prefix ) {
       _.each( properties, function( propertyValue, propertyName ) {
-        main.css( prefix + propertyName, propertyValue );
+        main.style.setProperty( prefix + propertyName, propertyValue );
       } );
     } );
   })();
 
   function log( msg ) {
-    var logElement = $( '#topleft' )[ 0 ];
+    var logElement = document.getElementById( 'topleft' );
     while ( logElement.children.length > 25 * 2 ) {
       logElement.removeChild( logElement.children[ 0 ] );
     }
-    $( logElement ).append( '<span>' + msg + '</span><br>' );
+    logElement.insertAdjacentHTML( 'beforeend', '<span>' + msg + '</span><br>' );
   }
 
   function parentId( element ) {
@@ -138,7 +137,7 @@
   // consider using document.elementFromPoint to determine if it needs to prevent default, etc.
   // document.ontouchmove = function(e){ e.preventDefault(); }
 
-  $( '#main' ).on( 'touchstart', function( evt ) {
+  main.addEventListener( 'touchstart', function( evt ) {
     log( 'touchstart ' + parentId( evt.target ) );
     _.each( evt, function( value, key ) {
       log( key + ': ' + value );
@@ -146,17 +145,17 @@
     evt.preventDefault();
     return false;
   } );
-  $( '#main' ).on( 'touchend', function( evt ) {
+  main.addEventListener( 'touchend', function( evt ) {
     log( 'touchend' + parentId( evt.target ) );
     evt.preventDefault();
     return false;
   } );
-  $( '#main' ).on( 'touchmove', function( evt ) {
+  main.addEventListener( 'touchmove', function( evt ) {
     log( 'touchmove' + parentId( evt.target ) );
     evt.preventDefault();
     return false;
   } );
-  $( '#main' ).on( 'touchcancel', function( evt ) {
+  main.addEventListener( 'touchcancel', function( evt ) {
     log( 'touchcancel' + parentId( evt.target ) );
     // evt.preventDefault();
     return false;
@@ -165,10 +164,10 @@
 
   // handle window resizing
   var resizer = function() {
-    main.width( window.innerWidth );
-    main.height( window.innerHeight );
+    main.style.width = window.innerWidth + 'px';
+    main.style.height = window.innerHeight + 'px';
   };
-  $( window ).resize( resizer );
+  window.addEventListener( 'resize', resizer );
   resizer();
 
 

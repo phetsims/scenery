@@ -42,9 +42,18 @@ import './util/TrailTests.js';
 
 // add elements to the QUnit fixture for our Scenery-specific tests
 // TODO: is this necessary? https://github.com/phetsims/scenery/issues/1581
-const $fixture = $( '#qunit-fixture' );
-$fixture.append( $( '<div>' ).attr( 'id', 'main' ).attr( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 1; width: 640px; height: 480px;' ) );
-$fixture.append( $( '<div>' ).attr( 'id', 'secondary' ).attr( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 0; width: 640px; height: 480px;' ) );
+const fixture = document.getElementById( 'qunit-fixture' );
+if ( fixture ) {
+  const mainDiv = document.createElement( 'div' );
+  mainDiv.id = 'main';
+  mainDiv.setAttribute( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 1; width: 640px; height: 480px;' );
+  fixture.appendChild( mainDiv );
+
+  const secondaryDiv = document.createElement( 'div' );
+  secondaryDiv.id = 'secondary';
+  secondaryDiv.setAttribute( 'style', 'position: absolute; left: 0; top: 0; background-color: white; z-index: 0; width: 640px; height: 480px;' );
+  fixture.appendChild( secondaryDiv );
+}
 
 // schema should be the same as in initializeGlobals
 const sceneryLogQueryParameter = QueryStringMachine.get( 'sceneryLog', {

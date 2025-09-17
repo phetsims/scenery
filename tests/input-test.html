@@ -9,7 +9,6 @@
   <title>Input Test - Scenery</title>
 
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
   <script src="../dist/scenery.min.js"></script>
 
@@ -40,9 +39,7 @@
 <script type="text/javascript">
   /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
 
-  var $div = $( '#output' );
-
-  var div = $div[ 0 ];
+  var div = document.getElementById( 'output' );
 
   div.innerHTML = '';
 

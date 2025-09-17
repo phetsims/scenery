@@ -12,8 +12,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and lodash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- lodash (if needed by examples) -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!--For the styling-->
@@ -56,22 +55,23 @@
 <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
 <script type="text/javascript">
   window.docExample = ( id, draw ) => {
-    var $container = $( '#' + id );
+    var container = document.getElementById( id );
     var scene = new phet.scenery.Node();
     var display = new phet.scenery.Display( scene, {
-      width: $container.width(),
-      height: $container.height()
+      width: container.clientWidth,
+      height: container.clientHeight
     } );
     window.display = display;
-    $container[ 0 ].appendChild( display.domElement );
+    container.appendChild( display.domElement );
     draw( scene, display );
     display.updateDisplay();
 
     var pdomHTMLBlock = display.pdomRootElement.outerHTML;
     var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
-    var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
-
-    $container.after( $PDOMcode );
+    var pre = document.createElement( 'pre' );
+    pre.className = 'brush: html';
+    pre.textContent = formattedPDOM;
+    container.parentNode && container.parentNode.insertBefore( pre, container.nextSibling );
   }
 </script>
 <script type="text/javascript">

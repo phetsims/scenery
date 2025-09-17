@@ -17,8 +17,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash is a dependency -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- For the styling -->
@@ -44,11 +43,11 @@
     phet.scenery.Utils.polyfillRequestAnimationFrame();
 
     window.docExample = ( id, draw ) => {
-      var $container = $( '#' + id );
-      var scene = new phet.scenery.Node();
-      var display = new phet.scenery.Display( scene, {
-        width: $container.width(),
-        height: $container.height(),
+      const container = document.getElementById( id );
+      const scene = new phet.scenery.Node();
+      const display = new phet.scenery.Display( scene, {
+        width: container.clientWidth,
+        height: container.clientHeight,
         accessibility: false,
 
         // We want to allow text selection, and currently this is needed to allow it
@@ -57,16 +56,16 @@
         // so Display input does not interfere with documentation links
         listenToOnlyElement: true
       } );
-      $container.addClass( 'exampleScene' );
-      $container[ 0 ].appendChild( display.domElement );
+      container.classList.add( 'exampleScene' );
+      container.appendChild( display.domElement );
       draw( scene, display );
       display.updateDisplay();
-      // var $code = $( '<pre class="brush: js"></pre>' );
-      // $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
 
-      $container.after( getCodeSnippet( draw ) );
-
-      // $container.appendChild( getCodeSnippet( getBox ) );
+      // Insert the code snippet after the container
+      const snippet = getCodeSnippet( draw );
+      if ( container.parentNode ) {
+        container.parentNode.insertBefore( snippet, container.nextSibling );
+      }
     }
   </script>
 
@@ -340,7 +339,6 @@ grunt</pre>
 
     <strong>External</strong> dependencies (please provide these in your page before loading Scenery):
     <ul>
-      <li><a href="http://jquery.com/">jQuery</a> for parts of DOM manipulation.</li>
       <li><a href="http://lodash.com/">Lo-Dash</a> for utility functions, as a replacement for <a href="http://underscorejs.org/">Underscore.js</a>.
       </li>
       <li>[optional] <a href="https://code.google.com/p/canvg/">Canvg</a>, for supporting SVG &#8594; Canvas operations, like rendering to Canvas</li>

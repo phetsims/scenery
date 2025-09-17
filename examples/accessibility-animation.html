@@ -13,8 +13,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src='../../chipper/js/browser/sim-tests/pageload-connector.js'></script>
 
-  <!-- jQuery and lodash are dependencies -->
-  <script src='../../sherpa/lib/jquery-2.1.0.min.js'></script>
+  <!-- lodash (if needed by examples) -->
   <script src='../../sherpa/lib/lodash-4.17.4.min.js'></script>
 
   <!--For the styling-->
@@ -106,17 +105,17 @@
 <script type="text/javascript">
   window.docExample = ( id, draw ) => {
     // specify the dom element to which the display will be appended
-    var $container = $( '#' + id );
+    var container = document.getElementById( id );
     // create the scene and display
     var scene = new phet.scenery.Node();
     var display = new phet.scenery.Display( scene, {
-      width: $container.width(),
-      height: $container.height()
+      width: container.clientWidth,
+      height: container.clientHeight
     } );
     // add all event listeners and start the animation loop
     display.initializeEvents();
     // append the scene to the container and draw it for the first time
-    $container[ 0 ].appendChild( display.domElement );
+    container.appendChild( display.domElement );
     draw( scene, display );
     display.updateDisplay();
   }
@@ -134,8 +133,14 @@
       .replace( new RegExp( '</p>', 'g' ), '\t</p>' ); //formatting for closing paragraph tag
 
     //syntax highlighting
-    var $PDOMcode = ( $( '<code class="language-html"></code>' ).text( formattedPDOM ) );
-    $( '#PDOM-pre' ).html( $PDOMcode );
+    var codeEl = document.createElement( 'code' );
+    codeEl.className = 'language-html';
+    codeEl.textContent = formattedPDOM;
+    var pre = document.getElementById( 'PDOM-pre' );
+    if ( pre ) {
+      pre.innerHTML = '';
+      pre.appendChild( codeEl );
+    }
     Prism.highlightAll();
   }
 

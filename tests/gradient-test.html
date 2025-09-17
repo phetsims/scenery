@@ -11,7 +11,6 @@
 
   <title>Gradient (+Transform) Tests</title>
 
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
 
   <style type="text/css">
 
@@ -130,7 +129,7 @@
 </svg>
 
 <script type="text/javascript">
-  const context = $( 'canvas' )[ 0 ].getContext( '2d' );
+  const context = document.querySelector( 'canvas' ).getContext( '2d' );
 
   context.save();
   const linearGradient = context.createLinearGradient( 0, 0, 100, 0 );

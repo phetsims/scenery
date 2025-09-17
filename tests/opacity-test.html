@@ -11,7 +11,6 @@
 
   <title>Opacity test</title>
 
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
 
   <style type="text/css">
 
@@ -48,7 +47,7 @@
 
 <script type="text/javascript">
   /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
-  var context = $( 'canvas' )[ 0 ].getContext( '2d' );
+  var context = document.querySelector( 'canvas' ).getContext( '2d' );
 
   var scratchCanvas = document.createElement( 'canvas' );
   scratchCanvas.width = 1000;

@@ -9,9 +9,8 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and LoDash are dependencies -->
+  <!-- LoDash and other deps -->
   <script src="../../assert/js/assert.js"></script>
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
   <script src="../../sherpa/lib/linebreak-1.1.0.js"></script>
   <script src="../../sherpa/lib/he-1.1.1.js"></script>
@@ -950,10 +949,10 @@
       testCases = selectTestCases( testCases, 'tests' );
 
       _.each( testCases, function( testCase, index ) {
-        var $testTitle = $( document.createElement( 'h2' ) );
-        $testTitle.text( '' + index + ': ' + testCase.name );
-        $testTitle.addClass( 'testname' );
-        $( document.body ).append( $testTitle );
+        var testTitleEl = document.createElement( 'h2' );
+        testTitleEl.textContent = '' + index + ': ' + testCase.name;
+        testTitleEl.classList.add( 'testname' );
+        document.body.appendChild( testTitleEl );
 
         _.each( renderers, function( renderer ) {
           // don't render unsupported renderers for specific test cases
@@ -973,22 +972,22 @@
           } );
 
           var layerType = renderer.defaultLayerType;
-          var $container = $( document.createElement( 'div' ) );
-          $container.addClass( 'scene' );
-          $container.addClass( renderer );
-          $container.width( width );
-          $container.height( height );
-          $container[ 0 ].appendChild( display.domElement );
-          $( document.body ).append( $container );
+          var container = document.createElement( 'div' );
+          container.classList.add( 'scene' );
+          container.classList.add( renderer );
+          container.style.width = width + 'px';
+          container.style.height = height + 'px';
+          container.appendChild( display.domElement );
+          document.body.appendChild( container );
 
           function updateDisplay() {
             display.updateDisplay();
 
             if ( display.getUsedRenderersBitmask() !== phet.scenery.Renderer.fromName( renderer ) ) {
-              $container.addClass( 'wrong-renderer' );
+              container.classList.add( 'wrong-renderer' );
             }
             else {
-              $container.removeClass( 'wrong-renderer' );
+              container.classList.remove( 'wrong-renderer' );
             }
           }
 

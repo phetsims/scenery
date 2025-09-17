@@ -6,8 +6,7 @@
 
   <title>Text Tests</title>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash dependency -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Canvg for SVG to Canvas -->
@@ -39,7 +38,7 @@
 <div id="main" style="width: 800px; height: 512px;" class="scene"></div>
 <script>
 
-  const scene = new phet.scenery.Scene( $( '#main' ) );
+  const scene = new phet.scenery.Scene( document.getElementById( 'main' ) );
 
   scene.initializeEvents();
   scene.updateOnRequestAnimationFrame();

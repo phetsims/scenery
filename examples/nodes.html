@@ -13,8 +13,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash (if needed by examples) -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Bootstrap not necessarily needed -->
@@ -129,16 +128,16 @@
    *----------------------------------------------------------------------------*/
 
   var element = document.createElement( 'div' );
-  $( element ).attr( 'class', 'btn-group' );
+  element.className = 'btn-group';
 
   function addButton( text, onclick ) {
     var actualButton = document.createElement( 'button' );
-    $( actualButton ).attr( 'class', 'btn' );
-    $( actualButton ).text( text );
-    $( actualButton ).on( 'click', onclick );
+    actualButton.className = 'btn';
+    actualButton.textContent = text;
+    actualButton.addEventListener( 'click', onclick );
 
     // for responsive touch handling without 300ms delay
-    $( actualButton ).on( 'touchstart', function( event ) {
+    actualButton.addEventListener( 'touchstart', function( event ) {
       onclick( event );
       event.preventDefault();
     } );
@@ -173,7 +172,7 @@
   var lastTime = 0;
   var timeElapsed = 0;
   function tick() {
-    var id = window.requestAnimationFrame( tick, main[ 0 ] );
+    var id = window.requestAnimationFrame( tick );
 
     var timeNow = new Date().getTime();
     if ( lastTime != 0 ) {
@@ -191,7 +190,7 @@
     }
     stats.end();
   }
-  window.requestAnimationFrame( tick, main[ 0 ] );
+  window.requestAnimationFrame( tick );
 
 
 </script>

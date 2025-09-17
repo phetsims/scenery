@@ -12,8 +12,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and lodash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- lodash (if needed by examples) -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!--For the styling-->
@@ -57,23 +56,24 @@
 </div>
 <script type="text/javascript">
   window.docExample = ( id, draw ) => {
-    const $container = $( '#' + id );
+    const container = document.getElementById( id );
     const scene = new phet.scenery.Node();
     const display = new phet.scenery.Display( scene, {
-      width: $container.width(),
-      height: $container.height()
+      width: container.clientWidth,
+      height: container.clientHeight
     } );
     display.initializeEvents();
 
-    $container[ 0 ].appendChild( display.domElement );
+    container.appendChild( display.domElement );
     draw( scene, display );
     display.updateDisplay();
 
     const pdomHTMLBlock = display.pdomRootElement.outerHTML;
     const formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
-    const $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
-
-    $container.after( $PDOMcode );
+    const pre = document.createElement( 'pre' );
+    pre.className = 'brush: html';
+    pre.textContent = formattedPDOM;
+    container.parentNode && container.parentNode.insertBefore( pre, container.nextSibling );
   };
 </script>
 <script type="text/javascript">

@@ -13,7 +13,6 @@
 
   <title>Canvas Composite Tests</title>
 
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
 
   <style type="text/css">
@@ -49,7 +48,7 @@
 </div>
 
 <script type="text/javascript">
-  const context = $( '#checker' )[ 0 ].getContext( '2d' );
+  const context = document.getElementById( 'checker' ).getContext( '2d' );
   const chunk = 2;
   for ( let i = 0; i < 512; i += chunk ) {
     for ( let j = 0; j < 512; j += chunk ) {
@@ -61,8 +60,8 @@
 
 <script type="text/javascript">
   /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
-  var context = $( '#target' )[ 0 ].getContext( '2d' );
-  var referenceContext = $( '#reference' )[ 0 ].getContext( '2d' );
+  var context = document.getElementById( 'target' ).getContext( '2d' );
+  var referenceContext = document.getElementById( 'reference' ).getContext( '2d' );
 
   var size = 32;
 
@@ -165,12 +164,15 @@
   for ( var k = 0; k < operations.length; k++ ) {
     (function() {
       var op = operations[ k ];
-      $( '#buttons' ).append(
-          $( '<button class="btn" type="button">' + operations[ k ] + '</button>' ).click( function() {
-            $( '#buttons p' ).html( op );
-            draw( op );
-          } )
-      );
+      const button = document.createElement( 'button' );
+      button.className = 'btn';
+      button.type = 'button';
+      button.textContent = operations[ k ];
+      button.addEventListener( 'click', function() {
+        document.querySelector( '#buttons p' ).innerHTML = op;
+        draw( op );
+      } );
+      document.getElementById( 'buttons' ).appendChild( button );
     })();
   }
 

@@ -4,14 +4,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-$( window ).ready( () => {
+window.addEventListener( 'load', () => {
   
   
   let element;
 
   function newElement() {
     element = document.createElement( 'div' );
-    $( element ).css( 'float', 'left' );
+    element.style.cssFloat = 'left';
     document.body.appendChild( element );
   }
 

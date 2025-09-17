@@ -42,7 +42,7 @@ const PixelComparisonTestUtils = {
     canvas.height = snapshot.height;
     const context = canvas.getContext( '2d' )!;
     context.putImageData( snapshot, 0, 0 );
-    $( canvas ).css( 'border', '1px solid black' );
+    canvas.style.border = '1px solid black';
     return canvas;
   },
 
@@ -99,26 +99,28 @@ const PixelComparisonTestUtils = {
     }
     const averageDifference = totalDifference / ( 4 * a.width * a.height );
     if ( averageDifference > threshold ) {
-      const display = $( '#display' );
-      // header
-      const note = document.createElement( 'h2' );
-      $( note ).text( message );
-      display.append( note );
-      const differenceDiv = document.createElement( 'div' );
-      $( differenceDiv ).text( `(actual) (expected) (color diff) (alpha diff) Diffs max: ${largestDifference}, average: ${averageDifference}` );
-      display.append( differenceDiv );
+      const display = document.getElementById( 'display' );
+      if ( display ) {
+        // header
+        const note = document.createElement( 'h2' );
+        note.textContent = message;
+        display.appendChild( note );
+        const differenceDiv = document.createElement( 'div' );
+        differenceDiv.textContent = `(actual) (expected) (color diff) (alpha diff) Diffs max: ${largestDifference}, average: ${averageDifference}`;
+        display.appendChild( differenceDiv );
 
-      display.append( PixelComparisonTestUtils.snapshotToCanvas( a ) );
-      display.append( PixelComparisonTestUtils.snapshotToCanvas( b ) );
-      display.append( PixelComparisonTestUtils.snapshotToCanvas( colorDiffData ) );
-      display.append( PixelComparisonTestUtils.snapshotToCanvas( alphaDiffData ) );
+        display.appendChild( PixelComparisonTestUtils.snapshotToCanvas( a ) );
+        display.appendChild( PixelComparisonTestUtils.snapshotToCanvas( b ) );
+        display.appendChild( PixelComparisonTestUtils.snapshotToCanvas( colorDiffData ) );
+        display.appendChild( PixelComparisonTestUtils.snapshotToCanvas( alphaDiffData ) );
 
-      if ( extraDom ) {
-        display.append( extraDom );
+        if ( extraDom ) {
+          display.appendChild( extraDom );
+        }
+
+        // for a line-break
+        display.appendChild( document.createElement( 'div' ) );
       }
-
-      // for a line-break
-      display.append( document.createElement( 'div' ) );
 
       isEqual = false;
     }

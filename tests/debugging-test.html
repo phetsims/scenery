@@ -10,8 +10,7 @@
 
   <title>Debugging Test</title>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash dependency -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Canvg for SVG to Canvas -->
@@ -56,11 +55,11 @@
 
 <script>
 
-  const $main = $( '#main' );
+  const main = document.getElementById( 'main' );
 
   // initialize our scene
   console.log( 'creating scene' );
-  const scene = new phet.scenery.Scene( $main );
+  const scene = new phet.scenery.Scene( main );
 
   console.log( 'creating node' );
   const node = new phet.scenery.Node();

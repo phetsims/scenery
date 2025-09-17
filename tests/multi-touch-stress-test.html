@@ -14,7 +14,6 @@
   <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
 
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Bootstrap not necessarily needed -->
@@ -60,7 +59,7 @@
 <script>
   /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
 
-  var main = $( '#main' );
+  var main = document.getElementById( 'main' );
 
   // initialize our scene
   var scene = new phet.scenery.Scene( main );
@@ -128,7 +127,7 @@
   var lastTime = 0;
   var timeElapsed = 0;
   function tick() {
-    window.requestAnimationFrame( tick, main[ 0 ] );
+    window.requestAnimationFrame( tick );
 
     var timeNow = new Date().getTime();
     if ( lastTime != 0 ) {
@@ -140,7 +139,7 @@
     scene.updateScene(); // repaints dirty regions. use renderScene() to render everything
     stats.end();
   }
-  window.requestAnimationFrame( tick, main[ 0 ] );
+  window.requestAnimationFrame( tick );
 
 
 </script>

@@ -13,8 +13,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and lodash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- lodash (if needed by examples) -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!--For the styling-->
@@ -105,15 +104,15 @@
 
   window.docExample = ( id, draw ) => {
     'use strict';
-    const $container = $( '#' + id );
+    const container = document.getElementById( id );
     scene = new phet.scenery.Node();
     const display = new phet.scenery.Display( scene, {
-      width: $container.width(),
-      height: $container.height(),
+      width: container.clientWidth,
+      height: container.clientHeight,
       backgroundColor: '#eee'
     } );
     display.initializeEvents();
-    $container[ 0 ].appendChild( display.domElement );
+    container.appendChild( display.domElement );
     draw( scene, display );
     display.updateDisplay();
   }
@@ -202,10 +201,14 @@
         .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
         .replace( new RegExp( pRegex, 'g' ), '\t\t$1\n\t\t\t$2\t\t<\/p>' ) //formatting for opening paragraph tag
         .replace( buttonRegex , '\t$1\n\t\t$2\t<\/button>' ); //formatting for buttons
-      var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
-
-      // add formatted code to the pre element
-      $( '#PDOM-pre' ).html( $PDOMcode );
+      const codeEl = document.createElement( 'code' );
+      codeEl.className = 'language-html no-whitespace-normalization';
+      codeEl.textContent = formattedPDOM;
+      const pre = document.getElementById( 'PDOM-pre' );
+      if ( pre ) {
+        pre.innerHTML = '';
+        pre.appendChild( codeEl );
+      }
 
       // apply syntax highlighting
       Prism.highlightAll();

@@ -13,8 +13,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and lodash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- lodash (if needed by examples) -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!--For the styling-->
@@ -107,15 +106,15 @@
   let scene;
 
   window.docExample = ( id, draw ) => {
-    let $container = $( '#' + id );
+    const container = document.getElementById( id );
     scene = new phet.scenery.Node();
-    let display = new phet.scenery.Display( scene, {
-      width: $container.width(),
-      height: $container.height(),
+    const display = new phet.scenery.Display( scene, {
+      width: container.clientWidth,
+      height: container.clientHeight,
       backgroundColor: '#eee'
     } );
     display.initializeEvents()
-    $container[ 0 ].appendChild( display.domElement );
+    container.appendChild( display.domElement );
     draw( scene, display );
     display.updateDisplay();
   }
@@ -299,10 +298,16 @@
         .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
         .replace( new RegExp( pRegex, 'g' ), '\t$1\n\t\t$2\t<\/p>' ) //formatting for opening paragraph tag
         .replace( buttonRegex, '\t$1\n\t\t$2\t<\/button>' ); //formatting for buttons
-      var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
+      var codeEl = document.createElement( 'code' );
+      codeEl.className = 'language-html no-whitespace-normalization';
+      codeEl.textContent = formattedPDOM;
 
-      //add formatted code to the pre element
-      $( '#PDOM-pre' ).html( $PDOMcode );
+      // add formatted code to the pre element
+      var pre = document.getElementById( 'PDOM-pre' );
+      if ( pre ) {
+        pre.innerHTML = '';
+        pre.appendChild( codeEl );
+      }
 
       //apply syntax highlighting
       Prism.highlightAll();

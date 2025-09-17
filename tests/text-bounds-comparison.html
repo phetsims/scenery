@@ -9,8 +9,7 @@
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../chipper/js/browser/sim-tests/pageload-connector.js"></script>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash (if needed) -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Canvg for SVG to Canvas -->
@@ -102,20 +101,21 @@
   }
 
   function wrapScene( node ) {
-    var $main = $( '<div>' );
+    var div = document.createElement( 'div' );
     var width = Math.ceil( node.width + 2 * padding );
     var height = Math.ceil( node.height + 2 * padding );
-    $main.width( width );
-    $main.height( height );
+    div.style.width = width + 'px';
+    div.style.height = height + 'px';
+    div.classList.add( 'scene' );
 
     var scene = new phet.scenery.Node();
-    var display = new phet.scenery.Display( scene, { container: $main[ 0 ], width: width, height: height } );
+    var display = new phet.scenery.Display( scene, { container: div, width: width, height: height } );
     scene.addChild( node );
     node.x += padding;
     node.y += padding;
     display.updateDisplay();
 
-    return $main.addClass( 'scene' )[ 0 ];
+    return div;
   }
 
   var queue = [];

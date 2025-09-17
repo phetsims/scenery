@@ -11,33 +11,32 @@
 
   <title>Stacking Test</title>
 
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
 
   <script type="text/javascript">
     /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
 
     // background
-    $( window ).ready( function() {
+    window.addEventListener( 'load', function() {
       (function() {
-        var backgroundCanvas = $( '#backgroundCanvas' );
-        var context = backgroundCanvas[ 0 ].getContext( '2d' );
+        var backgroundCanvas = document.getElementById( 'backgroundCanvas' );
+        var context = backgroundCanvas.getContext( '2d' );
         context.fillStyle = '#888888';
         context.fillRect( 0, 0, 256, 256 + 128 );
       })();
 
       (function() {
-        var midCanvas = $( '#midCanvas' );
-        var context = midCanvas[ 0 ].getContext( '2d' );
+        var midCanvas = document.getElementById( 'midCanvas' );
+        var context = midCanvas.getContext( '2d' );
         context.fillStyle = 'rgba(255, 255, 0, 0.5)';
         context.fillRect( 0, 0, 128, 256 );
       })();
 
       (function() {
-        var dataUrl = $( '#midCanvas' )[ 0 ].toDataURL( 'image/png' );
+        var dataUrl = document.getElementById( 'midCanvas' ).toDataURL( 'image/png' );
         var image = document.getElementById( 'dot' );
-        $( image ).attr( 'width', '128px' );
-        $( image ).attr( 'height', '128px' );
-        $( image ).attr( 'xlink:href', dataUrl );
+        image.setAttribute( 'width', '128px' );
+        image.setAttribute( 'height', '128px' );
+        image.setAttribute( 'xlink:href', dataUrl );
       })();
 
       window.addEventListener( 'click', function( evt ) {
@@ -46,7 +45,7 @@
         }
       }, true );
 
-      $( document ).on( 'click', function( evt ) {
+      document.addEventListener( 'click', function( evt ) {
         if ( console && console.log ) {
           console.log( evt.target );
         }

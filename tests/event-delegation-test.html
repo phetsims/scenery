@@ -13,7 +13,6 @@
 
   <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
 
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
 
@@ -124,8 +123,8 @@
     }
   }
 
-  $( window ).ready( function() {
-    $( '.dropdown-toggle' ).dropdown();
+  document.addEventListener( 'DOMContentLoaded', function() {
+    // Note: Bootstrap dropdown functionality may need to be manually implemented if needed
 
     var container = document.getElementById( 'containingBlock' );
 
@@ -223,21 +222,21 @@
     forwardSynthesizedTouchEvent( 'touchcancel' );
   } );
 
-  $( '#toggleOverlay' ).on( 'click', function( event ) {
-    $( '.above' ).toggleClass( 'notDisplayed' );
+  document.getElementById( 'toggleOverlay' ).addEventListener( 'click', function( event ) {
+    document.querySelectorAll( '.above' ).forEach( el => el.classList.toggle( 'notDisplayed' ) );
     aboveVisible = !aboveVisible;
   } );
 
-  $( '#tryMe' ).on( 'click', function( event ) {
-    $( '#targetSpan' ).text( Math.random().toFixed( 10 ) );
+  document.getElementById( 'tryMe' ).addEventListener( 'click', function( event ) {
+    document.getElementById( 'targetSpan' ).textContent = Math.random().toFixed( 10 );
   } );
 
-  $( '#hoverTest' ).on( 'mousemove', function( event ) {
-    $( '#mouseReport' ).text( 'mousemove on :hover: ' + event.clientX + ',' + event.clientY );
+  document.getElementById( 'hoverTest' ).addEventListener( 'mousemove', function( event ) {
+    document.getElementById( 'mouseReport' ).textContent = 'mousemove on :hover: ' + event.clientX + ',' + event.clientY;
   } );
 
-  $( '#clickable' ).on( 'click', function( event ) {
-    $( '#clickTest' ).text( 'Clicked' );
+  document.getElementById( 'clickable' ).addEventListener( 'click', function( event ) {
+    document.getElementById( 'clickTest' ).textContent = 'Clicked';
   } );
 </script>
 

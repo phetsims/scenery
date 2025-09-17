@@ -10,8 +10,7 @@
 
   <title>Diagnostics Test</title>
 
-  <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <!-- LoDash dependency -->
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- Canvg for SVG to Canvas -->
@@ -63,22 +62,22 @@
 
 <script>
 
-  $( '#userAgent' ).text( window.navigator.userAgent );
-  $( '#platform' ).text( window.navigator.platform );
+  document.getElementById( 'userAgent' ).textContent = window.navigator.userAgent;
+  document.getElementById( 'platform' ).textContent = window.navigator.platform;
 
   const canvas = document.createElement( 'canvas' );
   const context = canvas.getContext( '2d' );
 
-  $( '#devicePixelRatio' ).text( window.devicePixelRatio );
-  $( '#backingStorePixelRatio' ).text( phet.scenery.Utils.backingStorePixelRatio( context ) );
+  document.getElementById( 'devicePixelRatio' ).textContent = window.devicePixelRatio;
+  document.getElementById( 'backingStorePixelRatio' ).textContent = phet.scenery.Utils.backingStorePixelRatio( context );
 
   function updateOrientation( event ) {
-    $( '#innerWidth' ).text( window.innerWidth );
-    $( '#innerHeight' ).text( window.innerHeight );
-    $( '#orientationId' ).text( window.orientation );
-    $( '#alpha' ).text( event.alpha );
-    $( '#beta' ).text( event.beta );
-    $( '#gamma' ).text( event.gamma );
+    document.getElementById( 'innerWidth' ).textContent = window.innerWidth;
+    document.getElementById( 'innerHeight' ).textContent = window.innerHeight;
+    document.getElementById( 'orientationId' ).textContent = window.orientation;
+    document.getElementById( 'alpha' ).textContent = event.alpha;
+    document.getElementById( 'beta' ).textContent = event.beta;
+    document.getElementById( 'gamma' ).textContent = event.gamma;
   }
   updateOrientation( {} ); // trigger it at the start
   window.addEventListener( 'deviceorientation', updateOrientation );
