@@ -889,6 +889,12 @@ export default class ParallelDOM extends PhetioObject {
         if ( !PDOMUtils.tagIsDefaultFocusable( this._tagName ) && this.focusable ) {
           assert( this._ariaRole !== null && this._ariaRole !== '', `${this.constructor.name}: Option ariaRole is required for custom interactive components. Consider using AccessibleDraggableOptions or AccessibleInteractiveOptions.` );
         }
+
+        // If using the switch role, the aria-pressed attribute is not allowed.
+        // See https://github.com/phetsims/sun/issues/949.
+        if ( this._ariaRole === 'switch' ) {
+          assert( !this.hasPDOMAttribute( 'aria-pressed' ), 'aria-pressed is not allowed when using the switch role' );
+        }
       }
 
       // If using accessibleParagraph without a tagName, this Node cannot have any descendants with accessible content
