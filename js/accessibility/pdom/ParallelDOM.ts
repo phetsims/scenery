@@ -886,7 +886,7 @@ export default class ParallelDOM extends PhetioObject {
 
         // If focusable and this element is a div, ariaRole is required. It is likely that the application role
         // (AccessibleInteractiveOptions) was forgotten. Without it, alt input will not work with a screen reader.
-        if ( !PDOMUtils.tagIsDefaultFocusable( this._tagName ) && this.focusable ) {
+        if ( this._tagName.toUpperCase() === DIV_TAG && this.focusable ) {
           assert( this._ariaRole !== null && this._ariaRole !== '', `${this.constructor.name}: Option ariaRole is required for custom interactive components. Consider using AccessibleDraggableOptions or AccessibleInteractiveOptions.` );
         }
 
