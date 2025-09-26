@@ -10,7 +10,6 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import Emitter from '../../../axon/js/Emitter.js';
 import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
@@ -80,9 +79,6 @@ class HighlightPath extends Path {
   private _innerHighlightColor: TPaint;
   private _outerHighlightColor: TPaint;
 
-  // Emits whenever this highlight changes.
-  public readonly highlightChangedEmitter = new Emitter();
-
   // See option for documentation.
   public readonly transformSourceNode: Node | null;
   private readonly outerLineWidth: number | null;
@@ -111,6 +107,8 @@ class HighlightPath extends Path {
   // A scalar describing the layout scale of your application. Highlight line widths are corrected
   // by the layout scale so that they have the same sizes relative to the size of the application.
   public static layoutScale = 1;
+
+  private isDashed: boolean;
 
   /**
    * @param [shape] - the shape for the focus highlight
@@ -153,18 +151,8 @@ class HighlightPath extends Path {
     this.innerHighlightPath = new Path( shape, innerHighlightOptions );
     this.addChild( this.innerHighlightPath );
 
-    if ( options.dashed ) {
-      this.setDashed( true );
-    }
-  }
-
-  /**
-   * Mutating convenience function to mutate both the innerHighlightPath and outerHighlightPath.
-   */
-  public mutateWithInnerHighlight( options: PathOptions ): void {
-    super.mutate( options );
-    this.innerHighlightPath && this.innerHighlightPath.mutate( options );
-    this.highlightChangedEmitter.emit();
+    this.isDashed = options.dashed;
+    this.updateLineDash();
   }
 
   /**
@@ -172,13 +160,21 @@ class HighlightPath extends Path {
    */
   public setDashed( dashOn: boolean ): void {
 
+    this.isDashed = dashOn;
+    this.updateLineDash();
+  }
+
+  public updateLineDash(): void {
+
     // If there is a lineDashOverride, use that instead of the transformedLineDash. If the dash is off,
     // set the lineDash to an empty array.
-    const lineDash = dashOn ? ( this.lineDashOverride ? this.lineDashOverride : this.transformedLineDash ) : [];
+    const lineDash = this.isDashed ? ( this.lineDashOverride ? this.lineDashOverride : this.transformedLineDash ) : [];
 
-    this.mutateWithInnerHighlight( {
-      lineDash: lineDash
-    } );
+    // Apply it to this Path and the inner highlight Path.
+    this.lineDash = lineDash;
+    if ( this.innerHighlightPath ) {
+      this.innerHighlightPath.lineDash = lineDash;
+    }
   }
 
   /**
@@ -188,7 +184,6 @@ class HighlightPath extends Path {
   public override setShape( shape: InputShape ): this {
     super.setShape( shape );
     this.innerHighlightPath && this.innerHighlightPath.setShape( shape );
-    this.highlightChangedEmitter && this.highlightChangedEmitter.emit();
 
     return this;
   }
@@ -202,7 +197,8 @@ class HighlightPath extends Path {
     this.lineWidth = this.getOuterLineWidth( matrix );
     this.innerHighlightPath.lineWidth = this.getInnerLineWidth( matrix );
     this.transformedLineDash = this.getTransformedLineDash( matrix );
-    this.highlightChangedEmitter.emit();
+
+    this.updateLineDash();
   }
 
   /**
@@ -247,7 +243,6 @@ class HighlightPath extends Path {
   public setInnerHighlightColor( color: TPaint ): void {
     this._innerHighlightColor = color;
     this.innerHighlightPath.setStroke( color );
-    this.highlightChangedEmitter.emit();
   }
 
   public set innerHighlightColor( color: TPaint ) { this.setInnerHighlightColor( color ); }
@@ -267,7 +262,6 @@ class HighlightPath extends Path {
   public setOuterHighlightColor( color: TPaint ): void {
     this._outerHighlightColor = color;
     this.setStroke( color );
-    this.highlightChangedEmitter.emit();
   }
 
   public set outerHighlightColor( color: TPaint ) { this.setOuterHighlightColor( color ); }
