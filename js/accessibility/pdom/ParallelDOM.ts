@@ -305,7 +305,7 @@ type ParallelDOMSelfOptions = {
   accessibleParagraphContent?: PDOMValueType; // Sets the accessible paragraph content for the Node
 
   focusHighlight?: Highlight; // Sets the focus highlight for the Node
-  focusHighlightLayerable?: boolean; //lag to determine if the focus highlight Node can be layered in the scene graph
+  focusHighlightLayerable?: boolean; // Flag to determine if the focus highlight Node can be layered in the scene graph
   groupFocusHighlight?: Node | boolean; // Sets the outer focus highlight for this Node when a descendant has focus
   pdomVisibleProperty?: TReadOnlyProperty<boolean> | null;
   pdomVisible?: boolean; // Sets whether or not the Node's DOM element is visible in the parallel DOM
