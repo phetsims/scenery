@@ -168,7 +168,36 @@ class PDOMInstance {
     // NOTE: we are relying on `onPDOMContentChange()` to rebuild the PDOMInstance tree when the presence of an
     // accessibleHeading OR the value of accessibleHeadingIncrement changes! Thus these computed heading levels will
     // not change once constructed.
-    this.parentHeadingLevel = this.parent ? ( this.parent.headingLevel ?? this.parent.parentHeadingLevel ) : rootParentHeadingLevel!;
+    // Compute the heading level our parent effectively contributes to descendants.
+    if ( this.parent ) {
+      const parent = this.parent;
+
+      if ( parent.headingLevel !== null ) {
+
+        // Parent has an actual heading element if headingLevel is defined; its level becomes the baseline for children.
+        this.parentHeadingLevel = parent.headingLevel;
+      }
+      else if ( parent.node ) {
+
+        // Parent has a Node but no heading sibling; let its increment shift the level seen by descendants.
+        // Subtract 1 so the default increment of 1 yields an offset of 0, keeping descendants aligned unless the
+        // author explicitly changes the increment.
+        const parentIncrementOffset = parent.node.accessibleHeadingIncrement - 1;
+        this.parentHeadingLevel = Math.max(
+          parent.parentHeadingLevel,
+          0,
+          parent.parentHeadingLevel + parentIncrementOffset
+        );
+      }
+      else {
+
+        // Root placeholder instances do not have a Node; inherit their ancestor's logical level.
+        this.parentHeadingLevel = parent.parentHeadingLevel;
+      }
+    }
+    else {
+      this.parentHeadingLevel = rootParentHeadingLevel!;
+    }
 
     // An accessibleHeading may be computed by PDOMPeer.update, so wait to assign a headingLevel for descendants until
     // after the update call.

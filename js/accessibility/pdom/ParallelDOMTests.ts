@@ -2539,6 +2539,48 @@ QUnit.test( 'accessibleHeading', assert => {
   t21.accessibleParagraph = null;
   assert.ok( t21.pdomInstances.length === 0, 'Clearing accessibleHeading and accessibleParagraph removes all instances' );
 
+  //--------------------------------------------------------------------------
+  // accessibleHeadingIncrement without accessibleHeading adjusts descendant levels
+  //--------------------------------------------------------------------------
+  const t23 = new Node( { tagName: 'div' } );
+  const t24 = new Node( { tagName: 'div', accessibleHeadingIncrement: 2 } );
+  const t25 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  const t26 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent, accessibleHeadingIncrement: 2 } );
+
+  rootNode.addChild( t23 );
+  t23.addChild( t24 );
+  t24.addChild( t25 );
+  t24.addChild( t26 );
+
+  const t25Heading = getDOMElementByName( t25, PDOMPeer.HEADING_SIBLING );
+  const t26Heading = getDOMElementByName( t26, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t25Heading.tagName === 'H2', 't25 should be an h2 when ancestor without heading increments' );
+  assert.ok( t26Heading.tagName === 'H3', 't26 should be an h3 when ancestor and descendant increments combine' );
+
+  //--------------------------------------------------------------------------
+  // accessibleHeadingIncrement without heading at the root level
+  //--------------------------------------------------------------------------
+  const t27 = new Node( { tagName: 'div', accessibleHeadingIncrement: 2 } );
+  const t28 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  rootNode.addChild( t27 );
+  t27.addChild( t28 );
+
+  const t28Heading = getDOMElementByName( t28, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t28Heading.tagName === 'H2', 't28 should be an h2 when only ancestor increment is applied' );
+
+  //--------------------------------------------------------------------------
+  // accessibleHeadingIncrement of 0 without heading keeps ancestor baseline
+  //--------------------------------------------------------------------------
+  const t29 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  const t30 = new Node( { tagName: 'div', accessibleHeadingIncrement: 0 } );
+  const t31 = new Node( { tagName: 'div', accessibleHeading: testHeadingContent } );
+  rootNode.addChild( t29 );
+  t29.addChild( t30 );
+  t30.addChild( t31 );
+
+  const t31Heading = getDOMElementByName( t31, PDOMPeer.HEADING_SIBLING );
+  assert.ok( t31Heading.tagName === 'H2', 't31 should be an h2 when ancestor increment is 0 without a heading' );
+
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
 } );
