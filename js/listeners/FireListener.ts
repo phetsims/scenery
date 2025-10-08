@@ -33,7 +33,8 @@ type SelfOptions = {
   fireOnDown?: boolean;
 
   // fire-on-hold feature, see https://github.com/phetsims/scenery/issues/1004
-  // TODO: these options are not supported with PDOM interaction, see https://github.com/phetsims/scenery/issues/1117
+  // These options are not supported for accessibility. Fire activation must happen from a single logical
+  // click event. See https://github.com/phetsims/sun/issues/796.
   fireOnHold?: boolean; // is the fire-on-hold feature enabled?
   fireOnHoldDelay?: number; // start to fire continuously after pressing for this long (milliseconds)
   fireOnHoldInterval?: number; // fire continuously at this interval (milliseconds)

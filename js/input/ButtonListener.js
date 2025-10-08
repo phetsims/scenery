@@ -177,8 +177,7 @@ class ButtonListener extends DownUpListener {
    *
    * There are no `keyup` or `keydown` events when an assistive device is active. So we respond generally
    * to the single `click` event, which indicates a logical activation of this button.
-   * TODO: This may change after https://github.com/phetsims/scenery/issues/1117 is done, at which point
-   * `click` should likely be replaced by `keydown` and `keyup` listeners.
+   *
    * @private
    *
    * @param {SceneryEvent} event
