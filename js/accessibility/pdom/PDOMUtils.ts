@@ -10,7 +10,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { TReadOnlyProperty, isTReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
+import { isTReadOnlyProperty, TReadOnlyProperty } from '../../../../axon/js/TReadOnlyProperty.js';
 import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import Random from '../../../../dot/js/Random.js';
@@ -282,6 +282,17 @@ const PDOMUtils = {
     }
 
     return firstFocusable;
+  },
+
+  /**
+   * Moves focus to the first focusable element in the document.
+   * If no focusable element is found, no operation is performed.
+   */
+  focusTop(): void {
+    const focusable = PDOMUtils.getFirstFocusable();
+    if ( focusable ) {
+      focusable.focus();
+    }
   },
 
   /**
