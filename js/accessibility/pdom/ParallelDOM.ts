@@ -157,6 +157,7 @@ import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
 
 import { Highlight } from '../Highlight.js';
+import globalDescriptionQueue from './globalDescriptionQueue.js';
 import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
 import type PDOMInstance from './PDOMInstance.js';
 import PDOMTree from './PDOMTree.js';
@@ -378,6 +379,18 @@ type SetPDOMClassOptions = {
 
 type RemovePDOMClassOptions = {
   elementName?: string;
+};
+
+type DescriptionResponseOptions = {
+
+  // Queue behavior for the response.
+  // 'interrupt' - interrupt queue and any other responses and speak immediately (default)
+  // 'queue' - add to the end of the queue
+  alertBehavior?: 'interrupt' | 'queue';
+
+  // If true, the description will be spoken even if the Node is invisible or not attached to
+  // a Display. Default is false.
+  alertWhenNotDisplayed?: boolean;
 };
 
 /**
@@ -3154,12 +3167,15 @@ export default class ParallelDOM extends PhetioObject {
    * Alert on all interactive description utteranceQueues located on each connected Display. See
    * Node.getConnectedDisplays.
    *
-   * Note that if your Node is not connected to a Display, this function will hav no effect.
-   *
-   * This function will also have no effect if your Node is visible: false or pdomVisible: false.
-   * This ensures that Nodes on hidden screens or behind hidden layers do not create responses.
+   * By default, this function will have no effect if the Node is invisible or not attached to a Display.
+   * This ensures that Nodes on hidden screens and behind layers do not create responses.
+   * However, this can override that with options. See options documentation.
    */
-  public addAccessibleResponse( utterance: TAlertable ): void {
+  public addAccessibleResponse( utterance: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
+
+    // nullish coalescing for options because this function can be called a lot
+    const alertBehavior = providedOptions?.alertBehavior ?? 'interrupt';
+    const alertWhenNotDisplayed = providedOptions?.alertWhenNotDisplayed ?? false;
 
     // Nothing to do if there is no content.
     if ( utterance === null || Utterance.alertableToText( utterance ) === '' ) {
@@ -3176,41 +3192,39 @@ export default class ParallelDOM extends PhetioObject {
       return;
     }
 
-    const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
+    if ( alertWhenNotDisplayed ) {
 
-    // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
-    for ( let i = 0; i < connectedDisplays.length; i++ ) {
-      const display = connectedDisplays[ i ];
+      // alertWhenNotDisplayed is true - we want to hear the response even when the Node is invisible and detached
+      // Note that we cannot announce on each display, this will only be announced once globally.
+      globalDescriptionQueue.addAccessibleResponse( utterance, alertBehavior );
+    }
+    else {
 
-      // Only speak if the Node is globally visible with both `visible` and `pdomVisible`.
-      // Cannot use Node.wasVisuallyDisplayed() because it is not synchronous.
-      // Cannot use a DisplayedProperty because it observes `visibleProperty`, which may not
-      // be up-to-date in application specific code because of the listener order.
-      const nodeDisplayed = ( this as unknown as Node ).getTrails().some(
-        trail => trail.isVisible() && trail.isPDOMVisible()
-      );
+      // only clear if there is content (graceful if alertable is null so that reusable components can use this method
+      // without requiring content)
+      if ( utterance && alertBehavior === 'interrupt' ) {
+        this.forEachUtteranceQueue( queue => queue.clear() );
+      }
 
-      if ( display.isAccessible() && nodeDisplayed ) {
-        display.descriptionUtteranceQueue.addToBack( utterance );
+      const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
+
+      // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
+      for ( let i = 0; i < connectedDisplays.length; i++ ) {
+        const display = connectedDisplays[ i ];
+
+        // Only speak if the Node is globally visible with both `visible` and `pdomVisible`.
+        // Cannot use Node.wasVisuallyDisplayed() because it is not synchronous.
+        // Cannot use a DisplayedProperty because it observes `visibleProperty`, which may not
+        // be up-to-date in application specific code because of the listener order.
+        const nodeDisplayed = ( this as unknown as Node ).getTrails().some(
+          trail => trail.isVisible() && trail.isPDOMVisible()
+        );
+
+        if ( display.isAccessible() && nodeDisplayed ) {
+          display.descriptionUtteranceQueue.addToBack( utterance );
+        }
       }
     }
-  }
-
-  /**
-   * Helper method to add an accessible response of a specific category, with control over interruption behavior.
-   *
-   * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
-   */
-  private addCategorizedResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' ): void {
-
-    // only clear if there is content (graceful if alertable is null so that reusable components can use this method
-    // without requiring content)
-    if ( alertable && alertBehavior === 'interrupt' ) {
-      this.forEachUtteranceQueue( queue => queue.clear() );
-    }
-
-    this.addAccessibleResponse( alertable );
   }
 
   /**
@@ -3218,10 +3232,10 @@ export default class ParallelDOM extends PhetioObject {
    * object is or its current state.
    *
    * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   * @param [providedOptions]
    */
-  public addAccessibleObjectResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addCategorizedResponse( alertable, alertBehavior );
+  public addAccessibleObjectResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
+    this.addAccessibleResponse( alertable, providedOptions );
   }
 
   /**
@@ -3229,10 +3243,10 @@ export default class ParallelDOM extends PhetioObject {
    * information about the surrounding environment or the relationship of objects to one another.
    *
    * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   * @param [providedOptions]
    */
-  public addAccessibleContextResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addCategorizedResponse( alertable, alertBehavior );
+  public addAccessibleContextResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
+    this.addAccessibleResponse( alertable, providedOptions );
   }
 
   /**
@@ -3240,10 +3254,10 @@ export default class ParallelDOM extends PhetioObject {
    * what the user can do or how they can interact with an object.
    *
    * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   * @param [providedOptions]
    */
-  public addAccessibleHelpResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addCategorizedResponse( alertable, alertBehavior );
+  public addAccessibleHelpResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
+    this.addAccessibleResponse( alertable, providedOptions );
   }
 
   /**

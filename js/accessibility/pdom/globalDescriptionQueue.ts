@@ -49,8 +49,9 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
    * Enqueue an accessible response that will be announced through this queue's aria-live container.
    *
    * @param alertable - The content to be announced by screen readers
+   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
-  public addAccessibleResponse( alertable: TAlertable ): void {
+  public addAccessibleResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
     assert && assert( this._globalInitialized, 'Must be initialized to use.' );
 
     // Nothing to do if there is no content.
@@ -63,20 +64,11 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
       return;
     }
 
-    this.addToBack( alertable );
-  }
-
-  /**
-   * Helper method that queues a response of a specific category, with control over interruption behavior.
-   *
-   * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
-   */
-  private addCategorizedResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
     if ( alertBehavior === 'interrupt' ) {
       this.clear();
     }
-    this.addAccessibleResponse( alertable );
+
+    this.addToBack( alertable );
   }
 
   /**
@@ -86,7 +78,7 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
   public addAccessibleContextResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addCategorizedResponse( alertable, alertBehavior );
+    this.addAccessibleResponse( alertable, alertBehavior );
   }
 
   /**
@@ -96,7 +88,7 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
   public addAccessibleObjectResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addCategorizedResponse( alertable, alertBehavior );
+    this.addAccessibleResponse( alertable, alertBehavior );
   }
 
   /**
@@ -106,7 +98,7 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    */
   public addAccessibleHelpResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addCategorizedResponse( alertable, alertBehavior );
+    this.addAccessibleResponse( alertable, alertBehavior );
   }
 }
 
