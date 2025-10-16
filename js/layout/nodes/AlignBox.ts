@@ -23,7 +23,7 @@
  *
  * NOTE: AlignBox resize may not happen immediately, and may be delayed until bounds of a alignBox's child occurs.
  *       layout updates can be forced with invalidateAlignment(). If the alignBox's content that changed is connected
- *       to a Scenery display, its bounds will update when Display.updateDisplay() will called, so this will guarantee
+ *       to a Scenery display, its bounds will update when Display.updateDisplay() will be called, so this will guarantee
  *       that the layout will be applied before it is displayed. alignBox.getBounds() will not force a refresh, and
  *       may return stale bounds.
  *
