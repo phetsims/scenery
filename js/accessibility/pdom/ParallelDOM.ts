@@ -185,6 +185,16 @@ const unwrapProperty = ( valueOrProperty: PDOMValueType ): string | null => {
   return result;
 };
 
+// Scratch objects that are used in various places to avoid allocations in hot code paths.
+const scratchOptions: ParallelDOMOptions = {};
+const scratchCallbacksArray: ( () => void )[] = [];
+const cleanScratches = () => {
+  for ( const key in scratchOptions ) {
+    delete scratchOptions[ key as keyof ParallelDOMOptions ];
+  }
+  scratchCallbacksArray.length = 0;
+};
+
 // these elements are typically associated with forms, and support certain attributes
 const FORM_ELEMENTS = PDOMUtils.FORM_ELEMENTS;
 
@@ -984,21 +994,70 @@ export default class ParallelDOM extends PhetioObject {
   public setAccessibleParagraph( accessibleParagraph: PDOMValueType ): void {
     if ( accessibleParagraph !== this._accessibleParagraph ) {
 
-      if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
+      if ( isTReadOnlyProperty( this._accessibleParagraph ) &&
+
+           // The listener may not have been linked when we can render more efficiently,
+           // see below requireRender logic.
+           this._accessibleParagraph.hasListener( this._onPDOMContentChangeListener ) &&
+           !this._accessibleParagraph.isDisposed ) {
         this._accessibleParagraph.unlink( this._onPDOMContentChangeListener );
       }
 
       this._accessibleParagraph = accessibleParagraph;
 
-      if ( isTReadOnlyProperty( accessibleParagraph ) ) {
-        accessibleParagraph.lazyLink( this._onPDOMContentChangeListener );
+      // Run the behavior function for accessible paragraph. If the returned options only changes
+      // the accessibleParagraphContent, then we can optimize by only setting the content directly.
+      // Otherwise, we assume that a full PDOM update is needed.
+      const behaviorOptions = this._accessibleParagraphBehavior(
+        this as unknown as Node,
+        scratchOptions,
+        accessibleParagraph,
+        scratchCallbacksArray
+      );
+
+      // Optimization flag - we almost never need to re-render the full PDOM for accessible paragraph.
+      let requireRender = false;
+
+      // The behavior function is clearing content or setting options in another way. We may need to fully recompute.
+      // This might also happen if the behavior function is forwarding the content to another Node, and so this
+      // Node will not have any accessible paragraph content. We could call the forwarded callbacks
+      // after updating accessibleParagraphContent, but we would have to do that every time accessibleParagraph
+      // changes (requiring a new invalidation listener). So for now it is simpler to just do a full recompute
+      // in this case.
+      if ( behaviorOptions.accessibleParagraphContent === undefined || scratchCallbacksArray.length > 0 ) {
+        requireRender = true;
+      }
+      else {
+
+        // We have the content, but check to see if any other options are being set. If any other are present
+        // we need to do the full recompute.
+        for ( const key in behaviorOptions ) {
+          if ( key !== 'accessibleParagraphContent' && behaviorOptions[ key as keyof ParallelDOMOptions ] !== undefined ) {
+            requireRender = true;
+            break;
+          }
+        }
       }
 
-      this._accessibleParagraphDirty = true;
+      if ( requireRender ) {
 
-      // The behavior function may change any of this Node's state so we need to recompute all content.
-      this.onPDOMContentChange();
+        // Full render may be necessary. Make sure that any future changes to the Property trigger a full
+        // re-render and then update content immediately.
+        if ( isTReadOnlyProperty( accessibleParagraph ) ) {
+          accessibleParagraph.lazyLink( this._onPDOMContentChangeListener );
+        }
+        this._accessibleParagraphDirty = true;
+        this.onPDOMContentChange();
+      }
+      else {
+
+        // Only the accessibleParagraphContent is changing and that can be updated efficiently. This function
+        // will also link to the StringProperty if necessary.
+        this.setAccessibleParagraphContent( behaviorOptions.accessibleParagraphContent ?? null );
+      }
     }
+
+    cleanScratches();
   }
 
   public set accessibleParagraph( accessibleParagraph: PDOMValueType ) { this.setAccessibleParagraph( accessibleParagraph ); }
@@ -1108,6 +1167,8 @@ export default class ParallelDOM extends PhetioObject {
    */
   public setAccessibleParagraphContent( accessibleParagraphContent: PDOMValueType ): void {
     if ( accessibleParagraphContent !== this._accessibleParagraphContent ) {
+      const existenceChanged = ( accessibleParagraphContent === null ) !== ( this._accessibleParagraphContent === null );
+
       if ( isTReadOnlyProperty( this._accessibleParagraphContent ) && !this._accessibleParagraphContent.isDisposed ) {
         this._accessibleParagraphContent.unlink( this._onAccessibleParagraphContentChangeListener );
       }
@@ -1116,6 +1177,10 @@ export default class ParallelDOM extends PhetioObject {
 
       if ( isTReadOnlyProperty( accessibleParagraphContent ) ) {
         accessibleParagraphContent.lazyLink( this._onAccessibleParagraphContentChangeListener );
+      }
+
+      if ( existenceChanged ) {
+        this.onPDOMContentChange();
       }
 
       this.invalidatePeerParagraphSiblingContent();

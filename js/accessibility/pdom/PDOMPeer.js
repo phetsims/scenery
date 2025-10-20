@@ -261,11 +261,15 @@ class PDOMPeer {
       this.node._accessibleParagraphDirty = false;
     }
 
-    // If there is an accessible paragraph, create it now. Accessible paragraph does not require a tagName. But assertions are thrown
-    // if this instance has children without a tagName, so one is not created by default.
-    if ( options.accessibleParagraph ) {
+    // If there is an accessible paragraph, create it now. Accessible paragraph does not require a tagName.
+    //
+    // Always create a paragraph element, even if accessibleParagraphContent is missing.
+    // This ensures a top-level element exists for the peer, which is needed for cases
+    // like "forwarding" to other Nodes via callbacksForOtherNodes. In such cases, the
+    // paragraph will be empty because this Node has no content of its own.
+    if ( options.accessibleParagraphContent || options.accessibleParagraph ) {
       this._accessibleParagraphSibling = createElement( PDOMUtils.TAGS.P, false );
-      this.setAccessibleParagraphContent( options.accessibleParagraph );
+      this.setAccessibleParagraphContent( options.accessibleParagraphContent );
     }
 
     // accessibleHeading can be used without a tagName, and it enables PDOM for the Node. If there is no tagName, create one
