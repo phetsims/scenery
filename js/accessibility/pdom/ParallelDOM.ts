@@ -752,7 +752,13 @@ export default class ParallelDOM extends PhetioObject {
       this._accessibleHelpText = null;
     }
 
-    if ( isTReadOnlyProperty( this._accessibleParagraph ) && !this._accessibleParagraph.isDisposed ) {
+    if ( isTReadOnlyProperty( this._accessibleParagraph ) &&
+         !this._accessibleParagraph.isDisposed &&
+
+         // When the accessibleParagraph can be rendered more efficiently, _onPDOMContentChangeListener
+         // will not be linked.
+         this._accessibleParagraph.hasListener( this._onPDOMContentChangeListener )
+    ) {
       this._accessibleParagraph.unlink( this._onPDOMContentChangeListener );
       this._accessibleParagraph = null;
     }
