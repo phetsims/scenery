@@ -264,14 +264,26 @@ class PDOMInstance {
       `addConsecutiveInstances on ${this.toString()} with: ${pdomInstances.map( inst => inst.toString() ).join( ',' )}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
+    const pdomPeer = this.peer!;
+    assert && assert( pdomPeer, 'Peer must be prepared to add consecutive instances.' );
+
     const hadChildren = this.children.length > 0;
 
     Array.prototype.push.apply( this.children, pdomInstances );
 
+    if ( this.children.length > 0 && pdomPeer.getPrimarySibling() === null ) {
+
+      // There are children but the PDOMPeer doesn't have a primary sibling yet. In the last update,
+      // the PDOMPeer/PDOMInstance wasn't aware that it would have children. This may happen when
+      // using accessibleHeading or accessibleParagraph which does not require a tagName. The update
+      // will create a container for us without changing the Node state.
+      pdomPeer.update( false );
+    }
+
     for ( let i = 0; i < pdomInstances.length; i++ ) {
       // Append the container parent to the end (so that, when provided in order, we don't have to resort below
       // when initializing).
-      const placeableSibling = this.peer!.getPlaceableSibling();
+      const placeableSibling = pdomPeer.getPrimarySibling();
       assert && assert( !!placeableSibling, 'Primary sibling must be defined to insert elements.' );
 
       // @ts-expect-error - when PDOMPeer is converted to TS this ts-expect-error can probably be removed
@@ -523,7 +535,8 @@ class PDOMInstance {
     this.children = targetChildren;
 
     // the DOMElement to add the child DOMElements to.
-    const placeableSibling = this.peer!.getPlaceableSibling();
+    const placeableSibling = this.peer!.getPrimarySibling()!;
+    assert && assert( placeableSibling !== null, 'primary sibling required for sort' );
 
     // Ignore DAG for focused trail. We need to know if there is a focused child instance so that we can avoid
     // temporarily detaching the focused element from the DOM. See https://github.com/phetsims/my-solar-system/issues/142
@@ -682,7 +695,9 @@ class PDOMInstance {
 
       // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
       // primary sibling (or its child container)
-      PDOMUtils.removeElements( this.parent!.peer!.getPlaceableSibling(), thisPeer.topLevelElements! );
+      const primarySibling = this.parent!.peer!.getPrimarySibling()!;
+      assert && assert( primarySibling, 'The Peer must have a primary sibling to hold children.' );
+      PDOMUtils.removeElements( primarySibling, thisPeer.topLevelElements! );
 
       for ( let i = 0; i < this.relativeNodes!.length; i++ ) {
         this.relativeNodes![ i ].pdomDisplaysEmitter.removeListener( this.relativeListeners[ i ] );

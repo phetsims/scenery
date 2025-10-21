@@ -272,11 +272,14 @@ class PDOMPeer {
       this.setAccessibleParagraphContent( options.accessibleParagraphContent );
     }
 
-    // accessibleHeading can be used without a tagName, and it enables PDOM for the Node. If there is no tagName, create one
-    // so that children under the heading are added under it by default.
-    // This is done in PDOMPeer instead of on the Node, so that removing accessibleHeading from the Node when there is no
-    // set tagName will fully remove all content from the DOM (clear all PDOMInstances).
-    if ( options.accessibleHeading && !options.tagName ) {
+    // accessibleHeading and accessibleParagraph can be used without a tagName, and that it enables PDOM for the Node.
+    // If there is no tagName, create one so that children are placed under it by default.
+    // This is done in PDOMPeer instead of on the ParallelDOM, so that we do not alter public state.
+    // NOTE: It is posssible that the children check is enough. But there are assumptions in this file that
+    // a component using accessibleHeading always has a tagName for children (like getPlaceableSibling).
+    const headingRequiresContainer = options.accessibleHeading && !options.tagName;
+    const paragraphRequiresContainer = this.pdomInstance.children.length > 0 && !options.tagName;
+    if ( headingRequiresContainer || paragraphRequiresContainer ) {
       options.tagName = PDOMUtils.TAGS.DIV;
     }
 
@@ -433,7 +436,7 @@ class PDOMPeer {
    * @returns {HTMLElement|null}
    */
   getPrimarySibling() {
-    return this._primarySibling;
+    return this._primarySibling || null;
   }
 
   get primarySibling() { return this.getPrimarySibling(); }
@@ -444,7 +447,7 @@ class PDOMPeer {
    * @returns {HTMLElement|null}
    */
   getHeadingSibling() {
-    return this._headingSibling;
+    return this._headingSibling || null;
   }
 
   get headingSibling() { return this.getHeadingSibling(); }
@@ -455,7 +458,7 @@ class PDOMPeer {
    * @returns {HTMLElement|null}
    */
   getLabelSibling() {
-    return this._labelSibling;
+    return this._labelSibling || null;
   }
 
   get labelSibling() { return this.getLabelSibling(); }
@@ -466,7 +469,7 @@ class PDOMPeer {
    * @returns {HTMLElement|null}
    */
   getDescriptionSibling() {
-    return this._descriptionSibling;
+    return this._descriptionSibling || null;
   }
 
   get descriptionSibling() { return this.getDescriptionSibling(); }
@@ -477,7 +480,7 @@ class PDOMPeer {
    * @returns {HTMLElement|null}
    */
   getContainerParent() {
-    return this._containerParent;
+    return this._containerParent || null;
   }
 
   get containerParent() { return this.getContainerParent(); }
