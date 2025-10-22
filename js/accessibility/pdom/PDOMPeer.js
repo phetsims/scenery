@@ -267,7 +267,11 @@ class PDOMPeer {
     // This ensures a top-level element exists for the peer, which is needed for cases
     // like "forwarding" to other Nodes via callbacksForOtherNodes. In such cases, the
     // paragraph will be empty because this Node has no content of its own.
-    if ( options.accessibleParagraphContent || options.accessibleParagraph ) {
+    // If the content is an empty string, we still need to create an element for it, otherwise the element won't
+    // be available when the content is populated without calling update() again.
+    const paragraphContentDefined = options.accessibleParagraphContent !== null && options.accessibleParagraphContent !== undefined;
+    const paragraphDefined = options.accessibleParagraph !== null && options.accessibleParagraph !== undefined;
+    if ( paragraphContentDefined || paragraphDefined ) {
       this._accessibleParagraphSibling = createElement( PDOMUtils.TAGS.P, false );
       this.setAccessibleParagraphContent( options.accessibleParagraphContent );
     }
