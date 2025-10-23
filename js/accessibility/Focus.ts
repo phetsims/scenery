@@ -56,6 +56,10 @@ class Focus {
     this.trail = trail;
   }
 
+  /**
+   * An equality check for Property's valueComparisonStrategy.
+   * This is necessary because Scenery may attempt to set focus to a target that already has focus.
+   */
   public equals( other: Focus ): boolean {
     return this.display === other.display && this.trail.equals( other.trail );
   }
