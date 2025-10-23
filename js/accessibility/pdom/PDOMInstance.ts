@@ -534,6 +534,10 @@ class PDOMInstance {
     // {Array.<PDOMInstance>}
     this.children = targetChildren;
 
+    // No children to sort, so return early. We might get here if a Node has content without a primary sibling
+    // (like by using accessibleParagraph or accessibleHeading).
+    if ( this.children.length === 0 ) { return; }
+
     // the DOMElement to add the child DOMElements to.
     const placeableSibling = this.peer!.getPrimarySibling()!;
     assert && assert( placeableSibling !== null, 'primary sibling required for sort' );
