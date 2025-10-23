@@ -409,7 +409,6 @@ const PDOMUtils = {
       // https://github.com/phetsims/scenery/issues/1309
       const textWithoutBreaks = textContent.replace( /<br>/g, '<br/>' ); // because replaceAll is not supported in es2021
 
-      // TODO: this line must be removed to support i18n Interactive Description, see https://github.com/phetsims/chipper/issues/798
       const textWithoutEmbeddingMarks = stripEmbeddingMarks( textWithoutBreaks );
 
       // Disallow any unfilled template variables to be set in the PDOM.
