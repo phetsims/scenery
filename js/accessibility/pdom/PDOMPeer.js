@@ -322,8 +322,20 @@ class PDOMPeer {
 
     this.orderElements( options );
 
+    // New siblings must remain hidden if the peer already was.
+    if ( this.visible === false ) {
+      for ( let i = 0; i < this.topLevelElements.length; i++ ) {
+        this.setAttributeToElement( 'hidden', '', { element: this.topLevelElements[ i ] } );
+      }
+    }
+
     // The primary sibling (set with Node.tagName) is required for the peer to be visible in the PDOM.
     if ( this._primarySibling ) {
+
+      // If Display.interactive is off, restore the disabled state on the new primary sibling.
+      if ( !this.display.interactive ) {
+        this._primarySibling.disabled = true;
+      }
 
       // assign listeners (to be removed or disconnected during disposal)
       this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
