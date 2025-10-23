@@ -55,6 +55,10 @@ class Focus {
     this.display = display;
     this.trail = trail;
   }
+
+  public equals( other: Focus ): boolean {
+    return this.display === other.display && this.trail.equals( other.trail );
+  }
 }
 
 scenery.register( 'Focus', Focus );

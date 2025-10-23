@@ -23,7 +23,8 @@ export const pdomFocusProperty = new Property<Focus | null>( null, {
   phetioValueType: NullableIO( Focus.FocusIO ),
   phetioState: false,
   phetioFeatured: true,
-  phetioReadOnly: true
+  phetioReadOnly: true,
+  valueComparisonStrategy: 'equalsFunction'
 } );
 
 /**
