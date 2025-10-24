@@ -119,11 +119,17 @@ class HighlightFromNode extends HighlightPath {
       }
 
       const visibleBounds = this.useLocalBounds ? node.getVisibleLocalBounds() : node.getVisibleBounds();
-      assert && assert( visibleBounds.isFinite(), 'node must have finite bounds.' );
-      const dilatedVisibleBounds = visibleBounds.dilated( dilationCoefficient! );
 
-      // Update the line width of the focus highlight based on the transform of the node
-      this.setShape( Shape.bounds( dilatedVisibleBounds ) );
+      // Graceful when a Node has no defined bounds yet or is invisible.
+      if ( !visibleBounds.isFinite() ) {
+        this.setShape( null );
+      }
+      else {
+
+        // Update the line width of the focus highlight based on the transform of the node
+        const dilatedVisibleBounds = visibleBounds.dilated( dilationCoefficient! );
+        this.setShape( Shape.bounds( dilatedVisibleBounds ) );
+      }
     };
     this.observedBoundsProperty.link( this.boundsListener );
   }
