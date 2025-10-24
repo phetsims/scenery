@@ -5,6 +5,8 @@
  * the node. The focusHighlight will update as the Node's bounds changes. Handles transformations so that when the
  * source node is transformed, the HighlightFromNode will be updated as well.
  *
+ * When the Node has no defined bounds, the highlight will have no shape.
+ *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
