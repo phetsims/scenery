@@ -485,6 +485,13 @@ const PDOMUtils = {
   },
 
   /**
+   * Returns true if the provided level is a valid HTML heading level (1-6).
+   */
+  isValidHeadingLevel( level: number ): boolean {
+    return Number.isInteger( level ) && level >= 1 && level <= 6;
+  },
+
+  /**
    * Helper function to add multiple elements as children to a parent
    *
    * @param element - to add children to

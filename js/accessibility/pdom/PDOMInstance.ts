@@ -226,7 +226,7 @@ class PDOMInstance {
 
       // If the peer has a heading level after its update, then we need to set the heading level of this instance.
       this.headingLevel = this.peer!.headingSibling ? this.pendingHeadingLevel : null;
-      assert && assert( this.headingLevel === null || ( this.headingLevel >= 1 && this.headingLevel <= 6 ), `Heading level of h${this.headingLevel} is invalid` );
+      assert && assert( this.headingLevel === null || PDOMUtils.isValidHeadingLevel( this.headingLevel ), `Heading level of h${this.headingLevel} is invalid` );
 
       // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for pdomDisplays
       // so we can initialize our invisibleCount and add listeners.
