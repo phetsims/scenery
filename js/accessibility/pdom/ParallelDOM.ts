@@ -3249,7 +3249,8 @@ export default class ParallelDOM extends PhetioObject {
     const alertWhenNotDisplayed = providedOptions?.alertWhenNotDisplayed ?? false;
 
     // Nothing to do if there is no content.
-    if ( utterance === null || Utterance.alertableToText( utterance ) === '' ) {
+    const alertableText = Utterance.alertableToText( utterance );
+    if ( utterance === null || alertableText === null || alertableText === '' ) {
       return;
     }
 
