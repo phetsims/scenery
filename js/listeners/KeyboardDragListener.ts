@@ -486,6 +486,10 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       this.upKeyDownProperty.dispose();
       this.downKeyDownProperty.dispose();
 
+      this.dragStartAction.dispose();
+      this.dragEndAction.dispose();
+      this.dragAction.dispose();
+
       this.callbackTimer.dispose();
       if ( stepTimer.hasListener( this.boundStepListener ) ) {
         stepTimer.removeListener( this.boundStepListener );
