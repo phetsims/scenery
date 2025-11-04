@@ -391,12 +391,15 @@ type RemovePDOMClassOptions = {
   elementName?: string;
 };
 
+// Queue behavior for the response.
+// 'interrupt' - interrupt queue and any other responses and speak immediately (default)
+// 'queue' - add to the end of the queue
+export type DescriptionResponseAlertBehavior = 'interrupt' | 'queue';
+
 type DescriptionResponseOptions = {
 
   // Queue behavior for the response.
-  // 'interrupt' - interrupt queue and any other responses and speak immediately (default)
-  // 'queue' - add to the end of the queue
-  alertBehavior?: 'interrupt' | 'queue';
+  alertBehavior?: DescriptionResponseAlertBehavior;
 
   // If true, the description will be spoken even if the Node is invisible or not attached to
   // a Display. Default is false.
