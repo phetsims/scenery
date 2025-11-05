@@ -819,7 +819,12 @@ export default class PressListener extends EnabledComponent implements TInputLis
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} enter` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    this.overPointers.push( event.pointer );
+    // Workaround for https://github.com/phetsims/vector-addition/issues/348 recommended by JO.
+    // We are sometimes getting calls to enter without a call to exit in between. And that results in
+    // an assertion failure when PressListener attempts to add a duplicate listener to pointer.isDownProperty.
+    if ( !this.overPointers.includes( event.pointer ) ) {
+      this.overPointers.push( event.pointer );
+    }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
