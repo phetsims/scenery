@@ -14,6 +14,7 @@ import type Node from '../nodes/Node.js';
 import Focus from './Focus.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
+import scenery from '../scenery.js';
 
 export const pdomFocusProperty = new Property<Focus | null>( null, {
   tandem: Tandem.GENERAL_MODEL.createTandem( 'pdomFocusProperty' ),
@@ -39,3 +40,6 @@ export const getPDOMFocusedNode = (): Node | null => {
   }
   return focusedNode;
 };
+
+scenery.register( 'pdomFocusProperty', pdomFocusProperty );
+scenery.register( 'getPDOMFocusedNode', getPDOMFocusedNode );
