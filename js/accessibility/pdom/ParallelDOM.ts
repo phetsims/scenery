@@ -3638,6 +3638,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   public static forwardAccessibleName( node: ParallelDOM, otherNode: ParallelDOM ): void {
     ParallelDOM.useDefaultTagName( node );
+    ParallelDOM.useDefaultTagName( otherNode );
     node.accessibleNameBehavior = ( node: Node, options: ParallelDOMOptions, accessibleName: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => {
       callbacksForOtherNodes.push( () => {
         otherNode.accessibleName = accessibleName;
@@ -3653,6 +3654,7 @@ export default class ParallelDOM extends PhetioObject {
    */
   public static forwardHelpText( node: ParallelDOM, otherNode: ParallelDOM ): void {
     ParallelDOM.useDefaultTagName( node );
+    ParallelDOM.useDefaultTagName( otherNode );
     node.accessibleHelpTextBehavior = ( node: Node, options: ParallelDOMOptions, accessibleHelpText: PDOMValueType, callbacksForOtherNodes: ( () => void )[] ) => {
       callbacksForOtherNodes.push( () => {
         otherNode.accessibleHelpText = accessibleHelpText;
