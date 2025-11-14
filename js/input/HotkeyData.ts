@@ -9,7 +9,7 @@
 
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import Property from '../../../axon/js/Property.js';
-import { TReadOnlyProperty, isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import { isTReadOnlyProperty, TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import InstanceRegistry from '../../../phet-core/js/documentation/InstanceRegistry.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import scenery from '../scenery.js';
@@ -56,7 +56,8 @@ export default class HotkeyData {
 
   public constructor( providedOptions: HotkeyDataOptions ) {
     assert && assert( providedOptions.binderName || providedOptions.keyboardHelpDialogLabelStringProperty,
-      'You must provide some label for the hotkey' );
+      'You must provide some label for the hotkey. If not used in a keyboard help dialog, provide a binderName for' +
+      'auto-generated team-internal documentation.' );
 
     const options = optionize<HotkeyDataOptions>()( {
       keyboardHelpDialogPDOMLabelStringProperty: null,
