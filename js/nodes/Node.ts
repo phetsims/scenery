@@ -5936,6 +5936,21 @@ class Node extends ParallelDOM {
   }
 
   /**
+   * Transforms a delta from our local coordinate frame to the global coordinate frame.
+   *
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
+   * with an assertion (since the transform wouldn't be uniquely defined).
+   */
+  public localToGlobalDelta( delta: Vector2 ): Vector2 {
+    const referencePoint1 = new Vector2( 0, 0 );
+    const referencePoint2 = referencePoint1.plus( delta );
+
+    const globalPoint1 = this.localToGlobalPoint( referencePoint1 );
+    const globalPoint2 = this.localToGlobalPoint( referencePoint2 );
+    return globalPoint2.minus( globalPoint1 );
+  }
+
+  /**
    * Transforms a point from the global coordinate frame to our local coordinate frame.
    *
    * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
