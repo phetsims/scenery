@@ -101,7 +101,7 @@ class PDOMPeer {
     // (because it hasn't been set yet).
     this.visible = null;
 
-    // @private {boolean|null} - whether or not the primary sibling of this PDOMPeer can receive focus.
+    // @private {boolean|null} - whether or not the primary sibling can receive focus.
     this.focusable = null;
 
     // @private {HTMLElement|null} - Optional label/description elements
@@ -447,7 +447,7 @@ class PDOMPeer {
   }
 
   /**
-   * Get the primary sibling element for the peer
+   * Get the primary sibling HTMLElement for the peer
    * @public
    * @returns {HTMLElement|null}
    */
@@ -608,7 +608,7 @@ class PDOMPeer {
   }
 
   /**
-   * Set the input value on the peer's primary sibling element. The value attribute must be set as a Property to be
+   * Set the input value on the peer's primary sibling HTMLElement. The value attribute must be set as a Property to be
    * registered correctly by an assistive device. If null, the attribute is removed so that we don't clutter the DOM
    * with value="null" attributes.
    *
@@ -962,7 +962,7 @@ class PDOMPeer {
   }
 
   /**
-   * Focus the primary sibling of the peer. If this peer is not visible, this is a no-op (native behavior).
+   * Focus the primary sibling. If this peer is not visible, this is a no-op (native behavior).
    * @public (scenery-internal)
    */
   focus() {
@@ -976,7 +976,7 @@ class PDOMPeer {
   }
 
   /**
-   * Blur the primary sibling of the peer.
+   * Blur the primary sibling.
    * @public (scenery-internal)
    */
   blur() {

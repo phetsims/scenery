@@ -274,7 +274,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
 
 type ParallelDOMSelfOptions = {
   focusable?: boolean | null; // Sets whether the Node can receive keyboard focus
-  tagName?: string | null; // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
+  tagName?: string | null; // Sets the tag name for the primary sibling in the parallel DOM, should be first
 
   /*
    * Higher Level API Functions
@@ -296,22 +296,22 @@ type ParallelDOMSelfOptions = {
   containerTagName?: string | null; // Sets the tag name for an [optional] element that contains this Node's siblings
   containerAriaRole?: string | null; // Sets the ARIA role for the container parent DOM element
 
-  innerContent?: PDOMValueType; // Sets the inner text or HTML for a Node's primary sibling element
-  inputType?: string | null; // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
-  inputValue?: PDOMValueType | number; // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
+  innerContent?: PDOMValueType; // Sets the inner text or HTML for a Node's primary sibling
+  inputType?: string | null; // Sets the input type for the primary sibling, only relevant if tagName is 'input'
+  inputValue?: PDOMValueType | number; // Sets the input value for the primary sibling, only relevant if tagName is 'input'
   pdomChecked?: boolean; // Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
   pdomNamespace?: string | null; // Sets the namespace for the primary element
-  ariaLabel?: PDOMValueType; // Sets the value of the 'aria-label' attribute on the primary sibling of this Node
-  ariaRole?: string | null; // Sets the ARIA role for the primary sibling of this Node
+  ariaLabel?: PDOMValueType; // Sets the value of the 'aria-label' attribute on the primary sibling
+  ariaRole?: string | null; // Sets the ARIA role for the primary sibling
   accessibleRoleDescription?: PDOMValueType; // Sets the aria-roledescription for the primary sibling
 
   labelTagName?: string | null; // Sets the tag name for the DOM element sibling labeling this Node
   labelContent?: PDOMValueType; // Sets the label content for the Node
-  appendLabel?: boolean; // Sets the label sibling to come after the primary sibling in the PDOM
+  appendLabel?: boolean; // Sets the label sibling to come after the primary sibling
 
   descriptionTagName?: string | null; // Sets the tag name for the DOM element sibling describing this Node
   descriptionContent?: PDOMValueType; // Sets the description content for the Node
-  appendDescription?: boolean; // Sets the description sibling to come after the primary sibling in the PDOM
+  appendDescription?: boolean; // Sets the description sibling to come after the primary sibling
 
   accessibleParagraphContent?: PDOMValueType; // Sets the accessible paragraph content for the Node
 
@@ -333,7 +333,7 @@ type ParallelDOMSelfOptions = {
 
   positionInPDOM?: boolean; // Sets whether the Node's DOM elements are positioned in the viewport
 
-  pdomTransformSourceNode?: Node | null; // { sets the Node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
+  pdomTransformSourceNode?: Node | null; // { sets the Node that controls primary sibling positioning in the display, see setPDOMTransformSourceNode()
 };
 
 // Most options use null for their default behavior, see the setters for each option for a description of how null
@@ -457,14 +457,14 @@ export default class ParallelDOM extends PhetioObject {
   // type 'radio' and 'checkbox'
   private _pdomChecked: boolean;
 
-  // By default the label will be prepended before the primary sibling in the PDOM. This
+  // By default the label will be prepended before the primary sibling. This
   // option allows you to instead have the label added after the primary sibling. Note: The label will always
   // be in front of the description sibling. If this flag is set with `appendDescription: true`, the order will be
   // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
   // containerParent.
   private _appendLabel: boolean;
 
-  // By default the description will be prepended before the primary sibling in the PDOM. This
+  // By default the description will be prepended before the primary sibling. This
   // option allows you to instead have the description added after the primary sibling. Note: The description
   // will always be after the label sibling. If this flag is set with `appendLabel: true`, the order will be
   // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
@@ -1313,7 +1313,7 @@ export default class ParallelDOM extends PhetioObject {
    * accessibleHelpTextBehavior is a function that will set the appropriate options on this Node to get the desired help text.
    *
    * The default value does the best it can to create the help text based on the values for other ParallelDOM options.
-   * Usually, this is a paragraph element that comes after the Node's primary sibling in the PDOM. If you need to
+   * Usually, this is a paragraph element that comes after the Node's primary sibling. If you need to
    * customize this behavior, you can provide your own function to meet your requirements. If you provide your own
    * function, it is up to you to make sure that the help text is properly being set and is discoverable by AT.
    */
@@ -1343,7 +1343,7 @@ export default class ParallelDOM extends PhetioObject {
   /***********************************************************************************************************/
 
   /**
-   * Set the tag name for the primary sibling in the PDOM. DOM element tag names are read-only, so this
+   * Set the tag name for the primary sibling. DOM element tag names are read-only, so this
    * function will create a new DOM element each time it is called for the Node's PDOMPeer and
    * reset the pdom content.
    *
@@ -1466,7 +1466,7 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * By default the label will be prepended before the primary sibling in the PDOM. This
+   * By default the label will be prepended before the primary sibling. This
    * option allows you to instead have the label added after the primary sibling. Note: The label will always
    * be in front of the description sibling. If this flag is set with `appendDescription`, the order will be
    *
