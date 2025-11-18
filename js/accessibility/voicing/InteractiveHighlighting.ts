@@ -270,9 +270,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
 
         // Each display has its own focusManager.pointerHighlightsVisibleProperty, so we need to go through all of them
         // and update after this enabled change
-        const trailIds = Object.keys( this.displays );
-        for ( let i = 0; i < trailIds.length; i++ ) {
-          const display = this.displays[ trailIds[ i ] ];
+        for ( const display of this.getUniqueDisplays() ) {
           this._interactiveHighlightingEnabledListener( display.focusManager.pointerHighlightsVisibleProperty.value );
         }
       }
@@ -301,9 +299,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
       private isInteractiveHighlightActivated(): boolean {
         let activated = false;
 
-        const trailIds = Object.keys( this.displays );
-        for ( let i = 0; i < trailIds.length; i++ ) {
-          const display = this.displays[ trailIds[ i ] ];
+        for ( const display of this.getUniqueDisplays() ) {
 
           // The highlight is activated if
           // 1) The pointer highlights are visible (and the feature is enabled)
@@ -353,15 +349,40 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
 
         this._forwardingHighlightForPointer = null;
 
-        // remove listeners on displays and remove Displays from the map
+
+        // Unlink all of this Node's listeners from each unique Display.
+        for ( const display of this.getUniqueDisplays() ) {
+          this.onDisplayRemoved( display );
+        }
+
+        // Remove entries from the map.
         const trailIds = Object.keys( this.displays );
         for ( let i = 0; i < trailIds.length; i++ ) {
-          const display = this.displays[ trailIds[ i ] ];
-          this.onDisplayRemoved( display );
           delete this.displays[ trailIds[ i ] ];
         }
 
         super.dispose && super.dispose();
+      }
+
+      /**
+       * Returns a unique array of Displays associated with this node.
+       * Ensures no duplicate displays, which can occur before `updateDisplay` is called or in DAG structures.
+       * Asserts that at most one display is associated with the node, since only one display per Nodde is currently
+       * supported.
+       */
+      private getUniqueDisplays(): Display[] {
+        const allDisplays = Object.values( this.displays );
+
+        const uniqueDisplays: Display[] = [];
+        for ( let i = 0; i < allDisplays.length; i++ ) {
+          if ( !uniqueDisplays.includes( allDisplays[ i ] ) ) {
+            uniqueDisplays.push( allDisplays[ i ] );
+          }
+        }
+
+        assert && assert( uniqueDisplays.length < 2, 'InteractiveHighlighting currently only supports at most one Display.' );
+
+        return uniqueDisplays;
       }
 
       /**
@@ -380,9 +401,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
 
           // trail to the group highlight Node
           const rootToGroupNode = event.trail.subtrailTo( groupHighlightNode );
-          const displays = Object.values( this.displays );
-          for ( let i = 0; i < displays.length; i++ ) {
-            const display = displays[ i ];
+          for ( const display of this.getUniqueDisplays() ) {
 
             // only set focus if current Pointer focus is not defined (from a more descendant Node)
             if ( display.focusManager.pointerFocusProperty.value === null ) {
@@ -403,10 +422,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
 
         let lockPointer = false;
 
-        const displays = Object.values( this.displays );
-        for ( let i = 0; i < displays.length; i++ ) {
-          const display = displays[ i ];
-
+        for ( const display of this.getUniqueDisplays() ) {
           if ( display.focusManager.pointerFocusProperty.value === null ||
                !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
 
@@ -432,9 +448,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
       private _onPointerMove( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
         let lockPointer = false;
 
-        const displays = Object.values( this.displays );
-        for ( let i = 0; i < displays.length; i++ ) {
-          const display = displays[ i ];
+        for ( const display of this.getUniqueDisplays() ) {
 
           // the SceneryEvent might have gone through a descendant of this Node
           const rootToSelf = event.trail.subtrailTo( this );
@@ -465,9 +479,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
        */
       private _onPointerExited( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
-        const displays = Object.values( this.displays );
-        for ( let i = 0; i < displays.length; i++ ) {
-          const display = displays[ i ];
+        for ( const display of this.getUniqueDisplays() ) {
           display.focusManager.pointerFocusProperty.set( null );
 
           // An exit event may come from a Node along the trail becoming invisible or unpickable. In that case unlock
@@ -495,9 +507,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
         if ( this._pointer === null ) {
           let lockPointer = false;
 
-          const displays = Object.values( this.displays );
-          for ( let i = 0; i < displays.length; i++ ) {
-            const display = displays[ i ];
+          for ( const display of this.getUniqueDisplays() ) {
             const focus = display.focusManager.pointerFocusProperty.value;
             const locked = !!display.focusManager.lockedPointerFocusProperty.value;
 
@@ -558,9 +568,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
        */
       private _onPointerRelease( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
-        const displays = Object.values( this.displays );
-        for ( let i = 0; i < displays.length; i++ ) {
-          const display = displays[ i ];
+        for ( const display of this.getUniqueDisplays() ) {
           display.focusManager.lockedPointerFocusProperty.value = null;
 
           // Unlink the listener that was watching for the lockedPointerFocusProperty to be cleared externally
@@ -580,9 +588,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
        */
       private _onPointerCancel( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
-        const displays = Object.values( this.displays );
-        for ( let i = 0; i < displays.length; i++ ) {
-          const display = displays[ i ];
+        for ( const display of this.getUniqueDisplays() ) {
           display.focusManager.pointerFocusProperty.set( null );
         }
 
@@ -631,20 +637,21 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
        * (scenery-internal)
        */
       public unlockHighlight(): void {
-        Object.values( this.displays ).forEach( display => {
+        this.getUniqueDisplays().forEach( display => {
           display.focusManager.pointerFocusProperty.value = null;
         } );
         this.handleLockedPointerFocusCleared( null );
       }
 
       public forwardInteractiveHighlight( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
-        if ( Object.values( this.displays ).length === 0 ) {
+        const uniqueDisplays = this.getUniqueDisplays();
+        if ( uniqueDisplays.length === 0 ) {
 
           // If this target is not displayed, try to activate when the Node is added to the scene graph.
           this._forwardingHighlightForPointer = event.pointer;
         }
         else {
-          Object.values( this.displays ).forEach( display => {
+          uniqueDisplays.forEach( display => {
 
             // Only try to forward a highlight if the pointer Focus isn't already set.
             if ( display.focusManager.pointerFocusProperty.value === null ) {
@@ -666,9 +673,7 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
         // This strategy does not work for DAG, but it is graceful otherwise.
         if ( trails.length === 1 ) {
           const trail = trails[ 0 ];
-          const displays = Object.values( this.displays );
-          for ( let i = 0; i < displays.length; i++ ) {
-            const display = displays[ i ];
+          for ( const display of this.getUniqueDisplays() ) {
             const forwardFocus = new Focus( display, trail );
 
             // Set the pointer focus to this new target and lock.
