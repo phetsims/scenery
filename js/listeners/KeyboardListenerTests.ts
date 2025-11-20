@@ -13,6 +13,7 @@ import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import KeyboardListener from '../listeners/KeyboardListener.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import Node from '../nodes/Node.js';
+import type SceneryEvent from '../input/SceneryEvent.js';
 
 QUnit.module( 'KeyboardListener', {
   before() {
@@ -49,7 +50,7 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
   let callbackFired = false;
   const listener = new KeyboardListener( {
-    keys: [ 'enter' ],
+    keys: [ 'a' ],
     fire: () => {
       assert.ok( !callbackFired, 'callback cannot be fired' );
       callbackFired = true;
@@ -84,9 +85,9 @@ QUnit.test( 'KeyboardListener Tests', assert => {
   assert.ok( !callbackFired, 'should not fire on tab' );
   triggerKeyupEvent( domElementA, KeyboardUtils.KEY_TAB );
 
-  triggerKeydownEvent( domElementA, KeyboardUtils.KEY_ENTER );
-  assert.ok( callbackFired, 'should fire on enter' );
-  triggerKeyupEvent( domElementA, KeyboardUtils.KEY_ENTER );
+  triggerKeydownEvent( domElementA, KeyboardUtils.KEY_A );
+  assert.ok( callbackFired, 'should fire on "a"' );
+  triggerKeyupEvent( domElementA, KeyboardUtils.KEY_A );
 
   //////////////////////////////////////////////////////
   // Test an overlap of keys in two keygroups. The callback should fire for only the keygroup where every key
@@ -159,6 +160,65 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 
   document.body.removeChild( display.domElement );
   display.dispose();
+} );
+
+QUnit.test( 'KeyboardListener fireOnClick mode respects enabled state', assert => {
+
+  let fireCount = 0;
+  let pressCalled = false;
+  let releaseCalled = false;
+
+  const listener = new KeyboardListener( {
+    fireOnClick: true,
+    fire: () => fireCount++,
+    press: () => { pressCalled = true; },
+    release: () => { releaseCalled = true; }
+  } );
+
+  const createClickEvent = () => ( {
+    domEvent: new MouseEvent( 'click' )
+  } ) as unknown as SceneryEvent;
+
+  listener.click( createClickEvent() );
+  assert.strictEqual( fireCount, 1, 'fires when enabled' );
+  assert.ok( !pressCalled, 'press is never called in click mode' );
+  assert.ok( !releaseCalled, 'release is never called in click mode' );
+
+  listener.enabledProperty.value = false;
+  listener.click( createClickEvent() );
+  assert.strictEqual( fireCount, 1, 'disabled prevents firing' );
+
+  listener.enabledProperty.value = true;
+  listener.click( createClickEvent() );
+  assert.strictEqual( fireCount, 2, 'fires again when enabled' );
+
+  listener.dispose();
+} );
+
+QUnit.test( 'KeyboardListener Enter/Space assertion overrides', assert => {
+
+  window.assert && assert.throws( () => {
+    const badListener = new KeyboardListener( {
+      keys: [ 'enter' ],
+      fire: _.noop
+    } );
+    badListener.dispose();
+  }, 'enter key should require click activation or allowEnterSpaceWithoutApplicationRole' );
+
+  const allowListener = new KeyboardListener( {
+    keys: [ 'enter' ],
+    allowEnterSpaceWithoutApplicationRole: true,
+    fire: _.noop
+  } );
+  allowListener.dispose();
+
+  const clickListener = new KeyboardListener( {
+    fireOnClick: true,
+    fire: _.noop
+  } );
+
+  assert.strictEqual( clickListener.hotkeys.length, 0, 'click mode skips hotkeys' );
+  clickListener.dispose();
 } );
 
 //

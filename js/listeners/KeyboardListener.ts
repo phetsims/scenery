@@ -38,6 +38,13 @@
  * By default, the fire callback will fire when the last key is pressed down. See additional options for firing on key
  * release or other press and hold behavior.
  *
+ * **Click activation for assistive technology**
+ * Some screen readers (e.g. NVDA with certain controls) sends only "click" events instead of keyboard events.
+ * Set `fireOnClick: true` to let KeyboardListener listen for clicks instead of hotkeys. Only `fire` runs in this
+ * mode and `press/release` are skipped. Click activation is the preferred way to expose Enter/Space behavior to AT
+ * users. There are cases where you still want to use keyboard events for Enter/Space (e.g. a Node with
+ * ariaRole="application" or other roles that allow keyboard events). See the `allowEnterSpaceWithoutApplicationRole: true` option.
+ *
  * **Important Modifier Key Behavior**
  * Modifier keys prevent other key combinations from firing their behavior if they are pressed down.
  * For example, if you have a listener with 'shift+t' and 'y', pressing 'shift' will prevent 'y' from firing.
@@ -87,7 +94,7 @@ import EventContext from '../input/EventContext.js';
 import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
 import type { HotkeyFireOnHoldTiming, OverlapBehavior } from '../input/Hotkey.js';
 import Hotkey from '../input/Hotkey.js';
-import type { OneKeyStroke } from '../input/KeyDescriptor.js';
+import KeyDescriptor, { OneKeyStroke } from '../input/KeyDescriptor.js';
 import PDOMPointer from '../input/PDOMPointer.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import type TInputListener from '../input/TInputListener.js';
@@ -108,7 +115,7 @@ type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
   keyStringProperties?: TReadOnlyProperty<OneKeyStroke>[] | null;
 
   // Called when the listener detects that the set of keys are pressed.
-  fire?: ( event: KeyboardEvent | null, keysPressed: Keys[number], listener: KeyboardListener<Keys> ) => void;
+  fire?: ( event: KeyboardEvent | MouseEvent | null, keysPressed: Keys[number], listener: KeyboardListener<Keys> ) => void;
 
   // Called when the listener detects that the set of keys are pressed. Press is always called on the first press of
   // keys, but does not continue with fire-on-hold behavior. Will be called before fire if fireOnDown is true.
@@ -117,6 +124,16 @@ type KeyboardListenerSelfOptions<Keys extends readonly OneKeyStroke[ ]> = {
   // Called when the listener detects that the set of keys have been released. keysPressed may be null
   // in cases of interruption.
   release?: ( event: KeyboardEvent | null, keysPressed: Keys[number] | null, listener: KeyboardListener<Keys> ) => void;
+
+  // Enables click activation mode. When true, the listener skips hotkey creation and only calls `fire` when the target
+  // receives a click (Enter/Space or some other press from assistive technology). `press`/`release` never run in this
+  // mode.
+  fireOnClick?: boolean;
+
+  // Override for the Enter/Space assertion. When the target Node uses the ariaRole="application", keyboard events
+  // are expected. Otherwise, Enter/Space should be handled with click activation for assistive technology. An error
+  // will be thrown to catch this. Set this option to true to disable the assertion. Do this with caution.
+  allowEnterSpaceWithoutApplicationRole?: boolean;
 
   // Called when the listener target receives focus.
   focus?: ( listener: KeyboardListener<Keys> ) => void;
@@ -150,7 +167,7 @@ export type KeyboardListenerOptions<Keys extends readonly OneKeyStroke[]> = Keyb
 class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComponent implements TInputListener {
 
   // from options
-  private readonly _fire: ( event: KeyboardEvent | null, keysPressed: Keys[number], listener: KeyboardListener<Keys> ) => void;
+  private readonly _fire: ( event: KeyboardEvent | MouseEvent | null, keysPressed: Keys[number], listener: KeyboardListener<Keys> ) => void;
   private readonly _press: ( event: KeyboardEvent | null, keysPressed: Keys[number], listener: KeyboardListener<Keys> ) => void;
   private readonly _release: ( event: KeyboardEvent | null, keysPressed: Keys[number] | null, listener: KeyboardListener<Keys> ) => void;
   private readonly _focus: ( listener: KeyboardListener<Keys> ) => void;
@@ -161,11 +178,18 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   public readonly fireOnHoldCustomDelay: number;
   public readonly fireOnHoldCustomInterval: number;
   private readonly overlapBehavior: OverlapBehavior;
+  private readonly fireOnClick: boolean;
+  private readonly allowEnterSpaceWithoutApplicationRole: boolean;
+
+  // The validation state for enter/space assertion, to avoid iterating over the keys every event.
+  private enterAndSpaceValidated = false;
 
   public readonly hotkeys: Hotkey[];
 
   // A Property that is true when any of the keys
   public readonly isPressedProperty: TReadOnlyProperty<boolean>;
+
+  private readonly clickIsPressedDependency: Property<boolean> | null = null;
 
   // A Property that contains all the Property<KeyDescriptor> that are currently pressed down.
   public readonly pressedKeyStringPropertiesProperty: TProperty<TReadOnlyProperty<OneKeyStroke>[]>;
@@ -179,12 +203,18 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     // You can either provide keys directly OR provide a list of KeyDescriptor Properties. You cannot provide both.
     assertMutuallyExclusiveOptions( providedOptions, [ 'keys' ], [ 'keyStringProperties' ] );
 
+    // You can provide keys/keyStringProperties OR fireOnClick, but not both. Note that keys and keyStringProperties
+    // are mutually exclusive themselves with the above assertion.
+    assertMutuallyExclusiveOptions( providedOptions, [ 'keys', 'keyStringProperties' ], [ 'fireOnClick' ] );
+
     const options = optionize<KeyboardListenerOptions<Keys>, KeyboardListenerSelfOptions<Keys>, EnabledComponentOptions>()( {
       keys: null,
       keyStringProperties: null,
       fire: _.noop,
       press: _.noop,
       release: _.noop,
+      fireOnClick: false,
+      allowEnterSpaceWithoutApplicationRole: false,
       focus: _.noop,
       blur: _.noop,
       fireOnDown: true,
@@ -213,12 +243,26 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.fireOnHoldCustomInterval = options.fireOnHoldCustomInterval;
     this.overlapBehavior = options.overlapBehavior;
 
-    // convert the provided keys to data that we can respond to with scenery's Input system
-    this.hotkeys = this.createHotkeys( options.keys, options.keyStringProperties );
+    // If activating on click, do not create hotkeys.
+    let pressedDependencies: TReadOnlyProperty<boolean>[];
+    if ( !options.fireOnClick ) {
 
-    this.isPressedProperty = DerivedProperty.or( this.hotkeys.map( hotkey => hotkey.isPressedProperty ) );
+      // convert the provided keys to data that we can respond to with scenery's Input system
+      this.hotkeys = this.createHotkeys( options.keys, options.keyStringProperties );
+      pressedDependencies = this.hotkeys.map( hotkey => hotkey.isPressedProperty );
+    }
+    else {
+      this.hotkeys = [];
+
+      this.clickIsPressedDependency = new Property( false );
+      pressedDependencies = [ this.clickIsPressedDependency ];
+    }
+
+    this.isPressedProperty = DerivedProperty.or( pressedDependencies );
     this.pressedKeyStringPropertiesProperty = new Property( [] );
     this.interrupted = false;
+    this.fireOnClick = options.fireOnClick;
+    this.allowEnterSpaceWithoutApplicationRole = options.allowEnterSpaceWithoutApplicationRole;
 
     this.enabledPropertyListener = this.onEnabledPropertyChange.bind( this );
     this.enabledProperty.lazyLink( this.enabledPropertyListener );
@@ -245,6 +289,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.hotkeys.forEach( hotkey => hotkey.dispose() );
     this.isPressedProperty.dispose();
     this.pressedKeyStringPropertiesProperty.dispose();
+    this.clickIsPressedDependency?.dispose();
 
     this.enabledProperty.unlink( this.enabledPropertyListener );
 
@@ -257,6 +302,32 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
     event.pointer.reserveForKeyboardDrag();
+
+    // Validate enter/space usage assertion once per listener. This is done in the keydown event instead of the Hotkey
+    // because Hotkey has no access to the SceneryEvent or trail.
+    if ( assert && !this.enterAndSpaceValidated ) {
+      this.enterAndSpaceValidated = true;
+
+      // NOTE: We may want to add other roles here if this check is not wide enough.
+      const trailHasApplicationRole = event.trail.nodes.some( node => node.ariaRole === 'application' );
+
+      if ( !trailHasApplicationRole ) {
+        if ( !this.allowEnterSpaceWithoutApplicationRole && !this.fireOnClick ) {
+          const keysToValidate = this.hotkeys.map( hotkey => hotkey.keyStringProperty.value );
+
+          const hasEnterOrSpace = keysToValidate.some( keyString => {
+            const keyDescriptor = KeyDescriptor.keyStrokeToKeyDescriptor( keyString );
+            return keyDescriptor.key === 'enter' || keyDescriptor.key === 'space';
+          } );
+
+          assert && assert( !hasEnterOrSpace,
+            'KeyboardListener with enter/space should often be handled with click activation for assistive' +
+            'technology. Set fireOnClick: true, or allowEnterSpaceWithoutApplicationRole: true if the listener is added to a Node ' +
+            'with ariaRole: "application".'
+          );
+        }
+      }
+    }
   }
 
   /**
@@ -283,6 +354,15 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    */
   public cancel(): void {
     this.handleInterrupt();
+  }
+
+  public click( event: SceneryEvent ): void {
+    if ( this.fireOnClick && this.enabled ) {
+      assert && assert( this.clickIsPressedDependency, 'clickIsPressedDependency should be defined in click activation mode' );
+      this.clickIsPressedDependency!.value = true;
+      this._fire( ( event.domEvent as MouseEvent | null ), 'click', this );
+      this.clickIsPressedDependency!.value = false;
+    }
   }
 
   /**

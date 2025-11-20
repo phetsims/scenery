@@ -39,6 +39,7 @@ export type AllowedKeysString = `${AllowedKeys}`;
 export type OneKeyStrokeEntry = `${AllowedKeys}` | `${IgnoreModifierKey}+${EnglishKey}` | `${IgnoreOtherModifierKeys}+${EnglishKey}`;
 
 export type OneKeyStroke =
+  'click' | // Special case for when KeyboardListener fires with click events. Do not use as a key.
   `${AllowedKeys}` | // e.g. 't'
   `${ModifierKey}+${AllowedKeys}` | // e.g. 'shift+t'
   `${ModifierKey}+${ModifierKey}+${AllowedKeys}` | // e.g. 'ctrl+shift+t'
