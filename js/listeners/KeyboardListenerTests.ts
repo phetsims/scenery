@@ -202,6 +202,15 @@ QUnit.test( 'KeyboardListener Enter/Space assertion overrides', assert => {
       keys: [ 'enter' ],
       fire: _.noop
     } );
+
+    const nodeWithClickSemantics = new Node( { tagName: 'button' } );
+    nodeWithClickSemantics.addInputListener( badListener );
+
+    // trigger a keydown event for enter
+    const domElement = nodeWithClickSemantics.pdomInstances[ 0 ].peer!.primarySibling!;
+    triggerKeydownEvent( domElement, KeyboardUtils.KEY_ENTER );
+
+    nodeWithClickSemantics.dispose();
     badListener.dispose();
   }, 'enter key should require click activation or allowEnterSpaceWithoutApplicationRole' );
 
