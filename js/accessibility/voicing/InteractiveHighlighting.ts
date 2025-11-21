@@ -726,20 +726,53 @@ const InteractiveHighlighting = <SuperType extends Constructor<Node>>( Type: Sup
         const uniqueId = instance.trail!.uniqueId;
 
         if ( added ) {
-          const display = instance.display!;
-          this.displays[ uniqueId ] = display;
-          this.onDisplayAdded( display );
+          const displayToAdd = instance.display!;
+          this.displays[ uniqueId ] = displayToAdd;
+          this.onDisplayAdded( displayToAdd );
         }
         else {
           assert && assert( instance.node, 'should have a node' );
-          const display = this.displays[ uniqueId ];
-          assert && assert( display, `interactive highlighting does not have a Display for removed instance: ${uniqueId}` );
+          const displayToRemove = this.displays[ uniqueId ];
+          assert && assert( displayToRemove, `interactive highlighting does not have a Display for removed instance: ${uniqueId}` );
 
           // If the node was disposed, this display reference has already been cleaned up, but instances are updated
           // (disposed) on the next frame after the node was disposed. Only unlink if there are no more instances of
           // this node;
-          instance.node!.instances.length === 0 && this.onDisplayRemoved( display );
+          instance.node!.instances.length === 0 && this.onDisplayRemoved( displayToRemove );
           delete this.displays[ uniqueId ];
+        }
+
+        const display = instance.display;
+        const lockedPointerFocus = display.focusManager.lockedPointerFocusProperty.value;
+
+        // If a locked highlight currently targets this node, retarget it when the instance changes.
+        if ( added ) {
+          if ( lockedPointerFocus && lockedPointerFocus.trail.containsNode( this ) ) {
+
+            // Update both pointer and locked focus to the new trail so the highlight stays on the moved node.
+            // NOTE: we do not call unlockHighlight() here because it clears pointerFocusProperty and removes the
+            // pointer listener, which would drop the highlight, break pointer-up/cancel cleanup, and event forwarding.
+            // Retarget in place so the lock remains active and can still be released normally.
+            // WARNING: this runs on any added instance while "locked" Focus points at this node.
+            // In exotic DAG/multi-instance cases, that could retarget to the wrong instance. If that ever shows up,
+            // gate relock on knowing we just removed the specific instance that held the lock (e.g. set a pending
+            // relock flag on removal, only relock on add when that flag is set, then clear it).
+            const newFocus = new Focus( display, instance.trail!.copy() );
+            display.focusManager.pointerFocusProperty.value = newFocus;
+            display.focusManager.lockedPointerFocusProperty.value = newFocus;
+
+            // Keep the pointer listener attached so pointer-up/cancel can clear the lock normally.
+            if ( this._pointer && !this._pointer.listeners.includes( this._pointerListener ) ) {
+              this._pointer.addInputListener( this._pointerListener );
+            }
+          }
+        }
+        else {
+
+          // Only clear the lockedPointerFocus if it was targeting this instance that is being removed.
+          if ( lockedPointerFocus && lockedPointerFocus.trail.equals( instance.trail ) ) {
+            display.focusManager.lockedPointerFocusProperty.value = null;
+          }
         }
       }
 
