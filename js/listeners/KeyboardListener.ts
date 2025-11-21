@@ -302,32 +302,6 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
     event.pointer.reserveForKeyboardDrag();
-
-    // Validate enter/space usage assertion once per listener. This is done in the keydown event instead of the Hotkey
-    // because Hotkey has no access to the SceneryEvent or trail.
-    if ( assert && !this.enterAndSpaceValidated ) {
-      this.enterAndSpaceValidated = true;
-
-      // NOTE: We may want to add other roles here if this check is not wide enough.
-      const trailHasApplicationRole = event.trail.nodes.some( node => node.ariaRole === 'application' );
-
-      if ( !trailHasApplicationRole ) {
-        if ( !this.allowEnterSpaceWithoutApplicationRole && !this.fireOnClick ) {
-          const keysToValidate = this.hotkeys.map( hotkey => hotkey.keyStringProperty.value );
-
-          const hasEnterOrSpace = keysToValidate.some( keyString => {
-            const keyDescriptor = KeyDescriptor.keyStrokeToKeyDescriptor( keyString );
-            return keyDescriptor.key === 'enter' || keyDescriptor.key === 'space';
-          } );
-
-          assert && assert( !hasEnterOrSpace,
-            'KeyboardListener with enter/space should often be handled with click activation for assistive' +
-            'technology. Set fireOnClick: true, or allowEnterSpaceWithoutApplicationRole: true if the listener is added to a Node ' +
-            'with ariaRole: "application".'
-          );
-        }
-      }
-    }
   }
 
   /**
@@ -408,6 +382,13 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
       const hotkey = new Hotkey( {
         keyStringProperty: keyStringProperty,
         fire: ( event: KeyboardEvent | null ) => {
+
+          // Validate enter/space usage assertion once per listener for performance.
+          if ( assert && !this.enterAndSpaceValidated && event ) {
+            this.enterAndSpaceValidated = true;
+            this.validateEnterSpace( event );
+          }
+
           this._fire( event, keyStringProperty.value as Keys[number], this );
         },
         press: ( event: KeyboardEvent | null ) => {
@@ -442,6 +423,39 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
 
       return hotkey;
     } );
+  }
+
+  private validateEnterSpace( event: KeyboardEvent ): void {
+
+
+    // We cannot access a SceneryEvent/trail here. So we will walk up the actual DOM tree from the event target.
+    if ( event ) {
+
+      const path = event.composedPath ? event.composedPath() : [];
+      const elements = path.length ? path : [ event.target ];
+
+      // NOTE: We may want to add other roles here if this check is not wide enough.
+      const anyElementHasApplicationRole = elements
+        .filter( ( node ): node is Element => node instanceof Element )
+        .some( el => el.getAttribute( 'role' ) === 'application' );
+
+      if ( !anyElementHasApplicationRole ) {
+        if ( !this.allowEnterSpaceWithoutApplicationRole && !this.fireOnClick ) {
+          const keysToValidate = this.hotkeys.map( hotkey => hotkey.keyStringProperty.value );
+
+          const hasEnterOrSpace = keysToValidate.some( keyString => {
+            const keyDescriptor = KeyDescriptor.keyStrokeToKeyDescriptor( keyString );
+            return keyDescriptor.key === 'enter' || keyDescriptor.key === 'space';
+          } );
+
+          assert && assert( !hasEnterOrSpace,
+            'KeyboardListener with enter/space should often be handled with click activation for assistive' +
+            'technology. Set fireOnClick: true (preferred), or add ariaRole="application" if you ' +
+            'must use keyboard events.'
+          );
+        }
+      }
+    }
   }
 
   /**
