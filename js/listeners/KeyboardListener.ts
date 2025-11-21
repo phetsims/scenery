@@ -425,6 +425,10 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     } );
   }
 
+  /**
+   * Validates that enter/space usage is appropriate for assistive technology by checking ancestor roles.
+   * This runs when a hotkey fires and uses the composed event path instead of a Scenery trail.
+   */
   private validateEnterSpace( event: KeyboardEvent ): void {
 
 
@@ -449,7 +453,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
           } );
 
           assert && assert( !hasEnterOrSpace,
-            'KeyboardListener with enter/space should often be handled with click activation for assistive' +
+            'KeyboardListener with enter/space should often be handled with click activation for assistive ' +
             'technology. Set fireOnClick: true (preferred), or add ariaRole="application" if you ' +
             'must use keyboard events.'
           );
