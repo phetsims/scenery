@@ -438,12 +438,11 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
       const path = event.composedPath ? event.composedPath() : [];
       const elements = path.length ? path : [ event.target ];
 
-      // NOTE: We may want to add other roles here if this check is not wide enough.
-      const anyElementHasApplicationRole = elements
+      const hasAllowedAncestor = elements
         .filter( ( node ): node is Element => node instanceof Element )
-        .some( el => el.getAttribute( 'role' ) === 'application' );
+        .some( el => this.isEnterSpaceAllowedElement( el ) );
 
-      if ( !anyElementHasApplicationRole ) {
+      if ( !hasAllowedAncestor ) {
         if ( !this.allowEnterSpaceWithoutApplicationRole && !this.fireOnClick ) {
           const keysToValidate = this.hotkeys.map( hotkey => hotkey.keyStringProperty.value );
 
@@ -460,6 +459,24 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
         }
       }
     }
+  }
+
+  /**
+   * Whether the given element is an ancestor that permits enter/space activation without warning.
+   * Extend this as additional roles/input types become acceptable.
+   */
+  private isEnterSpaceAllowedElement( element: Element ): boolean {
+    const role = element.getAttribute( 'role' );
+    if ( role === 'application' ) {
+      return true;
+    }
+
+    if ( element instanceof HTMLInputElement ) {
+      const allowedInputTypes = [ 'range' ];
+      return allowedInputTypes.includes( element.type );
+    }
+
+    return false;
   }
 
   /**
