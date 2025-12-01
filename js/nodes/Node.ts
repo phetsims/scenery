@@ -6167,8 +6167,8 @@ class Node extends ParallelDOM {
     if ( assert && options.hasOwnProperty( 'visible' ) && options.hasOwnProperty( 'visibleProperty' ) ) {
       assert && assert( options.visibleProperty!.value === options.visible, 'If both visible and visibleProperty are provided, then values should match' );
     }
-    if ( assert && options.hasOwnProperty( 'pdomVisible' ) && options.hasOwnProperty( 'pdomVisibleProperty' ) ) {
-      assert && assert( options.pdomVisibleProperty!.value === options.pdomVisible, 'If both pdomVisible and pdomVisibleProperty are provided, then values should match' );
+    if ( assert && options.hasOwnProperty( 'accessibleVisible' ) && options.hasOwnProperty( 'accessibleVisibleProperty' ) ) {
+      assert && assert( options.accessibleVisibleProperty!.value === options.accessibleVisible, 'If both accessibleVisible and accessibleVisibleProperty are provided, then values should match' );
     }
     if ( assert && options.hasOwnProperty( 'pickable' ) && options.hasOwnProperty( 'pickableProperty' ) ) {
       assert && assert( options.pickableProperty!.value === options.pickable, 'If both pickable and pickableProperty are provided, then values should match' );

@@ -134,12 +134,12 @@ export default class Trail {
   }
 
   /**
-   * This trail is pdomVisible only if all nodes on it are marked as pdomVisible
+   * This trail is accessibleVisible only if all nodes on it are marked as accessibleVisible
    */
-  public isPDOMVisible(): boolean {
+  public isAccessibleVisible(): boolean {
     let i = this.nodes.length;
     while ( i-- ) {
-      if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].isPDOMVisible() ) {
+      if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].isAccessibleVisible() ) {
         return false;
       }
     }

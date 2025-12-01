@@ -58,7 +58,7 @@ class PDOMFuzzer {
     if ( this.logToConsole ) {
       for ( let i = 0; i < this.nodes.length; i++ ) {
         const node = this.nodes[ i ];
-        console.log( `${i}#${node.id} ${node.tagName} ch:${PDOMTree.debugOrder( node.children )} or:${PDOMTree.debugOrder( node.pdomOrder )} vis:${node.visible} avis:${node.pdomVisible}` );
+        console.log( `${i}#${node.id} ${node.tagName} ch:${PDOMTree.debugOrder( node.children )} or:${PDOMTree.debugOrder( node.pdomOrder )} vis:${node.visible} avis:${node.accessibleVisible}` );
       }
     }
   }
@@ -80,9 +80,9 @@ class PDOMFuzzer {
         }
       } );
       actions.push( {
-        text: `#${a.id}.pdomVisible = ${!a.pdomVisible}`,
+        text: `#${a.id}.accessibleVisible = ${!a.accessibleVisible}`,
         execute: () => {
-          a.pdomVisible = !a.pdomVisible;
+          a.accessibleVisible = !a.accessibleVisible;
         }
       } );
       [ 'span', 'div', null ].forEach( tagName => {

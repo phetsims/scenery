@@ -46,8 +46,8 @@ export type DisplayedTrailsPropertyOptions = {
   // If true, we will only report trails where every node is visible: true.
   requireVisible?: boolean;
 
-  // If true, we will only report trails where every node is pdomVisible: true.
-  requirePDOMVisible?: boolean;
+  // If true, we will only report trails where every node is accessibleVisible: true.
+  requireAccessibleVisible?: boolean;
 
   // If true, we will only report trails where every node is enabled: true.
   requireEnabled?: boolean;
@@ -77,7 +77,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
   private readonly display: DisplayPredicate;
   private readonly followPDOMOrder: boolean;
   private readonly requireVisible: boolean;
-  private readonly requirePDOMVisible: boolean;
+  private readonly requireAccessibleVisible: boolean;
   private readonly requireEnabled: boolean;
   private readonly requireInputEnabled: boolean;
 
@@ -93,7 +93,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       // Default to visual trails (just children), with only pruning by normal visibility
       followPDOMOrder: false,
       requireVisible: true,
-      requirePDOMVisible: false,
+      requireAccessibleVisible: false,
       requireEnabled: false,
       requireInputEnabled: false
     }, providedOptions );
@@ -105,7 +105,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     this.display = options.display;
     this.followPDOMOrder = options.followPDOMOrder;
     this.requireVisible = options.requireVisible;
-    this.requirePDOMVisible = options.requirePDOMVisible;
+    this.requireAccessibleVisible = options.requireAccessibleVisible;
     this.requireEnabled = options.requireEnabled;
     this.requireInputEnabled = options.requireInputEnabled;
 
@@ -120,7 +120,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     const display = this.display;
     const followPDOMOrder = this.followPDOMOrder;
     const requireVisible = this.requireVisible;
-    const requirePDOMVisible = this.requirePDOMVisible;
+    const requireAccessibleVisible = this.requireAccessibleVisible;
     const requireEnabled = this.requireEnabled;
     const requireInputEnabled = this.requireInputEnabled;
 
@@ -149,7 +149,7 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
       // If we fail other conditions, we won't add a trail OR recurse, but we will STILL have listeners added to the Node.
       if (
         ( requireVisible && !root.visible ) ||
-        ( requirePDOMVisible && !root.pdomVisible ) ||
+        ( requireAccessibleVisible && !root.accessibleVisible ) ||
         ( requireEnabled && !root.enabled ) ||
         ( requireInputEnabled && !root.inputEnabled )
       ) {
@@ -240,8 +240,8 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     if ( this.requireVisible ) {
       node.visibleProperty.lazyLink( this._trailUpdateListener );
     }
-    if ( this.requirePDOMVisible ) {
-      node.pdomVisibleProperty.lazyLink( this._trailUpdateListener );
+    if ( this.requireAccessibleVisible ) {
+      node.accessibleVisibleProperty.lazyLink( this._trailUpdateListener );
     }
     if ( this.requireEnabled ) {
       node.enabledProperty.lazyLink( this._trailUpdateListener );
@@ -264,8 +264,8 @@ export default class DisplayedTrailsProperty extends TinyProperty<Trail[]> {
     if ( this.requireVisible ) {
       node.visibleProperty.unlink( this._trailUpdateListener );
     }
-    if ( this.requirePDOMVisible ) {
-      node.pdomVisibleProperty.unlink( this._trailUpdateListener );
+    if ( this.requireAccessibleVisible ) {
+      node.accessibleVisibleProperty.unlink( this._trailUpdateListener );
     }
     if ( this.requireEnabled ) {
       node.enabledProperty.unlink( this._trailUpdateListener );

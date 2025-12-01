@@ -74,7 +74,7 @@ export default class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are invisible, our pdomDisplays would not have changed ([] => [])
-    if ( this.node.visible && this.node.pdomVisible ) {
+    if ( this.node.visible && this.node.accessibleVisible ) {
       const hadPDOM = !( Renderer.bitmaskNoPDOM & oldBitmask );
       const hasPDOM = !( Renderer.bitmaskNoPDOM & newBitmask );
 
@@ -99,8 +99,8 @@ export default class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onVisibilityChange n#${this.node.id} visible:${visible}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
-    // If we don't have pdom (or pdomVisible), our pdomDisplays would not have changed ([] => [])
-    if ( this.node.pdomVisible && !this.node._rendererSummary.hasNoPDOM() ) {
+    // If we don't have pdom (or accessibleVisible), our pdomDisplays would not have changed ([] => [])
+    if ( this.node.accessibleVisible && !this.node._rendererSummary.hasNoPDOM() ) {
       if ( visible ) {
         this.addAllPDOMDisplays();
       }
@@ -116,7 +116,7 @@ export default class PDOMDisplaysInfo {
    * Called when our pdomVisibility changes. (scenery-internal)
    */
   public onPDOMVisibilityChange( visible: boolean ): void {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onPDOMVisibilityChange n#${this.node.id} pdomVisible:${visible}` );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onPDOMVisibilityChange n#${this.node.id} accessibleVisible:${visible}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we don't have pdom, our pdomDisplays would not have changed ([] => [])
@@ -164,7 +164,7 @@ export default class PDOMDisplaysInfo {
    * Returns whether we can have pdomDisplays specified in our array. (scenery-internal)
    */
   public canHavePDOMDisplays(): boolean {
-    return this.node.visible && this.node.pdomVisible && !this.node._rendererSummary.hasNoPDOM();
+    return this.node.visible && this.node.accessibleVisible && !this.node._rendererSummary.hasNoPDOM();
   }
 
   /**

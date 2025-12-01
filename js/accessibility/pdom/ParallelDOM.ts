@@ -254,8 +254,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'focusHighlight',
   'focusHighlightLayerable',
   'groupFocusHighlight',
-  'pdomVisibleProperty',
-  'pdomVisible',
+  'accessibleVisibleProperty',
+  'accessibleVisible',
   'pdomOrder',
 
   'pdomAttributes',
@@ -318,8 +318,8 @@ type ParallelDOMSelfOptions = {
   focusHighlight?: Highlight; // Sets the focus highlight for the Node
   focusHighlightLayerable?: boolean; // Flag to determine if the focus highlight Node can be layered in the scene graph
   groupFocusHighlight?: Node | boolean; // Sets the outer focus highlight for this Node when a descendant has focus
-  pdomVisibleProperty?: TReadOnlyProperty<boolean> | null;
-  pdomVisible?: boolean; // Sets whether or not the Node's DOM element is visible in the parallel DOM
+  accessibleVisibleProperty?: TReadOnlyProperty<boolean> | null;
+  accessibleVisible?: boolean; // Sets whether or not the Node's DOM element is visible in the parallel DOM
   pdomOrder?: ( Node | null )[] | null; // Modifies the order of accessible navigation
 
   pdomAttributes?: PDOMAttribute[]; // Sets a list of attributes all at once, see setPDOMAttributes().
@@ -349,7 +349,7 @@ export type RemoveParallelDOMOptions<T extends ParallelDOMOptions> = StrictOmit<
 export type TrimParallelDOMOptions<T extends ParallelDOMSelfOptions> = RemoveParallelDOMOptions<T> &
   PickOptional<ParallelDOMSelfOptions,
     'accessibleName' | 'accessibleNameBehavior' | 'accessibleHelpText' | 'accessibleHelpTextBehavior' |
-    'accessibleParagraph' | 'accessibleHeading' | 'accessibleHeadingIncrement' | 'focusable' | 'pdomVisible'>;
+    'accessibleParagraph' | 'accessibleHeading' | 'accessibleHeadingIncrement' | 'focusable' | 'accessibleVisible'>;
 
 type PDOMAttribute = {
   attribute: string;
@@ -576,11 +576,11 @@ export default class ParallelDOM extends PhetioObject {
   private _groupFocusHighlight: Node | boolean;
 
   // Whether the pdom content will be visible from the browser and assistive
-  // technologies.  When pdomVisible is false, the Node's primary sibling will not be focusable, and it cannot
+  // technologies.  When accessibleVisible is false, the Node's primary sibling will not be focusable, and it cannot
   // be found by the assistive technology virtual cursor. For more information on how assistive technologies
   // read with the virtual cursor see
   // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
-  private readonly _pdomVisibleProperty: TinyForwardingProperty<boolean>;
+  private readonly _accessibleVisibleProperty: TinyForwardingProperty<boolean>;
 
   // If provided, it will override the focus order between children
   // (and optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
@@ -726,7 +726,7 @@ export default class ParallelDOM extends PhetioObject {
     this._positionInPDOM = false;
     this._excludeLabelSiblingFromInput = false;
 
-    this._pdomVisibleProperty = new TinyForwardingProperty<boolean>( true, false, this.onPdomVisiblePropertyChange.bind( this ) );
+    this._accessibleVisibleProperty = new TinyForwardingProperty<boolean>( true, false, this.onAccessibleVisiblePropertyChange.bind( this ) );
 
     // HIGHER LEVEL API INITIALIZATION
 
@@ -831,7 +831,7 @@ export default class ParallelDOM extends PhetioObject {
     // PDOM attributes can potentially have listeners, so we will clear those out.
     this.removePDOMAttributes();
 
-    this._pdomVisibleProperty.dispose();
+    this._accessibleVisibleProperty.dispose();
   }
 
   private pdomInputEnabledListener( enabled: boolean ): void {
@@ -877,7 +877,7 @@ export default class ParallelDOM extends PhetioObject {
       // when accessibility is widely used, this assertion can be added back in
       // assert && assert( this._pdomInstances.length > 0, 'there must be pdom content for the Node to receive focus' );
       assert && assert( this.focusable, 'trying to set focus on a Node that is not focusable' );
-      assert && assert( this.pdomVisible, 'trying to set focus on a Node with invisible pdom content' );
+      assert && assert( this.accessibleVisible, 'trying to set focus on a Node with invisible pdom content' );
       assert && assert( this._pdomInstances.length === 1, 'focus() unsupported for Nodes using DAG, pdom content is not unique' );
 
       const peer = this._pdomInstances[ 0 ].peer!;
@@ -2618,43 +2618,43 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * Called when our pdomVisible Property changes values.
+   * Called when our accessibleVisible Property changes values.
    */
-  private onPdomVisiblePropertyChange( visible: boolean ): void {
+  private onAccessibleVisiblePropertyChange( visible: boolean ): void {
     this._pdomDisplaysInfo.onPDOMVisibilityChange( visible );
   }
 
   /**
-   * Sets what Property our pdomVisibleProperty is backed by, so that changes to this provided Property will change this
-   * Node's pdom visibility, and vice versa. This does not change this._pdomVisibleProperty. See TinyForwardingProperty.setTargetProperty()
+   * Sets what Property our accessibleVisibleProperty is backed by, so that changes to this provided Property will change this
+   * Node's pdom visibility, and vice versa. This does not change this._accessibleVisibleProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    */
-  public setPdomVisibleProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
-    this._pdomVisibleProperty.setTargetProperty( newTarget );
+  public setAccessibleVisibleProperty( newTarget: TReadOnlyProperty<boolean> | null ): this {
+    this._accessibleVisibleProperty.setTargetProperty( newTarget );
 
     return this;
   }
 
   /**
-   * See setPdomVisibleProperty() for more information
+   * See setAccessibleVisibleProperty() for more information
    */
-  public set pdomVisibleProperty( property: TReadOnlyProperty<boolean> | null ) {
-    this.setPdomVisibleProperty( property );
+  public set accessibleVisibleProperty( property: TReadOnlyProperty<boolean> | null ) {
+    this.setAccessibleVisibleProperty( property );
   }
 
   /**
-   * See getPdomVisibleProperty() for more information
+   * See getAccessibleVisibleProperty() for more information
    */
-  public get pdomVisibleProperty(): TProperty<boolean> {
-    return this.getPdomVisibleProperty();
+  public get accessibleVisibleProperty(): TProperty<boolean> {
+    return this.getAccessibleVisibleProperty();
   }
 
 
   /**
-   * Get this Node's pdomVisibleProperty. See Node.getVisibleProperty for more information
+   * Get this Node's accessibleVisibleProperty. See Node.getVisibleProperty for more information
    */
-  public getPdomVisibleProperty(): TProperty<boolean> {
-    return this._pdomVisibleProperty;
+  public getAccessibleVisibleProperty(): TProperty<boolean> {
+    return this._accessibleVisibleProperty;
   }
 
   /**
@@ -2663,24 +2663,24 @@ export default class ParallelDOM extends PhetioObject {
    * should be hidden so that all PDOM elements are hidden as well.  Hiding the element will remove it from the focus
    * order.
    */
-  public setPDOMVisible( visible: boolean ): void {
-    this.pdomVisibleProperty.value = visible;
+  public setAccessibleVisible( visible: boolean ): void {
+    this.accessibleVisibleProperty.value = visible;
   }
 
-  public set pdomVisible( visible: boolean ) { this.setPDOMVisible( visible ); }
+  public set accessibleVisible( visible: boolean ) { this.setAccessibleVisible( visible ); }
 
-  public get pdomVisible(): boolean { return this.isPDOMVisible(); }
+  public get accessibleVisible(): boolean { return this.isAccessibleVisible(); }
 
   /**
    * Get whether or not this Node's representative DOM element is visible.
    */
-  public isPDOMVisible(): boolean {
-    return this.pdomVisibleProperty.value;
+  public isAccessibleVisible(): boolean {
+    return this.accessibleVisibleProperty.value;
   }
 
   /**
    * Returns true if any of the PDOMInstances for the Node are globally visible and displayed in the PDOM. A
-   * PDOMInstance is globally visible if Node and all ancestors are pdomVisible. PDOMInstance visibility is
+   * PDOMInstance is globally visible if Node and all ancestors are accessibleVisible. PDOMInstance visibility is
    * updated synchronously, so this returns the most up-to-date information without requiring Display.updateDisplay
    */
   public isPDOMDisplayed(): boolean {
@@ -3289,12 +3289,12 @@ export default class ParallelDOM extends PhetioObject {
       for ( let i = 0; i < connectedDisplays.length; i++ ) {
         const display = connectedDisplays[ i ];
 
-        // Only speak if the Node is globally visible with both `visible` and `pdomVisible`.
+        // Only speak if the Node is globally visible with both `visible` and `accessibleVisible`.
         // Cannot use Node.wasVisuallyDisplayed() because it is not synchronous.
         // Cannot use a DisplayedProperty because it observes `visibleProperty`, which may not
         // be up-to-date in application specific code because of the listener order.
         const nodeDisplayed = ( this as unknown as Node ).getTrails().some(
-          trail => trail.isVisible() && trail.isPDOMVisible()
+          trail => trail.isVisible() && trail.isAccessibleVisible()
         );
 
         if ( display.isAccessible() && nodeDisplayed ) {
@@ -3482,7 +3482,7 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Returns whether or not this Node has any representation for the Parallel DOM.
-   * Note this is still true if the content is pdomVisible=false or is otherwise hidden.
+   * Note this is still true if the content is accessibleVisible=false or is otherwise hidden.
    */
   public get hasPDOMContent(): boolean {
     return !!this._tagName || !!this._accessibleParagraph || !!this._accessibleHeading;

@@ -509,7 +509,7 @@ class GlobalKeyboardListener extends KeyboardListener<OneKeyStroke[]> {
       followPDOMOrder: true,
 
       // Additionally, the target must have each of these true up its Trails to receive alt input events.
-      requirePDOMVisible: true,
+      requireAccessibleVisible: true,
       requireEnabled: true,
       requireInputEnabled: true
     } );
