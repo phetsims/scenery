@@ -202,6 +202,14 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   // to start until its keys are pressed, and it starts the drag on the next SceneryEvent from keydown dispatch.
   private startNextKeyboardEvent = false;
 
+  // True once the pointer is attached but before dragStartAction finishes, so we can clean up silently if an
+  // interruption lands in that window.
+  private dragStartPending = false;
+
+  // True only after dragStartAction commits and before dragEndAction runs. Guards timer lifecycle and prevents
+  // "end" logic from running for pending starts.
+  private dragInProgress = false;
+
   // Similar to the above, but used for restarting the callback timer on the next keydown event when a new key is
   // pressed.
   private restartTimerNextKeyboardEvent = false;
@@ -324,6 +332,14 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
 
     this.dragStartAction = new PhetioAction( event => {
 
+      // Only if the key-press was cancelled mid-dispatch.
+      if ( !this.dragStartPending ) {
+        return;
+      }
+
+      this.dragStartPending = false;
+      this.dragInProgress = true;
+
       // If dragging with deltas, we can eagerly compute listener deltas so they are available for
       // the start callback. Otherwise, there will be no motion until the animation frame so deltas
       // are zero.
@@ -396,12 +412,8 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
     } );
 
     this.dragEndAction = new PhetioAction( () => {
-      if ( this.useDragSpeed ) {
-        stepTimer.removeListener( this.boundStepListener );
-      }
-      else {
-        this.callbackTimer.stop( false );
-      }
+      this.dragInProgress = false;
+      this.stopMotionTimers();
 
       const syntheticEvent = this._pointer ? this.createSyntheticEvent( this._pointer ) : null;
       this._end && this._end( syntheticEvent, this );
@@ -457,8 +469,11 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
         this.startNextKeyboardEvent = false;
         this.restartTimerNextKeyboardEvent = false;
 
-        if ( this.isDragging() ) {
+        if ( this.dragInProgress ) {
           this.dragEndAction.execute();
+        }
+        else if ( this.dragStartPending ) {
+          this.cancelPendingDrag();
         }
       }
     } );
@@ -495,6 +510,33 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
         stepTimer.removeListener( this.boundStepListener );
       }
     };
+  }
+
+  /**
+   * Clear partial drag state that was created while waiting for dragStartAction to finish. Mirrors dragEndAction,
+   * but intentionally skips the public end callback because the drag never officially started.
+   */
+  private cancelPendingDrag(): void {
+    assert && assert( !this.dragInProgress, 'cancelPendingDrag should never be called while a drag is in progress, only when pending' );
+    this.dragStartPending = false;
+    this.stopMotionTimers();
+    this.clearPointer();
+    this.computeDeltas( 0 );
+  }
+
+  /**
+   * Stop whichever timing mechanism was active (stepTimer for dragSpeed, callbackTimer for dragDelta). Shared by
+   * dragEndAction and cancelPendingDrag so timer cleanup logic stays in one place.
+   */
+  private stopMotionTimers(): void {
+    if ( this.useDragSpeed ) {
+      if ( stepTimer.hasListener( this.boundStepListener ) ) {
+        stepTimer.removeListener( this.boundStepListener );
+      }
+    }
+    else {
+      this.callbackTimer.stop( false );
+    }
   }
 
   /**
@@ -678,7 +720,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
    * must be attached to this _pointerListener (otherwise it is interacting with another target).
    */
   private isDragging(): boolean {
-    return !!this._pointer && this._pointer.attachedListener === this._pointerListener;
+    return this.dragInProgress && !!this._pointer && this._pointer.attachedListener === this._pointerListener;
   }
 
   /**
@@ -726,8 +768,15 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
         this._pointer = event.pointer as PDOMPointer;
         event.pointer.addInputListener( this._pointerListener, true );
 
-        this.dragStartAction.execute( event );
         this.startNextKeyboardEvent = false;
+        this.dragStartPending = true;
+
+        this.dragStartAction.execute( event );
+
+        // The start action aborted the drag, so clean up right away.
+        if ( !this.dragInProgress ) {
+          this.cancelPendingDrag();
+        }
       }
 
       // If the drag is already started, restart the callback timer on the next keydown event. The Pointer must
