@@ -207,6 +207,9 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     // are mutually exclusive themselves with the above assertion.
     assertMutuallyExclusiveOptions( providedOptions, [ 'keys', 'keyStringProperties' ], [ 'fireOnClick' ] );
 
+    // If you provide fireOnClick, you cannot provide press/release callbacks. Only a logical 'fire' in this mode.
+    assertMutuallyExclusiveOptions( providedOptions, [ 'fireOnClick' ], [ 'press', 'release' ] );
+
     const options = optionize<KeyboardListenerOptions<Keys>, KeyboardListenerSelfOptions<Keys>, EnabledComponentOptions>()( {
       keys: null,
       keyStringProperties: null,
