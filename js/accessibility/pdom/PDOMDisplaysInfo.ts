@@ -250,7 +250,7 @@ export default class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );
-    assert && assert( this.pdomDisplays.length >= displays.length, 'there should be at least as many PDOMDisplays as Displays' );
+    assert && assert( this.pdomDisplays.length >= displays.length, 'There should be at least as many PDOMDisplays as Displays. A likely reason for hitting this is if a Node is removed from the scene graph twice in the same animation frame before an updateDisplay.' );
 
     // Simplifies things if we can stop no-ops here.
     if ( displays.length !== 0 ) {
