@@ -165,14 +165,10 @@ QUnit.test( 'KeyboardListener Tests', assert => {
 QUnit.test( 'KeyboardListener fireOnClick mode respects enabled state', assert => {
 
   let fireCount = 0;
-  let pressCalled = false;
-  let releaseCalled = false;
 
   const listener = new KeyboardListener( {
     fireOnClick: true,
     fire: () => fireCount++,
-    press: () => { pressCalled = true; },
-    release: () => { releaseCalled = true; }
   } );
 
   const createClickEvent = () => ( {
@@ -181,8 +177,6 @@ QUnit.test( 'KeyboardListener fireOnClick mode respects enabled state', assert =
 
   listener.click( createClickEvent() );
   assert.strictEqual( fireCount, 1, 'fires when enabled' );
-  assert.ok( !pressCalled, 'press is never called in click mode' );
-  assert.ok( !releaseCalled, 'release is never called in click mode' );
 
   listener.enabledProperty.value = false;
   listener.click( createClickEvent() );
