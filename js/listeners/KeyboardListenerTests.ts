@@ -168,7 +168,7 @@ QUnit.test( 'KeyboardListener fireOnClick mode respects enabled state', assert =
 
   const listener = new KeyboardListener( {
     fireOnClick: true,
-    fire: () => fireCount++,
+    fire: () => fireCount++
   } );
 
   const createClickEvent = () => ( {
