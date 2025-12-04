@@ -773,7 +773,7 @@ function testAssociationAttribute( assert: Assert, attribute: string ): void {
     const nodeParent = nodePrimaryElement.parentElement!;
 
     const getUniqueIdStringForSibling = ( siblingString: string ): string => {
-      return instance.peer!.getElementId( siblingString, instance.getPDOMInstanceUniqueId() );
+      return instance.peer![ 'getElementId' ]( siblingString, instance.getPDOMInstanceUniqueId() );
     };
 
     assert.ok( nodePrimaryElement.getAttribute( attribute )!.includes( getUniqueIdStringForSibling( 'label' ) ), `${attribute} your own label element.` );
@@ -883,7 +883,7 @@ function testAssociationAttributeBySetters( assert: Assert, attribute: Associati
   const nPeer = getPDOMPeerByNode( n );
   const oElement = getPrimarySiblingElementByNode( o );
   assert.ok( oElement.getAttribute( attribute )!.includes(
-      nPeer.getElementId( 'label', nPeer.pdomInstance!.getPDOMInstanceUniqueId() ) ),
+      nPeer[ 'getElementId' ]( 'label', nPeer.pdomInstance.getPDOMInstanceUniqueId() ) ),
     `${attribute} for two nodes with setter (label).` );
 
   // make a list of associations to test as a setter
@@ -2268,7 +2268,7 @@ QUnit.test( 'accessibleParagraph', assert => {
   rootNode.addChild( b );
 
   const bPeer = getPDOMPeerByNode( b );
-  let bRenderedElements = bPeer.topLevelElements!;
+  let bRenderedElements = bPeer.topLevelElements;
   assert.ok( !!bRenderedElements, 'A peer should be created from tagName and accessibleParagraph' );
 
   assert.ok( bRenderedElements[ 0 ].tagName === bLabelTagName, 'b label element is in the DOM and before the paragraph' );

@@ -623,7 +623,8 @@ export default class ParallelDOM extends PhetioObject {
   // but there is a bug with NVDA and Firefox where both the label sibling AND primary sibling receive events in
   // this case, and both bubble up to the root of the PDOM, and so we would otherwise dispatch two SceneryEvents
   // instead of one.
-  private _excludeLabelSiblingFromInput: boolean;
+  // (scenery-internal)
+  public _excludeLabelSiblingFromInput: boolean;
 
   // HIGHER LEVEL API INITIALIZATION
 
@@ -2423,7 +2424,8 @@ export default class ParallelDOM extends PhetioObject {
     return this._nodesThatAreActiveDescendantToThisNode;
   }
 
-  private get nodesThatAreActiveDescendantToThisNode() { return this.getNodesThatAreActiveDescendantToThisNode(); }
+  // (scenery-internal)
+  public get nodesThatAreActiveDescendantToThisNode():Node[] { return this.getNodesThatAreActiveDescendantToThisNode(); }
 
 
   /**

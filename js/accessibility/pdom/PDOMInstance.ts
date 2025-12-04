@@ -550,20 +550,20 @@ class PDOMInstance {
     // added to a single parent DOMElement (this PDOMInstance's PDOMPeer's primarySibling)
     let i = placeableSibling.childNodes.length - 1;
 
-    const focusedChildInstance = focusedTrail && _.find( this.children, child => focusedTrail.containsNode( child.peer!.node ) );
+    const focusedChildInstance = focusedTrail && _.find( this.children, child => focusedTrail.containsNode( child.peer!.node! ) );
     if ( focusedChildInstance ) {
       // If there's a focused child instance, we need to make sure that its primarySibling is not detached from the DOM
       // (this has caused focus issues, see https://github.com/phetsims/my-solar-system/issues/142).
       // Since this doesn't happen often, we can just recompute the full order, and move every other element.
 
-      const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements! ) );
+      const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements ) );
       const needsOrderChange = !_.every( desiredOrder, ( desiredElement, index ) => placeableSibling.children[ index ] === desiredElement );
 
       if ( needsOrderChange ) {
 
         // "top level" elements which may be the primary sibling, a parent container, or one or more of the
         // accessibleParagraph or accessibleHeading.
-        const pivotElements = focusedChildInstance.peer!.topLevelElements!;
+        const pivotElements = focusedChildInstance.peer!.topLevelElements;
         assert && assert( pivotElements.length > 0, 'At least one pivot element must be present' );
 
         // Find indices of all pivot elements in desired order
@@ -591,8 +591,8 @@ class PDOMInstance {
         const peer = this.children[ peerIndex ].peer!;
 
         // Iterate through all top level elements of a PDOMInstance's peer
-        for ( let elementIndex = peer.topLevelElements!.length - 1; elementIndex >= 0; elementIndex-- ) {
-          const element = peer.topLevelElements![ elementIndex ];
+        for ( let elementIndex = peer.topLevelElements.length - 1; elementIndex >= 0; elementIndex-- ) {
+          const element = peer.topLevelElements[ elementIndex ];
 
           // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
           // No need to reinsert if `element` is already in the right order
@@ -607,7 +607,7 @@ class PDOMInstance {
     }
 
     if ( assert ) {
-      const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements! ) );
+      const desiredOrder = _.flatten( this.children.map( child => child.peer!.topLevelElements ) );
 
       // Verify the order
       assert( _.every( desiredOrder, ( desiredElement, index ) => placeableSibling.children[ index ] === desiredElement ) );
@@ -701,7 +701,7 @@ class PDOMInstance {
       // primary sibling (or its child container)
       const primarySibling = this.parent!.peer!.getPrimarySibling()!;
       assert && assert( primarySibling, 'The Peer must have a primary sibling to hold children.' );
-      PDOMUtils.removeElements( primarySibling, thisPeer.topLevelElements! );
+      PDOMUtils.removeElements( primarySibling, thisPeer.topLevelElements );
 
       for ( let i = 0; i < this.relativeNodes!.length; i++ ) {
         this.relativeNodes![ i ].pdomDisplaysEmitter.removeListener( this.relativeListeners[ i ] );
