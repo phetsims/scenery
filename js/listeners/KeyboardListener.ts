@@ -381,6 +381,27 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
       } );
     }
 
+    if ( assert ) {
+
+      // Make sure that there are no duplicate key strings. Duplicates are almost certainly a bug and will
+      // fire the same callback multiple times.
+      const keyStrings = usableKeyStringProperties.map( prop => prop.value );
+      const seen = new Set<string>();
+      const duplicates = new Set<string>();
+
+      keyStrings.forEach( keyString => {
+        if ( seen.has( keyString ) ) {
+          duplicates.add( keyString );
+        }
+        else {
+          seen.add( keyString );
+        }
+      } );
+
+      assert && assert( duplicates.size === 0,
+        `Duplicate key strokes in KeyboardListener: ${[ ...duplicates ].join( ', ' )}` );
+    }
+
     return usableKeyStringProperties.map( keyStringProperty => {
       const hotkey = new Hotkey( {
         keyStringProperty: keyStringProperty,
