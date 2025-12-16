@@ -150,6 +150,7 @@ import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
+import { ResponseCategory } from '../../../../utterance-queue/js/Announcer.js';
 import Utterance, { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
@@ -3247,7 +3248,7 @@ export default class ParallelDOM extends PhetioObject {
    * This ensures that Nodes on hidden screens and behind layers do not create responses.
    * However, this can override that with options. See options documentation.
    */
-  public addAccessibleResponse( utterance: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
+  private addAccessibleResponse( utterance: TAlertable, responseCategory: ResponseCategory = 'other', providedOptions?: DescriptionResponseOptions ): void {
 
     // nullish coalescing for options because this function can be called a lot
     const alertBehavior = providedOptions?.alertBehavior ?? 'interrupt';
@@ -3273,7 +3274,7 @@ export default class ParallelDOM extends PhetioObject {
 
       // alertWhenNotDisplayed is true - we want to hear the response even when the Node is invisible and detached
       // Note that we cannot announce on each display, this will only be announced once globally.
-      globalDescriptionQueue.addAccessibleResponse( utterance, alertBehavior );
+      globalDescriptionQueue.addAccessibleResponse( utterance, responseCategory, alertBehavior );
     }
     else {
 
@@ -3298,7 +3299,7 @@ export default class ParallelDOM extends PhetioObject {
         );
 
         if ( display.isAccessible() && nodeDisplayed ) {
-          display.descriptionUtteranceQueue.addToBack( utterance );
+          display.descriptionUtteranceQueue.addToBack( utterance, responseCategory );
         }
       }
     }
@@ -3312,7 +3313,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param [providedOptions]
    */
   public addAccessibleObjectResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
-    this.addAccessibleResponse( alertable, providedOptions );
+    this.addAccessibleResponse( alertable, 'object', providedOptions );
   }
 
   /**
@@ -3323,7 +3324,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param [providedOptions]
    */
   public addAccessibleContextResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
-    this.addAccessibleResponse( alertable, providedOptions );
+    this.addAccessibleResponse( alertable, 'context', providedOptions );
   }
 
   /**
@@ -3334,7 +3335,15 @@ export default class ParallelDOM extends PhetioObject {
    * @param [providedOptions]
    */
   public addAccessibleHelpResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
-    this.addAccessibleResponse( alertable, providedOptions );
+    this.addAccessibleResponse( alertable, 'help', providedOptions );
+  }
+
+  /**
+   * You should almost never need to use this function. But it is in place in case you need to create a response that
+   * does not fit into one of the predefined categories of the description framework.
+   */
+  public addAccessibleOtherResponse( alertable: TAlertable, providedOptions?: DescriptionResponseOptions ): void {
+    this.addAccessibleResponse( alertable, 'other', providedOptions );
   }
 
   /**

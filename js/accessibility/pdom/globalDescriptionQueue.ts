@@ -12,6 +12,7 @@
  */
 
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
+import { ResponseCategory } from '../../../../utterance-queue/js/Announcer.js';
 import AriaLiveAnnouncer from '../../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import Utterance, { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
@@ -50,8 +51,9 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
    *
    * @param alertable - The content to be announced by screen readers
    * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
+   * @param responseCategory
    */
-  public addAccessibleResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+  public addAccessibleResponse( alertable: TAlertable, responseCategory: ResponseCategory, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
     assert && assert( this._globalInitialized, 'Must be initialized to use.' );
 
     // Nothing to do if there is no content.
@@ -68,37 +70,7 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
       this.clear();
     }
 
-    this.addToBack( alertable );
-  }
-
-  /**
-   * Announce a contextual description, typically describing the result of an interaction.
-   *
-   * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
-   */
-  public addAccessibleContextResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addAccessibleResponse( alertable, alertBehavior );
-  }
-
-  /**
-   * Announce an object description, typically describing what an object is or its state.
-   *
-   * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
-   */
-  public addAccessibleObjectResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addAccessibleResponse( alertable, alertBehavior );
-  }
-
-  /**
-   * Announce a help response, typically providing instructions or guidance.
-   *
-   * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
-   */
-  public addAccessibleHelpResponse( alertable: TAlertable, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
-    this.addAccessibleResponse( alertable, alertBehavior );
+    this.addToBack( alertable, responseCategory );
   }
 }
 
