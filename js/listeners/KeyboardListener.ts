@@ -90,6 +90,7 @@ import TProperty from '../../../axon/js/TProperty.js';
 import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
+import EnglishStringKeyUtils from '../accessibility/EnglishStringKeyUtils.js';
 import EventContext from '../input/EventContext.js';
 import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
 import type { HotkeyFireOnHoldTiming, OverlapBehavior } from '../input/Hotkey.js';
@@ -305,6 +306,30 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
    */
   public keydown( event: SceneryEvent<KeyboardEvent> ): void {
     event.pointer.reserveForKeyboardDrag();
+    const domEvent = event.domEvent;
+
+    // Prevent default for arrow keys. This catch should only prevent default if this KeyboardListener
+    // observes arrow keys, and arrow keys are pressed.  If meta or modifier keys are down, we do
+    // not want to prevent default. These keys + arrow keys are often commands to navigate pages
+    // and we do not want to prevent that. If you need to preventDefault for this case, it should
+    // be done in your own listener.
+    if ( domEvent && !domEvent.metaKey && !domEvent.altKey && !domEvent.ctrlKey ) {
+
+      // NOTE: We can assume that the pressed keys are defined before this event because they
+      // are populated in the hotkey (global listeners) which will happen first.
+      // NOTE: Although static now, keyStringProperties may change in the future. So we inspect the
+      // pressed keys every event instead of once when keys are declared.
+      const arrowKeyPressed = this.pressedKeyStringPropertiesProperty.value.some( pressedKey => {
+
+        // NOTE: The pressed key will include modifier keys, this catches any key stroke that includes
+        // an arrow key.
+        return EnglishStringKeyUtils.includesArrowKey( pressedKey.value );
+      } );
+
+      if ( arrowKeyPressed ) {
+        domEvent.preventDefault();
+      }
+    }
   }
 
   /**

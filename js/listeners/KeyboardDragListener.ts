@@ -736,9 +736,7 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
 
     const domEvent = event.domEvent!;
 
-    // If the meta key is down (command key/windows key) prevent movement and do not preventDefault.
-    // Meta key + arrow key is a command to go back a page, and we need to allow that. But also, macOS
-    // fails to provide keyup events once the meta key is pressed, see
+    // macOS fails to provide keyup events once the meta key is pressed, see
     // http://web.archive.org/web/20160304022453/http://bitspushedaround.com/on-a-few-things-you-may-not-know-about-the-hellish-command-key-and-javascript-events/
     if ( domEvent.metaKey ) {
       return;
@@ -753,10 +751,6 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
         this.interrupt();
         return;
       }
-
-      // Finally, in this case we are actually going to drag the object. Prevent default behavior so that Safari
-      // doesn't play a 'bonk' sound every arrow key press.
-      domEvent.preventDefault();
 
       // Cannot attach a listener to a Pointer that is already attached. This needs to happen before
       // firing the callback timer, which can initiate a call to drag().

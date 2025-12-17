@@ -9,6 +9,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import type { OneKeyStroke } from '../input/KeyDescriptor.js';
 import type { EnglishKey } from './EnglishStringToCodeMap.js';
 
 const ARROW_KEYS: EnglishKey[] = [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown' ];
@@ -28,6 +29,17 @@ const EnglishStringKeyUtils = {
    */
   isArrowKey( key: EnglishKey ): boolean {
     return ARROW_KEYS.includes( key );
+  },
+
+  /**
+   * Returns true if the key stroke includes an arrow key. The keyPress may include modifier keys, for example
+   * 'arrowLeft' or
+   * 'shift+arrowLeft'
+   *
+   * This function would return true for both.
+   */
+  includesArrowKey( keyPress: OneKeyStroke ): boolean {
+    return keyPress.includes( 'arrow' );
   },
 
   /**
