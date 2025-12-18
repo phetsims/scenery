@@ -879,8 +879,12 @@ export default class ParallelDOM extends PhetioObject {
       // assert && assert( this._pdomInstances.length > 0, 'there must be pdom content for the Node to receive focus' );
       assert && assert( this.focusable, 'trying to set focus on a Node that is not focusable' );
       assert && assert( this.accessibleVisible, 'trying to set focus on a Node with invisible pdom content' );
-      assert && assert( ( this as unknown as Node ).visible, 'trying to set focus on a Node that is not visible, this function will have no effect' );
       assert && assert( this._pdomInstances.length === 1, 'focus() unsupported for Nodes using DAG, pdom content is not unique' );
+
+      // visibleProperty is instrumented and can be controlled by phet-io. This can put the simulation in a state
+      // where we try to focus Nodes that have been made invisible by phet-io. See
+      // https://github.com/phetsims/scenery/issues/1751
+      !Tandem.PHET_IO_ENABLED && assert && assert( ( this as unknown as Node ).visible, 'trying to set focus on a Node that is not visible, this function will have no effect' );
 
       const peer = this._pdomInstances[ 0 ].peer!;
       assert && assert( peer, 'must have a peer to focus' );
