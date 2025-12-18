@@ -879,7 +879,6 @@ export default class ParallelDOM extends PhetioObject {
       // assert && assert( this._pdomInstances.length > 0, 'there must be pdom content for the Node to receive focus' );
       assert && assert( this.focusable, 'trying to set focus on a Node that is not focusable' );
       assert && assert( this.accessibleVisible, 'trying to set focus on a Node with invisible pdom content' );
-      assert && assert( ( this as unknown as Node ).visible, 'trying to set focus on a Node that is not visible, this function will have no effect' );
       assert && assert( this._pdomInstances.length === 1, 'focus() unsupported for Nodes using DAG, pdom content is not unique' );
 
       const peer = this._pdomInstances[ 0 ].peer!;
