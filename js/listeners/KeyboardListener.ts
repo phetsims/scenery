@@ -85,12 +85,14 @@
 
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
+import Multilink, { UnknownMultilink } from '../../../axon/js/Multilink.js';
 import Property from '../../../axon/js/Property.js';
 import TProperty from '../../../axon/js/TProperty.js';
 import { TReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import assertMutuallyExclusiveOptions from '../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize, { EmptySelfOptions } from '../../../phet-core/js/optionize.js';
 import EnglishStringKeyUtils from '../accessibility/EnglishStringKeyUtils.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import EventContext from '../input/EventContext.js';
 import globalHotkeyRegistry from '../input/globalHotkeyRegistry.js';
 import type { HotkeyFireOnHoldTiming, OverlapBehavior } from '../input/Hotkey.js';
@@ -195,6 +197,14 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
   // A Property that contains all the Property<KeyDescriptor> that are currently pressed down.
   public readonly pressedKeyStringPropertiesProperty: TProperty<TReadOnlyProperty<OneKeyStroke>[]>;
 
+  // We prevent default for arrow keys only when the listener keys include arrow keys and an arrow key is pressed.
+  // This multilink tracks whether listener keys include arrow keys because keys can be dynamic via
+  // keyStringProperties.
+  private preventDefaultForArrowKeysMultilink: UnknownMultilink | null = null;
+
+  // Internal flag for whether we should prevent default for arrow keys.
+  private preventDefaultForArrowKeys = false;
+
   // (read-only) - Whether the last key press was interrupted. Will be valid until the next presss.
   public interrupted: boolean;
   private readonly enabledPropertyListener: ( enabled: boolean ) => void;
@@ -254,6 +264,13 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
       // convert the provided keys to data that we can respond to with scenery's Input system
       this.hotkeys = this.createHotkeys( options.keys, options.keyStringProperties );
       pressedDependencies = this.hotkeys.map( hotkey => hotkey.isPressedProperty );
+
+      const allKeys = this.hotkeys.map( hotkey => hotkey.keyStringProperty );
+      this.preventDefaultForArrowKeysMultilink = Multilink.multilinkAny( allKeys, () => {
+        this.preventDefaultForArrowKeys = allKeys.some( keyStringProperty => {
+          return EnglishStringKeyUtils.includesArrowKey( keyStringProperty.value );
+        } );
+      } );
     }
     else {
       this.hotkeys = [];
@@ -294,6 +311,7 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     this.isPressedProperty.dispose();
     this.pressedKeyStringPropertiesProperty.dispose();
     this.clickIsPressedDependency?.dispose();
+    this.preventDefaultForArrowKeysMultilink?.dispose();
 
     this.enabledProperty.unlink( this.enabledPropertyListener );
 
@@ -313,19 +331,8 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     // not want to prevent default. These keys + arrow keys are often commands to navigate pages
     // and we do not want to prevent that. If you need to preventDefault for this case, it should
     // be done in your own listener.
-    if ( domEvent && !domEvent.metaKey && !domEvent.altKey && !domEvent.ctrlKey ) {
-
-      // NOTE: We can assume that the pressed keys are defined before this event because they
-      // are populated in the hotkey (global listeners) which will happen first.
-      // NOTE: Although static now, keyStringProperties may change in the future. So we inspect the
-      // pressed keys every event instead of once when keys are declared.
-      const arrowKeyPressed = this.pressedKeyStringPropertiesProperty.value.some( pressedKey => {
-
-        // NOTE: The pressed key will include modifier keys, this catches any key stroke that includes
-        // an arrow key.
-        return EnglishStringKeyUtils.includesArrowKey( pressedKey.value );
-      } );
-
+    if ( this.preventDefaultForArrowKeys && domEvent && !domEvent.metaKey && !domEvent.altKey && !domEvent.ctrlKey ) {
+      const arrowKeyPressed = KeyboardUtils.isArrowKey( domEvent );
       if ( arrowKeyPressed ) {
         domEvent.preventDefault();
       }
