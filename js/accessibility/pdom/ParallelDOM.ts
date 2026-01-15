@@ -780,6 +780,7 @@ export default class ParallelDOM extends PhetioObject {
 
     if ( isTReadOnlyProperty( this._accessibleRoleDescription ) && !this._accessibleRoleDescription.isDisposed ) {
       this._accessibleRoleDescription.unlink( this._onAccessibleRoleDescriptionChangeListener );
+      this._accessibleRoleDescription = null;
     }
 
     if ( isTReadOnlyProperty( this._innerContent ) && !this._innerContent.isDisposed ) {
