@@ -21,6 +21,13 @@ import Utils from '../util/Utils.js';
 const useGreedyStitcher = true;
 
 class BackboneDrawable extends Drawable {
+
+  /**
+   * @public
+   * @type {Block[]}
+   */
+  blocks;
+
   /**
    * @mixes Poolable
    *

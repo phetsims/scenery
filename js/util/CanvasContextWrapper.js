@@ -14,6 +14,13 @@ import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
 import scenery from '../scenery.js';
 
 class CanvasContextWrapper {
+
+  /**
+   * @public
+   * @type {CanvasRenderingContext2D}
+   */
+  context;
+
   /**
    * @param {HTMLCanvasElement} canvas
    * @param {CanvasRenderingContext2D} context
