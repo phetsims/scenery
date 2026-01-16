@@ -152,7 +152,7 @@ class ButtonListener extends DownUpListener {
   /**
    * Called from "focus" events (part of the Scenery listener API). On focus the PDOMPointer is over the node
    * with the attached listener, so add to the over count.
-   * @private
+   * @public
    *
    * @param {SceneryEvent} event
    */
@@ -163,7 +163,7 @@ class ButtonListener extends DownUpListener {
   /**
    * Called from "blur" events (part of the Scenery listener API). On blur, the PDOMPointer leaves the node
    * with this listener so reduce the over count.
-   * @private
+   * @public
    *
    * @param {SceneryEvent} event
    */
@@ -178,7 +178,7 @@ class ButtonListener extends DownUpListener {
    * There are no `keyup` or `keydown` events when an assistive device is active. So we respond generally
    * to the single `click` event, which indicates a logical activation of this button.
    *
-   * @private
+   * @public
    *
    * @param {SceneryEvent} event
    */
