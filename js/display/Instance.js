@@ -53,9 +53,6 @@ const defaultPreferredRenderers = Renderer.createOrderBitmask(
   Renderer.bitmaskWebGL
 );
 
-/**
- * @property {Instance[]} children
- */
 class Instance {
 
   /**
@@ -63,6 +60,12 @@ class Instance {
    * @type {Display|null}
    */
   display = null;
+
+  /**
+   * @public
+   * @type {Instance[]}
+   */
+  children;
 
   /**
    * @mixes Poolable
