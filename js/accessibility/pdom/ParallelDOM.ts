@@ -1,4 +1,4 @@
-// Copyright 2021-2025, University of Colorado Boulder
+// Copyright 2021-2026, University of Colorado Boulder
 
 /**
  * A superclass for Node, adding accessibility by defining content for the Parallel DOM. Please note that Node and
