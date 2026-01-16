@@ -53,6 +53,9 @@ const defaultPreferredRenderers = Renderer.createOrderBitmask(
   Renderer.bitmaskWebGL
 );
 
+/**
+ * @property {Instance[]} children
+ */
 class Instance {
 
   /**
