@@ -1,4 +1,4 @@
-// Copyright 2013-2025, University of Colorado Boulder
+// Copyright 2013-2026, University of Colorado Boulder
 
 /**
  * An instance that is specific to the display (not necessarily a global instance, could be in a Canvas cache, etc),
