@@ -542,7 +542,7 @@ QUnit.test( 'ParallelDOM options', assert => {
     focusHighlight: new Circle( 5 ),
     containerTagName: 'div', // contained in parent element 'div'
     tagName: 'input', // dom element with tag name 'input'
-    inputType: 'button', // input type 'button'
+    inputType: 'checkbox', // input type 'checkbox'
     labelTagName: 'label', // label with tagname 'label'
     labelContent: TEST_LABEL, // label text content
     descriptionContent: TEST_DESCRIPTION, // description text content
@@ -570,7 +570,7 @@ QUnit.test( 'ParallelDOM options', assert => {
   assert.ok( buttonNode.descriptionContent === TEST_DESCRIPTION, 'Accessible Description' );
   assert.ok( buttonNode.focusHighlight instanceof Circle, 'Focus highlight' );
   assert.ok( buttonNode.tagName === 'input', 'Tag name' );
-  assert.ok( buttonNode.inputType === 'button', 'Input type' );
+  assert.ok( buttonNode.inputType === 'checkbox', 'Input type' );
 
   assert.ok( divNode.tagName === 'div', 'Tag name' );
   assert.ok( divNode.ariaLabel === TEST_LABEL, 'Use aria label' );
@@ -607,7 +607,7 @@ QUnit.test( 'ParallelDOM options', assert => {
   assert.ok( buttonDescription.tagName === DEFAULT_DESCRIPTION_TAG_NAME, 'description second' );
   assert.equal( buttonDescription.textContent, TEST_DESCRIPTION, 'description content' );
   assert.ok( buttonPeers[ 2 ] === buttonElement, 'Button third' );
-  assert.ok( buttonElement.getAttribute( 'type' ) === 'button', 'input type set' );
+  assert.ok( buttonElement.getAttribute( 'type' ) === 'checkbox', 'input type set' );
   assert.ok( buttonElement.getAttribute( 'role' ) === 'button', 'button role set' );
   assert.ok( buttonElement.tabIndex === -1, 'not focusable' );
 
