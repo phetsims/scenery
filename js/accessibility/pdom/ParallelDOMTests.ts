@@ -7,11 +7,13 @@
  */
 
 import StringProperty from '../../../../axon/js/StringProperty.js';
+import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import Display from '../../display/Display.js';
 import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
 import Rectangle from '../../nodes/Rectangle.js';
-import { AccessibleNameBehaviorFunction, ParallelDOMOptions } from './ParallelDOM.js';
+import globalDescriptionQueue from './globalDescriptionQueue.js';
+import ParallelDOM, { AccessibleNameBehaviorFunction, ParallelDOMOptions } from './ParallelDOM.js';
 import PDOMFuzzer from './PDOMFuzzer.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMUtils from './PDOMUtils.js';
@@ -106,6 +108,39 @@ function getPrimarySiblingElementByNode( node: Node ): HTMLElement {
  */
 function pdomAuditRootNode( rootNode: Node ): void {
   rootNode.pdomAudit();
+}
+
+/**
+ * Create a display and a connected Node to use for response tests.
+ */
+function createResponseTestHarness(): { rootNode: Node; display: Display; node: Node } {
+  const rootNode = new Node( { tagName: 'div' } );
+  const display = new Display( rootNode );
+  document.body.appendChild( display.domElement );
+
+  // display.descriptionUtteranceQueue.hasSpoken = true; // to allow description queue to function in tests
+  display.descriptionUtteranceQueue.announcer.hasSpoken = true;
+
+  const node = new Node();
+  rootNode.addChild( node );
+
+  return {
+    rootNode: rootNode,
+    display: display,
+    node: node
+  };
+}
+
+/**
+ * Ensure the global description queue is initialized for tests that use alertWhenNotDisplayed.
+ */
+function ensureGlobalDescriptionQueueInitialized(): void {
+  const announcer = ( globalDescriptionQueue as unknown as { announcer: { ariaLiveContainer: HTMLElement } } ).announcer;
+  if ( !document.body.contains( announcer.ariaLiveContainer ) ) {
+    globalDescriptionQueue.initialize( document.body );
+  }
+
+  globalDescriptionQueue.announcer.hasSpoken = true;
 }
 
 QUnit.test( 'tagName/innerContent options', assert => {
@@ -2634,6 +2669,127 @@ QUnit.test( 'accessibleRoleDescription', assert => {
 
   display.dispose();
   display.domElement.parentElement!.removeChild( display.domElement );
+} );
+
+QUnit.test( 'interruptible response behaviors', assert => {
+
+  // Default queues a response.
+  {
+    const { display, node } = createResponseTestHarness();
+
+    assert.equal( display.descriptionUtteranceQueue.length, 0, 'queue starts empty' );
+
+    node.addAccessibleContextResponse( 'Speed is 2 m/s' );
+    assert.equal( display.descriptionUtteranceQueue.length, 1, 'default response enqueued' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
+
+  // Default responses queue.
+  {
+    const { display, node } = createResponseTestHarness();
+
+    node.addAccessibleContextResponse( 'Speed is 1 m/s' );
+    node.addAccessibleContextResponse( 'Speed is 2 m/s' );
+    node.addAccessibleContextResponse( 'Speed is 3 m/s' );
+
+    assert.equal( display.descriptionUtteranceQueue.length, 3, 'default responses queue' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
+
+  // interruptible=false queues without requiring an Utterance.
+  {
+    const { display, node } = createResponseTestHarness();
+
+    node.addAccessibleContextResponse( 'Loading finished', { interruptible: false } );
+    assert.equal( display.descriptionUtteranceQueue.length, 1, 'non-interruptible response enqueued' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
+
+  // Self-interrupting responses replace themselves.
+  {
+    const { display, node } = createResponseTestHarness();
+
+    const statusUtterance = ParallelDOM.createSelfInterruptingUtterance();
+    statusUtterance.alert = 'Status: ready';
+    node.addAccessibleContextResponse( statusUtterance );
+    assert.equal( display.descriptionUtteranceQueue.length, 1, 'first response enqueued' );
+
+    statusUtterance.alert = 'Status: running';
+    node.addAccessibleContextResponse( statusUtterance );
+    assert.equal( display.descriptionUtteranceQueue.length, 1, 'self-interrupting response replaced' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
+
+  // Self-interrupting + non-interruptible responses set interruptible=false.
+  {
+    const { display, node } = createResponseTestHarness();
+
+    const statusUtterance = ParallelDOM.createSelfInterruptingUtterance( {
+      alert: 'Status: ready'
+    } );
+    node.addAccessibleContextResponse( statusUtterance, { interruptible: false } );
+
+    assert.equal( statusUtterance.interruptible, false, 'interruptible flag applied to Utterance' );
+    assert.equal( display.descriptionUtteranceQueue.length, 1, 'response enqueued' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
+
+  // interruptible=true does not override an existing Utterance flag.
+  {
+    const { display, node } = createResponseTestHarness();
+
+    const statusUtterance = new Utterance( {
+      alert: 'Status: ready',
+      interruptible: false
+    } );
+    node.addAccessibleContextResponse( statusUtterance, { interruptible: true } );
+
+    assert.equal( statusUtterance.interruptible, true, 'ParallelDOM sets interruptible flag' );
+    assert.equal( display.descriptionUtteranceQueue.length, 1, 'response enqueued' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
+
+  // flush clears the queue before enqueuing a response.
+  {
+    const { display, node } = createResponseTestHarness();
+
+    node.addAccessibleContextResponse( 'First response', { interruptible: false } );
+    node.addAccessibleContextResponse( 'Second response' );
+    assert.equal( display.descriptionUtteranceQueue.length, 2, 'two responses enqueued' );
+
+    node.addAccessibleContextResponse( 'Critical alert', { flush: true, interruptible: false } );
+    assert.equal( display.descriptionUtteranceQueue.length, 1, 'flush cleared previous responses' );
+
+    display.dispose();
+    display.domElement.parentElement!.removeChild( display.domElement );
+  }
+
+  // flush clears the global queue for alertWhenNotDisplayed responses.
+  {
+    ensureGlobalDescriptionQueueInitialized();
+    globalDescriptionQueue.clear();
+
+    const node = new Node();
+
+    node.addAccessibleContextResponse( 'First global response', { alertWhenNotDisplayed: true, interruptible: false } );
+    node.addAccessibleContextResponse( 'Second global response', { alertWhenNotDisplayed: true } );
+    assert.equal( globalDescriptionQueue.length, 2, 'two global responses enqueued' );
+
+    node.addAccessibleContextResponse( 'Critical global alert', { alertWhenNotDisplayed: true, flush: true } );
+    assert.equal( globalDescriptionQueue.length, 1, 'flush cleared previous global responses' );
+  }
 } );
 
 

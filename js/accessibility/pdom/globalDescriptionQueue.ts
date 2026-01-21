@@ -50,10 +50,10 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
    * Enqueue an accessible response that will be announced through this queue's aria-live container.
    *
    * @param alertable - The content to be announced by screen readers
-   * @param alertBehavior - Controls whether the response interrupts existing ones ('interrupt') or waits in the queue ('queue')
    * @param responseCategory
+   * @param flush - Whether to clear existing queued content before adding this alertable
    */
-  public addAccessibleResponse( alertable: TAlertable, responseCategory: ResponseCategory, alertBehavior: 'queue' | 'interrupt' = 'interrupt' ): void {
+  public addAccessibleResponse( alertable: TAlertable, responseCategory: ResponseCategory, flush = false ): void {
     assert && assert( this._globalInitialized, 'Must be initialized to use.' );
 
     // Nothing to do if there is no content.
@@ -66,7 +66,7 @@ class GlobalDescriptionQueue extends UtteranceQueue<AriaLiveAnnouncer> {
       return;
     }
 
-    if ( alertBehavior === 'interrupt' ) {
+    if ( flush ) {
       this.clear();
     }
 

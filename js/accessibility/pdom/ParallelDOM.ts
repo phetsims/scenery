@@ -144,14 +144,14 @@ import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Shape from '../../../../kite/js/Shape.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
-import optionize from '../../../../phet-core/js/optionize.js';
+import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
 import PickOptional from '../../../../phet-core/js/types/PickOptional.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { ResponseCategory } from '../../../../utterance-queue/js/Announcer.js';
-import Utterance, { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
+import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
@@ -394,19 +394,18 @@ type RemovePDOMClassOptions = {
   elementName?: string;
 };
 
-// Queue behavior for the response.
-// 'interrupt' - interrupt queue and any other responses and speak immediately (default)
-// 'queue' - add to the end of the queue
-export type DescriptionResponseAlertBehavior = 'interrupt' | 'queue';
-
 type DescriptionResponseOptions = {
-
-  // Queue behavior for the response.
-  alertBehavior?: DescriptionResponseAlertBehavior;
 
   // If true, the description will be spoken even if the Node is invisible or not attached to
   // a Display. Default is false.
   alertWhenNotDisplayed?: boolean;
+
+  // If true, this response will be interrupted by newer responses. Default is false.
+  interruptible?: boolean;
+
+  // If true, clear the target queue before enqueuing this response.
+  // This flushes all pending responses, even protected ones. Default is false.
+  flush?: boolean;
 };
 
 /**
@@ -3257,7 +3256,8 @@ export default class ParallelDOM extends PhetioObject {
   private addAccessibleResponse( utterance: TAlertable, responseCategory: ResponseCategory = 'other', providedOptions?: DescriptionResponseOptions ): void {
 
     // nullish coalescing for options because this function can be called a lot
-    const alertBehavior = providedOptions?.alertBehavior ?? 'interrupt';
+    const interruptible = providedOptions?.interruptible ?? false;
+    const flush = providedOptions?.flush ?? false;
     const alertWhenNotDisplayed = providedOptions?.alertWhenNotDisplayed ?? false;
 
     // Nothing to do if there is no content.
@@ -3276,17 +3276,29 @@ export default class ParallelDOM extends PhetioObject {
       return;
     }
 
+    const hasInterruptibleOption = providedOptions?.interruptible !== undefined;
+    if ( !( utterance instanceof Utterance ) ) {
+      utterance = new Utterance( {
+        alert: utterance,
+        interruptible: hasInterruptibleOption ? interruptible : false
+      } );
+    }
+    else if ( hasInterruptibleOption ) {
+      // When the option is provided, it overrides the Utterance setting; otherwise, the Utterance keeps its own value.
+      utterance.interruptible = interruptible;
+    }
+
     if ( alertWhenNotDisplayed ) {
 
       // alertWhenNotDisplayed is true - we want to hear the response even when the Node is invisible and detached
       // Note that we cannot announce on each display, this will only be announced once globally.
-      globalDescriptionQueue.addAccessibleResponse( utterance, responseCategory, alertBehavior );
+      globalDescriptionQueue.addAccessibleResponse( utterance, responseCategory, flush );
     }
     else {
 
       // only clear if there is content (graceful if alertable is null so that reusable components can use this method
       // without requiring content)
-      if ( utterance && alertBehavior === 'interrupt' ) {
+      if ( utterance && flush ) {
         this.forEachUtteranceQueue( queue => queue.clear() );
       }
 
@@ -3692,6 +3704,25 @@ export default class ParallelDOM extends PhetioObject {
     options.descriptionContent = accessibleHelpText;
     options.appendDescription = true;
     return options;
+  }
+
+  /**
+   * Create an Utterance intended to be reused for a self‑interrupting stream.
+   * Reusing the same instance causes earlier queued entries for that Utterance to be replaced,
+   * so only the most recent update from that source is spoken.
+   *
+   * Use this for fast‑changing values (like readouts) where you want the latest value without
+   * being interrupted by OTHER responses in the queue.
+   *
+   * Typical usage: create once, update `alert`, and re‑enqueue the same Utterance.
+   */
+  public static createSelfInterruptingUtterance( providedOptions?: UtteranceOptions ): Utterance {
+    return new Utterance( optionize<UtteranceOptions, EmptySelfOptions>()( {
+
+      // Not interruptible so that this Utterance will not be interrupted by responses behind it in the queue.
+      // But it WILL still interrupt earlier entries for itself in the queue.
+      interruptible: false
+    }, providedOptions ) );
   }
 
   /**
