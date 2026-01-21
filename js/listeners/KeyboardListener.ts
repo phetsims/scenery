@@ -327,11 +327,13 @@ class KeyboardListener<Keys extends readonly OneKeyStroke[]> extends EnabledComp
     const domEvent = event.domEvent;
 
     // Prevent default for arrow keys. This catch should only prevent default if this KeyboardListener
-    // observes arrow keys, and arrow keys are pressed.  If meta or modifier keys are down, we do
-    // not want to prevent default. These keys + arrow keys are often commands to navigate pages
-    // and we do not want to prevent that. If you need to preventDefault for this case, it should
-    // be done in your own listener.
-    if ( this.preventDefaultForArrowKeys && domEvent && !domEvent.metaKey && !domEvent.altKey && !domEvent.ctrlKey ) {
+    // observes arrow keys, the listener is enabled, and arrow keys are pressed.  If meta or modifier
+    // keys are down, we do not want to prevent default. These keys + arrow keys are often commands
+    // to navigate pages and we do not want to prevent that. If you need to preventDefault for this
+    // case, it should be done in your own listener.
+    if (
+      this.preventDefaultForArrowKeys && this.enabledProperty.value &&
+      domEvent && !domEvent.metaKey && !domEvent.altKey && !domEvent.ctrlKey ) {
       const arrowKeyPressed = KeyboardUtils.isArrowKey( domEvent );
       if ( arrowKeyPressed ) {
         domEvent.preventDefault();
