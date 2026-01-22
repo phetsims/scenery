@@ -2,7 +2,7 @@
 
 /**
  * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. A PDOMPeer can
- * have up to four window.Elements displayed in the PDOM, see ftructor for details.
+ * have up to four window.Elements displayed in the PDOM, see constructor for details.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Jesse Greenberg
@@ -15,12 +15,17 @@ import merge from '../../../../phet-core/js/merge.js';
 import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import FocusManager from '../../accessibility/FocusManager.js';
 import PDOMSiblingStyle from '../../accessibility/pdom/PDOMSiblingStyle.js';
 import PDOMUtils from '../../accessibility/pdom/PDOMUtils.js';
+import Display from '../../display/Display.js';
+import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
+import type Trail from '../../util/Trail.js';
 import { pdomFocusProperty } from '../pdomFocusProperty.js';
 import { guessVisualTrail } from './guessVisualTrail.js';
+import PDOMInstance from './PDOMInstance.js';
 import { PEER_ACCESSIBLE_PARAGRAPH_SIBLING } from './PEER_ACCESSIBLE_PARAGRAPH_SIBLING.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 import { PEER_DESCRIPTION_SIBLING } from './PEER_DESCRIPTION_SIBLING.js';
@@ -46,149 +51,178 @@ const OBSERVER_CONFIG = { attributes: false, childList: true, characterData: tru
 
 let globalId = 1;
 
-// mutables instances to avoid creating many in operations that occur frequently
+// mutable instances to avoid creating many in operations that occur frequently
 const scratchGlobalBounds = new Bounds2( 0, 0, 0, 0 );
 const scratchSiblingBounds = new Bounds2( 0, 0, 0, 0 );
 const globalNodeTranslationMatrix = new Matrix3();
 const globalToClientScaleMatrix = new Matrix3();
 const nodeScaleMagnitudeMatrix = new Matrix3();
 
+/**
+ * @mixes Poolable
+ */
 class PDOMPeer {
-  /**
-   * @param {PDOMInstance} pdomInstance
-   * @param {Object} [options]
-   * @mixes Poolable
-   */
-  constructor( pdomInstance, options ) {
+
+  // unique ID
+  public id!: number;
+
+  public pdomInstance!: PDOMInstance;
+
+  // only null for the root pdomInstance
+  public node!: Node | null;
+
+  // Each peer is associated with a specific Display.
+  public display!: Display;
+
+  // NOTE: May have "gaps" due to pdomOrder usage.
+  public trail!: Trail;
+
+  // whether this PDOMPeer is visible in the PDOM
+  // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null
+  // (because it hasn't been set yet).
+  public visible!: boolean | null;
+
+  // whether the primary sibling can receive focus.
+  public focusable!: boolean | null;
+
+  // Optional label/description elements
+  private _headingSibling!: HTMLElement | null;
+  private _labelSibling!: HTMLElement | null;
+  private _descriptionSibling!: HTMLElement | null;
+
+  // Optional paragraph element for the "high level" API.
+  private _accessibleParagraphSibling!: HTMLElement | null;
+
+  // A parent element that can contain this primarySibling and other siblings, usually
+  // the label and description content.
+  private _containerParent!: HTMLElement | null;
+
+  // Rather than guarantee that a peer is a tree with a root DOMElement,
+  // allow multiple window.Elements at the top level of the peer. This is used for sorting the instance.
+  // See this.orderElements for more info.
+  public topLevelElements!: HTMLElement[];
+
+  // flag that indicates that this peer has accessible content that changed, and so
+  // the siblings need to be repositioned in the next Display.updateDisplay()
+  private positionDirty!: boolean;
+
+  // Flag that indicates that PDOM elements require a forced reflow next animation frame.
+  // This is needed to fix a Safari VoiceOver bug where the accessible name is read incorrectly after elements
+  // are hidden/displayed. The usual workaround to force a reflow (set the style.display to none, query the offset,
+  // set it back) only fixes the problem if the style.display attribute is set in the next animation frame.
+  // See https://github.com/phetsims/a11y-research/issues/193.
+  private forceReflowWorkaround!: boolean;
+
+  // indicates that this peer's pdomInstance has a descendant that is dirty. Used to
+  // quickly find peers with positionDirty when we traverse the tree of PDOMInstances
+  private childPositionDirty!: boolean;
+
+  // Indicates that this peer will position sibling elements so that
+  // they are in the right location in the viewport, which is a requirement for touch based
+  // screen readers. See setPositionInPDOM.
+  private positionInPDOM!: boolean;
+
+  // An observer that will call back any time a property of the primary
+  // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
+  // all of the mutations, any single mutation will require updating CSS positioning.
+  //
+  // NOTE: Ideally, a single MutationObserver could be used to observe changes to all elements in the PDOM. But
+  // MutationObserver makes it impossible to detach observers from a single element. MutationObserver.detach()
+  // will remove listeners on all observed elements, so individual observers must be used on each element.
+  // One alternative could be to put the MutationObserver on the root element and use "subtree: true" in
+  // OBSERVER_CONFIG. This could reduce the number of MutationObservers, but there is no easy way to get the
+  // peer from the mutation target element. If MutationObserver takes a lot of memory, this could be an
+  // optimization that may come with a performance cost.
+  //
+  // NOTE: ResizeObserver is a superior alternative to MutationObserver for this purpose because
+  // it will only monitor changes we care about and prevent infinite callback loops if size is changed in
+  // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
+  // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver.
+  //
+  // TODO: Should we be watching "model" changes from ParallelDOM.js instead of using MutationObserver? https://github.com/phetsims/scenery/issues/1581
+  // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
+  // memory intensive because we don't need an instance of MutationObserver on every PDOMInstance.
+  private mutationObserver!: MutationObserver;
+
+  // must be removed on disposal
+  private transformListener!: () => void;
+
+  // To support setting the Display.interactive=false (which sets disabled on all primarySiblings,
+  // we need to set disabled on a separate channel from this.setAttributeToElement. That way we cover the case where
+  // `disabled` was set through the ParallelDOM API when we need to toggle it specifically for Display.interactive.
+  // This way we can conserve the previous `disabled` attribute/property value through toggling Display.interactive.
+  private _preservedDisabledValue: IntentionalAny | null;
+
+  // Whether we are currently in a "disposed" (in the pool) state, or are available to be interacted with.
+  private isDisposed!: boolean;
+
+  // The main element associated with this peer. If focusable, this is the element that gets
+  // the focus. It also will contain any children.
+  private _primarySibling!: HTMLElement | undefined;
+
+
+  protected constructor( pdomInstance: PDOMInstance, options: IntentionalAny ) {
     this.initializePDOMPeer( pdomInstance, options );
   }
+
 
   /**
    * Initializes the object (either from a freshly-created state, or from a "disposed" state brought back from a
    * pool).
    *
    * NOTE: the PDOMPeer is not fully constructed until calling PDOMPeer.update() after creating from pool.
-   * @private
    *
-   * @param {PDOMInstance} pdomInstance
-   * @param {Object} [options]
-   * @returns {PDOMPeer} - Returns 'this' reference, for chaining
+   * @returns 'this' reference, for chaining
+   * (scenery-internal)
    */
-  initializePDOMPeer( pdomInstance, options ) {
+  public initializePDOMPeer( pdomInstance: PDOMInstance, options: IntentionalAny ): this {
+
+    // eslint-disable-next-line phet/bad-typescript-text
     options = merge( {
       primarySibling: null
     }, options );
 
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
-    // @public {number} - unique ID
     this.id = this.id || globalId++;
-
-    // @public {PDOMInstance}
     this.pdomInstance = pdomInstance;
-
-    // @public {Node|null} only null for the root pdomInstance
     this.node = this.pdomInstance.node;
-
-    // @public {Display} - Each peer is associated with a specific Display.
-    this.display = pdomInstance.display;
-
-    // @public {Trail} - NOTE: May have "gaps" due to pdomOrder usage.
-    this.trail = pdomInstance.trail;
-
-    // @private {boolean|null} - whether or not this PDOMPeer is visible in the PDOM
-    // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null
-    // (because it hasn't been set yet).
+    this.display = pdomInstance.display!;
+    this.trail = pdomInstance.trail!;
     this.visible = null;
-
-    // @private {boolean|null} - whether or not the primary sibling can receive focus.
     this.focusable = null;
 
-    // @private {HTMLElement|null} - Optional label/description elements
     this._headingSibling = null;
     this._labelSibling = null;
     this._descriptionSibling = null;
 
-    // @private {HTMLElement|null} - Optional paragraph element for the "high level" API.
     this._accessibleParagraphSibling = null;
-
-    // @private {HTMLElement|null} - A parent element that can contain this primarySibling and other siblings, usually
-    // the label and description content.
     this._containerParent = null;
-
-    // @public {HTMLElement[]} Rather than guarantee that a peer is a tree with a root DOMElement,
-    // allow multiple window.Elements at the top level of the peer. This is used for sorting the instance.
-    // See this.orderElements for more info.
     this.topLevelElements = [];
-
-    // @private {boolean} - flag that indicates that this peer has accessible content that changed, and so
-    // the siblings need to be repositioned in the next Display.updateDisplay()
     this.positionDirty = false;
-
-    // @private {boolean} - Flag that indicates that PDOM elements require a forced reflow next animation frame.
-    // This is needed to fix a Safari VoiceOver bug where the accessible name is read incorrectly after elements
-    // are hidden/displayed. The usual workaround to force a reflow (set the style.display to none, query the offset,
-    // set it back) only fixes the problem if the style.display attribute is set in the next animation frame.
-    // See https://github.com/phetsims/a11y-research/issues/193.
     this.forceReflowWorkaround = false;
-
-    // @private {boolean} - indicates that this peer's pdomInstance has a descendant that is dirty. Used to
-    // quickly find peers with positionDirty when we traverse the tree of PDOMInstances
     this.childPositionDirty = false;
-
-    // @private {boolean} - Indicates that this peer will position sibling elements so that
-    // they are in the right location in the viewport, which is a requirement for touch based
-    // screen readers. See setPositionInPDOM.
     this.positionInPDOM = false;
 
-    // @private {MutationObserver} - An observer that will call back any time a property of the primary
-    // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
-    // all of the mutations, any single mutation will require updating CSS positioning.
-    //
-    // NOTE: Ideally, a single MutationObserver could be used to observe changes to all elements in the PDOM. But
-    // MutationObserver makes it impossible to detach observers from a single element. MutationObserver.detach()
-    // will remove listeners on all observed elements, so individual observers must be used on each element.
-    // One alternative could be to put the MutationObserver on the root element and use "subtree: true" in
-    // OBSERVER_CONFIG. This could reduce the number of MutationObservers, but there is no easy way to get the
-    // peer from the mutation target element. If MutationObserver takes a lot of memory, this could be an
-    // optimization that may come with a performance cost.
-    //
-    // NOTE: ResizeObserver is a superior alternative to MutationObserver for this purpose because
-    // it will only monitor changes we care about and prevent infinite callback loops if size is changed in
-    // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
-    // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver.
-    //
-    // TODO: Should we be watching "model" changes from ParallelDOM.js instead of using MutationObserver? https://github.com/phetsims/scenery/issues/1581
-    // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
-    // memory intensive because we don't need an instance of MutationObserver on every PDOMInstance.
     this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this, false ) );
 
-    // @private {function} - must be removed on disposal
     this.transformListener = this.transformListener || this.invalidateCSSPositioning.bind( this, false );
-    this.pdomInstance.transformTracker.addListener( this.transformListener );
+    this.pdomInstance.transformTracker!.addListener( this.transformListener );
 
-    // @private {*} - To support setting the Display.interactive=false (which sets disabled on all primarySiblings,
-    // we need to set disabled on a separate channel from this.setAttributeToElement. That way we cover the case where
-    // `disabled` was set through the ParallelDOM API when we need to toggle it specifically for Display.interactive.
-    // This way we can conserve the previous `disabled` attribute/property value through toggling Display.interactive.
     this._preservedDisabledValue = null;
 
-    // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
-    // interacted with.
     this.isDisposed = false;
 
     // edge case for root accessibility
     if ( this.pdomInstance.isRootInstance ) {
 
-      // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
-      // the focus. It also will contain any children.
       this._primarySibling = options.primarySibling;
-      this._primarySibling.classList.add( PDOMSiblingStyle.ROOT_CLASS_NAME );
+      this._primarySibling!.classList.add( PDOMSiblingStyle.ROOT_CLASS_NAME );
 
       // Stop blocked events from bubbling past the root of the PDOM so that scenery does
       // not dispatch them in Input.js.
       PDOMUtils.BLOCKED_DOM_EVENTS.forEach( eventType => {
-        this._primarySibling.addEventListener( eventType, event => {
+        this._primarySibling!.addEventListener( eventType, event => {
           event.stopPropagation();
         } );
       } );
@@ -199,15 +233,16 @@ class PDOMPeer {
 
   /**
    * Update the content of the peer. This must be called after the AccessiblePeer is constructed from pool.
-   * @param {boolean} updateIndicesStringAndElementIds - if this function should be called upon initial "construction" (in update), allows for the option to do this lazily, see https://github.com/phetsims/phet-io/issues/1847
-   * @public (scenery-internal)
+   * @param updateIndicesStringAndElementIds - if this function should be called upon initial "construction" (in update), allows for the option to do this lazily, see https://github.com/phetsims/phet-io/issues/1847
+   * (scenery-internal)
    */
-  update( updateIndicesStringAndElementIds ) {
+  public update( updateIndicesStringAndElementIds: boolean ): void {
+
     // NOTE: JO: 2025-04-01: This looks like it will usually convert string Properties to strings (because of the getters)
     // but this will probably make TypeScript conversion problematic.
-    let options = this.node.getBaseOptions();
+    let options = this.node!.getBaseOptions();
 
-    const callbacksForOtherNodes = [];
+    const callbacksForOtherNodes: Array<() => void> = [];
 
     // In case update() is called more than once on an instance of PDOMPeer. Observer will be set up
     // later if there is a primary sibling.
@@ -215,50 +250,53 @@ class PDOMPeer {
 
     // Even if the accessibleName is null, we need to run the behavior function if the dirty flag is set
     // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
-    if ( this.node.accessibleName !== null || this.node._accessibleNameDirty ) {
-      if ( this.node.accessibleName === null ) {
+    if ( this.node!.accessibleName !== null || this.node!._accessibleNameDirty ) {
+      if ( this.node!.accessibleName === null ) {
 
         // There is no accessibleName, so we don't want to modify options - just run the behavior for cleanup
         // and to update other nodes.
-        this.node.accessibleNameBehavior( this.node, {}, this.node.accessibleName, callbacksForOtherNodes );
+        this.node!.accessibleNameBehavior( this.node!, {}, this.node!.accessibleName, callbacksForOtherNodes );
       }
       else {
-        options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName, callbacksForOtherNodes );
+        options = this.node!.accessibleNameBehavior( this.node!, options, this.node!.accessibleName, callbacksForOtherNodes );
       }
+      // eslint-disable-next-line phet/no-simple-type-checking-assertions
       assert && assert( typeof options === 'object', 'should return an object' );
-      this.node._accessibleNameDirty = false;
+      this.node!._accessibleNameDirty = false;
     }
 
     // Even if the accessibleHelpText is null, we need to run the behavior function if the dirty flag is set
     // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
-    if ( this.node.accessibleHelpText !== null || this.node._accessibleHelpTextDirty ) {
-      if ( this.node.accessibleHelpText === null ) {
+    if ( this.node!.accessibleHelpText !== null || this.node!._accessibleHelpTextDirty ) {
+      if ( this.node!.accessibleHelpText === null ) {
 
         // There is no accessibleHelpText, so we don't want to modify options - just run the behavior for cleanup
         // and to update other nodes.
-        this.node.accessibleHelpTextBehavior( this.node, {}, this.node.accessibleHelpText, callbacksForOtherNodes );
+        this.node!.accessibleHelpTextBehavior( this.node!, {}, this.node!.accessibleHelpText, callbacksForOtherNodes );
       }
       else {
-        options = this.node.accessibleHelpTextBehavior( this.node, options, this.node.accessibleHelpText, callbacksForOtherNodes );
+        options = this.node!.accessibleHelpTextBehavior( this.node!, options, this.node!.accessibleHelpText, callbacksForOtherNodes );
       }
+      // eslint-disable-next-line phet/no-simple-type-checking-assertions
       assert && assert( typeof options === 'object', 'should return an object' );
-      this.node._accessibleHelpTextDirty = false;
+      this.node!._accessibleHelpTextDirty = false;
     }
 
     // Even if the accessibleHelpText is null, we need to run the behavior function if the dirty flag is set
     // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
-    if ( this.node.accessibleParagraph !== null || this.node._accessibleParagraphDirty ) {
-      if ( this.node.accessibleParagraph === null ) {
+    if ( this.node!.accessibleParagraph !== null || this.node!._accessibleParagraphDirty ) {
+      if ( this.node!.accessibleParagraph === null ) {
 
         // There is no accessibleParagraph, so we don't want to modify options - just run the behavior for cleanup
         // and to update other nodes.
-        this.node.accessibleParagraphBehavior( this.node, {}, this.node.accessibleParagraph, callbacksForOtherNodes );
+        this.node!.accessibleParagraphBehavior( this.node!, {}, this.node!.accessibleParagraph, callbacksForOtherNodes );
       }
       else {
-        options = this.node.accessibleParagraphBehavior( this.node, options, this.node.accessibleParagraph, callbacksForOtherNodes );
+        options = this.node!.accessibleParagraphBehavior( this.node!, options, this.node!.accessibleParagraph, callbacksForOtherNodes );
       }
+      // eslint-disable-next-line phet/no-simple-type-checking-assertions
       assert && assert( typeof options === 'object', 'should return an object' );
-      this.node._accessibleParagraphDirty = false;
+      this.node!._accessibleParagraphDirty = false;
     }
 
     // If there is an accessible paragraph, create it now. Accessible paragraph does not require a tagName.
@@ -273,6 +311,8 @@ class PDOMPeer {
     const paragraphDefined = options.accessibleParagraph !== null && options.accessibleParagraph !== undefined;
     if ( paragraphContentDefined || paragraphDefined ) {
       this._accessibleParagraphSibling = createElement( PDOMUtils.TAGS.P, false );
+
+      // @ts-expect-error
       this.setAccessibleParagraphContent( options.accessibleParagraphContent );
     }
 
@@ -291,7 +331,7 @@ class PDOMPeer {
     if ( options.tagName ) {
 
       // TODO: why not just options.focusable? https://github.com/phetsims/scenery/issues/1581
-      this._primarySibling = createElement( options.tagName, this.node.focusable, {
+      this._primarySibling = createElement( options.tagName, this.node!.focusable, {
         namespace: options.pdomNamespace
       } );
 
@@ -307,7 +347,7 @@ class PDOMPeer {
       // create the label DOM element representing this instance
       if ( options.labelTagName ) {
         this._labelSibling = createElement( options.labelTagName, false, {
-          excludeFromInput: this.node._excludeLabelSiblingFromInput
+          excludeFromInput: this.node!._excludeLabelSiblingFromInput
         } );
       }
 
@@ -334,6 +374,7 @@ class PDOMPeer {
 
       // If Display.interactive is off, restore the disabled state on the new primary sibling.
       if ( !this.display.interactive ) {
+        // @ts-expect-error
         this._primarySibling.disabled = true;
       }
 
@@ -341,27 +382,31 @@ class PDOMPeer {
       this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
 
       if ( options.accessibleHeading !== null ) {
+        // @ts-expect-error
         this.setHeadingContent( options.accessibleHeading );
       }
 
       // set the accessible label now that the element has been recreated again, but not if the tagName
       // has been cleared out
       if ( options.labelContent && options.labelTagName !== null ) {
+        // @ts-expect-error
         this.setLabelSiblingContent( options.labelContent );
       }
 
       // restore the innerContent
       if ( options.innerContent && options.tagName !== null ) {
+        // @ts-expect-error
         this.setPrimarySiblingContent( options.innerContent );
       }
 
       // set the accessible description, but not if the tagName has been cleared out.
       if ( options.descriptionContent && options.descriptionTagName !== null ) {
+        // @ts-expect-error
         this.setDescriptionSiblingContent( options.descriptionContent );
       }
 
       // if element is an input element, set input type
-      if ( options.tagName.toUpperCase() === INPUT_TAG && options.inputType ) {
+      if ( options.tagName!.toUpperCase() === INPUT_TAG && options.inputType ) {
         this.setAttributeToElement( 'type', options.inputType );
       }
 
@@ -372,10 +417,10 @@ class PDOMPeer {
         } );
       }
 
-      this.setFocusable( this.node.focusable );
+      this.setFocusable( this.node!.focusable );
 
       // set the positionInPDOM field to our updated instance
-      this.setPositionInPDOM( this.node.positionInPDOM );
+      this.setPositionInPDOM( this.node!.positionInPDOM );
 
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
       this.onAriaLabelledbyAssociationChange();
@@ -391,35 +436,31 @@ class PDOMPeer {
       // update input value attribute for the peer
       this.onInputValueChange();
 
-      this.node.updateOtherNodesAriaLabelledby();
-      this.node.updateOtherNodesAriaDescribedby();
-      this.node.updateOtherNodesActiveDescendant();
+      this.node!.updateOtherNodesAriaLabelledby();
+      this.node!.updateOtherNodesAriaDescribedby();
+      this.node!.updateOtherNodesActiveDescendant();
     }
 
-    callbacksForOtherNodes.forEach( callback => {
-      assert && assert( typeof callback === 'function' );
-      callback();
-    } );
+    callbacksForOtherNodes.forEach( callback => callback() );
   }
 
   /**
    * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
    * this.topLevelElements
-   * @param {Object} config - the computed mixin options to be applied to the peer. (select ParallelDOM mutator keys)
-   * @private
+   * @param config - the computed mixin options to be applied to the peer. (select ParallelDOM mutator keys)
    */
-  orderElements( config ) {
+  private orderElements( config: IntentionalAny ): void {
     if ( this._containerParent ) {
       // The first child of the container parent element should be the peer dom element
       // if undefined, the insertBefore method will insert the this._primarySibling as the first child
       assert && assert( this._primarySibling, 'There should be a _primarySibling if there is a _containerParent' );
-      this._containerParent.insertBefore( this._primarySibling, this._containerParent.children[ 0 ] || null );
+      this._containerParent.insertBefore( this._primarySibling!, this._containerParent.children[ 0 ] || null );
       this.topLevelElements = [ this._containerParent ];
     }
     else {
 
       // Wean out any null siblings
-      this.topLevelElements = [ this._headingSibling, this._labelSibling, this._descriptionSibling, this._primarySibling, this._accessibleParagraphSibling ].filter( _.identity );
+      this.topLevelElements = [ this._headingSibling, this._labelSibling, this._descriptionSibling, this._primarySibling, this._accessibleParagraphSibling ].filter( _.identity ) as HTMLElement[];
     }
 
     // insert the heading/label/description elements in the correct location if they exist
@@ -436,10 +477,8 @@ class PDOMPeer {
    * accessible paragraph.
    *
    * If other elements can be placed without the primary sibling, they could be added to this function.
-   *
-   * @public
    */
-  getPlaceableSibling() {
+  public getPlaceableSibling(): IntentionalAny {
     const placeable = this._primarySibling || this._accessibleParagraphSibling;
     assert && assert( placeable, 'No placeable sibling found!' );
 
@@ -448,71 +487,60 @@ class PDOMPeer {
 
   /**
    * Get the primary sibling HTMLElement for the peer
-   * @public
-   * @returns {HTMLElement|null}
    */
-  getPrimarySibling() {
+  public getPrimarySibling(): HTMLElement | null {
     return this._primarySibling || null;
   }
 
-  get primarySibling() { return this.getPrimarySibling(); }
+  public get primarySibling(): HTMLElement | null { return this.getPrimarySibling(); }
 
   /**
    * Get the heading sibling element for the peer
-   * @public
-   * @returns {HTMLElement|null}
    */
-  getHeadingSibling() {
+  public getHeadingSibling(): HTMLElement | null {
     return this._headingSibling || null;
   }
 
-  get headingSibling() { return this.getHeadingSibling(); }
+  public get headingSibling(): HTMLElement | null { return this.getHeadingSibling(); }
 
   /**
    * Get the label sibling element for the peer
-   * @public
-   * @returns {HTMLElement|null}
    */
-  getLabelSibling() {
+  public getLabelSibling(): HTMLElement | null {
     return this._labelSibling || null;
   }
 
-  get labelSibling() { return this.getLabelSibling(); }
+  public get labelSibling(): HTMLElement | null { return this.getLabelSibling(); }
 
   /**
    * Get the description sibling element for the peer
-   * @public
-   * @returns {HTMLElement|null}
    */
-  getDescriptionSibling() {
+  public getDescriptionSibling(): HTMLElement | null {
     return this._descriptionSibling || null;
   }
 
-  get descriptionSibling() { return this.getDescriptionSibling(); }
+  public get descriptionSibling(): HTMLElement | null { return this.getDescriptionSibling(); }
 
   /**
    * Get the container parent element for the peer
-   * @public
-   * @returns {HTMLElement|null}
    */
-  getContainerParent() {
+  public getContainerParent(): HTMLElement | null {
     return this._containerParent || null;
   }
 
-  get containerParent() { return this.getContainerParent(); }
+  public get containerParent(): HTMLElement | null { return this.getContainerParent(); }
 
   /**
    * Recompute the aria-labelledby attributes for all of the peer's elements
-   * @public
    */
-  onAriaLabelledbyAssociationChange() {
+  public onAriaLabelledbyAssociationChange(): void {
     this.removeAttributeFromAllElements( 'aria-labelledby' );
 
-    for ( let i = 0; i < this.node.ariaLabelledbyAssociations.length; i++ ) {
-      const associationObject = this.node.ariaLabelledbyAssociations[ i ];
+    for ( let i = 0; i < this.node!.ariaLabelledbyAssociations.length; i++ ) {
+      const associationObject = this.node!.ariaLabelledbyAssociations[ i ];
 
       // Assert out if the model list is different than the data held in the associationObject
-      assert && assert( associationObject.otherNode.nodesThatAreAriaLabelledbyThisNode.indexOf( this.node ) >= 0,
+      assert && assert( associationObject.otherNode.nodesThatAreAriaLabelledbyThisNode.includes( this.node! ),
         'unexpected otherNode' );
 
 
@@ -522,16 +550,15 @@ class PDOMPeer {
 
   /**
    * Recompute the aria-describedby attributes for all of the peer's elements
-   * @public
    */
-  onAriaDescribedbyAssociationChange() {
+  public onAriaDescribedbyAssociationChange(): void {
     this.removeAttributeFromAllElements( 'aria-describedby' );
 
-    for ( let i = 0; i < this.node.ariaDescribedbyAssociations.length; i++ ) {
-      const associationObject = this.node.ariaDescribedbyAssociations[ i ];
+    for ( let i = 0; i < this.node!.ariaDescribedbyAssociations.length; i++ ) {
+      const associationObject = this.node!.ariaDescribedbyAssociations[ i ];
 
       // Assert out if the model list is different than the data held in the associationObject
-      assert && assert( associationObject.otherNode.nodesThatAreAriaDescribedbyThisNode.indexOf( this.node ) >= 0,
+      assert && assert( associationObject.otherNode.nodesThatAreAriaDescribedbyThisNode.includes( this.node! ),
         'unexpected otherNode' );
 
 
@@ -541,16 +568,15 @@ class PDOMPeer {
 
   /**
    * Recompute the aria-activedescendant attributes for all of the peer's elements
-   * @public
    */
-  onActiveDescendantAssociationChange() {
+  public onActiveDescendantAssociationChange(): void {
     this.removeAttributeFromAllElements( 'aria-activedescendant' );
 
-    for ( let i = 0; i < this.node.activeDescendantAssociations.length; i++ ) {
-      const associationObject = this.node.activeDescendantAssociations[ i ];
+    for ( let i = 0; i < this.node!.activeDescendantAssociations.length; i++ ) {
+      const associationObject = this.node!.activeDescendantAssociations[ i ];
 
-      // Assert out if the model list is different than the data held in the associationObject
-      assert && assert( associationObject.otherNode.nodesThatAreActiveDescendantToThisNode.indexOf( this.node ) >= 0,
+      // Assert out if the model list is different from the data held in the associationObject
+      assert && assert( associationObject.otherNode.nodesThatAreActiveDescendantToThisNode.includes( this.node! ),
         'unexpected otherNode' );
 
 
@@ -561,12 +587,8 @@ class PDOMPeer {
   /**
    * Set the new attribute to the element if the value is a string. It will otherwise be null or undefined and should
    * then be removed from the element. This allows empty strings to be set as values.
-   *
-   * @param {string} key
-   * @param {string|null|undefined} value
-   * @private
    */
-  handleAttributeWithPDOMOption( key, value ) {
+  private handleAttributeWithPDOMOption( key: string, value: string | null | undefined ): void {
     if ( typeof value === 'string' ) {
       this.setAttributeToElement( key, value );
     }
@@ -577,14 +599,13 @@ class PDOMPeer {
 
   /**
    * Set all pdom attributes onto the peer elements from the model's stored data objects
-   * @private
    *
-   * @param {Object} [pdomOptions] - these can override the values of the node, see this.update()
+   * @param [pdomOptions] - these can override the values of the node, see this.update()
    */
-  onAttributeChange( pdomOptions ) {
+  private onAttributeChange( pdomOptions?: IntentionalAny ): void {
 
-    for ( let i = 0; i < this.node.pdomAttributes.length; i++ ) {
-      const dataObject = this.node.pdomAttributes[ i ];
+    for ( let i = 0; i < this.node!.pdomAttributes.length; i++ ) {
+      const dataObject = this.node!.pdomAttributes[ i ];
       this.setAttributeToElement( dataObject.attribute, dataObject.value, dataObject.options );
     }
 
@@ -598,11 +619,10 @@ class PDOMPeer {
 
   /**
    * Set all classes onto the peer elements from the model's stored data objects
-   * @private
    */
-  onClassChange() {
-    for ( let i = 0; i < this.node.pdomClasses.length; i++ ) {
-      const dataObject = this.node.pdomClasses[ i ];
+  private onClassChange(): void {
+    for ( let i = 0; i < this.node!.pdomClasses.length; i++ ) {
+      const dataObject = this.node!.pdomClasses[ i ];
       this.setClassToElement( dataObject.className, dataObject.options );
     }
   }
@@ -612,47 +632,46 @@ class PDOMPeer {
    * registered correctly by an assistive device. If null, the attribute is removed so that we don't clutter the DOM
    * with value="null" attributes.
    *
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  onInputValueChange() {
-    assert && assert( this.node.inputValue !== undefined, 'use null to remove input value attribute' );
+  public onInputValueChange(): void {
+    assert && assert( this.node!.inputValue !== undefined, 'use null to remove input value attribute' );
 
-    if ( this.node.inputValue === null ) {
+    if ( this.node!.inputValue === null ) {
       this.removeAttributeFromElement( 'value' );
     }
     else {
 
       // type conversion for DOM spec
-      const valueString = `${this.node.inputValue}`;
+      const valueString = `${this.node!.inputValue}`;
       this.setAttributeToElement( 'value', valueString, { type: 'property' } );
     }
   }
 
   /**
    * Get an element on this node, looked up by the elementName flag passed in.
-   * @public (scenery-internal)
+   * (scenery-internal)
    *
-   * @param {string} elementName - see PDOMUtils for valid associations
-   * @returns {HTMLElement}
+   * @param elementName - see PDOMUtils for valid associations
    */
-  getElementByName( elementName ) {
+  public getElementByName( elementName: string ): HTMLElement {
     if ( elementName === PDOMPeer.PRIMARY_SIBLING ) {
-      return this._primarySibling;
+      return this._primarySibling!;
     }
     else if ( elementName === PDOMPeer.LABEL_SIBLING ) {
-      return this._labelSibling;
+      return this._labelSibling!;
     }
     else if ( elementName === PDOMPeer.DESCRIPTION_SIBLING ) {
-      return this._descriptionSibling;
+      return this._descriptionSibling!;
     }
     else if ( elementName === PDOMPeer.CONTAINER_PARENT ) {
-      return this._containerParent;
+      return this._containerParent!;
     }
     else if ( elementName === ACCESSIBLE_PARAGRAPH_SIBLING ) {
-      return this._accessibleParagraphSibling;
+      return this._accessibleParagraphSibling!;
     }
     else if ( elementName === HEADING_SIBLING ) {
-      return this._headingSibling;
+      return this._headingSibling!;
     }
 
     throw new Error( `invalid elementName name: ${elementName}` );
@@ -660,13 +679,11 @@ class PDOMPeer {
 
   /**
    * Sets a attribute on one of the peer's window.Elements.
-   * @public (scenery-internal)
-   * @param {string} attribute
-   * @param {*} attributeValue
-   * @param {Object} [options]
+   * (scenery-internal)
    */
-  setAttributeToElement( attribute, attributeValue, options ) {
+  public setAttributeToElement( attribute: string, attributeValue: IntentionalAny, options?: IntentionalAny ): void {
 
+    // eslint-disable-next-line phet/bad-typescript-text
     options = merge( {
       // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
       // for setting certain attributes (e.g. MathML).
@@ -716,12 +733,11 @@ class PDOMPeer {
 
   /**
    * Remove attribute from one of the peer's window.Elements.
-   * @public (scenery-internal)
-   * @param {string} attribute
-   * @param {Object} [options]
+   * (scenery-internal)
    */
-  removeAttributeFromElement( attribute, options ) {
+  public removeAttributeFromElement( attribute: string, options?: IntentionalAny ): void {
 
+    // eslint-disable-next-line phet/bad-typescript-text
     options = merge( {
       // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
       // for setting certain attributes (e.g. MathML).
@@ -750,12 +766,10 @@ class PDOMPeer {
 
   /**
    * Remove the given attribute from all peer elements
-   * @public (scenery-internal)
-   * @param {string} attribute
+   * (scenery-internal)
    */
-  removeAttributeFromAllElements( attribute ) {
+  public removeAttributeFromAllElements( attribute: string ): void {
     assert && assert( attribute !== DISABLED_ATTRIBUTE_NAME, 'this method does not currently support disabled, to make Display.interactive toggling easier to implement' );
-    assert && assert( typeof attribute === 'string' );
     this._primarySibling && this._primarySibling.removeAttribute( attribute );
     this._labelSibling && this._labelSibling.removeAttribute( attribute );
     this._descriptionSibling && this._descriptionSibling.removeAttribute( attribute );
@@ -765,14 +779,10 @@ class PDOMPeer {
 
   /**
    * Add the provided className to the element's classList.
-   *
-   * @public
-   * @param {string} className
-   * @param {Object} [options]
    */
-  setClassToElement( className, options ) {
-    assert && assert( typeof className === 'string' );
+  public setClassToElement( className: string, options: IntentionalAny ): void {
 
+    // eslint-disable-next-line phet/bad-typescript-text
     options = merge( {
 
       // Name of the element who we are adding the class to, see this.getElementName() for valid values
@@ -784,14 +794,10 @@ class PDOMPeer {
 
   /**
    * Remove the specified className from the element.
-   * @public
-   *
-   * @param {string} className
-   * @param {Object} [options]
    */
-  removeClassFromElement( className, options ) {
-    assert && assert( typeof className === 'string' );
+  public removeClassFromElement( className: string, options: IntentionalAny ): void {
 
+    // eslint-disable-next-line phet/bad-typescript-text
     options = merge( {
 
       // Name of the element who we are removing the class from, see this.getElementName() for valid values
@@ -803,12 +809,12 @@ class PDOMPeer {
 
   /**
    * Set either association attribute (aria-labelledby/describedby) on one of this peer's Elements
-   * @public (scenery-internal)
-   * @param {string} attribute - either aria-labelledby or aria-describedby
-   * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
+   * (scenery-internal)
+   * @param attribute - either aria-labelledby or aria-describedby
+   * @param associationObject - see addAriaLabelledbyAssociation() for schema
    */
-  setAssociationAttribute( attribute, associationObject ) {
-    assert && assert( PDOMUtils.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
+  public setAssociationAttribute( attribute: string, associationObject: IntentionalAny ): void {
+    assert && assert( PDOMUtils.ASSOCIATION_ATTRIBUTES.includes( attribute ),
       `unsupported attribute for setting with association object: ${attribute}` );
 
     const otherNodePDOMInstances = associationObject.otherNode.getPDOMInstances();
@@ -841,7 +847,6 @@ class PDOMPeer {
         // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
         // we have to support cases where we set label association prior to setting the sibling/parent tagName
         const previousAttributeValue = element.getAttribute( attribute ) || '';
-        assert && assert( typeof previousAttributeValue === 'string' );
 
         const newAttributeValue = [ previousAttributeValue.trim(), otherPeerElement.id ].join( ' ' ).trim();
 
@@ -861,13 +866,8 @@ class PDOMPeer {
    *
    * NOTE: This function assumes it is called on label sibling before description sibling for inserting elements
    * into the correct order.
-   *
-   * @private
-   *
-   * @param {HTMLElement} contentElement
-   * @param {boolean} appendElement
    */
-  arrangeContentElement( contentElement, appendElement ) {
+  private arrangeContentElement( contentElement: HTMLElement, appendElement: boolean ): void {
 
     // if there is a containerParent
     if ( this.topLevelElements[ 0 ] === this._containerParent ) {
@@ -877,7 +877,7 @@ class PDOMPeer {
         this._containerParent.appendChild( contentElement );
       }
       else {
-        this._containerParent.insertBefore( contentElement, this._primarySibling );
+        this._containerParent.insertBefore( contentElement, this._primarySibling! );
       }
     }
 
@@ -889,7 +889,7 @@ class PDOMPeer {
 
       // keep this.topLevelElements in sync
       arrayRemove( this.topLevelElements, contentElement );
-      const indexOfPrimarySibling = this.topLevelElements.indexOf( this._primarySibling );
+      const indexOfPrimarySibling = this.topLevelElements.indexOf( this._primarySibling! );
 
       // if appending, just insert at at end of the top level elements
       const insertIndex = appendElement ? this.topLevelElements.length : indexOfPrimarySibling;
@@ -899,11 +899,8 @@ class PDOMPeer {
 
   /**
    * Is this peer hidden in the PDOM
-   * @public
-   *
-   * @returns {boolean}
    */
-  isVisible() {
+  public isVisible(): boolean {
     if ( assert ) {
 
       let visibleElements = 0;
@@ -922,13 +919,9 @@ class PDOMPeer {
   }
 
   /**
-   * Set whether or not the peer is visible in the PDOM
-   * @public
-   *
-   * @param {boolean} visible
+   * Set whether the peer is visible in the PDOM
    */
-  setVisible( visible ) {
-    assert && assert( typeof visible === 'boolean' );
+  public setVisible( visible: boolean ): void {
     if ( this.visible !== visible ) {
 
       this.visible = visible;
@@ -952,10 +945,9 @@ class PDOMPeer {
 
   /**
    * Returns if this peer is focused. A peer is focused if its primarySibling is focused.
-   * @public (scenery-internal)
-   * @returns {boolean}
+   * (scenery-internal)
    */
-  isFocused() {
+  public isFocused(): boolean | null {
     const visualFocusTrail = guessVisualTrail( this.trail, this.display.rootNode );
 
     return pdomFocusProperty.value && pdomFocusProperty.value.trail.equals( visualFocusTrail );
@@ -963,36 +955,33 @@ class PDOMPeer {
 
   /**
    * Focus the primary sibling. If this peer is not visible, this is a no-op (native behavior).
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  focus() {
+  public focus(): void {
     assert && assert( this._primarySibling, 'must have a primary sibling to focus' );
 
     // We do not want to steal focus from any parent application. For example, if this element is in an iframe.
     // See https://github.com/phetsims/joist/issues/897.
     if ( FocusManager.windowHasFocusProperty.value ) {
-      this._primarySibling.focus();
+      this._primarySibling!.focus();
     }
   }
 
   /**
    * Blur the primary sibling.
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  blur() {
+  public blur(): void {
     assert && assert( this._primarySibling, 'must have a primary sibling to blur' );
 
     // no op by the browser if primary sibling does not have focus
-    this._primarySibling.blur();
+    this._primarySibling!.blur();
   }
 
   /**
    * Make the peer focusable. Only the primary sibling is ever considered focusable.
-   * @public
-   * @param {boolean} focusable
    */
-  setFocusable( focusable ) {
-    assert && assert( typeof focusable === 'boolean' );
+  public setFocusable( focusable: boolean ): void {
 
     const peerHadFocus = this.isFocused();
     if ( this.focusable !== focusable && this.primarySibling ) {
@@ -1000,7 +989,7 @@ class PDOMPeer {
       PDOMUtils.overrideFocusWithTabIndex( this.primarySibling, focusable );
 
       // in Chrome, if tabindex is removed and the element is not focusable by default the element is blurred.
-      // This behavior is reasonable and we want to enforce it in other browsers for consistency. See
+      // This behavior is reasonable, and we want to enforce it in other browsers for consistency. See
       // https://github.com/phetsims/scenery/issues/967
       if ( peerHadFocus && !focusable ) {
         this.blur();
@@ -1013,11 +1002,11 @@ class PDOMPeer {
 
   /**
    * Sets the heading content
-   * @public (scenery-internal)
-   * @param {string|null} content --- NOTE that this is called from update(), where the value gets string-ified, so this
+   * (scenery-internal)
+   * @param content --- NOTE that this is called from update(), where the value gets string-ified, so this
    * type info is correct
    */
-  setHeadingContent( content ) {
+  public setHeadingContent( content: string | null ): void {
     assert && assert( content === null || typeof content === 'string', 'incorrect heading content type' );
 
     // no-op to support any option order
@@ -1030,10 +1019,10 @@ class PDOMPeer {
 
   /**
    * Responsible for setting the content for the label sibling
-   * @public (scenery-internal)
-   * @param {string|null} content - the content for the label sibling.
+   * (scenery-internal)
+   * content - the content for the label sibling.
    */
-  setLabelSiblingContent( content ) {
+  public setLabelSiblingContent( content: string | null ): void {
     assert && assert( content === null || typeof content === 'string', 'incorrect label content type' );
 
     // no-op to support any option order
@@ -1046,10 +1035,10 @@ class PDOMPeer {
 
   /**
    * Responsible for setting the content for the description sibling
-   * @public (scenery-internal)
-   * @param {string|null} content - the content for the description sibling.
+   * (scenery-internal)
+   * @param content - the content for the description sibling.
    */
-  setDescriptionSiblingContent( content ) {
+  public setDescriptionSiblingContent( content: string | null ): void {
     assert && assert( content === null || typeof content === 'string', 'incorrect description content type' );
 
     // no-op to support any option order
@@ -1061,10 +1050,10 @@ class PDOMPeer {
 
   /**
    * Responsible for setting the content for the paragraph sibling.
-   * @public (scenery-internal)
-   * @param {string|null} content - the content for the paragraph sibling.
+   * (scenery-internal)
+   * @param content - the content for the paragraph sibling.
    */
-  setAccessibleParagraphContent( content ) {
+  public setAccessibleParagraphContent( content: string | null ): void {
     assert && assert( content === null || typeof content === 'string', 'incorrect description content type' );
 
     // no-op to support any option order
@@ -1076,10 +1065,10 @@ class PDOMPeer {
 
   /**
    * Responsible for setting the content for the primary sibling
-   * @public (scenery-internal)
-   * @param {string|null} content - the content for the primary sibling.
+   * (scenery-internal)
+   * @param content - the content for the primary sibling.
    */
-  setPrimarySiblingContent( content ) {
+  public setPrimarySiblingContent( content: string | null ): void {
 
     // no-op to support any option order
     if ( !this._primarySibling ) {
@@ -1089,7 +1078,7 @@ class PDOMPeer {
     assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
     assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
-      `tagName: ${this.node.tagName} does not support inner content` );
+      `tagName: ${this.node!.tagName} does not support inner content` );
 
     PDOMUtils.setTextContent( this._primarySibling, content );
   }
@@ -1098,18 +1087,15 @@ class PDOMPeer {
    * Sets the pdomTransformSourceNode so that the primary sibling will be transformed with changes to along the
    * unique trail to the source node. If null, repositioning happens with transform changes along this
    * pdomInstance's trail.
-   * @public
-   *
-   * @param {../nodes/Node|null} node
    */
-  setPDOMTransformSourceNode( node ) {
+  public setPDOMTransformSourceNode( node: Node | null ): void {
 
     // remove previous listeners before creating a new TransformTracker
-    this.pdomInstance.transformTracker.removeListener( this.transformListener );
+    this.pdomInstance.transformTracker!.removeListener( this.transformListener );
     this.pdomInstance.updateTransformTracker( node );
 
     // add listeners back after update
-    this.pdomInstance.transformTracker.addListener( this.transformListener );
+    this.pdomInstance.transformTracker!.addListener( this.transformListener );
 
     // new trail with transforms so positioning is probably dirty
     this.invalidateCSSPositioning();
@@ -1119,11 +1105,9 @@ class PDOMPeer {
    * Enable or disable positioning of the sibling elements. Generally this is requiredfor accessibility to work on
    * touch screen based screen readers like phones. But repositioning DOM elements is expensive. This can be set to
    * false to optimize when positioning is not necessary.
-   * @public (scenery-internal)
-   *
-   * @param {boolean} positionInPDOM
+   * (scenery-internal)
    */
-  setPositionInPDOM( positionInPDOM ) {
+  public setPositionInPDOM( positionInPDOM: boolean ): void {
     this.positionInPDOM = positionInPDOM;
 
     // signify that it needs to be repositioned next frame, either off screen or to match
@@ -1131,8 +1115,7 @@ class PDOMPeer {
     this.invalidateCSSPositioning();
   }
 
-  // @private
-  getElementId( siblingName, stringId ) {
+  private getElementId( siblingName: string, stringId: string ): string {
     return `display${this.display.id}-${siblingName}-${stringId}`;
   }
 
@@ -1143,9 +1126,8 @@ class PDOMPeer {
    * for input handling).
    *
    * Note that dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute.
-   * @public
    */
-  updateIndicesStringAndElementIds() {
+  public updateIndicesStringAndElementIds(): void {
     const indices = this.pdomInstance.getPDOMInstanceUniqueId();
 
     if ( this._primarySibling ) {
@@ -1180,9 +1162,8 @@ class PDOMPeer {
    *
    * @param [forceReflowWorkaround] - In addition to repositioning, force a reflow next animation frame? See
    *                                  this.forceReflowWorkaround for more information.
-   * @private
    */
-  invalidateCSSPositioning( forceReflowWorkaround = false ) {
+  private invalidateCSSPositioning( forceReflowWorkaround = false ): void {
     if ( !this.positionDirty ) {
       this.positionDirty = true;
 
@@ -1200,7 +1181,7 @@ class PDOMPeer {
       // the PDOMInstance tree
       let parent = this.pdomInstance.parent;
       while ( parent ) {
-        parent.peer.childPositionDirty = true;
+        parent.peer!.childPositionDirty = true;
         parent = parent.parent;
       }
     }
@@ -1237,10 +1218,8 @@ class PDOMPeer {
    * surround the Node anymore. But it could be a performance enhancement and simplify this function.
    * Or maybe a big rectangle larger than the Display div still centered on the node so we never
    * see the VO highlight?
-   *
-   * @private
    */
-  positionElements( positionInPDOM ) {
+  private positionElements( positionInPDOM: boolean ): void {
     const placeableSibling = this.getPlaceableSibling();
     assert && assert( placeableSibling, 'a primary sibling required to receive CSS positioning' );
     assert && assert( this.positionDirty, 'elements should only be repositioned if dirty' );
@@ -1249,11 +1228,11 @@ class PDOMPeer {
     // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
     // need to be accurate because the AT doesn't need to send events to them.
     if ( positionInPDOM ) {
-      const transformSourceNode = this.node.pdomTransformSourceNode || this.node;
+      const transformSourceNode = this.node!.pdomTransformSourceNode || this.node;
 
-      scratchGlobalBounds.set( transformSourceNode.localBounds );
+      scratchGlobalBounds.set( transformSourceNode!.localBounds );
       if ( scratchGlobalBounds.isFinite() ) {
-        scratchGlobalBounds.transform( this.pdomInstance.transformTracker.getMatrix() );
+        scratchGlobalBounds.transform( this.pdomInstance.transformTracker!.getMatrix() );
 
         // no need to position if the node is fully outside of the Display bounds (out of view)
         const displayBounds = this.display.bounds;
@@ -1275,14 +1254,14 @@ class PDOMPeer {
           }
 
           if ( this.labelSibling ) {
-            clientDimensions = getClientDimensions( this._labelSibling );
+            clientDimensions = getClientDimensions( this._labelSibling! );
             clientWidth = clientDimensions.width;
             clientHeight = clientDimensions.height;
 
             if ( clientHeight > 0 && clientWidth > 0 ) {
               scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
               scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-              setClientBounds( this._labelSibling, scratchSiblingBounds );
+              setClientBounds( this._labelSibling!, scratchSiblingBounds );
             }
           }
         }
@@ -1303,6 +1282,8 @@ class PDOMPeer {
       // Force a reflow (recalculation of DOM layout) to fix the accessible name.
       this.topLevelElements.forEach( element => {
         element.style.transform = ''; // force reflow request by removing the transform added in the previous frame
+
+        // @ts-expect-error
         element.style.offsetHeight; // query the offsetHeight after restoring display to force reflow
       } );
     }
@@ -1315,9 +1296,9 @@ class PDOMPeer {
    * Update positioning of elements in the PDOM. Does a depth first search for all descendants of parentIntsance with
    * a peer that either has dirty positioning or as a descendant with dirty positioning.
    *
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  updateSubtreePositioning( parentPositionInPDOM = false ) {
+  public updateSubtreePositioning( parentPositionInPDOM = false ): void {
     this.childPositionDirty = false;
 
     const positionInPDOM = this.positionInPDOM || parentPositionInPDOM;
@@ -1327,9 +1308,9 @@ class PDOMPeer {
     }
 
     for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
-      const childPeer = this.pdomInstance.children[ i ].peer;
+      const childPeer = this.pdomInstance.children[ i ].peer!;
       if ( childPeer.positionDirty || childPeer.childPositionDirty ) {
-        this.pdomInstance.children[ i ].peer.updateSubtreePositioning( positionInPDOM );
+        this.pdomInstance.children[ i ].peer!.updateSubtreePositioning( positionInPDOM );
       }
     }
   }
@@ -1337,50 +1318,57 @@ class PDOMPeer {
   /**
    * Recursively set this PDOMPeer and children to be disabled. This will overwrite any previous value of disabled
    * that may have been set, but will keep track of the old value, and restore its state upon re-enabling.
-   * @param {boolean} disabled
-   * @public
    */
-  recursiveDisable( disabled ) {
+  public recursiveDisable( disabled: boolean ): void {
 
     if ( this._primarySibling ) {
       if ( disabled ) {
+        // @ts-expect-error
         this._preservedDisabledValue = this._primarySibling.disabled;
+        // @ts-expect-error
         this._primarySibling.disabled = true;
       }
       else {
+        // @ts-expect-error
         this._primarySibling.disabled = this._preservedDisabledValue;
       }
     }
 
     for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
-      this.pdomInstance.children[ i ].peer.recursiveDisable( disabled );
+      this.pdomInstance.children[ i ].peer!.recursiveDisable( disabled );
     }
   }
 
   /**
    * Removes external references from this peer, and places it in the pool.
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
-  dispose() {
+  public dispose(): void {
     this.isDisposed = true;
 
     // remove focus if the disposed peer is the active element
     if ( this._primarySibling ) {
       this.blur();
 
+      // @ts-expect-error
       this._primarySibling.removeEventListener( 'blur', this.blurEventListener );
+      // @ts-expect-error
       this._primarySibling.removeEventListener( 'focus', this.focusEventListener );
     }
 
     // remove listeners
-    this.pdomInstance.transformTracker.removeListener( this.transformListener );
+    this.pdomInstance.transformTracker!.removeListener( this.transformListener );
     this.mutationObserver.disconnect();
 
     // zero-out references
+    // @ts-expect-error
     this.pdomInstance = null;
     this.node = null;
+    // @ts-expect-error
     this.display = null;
+    // @ts-expect-error
     this.trail = null;
+    // @ts-expect-error
     this._primarySibling = null;
     this._labelSibling = null;
     this._descriptionSibling = null;
@@ -1390,25 +1378,26 @@ class PDOMPeer {
     this.focusable = null;
 
     // for now
+    // @ts-expect-error
     this.freeToPool();
   }
+
+  // specifies valid associations between related PDOMPeers in the DOM
+  public static readonly PRIMARY_SIBLING = PRIMARY_SIBLING; // associate with all accessible content related to this peer
+  public static readonly HEADING_SIBLING = HEADING_SIBLING; // associate with just the heading content of this peer
+  public static readonly LABEL_SIBLING = LABEL_SIBLING; // associate with just the label content of this peer
+  public static readonly DESCRIPTION_SIBLING = DESCRIPTION_SIBLING; // associate with just the description content of this peer
+  public static readonly PARAGRAPH_SIBLING = ACCESSIBLE_PARAGRAPH_SIBLING; // associate with just the paragraph content of this peer
+  public static readonly CONTAINER_PARENT = CONTAINER_PARENT; // associate with everything under the container parent of this peer
+
+  // (scenery-internal) - bounds for a sibling that should be moved off-screen when not positioning, in  global coordinates
+  public static readonly OFFSCREEN_SIBLING_BOUNDS = new Bounds2( 0, 0, 1, 1 );
 }
-
-// @public {string} - specifies valid associations between related PDOMPeers in the DOM
-PDOMPeer.PRIMARY_SIBLING = PRIMARY_SIBLING; // associate with all accessible content related to this peer
-PDOMPeer.HEADING_SIBLING = HEADING_SIBLING; // associate with just the heading content of this peer
-PDOMPeer.LABEL_SIBLING = LABEL_SIBLING; // associate with just the label content of this peer
-PDOMPeer.DESCRIPTION_SIBLING = DESCRIPTION_SIBLING; // associate with just the description content of this peer
-PDOMPeer.PARAGRAPH_SIBLING = ACCESSIBLE_PARAGRAPH_SIBLING; // associate with just the paragraph content of this peer
-PDOMPeer.CONTAINER_PARENT = CONTAINER_PARENT; // associate with everything under the container parent of this peer
-
-// @public (scenery-internal) - bounds for a sibling that should be moved off-screen when not positioning, in
-// global coordinates
-PDOMPeer.OFFSCREEN_SIBLING_BOUNDS = new Bounds2( 0, 0, 1, 1 );
 
 scenery.register( 'PDOMPeer', PDOMPeer );
 
 // Set up pooling
+// @ts-expect-error
 Poolable.mixInto( PDOMPeer, {
   initialize: PDOMPeer.prototype.initializePDOMPeer
 } );
@@ -1420,12 +1409,12 @@ Poolable.mixInto( PDOMPeer, {
 /**
  * Create a sibling element for the PDOMPeer.
  * TODO: this should be inlined with the PDOMUtils method https://github.com/phetsims/scenery/issues/1581
- * @param {string} tagName
- * @param {boolean} focusable
- * @param {Object} [options] - passed along to PDOMUtils.createElement
- * @returns {HTMLElement}
+ * @param tagName
+ * @param focusable
+ * @param [options] - passed along to PDOMUtils.createElement
  */
-function createElement( tagName, focusable, options ) {
+function createElement( tagName: string, focusable: boolean, options?: IntentionalAny ): HTMLElement {
+  // eslint-disable-next-line phet/bad-typescript-text
   options = merge( {
 
     // {string|null} - addition to the trailId, separated by a hyphen to identify the different siblings within
@@ -1440,6 +1429,7 @@ function createElement( tagName, focusable, options ) {
   const newElement = PDOMUtils.createElement( tagName, focusable, options );
 
   if ( options.excludeFromInput ) {
+    // @ts-expect-error -- only accepts string?
     newElement.setAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT, true );
   }
 
@@ -1450,12 +1440,11 @@ function createElement( tagName, focusable, options ) {
  * Get a matrix that can be used as the CSS transform for elements in the DOM. This matrix will an HTML element
  * dimensions in pixels to the global coordinate frame.
  *
- * @param  {number} clientWidth - width of the element to transform in pixels
- * @param  {number} clientHeight - height of the element to transform in pixels
- * @param  {Bounds2} nodeGlobalBounds - Bounds of the PDOMPeer's node in the global coordinate frame.
- * @returns {Matrix3}
+ * @param clientWidth - width of the element to transform in pixels
+ * @param clientHeight - height of the element to transform in pixels
+ * @param nodeGlobalBounds - Bounds of the PDOMPeer's node in the global coordinate frame.
  */
-function getCSSMatrix( clientWidth, clientHeight, nodeGlobalBounds ) {
+function getCSSMatrix( clientWidth: number, clientHeight: number, nodeGlobalBounds: Bounds2 ): Matrix3 {
 
   // the translation matrix for the node's bounds in its local coordinate frame
   globalNodeTranslationMatrix.setToTranslation( nodeGlobalBounds.minX, nodeGlobalBounds.minY );
@@ -1472,11 +1461,8 @@ function getCSSMatrix( clientWidth, clientHeight, nodeGlobalBounds ) {
  * Gets an object with the width and height of an HTML element in pixels, prior to any scaling. clientWidth and
  * clientHeight are zero for elements with inline layout and elements without CSS. For those elements we fall back
  * to the boundingClientRect, which at that point will describe the dimensions of the element prior to scaling.
- *
- * @param  {HTMLElement} siblingElement
- * @returns {Object} - Returns an object with two entries, { width: {number}, height: {number} }
  */
-function getClientDimensions( siblingElement ) {
+function getClientDimensions( siblingElement: HTMLElement ): { width: number; height: number } {
   let clientWidth = siblingElement.clientWidth;
   let clientHeight = siblingElement.clientHeight;
 
@@ -1494,10 +1480,10 @@ function getClientDimensions( siblingElement ) {
  * The element must be styled with 'position: fixed', and an ancestor must have position: 'relative', so that
  * the dimensions of the sibling are relative to the parent.
  *
- * @param {HTMLElement} siblingElement - the element to position
- * @param {Bounds2} bounds - desired bounds, in pixels
+ * @param siblingElement - the element to position
+ * @param bounds - desired bounds, in pixels
  */
-function setClientBounds( siblingElement, bounds ) {
+function setClientBounds( siblingElement: HTMLElement, bounds: Bounds2 ): void {
   siblingElement.style.top = `${bounds.top}px`;
   siblingElement.style.left = `${bounds.left}px`;
   siblingElement.style.width = `${bounds.width}px`;
