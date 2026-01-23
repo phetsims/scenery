@@ -13,7 +13,7 @@ import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
 import Rectangle from '../../nodes/Rectangle.js';
 import globalDescriptionQueue from './globalDescriptionQueue.js';
-import ParallelDOM, { AccessibleNameBehaviorFunction, ParallelDOMOptions } from './ParallelDOM.js';
+import { AccessibleNameBehaviorFunction, ParallelDOMOptions } from './ParallelDOM.js';
 import PDOMFuzzer from './PDOMFuzzer.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMUtils from './PDOMUtils.js';
@@ -2715,36 +2715,31 @@ QUnit.test( 'interruptible response behaviors', assert => {
   {
     const { display, node } = createResponseTestHarness();
 
-    const statusUtterance = ParallelDOM.createSelfInterruptingUtterance();
-    statusUtterance.alert = 'Status: ready';
-    node.addAccessibleContextResponse( statusUtterance );
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status', interruptible: false } );
     assert.equal( display.descriptionUtteranceQueue.length, 1, 'first response enqueued' );
 
-    statusUtterance.alert = 'Status: running';
-    node.addAccessibleContextResponse( statusUtterance );
+    // All of these should be self-interrupting in this channel.
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
+
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status', interruptible: false } );
     assert.equal( display.descriptionUtteranceQueue.length, 1, 'self-interrupting response replaced' );
 
-    display.dispose();
-    display.domElement.parentElement!.removeChild( display.domElement );
-  }
+    // Mix with two channels
+    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
+    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
+    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
+    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
 
-  // Self-interrupting + non-interruptible responses set interruptible=false.
-  {
-    const { display, node } = createResponseTestHarness();
-
-    const statusUtterance = ParallelDOM.createSelfInterruptingUtterance( {
-      alert: 'Status: ready'
-    } );
-    node.addAccessibleContextResponse( statusUtterance, { interruptible: false } );
-
-    assert.equal( statusUtterance.interruptible, false, 'interruptible flag applied to Utterance' );
-    assert.equal( display.descriptionUtteranceQueue.length, 1, 'response enqueued' );
+    assert.equal( display.descriptionUtteranceQueue.length, 2, 'self-interrupting responses replaced in their respective channels' );
 
     display.dispose();
     display.domElement.parentElement!.removeChild( display.domElement );
   }
 
-  // interruptible=true does not override an existing Utterance flag.
+  // interruptible option for addAccessibleContextResponse takes priority over Utterance fields
   {
     const { display, node } = createResponseTestHarness();
 

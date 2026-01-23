@@ -142,16 +142,17 @@ import validate from '../../../../axon/js/validate.js';
 import Validation from '../../../../axon/js/Validation.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Shape from '../../../../kite/js/Shape.js';
+import affirm from '../../../../perennial-alias/js/browser-and-node/affirm.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
-import optionize, { EmptySelfOptions } from '../../../../phet-core/js/optionize.js';
+import optionize from '../../../../phet-core/js/optionize.js';
 import PickOptional from '../../../../phet-core/js/types/PickOptional.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 import isSettingPhetioStateProperty from '../../../../tandem/js/isSettingPhetioStateProperty.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../../tandem/js/Tandem.js';
 import { ResponseCategory } from '../../../../utterance-queue/js/Announcer.js';
-import Utterance, { TAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
+import Utterance, { TAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import type UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
@@ -165,6 +166,7 @@ import PDOMTree from './PDOMTree.js';
 import PDOMUtils from './PDOMUtils.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
+import responseChannelRegistry from './responseChannelRegistry.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -406,6 +408,11 @@ type DescriptionResponseOptions = {
   // If true, clear the target queue before enqueuing this response.
   // This flushes all pending responses, even protected ones. Default is false.
   flush?: boolean;
+
+  // Optional global channel that causes successive responses with the same channel to replace each other.
+  // Use a stable, shared string (not per-instance) to create a self-interrupting stream of updates.
+  // Channels are global across the application and can be reused at different call sites.
+  channel?: string;
 };
 
 /**
@@ -2431,7 +2438,7 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   // (scenery-internal)
-  public get nodesThatAreActiveDescendantToThisNode():Node[] { return this.getNodesThatAreActiveDescendantToThisNode(); }
+  public get nodesThatAreActiveDescendantToThisNode(): Node[] { return this.getNodesThatAreActiveDescendantToThisNode(); }
 
 
   /**
@@ -3260,6 +3267,7 @@ export default class ParallelDOM extends PhetioObject {
     // nullish coalescing for options because this function can be called a lot
     const interruptible = providedOptions?.interruptible ?? false;
     const flush = providedOptions?.flush ?? false;
+    const channel = providedOptions?.channel ?? null;
     const alertWhenNotDisplayed = providedOptions?.alertWhenNotDisplayed ?? false;
 
     // Nothing to do if there is no content.
@@ -3278,29 +3286,45 @@ export default class ParallelDOM extends PhetioObject {
       return;
     }
 
+    let alertableToSpeak = utterance;
+
     const hasInterruptibleOption = providedOptions?.interruptible !== undefined;
-    if ( !( utterance instanceof Utterance ) ) {
-      utterance = new Utterance( {
-        alert: utterance,
+    if ( channel !== null ) {
+      affirm( !( utterance instanceof Utterance ), 'When a channel is provided, you cannot provide an Utterance, ParallelDOM creates one for you.' );
+      const channelUtterance = responseChannelRegistry.getOrCreateChannelUtterance( channel, interruptible );
+      channelUtterance.alert = utterance;
+
+      // Keep channel responses aligned with the default behavior when no option is provided,
+      // so an earlier interruptible setting does not "stick" to later channel responses.
+      if ( !hasInterruptibleOption ) {
+        channelUtterance.interruptible = false;
+      }
+
+      alertableToSpeak = channelUtterance;
+    }
+
+    if ( !( alertableToSpeak instanceof Utterance ) ) {
+      alertableToSpeak = new Utterance( {
+        alert: alertableToSpeak,
         interruptible: hasInterruptibleOption ? interruptible : false
       } );
     }
     else if ( hasInterruptibleOption ) {
       // When the option is provided, it overrides the Utterance setting; otherwise, the Utterance keeps its own value.
-      utterance.interruptible = interruptible;
+      alertableToSpeak.interruptible = interruptible;
     }
 
     if ( alertWhenNotDisplayed ) {
 
       // alertWhenNotDisplayed is true - we want to hear the response even when the Node is invisible and detached
       // Note that we cannot announce on each display, this will only be announced once globally.
-      globalDescriptionQueue.addAccessibleResponse( utterance, responseCategory, flush );
+      globalDescriptionQueue.addAccessibleResponse( alertableToSpeak, responseCategory, flush );
     }
     else {
 
       // only clear if there is content (graceful if alertable is null so that reusable components can use this method
       // without requiring content)
-      if ( utterance && flush ) {
+      if ( alertableToSpeak && flush ) {
         this.forEachUtteranceQueue( queue => queue.clear() );
       }
 
@@ -3319,7 +3343,7 @@ export default class ParallelDOM extends PhetioObject {
         );
 
         if ( display.isAccessible() && nodeDisplayed ) {
-          display.descriptionUtteranceQueue.addToBack( utterance, responseCategory );
+          display.descriptionUtteranceQueue.addToBack( alertableToSpeak, responseCategory );
         }
       }
     }
@@ -3706,25 +3730,6 @@ export default class ParallelDOM extends PhetioObject {
     options.descriptionContent = accessibleHelpText;
     options.appendDescription = true;
     return options;
-  }
-
-  /**
-   * Create an Utterance intended to be reused for a self‑interrupting stream.
-   * Reusing the same instance causes earlier queued entries for that Utterance to be replaced,
-   * so only the most recent update from that source is spoken.
-   *
-   * Use this for fast‑changing values (like readouts) where you want the latest value without
-   * being interrupted by OTHER responses in the queue.
-   *
-   * Typical usage: create once, update `alert`, and re‑enqueue the same Utterance.
-   */
-  public static createSelfInterruptingUtterance( providedOptions?: UtteranceOptions ): Utterance {
-    return new Utterance( optionize<UtteranceOptions, EmptySelfOptions>()( {
-
-      // Not interruptible so that this Utterance will not be interrupted by responses behind it in the queue.
-      // But it WILL still interrupt earlier entries for itself in the queue.
-      interruptible: false
-    }, providedOptions ) );
   }
 
   /**
