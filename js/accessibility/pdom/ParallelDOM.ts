@@ -3288,17 +3288,13 @@ export default class ParallelDOM extends PhetioObject {
 
     let alertableToSpeak = utterance;
 
-    const hasInterruptibleOption = providedOptions?.interruptible !== undefined;
     if ( channel !== null ) {
       affirm( !( utterance instanceof Utterance ), 'When a channel is provided, you cannot provide an Utterance, ParallelDOM creates one for you.' );
       const channelUtterance = responseChannelRegistry.getOrCreateChannelUtterance( channel, interruptible );
       channelUtterance.alert = utterance;
 
-      // Keep channel responses aligned with the default behavior when no option is provided,
-      // so an earlier interruptible setting does not "stick" to later channel responses.
-      if ( !hasInterruptibleOption ) {
-        channelUtterance.interruptible = false;
-      }
+      // Apply the interruptible setting from options for this call.
+      channelUtterance.interruptible = interruptible;
 
       alertableToSpeak = channelUtterance;
     }
@@ -3306,11 +3302,12 @@ export default class ParallelDOM extends PhetioObject {
     if ( !( alertableToSpeak instanceof Utterance ) ) {
       alertableToSpeak = new Utterance( {
         alert: alertableToSpeak,
-        interruptible: hasInterruptibleOption ? interruptible : false
+        interruptible: interruptible
       } );
     }
-    else if ( hasInterruptibleOption ) {
-      // When the option is provided, it overrides the Utterance setting; otherwise, the Utterance keeps its own value.
+    else {
+
+      // Interruptible from the options always overrides the Utterance setting.
       alertableToSpeak.interruptible = interruptible;
     }
 
