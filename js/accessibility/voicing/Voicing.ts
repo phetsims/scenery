@@ -477,7 +477,8 @@ const Voicing = <SuperType extends Constructor<Node>>( Type: SuperType ): SuperT
 
         // don't send to utteranceQueue if response is empty
         // don't send to utteranceQueue for PhET-iO dynamic element archetypes, https://github.com/phetsims/joist/issues/817
-        if ( content && notPhetioArchetype ) {
+        const alertableText = Utterance.alertableToText( content );
+        if ( alertableText && notPhetioArchetype ) {
           voicingUtteranceQueue.addToBack( content ); // eslint-disable-line phet/bad-sim-text
         }
       }
