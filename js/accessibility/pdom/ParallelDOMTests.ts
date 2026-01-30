@@ -2715,23 +2715,23 @@ QUnit.test( 'interruptible response behaviors', assert => {
   {
     const { display, node } = createResponseTestHarness();
 
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { responseGroup: 'status' } );
     assert.equal( display.descriptionUtteranceQueue.length, 1, 'first response enqueued' );
 
     // All of these should be self-interrupting in this channel.
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { responseGroup: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { responseGroup: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { responseGroup: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { responseGroup: 'status' } );
 
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
+    node.addAccessibleContextResponse( 'Status: ready', { responseGroup: 'status' } );
     assert.equal( display.descriptionUtteranceQueue.length, 1, 'self-interrupting response replaced' );
 
     // Mix with two channels
-    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
-    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
-    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
-    node.addAccessibleContextResponse( 'Update available', { channel: 'update' } );
+    node.addAccessibleContextResponse( 'Update available', { responseGroup: 'update' } );
+    node.addAccessibleContextResponse( 'Update available', { responseGroup: 'update' } );
+    node.addAccessibleContextResponse( 'Update available', { responseGroup: 'update' } );
+    node.addAccessibleContextResponse( 'Update available', { responseGroup: 'update' } );
 
     assert.equal( display.descriptionUtteranceQueue.length, 2, 'self-interrupting responses replaced in their respective channels' );
 

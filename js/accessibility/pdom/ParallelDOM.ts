@@ -410,10 +410,10 @@ type DescriptionResponseOptions = {
   // This flushes all pending responses, even protected ones. Default is false.
   flush?: boolean;
 
-  // Optional global channel that causes successive responses with the same channel to replace each other.
+  // Optional global group that causes successive responses with the same group to replace each other.
   // Use a stable, shared string (not per-instance) to create a self-interrupting stream of updates.
-  // Channels are global across the application and can be reused at different call sites.
-  channel?: string;
+  // Groups are global across the application and can be reused at different call sites.
+  responseGroup?: string;
 };
 
 /**
@@ -3265,16 +3265,16 @@ export default class ParallelDOM extends PhetioObject {
    */
   private addAccessibleResponse( utterance: TAlertable, responseCategory: ResponseCategory = 'other', providedOptions?: DescriptionResponseOptions ): void {
 
-    // You cannot provide both a channel and an interruptible option. When a channel is used, interruptible no longer
-    // affects whether those responses can interrupt each other (they always self-interrupt within the channel); it only
-    // controls whether other responses can interrupt that channel. If you want per-response interruptibility, just use
-    // interruptible without a channel.
-    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'channel' ], [ 'interruptible' ] );
+    // You cannot provide both a responseGroup and an interruptible option. When a responseGroup is used, interruptible
+    // no longer affects whether those responses can interrupt each other (they always self-interrupt within the
+    // responseGroup); it only controls whether other responses can interrupt that responseGroup. If you want
+    // per-response interruptibility, just use interruptible without a group.
+    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'responseGroup' ], [ 'interruptible' ] );
 
     // nullish coalescing for options because this function can be called a lot
     const interruptible = providedOptions?.interruptible ?? false;
     const flush = providedOptions?.flush ?? false;
-    const channel = providedOptions?.channel ?? null;
+    const responseGroup = providedOptions?.responseGroup ?? null;
     const alertWhenNotDisplayed = providedOptions?.alertWhenNotDisplayed ?? false;
 
     // Nothing to do if there is no content.
@@ -3295,15 +3295,17 @@ export default class ParallelDOM extends PhetioObject {
 
     let alertableToSpeak = utterance;
 
-    if ( channel !== null ) {
-      affirm( !( utterance instanceof Utterance ), 'When a channel is provided, you cannot provide an Utterance, ParallelDOM creates one for you.' );
-      const channelUtterance = responseChannelRegistry.getOrCreateChannelUtterance( channel, interruptible );
-      channelUtterance.alert = utterance;
+    if ( responseGroup !== null ) {
+      affirm( !( utterance instanceof Utterance ), 'When a responseGroup is provided, you cannot provide an Utterance, ParallelDOM creates one for you.' );
+
+      // TODO: Rename registry to ResponseGroupRegistry, see https://github.com/phetsims/scenery/issues/1729.
+      const responseGroupUtterance = responseChannelRegistry.getOrCreateChannelUtterance( responseGroup, interruptible );
+      responseGroupUtterance.alert = utterance;
 
       // Apply the interruptible setting from options for this call.
-      channelUtterance.interruptible = interruptible;
+      responseGroupUtterance.interruptible = interruptible;
 
-      alertableToSpeak = channelUtterance;
+      alertableToSpeak = responseGroupUtterance;
     }
 
     if ( !( alertableToSpeak instanceof Utterance ) ) {
