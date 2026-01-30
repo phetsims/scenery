@@ -145,6 +145,7 @@ import Shape from '../../../../kite/js/Shape.js';
 import affirm from '../../../../perennial-alias/js/browser-and-node/affirm.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
+import assertMutuallyExclusiveOptions from '../../../../phet-core/js/assertMutuallyExclusiveOptions.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import PickOptional from '../../../../phet-core/js/types/PickOptional.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
@@ -3263,6 +3264,12 @@ export default class ParallelDOM extends PhetioObject {
    * However, this can override that with options. See options documentation.
    */
   private addAccessibleResponse( utterance: TAlertable, responseCategory: ResponseCategory = 'other', providedOptions?: DescriptionResponseOptions ): void {
+
+    // You cannot provide both a channel and an interruptible option. When a channel is used, interruptible no longer
+    // affects whether those responses can interrupt each other (they always self-interrupt within the channel); it only
+    // controls whether other responses can interrupt that channel. If you want per-response interruptibility, just use
+    // interruptible without a channel.
+    assert && assertMutuallyExclusiveOptions( providedOptions, [ 'channel' ], [ 'interruptible' ] );
 
     // nullish coalescing for options because this function can be called a lot
     const interruptible = providedOptions?.interruptible ?? false;

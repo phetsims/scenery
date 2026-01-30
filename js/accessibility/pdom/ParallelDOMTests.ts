@@ -2715,7 +2715,7 @@ QUnit.test( 'interruptible response behaviors', assert => {
   {
     const { display, node } = createResponseTestHarness();
 
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status', interruptible: false } );
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
     assert.equal( display.descriptionUtteranceQueue.length, 1, 'first response enqueued' );
 
     // All of these should be self-interrupting in this channel.
@@ -2724,7 +2724,7 @@ QUnit.test( 'interruptible response behaviors', assert => {
     node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
     node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
 
-    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status', interruptible: false } );
+    node.addAccessibleContextResponse( 'Status: ready', { channel: 'status' } );
     assert.equal( display.descriptionUtteranceQueue.length, 1, 'self-interrupting response replaced' );
 
     // Mix with two channels
