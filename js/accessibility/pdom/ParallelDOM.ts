@@ -167,7 +167,7 @@ import PDOMTree from './PDOMTree.js';
 import PDOMUtils from './PDOMUtils.js';
 import { PEER_CONTAINER_PARENT } from './PEER_CONTAINER_PARENT.js';
 import { PEER_PRIMARY_SIBLING } from './PEER_PRIMARY_SIBLING.js';
-import responseChannelRegistry from './responseChannelRegistry.js';
+import responseGroupRegistry from './responseGroupRegistry.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -3298,8 +3298,7 @@ export default class ParallelDOM extends PhetioObject {
     if ( responseGroup !== null ) {
       affirm( !( utterance instanceof Utterance ), 'When a responseGroup is provided, you cannot provide an Utterance, ParallelDOM creates one for you.' );
 
-      // TODO: Rename registry to ResponseGroupRegistry, see https://github.com/phetsims/scenery/issues/1729.
-      const responseGroupUtterance = responseChannelRegistry.getOrCreateChannelUtterance( responseGroup, interruptible );
+      const responseGroupUtterance = responseGroupRegistry.getOrCreateGroupUtterance( responseGroup, interruptible );
       responseGroupUtterance.alert = utterance;
 
       // Apply the interruptible setting from options for this call.
