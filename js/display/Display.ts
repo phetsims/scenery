@@ -868,6 +868,12 @@ export default class Display {
 
   public get bounds(): Bounds2 { return this.getBounds(); }
 
+  public getPointers(): Pointer[] {
+    return this._input ? this._input.pointers.slice() : [];
+  }
+
+  public get pointers(): Pointer[] { return this.getPointers(); }
+
   /**
    * Changes the size that the Display's DOM element will be after the next updateDisplay()
    */
