@@ -59,6 +59,7 @@ import { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
+import HotkeyData from '../input/HotkeyData.js';
 import type { OneKeyStroke } from '../input/KeyDescriptor.js';
 import PDOMPointer from '../input/PDOMPointer.js';
 import SceneryEvent from '../input/SceneryEvent.js';
@@ -872,6 +873,31 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
       }
     };
   }
+
+  /**
+   * Reusable hotkey data for listeners and keyboard help content. Beware that this listener
+   * does not actually use this data because it requires a special implementation with
+   * the globalKeyStateTracker. But this is still useful for convenience and consistency.
+   */
+  public static readonly MOVE_HOTKEY_DATA = new HotkeyData( {
+    keys: [ 'arrowLeft', 'arrowRight', 'arrowUp', 'arrowDown', 'w', 'a', 's', 'd' ],
+    binderName: 'Move objects',
+    repoName: scenery.name
+  } );
+
+  /**
+   * Reusable hotkey data for listeners and keyboard help content. Beware that this listener
+   * does not actually use this data because it requires a special implementation with
+   * the globalKeyStateTracker. But this is still useful for convenience and consistency.
+   */
+  public static readonly MOVE_SLOWER_HOTKEY_DATA = new HotkeyData( {
+    keys: [
+      'shift+arrowLeft', 'shift+arrowRight', 'shift+arrowUp', 'shift+arrowDown',
+      'shift+w', 'shift+a', 'shift+s', 'shift+d'
+    ],
+    binderName: 'Move objects slower',
+    repoName: scenery.name
+  } );
 }
 
 scenery.register( 'KeyboardDragListener', KeyboardDragListener );
