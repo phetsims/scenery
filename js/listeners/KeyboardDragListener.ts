@@ -1,4 +1,4 @@
-// Copyright 2019-2025, University of Colorado Boulder
+// Copyright 2019-2026, University of Colorado Boulder
 
 /**
  * An input listener for keyboard-based drag interactions, allowing objects to be moved using the arrow keys or
