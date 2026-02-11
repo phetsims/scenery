@@ -886,6 +886,34 @@ class KeyboardDragListener extends KeyboardListener<KeyboardDragListenerKeyStrok
   } );
 
   /**
+   * Reusable hotkey data for listeners and keyboard help content. This configuration
+   * is for the 'left and right' direction of movement, so it only includes the lef
+   * and right arrow keys and the 'a' and 'd' keys.
+   *
+   * Beware that this listener does not actually use this data because it requires a special implementation with
+   * the globalKeyStateTracker. But this is still useful for convenience and consistency.
+   */
+  public static readonly MOVE_LEFT_RIGHT_HOTKEY_DATA = new HotkeyData( {
+    keys: [ 'arrowLeft', 'arrowRight', 'a', 'd' ],
+    binderName: 'Move objects left and right',
+    repoName: scenery.name
+  } );
+
+  /**
+   * Reusable hotkey data for listeners and keyboard help content. This configuration
+   * is for the 'up and down' direction of movement, so it only includes the up
+   * and down arrow keys and the 'w' and 's' keys.
+   *
+   * Beware that this listener does not actually use this data because it requires a special implementation with
+   * the globalKeyStateTracker. But this is still useful for convenience and consistency.
+   */
+  public static readonly MOVE_UP_DOWN_HOTKEY_DATA = new HotkeyData( {
+    keys: [ 'arrowUp', 'arrowDown', 'w', 's' ],
+    binderName: 'Move objects up and down',
+    repoName: scenery.name
+  } );
+
+  /**
    * Reusable hotkey data for listeners and keyboard help content. Beware that this listener
    * does not actually use this data because it requires a special implementation with
    * the globalKeyStateTracker. But this is still useful for convenience and consistency.
