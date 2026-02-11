@@ -34,6 +34,8 @@ export type HotkeyDataOptions = {
   keyboardHelpDialogLabelStringProperty?: TReadOnlyProperty<string> | null;
 
   // The PDOM label and description for this Hotkey in the Keyboard Help dialog.
+  // Warning: You generally should not need this. This description can be automatically generated when using
+  // KeyboardHelpSectionRow.fromHotkeyData().
   keyboardHelpDialogPDOMLabelStringProperty?: TReadOnlyProperty<string> | string | null;
 
   // Data for binder (generated documentation).
