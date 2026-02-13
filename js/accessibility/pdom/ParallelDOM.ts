@@ -269,11 +269,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'activeDescendantAssociations',
 
   'focusPanTargetBoundsProperty',
-  'limitPanDirection',
-
-  'positionInPDOM',
-
-  'pdomTransformSourceNode'
+  'limitPanDirection'
 ];
 
 type ParallelDOMSelfOptions = {
@@ -334,10 +330,6 @@ type ParallelDOMSelfOptions = {
 
   focusPanTargetBoundsProperty?: TReadOnlyProperty<Bounds2> | null; // A Property with bounds that describe the bounds of this Node that should remain displayed by the global AnimatedPanZoomListener
   limitPanDirection?: LimitPanDirection | null; // A constraint on the direction of panning when interacting with this Node.
-
-  positionInPDOM?: boolean; // Sets whether the Node's DOM elements are positioned in the viewport
-
-  pdomTransformSourceNode?: Node | null; // { sets the Node that controls primary sibling positioning in the display, see setPDOMTransformSourceNode()
 };
 
 // Most options use null for their default behavior, see the setters for each option for a description of how null
@@ -601,11 +593,6 @@ export default class ParallelDOM extends PhetioObject {
   // (scenery-internal)
   public _pdomParent: Node | null;
 
-  // If this is specified, the primary sibling will be positioned
-  // to align with this source Node and observe the transforms along this Node's trail. At this time the
-  // pdomTransformSourceNode cannot use DAG.
-  private _pdomTransformSourceNode: Node | null;
-
   // If this is provided, the AnimatedPanZoomListener will attempt to keep this Node in view as long as it has
   // focus
   private _focusPanTargetBoundsProperty: TReadOnlyProperty<Bounds2> | null;
@@ -620,11 +607,6 @@ export default class ParallelDOM extends PhetioObject {
 
   // Empty unless the Node contains some pdom content (PDOMInstance).
   private readonly _pdomInstances: PDOMInstance[];
-
-  // Determines if DOM siblings are positioned in the viewport. This
-  // is required for Nodes that require unique input gestures with iOS VoiceOver like "Drag and Drop".
-  // See setPositionInPDOM for more information.
-  private _positionInPDOM: boolean;
 
   // If true, any DOM input events received from the label sibling will not be dispatched as SceneryEvents in Input.js.
   // The label sibling may receive input by screen readers if the virtual cursor is over it. That is usually fine,
@@ -727,12 +709,10 @@ export default class ParallelDOM extends PhetioObject {
     this._groupFocusHighlight = false;
     this._pdomOrder = null;
     this._pdomParent = null;
-    this._pdomTransformSourceNode = null;
     this._focusPanTargetBoundsProperty = null;
     this._limitPanDirection = null;
     this._pdomDisplaysInfo = new PDOMDisplaysInfo( this as unknown as Node );
     this._pdomInstances = [];
-    this._positionInPDOM = false;
     this._excludeLabelSiblingFromInput = false;
 
     this._accessibleVisibleProperty = new TinyForwardingProperty<boolean>( true, false, this.onAccessibleVisiblePropertyChange.bind( this ) );
@@ -825,9 +805,6 @@ export default class ParallelDOM extends PhetioObject {
       arrayRemove( updatedOrder, this as unknown as Node );
       this._pdomParent.pdomOrder = updatedOrder;
     }
-
-    // clear references to the pdomTransformSourceNode
-    this.setPDOMTransformSourceNode( null );
 
     // Clear behavior functions because they may create references between other Nodes
     this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
@@ -3094,37 +3071,6 @@ export default class ParallelDOM extends PhetioObject {
   }
 
   /**
-   * Sets the source Node that controls positioning of the primary sibling. Transforms along the trail to this
-   * Node are observed so that the primary sibling is positioned correctly in the global coordinate frame.
-   *
-   * The transformSourceNode cannot use DAG for now because we need a unique trail to observe transforms.
-   *
-   * By default, transforms along trails to all of this Node's PDOMInstances are observed. But this
-   * function can be used if you have a visual Node represented in the PDOM by a different Node in the scene
-   * graph but still need the other Node's PDOM content positioned over the visual Node. For example, this could
-   * be required to catch all fake pointer events that may come from certain types of screen readers.
-   */
-  public setPDOMTransformSourceNode( node: Node | null ): void {
-    this._pdomTransformSourceNode = node;
-
-    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      this._pdomInstances[ i ].peer!.setPDOMTransformSourceNode( this._pdomTransformSourceNode );
-    }
-  }
-
-  public set pdomTransformSourceNode( node: Node | null ) { this.setPDOMTransformSourceNode( node ); }
-
-  public get pdomTransformSourceNode(): Node | null { return this.getPDOMTransformSourceNode(); }
-
-  /**
-   * Get the source Node that controls positioning of the primary sibling in the global coordinate frame. See
-   * setPDOMTransformSourceNode for more in depth information.
-   */
-  public getPDOMTransformSourceNode(): Node | null {
-    return this._pdomTransformSourceNode;
-  }
-
-  /**
    * Used by the animatedPanZoomSingleton. It will try to keep these bounds visible in the viewport when this Node
    * (or any ancestor) has a transform change while focused. This is useful if the bounds of your focusable
    * Node do not accurately surround the conceptual interactive component. If null, this Node's local bounds
@@ -3194,35 +3140,6 @@ export default class ParallelDOM extends PhetioObject {
    */
   public get limitPanDirection(): LimitPanDirection | null {
     return this.getLimitPanDirection();
-  }
-
-  /**
-   * Sets whether the PDOM sibling elements are positioned in the correct place in the viewport. Doing so is a
-   * requirement for custom gestures on touch based screen readers. However, doing this DOM layout is expensive so
-   * only do this when necessary. Generally only needed for elements that utilize a "double tap and hold" gesture
-   * to drag and drop.
-   *
-   * Positioning the PDOM element will caused some screen readers to send both click and pointer events to the
-   * location of the Node in global coordinates. Do not position elements that use click listeners since activation
-   * will fire twice (once for the pointer event listeners and once for the click event listeners).
-   */
-  public setPositionInPDOM( positionInPDOM: boolean ): void {
-    this._positionInPDOM = positionInPDOM;
-
-    for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-      this._pdomInstances[ i ].peer!.setPositionInPDOM( positionInPDOM );
-    }
-  }
-
-  public set positionInPDOM( positionInPDOM: boolean ) { this.setPositionInPDOM( positionInPDOM ); }
-
-  public get positionInPDOM(): boolean { return this.getPositionInPDOM(); }
-
-  /**
-   * Gets whether or not we are positioning the PDOM sibling elements. See setPositionInPDOM().
-   */
-  public getPositionInPDOM(): boolean {
-    return this._positionInPDOM;
   }
 
   /**

@@ -22,15 +22,14 @@ const LIST_ITEM_CLASS_NAME = 'a11y-pdom-list-item';
 // The css style used for hiding an element in the Parallel DOM.
 export const styleForHiddenPDOM =
 
-  // 'fixed' positions elements relative to the ViewPort (global coordinate frame), a requirement for the approach
-  // in PDOMPeer.positionElements
+  // 'fixed' positions elements relative to the ViewPort (global coordinate frame)
   'position: fixed;' +
 
   // default, to the 'relative' root PDOM element - will change with node transform if focusable
   'top: 0px;' +
   'left: 0px;' +
 
-  // for CSS transformations of focusable elements, origin at left top
+  // for more consistent CSS transformations, origin at left top
   'transform-origin: left top 0px;' +
 
   // helps get accurate bounds with getBoundingClientRect() for transformations

@@ -27,8 +27,6 @@ const AriaHasPopUpMutator = {
       assert && assert( node.hasPDOMAttribute( 'aria-haspopup' ), 'Set aria-haspopup once before removing it.' );
       node.removePDOMAttribute( 'aria-haspopup' );
     }
-
-    node.positionInPDOM = !!value;
   }
 };
 

@@ -8,11 +8,8 @@
  * @author Jesse Greenberg
  */
 
-import Bounds2 from '../../../../dot/js/Bounds2.js';
-import Matrix3 from '../../../../dot/js/Matrix3.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
-import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -44,19 +41,7 @@ const LABEL_TAG = PDOMUtils.TAGS.LABEL;
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const DISABLED_ATTRIBUTE_NAME = 'disabled';
 
-// DOM observers that apply new CSS transformations are triggered when children, or inner content change. Updating
-// style/positioning of the element will change attributes so we can't observe those changes since it would trigger
-// the MutationObserver infinitely.
-const OBSERVER_CONFIG = { attributes: false, childList: true, characterData: true };
-
 let globalId = 1;
-
-// mutable instances to avoid creating many in operations that occur frequently
-const scratchGlobalBounds = new Bounds2( 0, 0, 0, 0 );
-const scratchSiblingBounds = new Bounds2( 0, 0, 0, 0 );
-const globalNodeTranslationMatrix = new Matrix3();
-const globalToClientScaleMatrix = new Matrix3();
-const nodeScaleMagnitudeMatrix = new Matrix3();
 
 /**
  * @mixes Poolable
@@ -102,51 +87,6 @@ class PDOMPeer {
   // See this.orderElements for more info.
   public topLevelElements!: HTMLElement[];
 
-  // flag that indicates that this peer has accessible content that changed, and so
-  // the siblings need to be repositioned in the next Display.updateDisplay()
-  private positionDirty!: boolean;
-
-  // Flag that indicates that PDOM elements require a forced reflow next animation frame.
-  // This is needed to fix a Safari VoiceOver bug where the accessible name is read incorrectly after elements
-  // are hidden/displayed. The usual workaround to force a reflow (set the style.display to none, query the offset,
-  // set it back) only fixes the problem if the style.display attribute is set in the next animation frame.
-  // See https://github.com/phetsims/a11y-research/issues/193.
-  private forceReflowWorkaround!: boolean;
-
-  // indicates that this peer's pdomInstance has a descendant that is dirty. Used to
-  // quickly find peers with positionDirty when we traverse the tree of PDOMInstances
-  private childPositionDirty!: boolean;
-
-  // Indicates that this peer will position sibling elements so that
-  // they are in the right location in the viewport, which is a requirement for touch based
-  // screen readers. See setPositionInPDOM.
-  private positionInPDOM!: boolean;
-
-  // An observer that will call back any time a property of the primary
-  // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
-  // all of the mutations, any single mutation will require updating CSS positioning.
-  //
-  // NOTE: Ideally, a single MutationObserver could be used to observe changes to all elements in the PDOM. But
-  // MutationObserver makes it impossible to detach observers from a single element. MutationObserver.detach()
-  // will remove listeners on all observed elements, so individual observers must be used on each element.
-  // One alternative could be to put the MutationObserver on the root element and use "subtree: true" in
-  // OBSERVER_CONFIG. This could reduce the number of MutationObservers, but there is no easy way to get the
-  // peer from the mutation target element. If MutationObserver takes a lot of memory, this could be an
-  // optimization that may come with a performance cost.
-  //
-  // NOTE: ResizeObserver is a superior alternative to MutationObserver for this purpose because
-  // it will only monitor changes we care about and prevent infinite callback loops if size is changed in
-  // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
-  // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver.
-  //
-  // TODO: Should we be watching "model" changes from ParallelDOM.js instead of using MutationObserver? https://github.com/phetsims/scenery/issues/1581
-  // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
-  // memory intensive because we don't need an instance of MutationObserver on every PDOMInstance.
-  private mutationObserver!: MutationObserver;
-
-  // must be removed on disposal
-  private transformListener!: () => void;
-
   // To support setting the Display.interactive=false (which sets disabled on all primarySiblings,
   // we need to set disabled on a separate channel from this.setAttributeToElement. That way we cover the case where
   // `disabled` was set through the ParallelDOM API when we need to toggle it specifically for Display.interactive.
@@ -159,7 +99,6 @@ class PDOMPeer {
   // The main element associated with this peer. If focusable, this is the element that gets
   // the focus. It also will contain any children.
   private _primarySibling!: HTMLElement | undefined;
-
 
   protected constructor( pdomInstance: PDOMInstance, options: IntentionalAny ) {
     this.initializePDOMPeer( pdomInstance, options );
@@ -199,15 +138,6 @@ class PDOMPeer {
     this._accessibleParagraphSibling = null;
     this._containerParent = null;
     this.topLevelElements = [];
-    this.positionDirty = false;
-    this.forceReflowWorkaround = false;
-    this.childPositionDirty = false;
-    this.positionInPDOM = false;
-
-    this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this, false ) );
-
-    this.transformListener = this.transformListener || this.invalidateCSSPositioning.bind( this, false );
-    this.pdomInstance.transformTracker!.addListener( this.transformListener );
 
     this._preservedDisabledValue = null;
 
@@ -243,10 +173,6 @@ class PDOMPeer {
     let options = this.node!.getBaseOptions();
 
     const callbacksForOtherNodes: Array<() => void> = [];
-
-    // In case update() is called more than once on an instance of PDOMPeer. Observer will be set up
-    // later if there is a primary sibling.
-    this.mutationObserver.disconnect();
 
     // Even if the accessibleName is null, we need to run the behavior function if the dirty flag is set
     // to run any cleanup on Nodes changed with callbacksForOtherNodes. See https://github.com/phetsims/scenery/issues/1679.
@@ -378,9 +304,6 @@ class PDOMPeer {
         this._primarySibling.disabled = true;
       }
 
-      // assign listeners (to be removed or disconnected during disposal)
-      this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
-
       if ( options.accessibleHeading !== null ) {
         // @ts-expect-error
         this.setHeadingContent( options.accessibleHeading );
@@ -418,9 +341,6 @@ class PDOMPeer {
       }
 
       this.setFocusable( this.node!.focusable );
-
-      // set the positionInPDOM field to our updated instance
-      this.setPositionInPDOM( this.node!.positionInPDOM );
 
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
       this.onAriaLabelledbyAssociationChange();
@@ -934,12 +854,6 @@ class PDOMPeer {
           this.setAttributeToElement( 'hidden', '', { element: element } );
         }
       }
-
-      // Invalidate CSS transforms because when 'hidden' the content will have no dimensions in the viewport. For
-      // a Safari VoiceOver bug, also force a reflow in the next animation frame to ensure that the accessible name is
-      // correct.
-      // TODO: Remove this when the bug is fixed. See https://github.com/phetsims/a11y-research/issues/193
-      this.invalidateCSSPositioning( platform.safari );
     }
   }
 
@@ -994,9 +908,6 @@ class PDOMPeer {
       if ( peerHadFocus && !focusable ) {
         this.blur();
       }
-
-      // reposition the sibling in the DOM, since non-focusable nodes are not positioned
-      this.invalidateCSSPositioning();
     }
   }
 
@@ -1083,42 +994,9 @@ class PDOMPeer {
     PDOMUtils.setTextContent( this._primarySibling, content );
   }
 
-  /**
-   * Sets the pdomTransformSourceNode so that the primary sibling will be transformed with changes to along the
-   * unique trail to the source node. If null, repositioning happens with transform changes along this
-   * pdomInstance's trail.
-   */
-  public setPDOMTransformSourceNode( node: Node | null ): void {
-
-    // remove previous listeners before creating a new TransformTracker
-    this.pdomInstance.transformTracker!.removeListener( this.transformListener );
-    this.pdomInstance.updateTransformTracker( node );
-
-    // add listeners back after update
-    this.pdomInstance.transformTracker!.addListener( this.transformListener );
-
-    // new trail with transforms so positioning is probably dirty
-    this.invalidateCSSPositioning();
-  }
-
-  /**
-   * Enable or disable positioning of the sibling elements. Generally this is requiredfor accessibility to work on
-   * touch screen based screen readers like phones. But repositioning DOM elements is expensive. This can be set to
-   * false to optimize when positioning is not necessary.
-   * (scenery-internal)
-   */
-  public setPositionInPDOM( positionInPDOM: boolean ): void {
-    this.positionInPDOM = positionInPDOM;
-
-    // signify that it needs to be repositioned next frame, either off screen or to match
-    // graphical rendering
-    this.invalidateCSSPositioning();
-  }
-
   private getElementId( siblingName: string, stringId: string ): string {
     return `display${this.display.id}-${siblingName}-${stringId}`;
   }
-
 
   /**
    * Set ids on elements so for easy lookup with document.getElementById. Also assign a unique
@@ -1153,165 +1031,6 @@ class PDOMPeer {
     if ( this._containerParent ) {
       this._containerParent.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
       this._containerParent.id = this.getElementId( 'container', indices );
-    }
-  }
-
-  /**
-   * Mark that the siblings of this PDOMPeer need to be updated in the next Display update. Possibly from a
-   * change of accessible content or node transformation. Does nothing if already marked dirty.
-   *
-   * @param [forceReflowWorkaround] - In addition to repositioning, force a reflow next animation frame? See
-   *                                  this.forceReflowWorkaround for more information.
-   */
-  private invalidateCSSPositioning( forceReflowWorkaround = false ): void {
-    if ( !this.positionDirty ) {
-      this.positionDirty = true;
-
-      if ( forceReflowWorkaround ) {
-        this.forceReflowWorkaround = true;
-
-        // `transform=scale(1)` forces a reflow so we can set this and revert it in the next animation frame.
-        // Transform is used instead of `display='none'` because changing display impacts focus.
-        for ( let i = 0; i < this.topLevelElements.length; i++ ) {
-          this.topLevelElements[ i ].style.transform = 'scale(1)';
-        }
-      }
-
-      // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
-      // the PDOMInstance tree
-      let parent = this.pdomInstance.parent;
-      while ( parent ) {
-        parent.peer!.childPositionDirty = true;
-        parent = parent.parent;
-      }
-    }
-  }
-
-  /**
-   * Update the CSS positioning of the primary and label siblings. Required to support accessibility on mobile
-   * devices. On activation of focusable elements, certain AT will send fake pointer events to the browser at
-   * the center of the client bounding rectangle of the HTML element. By positioning elements over graphical display
-   * objects we can capture those events. A transformation matrix is calculated that will transform the position
-   * and dimension of the HTML element in pixels to the global coordinate frame. The matrix is used to transform
-   * the bounds of the element prior to any other transformation so we can set the element's left, top, width, and
-   * height with CSS attributes.
-   *
-   * For now we are only transforming the primary and label siblings if the primary sibling is focusable. If
-   * focusable, the primary sibling needs to be transformed to receive user input. VoiceOver includes the label bounds
-   * in its calculation for where to send the events, so it needs to be transformed as well. Descriptions are not
-   * considered and do not need to be positioned.
-   *
-   * Initially, we tried to set the CSS transformations on elements directly through the transform attribute. While
-   * this worked for basic input, it did not support other AT features like tapping the screen to focus elements.
-   * With this strategy, the VoiceOver "touch area" was a small box around the top left corner of the element. It was
-   * never clear why this was this case, but forced us to change our strategy to set the left, top, width, and height
-   * attributes instead.
-   *
-   * This function assumes that elements have other style attributes so they can be positioned correctly and don't
-   * interfere with scenery input, see SceneryStyle in PDOMUtils.
-   *
-   * Additional notes were taken in https://github.com/phetsims/scenery/issues/852, see that issue for more
-   * information.
-   *
-   * Review: This function could be simplified by setting the element width/height a small arbitrary shape
-   * at the center of the node's global bounds. There is a drawback in that the VO default highlight won't
-   * surround the Node anymore. But it could be a performance enhancement and simplify this function.
-   * Or maybe a big rectangle larger than the Display div still centered on the node so we never
-   * see the VO highlight?
-   */
-  private positionElements( positionInPDOM: boolean ): void {
-    const placeableSibling = this.getPlaceableSibling();
-    assert && assert( placeableSibling, 'a primary sibling required to receive CSS positioning' );
-    assert && assert( this.positionDirty, 'elements should only be repositioned if dirty' );
-
-    // CSS transformation only needs to be applied if the node is focusable - otherwise the element will be found
-    // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
-    // need to be accurate because the AT doesn't need to send events to them.
-    if ( positionInPDOM ) {
-      const transformSourceNode = this.node!.pdomTransformSourceNode || this.node;
-
-      scratchGlobalBounds.set( transformSourceNode!.localBounds );
-      if ( scratchGlobalBounds.isFinite() ) {
-        scratchGlobalBounds.transform( this.pdomInstance.transformTracker!.getMatrix() );
-
-        // no need to position if the node is fully outside of the Display bounds (out of view)
-        const displayBounds = this.display.bounds;
-        if ( displayBounds.intersectsBounds( scratchGlobalBounds ) ) {
-
-          // Constrain the global bounds to Display bounds so that center of the sibling element
-          // is always in the Display. We may miss input if the center of the Node is outside
-          // the Display, where VoiceOver would otherwise send pointer events.
-          scratchGlobalBounds.constrainBounds( displayBounds );
-
-          let clientDimensions = getClientDimensions( placeableSibling );
-          let clientWidth = clientDimensions.width;
-          let clientHeight = clientDimensions.height;
-
-          if ( clientWidth > 0 && clientHeight > 0 ) {
-            scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-            scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-            setClientBounds( placeableSibling, scratchSiblingBounds );
-          }
-
-          if ( this.labelSibling ) {
-            clientDimensions = getClientDimensions( this._labelSibling! );
-            clientWidth = clientDimensions.width;
-            clientHeight = clientDimensions.height;
-
-            if ( clientHeight > 0 && clientWidth > 0 ) {
-              scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-              scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-              setClientBounds( this._labelSibling!, scratchSiblingBounds );
-            }
-          }
-        }
-      }
-    }
-    else {
-
-      // not positioning, just move off screen
-      scratchSiblingBounds.set( PDOMPeer.OFFSCREEN_SIBLING_BOUNDS );
-      setClientBounds( placeableSibling, scratchSiblingBounds );
-      if ( this._labelSibling ) {
-        setClientBounds( this._labelSibling, scratchSiblingBounds );
-      }
-    }
-
-    if ( this.forceReflowWorkaround ) {
-
-      // Force a reflow (recalculation of DOM layout) to fix the accessible name.
-      this.topLevelElements.forEach( element => {
-        element.style.transform = ''; // force reflow request by removing the transform added in the previous frame
-
-        // @ts-expect-error
-        element.style.offsetHeight; // query the offsetHeight after restoring display to force reflow
-      } );
-    }
-
-    this.positionDirty = false;
-    this.forceReflowWorkaround = false;
-  }
-
-  /**
-   * Update positioning of elements in the PDOM. Does a depth first search for all descendants of parentIntsance with
-   * a peer that either has dirty positioning or as a descendant with dirty positioning.
-   *
-   * (scenery-internal)
-   */
-  public updateSubtreePositioning( parentPositionInPDOM = false ): void {
-    this.childPositionDirty = false;
-
-    const positionInPDOM = this.positionInPDOM || parentPositionInPDOM;
-
-    if ( this.positionDirty ) {
-      this.positionElements( positionInPDOM );
-    }
-
-    for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
-      const childPeer = this.pdomInstance.children[ i ].peer!;
-      if ( childPeer.positionDirty || childPeer.childPositionDirty ) {
-        this.pdomInstance.children[ i ].peer!.updateSubtreePositioning( positionInPDOM );
-      }
     }
   }
 
@@ -1356,10 +1075,6 @@ class PDOMPeer {
       this._primarySibling.removeEventListener( 'focus', this.focusEventListener );
     }
 
-    // remove listeners
-    this.pdomInstance.transformTracker!.removeListener( this.transformListener );
-    this.mutationObserver.disconnect();
-
     // zero-out references
     // @ts-expect-error
     this.pdomInstance = null;
@@ -1389,9 +1104,6 @@ class PDOMPeer {
   public static readonly DESCRIPTION_SIBLING = DESCRIPTION_SIBLING; // associate with just the description content of this peer
   public static readonly PARAGRAPH_SIBLING = ACCESSIBLE_PARAGRAPH_SIBLING; // associate with just the paragraph content of this peer
   public static readonly CONTAINER_PARENT = CONTAINER_PARENT; // associate with everything under the container parent of this peer
-
-  // (scenery-internal) - bounds for a sibling that should be moved off-screen when not positioning, in  global coordinates
-  public static readonly OFFSCREEN_SIBLING_BOUNDS = new Bounds2( 0, 0, 1, 1 );
 }
 
 scenery.register( 'PDOMPeer', PDOMPeer );
@@ -1434,60 +1146,6 @@ function createElement( tagName: string, focusable: boolean, options?: Intention
   }
 
   return newElement;
-}
-
-/**
- * Get a matrix that can be used as the CSS transform for elements in the DOM. This matrix will an HTML element
- * dimensions in pixels to the global coordinate frame.
- *
- * @param clientWidth - width of the element to transform in pixels
- * @param clientHeight - height of the element to transform in pixels
- * @param nodeGlobalBounds - Bounds of the PDOMPeer's node in the global coordinate frame.
- */
-function getCSSMatrix( clientWidth: number, clientHeight: number, nodeGlobalBounds: Bounds2 ): Matrix3 {
-
-  // the translation matrix for the node's bounds in its local coordinate frame
-  globalNodeTranslationMatrix.setToTranslation( nodeGlobalBounds.minX, nodeGlobalBounds.minY );
-
-  // scale matrix for "client" HTML element, scale to make the HTML element's DOM bounds match the
-  // local bounds of the node
-  globalToClientScaleMatrix.setToScale( nodeGlobalBounds.width / clientWidth, nodeGlobalBounds.height / clientHeight );
-
-  // combine these in a single transformation matrix
-  return globalNodeTranslationMatrix.multiplyMatrix( globalToClientScaleMatrix ).multiplyMatrix( nodeScaleMagnitudeMatrix );
-}
-
-/**
- * Gets an object with the width and height of an HTML element in pixels, prior to any scaling. clientWidth and
- * clientHeight are zero for elements with inline layout and elements without CSS. For those elements we fall back
- * to the boundingClientRect, which at that point will describe the dimensions of the element prior to scaling.
- */
-function getClientDimensions( siblingElement: HTMLElement ): { width: number; height: number } {
-  let clientWidth = siblingElement.clientWidth;
-  let clientHeight = siblingElement.clientHeight;
-
-  if ( clientWidth === 0 && clientHeight === 0 ) {
-    const clientRect = siblingElement.getBoundingClientRect();
-    clientWidth = clientRect.width;
-    clientHeight = clientRect.height;
-  }
-
-  return { width: clientWidth, height: clientHeight };
-}
-
-/**
- * Set the bounds of the sibling element in the view port in pixels, using top, left, width, and height css.
- * The element must be styled with 'position: fixed', and an ancestor must have position: 'relative', so that
- * the dimensions of the sibling are relative to the parent.
- *
- * @param siblingElement - the element to position
- * @param bounds - desired bounds, in pixels
- */
-function setClientBounds( siblingElement: HTMLElement, bounds: Bounds2 ): void {
-  siblingElement.style.top = `${bounds.top}px`;
-  siblingElement.style.left = `${bounds.left}px`;
-  siblingElement.style.width = `${bounds.width}px`;
-  siblingElement.style.height = `${bounds.height}px`;
 }
 
 export default PDOMPeer;

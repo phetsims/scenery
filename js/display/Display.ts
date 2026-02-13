@@ -629,12 +629,6 @@ export default class Display {
       this._input.validatePointers();
     }
 
-    if ( this._accessible ) {
-
-      // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
-      this._rootPDOMInstance!.peer!.updateSubtreePositioning();
-    }
-
     // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
     // from code below without triggering side effects (we assume that we are not reentrant).
     this._rootNode.validateWatchedBounds();

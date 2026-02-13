@@ -37,9 +37,7 @@ import type Display from '../../display/Display.js';
 import type Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
-import TransformTracker from '../../util/TransformTracker.js';
 import { getPDOMFocusedNode } from '../pdomFocusProperty.js';
-import { guessVisualTrail } from './guessVisualTrail.js';
 import { PDOM_UNIQUE_ID_SEPARATOR } from './PDOM_UNIQUE_ID_SEPARATOR.js';
 import PDOMUniqueIdStrategy from './PDOMUniqueIdStrategy.js';
 import UNIQUE_ID_STRATEGY from './UNIQUE_ID_STRATEGY.js';
@@ -83,11 +81,6 @@ class PDOMInstance {
 
   // {function} - The listeners added to the respective relativeNodes
   private relativeListeners: ( () => void )[] = [];
-
-  // (scenery-internal) {TransformTracker|null} - Used to quickly compute the global matrix of this
-  // instance's transform source Node and observe when the transform changes. Used by PDOMPeer to update
-  // positioning of sibling elements. By default, watches this PDOMInstance's visual trail.
-  public transformTracker: TransformTracker | null = null;
 
   // {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
   // re-initialized
@@ -152,12 +145,6 @@ class PDOMInstance {
 
     // {function} - The listeners added to the respective relativeNodes
     this.relativeListeners = [];
-
-    // (scenery-internal) {TransformTracker|null} - Used to quickly compute the global matrix of this
-    // instance's transform source Node and observe when the transform changes. Used by PDOMPeer to update
-    // positioning of sibling elements. By default, watches this PDOMInstance's visual trail.
-    this.transformTracker = null;
-    this.updateTransformTracker( this.node ? this.node.pdomTransformSourceNode : null );
 
     // {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
     // re-initialized
@@ -621,25 +608,6 @@ class PDOMInstance {
   }
 
   /**
-   * Create a new TransformTracker that will observe transforms along the trail of this PDOMInstance OR
-   * the provided pdomTransformSourceNode. See ParallelDOM.setPDOMTransformSourceNode(). The The source Node
-   * must not use DAG so that its trail is unique.
-   */
-  public updateTransformTracker( pdomTransformSourceNode: Node | null ): void {
-    this.transformTracker && this.transformTracker.dispose();
-
-    let trackedTrail = null;
-    if ( pdomTransformSourceNode ) {
-      trackedTrail = pdomTransformSourceNode.getUniqueTrail();
-    }
-    else {
-      trackedTrail = guessVisualTrail( this.trail!, this.display!.rootNode );
-    }
-
-    this.transformTracker = new TransformTracker( trackedTrail );
-  }
-
-  /**
    * Depending on what the unique ID strategy is, formulate the correct id for this PDOM instance.
    */
   public getPDOMInstanceUniqueId(): string {
@@ -715,10 +683,6 @@ class PDOMInstance {
     // NOTE: We dispose OUR peer after disposing children, so our peer can be available for our children during
     // disposal.
     thisPeer.dispose();
-
-    // dispose after the peer so the peer can remove any listeners from it
-    this.transformTracker!.dispose();
-    this.transformTracker = null;
 
     // If we are the root accessible instance, we won't actually have a reference to a node.
     if ( this.node ) {

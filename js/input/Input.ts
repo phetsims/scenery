@@ -1054,16 +1054,16 @@ export default class Input extends PhetioObject {
 
     const trail = this.getTrailFromPDOMEvent( domEvent );
 
-    // Only dispatch the event if the click did not happen rapidly after an up event. It is
-    // likely that the screen reader dispatched both pointer AND click events in this case, and
-    // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
-    // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
-    // stream.
-    const notBlockingSubsequentClicksOccurringTooQuickly = trail && !( eventName === 'click' &&
-                                                           _.some( trail.nodes, node => node.positionInPDOM ) &&
-                                                           domEvent.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY );
+    // Block PDOM click events that arrive immediately after an up event; some ATs emit both
+    // pointer-up and click, and we only want one activation. Only apply this when we have a
+    // valid PDOM trail so we don't suppress unrelated clicks. See
+    // https://github.com/phetsims/scenery/issues/1094. This is outside of clickAction so
+    // blocked clicks are not included in the PhET-iO stream.
+    const blockClick = !!trail &&
+                       eventName === 'click' &&
+                       ( domEvent.timeStamp - this.upTimeStamp ) <= PDOM_CLICK_DELAY;
 
-    return notBlockingSubsequentClicksOccurringTooQuickly ? trail : null;
+    return blockClick ? null : trail;
   }
 
   private ensureMouse( point: Vector2, context: EventContext<MouseEvent> | EventContext<WheelEvent> ): Mouse {
