@@ -1,4 +1,4 @@
-// Copyright 2015-2025, University of Colorado Boulder
+// Copyright 2015-2026, University of Colorado Boulder
 
 /**
  * An instance that is synchronously created, for handling accessibility needs.

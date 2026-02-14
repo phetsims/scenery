@@ -1,4 +1,4 @@
-// Copyright 2021-2025, University of Colorado Boulder
+// Copyright 2021-2026, University of Colorado Boulder
 
 /**
  * Sets ParallelDOM.js fields for an Node that uses aria-haspopup. It was discovered that
