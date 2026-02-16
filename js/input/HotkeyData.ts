@@ -36,7 +36,7 @@ export type HotkeyDataOptions = {
   // The PDOM label and description for this Hotkey in the Keyboard Help dialog.
   // Warning: You generally should not need this. This description can be automatically generated when using
   // KeyboardHelpSectionRow.fromHotkeyData().
-  keyboardHelpDialogPDOMLabelStringProperty?: TReadOnlyProperty<string> | string | null;
+  keyboardHelpDialogPDOMLabelStringProperty?: TReadOnlyProperty<string> | null;
 
   // Data for binder (generated documentation).
   repoName: string; // Name of the repository where the hotkey is defined.
@@ -47,7 +47,7 @@ export type HotkeyDataOptions = {
 export default class HotkeyData {
   public readonly keyStringProperties: TReadOnlyProperty<OneKeyStroke>[];
   public readonly keyboardHelpDialogLabelStringProperty: TReadOnlyProperty<string> | null;
-  public readonly keyboardHelpDialogPDOMLabelStringProperty: TReadOnlyProperty<string> | string | null;
+  public readonly keyboardHelpDialogPDOMLabelStringProperty: TReadOnlyProperty<string> | null;
 
   // KeyDescriptors derived from keys.
   public readonly keyDescriptorsProperty: TReadOnlyProperty<KeyDescriptor[]>;
