@@ -33,10 +33,10 @@ export type HotkeyDataOptions = {
   // generated documentation, unless binderName is provided.
   keyboardHelpDialogLabelStringProperty?: TReadOnlyProperty<string> | null;
 
-  // The PDOM label and description for this Hotkey in the Keyboard Help dialog.
+  // The description for this Hotkey in the Keyboard Help dialog.
   // Warning: You generally should not need this. This description can be automatically generated when using
   // KeyboardHelpSectionRow.fromHotkeyData().
-  keyboardHelpDialogPDOMLabelStringProperty?: TReadOnlyProperty<string> | null;
+  accessibleKeyboardHelpDialogDescriptionStringProperty?: TReadOnlyProperty<string> | null;
 
   // Data for binder (generated documentation).
   repoName: string; // Name of the repository where the hotkey is defined.
@@ -47,7 +47,7 @@ export type HotkeyDataOptions = {
 export default class HotkeyData {
   public readonly keyStringProperties: TReadOnlyProperty<OneKeyStroke>[];
   public readonly keyboardHelpDialogLabelStringProperty: TReadOnlyProperty<string> | null;
-  public readonly keyboardHelpDialogPDOMLabelStringProperty: TReadOnlyProperty<string> | null;
+  public readonly accessibleKeyboardHelpDialogDescriptionStringProperty: TReadOnlyProperty<string> | null;
 
   // KeyDescriptors derived from keys.
   public readonly keyDescriptorsProperty: TReadOnlyProperty<KeyDescriptor[]>;
@@ -62,14 +62,14 @@ export default class HotkeyData {
       'auto-generated team-internal documentation.' );
 
     const options = optionize<HotkeyDataOptions>()( {
-      keyboardHelpDialogPDOMLabelStringProperty: null,
+      accessibleKeyboardHelpDialogDescriptionStringProperty: null,
       keyboardHelpDialogLabelStringProperty: null,
       global: false,
       binderName: ''
     }, providedOptions );
 
     this.keyboardHelpDialogLabelStringProperty = options.keyboardHelpDialogLabelStringProperty;
-    this.keyboardHelpDialogPDOMLabelStringProperty = options.keyboardHelpDialogPDOMLabelStringProperty;
+    this.accessibleKeyboardHelpDialogDescriptionStringProperty = options.accessibleKeyboardHelpDialogDescriptionStringProperty;
 
     this.repoName = options.repoName;
     this.global = options.global;
